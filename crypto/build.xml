@@ -1,0 +1,50 @@
+<!--
+  Bouncy Castle Master Build File 
+
+  This file will then invoke sub-build files to create all the
+  individual releases.  Currently there are requirements to 
+  build releases for:
+
+  j2me			(jdk1.3 only)
+  provider+lw	(jdk1.0, jdk1.1, jdk1.2, jdk1.3)
+  lw only		(jdk1.0, jdk1.1, jdk1.2, jdk1.3)
+
+  The USER_PROP environment variable must be set to the file name
+  and path of the user_env.prop file
+
+  $RCSfile: build.xml,v $
+  $Author: bouncy $
+  $Date: 2005-07-06 13:02:52 $
+  $Revision: 1.1 $
+-->
+
+<project name="bc" default="compile" basedir=".">
+  <property environment="env" />
+
+  <!-- targets -->
+
+  <target name="check">
+  </target>
+
+  <target name="clean">
+  </target>
+
+  <target name="compile">
+  </target>
+
+  <target name="package">
+  </target>
+
+  <target name="doc">
+  </target>
+
+  <target name="test">
+  </target>
+
+  <target name="j2me">
+  </target>
+
+  <target name="preverify">
+  </target>
+
+</project>
