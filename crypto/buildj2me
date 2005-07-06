@@ -1,0 +1,97 @@
+#!/bin/sh -
+#
+# build script for J2ME - this only includes the lightweight API
+# if a distribution name is given as an argument the build is placed
+# in a subdirectory - nothing gets compiled as we expect the classes
+# to be in ./palm
+#
+# Note: this script expects javadoc for jdk 1.3 to be in your path.
+#
+
+base=$1
+version=`echo $base | sed -e "s/\([0-9]\)\([0-9a-z]*\)/\1.\2/"`
+
+WINDOWTITLE="Bouncy Castle Cryptography $version API Specification"
+HEADER="<b>Bouncy Castle Cryptography $version</b>"
+DOCTITLE="Bouncy Castle $version API Specification"
+
+echo "making j2me lightweight release"
+
+if test "$base" != "" 
+then
+    mkdir lcrypto-j2me-$base
+    mkdir lcrypto-j2me-$base/docs
+    tar cf - common.xml midp.xml crypto_env.properties index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html zips src/org/bouncycastle/LICENSE.java src/org/bouncycastle/math \
+src/org/bouncycastle/crypto/*.java \
+src/org/bouncycastle/crypto/*.html \
+src/org/bouncycastle/crypto/agreement \
+src/org/bouncycastle/crypto/digests \
+src/org/bouncycastle/crypto/encodings \
+src/org/bouncycastle/crypto/engines \
+src/org/bouncycastle/crypto/examples \
+src/org/bouncycastle/crypto/paddings \
+src/org/bouncycastle/crypto/generators \
+src/org/bouncycastle/crypto/io \
+src/org/bouncycastle/crypto/macs \
+src/org/bouncycastle/crypto/modes \
+src/org/bouncycastle/crypto/params \
+src/org/bouncycastle/crypto/signers \
+src/org/bouncycastle/crypto/test \
+src/org/bouncycastle/util src/org/bouncycastle/bcpg src/org/bouncycastle/asn1 | (cd lcrypto-j2me-$base; tar xf -)
+    (cd j2me; tar cf - * | (cd ../lcrypto-j2me-$base; cd src; tar xf -))
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/util/Dump.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AESVectorFileTest.java
+
+   (2>&1 find lcrypto-j2me-$base -name CVS -exec rm -rf \{\} \; ) > /dev/null
+
+    (
+    cd lcrypto-j2me-$base;
+    javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
+      -header "$HEADER" \
+    -group "Lightweight Crypto Packages" "org.bouncycastle.crypto*" \
+    -group "ASN.1 Support Packages" "org.bouncycastle.asn1*" \
+    -group "BCPG OpenPGP Support Packages" "org.bouncycastle.bcpg*" \
+    -group "Utility Packages" "org.bouncycastle.util*:org.bouncycastle.math*" \
+      -classpath classes \
+      -d docs -sourcepath src -breakiterator \
+    org.bouncycastle.asn1 \
+    org.bouncycastle.asn1.cmp \
+    org.bouncycastle.asn1.cms \
+    org.bouncycastle.asn1.cryptopro \
+    org.bouncycastle.asn1.ess \
+    org.bouncycastle.asn1.misc \
+    org.bouncycastle.asn1.mozilla \
+    org.bouncycastle.asn1.nist \
+    org.bouncycastle.asn1.ocsp \
+    org.bouncycastle.asn1.oiw \
+    org.bouncycastle.asn1.pkcs \
+    org.bouncycastle.asn1.sec \
+    org.bouncycastle.asn1.smime \
+    org.bouncycastle.asn1.teletrust \
+    org.bouncycastle.asn1.test \
+    org.bouncycastle.asn1.tsp \
+    org.bouncycastle.asn1.util \
+    org.bouncycastle.asn1.x509 \
+    org.bouncycastle.asn1.x9 \
+    org.bouncycastle.bcpg \
+    org.bouncycastle.bcpg.sig \
+    org.bouncycastle.math.ec \
+    org.bouncycastle.crypto \
+    org.bouncycastle.crypto.agreement \
+    org.bouncycastle.crypto.digests \
+    org.bouncycastle.crypto.encodings \
+    org.bouncycastle.crypto.engines \
+    org.bouncycastle.crypto.generators \
+    org.bouncycastle.crypto.io \
+    org.bouncycastle.crypto.macs \
+    org.bouncycastle.crypto.modes \
+    org.bouncycastle.crypto.params \
+    org.bouncycastle.crypto.paddings \
+    org.bouncycastle.crypto.signers \
+    org.bouncycastle.crypto.test \
+    org.bouncycastle.crypto.examples \
+    org.bouncycastle.util.encoders \
+    org.bouncycastle.util.test > /dev/null \
+
+    )
+fi

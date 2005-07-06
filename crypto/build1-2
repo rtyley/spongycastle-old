@@ -1,0 +1,305 @@
+#!/bin/sh -
+#
+# build script for 1.2
+#
+# If it's given a buildname it creates a subdirectory and places a build in it,
+# otherwise it just creates the docs and class files.
+#
+
+JDK12PATH=/opt/jdk1.2.2   # JDK 1.2 location
+
+base=$1
+version=`echo $base | sed -e "s/\([0-9]\)\([0-9a-z]*\)/\1.\2/"`
+
+WINDOWTITLE="Bouncy Castle Cryptography $version API Specification"
+HEADER="<b>Bouncy Castle Cryptography $version</b>"
+DOCTITLE="Bouncy Castle $version API Specification"
+
+if test "$base" != ""  -a ! -d lcrypto-jdk12-$base
+then
+    echo "making lightweight release"
+
+    mkdir lcrypto-jdk12-$base
+    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/LICENSE.java src/org/bouncycastle/math src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1 | (cd lcrypto-jdk12-$base; tar xf -)
+    (
+        cd lcrypto-jdk12-$base;
+
+        mkdir classes; mkdir docs;
+
+        rm -rf src/org/bouncycastle/jce
+        rm -rf src/org/bouncycastle/ocsp
+        rm -rf src/org/bouncycastle/openpgp
+
+        (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
+            -header "$HEADER" \
+            -group "Lightweight Crypto Packages" "org.bouncycastle.crypto*" \
+            -group "ASN.1 Support Packages" "org.bouncycastle.asn1*" \
+            -group "Math Support Packages" "org.bouncycastle.math*" \
+            -group "Utility Packages" "org.bouncycastle.util*" \
+            -classpath classes \
+            -d docs -sourcepath src \
+            org.bouncycastle.asn1 \
+            org.bouncycastle.asn1.cmp \
+            org.bouncycastle.asn1.cms \
+            org.bouncycastle.asn1.cryptopro \
+            org.bouncycastle.asn1.ess \
+            org.bouncycastle.asn1.misc \
+            org.bouncycastle.asn1.mozilla \
+            org.bouncycastle.asn1.nist \
+            org.bouncycastle.asn1.ocsp \
+            org.bouncycastle.asn1.oiw \
+            org.bouncycastle.asn1.pkcs \
+            org.bouncycastle.asn1.sec \
+            org.bouncycastle.asn1.smime \
+            org.bouncycastle.asn1.teletrust \
+            org.bouncycastle.asn1.test \
+            org.bouncycastle.asn1.tsp \
+            org.bouncycastle.asn1.util \
+            org.bouncycastle.asn1.x509 \
+            org.bouncycastle.asn1.x9 \
+            org.bouncycastle.math.ec \
+            org.bouncycastle.crypto \
+            org.bouncycastle.crypto.agreement \
+            org.bouncycastle.crypto.digests \
+            org.bouncycastle.crypto.encodings \
+            org.bouncycastle.crypto.engines \
+            org.bouncycastle.crypto.generators \
+            org.bouncycastle.crypto.io \
+            org.bouncycastle.crypto.macs \
+            org.bouncycastle.crypto.modes \
+            org.bouncycastle.crypto.paddings \
+            org.bouncycastle.crypto.params \
+            org.bouncycastle.crypto.signers \
+            org.bouncycastle.crypto.test \
+            org.bouncycastle.crypto.examples \
+            org.bouncycastle.util.encoders \
+            org.bouncycastle.util.test) > /dev/null \
+
+        PATH=$JDK12PATH/bin:$PATH
+        export PATH
+
+        echo "compiling"
+
+        (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java */*/*.java )
+
+        echo "lightweight regression test"
+        java -classpath classes org.bouncycastle.crypto.test.RegressionTest
+
+    )
+    (2>&1 find lcrypto-jdk12-$base -name CVS -exec rm -rf \{\} \; ) > /dev/null
+fi
+
+if  test "$base" != "" -a ! -d jce-jdk12-$base
+then
+    echo "making JCE release"
+
+    mkdir jce-jdk12-$base
+    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src | (cd jce-jdk12-$base; tar xf -)
+    (cd jdk1.4; tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
+    (cd jdk1.3; tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
+    (cd jdk1.2; tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
+
+    (
+    cd jce-jdk12-$base; mkdir classes; mkdir docs;
+
+    rm -rf src/org/bouncycastle/mail
+    rm -rf src/org/bouncycastle/cms
+    rm -rf src/org/bouncycastle/bcpg
+    rm -rf src/org/bouncycastle/openpgp
+    rm -rf src/org/bouncycastle/tsp
+    rm -rf src/org/bouncycastle/jce/ECPointUtil.java
+    rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
+    rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
+    rm -rf src/org/bouncycastle/jce/spec/ECNamedCurveSpec.java
+    rm -rf src/org/bouncycastle/util/encoders/test/*.java
+
+    (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
+        -header "$HEADER" \
+        -group "Cleanroom JCE" "javax.crypto*" \
+        -group "JCE Utility and Extension Packages" "org.bouncycastle.jce*" \
+        -group "OCSP and OpenSSL PEM Support Packages" "org.bouncycastle.ocsp*:org.bouncycastle.openssl*" \
+        -group "ASN.1 Support Packages" "org.bouncycastle.asn1*" \
+        -group "Lightweight Crypto Packages" "org.bouncycastle.crypto*" \
+        -group "Utility Packages" "org.bouncycastle.util*:org.bouncycastle.math*" \
+        -group "JCE Provider and Test Classes" "org.bouncycastle.jce.provider*" \
+        -classpath classes \
+        -d docs -sourcepath src \
+        java.security.spec \
+        javax.crypto  \
+        javax.crypto.interfaces \
+        javax.crypto.spec \
+        org.bouncycastle.asn1 \
+        org.bouncycastle.asn1.cmp \
+        org.bouncycastle.asn1.cms \
+        org.bouncycastle.asn1.cryptopro \
+        org.bouncycastle.asn1.ess \
+        org.bouncycastle.asn1.misc \
+        org.bouncycastle.asn1.mozilla \
+        org.bouncycastle.asn1.nist \
+        org.bouncycastle.asn1.ocsp \
+        org.bouncycastle.asn1.oiw \
+        org.bouncycastle.asn1.pkcs \
+        org.bouncycastle.asn1.sec \
+        org.bouncycastle.asn1.smime \
+        org.bouncycastle.asn1.teletrust \
+        org.bouncycastle.asn1.test \
+        org.bouncycastle.asn1.tsp \
+        org.bouncycastle.asn1.util \
+        org.bouncycastle.asn1.x509 \
+        org.bouncycastle.asn1.x9 \
+        org.bouncycastle.math.ec \
+        org.bouncycastle.crypto \
+        org.bouncycastle.crypto.agreement \
+        org.bouncycastle.crypto.digests \
+        org.bouncycastle.crypto.encodings \
+        org.bouncycastle.crypto.engines \
+        org.bouncycastle.crypto.generators \
+        org.bouncycastle.crypto.io \
+        org.bouncycastle.crypto.macs \
+        org.bouncycastle.crypto.modes \
+        org.bouncycastle.crypto.paddings \
+        org.bouncycastle.crypto.params \
+        org.bouncycastle.crypto.signers \
+        org.bouncycastle.crypto.test \
+        org.bouncycastle.crypto.examples \
+        org.bouncycastle.jce \
+        org.bouncycastle.jce.cert \
+        org.bouncycastle.jce.interfaces \
+        org.bouncycastle.jce.spec \
+        org.bouncycastle.jce.examples \
+        org.bouncycastle.jce.provider \
+        org.bouncycastle.jce.provider.test \
+        org.bouncycastle.ocsp \
+        org.bouncycastle.ocsp.test \
+        org.bouncycastle.openssl \
+        org.bouncycastle.openssl.test \
+        org.bouncycastle.mozilla \
+        org.bouncycastle.mozilla.test \
+        org.bouncycastle.x509 \
+        org.bouncycastle.x509.examples \
+        org.bouncycastle.x509.extension \
+        org.bouncycastle.util.encoders \
+        org.bouncycastle.util.test) > /dev/null \
+
+    PATH=$JDK12PATH/bin:$PATH
+    export PATH
+
+    echo "compiling"
+
+    (cd src/java/security/spec; javac -d ../../../../classes -classpath ../../../../classes *.java )
+
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java */*/*.java */*/*/*.java)
+
+    (cd src/javax/crypto; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java)
+
+
+    cp src/org/bouncycastle/openssl/test/*.pem classes/org/bouncycastle/openssl/test
+
+    echo "provider regression test"
+    java -classpath classes org.bouncycastle.jce.provider.test.RegressionTest
+    java -classpath classes org.bouncycastle.openssl.test.ReaderTest
+
+    (cd classes; jar cf ../../bctest-jdk12-$base.jar org/bouncycastle/asn1/test org/bouncycastle/crypto/test org/bouncycastle/jce/provider/test)
+
+    rm -rf classes/org/bouncycastle/asn1/test
+    rm -rf classes/org/bouncycastle/crypto/test
+    rm -rf classes/org/bouncycastle/jce/provider/test
+
+
+    (cd classes; jar cf ../../bcprov-jdk12-$base.jar java org)
+    (cd classes; jar cf ../../jce-jdk12-$base.jar java javax org)
+    )
+
+    ( 2>&1 find jce-jdk12-$base -name CVS -exec rm -rf \{\} \;) > /dev/null
+fi
+
+if test "$base" != "" -a ! -d bcpg-jdk12-$base
+then
+    echo "making OpenPGP release"
+
+    mkdir bcpg-jdk12-$base
+    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/bcpg src/org/bouncycastle/openpgp | (cd bcpg-jdk12-$base; tar xf -)
+    (cd jdk1.2; tar cf - * | (cd ../bcpg-jdk12-$base/src; tar xf -))
+    (
+    cd bcpg-jdk12-$base; mkdir classes; mkdir docs;
+
+    PATH=$JDK12PATH/bin:$PATH
+    export PATH
+
+    rm -rf src/java
+    rm -rf src/org/bouncycastle/jce
+    rm -rf src/org/bouncycastle/ocsp
+    rm -rf src/org/bouncycastle/mail
+    rm -rf src/org/bouncycastle/cms
+
+    javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
+        -header "$HEADER" \
+        -group "BCPG Support Packages" "org.bouncycastle.bcpg*" \
+        -group "OpenPGP Packages" "org.bouncycastle.openpgp*" \
+        -classpath classes:../jce-jdk12-$base/classes \
+        -d docs -sourcepath src \
+        org.bouncycastle.bcpg \
+        org.bouncycastle.bcpg.attr \
+        org.bouncycastle.bcpg.sig \
+        org.bouncycastle.openpgp \
+        org.bouncycastle.openpgp.examples \
+        org.bouncycastle.openpgp.test > /dev/null \
+
+    echo "compiling"
+
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:../../../../jce-jdk12-$base/classes */*.java */*/*.java)
+    cat > classes/pg.mf <<%
+Manifest-Version: 1.0
+Extension-Name: org.bouncycastle.bcpg
+Specification-Vendor: BouncyCastle.org
+Specification-Version: 1.1
+Implementation-Vendor-Id: org.bouncycastle
+Implementation-Vendor: BouncyCastle.org
+Implementation-Version: $version.0
+%
+
+    (cd classes; jar cmf pg.mf ../../bcpg-jdk12-$base.jar org)
+    java -classpath ../jce-jdk12-$base/classes:classes org.bouncycastle.openpgp.test.RegressionTest
+
+    )
+
+    (2>&1 find bcpg-jdk12-$base -name CVS -exec rm -rf \{\} \;) > /dev/null
+fi
+
+if false # test "$base" != ""
+then
+    echo "making tools release"
+
+    mkdir bctools-jdk12-$base
+    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html | (cd bctools-jdk12-$base; tar xf -)
+    (cd tools; tar cf - src) | (cd bctools-jdk12-$base; tar xf -)
+    (
+    cd bctools-jdk12-$base; mkdir classes; mkdir docs;
+
+    javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
+        -header "$HEADER" -group "Core Packages" "org.bouncycastle*" \
+        -classpath classes \
+        -d docs -sourcepath src -breakiterator \
+        org.bouncycastle.tools.openpgp \
+        org.bouncycastle.tools.openpgp.dump \
+        org.bouncycastle.tools.openpgp.rampage \
+        org.bouncycastle.tools.openpgp.util \
+        > /dev/null \
+
+    echo "compiling"
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../tools/src */*/*.java */*/*/*.java)
+    cat > classes/tools.mf <<%
+Manifest-Version: 1.0
+Extension-Name: org.bouncycastle.tools
+Specification-Vendor: BouncyCastle.org
+Specification-Version: 1.1
+Implementation-Vendor-Id: org.bouncycastle
+Implementation-Vendor: BouncyCastle.org
+Implementation-Version: $version.0
+%
+
+    (cd classes; jar cmf tools.mf ../../bctools-jdk12-$base.jar org)
+    )
+
+    (2>&1 find bctools-jdk12-$base -name CVS -exec rm -rf \{\} \;) > /dev/null
+fi
