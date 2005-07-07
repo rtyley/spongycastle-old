@@ -55,6 +55,8 @@ public class RegressionTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
+        System.out.println("Testing " + Security.getProvider("BC").getInfo() + " version: " + Security.getProvider("BC").getVersion());
+        
         for (int i = 0; i != tests.length; i++)
         {
             TestResult  result = tests[i].perform();
