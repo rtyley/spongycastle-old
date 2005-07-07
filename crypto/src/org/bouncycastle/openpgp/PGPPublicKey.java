@@ -680,6 +680,41 @@ public class PGPPublicKey
     }
     
     /**
+     * Check whether this (sub)key has a revocation signature on it.
+     * 
+     * @return boolean indicating whether this (sub)key has been revoked.
+     */
+    public boolean isRevoked()
+    {
+        int ns = 0;
+        boolean revoked = false;
+
+        if (this.isMasterKey())    // Master key
+        {
+            while (!revoked && (ns < keySigs.size()))
+            {
+                if (((PGPSignature)keySigs.get(ns++)).getSignatureType() == PGPSignature.KEY_REVOCATION)
+                {
+                    revoked = true;
+                }
+            }
+        }
+        else                    // Sub-key
+        {
+            while (!revoked && (ns < subSigs.size()))
+            {
+                if (((PGPSignature)subSigs.get(ns++)).getSignatureType() == PGPSignature.SUBKEY_REVOCATION)
+                {
+                    revoked = true;
+                }
+            }
+        }
+
+        return revoked;
+    }
+
+
+    /**
      * Add a certification to the given public key.
      * 
      * @param key the key the certification is to be added to.
