@@ -107,6 +107,10 @@ public class PGPCmdLineArgProcessor
             {
                 rv.setMDCRequired(true);
             }
+            else if (arg.equals("-pgp2")) // if specified, set to true
+            {
+                rv.setPGP2Compatible(true);
+            }
             else if (arg.startsWith("-"))
             {
                 rv.addError("Unknown option [" + arg + "]");
