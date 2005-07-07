@@ -7,20 +7,14 @@ import java.security.SecureRandom;
 
 public class BigInteger
 {
-    private int               sign;                    // -1 means -ve; +1
-                                                        // means +ve; 0 means 0;
-    private int[]             magnitude;               // array of ints with
-                                                        // [0] being the most
-                                                        // significant
-    private int               nBits      = -1;         // cache bitCount()
-                                                        // value
-    private int               nBitLength = -1;         // cache bitLength()
-                                                        // value
-    private static final long IMASK      = 0xffffffffL;
-    private long              mQuote     = -1L;        // -m^(-1) mod b, b =
-                                                        // 2^32 (see Montgomery
-                                                        // mult.)
 
+    private int sign; // -1 means -ve; +1 means +ve; 0 means 0;
+    private int[] magnitude; // array of ints with [0] being the most significant
+    private int nBits = -1; // cache bitCount() value
+    private int nBitLength = -1; // cache bitLength() value
+    private static final long IMASK = 0xffffffffL;
+    private long mQuote = -1L; // -m^(-1) mod b, b = 2^32 (see Montgomery mult.)
+    
     private BigInteger()
     {
     }
@@ -52,9 +46,7 @@ public class BigInteger
                 System.arraycopy(mag, i, newMag, 0, newMag.length);
                 magnitude = newMag;
                 if (newMag.length == 0)
-                {
                     sign = 0;
-                }
             }
         }
         else
@@ -109,11 +101,11 @@ public class BigInteger
             return;
         }
 
-        // ////
+        //////
         // could we work out the max number of ints required to store
         // sval.length digits in the given base, then allocate that
         // storage in one hit?, then generate the magnitude in one hit too?
-        // ////
+        //////
 
         BigInteger b = BigInteger.ZERO;
         BigInteger r = valueOf(rdx);
@@ -141,26 +133,24 @@ public class BigInteger
             sign = -1;
         }
         magnitude = makeMagnitude(bval, sign);
-        if (magnitude.length == 0)
-        {
+        if (magnitude.length == 0) {
             sign = 0;
         }
     }
 
     /**
      * If sign >= 0, packs bytes into an array of ints, most significant first
-     * If sign < 0, packs 2's complement of bytes into an array of ints, most
-     * significant first, adding an extra most significant byte in case bval =
-     * {0x80, 0x00, ..., 0x00}
-     * 
+     * If sign <  0, packs 2's complement of bytes into 
+     * an array of ints, most significant first,
+     * adding an extra most significant byte in case bval = {0x80, 0x00, ..., 0x00}
+     *
      * @param bval
      * @param sign
      * @return
      */
-    private int[] makeMagnitude(byte[] bval, int theSign)
+    private int[] makeMagnitude(byte[] bval, int sign)
     {
-        if (theSign >= 0)
-        {
+        if (sign >= 0) {
             int i;
             int[] mag;
             int firstSignificant;
@@ -175,11 +165,9 @@ public class BigInteger
             }
 
             int nInts = (bval.length - firstSignificant + 3) / 4;
-            int bCount = (bval.length - firstSignificant) % 4;
+            int bCount = (bval.length - firstSignificant) % 4;            
             if (bCount == 0)
-            {
                 bCount = 4;
-            }
             // n = k * (n / k) + n % k
             // bval.length - firstSignificant + 3 = 4 * nInts + bCount - 1
             // bval.length - firstSignificant + 4 - bCount = 4 * nInts
@@ -207,17 +195,17 @@ public class BigInteger
             // 1 <= bCount <= 4
             // So bCount = 4 and magnitudeIndex = nInts = mag.length
 
-            // if (magnitudeIndex < mag.length)
-            // {
-            // mag[magnitudeIndex] = v;
-            // }
+//            if (magnitudeIndex < mag.length)
+//            {
+//                mag[magnitudeIndex] = v;
+//            }
             return mag;
         }
-        else
-        {
+        else {
             int i;
             int[] mag;
             int firstSignificant;
+            
 
             // strip leading -1's
             for (firstSignificant = 0; firstSignificant < bval.length - 1
@@ -227,17 +215,13 @@ public class BigInteger
             boolean leadingByte = false;
 
             // check for -2^(n-1)
-            if (bval[firstSignificant] == 0x80)
-            {
-                for (i = firstSignificant + 1; i < bval.length; i++)
-                {
-                    if (bval[i] != 0)
-                    {
+            if (bval[firstSignificant] == 0x80) {
+                for (i = firstSignificant + 1; i < bval.length; i++) {
+                    if (bval[i] != 0) {
                         break;
                     }
                 }
-                if (i == bval.length)
-                {
+                if (i == bval.length) {
                     nBytes++;
                     leadingByte = true;
                 }
@@ -258,13 +242,10 @@ public class BigInteger
             int magnitudeIndex = 0;
             // nBytes + 4 - bCount - i + 4 * magnitudeIndex = 4 * nInts
             // 1 <= bCount <= 4
-            if (leadingByte)
-            {
-                // bval.length + 1 + 4 - bCount - i + 4 * magnitudeIndex = 4 *
-                // nInts
+            if (leadingByte) {
+                // bval.length + 1 + 4 - bCount - i + 4 * magnitudeIndex = 4 * nInts
                 bCount--;
-                // bval.length + 1 + 4 - (bCount + 1) - i + 4 * magnitudeIndex =
-                // 4 * nInts
+                // bval.length + 1 + 4 - (bCount + 1) - i + 4 * magnitudeIndex = 4 * nInts
                 // bval.length + 4 - bCount - i + 4 * magnitudeIndex = 4 * nInts
                 if (bCount <= 0)
                 {
@@ -295,23 +276,23 @@ public class BigInteger
             // 1 <= bCount <= 4
             // So bCount = 4 and magnitudeIndex = nInts = mag.length
 
-            // if (magnitudeIndex < mag.length)
-            // {
-            // mag[magnitudeIndex] = v;
-            // }
+//            if (magnitudeIndex < mag.length)
+//            {
+//                mag[magnitudeIndex] = v;
+//            }
             return inc(mag);
         }
 
     }
 
-    public BigInteger(int thSign, byte[] mag) throws NumberFormatException
+    public BigInteger(int sign, byte[] mag) throws NumberFormatException
     {
-        if (theSign < -1 || theSign > 1)
+        if (sign < -1 || sign > 1)
         {
             throw new NumberFormatException("Invalid sign value");
         }
 
-        if (theSign == 0)
+        if (sign == 0)
         {
             this.sign = 0;
             this.magnitude = new int[0];
@@ -320,7 +301,7 @@ public class BigInteger
 
         // copy bytes
         this.magnitude = makeMagnitude(mag, 1);
-        this.sign = theSign;
+        this.sign = sign;
     }
 
     public BigInteger(int numBits, Random rnd) throws IllegalArgumentException
@@ -351,14 +332,16 @@ public class BigInteger
     private static final int BYTES_PER_INT = 4;
 
     /**
-     * strictly speaking this is a little dodgey from a compliance point of view
-     * as it forces people to be using SecureRandom as well, that being said -
-     * this implementation is for a crypto library and you do have the source!
+     * strictly speaking this is a little dodgey from a compliance
+     * point of view as it forces people to be using SecureRandom as
+     * well, that being said - this implementation is for a crypto
+     * library and you do have the source!
      */
     private void nextRndBytes(Random rnd, byte[] bytes)
     {
         int numRequested = bytes.length;
-        int numGot = 0, r = 0;
+        int numGot = 0, 
+        r = 0;
 
         if (rnd instanceof java.security.SecureRandom)
         {
@@ -366,7 +349,7 @@ public class BigInteger
         }
         else
         {
-            for (;;)
+            for (; ; )
             {
                 for (int i = 0; i < BYTES_PER_INT; i++)
                 {
@@ -404,7 +387,7 @@ public class BigInteger
             this.nBits = -1;
             this.nBitLength = -1;
             this.mQuote = -1L;
-
+            
             if (certainty > 0 && bitLength > 2)
             {
                 this.magnitude[this.magnitude.length - 1] |= 1;
@@ -468,14 +451,9 @@ public class BigInteger
     public BigInteger add(BigInteger val) throws ArithmeticException
     {
         if (val.sign == 0 || val.magnitude.length == 0)
-        {
             return this;
-        }
-        
         if (this.sign == 0 || this.magnitude.length == 0)
-        {
             return val;
-        }
 
         if (val.sign < 0)
         {
@@ -490,7 +468,8 @@ public class BigInteger
 
         // both BigIntegers are either +ve or -ve; set the sign later
 
-        int[] mag, op;
+        int[] mag, 
+        op;
 
         if (this.magnitude.length < val.magnitude.length)
         {
@@ -527,16 +506,16 @@ public class BigInteger
         return nBits;
     }
 
-    private static final byte[] bitCounts = {0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2,
-            2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4,
-            5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4,
-            3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3,
-            4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3,
-            3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3,
-            4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
-            2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5,
-            6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6,
-            6, 7, 6, 7, 7, 8              };
+    private final static byte[] bitCounts = {0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1,
+        2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4,
+        4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3,
+        4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5,
+        3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2,
+        3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3,
+        3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6,
+        7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6,
+        5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5,
+        6, 6, 7, 6, 7, 7, 8};
 
     private int bitLength(int indx, int[] mag)
     {
@@ -606,33 +585,31 @@ public class BigInteger
     static int bitLen(int w)
     {
         // Binary search - decision tree (5 tests, rarely 6)
-        return (w < 1 << 15 ? (w < 1 << 7 ? (w < 1 << 3 ? (w < 1 << 1 ? (w < 1 << 0 ? (w < 0
-                ? 32
-                : 0) : 1) : (w < 1 << 2 ? 2 : 3)) : (w < 1 << 5
-                ? (w < 1 << 4 ? 4 : 5)
-                : (w < 1 << 6 ? 6 : 7))) : (w < 1 << 11 ? (w < 1 << 9
-                ? (w < 1 << 8 ? 8 : 9)
-                : (w < 1 << 10 ? 10 : 11)) : (w < 1 << 13 ? (w < 1 << 12 ? 12 : 13) : (w < 1 << 14
-                ? 14
-                : 15)))) : (w < 1 << 23 ? (w < 1 << 19 ? (w < 1 << 17
-                ? (w < 1 << 16 ? 16 : 17)
-                : (w < 1 << 18 ? 18 : 19)) : (w < 1 << 21 ? (w < 1 << 20 ? 20 : 21) : (w < 1 << 22
-                ? 22
-                : 23))) : (w < 1 << 27 ? (w < 1 << 25 ? (w < 1 << 24 ? 24 : 25) : (w < 1 << 26
-                ? 26
-                : 27)) : (w < 1 << 29 ? (w < 1 << 28 ? 28 : 29) : (w < 1 << 30 ? 30 : 31)))));
+        return (w < 1 << 15 ? (w < 1 << 7
+                ? (w < 1 << 3 ? (w < 1 << 1
+                        ? (w < 1 << 0 ? (w < 0 ? 32 : 0) : 1)
+                        : (w < 1 << 2 ? 2 : 3)) : (w < 1 << 5
+                        ? (w < 1 << 4 ? 4 : 5)
+                        : (w < 1 << 6 ? 6 : 7)))
+                : (w < 1 << 11
+                        ? (w < 1 << 9 ? (w < 1 << 8 ? 8 : 9) : (w < 1 << 10 ? 10 : 11))
+                        : (w < 1 << 13 ? (w < 1 << 12 ? 12 : 13) : (w < 1 << 14 ? 14 : 15)))) : (w < 1 << 23 ? (w < 1 << 19
+                ? (w < 1 << 17 ? (w < 1 << 16 ? 16 : 17) : (w < 1 << 18 ? 18 : 19))
+                : (w < 1 << 21 ? (w < 1 << 20 ? 20 : 21) : (w < 1 << 22 ? 22 : 23))) : (w < 1 << 27
+                ? (w < 1 << 25 ? (w < 1 << 24 ? 24 : 25) : (w < 1 << 26 ? 26 : 27))
+                : (w < 1 << 29 ? (w < 1 << 28 ? 28 : 29) : (w < 1 << 30 ? 30 : 31)))));
     }
 
-    private static final byte[] bitLengths = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5,
-            5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-            6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8,
-            8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-            8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-            8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-            8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-            8, 8, 8, 8, 8, 8               };
+    private final static byte[] bitLengths = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
+        5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8};
 
     public int compareTo(Object o)
     {
@@ -640,8 +617,8 @@ public class BigInteger
     }
 
     /**
-     * unsigned comparison on two arrays - note the arrays may start with
-     * leading zeros.
+     * unsigned comparison on two arrays - note the arrays may
+     * start with leading zeros.
      */
     private int compareTo(int xIndx, int[] x, int yIndx, int[] y)
     {
@@ -716,7 +693,7 @@ public class BigInteger
                 if (shift % 32 == 0)
                 {
                     // Special case where the shift is the size of an int.
-                    int[] countSpecial = new int[shift / 32 + 1];
+                    int countSpecial[] = new int[shift / 32 + 1];
                     System.arraycopy(count, 0, countSpecial, 1, countSpecial.length - 1);
                     countSpecial[0] = 0;
                     count = countSpecial;
@@ -740,7 +717,7 @@ public class BigInteger
             int cStart = 0;
             int iCountStart = 0;
 
-            for (;;)
+            for (; ; )
             {
                 int cmp = compareTo(xStart, x, cStart, c);
 
@@ -937,8 +914,8 @@ public class BigInteger
     }
 
     /**
-     * return whether or not a BigInteger is probably prime with a probability
-     * of 1 - (1/2)**certainty.
+     * return whether or not a BigInteger is probably prime with a
+     * probability of 1 - (1/2)**certainty.
      * <p>
      * From Knuth Vol 2, pg 395.
      */
@@ -1086,23 +1063,20 @@ public class BigInteger
 
     /**
      * Calculate the numbers u1, u2, and u3 such that:
-     * 
+     *
      * u1 * a + u2 * b = u3
-     * 
-     * where u3 is the greatest common divider of a and b. a and b using the
-     * extended Euclid algorithm (refer p. 323 of The Art of Computer
-     * Programming vol 2, 2nd ed). This also seems to have the side effect of
-     * calculating some form of multiplicative inverse.
-     * 
-     * @param a
-     *            First number to calculate gcd for
-     * @param b
-     *            Second number to calculate gcd for
-     * @param u1Out
-     *            the return object for the u1 value
-     * @param u2Out
-     *            the return object for the u2 value
-     * @return The greatest common divisor of a and b
+     *
+     * where u3 is the greatest common divider of a and b.
+     * a and b using the extended Euclid algorithm (refer p. 323
+     * of The Art of Computer Programming vol 2, 2nd ed).
+     * This also seems to have the side effect of calculating
+     * some form of multiplicative inverse.
+     *
+     * @param a    First number to calculate gcd for
+     * @param b    Second number to calculate gcd for
+     * @param u1Out      the return object for the u1 value
+     * @param u2Out      the return object for the u2 value
+     * @return     The greatest common divisor of a and b
      */
     private static BigInteger extEuclid(BigInteger a, BigInteger b, BigInteger u1Out,
             BigInteger u2Out)
@@ -1116,7 +1090,9 @@ public class BigInteger
 
         while (v3.compareTo(BigInteger.ZERO) > 0)
         {
-            BigInteger q, tn, tv;
+            BigInteger q, 
+            tn, 
+            tv;
 
             q = u3.divide(v3);
 
@@ -1177,7 +1153,7 @@ public class BigInteger
                 {
                     int[] longZ = new int[m.magnitude.length];
                     System.arraycopy(zVal, 0, longZ, longZ.length - zVal.length, zVal.length);
-                    zVal = longZ;
+                    zVal = longZ;  
                 }
             }
         }
@@ -1186,7 +1162,7 @@ public class BigInteger
         {
             if (magnitude.length <= m.magnitude.length)
             {
-                // zAccum = new int[m.magnitude.length * 2];
+                //zAccum = new int[m.magnitude.length * 2];
                 zVal = new int[m.magnitude.length];
 
                 System.arraycopy(magnitude, 0, zVal, zVal.length - magnitude.length,
@@ -1199,7 +1175,7 @@ public class BigInteger
                 //
                 BigInteger tmp = this.remainder(m);
 
-                // zAccum = new int[m.magnitude.length * 2];
+                //zAccum = new int[m.magnitude.length * 2];
                 zVal = new int[m.magnitude.length];
 
                 System.arraycopy(tmp.magnitude, 0, zVal, zVal.length - tmp.magnitude.length,
@@ -1264,7 +1240,8 @@ public class BigInteger
                     {
                         multiply(yAccum, yVal, zVal);
                         remainder(yAccum, m.magnitude);
-                        System.arraycopy(yAccum, yAccum.length - yVal.length, yVal, 0, yVal.length);
+                        System.arraycopy(yAccum, yAccum.length - yVal.length, yVal, 0,
+                                yVal.length);
                         zero(yAccum);
                     }
                 }
@@ -1305,7 +1282,9 @@ public class BigInteger
      */
     private int[] square(int[] w, int[] x)
     {
-        long u1, u2, c;
+        long u1, 
+        u2, 
+        c;
 
         if (w.length != 2 * x.length)
         {
@@ -1410,14 +1389,15 @@ public class BigInteger
         return u3;
     }
 
-    private long _modInverse(long v, long m) throws ArithmeticException
+    private long _modInverse(long v, long m)
+        throws ArithmeticException
     {
         if (m < 0)
         {
             throw new ArithmeticException("Modulus must be positive");
         }
 
-        long[] x = new long[2];
+        long[]	x = new long[2];
 
         long gcd = _extEuclid(v, m, x);
 
@@ -1448,25 +1428,28 @@ public class BigInteger
             return -1L; // not for even numbers
         }
 
-        /*
-         * byte[] bytes = {1, 0, 0, 0, 0}; BigInteger b = new BigInteger(1,
-         * bytes); // 2^32 mQuote =
-         * this.negate().mod(b).modInverse(b).longValue();
-         */
+/*
+        byte[] bytes = {1, 0, 0, 0, 0};
+        BigInteger b = new BigInteger(1, bytes); // 2^32
+        mQuote = this.negate().mod(b).modInverse(b).longValue();
+*/
         long v = (((~this.magnitude[this.magnitude.length - 1]) | 1) & 0xffffffffL);
-        mQuote = _modInverse(v, 0x100000000L);
+	mQuote = _modInverse(v, 0x100000000L);
 
         return mQuote;
     }
 
     /**
-     * Montgomery multiplication: a = x * y * R^(-1) mod m <br>
-     * Based algorithm 14.36 of Handbook of Applied Cryptography. <br>
+     * Montgomery multiplication: a = x * y * R^(-1) mod m
+     * <br>
+     * Based algorithm 14.36 of Handbook of Applied Cryptography.
+     * <br>
      * <li> m, x, y should have length n </li>
      * <li> a should have length (n + 1) </li>
      * <li> b = 2^32, R = b^n </li>
      * <br>
-     * The result is put in x <br>
+     * The result is put in x
+     * <br>
      * NOTE: the indices of x, y, m, a different in HAC and in Java
      */
     public void multiplyMonty(int[] a, int[] x, int[] y, int[] m, long mQuote)
@@ -1534,7 +1517,7 @@ public class BigInteger
 
     public BigInteger negate()
     {
-        return new BigInteger(-sign, magnitude);
+        return new BigInteger( -sign, magnitude);
     }
 
     public BigInteger pow(int exp) throws ArithmeticException
@@ -1544,7 +1527,8 @@ public class BigInteger
         if (sign == 0)
             return (exp == 0 ? BigInteger.ONE : this);
 
-        BigInteger y, z;
+        BigInteger y, 
+        z;
         y = BigInteger.ONE;
         z = this;
 
@@ -1592,7 +1576,7 @@ public class BigInteger
             int xStart = 0;
             int cStart = 0;
 
-            for (;;)
+            for (; ; )
             {
                 int cmp = compareTo(xStart, x, cStart, c);
 
@@ -1679,7 +1663,7 @@ public class BigInteger
         int nInts = n >>> 5;
         int nBits = n & 0x1f;
         int magLen = mag.length;
-        int[] newMag = null;
+        int newMag[] = null;
 
         if (nBits == 0)
         {
@@ -1733,7 +1717,7 @@ public class BigInteger
 
         if (n < 0)
         {
-            return shiftRight(-n);
+            return shiftRight( -n);
         }
 
         return new BigInteger(sign, shiftLeft(magnitude, n));
@@ -1812,12 +1796,12 @@ public class BigInteger
 
         if (n < 0)
         {
-            return shiftLeft(-n);
+            return shiftLeft( -n);
         }
 
         if (n >= bitLength())
         {
-            return (this.sign < 0 ? valueOf(-1) : BigInteger.ZERO);
+            return (this.sign < 0 ? valueOf( -1) : BigInteger.ZERO);
         }
 
         int[] res = new int[this.magnitude.length];
@@ -1897,7 +1881,8 @@ public class BigInteger
                 return this.add(val.negate());
         }
 
-        BigInteger bigun, littlun;
+        BigInteger bigun, 
+        littlun;
         int compare = compareTo(val);
         if (compare == 0)
         {
@@ -1938,10 +1923,8 @@ public class BigInteger
             {
                 if (sign < 0)
                 {
-                    // we are dealing with a +ve number and we want a -ve one,
-                    // so
-                    // invert the magnitude ints and add 1 (propagating the
-                    // carry)
+                    // we are dealing with a +ve number and we want a -ve one, so
+                    // invert the magnitude ints and add 1 (propagating the carry)
                     // to make a 2's complement -ve number
                     lMag = ~magnitude[ofs--] & IMASK;
                     lMag += carry;
@@ -1999,24 +1982,18 @@ public class BigInteger
         }
         else
         {
-            // This is algorithm 1a from chapter 4.4 in Seminumerical
-            // Algorithms, slow but it works
+            // This is algorithm 1a from chapter 4.4 in Seminumerical Algorithms, slow but it works
             Stack S = new Stack();
             BigInteger base = new BigInteger(Integer.toString(rdx, rdx), rdx);
             // The sign is handled separatly.
-            // Notice however that for this to work, radix 16 _MUST_ be a
-            // special case,
-            // unless we want to enter a recursion well. In their infinite
-            // wisdom, why did not
-            // the Sun engineers made a c'tor for BigIntegers taking a
-            // BigInteger as parameter?
-            // (Answer: Becuase Sun's BigIntger is clonable, something
-            // bouncycastle's isn't.)
+            // Notice however that for this to work, radix 16 _MUST_ be a special case,
+            // unless we want to enter a recursion well. In their infinite wisdom, why did not 
+            // the Sun engineers made a c'tor for BigIntegers taking a BigInteger as parameter?
+            // (Answer: Becuase Sun's BigIntger is clonable, something bouncycastle's isn't.)
             BigInteger u = new BigInteger(this.abs().toString(16), 16);
             BigInteger b;
 
-            // For speed, maye these test should look directly a
-            // u.magnitude.length?
+            // For speed, maye these test should look directly a u.magnitude.length?
             while (!u.equals(BigInteger.ZERO))
             {
                 b = u.mod(base);
@@ -2042,9 +2019,9 @@ public class BigInteger
         return s;
     }
 
-    public static final BigInteger  ZERO = new BigInteger(0, new byte[0]);
-    public static final BigInteger  ONE  = valueOf(1);
-    private static final BigInteger TWO  = valueOf(2);
+    public static final BigInteger ZERO = new BigInteger(0, new byte[0]);
+    public static final BigInteger ONE = valueOf(1);
+    private static final BigInteger TWO = valueOf(2);
 
     public static BigInteger valueOf(long val)
     {
