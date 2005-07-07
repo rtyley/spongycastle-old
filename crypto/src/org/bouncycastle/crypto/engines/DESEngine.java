@@ -36,6 +36,11 @@ public class DESEngine
     {
         if (params instanceof KeyParameter)
         {
+            if (((KeyParameter)params).getKey().length > 8)
+            {
+                throw new IllegalArgumentException("DES key too long - should be 8 bytes");
+            }
+            
             workingKey = generateWorkingKey(encrypting,
                                   ((KeyParameter)params).getKey());
 
