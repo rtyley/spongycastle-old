@@ -454,6 +454,28 @@ e.printStackTrace();
         return new SimpleTestResult(true, this.getName() + ": Okay");
     }
 
+    private TestResult testExceptions()
+    {
+        DHParameterSpec        dhParams = new DHParameterSpec(p512, g512);
+
+        try
+        {
+            KeyAgreement aKeyAgree = KeyAgreement.getInstance("DH", "BC");
+
+            aKeyAgree.generateSecret("DES");
+        }
+        catch (IllegalStateException e)
+        {
+            // okay
+        }
+        catch (Exception e)
+        {
+            return new SimpleTestResult(false, "Unexpected exception: " + e, e);
+        }
+
+        return new SimpleTestResult(true, this.getName() + ": Okay");
+    }
+    
     private boolean arrayEquals(
         byte[]  a,
         byte[]  b)
@@ -510,6 +532,12 @@ e.printStackTrace();
         }
         
         result = testECDHC();
+        if (!result.isSuccessful())
+        {
+            return result;
+        }
+        
+        result = testExceptions();
         if (!result.isSuccessful())
         {
             return result;

@@ -54,18 +54,23 @@ public abstract class JDKAlgorithmParameters
 
         protected byte[] engineGetEncoded() 
         {
-            byte[]  tmp = new byte[iv.length];
-
-            System.arraycopy(iv, 0, tmp, 0, iv.length);
-            return tmp;
+            return engineGetEncoded("ASN.1");
         }
 
         protected byte[] engineGetEncoded(
             String format) 
         {
+            if (format == null)
+            {
+                return engineGetEncoded("ASN.1");
+            }
+            
             if (format.equals("RAW"))
             {
-                return engineGetEncoded();
+                byte[]  tmp = new byte[iv.length];
+
+                System.arraycopy(iv, 0, tmp, 0, iv.length);
+                return tmp;
             }
             else if (format.equals("ASN.1"))
             {
@@ -74,7 +79,7 @@ public abstract class JDKAlgorithmParameters
 
                 try
                 {
-                    dOut.writeObject(new DEROctetString(engineGetEncoded()));
+                    dOut.writeObject(new DEROctetString(engineGetEncoded("RAW")));
                 }
                 catch (IOException e)
                 {
@@ -147,9 +152,16 @@ public abstract class JDKAlgorithmParameters
             {
                 ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
                 ASN1InputStream         aIn = new ASN1InputStream(bIn);
-                ASN1OctetString         oct = (ASN1OctetString)aIn.readObject();
-
-                engineInit(oct.getOctets());
+                try
+                {
+                    ASN1OctetString         oct = (ASN1OctetString)aIn.readObject();
+    
+                    engineInit(oct.getOctets());
+                }
+                catch (Exception e)
+                {
+                    throw new IOException("Exception decoding: " + e);
+                }
                 return;
             }
 
@@ -169,18 +181,23 @@ public abstract class JDKAlgorithmParameters
 
         protected byte[] engineGetEncoded() 
         {
-            byte[]  tmp = new byte[iv.length];
-
-            System.arraycopy(iv, 0, tmp, 0, iv.length);
-            return tmp;
+            return engineGetEncoded("ASN.1");
         }
 
         protected byte[] engineGetEncoded(
             String format) 
         {
+            if (format == null)
+            {
+                return engineGetEncoded("ASN.1");
+            }
+            
             if (format.equals("RAW"))
             {
-                return engineGetEncoded();
+                byte[]  tmp = new byte[iv.length];
+
+                System.arraycopy(iv, 0, tmp, 0, iv.length);
+                return tmp;
             }
             else if (format.equals("ASN.1"))
             {
@@ -189,7 +206,7 @@ public abstract class JDKAlgorithmParameters
 
                 try
                 {
-                    dOut.writeObject(new IDEACBCPar(engineGetEncoded()));
+                    dOut.writeObject(new IDEACBCPar(engineGetEncoded("RAW")));
                 }
                 catch (IOException e)
                 {
@@ -249,9 +266,17 @@ public abstract class JDKAlgorithmParameters
             {
                 ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
                 ASN1InputStream         aIn = new ASN1InputStream(bIn);
-                IDEACBCPar              oct = new IDEACBCPar((ASN1Sequence)aIn.readObject());
-
-                engineInit(oct.getIV());
+                
+                try
+                {
+                    IDEACBCPar              oct = new IDEACBCPar((ASN1Sequence)aIn.readObject());
+    
+                    engineInit(oct.getIV());                
+                }
+                catch (Exception e)
+                {
+                    throw new IOException("Exception decoding: " + e);
+                }
                 return;
             }
 
