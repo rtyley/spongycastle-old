@@ -52,6 +52,8 @@ public class WhirlpoolDigestTest implements Test
     
     private static String _millionAResultVector = "0C99005BEB57EFF50A7CF005560DDF5D29057FD86B20BFD62DECA0F1CCEA4AF51FC15490EDDC47AF32BB2B66C34FF9AD8C6008AD677F77126953B226E4ED8B01";
     
+    private static String _thirtyOneZeros = "3E3F188F8FEBBEB17A933FEAF7FE53A4858D80C915AD6A1418F0318E68D49B4E459223CD414E0FBC8A57578FD755D86E827ABEF4070FC1503E25D99E382F72BA";
+
     public String getName()
     {
         return "Whirlpool";
@@ -67,6 +69,14 @@ public class WhirlpoolDigestTest implements Test
             {
                 return result;
             }
+        }
+
+        byte[] thirtyOneZeros = new byte[31];
+        TestResult thirtyOneResult = performStandardVectorTest("31 zeroes test", 
+                    thirtyOneZeros, _thirtyOneZeros);
+        if (!thirtyOneResult.isSuccessful())
+        {
+            return thirtyOneResult;
         }
 
         byte[] millionAInByteArray = new byte[1000000];
