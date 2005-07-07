@@ -351,13 +351,18 @@ public final class WhirlpoolDigest implements Digest
         
         _buffer[_bufferPos++] |= 0x80;
 
+        if (_bufferPos == _buffer.length)
+        {
+            processFilledBuffer(_buffer, 0);
+        }
+
         /*
          * Final block contains 
          * [ ... data .... ][0][0][0][ length ]
          * 
          * if [ length ] cannot fit.  Need to create a new block.
          */
-        if (_bufferPos >= 32)
+        if (_bufferPos > 32)
         {
             while (_bufferPos != 0)
             {
@@ -365,7 +370,7 @@ public final class WhirlpoolDigest implements Digest
             }
         }
         
-        while (_bufferPos < 32)
+        while (_bufferPos <= 32)
         {
             update((byte)0);
         }
