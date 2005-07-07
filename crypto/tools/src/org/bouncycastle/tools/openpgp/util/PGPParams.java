@@ -21,6 +21,7 @@ public class PGPParams
     private String             _passPhrase        = null;
     private String             _keyPassPhrase     = null;
     private boolean            _mdcRequired       = false;
+    private boolean            _pgp2Compatible    = false;
     private String             _recipient         = null;
     private String             _signor            = null;
     private boolean            _armor             = false;
@@ -151,11 +152,29 @@ public class PGPParams
     public void setMDCRequired(boolean mdc)
     {
         _mdcRequired = mdc;
+        if (mdc) {
+            // Cannot be PGP 2 compatible if MDC required
+            _pgp2Compatible = false;
+        }
     }
 
     public boolean isMDCRequired()
     {
         return _mdcRequired;
+    }
+
+    public void setPGP2Compatible(boolean pgp2)
+    {
+        _pgp2Compatible = pgp2;
+        if (pgp2) {
+            // Cannot have MDC if PGP 2 compatible
+            _mdcRequired = false;
+        }
+    }
+
+    public boolean isPGP2Compatible()
+    {
+        return _pgp2Compatible;
     }
 
     public void setVerify(boolean verify)
