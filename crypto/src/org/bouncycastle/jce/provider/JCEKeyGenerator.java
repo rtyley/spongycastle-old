@@ -45,9 +45,12 @@ public class JCEKeyGenerator
     protected void engineInit(
         SecureRandom    random)
     {
-        uninitialised = false;
-
-        engine.init(new KeyGenerationParameters(random, defaultKeySize));
+        if (random != null)
+        {
+            uninitialised = false;
+    
+            engine.init(new KeyGenerationParameters(random, defaultKeySize));
+        }
     }
 
     protected void engineInit(

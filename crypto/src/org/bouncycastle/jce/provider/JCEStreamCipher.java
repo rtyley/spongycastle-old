@@ -9,6 +9,7 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
@@ -16,6 +17,7 @@ import javax.crypto.spec.RC5ParameterSpec;
 
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.StreamBlockCipher;
 import org.bouncycastle.crypto.StreamCipher;
 import org.bouncycastle.crypto.engines.BlowfishEngine;
@@ -278,7 +280,7 @@ public class JCEStreamCipher
         }
         catch (InvalidAlgorithmParameterException e)
         {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new InvalidKeyException(e.getMessage());
         }
     }
 
@@ -300,10 +302,18 @@ public class JCEStreamCipher
         int     inputLen,
         byte[]  output,
         int     outputOffset) 
+        throws ShortBufferException 
     {
+        try
+        {
         cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
 
         return inputLen;
+        }
+        catch (DataLengthException e)
+        {
+            throw new ShortBufferException(e.getMessage());
+        }
     }
 
     protected byte[] engineDoFinal(

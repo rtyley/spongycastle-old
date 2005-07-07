@@ -12,6 +12,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
@@ -481,18 +482,25 @@ public class JCEBlockCipher extends WrapCipherSpi
             param = new ParametersWithRandom(param, random);
         }
 
-        switch (opmode)
+        try
         {
-        case Cipher.ENCRYPT_MODE:
-        case Cipher.WRAP_MODE:
-            cipher.init(true, param);
-            break;
-        case Cipher.DECRYPT_MODE:
-        case Cipher.UNWRAP_MODE:
-            cipher.init(false, param);
-            break;
-        default:
-            System.out.println("eeek!");
+            switch (opmode)
+            {
+            case Cipher.ENCRYPT_MODE:
+            case Cipher.WRAP_MODE:
+                cipher.init(true, param);
+                break;
+            case Cipher.DECRYPT_MODE:
+            case Cipher.UNWRAP_MODE:
+                cipher.init(false, param);
+                break;
+            default:
+                throw new InvalidKeyException("opmode not recognised");
+            }
+        }
+        catch (Exception e)
+        {
+            throw new InvalidKeyException(e.getMessage());
         }
     }
 
@@ -543,7 +551,7 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
         catch (InvalidAlgorithmParameterException e)
         {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new InvalidKeyException(e.getMessage());
         }
     }
 
@@ -586,9 +594,17 @@ public class JCEBlockCipher extends WrapCipherSpi
         int     inputOffset,
         int     inputLen,
         byte[]  output,
-        int     outputOffset) 
+        int     outputOffset)
+        throws ShortBufferException
     {
-        return cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
+        try
+        {
+            return cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
+        }
+        catch (DataLengthException e)
+        {
+            throw new ShortBufferException(e.getMessage());
+        }
     }
 
     protected byte[] engineDoFinal(
