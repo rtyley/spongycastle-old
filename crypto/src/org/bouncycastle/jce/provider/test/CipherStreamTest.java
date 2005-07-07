@@ -9,7 +9,9 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTestResult;
@@ -90,6 +92,46 @@ public class CipherStreamTest
         return new SimpleTestResult(true, getName() + ": Okay");
     }
 
+    private TestResult testException(
+        String  name)
+    {
+        String lCode = "ABCDEFGHIJKLMNOPQRSTUVWXY0123456789";
+        
+        try
+        {
+            byte[] rc4Key = { (byte)128, (byte)131, (byte)133, (byte)134,
+                    (byte)137, (byte)138, (byte)140, (byte)143 };
+
+            SecretKeySpec cipherKey = new SecretKeySpec(rc4Key, name);
+            Cipher ecipher = Cipher.getInstance(name, "BC");
+            ecipher.init(Cipher.ENCRYPT_MODE, cipherKey);
+
+            byte[] cipherText = new byte[0];
+            try
+            {
+                // According specification Method engineUpdate(byte[] input,
+                // int inputOffset, int inputLen, byte[] output, int
+                // outputOffset)
+                // throws ShortBufferException - if the given output buffer is
+                // too
+                // small to hold the result
+                ecipher.update(new byte[20], 0, 20, cipherText);
+                
+                return new SimpleTestResult(false, getName() + ": failed exception test - no ShortBufferException thrown");
+            }
+            catch (ShortBufferException e)
+            {
+                // ignore
+            }
+        }
+        catch (Exception e)
+        {
+            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+        }
+        
+        return new SimpleTestResult(true, getName() + ": Okay");
+    }
+    
     public TestResult perform()
     {
         TestResult  res = runTest("RC4");
@@ -98,6 +140,12 @@ public class CipherStreamTest
             return res;
         }
 
+        res = testException("RC4");
+        if (!res.isSuccessful())
+        {
+            return res;
+        }
+        
         res = runTest("DES/ECB/PKCS7Padding");
         if (!res.isSuccessful())
         {

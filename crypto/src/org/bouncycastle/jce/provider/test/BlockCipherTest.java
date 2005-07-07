@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -20,6 +21,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
@@ -529,11 +531,12 @@ public class BlockCipherTest
         KeySpec ks = null;
         SecretKey secKey = null;
         byte[] bb = new byte[24];
-        SecretKeySpec secKeySpec = new SecretKeySpec(bb, "DESede");
 
         try
         {
             skF.getKeySpec(null, null);
+            
+            return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
         }
         catch (InvalidKeySpecException e)
         {
@@ -547,6 +550,8 @@ public class BlockCipherTest
         {
             ks = (KeySpec)new DESedeKeySpec(bb);
             skF.getKeySpec(null, ks.getClass());
+            
+            return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
         }
         catch (InvalidKeySpecException e)
         {
@@ -575,6 +580,8 @@ public class BlockCipherTest
             try
             {
                 kg.init(Integer.MIN_VALUE, new SecureRandom());
+                
+                return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
             }
             catch (InvalidParameterException e)
             {
@@ -597,6 +604,8 @@ public class BlockCipherTest
             try
             {
                 skF.translateKey(null);
+                
+                return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
             }
             catch (InvalidKeyException e)
             {
@@ -610,6 +619,188 @@ public class BlockCipherTest
         catch (Exception e)
         {
             return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+        }
+        
+        try
+        {
+            byte[] rawDESKey = { (byte)128, (byte)131, (byte)133, (byte)134,
+                    (byte)137, (byte)138, (byte)140, (byte)143 };
+
+            SecretKeySpec cipherKey = new SecretKeySpec(rawDESKey, "DES");
+
+            Cipher cipher = Cipher.getInstance("DES/CBC/NoPadding", "BC");
+            
+            try
+            {
+                // According specification engineInit(int opmode, Key key,
+                // SecureRandom random) throws InvalidKeyException if this
+                // cipher is being
+                // initialized for decryption and requires algorithm parameters
+                // that cannot be determined from the given key
+                cipher.init(Cipher.DECRYPT_MODE, cipherKey, (SecureRandom)null);
+                
+                return new SimpleTestResult(false, getName() + ": failed exception test - no InvalidKeyException thrown");
+            }
+            catch (InvalidKeyException e)
+            {
+                // ignore
+            }
+        }
+        catch (Exception e)
+        {
+            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+        }
+
+        try
+        {
+            byte[] rawDESKey = { -128, -125, -123, -122, -119, -118 };
+
+            SecretKeySpec cipherKey = new SecretKeySpec(rawDESKey, "DES");
+            Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding", "BC");
+            try
+            {
+                // According specification engineInit(int opmode, Key key,
+                // SecureRandom random) throws InvalidKeyException if the given
+                // key is inappropriate for initializing this cipher
+                cipher.init(Cipher.ENCRYPT_MODE, cipherKey);
+                
+                return new SimpleTestResult(false, getName() + ": failed exception test - no InvalidKeyException thrown");
+            }
+            catch (InvalidKeyException e)
+            {
+                // ignore
+            }
+        }
+        catch (Exception e)
+        {
+            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+        }
+
+        try
+        {
+            byte[] rawDESKey = { -128, -125, -123, -122, -119, -118, -117, -115, -114 };
+
+            SecretKeySpec cipherKey = new SecretKeySpec(rawDESKey, "DES");
+            Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding", "BC");
+            try
+            {
+                // According specification engineInit(int opmode, Key key,
+                // SecureRandom random) throws InvalidKeyException if the given
+                // key is inappropriate for initializing this cipher
+                cipher.init(Cipher.ENCRYPT_MODE, cipherKey);
+                
+                return new SimpleTestResult(false, getName() + ": failed exception test - no InvalidKeyException thrown");
+            }
+            catch (InvalidKeyException e)
+            {
+                // ignore
+            }
+        }
+        catch (Exception e)
+        {
+            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+        }
+        
+
+        try
+        {
+            byte[] rawDESKey = { (byte)128, (byte)131, (byte)133, (byte)134,
+                    (byte)137, (byte)138, (byte)140, (byte)143 };
+
+            SecretKeySpec cipherKey = new SecretKeySpec(rawDESKey, "DES");
+            Cipher ecipher = Cipher.getInstance("DES/ECB/PKCS5Padding", "BC");
+            ecipher.init(Cipher.ENCRYPT_MODE, cipherKey);
+
+            byte[] cipherText = new byte[0];
+            try
+            {
+                // According specification Method engineUpdate(byte[] input,
+                // int inputOffset, int inputLen, byte[] output, int
+                // outputOffset)
+                // throws ShortBufferException - if the given output buffer is
+                // too
+                // small to hold the result
+                ecipher.update(new byte[20], 0, 20, cipherText);
+                
+                return new SimpleTestResult(false, getName() + ": failed exception test - no ShortBufferException thrown");
+            }
+            catch (ShortBufferException e)
+            {
+                // ignore
+            }
+        }
+        catch (Exception e)
+        {
+            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+        }
+
+        try
+        {
+            KeyGenerator keyGen = KeyGenerator.getInstance("DES", "BC");
+
+            keyGen.init((SecureRandom)null);
+
+            // According specification engineGenerateKey() doesn't throw any exceptions.
+
+            SecretKey key = keyGen.generateKey();
+            if (key == null)
+            {
+                return new SimpleTestResult(false, getName() + ": key is null!");
+            }
+        }
+        catch (Exception e)
+        {
+            return new SimpleTestResult(false, getName()
+                    + ": unexpected exception.", e);
+        }
+
+        try
+        {
+            AlgorithmParameters algParams = AlgorithmParameters.getInstance("DES", "BC");
+            
+            algParams.init(new IvParameterSpec(new byte[8]));
+
+            // According specification engineGetEncoded() returns
+            // the parameters in their primary encoding format. The primary
+            // encoding
+            // format for parameters is ASN.1, if an ASN.1 specification for
+            // this type
+            // of parameters exists.
+            byte[] iv = algParams.getEncoded();
+            
+            if (iv.length != 10)
+            {
+                return new SimpleTestResult(false, getName() + ": parameters encoding wrong length - "  + iv.length);
+            }
+        }
+        catch (Exception e)
+        {
+            return new SimpleTestResult(false, getName()
+                    + ": unexpected exception.", e);
+        }
+
+        try
+        {
+            AlgorithmParameters algParams = AlgorithmParameters.getInstance("DES", "BC");
+
+            byte[] encoding = new byte[10];
+            encoding[0] = 3;
+            encoding[1] = 8;
+
+            // According specification engineInit(byte[] params, String format)
+            // throws
+            // IOException on decoding errors, but BC throws ClassCastException.
+            algParams.init(encoding, "ASN.1");
+
+            return new SimpleTestResult(false, getName() + ": failed exception test - no IOException thrown");
+        }
+        catch (IOException e)
+        {
+            // okay
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
 
         return new SimpleTestResult(true, getName() + ": Okay");
