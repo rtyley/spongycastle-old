@@ -116,6 +116,11 @@ public class JCEDHKeyAgreement
     protected SecretKey engineGenerateSecret(
         String algorithm) 
     {
+        if (x == null)
+        {
+            throw new IllegalStateException("Diffie-Hellman not initialised.");
+        }
+        
         return new SecretKeySpec(bigIntToBytes(result), algorithm);
     }
 

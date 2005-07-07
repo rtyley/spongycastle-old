@@ -20,6 +20,7 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherSpi;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
@@ -234,6 +235,7 @@ public abstract class WrapCipherSpi extends CipherSpi
         int     inputLen,
         byte[]  output,
         int     outputOffset)
+        throws ShortBufferException
     {
         throw new RuntimeException("not supported for wrapping");
     }
