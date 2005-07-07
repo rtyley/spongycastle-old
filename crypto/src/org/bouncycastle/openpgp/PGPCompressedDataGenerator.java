@@ -16,6 +16,7 @@ public class PGPCompressedDataGenerator
     implements CompressionAlgorithmTags
 {
     private int                     algorithm;
+    private int                     compression;
     
     private OutputStream            out;
     private DeflaterOutputStream    dOut;
@@ -24,14 +25,30 @@ public class PGPCompressedDataGenerator
     public PGPCompressedDataGenerator(
         int                    algorithm)
     {
+        this(algorithm, Deflater.DEFAULT_COMPRESSION);
+    }
+                    
+    public PGPCompressedDataGenerator(
+        int                    algorithm,
+        int                    compression)
+    {
         if (algorithm != PGPCompressedData.ZIP && algorithm != PGPCompressedData.ZLIB)
         {
             throw new IllegalArgumentException("unknown compression algorithm");
         }
+
+        if (compression != Deflater.DEFAULT_COMPRESSION)
+        {
+            if ((compression < 0) || (compression > 9))
+            {
+                throw new IllegalArgumentException("unknown compression level: " + compression);
+            }
+        }
         
         this.algorithm = algorithm;
+        this.compression = compression;
     }
-                    
+
     /**
      * Return an outputstream which will save the data being written to 
      * the compressed object.
@@ -52,7 +69,7 @@ public class PGPCompressedDataGenerator
             
             pkOut.write(PGPCompressedData.ZIP);
 
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(Deflater.DEFAULT_COMPRESSION, true));
+            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression, true));
         }
         else
         {
@@ -60,7 +77,7 @@ public class PGPCompressedDataGenerator
             
             pkOut.write(PGPCompressedData.ZLIB);
             
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(Deflater.DEFAULT_COMPRESSION));
+            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression));
         }
         
         return dOut;
@@ -79,8 +96,9 @@ public class PGPCompressedDataGenerator
             throw new IOException("generator not opened.");
         }
         
-        dOut.flush();
         dOut.finish();
+        dOut.flush();
+        pkOut.finish();
         pkOut.flush();
         out.flush();
     }
