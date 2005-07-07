@@ -26,6 +26,8 @@ Release 1.30
 <h3>2.1.2 Defects Fixed</h3>
 <ul>
 <li>Whirlpool was calculating the wrong digest for 31 byte data and could throw an exception for some other data lengths. This has been fixed.
+<li>AlgorithmParameters for IVs were returning a default of RAW encoding of the parameters when they should have been returning an
+ASN.1 encoding. This has been fixed.
 </ul>
 
 <h3>2.2.1 Version</h3>
