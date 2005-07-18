@@ -103,8 +103,6 @@ public class PGPUtil
         int    algorithm) 
         throws PGPException
     {
-        String    algName;
-        
         switch (algorithm)
         {
         case SymmetricKeyAlgorithmTags.NULL:
@@ -498,7 +496,7 @@ public class PGPUtil
             }
             
             byte[]  buf = new byte[READ_AHEAD];
-            int     count = 0;
+            int     count = 1;
             int     index = 1;
             
             buf[0] = (byte)ch;
