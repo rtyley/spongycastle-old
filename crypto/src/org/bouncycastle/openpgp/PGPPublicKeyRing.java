@@ -265,7 +265,7 @@ public class PGPPublicKeyRing
     }
     
     /**
-     * Returns a new key ring with the publick key passed in
+     * Returns a new key ring with the public key passed in
      * either added or replacing an existing one.
      * 
      * @param pubRing the public key ring to be modified
@@ -299,7 +299,7 @@ public class PGPPublicKeyRing
     }
     
     /**
-     * Returns a new key ring with the publick key passed in
+     * Returns a new key ring with the public key passed in
      * removed from the key ring.
      * 
      * @param pubRing the public key ring to be modified
