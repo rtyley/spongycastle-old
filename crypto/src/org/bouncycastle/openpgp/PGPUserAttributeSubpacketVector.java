@@ -5,7 +5,7 @@ import org.bouncycastle.bcpg.UserAttributeSubpacketTags;
 import org.bouncycastle.bcpg.attr.ImageAttribute;
 
 /**
- * Container for a list of signature subpackets.
+ * Container for a list of user attribute subpackets.
  */
 public class PGPUserAttributeSubpacketVector
 {
