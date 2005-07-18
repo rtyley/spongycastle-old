@@ -728,9 +728,7 @@ public class PGPPublicKey
         PGPSignature    certification)
     {
         PGPPublicKey    returnKey = new PGPPublicKey(key);
-        
-        Iterator    idIt = returnKey.getUserIDs();
-        ArrayList    sigList = null;
+        ArrayList       sigList = null;
         
         for (int i = 0; i != returnKey.ids.size(); i++)
         {
@@ -769,8 +767,6 @@ public class PGPPublicKey
         String          id)
     {
         PGPPublicKey    returnKey = new PGPPublicKey(key);
-        Iterator        idIt = returnKey.getUserIDs();
-        ArrayList       sigList = null;
         boolean         found = false;
         
         for (int i = 0; i < returnKey.ids.size(); i++)
@@ -806,10 +802,7 @@ public class PGPPublicKey
         PGPSignature    certification)
     {
         PGPPublicKey    returnKey = new PGPPublicKey(key);
-        
-        Iterator    idIt = returnKey.getUserIDs();
-        ArrayList   sigList = null;
-        boolean     found = false;
+        boolean         found = false;
         
         for (int i = 0; i < returnKey.ids.size(); i++)
         {
