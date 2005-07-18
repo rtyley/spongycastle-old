@@ -48,6 +48,11 @@ public class TimeStampTokenInfo
         return tstInfo.getPolicy().getId();
     }
     
+    public BigInteger getSerialNumber()
+    {
+        return tstInfo.getSerialNumber().getValue();
+    }
+    
     /**
      * @return the nonce value, null if there isn't one.
      */
