@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.bouncycastle.bcpg.*;
@@ -47,6 +48,14 @@ public class PGPSecretKeyRing
         else
         {
             pIn = new BCPGInputStream(in);
+        }
+
+        int initialTag = pIn.nextPacketTag();
+        if (initialTag != PacketTags.SECRET_KEY && initialTag != PacketTags.SECRET_SUBKEY)
+        {
+            throw new IOException(
+                "secret key ring doesn't start with secret key tag: " +
+                "tag 0x" + Integer.toHexString(initialTag));
         }
         
         SecretKeyPacket secret = (SecretKeyPacket)pIn.readPacket();
@@ -203,7 +212,7 @@ public class PGPSecretKeyRing
      */
     public Iterator getSecretKeys()
     {
-        return keys.iterator();
+        return Collections.unmodifiableList(keys).iterator();
     }
     
     public PGPSecretKey getSecretKey(
@@ -242,5 +251,73 @@ public class PGPSecretKeyRing
             
             k.encode(outStream);
         }
+    }
+    
+    /**
+     * Returns a new key ring with the secret key passed in either added or
+     * replacing an existing one with the same key ID.
+     * 
+     * @param secRing the secret key ring to be modified.
+     * @param secKey the secret key to be added.
+     * @return a new secret key ring.
+     */
+    public static PGPSecretKeyRing insertSecretKey(
+        PGPSecretKeyRing  secRing,
+        PGPSecretKey      secKey)
+    {
+        ArrayList  keys = new ArrayList(secRing.keys);
+        boolean    found = false;
+        
+        for (int i = 0; i != keys.size();i++)
+        {
+            PGPSecretKey   key = (PGPSecretKey)keys.get(i);
+            
+            if (key.getKeyID() == secKey.getKeyID())
+            {
+                found = true;
+                keys.set(i, secKey);
+            }
+        }
+        
+        if (!found)
+        {
+            keys.add(secKey);
+        }
+        
+        return new PGPSecretKeyRing(keys);
+    }
+    
+    /**
+     * Returns a new key ring with the secret key passed in removed from the
+     * key ring.
+     * 
+     * @param secRing the secret key ring to be modified.
+     * @param secKey the secret key to be removed.
+     * @return a new secret key ring, or null if secKey is not found.
+     */
+    public static PGPSecretKeyRing removeSecretKey(
+        PGPSecretKeyRing  secRing,
+        PGPSecretKey      secKey)
+    {
+        ArrayList  keys = new ArrayList(secRing.keys);
+        boolean    found = false;
+        
+        for (int i = 0; i < keys.size();i++)
+        {
+            PGPSecretKey   key = (PGPSecretKey)keys.get(i);
+            
+            if (key.getKeyID() == secKey.getKeyID())
+            {
+                found = true;
+                keys.remove(i);
+            }
+        }
+        
+        if (!found)
+        {
+            return null;
+        }
+        
+        return new PGPSecretKeyRing(keys);
     }
 }
