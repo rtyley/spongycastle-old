@@ -28,6 +28,15 @@ Release 1.30
 <li>Whirlpool was calculating the wrong digest for 31 byte data and could throw an exception for some other data lengths. This has been fixed.
 <li>AlgorithmParameters for IVs were returning a default of RAW encoding of the parameters when they should have been returning an
 ASN.1 encoding. This has been fixed.
+<li>Base64 encoded streams without armoring could cause an exception in PGPUtil.getDecoderStream(). This has been fixed.
+<li>PGPSecretKey.copyWithNewPassword() would incorrectly tag sub keys. This has been fixed.
+<li>PGPSecretKey.copyWithNewPassword() would not handle the NULL algorithm. This has been fixed.
+</ul>
+<h3>2.2.3 Additional Features and Functionality</h3>
+<ul>
+<li>RSAEngine no longer assumes keys are byte aligned when checking for out of range input.
+<li>PGPSecretKeyRing.removeSecretKey and PGPSecretKeyRing.insertSecretKey have been added.
+<li>There is now a getter for the serial number on TimeStampTokenInfo.
 </ul>
 
 <h3>2.2.1 Version</h3>
