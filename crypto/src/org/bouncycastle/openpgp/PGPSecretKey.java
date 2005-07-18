@@ -23,7 +23,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
 import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.BCPGKey;
 import org.bouncycastle.bcpg.BCPGObject;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.ContainedPacket;
@@ -38,6 +37,7 @@ import org.bouncycastle.bcpg.RSASecretBCPGKey;
 import org.bouncycastle.bcpg.S2K;
 import org.bouncycastle.bcpg.SecretKeyPacket;
 import org.bouncycastle.bcpg.SecretSubkeyPacket;
+import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.bcpg.TrustPacket;
 import org.bouncycastle.bcpg.UserAttributePacket;
 import org.bouncycastle.bcpg.UserIDPacket;
@@ -49,10 +49,7 @@ import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
  * general class to handle a PGP secret key object.
  */
 public class PGPSecretKey
-{
-    private long    keyID;
-    private byte[]  fingerPrint;
-    
+{    
     SecretKeyPacket secret;
     TrustPacket     trust;
     ArrayList       keySigs;
@@ -420,8 +417,6 @@ public class PGPSecretKey
         String provider)
         throws PGPException, NoSuchProviderException
     {
-        PublicKeyPacket pub = secret.getPublicKeyPacket();
-        BCPGKey         sKey = null;
         String          cName = PGPUtil.getSymmetricCipherName(secret.getEncAlgorithm());
         Cipher          c = null;
         
@@ -553,8 +548,7 @@ public class PGPSecretKey
         String                provider)
         throws PGPException, NoSuchProviderException
     {
-        PublicKeyPacket            pub = secret.getPublicKeyPacket();
-        BCPGKey                    sKey = null;
+        PublicKeyPacket            pubPk = secret.getPublicKeyPacket();
     
         if (secret.getSecretKeyData() == null)
         {
@@ -567,12 +561,12 @@ public class PGPSecretKey
             byte[]             data = extractKeyData(passPhrase, provider);
             BCPGInputStream    in = new BCPGInputStream(new ByteArrayInputStream(data));
         
-            switch (pub.getAlgorithm())
+            switch (pubPk.getAlgorithm())
             {
             case PGPPublicKey.RSA_ENCRYPT:
             case PGPPublicKey.RSA_GENERAL:
             case PGPPublicKey.RSA_SIGN:
-                RSAPublicBCPGKey        rsaPub = (RSAPublicBCPGKey)pub.getKey();
+                RSAPublicBCPGKey        rsaPub = (RSAPublicBCPGKey)pubPk.getKey();
                 RSASecretBCPGKey        rsaPriv = new RSASecretBCPGKey(in);
                 RSAPrivateCrtKeySpec    rsaPrivSpec = new RSAPrivateCrtKeySpec(
                                                     rsaPriv.getModulus(), 
@@ -588,7 +582,7 @@ public class PGPSecretKey
 
                 return new PGPPrivateKey(fact.generatePrivate(rsaPrivSpec), this.getKeyID());    
             case PGPPublicKey.DSA:
-                DSAPublicBCPGKey    dsaPub = (DSAPublicBCPGKey)pub.getKey();
+                DSAPublicBCPGKey    dsaPub = (DSAPublicBCPGKey)pubPk.getKey();
                 DSASecretBCPGKey    dsaPriv = new DSASecretBCPGKey(in);
                 DSAPrivateKeySpec   dsaPrivSpec =
                                             new DSAPrivateKeySpec(dsaPriv.getX(), dsaPub.getP(), dsaPub.getQ(), dsaPub.getG());
@@ -598,7 +592,7 @@ public class PGPSecretKey
                 return new PGPPrivateKey(fact.generatePrivate(dsaPrivSpec), this.getKeyID());
             case PGPPublicKey.ELGAMAL_ENCRYPT:
             case PGPPublicKey.ELGAMAL_GENERAL:
-                ElGamalPublicBCPGKey    elPub = (ElGamalPublicBCPGKey)pub.getKey();
+                ElGamalPublicBCPGKey    elPub = (ElGamalPublicBCPGKey)pubPk.getKey();
                 ElGamalSecretBCPGKey    elPriv = new ElGamalSecretBCPGKey(in);
                 ElGamalPrivateKeySpec   elSpec = new ElGamalPrivateKeySpec(elPriv.getX(), new ElGamalParameterSpec(elPub.getP(), elPub.getG()));
             
@@ -714,52 +708,69 @@ public class PGPSecretKey
         String          provider)
         throws PGPException, NoSuchProviderException
     {
-        byte[]      keyData = key.extractKeyData(oldPassPhrase, provider);
-        Cipher      c = null;
-        String      cName = PGPUtil.getSymmetricCipherName(newEncAlgorithm);
+        byte[]   rawKeyData = key.extractKeyData(oldPassPhrase, provider);
+        byte[]           iv = null;
+        S2K             s2k = null;
+        byte[]      keyData = null;
         
-        try
+        if (newEncAlgorithm == SymmetricKeyAlgorithmTags.NULL)
         {
-            c = Cipher.getInstance(cName + "/CFB/NoPadding", provider);
+            keyData = rawKeyData;
         }
-        catch (NoSuchProviderException e)
+        else
         {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new PGPException("Exception creating cipher", e);
-        }
-        
-        byte[]                      iv = new byte[8];
-        
-        rand.nextBytes(iv);
-        
-        S2K                         s2k = new S2K(HashAlgorithmTags.SHA1, iv, 0x60);
-        SecretKeyPacket             secret = null;
-        
-        try
-        {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            BCPGOutputStream        pOut = new BCPGOutputStream(bOut);
+            Cipher      c = null;
+            String      cName = PGPUtil.getSymmetricCipherName(newEncAlgorithm);
             
-            SecretKey    sKey = PGPUtil.makeKeyFromPassPhrase(newEncAlgorithm, s2k, newPassPhrase, provider);
+            try
+            {
+                c = Cipher.getInstance(cName + "/CFB/NoPadding", provider);
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new PGPException("Exception creating cipher", e);
+            }
+            
+            iv = new byte[8];
+            
+            rand.nextBytes(iv);
+            
+            s2k = new S2K(HashAlgorithmTags.SHA1, iv, 0x60);
+            
+            try
+            {                
+                SecretKey    sKey = PGPUtil.makeKeyFromPassPhrase(newEncAlgorithm, s2k, newPassPhrase, provider);
 
-            c.init(Cipher.ENCRYPT_MODE, sKey, rand);
-        
-            iv = c.getIV();
+                c.init(Cipher.ENCRYPT_MODE, sKey, rand);
             
-            byte[]    encData = c.doFinal(keyData);
-            
-            secret = new SecretKeyPacket(key.secret.getPublicKeyPacket(), newEncAlgorithm, s2k, iv, encData);
+                iv = c.getIV();
+                
+                keyData = c.doFinal(rawKeyData);
+            }
+            catch (PGPException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new PGPException("Exception encrypting key", e);
+            }
         }
-        catch (PGPException e)
+
+        SecretKeyPacket             secret = null;
+        if (key.secret instanceof SecretSubkeyPacket)
         {
-            throw e;
+            secret = new SecretSubkeyPacket(key.secret.getPublicKeyPacket(),
+                newEncAlgorithm, s2k, iv, keyData);
         }
-        catch (Exception e)
+        else
         {
-            throw new PGPException("Exception encrypting key", e);
+            secret = new SecretKeyPacket(key.secret.getPublicKeyPacket(),
+                newEncAlgorithm, s2k, iv, keyData);
         }
 
         if (key.subSigs == null)
