@@ -87,6 +87,16 @@ public class PKIStatusInfo
         this.statusString = statusString;
     }
 
+    public PKIStatusInfo(
+            int            status,
+            PKIFreeText    statusString,
+            PKIFailureInfo failInfo)
+    {
+        this.status = new DERInteger(status);
+        this.statusString = statusString;
+        this.failInfo = failInfo;
+    }
+    
     public BigInteger getStatus()
     {
         return status.getValue();
