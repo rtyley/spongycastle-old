@@ -16,6 +16,7 @@ public class RSAEngine
 {
     private RSAKeyParameters        key;
     private boolean                 forEncryption;
+    private int                     shift;
 
     /**
      * initialise the RSA engine.
@@ -29,6 +30,17 @@ public class RSAEngine
     {
         this.key = (RSAKeyParameters)param;
         this.forEncryption = forEncryption;
+        
+        int     bitSize = key.getModulus().bitLength();
+        
+        if (bitSize % 8 == 0)    // a multiple of 8
+        {
+            this.shift = 0;
+        }
+        else
+        {
+            this.shift = (8 - (bitSize % 8));
+        }
     }
 
     /**
@@ -91,7 +103,7 @@ public class RSAEngine
         {
             throw new DataLengthException("input too large for RSA cipher.\n");
         }
-        else if (inLen == (getInputBlockSize() + 1) && (in[inOff] & 0x80) != 0)
+        else if (inLen == (getInputBlockSize() + 1) && (in[inOff] & (0x80 >> shift)) != 0)
         {
             throw new DataLengthException("input too large for RSA cipher.\n");
         }
