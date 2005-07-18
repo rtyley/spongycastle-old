@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.bouncycastle.bcpg.BCPGInputStream;
@@ -52,6 +53,14 @@ public class PGPPublicKeyRing
         else
         {
             pIn = new BCPGInputStream(in);
+        }
+        
+        int initialTag = pIn.nextPacketTag();
+        if (initialTag != PacketTags.PUBLIC_KEY && initialTag != PacketTags.PUBLIC_SUBKEY)
+        {
+            throw new IOException(
+                "public key ring doesn't start with public key tag: " +
+                "tag 0x" + Integer.toHexString(initialTag));
         }
         
         PublicKeyPacket   pubPk;
@@ -230,7 +239,7 @@ public class PGPPublicKeyRing
      */
     public Iterator getPublicKeys()
     {
-        return keys.iterator();
+        return Collections.unmodifiableList(keys).iterator();
     }
     
     public byte[] getEncoded() 
