@@ -44,7 +44,7 @@ public class EnvelopedDataTest extends TestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(EnvelopedDataTest.class);
+        return new CMSTestSetup(new TestSuite(EnvelopedDataTest.class));
     }
 
     public void log(Exception _ex) {

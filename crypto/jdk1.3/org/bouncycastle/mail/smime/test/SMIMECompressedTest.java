@@ -87,7 +87,7 @@ public class SMIMECompressedTest
     }
 
     public static Test suite() {
-        return new TestSuite(SMIMECompressedTest.class);
+        return new SMIMETestSetup(new TestSuite(SMIMECompressedTest.class));
     }
 
     public void log(Exception _ex) {

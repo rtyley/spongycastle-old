@@ -58,7 +58,7 @@ public class SMIMEEnvelopedTest extends TestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(SMIMEEnvelopedTest.class);
+        return new SMIMETestSetup(new TestSuite(SMIMEEnvelopedTest.class));
     }
 
     public void log(Exception _ex) {
