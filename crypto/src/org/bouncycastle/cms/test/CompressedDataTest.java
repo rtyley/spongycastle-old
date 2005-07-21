@@ -37,7 +37,7 @@ public class CompressedDataTest
     }
 
     public static Test suite() {
-        return new TestSuite(CompressedDataTest.class);
+        return new CMSTestSetup(new TestSuite(CompressedDataTest.class));
     }
 
     public void log(Exception _ex) {

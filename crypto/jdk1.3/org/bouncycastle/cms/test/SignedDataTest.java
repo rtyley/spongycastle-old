@@ -219,7 +219,7 @@ public class SignedDataTest
     }
 
     public static Test suite() {
-        return new TestSuite(SignedDataTest.class);
+        return new CMSTestSetup(new TestSuite(SignedDataTest.class));
     }
 
     public void log(Exception _ex) {

@@ -82,7 +82,7 @@ public class SMIMESignedTest
     }
 
     public static Test suite() {
-        return new TestSuite(SMIMESignedTest.class);
+        return new SMIMETestSetup(new TestSuite(SMIMESignedTest.class));
     }
 
     public void log(Exception _ex) {

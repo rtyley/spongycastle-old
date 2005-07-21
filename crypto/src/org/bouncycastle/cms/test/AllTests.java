@@ -1,15 +1,11 @@
 package org.bouncycastle.cms.test;
 
-import java.security.Security;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class AllTests {
     
     public static void main (String[] args) {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        
         junit.textui.TestRunner.run (suite());
     }
     
