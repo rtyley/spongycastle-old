@@ -45,9 +45,7 @@ public class X509V2AttributeCertificate
         InputStream encIn)
         throws IOException
     {
-        ASN1InputStream aIn = new ASN1InputStream(encIn);
-        
-        cert = AttributeCertificate.getInstance(aIn.readObject());
+        this(AttributeCertificate.getInstance(new ASN1InputStream(encIn).readObject()));
     }
     
     public X509V2AttributeCertificate(
