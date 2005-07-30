@@ -158,6 +158,13 @@ public class AttrCertTest
             
             aCert.verify(sCert.getPublicKey(), "BC");
             
+            X509AttributeCertificate saCert = new X509V2AttributeCertificate(new ByteArrayInputStream(aCert.getEncoded()));
+            
+            if (!aCert.getNotAfter().equals(saCert.getNotAfter()))
+            {
+                return new SimpleTestResult(false, getName() + ": failed date comparison");
+            }
+            
             // base generator test
             
             //
@@ -180,7 +187,6 @@ public class AttrCertTest
             //
             // set up the keys
             //
-            SecureRandom        rand = new SecureRandom();
             PrivateKey          privKey;
             PublicKey           pubKey;
 
