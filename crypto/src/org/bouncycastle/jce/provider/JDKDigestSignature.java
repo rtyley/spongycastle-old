@@ -66,9 +66,9 @@ public class JDKDigestSignature
         PublicKey   publicKey)
         throws InvalidKeyException
     {
-        if ( !(publicKey instanceof RSAPublicKey) )
+        if (!(publicKey instanceof RSAPublicKey))
         {
-            throw new InvalidKeyException("Supplied key is not a RSAPublicKey instance");
+            throw new InvalidKeyException("Supplied key (" + getType(publicKey) + ") is not a RSAPublicKey instance");
         }
 
         CipherParameters    param = RSAUtil.generatePublicKeyParameter((RSAPublicKey)publicKey);
@@ -81,9 +81,9 @@ public class JDKDigestSignature
         PrivateKey  privateKey)
         throws InvalidKeyException
     {
-        if ( !(privateKey instanceof RSAPrivateKey) )
+        if (!(privateKey instanceof RSAPrivateKey))
         {
-            throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
+            throw new InvalidKeyException("Supplied key (" + getType(privateKey) + ") is not a RSAPrivateKey instance");
         }
 
         CipherParameters    param = RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey);
@@ -93,6 +93,17 @@ public class JDKDigestSignature
         cipher.init(true, param);
     }
 
+    private String getType(
+        Object o)
+    {
+        if (o == null)
+        {
+            return null;
+        }
+        
+        return o.getClass().getName();
+    }
+    
     protected void engineUpdate(
         byte    b)
         throws SignatureException
