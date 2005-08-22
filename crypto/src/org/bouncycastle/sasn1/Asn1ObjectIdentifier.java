@@ -1,0 +1,198 @@
+package org.bouncycastle.sasn1;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
+public class Asn1ObjectIdentifier
+    extends DerObject
+{
+    private String  _oid;
+    
+    Asn1ObjectIdentifier(
+        int    baseTag,
+        byte[] data) 
+        throws IOException
+    {
+        super(baseTag, BerTag.OBJECT_IDENTIFIER, data);
+
+        StringBuffer    objId = new StringBuffer();
+        long            value = 0;
+        boolean         first = true;
+        int             b = 0;
+        ByteArrayInputStream bIn = new ByteArrayInputStream(data);
+        
+        while ((b = bIn.read()) >= 0)
+        {
+            value = value * 128 + (b & 0x7f);
+            if ((b & 0x80) == 0)             // end of number reached
+            {
+                if (first)
+                {
+                    switch ((int)value / 40)
+                    {
+                    case 0:
+                        objId.append('0');
+                        break;
+                    case 1:
+                        objId.append('1');
+                        value -= 40;
+                        break;
+                    default:
+                        objId.append('2');
+                        value -= 80;
+                    }
+                    first = false;
+                }
+
+                objId.append('.');
+                objId.append(Long.toString(value));
+                value = 0;
+            }
+        }
+
+        this._oid = objId.toString();
+    }
+    
+    public Asn1ObjectIdentifier(
+        String oid)
+        throws IllegalArgumentException
+    {
+        super(BerTagClass.UNIVERSAL, BerTag.OBJECT_IDENTIFIER, toByteArray(oid));
+        
+        this._oid = oid;
+    }
+
+    public String toString()
+    {
+        return _oid;
+    }
+    
+    public int hashCode()
+    {
+        return _oid.hashCode();
+    }
+
+    public boolean equals(
+        Object  o)
+    {
+        if (!(o instanceof Asn1ObjectIdentifier))
+        {
+            return false;
+        }
+
+        return _oid.equals(((Asn1ObjectIdentifier)o)._oid);
+    }
+    
+    private static void writeField(
+        OutputStream    out,
+        long            fieldValue)
+        throws IOException
+    {
+        if (fieldValue >= (1 << 7))
+        {
+            if (fieldValue >= (1 << 14))
+            {
+                if (fieldValue >= (1 << 21))
+                {
+                    if (fieldValue >= (1 << 28))
+                    {
+                        if (fieldValue >= (1 << 35))
+                        {
+                            if (fieldValue >= (1 << 42))
+                            {
+                                if (fieldValue >= (1 << 49))
+                                {
+                                    if (fieldValue >= (1 << 56))
+                                    {
+                                        out.write((int)(fieldValue >> 56) | 0x80);
+                                    }
+                                    out.write((int)(fieldValue >> 49) | 0x80);
+                                }
+                                out.write((int)(fieldValue >> 42) | 0x80);
+                            }
+                            out.write((int)(fieldValue >> 35) | 0x80);
+                        }
+                        out.write((int)(fieldValue >> 28) | 0x80);
+                    }
+                    out.write((int)(fieldValue >> 21) | 0x80);
+                }
+                out.write((int)(fieldValue >> 14) | 0x80);
+            }
+            out.write((int)(fieldValue >> 7) | 0x80);
+        }
+        out.write((int)fieldValue & 0x7f);
+    }
+
+    private static byte[] toByteArray(
+        String oid) 
+        throws IllegalArgumentException
+    {
+        OIDTokenizer            tok = new OIDTokenizer(oid);
+        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+
+        try
+        {
+            writeField(bOut, 
+                        Integer.parseInt(tok.nextToken()) * 40
+                        + Integer.parseInt(tok.nextToken()));
+        
+            while (tok.hasMoreTokens())
+            {
+                writeField(bOut, Long.parseLong(tok.nextToken()));
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            throw new IllegalArgumentException("exception parsing field value: " + e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("exception converting to bytes: " + e.getMessage());
+        }
+
+        return bOut.toByteArray();
+    }
+    
+    private static class OIDTokenizer
+    {
+        private String  oid;
+        private int     index;
+
+        public OIDTokenizer(
+            String oid)
+        {
+            this.oid = oid;
+            this.index = 0;
+        }
+
+        public boolean hasMoreTokens()
+        {
+            return (index != -1);
+        }
+
+        public String nextToken()
+        {
+            if (index == -1)
+            {
+                return null;
+            }
+
+            String  token;
+            int     end = oid.indexOf('.', index);
+
+            if (end == -1)
+            {
+                token = oid.substring(index);
+                index = -1;
+                return token;
+            }
+
+            token = oid.substring(index, end);
+
+            index = end + 1;
+            return token;
+        }
+    }
+}
