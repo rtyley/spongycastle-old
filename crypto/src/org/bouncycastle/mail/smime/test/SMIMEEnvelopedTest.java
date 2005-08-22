@@ -17,6 +17,7 @@ import junit.framework.TestSuite;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEUtil;
@@ -31,6 +32,40 @@ public class SMIMEEnvelopedTest extends TestCase {
 
     public boolean DEBUG = true;
 
+    private static String          _signDN;
+    private static KeyPair         _signKP;  
+    private static X509Certificate _signCert;
+
+    private static String          _origDN;
+    private static KeyPair         _origKP;
+    private static X509Certificate _origCert;
+
+    private static String          _reciDN;
+    private static KeyPair         _reciKP;
+    private static X509Certificate _reciCert;
+    
+    private static boolean         _initialised = false;
+
+    private static void init()
+        throws Exception
+    {
+        if (!_initialised)
+        {
+            _initialised = true;
+            
+            _signDN   = "O=Bouncy Castle, C=AU";
+            _signKP   = CMSTestUtil.makeKeyPair();  
+            _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+
+            _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
+            _origKP   = CMSTestUtil.makeKeyPair();
+            _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
+
+            _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
+            _reciKP   = CMSTestUtil.makeKeyPair();
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);      
+        }
+    }
     /*
      *
      *  INFRASTRUCTURE
@@ -56,7 +91,10 @@ public class SMIMEEnvelopedTest extends TestCase {
         junit.textui.TestRunner.run(SMIMEEnvelopedTest.class);
     }
 
-    public static Test suite() {
+    public static Test suite() 
+        throws Exception {
+        init();
+        
         return new SMIMETestSetup(new TestSuite(SMIMEEnvelopedTest.class));
     }
 
@@ -92,18 +130,6 @@ public class SMIMEEnvelopedTest extends TestCase {
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
               
             gen.addKeyTransRecipient(_reciCert);
@@ -149,18 +175,6 @@ public class SMIMEEnvelopedTest extends TestCase {
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
               
             gen.addKeyTransRecipient(_reciCert);
@@ -207,18 +221,6 @@ public class SMIMEEnvelopedTest extends TestCase {
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
               
             gen.addKeyTransRecipient(_reciCert);
@@ -265,18 +267,6 @@ public class SMIMEEnvelopedTest extends TestCase {
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
               
             gen.addKeyTransRecipient(_reciCert);
@@ -323,18 +313,6 @@ public class SMIMEEnvelopedTest extends TestCase {
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator   gen = new SMIMEEnvelopedGenerator();
 
             //
@@ -390,18 +368,6 @@ public class SMIMEEnvelopedTest extends TestCase {
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator   gen = new SMIMEEnvelopedGenerator();
 
             //
