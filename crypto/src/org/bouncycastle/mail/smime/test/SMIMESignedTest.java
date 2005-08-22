@@ -99,22 +99,25 @@ public class SMIMESignedTest
 
     public void setUp()
     {
-        try
+        if (msg == null)
         {
-            msg      = SMIMETestUtil.makeMimeBodyPart("Hello world!");
-
-            signDN   = "O=Bouncy Castle, C=AU";
-            signKP   = SMIMETestUtil.makeKeyPair();  
-            signCert = SMIMETestUtil.makeCertificate(signKP, signDN, signKP, signDN);
-
-            origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
-            origKP   = SMIMETestUtil.makeKeyPair();
-            origCert = SMIMETestUtil.makeCertificate(origKP, origDN, signKP, signDN);
-        }
-        catch(Exception ex)
-        {
-            log(ex);
-            fail();
+            try
+            {
+                msg      = SMIMETestUtil.makeMimeBodyPart("Hello world!");
+    
+                signDN   = "O=Bouncy Castle, C=AU";
+                signKP   = SMIMETestUtil.makeKeyPair();  
+                signCert = SMIMETestUtil.makeCertificate(signKP, signDN, signKP, signDN);
+    
+                origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+                origKP   = SMIMETestUtil.makeKeyPair();
+                origCert = SMIMETestUtil.makeCertificate(origKP, origDN, signKP, signDN);
+            }
+            catch(Exception ex)
+            {
+                log(ex);
+                fail();
+            }
         }
     }
 
