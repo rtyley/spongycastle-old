@@ -110,6 +110,7 @@ then
     rm -rf src/org/bouncycastle/jce/provider/BCEC*.java
     rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
+    rm -rf src/org/bouncycastle/sasn1
 
     PATH=$JDK13PATH/bin:$PATH
     export PATH
@@ -266,6 +267,7 @@ then
     rm -rf src/org/bouncycastle/mail
     rm -rf src/org/bouncycastle/cms
     rm -rf src/org/bouncycastle/tsp
+    rm -rf src/org/bouncycastle/sasn1
 
     javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -305,7 +307,7 @@ then
     echo "making Mail release"
 
     mkdir bcmail-jdk13-$base
-    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/mail src/org/bouncycastle/cms | (cd bcmail-jdk13-$base; tar xf -)
+    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/mail src/org/bouncycastle/cms src/org/bouncycastle/sasn1 | (cd bcmail-jdk13-$base; tar xf -)
     (cd jdk1.3; tar cf - org | (cd ../bcmail-jdk13-$base/src; tar xf -))
     (
     cd bcmail-jdk13-$base; mkdir classes; mkdir docs;
@@ -328,6 +330,8 @@ then
         -d docs -sourcepath src \
         org.bouncycastle.cms \
         org.bouncycastle.cms.test \
+        org.bouncycastle.sasn1 \
+        org.bouncycastle.sasn1.test \
         org.bouncycastle.mail.smime \
         org.bouncycastle.mail.smime.handlers \
         org.bouncycastle.mail.smime.examples \
@@ -349,6 +353,7 @@ Implementation-Version: $version.0
     (cd classes; jar cmf mail.mf ../../bcmail-jdk13-$base.jar org)
     java -classpath ../jce-jdk13-$base/classes:classes org.bouncycastle.cms.test.AllTests
     java -classpath ../jce-jdk13-$base/classes:classes org.bouncycastle.mail.smime.test.AllTests
+    java -classpath ../jce-jdk13-$base/classes:classes org.bouncycastle.sasn1.test.RegressionTest
 
     )
 
@@ -374,6 +379,7 @@ then
     rm -rf src/org/bouncycastle/openpgp
     rm -rf src/org/bouncycastle/cms
     rm -rf src/org/bouncycastle/mail
+    rm -rf src/org/bouncycastle/sasn1
 
     javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
