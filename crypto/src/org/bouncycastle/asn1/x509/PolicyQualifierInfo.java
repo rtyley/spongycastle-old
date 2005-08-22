@@ -22,8 +22,8 @@ import org.bouncycastle.asn1.DERSequence;
 public class PolicyQualifierInfo
     extends ASN1Encodable
 {
-   DERObjectIdentifier policyQualifierId;
-   DEREncodable qualifier;
+   private DERObjectIdentifier policyQualifierId;
+   private DEREncodable        qualifier;
 
    /**
     * Creates a new <code>PolicyQualifierInfo</code> instance.
@@ -31,8 +31,9 @@ public class PolicyQualifierInfo
     * @param policyQualifierId a <code>PolicyQualifierId</code> value
     * @param qualifier the qualifier, defined by the above field.
     */
-   public PolicyQualifierInfo (DERObjectIdentifier policyQualifierId,
-                               DEREncodable qualifier) 
+   public PolicyQualifierInfo(
+       DERObjectIdentifier policyQualifierId,
+       DEREncodable qualifier) 
    {
       this.policyQualifierId = policyQualifierId;
       this.qualifier = qualifier;
@@ -45,7 +46,8 @@ public class PolicyQualifierInfo
     * @param cps the CPS (certification practice statement) uri as a
     * <code>String</code>.
     */
-   public PolicyQualifierInfo (String cps) 
+   public PolicyQualifierInfo(
+       String cps) 
    {
       policyQualifierId = PolicyQualifierId.id_qt_cps;
       qualifier = new DERIA5String (cps);
@@ -57,13 +59,15 @@ public class PolicyQualifierInfo
     * @param as <code>PolicyQualifierInfo</code> X509 structure
     * encoded as an ASN1Sequence. 
     */
-   public PolicyQualifierInfo (ASN1Sequence as)
+   public PolicyQualifierInfo(
+       ASN1Sequence as)
    {
         policyQualifierId = (DERObjectIdentifier) as.getObjectAt(0);
         qualifier = as.getObjectAt(1);
-    }
+   }
 
-   public static PolicyQualifierInfo getInstance (Object as) 
+   public static PolicyQualifierInfo getInstance(
+       Object as) 
    {
         if (as instanceof PolicyQualifierInfo)
         {
@@ -77,6 +81,17 @@ public class PolicyQualifierInfo
         throw new IllegalArgumentException("unknown object in getInstance.");
    }
 
+
+   public DERObjectIdentifier getPolicyQualifierId()
+   {
+       return policyQualifierId;
+   }
+
+   public DEREncodable getQualifier()
+   {
+       return qualifier;
+   }
+   
    /**
     * Returns a DER-encodable representation of this instance. 
     *

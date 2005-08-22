@@ -23,8 +23,8 @@ import org.bouncycastle.asn1.DERSequence;
 public class UserNotice 
     extends ASN1Encodable 
 {
-    NoticeReference noticeRef;
-    DisplayText     explicitText;
+    private NoticeReference noticeRef;
+    private DisplayText     explicitText;
    
     /**
      * Creates a new <code>UserNotice</code> instance.
@@ -84,6 +84,16 @@ public class UserNotice
        }
     }
    
+    public NoticeReference getNoticeRef()
+    {
+        return noticeRef;
+    }
+    
+    public DisplayText getExplicitText()
+    {
+        return explicitText;
+    }
+    
     public DERObject toASN1Object() 
     {
         ASN1EncodableVector av = new ASN1EncodableVector();
