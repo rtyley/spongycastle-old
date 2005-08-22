@@ -49,15 +49,18 @@ public class SignerInformation
     private CMSProcessable          content;
     private byte[]                  signature;
     private DERObjectIdentifier     contentType;
+    private byte[]                  _digest;
 
     SignerInformation(
         SignerInfo          info,
         DERObjectIdentifier contentType,
-        CMSProcessable      content)
+        CMSProcessable      content,
+        byte[]              digest)
     {
         this.info = info;
         this.sid = new SignerId();
         this.contentType = contentType;
+
 
         try
         {
@@ -94,6 +97,7 @@ public class SignerInformation
         this.signature = info.getEncryptedDigest().getOctets();
 
         this.content = content;
+        _digest = digest;
     }
 
     private byte[] encodeObj(
@@ -349,7 +353,7 @@ public class SignerInformation
         {
             sig.initVerify(key);
             
-            if (content == null)
+            if (content == null && _digest == null)
             {
                 throw new IllegalArgumentException("no content specified for signature verification.");
             }
@@ -361,10 +365,19 @@ public class SignerInformation
             }
             else
             {
-                content.write(
-                        new CMSSignedDataGenerator.DigOutputStream(digest));
-
-                byte[]  hash = digest.digest();
+                byte[]  hash;
+                
+                if (content != null)
+                {
+                    content.write(
+                            new CMSSignedDataGenerator.DigOutputStream(digest));
+    
+                    hash = digest.digest();
+                }
+                else
+                {
+                    hash = _digest;
+                }
 
                 Attribute dig = signedAttrTable.get(
                                 CMSAttributes.messageDigest);
@@ -505,6 +518,6 @@ public class SignerInformation
         return new SignerInformation(
                 new SignerInfo(sInfo.getSID(), sInfo.getDigestAlgorithm(),
                     sInfo.getAuthenticatedAttributes(), sInfo.getDigestEncryptionAlgorithm(), sInfo.getEncryptedDigest(), unsignedAttr),
-                    signerInformation.contentType, signerInformation.content);
+                    signerInformation.contentType, signerInformation.content, null);
     }
 }

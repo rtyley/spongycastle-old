@@ -9,15 +9,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CRLException;
 import org.bouncycastle.jce.cert.CertStore;
-
 import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -36,7 +34,6 @@ import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.cms.CMSException;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -183,7 +180,7 @@ public class CMSSignedData
 
             for (int i = 0; i != s.size(); i++)
             {
-                signerInfos.add(new SignerInformation(SignerInfo.getInstance(s.getObjectAt(i)), signedData.getEncapContentInfo().getContentType(), signedContent));
+                signerInfos.add(new SignerInformation(SignerInfo.getInstance(s.getObjectAt(i)), signedData.getEncapContentInfo().getContentType(), signedContent, null));
             }
 
             signerInfoStore = new SignerInformationStore(signerInfos);

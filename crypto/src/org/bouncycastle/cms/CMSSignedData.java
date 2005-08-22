@@ -180,7 +180,7 @@ public class CMSSignedData
 
             for (int i = 0; i != s.size(); i++)
             {
-                signerInfos.add(new SignerInformation(SignerInfo.getInstance(s.getObjectAt(i)), signedData.getEncapContentInfo().getContentType(), signedContent));
+                signerInfos.add(new SignerInformation(SignerInfo.getInstance(s.getObjectAt(i)), signedData.getEncapContentInfo().getContentType(), signedContent, null));
             }
 
             signerInfoStore = new SignerInformationStore(signerInfos);

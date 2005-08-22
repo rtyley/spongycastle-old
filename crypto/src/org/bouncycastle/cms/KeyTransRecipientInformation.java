@@ -2,6 +2,7 @@ package org.bouncycastle.cms;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -16,7 +17,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.cms.EncryptedContentInfo;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientIdentifier;
@@ -31,16 +31,19 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class KeyTransRecipientInformation
     extends RecipientInformation
 {
-    private KeyTransRecipientInfo   info;
+    private KeyTransRecipientInfo _info;
+    private AlgorithmIdentifier   _encAlg;
 
     public KeyTransRecipientInformation(
         KeyTransRecipientInfo   info,
-        EncryptedContentInfo    data)
+        AlgorithmIdentifier     encAlg,
+        InputStream             data)
     {
-        super(AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
+        super(encAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
         
-        this.info = info;
-        this.rid = new RecipientId();
+        this._info = info;
+        this._encAlg = encAlg;
+        this._rid = new RecipientId();
 
         RecipientIdentifier r = info.getRecipientIdentifier();
 
@@ -50,7 +53,7 @@ public class KeyTransRecipientInformation
             {
                 ASN1OctetString octs = ASN1OctetString.getInstance(r.getId());
 
-                rid.setSubjectKeyIdentifier(octs.getOctets());
+                _rid.setSubjectKeyIdentifier(octs.getOctets());
             }
             else
             {
@@ -61,8 +64,8 @@ public class KeyTransRecipientInformation
 
                 aOut.writeObject(iAnds.getName());
 
-                rid.setIssuer(bOut.toByteArray());
-                rid.setSerialNumber(iAnds.getSerialNumber().getValue());
+                _rid.setIssuer(bOut.toByteArray());
+                _rid.setSerialNumber(iAnds.getSerialNumber().getValue());
             }
         }
         catch (IOException e)
@@ -74,20 +77,19 @@ public class KeyTransRecipientInformation
     /**
      * decrypt the content and return it as a byte array.
      */
-    public byte[] getContent(
+    public CMSTypedStream getContentStream(
         Key      key,
         String   prov)
         throws CMSException, NoSuchProviderException
     {
         try
         {
-            byte[]              encryptedKey = info.getEncryptedKey().getOctets();
-            Cipher              keyCipher = Cipher.getInstance(keyEncAlg.getObjectId().getId(), prov);
+            byte[]              encryptedKey = _info.getEncryptedKey().getOctets();
+            Cipher              keyCipher = Cipher.getInstance(_keyEncAlg.getObjectId().getId(), prov);
 
             keyCipher.init(Cipher.DECRYPT_MODE, key);
 
-            AlgorithmIdentifier aid = data.getContentEncryptionAlgorithm();
-            String              alg = aid.getObjectId().getId();
+            String              alg = _encAlg.getObjectId().getId();
             SecretKey           sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             
             return getContentFromSessionKey(sKey, prov);

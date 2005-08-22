@@ -34,35 +34,37 @@ public class SignedDataTest
 
     MimeBodyPart    msg;
 
-    String          signDN;
-    KeyPair         signKP;
-    X509Certificate signCert;
+    private static String          _signDN;
+    private static KeyPair         _signKP;
+    private static X509Certificate _signCert;
     
-    KeyPair         signGostKP;
-    X509Certificate signGostCert;
+    private static KeyPair         _signGostKP;
+    private static X509Certificate _signGostCert;
 
-    String          origDN;
-    KeyPair         origKP;
-    X509Certificate origCert;
+    private static String          _origDN;
+    private static KeyPair         _origKP;
+    private static X509Certificate _origCert;
     
-    KeyPair         origGostKP;
-    X509Certificate origGostCert;
+    private static KeyPair         _origGostKP;
+    private static X509Certificate _origGostCert;
 
-    String          reciDN;
-    KeyPair         reciKP;
-    X509Certificate reciCert;
+    private static String          _reciDN;
+    private static KeyPair         _reciKP;
+    private static X509Certificate _reciCert;
 
-    KeyPair         dsaSignKP;
-    X509Certificate dsaSignCert;
+    private static KeyPair         _dsaSignKP;
+    private static X509Certificate _dsaSignCert;
 
-    KeyPair         dsaOrigKP;
-    X509Certificate dsaOrigCert;
+    private static KeyPair         _dsaOrigKP;
+    private static X509Certificate _dsaOrigCert;
+
+    private static boolean _initialised = false;
 
     private byte[] disorderedMessage = Base64.decode(
             "SU9fc3RkaW5fdXNlZABfX2xpYmNfc3RhcnRfbWFpbgBnZXRob3N0aWQAX19n"
           + "bW9uX3M=");
 
-        private byte[] disorderedSet = Base64.decode(
+    private byte[] disorderedSet = Base64.decode(
             "MIIYXQYJKoZIhvcNAQcCoIIYTjCCGEoCAQExCzAJBgUrDgMCGgUAMAsGCSqG"
           + "SIb3DQEHAaCCFqswggJUMIIBwKADAgECAgMMg6wwCgYGKyQDAwECBQAwbzEL"
           + "MAkGA1UEBhMCREUxPTA7BgNVBAoUNFJlZ3VsaWVydW5nc2JlaMhvcmRlIGbI"
@@ -218,49 +220,39 @@ public class SignedDataTest
         junit.textui.TestRunner.run(SignedDataTest.class);
     }
 
-    public static Test suite() {
+    public static Test suite() 
+        throws Exception
+    {
+        init();
+        
         return new CMSTestSetup(new TestSuite(SignedDataTest.class));
     }
 
-    public void log(Exception _ex) {
-        if(DEBUG) {
-            _ex.printStackTrace();
-        }
-    }
-
-    public void log(String _msg) {
-        if(DEBUG) {
-            System.out.println(_msg);
-        }
-    }
-
-    public void setUp()
+    private static void init()
+        throws Exception
     {
-        try
+        if (!_initialised)
         {
-            signDN   = "O=Bouncy Castle, C=AU";
-            signKP   = CMSTestUtil.makeKeyPair();  
-            signCert = CMSTestUtil.makeCertificate(signKP, signDN, signKP, signDN);
-
-            signGostKP   = CMSTestUtil.makeGostKeyPair();  
-            signGostCert = CMSTestUtil.makeCertificate(signGostKP, signDN, signGostKP, signDN);
+            _initialised = true;
             
-            origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
-            origKP   = CMSTestUtil.makeKeyPair();
-            origCert = CMSTestUtil.makeCertificate(origKP, origDN, signKP, signDN);
+            _signDN   = "O=Bouncy Castle, C=AU";
+            _signKP   = CMSTestUtil.makeKeyPair();  
+            _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+
+            _signGostKP   = CMSTestUtil.makeGostKeyPair();  
+            _signGostCert = CMSTestUtil.makeCertificate(_signGostKP, _signDN, _signGostKP, _signDN);
+    
+            _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
+            _origKP   = CMSTestUtil.makeKeyPair();
+            _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
             
-            origGostKP   = CMSTestUtil.makeGostKeyPair();
-            origGostCert = CMSTestUtil.makeCertificate(origGostKP, origDN, signGostKP, signDN);
+            _origGostKP   = CMSTestUtil.makeGostKeyPair();
+            _origGostCert = CMSTestUtil.makeCertificate(_origGostKP, _origDN, _signGostKP, _signDN);
+    
+            _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
+            _reciKP   = CMSTestUtil.makeKeyPair();
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);      
         }
-        catch(Exception ex)
-        {
-            log(ex);
-            fail();
-        }
-    }
-
-    public void tearDown() {
-
     }
 
     /*
@@ -276,17 +268,17 @@ public class SignedDataTest
             ArrayList           certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
-            certList.add(origCert);
-            certList.add(signCert);
+            certList.add(_origCert);
+            certList.add(_signCert);
 
             CertStore           certs = CertStore.getInstance("Collection",
                             new CollectionCertStoreParameters(certList), "BC");
 
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-            gen.addSigner(origKP.getPrivate(), origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+            gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
 
-            gen.addSigner(origKP.getPrivate(), origCert, CMSSignedDataGenerator.DIGEST_MD5);
+            gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_MD5);
             
             gen.addCertificatesAndCRLs(certs);
 
@@ -380,7 +372,6 @@ public class SignedDataTest
         }
         catch(Exception ex)
         {
-            log(ex);
             fail();
         }
     }
@@ -392,15 +383,15 @@ public class SignedDataTest
             ArrayList           certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
-            certList.add(origCert);
-            certList.add(signCert);
+            certList.add(_origCert);
+            certList.add(_signCert);
 
             CertStore           certs = CertStore.getInstance("Collection",
                             new CollectionCertStoreParameters(certList), "BC");
 
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-            gen.addSigner(origKP.getPrivate(), origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+            gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
 
             gen.addCertificatesAndCRLs(certs);
 
@@ -484,7 +475,6 @@ public class SignedDataTest
         }
         catch(Exception ex)
         {
-            log(ex);
             fail();
         }
     }
@@ -496,15 +486,15 @@ public class SignedDataTest
             ArrayList           certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
-            certList.add(origCert);
-            certList.add(signCert);
+            certList.add(_origCert);
+            certList.add(_signCert);
 
             CertStore           certs = CertStore.getInstance("Collection",
                             new CollectionCertStoreParameters(certList), "BC");
 
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-            gen.addSigner(origKP.getPrivate(), origCert, CMSSignedDataGenerator.DIGEST_SHA224);
+            gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA224);
 
             gen.addCertificatesAndCRLs(certs);
 
@@ -588,7 +578,6 @@ public class SignedDataTest
         }
         catch(Exception ex)
         {
-            log(ex);
             fail();
         }
     }
@@ -600,15 +589,15 @@ public class SignedDataTest
             ArrayList           certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
-            certList.add(origCert);
-            certList.add(signCert);
+            certList.add(_origCert);
+            certList.add(_signCert);
 
             CertStore           certs = CertStore.getInstance("Collection",
                             new CollectionCertStoreParameters(certList), "BC");
 
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-            gen.addSigner(origKP.getPrivate(), origCert, CMSSignedDataGenerator.DIGEST_SHA256);
+            gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA256);
 
             gen.addCertificatesAndCRLs(certs);
 
@@ -692,7 +681,6 @@ public class SignedDataTest
         }
         catch(Exception ex)
         {
-            log(ex);
             fail();
         }
     }
@@ -704,15 +692,15 @@ public class SignedDataTest
             ArrayList           certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
-            certList.add(origGostCert);
-            certList.add(signGostCert);
+            certList.add(_origGostCert);
+            certList.add(_signGostCert);
 
             CertStore           certs = CertStore.getInstance("Collection",
                             new CollectionCertStoreParameters(certList), "BC");
 
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-            gen.addSigner(origGostKP.getPrivate(), origGostCert, CMSSignedDataGenerator.DIGEST_GOST3411);
+            gen.addSigner(_origGostKP.getPrivate(), _origGostCert, CMSSignedDataGenerator.DIGEST_GOST3411);
 
             gen.addCertificatesAndCRLs(certs);
 
@@ -796,7 +784,6 @@ public class SignedDataTest
         }
         catch(Exception ex)
         {
-            log(ex);
             fail();
         }
     }
@@ -826,7 +813,6 @@ public class SignedDataTest
         }
         catch(Exception ex)
         {
-            log(ex);
             fail();
         }
     }

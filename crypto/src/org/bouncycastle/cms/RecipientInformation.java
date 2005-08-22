@@ -1,7 +1,9 @@
 package org.bouncycastle.cms;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -9,9 +11,8 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 
@@ -19,28 +20,30 @@ import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.cms.EncryptedContentInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public abstract class RecipientInformation
 {
-    private static ASN1Null         asn1Null = new DERNull();
+    private static final ASN1Null   asn1Null = new DERNull();
     
-    protected RecipientId             rid = new RecipientId();
-    protected AlgorithmIdentifier     keyEncAlg;
-    protected EncryptedContentInfo    data;
+    protected RecipientId           _rid = new RecipientId();
+    protected AlgorithmIdentifier   _encAlg;
+    protected AlgorithmIdentifier   _keyEncAlg;
+    protected InputStream           _data;
 
     protected RecipientInformation(
-        AlgorithmIdentifier     keyEncAlg,
-        EncryptedContentInfo    data)
+        AlgorithmIdentifier encAlg,
+        AlgorithmIdentifier keyEncAlg,
+        InputStream         data)
     {
-        this.keyEncAlg = keyEncAlg;
-        this.data = data;
+        this._encAlg = encAlg;
+        this._keyEncAlg = keyEncAlg;
+        this._data = data;
     }
     
     public RecipientId getRID()
     {
-        return rid;
+        return _rid;
     }
     
     private byte[] encodeObj(
@@ -65,7 +68,7 @@ public abstract class RecipientInformation
      */
     public String getKeyEncryptionAlgOID()
     {
-        return keyEncAlg.getObjectId().getId();
+        return _keyEncAlg.getObjectId().getId();
     }
 
     /**
@@ -76,7 +79,7 @@ public abstract class RecipientInformation
     {
         try
         {
-            return encodeObj(keyEncAlg.getParameters());
+            return encodeObj(_keyEncAlg.getParameters());
         }
         catch (Exception e)
         {
@@ -99,7 +102,7 @@ public abstract class RecipientInformation
     {        
         try
         {
-            byte[]  enc = this.encodeObj(keyEncAlg.getParameters());
+            byte[]  enc = this.encodeObj(_keyEncAlg.getParameters());
             if (enc == null)
             {
                 return null;
@@ -121,19 +124,17 @@ public abstract class RecipientInformation
         }  
     }
     
-    protected byte[] getContentFromSessionKey(
+    protected CMSTypedStream getContentFromSessionKey(
         Key     sKey,
         String  provider)
         throws CMSException, NoSuchProviderException
     {
-        AlgorithmIdentifier aid = data.getContentEncryptionAlgorithm();
-        String              alg = aid.getObjectId().getId();
-        byte[]              enc = data.getEncryptedContent().getOctets();
+        String              alg = _encAlg.getObjectId().getId();
         
         try
         {
             Cipher              cipher = Cipher.getInstance(alg, provider);
-            DEREncodable        sParams = aid.getParameters();
+            DEREncodable        sParams = _encAlg.getParameters();
     
             if (sParams != null && !asn1Null.equals(sParams))
             {
@@ -142,7 +143,7 @@ public abstract class RecipientInformation
                 ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
                 ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
     
-                aOut.writeObject(aid.getParameters());
+                aOut.writeObject(_encAlg.getParameters());
     
                 params.init(bOut.toByteArray(), "ASN.1");
     
@@ -162,15 +163,11 @@ public abstract class RecipientInformation
                 }
             }
     
-            return cipher.doFinal(enc);
+            return new CMSTypedStream(new CipherInputStream(_data, cipher));
         }
         catch (NoSuchAlgorithmException e)
         {
             throw new CMSException("can't find algorithm.", e);
-        }
-        catch (IllegalBlockSizeException e)
-        {
-            throw new CMSException("illegal blocksize in message.", e);
         }
         catch (InvalidKeyException e)
         {
@@ -179,10 +176,6 @@ public abstract class RecipientInformation
         catch (NoSuchPaddingException e)
         {
             throw new CMSException("required padding not supported.", e);
-        }
-        catch (BadPaddingException e)
-        {
-            throw new CMSException("bad padding in message.", e);
         }
         catch (InvalidAlgorithmParameterException e)
         {
@@ -193,7 +186,27 @@ public abstract class RecipientInformation
             throw new CMSException("error decoding algorithm parameters.", e);
         }
     }
-        
-    abstract public byte[] getContent(Key key, String provider)
+    
+    public byte[] getContent(
+        Key    key,
+        String provider)
+        throws CMSException, NoSuchProviderException
+    {
+        try
+        {
+            if (_data instanceof ByteArrayInputStream)
+            {
+                _data.reset();
+            }
+            
+            return CMSUtils.streamToByteArray(getContentStream(key, provider).getContentStream());
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("unable to parse internal stream: " + e);
+        }
+    }
+    
+    abstract public CMSTypedStream getContentStream(Key key, String provider)
         throws CMSException, NoSuchProviderException;
 }
