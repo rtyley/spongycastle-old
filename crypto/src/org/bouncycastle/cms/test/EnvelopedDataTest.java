@@ -19,566 +19,411 @@ import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 
-public class EnvelopedDataTest extends TestCase {
+public class EnvelopedDataTest
+    extends TestCase 
+{
+    private static String          _signDN;
+    private static KeyPair         _signKP;  
+    private static X509Certificate _signCert;
 
-    /*
-     *
-     *  VARIABLES
-     *
-     */
+    private static String          _origDN;
+    private static KeyPair         _origKP;
+    private static X509Certificate _origCert;
 
-    public boolean DEBUG = true;
+    private static String          _reciDN;
+    private static KeyPair         _reciKP;
+    private static X509Certificate _reciCert;
+    
+    private static boolean         _initialised = false;
 
-    /*
-     *
-     *  INFRASTRUCTURE
-     *
-     */
-
-    public EnvelopedDataTest(String name) {
-        super(name);
+    public EnvelopedDataTest() 
+    {
     }
 
-    public static void main(String args[]) {
+    private static void init()
+        throws Exception
+    {
+        if (!_initialised)
+        {
+            _initialised = true;
+            
+            _signDN   = "O=Bouncy Castle, C=AU";
+            _signKP   = CMSTestUtil.makeKeyPair();  
+            _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+
+            _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
+            _origKP   = CMSTestUtil.makeKeyPair();
+            _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
+
+            _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
+            _reciKP   = CMSTestUtil.makeKeyPair();
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);      
+        }
+    }
+    
+    public static void main(
+        String args[]) 
+    {
         junit.textui.TestRunner.run(EnvelopedDataTest.class);
     }
 
-    public static Test suite() {
+    public static Test suite() 
+        throws Exception
+    {
+        init();
+        
         return new CMSTestSetup(new TestSuite(EnvelopedDataTest.class));
     }
 
-    public void log(Exception _ex) {
-        if(DEBUG) {
-            _ex.printStackTrace();
-        }
-    }
-
-    public void log(String _msg) {
-        if(DEBUG) {
-            System.out.println(_msg);
-        }
-    }
-
-    public void setUp() {
-
-    }
-
-    public void tearDown() {
-
-    }
-
-    /*
-     *
-     *  TESTS
-     *
-     */
-
     public void testKeyTrans()
+        throws Exception
     {
-        try {
-            byte[]          data     = "WallaWallaWashington".getBytes();
+        byte[]          data     = "WallaWallaWashington".getBytes();
 
-            String          _signDN   = "O=Bouncy Castle, C=AU";
-            KeyPair         _signKP   = CMSTestUtil.makeKeyPair();  
-            X509Certificate _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _origKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
+        edGen.addKeyTransRecipient(_reciCert);
 
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _reciKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
             
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
 
-            edGen.addKeyTransRecipient(_reciCert);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-
-            assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
-                
-                byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-        }
-        catch(Exception ex) {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
 
     public void testKeyTransAES128()
+        throws Exception
     {
-        try {
-            byte[]          data     = "WallaWallaWashington".getBytes();
+        byte[]          data     = "WallaWallaWashington".getBytes();
 
-            String          _signDN   = "O=Bouncy Castle, C=AU";
-            KeyPair         _signKP   = CMSTestUtil.makeKeyPair();  
-            X509Certificate _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _origKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
+        edGen.addKeyTransRecipient(_reciCert);
 
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _reciKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+        
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
             
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
 
-            edGen.addKeyTransRecipient(_reciCert);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    CMSEnvelopedDataGenerator.AES128_CBC, "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-            assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
-                
-                byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-        }
-        catch(Exception ex) {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
 
     public void testKeyTransAES192()
+        throws Exception
     {
-        try {
-            byte[]          data     = "WallaWallaWashington".getBytes();
+        byte[]          data     = "WallaWallaWashington".getBytes();
 
-            String          _signDN   = "O=Bouncy Castle, C=AU";
-            KeyPair         _signKP   = CMSTestUtil.makeKeyPair();  
-            X509Certificate _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _reciKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
+        edGen.addKeyTransRecipient(_reciCert);
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                CMSEnvelopedDataGenerator.AES192_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES192_CBC);
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
             
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
 
-            edGen.addKeyTransRecipient(_reciCert);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    CMSEnvelopedDataGenerator.AES192_CBC, "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-            assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES192_CBC);
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
-                
-                byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-        }
-        catch(Exception ex) {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
 
     public void testKeyTransAES256()
+        throws Exception
     {
-        try {
-            byte[]          data     = "WallaWallaWashington".getBytes();
+        byte[]          data     = "WallaWallaWashington".getBytes();
 
-            String          _signDN   = "O=Bouncy Castle, C=AU";
-            KeyPair         _signKP   = CMSTestUtil.makeKeyPair();  
-            X509Certificate _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _origKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
+        edGen.addKeyTransRecipient(_reciCert);
 
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _reciKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                CMSEnvelopedDataGenerator.AES256_CBC, "BC");
 
-            edGen.addKeyTransRecipient(_reciCert);
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
 
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    CMSEnvelopedDataGenerator.AES256_CBC, "BC");
+        assertEquals(ed.getEncryptionAlgOID(), "2.16.840.1.101.3.4.1.42");
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
 
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            assertEquals(ed.getEncryptionAlgOID(), "2.16.840.1.101.3.4.1.42");
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
 
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-        }
-        catch(Exception ex) {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
 
     public void testKeyTransRC4()
+        throws Exception
     {
-        try
+        byte[]          data     = "WallaWallaBouncyCastle".getBytes();
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        edGen.addKeyTransRecipient(_reciCert);
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                "1.2.840.113549.3.4", "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), "1.2.840.113549.3.4");
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
         {
-            byte[]          data     = "WallaWallaBouncyCastle".getBytes();
+            RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            String          _signDN   = "O=Bouncy Castle, C=AU";
-            KeyPair         _signKP   = CMSTestUtil.makeKeyPair();  
-            X509Certificate _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
 
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _origKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _reciKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-
-            edGen.addKeyTransRecipient(_reciCert);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    "1.2.840.113549.3.4", "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-            assertEquals(ed.getEncryptionAlgOID(), "1.2.840.113549.3.4");
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-        }
-        catch(Exception ex)
-        {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
     
     public void testKeyTrans128RC4()
+        throws Exception
     {
-        try
+        byte[]          data     = "WallaWallaBouncyCastle".getBytes();
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        edGen.addKeyTransRecipient(_reciCert);
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                "1.2.840.113549.3.4", 128, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), "1.2.840.113549.3.4");
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
         {
-            byte[]          data     = "WallaWallaBouncyCastle".getBytes();
+            RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            String          _signDN   = "O=Bouncy Castle, C=AU";
-            KeyPair         _signKP   = CMSTestUtil.makeKeyPair();  
-            X509Certificate _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
 
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _origKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _reciKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-
-            edGen.addKeyTransRecipient(_reciCert);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    "1.2.840.113549.3.4", 128, "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-            assertEquals(ed.getEncryptionAlgOID(), "1.2.840.113549.3.4");
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-        }
-        catch(Exception ex)
-        {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
+    
     public void testKeyTransODES()
+        throws Exception
     {
-        try
+        byte[]          data     = "WallaWallaBouncyCastle".getBytes();
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        edGen.addKeyTransRecipient(_reciCert);
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                "1.3.14.3.2.7", "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), "1.3.14.3.2.7");
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
         {
-            byte[]          data     = "WallaWallaBouncyCastle".getBytes();
+            RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            String          _signDN   = "O=Bouncy Castle, C=AU";
-            KeyPair         _signKP   = CMSTestUtil.makeKeyPair();  
-            X509Certificate _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
 
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _origKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _reciKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-
-            edGen.addKeyTransRecipient(_reciCert);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    "1.3.14.3.2.7", "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-            assertEquals(ed.getEncryptionAlgOID(), "1.3.14.3.2.7");
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-        }
-        catch(Exception ex)
-        {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
 
     public void testKeyTransSmallAES()
+        throws Exception
     {
-        try
+        byte[]          data     = new byte[] { 0, 1, 2, 3 };
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        edGen.addKeyTransRecipient(_reciCert);
+
+        CMSEnvelopedData ed = edGen.generate(
+                              new CMSProcessableByteArray(data),
+                              CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(),
+                                   CMSEnvelopedDataGenerator.AES128_CBC);
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
         {
-            byte[]          data     = new byte[] { 0, 1, 2, 3 };
+            RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            String          _signDN   = "O=Bouncy Castle, C=AU";
-            KeyPair         _signKP   = CMSTestUtil.makeKeyPair();  
-            X509Certificate _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _origKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
-            KeyPair         _reciKP   = CMSTestUtil.makeKeyPair();
-            X509Certificate _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-
-            edGen.addKeyTransRecipient(_reciCert);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                  new CMSProcessableByteArray(data),
-                                  CMSEnvelopedDataGenerator.AES128_CBC, "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-            assertEquals(ed.getEncryptionAlgOID(),
-                                       CMSEnvelopedDataGenerator.AES128_CBC);
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-        }
-        catch(Exception ex)
-        {
-            log(ex);
-            fail();
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
 
     public void testDESKEK()
+        throws Exception
     {
-        try {
-            byte[]    data = "WallaWallaWashington".getBytes();
-            SecretKey kek  = CMSTestUtil.makeDesede192Key();
+        byte[]    data = "WallaWallaWashington".getBytes();
+        SecretKey kek  = CMSTestUtil.makeDesede192Key();
+        
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
+
+        edGen.addKEKRecipient(kek, kekId);
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), "1.2.840.113549.1.9.16.3.6");
             
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+            byte[] recData = recipient.getContent(kek, "BC");
 
-            byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
-
-            edGen.addKEKRecipient(kek, kekId);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-            assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                assertEquals(recipient.getKeyEncryptionAlgOID(), "1.2.840.113549.1.9.16.3.6");
-                
-                byte[] recData = recipient.getContent(kek, "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-            
-        }
-        catch(Exception ex) {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
     
     public void testAESKEK()
+        throws Exception
     {
-        try {
-            byte[]    data = "WallaWallaWashington".getBytes();
-            SecretKey kek  = CMSTestUtil.makeAES192Key();
+        byte[]    data = "WallaWallaWashington".getBytes();
+        SecretKey kek  = CMSTestUtil.makeAES192Key();
+        
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
+
+        edGen.addKEKRecipient(kek, kekId);
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), "2.16.840.1.101.3.4.1.25");
             
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+            byte[] recData = recipient.getContent(kek, "BC");
 
-            byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
-
-            edGen.addKEKRecipient(kek, kekId);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-            assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
-            
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                assertEquals(recipient.getKeyEncryptionAlgOID(), "2.16.840.1.101.3.4.1.25");
-                
-                byte[] recData = recipient.getContent(kek, "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-            
-        }
-        catch(Exception ex) {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
 
     public void testRC2KEK()
+        throws Exception
     {
-        try {
-            byte[]    data = "WallaWallaWashington".getBytes();
-            SecretKey kek  = CMSTestUtil.makeRC2128Key();
+        byte[]    data = "WallaWallaWashington".getBytes();
+        SecretKey kek  = CMSTestUtil.makeRC2128Key();
+        
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
+
+        edGen.addKEKRecipient(kek, kekId);
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+        
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), "1.2.840.113549.1.9.16.3.7");
             
-            CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+            byte[] recData = recipient.getContent(kek, "BC");
 
-            byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
-
-            edGen.addKEKRecipient(kek, kekId);
-
-            CMSEnvelopedData ed = edGen.generate(
-                                    new CMSProcessableByteArray(data),
-                                    CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
-
-            RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-            Collection  c = recipients.getRecipients();
-            Iterator    it = c.iterator();
-
-            assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
-            
-            while (it.hasNext())
-            {
-                RecipientInformation   recipient = (RecipientInformation)it.next();
-
-                assertEquals(recipient.getKeyEncryptionAlgOID(), "1.2.840.113549.1.9.16.3.7");
-                
-                byte[] recData = recipient.getContent(kek, "BC");
-
-                assertEquals(true, Arrays.equals(data, recData));
-            }
-            
-        }
-        catch(Exception ex) {
-            log(ex);
-            fail();
+            assertEquals(true, Arrays.equals(data, recData));
         }
     }
 }

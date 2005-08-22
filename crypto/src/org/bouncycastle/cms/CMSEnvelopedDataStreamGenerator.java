@@ -1,8 +1,8 @@
 package org.bouncycastle.cms;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
@@ -24,10 +24,16 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.RC2ParameterSpec;
 
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.EncryptedContentInfo;
-import org.bouncycastle.asn1.cms.EnvelopedData;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
@@ -39,24 +45,31 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.sasn1.Asn1Integer;
+import org.bouncycastle.sasn1.Asn1ObjectIdentifier;
+import org.bouncycastle.sasn1.BerOctetStringGenerator;
+import org.bouncycastle.sasn1.BerSequenceGenerator;
 
 /**
- * General class for generating a CMS enveloped-data message.
- *
+ * General class for generating a CMS enveloped-data message stream.
+ * <p>
  * A simple example of usage.
- *
  * <pre>
- *      CMSEnvelopedDataGenerator  fact = new CMSEnvelopedDataGenerator();
+ *      CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
  *
- *      fact.addKeyTransRecipient(cert);
+ *      edGen.addKeyTransRecipient(cert);
  *
- *      CMSEnvelopedData         data = fact.generate(content, algorithm, "BC");
+ *      ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+ *      
+ *      OutputStream out = edGen.open(
+ *                              bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");*
+ *      out.write(data);
+ *      
+ *      out.close();
  * </pre>
  */
-public class CMSEnvelopedDataGenerator
+public class CMSEnvelopedDataStreamGenerator
 {
-    ArrayList                   recipientInfs = new ArrayList();
-
     public static final String  DES_EDE3_CBC    = "1.2.840.113549.3.7";
     public static final String  RC2_CBC         = "1.2.840.113549.3.2";
     public static final String  IDEA_CBC        = "1.3.6.1.4.1.188.7.1.1.2";
@@ -67,6 +80,10 @@ public class CMSEnvelopedDataGenerator
 
     SecureRandom  rand = new SecureRandom();
 
+    ArrayList                   recipientInfs = new ArrayList();
+    private Object              _originatorInfo = null;
+    private Object              _unprotectedAttributes = null;
+    
     private class RecipientInf
     {
         X509Certificate         cert;
@@ -230,7 +247,7 @@ public class CMSEnvelopedDataGenerator
     /**
      * base constructor
      */
-    public CMSEnvelopedDataGenerator()
+    public CMSEnvelopedDataStreamGenerator()
     {
     }
 
@@ -264,35 +281,88 @@ public class CMSEnvelopedDataGenerator
     public void addKEKRecipient(
         SecretKey   key,
         byte[]      keyIdentifier)
+        throws IllegalArgumentException
     {
         recipientInfs.add(new RecipientInf(key, new KEKIdentifier(
                                                 keyIdentifier, null, null)));
     }
     
+    private Asn1Integer getVersion()
+    {
+        if (_originatorInfo != null || _unprotectedAttributes != null)
+        {
+            return new Asn1Integer(2);
+        }
+        else
+        {
+            return new Asn1Integer(0);
+        }
+    }
+    
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider and the passed in key generator.
+     * @throws IOException 
      */
-    private CMSEnvelopedData generate(
-        CMSProcessable  content,
-        String                    encryptionOID,
-        KeyGenerator       keyGen,
-        String                     provider)
+    private OutputStream open(
+        OutputStream out,
+        String       encryptionOID,
+        KeyGenerator keyGen,
+        String       provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        ASN1EncodableVector     recipientInfos = new ASN1EncodableVector();
-        AlgorithmIdentifier     encAlgId;
-        SecretKey               encKey;
-        ASN1OctetString         encContent;
-
         try
         {
+            //
+            // ContentInfo
+            //
+            BerSequenceGenerator cGen = new BerSequenceGenerator(out);
+            
+            cGen.addObject(new Asn1ObjectIdentifier(CMSObjectIdentifiers.envelopedData.getId()));
+            
+            //
+            // Signed Data
+            //
+            BerSequenceGenerator envGen = new BerSequenceGenerator(cGen.getRawOutputStream(), 0, true);
+            
+            envGen.addObject(getVersion());
+    
+            AlgorithmIdentifier     encAlgId;
+            SecretKey               encKey;
+
             Cipher              cipher = Cipher.getInstance(encryptionOID, provider);
             AlgorithmParameters params;
             DEREncodable        asn1Params;
             
             encKey = keyGen.generateKey();
 
+            Iterator            it = recipientInfs.iterator();
+            ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
+            
+            while (it.hasNext())
+            {
+                RecipientInf            recipient = (RecipientInf)it.next();
+
+                try
+                {
+                    recipientInfos.add(recipient.toRecipientInfo(encKey, provider));
+                }
+                catch (IOException e)
+                {
+                    throw new CMSException("encoding error.", e);
+                }
+                catch (InvalidKeyException e)
+                {
+                    throw new CMSException("key inappropriate for algorithm.", e);
+                }
+                catch (GeneralSecurityException e)
+                {
+                    throw new CMSException("error making encrypted content.", e);
+                }
+            }
+            
+            envGen.getRawOutputStream().write(new DERSet(recipientInfos).getEncoded());
+            
             try
             {
                 AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, provider);
@@ -330,14 +400,17 @@ public class CMSEnvelopedDataGenerator
 
             cipher.init(Cipher.ENCRYPT_MODE, encKey, params);
 
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            CipherOutputStream      cOut = new CipherOutputStream(bOut, cipher);
+            BerSequenceGenerator eiGen = new BerSequenceGenerator(envGen.getRawOutputStream());
+            
+            eiGen.addObject(new Asn1ObjectIdentifier(PKCSObjectIdentifiers.data.getId()));
+            
+            eiGen.getRawOutputStream().write(encAlgId.getEncoded());
+            
+            BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
+            
+            CipherOutputStream      cOut = new CipherOutputStream(octGen.getOctetOutputStream(), cipher);
 
-            content.write(cOut);
-
-            cOut.close();
-
-            encContent = new BERConstructedOctetString(bOut.toByteArray());
+            return new CmsEnvelopedDataOutputStream(cOut, cGen, envGen, eiGen);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -359,59 +432,25 @@ public class CMSEnvelopedDataGenerator
         {
             throw new CMSException("exception decoding algorithm parameters.", e);
         }
-
-        Iterator            it = recipientInfs.iterator();
-
-        while (it.hasNext())
-        {
-            RecipientInf            recipient = (RecipientInf)it.next();
-
-            try
-            {
-                recipientInfos.add(recipient.toRecipientInfo(encKey, provider));
-            }
-            catch (IOException e)
-            {
-                throw new CMSException("encoding error.", e);
-            }
-            catch (InvalidKeyException e)
-            {
-                throw new CMSException("key inappropriate for algorithm.", e);
-            }
-            catch (GeneralSecurityException e)
-            {
-                throw new CMSException("error making encrypted content.", e);
-            }
-        }
-
-        EncryptedContentInfo  eci = new EncryptedContentInfo(
-                                 PKCSObjectIdentifiers.data,
-                                 encAlgId, 
-                                 encContent);
-
-        ContentInfo contentInfo = new ContentInfo(
-                PKCSObjectIdentifiers.envelopedData,
-                new EnvelopedData(null, new DERSet(recipientInfos), eci, null));
-
-        return new CMSEnvelopedData(contentInfo);
     }
     
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
+     * @throws IOException 
      */
-    public CMSEnvelopedData generate(
-        CMSProcessable  content,
+    public OutputStream open(
+        OutputStream    out,
         String          encryptionOID,
         String          provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException
     {
         try
         {
             KeyGenerator                keyGen = KeyGenerator.getInstance(
                                                     encryptionOID, provider);
                                                     
-            return generate(content, encryptionOID, keyGen, provider);
+            return open(out, encryptionOID, keyGen, provider);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -422,13 +461,14 @@ public class CMSEnvelopedDataGenerator
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
+     * @throws IOException 
      */
-    public CMSEnvelopedData generate(
-        CMSProcessable  content,
+    public OutputStream open(
+        OutputStream    out,
         String          encryptionOID,
         int             keySize,
         String          provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException
     {
         try
         {
@@ -437,11 +477,51 @@ public class CMSEnvelopedDataGenerator
             
             keyGen.init(keySize);
 
-            return generate(content, encryptionOID, keyGen, provider);
+            return open(out, encryptionOID, keyGen, provider);
         }
         catch (NoSuchAlgorithmException e)
         {
             throw new CMSException("can't find key generation algorithm.", e);
+        }
+    }
+    
+    private class CmsEnvelopedDataOutputStream
+        extends OutputStream
+    {
+        private CipherOutputStream   _out;
+        private BerSequenceGenerator _cGen;
+        private BerSequenceGenerator _envGen;
+        private BerSequenceGenerator _eiGen;
+    
+        public CmsEnvelopedDataOutputStream(
+            CipherOutputStream   out,
+            BerSequenceGenerator cGen, 
+            BerSequenceGenerator envGen,
+            BerSequenceGenerator eiGen)
+        {
+            _out = out;
+            _cGen = cGen;
+            _envGen = envGen;
+            _eiGen = eiGen;
+        }
+    
+        public void write(
+            int b)
+            throws IOException
+        {
+            _out.write(b);
+        }
+        
+        public void close()
+            throws IOException
+        {
+            _out.close();
+            _eiGen.close();
+            
+            // [TODO] unprotected attributes go here
+    
+            _envGen.close();
+            _cGen.close();
         }
     }
 }

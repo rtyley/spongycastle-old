@@ -15,6 +15,7 @@ import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.EncryptedContentInfo;
 import org.bouncycastle.asn1.cms.EnvelopedData;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
@@ -31,6 +32,7 @@ public class CMSEnvelopedData
     
     private AlgorithmIdentifier    encAlg;
     private ASN1Set                unprotectedAttributes;
+    private AlgorithmIdentifier _encAlg;
 
     private static ContentInfo readContentInfo(
         InputStream envelopedData)
@@ -71,6 +73,13 @@ public class CMSEnvelopedData
         EnvelopedData  envData = EnvelopedData.getInstance(contentInfo.getContent());
 
         //
+        // read the encrypted content info
+        //
+        EncryptedContentInfo encInfo = envData.getEncryptedContentInfo();
+        
+        this._encAlg = encInfo.getContentEncryptionAlgorithm();
+        
+        //
         // load the RecepientInfoStore
         //
         ASN1Set     s = envData.getRecipientInfos();
@@ -83,12 +92,12 @@ public class CMSEnvelopedData
             if (info.getInfo() instanceof KeyTransRecipientInfo)
             {
                 infos.add(new KeyTransRecipientInformation(
-                            (KeyTransRecipientInfo)info.getInfo(), envData.getEncryptedContentInfo()));
+                            (KeyTransRecipientInfo)info.getInfo(), _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
             }
             else if (info.getInfo() instanceof KEKRecipientInfo)
             {
                 infos.add(new KEKRecipientInformation(
-                            (KEKRecipientInfo)info.getInfo(), envData.getEncryptedContentInfo()));
+                            (KEKRecipientInfo)info.getInfo(), _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
             }
         }
 

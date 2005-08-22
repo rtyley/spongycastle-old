@@ -1,5 +1,6 @@
 package org.bouncycastle.cms;
 
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -8,11 +9,9 @@ import java.security.NoSuchProviderException;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
-import org.bouncycastle.asn1.cms.EncryptedContentInfo;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -21,39 +20,41 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class KEKRecipientInformation
     extends RecipientInformation
 {
-    private KEKRecipientInfo        info;
+    private KEKRecipientInfo      _info;
+    private AlgorithmIdentifier   _encAlg;
 
     public KEKRecipientInformation(
         KEKRecipientInfo        info,
-        EncryptedContentInfo    data)
+        AlgorithmIdentifier     encAlg,
+        InputStream             data)
     {
-        super(AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
+        super(encAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
         
-        this.info = info;
-        this.rid = new RecipientId();
+        this._info = info;
+        this._encAlg = encAlg;
+        this._rid = new RecipientId();
         
         KEKIdentifier       kekId = info.getKekid();
 
-        rid.setKeyIdentifier(kekId.getKeyIdentifier().getOctets());
+        _rid.setKeyIdentifier(kekId.getKeyIdentifier().getOctets());
     }
 
     /**
-     * decrypt the content and return it as a byte array.
+     * decrypt the content and return an input stream.
      */
-    public byte[] getContent(
+    public CMSTypedStream getContentStream(
         Key      key,
         String   prov)
         throws CMSException, NoSuchProviderException
     {
         try
         {
-            byte[]              encryptedKey = info.getEncryptedKey().getOctets();
-            Cipher              keyCipher = Cipher.getInstance(keyEncAlg.getObjectId().getId(), prov);
+            byte[]              encryptedKey = _info.getEncryptedKey().getOctets();
+            Cipher              keyCipher = Cipher.getInstance(_keyEncAlg.getObjectId().getId(), prov);
 
             keyCipher.init(Cipher.UNWRAP_MODE, key);
 
-            byte[]              enc = data.getEncryptedContent().getOctets();
-            AlgorithmIdentifier aid = data.getContentEncryptionAlgorithm();
+            AlgorithmIdentifier aid = _encAlg;
             String              alg = aid.getObjectId().getId();
             Key                 sKey = keyCipher.unwrap(
                                         encryptedKey, alg, Cipher.SECRET_KEY);

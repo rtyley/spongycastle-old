@@ -1,7 +1,9 @@
 package org.bouncycastle.cms.test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -18,21 +20,19 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
-public class CMSTestUtil {
+public class CMSTestUtil
+{
     
     public static SecureRandom     rand;
     public static KeyPairGenerator kpg;
@@ -49,6 +49,8 @@ public class CMSTestUtil {
     
     static {
         try {
+            java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
             rand = new SecureRandom();
 
             kpg  = KeyPairGenerator.getInstance("RSA", "BC");
@@ -80,7 +82,7 @@ public class CMSTestUtil {
             serialNumber = new BigInteger("1");
         }
         catch(Exception ex) {
-            log(ex);
+            ex.printStackTrace();
         }
     }
     
@@ -107,47 +109,59 @@ public class CMSTestUtil {
         return buf.toString();
     }
     
-    public static KeyPair makeKeyPair() {
+    public static KeyPair makeKeyPair()
+    {
         return kpg.generateKeyPair();
     }
-    
-    public static KeyPair makeGostKeyPair() {
+
+    public static KeyPair makeGostKeyPair()
+    {
         return gostKpg.generateKeyPair();
     }
-    
-    public static SecretKey makeDesede128Key() {
+
+    public static SecretKey makeDesede128Key()
+    {
         return desede128kg.generateKey();
     }
-    
-    public static SecretKey makeAES192Key() {
+
+    public static SecretKey makeAES192Key()
+    {
         return aes192kg.generateKey();
     }
 
-    public static SecretKey makeDesede192Key() {
+    public static SecretKey makeDesede192Key()
+    {
         return desede192kg.generateKey();
     }
-    
-    public static SecretKey makeRC240Key() {
+
+    public static SecretKey makeRC240Key()
+    {
         return rc240kg.generateKey();
     }
-    
-    public static SecretKey makeRC264Key() {
+
+    public static SecretKey makeRC264Key()
+    {
         return rc264kg.generateKey();
     }
-    
-    public static SecretKey makeRC2128Key() {
+
+    public static SecretKey makeRC2128Key()
+    {
         return rc2128kg.generateKey();
     }
 
-    public static X509Certificate makeCertificate(KeyPair _subKP, String _subDN, KeyPair _issKP, String _issDN) 
-        throws GeneralSecurityException, IOException {
-        
+    public static X509Certificate makeCertificate(KeyPair _subKP,
+            String _subDN, KeyPair _issKP, String _issDN)
+            throws GeneralSecurityException, IOException
+    {
+
         return makeCertificate(_subKP, _subDN, _issKP, _issDN, false);
     }
-    
-    public static X509Certificate makeCACertificate(KeyPair _subKP, String _subDN, KeyPair _issKP, String _issDN) 
-        throws GeneralSecurityException, IOException {
-        
+
+    public static X509Certificate makeCACertificate(KeyPair _subKP,
+            String _subDN, KeyPair _issKP, String _issDN)
+            throws GeneralSecurityException, IOException
+    {
+
         return makeCertificate(_subKP, _subDN, _issKP, _issDN, true);
     }
     
@@ -209,55 +223,50 @@ public class CMSTestUtil {
      *  
      */ 
     
-    private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey _pubKey) 
-        throws IOException {
-        
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey.getEncoded());
+    private static AuthorityKeyIdentifier createAuthorityKeyId(
+        PublicKey _pubKey)
+        throws IOException
+    {
+
+        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
+                .getEncoded());
         SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(_bais).readObject());
+                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
 
         return new AuthorityKeyIdentifier(_info);
     }
 
-    private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey _pubKey, X509Name _name, int _sNumber) 
-        throws IOException {
-        
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey.getEncoded());
+    private static SubjectKeyIdentifier createSubjectKeyId(
+        PublicKey _pubKey)
+        throws IOException
+    {
+
+        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
+                .getEncoded());
         SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(_bais).readObject());
-
-        GeneralName             _genName = new GeneralName(_name);
-
-        return new AuthorityKeyIdentifier(
-            _info, new GeneralNames(new DERSequence(_genName)), BigInteger.valueOf(_sNumber));
-
-    }
-    
-    private static SubjectKeyIdentifier createSubjectKeyId(PublicKey _pubKey) 
-        throws IOException {
-        
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey.getEncoded());
-        SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(_bais).readObject());
+                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
         return new SubjectKeyIdentifier(_info);
     }
 
-    private static BigInteger allocateSerialNumber() {
+    private static BigInteger allocateSerialNumber()
+    {
         BigInteger _tmp = serialNumber;
         serialNumber = serialNumber.add(BigInteger.ONE);
         return _tmp;
     }
     
-    
-    public static void log(Exception _ex) {
-        if(DEBUG) {
-            _ex.printStackTrace();
+    public static byte[] streamToByteArray(
+        InputStream in) 
+        throws IOException
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        int ch;
+        
+        while ((ch = in.read()) >= 0)
+        {
+            bOut.write(ch);
         }
-    }
-
-    public static void log(String _msg) {
-        if(DEBUG) {
-            System.out.println(_msg);
-        }
+        
+        return bOut.toByteArray();
     }
 }
