@@ -84,6 +84,52 @@ public class PGPCompressedDataGenerator
     }
     
     /**
+     * Return an outputstream which will compress the data as it is written
+     * to it. The stream will be written out in chunks according to the size of the
+     * passed in buffer.
+     * <p>
+     * <b>Note</b>: if the buffer is not a power of 2 in length only the largest power of 2
+     * bytes worth of the buffer will be used.
+     * </p>
+     * <p>
+     * <b>Note</b>: using this may break compatability with RFC 1991 compliant tools. Only recent OpenPGP
+     * implementations are capable of accepting these streams.
+     * </p>
+     * 
+     * @param out
+     * @param buffer the buffer to use.
+     * @return OutputStream
+     * @throws IOException
+     * @throws PGPException
+     */
+    public OutputStream open(
+        OutputStream    out,
+        byte[]          buffer)
+        throws IOException, PGPException
+    {
+        this.out = out;
+
+        if (algorithm == PGPCompressedData.ZIP)
+        {
+            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
+            
+            pkOut.write(PGPCompressedData.ZIP);
+
+            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression, true));
+        }
+        else
+        {
+            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
+            
+            pkOut.write(PGPCompressedData.ZLIB);
+            
+            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression));
+        }
+        
+        return dOut;
+    }
+    
+    /**
      * Close the compressed object.
      * 
      * @throws IOException
