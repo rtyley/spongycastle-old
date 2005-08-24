@@ -855,15 +855,105 @@ public class PGPRSATest
             
             pgpPrivKey = secretKey.extractPrivateKey(pgp8Pass, "BC");
 
+            //
+            // other sig tests
+            //
+            TestResult res = testSig(HashAlgorithmTags.SHA256, secretKey.getPublicKey(), pgpPrivKey);
+            if (!res.isSuccessful())
+            {
+                return res;
+            }
+            
+            res = testSig(HashAlgorithmTags.SHA384, secretKey.getPublicKey(), pgpPrivKey);
+            if (!res.isSuccessful())
+            {
+                return res;
+            }
+            
+            res = testSig(HashAlgorithmTags.SHA512, secretKey.getPublicKey(), pgpPrivKey);
+            if (!res.isSuccessful())
+            {
+                return res;
+            }
+            
             return fingerPrintTest();
         }
         catch (Exception e)
         {    
-            e.printStackTrace();
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
+            return new SimpleTestResult(false, getName() + ": exception - " + e.toString(), e);
         }
     }
 
+    private TestResult testSig(
+        int           hashAlgorithm,
+        PGPPublicKey  pubKey,
+        PGPPrivateKey privKey)
+        throws Exception
+    {            
+        String                data = "hello world!";  
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ByteArrayInputStream  testIn = new ByteArrayInputStream(data.getBytes());
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, hashAlgorithm, "BC");
+    
+        sGen.initSign(PGPSignature.BINARY_DOCUMENT, privKey);
+    
+        PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator(
+                                                    PGPCompressedData.ZIP);
+    
+        BCPGOutputStream            bcOut = new BCPGOutputStream(cGen.open(bOut));
+    
+        sGen.generateOnePassVersion(false).encode(bcOut);
+    
+        PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator();
+        OutputStream                    lOut = lGen.open(bcOut, PGPLiteralData.BINARY, "_CONSOLE", data.getBytes().length, new Date());
+        
+        int ch;
+        while ((ch = testIn.read()) >= 0)
+        {
+            lOut.write(ch);
+            sGen.update((byte)ch);
+        }
+    
+        lGen.close();
+    
+        sGen.generate().encode(bcOut);
+    
+        cGen.close();
+    
+        //
+        // verify generated signature
+        //
+        PGPObjectFactory pgpFact = new PGPObjectFactory(bOut.toByteArray());
+    
+        PGPCompressedData c1 = (PGPCompressedData)pgpFact.nextObject();
+    
+        pgpFact = new PGPObjectFactory(c1.getDataStream());
+        
+        PGPOnePassSignatureList p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
+        
+        PGPOnePassSignature ops = p1.get(0);
+        
+        PGPLiteralData p2 = (PGPLiteralData)pgpFact.nextObject();
+    
+        InputStream dIn = p2.getInputStream();
+    
+        ops.initVerify(pubKey, "BC");
+        
+        while ((ch = dIn.read()) >= 0)
+        {
+            ops.update((byte)ch);
+        }
+    
+        PGPSignatureList p3 = (PGPSignatureList)pgpFact.nextObject();
+    
+        if (!ops.verify(p3.get(0)))
+        {
+            return new SimpleTestResult(false, getName() + ": Failed generated signature check - " + hashAlgorithm);
+        }
+        
+        return new SimpleTestResult(true, getName() + ": Okay");
+    }
+    
     public String getName()
     {
         return "PGPRSATest";
