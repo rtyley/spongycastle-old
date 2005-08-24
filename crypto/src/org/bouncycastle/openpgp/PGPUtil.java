@@ -67,6 +67,12 @@ public class PGPUtil
             return "MD5";
         case HashAlgorithmTags.RIPEMD160:
             return "RIPEMD160";
+        case HashAlgorithmTags.SHA256:
+            return "SHA256";
+        case HashAlgorithmTags.SHA384:
+            return "SHA384";
+        case HashAlgorithmTags.SHA512:
+            return "SHA512";
         default:
             throw new PGPException("unknown hash algorithm tag in getDigestName: " + hashAlgorithm);
         }
