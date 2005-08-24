@@ -31,7 +31,6 @@ public class PGPEncryptedDataGenerator
 {
     private BCPGOutputStream     pOut;
     private CipherOutputStream   cOut;
-    private OutputStream         out;
     private Cipher               c;
     private boolean              withIntegrityPacket = false;
     private boolean              oldFormat = false;
@@ -106,7 +105,6 @@ public class PGPEncryptedDataGenerator
             byte[]    sessionInfo) 
             throws Exception
         {
-            String            cName = PGPUtil.getSymmetricCipherName(encAlgorithm);
             Cipher            c;
 
             switch (pubKey.getAlgorithm())
@@ -270,8 +268,6 @@ public class PGPEncryptedDataGenerator
         
         rand.nextBytes(iv);
         
-        S2K            s2k = new S2K(HashAlgorithmTags.SHA1, iv, 0x60);
-        
         methods.add(new PubMethod(key));
     }
     
@@ -309,7 +305,6 @@ public class PGPEncryptedDataGenerator
         Key             key = null;
         
         pOut = new BCPGOutputStream(out);
-        this.out = out;
         
         if (methods.size() == 0)
         {
