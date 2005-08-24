@@ -35,6 +35,9 @@ public class PGPCompressionTest implements Test
     {
         try
         {
+            //
+            // standard
+            //
             ByteArrayOutputStream bOut = new ByteArrayOutputStream();
             PGPCompressedDataGenerator cPacket = new PGPCompressedDataGenerator(
                     PGPCompressedData.ZIP);
@@ -45,9 +48,6 @@ public class PGPCompressionTest implements Test
 
             cPacket.close();
 
-            //
-            // test signature message
-            //
             PGPObjectFactory pgpFact = new PGPObjectFactory(bOut.toByteArray());
             PGPCompressedData c1 = (PGPCompressedData)pgpFact.nextObject();
             InputStream pIn = c1.getDataStream();
@@ -65,6 +65,35 @@ public class PGPCompressionTest implements Test
                 return new SimpleTestResult(false, getName() + ": compression test failed");
             }
 
+            //
+            // new style
+            //
+            bOut = new ByteArrayOutputStream();
+            cPacket = new PGPCompressedDataGenerator(
+                    PGPCompressedData.ZIP);
+
+            out = cPacket.open(bOut, new byte[4]);
+
+            out.write("hello world! !dlrow olleh".getBytes());
+
+            cPacket.close();
+
+            pgpFact = new PGPObjectFactory(bOut.toByteArray());
+            c1 = (PGPCompressedData)pgpFact.nextObject();
+            pIn = c1.getDataStream();
+
+            bOut.reset();
+
+            while ((ch = pIn.read()) >= 0)
+            {
+                bOut.write(ch);
+            }
+
+            if (notEqual(bOut.toByteArray(), "hello world! !dlrow olleh".getBytes()))
+            {
+                return new SimpleTestResult(false, getName() + ": compression test failed");
+            }
+            
             return new SimpleTestResult(true, getName() + ": Okay");
         }
         catch (Exception e)
