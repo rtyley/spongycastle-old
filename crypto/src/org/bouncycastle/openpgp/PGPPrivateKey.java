@@ -9,7 +9,6 @@ import java.security.PrivateKey;
 public class PGPPrivateKey
 {
     private long          keyID;
-    private byte[]        fingerPrint;
     private PrivateKey    privateKey;
     
     PGPPrivateKey(
