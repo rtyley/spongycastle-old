@@ -344,9 +344,14 @@ public class CMSSignedDataGenerator
                 dig = MessageDigest.getInstance(this.getDigestAlgName());
             }                
 
-            content.write(new DigOutputStream(dig));
+            byte[]      hash = null;
 
-            byte[]      hash = dig.digest();
+            if (content != null)
+            {
+                content.write(new DigOutputStream(dig));
+
+                hash = dig.digest();
+            }
 
             AttributeTable   attr = this.getSignedAttributes();
 
@@ -374,8 +379,16 @@ public class CMSSignedDataGenerator
                     v.add(attr.get(CMSAttributes.signingTime));
                 }
 
-                v.add(new Attribute(CMSAttributes.messageDigest,
+                if (hash != null)
+                {
+                    v.add(new Attribute(CMSAttributes.messageDigest,
                         new DERSet(new DEROctetString(hash))));
+                }
+                else
+                {
+                    v.add(new Attribute(CMSAttributes.messageDigest,
+                        new DERSet(new DERNull())));
+                }
                 
                 Hashtable           ats = attr.toHashtable();
                 
@@ -406,9 +419,16 @@ public class CMSSignedDataGenerator
                         CMSAttributes.signingTime,
                             new DERSet(new DERUTCTime(new Date()))));
 
-                    v.add(new Attribute(
-                        CMSAttributes.messageDigest,
+                    if (hash != null)
+                    {
+                        v.add(new Attribute(CMSAttributes.messageDigest,
                             new DERSet(new DEROctetString(hash))));
+                    }
+                    else
+                    {
+                        v.add(new Attribute(CMSAttributes.messageDigest,
+                            new DERSet(new DERNull())));
+                    }
 
                     signedAttr = new DERSet(v);
                 }
@@ -435,7 +455,7 @@ public class CMSSignedDataGenerator
             //
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
  
-            if(signedAttr != null) 
+            if (signedAttr != null) 
             {
                 DEROutputStream         dOut = new DEROutputStream(bOut);
                 dOut.writeObject(signedAttr);
