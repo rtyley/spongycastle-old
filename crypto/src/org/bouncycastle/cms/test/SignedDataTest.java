@@ -816,4 +816,52 @@ public class SignedDataTest
             fail();
         }
     }
+    
+    public void testNullContentWithSigner()
+    {
+        try
+        {
+            ArrayList           certList = new ArrayList();
+
+            certList.add(_origCert);
+            certList.add(_signCert);
+
+            CertStore           certs = CertStore.getInstance("Collection",
+                            new CollectionCertStoreParameters(certList), "BC");
+
+            CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+            gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+
+            gen.addCertificatesAndCRLs(certs);
+
+            CMSSignedData s = gen.generate(null, false, "BC");
+
+            ByteArrayInputStream bIn = new ByteArrayInputStream(s.getEncoded());
+            ASN1InputStream      aIn = new ASN1InputStream(bIn);
+            
+            s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
+
+            certs = s.getCertificatesAndCRLs("Collection", "BC");
+
+            SignerInformationStore  signers = s.getSignerInfos();
+            Collection              c = signers.getSigners();
+            Iterator                it = c.iterator();
+
+            while (it.hasNext())
+            {
+                SignerInformation   signer = (SignerInformation)it.next();
+                Collection          certCollection = certs.getCertificates(signer.getSID());
+
+                Iterator        certIt = certCollection.iterator();
+                X509Certificate cert = (X509Certificate)certIt.next();
+
+                assertEquals(true, signer.verify(cert, "BC"));
+            }
+        }
+        catch(Exception ex)
+        {
+            fail();
+        }
+    }
 }
