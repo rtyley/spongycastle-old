@@ -20,6 +20,8 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
@@ -353,11 +355,6 @@ public class SignerInformation
         {
             sig.initVerify(key);
             
-            if (content == null && _digest == null)
-            {
-                throw new IllegalArgumentException("no content specified for signature verification.");
-            }
-
             if (signedAttributes == null)
             {
                 content.write(
@@ -394,11 +391,23 @@ public class SignerInformation
                     throw new SignatureException("no content type id found in signed attributes");
                 }
 
-                byte[]  signedHash = ((ASN1OctetString)dig.getAttrValues().getObjectAt(0)).getOctets();
-
-                if (!MessageDigest.isEqual(hash, signedHash))
+                DERObject hashObj = dig.getAttrValues().getObjectAt(0).getDERObject();
+                
+                if (hashObj instanceof ASN1OctetString)
                 {
-                    throw new SignatureException("content hash found in signed attributes different");
+                    byte[]  signedHash = ((ASN1OctetString)hashObj).getOctets();
+    
+                    if (!MessageDigest.isEqual(hash, signedHash))
+                    {
+                        throw new SignatureException("content hash found in signed attributes different");
+                    }
+                }
+                else if (hashObj instanceof DERNull)
+                {
+                    if (hash != null)
+                    {
+                        throw new SignatureException("NULL hash found in signed attributes when one expected");
+                    }
                 }
 
                 DERObjectIdentifier  typeOID = (DERObjectIdentifier)type.getAttrValues().getObjectAt(0);

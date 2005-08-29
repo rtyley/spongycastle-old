@@ -14,10 +14,6 @@ import java.security.SignatureException;
 import java.security.cert.CRLException;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CertStoreException;
-import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
-import org.bouncycastle.mail.smime.SMIMEException;
-import org.bouncycastle.util.encoders.Base64;
-
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -45,8 +41,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -307,7 +302,8 @@ public class CMSSignedDataGenerator
         SignerInfo toSignerInfo(
             DERObjectIdentifier contentType,
             CMSProcessable      content,
-            String              sigProvider)
+            String              sigProvider,
+            boolean             addDefaultAttributes)
             throws IOException, SignatureException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, CertificateEncodingException, CMSException
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
@@ -333,7 +329,14 @@ public class CMSSignedDataGenerator
             if(sigProvider != null)
             {
                 sig = Signature.getInstance(this.getDigestAlgName() + "with" + this.getEncryptionAlgName(), sigProvider);
-                dig = MessageDigest.getInstance(this.getDigestAlgName(), sigProvider);
+                try
+                {
+                    dig = MessageDigest.getInstance(this.getDigestAlgName(), sigProvider);
+                }
+                catch (NoSuchAlgorithmException e)
+                {
+                    dig = MessageDigest.getInstance(this.getDigestAlgName());
+                }
             }
             else
             {
@@ -341,9 +344,14 @@ public class CMSSignedDataGenerator
                 dig = MessageDigest.getInstance(this.getDigestAlgName());
             }                
 
-            content.write(new DigOutputStream(dig));
+            byte[]      hash = null;
 
-            byte[]      hash = dig.digest();
+            if (content != null)
+            {
+                content.write(new DigOutputStream(dig));
+
+                hash = dig.digest();
+            }
 
             AttributeTable   attr = this.getSignedAttributes();
 
@@ -371,41 +379,59 @@ public class CMSSignedDataGenerator
                     v.add(attr.get(CMSAttributes.signingTime));
                 }
 
-                v.add(new Attribute(CMSAttributes.messageDigest,
-                                       new DERSet(new DEROctetString(hash))));
-
+                if (hash != null)
+                {
+                    v.add(new Attribute(CMSAttributes.messageDigest,
+                        new DERSet(new DEROctetString(hash))));
+                }
+                else
+                {
+                    v.add(new Attribute(CMSAttributes.messageDigest,
+                        new DERSet(new DERNull())));
+                }
+                
                 Hashtable           ats = attr.toHashtable();
-
+                
                 ats.remove(CMSAttributes.contentType);
                 ats.remove(CMSAttributes.signingTime);
                 ats.remove(CMSAttributes.messageDigest);
-
+                
                 Iterator            it = ats.values().iterator();
-
+                
                 while (it.hasNext())
                 {
                     v.add(Attribute.getInstance(it.next()));
                 }
-
+                
                 signedAttr = new DERSet(v);
             }
             else
             {
-                ASN1EncodableVector  v = new ASN1EncodableVector();
+                if (addDefaultAttributes) 
+                {
+                    ASN1EncodableVector  v = new ASN1EncodableVector();
 
-                v.add(new Attribute(
+                    v.add(new Attribute(
                         CMSAttributes.contentType,
                             new DERSet(contentType)));
 
-                v.add(new Attribute(
+                    v.add(new Attribute(
                         CMSAttributes.signingTime,
                             new DERSet(new DERUTCTime(new Date()))));
 
-                v.add(new Attribute(
-                        CMSAttributes.messageDigest,
+                    if (hash != null)
+                    {
+                        v.add(new Attribute(CMSAttributes.messageDigest,
                             new DERSet(new DEROctetString(hash))));
+                    }
+                    else
+                    {
+                        v.add(new Attribute(CMSAttributes.messageDigest,
+                            new DERSet(new DERNull())));
+                    }
 
-                signedAttr = new DERSet(v);
+                    signedAttr = new DERSet(v);
+                }
             }
 
             attr = this.getUnsignedAttributes();
@@ -428,10 +454,16 @@ public class CMSSignedDataGenerator
             // sig must be composed from the DER encoding.
             //
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(signedAttr);
-
+ 
+            if (signedAttr != null) 
+            {
+                DEROutputStream         dOut = new DEROutputStream(bOut);
+                dOut.writeObject(signedAttr);
+            } 
+            else
+            {
+                content.write(bOut);
+            }
             sig.initSign(key);
 
             sig.update(bOut.toByteArray());
@@ -457,7 +489,7 @@ public class CMSSignedDataGenerator
     }
 
     private String getEncOID(
-            PrivateKey key,
+        PrivateKey key,
         String     digestOID)
     {
         String encOID = null;
@@ -641,10 +673,27 @@ public class CMSSignedDataGenerator
      * is set according to the OID represented by the string signedContentType.
      */
     public CMSSignedData generate(
+        String          signedContentType,
+        CMSProcessable  content,
+        boolean         encapsulate,
+        String          sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        return generate(signedContentType, content, encapsulate, sigProvider, true);
+    }
+    
+    /**
+     * Similar method to the other generate methods. The additional argument
+     * addDefaultAttributes indicates whether or not a default set of signed attributes
+     * need to be added automatically. If the argument is set to false, no
+     * attributes will get added at all. 
+     */
+    public CMSSignedData generate(
         String                    signedContentType,
-        CMSProcessable      content,
-        boolean                 encapsulate,
-        String                      sigProvider)
+        CMSProcessable          content,
+        boolean                     encapsulate,
+        String                  sigProvider,
+        boolean                    addDefaultAttributes)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
@@ -694,7 +743,7 @@ public class CMSSignedDataGenerator
 
                 digestAlgs.add(digAlgId);
 
-                signerInfos.add(signer.toSignerInfo(contentTypeOID, content, sigProvider));
+                signerInfos.add(signer.toSignerInfo(contentTypeOID, content, sigProvider, addDefaultAttributes));
             }
             catch (IOException e)
             {
