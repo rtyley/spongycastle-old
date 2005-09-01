@@ -528,6 +528,16 @@ public class PKCS12StoreTest
             }
 
             //
+            // cert chain test
+            //
+            store.setCertificateEntry("testCert", ch[2]);
+            
+            if (store.getCertificateChain("testCert") != null)
+            {
+                return new SimpleTestResult(false, getName() + ": Failed null chain test.");
+            }
+            
+            //
             // UTF 8 single cert test
             //
             store = KeyStore.getInstance("PKCS12", "BC");
