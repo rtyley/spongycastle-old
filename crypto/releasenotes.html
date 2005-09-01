@@ -33,6 +33,7 @@ ASN.1 encoding. This has been fixed.
 <li>PGPSecretKey.copyWithNewPassword() would not handle the NULL algorithm. This has been fixed.
 <li>Directly accessing the dates on an X.509 Attribute Certificate constructed from an InputStream would return null, not the date objects. This has been fixed.
 <li>KEKIdentifier would not handle OtherKeyAttribute objects correctly. This has been fixed.
+<li>GetCertificateChain on a PKCS12 keystore would return a single certificate chain rather than null if the alias passed in represented a certificate not a key. This has been fixed.
 </ul>
 <h3>2.2.3 Additional Features and Functionality</h3>
 <ul>
