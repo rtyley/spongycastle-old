@@ -335,6 +335,11 @@ public class JDKPKCS12KeyStore
             throw new IllegalArgumentException("null alias passed to getCertificateChain.");
         }
         
+        if (!engineIsKeyEntry(alias))
+        {
+            return null;
+        }
+        
         Certificate c = engineGetCertificate(alias);
 
         if (c != null)
