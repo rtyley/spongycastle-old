@@ -73,19 +73,18 @@ public class HexEncoder
      * @return the number of bytes produced.
      */
     public int decode(
-        byte[]                data,
-        int                    off,
-        int                    length,
+        byte[]          data,
+        int             off,
+        int             length,
         OutputStream    out)
         throws IOException
     {
-        byte[]    bytes;
         byte    b1, b2;
-        int        outLen = 0;
+        int     outLen = 0;
         
-        int        end = off + length;
+        int     end = off + length;
         
-        while (end > 0)
+        while (end > off)
         {
             if (!ignore((char)data[end - 1]))
             {
@@ -127,15 +126,14 @@ public class HexEncoder
      * @return the number of bytes produced.
      */
     public int decode(
-        String                data,
+        String          data,
         OutputStream    out)
         throws IOException
     {
-        byte[]    bytes;
-        byte    b1, b2, b3, b4;
-        int        length = 0;
+        byte    b1, b2;
+        int     length = 0;
         
-        int        end = data.length();
+        int     end = data.length();
         
         while (end > 0)
         {
