@@ -205,6 +205,7 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_wrap, "AESWRAP");
         
         put("Cipher.SERPENT", "org.bouncycastle.jce.provider.JCEBlockCipher$Serpent");
+        put("Cipher.CAMELLIA", "org.bouncycastle.jce.provider.JCEBlockCipher$Camellia");
         put("Cipher.CAST5", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST5");
         put("Cipher.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST5CBC");
         put("Cipher.CAST6", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST6");
@@ -394,6 +395,7 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_wrap, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES192");
         put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_wrap, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES256");
         put("KeyGenerator.SERPENT", "org.bouncycastle.jce.provider.JCEKeyGenerator$Serpent");
+        put("KeyGenerator.CAMELLIA", "org.bouncycastle.jce.provider.JCEKeyGenerator$Camellia");
         put("KeyGenerator.CAST5", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST5");
         put("KeyGenerator.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST5");
         put("KeyGenerator.CAST6", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST6");

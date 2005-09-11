@@ -912,6 +912,18 @@ public class JCEBlockCipher extends WrapCipherSpi
     }
 
     /**
+     * Camellia
+     */
+    static public class Camellia
+        extends JCEBlockCipher
+    {
+        public Camellia()
+        {
+            super(new CamelliaEngine());
+        }
+    }
+    
+    /**
      * CAST5
      */
     static public class CAST5
