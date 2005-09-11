@@ -353,6 +353,18 @@ public class JCEKeyGenerator
     }
 
     /**
+     * Camellia
+     */
+    public static class Camellia
+        extends JCEKeyGenerator
+    {
+        public Camellia()
+        {
+            super("Camellia", 256, new CipherKeyGenerator());
+        }
+    }
+    
+    /**
      * CAST5
      */
     public static class CAST5
