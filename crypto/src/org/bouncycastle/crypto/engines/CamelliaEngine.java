@@ -6,7 +6,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.params.KeyParameter;
 
 /**
- * Camellia - based on RFC 3370.
+ * Camellia - based on RFC 3713.
  */
 public class CamelliaEngine implements BlockCipher
 {
