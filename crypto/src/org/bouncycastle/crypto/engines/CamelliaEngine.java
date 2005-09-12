@@ -298,7 +298,7 @@ public class CamelliaEngine implements BlockCipher
 
     public void reset()
     {
-        // TODO Auto-generated method stub
+        // nothing
 
     }
 
@@ -393,37 +393,32 @@ public class CamelliaEngine implements BlockCipher
         long ke)
     {
         long x;
-        byte t1, t2, t3, t4, t5, t6, t7, t8;
-        byte y1, y2, y3, y4, y5, y6, y7, y8;
+        int  a, b;
+        int  t1, t2, t3, t4, t5, t6, t7, t8;
+        int  y1, y2, y3, y4, y5, y6, y7, y8;
         
         x  = in ^ ke;
         
-        t1 = (byte)(x >> 56);
-        t2 = (byte)(x >> 48);
-        t3 = (byte)(x >> 40);
-        t4 = (byte)(x >> 32);
-        t5 = (byte)(x >> 24);
-        t6 = (byte)(x >> 16);
-        t7 = (byte)(x >>  8);
-        t8 = (byte)x;
+        a = (int)(x >> 32);
+        b = (int)x;
         
-        t1 = SBOX1[t1 & 0xff];
-        t2 = SBOX2[t2 & 0xff];
-        t3 = SBOX3[t3 & 0xff];
-        t4 = SBOX4[t4 & 0xff];
-        t5 = SBOX2[t5 & 0xff];
-        t6 = SBOX3[t6 & 0xff];
-        t7 = SBOX4[t7 & 0xff];
-        t8 = SBOX1[t8 & 0xff];
-        
-        y1 = (byte)(t1 ^ t3 ^ t4 ^ t6 ^ t7 ^ t8);
-        y2 = (byte)(t1 ^ t2 ^ t4 ^ t5 ^ t7 ^ t8);
-        y3 = (byte)(t1 ^ t2 ^ t3 ^ t5 ^ t6 ^ t8);
-        y4 = (byte)(t2 ^ t3 ^ t4 ^ t5 ^ t6 ^ t7);
-        y5 = (byte)(t1 ^ t2 ^ t6 ^ t7 ^ t8);
-        y6 = (byte)(t2 ^ t3 ^ t5 ^ t7 ^ t8);
-        y7 = (byte)(t3 ^ t4 ^ t5 ^ t6 ^ t8);
-        y8 = (byte)(t1 ^ t4 ^ t5 ^ t6 ^ t7);
+        t1 = SBOX1[(a >> 24) & 0xff];
+        t2 = SBOX2[(a >> 16) & 0xff];
+        t3 = SBOX3[(a >>  8) & 0xff];
+        t4 = SBOX4[a & 0xff];
+        t5 = SBOX2[(b >> 24) & 0xff];
+        t6 = SBOX3[(b >> 16) & 0xff];
+        t7 = SBOX4[(b >>  8) & 0xff];
+        t8 = SBOX1[b & 0xff];
+
+        y1 = (t1 ^ t3 ^ t4 ^ t6 ^ t7 ^ t8);
+        y2 = (t1 ^ t2 ^ t4 ^ t5 ^ t7 ^ t8);
+        y3 = (t1 ^ t2 ^ t3 ^ t5 ^ t6 ^ t8);
+        y4 = (t2 ^ t3 ^ t4 ^ t5 ^ t6 ^ t7);
+        y5 = (t1 ^ t2 ^ t6 ^ t7 ^ t8);
+        y6 = (t2 ^ t3 ^ t5 ^ t7 ^ t8);
+        y7 = (t3 ^ t4 ^ t5 ^ t6 ^ t8);
+        y8 = (t1 ^ t4 ^ t5 ^ t6 ^ t7);
         
         return ((long)y1 << 56) | (((long)y2 & MASK8) << 48) | (((long)y3 & MASK8) << 40) 
                 | (((long)y4 & MASK8) << 32) | (((long)y5 & MASK8) << 24) | (((long)y6 & MASK8) << 16) 
