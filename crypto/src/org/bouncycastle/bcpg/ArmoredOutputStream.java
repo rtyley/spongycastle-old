@@ -343,47 +343,53 @@ public class ArmoredOutputStream
     public void close()
         throws IOException
     {
-        encode(out, buf, bufPtr);
-    
-        for (int i = 0; i != nl.length(); i++)
+        if (type != null)
         {
-            out.write(nl.charAt(i));
+            encode(out, buf, bufPtr);
+        
+            for (int i = 0; i != nl.length(); i++)
+            {
+                out.write(nl.charAt(i));
+            }
+            out.write('=');
+        
+            int        crcV = crc.getValue();
+        
+            buf[0] = ((crcV >> 16) & 0xff);
+            buf[1] = ((crcV >> 8) & 0xff);
+            buf[2] = (crcV & 0xff);
+        
+            encode(out, buf, 3);
+        
+            for (int i = 0; i != nl.length(); i++)
+            {
+                out.write(nl.charAt(i));
+            }
+        
+            for (int i = 0; i != footerStart.length(); i++)
+            {
+                out.write(footerStart.charAt(i));
+            }
+        
+            for (int i = 0; i != type.length(); i++)
+            {
+                out.write(type.charAt(i));
+            }
+        
+            for (int i = 0; i != footerTail.length(); i++)
+            {
+                out.write(footerTail.charAt(i));
+            }
+        
+            for (int i = 0; i != nl.length(); i++)
+            {
+                out.write(nl.charAt(i));
+            }
+        
+            out.flush();
+            
+            type = null;
+            start = true;
         }
-        out.write('=');
-    
-        int        crcV = crc.getValue();
-    
-        buf[0] = ((crcV >> 16) & 0xff);
-        buf[1] = ((crcV >> 8) & 0xff);
-        buf[2] = (crcV & 0xff);
-    
-        encode(out, buf, 3);
-    
-        for (int i = 0; i != nl.length(); i++)
-        {
-            out.write(nl.charAt(i));
-        }
-    
-        for (int i = 0; i != footerStart.length(); i++)
-        {
-            out.write(footerStart.charAt(i));
-        }
-    
-        for (int i = 0; i != type.length(); i++)
-        {
-            out.write(type.charAt(i));
-        }
-    
-        for (int i = 0; i != footerTail.length(); i++)
-        {
-            out.write(footerTail.charAt(i));
-        }
-    
-        for (int i = 0; i != nl.length(); i++)
-        {
-            out.write(nl.charAt(i));
-        }
-    
-        out.flush();
     }
 }
