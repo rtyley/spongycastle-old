@@ -324,6 +324,26 @@ public class SignerInformation
         return signature;
     }
 
+    /**
+     * return the DER encoding of the signed attributes.
+     * @throws IOException if an encoding error occurs.
+     */
+    public byte[] getEncodedSignedAttributes()
+        throws IOException
+    {
+        if (signedAttributes != null)
+        {
+            ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+            DEROutputStream        aOut = new DEROutputStream(bOut);
+
+            aOut.writeObject(signedAttributes);
+
+            return bOut.toByteArray();
+        }
+
+        return null;
+    }
+    
     private boolean doVerify(
         PublicKey       key,
         AttributeTable  signedAttrTable,
@@ -417,14 +437,7 @@ public class SignerInformation
                     throw new SignatureException("contentType in signed attributes different");
                 }
 
-                ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-                DEROutputStream dOut = new DEROutputStream(bOut);
-
-                dOut.writeObject(signedAttributes);
-
-                dOut.close();
-
-                sig.update(bOut.toByteArray());
+                sig.update(this.getEncodedSignedAttributes());
             }
 
             return sig.verify(this.getSignature());
