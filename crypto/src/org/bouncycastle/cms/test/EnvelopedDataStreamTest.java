@@ -1,5 +1,6 @@
 package org.bouncycastle.cms.test;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.security.Key;
@@ -123,6 +124,148 @@ public class EnvelopedDataStreamTest
             
             assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }
+    }
+    
+    private void verifyData(
+        ByteArrayOutputStream encodedStream,
+        String                expectedOid,
+        byte[]                expectedData)
+        throws Exception
+    {
+        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(encodedStream.toByteArray());
+        RecipientInformationStore  recipients = ep.getRecipientInfos();
+    
+        assertEquals(ep.getEncryptionAlgOID(), expectedOid);
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+        
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+    
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+            
+            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), "BC");
+            
+            assertEquals(true, Arrays.equals(expectedData, CMSTestUtil.streamToByteArray(recData.getContentStream())));
+        }
+    }
+    
+    public void testKeyTransAES128BufferedStream()
+        throws Exception
+    {
+        byte[] data = new byte[2000];
+        
+        for (int i = 0; i != 2000; i++)
+        {
+            data[i] = (byte)(i & 0xff);
+        }
+        
+        //
+        // unbuffered
+        //
+        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
+    
+        edGen.addKeyTransRecipient(_reciCert);
+    
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        
+        OutputStream out = edGen.open(
+                                bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+    
+        for (int i = 0; i != 2000; i++)
+        {
+            out.write(data[i]);
+        }
+        
+        out.close();
+        
+        verifyData(bOut, CMSEnvelopedDataGenerator.AES128_CBC, data);
+        
+        int unbufferedLength = bOut.toByteArray().length;
+        
+        //
+        // buffered
+        //
+        edGen = new CMSEnvelopedDataStreamGenerator();
+    
+        edGen.addKeyTransRecipient(_reciCert);
+    
+        bOut = new ByteArrayOutputStream();
+        
+        out = edGen.open(bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+    
+        BufferedOutputStream bfOut = new BufferedOutputStream(out, 300);
+        
+        for (int i = 0; i != 2000; i++)
+        {
+            bfOut.write(data[i]);
+        }
+        
+        bfOut.close();
+        
+        verifyData(bOut, CMSEnvelopedDataGenerator.AES128_CBC, data);
+
+        assertTrue(bOut.toByteArray().length < unbufferedLength);
+    }
+    
+    public void testKeyTransAES128Buffered()
+        throws Exception
+    {
+        byte[] data = new byte[2000];
+        
+        for (int i = 0; i != 2000; i++)
+        {
+            data[i] = (byte)(i & 0xff);
+        }
+        
+        //
+        // unbuffered
+        //
+        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
+    
+        edGen.addKeyTransRecipient(_reciCert);
+    
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        
+        OutputStream out = edGen.open(
+                                bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+    
+        for (int i = 0; i != 2000; i++)
+        {
+            out.write(data[i]);
+        }
+        
+        out.close();
+        
+        verifyData(bOut, CMSEnvelopedDataGenerator.AES128_CBC, data);
+        
+        int unbufferedLength = bOut.toByteArray().length;
+        
+        //
+        // buffered
+        //
+        edGen = new CMSEnvelopedDataStreamGenerator();
+    
+        edGen.setBufferSize(300);
+        
+        edGen.addKeyTransRecipient(_reciCert);
+    
+        bOut = new ByteArrayOutputStream();
+        
+        out = edGen.open(bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+    
+        for (int i = 0; i != 2000; i++)
+        {
+            out.write(data[i]);
+        }
+        
+        out.close();
+        
+        verifyData(bOut, CMSEnvelopedDataGenerator.AES128_CBC, data);
+
+        assertTrue(bOut.toByteArray().length < unbufferedLength);
     }
     
     public void testKeyTransAES128()

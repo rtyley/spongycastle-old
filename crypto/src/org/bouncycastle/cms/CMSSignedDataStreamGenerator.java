@@ -105,6 +105,7 @@ public class CMSSignedDataStreamGenerator
     private ArrayList  _signerInfs = new ArrayList();
     private ArrayList  _signers = new ArrayList();
     private ArrayList  _digests = new ArrayList();
+    private int        _bufferSize;
     
     static class DigOutputStream
         extends OutputStream
@@ -384,6 +385,17 @@ public class CMSSignedDataStreamGenerator
     {
     }
 
+    /**
+     * Set the underlying string size for encapsulated data
+     * 
+     * @param bufferSize length of octet strings to buffer the data.
+     */
+    public void setBufferSize(
+        int bufferSize)
+    {
+        _bufferSize = bufferSize;
+    }
+    
     private String getEncOID(
         PrivateKey key,
         String     digestOID)
@@ -674,7 +686,14 @@ public class CMSSignedDataStreamGenerator
         
         if (encapsulate)
         {
-            digStream = octGen.getOctetOutputStream();
+            if (_bufferSize != 0)
+            {
+                digStream = octGen.getOctetOutputStream(new byte[_bufferSize]);
+            }
+            else
+            {
+                digStream = octGen.getOctetOutputStream();
+            }
         }
         else
         {
@@ -795,6 +814,22 @@ public class CMSSignedDataStreamGenerator
             throws IOException
         {
             _out.write(b);
+        }
+        
+        public void write(
+            byte[] bytes,
+            int    off,
+            int    len)
+            throws IOException
+        {
+            _out.write(bytes, off, len);
+        }
+        
+        public void write(
+            byte[] bytes)
+            throws IOException
+        {
+            _out.write(bytes);
         }
         
         public void close()

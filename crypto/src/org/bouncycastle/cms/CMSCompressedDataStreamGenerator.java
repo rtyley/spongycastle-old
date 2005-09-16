@@ -110,6 +110,23 @@ public class CMSCompressedDataStreamGenerator
             _out.write(b); 
         }
         
+        
+        public void write(
+            byte[] bytes,
+            int    off,
+            int    len)
+            throws IOException
+        {
+            _out.write(bytes, off, len);
+        }
+        
+        public void write(
+            byte[] bytes)
+            throws IOException
+        {
+            _out.write(bytes);
+        }
+        
         public void close()
             throws IOException
         {

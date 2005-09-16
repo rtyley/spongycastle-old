@@ -83,6 +83,7 @@ public class CMSEnvelopedDataStreamGenerator
     ArrayList                   recipientInfs = new ArrayList();
     private Object              _originatorInfo = null;
     private Object              _unprotectedAttributes = null;
+    private int                 _bufferSize;
     
     private class RecipientInf
     {
@@ -251,6 +252,18 @@ public class CMSEnvelopedDataStreamGenerator
     {
     }
 
+
+    /**
+     * Set the underlying string size for encapsulated data
+     * 
+     * @param bufferSize length of octet strings to buffer the data.
+     */
+    public void setBufferSize(
+        int bufferSize)
+    {
+        _bufferSize = bufferSize;
+    }
+    
     /**
      * add a recipient.
      */
@@ -408,7 +421,16 @@ public class CMSEnvelopedDataStreamGenerator
             
             BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
             
-            CipherOutputStream      cOut = new CipherOutputStream(octGen.getOctetOutputStream(), cipher);
+            CipherOutputStream      cOut;
+            
+            if (_bufferSize != 0)
+            {
+                cOut = new CipherOutputStream(octGen.getOctetOutputStream(new byte[_bufferSize]), cipher);
+            }
+            else
+            {
+                cOut = new CipherOutputStream(octGen.getOctetOutputStream(), cipher);
+            }
 
             return new CmsEnvelopedDataOutputStream(cOut, cGen, envGen, eiGen);
         }
@@ -510,6 +532,22 @@ public class CMSEnvelopedDataStreamGenerator
             throws IOException
         {
             _out.write(b);
+        }
+        
+        public void write(
+            byte[] bytes,
+            int    off,
+            int    len)
+            throws IOException
+        {
+            _out.write(bytes, off, len);
+        }
+        
+        public void write(
+            byte[] bytes)
+            throws IOException
+        {
+            _out.write(bytes);
         }
         
         public void close()
