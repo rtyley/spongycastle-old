@@ -54,36 +54,7 @@ public class CMSCompressedDataParser
     
             Asn1OctetString bytes = (Asn1OctetString)content.getContent(BerTag.OCTET_STRING);
     
-            return new CMSTypedStream(content.getContentType().toString(), new InflaterInputStream(bytes.getOctetStream()) 
-            {
-                // If the "nowrap" inflater option is used the stream can 
-                // apparently overread - we override fill() and provide
-                // an extra byte for the end of the input stream to get
-                // around this.
-                //
-                // Totally weird...
-                //
-                protected void fill() throws IOException
-                {
-                    if (eof)
-                    {
-                        throw new EOFException("Unexpected end of ZIP input stream");
-                    }
-                    
-                    len = this.in.read(buf, 0, buf.length);
-                    
-                    if (len == -1)
-                    {
-                        buf[0] = 0;
-                        len = 1;
-                        eof = true;
-                    }
-                    
-                    inf.setInput(buf, 0, len);
-                }
-
-                private boolean eof = false;
-            });
+            return new CMSTypedStream(content.getContentType().toString(), new InflaterInputStream(bytes.getOctetStream()));
         }
         catch (IOException e)
         {
