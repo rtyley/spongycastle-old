@@ -213,7 +213,6 @@ public class PGPPublicKeyRing
      * @param keyID
      * @return PGPPublicKey
      * @throws PGPException
-     * @throws NoSuchProviderException
      */
     public PGPPublicKey getPublicKey(
         long        keyID)
