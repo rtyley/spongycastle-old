@@ -33,4 +33,12 @@ abstract class LimitedInputStream
     {
         return _in;
     }
+
+    protected void setParentEofDetect(boolean on)
+    {
+        if (_in instanceof IndefiniteLengthInputStream)
+        {
+            ((IndefiniteLengthInputStream)_in).setEofOn00(on);
+        }
+    }
 }
