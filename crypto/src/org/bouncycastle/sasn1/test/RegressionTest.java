@@ -14,7 +14,8 @@ public class RegressionTest
     {
         TestSuite suite = new TestSuite("ASN.1 tests");
         
-        suite.addTest(Asn1SequenceTest.suite());
+        suite.addTestSuite(Asn1SequenceTest.class);
+        suite.addTestSuite(OctetStringTest.class);
         
         return suite;
     }
