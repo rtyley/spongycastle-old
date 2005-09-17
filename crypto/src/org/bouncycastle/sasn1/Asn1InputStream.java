@@ -22,6 +22,11 @@ public class Asn1InputStream
         this._in = new ByteArrayInputStream(encoding);
     }
     
+    InputStream getParentStream()
+    {
+        return _in;
+    }
+    
     private int readLength()
         throws IOException
     {
@@ -83,6 +88,14 @@ public class Asn1InputStream
             return null;
         }
 
+        //
+        // turn of looking for "00" while we resolve the tag
+        //
+        if (_in instanceof IndefiniteLengthInputStream)
+        {
+            ((IndefiniteLengthInputStream)_in).setEofOn00(false);
+        }
+        
         //
         // calculate length
         //

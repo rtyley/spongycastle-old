@@ -3,6 +3,7 @@ package org.bouncycastle.sasn1;
 import java.io.IOException;
 import java.io.InputStream;
 
+
 class DefiniteLengthInputStream
     extends LimitedInputStream
 {
@@ -15,13 +16,8 @@ class DefiniteLengthInputStream
         super(in);
         
         this._length = length;
-        
-        if (_in instanceof IndefiniteLengthInputStream)
-        {
-            ((IndefiniteLengthInputStream)_in).setEofOn00(false);
-        }
     }
-    
+
     public int read()
         throws IOException
     {
@@ -31,12 +27,7 @@ class DefiniteLengthInputStream
         }
         else
         {
-            if (_in instanceof IndefiniteLengthInputStream)
-            {
-                IndefiniteLengthInputStream parent = (IndefiniteLengthInputStream)_in;
-                
-                parent.setEofOn00(true);
-            }
+            setParentEofDetect(true);
             
             return -1;
         }

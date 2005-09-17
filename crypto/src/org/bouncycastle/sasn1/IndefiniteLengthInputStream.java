@@ -18,11 +18,6 @@ class IndefiniteLengthInputStream
     {
         super(in);
         
-        if (in instanceof IndefiniteLengthInputStream)
-        {
-            ((IndefiniteLengthInputStream)in).setEofOn00(false);
-        }
-        
         _b1 = in.read();
         _b2 = in.read();
         _eofReached = (_b2 < 0);
@@ -40,13 +35,7 @@ class IndefiniteLengthInputStream
         if (_eofOn00 && (_b1 == 0x00 && _b2 == 0x00))
         {
             _eofReached = true;
-
-            if (_in instanceof IndefiniteLengthInputStream)
-            {
-                IndefiniteLengthInputStream parent = (IndefiniteLengthInputStream)_in;
-                parent.setEofOn00(true);
-                parent.checkForEof();
-            }
+            setParentEofDetect(true);
         }
     }
     
@@ -69,7 +58,7 @@ class IndefiniteLengthInputStream
         if (b < 0)
         {            
             _eofReached = true;
-            
+
             return -1;
         }
         
