@@ -3,6 +3,7 @@ package org.bouncycastle.cms.test;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Random;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -89,6 +90,33 @@ public class CompressedDataStreamTest
         CMSCompressedDataParser ed = new CMSCompressedDataParser(bOut.toByteArray());
         
         assertEquals(true, Arrays.equals(testData, CMSTestUtil.streamToByteArray(ed.getContent().getContentStream())));
+    }
+    
+    public void test1000()
+        throws Exception
+    {
+        byte[]  testData = new byte[10000];
+        Random  rand = new Random();
+        
+        rand.setSeed(0);
+
+        for (int i = 0; i != 10; i++)
+        {   
+            CMSCompressedDataStreamGenerator gen = new CMSCompressedDataStreamGenerator();
+            ByteArrayOutputStream            bOut = new ByteArrayOutputStream();
+            
+            OutputStream cOut = gen.open(bOut, CMSCompressedDataStreamGenerator.ZLIB);
+
+            rand.nextBytes(testData);
+            
+            cOut.write(testData);
+            
+            cOut.close();
+
+            CMSCompressedDataParser ed = new CMSCompressedDataParser(bOut.toByteArray());
+            
+            assertEquals(true, Arrays.equals(testData, CMSTestUtil.streamToByteArray(ed.getContent().getContentStream())));
+        }
     }
     
     public static Test suite()
