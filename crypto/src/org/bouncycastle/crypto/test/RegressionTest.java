@@ -27,6 +27,7 @@ public class RegressionTest
         new RC6Test(),
         new RijndaelTest(),
         new SerpentTest(),
+        new CamelliaTest(),
         new SkipjackTest(),
         new BlowfishTest(),
         new TwofishTest(),
