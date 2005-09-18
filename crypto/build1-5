@@ -105,7 +105,7 @@ then
     rm -rf src/org/bouncycastle/bcpg
     rm -rf src/org/bouncycastle/openpgp
     rm -rf src/org/bouncycastle/tsp
-    rm -rf src/org/bouncycastle/sans1
+    rm -rf src/org/bouncycastle/sasn1
 
     PATH=$JDK15PATH/bin:$PATH
     export PATH

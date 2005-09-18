@@ -84,9 +84,9 @@ then
 
     echo "compiling"
 
-    (cd src; javac -green -d ../classes -classpath ../classes:../src:../jdk1.0:$JDKPATH/lib/classes.zip */*/*.java */*/*/*.java )
-    (cd src; javac -green -d ../classes -classpath ../classes:../src:../jdk1.0:$JDKPATH/lib/classes.zip */*/[amu]*/*/*.java)
-    (cd src; javac -green -d ../classes -classpath ../classes:../src:../jdk1.0:$JDKPATH/lib/classes.zip */*/c*/*/*.java)
+    (cd src; javac -d ../classes -classpath ../classes:../src:../jdk1.0:$JDKPATH/lib/classes.zip */*/*.java */*/*/*.java )
+    (cd src; javac -d ../classes -classpath ../classes:../src:../jdk1.0:$JDKPATH/lib/classes.zip */*/[amu]*/*/*.java)
+    (cd src; javac -d ../classes -classpath ../classes:../src:../jdk1.0:$JDKPATH/lib/classes.zip */*/c*/*/*.java)
 
     echo "lightweight regression test"
     java -classpath classes:$JDKPATH/lib/classes.zip org.bouncycastle.crypto.test.RegressionTest

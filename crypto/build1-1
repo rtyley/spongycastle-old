@@ -122,6 +122,7 @@ then
     rm -rf src/org/bouncycastle/ocsp
     rm -rf src/org/bouncycastle/bcpg
     rm -rf src/org/bouncycastle/openpgp
+    rm -rf src/org/bouncycastle/sasn1/test
     rm -rf src/org/bouncycastle/tsp
     rm -rf src/org/bouncycastle/util/encoders/test
 
