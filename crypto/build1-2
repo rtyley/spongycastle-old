@@ -107,6 +107,7 @@ then
     rm -rf src/org/bouncycastle/bcpg
     rm -rf src/org/bouncycastle/openpgp
     rm -rf src/org/bouncycastle/tsp
+    rm -rf src/org/bouncycastle/sasn1/test
     rm -rf src/org/bouncycastle/jce/ECPointUtil.java
     rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
@@ -231,6 +232,7 @@ then
     rm -rf src/org/bouncycastle/ocsp
     rm -rf src/org/bouncycastle/mail
     rm -rf src/org/bouncycastle/cms
+    rm -rf src/org/bouncycastle/sasn1
 
     javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
