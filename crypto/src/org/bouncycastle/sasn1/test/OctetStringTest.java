@@ -54,6 +54,34 @@ public class OctetStringTest
        assertEquals(8, count);
     }
     
+    public void testReadingWritingZeroInLength()
+        throws Exception
+    {
+       ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+       BerOctetStringGenerator octGen = new BerOctetStringGenerator(bOut);
+       
+       OutputStream out = octGen.getOctetOutputStream();
+       
+       out.write(new byte[] { 1, 2, 3, 4 });
+       out.write(new byte[512]);  // forces a zero to appear in length
+       
+       out.close();
+       
+       Asn1InputStream aIn = new Asn1InputStream(bOut.toByteArray());
+       
+       BerOctetString s = (BerOctetString)aIn.readObject();
+       
+       InputStream in = s.getOctetStream();
+       int         count = 0;
+       
+       while (in.read() >= 0)
+       {
+           count++;
+       }
+    
+       assertEquals(516, count);
+    }
+    
     public void testReadingWritingNested()
         throws Exception
     {
