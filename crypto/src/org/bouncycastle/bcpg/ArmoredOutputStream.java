@@ -161,6 +161,15 @@ public class ArmoredOutputStream
         case HashAlgorithmTags.SHA1:
             hash = "SHA1";
             break;
+        case HashAlgorithmTags.SHA256:
+            hash = "SHA265";
+            break;
+        case HashAlgorithmTags.SHA384:
+            hash = "SHA384";
+            break;
+        case HashAlgorithmTags.SHA512:
+            hash = "SHA512";
+            break;
         case HashAlgorithmTags.MD2:
             hash = "MD2";
             break;
