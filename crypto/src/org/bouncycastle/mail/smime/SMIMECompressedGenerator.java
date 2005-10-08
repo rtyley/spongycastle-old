@@ -1,30 +1,26 @@
 package org.bouncycastle.mail.smime;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import javax.mail.MessagingException;
-import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
-import org.bouncycastle.cms.CMSCompressedData;
 import org.bouncycastle.cms.CMSCompressedDataGenerator;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.cms.CMSCompressedDataStreamGenerator;
 
 /**
- * General class for generating a pkcs7-mime message.
+ * General class for generating a pkcs7-mime compressed message.
  *
  * A simple example of usage.
  *
  * <pre>
  *      SMIMECompressedGenerator  fact = new SMIMECompressedGenerator();
  *
- *      fact.addKeyTransRecipient(cert);
- *
- *      MimeBodyPart           smime = fact.generate(content, algorithm, "BC");
+ *      MimeBodyPart           smime = fact.generate(content, algorithm);
  * </pre>
  *
  * <b>Note:<b> Most clients expect the MimeBodyPart to be in a MimeMultipart
@@ -35,7 +31,7 @@ public class SMIMECompressedGenerator
 {
     public static final String  ZLIB    = CMSCompressedDataGenerator.ZLIB;
 
-    private CMSCompressedDataGenerator fact;
+    private static final String COMPRESSED_CONTENT_TYPE = "application/pkcs7-mime; name=\"smime.p7z\"; smime-type=compressed-data";
 
     static
     {
@@ -48,64 +44,29 @@ public class SMIMECompressedGenerator
     }
 
     /**
-     * base constructor
-     */
-    public SMIMECompressedGenerator()
-    {
-        fact = new CMSCompressedDataGenerator();
-    }
-
-    /**
      * generate an compressed object that contains an SMIME Compressed
-     * object using the given provider.
+     * object using the given compression algorithm.
      */
     private MimeBodyPart make(
         MimeBodyPart    content,
         String          compressionOID)
         throws SMIMEException
     {
-        CMSCompressedData    compressedData;
-
         try
-        {
-            compressedData = fact.generate(
-                new CMSProcessableBodyPart(content), compressionOID);
-        }
-        catch (CMSException e)
-        {
-            throw new SMIMEException(e.getMessage(), e.getUnderlyingException());
-        }
-
-        InternetHeaders sigHeader = new InternetHeaders();
-
-        sigHeader.addHeader("Content-Type", "application/pkcs7-mime; name=\"smime.p7z\"; smime-type=compressed-data");
-        sigHeader.addHeader("Content-Disposition", "attachment; filename=\"smime.p7z\"");
-        sigHeader.addHeader("Content-Description", "S/MIME Compressed Message");
-
-        try
-        {
-            MimeBodyPart    data;
-
-            if (useBase64)
-            {
-                sigHeader.addHeader("Content-Transfer-Encoding", "base64");
-                data = new MimeBodyPart(sigHeader, Base64.encode(compressedData.getEncoded()));
-            }
-            else
-            {
-                sigHeader.addHeader("Content-Transfer-Encoding", encoding);
-                data = new MimeBodyPart(sigHeader, compressedData.getEncoded());
-            }
+        {  
+            MimeBodyPart data = new MimeBodyPart();
+        
+            data.setContent(new ContentCompressor(content, compressionOID), COMPRESSED_CONTENT_TYPE);
+            data.addHeader("Content-Type", COMPRESSED_CONTENT_TYPE);
+            data.addHeader("Content-Disposition", "attachment; filename=\"smime.p7z\"");
+            data.addHeader("Content-Description", "S/MIME Compressed Message");
+            data.addHeader("Content-Transfer-Encoding", encoding);
 
             return data;
         }
         catch (MessagingException e)
         {
             throw new SMIMEException("exception putting multi-part together.", e);
-        }
-        catch (IOException e)
-        {
-            throw new SMIMEException("exception generating encoded content", e);
         }
     }
 
@@ -142,5 +103,39 @@ public class SMIMECompressedGenerator
         }
                         
         return make(makeContentBodyPart(message), compressionOID);
+    }
+    
+    private class ContentCompressor
+        implements SMIMEStreamingProcessor
+    {
+        private final MimeBodyPart _content;
+        private final String _compressionOid;
+        
+        ContentCompressor(
+            MimeBodyPart content,
+            String       compressionOid)
+        {
+            _content = content;
+            _compressionOid = compressionOid;
+        }
+
+        public void write(OutputStream out)
+            throws IOException
+        {
+            CMSCompressedDataStreamGenerator cGen = new CMSCompressedDataStreamGenerator();
+            
+            OutputStream compressed = cGen.open(out, _compressionOid);
+            
+            try
+            {
+                _content.writeTo(compressed);
+                
+                compressed.close();
+            }
+            catch (MessagingException e)
+            {
+                throw new IOException(e.toString());
+            }
+        }
     }
 }

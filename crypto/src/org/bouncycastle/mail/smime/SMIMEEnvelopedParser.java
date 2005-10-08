@@ -9,43 +9,36 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimePart;
 
-import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.CMSEnvelopedDataParser;
 import org.bouncycastle.cms.CMSException;
 
 /**
- * containing class for an S/MIME pkcs7-mime encrypted MimePart.
+ * Stream based containing class for an S/MIME pkcs7-mime encrypted MimePart.
  */
-public class SMIMEEnveloped
-    extends CMSEnvelopedData
+public class SMIMEEnvelopedParser
+    extends CMSEnvelopedDataParser
 {
     MimePart                message;
 
     private static InputStream getInputStream(
         Part    bodyPart)
-        throws MessagingException
+        throws IOException, MessagingException
     {
-        try
-        {
-            return bodyPart.getInputStream();
-        }
-        catch (IOException e)
-        {
-            throw new MessagingException("can't extract input stream: " + e);
-        }
+        return bodyPart.getInputStream();
     }
 
-    public SMIMEEnveloped(
+    public SMIMEEnvelopedParser(
         MimeBodyPart    message) 
-        throws MessagingException, CMSException
+        throws IOException, CMSException, MessagingException
     {
         super(getInputStream(message));
 
         this.message = message;
     }
 
-    public SMIMEEnveloped(
+    public SMIMEEnvelopedParser(
         MimeMessage    message) 
-        throws MessagingException, CMSException
+        throws IOException, CMSException, MessagingException
     {
         super(getInputStream(message));
 

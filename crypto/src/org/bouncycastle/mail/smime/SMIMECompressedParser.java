@@ -9,14 +9,14 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimePart;
 
-import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.CMSCompressedDataParser;
 import org.bouncycastle.cms.CMSException;
 
 /**
- * containing class for an S/MIME pkcs7-mime encrypted MimePart.
+ * Stream based containing class for an S/MIME pkcs7-mime MimePart.
  */
-public class SMIMEEnveloped
-    extends CMSEnvelopedData
+public class SMIMECompressedParser
+    extends CMSCompressedDataParser
 {
     MimePart                message;
 
@@ -34,7 +34,7 @@ public class SMIMEEnveloped
         }
     }
 
-    public SMIMEEnveloped(
+    public SMIMECompressedParser(
         MimeBodyPart    message) 
         throws MessagingException, CMSException
     {
@@ -43,7 +43,7 @@ public class SMIMEEnveloped
         this.message = message;
     }
 
-    public SMIMEEnveloped(
+    public SMIMECompressedParser(
         MimeMessage    message) 
         throws MessagingException, CMSException
     {
@@ -52,7 +52,7 @@ public class SMIMEEnveloped
         this.message = message;
     }
 
-    public MimePart getEncryptedContent()
+    public MimePart getCompressedContent()
     {
         return message;
     }

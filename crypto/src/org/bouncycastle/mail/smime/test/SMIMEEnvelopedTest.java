@@ -18,8 +18,10 @@ import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.test.CMSTestUtil;
+import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
+import org.bouncycastle.mail.smime.SMIMEEnvelopedParser;
 import org.bouncycastle.mail.smime.SMIMEUtil;
 
 public class SMIMEEnvelopedTest extends TestCase {
@@ -110,65 +112,106 @@ public class SMIMEEnvelopedTest extends TestCase {
         }
     }
 
-    public void setUp() {
 
-    }
-
-    public void tearDown() {
-
-    }
-
-    /*
-     *
-     *  TESTS
-     *
-     */
-
-    public void testDESEDE3Encrypted()
+    public void testHeaders()
+        throws Exception
     {
-        try
-        {
-            MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
-              
-            gen.addKeyTransRecipient(_reciCert);
-             
-            //
-            // generate a MimeBodyPart object which encapsulates the content
-            // we want encrypted.
-            //
+        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
+          
+        gen.addKeyTransRecipient(_reciCert);
+         
+        //
+        // generate a MimeBodyPart object which encapsulates the content
+        // we want encrypted.
+        //
 
-            MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
+        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
 
-            SMIMEEnveloped       m = new SMIMEEnveloped(mp);
-            RecipientId          recId = new RecipientId();
+        assertEquals("application/pkcs7-mime; name=\"smime.p7m\"; smime-type=enveloped-data", mp.getHeader("Content-Type")[0]);
+        assertEquals("attachment; filename=\"smime.p7m\"", mp.getHeader("Content-Disposition")[0]);
+        assertEquals("S/MIME Encrypted Message", mp.getHeader("Content-Description")[0]);
+    }
+    
+    public void testDESEDE3Encrypted()
+        throws Exception
+    {
+        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            recId.setSerialNumber(_reciCert.getSerialNumber());
-            recId.setIssuer(_reciCert.getIssuerX500Principal().getEncoded());
+        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
+          
+        gen.addKeyTransRecipient(_reciCert);
+         
+        //
+        // generate a MimeBodyPart object which encapsulates the content
+        // we want encrypted.
+        //
 
-            RecipientInformationStore  recipients = m.getRecipientInfos();
-            RecipientInformation       recipient = recipients.get(recId);
+        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
 
-            MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+        SMIMEEnveloped       m = new SMIMEEnveloped(mp);
+        RecipientId          recId = new RecipientId();
 
-            ByteArrayOutputStream _baos = new ByteArrayOutputStream();
-            _msg.writeTo(_baos);
-            _baos.close();
-            byte[] _msgBytes = _baos.toByteArray();
-            _baos = new ByteArrayOutputStream();
-            res.writeTo(_baos);
-            _baos.close();
-            byte[] _resBytes = _baos.toByteArray();
-            
-            assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
-        }
-        catch(Exception ex) {
-            log(ex);
-            fail();
-        }
+        recId.setSerialNumber(_reciCert.getSerialNumber());
+        recId.setIssuer(_reciCert.getIssuerX500Principal().getEncoded());
+
+        RecipientInformationStore  recipients = m.getRecipientInfos();
+        RecipientInformation       recipient = recipients.get(recId);
+
+        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+
+        ByteArrayOutputStream _baos = new ByteArrayOutputStream();
+        _msg.writeTo(_baos);
+        _baos.close();
+        byte[] _msgBytes = _baos.toByteArray();
+        _baos = new ByteArrayOutputStream();
+        res.writeTo(_baos);
+        _baos.close();
+        byte[] _resBytes = _baos.toByteArray();
+        
+        assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
     }
 
+    public void testParserDESEDE3Encrypted()
+        throws Exception
+    {
+        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+    
+        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
+          
+        gen.addKeyTransRecipient(_reciCert);
+         
+        //
+        // generate a MimeBodyPart object which encapsulates the content
+        // we want encrypted.
+        //
+    
+        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
+    
+        SMIMEEnvelopedParser m = new SMIMEEnvelopedParser(mp);
+        RecipientId          recId = new RecipientId();
+    
+        recId.setSerialNumber(_reciCert.getSerialNumber());
+        recId.setIssuer(_reciCert.getIssuerX500Principal().getEncoded());
+    
+        RecipientInformationStore  recipients = m.getRecipientInfos();
+        RecipientInformation       recipient = recipients.get(recId);
+    
+        MimeBodyPart    res = new MimeBodyPart(recipient.getContentStream(_reciKP.getPrivate(), "BC").getContentStream());
+    
+        ByteArrayOutputStream _baos = new ByteArrayOutputStream();
+        _msg.writeTo(_baos);
+        _baos.close();
+        byte[] _msgBytes = _baos.toByteArray();
+        _baos = new ByteArrayOutputStream();
+        res.writeTo(_baos);
+        _baos.close();
+        byte[] _resBytes = _baos.toByteArray();
+        
+        assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
+    }
+    
     public void testIDEAEncrypted()
     {
         try

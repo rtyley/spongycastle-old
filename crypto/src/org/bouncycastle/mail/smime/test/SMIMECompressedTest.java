@@ -1,19 +1,18 @@
 package org.bouncycastle.mail.smime.test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.security.KeyPair;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import javax.mail.Session;
-import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -31,13 +30,16 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.mail.smime.SMIMECompressed;
 import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
+import org.bouncycastle.mail.smime.SMIMECompressedParser;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMEUtil;
+import org.bouncycastle.util.Arrays;
 
 public class SMIMECompressedTest
     extends TestCase
 {
+    private static final String COMPRESSED_CONTENT_TYPE = "application/pkcs7-mime; name=\"smime.p7z\"; smime-type=compressed-data";
 
     boolean DEBUG = true;
 
@@ -67,8 +69,21 @@ public class SMIMECompressedTest
      *
      */
 
-    public SMIMECompressedTest(String name) {
+    public SMIMECompressedTest(
+         String name)
+        throws Exception
+    {
         super(name);
+        
+        msg      = SMIMETestUtil.makeMimeBodyPart("Hello world!");
+
+        signDN   = "O=Bouncy Castle, C=AU";
+        signKP   = SMIMETestUtil.makeKeyPair();  
+        signCert = SMIMETestUtil.makeCertificate(signKP, signDN, signKP, signDN);
+
+        origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+        origKP   = SMIMETestUtil.makeKeyPair();
+        origCert = SMIMETestUtil.makeCertificate(origKP, origDN, signKP, signDN);
     }
 
     public static void main(String args[]) {
@@ -90,130 +105,127 @@ public class SMIMECompressedTest
         return new SMIMETestSetup(new TestSuite(SMIMECompressedTest.class));
     }
 
-    public void log(Exception _ex) {
-        if(DEBUG) {
-            _ex.printStackTrace();
-        }
-    }
-
-    public void log(String _msg) {
-        if(DEBUG) {
-            System.out.println(_msg);
-        }
-    }
-
-    public void setUp()
+    public void testHeaders()
+        throws Exception
     {
-        try
-        {
-            msg      = SMIMETestUtil.makeMimeBodyPart("Hello world!");
+        SMIMECompressedGenerator    cgen = new SMIMECompressedGenerator();
 
-            signDN   = "O=Bouncy Castle, C=AU";
-            signKP   = SMIMETestUtil.makeKeyPair();  
-            signCert = SMIMETestUtil.makeCertificate(signKP, signDN, signKP, signDN);
-
-            origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
-            origKP   = SMIMETestUtil.makeKeyPair();
-            origCert = SMIMETestUtil.makeCertificate(origKP, origDN, signKP, signDN);
-        }
-        catch(Exception ex)
-        {
-            log(ex);
-            fail();
-        }
+        MimeBodyPart cbp = cgen.generate(msg, SMIMECompressedGenerator.ZLIB);
+        
+        assertEquals(COMPRESSED_CONTENT_TYPE, cbp.getHeader("Content-Type")[0]);
+        assertEquals("attachment; filename=\"smime.p7z\"", cbp.getHeader("Content-Disposition")[0]);
+        assertEquals("S/MIME Compressed Message", cbp.getHeader("Content-Description")[0]);
     }
 
-    public void tearDown() {
+    public void testBasic()
+        throws Exception
+    {
+        SMIMECompressedGenerator    cgen = new SMIMECompressedGenerator();
+        ByteArrayOutputStream       bOut = new ByteArrayOutputStream();
+        MimeBodyPart cbp = cgen.generate(msg, SMIMECompressedGenerator.ZLIB);
+        
+        SMIMECompressed sc = new SMIMECompressed(cbp);
+        
+        msg.writeTo(bOut);
 
+        assertTrue(Arrays.areEqual(bOut.toByteArray(), sc.getContent()));
     }
-
-    /*
-     *
-     *  TESTS
-     *
-     */
-
+    
+    public void testParser()
+        throws Exception
+    {
+        SMIMECompressedGenerator    cgen = new SMIMECompressedGenerator();
+        ByteArrayOutputStream       bOut1 = new ByteArrayOutputStream();
+        ByteArrayOutputStream       bOut2 = new ByteArrayOutputStream();
+        MimeBodyPart                cbp = cgen.generate(msg, SMIMECompressedGenerator.ZLIB);
+        SMIMECompressedParser       sc = new SMIMECompressedParser(cbp);
+        
+        msg.writeTo(bOut1);
+    
+        InputStream in = sc.getContent().getContentStream();
+        int ch;
+        
+        while ((ch = in.read()) >= 0)
+        {
+            bOut2.write(ch);
+        }
+        
+        assertTrue(Arrays.areEqual(bOut1.toByteArray(), bOut2.toByteArray()));
+    }
+    
     /**
      * test compressing and uncompressing of a multipart-signed message.
      */
-    public void testSHA1WithRSA()
+    public void testCompressedSHA1WithRSA()
+        throws Exception
     {
-        try
+        ArrayList           certList = new ArrayList();
+
+        certList.add(origCert);
+        certList.add(signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                                       new CollectionCertStoreParameters(certList), "BC");
+
+        ASN1EncodableVector         signedAttrs = new ASN1EncodableVector();
+        SMIMECapabilityVector       caps = new SMIMECapabilityVector();
+
+        caps.addCapability(SMIMECapability.dES_EDE3_CBC);
+        caps.addCapability(SMIMECapability.rC2_CBC, 128);
+        caps.addCapability(SMIMECapability.dES_CBC);
+
+        signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+
+        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+
+        gen.addCertificatesAndCRLs(certs);
+
+        MimeMultipart smp = gen.generate(msg, "BC");
+
+        MimeMessage bp2 = new MimeMessage((Session)null);                          
+
+        bp2.setContent(smp, smp.getContentType());
+
+        bp2.saveChanges();
+
+        SMIMECompressedGenerator    cgen = new SMIMECompressedGenerator();
+
+        MimeBodyPart cbp = cgen.generate(bp2, SMIMECompressedGenerator.ZLIB);
+
+        SMIMECompressed cm = new SMIMECompressed(cbp);
+
+        MimeBodyPart  _res = (MimeBodyPart)smp.getBodyPart(0);
+        
+        SMIMESigned s = new SMIMESigned((MimeMultipart)SMIMEUtil.toMimeBodyPart(cm.getContent()).getContent());
+
+        ByteArrayOutputStream _baos = new ByteArrayOutputStream();
+        msg.writeTo(_baos);
+        _baos.close();
+        byte[] _msgBytes = _baos.toByteArray();
+        _baos = new ByteArrayOutputStream();
+        s.getContent().writeTo(_baos);
+        _baos.close();
+        byte[] _resBytes = _baos.toByteArray();
+        
+        assertEquals(true, Arrays.areEqual(_msgBytes, _resBytes));
+
+        certs = s.getCertificatesAndCRLs("Collection", "BC");
+
+        SignerInformationStore  signers = s.getSignerInfos();
+        Collection              c = signers.getSigners();
+        Iterator                it = c.iterator();
+
+        while (it.hasNext())
         {
-            ArrayList           certList = new ArrayList();
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certs.getCertificates(signer.getSID());
 
-            certList.add(origCert);
-            certList.add(signCert);
+            Iterator            certIt = certCollection.iterator();
+            X509Certificate     cert = (X509Certificate)certIt.next();
 
-            CertStore           certs = CertStore.getInstance("Collection",
-                                           new CollectionCertStoreParameters(certList), "BC");
-
-            ASN1EncodableVector         signedAttrs = new ASN1EncodableVector();
-            SMIMECapabilityVector       caps = new SMIMECapabilityVector();
-
-            caps.addCapability(SMIMECapability.dES_EDE3_CBC);
-            caps.addCapability(SMIMECapability.rC2_CBC, 128);
-            caps.addCapability(SMIMECapability.dES_CBC);
-
-            signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
-
-            SMIMESignedGenerator gen = new SMIMESignedGenerator();
-
-            gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
-
-            gen.addCertificatesAndCRLs(certs);
-
-            MimeMultipart smp = gen.generate(msg, "BC");
-
-            String boundary = new ContentType(smp.getContentType()).getParameter("boundary");
-            MimeMessage bp2 = new MimeMessage((Session)null);                          
-
-            bp2.setContent(smp, smp.getContentType());
-
-            bp2.saveChanges();
-
-            SMIMECompressedGenerator    cgen = new SMIMECompressedGenerator();
-
-            MimeBodyPart cbp = cgen.generate(bp2, SMIMECompressedGenerator.ZLIB);
-
-            SMIMECompressed cm = new SMIMECompressed(cbp);
-
-            MimeBodyPart  _res = (MimeBodyPart)smp.getBodyPart(0);
-            
-            SMIMESigned s = new SMIMESigned((MimeMultipart)SMIMEUtil.toMimeBodyPart(cm.getContent()).getContent());
-
-            ByteArrayOutputStream _baos = new ByteArrayOutputStream();
-            msg.writeTo(_baos);
-            _baos.close();
-            byte[] _msgBytes = _baos.toByteArray();
-            _baos = new ByteArrayOutputStream();
-            s.getContent().writeTo(_baos);
-            _baos.close();
-            byte[] _resBytes = _baos.toByteArray();
-            
-            assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
-
-            certs = s.getCertificatesAndCRLs("Collection", "BC");
-
-            SignerInformationStore  signers = s.getSignerInfos();
-            Collection              c = signers.getSigners();
-            Iterator                it = c.iterator();
-
-            while (it.hasNext())
-            {
-                SignerInformation   signer = (SignerInformation)it.next();
-                Collection          certCollection = certs.getCertificates(signer.getSID());
-
-                Iterator            certIt = certCollection.iterator();
-                X509Certificate     cert = (X509Certificate)certIt.next();
-
-                assertEquals(true, signer.verify(cert, "BC"));
-            }
-        }
-        catch(Exception ex)
-        {
-            log(ex);
-            fail();
+            assertEquals(true, signer.verify(cert, "BC"));
         }
     }
 }
