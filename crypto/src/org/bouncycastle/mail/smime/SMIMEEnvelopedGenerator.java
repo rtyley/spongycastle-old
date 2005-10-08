@@ -1,6 +1,7 @@
 package org.bouncycastle.mail.smime;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
@@ -8,15 +9,14 @@ import java.security.cert.X509Certificate;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
+import javax.crypto.KeyGenerator;
 import javax.mail.MessagingException;
-import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
-import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.util.encoders.Base64;
 
 /**
  * General class for generating a pkcs7-mime message.
@@ -37,6 +37,7 @@ import org.bouncycastle.util.encoders.Base64;
 public class SMIMEEnvelopedGenerator
     extends SMIMEGenerator
 {
+    private static final String ENCRYPTED_CONTENT_TYPE = "application/pkcs7-mime; name=\"smime.p7m\"; smime-type=enveloped-data";
     public static final String  DES_EDE3_CBC    = CMSEnvelopedDataGenerator.DES_EDE3_CBC;
     public static final String  RC2_CBC         = CMSEnvelopedDataGenerator.RC2_CBC;
     public static final String  IDEA_CBC        = CMSEnvelopedDataGenerator.IDEA_CBC;
@@ -46,7 +47,7 @@ public class SMIMEEnvelopedGenerator
     public static final String  AES192_CBC      = CMSEnvelopedDataGenerator.AES192_CBC;
     public static final String  AES256_CBC      = CMSEnvelopedDataGenerator.AES256_CBC;
 
-    private CMSEnvelopedDataGenerator fact;
+    private CMSEnvelopedDataStreamGenerator fact;
 
     static
     {
@@ -63,7 +64,7 @@ public class SMIMEEnvelopedGenerator
      */
     public SMIMEEnvelopedGenerator()
     {
-        fact = new CMSEnvelopedDataGenerator();
+        fact = new CMSEnvelopedDataStreamGenerator();
     }
 
     /**
@@ -100,56 +101,26 @@ public class SMIMEEnvelopedGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
     {
-        CMSEnvelopedData    envelopedData;
-
+        //
+        // check the base algorithm and provider is available
+        //
+        KeyGenerator.getInstance(encryptionOID, provider);
+                
         try
-        {
-            if (keySize == 0)       // use default
-            {
-                envelopedData = fact.generate(
-                    new CMSProcessableBodyPart(content), encryptionOID, provider);
-            }
-            else
-            {
-                envelopedData = fact.generate(
-                    new CMSProcessableBodyPart(content), encryptionOID, keySize, provider);
-            }
-        }
-        catch (CMSException e)
-        {
-            throw new SMIMEException(e.getMessage(), e.getUnderlyingException());
-        }
-
-        InternetHeaders sigHeader = new InternetHeaders();
-
-        sigHeader.addHeader("Content-Type", "application/pkcs7-mime; name=\"smime.p7m\"; smime-type=enveloped-data");
-        sigHeader.addHeader("Content-Disposition", "attachment; filename=\"smime.p7m\"");
-        sigHeader.addHeader("Content-Description", "S/MIME Encrypted Message");
-
-        try
-        {
-            MimeBodyPart    data;
-
-            if (useBase64)
-            {
-                sigHeader.addHeader("Content-Transfer-Encoding", "base64");
-                data = new MimeBodyPart(sigHeader, Base64.encode(envelopedData.getEncoded()));
-            }
-            else
-            {
-                sigHeader.addHeader("Content-Transfer-Encoding", encoding);
-                data = new MimeBodyPart(sigHeader, envelopedData.getEncoded());
-            }
-
+        {  
+            MimeBodyPart data = new MimeBodyPart();
+        
+            data.setContent(new ContentEncryptor(content, encryptionOID, keySize, provider), ENCRYPTED_CONTENT_TYPE);
+            data.addHeader("Content-Type", ENCRYPTED_CONTENT_TYPE);
+            data.addHeader("Content-Disposition", "attachment; filename=\"smime.p7m\"");
+            data.addHeader("Content-Description", "S/MIME Encrypted Message");
+            data.addHeader("Content-Transfer-Encoding", encoding);
+    
             return data;
         }
         catch (MessagingException e)
         {
             throw new SMIMEException("exception putting multi-part together.", e);
-        }
-        catch (IOException e)
-        {
-            throw new SMIMEException("exception generating encoded content", e);
         }
     }
 
@@ -227,5 +198,65 @@ public class SMIMEEnvelopedGenerator
         }
                         
         return make(makeContentBodyPart(message), encryptionOID, keySize, provider);
+    }
+    
+    private class ContentEncryptor
+        implements SMIMEStreamingProcessor
+    {
+        private final MimeBodyPart _content;
+        private final String _encryptionOid;
+        private final int    _keySize;
+        private final String _provider;
+        
+        ContentEncryptor(
+            MimeBodyPart content,
+            String       encryptionOid,
+            int          keySize,
+            String       provider)
+        {
+            _content = content;
+            _encryptionOid = encryptionOid;
+            _keySize = keySize;
+            _provider = provider;
+        }
+    
+        public void write(OutputStream out)
+            throws IOException
+        {
+            
+            OutputStream encrypted;
+            
+            try
+            {
+                if (_keySize == 0)  // use the default
+                {
+                    encrypted = fact.open(out, _encryptionOid, _provider);
+                }
+                else
+                {
+                    encrypted = fact.open(out, _encryptionOid, _keySize, _provider);
+                }
+            
+                _content.writeTo(encrypted);
+                
+                encrypted.close();
+            }
+            catch (MessagingException e)
+            {
+                throw new IOException(e.toString());
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                throw new IOException(e.toString());
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new IOException(e.toString());
+            }
+            catch (CMSException e)
+            {
+                throw new IOException(e.toString());
+            }
+        }
     }
 }

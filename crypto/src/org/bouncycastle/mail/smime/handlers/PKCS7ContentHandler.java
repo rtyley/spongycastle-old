@@ -10,40 +10,41 @@ import javax.activation.ActivationDataFlavor;
 import javax.activation.DataContentHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeBodyPart;
 
-public class multipart_signed implements DataContentHandler {
+import org.bouncycastle.mail.smime.SMIMEStreamingProcessor;
+
+public class PKCS7ContentHandler 
+    implements DataContentHandler 
+{
+    private final ActivationDataFlavor _adf;
+    private final DataFlavor[]         _dfs;
     
-    /*  
-     *  
-     *  VARIABLES
-     *  
-     */ 
-    
-    private static final ActivationDataFlavor ADF = new ActivationDataFlavor(MimeMultipart.class, "multipart/signed", "Multipart Signed");
-    private static final DataFlavor[]         DFS = new DataFlavor[] { ADF };
-    
-    public Object getContent(DataSource ds) 
-        throws IOException 
+    PKCS7ContentHandler(
+        ActivationDataFlavor adf,
+        DataFlavor[]         dfs)
     {
-        try
-        {
-            return new MimeMultipart(ds);
-        }
-        catch (MessagingException ex)
-        {
-            return null;
-        }
+        _adf = adf;
+        _dfs = dfs;
+    }
+
+    public Object getContent(
+        DataSource ds)
+        throws IOException
+    {
+        return ds.getInputStream();
     }
     
-    public Object getTransferData(DataFlavor df, DataSource ds) 
+    public Object getTransferData(
+        DataFlavor df, 
+        DataSource ds) 
         throws IOException 
-    {    
-        if (ADF.equals(df))
+    { 
+        if (_adf.equals(df))
         {
             return getContent(ds);
         }
-        else
+        else 
         {
             return null;
         }
@@ -51,25 +52,27 @@ public class multipart_signed implements DataContentHandler {
     
     public DataFlavor[] getTransferDataFlavors() 
     {
-        return DFS;
+        return _dfs;
     }
     
-    public void writeTo(Object obj, String _mimeType, OutputStream os) 
-        throws IOException
+    public void writeTo(
+        Object obj, 
+        String mimeType,
+        OutputStream os) 
+        throws IOException 
     {
-        
-        if (obj instanceof MimeMultipart)
+        if (obj instanceof MimeBodyPart) 
         {
-            try
+            try 
             {
-                ((MimeMultipart)obj).writeTo(os);
+                ((MimeBodyPart)obj).writeTo(os);
             }
             catch (MessagingException ex)
             {
                 throw new IOException(ex.getMessage());
             }
         }
-        else if(obj instanceof byte[])
+        else if (obj instanceof byte[]) 
         {
             os.write((byte[])obj);
         }
@@ -87,6 +90,12 @@ public class multipart_signed implements DataContentHandler {
             {
                 os.write(b);
             }
+        }
+        else if (obj instanceof SMIMEStreamingProcessor)
+        {
+            SMIMEStreamingProcessor processor = (SMIMEStreamingProcessor)obj;
+
+            processor.write(os);
         }
         else
         {

@@ -15,7 +15,7 @@ import javax.mail.internet.MimeMessage;
 public class SMIMEGenerator
 {
     protected boolean                     useBase64 = true;
-    protected String                      encoding = "";  // default sets base64
+    protected String                      encoding = "base64";  // default sets base64
 
     /**
      * base constructor
