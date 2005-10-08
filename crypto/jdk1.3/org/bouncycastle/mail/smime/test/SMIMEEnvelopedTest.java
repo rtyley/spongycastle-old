@@ -17,9 +17,13 @@ import junit.framework.TestSuite;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.test.CMSTestUtil;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
+import org.bouncycastle.mail.smime.SMIMEEnvelopedParser;
 import org.bouncycastle.mail.smime.SMIMEUtil;
 
 public class SMIMEEnvelopedTest extends TestCase {
@@ -32,6 +36,40 @@ public class SMIMEEnvelopedTest extends TestCase {
 
     public boolean DEBUG = true;
 
+    private static String          _signDN;
+    private static KeyPair         _signKP;  
+    private static X509Certificate _signCert;
+
+    private static String          _origDN;
+    private static KeyPair         _origKP;
+    private static X509Certificate _origCert;
+
+    private static String          _reciDN;
+    private static KeyPair         _reciKP;
+    private static X509Certificate _reciCert;
+    
+    private static boolean         _initialised = false;
+
+    private static void init()
+        throws Exception
+    {
+        if (!_initialised)
+        {
+            _initialised = true;
+            
+            _signDN   = "O=Bouncy Castle, C=AU";
+            _signKP   = CMSTestUtil.makeKeyPair();  
+            _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+
+            _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
+            _origKP   = CMSTestUtil.makeKeyPair();
+            _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
+
+            _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
+            _reciKP   = CMSTestUtil.makeKeyPair();
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);      
+        }
+    }
     /*
      *
      *  INFRASTRUCTURE
@@ -57,7 +95,10 @@ public class SMIMEEnvelopedTest extends TestCase {
         junit.textui.TestRunner.run(SMIMEEnvelopedTest.class);
     }
 
-    public static Test suite() {
+    public static Test suite() 
+        throws Exception {
+        init();
+        
         return new SMIMETestSetup(new TestSuite(SMIMEEnvelopedTest.class));
     }
 
@@ -73,96 +114,112 @@ public class SMIMEEnvelopedTest extends TestCase {
         }
     }
 
-    public void setUp() {
 
-    }
-
-    public void tearDown() {
-
-    }
-
-    /*
-     *
-     *  TESTS
-     *
-     */
-
-    public void testDESEDE3Encrypted()
+    public void testHeaders()
+        throws Exception
     {
-        try
-        {
-            MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
+        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
+          
+        gen.addKeyTransRecipient(_reciCert);
+         
+        //
+        // generate a MimeBodyPart object which encapsulates the content
+        // we want encrypted.
+        //
 
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
+        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
 
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
-            SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
-              
-            gen.addKeyTransRecipient(_reciCert);
-             
-            //
-            // generate a MimeBodyPart object which encapsulates the content
-            // we want encrypted.
-            //
+        assertEquals("application/pkcs7-mime; name=\"smime.p7m\"; smime-type=enveloped-data", mp.getHeader("Content-Type")[0]);
+        assertEquals("attachment; filename=\"smime.p7m\"", mp.getHeader("Content-Disposition")[0]);
+        assertEquals("S/MIME Encrypted Message", mp.getHeader("Content-Description")[0]);
+    }
+    
+    public void testDESEDE3Encrypted()
+        throws Exception
+    {
+        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
+        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
+          
+        gen.addKeyTransRecipient(_reciCert);
+         
+        //
+        // generate a MimeBodyPart object which encapsulates the content
+        // we want encrypted.
+        //
 
-            SMIMEEnveloped       m = new SMIMEEnveloped(mp);
+        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
 
-            RecipientId     recId = new RecipientId();
+        SMIMEEnveloped       m = new SMIMEEnveloped(mp);
+        RecipientId          recId = new RecipientId();
 
-            recId.setSerialNumber(_reciCert.getSerialNumber());
-            recId.setIssuer(((X509Principal)_reciCert.getIssuerDN()).getEncoded());
+        recId.setSerialNumber(_reciCert.getSerialNumber());
+        recId.setIssuer(PrincipalUtil.getIssuerX509Principal(_reciCert).getEncoded());
 
-            RecipientInformationStore  recipients = m.getRecipientInfos();
-            RecipientInformation        recipient = recipients.get(recId);
+        RecipientInformationStore  recipients = m.getRecipientInfos();
+        RecipientInformation       recipient = recipients.get(recId);
 
-            MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
 
-            ByteArrayOutputStream _baos = new ByteArrayOutputStream();
-            _msg.writeTo(_baos);
-            _baos.close();
-            byte[] _msgBytes = _baos.toByteArray();
-            _baos = new ByteArrayOutputStream();
-            res.writeTo(_baos);
-            _baos.close();
-            byte[] _resBytes = _baos.toByteArray();
-            
-            assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
-        }
-        catch(Exception ex) {
-            log(ex);
-            fail();
-        }
+        ByteArrayOutputStream _baos = new ByteArrayOutputStream();
+        _msg.writeTo(_baos);
+        _baos.close();
+        byte[] _msgBytes = _baos.toByteArray();
+        _baos = new ByteArrayOutputStream();
+        res.writeTo(_baos);
+        _baos.close();
+        byte[] _resBytes = _baos.toByteArray();
+        
+        assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
     }
 
+    public void testParserDESEDE3Encrypted()
+        throws Exception
+    {
+        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+    
+        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
+          
+        gen.addKeyTransRecipient(_reciCert);
+         
+        //
+        // generate a MimeBodyPart object which encapsulates the content
+        // we want encrypted.
+        //
+    
+        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
+    
+        SMIMEEnvelopedParser m = new SMIMEEnvelopedParser(mp);
+        RecipientId          recId = new RecipientId();
+    
+        recId.setSerialNumber(_reciCert.getSerialNumber());
+        recId.setIssuer(PrincipalUtil.getIssuerX509Principal(_reciCert).getEncoded());
+    
+        RecipientInformationStore  recipients = m.getRecipientInfos();
+        RecipientInformation       recipient = recipients.get(recId);
+    
+        MimeBodyPart    res = new MimeBodyPart(recipient.getContentStream(_reciKP.getPrivate(), "BC").getContentStream());
+    
+        ByteArrayOutputStream _baos = new ByteArrayOutputStream();
+        _msg.writeTo(_baos);
+        _baos.close();
+        byte[] _msgBytes = _baos.toByteArray();
+        _baos = new ByteArrayOutputStream();
+        res.writeTo(_baos);
+        _baos.close();
+        byte[] _resBytes = _baos.toByteArray();
+        
+        assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
+    }
+    
     public void testIDEAEncrypted()
     {
         try
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
               
             gen.addKeyTransRecipient(_reciCert);
@@ -174,15 +231,15 @@ public class SMIMEEnvelopedTest extends TestCase {
 
             MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.IDEA_CBC, "BC");
 
-            SMIMEEnveloped       m = new SMIMEEnveloped(mp);
+            SMIMEEnveloped  m = new SMIMEEnveloped(mp);
 
             RecipientId     recId = new RecipientId();
 
             recId.setSerialNumber(_reciCert.getSerialNumber());
-            recId.setIssuer(((X509Principal)_reciCert.getIssuerDN()).getEncoded());
+            recId.setIssuer(PrincipalUtil.getIssuerX509Principal(_reciCert).getEncoded());
 
             RecipientInformationStore  recipients = m.getRecipientInfos();
-            RecipientInformation        recipient = recipients.get(recId);
+            RecipientInformation       recipient = recipients.get(recId);
 
             MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
 
@@ -209,18 +266,6 @@ public class SMIMEEnvelopedTest extends TestCase {
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
               
             gen.addKeyTransRecipient(_reciCert);
@@ -232,12 +277,12 @@ public class SMIMEEnvelopedTest extends TestCase {
 
             MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.RC2_CBC, "BC");
 
-            SMIMEEnveloped       m = new SMIMEEnveloped(mp);
+            SMIMEEnveloped  m = new SMIMEEnveloped(mp);
 
             RecipientId     recId = new RecipientId();
 
             recId.setSerialNumber(_reciCert.getSerialNumber());
-            recId.setIssuer(((X509Principal)_reciCert.getIssuerDN()).getEncoded());
+            recId.setIssuer(PrincipalUtil.getIssuerX509Principal(_reciCert).getEncoded());
 
             RecipientInformationStore  recipients = m.getRecipientInfos();
             RecipientInformation        recipient = recipients.get(recId);
@@ -267,18 +312,6 @@ public class SMIMEEnvelopedTest extends TestCase {
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
               
             gen.addKeyTransRecipient(_reciCert);
@@ -290,12 +323,12 @@ public class SMIMEEnvelopedTest extends TestCase {
 
             MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.CAST5_CBC, "BC");
 
-            SMIMEEnveloped       m = new SMIMEEnveloped(mp);
+            SMIMEEnveloped  m = new SMIMEEnveloped(mp);
 
             RecipientId     recId = new RecipientId();
 
             recId.setSerialNumber(_reciCert.getSerialNumber());
-            recId.setIssuer(((X509Principal)_reciCert.getIssuerDN()).getEncoded());
+            recId.setIssuer(PrincipalUtil.getIssuerX509Principal(_reciCert).getEncoded());
 
             RecipientInformationStore  recipients = m.getRecipientInfos();
             RecipientInformation        recipient = recipients.get(recId);
@@ -325,18 +358,6 @@ public class SMIMEEnvelopedTest extends TestCase {
         {
             MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
 
-            String          _signDN   = "O=Bouncy Castle, C=CA";
-            KeyPair         _signKP   = SMIMETestUtil.makeKeyPair();  
-            X509Certificate _signCert = SMIMETestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            String          _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _origKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _origCert = SMIMETestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
-
-            String          _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=CA";
-            KeyPair         _reciKP   = SMIMETestUtil.makeKeyPair();
-            X509Certificate _reciCert = SMIMETestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
-            
             SMIMEEnvelopedGenerator   gen = new SMIMEEnvelopedGenerator();
 
             //
@@ -354,11 +375,65 @@ public class SMIMEEnvelopedTest extends TestCase {
             // we want encrypted.
             //
 
-            MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
+            MimeBodyPart         mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
 
             SMIMEEnveloped       m = new SMIMEEnveloped(mp);
 
-            RecipientId     recId = new RecipientId();
+            RecipientId          recId = new RecipientId();
+
+            dig.update(_reciCert.getPublicKey().getEncoded());
+
+            recId.setSubjectKeyIdentifier(dig.digest());
+
+            RecipientInformationStore  recipients = m.getRecipientInfos();
+            RecipientInformation       recipient = recipients.get(recId);
+
+            MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+
+            ByteArrayOutputStream _baos = new ByteArrayOutputStream();
+            _msg.writeTo(_baos);
+            _baos.close();
+            byte[] _msgBytes = _baos.toByteArray();
+            _baos = new ByteArrayOutputStream();
+            res.writeTo(_baos);
+            _baos.close();
+            byte[] _resBytes = _baos.toByteArray();
+            
+            assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
+        }
+        catch(Exception ex) {
+            log(ex);
+            fail();
+        }
+    }
+
+    public void testCapEncrypt()
+    {
+        try
+        {
+            MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+
+            SMIMEEnvelopedGenerator   gen = new SMIMEEnvelopedGenerator();
+
+            //
+            // create a subject key id - this has to be done the same way as
+            // it is done in the certificate associated with the private key
+            //
+            MessageDigest           dig = MessageDigest.getInstance("SHA1", "BC");
+            dig.update(_reciCert.getPublicKey().getEncoded());
+
+              
+            gen.addKeyTransRecipient(_reciCert.getPublicKey(), dig.digest());
+             
+            //
+            // generate a MimeBodyPart object which encapsulates the content
+            // we want encrypted.
+            //
+            MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.RC2_CBC, 40, "BC");
+
+            SMIMEEnveloped       m = new SMIMEEnveloped(mp);
+
+            RecipientId          recId = new RecipientId();
 
             dig.update(_reciCert.getPublicKey().getEncoded());
 
