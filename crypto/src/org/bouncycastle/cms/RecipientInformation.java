@@ -108,7 +108,16 @@ public abstract class RecipientInformation
                 return null;
             }
             
-            AlgorithmParameters params = AlgorithmParameters.getInstance(getKeyEncryptionAlgOID(), provider); 
+            AlgorithmParameters params;
+            
+            try
+            {
+                params = AlgorithmParameters.getInstance(getKeyEncryptionAlgOID(), provider);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                params = AlgorithmParameters.getInstance(getKeyEncryptionAlgOID());
+            }
             
             params.init(enc, "ASN.1");
             
@@ -133,12 +142,31 @@ public abstract class RecipientInformation
         
         try
         {
-            Cipher              cipher = Cipher.getInstance(alg, provider);
+            Cipher              cipher;
+            
+            try
+            {
+                cipher = Cipher.getInstance(alg, provider);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                cipher = Cipher.getInstance(alg);
+            }
+            
             DEREncodable        sParams = _encAlg.getParameters();
     
             if (sParams != null && !asn1Null.equals(sParams))
             {
-                AlgorithmParameters     params = AlgorithmParameters.getInstance(alg, provider);
+                AlgorithmParameters     params;
+                
+                try
+                {
+                    params = AlgorithmParameters.getInstance(alg, provider);
+                }
+                catch (NoSuchAlgorithmException e)
+                {
+                    params = AlgorithmParameters.getInstance(alg);
+                }
     
                 ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
                 ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
