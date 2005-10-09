@@ -165,14 +165,18 @@ public class CMSSignedDataParser
             else
             {
                 //
-                // content passed in, need to read past empty encapsulated content info object
+                // content passed in, need to read past empty encapsulated content info object if present
                 //
                 Asn1OctetString octs = (Asn1OctetString)_signedData.getEncapContentInfo().getContent(BerTag.OCTET_STRING);
-                InputStream     in = octs.getOctetStream();
                 
-                while (in.read() >= 0)
+                if (octs != null)
                 {
-                    // ignore
+                    InputStream     in = octs.getOctetStream();
+                    
+                    while (in.read() >= 0)
+                    {
+                        // ignore
+                    }
                 }
             }
         }
