@@ -88,11 +88,52 @@ public abstract class ECPoint
             this.withCompression = withCompression;
         }
         
+        private int getQLength(
+            BigInteger p)
+        {
+            byte[] bytes = p.toByteArray();
+            
+            if (bytes[0] == 0)
+            {
+                return bytes.length - 1;
+            }
+            
+            return bytes.length;
+        }
+            
+        private byte[] intToBytes(
+            BigInteger s,
+            int        qLength)
+        {
+            byte[] bytes = s.toByteArray();
+            
+            if (qLength < bytes.length)
+            {
+                byte[] tmp = new byte[qLength];
+
+                System.arraycopy(bytes, bytes.length - tmp.length, tmp, 0, tmp.length);
+                
+                return tmp;
+            }
+            else if (qLength > bytes.length)
+            {
+                byte[] tmp = new byte[qLength];
+
+                System.arraycopy(bytes, 0, tmp, tmp.length - bytes.length, bytes.length);
+                
+                return tmp; 
+            }
+            
+            return bytes;
+        }
+        
         /**
          * return the field element encoded with point compression. (S 4.3.6)
          */
         public byte[] getEncoded()
         {
+            int qLength = getQLength(getX().p);
+            
             if (withCompression)
             {
                 byte    PC;
@@ -106,7 +147,7 @@ public abstract class ECPoint
                     PC = 0x03;
                 }
     
-                byte[]  X = this.getX().toBigInteger().toByteArray();
+                byte[]  X = intToBytes(this.getX().toBigInteger(), qLength);
                 byte[]  PO = new byte[X.length + 1];
     
                 PO[0] = PC;
@@ -116,14 +157,14 @@ public abstract class ECPoint
             }
             else
             {
-                byte[]  X = this.getX().toBigInteger().toByteArray();
-                byte[]  Y = this.getY().toBigInteger().toByteArray();
+                byte[]  X = intToBytes(this.getX().toBigInteger(), qLength);
+                byte[]  Y = intToBytes(this.getY().toBigInteger(), qLength);
                 byte[]  PO = new byte[X.length + Y.length + 1];
                 
                 PO[0] = 0x04;
                 System.arraycopy(X, 0, PO, 1, X.length);
                 System.arraycopy(Y, 0, PO, X.length + 1, Y.length);
-                
+
                 return PO;
             }
         }
