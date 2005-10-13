@@ -20,7 +20,6 @@ import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.test.CMSTestUtil;
-import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser;
@@ -226,7 +225,9 @@ public class SMIMEEnvelopedTest extends TestCase {
 
         verifyMessageBytes(_msg, res);
     }
-    private void verifyMessageBytes(MimeBodyPart a, MimeBodyPart b) throws IOException, MessagingException
+    
+    private void verifyMessageBytes(MimeBodyPart a, MimeBodyPart b) 
+        throws IOException, MessagingException
     {
         ByteArrayOutputStream _baos = new ByteArrayOutputStream();
         a.writeTo(_baos);
