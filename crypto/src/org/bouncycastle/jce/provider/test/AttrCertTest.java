@@ -17,6 +17,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 import org.bouncycastle.x509.AttributeCertificateHolder;
 import org.bouncycastle.x509.AttributeCertificateIssuer;
@@ -24,6 +25,7 @@ import org.bouncycastle.x509.X509Attribute;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
 import org.bouncycastle.x509.X509V2AttributeCertificateGenerator;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTestResult;
@@ -250,6 +252,30 @@ public class AttrCertTest
             if (principals == null)
             {
                 return new SimpleTestResult(false, getName() + ": entity names not found.");
+            }
+            
+            //
+            // extension test
+            //
+            
+            gen.addExtension("1.1", true, new DEROctetString(new byte[10]));
+            
+            gen.addExtension("2.2", false, new DEROctetString(new byte[10]));
+            
+            aCert = gen.generateCertificate(privKey, "BC");
+            
+            Set exts = aCert.getCriticalExtensionOIDs();
+            
+            if (exts.size() != 1 || !exts.contains("1.1"))
+            {
+                return new SimpleTestResult(false, getName() + ": critical extension test failed");
+            }
+
+            exts = aCert.getNonCriticalExtensionOIDs();
+            
+            if (exts.size() != 1 || !exts.contains("2.2"))
+            {
+                return new SimpleTestResult(false, getName() + ": non-critical extension test failed");
             }
         }
         catch (Exception e)
