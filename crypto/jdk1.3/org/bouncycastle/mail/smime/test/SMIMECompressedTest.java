@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -86,22 +84,13 @@ public class SMIMECompressedTest
         origCert = SMIMETestUtil.makeCertificate(origKP, origDN, signKP, signDN);
     }
 
-    public static void main(String args[]) {
-        MailcapCommandMap _mailcap =
-                           (MailcapCommandMap)CommandMap.getDefaultCommandMap();
-
-        _mailcap.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
-        _mailcap.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
-        _mailcap.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
-        _mailcap.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
-        _mailcap.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
-
-        CommandMap.setDefaultCommandMap(_mailcap);
-
+    public static void main(String args[]) 
+    {
         junit.textui.TestRunner.run(SMIMECompressedTest.class);
     }
 
-    public static Test suite() {
+    public static Test suite() 
+    {
         return new SMIMETestSetup(new TestSuite(SMIMECompressedTest.class));
     }
 
@@ -186,7 +175,7 @@ public class SMIMECompressedTest
 
         MimeMessage bp2 = new MimeMessage((Session)null);                          
 
-        bp2.setContent(smp, smp.getContentType());
+        bp2.setContent(smp);
 
         bp2.saveChanges();
 
@@ -196,9 +185,9 @@ public class SMIMECompressedTest
 
         SMIMECompressed cm = new SMIMECompressed(cbp);
 
-        MimeBodyPart  _res = (MimeBodyPart)smp.getBodyPart(0);
+        MimeMultipart mm = (MimeMultipart)SMIMEUtil.toMimeBodyPart(cm.getContent()).getContent();
         
-        SMIMESigned s = new SMIMESigned((MimeMultipart)SMIMEUtil.toMimeBodyPart(cm.getContent()).getContent());
+        SMIMESigned s = new SMIMESigned(mm);
 
         ByteArrayOutputStream _baos = new ByteArrayOutputStream();
         msg.writeTo(_baos);
