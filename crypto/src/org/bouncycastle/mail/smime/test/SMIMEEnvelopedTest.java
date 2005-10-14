@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
@@ -18,6 +19,7 @@ import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.test.CMSTestUtil;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser;
@@ -95,171 +97,48 @@ public class SMIMEEnvelopedTest
     public void testDESEDE3Encrypted()
         throws Exception
     {
-        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
-
-        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
-          
-        gen.addKeyTransRecipient(_reciCert);
-         
-        //
-        // generate a MimeBodyPart object which encapsulates the content
-        // we want encrypted.
-        //
-
-        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
-
-        SMIMEEnveloped       m = new SMIMEEnveloped(mp);
-        RecipientId          recId = new RecipientId();
-
-        recId.setSerialNumber(_reciCert.getSerialNumber());
-        recId.setIssuer(_reciCert.getIssuerX500Principal().getEncoded());
-
-        RecipientInformationStore  recipients = m.getRecipientInfos();
-        RecipientInformation       recipient = recipients.get(recId);
-
-        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
-
-        verifyMessageBytes(_msg, res);
+        MimeBodyPart  msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+        String        algorithm = SMIMEEnvelopedGenerator.DES_EDE3_CBC;
+        
+        verifyAlgorithm(algorithm, msg);
     }
 
     public void testParserDESEDE3Encrypted()
         throws Exception
     {
-        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
-    
-        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
-          
-        gen.addKeyTransRecipient(_reciCert);
-         
-        //
-        // generate a MimeBodyPart object which encapsulates the content
-        // we want encrypted.
-        //
-    
-        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
-    
-        SMIMEEnvelopedParser m = new SMIMEEnvelopedParser(mp);
-        RecipientId          recId = new RecipientId();
-    
-        recId.setSerialNumber(_reciCert.getSerialNumber());
-        recId.setIssuer(_reciCert.getIssuerX500Principal().getEncoded());
-    
-        RecipientInformationStore  recipients = m.getRecipientInfos();
-        RecipientInformation       recipient = recipients.get(recId);
-    
-        MimeBodyPart    res = new MimeBodyPart(recipient.getContentStream(_reciKP.getPrivate(), "BC").getContentStream());
-    
-        verifyMessageBytes(_msg, res);
+        MimeBodyPart  msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+        String        algorithm = SMIMEEnvelopedGenerator.DES_EDE3_CBC;
+        
+        verifyParserAlgorithm(algorithm, msg);
     }
     
     public void testIDEAEncrypted()
         throws Exception
     {
-        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
-
-        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
-          
-        gen.addKeyTransRecipient(_reciCert);
-         
-        //
-        // generate a MimeBodyPart object which encapsulates the content
-        // we want encrypted.
-        //
-
-        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.IDEA_CBC, "BC");
-
-        SMIMEEnveloped  m = new SMIMEEnveloped(mp);
-
-        RecipientId     recId = new RecipientId();
-
-        recId.setSerialNumber(_reciCert.getSerialNumber());
-        recId.setIssuer(_reciCert.getIssuerX500Principal().getEncoded());
-
-        RecipientInformationStore  recipients = m.getRecipientInfos();
-        RecipientInformation       recipient = recipients.get(recId);
-
-        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
-
-        verifyMessageBytes(_msg, res);
-    }
-    
-    private void verifyMessageBytes(MimeBodyPart a, MimeBodyPart b) 
-        throws IOException, MessagingException
-    {
-        ByteArrayOutputStream _baos = new ByteArrayOutputStream();
-        a.writeTo(_baos);
-        _baos.close();
-        byte[] _msgBytes = _baos.toByteArray();
-        _baos = new ByteArrayOutputStream();
-        b.writeTo(_baos);
-        _baos.close();
-        byte[] _resBytes = _baos.toByteArray();
+        MimeBodyPart  msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+        String        algorithm = SMIMEEnvelopedGenerator.IDEA_CBC;
         
-        assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
+        verifyAlgorithm(algorithm, msg);
     }
 
     public void testRC2Encrypted()
         throws Exception
     {
-        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
-
-        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
-          
-        gen.addKeyTransRecipient(_reciCert);
-         
-        //
-        // generate a MimeBodyPart object which encapsulates the content
-        // we want encrypted.
-        //
-
-        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.RC2_CBC, "BC");
-
-        SMIMEEnveloped  m = new SMIMEEnveloped(mp);
-
-        RecipientId     recId = new RecipientId();
-
-        recId.setSerialNumber(_reciCert.getSerialNumber());
-        recId.setIssuer(_reciCert.getIssuerX500Principal().getEncoded());
-
-        RecipientInformationStore  recipients = m.getRecipientInfos();
-        RecipientInformation        recipient = recipients.get(recId);
-
-        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
-
-        verifyMessageBytes(_msg, res);
+        MimeBodyPart  msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+        String        algorithm = SMIMEEnvelopedGenerator.RC2_CBC;
+        
+        verifyAlgorithm(algorithm, msg);
     }
 
     public void testCASTEncrypted()
         throws Exception
     {
-        MimeBodyPart    _msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
-
-        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
-          
-        gen.addKeyTransRecipient(_reciCert);
-         
-        //
-        // generate a MimeBodyPart object which encapsulates the content
-        // we want encrypted.
-        //
-
-        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.CAST5_CBC, "BC");
-
-        SMIMEEnveloped  m = new SMIMEEnveloped(mp);
-
-        RecipientId     recId = new RecipientId();
-
-        recId.setSerialNumber(_reciCert.getSerialNumber());
-        recId.setIssuer(_reciCert.getIssuerX500Principal().getEncoded());
-
-        RecipientInformationStore  recipients = m.getRecipientInfos();
-        RecipientInformation        recipient = recipients.get(recId);
-
-        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
-
-        verifyMessageBytes(_msg, res);
+        MimeBodyPart  msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
+        String        algorithm = SMIMEEnvelopedGenerator.CAST5_CBC;
+        
+        verifyAlgorithm(algorithm, msg);
     }
-
+    
     public void testSubKeyId()
         throws Exception
     {
@@ -337,5 +216,82 @@ public class SMIMEEnvelopedTest
         MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
 
         verifyMessageBytes(_msg, res);
+    }
+    
+    private void verifyAlgorithm(
+        String algorithmOid,
+        MimeBodyPart msg) 
+        throws Exception
+    {
+        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
+          
+        gen.addKeyTransRecipient(_reciCert);
+         
+        //
+        // generate a MimeBodyPart object which encapsulates the content
+        // we want encrypted.
+        //
+
+        MimeBodyPart   mp = gen.generate(msg, algorithmOid, "BC");
+        SMIMEEnveloped m = new SMIMEEnveloped(mp);
+        RecipientId    recId = getRecipientId();
+
+        RecipientInformationStore  recipients = m.getRecipientInfos();
+        RecipientInformation       recipient = recipients.get(recId);
+
+        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+
+        verifyMessageBytes(msg, res);
+    }
+    
+    private void verifyParserAlgorithm(
+        String algorithmOid,
+        MimeBodyPart msg) 
+        throws Exception
+    {
+        SMIMEEnvelopedGenerator  gen = new SMIMEEnvelopedGenerator();
+          
+        gen.addKeyTransRecipient(_reciCert);
+         
+        //
+        // generate a MimeBodyPart object which encapsulates the content
+        // we want encrypted.
+        //
+
+        MimeBodyPart         mp = gen.generate(msg, algorithmOid, "BC");
+        SMIMEEnvelopedParser m = new SMIMEEnvelopedParser(mp);
+        RecipientId          recId = getRecipientId();
+
+        RecipientInformationStore  recipients = m.getRecipientInfos();
+        RecipientInformation       recipient = recipients.get(recId);
+
+        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+
+        verifyMessageBytes(msg, res);
+    }
+
+    private RecipientId getRecipientId() throws IOException, CertificateEncodingException
+    {
+        RecipientId          recId = new RecipientId();
+
+        recId.setSerialNumber(_reciCert.getSerialNumber());
+        recId.setIssuer(PrincipalUtil.getIssuerX509Principal(_reciCert).getEncoded());
+        return recId;
+    }
+    
+    
+    private void verifyMessageBytes(MimeBodyPart a, MimeBodyPart b) 
+        throws IOException, MessagingException
+    {
+        ByteArrayOutputStream _baos = new ByteArrayOutputStream();
+        a.writeTo(_baos);
+        _baos.close();
+        byte[] _msgBytes = _baos.toByteArray();
+        _baos = new ByteArrayOutputStream();
+        b.writeTo(_baos);
+        _baos.close();
+        byte[] _resBytes = _baos.toByteArray();
+        
+        assertEquals(true, Arrays.equals(_msgBytes, _resBytes));
     }
 }
