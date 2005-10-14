@@ -21,11 +21,8 @@ import javax.mail.internet.MimeMultipart;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -34,8 +31,8 @@ import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 
 
-public class SMIMETestUtil {
-    
+public class SMIMETestUtil
+{    
     public static SecureRandom     rand;
     public static KeyPairGenerator kpg;
     public static KeyPairGenerator dsaKpg;
@@ -102,9 +99,8 @@ public class SMIMETestUtil {
     }
     
     public static X509Certificate makeCertificate(KeyPair _subKP, String _subDN, KeyPair _issKP, String _issDN) 
-        throws GeneralSecurityException, IOException {
-
-        X509Name   _xName   = new X509Name(_subDN);
+        throws GeneralSecurityException, IOException 
+    {
         PublicKey  _subPub  = _subKP.getPublic();
         PrivateKey _issPriv = _issKP.getPrivate();
         PublicKey  _issPub  = _issKP.getPublic();
@@ -201,20 +197,6 @@ public class SMIMETestUtil {
         return new AuthorityKeyIdentifier(_info);
     }
 
-    private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey _pubKey, X509Name _name, int _sNumber) 
-        throws IOException {
-        
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey.getEncoded());
-        SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(_bais).readObject());
-
-        GeneralName             _genName = new GeneralName(_name);
-
-        return new AuthorityKeyIdentifier(
-            _info, new GeneralNames(new DERSequence(_genName)), BigInteger.valueOf(_sNumber));
-
-    }
-    
     private static SubjectKeyIdentifier createSubjectKeyId(PublicKey _pubKey) 
         throws IOException {
         

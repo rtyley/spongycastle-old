@@ -5,11 +5,10 @@ import java.io.OutputStream;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
 
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
-import org.bouncycastle.mail.smime.CMSProcessableBodyPartInbound.CRLFOutputStream;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 
 /**
  * a holding class for a BodyPart to be processed which does CRLF canocicalisation if 
@@ -53,37 +52,12 @@ public class CMSProcessableBodyPartOutbound
     {
         try
         {
-            if (bodyPart instanceof MimeBodyPart)
+            if (SMIMEUtil.isCanonicalisationRequired(bodyPart, defaultContentTransferEncoding))
             {
-                MimeBodyPart    mimePart = (MimeBodyPart)bodyPart;
-                String[]        cte = mimePart.getHeader("Content-Transfer-Encoding");
-                String          contentTransferEncoding;
-
-                if (cte == null)
-                {
-                    contentTransferEncoding = defaultContentTransferEncoding;
-                }
-                else
-                {
-                    contentTransferEncoding = cte[0];
-                }
-                
-                if (!contentTransferEncoding.equalsIgnoreCase("binary"))
-                {
-                    out = new CRLFOutputStream(out);
-                }
-                
-                bodyPart.writeTo(out);
+                out = new CRLFOutputStream(out);
             }
-            else
-            {
-                if (!defaultContentTransferEncoding.equalsIgnoreCase("binary"))
-                {
-                    out = new CRLFOutputStream(out);
-                }
-                
-                bodyPart.writeTo(new CRLFOutputStream(out));
-            }
+            
+            bodyPart.writeTo(out);
         }
         catch (MessagingException e)
         {

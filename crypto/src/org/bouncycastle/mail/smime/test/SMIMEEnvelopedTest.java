@@ -7,8 +7,6 @@ import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 
@@ -25,23 +23,11 @@ import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser;
 import org.bouncycastle.mail.smime.SMIMEUtil;
 
-public class SMIMEEnvelopedTest extends TestCase {
-
-    /*
-     *
-     *  VARIABLES
-     *
-     */
-
-    public boolean DEBUG = true;
-
+public class SMIMEEnvelopedTest 
+    extends TestCase 
+{
     private static String          _signDN;
     private static KeyPair         _signKP;  
-    private static X509Certificate _signCert;
-
-    private static String          _origDN;
-    private static KeyPair         _origKP;
-    private static X509Certificate _origCert;
 
     private static String          _reciDN;
     private static KeyPair         _reciKP;
@@ -58,61 +44,32 @@ public class SMIMEEnvelopedTest extends TestCase {
             
             _signDN   = "O=Bouncy Castle, C=AU";
             _signKP   = CMSTestUtil.makeKeyPair();  
-            _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _signKP, _signDN);
-
-            _origDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
-            _origKP   = CMSTestUtil.makeKeyPair();
-            _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
 
             _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
             _reciKP   = CMSTestUtil.makeKeyPair();
             _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);      
         }
     }
-    /*
-     *
-     *  INFRASTRUCTURE
-     *
-     */
-
-    public SMIMEEnvelopedTest(String name) {
+ 
+    public SMIMEEnvelopedTest(
+        String name) 
+    {
         super(name);
     }
 
-    public static void main(String args[]) {
-        MailcapCommandMap _mailcap =
-                           (MailcapCommandMap)CommandMap.getDefaultCommandMap();
-
-        _mailcap.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
-        _mailcap.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
-        _mailcap.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
-        _mailcap.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
-        _mailcap.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
-
-        CommandMap.setDefaultCommandMap(_mailcap);
-
+    public static void main(
+        String args[]) 
+    {
         junit.textui.TestRunner.run(SMIMEEnvelopedTest.class);
     }
 
     public static Test suite() 
-        throws Exception {
+        throws Exception 
+    {
         init();
         
         return new SMIMETestSetup(new TestSuite(SMIMEEnvelopedTest.class));
     }
-
-    public void log(Exception _ex) {
-        if(DEBUG) {
-            _ex.printStackTrace();
-        }
-    }
-
-    public void log(String _msg) {
-        if(DEBUG) {
-            System.out.println(_msg);
-        }
-    }
-
 
     public void testHeaders()
         throws Exception

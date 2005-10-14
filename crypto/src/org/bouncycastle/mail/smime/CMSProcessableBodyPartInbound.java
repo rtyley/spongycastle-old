@@ -13,6 +13,7 @@ import javax.mail.internet.MimeBodyPart;
 
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 
 /**
  * a holding class for a BodyPart to be processed which does CRLF canonicalisation if
@@ -25,88 +26,6 @@ public class CMSProcessableBodyPartInbound
     private byte[]      buf = new byte[4];
     private String      defaultContentTransferEncoding = "7bit";
 
-    static class CRLFOutputStream extends FilterOutputStream
-    {
-        protected int lastb;
-        protected static byte newline[];
-
-        public CRLFOutputStream(OutputStream outputstream)
-        {
-            super(outputstream);
-            lastb = -1;
-        }
-
-        public void write(int i)
-            throws IOException
-        {
-            if(i == 13)
-            {
-                super.out.write(newline);
-            } 
-            else if(i == 10)
-            {
-                if(lastb != 13)
-                {
-                    super.out.write(newline);
-                }
-            } 
-            else
-            {
-                super.out.write(i);
-            }
-            lastb = i;
-        }
-
-        public void write(byte abyte0[])
-            throws IOException
-        {
-            write(abyte0, 0, abyte0.length);
-        }
-
-        public void write(byte abyte0[], int i, int j)
-            throws IOException
-        {
-            int k = i;
-            j += i;
-            for(int l = k; l < j; l++)
-            {
-                if(abyte0[l] == 13)
-                {
-                    super.out.write(abyte0, k, l - k);
-                    super.out.write(newline);
-                    k = l + 1;
-                } 
-                else if(abyte0[l] == 10)
-                {
-                    if(lastb != 13)
-                    {
-                        super.out.write(abyte0, k, l - k);
-                        super.out.write(newline);
-                    }
-                    k = l + 1;
-                }
-                lastb = abyte0[l];
-            }
-
-            if(j - k > 0)
-            {
-                super.out.write(abyte0, k, j - k);
-            }
-        }
-
-        public void writeln()
-            throws IOException
-        {
-            super.out.write(newline);
-        }
-
-        static 
-        {
-            newline = new byte[2];
-            newline[0] = 13;
-            newline[1] = 10;
-        }
-    }
     private static class LineOutputStream extends FilterOutputStream
     {
         private static byte newline[];

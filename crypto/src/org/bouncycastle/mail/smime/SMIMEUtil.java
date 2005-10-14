@@ -10,6 +10,7 @@ import java.security.cert.X509Certificate;
 import java.security.cert.CertificateParsingException;
 
 import javax.mail.MessagingException;
+import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -19,6 +20,34 @@ import org.bouncycastle.mail.smime.util.SharedFileInputStream;
 
 public class SMIMEUtil
 {
+    static boolean isCanonicalisationRequired(
+        Part   bodyPart,
+        String defaultContentTransferEncoding) 
+        throws MessagingException
+    {
+        if (bodyPart instanceof MimeBodyPart)
+        {
+            MimeBodyPart    mimePart = (MimeBodyPart)bodyPart;
+            String[]        cte = mimePart.getHeader("Content-Transfer-Encoding");
+            String          contentTransferEncoding;
+
+            if (cte == null)
+            {
+                contentTransferEncoding = defaultContentTransferEncoding;
+            }
+            else
+            {
+                contentTransferEncoding = cte[0];
+            }
+            
+            return !contentTransferEncoding.equalsIgnoreCase("binary");
+        }
+        else
+        {
+            return !defaultContentTransferEncoding.equalsIgnoreCase("binary");
+        }
+    }
+    
     /**
      * return the MimeBodyPart described in the raw bytes provided in content
      */
