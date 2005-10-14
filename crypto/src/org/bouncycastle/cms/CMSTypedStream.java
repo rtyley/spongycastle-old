@@ -45,5 +45,7 @@ public class CMSTypedStream
         {
             // keep going...
         }
+        
+        _in.close();
     }
 }
