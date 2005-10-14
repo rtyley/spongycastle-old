@@ -11,8 +11,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
@@ -39,28 +37,45 @@ import org.bouncycastle.mail.smime.SMIMESignedParser;
 public class SMIMESignedTest
     extends TestCase
 {
+    static MimeBodyPart    msg;
 
-    boolean DEBUG = true;
+    static String          signDN;
+    static KeyPair         signKP;
+    static X509Certificate signCert;
 
-    MimeBodyPart    msg;
+    static String          origDN;
+    static KeyPair         origKP;
+    static X509Certificate origCert;
 
-    String          signDN;
-    KeyPair         signKP;
-    X509Certificate signCert;
-
-    String          origDN;
-    KeyPair         origKP;
-    X509Certificate origCert;
-
-    String          reciDN;
-    KeyPair         reciKP;
-    X509Certificate reciCert;
+    static String          reciDN;
+    static KeyPair         reciKP;
+    static X509Certificate reciCert;
 
     KeyPair         dsaSignKP;
     X509Certificate dsaSignCert;
 
     KeyPair         dsaOrigKP;
     X509Certificate dsaOrigCert;
+    
+    static
+    {
+        try
+        {
+            msg      = SMIMETestUtil.makeMimeBodyPart("Hello world!\n");
+            
+            signDN   = "O=Bouncy Castle, C=AU";
+            signKP   = SMIMETestUtil.makeKeyPair();  
+            signCert = SMIMETestUtil.makeCertificate(signKP, signDN, signKP, signDN);
+    
+            origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+            origKP   = SMIMETestUtil.makeKeyPair();
+            origCert = SMIMETestUtil.makeCertificate(origKP, origDN, signKP, signDN);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("problem setting up signed test class: " + e);
+        }
+    }
 
     /*
      *
@@ -68,67 +83,19 @@ public class SMIMESignedTest
      *
      */
 
-    public SMIMESignedTest(String name) {
+    public SMIMESignedTest(String name)
+    {
         super(name);
     }
 
-    public static void main(String args[]) {
-        MailcapCommandMap _mailcap =
-                           (MailcapCommandMap)CommandMap.getDefaultCommandMap();
-
-        _mailcap.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
-        _mailcap.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
-        _mailcap.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
-        _mailcap.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
-        _mailcap.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
-
-        CommandMap.setDefaultCommandMap(_mailcap);
-
+    public static void main(String args[]) 
+    {
         junit.textui.TestRunner.run(SMIMESignedTest.class);
     }
 
-    public static Test suite() {
-        return new SMIMETestSetup(new TestSuite(SMIMESignedTest.class));
-    }
-
-    public void log(Exception _ex) {
-        if(DEBUG) {
-            _ex.printStackTrace();
-        }
-    }
-
-    public void log(String _msg) {
-        if(DEBUG) {
-            System.out.println(_msg);
-        }
-    }
-
-    public void setUp()
+    public static Test suite() 
     {
-        if (msg == null)
-        {
-            try
-            {
-                msg      = SMIMETestUtil.makeMimeBodyPart("Hello world!\n");
-    
-                signDN   = "O=Bouncy Castle, C=AU";
-                signKP   = SMIMETestUtil.makeKeyPair();  
-                signCert = SMIMETestUtil.makeCertificate(signKP, signDN, signKP, signDN);
-    
-                origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
-                origKP   = SMIMETestUtil.makeKeyPair();
-                origCert = SMIMETestUtil.makeCertificate(origKP, origDN, signKP, signDN);
-            }
-            catch(Exception ex)
-            {
-                log(ex);
-                fail();
-            }
-        }
-    }
-
-    public void tearDown() {
-
+        return new SMIMETestSetup(new TestSuite(SMIMESignedTest.class));
     }
     
     public void testHeaders()

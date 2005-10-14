@@ -38,6 +38,11 @@ public class ContentInfoParser
         int  tag) 
         throws IOException
     {
-        return content.getObject(tag, true);
+        if (content != null)
+        {
+            return content.getObject(tag, true);
+        }
+        
+        return null;
     }
 }

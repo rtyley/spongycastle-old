@@ -26,6 +26,8 @@ public class SignedDataParser
     private Asn1Sequence         _seq;
     private Asn1Integer          _version;
     private Asn1Object           _nextObject;
+    private boolean              _certsCalled;
+    private boolean              _crlsCalled;
     
     public SignedDataParser(
         Asn1Sequence seq)
@@ -55,6 +57,7 @@ public class SignedDataParser
     public Asn1Set getCertificates() 
         throws IOException
     {
+        _certsCalled = true;
         _nextObject = _seq.readObject();
 
         if (_nextObject instanceof Asn1TaggedObject && ((Asn1TaggedObject)_nextObject).getTagNumber() == 0)
@@ -71,6 +74,13 @@ public class SignedDataParser
     public Asn1Set getCrls() 
         throws IOException
     {
+        if (!_certsCalled)
+        {
+            throw new IOException("getCerts() has not been called.");
+        }
+        
+        _crlsCalled = true;
+        
         if (_nextObject == null)
         {
             _nextObject = _seq.readObject();
@@ -90,6 +100,11 @@ public class SignedDataParser
     public Asn1Set getSignerInfos() 
         throws IOException
     {
+        if (!_certsCalled || !_crlsCalled)
+        {
+            throw new IOException("getCerts() and/or getCrls() has not been called.");
+        }
+        
         if (_nextObject == null)
         {
             _nextObject = _seq.readObject();

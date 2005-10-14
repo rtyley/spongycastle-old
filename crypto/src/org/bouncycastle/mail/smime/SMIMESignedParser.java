@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.Session;
@@ -20,7 +22,7 @@ import javax.mail.internet.MimeMultipart;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSTypedStream;
-import org.bouncycastle.mail.smime.util.CRLFInputStream;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -86,53 +88,41 @@ public class SMIMESignedParser
         String  defaultContentTransferEncoding)
         throws MessagingException
     {
-        InputStream in;
-        
         try
         {
             File         tmp = File.createTempFile("bcMail", ".mime");   
             OutputStream out = new BufferedOutputStream(new FileOutputStream(tmp));
             
+            if (SMIMEUtil.isCanonicalisationRequired(bodyPart, defaultContentTransferEncoding))
+            {
+                out = new CRLFOutputStream(out);
+            }
+            
             bodyPart.writeTo(out);
             
             out.close();
             
-            in = new TemporaryFileInputStream(tmp);
+            InputStream in = new TemporaryFileInputStream(tmp);
+
+            return new CMSTypedStream(in);
         }
         catch (IOException e)
         {
             throw new MessagingException("can't extract input stream: " + e);
         }
+    }
+    
+    static
+    {
+        MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
 
-        if (bodyPart instanceof MimeBodyPart)
-        {
-            MimeBodyPart    mimePart = (MimeBodyPart)bodyPart;
-            String[]        cte = mimePart.getHeader("Content-Transfer-Encoding");
-            String          contentTransferEncoding;
-
-            if (cte == null)
-            {
-                contentTransferEncoding = defaultContentTransferEncoding;
-            }
-            else
-            {
-                contentTransferEncoding = cte[0];
-            }
-            
-            if (!contentTransferEncoding.equalsIgnoreCase("binary"))
-            {
-                in = new CRLFInputStream(in);
-            }
-        }
-        else
-        {
-            if (!defaultContentTransferEncoding.equalsIgnoreCase("binary"))
-            {
-                in = new CRLFInputStream(in);
-            }
-        }
+        mc.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
+        mc.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
+        mc.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
+        mc.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
+        mc.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
         
-        return new CMSTypedStream(in);
+        CommandMap.setDefaultCommandMap(mc);
     }
     
     /**

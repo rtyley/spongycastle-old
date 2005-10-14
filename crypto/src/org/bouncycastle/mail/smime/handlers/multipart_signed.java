@@ -12,14 +12,11 @@ import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 
-public class multipart_signed implements DataContentHandler {
-    
-    /*  
-     *  
-     *  VARIABLES
-     *  
-     */ 
-    
+import org.bouncycastle.mail.smime.SMIMEStreamingProcessor;
+
+public class multipart_signed 
+    implements DataContentHandler 
+{
     private static final ActivationDataFlavor ADF = new ActivationDataFlavor(MimeMultipart.class, "multipart/signed", "Multipart Signed");
     private static final DataFlavor[]         DFS = new DataFlavor[] { ADF };
     
@@ -87,6 +84,12 @@ public class multipart_signed implements DataContentHandler {
             {
                 os.write(b);
             }
+        }
+        else if (obj instanceof SMIMEStreamingProcessor)
+        {
+            SMIMEStreamingProcessor processor = (SMIMEStreamingProcessor)obj;
+
+            processor.write(os);
         }
         else
         {
