@@ -1,7 +1,14 @@
 package org.bouncycastle.mail.smime;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.mail.MessagingException;
 import javax.mail.Part;
@@ -13,6 +20,7 @@ import javax.mail.internet.MimeMultipart;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.mail.smime.util.CRLFInputStream;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -73,6 +81,60 @@ public class SMIMESignedParser
         }
     }
 
+    private static CMSTypedStream getSignedInputStream(
+        Part    bodyPart,
+        String  defaultContentTransferEncoding)
+        throws MessagingException
+    {
+        InputStream in;
+        
+        try
+        {
+            File         tmp = File.createTempFile("bcMail", ".mime");   
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(tmp));
+            
+            bodyPart.writeTo(out);
+            
+            out.close();
+            
+            in = new TemporaryFileInputStream(tmp);
+        }
+        catch (IOException e)
+        {
+            throw new MessagingException("can't extract input stream: " + e);
+        }
+
+        if (bodyPart instanceof MimeBodyPart)
+        {
+            MimeBodyPart    mimePart = (MimeBodyPart)bodyPart;
+            String[]        cte = mimePart.getHeader("Content-Transfer-Encoding");
+            String          contentTransferEncoding;
+
+            if (cte == null)
+            {
+                contentTransferEncoding = defaultContentTransferEncoding;
+            }
+            else
+            {
+                contentTransferEncoding = cte[0];
+            }
+            
+            if (!contentTransferEncoding.equalsIgnoreCase("binary"))
+            {
+                in = new CRLFInputStream(in);
+            }
+        }
+        else
+        {
+            if (!defaultContentTransferEncoding.equalsIgnoreCase("binary"))
+            {
+                in = new CRLFInputStream(in);
+            }
+        }
+        
+        return new CMSTypedStream(in);
+    }
+    
     /**
      * base constructor using a defaultContentTransferEncoding of 7bit
      *
@@ -80,15 +142,17 @@ public class SMIMESignedParser
      * otherwise processing the message.
      * @exception CMSException if some other problem occurs.
      */
-//    public SMIMESignedParser(
-//        MimeMultipart message) 
-//        throws IOException, MessagingException, CMSException
-//    {
-//        super(new CMSTypedStream(message.getBodyPart(0).getInputStream()), getInputStream(message.getBodyPart(1)));
-//
-//        this.message = message;
-//        this.content = (MimeBodyPart)message.getBodyPart(0);
-//    }
+    public SMIMESignedParser(
+        MimeMultipart message) 
+        throws MessagingException, CMSException
+    {
+        super(getSignedInputStream(message.getBodyPart(0), "7bit"), getInputStream(message.getBodyPart(1)));
+
+        this.message = message;
+        this.content = (MimeBodyPart)message.getBodyPart(0);
+        
+        drainContent();
+    }
 
     /**
      * base constructor with settable contentTransferEncoding
@@ -99,16 +163,18 @@ public class SMIMESignedParser
      * otherwise processing the message.
      * @exception CMSException if some other problem occurs.
      */
-//    public SMIMESignedParser(
-//        MimeMultipart message,
-//        String        defaultContentTransferEncoding) 
-//        throws IOException, MessagingException, CMSException
-//    {
-//        super(new CMSTypedStream(message.getBodyPart(0).getInputStream()), getInputStream(message.getBodyPart(1)));
-//
-//        this.message = message;
-//        this.content = (MimeBodyPart)message.getBodyPart(0);
-//    }
+    public SMIMESignedParser(
+        MimeMultipart message,
+        String        defaultContentTransferEncoding) 
+        throws MessagingException, CMSException
+    {
+        super(getSignedInputStream(message.getBodyPart(0), defaultContentTransferEncoding), getInputStream(message.getBodyPart(1)));
+
+        this.message = message;
+        this.content = (MimeBodyPart)message.getBodyPart(0);
+        
+        drainContent();
+    }
     
     /**
      * base constructor for a signed message with encapsulated content.
@@ -130,7 +196,7 @@ public class SMIMESignedParser
 
         if (cont != null)
         {
-	        this.content = new MimeBodyPart(cont.getContentStream());
+	        this.content = SMIMEUtil.toMimeBodyPart(cont);
         }
     }
 
@@ -162,5 +228,40 @@ public class SMIMESignedParser
     public Object getContentWithSignature()
     {
         return message;
+    }
+    
+    private void drainContent() 
+        throws CMSException
+    {
+        try
+        {
+            this.getSignedContent().drain();
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("unable to read content for verification: " + e, e);
+        }
+    }
+    
+    private static class TemporaryFileInputStream
+        extends BufferedInputStream
+    {
+        private final File _file;
+        
+        TemporaryFileInputStream(File file) 
+            throws FileNotFoundException
+        {
+            super(new FileInputStream(file));
+            
+            _file = file;
+        }
+        
+        public void close() 
+            throws IOException
+        {
+            super.close();
+
+            _file.delete();
+        }
     }
 }
