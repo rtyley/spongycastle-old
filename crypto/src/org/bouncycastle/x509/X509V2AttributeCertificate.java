@@ -186,22 +186,6 @@ public class X509V2AttributeCertificate
         return cert.getEncoded();
     }
 
-    private byte[] getExtensionBytes(String oid)
-    {
-        X509Extensions  extensions = cert.getAcinfo().getExtensions();
-
-        if (extensions != null)
-        {
-            X509Extension   ext = extensions.getExtension(new DERObjectIdentifier(oid));
-            if (ext != null)
-            {
-                return ext.getValue().getOctets();
-            }
-        }
-
-        return null;
-    }
-
     public byte[] getExtensionValue(String oid) 
     {
         X509Extensions  extensions = cert.getAcinfo().getExtensions();
@@ -265,7 +249,7 @@ public class X509V2AttributeCertificate
 
     public Set getCriticalExtensionOIDs() 
     {
-        return getExtensionOIDs(false);
+        return getExtensionOIDs(true);
     }
     
     public boolean hasUnsupportedCriticalExtension()
