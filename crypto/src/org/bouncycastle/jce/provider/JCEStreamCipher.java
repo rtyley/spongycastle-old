@@ -120,8 +120,10 @@ public class JCEStreamCipher
     protected void engineSetMode(
         String  mode) 
     {
-        if ( !mode.equalsIgnoreCase("ECB") )
+        if (!mode.equalsIgnoreCase("ECB"))
+        {
             throw new IllegalArgumentException("can't support mode " + mode);
+        }
     }
 
     /**
@@ -131,7 +133,7 @@ public class JCEStreamCipher
         String  padding) 
     throws NoSuchPaddingException
     {
-        if ( !padding.equalsIgnoreCase("NoPadding") )
+        if (!padding.equalsIgnoreCase("NoPadding"))
             throw new NoSuchPaddingException("Padding " + padding + " unknown.");
     }
 

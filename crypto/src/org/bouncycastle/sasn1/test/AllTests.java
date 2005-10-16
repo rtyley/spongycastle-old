@@ -3,7 +3,7 @@ package org.bouncycastle.sasn1.test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class RegressionTest
+public class AllTests
 {
     public static void main(String[] args)
     {

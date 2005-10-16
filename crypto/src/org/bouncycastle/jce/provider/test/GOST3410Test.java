@@ -314,24 +314,24 @@ public class GOST3410Test
         {
             try
             {
-//				AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("GOST3410", "BC");
-//				a.init(512, random);
-//				AlgorithmParameters params = a.generateParameters();
+//                AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("GOST3410", "BC");
+//                a.init(512, random);
+//                AlgorithmParameters params = a.generateParameters();
 //
-//				byte[] encodeParams = params.getEncoded();
+//                byte[] encodeParams = params.getEncoded();
 //
-//				AlgorithmParameters a2 = AlgorithmParameters.getInstance("GOST3410", "BC");
-//				a2.init(encodeParams);
+//                AlgorithmParameters a2 = AlgorithmParameters.getInstance("GOST3410", "BC");
+//                a2.init(encodeParams);
 //
-//				// a and a2 should be equivalent!
-//				byte[] encodeParams_2 = a2.getEncoded();
+//                // a and a2 should be equivalent!
+//                byte[] encodeParams_2 = a2.getEncoded();
 //
-//				if ( !arrayEquals(encodeParams, encodeParams_2) )
-//				{
-//					return new SimpleTestResult(false, this.getName() + ": encode/decode parameters failed");
-//				}
+//                if (!arrayEquals(encodeParams, encodeParams_2))
+//                {
+//                    return new SimpleTestResult(false, this.getName() + ": encode/decode parameters failed");
+//                }
 
-				GOST3410ParameterSpec gost3410P = new GOST3410ParameterSpec(CryptoProObjectIdentifiers.gostR3410_94_CryptoPro_B.getId());
+                GOST3410ParameterSpec gost3410P = new GOST3410ParameterSpec(CryptoProObjectIdentifiers.gostR3410_94_CryptoPro_B.getId());
 
                 KeyPairGenerator    g = KeyPairGenerator.getInstance("GOST3410", "BC");
                 g.initialize(gost3410P, new SecureRandom());

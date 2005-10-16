@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 
 public class SignerInformationStore
 {
-    private HashMap table = new HashMap();
+    private Map table = new HashMap();
 
     public SignerInformationStore(
         Collection  signerInfos)
@@ -102,7 +103,7 @@ public class SignerInformationStore
      */
     public Collection getSigners()
     {
-        ArrayList	list = new ArrayList(table.size());
+        List        list = new ArrayList(table.size());
         Iterator    it = table.values().iterator();
         
         while (it.hasNext())

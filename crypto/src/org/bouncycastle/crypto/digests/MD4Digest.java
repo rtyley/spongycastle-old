@@ -196,62 +196,62 @@ public class MD4Digest
         //
         // Round 1 - F cycle, 16 times.
         //
-        a = rotateLeft((a + F(b, c, d) + X[ 0]), S11);
-        d = rotateLeft((d + F(a, b, c) + X[ 1]), S12);
-        c = rotateLeft((c + F(d, a, b) + X[ 2]), S13);
-        b = rotateLeft((b + F(c, d, a) + X[ 3]), S14);
-        a = rotateLeft((a + F(b, c, d) + X[ 4]), S11);
-        d = rotateLeft((d + F(a, b, c) + X[ 5]), S12);
-        c = rotateLeft((c + F(d, a, b) + X[ 6]), S13);
-        b = rotateLeft((b + F(c, d, a) + X[ 7]), S14);
-        a = rotateLeft((a + F(b, c, d) + X[ 8]), S11);
-        d = rotateLeft((d + F(a, b, c) + X[ 9]), S12);
-        c = rotateLeft((c + F(d, a, b) + X[10]), S13);
-        b = rotateLeft((b + F(c, d, a) + X[11]), S14);
-        a = rotateLeft((a + F(b, c, d) + X[12]), S11);
-        d = rotateLeft((d + F(a, b, c) + X[13]), S12);
-        c = rotateLeft((c + F(d, a, b) + X[14]), S13);
-        b = rotateLeft((b + F(c, d, a) + X[15]), S14);
+        a = rotateLeft(a + F(b, c, d) + X[ 0], S11);
+        d = rotateLeft(d + F(a, b, c) + X[ 1], S12);
+        c = rotateLeft(c + F(d, a, b) + X[ 2], S13);
+        b = rotateLeft(b + F(c, d, a) + X[ 3], S14);
+        a = rotateLeft(a + F(b, c, d) + X[ 4], S11);
+        d = rotateLeft(d + F(a, b, c) + X[ 5], S12);
+        c = rotateLeft(c + F(d, a, b) + X[ 6], S13);
+        b = rotateLeft(b + F(c, d, a) + X[ 7], S14);
+        a = rotateLeft(a + F(b, c, d) + X[ 8], S11);
+        d = rotateLeft(d + F(a, b, c) + X[ 9], S12);
+        c = rotateLeft(c + F(d, a, b) + X[10], S13);
+        b = rotateLeft(b + F(c, d, a) + X[11], S14);
+        a = rotateLeft(a + F(b, c, d) + X[12], S11);
+        d = rotateLeft(d + F(a, b, c) + X[13], S12);
+        c = rotateLeft(c + F(d, a, b) + X[14], S13);
+        b = rotateLeft(b + F(c, d, a) + X[15], S14);
 
         //
         // Round 2 - G cycle, 16 times.
         //
-        a = rotateLeft((a + G(b, c, d) + X[ 0] + 0x5a827999), S21);
-        d = rotateLeft((d + G(a, b, c) + X[ 4] + 0x5a827999), S22);
-        c = rotateLeft((c + G(d, a, b) + X[ 8] + 0x5a827999), S23);
-        b = rotateLeft((b + G(c, d, a) + X[12] + 0x5a827999), S24);
-        a = rotateLeft((a + G(b, c, d) + X[ 1] + 0x5a827999), S21);
-        d = rotateLeft((d + G(a, b, c) + X[ 5] + 0x5a827999), S22);
-        c = rotateLeft((c + G(d, a, b) + X[ 9] + 0x5a827999), S23);
-        b = rotateLeft((b + G(c, d, a) + X[13] + 0x5a827999), S24);
-        a = rotateLeft((a + G(b, c, d) + X[ 2] + 0x5a827999), S21);
-        d = rotateLeft((d + G(a, b, c) + X[ 6] + 0x5a827999), S22);
-        c = rotateLeft((c + G(d, a, b) + X[10] + 0x5a827999), S23);
-        b = rotateLeft((b + G(c, d, a) + X[14] + 0x5a827999), S24);
-        a = rotateLeft((a + G(b, c, d) + X[ 3] + 0x5a827999), S21);
-        d = rotateLeft((d + G(a, b, c) + X[ 7] + 0x5a827999), S22);
-        c = rotateLeft((c + G(d, a, b) + X[11] + 0x5a827999), S23);
-        b = rotateLeft((b + G(c, d, a) + X[15] + 0x5a827999), S24);
+        a = rotateLeft(a + G(b, c, d) + X[ 0] + 0x5a827999, S21);
+        d = rotateLeft(d + G(a, b, c) + X[ 4] + 0x5a827999, S22);
+        c = rotateLeft(c + G(d, a, b) + X[ 8] + 0x5a827999, S23);
+        b = rotateLeft(b + G(c, d, a) + X[12] + 0x5a827999, S24);
+        a = rotateLeft(a + G(b, c, d) + X[ 1] + 0x5a827999, S21);
+        d = rotateLeft(d + G(a, b, c) + X[ 5] + 0x5a827999, S22);
+        c = rotateLeft(c + G(d, a, b) + X[ 9] + 0x5a827999, S23);
+        b = rotateLeft(b + G(c, d, a) + X[13] + 0x5a827999, S24);
+        a = rotateLeft(a + G(b, c, d) + X[ 2] + 0x5a827999, S21);
+        d = rotateLeft(d + G(a, b, c) + X[ 6] + 0x5a827999, S22);
+        c = rotateLeft(c + G(d, a, b) + X[10] + 0x5a827999, S23);
+        b = rotateLeft(b + G(c, d, a) + X[14] + 0x5a827999, S24);
+        a = rotateLeft(a + G(b, c, d) + X[ 3] + 0x5a827999, S21);
+        d = rotateLeft(d + G(a, b, c) + X[ 7] + 0x5a827999, S22);
+        c = rotateLeft(c + G(d, a, b) + X[11] + 0x5a827999, S23);
+        b = rotateLeft(b + G(c, d, a) + X[15] + 0x5a827999, S24);
 
         //
         // Round 3 - H cycle, 16 times.
         //
-        a = rotateLeft((a + H(b, c, d) + X[ 0] + 0x6ed9eba1), S31);
-        d = rotateLeft((d + H(a, b, c) + X[ 8] + 0x6ed9eba1), S32);
-        c = rotateLeft((c + H(d, a, b) + X[ 4] + 0x6ed9eba1), S33);
-        b = rotateLeft((b + H(c, d, a) + X[12] + 0x6ed9eba1), S34);
-        a = rotateLeft((a + H(b, c, d) + X[ 2] + 0x6ed9eba1), S31);
-        d = rotateLeft((d + H(a, b, c) + X[10] + 0x6ed9eba1), S32);
-        c = rotateLeft((c + H(d, a, b) + X[ 6] + 0x6ed9eba1), S33);
-        b = rotateLeft((b + H(c, d, a) + X[14] + 0x6ed9eba1), S34);
-        a = rotateLeft((a + H(b, c, d) + X[ 1] + 0x6ed9eba1), S31);
-        d = rotateLeft((d + H(a, b, c) + X[ 9] + 0x6ed9eba1), S32);
-        c = rotateLeft((c + H(d, a, b) + X[ 5] + 0x6ed9eba1), S33);
-        b = rotateLeft((b + H(c, d, a) + X[13] + 0x6ed9eba1), S34);
-        a = rotateLeft((a + H(b, c, d) + X[ 3] + 0x6ed9eba1), S31);
-        d = rotateLeft((d + H(a, b, c) + X[11] + 0x6ed9eba1), S32);
-        c = rotateLeft((c + H(d, a, b) + X[ 7] + 0x6ed9eba1), S33);
-        b = rotateLeft((b + H(c, d, a) + X[15] + 0x6ed9eba1), S34);
+        a = rotateLeft(a + H(b, c, d) + X[ 0] + 0x6ed9eba1, S31);
+        d = rotateLeft(d + H(a, b, c) + X[ 8] + 0x6ed9eba1, S32);
+        c = rotateLeft(c + H(d, a, b) + X[ 4] + 0x6ed9eba1, S33);
+        b = rotateLeft(b + H(c, d, a) + X[12] + 0x6ed9eba1, S34);
+        a = rotateLeft(a + H(b, c, d) + X[ 2] + 0x6ed9eba1, S31);
+        d = rotateLeft(d + H(a, b, c) + X[10] + 0x6ed9eba1, S32);
+        c = rotateLeft(c + H(d, a, b) + X[ 6] + 0x6ed9eba1, S33);
+        b = rotateLeft(b + H(c, d, a) + X[14] + 0x6ed9eba1, S34);
+        a = rotateLeft(a + H(b, c, d) + X[ 1] + 0x6ed9eba1, S31);
+        d = rotateLeft(d + H(a, b, c) + X[ 9] + 0x6ed9eba1, S32);
+        c = rotateLeft(c + H(d, a, b) + X[ 5] + 0x6ed9eba1, S33);
+        b = rotateLeft(b + H(c, d, a) + X[13] + 0x6ed9eba1, S34);
+        a = rotateLeft(a + H(b, c, d) + X[ 3] + 0x6ed9eba1, S31);
+        d = rotateLeft(d + H(a, b, c) + X[11] + 0x6ed9eba1, S32);
+        c = rotateLeft(c + H(d, a, b) + X[ 7] + 0x6ed9eba1, S33);
+        b = rotateLeft(b + H(c, d, a) + X[15] + 0x6ed9eba1, S34);
 
         H1 += a;
         H2 += b;

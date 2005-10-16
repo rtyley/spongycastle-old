@@ -142,7 +142,7 @@ public class TBSCertList
             ASN1Sequence certs = (ASN1Sequence)seq.getObjectAt(seqPos++);
             revokedCertificates = new CRLEntry[certs.size()];
 
-            for ( int i = 0; i < revokedCertificates.length; i++)
+            for (int i = 0; i < revokedCertificates.length; i++)
             {
                 revokedCertificates[i] = new CRLEntry((ASN1Sequence)certs.getObjectAt(i));
             }

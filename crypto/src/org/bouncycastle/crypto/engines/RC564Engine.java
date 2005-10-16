@@ -166,7 +166,7 @@ public class RC564Engine
         for (int k = 0; k < iter; k++)
         {
             A = _S[i] = rotateLeft(_S[i] + A + B, 3);
-            B =  L[j] = rotateLeft( L[j] + A + B, A+B);
+            B =  L[j] = rotateLeft(L[j] + A + B, A+B);
             i = (i+1) % _S.length;
             j = (j+1) %  L.length;
         }
@@ -240,7 +240,8 @@ public class RC564Engine
      * @param  x  word to rotate
      * @param  y    number of bits to rotate % wordSize
      */
-    private long rotateLeft(long x, long y) {
+    private long rotateLeft(long x, long y)
+    {
         return ((x << (y & (wordSize-1))) | (x >>> (wordSize - (y & (wordSize-1)))));
     }
 
@@ -254,7 +255,8 @@ public class RC564Engine
      * @param  x  word to rotate
      * @param  y    number of bits to rotate % wordSize
      */
-    private long rotateRight(long x, long y) {
+    private long rotateRight(long x, long y)
+    {
         return ((x >>> (y & (wordSize-1))) | (x << (wordSize - (y & (wordSize-1)))));
     }
 

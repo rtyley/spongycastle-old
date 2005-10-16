@@ -128,7 +128,10 @@ public class GOST3411Digest
     byte[] a = new byte[8];
     private byte[] A(byte[] in)
     {
-        for(int j=0; j<8; j++) a[j]=(byte)(in[j] ^ in[j+8]);
+        for(int j=0; j<8; j++)
+        {
+            a[j]=(byte)(in[j] ^ in[j+8]);
+        }
 
         System.arraycopy(in, 8, in, 0, 24);
         System.arraycopy(a, 0, in, 24, 8);
@@ -151,7 +154,10 @@ public class GOST3411Digest
     {
         cpyBytesToShort(in, wS);
         w_S[15] = (short)(wS[0] ^ wS[1] ^ wS[2] ^ wS[3] ^ wS[12] ^ wS[15]);
-        for(int i = 14; i >= 0; i--) w_S[i] = wS[i+1];
+        for (int i = 14; i >= 0; i--)
+        {
+            w_S[i] = wS[i+1];
+        }
         cpyShortToBytes(w_S, in);
     }
 
@@ -169,7 +175,10 @@ public class GOST3411Digest
         // S = s3 || s2 || s1 || s0
         System.arraycopy(H, 0, U, 0, 32);
         System.arraycopy(M, 0, V, 0, 32);
-        for(int j=0; j<32; j++) W[j] = (byte)(U[j]^V[j]);
+        for (int j=0; j<32; j++)
+        {
+            W[j] = (byte)(U[j]^V[j]);
+        }
         // Encrypt gost28147-ECB
         E(P(W), S, 0, H, 0); // s0 = EK0 [h0]
 
@@ -177,20 +186,43 @@ public class GOST3411Digest
         for (i=1; i<4; i++)
         {
             byte[] tmpA = A(U);
-            for (int j=0; j<32; j++) U[j] = (byte)(tmpA[j] ^ C[i][j]);
+            for (int j=0; j<32; j++)
+            {
+                U[j] = (byte)(tmpA[j] ^ C[i][j]);
+            }
             V = A(A(V));
-            for (int j=0; j<32; j++) W[j] = (byte)(U[j]^V[j]);
+            for (int j=0; j<32; j++)
+            {
+                W[j] = (byte)(U[j]^V[j]);
+            }
             // Encrypt gost28147-ECB
             E(P(W), S, i * 8, H, i * 8); // si = EKi [hi]
         }
 
         // x(M, H) = y61(H^y(M^y12(S)))
-        for(int n = 0; n < 12; n++) fw(S);
-        for(int n = 0; n < 32; n++) S[n] = (byte)(S[n] ^ M[n]);
+        for(int n = 0; n < 12; n++)
+        {
+            fw(S);
+        }
+        for(int n = 0; n < 32; n++)
+        {
+            S[n] = (byte)(S[n] ^ M[n]);
+        }
+
         fw(S);
-        for(int n = 0; n < 32; n++) S[n] = (byte)(H[n] ^ S[n]);
-        for(int n = 0; n < 61; n++) fw(S);
-        for(int j=0; j < H.length; j++) H[j] = S[j];
+
+        for(int n = 0; n < 32; n++)
+        {
+            S[n] = (byte)(H[n] ^ S[n]);
+        }
+        for(int n = 0; n < 61; n++)
+        {
+            fw(S);
+        }
+        for(int j=0; j < H.length; j++)
+        {
+            H[j] = S[j];
+        }
     }
 
     private void finish()
@@ -209,7 +241,10 @@ public class GOST3411Digest
     {
         finish();
 
-        for(int i=0; i<H.length; i++) out[i+outOff] = H[i];
+        for(int i=0; i<H.length; i++)
+        {
+            out[i+outOff] = H[i];
+        }
 
         reset();
 
@@ -230,13 +265,34 @@ public class GOST3411Digest
         byteCount = 0;
         xBufOff = 0;
 
-        for(int i=0; i<H.length; i++) H[i] = 0;  // start vector H
-        for(int i=0; i<L.length; i++) L[i] = 0;
-        for(int i=0; i<M.length; i++) M[i] = 0;
-        for(int i=0; i<C[1].length; i++) C[1][i] = 0;  // real index C = +1 because index array with 0.
-        for(int i=0; i<C[3].length; i++) C[3][i] = 0;
-        for(int i=0; i<Sum.length; i++) Sum[i] = 0;
-        for(int i = 0; i < xBuf.length; i++ ) xBuf[i] = 0;
+        for(int i=0; i<H.length; i++)
+        {
+            H[i] = 0;  // start vector H
+        }
+        for(int i=0; i<L.length; i++)
+        {
+            L[i] = 0;
+        }
+        for(int i=0; i<M.length; i++)
+        {
+            M[i] = 0;
+        }
+        for(int i=0; i<C[1].length; i++)
+        {
+            C[1][i] = 0;  // real index C = +1 because index array with 0.
+        }
+        for(int i=0; i<C[3].length; i++)
+        {
+            C[3][i] = 0;
+        }
+        for(int i=0; i<Sum.length; i++)
+        {
+            Sum[i] = 0;
+        }
+        for(int i = 0; i < xBuf.length; i++)
+        {
+            xBuf[i] = 0;
+        }
 
         System.arraycopy(C2, 0, C[2], 0, C2.length);
     }
@@ -256,7 +312,7 @@ public class GOST3411Digest
         }
     }
 
-    private void LongToBytes( long r, byte[] out, int outOff)
+    private void LongToBytes(long r, byte[] out, int outOff)
     {
         out[outOff + 7] = (byte)(r >> 56);
         out[outOff + 6] = (byte)(r >> 48);
@@ -270,14 +326,16 @@ public class GOST3411Digest
 
     private void cpyBytesToShort(byte[] S, short[] wS)
     {
-        for(int i=0; i<S.length/2; i++){
+        for(int i=0; i<S.length/2; i++)
+        {
             wS[i] = (short)(((S[i*2+1]<<8)&0xFF00)|(S[i*2]&0xFF));
         }
     }
 
     private void cpyShortToBytes(short[] wS, byte[] S)
     {
-        for(int i=0; i<S.length/2; i++){
+        for(int i=0; i<S.length/2; i++) 
+        {
             S[i*2 + 1] = (byte)(wS[i] >> 8);
             S[i*2] = (byte)wS[i];
         }

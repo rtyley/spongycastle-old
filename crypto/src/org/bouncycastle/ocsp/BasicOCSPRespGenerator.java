@@ -14,6 +14,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
@@ -32,7 +33,7 @@ import org.bouncycastle.asn1.x509.CRLReason;
  */
 public class BasicOCSPRespGenerator
 {
-    private ArrayList       list = new ArrayList();
+    private List            list = new ArrayList();
     private GeneralName     responderName = null;
     private X509Extensions  responseExtensions = null;
     private RespID          responderID;

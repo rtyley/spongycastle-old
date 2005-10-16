@@ -26,14 +26,19 @@ public abstract class ECFieldElement
 
     public boolean equals(Object other)
     {
-        if ( other == this )
+        if (other == this)
             return true;
 
-        if ( !(other instanceof ECFieldElement) )
+        if (!(other instanceof ECFieldElement))
             return false;
 
         ECFieldElement o = (ECFieldElement)other;
         return p.equals(o.p) && x.equals(o.x);
+    }
+
+    public int hashCode()
+    {
+        return p.hashCode() ^ x.hashCode();
     }
 
     public abstract String         getFieldName();
@@ -106,7 +111,7 @@ public abstract class ECFieldElement
         public ECFieldElement sqrt()
         {
             // p mod 4 == 3
-            if ( p.testBit(1) )
+            if (p.testBit(1))
             {
                 // z = g^(u+1) + p, p = 4u + 3
                 ECFieldElement z = new Fp(p, x.modPow(p.shiftRight(2).add(ONE), p));

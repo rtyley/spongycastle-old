@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -100,12 +101,12 @@ public class CMSSignedDataStreamGenerator
     public static final String  ENCRYPTION_GOST3410 = CryptoProObjectIdentifiers.gostR3410_94.getId();
     public static final String  ENCRYPTION_ECGOST3410 = CryptoProObjectIdentifiers.gostR3410_2001.getId();
     
-    private ArrayList  _certs = new ArrayList();
-    private ArrayList  _crls = new ArrayList();
-    private ArrayList  _signerInfs = new ArrayList();
-    private ArrayList  _signers = new ArrayList();
-    private ArrayList  _digests = new ArrayList();
-    private int        _bufferSize;
+    private List  _certs = new ArrayList();
+    private List  _crls = new ArrayList();
+    private List  _signerInfs = new ArrayList();
+    private List  _signers = new ArrayList();
+    private List  _digests = new ArrayList();
+    private int   _bufferSize;
     
     static class DigOutputStream
         extends OutputStream

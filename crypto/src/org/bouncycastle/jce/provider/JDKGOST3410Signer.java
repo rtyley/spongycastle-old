@@ -238,20 +238,20 @@ public class JDKGOST3410Signer
     }
 
     static public class gost3410
-	    extends JDKGOST3410Signer
-	{
-	    public gost3410()
-	    {
-	        super("GOST3411withGOST3410", new GOST3411Digest(), new GOST3410Signer());
-	    }
-	}
+        extends JDKGOST3410Signer
+    {
+        public gost3410()
+        {
+            super("GOST3411withGOST3410", new GOST3411Digest(), new GOST3410Signer());
+        }
+    }
     
     static public class ecgost3410
-	    extends JDKGOST3410Signer
-	{
-	    public ecgost3410()
-	    {
-	        super("GOST3411withECGOST3410", new GOST3411Digest(), new ECGOST3410Signer());
-	    }
-	}
+        extends JDKGOST3410Signer
+    {
+        public ecgost3410()
+        {
+            super("GOST3411withECGOST3410", new GOST3411Digest(), new ECGOST3410Signer());
+        }
+    }
 }

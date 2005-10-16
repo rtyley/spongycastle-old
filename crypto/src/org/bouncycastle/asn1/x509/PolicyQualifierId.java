@@ -12,7 +12,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
  *    id-qt-cps      OBJECT IDENTIFIER ::=  { id-qt 1 }
  *    id-qt-unotice  OBJECT IDENTIFIER ::=  { id-qt 2 }
  *  PolicyQualifierId ::=
- *       OBJECT IDENTIFIER ( id-qt-cps | id-qt-unotice )
+ *       OBJECT IDENTIFIER (id-qt-cps | id-qt-unotice)
  * </pre>
  */
 public class PolicyQualifierId extends DERObjectIdentifier 

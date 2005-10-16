@@ -118,7 +118,7 @@ public abstract class PGPEncryptedData
         int ch = 0;
         while ((ch = encStream.read()) >= 0)
         {
-            ;
+            // do nothing
         }
 
         MessageDigest        hash = dIn.getMessageDigest();

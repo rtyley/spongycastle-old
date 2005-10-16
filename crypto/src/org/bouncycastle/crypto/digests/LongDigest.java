@@ -139,7 +139,8 @@ public abstract class LongDigest
         byteCount2 = 0;
 
         xBufOff = 0;
-        for ( int i = 0; i < xBuf.length; i++ ) {
+        for (int i = 0; i < xBuf.length; i++)
+        {
             xBuf[i] = 0;
         }
 

@@ -39,4 +39,16 @@ public class DHKeyParameters
             return params.equals(dhKey.getParameters());
         }
     }
+    
+    public int hashCode()
+    {
+        int code = isPrivate() ? 0 : 1;
+        
+        if (params != null)
+        {
+            code ^= params.hashCode();
+        }
+        
+        return code;
+    }
 }

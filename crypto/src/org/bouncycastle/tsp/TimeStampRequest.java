@@ -191,7 +191,7 @@ public class TimeStampRequest
     private Set getExtensionOIDS(
         boolean critical)
     {
-        HashSet         set = new HashSet();
+        Set             set = new HashSet();
         X509Extensions  extensions = req.getExtensions();
 
         if (extensions != null)

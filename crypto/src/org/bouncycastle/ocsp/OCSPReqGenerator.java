@@ -12,6 +12,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -36,7 +37,7 @@ import org.bouncycastle.jce.X509Principal;
 
 public class OCSPReqGenerator
 {
-    private ArrayList       list = new ArrayList();
+    private List            list = new ArrayList();
     private GeneralName     requestorName = null;
     private X509Extensions  requestExtensions = null;
 

@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
@@ -37,19 +38,6 @@ public class RIPEMD160DigestTest
 
     final static String million_a_digest = "52783243c1697bdbe16d37f97f68f08325dc1528";
 
-    public static boolean arraysEqual(byte[] a, byte[] b)
-    {
-        if (a == b) return true;
-        if (a.length != b.length) return false;
-
-        for (int i = 0; i < a.length; i++)
-        {
-            if (a[i] != b[i]) return false;
-        }
-
-        return true;
-    }
-        
     public String getName()
     {
         return "RIPEMD160";
@@ -66,7 +54,7 @@ public class RIPEMD160DigestTest
             digest.update(m, 0, m.length);
             digest.doFinal(resBuf, 0);
 
-            if (!arraysEqual(resBuf, Hex.decode(digests[i])))
+            if (!Arrays.areEqual(resBuf, Hex.decode(digests[i])))
             {
                 return new SimpleTestResult(false, getName() + ": Vector " + i + " failed");
             }
@@ -85,7 +73,7 @@ public class RIPEMD160DigestTest
         digest.update(m, m.length/2, m.length - m.length/2);
         digest.doFinal(resBuf, 0);
 
-        if (!arraysEqual(resBuf, Hex.decode(digests[digests.length-1])))
+        if (!Arrays.areEqual(resBuf, Hex.decode(digests[digests.length-1])))
         {
             return new SimpleTestResult(false,
                 "RIPEMD160 failing clone test"
@@ -98,7 +86,7 @@ public class RIPEMD160DigestTest
         d.update(m, m.length/2, m.length - m.length/2);
         d.doFinal(resBuf, 0);
 
-        if (!arraysEqual(resBuf, Hex.decode(digests[digests.length-1])))
+        if (!Arrays.areEqual(resBuf, Hex.decode(digests[digests.length-1])))
         {
             return new SimpleTestResult(false,
                 "RIPEMD160 failing clone test - part 2"
@@ -114,7 +102,7 @@ public class RIPEMD160DigestTest
         }
         digest.doFinal(resBuf, 0);
 
-        if (!arraysEqual(resBuf, Hex.decode(million_a_digest)))
+        if (!Arrays.areEqual(resBuf, Hex.decode(million_a_digest)))
         {
             return new SimpleTestResult(false, getName() + ": Million a's failed");
         }

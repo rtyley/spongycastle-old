@@ -186,7 +186,7 @@ public class SMIMESignedParser
 
         if (cont != null)
         {
-	        this.content = SMIMEUtil.toMimeBodyPart(cont);
+            this.content = SMIMEUtil.toMimeBodyPart(cont);
         }
     }
 

@@ -757,7 +757,7 @@ public class X509Name
             
             for(int j = 0; j < _orderingSize; j++) 
             {
-                if(_indexes[j] == true)
+                if (_indexes[j])
                 {
                     continue;
                 }

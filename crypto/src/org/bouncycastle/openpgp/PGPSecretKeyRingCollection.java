@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,12 +17,12 @@ import org.bouncycastle.bcpg.BCPGOutputStream;
  */
 public class PGPSecretKeyRingCollection 
 {
-    private HashMap     secretRings = new HashMap();
-    private ArrayList   order = new ArrayList();
+    private Map    secretRings = new HashMap();
+    private List   order = new ArrayList();
     
     private PGPSecretKeyRingCollection(
-        HashMap     secretRings,
-        ArrayList   order)
+        Map     secretRings,
+        List    order)
     {
         this.secretRings = secretRings;
         this.order = order;
@@ -263,8 +264,8 @@ public class PGPSecretKeyRingCollection
             throw new IllegalArgumentException("Collection already contains a key with a keyID for the passed in ring.");
         }
         
-        HashMap     newSecretRings = new HashMap(ringCollection.secretRings);
-        ArrayList   newOrder = new ArrayList(ringCollection.order); 
+        Map     newSecretRings = new HashMap(ringCollection.secretRings);
+        List    newOrder = new ArrayList(ringCollection.order); 
         
         newSecretRings.put(key, secretKeyRing);
         newOrder.add(key);
@@ -292,8 +293,8 @@ public class PGPSecretKeyRingCollection
             throw new IllegalArgumentException("Collection already contains a key with a keyID for the passed in ring.");
         }
         
-        HashMap     newSecretRings = new HashMap(ringCollection.secretRings);
-        ArrayList   newOrder = new ArrayList(ringCollection.order); 
+        Map     newSecretRings = new HashMap(ringCollection.secretRings);
+        List    newOrder = new ArrayList(ringCollection.order); 
         
         newSecretRings.remove(key);
         

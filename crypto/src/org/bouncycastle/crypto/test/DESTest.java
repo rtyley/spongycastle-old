@@ -97,7 +97,7 @@ public class DESTest
 
     public DESTest()
     {
-        super(tests);
+        super(tests, new DESEngine(), new KeyParameter(new byte[8]));
     }
 
     public String getName()

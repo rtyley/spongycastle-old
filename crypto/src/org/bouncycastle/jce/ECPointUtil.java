@@ -49,7 +49,7 @@ public class ECPointUtil
                 throw new RuntimeException("Invalid point compression");
             }
 
-            int bit0 = (beta.testBit(0) ? 0 : 1);
+            int bit0 = beta.testBit(0) ? 0 : 1;
 
             if (bit0 == ytilde)
             {

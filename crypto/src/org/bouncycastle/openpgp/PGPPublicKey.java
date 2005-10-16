@@ -31,19 +31,19 @@ import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
 public class PGPPublicKey
     implements PublicKeyAlgorithmTags
 {
+    PublicKeyPacket publicPk;
+    TrustPacket     trustPk;
+    List            keySigs = new ArrayList();
+    List            ids = new ArrayList();
+    List            idTrusts = new ArrayList();
+    List            idSigs = new ArrayList();
+    
+    List            subSigs = null;
+
     private long    keyID;
     private byte[]  fingerprint;
     private int     keyStrength;
     
-    PublicKeyPacket publicPk;
-    TrustPacket     trustPk;
-    ArrayList       keySigs = new ArrayList();
-    ArrayList       ids = new ArrayList();
-    ArrayList       idTrusts = new ArrayList();
-    ArrayList       idSigs = new ArrayList();
-    
-    ArrayList       subSigs = null;
-
     private void init()
         throws IOException
     {
@@ -131,7 +131,7 @@ public class PGPPublicKey
      * @throws PGPException
      * @throws NoSuchProviderException
      */
-    public PGPPublicKey(        
+    public PGPPublicKey(
         int            algorithm,
         PublicKey      pubKey,
         Date           time,
@@ -189,7 +189,7 @@ public class PGPPublicKey
     PGPPublicKey(
         PublicKeyPacket publicPk, 
         TrustPacket     trustPk, 
-        ArrayList       sigs)
+        List            sigs)
         throws IOException
      {
         this.publicPk = publicPk;
@@ -207,7 +207,7 @@ public class PGPPublicKey
     PGPPublicKey(
         PGPPublicKey key,
         TrustPacket trust, 
-        ArrayList subSigs)
+        List        subSigs)
     {
         this.publicPk = key.publicPk;
         this.trustPk = trust;
@@ -253,10 +253,10 @@ public class PGPPublicKey
     PGPPublicKey(
         PublicKeyPacket publicPk,
         TrustPacket     trustPk,
-        ArrayList       keySigs,
-        ArrayList       ids,
-        ArrayList       idTrusts,
-        ArrayList       idSigs)
+        List            keySigs,
+        List            ids,
+        List            idTrusts,
+        List            idSigs)
         throws IOException
     {
         this.publicPk = publicPk;
@@ -271,8 +271,8 @@ public class PGPPublicKey
     
     PGPPublicKey(
         PublicKeyPacket  publicPk,
-        ArrayList        ids,
-        ArrayList        idSigs)
+        List             ids,
+        List             idSigs)
         throws IOException
     {
         this.publicPk = publicPk;
@@ -481,7 +481,7 @@ public class PGPPublicKey
      */
     public Iterator getUserIDs()
     {
-        ArrayList    temp = new ArrayList();
+        List    temp = new ArrayList();
         
         for (int i = 0; i != ids.size(); i++)
         {
@@ -501,7 +501,7 @@ public class PGPPublicKey
      */
     public Iterator getUserAttributes()
     {
-        ArrayList    temp = new ArrayList();
+        List    temp = new ArrayList();
         
         for (int i = 0; i != ids.size(); i++)
         {
@@ -588,7 +588,7 @@ public class PGPPublicKey
     {
         if (subSigs == null)
         {
-            ArrayList sigs = new ArrayList();
+            List sigs = new ArrayList();
 
             sigs.addAll(keySigs);
 
@@ -663,7 +663,7 @@ public class PGPPublicKey
                     out.writePacket((ContainedPacket)idTrusts.get(i));
                 }
                 
-                ArrayList    sigs = (ArrayList)idSigs.get(i);
+                List    sigs = (List)idSigs.get(i);
                 for (int j = 0; j != sigs.size(); j++)
                 {
                     ((PGPSignature)sigs.get(j)).encode(out);
@@ -728,13 +728,13 @@ public class PGPPublicKey
         PGPSignature    certification)
     {
         PGPPublicKey    returnKey = new PGPPublicKey(key);
-        ArrayList       sigList = null;
+        List            sigList = null;
         
         for (int i = 0; i != returnKey.ids.size(); i++)
         {
             if (id.equals(returnKey.ids.get(i)))
             {
-                sigList = (ArrayList)returnKey.idSigs.get(i);
+                sigList = (List)returnKey.idSigs.get(i);
             }
         }
         
@@ -808,7 +808,7 @@ public class PGPPublicKey
         {
             if (id.equals(returnKey.ids.get(i)))
             {
-                found = ((ArrayList)returnKey.idSigs.get(i)).remove(certification);
+                found = ((List)returnKey.idSigs.get(i)).remove(certification);
             }
         }
         

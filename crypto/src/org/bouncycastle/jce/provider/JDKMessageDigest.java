@@ -297,28 +297,28 @@ public class JDKMessageDigest
     }
     
     static public class GOST3411
-	    extends JDKMessageDigest
-		implements Cloneable
-	{
-	    public GOST3411()
-	    {
-	        super(new GOST3411Digest());
-	    }
-	
-		public Object clone()
-		throws CloneNotSupportedException
-		{
-			GOST3411 d = (GOST3411)super.clone();
-			d.digest = new GOST3411Digest((GOST3411Digest)digest);
+        extends JDKMessageDigest
+        implements Cloneable
+    {
+        public GOST3411()
+        {
+            super(new GOST3411Digest());
+        }
+    
+        public Object clone()
+        throws CloneNotSupportedException
+        {
+            GOST3411 d = (GOST3411)super.clone();
+            d.digest = new GOST3411Digest((GOST3411Digest)digest);
 
-			return d;
-		}
-	}
+            return d;
+        }
+    }
     
     static public class Whirlpool
        extends JDKMessageDigest
-	   implements Cloneable
-	{
+       implements Cloneable
+    {
         public Whirlpool()
         {
             super(new WhirlpoolDigest());

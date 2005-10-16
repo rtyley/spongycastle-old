@@ -69,14 +69,16 @@ public class DisplayText
     */
    public DisplayText (int type, String text) 
    {
-      if (text.length() > DISPLAY_TEXT_MAXIMUM_SIZE) {
+      if (text.length() > DISPLAY_TEXT_MAXIMUM_SIZE)
+      {
          // RFC3280 limits these strings to 200 chars
          // truncate the string
          text = text.substring (0, DISPLAY_TEXT_MAXIMUM_SIZE);
       }
      
       contentType = type;
-      switch (type) {
+      switch (type)
+      {
          case CONTENT_TYPE_IA5STRING:
             contents = (DERString)new DERIA5String (text);
             break;
@@ -122,7 +124,8 @@ public class DisplayText
    public DisplayText (String text) 
    {
       // by default use UTF8String
-      if (text.length() > DISPLAY_TEXT_MAXIMUM_SIZE) {
+      if (text.length() > DISPLAY_TEXT_MAXIMUM_SIZE)
+      {
          text = text.substring(0, DISPLAY_TEXT_MAXIMUM_SIZE);
       }
       

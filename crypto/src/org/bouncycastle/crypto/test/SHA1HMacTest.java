@@ -3,6 +3,7 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
@@ -46,19 +47,6 @@ public class SHA1HMacTest
         "Test Using Larger Than Block-Size Key - Hash Key First",
         "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data"
     };
-
-    public static boolean arraysEqual(byte[] a, byte[] b)
-    {
-        if (a == b) return true;
-        if (a.length != b.length) return false;
-
-        for (int i = 0; i < a.length; i++)
-        {
-            if (a[i] != b[i]) return false;
-        }
-
-        return true;
-    }
         
     public String getName()
     {
@@ -81,7 +69,7 @@ public class SHA1HMacTest
             hmac.update(m, 0, m.length);
             hmac.doFinal(resBuf, 0);
 
-            if (!arraysEqual(resBuf, Hex.decode(digests[i])))
+            if (!Arrays.areEqual(resBuf, Hex.decode(digests[i])))
             {
                 return new SimpleTestResult(false, getName() + ": Vector " + i + " failed");
             }
@@ -103,7 +91,7 @@ public class SHA1HMacTest
         hmac.update(m, 0, m.length);
         hmac.doFinal(resBuf, 0);
 
-        if (!arraysEqual(resBuf, Hex.decode(digests[vector])))
+        if (!Arrays.areEqual(resBuf, Hex.decode(digests[vector])))
         {
             return new SimpleTestResult(false, getName() +
                     "Reset with vector " + vector + " failed");

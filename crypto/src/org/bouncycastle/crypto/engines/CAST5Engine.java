@@ -648,7 +648,7 @@ public class CAST5Engine
         int I = Kmi + D;
         I = I << Kri | I >>> (32-Kri);
         return ((S1[(I>>>24)&0xff]^S2[(I>>>16)&0xff])-S3[(I>>> 8)&0xff])+
-                 S4[(I     )&0xff];
+                 S4[I & 0xff];
     }
 
     /**
@@ -665,7 +665,7 @@ public class CAST5Engine
         int I = Kmi ^ D;
         I = I << Kri | I >>> (32-Kri);
         return ((S1[(I>>>24)&0xff]-S2[(I>>>16)&0xff])+S3[(I>>> 8)&0xff])^
-                 S4[(I     )&0xff];
+                 S4[I & 0xff];
     }
 
     /**
@@ -682,7 +682,7 @@ public class CAST5Engine
         int I = Kmi - D;
         I = I << Kri | I >>> (32-Kri);
         return ((S1[(I>>>24)&0xff]+S2[(I>>>16)&0xff])^S3[(I>>> 8)&0xff])-
-                 S4[(I     )&0xff];
+                 S4[I & 0xff];
     }
 
     /**

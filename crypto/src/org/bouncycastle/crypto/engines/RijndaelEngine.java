@@ -18,7 +18,7 @@ public class RijndaelEngine
 
     private static final int MAXKC = (256/4);
 
-    private static final byte[] Logtable = {
+    private static final byte[] logtable = {
         (byte)0,    (byte)0,    (byte)25,   (byte)1,    (byte)50,   (byte)2,    (byte)26,   (byte)198,
         (byte)75,   (byte)199,  (byte)27,   (byte)104,  (byte)51,   (byte)238,  (byte)223,  (byte)3,
         (byte)100,  (byte)4,    (byte)224,  (byte)14,   (byte)52,   (byte)141,  (byte)129,  (byte)239,
@@ -53,7 +53,7 @@ public class RijndaelEngine
         (byte)13,   (byte)99,   (byte)140,  (byte)128,  (byte)192,  (byte)247,  (byte)112,  (byte)7
     };
 
-    private static final byte[] Alogtable = {
+    private static final byte[] aLogtable = {
           (byte)0,   (byte)3,   (byte)5,  (byte)15,  (byte)17,  (byte)51,  (byte)85, (byte)255,  (byte)26,  (byte)46, (byte)114, (byte)150, (byte)161, (byte)248,  (byte)19,  (byte)53,
          (byte)95, (byte)225,  (byte)56,  (byte)72, (byte)216, (byte)115, (byte)149, (byte)164, (byte)247,   (byte)2,   (byte)6,  (byte)10,  (byte)30,  (byte)34, (byte)102, (byte)170,
         (byte)229,  (byte)52,  (byte)92, (byte)228,  (byte)55,  (byte)89, (byte)235,  (byte)38, (byte)106, (byte)190, (byte)217, (byte)112, (byte)144, (byte)171, (byte)230,  (byte)49,
@@ -156,7 +156,7 @@ public class RijndaelEngine
     {
         if (b != 0)
         {
-            return Alogtable[25 + (Logtable[b] & 0xff)];
+            return aLogtable[25 + (logtable[b] & 0xff)];
         }
         else
         {
@@ -169,7 +169,7 @@ public class RijndaelEngine
     {
         if (b != 0)
         {
-            return Alogtable[1 + (Logtable[b] & 0xff)];
+            return aLogtable[1 + (logtable[b] & 0xff)];
         }
         else
         {
@@ -182,7 +182,7 @@ public class RijndaelEngine
     {
         if (b >= 0)
         {
-            return Alogtable[199 + b];
+            return aLogtable[199 + b];
         }
         else
         {
@@ -195,7 +195,7 @@ public class RijndaelEngine
     {
         if (b >= 0)
         {
-            return Alogtable[104 + b];
+            return aLogtable[104 + b];
         }
         else
         {
@@ -208,7 +208,7 @@ public class RijndaelEngine
     {
         if (b >= 0)
         {
-            return Alogtable[238 + b];
+            return aLogtable[238 + b];
         }
         else
         {
@@ -221,7 +221,7 @@ public class RijndaelEngine
     {
         if (b >= 0)
         {
-            return Alogtable[223 + b];
+            return aLogtable[223 + b];
         }
         else
         {
@@ -337,10 +337,10 @@ public class RijndaelEngine
             //
             // pre-lookup the log table
             //
-            a0 = (a0 != 0) ? (Logtable[a0 & 0xff] & 0xff) : -1;
-            a1 = (a1 != 0) ? (Logtable[a1 & 0xff] & 0xff) : -1;
-            a2 = (a2 != 0) ? (Logtable[a2 & 0xff] & 0xff) : -1;
-            a3 = (a3 != 0) ? (Logtable[a3 & 0xff] & 0xff) : -1;
+            a0 = (a0 != 0) ? (logtable[a0 & 0xff] & 0xff) : -1;
+            a1 = (a1 != 0) ? (logtable[a1 & 0xff] & 0xff) : -1;
+            a2 = (a2 != 0) ? (logtable[a2 & 0xff] & 0xff) : -1;
+            a3 = (a3 != 0) ? (logtable[a3 & 0xff] & 0xff) : -1;
 
             r0 |= (long)((mul0xe(a0) ^ mul0xb(a1) ^ mul0xd(a2) ^ mul0x9(a3)) & 0xff) << j;
 

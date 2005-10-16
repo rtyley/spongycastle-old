@@ -59,48 +59,58 @@ public class DESedeWrapEngine
     * @param forWrapping
     * @param param
     */
-   public void init(boolean forWrapping, CipherParameters param) {
+    public void init(boolean forWrapping, CipherParameters param)
+    {
 
-      this.forWrapping = forWrapping;
-      this.engine = new CBCBlockCipher(new DESedeEngine());
+        this.forWrapping = forWrapping;
+        this.engine = new CBCBlockCipher(new DESedeEngine());
 
-      if (param instanceof KeyParameter) {
-         this.param = (KeyParameter) param;
+        if (param instanceof KeyParameter)
+        {
+            this.param = (KeyParameter)param;
 
-         if (this.forWrapping) {
+            if (this.forWrapping)
+            {
 
-            // Hm, we have no IV but we want to wrap ?!?
-            // well, then we have to create our own IV.
-            this.iv = new byte[8];
+                // Hm, we have no IV but we want to wrap ?!?
+                // well, then we have to create our own IV.
+                this.iv = new byte[8];
 
-            SecureRandom sr = new SecureRandom();
+                SecureRandom sr = new SecureRandom();
 
-            sr.nextBytes(iv);
+                sr.nextBytes(iv);
 
-            this.paramPlusIV = new ParametersWithIV(this.param, this.iv);
-         }
-      } else if (param instanceof ParametersWithIV) {
-         this.paramPlusIV = (ParametersWithIV) param;
-         this.iv = this.paramPlusIV.getIV();
-         this.param = (KeyParameter) this.paramPlusIV.getParameters();
-
-         if (this.forWrapping) {
-            if ((this.iv == null) || (this.iv.length != 8)) {
-               throw new IllegalArgumentException("IV is not 8 octets");
+                this.paramPlusIV = new ParametersWithIV(this.param, this.iv);
             }
-         } else {
-            throw new IllegalArgumentException(
-               "You should not supply an IV for unwrapping");
-         }
-      }
-   }
+        }
+        else if (param instanceof ParametersWithIV)
+        {
+            this.paramPlusIV = (ParametersWithIV)param;
+            this.iv = this.paramPlusIV.getIV();
+            this.param = (KeyParameter)this.paramPlusIV.getParameters();
+
+            if (this.forWrapping)
+            {
+                if ((this.iv == null) || (this.iv.length != 8))
+                {
+                    throw new IllegalArgumentException("IV is not 8 octets");
+                }
+            }
+            else
+            {
+                throw new IllegalArgumentException(
+                        "You should not supply an IV for unwrapping");
+            }
+        }
+    }
 
    /**
     * Method getAlgorithmName
     *
     * @return the algorithm name "DESede".
     */
-   public String getAlgorithmName() {
+   public String getAlgorithmName() 
+   {
       return "DESede";
    }
 
@@ -112,9 +122,10 @@ public class DESedeWrapEngine
     * @param inLen
     * @return the wrapped bytes.
     */
-   public byte[] wrap(byte[] in, int inOff, int inLen) {
-
-      if (!forWrapping) {
+   public byte[] wrap(byte[] in, int inOff, int inLen) 
+   {
+      if (!forWrapping) 
+      {
          throw new IllegalStateException("Not initialized for wrapping");
       }
 
@@ -140,13 +151,15 @@ public class DESedeWrapEngine
       int noOfBlocks = WKCKS.length / engine.getBlockSize();
       int extraBytes = WKCKS.length % engine.getBlockSize();
 
-      if (extraBytes != 0) {
+      if (extraBytes != 0) 
+      {
          throw new IllegalStateException("Not multiple of block length");
       }
 
       engine.init(true, paramPlusIV);
 
-      for (int i = 0; i < noOfBlocks; i++) {
+      for (int i = 0; i < noOfBlocks; i++) 
+      {
          int currentBytePos = i * engine.getBlockSize();
 
          engine.processBlock(TEMP1, currentBytePos, TEMP1, currentBytePos);
@@ -161,7 +174,8 @@ public class DESedeWrapEngine
       // Reverse the order of the octets in TEMP2 and call the result TEMP3.
       byte[] TEMP3 = new byte[TEMP2.length];
 
-      for (int i = 0; i < TEMP2.length; i++) {
+      for (int i = 0; i < TEMP2.length; i++) 
+      {
          TEMP3[i] = TEMP2[TEMP2.length - (i + 1)];
       }
 
@@ -172,7 +186,8 @@ public class DESedeWrapEngine
 
       this.engine.init(true, param2);
 
-      for (int i = 0; i < noOfBlocks + 1; i++) {
+      for (int i = 0; i < noOfBlocks + 1; i++) 
+      {
          int currentBytePos = i * engine.getBlockSize();
 
          engine.processBlock(TEMP3, currentBytePos, TEMP3, currentBytePos);
@@ -190,21 +205,24 @@ public class DESedeWrapEngine
     * @return the unwrapped bytes.
     * @throws InvalidCipherTextException
     */
-   public byte[] unwrap(byte[] in, int inOff, int inLen)
-           throws InvalidCipherTextException {
-
-      if (forWrapping) {
-         throw new IllegalStateException("Not set for unwrapping");
-      }
-
-      if (in == null) {
-         throw new InvalidCipherTextException("Null pointer as ciphertext");
-      }
-
-      if (inLen % engine.getBlockSize() != 0) {
-         throw new InvalidCipherTextException("Ciphertext not multiple of "
-                                              + engine.getBlockSize());
-      }
+    public byte[] unwrap(byte[] in, int inOff, int inLen)
+           throws InvalidCipherTextException 
+    {
+        if (forWrapping)
+        {
+            throw new IllegalStateException("Not set for unwrapping");
+        }
+        
+        if (in == null)
+        {
+            throw new InvalidCipherTextException("Null pointer as ciphertext");
+        }
+        
+        if (inLen % engine.getBlockSize() != 0)
+        {
+            throw new InvalidCipherTextException("Ciphertext not multiple of "
+                    + engine.getBlockSize());
+        }
 
       /*
       // Check if the length of the cipher text is reasonable given the key
@@ -232,7 +250,8 @@ public class DESedeWrapEngine
 
       System.arraycopy(in, inOff, TEMP3, 0, inLen);
 
-      for (int i = 0; i < (TEMP3.length / engine.getBlockSize()); i++) {
+      for (int i = 0; i < (TEMP3.length / engine.getBlockSize()); i++) 
+      {
          int currentBytePos = i * engine.getBlockSize();
 
          engine.processBlock(TEMP3, currentBytePos, TEMP3, currentBytePos);
@@ -241,7 +260,8 @@ public class DESedeWrapEngine
       // Reverse the order of the octets in TEMP3 and call the result TEMP2.
       byte[] TEMP2 = new byte[TEMP3.length];
 
-      for (int i = 0; i < TEMP3.length; i++) {
+      for (int i = 0; i < TEMP3.length; i++) 
+      {
          TEMP2[i] = TEMP3[TEMP3.length - (i + 1)];
       }
 
@@ -263,7 +283,8 @@ public class DESedeWrapEngine
 
       System.arraycopy(TEMP1, 0, WKCKS, 0, TEMP1.length);
 
-      for (int i = 0; i < (WKCKS.length / engine.getBlockSize()); i++) {
+      for (int i = 0; i < (WKCKS.length / engine.getBlockSize()); i++) 
+      {
          int currentBytePos = i * engine.getBlockSize();
 
          engine.processBlock(WKCKS, currentBytePos, WKCKS, currentBytePos);
@@ -279,7 +300,8 @@ public class DESedeWrapEngine
 
       // Calculate a CMS Key Checksum, (section 5.6.1), over the WK and compare
       // with the CKS extracted in the above step. If they are not equal, return error.
-      if (!checkCMSKeyChecksum(result, CKStoBeVerified)) {
+      if (!checkCMSKeyChecksum(result, CKStoBeVerified)) 
+      {
          throw new InvalidCipherTextException(
             "Checksum inside ciphertext is corrupted");
       }

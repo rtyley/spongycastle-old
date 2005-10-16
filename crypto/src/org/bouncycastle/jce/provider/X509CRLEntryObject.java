@@ -42,7 +42,7 @@ public class X509CRLEntryObject extends X509CRLEntry
     public boolean hasUnsupportedCriticalExtension()
     {
         Set extns = getCriticalExtensionOIDs();
-        if ( extns != null && !extns.isEmpty() )
+        if (extns != null && !extns.isEmpty())
         {
             return true;
         }
@@ -54,9 +54,9 @@ public class X509CRLEntryObject extends X509CRLEntry
     {
         X509Extensions extensions = c.getExtensions();
 
-        if ( extensions != null )
+        if (extensions != null)
         {
-            HashSet            set = new HashSet();
+            Set                set = new HashSet();
             Enumeration        e = extensions.oids();
 
             while (e.hasMoreElements())
@@ -154,14 +154,14 @@ public class X509CRLEntryObject extends X509CRLEntry
 
         X509Extensions extensions = c.getExtensions();
 
-        if ( extensions != null )
+        if (extensions != null)
         {
             Enumeration e = extensions.oids();
-            if ( e.hasMoreElements() )
+            if (e.hasMoreElements())
             {
                 buf.append("   crlEntryExtensions:" + nl);
 
-                while ( e.hasMoreElements() )
+                while (e.hasMoreElements())
                 {
                     DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
                     X509Extension ext = extensions.getExtension(oid);

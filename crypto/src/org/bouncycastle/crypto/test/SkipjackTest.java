@@ -20,7 +20,7 @@ public class SkipjackTest
 
     SkipjackTest()
     {
-        super(tests);
+        super(tests, new SkipjackEngine(), new KeyParameter(Hex.decode("00998877665544332211")));
     }
 
     public String getName()

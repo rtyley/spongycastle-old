@@ -30,5 +30,5 @@ public interface TSPAlgorithms
     
     public static final String GOST3411 = CryptoProObjectIdentifiers.gostR3411.getId();
     
-    public static final Set    ALLOWED = new HashSet(Arrays.asList(new String[] { GOST3411, MD5, SHA1, SHA224, SHA256, SHA384, SHA512, RIPEMD128, RIPEMD160, RIPEMD256 } ));
+    public static final Set    ALLOWED = new HashSet(Arrays.asList(new String[] { GOST3411, MD5, SHA1, SHA224, SHA256, SHA384, SHA512, RIPEMD128, RIPEMD160, RIPEMD256 }));
 }

@@ -17,7 +17,8 @@ import java.util.Vector;
  * and list of Fully Qualified Attribute Names, or FQANs) contained in
  * a VOMS attribute certificate.
  */
-public class VOMSAttribute {
+public class VOMSAttribute
+{
 
     /**
      * The ASN.1 object identifier for VOMS attributes
@@ -58,29 +59,31 @@ public class VOMSAttribute {
                 IetfAttrSyntax attr = new IetfAttrSyntax((ASN1Sequence)l[i].getValues()[0]);
 
                 // policyAuthority is on the format <vo>/<host>:<port>
-                String url = ((DERIA5String)GeneralName.getInstance(((ASN1Sequence) attr.getPolicyAuthority()
-                                                                                         .getDERObject()).getObjectAt(0))
-                                                        .getName()).getString();
+                String url = ((DERIA5String)GeneralName.getInstance(((ASN1Sequence) attr.getPolicyAuthority().getDERObject()).getObjectAt(0)).getName()).getString();
                 int idx = url.indexOf("://");
 
-                if ((idx < 0) || (idx == (url.length() - 1))) {
+                if ((idx < 0) || (idx == (url.length() - 1)))
+                {
                     throw new IllegalArgumentException("Bad encoding of VOMS policyAuthority : [" + url + "]");
                 }
 
                 myVo = url.substring(0, idx);
                 myHostPort = url.substring(idx + 3);
 
-                if (attr.getValueType() != IetfAttrSyntax.VALUE_OCTETS) {
+                if (attr.getValueType() != IetfAttrSyntax.VALUE_OCTETS)
+                {
                     throw new IllegalArgumentException(
                         "VOMS attribute values are not encoded as octet strings, policyAuthority = " + url);
                 }
 
                 ASN1OctetString[]   values = (ASN1OctetString[])attr.getValues();
-                for (int j = 0; j != values.length; j++) {
+                for (int j = 0; j != values.length; j++)        
+                {
                     String fqan = new String(values[j].getOctets());
                     FQAN f = new FQAN(fqan);
 
-                    if (!myStringList.contains(fqan) && fqan.startsWith("/" + myVo + "/")) {
+                    if (!myStringList.contains(fqan) && fqan.startsWith("/" + myVo + "/"))
+               {
                         myStringList.add(fqan);
                         myFQANs.add(f);
                     }
@@ -101,7 +104,8 @@ public class VOMSAttribute {
     /**
      * @return The AttributeCertificate containing the VOMS information
      */
-    public X509AttributeCertificate getAC() {
+    public X509AttributeCertificate getAC()
+    {
         return myAC;
     }
 
@@ -110,7 +114,8 @@ public class VOMSAttribute {
      * attributes names (FQANs):<br>
      * <code>/vo[/group[/group2...]][/Role=[role]][/Capability=capability]</code>
      */
-    public List getFullyQualifiedAttributes() {
+    public List getFullyQualifiedAttributes()
+    {
         return myStringList;
     }
 
@@ -119,7 +124,8 @@ public class VOMSAttribute {
      * attributes names (FQANs)
      * @see #FQAN
      */
-    public List getListOfFQAN() {
+    public List getListOfFQAN()
+    {
         return myFQANs;
     }
 
@@ -127,7 +133,8 @@ public class VOMSAttribute {
      * Returns the address of the issuing VOMS server, on the form <code>&lt;host&gt;:&lt;port&gt;</code>
      * @return String
      */
-    public String getHostPort() {
+    public String getHostPort()
+    {
         return myHostPort;
     }
 
@@ -135,11 +142,13 @@ public class VOMSAttribute {
      * Returns the VO name
      * @return
      */
-    public String getVO() {
+    public String getVO()
+    {
         return myVo;
     }
 
-    public String toString() {
+    public String toString()
+    {
         return "VO      :" + myVo + "\n" + "HostPort:" + myHostPort + "\n" + "FQANs   :" + myFQANs;
     }
 
@@ -147,24 +156,29 @@ public class VOMSAttribute {
      * Inner class providing a container of the group,role,capability
      * information triplet in an FQAN.
      */
-    public class FQAN {
+    public class FQAN
+    {
         String fqan;
         String group;
         String role;
         String capability;
 
-        public FQAN(String fqan) {
+        public FQAN(String fqan)
+        {
             this.fqan = fqan;
         }
 
-        public FQAN(String group, String role, String capability) {
+        public FQAN(String group, String role, String capability)
+        {
             this.group = group;
             this.role = role;
             this.capability = capability;
         }
 
-        public String getFQAN() {
-            if (fqan != null) {
+        public String getFQAN()
+        {
+            if (fqan != null)
+            {
                 return fqan;
             }
 
@@ -174,11 +188,13 @@ public class VOMSAttribute {
             return fqan;
         }
 
-        protected void split() {
+        protected void split()
+        {
             int len = fqan.length();
             int i = fqan.indexOf("/Role=");
 
-            if (i < 0) {
+            if (i < 0)
+            {
                 return;
             }
 
@@ -191,31 +207,38 @@ public class VOMSAttribute {
             capability = ((s == null) || (s.length() == 0)) ? null : s;
         }
 
-        public String getGroup() {
-            if ((group == null) && (fqan != null)) {
+        public String getGroup()
+        {
+            if ((group == null) && (fqan != null))
+            {
                 split();
             }
 
             return group;
         }
 
-        public String getRole() {
-            if ((group == null) && (fqan != null)) {
+        public String getRole()
+        {
+            if ((group == null) && (fqan != null))
+            {
                 split();
             }
 
             return role;
         }
 
-        public String getCapability() {
-            if ((group == null) && (fqan != null)) {
+        public String getCapability()   
+        {
+            if ((group == null) && (fqan != null))
+            {
                 split();
             }
 
             return capability;
         }
 
-        public String toString() {
+        public String toString()
+        {
             return getFQAN();
         }
     }

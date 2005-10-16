@@ -85,13 +85,13 @@ public class ECDSASigner
 
                 r = x.mod(n);
             }
-            while ( r.equals(ZERO) );
+            while (r.equals(ZERO));
 
             BigInteger d = ((ECPrivateKeyParameters)key).getD();
 
             s = k.modInverse(n).multiply(e.add(d.multiply(r))).mod(n);
         }
-        while ( s.equals(ZERO) );
+        while (s.equals(ZERO));
 
         BigInteger[]  res = new BigInteger[2];
 
@@ -116,13 +116,13 @@ public class ECDSASigner
         BigInteger n = key.getParameters().getN();
 
         // r in the range [1,n-1]
-        if ( r.compareTo(ONE) < 0 || r.compareTo(n) >= 0 )
+        if (r.compareTo(ONE) < 0 || r.compareTo(n) >= 0)
         {
             return false;
         }
 
         // s in the range [1,n-1]
-        if ( s.compareTo(ONE) < 0 || s.compareTo(n) >= 0 )
+        if (s.compareTo(ONE) < 0 || s.compareTo(n) >= 0)
         {
             return false;
         }

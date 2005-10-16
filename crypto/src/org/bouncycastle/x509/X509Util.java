@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -55,7 +56,7 @@ class X509Util
     static Iterator getAlgNames()
     {
         Enumeration e = algorithms.keys();
-        ArrayList   l = new ArrayList();
+        List        l = new ArrayList();
         
         while (e.hasMoreElements())
         {

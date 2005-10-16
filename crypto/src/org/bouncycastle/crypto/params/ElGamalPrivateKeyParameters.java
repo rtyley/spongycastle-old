@@ -38,4 +38,9 @@ public class ElGamalPrivateKeyParameters
 
         return super.equals(obj);
     }
+    
+    public int hashCode()
+    {
+        return getX().hashCode();
+    }
 }

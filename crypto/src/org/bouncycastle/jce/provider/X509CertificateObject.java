@@ -320,7 +320,7 @@ public class X509CertificateObject
             {
                 ASN1InputStream dIn = new ASN1InputStream(new ByteArrayInputStream(bytes));
                 ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
-                ArrayList       list = new ArrayList();
+                List            list = new ArrayList();
 
                 for (int i = 0; i != seq.size(); i++)
                 {
@@ -392,7 +392,7 @@ public class X509CertificateObject
     {
         if (this.getVersion() == 3)
         {
-            HashSet         set = new HashSet();
+            Set             set = new HashSet();
             X509Extensions  extensions = c.getTBSCertificate().getExtensions();
 
             if (extensions != null)
@@ -466,7 +466,7 @@ public class X509CertificateObject
     {
         if (this.getVersion() == 3)
         {
-            HashSet         set = new HashSet();
+            Set             set = new HashSet();
             X509Extensions  extensions = c.getTBSCertificate().getExtensions();
 
             if (extensions != null)

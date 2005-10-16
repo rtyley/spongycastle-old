@@ -314,7 +314,7 @@ public class OpenPGPCFBBlockCipher
                 out[outOff + n] = encryptByte(in[inOff + n], n - 2);
             }
 
-            count += blockSize;;
+            count += blockSize;
         }
         
         return blockSize;

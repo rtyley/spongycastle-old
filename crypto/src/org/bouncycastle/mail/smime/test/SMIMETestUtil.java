@@ -42,15 +42,17 @@ public class SMIMETestUtil
     public static BigInteger       serialNumber;
     
     public static final boolean DEBUG = true;
-    
-    static {
-        try {
+
+    static
+    {
+        try
+        {
             rand = new SecureRandom();
 
-            kpg  = KeyPairGenerator.getInstance("RSA", "BC");
+            kpg = KeyPairGenerator.getInstance("RSA", "BC");
             kpg.initialize(1024, rand);
 
-            dsaKpg  = KeyPairGenerator.getInstance("DSA", "BC");
+            dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
             dsaKpg.initialize(1024, rand);
 
             desede128kg = KeyGenerator.getInstance("DESEDE", "BC");
@@ -62,56 +64,62 @@ public class SMIMETestUtil
 
             rc240kg = KeyGenerator.getInstance("RC2", "BC");
             rc240kg.init(40, rand);
-            
+
             serialNumber = new BigInteger("1");
         }
-        catch(Exception ex) {
+        catch (Exception ex)
+        {
             log(ex);
         }
     }
-    
-    
-    
+
     /*  
      *  
      *  CRYPT
      *  
-     */ 
-    
-    public static KeyPair makeKeyPair() {
+     */
+
+    public static KeyPair makeKeyPair()
+    {
         return kpg.generateKeyPair();
     }
 
-    public static KeyPair makeDSAKeyPair() {
+    public static KeyPair makeDSAKeyPair()
+    {
         return dsaKpg.generateKeyPair();
     }
-    
-    public static SecretKey makeDesede128Key() {
+
+    public static SecretKey makeDesede128Key()
+    {
         return desede128kg.generateKey();
     }
-    
-    public static SecretKey makeDesede192Key() {
+
+    public static SecretKey makeDesede192Key()
+    {
         return desede192kg.generateKey();
     }
-    
-    public static SecretKey makeRC240Key() {
+
+    public static SecretKey makeRC240Key()
+    {
         return rc240kg.generateKey();
     }
-    
-    public static X509Certificate makeCertificate(KeyPair _subKP, String _subDN, KeyPair _issKP, String _issDN) 
-        throws GeneralSecurityException, IOException 
+
+    public static X509Certificate makeCertificate(KeyPair _subKP,
+            String _subDN, KeyPair _issKP, String _issDN)
+            throws GeneralSecurityException, IOException
     {
-        PublicKey  _subPub  = _subKP.getPublic();
+        PublicKey _subPub = _subKP.getPublic();
         PrivateKey _issPriv = _issKP.getPrivate();
-        PublicKey  _issPub  = _issKP.getPublic();
-        
+        PublicKey _issPub = _issKP.getPublic();
+
         X509V3CertificateGenerator _v3CertGen = new X509V3CertificateGenerator();
-        
+
         _v3CertGen.reset();
         _v3CertGen.setSerialNumber(allocateSerialNumber());
         _v3CertGen.setIssuerDN(new X509Name(_issDN));
         _v3CertGen.setNotBefore(new Date(System.currentTimeMillis()));
-        _v3CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)));
+        _v3CertGen.setNotAfter(new Date(System.currentTimeMillis()
+                + (1000L * 60 * 60 * 24 * 100)));
         _v3CertGen.setSubjectDN(new X509Name(_subDN));
         _v3CertGen.setPublicKey(_subPub);
 
@@ -124,20 +132,14 @@ public class SMIMETestUtil
             _v3CertGen.setSignatureAlgorithm("SHA1WithDSA");
         }
 
-        _v3CertGen.addExtension(
-            X509Extensions.SubjectKeyIdentifier,
-            false,
-            createSubjectKeyId(_subPub));
+        _v3CertGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
+                createSubjectKeyId(_subPub));
 
-        _v3CertGen.addExtension(
-            X509Extensions.AuthorityKeyIdentifier,
-            false,
-            createAuthorityKeyId(_issPub));
+        _v3CertGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false,
+                createAuthorityKeyId(_issPub));
 
-        _v3CertGen.addExtension(
-            X509Extensions.BasicConstraints,
-            false,
-            new BasicConstraints(false));
+        _v3CertGen.addExtension(X509Extensions.BasicConstraints, false,
+                new BasicConstraints(false));
 
         X509Certificate _cert = _v3CertGen.generateX509Certificate(_issPriv);
 
@@ -151,77 +153,85 @@ public class SMIMETestUtil
      *  
      *  MAIL
      *  
-     */ 
-    
-    
-    public static MimeBodyPart makeMimeBodyPart(String _msg) 
-        throws MessagingException {
-        
+     */
+
+    public static MimeBodyPart makeMimeBodyPart(String _msg)
+            throws MessagingException
+    {
+
         MimeBodyPart _mbp = new MimeBodyPart();
         _mbp.setText(_msg);
         return _mbp;
     }
 
-    public static MimeBodyPart makeMimeBodyPart(MimeMultipart _mm) 
-        throws MessagingException {
-        
+    public static MimeBodyPart makeMimeBodyPart(MimeMultipart _mm)
+            throws MessagingException
+    {
+
         MimeBodyPart _mbp = new MimeBodyPart();
         _mbp.setContent(_mm, _mm.getContentType());
         return _mbp;
     }
-    
-    public static MimeMultipart makeMimeMultipart(String _msg1, String _msg2) 
-        throws MessagingException {
-        
+
+    public static MimeMultipart makeMimeMultipart(String _msg1, String _msg2)
+            throws MessagingException
+    {
+
         MimeMultipart _mm = new MimeMultipart();
         _mm.addBodyPart(makeMimeBodyPart(_msg1));
         _mm.addBodyPart(makeMimeBodyPart(_msg2));
-        
+
         return _mm;
     }
-    
-    
+
     /*  
      *  
      *  INTERNAL METHODS
      *  
-     */ 
-    
-    private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey _pubKey) 
-        throws IOException {
-        
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey.getEncoded());
+     */
+
+    private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey _pubKey)
+            throws IOException
+    {
+
+        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
+                .getEncoded());
         SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(_bais).readObject());
+                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
 
         return new AuthorityKeyIdentifier(_info);
     }
 
-    private static SubjectKeyIdentifier createSubjectKeyId(PublicKey _pubKey) 
-        throws IOException {
-        
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey.getEncoded());
+    private static SubjectKeyIdentifier createSubjectKeyId(PublicKey _pubKey)
+            throws IOException
+    {
+
+        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
+                .getEncoded());
         SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(_bais).readObject());
+                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
         return new SubjectKeyIdentifier(_info);
     }
 
-    private static BigInteger allocateSerialNumber() {
+    private static BigInteger allocateSerialNumber()
+    {
         BigInteger _tmp = serialNumber;
         serialNumber = serialNumber.add(new BigInteger("1"));
         return _tmp;
     }
-    
-    
-    
-    public static void log(Exception _ex) {
-        if(DEBUG) {
+
+    public static void log(Exception _ex)
+    {
+        if (DEBUG)
+        {
             _ex.printStackTrace();
         }
     }
 
-    public static void log(String _msg) {
-        if(DEBUG) {
+    public static void log(String _msg)
+    {
+        if (DEBUG)
+        {
             System.out.println(_msg);
         }
     }

@@ -6,8 +6,6 @@ import org.bouncycastle.crypto.params.KeyParameter;
 
 /**
  * An RC6 engine.
- *
- * Implementation courtesy of Michael Lee.
  */
 public class RC6Engine
     implements BlockCipher
@@ -169,7 +167,7 @@ public class RC6Engine
         for (int k = 0; k < iter; k++)
         {
             A = _S[i] = rotateLeft(_S[i] + A + B, 3);
-            B =  L[j] = rotateLeft( L[j] + A + B, A+B);
+            B =  L[j] = rotateLeft(L[j] + A + B, A+B);
             i = (i+1) % _S.length;
             j = (j+1) %  L.length;
         }
@@ -315,7 +313,8 @@ public class RC6Engine
      * @param  x  word to rotate
      * @param  y    number of bits to rotate % wordSize
      */
-    private int rotateRight(int x, int y) {
+    private int rotateRight(int x, int y)
+    {
         return ((x >>> (y & (wordSize-1))) | (x << (wordSize - (y & (wordSize-1)))));
     }
 

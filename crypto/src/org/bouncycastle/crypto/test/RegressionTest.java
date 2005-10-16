@@ -8,6 +8,9 @@ public class RegressionTest
 {
     public static Test[]    tests = {
         new AESTest(),
+        new AESLightTest(),
+        new AESFastTest(),
+        new AESWrapTest(),
         new DESTest(),
         new DESedeTest(),
         new ModeTest(),
@@ -64,7 +67,8 @@ public class RegressionTest
         new PSSTest(),
         new CTSTest(),
         new PKCS5Test(),
-        new PKCS12Test()
+        new PKCS12Test(),
+        new NullTest()
     };
 
     public static void main(

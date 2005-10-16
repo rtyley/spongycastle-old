@@ -24,7 +24,8 @@ public class SICBlockCipher implements BlockCipher
      *
      * @param c the block cipher to be used.
      */
-    public SICBlockCipher(BlockCipher c) {
+    public SICBlockCipher(BlockCipher c)
+    {
         this.cipher = c;
         this.blockSize = cipher.getBlockSize();
         this.IV = new byte[blockSize];
@@ -45,10 +46,12 @@ public class SICBlockCipher implements BlockCipher
 
 
     public void init(boolean forEncryption, CipherParameters params)
-          throws IllegalArgumentException {
+          throws IllegalArgumentException
+    {
         this.encrypting = forEncryption;
 
-        if (params instanceof ParametersWithIV) {
+        if (params instanceof ParametersWithIV)
+        {
           ParametersWithIV ivParam = (ParametersWithIV)params;
           byte[]           iv      = ivParam.getIV();
           System.arraycopy(iv, 0, IV, 0, IV.length);
@@ -70,13 +73,15 @@ public class SICBlockCipher implements BlockCipher
 
 
     public int processBlock(byte[] in, int inOff, byte[] out, int outOff)
-          throws DataLengthException, IllegalStateException {
+          throws DataLengthException, IllegalStateException
+    {
         cipher.processBlock(counter, 0, counterOut, 0);
 
         //
         // XOR the counterOut with the plaintext producing the cipher text
         //
-        for (int i = 0; i < counterOut.length; i++) {
+        for (int i = 0; i < counterOut.length; i++)
+        {
           out[outOff + i] = (byte)(counterOut[i] ^ in[inOff + i]);
         }
 
@@ -102,7 +107,8 @@ public class SICBlockCipher implements BlockCipher
     }
 
 
-    public void reset() {
+    public void reset()
+    {
         System.arraycopy(IV, 0, counter, 0, counter.length);
         cipher.reset();
     }

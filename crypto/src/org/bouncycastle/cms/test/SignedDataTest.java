@@ -8,6 +8,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.mail.internet.MimeBodyPart;
 
@@ -211,11 +212,13 @@ public class SignedDataTest
      *
      */
 
-    public SignedDataTest(String name) {
+    public SignedDataTest(String name)
+    {
         super(name);
     }
 
-    public static void main(String args[]) {
+    public static void main(String args[])
+    {
 
         junit.textui.TestRunner.run(SignedDataTest.class);
     }
@@ -265,7 +268,7 @@ public class SignedDataTest
     {
         try
         {
-            ArrayList           certList = new ArrayList();
+            List                certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
             certList.add(_origCert);
@@ -380,7 +383,7 @@ public class SignedDataTest
     {
         try
         {
-            ArrayList           certList = new ArrayList();
+            List                certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
             certList.add(_origCert);
@@ -483,7 +486,7 @@ public class SignedDataTest
     {
         try
         {
-            ArrayList           certList = new ArrayList();
+            List                certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
             certList.add(_origCert);
@@ -586,7 +589,7 @@ public class SignedDataTest
     {
         try
         {
-            ArrayList           certList = new ArrayList();
+            List                certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
             certList.add(_origCert);
@@ -689,7 +692,7 @@ public class SignedDataTest
     {
         try
         {
-            ArrayList           certList = new ArrayList();
+            List                certList = new ArrayList();
             CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
             certList.add(_origGostCert);
@@ -821,7 +824,7 @@ public class SignedDataTest
     {
         try
         {
-            ArrayList           certList = new ArrayList();
+            List                certList = new ArrayList();
 
             certList.add(_origCert);
             certList.add(_signCert);

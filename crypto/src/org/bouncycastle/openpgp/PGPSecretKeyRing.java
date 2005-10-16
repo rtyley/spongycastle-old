@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.bcpg.*;
 
@@ -18,12 +19,12 @@ import org.bouncycastle.bcpg.*;
  */
 public class PGPSecretKeyRing
 {    
-    ArrayList            keys = new ArrayList();
+    List            keys = new ArrayList();
     
     /**
      * @param keys
      */
-    PGPSecretKeyRing(ArrayList keys)
+    PGPSecretKeyRing(List keys)
     {
         this.keys = keys;
     }
@@ -60,10 +61,10 @@ public class PGPSecretKeyRing
         
         SecretKeyPacket secret = (SecretKeyPacket)pIn.readPacket();
         TrustPacket     trust = null;
-        ArrayList       keySigs = new ArrayList();
-        ArrayList       ids = new ArrayList();
-        ArrayList       idTrusts = new ArrayList();
-        ArrayList       idSigs = new ArrayList();
+        List            keySigs = new ArrayList();
+        List            ids = new ArrayList();
+        List            idTrusts = new ArrayList();
+        List            idSigs = new ArrayList();
         MessageDigest   sha;
         
         try
@@ -107,7 +108,7 @@ public class PGPSecretKeyRing
             || pIn.nextPacketTag() == PacketTags.USER_ATTRIBUTE)
         {
             Object                obj = pIn.readPacket();
-            ArrayList            sigList = new ArrayList();
+            List                 sigList = new ArrayList();
             
             if (obj instanceof UserIDPacket)
             {
@@ -151,8 +152,8 @@ public class PGPSecretKeyRing
         while (pIn.nextPacketTag() == PacketTags.SECRET_SUBKEY)
         {
             SecretSubkeyPacket    sub = (SecretSubkeyPacket)pIn.readPacket();
-            TrustPacket                subTrust = null;
-            ArrayList                    sigList = new ArrayList();
+            TrustPacket           subTrust = null;
+            List                  sigList = new ArrayList();
             
             //
             // ignore GPG comment packets if found.
@@ -265,7 +266,7 @@ public class PGPSecretKeyRing
         PGPSecretKeyRing  secRing,
         PGPSecretKey      secKey)
     {
-        ArrayList  keys = new ArrayList(secRing.keys);
+        List       keys = new ArrayList(secRing.keys);
         boolean    found = false;
         
         for (int i = 0; i != keys.size();i++)
@@ -299,7 +300,7 @@ public class PGPSecretKeyRing
         PGPSecretKeyRing  secRing,
         PGPSecretKey      secKey)
     {
-        ArrayList  keys = new ArrayList(secRing.keys);
+        List       keys = new ArrayList(secRing.keys);
         boolean    found = false;
         
         for (int i = 0; i < keys.size();i++)

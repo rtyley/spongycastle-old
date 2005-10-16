@@ -254,7 +254,7 @@ public class DHTest
             // a and a2 should be equivalent!
             byte[] encodeParams_2 = a2.getEncoded();
 
-            if ( !arrayEquals(encodeParams, encodeParams_2) )
+            if (!arrayEquals(encodeParams, encodeParams_2))
             {
                 return new SimpleTestResult(false, this.getName() + ": encode/decode parameters failed");
             }

@@ -9,6 +9,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
@@ -148,12 +149,12 @@ public class SMIMECompressedTest
     public void testCompressedSHA1WithRSA()
         throws Exception
     {
-        ArrayList           certList = new ArrayList();
+        List           certList = new ArrayList();
 
         certList.add(origCert);
         certList.add(signCert);
 
-        CertStore           certs = CertStore.getInstance("Collection",
+        CertStore      certs = CertStore.getInstance("Collection",
                                        new CollectionCertStoreParameters(certList), "BC");
 
         ASN1EncodableVector         signedAttrs = new ASN1EncodableVector();

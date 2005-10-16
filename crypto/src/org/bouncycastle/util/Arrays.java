@@ -14,6 +14,11 @@ public final class Arrays
         byte[]  a,
         byte[]  b)
     {
+        if (a == b)
+        {
+            return true;
+        }
+        
         if (a.length != b.length)
         {
             return false;

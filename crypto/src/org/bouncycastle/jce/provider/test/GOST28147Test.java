@@ -67,7 +67,7 @@ public class GOST28147Test
         }
 
         public TestResult testECB(
-            int			strength,
+            int         strength,
             byte[]      keyBytes,
             byte[]      input,
             byte[]      output)
@@ -164,7 +164,7 @@ public class GOST28147Test
         }
 
     public TestResult testCFB(
-        int			strength,
+        int         strength,
         byte[]      keyBytes,
         byte[]      input,
         byte[]      output)

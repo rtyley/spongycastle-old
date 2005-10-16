@@ -118,4 +118,9 @@ public class DHParameters
         
         return (j == pm.getJ()) && pm.getP().equals(p) && pm.getG().equals(g);
     }
+    
+    public int hashCode()
+    {
+        return getJ() ^ getP().hashCode() ^ getG().hashCode();
+    }
 }

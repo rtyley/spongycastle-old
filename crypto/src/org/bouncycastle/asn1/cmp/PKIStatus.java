@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1.cmp;
 
-public interface PKIStatus {
+public interface PKIStatus
+{
 
   public static final int GRANTED                 = 0;
   public static final int GRANTED_WITH_MODS       = 1;

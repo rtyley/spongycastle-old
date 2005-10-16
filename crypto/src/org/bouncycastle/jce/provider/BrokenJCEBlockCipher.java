@@ -453,7 +453,7 @@ public class BrokenJCEBlockCipher
 
         try
         {
-            return (len + cipher.doFinal(output, outputOffset + len));
+            return len + cipher.doFinal(output, outputOffset + len);
         }
         catch (DataLengthException e)
         {
@@ -515,11 +515,11 @@ public class BrokenJCEBlockCipher
             {
                 KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, "BC");
 
-                if ( wrappedKeyType == Cipher.PUBLIC_KEY )
+                if (wrappedKeyType == Cipher.PUBLIC_KEY)
                 {
                     return kf.generatePublic(new X509EncodedKeySpec(encoded));
                 }
-                else if ( wrappedKeyType == Cipher.PRIVATE_KEY )
+                else if (wrappedKeyType == Cipher.PRIVATE_KEY)
                 {
                     return kf.generatePrivate(new PKCS8EncodedKeySpec(encoded));
                 }

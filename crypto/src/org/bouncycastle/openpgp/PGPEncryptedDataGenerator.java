@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -165,7 +166,7 @@ public class PGPEncryptedDataGenerator
         }
     }
     
-    private ArrayList       methods = new ArrayList();
+    private List            methods = new ArrayList();
     private int             defAlgorithm;
     private SecureRandom    rand;
     private String          defProvider;

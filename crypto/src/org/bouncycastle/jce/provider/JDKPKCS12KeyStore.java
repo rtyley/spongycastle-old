@@ -689,7 +689,7 @@ public class JDKPKCS12KeyStore
             return;
         }
 
-        if ( password == null )
+        if (password == null)
         {
             throw new NullPointerException("No password supplied for PKCS#12 KeyStore.");
         }
@@ -1108,7 +1108,7 @@ public class JDKPKCS12KeyStore
     public void engineStore(OutputStream stream, char[] password) 
         throws IOException
     {
-        if ( password == null )
+        if (password == null)
         {
             throw new NullPointerException("No password supplied for PKCS#12 KeyStore.");
         }

@@ -861,10 +861,10 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature." + CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, "GOST3410");
 
     // Certification Path API
-        put("CertPathValidator.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathValidatorSpi" );
+        put("CertPathValidator.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathValidatorSpi");
         put("CertPathValidator.PKIX ValidationAlgorithm", "RFC2459");
-        put("CertPathBuilder.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi" );
+        put("CertPathBuilder.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi");
         put("CertPathBuilder.PKIX ValidationAlgorithm", "RFC2459");
-        put("CertStore.Collection", "org.bouncycastle.jce.provider.CertStoreCollectionSpi" );
+        put("CertStore.Collection", "org.bouncycastle.jce.provider.CertStoreCollectionSpi");
     }
 }

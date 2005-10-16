@@ -1,12 +1,13 @@
 package org.bouncycastle.cms;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
 public class RecipientInformationStore
 {
-    private HashMap table = new HashMap();
+    private Map table = new HashMap();
 
     public RecipientInformationStore(
         Collection  recipientInfos)

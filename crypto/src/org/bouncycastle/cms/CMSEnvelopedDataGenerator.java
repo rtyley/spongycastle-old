@@ -16,6 +16,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -55,7 +56,7 @@ import org.bouncycastle.asn1.x509.TBSCertificateStructure;
  */
 public class CMSEnvelopedDataGenerator
 {
-    ArrayList                   recipientInfs = new ArrayList();
+    List                        recipientInfs = new ArrayList();
 
     public static final String  DES_EDE3_CBC    = "1.2.840.113549.3.7";
     public static final String  RC2_CBC         = "1.2.840.113549.3.2";

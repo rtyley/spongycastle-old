@@ -47,7 +47,7 @@ public class ECDHCBasicAgreement
         ECDomainParameters      params = pub.getParameters();
         ECPoint P = pub.getQ().multiply(params.getH().multiply(key.getD()));
 
-        // if ( p.isInfinity() ) throw new RuntimeException("Invalid public key");
+        // if (p.isInfinity()) throw new RuntimeException("Invalid public key");
 
         return P.getX().toBigInteger();
     }

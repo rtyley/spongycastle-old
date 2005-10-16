@@ -62,7 +62,7 @@ public abstract class JDKAlgorithmParameterGenerator
         {
             DHParametersGenerator        pGen = new DHParametersGenerator();
 
-            if ( random != null )
+            if (random != null)
             {
                 pGen.init(strength, 20, random);
             }
@@ -104,7 +104,7 @@ public abstract class JDKAlgorithmParameterGenerator
         {
             DSAParametersGenerator pGen = new DSAParametersGenerator();
 
-            if ( random != null )
+            if (random != null)
             {
                 pGen.init(strength, 20, random);
             }
@@ -146,7 +146,7 @@ public abstract class JDKAlgorithmParameterGenerator
         {
             GOST3410ParametersGenerator pGen = new GOST3410ParametersGenerator();
             
-            if ( random != null )
+            if (random != null)
             {
                 pGen.init(strength, 2, random);
             }
@@ -198,7 +198,7 @@ public abstract class JDKAlgorithmParameterGenerator
         {
             ElGamalParametersGenerator pGen = new ElGamalParametersGenerator();
 
-            if ( random != null )
+            if (random != null)
             {
                 pGen.init(strength, 20, random);
             }

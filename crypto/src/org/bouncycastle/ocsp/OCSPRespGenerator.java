@@ -24,7 +24,8 @@ public class OCSPRespGenerator
         Object  response)
         throws OCSPException
     {
-      if (response == null) {
+      if (response == null)
+      {
               return new OCSPResp(new OCSPResponse(new OCSPResponseStatus(status),null));
       }
         if (response instanceof BasicOCSPResp)

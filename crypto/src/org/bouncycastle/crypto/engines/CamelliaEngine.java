@@ -97,13 +97,13 @@ public class CamelliaEngine implements BlockCipher
             throw new IllegalArgumentException("only a key sizes of 128/192/256 are acceptable.");
         }
         
-        long d1 = (klA ^ krA);
-        long d2 = (klB ^ krB);
+        long d1 = klA ^ krA;
+        long d2 = klB ^ krB;
         
         d2 = d2 ^ f(d1, SIGMA1);
         d1 = d1 ^ f(d2, SIGMA2);
-        d1 = d1 ^ (klA);
-        d2 = d2 ^ (klB);
+        d1 = d1 ^ klA;
+        d2 = d2 ^ klB;
         d2 = d2 ^ f(d1, SIGMA3);
         d1 = d1 ^ f(d2, SIGMA4);
         
@@ -173,8 +173,8 @@ public class CamelliaEngine implements BlockCipher
         }
         else
         {
-            d1 = (kaA ^ krA);
-            d2 = (kaB ^ krB);
+            d1 = kaA ^ krA;
+            d2 = kaB ^ krB;
             d2 = d2 ^ f(d1, SIGMA5);
             d1 = d1 ^ f(d2, SIGMA6);
             

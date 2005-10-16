@@ -187,7 +187,7 @@ public class V2TBSCertListGenerator
         {
             ASN1EncodableVector certs = new ASN1EncodableVector();
             Enumeration it = crlentries.elements();
-            while( it.hasMoreElements() )
+            while(it.hasMoreElements())
             {
                 certs.add((ASN1Sequence)it.nextElement());
             }

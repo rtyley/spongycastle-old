@@ -36,15 +36,20 @@ public abstract class ECPoint
     public boolean equals(
         Object  other)
     {
-        if ( other == this )
+        if (other == this)
             return true;
 
-        if ( !(other instanceof ECPoint) )
+        if (!(other instanceof ECPoint))
             return false;
 
         ECPoint o = (ECPoint)other;
 
         return x.equals(o.x) && y.equals(o.y);
+    }
+
+    public int hashCode()
+    {
+        return x.hashCode() ^ y.hashCode();
     }
 
     public abstract byte[] getEncoded();
@@ -213,12 +218,12 @@ public abstract class ECPoint
             {             
                 R = R.twice();       
 
-                if ( h.testBit(i) && !e.testBit(i) )
+                if (h.testBit(i) && !e.testBit(i))
                 {                    
                     //System.out.print("+");
                     R = R.add(this);
                 }
-                else if ( !h.testBit(i) && e.testBit(i) )
+                else if (!h.testBit(i) && e.testBit(i))
                 {
                     //System.out.print("-");
                     R = R.subtract(this);

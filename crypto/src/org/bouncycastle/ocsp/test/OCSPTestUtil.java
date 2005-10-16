@@ -41,8 +41,10 @@ public class OCSPTestUtil
     
     public static final boolean DEBUG = true;
     
-    static {
-        try {
+    static
+    {
+        try
+        {
             rand = new SecureRandom();
 
             kpg  = KeyPairGenerator.getInstance("RSA", "BC");
@@ -50,60 +52,62 @@ public class OCSPTestUtil
 
             serialNumber = new BigInteger("1");
         }
-        catch(Exception ex) {
+        catch(Exception ex)
+        {
             log(ex);
         }
     }
     
-    public static KeyPair makeKeyPair() {
+    public static KeyPair makeKeyPair()
+    {
         return kpg.generateKeyPair();
     }
     
-    public static X509Certificate makeCertificate(KeyPair _subKP, String _subDN, KeyPair _issKP, String _issDN) 
-        throws GeneralSecurityException, IOException {
-        
+    public static X509Certificate makeCertificate(KeyPair _subKP,
+            String _subDN, KeyPair _issKP, String _issDN)
+            throws GeneralSecurityException, IOException
+    {
+
         return makeCertificate(_subKP, _subDN, _issKP, _issDN, false);
     }
-    
-    public static X509Certificate makeCACertificate(KeyPair _subKP, String _subDN, KeyPair _issKP, String _issDN) 
-        throws GeneralSecurityException, IOException {
-        
+
+    public static X509Certificate makeCACertificate(KeyPair _subKP,
+            String _subDN, KeyPair _issKP, String _issDN)
+            throws GeneralSecurityException, IOException
+    {
+
         return makeCertificate(_subKP, _subDN, _issKP, _issDN, true);
     }
-    
-    
-    public static X509Certificate makeCertificate(KeyPair _subKP, String _subDN, KeyPair _issKP, String _issDN, boolean _ca) 
-        throws GeneralSecurityException, IOException {
 
-        PublicKey  _subPub  = _subKP.getPublic();
+    public static X509Certificate makeCertificate(KeyPair _subKP,
+            String _subDN, KeyPair _issKP, String _issDN, boolean _ca)
+            throws GeneralSecurityException, IOException
+    {
+
+        PublicKey _subPub = _subKP.getPublic();
         PrivateKey _issPriv = _issKP.getPrivate();
-        PublicKey  _issPub  = _issKP.getPublic();
-        
+        PublicKey _issPub = _issKP.getPublic();
+
         X509V3CertificateGenerator _v3CertGen = new X509V3CertificateGenerator();
-        
+
         _v3CertGen.reset();
         _v3CertGen.setSerialNumber(allocateSerialNumber());
         _v3CertGen.setIssuerDN(new X509Name(_issDN));
         _v3CertGen.setNotBefore(new Date(System.currentTimeMillis()));
-        _v3CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)));
+        _v3CertGen.setNotAfter(new Date(System.currentTimeMillis()
+                + (1000L * 60 * 60 * 24 * 100)));
         _v3CertGen.setSubjectDN(new X509Name(_subDN));
         _v3CertGen.setPublicKey(_subPub);
         _v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
 
-        _v3CertGen.addExtension(
-            X509Extensions.SubjectKeyIdentifier,
-            false,
-            createSubjectKeyId(_subPub));
+        _v3CertGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
+                createSubjectKeyId(_subPub));
 
-        _v3CertGen.addExtension(
-            X509Extensions.AuthorityKeyIdentifier,
-            false,
-            createAuthorityKeyId(_issPub));
+        _v3CertGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false,
+                createAuthorityKeyId(_issPub));
 
-        _v3CertGen.addExtension(
-            X509Extensions.BasicConstraints,
-            false,
-            new BasicConstraints(_ca));
+        _v3CertGen.addExtension(X509Extensions.BasicConstraints, false,
+                new BasicConstraints(_ca));
 
         X509Certificate _cert = _v3CertGen.generateX509Certificate(_issPriv);
 
@@ -112,63 +116,72 @@ public class OCSPTestUtil
 
         return _cert;
     }
-    
 
+    /*
+     * 
+     * INTERNAL METHODS
+     * 
+     */
 
-    /*  
-     *  
-     *  INTERNAL METHODS
-     *  
-     */ 
-    
-    private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey _pubKey) 
-        throws IOException {
-        
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey.getEncoded());
+    private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey _pubKey)
+            throws IOException
+    {
+
+        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
+                .getEncoded());
         SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(_bais).readObject());
+                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
 
         return new AuthorityKeyIdentifier(_info);
     }
 
-    private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey _pubKey, X509Name _name, int _sNumber) 
-        throws IOException {
-        
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey.getEncoded());
+    private static AuthorityKeyIdentifier createAuthorityKeyId(
+            PublicKey _pubKey, X509Name _name, int _sNumber) throws IOException
+    {
+
+        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
+                .getEncoded());
         SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(_bais).readObject());
+                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
 
-        GeneralName             _genName = new GeneralName(_name);
+        GeneralName _genName = new GeneralName(_name);
 
-        return new AuthorityKeyIdentifier(
-            _info, new GeneralNames(new DERSequence(_genName)), BigInteger.valueOf(_sNumber));
+        return new AuthorityKeyIdentifier(_info, new GeneralNames(
+                new DERSequence(_genName)), BigInteger.valueOf(_sNumber));
 
     }
-    
-    private static SubjectKeyIdentifier createSubjectKeyId(PublicKey _pubKey) 
-        throws IOException {
-        
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey.getEncoded());
+
+    private static SubjectKeyIdentifier createSubjectKeyId(PublicKey _pubKey)
+            throws IOException
+    {
+
+        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
+                .getEncoded());
         SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(_bais).readObject());
+                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
         return new SubjectKeyIdentifier(_info);
     }
 
-    private static BigInteger allocateSerialNumber() {
+    private static BigInteger allocateSerialNumber()
+    {
         BigInteger _tmp = serialNumber;
         serialNumber = serialNumber.add(BigInteger.ONE);
         return _tmp;
     }
     
     
-    public static void log(Exception _ex) {
-        if(DEBUG) {
+    public static void log(Exception _ex)
+    {
+        if(DEBUG)
+        {
             _ex.printStackTrace();
         }
     }
 
-    public static void log(String _msg) {
-        if(DEBUG) {
+    public static void log(String _msg)
+    {
+        if(DEBUG)
+        {
             System.out.println(_msg);
         }
     }

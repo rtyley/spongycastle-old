@@ -4,6 +4,7 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.bcpg.*;
 
@@ -13,7 +14,7 @@ import org.bouncycastle.bcpg.*;
  */
 public class PGPKeyRingGenerator
 {    
-    ArrayList                           keys = new ArrayList();
+    List                                keys = new ArrayList();
     
     private String                      id;
     private int                         encAlgorithm;
@@ -88,7 +89,7 @@ public class PGPKeyRingGenerator
             sGen.setHashedSubpackets(hashedPcks);
             sGen.setUnhashedSubpackets(unhashedPcks);
 
-            ArrayList            subSigs = new ArrayList();
+            List                 subSigs = new ArrayList();
             
             subSigs.add(sGen.generateCertification(masterKey.getPublicKey(), keyPair.getPublicKey()));
             
@@ -121,8 +122,8 @@ public class PGPKeyRingGenerator
      */
     public PGPPublicKeyRing generatePublicKeyRing()
     {
-        Iterator    it = keys.iterator();
-        ArrayList   pubKeys = new ArrayList();
+        Iterator it = keys.iterator();
+        List     pubKeys = new ArrayList();
         
         pubKeys.add(((PGPSecretKey)it.next()).getPublicKey());
         

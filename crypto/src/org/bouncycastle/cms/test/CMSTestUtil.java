@@ -47,8 +47,10 @@ public class CMSTestUtil
     
     public static final boolean DEBUG = true;
     
-    static {
-        try {
+    static
+    {
+        try
+        {
             java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
             rand = new SecureRandom();
@@ -81,7 +83,8 @@ public class CMSTestUtil
             
             serialNumber = new BigInteger("1");
         }
-        catch(Exception ex) {
+        catch(Exception ex)
+        {
             ex.printStackTrace();
         }
     }
@@ -167,7 +170,8 @@ public class CMSTestUtil
     
     
     public static X509Certificate makeCertificate(KeyPair _subKP, String _subDN, KeyPair _issKP, String _issDN, boolean _ca) 
-        throws GeneralSecurityException, IOException {
+        throws GeneralSecurityException, IOException
+    {
 
         PublicKey  _subPub  = _subKP.getPublic();
         PrivateKey _issPriv = _issKP.getPrivate();
