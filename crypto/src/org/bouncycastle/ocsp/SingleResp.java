@@ -90,7 +90,7 @@ public class SingleResp
     public boolean hasUnsupportedCriticalExtension()
     {
         Set extns = getCriticalExtensionOIDs();
-        if ( extns != null && !extns.isEmpty() )
+        if (extns != null && !extns.isEmpty())
         {
             return true;
         }
@@ -100,7 +100,7 @@ public class SingleResp
 
     private Set getExtensionOIDs(boolean critical)
     {
-        HashSet         set = new HashSet();
+        Set             set = new HashSet();
         X509Extensions  extensions = this.getSingleExtensions();
         
         if (extensions != null)

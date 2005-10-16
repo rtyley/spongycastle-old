@@ -6,6 +6,7 @@ import java.security.cert.CertSelector;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -63,7 +64,7 @@ public class AttributeCertificateIssuer
         
         GeneralName[]   names = name.getNames();
         
-        ArrayList   l = new ArrayList(names.length);
+        List        l = new ArrayList(names.length);
         
         for (int i = 0; i != names.length; i++)
         {
@@ -91,7 +92,7 @@ public class AttributeCertificateIssuer
     public Principal[] getPrincipals()
     {
         Object[]    p = this.getNames();
-        ArrayList   l = new ArrayList();
+        List        l = new ArrayList();
         
         for (int i = 0; i != p.length; i++)
         {
@@ -155,15 +156,8 @@ public class AttributeCertificateIssuer
             V2Form issuer = (V2Form)form;
             if (issuer.getBaseCertificateID() != null)
             {
-                if (issuer.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber())
-                    && matchesDN(x509Cert.getIssuerX500Principal(), issuer.getBaseCertificateID().getIssuer()))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return issuer.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber())
+                    && matchesDN(x509Cert.getIssuerX500Principal(), issuer.getBaseCertificateID().getIssuer());
             }
             
             GeneralNames name = issuer.getIssuerName();

@@ -19,6 +19,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -176,7 +177,7 @@ public class CMSSignedData
         if (signerInfoStore == null)
         {
             ASN1Set         s = signedData.getSignerInfos();
-            ArrayList       signerInfos = new ArrayList();
+            List            signerInfos = new ArrayList();
 
             for (int i = 0; i != s.size(); i++)
             {
@@ -203,7 +204,7 @@ public class CMSSignedData
     {
         if (certStore == null)
         {
-            ArrayList               certsAndcrls = new ArrayList();
+            List                    certsAndcrls = new ArrayList();
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
             ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
             CertificateFactory      cf;

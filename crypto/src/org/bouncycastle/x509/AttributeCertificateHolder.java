@@ -22,6 +22,7 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -117,7 +118,7 @@ public class AttributeCertificateHolder
     private Object[] getNames(
         GeneralName[] names)
     {        
-        ArrayList   l = new ArrayList(names.length);
+        List        l = new ArrayList(names.length);
         
         for (int i = 0; i != names.length; i++)
         {
@@ -141,7 +142,7 @@ public class AttributeCertificateHolder
         GeneralNames    names)
     {
         Object[]    p = this.getNames(names.getNames());
-        ArrayList   l = new ArrayList();
+        List        l = new ArrayList();
         
         for (int i = 0; i != p.length; i++)
         {
@@ -223,15 +224,8 @@ public class AttributeCertificateHolder
         {
             if (holder.getBaseCertificateID() != null)
             {
-                if (holder.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber())
-                    && matchesDN(PrincipalUtil.getIssuerX509Principal(x509Cert), holder.getBaseCertificateID().getIssuer()))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return holder.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber())
+                    && matchesDN(PrincipalUtil.getIssuerX509Principal(x509Cert), holder.getBaseCertificateID().getIssuer());
             }
     
             if (holder.getEntityName() != null)

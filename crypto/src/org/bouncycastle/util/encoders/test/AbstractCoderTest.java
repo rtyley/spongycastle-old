@@ -100,7 +100,8 @@ public abstract class AbstractCoderTest extends TestCase
         {
             assertEquals(original.length, enc.decode(encString, out));
             assertTrue(Arrays.equals(original, out.toByteArray()));
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             fail("This shouldn't happen");
         }

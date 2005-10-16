@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -32,106 +33,152 @@ public class AESVectorFileTest
     private int countOfTests = 0;
     private int testNum = 0;
 
-    protected BlockCipher createNewEngineForTest() {
+    protected BlockCipher createNewEngineForTest()
+    {
         return new AESEngine();
     }
-        
-    private Test[] readTestVectors(InputStream inStream) {
+
+    private Test[] readTestVectors(InputStream inStream)
+    {
         // initialize key, plaintext, ciphertext = null
         // read until find BLOCKSIZE=
         // return if not 128
         // read KEYSIZE= or ignore
         // loop
-        //  read a line
+        // read a line
         // if starts with BLOCKSIZE=
-        //    parse the rest. return if not 128
+        // parse the rest. return if not 128
         // if starts with KEY=
-        //    parse the rest and set KEY
+        // parse the rest and set KEY
         // if starts with PT=
-        //    parse the rest and set plaintext
+        // parse the rest and set plaintext
         // if starts with CT=
-        //    parse the rest and set ciphertext
+        // parse the rest and set ciphertext
         // if starts with TEST= or end of file
-        //       if key, plaintext, ciphertext are all not null
-        //          save away their values as the next test
+        // if key, plaintext, ciphertext are all not null
+        // save away their values as the next test
         // until end of file
-        ArrayList tests = new ArrayList();
+        List   tests = new ArrayList();
         String key = null;
         String plaintext = null;
         String ciphertext = null;
 
         BufferedReader in = new BufferedReader(new InputStreamReader(inStream));
 
-        try {
-            for (String line = in.readLine(); (line != null) ;) {
+        try
+        {
+            String line = in.readLine();
+
+            while (line != null)
+            {
                 line = line.trim().toLowerCase();
-                if (line.startsWith("blocksize=")) {
-                    int i=0;
-                    try {
+                if (line.startsWith("blocksize="))
+                {
+                    int i = 0;
+                    try
+                    {
                         i = Integer.parseInt(line.substring(10).trim());
-                    } catch (Exception e) {
                     }
-                    if (i != 128) {
+                    catch (Exception e)
+                    {
+                    }
+                    if (i != 128)
+                    {
                         return null;
-                    }
-                } else if (line.startsWith("keysize=")) {
-                    int i=0;
-                    try {
-                        i = Integer.parseInt(line.substring(10).trim());
-                    } catch (Exception e) {
-                    }
-                    if ((i != 128) && (i != 192) && (i != 256)) {
-                        return null;
-                    }
-                } else if (line.startsWith("key=")) {
-                    key = line.substring(4).trim();
-                } else if (line.startsWith("pt=")) {
-                    plaintext = line.substring(3).trim();
-                } else if (line.startsWith("ct=")) {
-                    ciphertext = line.substring(3).trim();
-                } else if (line.startsWith("test=")) {
-                    if ((key != null) && (plaintext != null) && (ciphertext != null)) {
-                        tests.add(new BlockCipherVectorTest(testNum++, createNewEngineForTest(),
-                                                            new KeyParameter(Hex.decode(key)), plaintext, ciphertext));
                     }
                 }
-                
+                else if (line.startsWith("keysize="))
+                {
+                    int i = 0;
+                    try
+                    {
+                        i = Integer.parseInt(line.substring(10).trim());
+                    }
+                    catch (Exception e)
+                    {
+                    }
+                    if ((i != 128) && (i != 192) && (i != 256))
+                    {
+                        return null;
+                    }
+                }
+                else if (line.startsWith("key="))
+                {
+                    key = line.substring(4).trim();
+                }
+                else if (line.startsWith("pt="))
+                {
+                    plaintext = line.substring(3).trim();
+                }
+                else if (line.startsWith("ct="))
+                {
+                    ciphertext = line.substring(3).trim();
+                }
+                else if (line.startsWith("test="))
+                {
+                    if ((key != null) && (plaintext != null)
+                            && (ciphertext != null))
+                    {
+                        tests.add(new BlockCipherVectorTest(testNum++,
+                                createNewEngineForTest(), new KeyParameter(Hex
+                                        .decode(key)), plaintext, ciphertext));
+                    }
+                }
+
                 line = in.readLine();
             }
-            try {
+            try
+            {
                 in.close();
-            } catch (IOException e) {
             }
-        } catch (IOException e) {
+            catch (IOException e)
+            {
+            }
         }
-        if ((key != null) && (plaintext != null) && (ciphertext != null)) {
-            tests.add(new BlockCipherVectorTest(testNum++, createNewEngineForTest(),
-                                                new KeyParameter(Hex.decode(key)), plaintext, ciphertext));
+        catch (IOException e)
+        {
+        }
+        if ((key != null) && (plaintext != null) && (ciphertext != null))
+        {
+            tests.add(new BlockCipherVectorTest(testNum++,
+                    createNewEngineForTest(),
+                    new KeyParameter(Hex.decode(key)), plaintext, ciphertext));
         }
         return (Test[])(tests.toArray(new Test[tests.size()]));
     }
 
-
-    public String getName() {
+    public String getName()
+    {
         return "AES";
     }
 
-    private TestResult performTestsFromZipFile(File zfile) {
-        try {
+    private TestResult performTestsFromZipFile(File zfile)
+    {
+        try
+        {
             ZipFile inZip = new ZipFile(zfile);
-            for (Enumeration files = inZip.entries(); files.hasMoreElements();) {
+            for (Enumeration files = inZip.entries(); files.hasMoreElements();)
+            {
                 Test[] tests = null;
-                try {
-                    tests = readTestVectors(inZip.getInputStream((ZipEntry)(files.nextElement())));
-                } catch (Exception e) {
-                    return new SimpleTestResult(false, getName()+": threw "+e);
+                try
+                {
+                    tests = readTestVectors(inZip
+                            .getInputStream((ZipEntry)(files.nextElement())));
                 }
-                if (tests != null) {
-                    for (int i = 0; i != tests.length; i++) {
-                        TestResult  res = tests[i].perform();
+                catch (Exception e)
+                {
+                    return new SimpleTestResult(false, getName() + ": threw "
+                            + e);
+                }
+                if (tests != null)
+                {
+                    for (int i = 0; i != tests.length; i++)
+                    {
+                        TestResult res = tests[i].perform();
                         countOfTests++;
-                        
-                        if (!res.isSuccessful()) {
+
+                        if (!res.isSuccessful())
+                        {
                             return res;
                         }
                     }
@@ -139,29 +186,33 @@ public class AESVectorFileTest
             }
             inZip.close();
             return new SimpleTestResult(true, getName() + ": Okay");
-        } catch (Exception e) {
-            return new SimpleTestResult(false, getName()+": threw "+e);
+        }
+        catch (Exception e)
+        {
+            return new SimpleTestResult(false, getName() + ": threw " + e);
         }
     }
-    
-    private static final String[] zipFileNames = {"rijn.tv.ecbnk.zip",
-                                                  "rijn.tv.ecbnt.zip",
-                                                  "rijn.tv.ecbvk.zip",
-                                                  "rijn.tv.ecbvt.zip"};
 
-    public TestResult perform() {
+    private static final String[] zipFileNames = { "rijn.tv.ecbnk.zip",
+            "rijn.tv.ecbnt.zip", "rijn.tv.ecbvk.zip", "rijn.tv.ecbvt.zip" };
+
+    public TestResult perform()
+    {
         countOfTests = 0;
-        for (int i = 0; i < zipFileNames.length; i++) {
+        for (int i = 0; i < zipFileNames.length; i++)
+        {
             File inf = new File(zipFileNames[i]);
             TestResult res = performTestsFromZipFile(inf);
-            if (!res.isSuccessful()) {
+            if (!res.isSuccessful())
+            {
                 return res;
             }
         }
-        return new SimpleTestResult(true, getName() + ": "+countOfTests+" performed Okay");
+        return new SimpleTestResult(true, getName() + ": " + countOfTests
+                + " performed Okay");
     }
 
-   public static void main(String[]    args)
+    public static void main(String[] args)
     {
         AESVectorFileTest test = new AESVectorFileTest();
         TestResult result = test.perform();
@@ -177,23 +228,29 @@ public class AESVectorFileTest
 
     }
 
-    private static class AESLightVectorFileTest extends AESVectorFileTest {
-        protected BlockCipher createNewEngineForTest() {
+    private static class AESLightVectorFileTest extends AESVectorFileTest
+    {
+        protected BlockCipher createNewEngineForTest()
+        {
             return new AESLightEngine();
         }
 
-        public String getName() {
+        public String getName()
+        {
             return "AESLight";
         }
 
     }
 
-    private static class AESFastVectorFileTest extends AESVectorFileTest {
-        protected BlockCipher createNewEngineForTest() {
+    private static class AESFastVectorFileTest extends AESVectorFileTest
+    {
+        protected BlockCipher createNewEngineForTest()
+        {
             return new AESFastEngine();
         }
 
-        public String getName() {
+        public String getName()
+        {
             return "AESFast";
         }
 

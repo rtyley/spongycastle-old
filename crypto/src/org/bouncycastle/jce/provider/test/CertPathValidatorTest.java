@@ -150,28 +150,28 @@ public class CertPathValidatorTest
             X509CRL rootCrl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(CertPathTest.rootCrlBin));
             X509CRL interCrl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(CertPathTest.interCrlBin));
             List list = new ArrayList();
-            list.add( rootCert );
-            list.add( interCert );
-            list.add( finalCert );
-            list.add( rootCrl );
-            list.add( interCrl );
-            CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters( list );
-            CertStore store = CertStore.getInstance("Collection", ccsp );
+            list.add(rootCert);
+            list.add(interCert);
+            list.add(finalCert);
+            list.add(rootCrl);
+            list.add(interCrl);
+            CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
+            CertStore store = CertStore.getInstance("Collection", ccsp);
             Calendar validDate = Calendar.getInstance();
             validDate.set(2002,2,21,2,21,10);
 
                 //validating path
             List certchain = new ArrayList();
-            certchain.add( finalCert );
-            certchain.add( interCert );
-            CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath( certchain );
+            certchain.add(finalCert);
+            certchain.add(interCert);
+            CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
             Set trust = new HashSet();
-            trust.add( new TrustAnchor( rootCert, null ) );
+            trust.add(new TrustAnchor(rootCert, null));
 
             CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
-            PKIXParameters param = new PKIXParameters( trust );
+            PKIXParameters param = new PKIXParameters(trust);
             param.addCertStore(store);
-            param.setDate( validDate.getTime() );
+            param.setDate(validDate.getTime());
             PKIXCertPathValidatorResult result =
                 (PKIXCertPathValidatorResult) cpv.validate(cp, param);
             PolicyNode policyTree = result.getPolicyTree();
@@ -196,28 +196,28 @@ public class CertPathValidatorTest
             X509Certificate finalCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(schefer));
     
             List list = new ArrayList();
-            list.add( rootCert );
-            list.add( interCert );
-            list.add( finalCert );
+            list.add(rootCert);
+            list.add(interCert);
+            list.add(finalCert);
 
-            CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters( list );
-            CertStore store = CertStore.getInstance("Collection", ccsp );
+            CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
+            CertStore store = CertStore.getInstance("Collection", ccsp);
             Calendar validDate = Calendar.getInstance();
             validDate.set(2004,2,21,2,21,10);
     
                 //validating path
             List certchain = new ArrayList();
-            certchain.add( finalCert );
-            certchain.add( interCert );
-            CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath( certchain );
+            certchain.add(finalCert);
+            certchain.add(interCert);
+            CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
             Set trust = new HashSet();
-            trust.add( new TrustAnchor( rootCert, null ) );
+            trust.add(new TrustAnchor(rootCert, null));
 
             CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
-            PKIXParameters param = new PKIXParameters( trust );
+            PKIXParameters param = new PKIXParameters(trust);
             param.addCertStore(store);
             param.setRevocationEnabled(false);
-            param.setDate( validDate.getTime() );
+            param.setDate(validDate.getTime());
             PKIXCertPathValidatorResult result =
                 (PKIXCertPathValidatorResult) cpv.validate(cp, param);
             PolicyNode policyTree = result.getPolicyTree();

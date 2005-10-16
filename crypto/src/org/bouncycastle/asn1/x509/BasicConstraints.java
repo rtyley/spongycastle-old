@@ -66,7 +66,7 @@ public class BasicConstraints
         boolean cA,
         int     pathLenConstraint)
     {
-        if (cA )
+        if (cA)
         {
             this.cA = new DERBoolean(cA);
             this.pathLenConstraint = new DERInteger(pathLenConstraint);

@@ -84,7 +84,7 @@ public abstract class ECCurve
 
                 int bit0 = (beta.toBigInteger().testBit(0) ? 0 : 1);
 
-                if ( bit0 == ytilde )
+                if (bit0 == ytilde)
                 {
                     p = new ECPoint.Fp(this, x, beta);
                 }

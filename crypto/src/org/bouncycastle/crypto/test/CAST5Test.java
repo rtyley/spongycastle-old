@@ -29,7 +29,7 @@ public class CAST5Test
 
     CAST5Test()
     {
-        super(tests);
+        super(tests, new CAST5Engine(), new KeyParameter(new byte[16]));
     }
 
     public String getName()

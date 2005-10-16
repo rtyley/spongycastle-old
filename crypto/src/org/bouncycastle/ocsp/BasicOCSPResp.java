@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1OutputStream;
@@ -115,7 +116,7 @@ public class BasicOCSPResp
     public boolean hasUnsupportedCriticalExtension()
     {
         Set extns = getCriticalExtensionOIDs();
-        if ( extns != null && !extns.isEmpty() )
+        if (extns != null && !extns.isEmpty())
         {
             return true;
         }
@@ -125,7 +126,7 @@ public class BasicOCSPResp
 
     private Set getExtensionOIDs(boolean critical)
     {
-        HashSet         set = new HashSet();
+        Set             set = new HashSet();
         X509Extensions  extensions = this.getResponseExtensions();
         
         if (extensions != null)
@@ -206,11 +207,11 @@ public class BasicOCSPResp
         return resp.getSignature().getBytes();
     }
 
-    private ArrayList getCertList(
+    private List getCertList(
         String provider) 
         throws OCSPException, NoSuchProviderException
     {
-        ArrayList               certs = new ArrayList();
+        List                    certs = new ArrayList();
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
         CertificateFactory      cf;
@@ -264,7 +265,7 @@ public class BasicOCSPResp
         String  provider)
         throws OCSPException, NoSuchProviderException
     {
-        ArrayList               certs = getCertList(provider);
+        List                    certs = getCertList(provider);
             
         return (X509Certificate[])certs.toArray(new X509Certificate[certs.size()]);
     }

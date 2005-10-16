@@ -77,7 +77,9 @@ public class CMSProcessableBodyPartInbound
             char ac[] = s.toCharArray();
             int i = ac.length;
             byte abyte0[] = new byte[i];
-            for(int j = 0; j < i;)
+            int j = 0;
+
+            while (j < i)
             {
                 abyte0[j] = (byte)ac[j++];
             }

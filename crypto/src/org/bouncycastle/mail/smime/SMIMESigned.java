@@ -148,9 +148,9 @@ public class SMIMESigned
 
         if (cont != null)
         {
-	        byte[]  contBytes = (byte[])cont.getContent();
-	
-	        this.content = SMIMEUtil.toMimeBodyPart(contBytes);
+            byte[]  contBytes = (byte[])cont.getContent();
+    
+            this.content = SMIMEUtil.toMimeBodyPart(contBytes);
         }
     }
 

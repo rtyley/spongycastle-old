@@ -3,6 +3,7 @@ package org.bouncycastle.openpgp;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.InputStreamPacket;
@@ -15,7 +16,7 @@ import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
  */
 public class PGPEncryptedDataList
 {
-    ArrayList            list = new ArrayList();
+    List                 list = new ArrayList();
     InputStreamPacket    data;
     
     public PGPEncryptedDataList(

@@ -43,4 +43,16 @@ public class DHValidationParameters
 
         return true;
     }
+    
+    public int hashCode()
+    {
+        int code = counter;
+        
+        for (int i = 0; i != seed.length; i++)
+        {
+            code ^= (seed[i] & 0xff) << (i % 4);
+        }
+        
+        return code;
+    }
 }

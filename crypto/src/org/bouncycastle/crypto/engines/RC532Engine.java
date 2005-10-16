@@ -172,7 +172,7 @@ public class RC532Engine
         for (int k = 0; k < iter; k++)
         {
             A = _S[i] = rotateLeft(_S[i] + A + B, 3);
-            B =  L[j] = rotateLeft( L[j] + A + B, A+B);
+            B =  L[j] = rotateLeft(L[j] + A + B, A+B);
             i = (i+1) % _S.length;
             j = (j+1) %  L.length;
         }
@@ -246,7 +246,8 @@ public class RC532Engine
      * @param  x  word to rotate
      * @param  y    number of bits to rotate % 32
      */
-    private int rotateLeft(int x, int y) {
+    private int rotateLeft(int x, int y)
+    {
         return ((x << (y & (32-1))) | (x >>> (32 - (y & (32-1)))));
     }
 
@@ -260,7 +261,8 @@ public class RC532Engine
      * @param  x  word to rotate
      * @param  y    number of bits to rotate % 32
      */
-    private int rotateRight(int x, int y) {
+    private int rotateRight(int x, int y)
+    {
         return ((x >>> (y & (32-1))) | (x << (32 - (y & (32-1)))));
     }
 

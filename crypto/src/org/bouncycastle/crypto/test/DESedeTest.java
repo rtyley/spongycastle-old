@@ -38,7 +38,7 @@ public class DESedeTest
 
     DESedeTest()
     {
-        super(tests);
+        super(tests, new DESedeEngine(), new KeyParameter(new byte[16]));
     }
 
     private TestResult wrapTest(

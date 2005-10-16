@@ -8,6 +8,7 @@ import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
@@ -83,7 +84,7 @@ public class CMSEnvelopedData
         // load the RecepientInfoStore
         //
         ASN1Set     s = envData.getRecipientInfos();
-        ArrayList   infos = new ArrayList();
+        List        infos = new ArrayList();
 
         for (int i = 0; i != s.size(); i++)
         {

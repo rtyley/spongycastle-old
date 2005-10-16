@@ -47,10 +47,12 @@ public class NoticeReference
       Object o = numbers.elementAt(0);
 
       ASN1EncodableVector av = new ASN1EncodableVector();
-      if (o instanceof Integer) {
+      if (o instanceof Integer)
+      {
          Enumeration it = numbers.elements();
 
-         while (it.hasMoreElements()) {
+         while (it.hasMoreElements())
+         {
             Integer nm = (Integer) it.nextElement();
                DERInteger di = new DERInteger(nm.intValue());
             av.add (di);

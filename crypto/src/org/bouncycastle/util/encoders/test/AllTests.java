@@ -2,9 +2,10 @@ package org.bouncycastle.util.encoders.test;
 
 import junit.framework.*;
 
-public class EncoderTestSuite
+public class AllTests
 {
-    public static void main (String[] args) {
+    public static void main (String[] args)
+    {
         junit.textui.TestRunner.run (suite());
     }
     

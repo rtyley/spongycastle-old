@@ -215,7 +215,7 @@ public class SHA256Digest
         int    y,
         int    z)
     {
-        return ((x & y) ^ ((~x) & z));
+        return (x & y) ^ ((~x) & z);
     }
 
     private int Maj(
@@ -223,7 +223,7 @@ public class SHA256Digest
         int    y,
         int    z)
     {
-        return ((x & y) ^ (x & z) ^ (y & z));
+        return (x & y) ^ (x & z) ^ (y & z);
     }
 
     private int Sum0(

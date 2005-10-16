@@ -9,7 +9,8 @@ public class TSPException  extends Exception
     super(message);
   }
 
-  public TSPException(String message, Exception e) {
+  public TSPException(String message, Exception e)   
+  {
     super(message);
     underlyingException = e;
   }

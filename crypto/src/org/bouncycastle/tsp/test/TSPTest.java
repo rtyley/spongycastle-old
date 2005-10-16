@@ -23,9 +23,11 @@ import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertStore;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 
 public class TSPTest
     implements Test
@@ -57,7 +59,7 @@ public class TSPTest
 
 
             
-            java.util.ArrayList certList = new java.util.ArrayList();
+            List certList = new ArrayList();
             certList.add(origCert);
             certList.add(signCert);
 

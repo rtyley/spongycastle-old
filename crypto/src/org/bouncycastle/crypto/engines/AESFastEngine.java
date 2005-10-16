@@ -561,7 +561,9 @@ private static final int[] Tinv0 =
     private static final int m1 = 0x80808080;
     private static final int m2 = 0x7f7f7f7f;
     private static final int m3 = 0x0000001b;
-    private int FFmulX(int x) {
+
+    private int FFmulX(int x)
+    {
         return (((x & m2) << 1) ^ (((x & m1) >>> 7) * m3));
     }
 
@@ -575,7 +577,8 @@ private static final int[] Tinv0 =
 
     */
 
-    private int inv_mcol(int x) {
+    private int inv_mcol(int x)
+    {
         int f2 = FFmulX(x);
         int f4 = FFmulX(f2);
         int f8 = FFmulX(f4);
@@ -585,7 +588,8 @@ private static final int[] Tinv0 =
     }
 
 
-    private int subWord(int x) {
+    private int subWord(int x)
+    {
         return (S[x&255]&255 | ((S[(x>>8)&255]&255)<<8) | ((S[(x>>16)&255]&255)<<16) | S[(x>>24)&255]<<24);
     }
 
@@ -602,7 +606,8 @@ private static final int[] Tinv0 =
         int         KC = key.length / 4;  // key length in words
         int         t;
         
-        if (((KC != 4) && (KC != 6) && (KC != 8)) || ((KC * 4) != key.length)) {
+        if (((KC != 4) && (KC != 6) && (KC != 8)) || ((KC * 4) != key.length))
+        {
             throw new IllegalArgumentException("Key length not 128/192/256 bits.");
         }
 
@@ -614,32 +619,40 @@ private static final int[] Tinv0 =
         //
         
         t = 0;
-        for (int i = 0; i < key.length; t++)
-            {
-                W[t >> 2][t & 3] = (key[i]&0xff) | ((key[i+1]&0xff) << 8) | ((key[i+2]&0xff) << 16) | (key[i+3] << 24);
-                i+=4;
-            }
+        int i = 0;
+        while (i < key.length)
+        {
+            W[t >> 2][t & 3] = (key[i]&0xff) | ((key[i+1]&0xff) << 8) | ((key[i+2]&0xff) << 16) | (key[i+3] << 24);
+            i+=4;
+            t++;
+        }
         
         //
         // while not enough round key material calculated
         // calculate new values
         //
         int k = (ROUNDS + 1) << 2;
-        for (int i = KC; (i < k); i++)
+        for (i = KC; (i < k); i++)
+        {
+            int temp = W[(i - 1) >> 2][(i - 1) & 3];
+            if ((i % KC) == 0)
             {
-                int temp = W[(i-1)>>2][(i-1)&3];
-                if ((i % KC) == 0) {
-                    temp = subWord(shift(temp, 8)) ^ rcon[(i / KC)-1];
-                } else if ((KC > 6) && ((i % KC) == 4)) {
-                    temp = subWord(temp);
-                }
-                
-                W[i>>2][i&3] = W[(i - KC)>>2][(i-KC)&3] ^ temp;
+                temp = subWord(shift(temp, 8)) ^ rcon[(i / KC) - 1];
+            }
+            else if ((KC > 6) && ((i % KC) == 4))
+            {
+                temp = subWord(temp);
             }
 
-        if (!forEncryption) {
-            for (int j = 1; j < ROUNDS; j++) {
-                for (int i = 0; i < 4; i++){
+            W[i >> 2][i & 3] = W[(i - KC) >> 2][(i - KC) & 3] ^ temp;
+        }
+
+        if (!forEncryption)
+        {
+            for (int j = 1; j < ROUNDS; j++)
+            {
+                for (i = 0; i < 4; i++)
+                {
                     W[j][i] = inv_mcol(W[j][i]);
                 }
             }
@@ -798,7 +811,9 @@ private static final int[] Tinv0 =
         C2 ^= KW[0][2];
         C3 ^= KW[0][3];
 
-        for (r = 1; r < ROUNDS - 1;) {
+        r = 1;
+        while (r < ROUNDS - 1)
+        {
             r0 = T0[C0&255] ^ T1[(C1>>8)&255] ^ T2[(C2>>16)&255] ^ T3[(C3>>24)&255] ^ KW[r][0];
             r1 = T0[C1&255] ^ T1[(C2>>8)&255] ^ T2[(C3>>16)&255] ^ T3[(C0>>24)&255] ^ KW[r][1];
             r2 = T0[C2&255] ^ T1[(C3>>8)&255] ^ T2[(C0>>16)&255] ^ T3[(C1>>24)&255] ^ KW[r][2];
@@ -825,14 +840,17 @@ private static final int[] Tinv0 =
 
     private final void decryptBlock(int[][] KW)
     {
-        int r, r0, r1, r2, r3;
+        int r0, r1, r2, r3;
 
         C0 ^= KW[ROUNDS][0];
         C1 ^= KW[ROUNDS][1];
         C2 ^= KW[ROUNDS][2];
         C3 ^= KW[ROUNDS][3];
 
-        for (r = ROUNDS-1; r>1;) {
+        int r = ROUNDS-1; 
+        
+        while (r>1) 
+        {
             r0 = Tinv0[C0&255] ^ Tinv1[(C3>>8)&255] ^ Tinv2[(C2>>16)&255] ^ Tinv3[(C1>>24)&255] ^ KW[r][0];
             r1 = Tinv0[C1&255] ^ Tinv1[(C0>>8)&255] ^ Tinv2[(C3>>16)&255] ^ Tinv3[(C2>>24)&255] ^ KW[r][1];
             r2 = Tinv0[C2&255] ^ Tinv1[(C1>>8)&255] ^ Tinv2[(C0>>16)&255] ^ Tinv3[(C3>>24)&255] ^ KW[r][2];

@@ -7,8 +7,9 @@ import java.security.spec.KeySpec;
  * This class specifies a GOST3410-94 private key with its associated parameters.
  */
 
-public class GOST3410PrivateKeySpec implements KeySpec {
-
+public class GOST3410PrivateKeySpec
+    implements KeySpec
+{
     private BigInteger x;
     private BigInteger p;
     private BigInteger q;
@@ -23,42 +24,47 @@ public class GOST3410PrivateKeySpec implements KeySpec {
      * @param a the base.
      */
     public GOST3410PrivateKeySpec(BigInteger x, BigInteger p, BigInteger q,
-			     BigInteger a) {
-	this.x = x;
-	this.p = p;
-	this.q = q;
-	this.a = a;
+         BigInteger a)
+    {
+        this.x = x;
+        this.p = p;
+        this.q = q;
+        this.a = a;
     }
 
     /**
      * Returns the private key <code>x</code>.
      * @return the private key <code>x</code>.
      */
-    public BigInteger getX() {
-	return this.x;
+    public BigInteger getX()
+    {
+        return this.x;
     }
 
     /**
      * Returns the prime <code>p</code>.
      * @return the prime <code>p</code>.
      */
-    public BigInteger getP() {
-	return this.p;
+    public BigInteger getP()
+    {
+        return this.p;
     }
 
     /**
      * Returns the sub-prime <code>q</code>.
      * @return the sub-prime <code>q</code>.
      */
-    public BigInteger getQ() {
-	return this.q;
+    public BigInteger getQ()
+    {
+        return this.q;
     }
 
     /**
      * Returns the base <code>a</code>.
      * @return the base <code>a</code>.
      */
-    public BigInteger getA() {
-	return this.a;
+    public BigInteger getA()
+    {
+        return this.a;
     }
 }

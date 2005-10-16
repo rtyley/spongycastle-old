@@ -40,7 +40,7 @@ public class ECDHBasicAgreement
         ECPublicKeyParameters pub = (ECPublicKeyParameters)pubKey;
         ECPoint P = pub.getQ().multiply(key.getD());
 
-        // if ( p.isInfinity() ) throw new RuntimeException("d*Q == infinity");
+        // if (p.isInfinity()) throw new RuntimeException("d*Q == infinity");
 
         return P.getX().toBigInteger();
     }

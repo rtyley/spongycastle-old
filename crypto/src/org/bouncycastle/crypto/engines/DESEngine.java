@@ -311,7 +311,7 @@ public class DESEngine
         boolean[]   pc1m = new boolean[56],
                     pcr = new boolean[56];
 
-        for (int j = 0; j < 56; j++ )
+        for (int j = 0; j < 56; j++)
         {
             int    l = pc1[j];
 
@@ -337,7 +337,7 @@ public class DESEngine
             for (int j = 0; j < 28; j++)
             {
                 l = j + totrot[i];
-                if ( l < 28 )
+                if (l < 28)
                 {
                     pcr[j] = pc1m[l];
                 }
@@ -350,7 +350,7 @@ public class DESEngine
             for (int j = 28; j < 56; j++)
             {
                 l = j + totrot[i];
-                if (l < 56 )
+                if (l < 56)
                 {
                     pcr[j] = pc1m[l];
                 }
@@ -485,10 +485,10 @@ public class DESEngine
         out[outOff + 0] = (byte)((right >>> 24) & 0xff);
         out[outOff + 1] = (byte)((right >>> 16) & 0xff);
         out[outOff + 2] = (byte)((right >>>  8) & 0xff);
-        out[outOff + 3] = (byte)( right         & 0xff);
+        out[outOff + 3] = (byte)(right         & 0xff);
         out[outOff + 4] = (byte)((left >>> 24) & 0xff);
         out[outOff + 5] = (byte)((left >>> 16) & 0xff);
         out[outOff + 6] = (byte)((left >>>  8) & 0xff);
-        out[outOff + 7] = (byte)( left         & 0xff);
+        out[outOff + 7] = (byte)(left         & 0xff);
     }
 }

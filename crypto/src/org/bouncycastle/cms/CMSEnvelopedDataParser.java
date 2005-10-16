@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -93,7 +94,7 @@ public class CMSEnvelopedDataParser
         // load the RecepientInfoStore
         //
         Asn1Set     s = _envelopedData.getRecipientInfos();
-        ArrayList   baseInfos = new ArrayList();
+        List        baseInfos = new ArrayList();
         Asn1Object  o = null;
         
         while ((o = s.readObject()) != null)
@@ -123,7 +124,7 @@ public class CMSEnvelopedDataParser
         //
         // prime the recepients
         //
-        ArrayList infos = new ArrayList();
+        List      infos = new ArrayList();
         Iterator  it = baseInfos.iterator();
         
         while (it.hasNext())

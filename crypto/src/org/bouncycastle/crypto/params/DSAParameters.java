@@ -66,4 +66,9 @@ public class DSAParameters
 
         return (pm.getP().equals(p) && pm.getQ().equals(q) && pm.getG().equals(g));
     }
+    
+    public int hashCode()
+    {
+        return getP().hashCode() ^ getQ().hashCode() ^ getG().hashCode();
+    }
 }

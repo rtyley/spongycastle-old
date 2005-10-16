@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.PacketTags;
@@ -22,7 +23,7 @@ import org.bouncycastle.bcpg.UserIDPacket;
  */
 public class PGPPublicKeyRing
 {
-    ArrayList            keys = new ArrayList();
+    List            keys = new ArrayList();
     
     public PGPPublicKeyRing(
         byte[]    encoding)
@@ -35,7 +36,7 @@ public class PGPPublicKeyRing
      * @param pubKeys
      */
     PGPPublicKeyRing(
-        ArrayList pubKeys)
+        List pubKeys)
     {
         this.keys = pubKeys;
     }
@@ -65,10 +66,10 @@ public class PGPPublicKeyRing
         
         PublicKeyPacket   pubPk;
         TrustPacket       trustPk;
-        ArrayList         keySigs = new ArrayList();
-        ArrayList         ids = new ArrayList();
-        ArrayList         idTrust = new ArrayList();
-        ArrayList         idSigs = new ArrayList();
+        List              keySigs = new ArrayList();
+        List              ids = new ArrayList();
+        List              idTrust = new ArrayList();
+        List              idSigs = new ArrayList();
     
         pubPk = (PublicKeyPacket)pIn.readPacket();
         trustPk = null;
@@ -128,7 +129,7 @@ public class PGPPublicKeyRing
                 idTrust.add(null);
             }
             
-            ArrayList        sigList = new ArrayList();
+            List             sigList = new ArrayList();
             
             idSigs.add(sigList);
 
@@ -166,7 +167,7 @@ public class PGPPublicKeyRing
                 kTrust = (TrustPacket)pIn.readPacket();
             }
 
-            ArrayList    sigList = new ArrayList();
+            List         sigList = new ArrayList();
             
             try
             {
@@ -275,7 +276,7 @@ public class PGPPublicKeyRing
         PGPPublicKeyRing  pubRing,
         PGPPublicKey      pubKey)
     {
-        ArrayList  keys = new ArrayList(pubRing.keys);
+        List       keys = new ArrayList(pubRing.keys);
         boolean    found = false;
         
         for (int i = 0; i != keys.size();i++)
@@ -309,7 +310,7 @@ public class PGPPublicKeyRing
         PGPPublicKeyRing  pubRing,
         PGPPublicKey      pubKey)
     {
-        ArrayList  keys = new ArrayList(pubRing.keys);
+        List       keys = new ArrayList(pubRing.keys);
         boolean    found = false;
         
         for (int i = 0; i < keys.size();i++)

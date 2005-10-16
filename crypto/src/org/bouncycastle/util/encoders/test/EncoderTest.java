@@ -4,21 +4,10 @@ import java.util.*;
 import org.bouncycastle.util.encoders.*;
 import org.bouncycastle.util.test.*;
 
-public class EncoderTest implements Test {
-
-    /*
-     *
-     *  VARIABLES
-     *
-     */
-
+public class EncoderTest
+    implements Test
+{
     public static final boolean DEBUG = true;
-
-    /*
-     *
-     *  INFRASTRUCTURE
-     *
-     */
 
     public static void main(String[] _args)
     {
@@ -27,14 +16,18 @@ public class EncoderTest implements Test {
         System.out.println(_test.testHex());
     }
 
-    public static void log(Exception _ex) {
-        if(DEBUG) {
+    public static void log(Exception _ex)
+    {
+        if(DEBUG)
+    {
             _ex.printStackTrace();
         }
     }
 
-    public static void log(String _msg) {
-        if(DEBUG) {
+    public static void log(String _msg)
+    {
+        if(DEBUG)
+    {
             System.out.println(_msg);
         }
     }
@@ -56,8 +49,10 @@ public class EncoderTest implements Test {
     }
     
     
-    public TestResult testBase64() {
-        try {
+    public TestResult testBase64()
+    {
+        try
+        {
             Random _r = new Random();
             
             byte[] _orig1024 = new byte[1024];
@@ -82,19 +77,23 @@ public class EncoderTest implements Test {
             byte[] _dec4096 = Base64.decode(_enc4096);
             byte[] _dec8192 = Base64.decode(_enc8192);
             
-            if(!Arrays.equals(_orig1024, _dec1024)) {
+            if(!Arrays.equals(_orig1024, _dec1024))
+            {
                 return new SimpleTestResult(false, "Failed Base64 test");
             }
             
-            if(!Arrays.equals(_orig2048, _dec2048)) {
+            if(!Arrays.equals(_orig2048, _dec2048))
+            {
                 return new SimpleTestResult(false, "Failed Base64 test");
             }
             
-            if(!Arrays.equals(_orig4096, _dec4096)) {
+            if(!Arrays.equals(_orig4096, _dec4096))
+            {
                 return new SimpleTestResult(false, "Failed Base64 test");
             }
             
-            if(!Arrays.equals(_orig8192, _dec8192)) {
+            if(!Arrays.equals(_orig8192, _dec8192))
+            {
                 return new SimpleTestResult(false, "Failed Base64 test");
             }
             
@@ -122,33 +121,40 @@ public class EncoderTest implements Test {
             byte[] _dec4097 = Base64.decode(_enc4097);
             byte[] _dec8193 = Base64.decode(_enc8193);
             
-            if(!Arrays.equals(_orig1025, _dec1025)) {
+            if(!Arrays.equals(_orig1025, _dec1025))
+            {
                 return new SimpleTestResult(false, "Failed Base64 test");
             }
             
-            if(!Arrays.equals(_orig2049, _dec2049)) {
+            if(!Arrays.equals(_orig2049, _dec2049))
+            {
                 return new SimpleTestResult(false, "Failed Base64 test");
             }
             
-            if(!Arrays.equals(_orig4097, _dec4097)) {
+            if(!Arrays.equals(_orig4097, _dec4097))
+            {
                 return new SimpleTestResult(false, "Failed Base64 test");
             }
             
-            if(!Arrays.equals(_orig8193, _dec8193)) {
+            if(!Arrays.equals(_orig8193, _dec8193))
+            {
                 return new SimpleTestResult(false, "Failed Base64 test");
             }
             
             return new SimpleTestResult(true, "Passed Base64 test");
         }
-        catch(Exception ex) {
+        catch(Exception ex)
+        {
             log(ex);
             return new SimpleTestResult(false, "Failed Base64 test");
         }
     }
 
 
-    public TestResult testHex() {
-        try {
+    public TestResult testHex()
+    {
+        try
+        {
             Random _r = new Random();
             
             byte[] _orig1024 = new byte[1024];
@@ -173,19 +179,23 @@ public class EncoderTest implements Test {
             byte[] _dec4096 = Hex.decode(_enc4096);
             byte[] _dec8192 = Hex.decode(_enc8192);
             
-            if(!Arrays.equals(_orig1024, _dec1024)) {
+            if(!Arrays.equals(_orig1024, _dec1024))
+            {
                 return new SimpleTestResult(false, "Failed Hex test");
             }
             
-            if(!Arrays.equals(_orig2048, _dec2048)) {
+            if(!Arrays.equals(_orig2048, _dec2048))
+            {
                 return new SimpleTestResult(false, "Failed Hex test");
             }
             
-            if(!Arrays.equals(_orig4096, _dec4096)) {
+            if(!Arrays.equals(_orig4096, _dec4096))
+            {
                 return new SimpleTestResult(false, "Failed Hex test");
             }
             
-            if(!Arrays.equals(_orig8192, _dec8192)) {
+            if(!Arrays.equals(_orig8192, _dec8192))
+            {
                 return new SimpleTestResult(false, "Failed Hex test");
             }
             
@@ -212,25 +222,30 @@ public class EncoderTest implements Test {
             byte[] _dec4097 = Hex.decode(_enc4097);
             byte[] _dec8193 = Hex.decode(_enc8193);
             
-            if(!Arrays.equals(_orig1025, _dec1025)) {
+            if(!Arrays.equals(_orig1025, _dec1025))
+            {
                 return new SimpleTestResult(false, "Failed Hex test");
             }
             
-            if(!Arrays.equals(_orig2049, _dec2049)) {
+            if(!Arrays.equals(_orig2049, _dec2049))
+            {
                 return new SimpleTestResult(false, "Failed Hex test");
             }
             
-            if(!Arrays.equals(_orig4097, _dec4097)) {
+            if(!Arrays.equals(_orig4097, _dec4097))
+            {
                 return new SimpleTestResult(false, "Failed Hex test");
             }
             
-            if(!Arrays.equals(_orig8193, _dec8193)) {
+            if(!Arrays.equals(_orig8193, _dec8193))
+            {
                 return new SimpleTestResult(false, "Failed Hex test");
             }
             
             return new SimpleTestResult(true, "Passed Hex test");
         }
-        catch(Exception ex) {
+        catch(Exception ex)
+        {
             log(ex);
             return new SimpleTestResult(false, "Failed Hex test");
         }

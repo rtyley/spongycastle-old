@@ -116,7 +116,8 @@ public class GOST3410ParametersGenerator
                         m -= 1;
                         break;
                     }
-                    else {
+                    else
+                    {
                         k += 2;
                         continue step11;
                     }
@@ -215,7 +216,8 @@ public class GOST3410ParametersGenerator
                         m -= 1;
                         break;
                     }
-                    else {
+                    else
+                    {
                         k += 2;
                         continue step11;
                     }
@@ -295,7 +297,8 @@ public class GOST3410ParametersGenerator
                     pq[1] = q;
                     return;
                 }
-                else {
+                else
+                {
                     k += 2;
                     continue step8;
                 }
@@ -365,7 +368,8 @@ public class GOST3410ParametersGenerator
                     pq[1] = q;
                     return;
                 }
-                else {
+                else
+                {
                     k += 2;
                     continue step8;
                 }

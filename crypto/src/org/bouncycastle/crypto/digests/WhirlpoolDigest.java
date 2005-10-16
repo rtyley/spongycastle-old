@@ -86,7 +86,7 @@ public final class WhirlpoolDigest implements Digest
 
     private long packIntoLong(int b7, int b6, int b5, int b4, int b3, int b2, int b1, int b0)
     {
-        return (
+        return 
                     ((long)b7 << 56) ^
                     ((long)b6 << 48) ^
                     ((long)b5 << 40) ^
@@ -94,7 +94,7 @@ public final class WhirlpoolDigest implements Digest
                     ((long)b3 << 24) ^
                     ((long)b2 << 16) ^
                     ((long)b1 <<  8) ^
-                    b0);
+                    b0;
     }
 
     /*

@@ -79,7 +79,7 @@ public class ECGOST3410Signer
                 {
                     k = new BigInteger(n.bitLength(), random);
                 }
-                while ( k.equals(ECConstants.ZERO) );
+                while (k.equals(ECConstants.ZERO));
 
                 ECPoint p = key.getParameters().getG().multiply(k);
 
@@ -87,13 +87,13 @@ public class ECGOST3410Signer
 
                 r = x.mod(n);
             }
-            while ( r.equals(ECConstants.ZERO) );
+            while (r.equals(ECConstants.ZERO));
 
             BigInteger d = ((ECPrivateKeyParameters)key).getD();
 
             s = (k.multiply(e)).add(d.multiply(r)).mod(n);
         }
-        while ( s.equals(ECConstants.ZERO) );
+        while (s.equals(ECConstants.ZERO));
 
         BigInteger[]  res = new BigInteger[2];
 
@@ -123,13 +123,13 @@ public class ECGOST3410Signer
         BigInteger n = key.getParameters().getN();
 
         // r in the range [1,n-1]
-        if ( r.compareTo(ECConstants.ONE) < 0 || r.compareTo(n) >= 0 )
+        if (r.compareTo(ECConstants.ONE) < 0 || r.compareTo(n) >= 0)
         {
             return false;
         }
 
         // s in the range [1,n-1]
-        if ( s.compareTo(ECConstants.ONE) < 0 || s.compareTo(n) >= 0 )
+        if (s.compareTo(ECConstants.ONE) < 0 || s.compareTo(n) >= 0)
         {
             return false;
         }

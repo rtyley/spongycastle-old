@@ -304,7 +304,7 @@ public class CertificateTest
                             DistributionPoint[] points = p.getDistributionPoints();
                             for (int i = 0; i != points.length; i++)
                             {
-                                ;
+                                // do nothing
                             }
                         }
                         else if (oid.equals(X509Extensions.CertificatePolicies))

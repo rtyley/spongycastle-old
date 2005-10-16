@@ -209,12 +209,12 @@ public class PKIXTest
 
             crl.verify(rootCert.getPublicKey(), "BC");
 
-            if ( !crl.isRevoked(userCert1) )
+            if (!crl.isRevoked(userCert1))
             {
                 return new SimpleTestResult(false, this.getName() + ": usercert1 not revoked.");
             }
 
-            if ( crl.isRevoked(userCert2) )
+            if (crl.isRevoked(userCert2))
             {
                 return new SimpleTestResult(false, this.getName() + ": usercert2 revoked.");
             }

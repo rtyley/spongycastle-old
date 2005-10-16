@@ -64,7 +64,8 @@ public class RecipientKeyIdentifier
      * @exception IllegalArgumentException if the object held by the
      *          tagged object cannot be converted.
      */
-    public static RecipientKeyIdentifier getInstance(ASN1TaggedObject _ato, boolean _explicit) {
+    public static RecipientKeyIdentifier getInstance(ASN1TaggedObject _ato, boolean _explicit)
+    {
         return getInstance(ASN1Sequence.getInstance(_ato, _explicit));
     }
     
@@ -74,12 +75,15 @@ public class RecipientKeyIdentifier
      * @param _obj the object we want converted.
      * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public static RecipientKeyIdentifier getInstance(Object _obj) {
-        if(_obj == null || _obj instanceof RecipientKeyIdentifier) {
+    public static RecipientKeyIdentifier getInstance(Object _obj)
+    {
+        if(_obj == null || _obj instanceof RecipientKeyIdentifier)
+        {
             return (RecipientKeyIdentifier)_obj;
         }
         
-        if(_obj instanceof ASN1Sequence) {
+        if(_obj instanceof ASN1Sequence)
+        {
             return new RecipientKeyIdentifier((ASN1Sequence)_obj);
         }
         

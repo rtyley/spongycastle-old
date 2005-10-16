@@ -173,7 +173,8 @@ public class AESLightEngine
         int         KC = key.length / 4;  // key length in words
         int         t;
         
-        if (((KC != 4) && (KC != 6) && (KC != 8)) || ((KC * 4) != key.length)) {
+        if (((KC != 4) && (KC != 6) && (KC != 8)) || ((KC * 4) != key.length))
+        {
             throw new IllegalArgumentException("Key length not 128/192/256 bits.");
         }
 
@@ -185,10 +186,12 @@ public class AESLightEngine
         //
         
         t = 0;
-        for (int i = 0; i < key.length; t++)
+        int i = 0;
+        while (i < key.length)
             {
                 W[t >> 2][t & 3] = (key[i]&0xff) | ((key[i+1]&0xff) << 8) | ((key[i+2]&0xff) << 16) | (key[i+3] << 24);
                 i+=4;
+                t++;
             }
         
         //
@@ -196,21 +199,27 @@ public class AESLightEngine
         // calculate new values
         //
         int k = (ROUNDS + 1) << 2;
-        for (int i = KC; (i < k); i++)
+        for (i = KC; (i < k); i++)
             {
                 int temp = W[(i-1)>>2][(i-1)&3];
-                if ((i % KC) == 0) {
+                if ((i % KC) == 0)
+                {
                     temp = subWord(shift(temp, 8)) ^ rcon[(i / KC)-1];
-                } else if ((KC > 6) && ((i % KC) == 4)) {
+                }
+                else if ((KC > 6) && ((i % KC) == 4))
+                {
                     temp = subWord(temp);
                 }
                 
                 W[i>>2][i&3] = W[(i - KC)>>2][(i-KC)&3] ^ temp;
             }
 
-        if (!forEncryption) {
-            for (int j = 1; j < ROUNDS; j++) {
-                for (int i = 0; i < 4; i++){
+        if (!forEncryption)
+        {
+            for (int j = 1; j < ROUNDS; j++)
+            {
+                for (i = 0; i < 4; i++) 
+                {
                     W[j][i] = inv_mcol(W[j][i]);
                 }
             }
@@ -369,7 +378,8 @@ public class AESLightEngine
         C2 ^= KW[0][2];
         C3 ^= KW[0][3];
 
-        for (r = 1; r < ROUNDS - 1;) {
+        for (r = 1; r < ROUNDS - 1;)
+        {
             r0 = mcol((S[C0&255]&255) ^ ((S[(C1>>8)&255]&255)<<8) ^ ((S[(C2>>16)&255]&255)<<16) ^ (S[(C3>>24)&255]<<24)) ^ KW[r][0];
             r1 = mcol((S[C1&255]&255) ^ ((S[(C2>>8)&255]&255)<<8) ^ ((S[(C3>>16)&255]&255)<<16) ^ (S[(C0>>24)&255]<<24)) ^ KW[r][1];
             r2 = mcol((S[C2&255]&255) ^ ((S[(C3>>8)&255]&255)<<8) ^ ((S[(C0>>16)&255]&255)<<16) ^ (S[(C1>>24)&255]<<24)) ^ KW[r][2];
@@ -403,7 +413,8 @@ public class AESLightEngine
         C2 ^= KW[ROUNDS][2];
         C3 ^= KW[ROUNDS][3];
 
-        for (r = ROUNDS-1; r>1;) {
+        for (r = ROUNDS-1; r>1;)
+        {
             r0 = inv_mcol((Si[C0&255]&255) ^ ((Si[(C3>>8)&255]&255)<<8) ^ ((Si[(C2>>16)&255]&255)<<16) ^ (Si[(C1>>24)&255]<<24)) ^ KW[r][0];
             r1 = inv_mcol((Si[C1&255]&255) ^ ((Si[(C0>>8)&255]&255)<<8) ^ ((Si[(C3>>16)&255]&255)<<16) ^ (Si[(C2>>24)&255]<<24)) ^ KW[r][1];
             r2 = inv_mcol((Si[C2&255]&255) ^ ((Si[(C1>>8)&255]&255)<<8) ^ ((Si[(C0>>16)&255]&255)<<16) ^ (Si[(C3>>24)&255]<<24)) ^ KW[r][2];

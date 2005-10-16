@@ -48,7 +48,8 @@ public class PolicyMappings
          ASN1EncodableVector dev = new ASN1EncodableVector();
          Enumeration it = mappings.keys();
 
-         while (it.hasMoreElements()) {
+         while (it.hasMoreElements())
+         {
             String idp = (String) it.nextElement();
             String sdp = (String) mappings.get(idp);
             ASN1EncodableVector dv = new ASN1EncodableVector();

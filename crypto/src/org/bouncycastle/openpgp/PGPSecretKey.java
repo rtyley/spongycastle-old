@@ -17,6 +17,7 @@ import java.security.spec.RSAPrivateCrtKeySpec;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -52,12 +53,12 @@ public class PGPSecretKey
 {    
     SecretKeyPacket secret;
     TrustPacket     trust;
-    ArrayList       keySigs;
-    ArrayList       ids;
-    ArrayList       idTrusts;
-    ArrayList       idSigs;
+    List            keySigs;
+    List            ids;
+    List            idTrusts;
+    List            idSigs;
     PGPPublicKey    pub;
-    ArrayList       subSigs = null;
+    List       subSigs = null;
     
     /**
      * copy constructor - master key.
@@ -65,10 +66,10 @@ public class PGPSecretKey
     private PGPSecretKey(
         SecretKeyPacket secret,
         TrustPacket     trust,
-        ArrayList       keySigs,
-        ArrayList       ids,
-        ArrayList       idTrusts,
-        ArrayList       idSigs,
+        List            keySigs,
+        List            ids,
+        List            idTrusts,
+        List            idSigs,
         PGPPublicKey    pub)
     {
         this.secret = secret;
@@ -86,7 +87,7 @@ public class PGPSecretKey
     private PGPSecretKey(
         SecretKeyPacket secret,
         TrustPacket     trust,
-        ArrayList       subSigs,
+        List            subSigs,
         PGPPublicKey    pub)
     {
         this.secret = secret;
@@ -99,10 +100,10 @@ public class PGPSecretKey
         SecretKeyPacket secret,
         TrustPacket     trust,
         MessageDigest   sha,
-        ArrayList       keySigs,
-        ArrayList       ids,
-        ArrayList       idTrusts,
-        ArrayList       idSigs)
+        List            keySigs,
+        List            ids,
+        List            idTrusts,
+        List            idSigs)
         throws IOException
     {
         this.secret = secret;
@@ -118,7 +119,7 @@ public class PGPSecretKey
         SecretKeyPacket secret,
         TrustPacket     trust,
         MessageDigest   sha,
-        ArrayList       subSigs)
+        List            subSigs)
         throws IOException
     {
         this.secret = secret;
@@ -143,7 +144,7 @@ public class PGPSecretKey
     PGPSecretKey(
         PGPKeyPair      keyPair,
         TrustPacket     trust,
-        ArrayList       subSigs,
+        List            subSigs,
         int             encAlgorithm,
         char[]          passPhrase,
         SecureRandom    rand,
@@ -308,7 +309,7 @@ public class PGPSecretKey
                 
             this.pub = PGPPublicKey.addCertification(keyPair.getPublicKey(), id, certification);
             
-            ArrayList sigList = new ArrayList();
+            List      sigList = new ArrayList();
             
             sigList.add(certification);
             
@@ -671,7 +672,7 @@ public class PGPSecretKey
                     out.writePacket((ContainedPacket)idTrusts.get(i));
                 }
                 
-                ArrayList    sigs = (ArrayList)idSigs.get(i);
+                List         sigs = (ArrayList)idSigs.get(i);
                 
                 for (int j = 0; j != sigs.size(); j++)
                 {

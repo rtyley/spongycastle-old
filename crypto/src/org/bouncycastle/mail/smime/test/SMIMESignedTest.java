@@ -217,12 +217,12 @@ public class SMIMESignedTest
         dsaOrigKP   = SMIMETestUtil.makeDSAKeyPair();
         dsaOrigCert = SMIMETestUtil.makeCertificate(dsaOrigKP, origDN, dsaSignKP, signDN);
 
-        ArrayList           certList = new ArrayList();
+        List           certList = new ArrayList();
 
         certList.add(dsaOrigCert);
         certList.add(dsaSignCert);
 
-        CertStore           certs = CertStore.getInstance("Collection",
+        CertStore      certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
 
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
@@ -319,7 +319,7 @@ public class SMIMESignedTest
     public void testCertificateManagement()
         throws Exception
     {
-        ArrayList           certList = new ArrayList();
+        List           certList = new ArrayList();
 
         certList.add(origCert);
         certList.add(signCert);

@@ -268,13 +268,15 @@ public class GOST28147Engine
 
         if (this.forEncryption)
         {
-          for(int k = 0, j; k < 3; k++)  // 1-24 steps
-            for(j = 0; j < 8; j++)
+          for(int k = 0; k < 3; k++)  // 1-24 steps
+          {
+            for(int j = 0; j < 8; j++)
             {
                 tmp = N1;
                 N1 = N2 ^ GOST28147_mainStep(N1, workingKey[j]); // CM2
                 N2 = tmp;
             }
+          }
           for(int j = 7; j > 0; j--)  // 25-31 steps
           {
               tmp = N1;
@@ -290,14 +292,16 @@ public class GOST28147Engine
              N1 = N2 ^ GOST28147_mainStep(N1, workingKey[j]); // CM2
              N2 = tmp;
           }
-          for(int k = 0, j; k < 3; k++)  //9-31 steps
-            for(j = 7; j >= 0; j--)
+          for(int k = 0; k < 3; k++)  //9-31 steps
+          {
+            for(int j = 7; j >= 0; j--)
             {
                 if ((k == 2) && (j==0)) break; // break 32 step
                 tmp = N1;
                 N1 = N2 ^ GOST28147_mainStep(N1, workingKey[j]); // CM2
                 N2 = tmp;
             }
+          }
         }
 
         N2 = N2 ^ GOST28147_mainStep(N1, workingKey[0]);  // 32 step (N1=N1)

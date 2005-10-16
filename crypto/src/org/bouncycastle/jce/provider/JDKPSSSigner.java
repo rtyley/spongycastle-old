@@ -75,7 +75,7 @@ public class JDKPSSSigner
         PublicKey   publicKey)
         throws InvalidKeyException
     {
-        if ( !(publicKey instanceof RSAPublicKey) )
+        if (!(publicKey instanceof RSAPublicKey))
         {
             throw new InvalidKeyException("Supplied key is not a RSAPublicKey instance");
         }
@@ -90,7 +90,7 @@ public class JDKPSSSigner
         SecureRandom    random)
         throws InvalidKeyException
     {
-        if ( !(privateKey instanceof RSAPrivateKey) )
+        if (!(privateKey instanceof RSAPrivateKey))
         {
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
@@ -103,7 +103,7 @@ public class JDKPSSSigner
         PrivateKey  privateKey)
         throws InvalidKeyException
     {
-        if ( !(privateKey instanceof RSAPrivateKey) )
+        if (!(privateKey instanceof RSAPrivateKey))
         {
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
@@ -131,7 +131,8 @@ public class JDKPSSSigner
     protected byte[] engineSign()
         throws SignatureException
     {
-        try {
+        try
+        {
             return pss.generateSignature();
         }
         catch (CryptoException e)
@@ -153,7 +154,7 @@ public class JDKPSSSigner
     {
         if (params instanceof PSSParameterSpec)
         {
-            paramSpec = (PSSParameterSpec)params;;
+            paramSpec = (PSSParameterSpec)params;
             
             if (originalSpec != null)
             {

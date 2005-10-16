@@ -47,8 +47,14 @@ public class MD5HMacTest
 
     public static boolean arraysEqual(byte[] a, byte[] b)
     {
-        if (a == b) return true;
-        if (a.length != b.length) return false;
+        if (a == b)
+        {
+            return true;
+        }
+        if (a.length != b.length)
+        {
+            return false;
+        }
 
         for (int i = 0; i < a.length; i++)
         {

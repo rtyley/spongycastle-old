@@ -17,6 +17,7 @@ import java.security.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -208,7 +209,7 @@ public class CMSSignedDataParser
     {
         if (_signerInfoStore == null)
         {
-            ArrayList signerInfos = new ArrayList();
+            List      signerInfos = new ArrayList();
             Map       hashes = new HashMap();
             
             Iterator  it = _digests.keySet().iterator();
@@ -260,7 +261,7 @@ public class CMSSignedDataParser
     {
         if (_certStore == null)
         {
-            ArrayList               certsAndcrls = new ArrayList();
+            List                    certsAndcrls = new ArrayList();
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
             CertificateFactory      cf;
 

@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.PacketTags;
@@ -41,7 +42,7 @@ public class PGPObjectFactory
     public Object nextObject()
         throws IOException
     {
-        ArrayList l;
+        List l;
 
         switch (in.nextPacketTag())
         {

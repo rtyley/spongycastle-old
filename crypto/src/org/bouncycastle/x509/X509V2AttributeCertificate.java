@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -222,7 +223,7 @@ public class X509V2AttributeCertificate
 
         if (extensions != null)
         {
-            HashSet         set = new HashSet();
+            Set             set = new HashSet();
             Enumeration     e = extensions.oids();
 
             while (e.hasMoreElements())
@@ -285,7 +286,7 @@ public class X509V2AttributeCertificate
     public X509Attribute[] getAttributes(String oid)
     {
         ASN1Sequence    seq = cert.getAcinfo().getAttributes();
-        ArrayList       list = new ArrayList();
+        List            list = new ArrayList();
         
         for (int i = 0; i != seq.size(); i++)
         {

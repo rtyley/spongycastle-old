@@ -38,14 +38,18 @@ public class SPKACTest implements Test
   public TestResult spkacTest(String testName, byte[] req)
   {
     SignedPublicKeyAndChallenge spkac;
-    try {
+    try
+    {
       spkac = new SignedPublicKeyAndChallenge(req);
-    } catch (Exception e) {
+    }
+    catch (Exception e)
+    {
       return new SimpleTestResult(false, getName()+":Exception - "+testName+
                                          " failed decode test.");
     }
 
-    try {
+    try
+    {
       PublicKeyAndChallenge pkac = spkac.getPublicKeyAndChallenge();
       PublicKey pubKey = spkac.getPublicKey("BC");
       DERObject obj = pkac.getDERObject();
@@ -98,7 +102,9 @@ public class SPKACTest implements Test
           return new SimpleTestResult(false, getName() + ": " + testName + 
                                             " verification failed");
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e)
+    {
       return new SimpleTestResult(false, getName() + ": Exception - " + 
                                          testName + " " + e.toString());
     }

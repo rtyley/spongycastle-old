@@ -205,12 +205,12 @@ public class JCERSAPrivateCrtKey
 
     public boolean equals(Object o)
     {
-        if ( !(o instanceof RSAPrivateCrtKey) )
+        if (!(o instanceof RSAPrivateCrtKey))
         {
             return false;
         }
 
-        if ( o == this )
+        if (o == this)
         {
             return true;
         }

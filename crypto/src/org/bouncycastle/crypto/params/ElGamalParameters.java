@@ -43,4 +43,9 @@ public class ElGamalParameters
 
         return pm.getP().equals(p) && pm.getG().equals(g);
     }
+    
+    public int hashCode()
+    {
+        return getP().hashCode() ^ getG().hashCode();
+    }
 }

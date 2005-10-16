@@ -55,8 +55,8 @@ public class x_pkcs7_signature
     }
     
     public void writeTo(Object _obj, String _mimeType, OutputStream _os) 
-        throws IOException {
-        
+        throws IOException 
+    {
         if (_obj instanceof MimeBodyPart) 
         {
             try 

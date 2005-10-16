@@ -99,7 +99,10 @@ public class DESExample extends Object
     }
 
     // Default constructor, used for the usage message
-    public DESExample() { }
+    public DESExample()
+    {
+    }
+
     /*
      * Constructor, that takes the arguments appropriate for
      * processing the command line directives.
@@ -108,8 +111,7 @@ public class DESExample extends Object
                 String infile,
                 String outfile,
                 String keyfile,
-                boolean encrypt
-                    )
+                boolean encrypt)
     {
         /* 
          * First, determine that infile & keyfile exist as appropriate.

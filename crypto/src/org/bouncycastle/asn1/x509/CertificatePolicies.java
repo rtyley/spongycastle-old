@@ -112,7 +112,7 @@ public class CertificatePolicies
      *   qualifier          ANY DEFINED BY policyQualifierId }
      *
      * PolicyQualifierId ::=
-     *   OBJECT IDENTIFIER ( id-qt-cps | id-qt-unotice )
+     *   OBJECT IDENTIFIER (id-qt-cps | id-qt-unotice)
      * </pre>
      * @deprecated use an ASN1Sequence of PolicyInformation
      */

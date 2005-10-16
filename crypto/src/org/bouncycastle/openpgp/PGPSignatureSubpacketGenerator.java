@@ -1,6 +1,7 @@
 package org.bouncycastle.openpgp;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
@@ -19,7 +20,7 @@ import org.bouncycastle.bcpg.sig.TrustSignature;
  */
 public class PGPSignatureSubpacketGenerator
 {
-    ArrayList    list = new ArrayList();
+    List         list = new ArrayList();
     
     public PGPSignatureSubpacketGenerator()
     {

@@ -131,7 +131,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     }
 
     private void checkPermittedDN(
-        HashSet         permitted,
+        Set             permitted,
         ASN1Sequence    dns)
     throws CertPathValidatorException
     {
@@ -156,7 +156,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     }
     
     private void checkExcludedDN(
-        HashSet         excluded,
+        Set             excluded,
         ASN1Sequence    dns)
         throws CertPathValidatorException
     {
@@ -178,8 +178,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
     }
 
-    private HashSet intersectDN(
-        HashSet         permitted,
+    private Set intersectDN(
+        Set             permitted,
         ASN1Sequence    dn)
     {
         if (permitted.isEmpty())
@@ -188,8 +188,9 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
             return permitted;
         }
-        else {
-            HashSet intersect = new HashSet();
+        else
+        {
+            Set     intersect = new HashSet();
             
             Iterator _iter = permitted.iterator();
             while (_iter.hasNext())
@@ -210,8 +211,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
     }
     
-    private HashSet unionDN(
-        HashSet         excluded,
+    private Set unionDN(
+        Set             excluded,
         ASN1Sequence    dn)
     {
         if (excluded.isEmpty())
@@ -222,7 +223,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
         else
         {
-            HashSet     intersect = new HashSet();
+            Set         intersect = new HashSet();
 
             Iterator _iter = excluded.iterator();
             while (_iter.hasNext())
@@ -248,8 +249,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
     }
     
-    private HashSet intersectEmail(
-        HashSet permitted,
+    private Set intersectEmail(
+        Set     permitted,
         String  email)
     {
         String _sub = email.substring(email.indexOf('@') + 1);
@@ -262,7 +263,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
         else
         {
-            HashSet  intersect = new HashSet();
+            Set      intersect = new HashSet();
 
             Iterator _iter = permitted.iterator();
             while (_iter.hasNext())
@@ -283,8 +284,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
     }
 
-    private HashSet unionEmail(
-        HashSet excluded,
+    private Set unionEmail(
+        Set     excluded,
         String  email)
     {
         String _sub = email.substring(email.indexOf('@') + 1);
@@ -296,7 +297,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
         else
         {
-            HashSet intersect = new HashSet();
+            Set     intersect = new HashSet();
 
             Iterator _iter = excluded.iterator();
             while (_iter.hasNext())
@@ -322,16 +323,16 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
     }
     
-    private HashSet intersectIP(
-        HashSet permitted,
+    private Set intersectIP(
+        Set     permitted,
         byte[]  ip)
     {
         // TBD
         return permitted;
     }
     
-    private HashSet unionIP(
-        HashSet excluded,
+    private Set unionIP(
+        Set     excluded,
         byte[]  ip)
     {
         // TBD
@@ -339,7 +340,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     }
 
     private void checkPermittedEmail(
-        HashSet permitted,
+        Set     permitted,
         String email) 
         throws CertPathValidatorException
     {
@@ -365,7 +366,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     }
     
     private void checkExcludedEmail(
-        HashSet excluded,
+        Set     excluded,
         String  email) 
         throws CertPathValidatorException
     {
@@ -388,7 +389,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     }
     
     private void checkPermittedIP(
-        HashSet permitted,
+        Set     permitted,
         byte[]  ip) 
         throws CertPathValidatorException
     {
@@ -401,7 +402,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     }
     
     private void checkExcludedIP(
-        HashSet excluded,
+        Set     excluded,
         byte[]  ip) 
         throws CertPathValidatorException
     {
@@ -415,7 +416,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
     private PKIXPolicyNode removePolicyNode(
         PKIXPolicyNode  validPolicyTree,
-        ArrayList[]        policyNodes,
+        List     []        policyNodes,
         PKIXPolicyNode _node)
     {
         PKIXPolicyNode _parent = (PKIXPolicyNode)_node.getParent();
@@ -444,7 +445,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     }
     
     private void removePolicyNodeRecurse(
-        ArrayList[]        policyNodes,
+        List     []        policyNodes,
         PKIXPolicyNode  _node)
     {
         policyNodes[_node.getDepth()].remove(_node);
@@ -527,11 +528,11 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
     private boolean processCertD1i(
         int                 index,
-        ArrayList[]            policyNodes,
+        List     []            policyNodes,
         DERObjectIdentifier pOid,
         Set                 pq)
     {
-        ArrayList  policyNodeVec = policyNodes[index - 1];
+        List       policyNodeVec = policyNodes[index - 1];
 
         for (int j = 0; j < policyNodeVec.size(); j++)
         {
@@ -562,11 +563,11 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
     private void processCertD1ii(
         int                 index,
-        ArrayList[]            policyNodes,
+        List     []            policyNodes,
         DERObjectIdentifier _poid,
         Set _pq)
     {
-        ArrayList  policyNodeVec = policyNodes[index - 1];
+        List       policyNodeVec = policyNodes[index - 1];
 
         for (int j = 0; j < policyNodeVec.size(); j++)
         {
@@ -599,13 +600,13 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     {
         if (!(params instanceof PKIXParameters))
         {
-            throw new InvalidAlgorithmParameterException( "params must be a PKIXParameters instance");
+            throw new InvalidAlgorithmParameterException("params must be a PKIXParameters instance");
         }
 
         PKIXParameters paramsPKIX = (PKIXParameters)params;
         if (paramsPKIX.getTrustAnchors() == null)
         {
-            throw new InvalidAlgorithmParameterException( "trustAnchors is null, this is not allowed for path validation" );
+            throw new InvalidAlgorithmParameterException("trustAnchors is null, this is not allowed for path validation");
         }
 
         //
@@ -645,7 +646,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
         if (trust == null)
         {
-            throw new CertPathValidatorException("TrustAnchor for CertPath not found", null, certPath, 0 );
+            throw new CertPathValidatorException("TrustAnchor for CertPath not found", null, certPath, 0);
         }
         
         //
@@ -667,7 +668,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         //
         // (a)
         //
-        ArrayList[]  policyNodes = new ArrayList[n + 1];
+        List     []  policyNodes = new ArrayList[n + 1];
         for (int j = 0; j < policyNodes.length; j++)
         {
             policyNodes[j] = new ArrayList();
@@ -684,16 +685,16 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         //
         // (b)
         //
-        HashSet permittedSubtreesDN = new HashSet();
-        HashSet permittedSubtreesEmail = new HashSet();
-        HashSet permittedSubtreesIP = new HashSet();
+        Set     permittedSubtreesDN = new HashSet();
+        Set     permittedSubtreesEmail = new HashSet();
+        Set     permittedSubtreesIP = new HashSet();
     
         //
         // (c)
         //
-        HashSet excludedSubtreesDN = new HashSet();
-        HashSet excludedSubtreesEmail = new HashSet();
-        HashSet excludedSubtreesIP = new HashSet();
+        Set     excludedSubtreesDN = new HashSet();
+        Set     excludedSubtreesEmail = new HashSet();
+        Set     excludedSubtreesIP = new HashSet();
     
         //
         // (d)
@@ -760,7 +761,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
         catch (IllegalArgumentException ex)
         {
-            throw new CertPathValidatorException("TrustAnchor subjectDN: " + ex.toString() );
+            throw new CertPathValidatorException("TrustAnchor subjectDN: " + ex.toString());
         }
 
         AlgorithmIdentifier workingAlgId = getAlgorithmIdentifier(workingPublicKey);
@@ -785,7 +786,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         CertStore certstore;
 
         if (paramsPKIX.getTargetCertConstraints() != null
-            && !paramsPKIX.getTargetCertConstraints().match((X509Certificate)certs.get(0)) )
+            && !paramsPKIX.getTargetCertConstraints().match((X509Certificate)certs.get(0)))
         {
             throw new CertPathValidatorException("target certificate in certpath does not match targetcertconstraints", null, certPath, 0);
         }
@@ -998,7 +999,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
                 if (!tmpTest)
                 {
-                    throw new CertPathValidatorException("no valid CRL found", null, certPath, index );
+                    throw new CertPathValidatorException("no valid CRL found", null, certPath, index);
                 }
             }
 
@@ -1010,7 +1011,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 throw new CertPathValidatorException(
                             "IssuerName(" + cert.getIssuerX500Principal() +
                             ") does not match SubjectName(" + workingIssuerName +
-                            ") of signing certificate", null, certPath, index );
+                            ") of signing certificate", null, certPath, index);
             }
 
             //
@@ -1038,7 +1039,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 ASN1Sequence   altName = (ASN1Sequence)getExtensionValue(cert, SUBJECT_ALTERNATIVE_NAME);
                 if (altName != null)
                 {
-                    for ( int j = 0; j < altName.size(); j++)
+                    for (int j = 0; j < altName.size(); j++)
                     {
                         ASN1TaggedObject o = (ASN1TaggedObject)altName.getObjectAt(j);
 
@@ -1077,7 +1078,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 // (d) (1)
                 //
                 Enumeration e = certPolicies.getObjects();
-                HashSet     pols = new HashSet();
+                Set         pols = new HashSet();
                     
                 while (e.hasMoreElements())
                 {
@@ -1106,7 +1107,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 else
                 {
                     Iterator    it = acceptablePolicies.iterator();
-                    HashSet     t1 = new HashSet();
+                    Set         t1 = new HashSet();
 
                     while (it.hasNext())
                     {
@@ -1135,7 +1136,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         if (!ANY_POLICY.equals(pInfo.getPolicyIdentifier().getId()))
                         {
                             Set    _apq   = getQualifierSet(pInfo.getPolicyQualifiers());
-                            ArrayList _nodes = policyNodes[i - 1];
+                            List      _nodes = policyNodes[i - 1];
                             
                             for (int k = 0; k < _nodes.size(); k++)
                             {
@@ -1200,7 +1201,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 //
                 for (int j = (i - 1); j >= 0; j--)
                 {
-                    ArrayList nodes = policyNodes[j];
+                    List      nodes = policyNodes[j];
                     
                     for (int k = 0; k < nodes.size(); k++)
                     {
@@ -1225,7 +1226,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 {
                     boolean critical = criticalExtensionOids.contains(CERTIFICATE_POLICIES);
                 
-                    ArrayList nodes = policyNodes[i];
+                    List      nodes = policyNodes[i];
                     for (int j = 0; j < nodes.size(); j++)
                     {
                         PKIXPolicyNode node = (PKIXPolicyNode)nodes.get(j);
@@ -1238,7 +1239,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 //
                 for (int j = (i - 1); j >= 0; j--)
                 {
-                    ArrayList _nodes = policyNodes[j];
+                    List      _nodes = policyNodes[j];
 
                     for (int k = 0; k < _nodes.size(); k++)
                     {
@@ -1509,7 +1510,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 {
                     throw new CertPathValidatorException(
                                 "Issuer certificate keyusage extension is critical an does not permit key signing.\n",
-                                null, certPath, index );
+                                null, certPath, index);
                 }
 
                 //
@@ -1542,7 +1543,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 }
                 if (!criticalExtensions.isEmpty())
                 {
-                    throw new CertPathValidatorException( 
+                    throw new CertPathValidatorException(
                         "Certificate has unsupported critical extension", null, certPath, index);
                 }
             }
@@ -1643,7 +1644,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         
         if (!criticalExtensions.isEmpty())
         {
-            throw new CertPathValidatorException( 
+            throw new CertPathValidatorException(
                 "Certificate has unsupported critical extension", null, certPath, index);
         }
 
@@ -1674,7 +1675,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     
                     for (int j = 0; j < policyNodes.length; j++)
                     {
-                        ArrayList _nodeDepth = policyNodes[j];
+                        List      _nodeDepth = policyNodes[j];
                         
                         for (int k = 0; k < _nodeDepth.size(); k++)
                         {
@@ -1706,7 +1707,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     {
                         for (int j = (n - 1); j >= 0; j--)
                         {
-                            ArrayList nodes = policyNodes[j];
+                            List      nodes = policyNodes[j];
                             
                             for (int k = 0; k < nodes.size(); k++)
                             {
@@ -1737,7 +1738,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             
             for (int j = 0; j < policyNodes.length; j++)
             {
-                ArrayList _nodeDepth = policyNodes[j];
+                List      _nodeDepth = policyNodes[j];
                 
                 for (int k = 0; k < _nodeDepth.size(); k++)
                 {
@@ -1788,7 +1789,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             {
                 for (int j = (n - 1); j >= 0; j--)
                 {
-                    ArrayList nodes = policyNodes[j];
+                    List      nodes = policyNodes[j];
                     
                     for (int k = 0; k < nodes.size(); k++)
                     {
@@ -1886,12 +1887,12 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             return null;
         }
 
-        while ( iter.hasNext() && trust == null )
+        while (iter.hasNext() && trust == null)
         {
             trust = (TrustAnchor)iter.next();
-            if ( trust.getTrustedCert() != null )
+            if (trust.getTrustedCert() != null)
             {
-                if ( certSelectX509.match(trust.getTrustedCert()) )
+                if (certSelectX509.match(trust.getTrustedCert()))
                 {
                     trustPublicKey = trust.getTrustedCert().getPublicKey();
                 }

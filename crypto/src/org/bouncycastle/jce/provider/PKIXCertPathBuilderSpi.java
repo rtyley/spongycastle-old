@@ -85,7 +85,7 @@ public class PKIXCertPathBuilderSpi
             while (cert != null)
             {
                 // add cert to the certpath
-                certPathList.add( cert );
+                certPathList.add(cert);
 
                 // check wether the issuer of <cert> is a TrustAnchor 
                 if (findTrustAnchor(cert, pkixParams.getTrustAnchors()) != null)
@@ -99,7 +99,7 @@ public class PKIXCertPathBuilderSpi
                         return new PKIXCertPathBuilderResult(certPath,
                                      result.getTrustAnchor(),
                                      result.getPolicyTree(),
-                                     result.getPublicKey() );
+                                     result.getPublicKey());
                     }
                     catch (CertificateException ex)
                     {
@@ -181,12 +181,12 @@ public class PKIXCertPathBuilderSpi
             throw new CertPathBuilderException("can't get trust anchor principal",null);
         }
 
-        while ( iter.hasNext() && trust == null )
+        while (iter.hasNext() && trust == null)
         {
             trust = (TrustAnchor)iter.next();
-            if ( trust.getTrustedCert() != null )
+            if (trust.getTrustedCert() != null)
             {
-                if ( certSelectX509.match(trust.getTrustedCert()) )
+                if (certSelectX509.match(trust.getTrustedCert()))
                 {
                     trustPublicKey = trust.getTrustedCert().getPublicKey();
                 }
@@ -314,7 +314,7 @@ public class PKIXCertPathBuilderSpi
 
         Iterator iter = findCertificates(certSelect, certStores).iterator();
         X509Certificate issuer = null;
-        while ( iter.hasNext() && issuer == null )
+        while (iter.hasNext() && issuer == null)
         {
             issuer = (X509Certificate)iter.next();
             try
@@ -333,7 +333,7 @@ public class PKIXCertPathBuilderSpi
            throw new CertPathValidatorException("Issuer not found", null, null, -1);
         }
 
-        if ( issuer == null && invalidKeyEx != null )
+        if (issuer == null && invalidKeyEx != null)
         {
             throw new CertPathValidatorException("issuer found but certificate validation failed",invalidKeyEx,null,-1);
         }

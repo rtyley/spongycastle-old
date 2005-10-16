@@ -110,12 +110,12 @@ public class JCERSAPublicKey
 
     public boolean equals(Object o)
     {
-        if ( !(o instanceof RSAPublicKey) )
+        if (!(o instanceof RSAPublicKey))
         {
             return false;
         }
 
-        if ( o == this )
+        if (o == this)
         {
             return true;
         }

@@ -149,7 +149,7 @@ public class PKCS10CertificationRequest
     }
 
     private static X509Name convertName(
-        X500Principal	name)
+        X500Principal    name)
     {
         try
         {

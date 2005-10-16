@@ -16,6 +16,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -80,7 +81,7 @@ public class CMSEnvelopedDataStreamGenerator
 
     SecureRandom  rand = new SecureRandom();
 
-    ArrayList                   recipientInfs = new ArrayList();
+    List                        recipientInfs = new ArrayList();
     private Object              _originatorInfo = null;
     private Object              _unprotectedAttributes = null;
     private int                 _bufferSize;

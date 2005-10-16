@@ -322,7 +322,7 @@ public abstract class WrapCipherSpi extends CipherSpi
         {
             return new SecretKeySpec(encoded, wrappedKeyAlgorithm);
         }
-        else if ( wrappedKeyAlgorithm.equals("") && wrappedKeyType == Cipher.PRIVATE_KEY )
+        else if (wrappedKeyAlgorithm.equals("") && wrappedKeyType == Cipher.PRIVATE_KEY)
         {
             /*
              * The caller doesnt know the algorithm as it is part of
@@ -376,11 +376,11 @@ public abstract class WrapCipherSpi extends CipherSpi
             {
                 KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, "BC");
 
-                if ( wrappedKeyType == Cipher.PUBLIC_KEY )
+                if (wrappedKeyType == Cipher.PUBLIC_KEY)
                 {
                     return kf.generatePublic(new X509EncodedKeySpec(encoded));
                 }
-                else if ( wrappedKeyType == Cipher.PRIVATE_KEY )
+                else if (wrappedKeyType == Cipher.PRIVATE_KEY)
                 {
                     return kf.generatePrivate(new PKCS8EncodedKeySpec(encoded));
                 }

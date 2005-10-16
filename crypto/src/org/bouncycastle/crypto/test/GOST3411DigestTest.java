@@ -163,7 +163,7 @@ public class GOST3411DigestTest
         }
 
         bytes = Hex.decode(testVec5);
-        for ( int i = 0; i < 100000; i++ )
+        for (int i = 0; i < 100000; i++)
         {
             digest.update(bytes, 0, bytes.length);
         }

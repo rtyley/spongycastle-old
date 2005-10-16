@@ -12,6 +12,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -148,7 +149,7 @@ public class SignedDataStreamTest
     public void testSHA1WithRSA()
         throws Exception
     {
-        ArrayList             certList = new ArrayList();
+        List                  certList = new ArrayList();
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         
         certList.add(_origCert);
@@ -199,7 +200,7 @@ public class SignedDataStreamTest
     public void testSHA1WithRSAEncapsulatedBufferedStream()
         throws Exception
     {
-        ArrayList             certList = new ArrayList();
+        List                  certList = new ArrayList();
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         
         certList.add(_origCert);
@@ -264,7 +265,7 @@ public class SignedDataStreamTest
     public void testSHA1WithRSAEncapsulatedBuffered()
         throws Exception
     {
-        ArrayList             certList = new ArrayList();
+        List                  certList = new ArrayList();
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         
         certList.add(_origCert);
@@ -329,7 +330,7 @@ public class SignedDataStreamTest
     public void testSHA1WithRSAEncapsulated()
         throws Exception
     {
-        ArrayList             certList = new ArrayList();
+        List                  certList = new ArrayList();
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         
         certList.add(_origCert);

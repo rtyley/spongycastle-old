@@ -37,28 +37,32 @@ public class SealedTest
             c.init(Cipher.DECRYPT_MODE, key);
 
             Object o = so.getObject(c);
-            if ( !o.equals(object) ) {
+            if (!o.equals(object))
+            {
                 return new SimpleTestResult(false, "Result object 1 not equal"
-                                                    + "orig: " + object + " res: " + o);
+                        + "orig: " + object + " res: " + o);
             }
-    
+
             o = so.getObject(key);
-            if ( !o.equals(object) ) {
+            if (!o.equals(object))
+            {
                 return new SimpleTestResult(false, "Result object 2 not equal"
-                                                    + "orig: " + object + " res: " + o);
+                        + "orig: " + object + " res: " + o);
             }
-    
+
             o = so.getObject(key, provider);
-            if ( !o.equals(object) ) {
+            if (!o.equals(object))
+            {
                 return new SimpleTestResult(false, "Result object 3 not equal"
-                                                    + "orig: " + object + " res: " + o);
+                        + "orig: " + object + " res: " + o);
             }
 
             return new SimpleTestResult(true, getName() + ": Okay");
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed excpetion - " + e.toString());
+            return new SimpleTestResult(false, getName()
+                    + ": failed excpetion - " + e.toString(), e);
         }
     }
 

@@ -14,7 +14,7 @@ public class SymmetricKeyEncSessionPacket
     private S2K       s2k;
     private byte[]    secKeyData;
     
-    public SymmetricKeyEncSessionPacket( 
+    public SymmetricKeyEncSessionPacket(
         BCPGInputStream  in)
         throws IOException
     {

@@ -351,12 +351,12 @@ public final class TwofishEngine
         /*
          * k64Cnt is the number of 8 byte blocks (64 chunks)
          * that are in the input key.  The input key is a
-         * maximum of 32 bytes ( 256 bits ), so the range
+         * maximum of 32 bytes (256 bits), so the range
          * for k64Cnt is 1..4
          */
-        for (int i=0,p=0; i<k64Cnt ; i++)
+        for (int i=0; i<k64Cnt ; i++)
         {
-            p = i* 8;
+            int p = i* 8;
 
             k32e[i] = BytesTo32Bits(key, p);
             k32o[i] = BytesTo32Bits(key, p+4);
@@ -656,7 +656,7 @@ public final class TwofishEngine
     
     private final int BytesTo32Bits(byte[] b, int p)
     {
-        return ((b[p] & 0xff) ) | 
+        return ((b[p] & 0xff)) | 
              ((b[p+1] & 0xff) << 8) |
              ((b[p+2] & 0xff) << 16) |
              ((b[p+3] & 0xff) << 24);

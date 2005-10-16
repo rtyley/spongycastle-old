@@ -1,6 +1,7 @@
 package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.crypto.engines.RC2Engine;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.TestResult;
@@ -50,7 +51,7 @@ public class RC2Test
 
     RC2Test()
     {
-        super(tests);
+        super(tests, new RC2Engine(), new KeyParameter(new byte[16]));
     }
 
     public String getName()

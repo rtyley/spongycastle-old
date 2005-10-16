@@ -80,12 +80,12 @@ public class JCERSAPrivateKey
 
     public boolean equals(Object o)
     {
-        if ( !(o instanceof RSAPrivateKey) )
+        if (!(o instanceof RSAPrivateKey))
         {
             return false;
         }
 
-        if ( o == this )
+        if (o == this)
         {
             return true;
         }
@@ -94,6 +94,11 @@ public class JCERSAPrivateKey
 
         return getModulus().equals(key.getModulus())
             && getPrivateExponent().equals(key.getPrivateExponent());
+    }
+
+    public int hashCode()
+    {
+        return getModulus().hashCode() ^ getPrivateExponent().hashCode();
     }
 
     public void setBagAttribute(

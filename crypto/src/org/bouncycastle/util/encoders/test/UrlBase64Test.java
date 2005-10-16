@@ -26,10 +26,12 @@ public class UrlBase64Test extends AbstractCoderTest
         if (Character.isLetterOrDigit(c))
         {
             return true;
-        } else if (c == '-')
+        }
+        else if (c == '-')
         {
             return true;
-        } else if (c == '_')
+        }
+        else if (c == '_')
         {
             return true;
         }
