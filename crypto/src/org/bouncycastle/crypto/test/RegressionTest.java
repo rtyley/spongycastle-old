@@ -25,6 +25,7 @@ public class RegressionTest
         new MacTest(),
         new GOST28147MacTest(),
         new RC2Test(),
+        new RC2WrapTest(),
         new RC4Test(),
         new RC5Test(),
         new RC6Test(),
