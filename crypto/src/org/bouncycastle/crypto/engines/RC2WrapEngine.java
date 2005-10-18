@@ -8,21 +8,11 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Wrapper;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
 
 /**
- * Wrap keys according to
- * <A HREF="http://www.ietf.org/internet-drafts/draft-ietf-smime-key-wrap-01.txt">
- * draft-ietf-smime-key-wrap-01.txt</A>.
- * <p>
- * Note: 
- * <ul>
- * <li>this is based on a draft, and as such is subject to change - don't use this class for anything requiring long term storage.
- * <li>if you are using this to wrap triple-des keys you need to set the
- * parity bits on the key and, if it's a two-key triple-des key, pad it
- * yourself.
- * </ul>
+ * Wrap keys according to RFC 3217 - RC2 mechanism
  */
 public class RC2WrapEngine
     implements Wrapper
@@ -31,7 +21,7 @@ public class RC2WrapEngine
    private CBCBlockCipher engine;
 
    /** Field param */
-   private KeyParameter param;
+   private CipherParameters param;
 
    /** Field paramPlusIV */
    private ParametersWithIV paramPlusIV;
@@ -41,6 +31,8 @@ public class RC2WrapEngine
 
    /** Field forWrapping */
    private boolean forWrapping;
+   
+   private SecureRandom sr;
 
    /** Field IV2           */
    private static final byte[] IV2 = { (byte) 0x4a, (byte) 0xdd, (byte) 0xa2,
@@ -64,29 +56,22 @@ public class RC2WrapEngine
         this.forWrapping = forWrapping;
         this.engine = new CBCBlockCipher(new RC2Engine());
 
-        if (param instanceof KeyParameter)
+        if (param instanceof ParametersWithRandom)
         {
-            this.param = (KeyParameter)param;
-
-            if (this.forWrapping)
-            {
-
-                // Hm, we have no IV but we want to wrap ?!?
-                // well, then we have to create our own IV.
-                this.iv = new byte[8];
-
-                SecureRandom sr = new SecureRandom();
-
-                sr.nextBytes(iv);
-
-                this.paramPlusIV = new ParametersWithIV(this.param, this.iv);
-            }
+            ParametersWithRandom pWithR = (ParametersWithRandom)param;
+            sr = pWithR.getRandom();
+            param = pWithR.getParameters();
         }
-        else if (param instanceof ParametersWithIV)
+        else
+        {
+            sr = new SecureRandom();
+        }
+        
+        if (param instanceof ParametersWithIV)
         {
             this.paramPlusIV = (ParametersWithIV)param;
             this.iv = this.paramPlusIV.getIV();
-            this.param = (KeyParameter)this.paramPlusIV.getParameters();
+            this.param = this.paramPlusIV.getParameters();
 
             if (this.forWrapping)
             {
@@ -101,6 +86,23 @@ public class RC2WrapEngine
                         "You should not supply an IV for unwrapping");
             }
         }
+        else
+        {
+            this.param = param;
+
+            if (this.forWrapping)
+            {
+
+                // Hm, we have no IV but we want to wrap ?!?
+                // well, then we have to create our own IV.
+                this.iv = new byte[8];
+
+                sr.nextBytes(iv);
+
+                this.paramPlusIV = new ParametersWithIV(this.param, this.iv);
+            }
+        }
+
    }
 
    /**
@@ -139,6 +141,14 @@ public class RC2WrapEngine
 
         keyToBeWrapped[0] = (byte)inLen;
         System.arraycopy(in, inOff, keyToBeWrapped, 1, inLen);
+        
+        byte[] pad = new byte[keyToBeWrapped.length - inLen - 1];
+
+        if (pad.length > 0)
+        {
+            sr.nextBytes(pad);
+            System.arraycopy(pad, 0, keyToBeWrapped, inLen + 1, pad.length);
+        }
 
         // Compute the CMS Key Checksum, (section 5.6.1), call this CKS.
         byte[] CKS = calculateCMSKeyChecksum(keyToBeWrapped);
