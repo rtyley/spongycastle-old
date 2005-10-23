@@ -13,12 +13,10 @@ import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class DHTest
-    implements Test
+    extends SimpleTest
 {
     private BigInteger g512 = new BigInteger("153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b410b7a0f12ca1cb9a428cc", 16);
     private BigInteger p512 = new BigInteger("9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd38744d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94bf0573bf047a3aca98cdf3b", 16);
@@ -34,7 +32,7 @@ public class DHTest
         return "DH";
     }
 
-    private TestResult testGP(
+    private void testGP(
         int         size,
         BigInteger  g,
         BigInteger  p)
@@ -79,13 +77,11 @@ public class DHTest
 
         if (!k1.equals(k2))
         {
-            return new SimpleTestResult(false, size + " bit 2-way test failed");
+            fail(size + " bit 2-way test failed");
         }
-
-        return new SimpleTestResult(true, this.getName() + ": Okay");
     }
 
-    private TestResult testSimple(
+    private void testSimple(
         int         size,
         BigInteger  g,
         BigInteger  p)
@@ -127,16 +123,14 @@ public class DHTest
 
         if (!k1.equals(k2))
         {
-            return new SimpleTestResult(false, "basic " + size + " bit 2-way test failed");
+            fail("basic " + size + " bit 2-way test failed");
         }
-
-        return new SimpleTestResult(true, this.getName() + ": Okay");
     }
 
     /**
      * this test is can take quiet a while
      */
-    private TestResult testGeneration(
+    private void testGeneration(
         int         size)
     {
         DHParametersGenerator       pGen = new DHParametersGenerator();
@@ -158,6 +152,7 @@ public class DHTest
 
         DHPublicKeyParameters       pu1 = (DHPublicKeyParameters)pair.getPublic();
         DHPrivateKeyParameters      pv1 = (DHPrivateKeyParameters)pair.getPrivate();
+        
         //
         // generate second pair
         //
@@ -184,66 +179,29 @@ public class DHTest
 
         if (!k1.equals(k2))
         {
-            return new SimpleTestResult(false, "basic " + size + " bit 2-way test failed");
+            fail("basic " + size + " bit 2-way test failed");
         }
-
-        return new SimpleTestResult(true, this.getName() + ": Okay");
     }
 
-
-    public TestResult perform()
+    public void performTest()
     {
-        TestResult      result = testSimple(512, g512, p512);
+        testSimple(512, g512, p512);
+        testSimple(768, g768, p768);
+        testSimple(1024, g1024, p1024);
 
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-        
-        result = testSimple(768, g768, p768);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-        
-        result = testSimple(1024, g1024, p1024);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-        
-        result = testGP(512, g512, p512);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-        
-        result = testGP(768, g768, p768);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-        
-        result = testGP(1024, g1024, p1024);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
+        testGP(512, g512, p512);
+        testGP(768, g768, p768);
+        testGP(1024, g1024, p1024);
 
         //
         // generation test.
         //
-        result = testGeneration(256);
-
-        return result;
+        testGeneration(256);
     }
 
     public static void main(
         String[]    args)
     {
-        DHTest         test = new DHTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new DHTest());
     }
 }

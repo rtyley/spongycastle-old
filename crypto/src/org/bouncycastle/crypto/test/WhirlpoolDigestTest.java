@@ -4,15 +4,14 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.WhirlpoolDigest;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * ISO vector test for Whirlpool
  *  
  */
-public class WhirlpoolDigestTest implements Test
+public class WhirlpoolDigestTest 
+    extends SimpleTest
 {
     private static String[][] _isoVectors = 
     {
@@ -59,60 +58,44 @@ public class WhirlpoolDigestTest implements Test
         return "Whirlpool";
     }
 
-    public TestResult perform()
+    public void performTest()
     {
         for (int i = 0; i < _isoVectors.length; i++)
         {
-            TestResult result = performStandardVectorTest("ISO vector test ["+i+"]", _isoVectors[i][0],
+            performStandardVectorTest("ISO vector test ["+i+"]", _isoVectors[i][0],
                     _isoVectors[i][1]);
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
         }
 
         byte[] thirtyOneZeros = new byte[31];
-        TestResult thirtyOneResult = performStandardVectorTest("31 zeroes test", 
+        performStandardVectorTest("31 zeroes test", 
                     thirtyOneZeros, _thirtyOneZeros);
-        if (!thirtyOneResult.isSuccessful())
-        {
-            return thirtyOneResult;
-        }
 
         byte[] millionAInByteArray = new byte[1000000];
         Arrays.fill(millionAInByteArray, (byte)'a');
 
-        TestResult millionAsResult = performStandardVectorTest("Million 'a' test", 
+        performStandardVectorTest("Million 'a' test", 
                     millionAInByteArray, _millionAResultVector);
-        if (!millionAsResult.isSuccessful())
-        {
-            return millionAsResult;
-        }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
-    private TestResult performStandardVectorTest(String testTitle, byte[] inputBytes,
+    private void performStandardVectorTest(String testTitle, byte[] inputBytes,
             String resultsAsHex)
     {
-        return doPerformTest(testTitle, inputBytes, resultsAsHex);        
+        doPerformTest(testTitle, inputBytes, resultsAsHex);        
     }
 
-    private TestResult doPerformTest(String testTitle, byte[] inputBytes, String resultsAsHex)
+    private void doPerformTest(String testTitle, byte[] inputBytes, String resultsAsHex)
     {
         String resStr = createHexOutputFromDigest(inputBytes);
         if (!resultsAsHex.equals(resStr.toUpperCase()))
         {
-            return SimpleTestResult.failed(SimpleTestResult.failedMessage("Whirlpool", testTitle,
-                    resultsAsHex, resStr));
+            fail(testTitle, resultsAsHex, resStr);
         }
-        return SimpleTestResult.successful(testTitle + ": Okay");
     }
 
-    private TestResult performStandardVectorTest(String testTitle, String inputBytesAsString,
+    private void performStandardVectorTest(String testTitle, String inputBytesAsString,
             String resultsAsHex)
     {
-        return doPerformTest(testTitle, inputBytesAsString.getBytes(), resultsAsHex);
+        doPerformTest(testTitle, inputBytesAsString.getBytes(), resultsAsHex);
     }
 
     private String createHexOutputFromDigest(byte[] digestBytes)
@@ -129,9 +112,6 @@ public class WhirlpoolDigestTest implements Test
 
     public static void main(String[] args)
     {
-        WhirlpoolDigestTest test = new WhirlpoolDigestTest();
-        TestResult result = test.perform();
-
-        System.out.println(result);
+        runTest(new WhirlpoolDigestTest());
     }
 }

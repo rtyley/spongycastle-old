@@ -3,11 +3,8 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * a basic test that takes a cipher, key parameter, and an input
@@ -15,7 +12,7 @@ import org.bouncycastle.util.test.TestResult;
  * cipher with padding disabled.
  */
 public class BlockCipherVectorTest
-    implements Test
+    extends SimpleTest
 {
     int                 id;
     BlockCipher         engine;
@@ -42,7 +39,8 @@ public class BlockCipherVectorTest
         return engine.getAlgorithmName() + " Vector Test " + id;
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
         BufferedBlockCipher cipher = new BufferedBlockCipher(engine);
 
@@ -52,61 +50,22 @@ public class BlockCipherVectorTest
 
         int len1 = cipher.processBytes(input, 0, input.length, out, 0);
 
-        try
-        {
             cipher.doFinal(out, len1);
-        }
-        catch (CryptoException e)
-        {
-            return new SimpleTestResult(false, 
-                   getName() + ": failed - exception " + e.toString());
-        }
 
-        if (!isEqualArray(out, output))
+        if (!areEqual(out, output))
         {
-            return new SimpleTestResult(false,
-                    getName() + ": failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+            fail("failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
         }
 
         cipher.init(false, param);
 
         int len2 = cipher.processBytes(output, 0, output.length, out, 0);
 
-        try
-        {
-            cipher.doFinal(out, len2);
-        }
-        catch (CryptoException e)
-        {
-            return new SimpleTestResult(false, 
-                   getName() + ": failed reversal - exception " + e.toString());
-        }
+        cipher.doFinal(out, len2);
 
-        if (!isEqualArray(input, out))
+        if (!areEqual(input, out))
         {
-            return new SimpleTestResult(false, getName() + ": failed reversal got " + new String(Hex.encode(out)));
+            fail("failed reversal got " + new String(Hex.encode(out)));
         }
-
-        return new SimpleTestResult(true, getName() + ": OKAY");
-    }
-
-    private boolean isEqualArray(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

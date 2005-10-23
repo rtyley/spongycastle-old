@@ -13,15 +13,13 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
 import org.bouncycastle.crypto.signers.ISO9796d2Signer;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * test vectors from ISO 9796-1 and ISO 9796-2 edition 1.
  */
 public class ISO9796Test
-    implements Test
+    extends SimpleTest
 {
     static BigInteger mod1 = new BigInteger("0100000000000000000000000000000000bba2d15dbb303c8a21c5ebbcbae52b7125087920dd7cdf358ea119fd66fb064012ec8ce692f0a0b8e8321b041acd40b7", 16);
 
@@ -113,7 +111,8 @@ public class ISO9796Test
         return true;
     }
 
-    private TestResult doTest1()
+    private void doTest1()
+        throws Exception
     {
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod1, pub1);
         RSAKeyParameters    privParameters = new RSAKeyParameters(true, mod1, pri1);
@@ -129,40 +128,25 @@ public class ISO9796Test
 
         eng.setPadBits(4);
 
-        try
-        {
-            data = eng.processBlock(msg1, 0, msg1.length);
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.processBlock(msg1, 0, msg1.length);
 
         eng.init(false, pubParameters);
 
-        if (!isSameAs(sig1, 0, data))
+        if (!areEqual(sig1, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-1 generation Test 1");
+            fail("failed ISO9796-1 generation Test 1");
         }
 
-        try
-        {
-            data = eng.processBlock(data, 0, data.length);
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.processBlock(data, 0, data.length);
 
-        if (!isSameAs(msg1, 0, data))
+        if (!areEqual(msg1, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-1 retrieve Test 1");
+            fail("failed ISO9796-1 retrieve Test 1");
         }
-
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
 
-    private TestResult doTest2()
+    private void doTest2()
+        throws Exception
     {
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod1, pub1);
         RSAKeyParameters    privParameters = new RSAKeyParameters(true, mod1, pri1);
@@ -176,40 +160,26 @@ public class ISO9796Test
 
         eng.init(true, privParameters);
 
-        try
-        {
-            data = eng.processBlock(msg2, 0, msg2.length);
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.processBlock(msg2, 0, msg2.length);
 
         eng.init(false, pubParameters);
 
         if (!isSameAs(data, 1, sig2))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-1 generation Test 2");
+            fail("failed ISO9796-1 generation Test 2");
         }
 
-        try
-        {
-            data = eng.processBlock(data, 0, data.length);
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.processBlock(data, 0, data.length);
 
-        if (!isSameAs(msg2, 0, data))
-        {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-1 retrieve Test 2");
-        }
 
-        return new SimpleTestResult(true, "ISO9796: Okay");
+        if (!areEqual(msg2, data))
+        {
+            fail("failed ISO9796-1 retrieve Test 2");
+        }
     }
 
-    public TestResult doTest3()
+    public void doTest3()
+        throws Exception
     {
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod2, pub2);
         RSAKeyParameters    privParameters = new RSAKeyParameters(true, mod2, pri2);
@@ -225,40 +195,25 @@ public class ISO9796Test
 
         eng.setPadBits(4);
 
-        try
-        {
-            data = eng.processBlock(msg3, 0, msg3.length);
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.processBlock(msg3, 0, msg3.length);
 
         eng.init(false, pubParameters);
 
         if (!isSameAs(sig3, 1, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-1 generation Test 3");
+            fail("failed ISO9796-1 generation Test 3");
         }
 
-        try
-        {
-            data = eng.processBlock(data, 0, data.length);
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.processBlock(data, 0, data.length);
 
         if (!isSameAs(msg3, 0, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-1 retrieve Test 3");
+            fail("failed ISO9796-1 retrieve Test 3");
         }
-
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
 
-    public TestResult doTest4()
+    public void doTest4()
+        throws Exception
     {
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod3, pub3);
         RSAKeyParameters    privParameters = new RSAKeyParameters(true, mod3, pri3);
@@ -272,23 +227,16 @@ public class ISO9796Test
 
         eng.init(true, privParameters);
 
-        try
-        {
-            eng.update(msg4[0]);
-            eng.update(msg4, 1, msg4.length - 1);
+        eng.update(msg4[0]);
+        eng.update(msg4, 1, msg4.length - 1);
 
-            data = eng.generateSignature();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.generateSignature();
 
         eng.init(false, pubParameters);
 
         if (!isSameAs(sig4, 0, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 generation Test 4");
+            fail("failed ISO9796-2 generation Test 4");
         }
 
         eng.update(msg4[0]);
@@ -296,13 +244,12 @@ public class ISO9796Test
 
         if (!eng.verifySignature(sig4))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 verify Test 4");
+            fail("failed ISO9796-2 verify Test 4");
         }
-
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
 
-    public TestResult doTest5()
+    public void doTest5()
+        throws Exception
     {
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod3, pub3);
         RSAKeyParameters    privParameters = new RSAKeyParameters(true, mod3, pri3);
@@ -316,23 +263,16 @@ public class ISO9796Test
 
         eng.init(true, privParameters);
 
-        try
-        {
-            eng.update(msg5[0]);
-            eng.update(msg5, 1, msg5.length - 1);
+        eng.update(msg5[0]);
+        eng.update(msg5, 1, msg5.length - 1);
 
-            data = eng.generateSignature();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.generateSignature();
 
         eng.init(false, pubParameters);
 
         if (!isSameAs(sig5, 0, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 generation Test 5");
+            fail("failed ISO9796-2 generation Test 5");
         }
 
         eng.update(msg5[0]);
@@ -340,16 +280,15 @@ public class ISO9796Test
 
         if (!eng.verifySignature(sig5))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 verify Test 5");
+            fail("failed ISO9796-2 verify Test 5");
         }
-
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
 
     //
     // against a zero length string
     //
-    public TestResult doTest6()
+    public void doTest6()
+        throws Exception
     {
         byte[]                salt = Hex.decode("61DF870C4890FE85D6E3DD87C3DCE3723F91DB49");
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod6, pub6);
@@ -365,31 +304,23 @@ public class ISO9796Test
 
         eng.init(true, sigParameters);
 
-        try
-        {
-            data = eng.generateSignature();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.generateSignature();
 
         eng.init(false, pubParameters);
 
         if (!isSameAs(sig6, 1, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 generation Test 6");
+            fail("failed ISO9796-2 generation Test 6");
         }
 
         if (!eng.verifySignature(sig6))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 verify Test 6");
+            fail("failed ISO9796-2 verify Test 6");
         }
-
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
     
-    public TestResult doTest7()
+    public void doTest7()
+        throws Exception
     {
         byte[]                salt = new byte[0];
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod6, pub6);
@@ -405,23 +336,16 @@ public class ISO9796Test
 
         eng.init(true, sigParameters);
 
-        try
-        {
-            eng.update(msg7[0]);
-            eng.update(msg7, 1, msg7.length - 1);
+        eng.update(msg7[0]);
+        eng.update(msg7, 1, msg7.length - 1);
 
-            data = eng.generateSignature();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.generateSignature();
 
         eng.init(false, pubParameters);
 
         if (!isSameAs(sig7, 0, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 generation Test 7");
+            fail("failed ISO9796-2 generation Test 7");
         }
 
         eng.update(msg7[0]);
@@ -429,18 +353,17 @@ public class ISO9796Test
 
         if (!eng.verifySignature(sig7))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 verify Test 7");
+            fail("failed ISO9796-2 verify Test 7");
         }
 
         if (!isSameAs(msg7, 0, eng.getRecoveredMessage()))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 recovery Test 7");
+            fail("failed ISO9796-2 recovery Test 7");
         }
-        
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
     
-    public TestResult doTest8()
+    public void doTest8()
+        throws Exception
     {
         byte[]              salt = Hex.decode("78E293203CBA1B7F92F05F4D171FF8CA3E738FF8");
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod6, pub6);
@@ -456,23 +379,16 @@ public class ISO9796Test
 
         eng.init(true, sigParameters);
 
-        try
-        {
-            eng.update(msg8[0]);
-            eng.update(msg8, 1, msg8.length - 1);
+        eng.update(msg8[0]);
+        eng.update(msg8, 1, msg8.length - 1);
 
-            data = eng.generateSignature();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.generateSignature();
 
         eng.init(false, pubParameters);
 
         if (!isSameAs(sig8, 0, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 generation Test 8");
+            fail("failed ISO9796-2 generation Test 8");
         }
 
         eng.update(msg8[0]);
@@ -480,13 +396,12 @@ public class ISO9796Test
 
         if (!eng.verifySignature(sig8))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 verify Test 8");
+            fail("failed ISO9796-2 verify Test 8");
         }
-
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
     
-    public TestResult doTest9()
+    public void doTest9()
+        throws Exception
     {
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod6, pub6);
         RSAKeyParameters    privParameters = new RSAKeyParameters(true, mod6, pri6);
@@ -500,23 +415,16 @@ public class ISO9796Test
 
         eng.init(true, privParameters);
 
-        try
-        {
-            eng.update(msg9[0]);
-            eng.update(msg9, 1, msg9.length - 1);
+        eng.update(msg9[0]);
+        eng.update(msg9, 1, msg9.length - 1);
 
-            data = eng.generateSignature();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.generateSignature();
 
         eng.init(false, pubParameters);
 
         if (!isSameAs(sig9, 0, data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 generation Test 9");
+            fail("failed ISO9796-2 generation Test 9");
         }
 
         eng.update(msg9[0]);
@@ -524,13 +432,12 @@ public class ISO9796Test
 
         if (!eng.verifySignature(sig9))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 verify Test 9");
+            fail("failed ISO9796-2 verify Test 9");
         }
-
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
     
-    public TestResult doTest10()
+    public void doTest10()
+        throws Exception
     {
         BigInteger          mod = new BigInteger("B3ABE6D91A4020920F8B3847764ECB34C4EB64151A96FDE7B614DC986C810FF2FD73575BDF8532C06004C8B4C8B64F700A50AEC68C0701ED10E8D211A4EA554D", 16);
         BigInteger          pubExp = new BigInteger("65537", 10);
@@ -554,17 +461,10 @@ public class ISO9796Test
         {
             eng.init(true, privParameters);
     
-            try
-            {
-                eng.update(msg9[0]);
-                eng.update(msg9, 1, msg9.length - 1);
-    
-                data = eng.generateSignature();
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-            }
+            eng.update(msg9[0]);
+            eng.update(msg9, 1, msg9.length - 1);
+
+            data = eng.generateSignature();
     
             eng.init(false, pubParameters);
     
@@ -573,14 +473,13 @@ public class ISO9796Test
     
             if (!eng.verifySignature(data))
             {
-                return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 verify Test 10");
+                fail("failed ISO9796-2 verify Test 10");
             }
         }
-
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
     
-    public TestResult doTest11()
+    public void doTest11()
+        throws Exception
     {
         BigInteger          mod = new BigInteger("B3ABE6D91A4020920F8B3847764ECB34C4EB64151A96FDE7B614DC986C810FF2FD73575BDF8532C06004C8B4C8B64F700A50AEC68C0701ED10E8D211A4EA554D", 16);
         BigInteger          pubExp = new BigInteger("65537", 10);
@@ -604,16 +503,9 @@ public class ISO9796Test
         //
         eng.init(true, privParameters);
 
-        try
-        {
-            eng.update(m1, 0, m1.length);
+        eng.update(m1, 0, m1.length);
 
-            data = eng.generateSignature();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.generateSignature();
 
         eng.init(false, pubParameters);
 
@@ -621,7 +513,7 @@ public class ISO9796Test
 
         if (eng.verifySignature(data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 m2 verify Test 11");
+            fail("failed ISO9796-2 m2 verify Test 11");
         }
 
         eng.init(false, pubParameters);
@@ -630,7 +522,7 @@ public class ISO9796Test
 
         if (eng.verifySignature(data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 m3 verify Test 11");
+            fail("failed ISO9796-2 m3 verify Test 11");
         }
         
         eng.init(false, pubParameters);
@@ -639,13 +531,12 @@ public class ISO9796Test
 
         if (!eng.verifySignature(data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 verify Test 11");
+            fail("failed ISO9796-2 verify Test 11");
         }
-        
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
     
-    public TestResult doTest12()
+    public void doTest12() 
+        throws Exception
     {
         BigInteger          mod = new BigInteger("B3ABE6D91A4020920F8B3847764ECB34C4EB64151A96FDE7B614DC986C810FF2FD73575BDF8532C06004C8B4C8B64F700A50AEC68C0701ED10E8D211A4EA554D", 16);
         BigInteger          pubExp = new BigInteger("65537", 10);
@@ -669,16 +560,9 @@ public class ISO9796Test
         //
         eng.init(true, privParameters);
 
-        try
-        {
-            eng.update(m1, 0, m1.length);
+        eng.update(m1, 0, m1.length);
 
-            data = eng.generateSignature();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, "ISO9796: failed - exception " + e.toString());
-        }
+        data = eng.generateSignature();
 
         eng.init(false, pubParameters);
 
@@ -686,7 +570,7 @@ public class ISO9796Test
 
         if (eng.verifySignature(data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 m2 verify Test 12");
+            fail("failed ISO9796-2 m2 verify Test 12");
         }
 
         eng.init(false, pubParameters);
@@ -695,7 +579,7 @@ public class ISO9796Test
 
         if (eng.verifySignature(data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 m3 verify Test 12");
+            fail("failed ISO9796-2 m3 verify Test 12");
         }
         
         eng.init(false, pubParameters);
@@ -704,89 +588,30 @@ public class ISO9796Test
 
         if (!eng.verifySignature(data))
         {
-            return new SimpleTestResult(false, "ISO9796: failed ISO9796-2 verify Test 12");
+            fail("failed ISO9796-2 verify Test 12");
         }
-        
-        return new SimpleTestResult(true, "ISO9796: Okay");
     }
     
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        TestResult  res = doTest1();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = doTest2();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = doTest3();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = doTest4();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = doTest5();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        res = doTest6();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        res = doTest7();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        res = doTest8();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        res = doTest9();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        res = doTest10();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        res = doTest11();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        return doTest12();
+        doTest1();
+        doTest2();
+        doTest3();
+        doTest4();
+        doTest5();
+        doTest6();
+        doTest7();
+        doTest8();
+        doTest9();
+        doTest10();
+        doTest11();
+        doTest12();
     }
 
     public static void main(
         String[]    args)
     {
-        ISO9796Test         test = new ISO9796Test();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new ISO9796Test());
     }
 }

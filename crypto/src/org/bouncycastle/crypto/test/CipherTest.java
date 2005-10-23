@@ -3,27 +3,23 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
-/**
- */
 public abstract class CipherTest
-    implements Test
+    extends SimpleTest
 {
-    private Test[]      _tests;
+    private SimpleTest[]      _tests;
     private BlockCipher _engine;
     private KeyParameter _validKey;
 
     protected CipherTest(
-        Test[]  tests)
+        SimpleTest[]  tests)
     {
         _tests = tests;
     }
 
     protected CipherTest(
-        Test[]       tests,
+        SimpleTest[]   tests,
         BlockCipher  engine,
         KeyParameter validKey)
     {
@@ -34,16 +30,12 @@ public abstract class CipherTest
     
     public abstract String getName();
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
         for (int i = 0; i != _tests.length; i++)
         {
-            TestResult  res = _tests[i].perform();
-
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
+            _tests[i].performTest();
         }
 
         if (_engine != null)
@@ -57,20 +49,18 @@ public abstract class CipherTest
             {   
                 _engine.processBlock(buf, 0, buf, 0);
                 
-                return new SimpleTestResult(false, getName() + ": failed initialisation check");
+                fail("failed initialisation check");
             }
             catch (IllegalStateException e)
             {
                 // expected 
             }
             
-            return bufferSizeCheck((_engine));
+            bufferSizeCheck((_engine));
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    private TestResult bufferSizeCheck(
+    private void bufferSizeCheck(
         BlockCipher engine)
     {
         byte[] correctBuf = new byte[engine.getBlockSize()];
@@ -82,7 +72,7 @@ public abstract class CipherTest
         {   
             engine.processBlock(shortBuf, 0, correctBuf, 0);
             
-            return new SimpleTestResult(false, getName() + ": failed short input check");
+            fail("failed short input check");
         }
         catch (DataLengthException e)
         {
@@ -93,7 +83,7 @@ public abstract class CipherTest
         {   
             engine.processBlock(correctBuf, 0, shortBuf, 0);
             
-            return new SimpleTestResult(false, getName() + ": failed short output check");
+            fail("failed short output check");
         }
         catch (DataLengthException e)
         {
@@ -106,7 +96,7 @@ public abstract class CipherTest
         {   
             engine.processBlock(shortBuf, 0, correctBuf, 0);
             
-            return new SimpleTestResult(false, getName() + ": failed short input check");
+            fail("failed short input check");
         }
         catch (DataLengthException e)
         {
@@ -117,13 +107,11 @@ public abstract class CipherTest
         {   
             engine.processBlock(correctBuf, 0, shortBuf, 0);
             
-            return new SimpleTestResult(false, getName() + ": failed short output check");
+            fail("failed short output check");
         }
         catch (DataLengthException e)
         {
             // expected 
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 }

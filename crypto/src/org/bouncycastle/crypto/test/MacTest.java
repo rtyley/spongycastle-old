@@ -9,9 +9,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.paddings.PKCS7Padding;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * MAC tester - vectors from 
@@ -19,7 +17,7 @@ import org.bouncycastle.util.test.TestResult;
  * <a href=http://www.itl.nist.gov/fipspubs/fip113.htm>FIP 113</a>.
  */
 public class MacTest
-    implements Test
+    extends SimpleTest
 {
     static byte[]   keyBytes = Hex.decode("0123456789abcdef");
     static byte[]   ivBytes = Hex.decode("1234567890abcdef");
@@ -43,24 +41,7 @@ public class MacTest
     {
     }
 
-    private boolean arraysEqual(
-        byte[] a,
-        byte[] b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < a.length; i++)
-        {
-            if (a[i] != b[i]) return false;
-        }
-
-        return true;
-    }
-
-    public TestResult perform()
+    public void performTest()
     {
         KeyParameter        key = new KeyParameter(keyBytes);
         BlockCipher         cipher = new DESEngine();
@@ -77,9 +58,9 @@ public class MacTest
 
         mac.doFinal(out, 0);
 
-        if (!arraysEqual(out, output1))
+        if (!areEqual(out, output1))
         {
-            return new SimpleTestResult(false, getName() + ": Failed - expected " + new String(Hex.encode(output1)) + " got " + new String(Hex.encode(out)));
+            fail("Failed - expected " + new String(Hex.encode(output1)) + " got " + new String(Hex.encode(out)));
         }
         
         //
@@ -95,9 +76,9 @@ public class MacTest
 
         mac.doFinal(out, 0);
 
-        if (!arraysEqual(out, output2))
+        if (!areEqual(out, output2))
         {
-            return new SimpleTestResult(false, getName() + ": Failed - expected " + new String(Hex.encode(output2)) + " got " + new String(Hex.encode(out)));
+            fail("Failed - expected " + new String(Hex.encode(output2)) + " got " + new String(Hex.encode(out)));
         }
         
         //
@@ -115,9 +96,9 @@ public class MacTest
 
         mac.doFinal(out, 0);
 
-        if (!arraysEqual(out, output3))
+        if (!areEqual(out, output3))
         {
-            return new SimpleTestResult(false, getName() + ": Failed - expected " + new String(Hex.encode(output3)) + " got " + new String(Hex.encode(out)));
+            fail("Failed - expected " + new String(Hex.encode(output3)) + " got " + new String(Hex.encode(out)));
         }
 
         //
@@ -131,9 +112,9 @@ public class MacTest
 
         mac.doFinal(out, 0);
 
-        if (!arraysEqual(out, output4))
+        if (!areEqual(out, output4))
         {
-            return new SimpleTestResult(false, getName() + ": Failed - expected " + new String(Hex.encode(output4)) + " got " + new String(Hex.encode(out)));
+            fail("Failed - expected " + new String(Hex.encode(output4)) + " got " + new String(Hex.encode(out)));
         }
 
         //
@@ -149,9 +130,9 @@ public class MacTest
 
         mac.doFinal(out, 0);
 
-        if (!arraysEqual(out, output5))
+        if (!areEqual(out, output5))
         {
-            return new SimpleTestResult(false, getName() + ": Failed - expected " + new String(Hex.encode(output5)) + " got " + new String(Hex.encode(out)));
+            fail("Failed - expected " + new String(Hex.encode(output5)) + " got " + new String(Hex.encode(out)));
         }
 
         //
@@ -165,9 +146,9 @@ public class MacTest
 
         mac.doFinal(out, 0);
 
-        if (!arraysEqual(out, output6))
+        if (!areEqual(out, output6))
         {
-            return new SimpleTestResult(false, getName() + ": Failed - expected " + new String(Hex.encode(output6)) + " got " + new String(Hex.encode(out)));
+            fail("Failed - expected " + new String(Hex.encode(output6)) + " got " + new String(Hex.encode(out)));
         }
 
         //
@@ -181,12 +162,10 @@ public class MacTest
 
         mac.doFinal(out, 0);
 
-        if (!arraysEqual(out, output6))
+        if (!areEqual(out, output6))
         {
-            return new SimpleTestResult(false, getName() + ": Failed - expected " + new String(Hex.encode(output6)) + " got " + new String(Hex.encode(out)));
+            fail("Failed - expected " + new String(Hex.encode(output6)) + " got " + new String(Hex.encode(out)));
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
     public String getName()
@@ -197,9 +176,6 @@ public class MacTest
     public static void main(
         String[]    args)
     {
-        MacTest    test = new MacTest();
-        TestResult result = test.perform();
-
-        System.out.println(result);
+        runTest(new MacTest());
     }
 }

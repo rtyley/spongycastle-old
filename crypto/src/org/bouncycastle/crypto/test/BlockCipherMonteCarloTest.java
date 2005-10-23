@@ -3,11 +3,8 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * a basic test that takes a cipher, key parameter, and an input
@@ -15,7 +12,7 @@ import org.bouncycastle.util.test.TestResult;
  * cipher with padding disabled.
  */
 public class BlockCipherMonteCarloTest
-    implements Test
+    extends SimpleTest
 {
     int                 id;
     int                 iterations;
@@ -45,7 +42,8 @@ public class BlockCipherMonteCarloTest
         return engine.getAlgorithmName() + " Monte Carlo Test " + id;
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
         BufferedBlockCipher cipher = new BufferedBlockCipher(engine);
 
@@ -59,21 +57,12 @@ public class BlockCipherMonteCarloTest
         {
             int len1 = cipher.processBytes(out, 0, out.length, out, 0);
 
-            try
-            {
-                cipher.doFinal(out, len1);
-            }
-            catch (CryptoException e)
-            {
-                return new SimpleTestResult(false, 
-                       getName() + ": failed - exception " + e.toString());
-            }
+            cipher.doFinal(out, len1);
         }
 
-        if (!isEqualArray(out, output))
+        if (!areEqual(out, output))
         {
-            return new SimpleTestResult(false,
-                    getName() + ": failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+            fail("failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
         }
 
         cipher.init(false, param);
@@ -82,42 +71,12 @@ public class BlockCipherMonteCarloTest
         {
             int len1 = cipher.processBytes(out, 0, out.length, out, 0);
 
-            try
-            {
-                cipher.doFinal(out, len1);
-            }
-            catch (CryptoException e)
-            {
-                return new SimpleTestResult(false, 
-                       getName() + ": failed reversal - exception " + e.toString());
-            }
+            cipher.doFinal(out, len1);
         }
 
-        if (!isEqualArray(input, out))
+        if (!areEqual(input, out))
         {
-            return new SimpleTestResult(false, getName() + ": failed reversal");
+            fail("failed reversal");
         }
-
-        return new SimpleTestResult(true, getName() + ": OKAY");
-    }
-
-    private boolean isEqualArray(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

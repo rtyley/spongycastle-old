@@ -20,15 +20,13 @@ import org.bouncycastle.crypto.params.IESParameters;
 import org.bouncycastle.crypto.params.IESWithCipherParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * test for ECIES - Elliptic Curve Integrated Encryption Scheme
  */
 public class ECIESTest
-    implements Test
+    extends SimpleTest
 {
     ECIESTest()
     {
@@ -39,27 +37,7 @@ public class ECIESTest
         return "ECIES";
     }
 
-    private boolean sameAs(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public TestResult perform()
+    public void performTest()
     {
         SecureRandom    random = new SecureRandom();
         ECCurve.Fp curve = new ECCurve.Fp(
@@ -109,15 +87,15 @@ public class ECIESTest
 
             byte[]   out2 = i2.processBlock(out1, 0, out1.length);
 
-            if (!sameAs(out2, message))
+            if (!areEqual(out2, message))
             {
-                return new SimpleTestResult(false, this.getName() + ": stream cipher test failed");
+                fail("stream cipher test failed");
             }
       
         }
         catch (Exception ex)
         {
-            return new SimpleTestResult(false, this.getName() + ": stream cipher test exception " + ex.toString());
+            fail("stream cipher test exception " + ex.toString(), ex);
         }
 
         //
@@ -152,25 +130,20 @@ public class ECIESTest
 
             byte[]    out2 = i2.processBlock(out1, 0, out1.length);
 
-            if (!sameAs(out2, message))
+            if (!areEqual(out2, message))
             {
-                return new SimpleTestResult(false, this.getName() + ": twofish cipher test failed");
+                fail("twofish cipher test failed");
             }
         }
         catch (Exception ex)
         {
-            return new SimpleTestResult(false, this.getName() + ": twofish cipher test exception " + ex.toString());
+            fail("twofish cipher test exception " + ex.toString(), ex);
         }
-
-        return new SimpleTestResult(true, this.getName() + ": Okay");
     }
 
     public static void main(
         String[]    args)
     {
-        ECIESTest    test = new ECIESTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new ECIESTest());
     }
 }

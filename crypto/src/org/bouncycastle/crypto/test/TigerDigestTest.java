@@ -2,16 +2,12 @@ package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.TigerDigest;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
 
 /**
  * Tiger Digest Test
  */
 public class TigerDigestTest
-    implements Test
+    extends DigestTest
 {
     final static String[] messages = {
         "",
@@ -37,99 +33,27 @@ public class TigerDigestTest
     };
 
     final static String hash64k = "FDF4F5B35139F48E710E421BE5AF411DE1A8AAC333F26204";
-
-    public static boolean arraysEqual(byte[] a, byte[] b)
+    
+    TigerDigestTest()
     {
-        if (a == b) return true;
-        if (a.length != b.length) return false;
-
-        for (int i = 0; i < a.length; i++)
-        {
-            if (a[i] != b[i]) return false;
-        }
-
-        return true;
+        super(new TigerDigest(), messages, digests);
     }
+
+    public void performTest()
+    {
+        super.performTest();
         
-    public String getName()
-    {
-        return "Tiger";
+        sixtyFourKTest(hash64k);
     }
 
-    public TestResult perform()
+    protected Digest cloneDigest(Digest digest)
     {
-        Digest digest = new TigerDigest();
-        byte[] resBuf = new byte[digest.getDigestSize()];
-        int failCount = 0;
-
-        for (int i = 0; i < messages.length; i++)
-        {
-            byte[] m = messages[i].getBytes();
-            digest.update(m, 0, m.length);
-            digest.doFinal(resBuf, 0);
-
-            if (!arraysEqual(resBuf, Hex.decode(digests[i])))
-            {
-                return new SimpleTestResult(false, getName() + ": Vector " + i + " failed got " + new String(Hex.encode(resBuf)));
-            }
-        }
-
-        //
-        // test 2
-        //
-        byte[] m = messages[messages.length-1].getBytes();
-
-        digest.update(m, 0, m.length/2);
-
-        // clone the Digest
-        Digest d = new TigerDigest((TigerDigest)digest);
-
-        digest.update(m, m.length/2, m.length - m.length/2);
-        digest.doFinal(resBuf, 0);
-
-        if (!arraysEqual(resBuf, Hex.decode(digests[digests.length-1])))
-        {
-            return new SimpleTestResult(false,
-                "Tiger failing clone test"
-                + System.getProperty("line.separator")
-                + "    expected: " + digests[digests.length-1]
-                + System.getProperty("line.separator")
-                + "    got     : " + new String(Hex.encode(resBuf)));
-        }
-
-        d.update(m, m.length/2, m.length - m.length/2);
-        d.doFinal(resBuf, 0);
-
-        if (!arraysEqual(resBuf, Hex.decode(digests[digests.length-1])))
-        {
-            return new SimpleTestResult(false,
-                "Tiger failing clone test - part 2"
-                + System.getProperty("line.separator")
-                + "    expected: " +  digests[digests.length-1]
-                + System.getProperty("line.separator")
-                + "    got     : " + new String(Hex.encode(resBuf)));
-        }
-
-        for (int i = 0; i < 65536; i++)
-        {
-            digest.update((byte)(i & 0xff));
-        }
-        digest.doFinal(resBuf, 0);
-
-        if (!arraysEqual(resBuf, Hex.decode(hash64k)))
-        {
-            return new SimpleTestResult(false, getName() + ": Million a's failed");
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        return new TigerDigest((TigerDigest)digest);
     }
-
+    
     public static void main(
         String[]    args)
     {
-        TigerDigestTest test = new TigerDigestTest();
-        TestResult          result = test.perform();
-
-        System.out.println(result);
+        runTest(new TigerDigestTest());
     }
 }

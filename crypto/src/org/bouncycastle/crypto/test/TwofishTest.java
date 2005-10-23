@@ -3,8 +3,7 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class TwofishTest
     extends CipherTest
@@ -15,7 +14,7 @@ public class TwofishTest
 
     static String input = "000102030405060708090A0B0C0D0E0F";
 
-    static Test[]  tests =
+    static SimpleTest[]  tests =
     {
         new BlockCipherVectorTest(0, new TwofishEngine(),
                 new KeyParameter(Hex.decode(key1)),
@@ -41,9 +40,6 @@ public class TwofishTest
     public static void main(
         String[]    args)
     {
-        TwofishTest     test = new TwofishTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new TwofishTest());
     }
 }

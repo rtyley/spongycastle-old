@@ -3,15 +3,13 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.RC4Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * RC4 Test
  */
 public class RC4Test
-    implements Test
+    extends SimpleTest
 {
     StreamCipherVectorTest[] tests =
     {
@@ -31,27 +29,17 @@ public class RC4Test
         return "RC4";
     }
 
-    public TestResult perform()
+    public void performTest()
     {
         for (int i = 0; i != tests.length; i++)
         {
-            TestResult  res = tests[i].perform();
-
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
+            tests[i].performTest();
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
     public static void main(
         String[]    args)
     {
-        RC4Test test = new RC4Test();
-        TestResult  result = test.perform();
-
-        System.out.println(result);
+        runTest(new RC4Test());
     }
 }

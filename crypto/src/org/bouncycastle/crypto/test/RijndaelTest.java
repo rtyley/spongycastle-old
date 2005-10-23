@@ -3,8 +3,7 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.RijndaelEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * Test vectors from the NIST standard tests and Brian Gladman's vector set
@@ -14,7 +13,7 @@ import org.bouncycastle.util.test.TestResult;
 public class RijndaelTest
     extends CipherTest
 {
-    static Test[]  tests = 
+    static SimpleTest[]  tests = 
             {
                 new BlockCipherVectorTest(0, new RijndaelEngine(128),
                         new KeyParameter(Hex.decode("80000000000000000000000000000000")),
@@ -112,9 +111,6 @@ public class RijndaelTest
     public static void main(
         String[]    args)
     {
-        RijndaelTest    test = new RijndaelTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new RijndaelTest());
     }
 }

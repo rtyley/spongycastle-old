@@ -3,15 +3,14 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.IDEAEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  */
 public class IDEATest
     extends CipherTest
 {
-    static Test[] tests =
+    static SimpleTest[] tests =
             {
                 new BlockCipherVectorTest(0, new IDEAEngine(),
                         new KeyParameter(Hex.decode("00112233445566778899AABBCCDDEEFF")),
@@ -34,9 +33,6 @@ public class IDEATest
     public static void main(
         String[]    args)
     {
-        IDEATest    test = new IDEATest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new IDEATest());
     }
 }

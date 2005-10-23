@@ -3,8 +3,7 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.CAST5Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * cast tester - vectors from http://www.ietf.org/rfc/rfc2144.txt
@@ -12,7 +11,7 @@ import org.bouncycastle.util.test.TestResult;
 public class CAST5Test
     extends CipherTest
 {
-    static Test[]  tests = {
+    static SimpleTest[]  tests = {
         new BlockCipherVectorTest(0, new CAST5Engine(),
             new KeyParameter(Hex.decode("0123456712345678234567893456789A")),
             "0123456789ABCDEF", 
@@ -40,9 +39,6 @@ public class CAST5Test
     public static void main(
         String[]    args)
     {
-        CAST5Test       test = new CAST5Test();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new CAST5Test());
     }
 }
