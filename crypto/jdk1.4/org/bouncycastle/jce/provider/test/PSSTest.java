@@ -112,7 +112,7 @@ public class PSSTest
             
             s.initVerify(pubKey);
             s.update(msg1a);
-            if ( !s.verify(sig1a) )
+            if (!s.verify(sig1a))
             {
                 return new SimpleTestResult(false, "SHA1 signature verification failed");
             }
@@ -123,7 +123,7 @@ public class PSSTest
             
             s.initVerify(pubKey);
             s.update(msg1a);
-            if ( !s.verify(sig1a) )
+            if (!s.verify(sig1a))
             {
                 return new SimpleTestResult(false, "SHA1 signature verification with default parameters failed");
             }
@@ -153,7 +153,7 @@ public class PSSTest
             
             s.initVerify(pubKey);
             s.update(msg1a);
-            if ( !s.verify(sig1b) )
+            if (!s.verify(sig1b))
             {
                 return new SimpleTestResult(false, "SHA256 signature verification failed");
             }
@@ -182,7 +182,7 @@ public class PSSTest
             
             s.initVerify(pubKey);
             s.update(msg1a);
-            if ( !s.verify(sig1c) )
+            if (!s.verify(sig1c))
             {
                 return new SimpleTestResult(false, "SHA512 signature verification failed");
             }
