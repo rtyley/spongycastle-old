@@ -39,8 +39,15 @@ public class GOST3410ParametersGenerator
     private int procedure_A(int x0, int c,  BigInteger[] pq, int size)
     {
         //Verify and perform condition: 0<x<2^16; 0<c<2^16; c - odd.
-        while(x0<0 || x0>65536) x0 = init_random.nextInt()/32768;
-        while((c<0 || c>65536) || (c/2==0)) c = init_random.nextInt()/32768 + 1;
+        while(x0<0 || x0>65536)
+        {
+            x0 = init_random.nextInt()/32768;
+        }
+
+        while((c<0 || c>65536) || (c/2==0))
+        {
+            c = init_random.nextInt()/32768 + 1;
+        }
 
         BigInteger C = new BigInteger(Integer.toString(c));
         BigInteger constA16 = new BigInteger("19381");
@@ -84,12 +91,16 @@ public class GOST3410ParametersGenerator
                 System.arraycopy(tmp_y,0,y,0,tmp_y.length);     ////////////////
 
                 for (int j=0; j<rm; j++)
+                {
                     y[j+1] = (y[j].multiply(constA16).add(C)).mod(TWO.pow(16));
+                }
 
                 //step 7
                 BigInteger Ym = new BigInteger("0");
                 for (int j=0; j<rm; j++)
+                {
                     Ym = Ym.add(y[j].multiply(TWO.pow(16*j)));
+                }
 
                 y[0] = y[rm]; //step 8
 
@@ -98,7 +109,10 @@ public class GOST3410ParametersGenerator
                                    add((TWO.pow(t[m]-1).multiply(Ym)).
                                        divide(p[m+1].multiply(TWO.pow(16*rm))));
 
-                if (N.mod(TWO).compareTo(ONE)==0) N = N.add(ONE);
+                if (N.mod(TWO).compareTo(ONE)==0) 
+                {
+                    N = N.add(ONE);
+                }
 
                 int k = 0; //step 10
 
@@ -107,7 +121,10 @@ public class GOST3410ParametersGenerator
                     //step 11
                     p[m] = p[m+1].multiply(N.add(BigInteger.valueOf(k))).add(ONE);
 
-                    if (p[m].compareTo(TWO.pow(t[m]))==1) continue step6; //step 12
+                    if (p[m].compareTo(TWO.pow(t[m]))==1)
+                    {
+                        continue step6; //step 12
+                    }
 
                     //step13
                     if ((TWO.modPow(p[m+1].multiply(N.add(BigInteger.valueOf(k))),p[m]).compareTo(ONE)==0) &&
@@ -123,7 +140,10 @@ public class GOST3410ParametersGenerator
                     }
                 }
 
-                if (m>=0) break; //step 14
+                if (m>=0) 
+                {
+                    break; //step 14
+                }
                 else
                 {
                     pq[0] = p[0];
@@ -139,8 +159,15 @@ public class GOST3410ParametersGenerator
     private long procedure_Aa(long x0, long c, BigInteger[] pq, int size)
     {
         //Verify and perform condition: 0<x<2^32; 0<c<2^32; c - odd.
-        while(x0<0 || x0>4294967296L) x0 = init_random.nextInt()*2;
-        while((c<0 || c>4294967296L) || (c/2==0)) c = init_random.nextInt()*2+1;
+        while(x0<0 || x0>4294967296L)
+        {
+            x0 = init_random.nextInt()*2;
+        }
+
+        while((c<0 || c>4294967296L) || (c/2==0))
+        {
+            c = init_random.nextInt()*2+1;
+        }
 
         BigInteger C = new BigInteger(Long.toString(c));
         BigInteger constA32 = new BigInteger("97781173");
@@ -184,12 +211,16 @@ public class GOST3410ParametersGenerator
                 System.arraycopy(tmp_y,0,y,0,tmp_y.length);     ////////////////
 
                 for (int j=0; j<rm; j++)
+                {
                     y[j+1] = (y[j].multiply(constA32).add(C)).mod(TWO.pow(32));
+                }
 
                 //step 7
                 BigInteger Ym = new BigInteger("0");
                 for (int j=0; j<rm; j++)
+                {
                     Ym = Ym.add(y[j].multiply(TWO.pow(32*j)));
+                }
 
                 y[0] = y[rm]; //step 8
 
@@ -198,7 +229,10 @@ public class GOST3410ParametersGenerator
                                    add((TWO.pow(t[m]-1).multiply(Ym)).
                                        divide(p[m+1].multiply(TWO.pow(32*rm))));
 
-                if (N.mod(TWO).compareTo(ONE)==0) N = N.add(ONE);
+                if (N.mod(TWO).compareTo(ONE)==0) 
+                {
+                    N = N.add(ONE);
+                }
 
                 int k = 0; //step 10
 
@@ -207,7 +241,10 @@ public class GOST3410ParametersGenerator
                     //step 11
                     p[m] = p[m+1].multiply(N.add(BigInteger.valueOf(k))).add(ONE);
 
-                    if (p[m].compareTo(TWO.pow(t[m]))==1) continue step6; //step 12
+                    if (p[m].compareTo(TWO.pow(t[m]))==1)
+                    {
+                        continue step6; //step 12
+                    }
 
                     //step13
                     if ((TWO.modPow(p[m+1].multiply(N.add(BigInteger.valueOf(k))),p[m]).compareTo(ONE)==0) &&
@@ -223,8 +260,11 @@ public class GOST3410ParametersGenerator
                     }
                 }
 
-                if (m>=0) break; //step 14
-                  else
+                if (m>=0)
+                {
+                    break; //step 14
+                }
+                else
                 {
                     pq[0] = p[0];
                     pq[1] = p[1];
@@ -239,8 +279,15 @@ public class GOST3410ParametersGenerator
     private void procedure_B(int x0, int c, BigInteger[] pq)
     {
         //Verify and perform condition: 0<x<2^16; 0<c<2^16; c - odd.
-        while(x0<0 || x0>65536) x0 = init_random.nextInt()/32768;
-        while((c<0 || c>65536) || (c/2==0)) c = init_random.nextInt()/32768 + 1;
+        while(x0<0 || x0>65536)
+        {
+            x0 = init_random.nextInt()/32768;
+        }
+
+        while((c<0 || c>65536) || (c/2==0))
+        {
+            c = init_random.nextInt()/32768 + 1;
+        }
 
         BigInteger [] qp = new BigInteger[2];
         BigInteger q = null, Q = null, p = null;
@@ -264,12 +311,17 @@ public class GOST3410ParametersGenerator
         {
             //step 3
             for (int j=0; j<64; j++)
+            {
                 y[j+1] = (y[j].multiply(constA16).add(C)).mod(TWO.pow(16));
+            }
 
             //step 4
             BigInteger Y = new BigInteger("0");
+ 
             for (int j=0; j<64; j++)
+            {
                 Y = Y.add(y[j].multiply(TWO.pow(16*j)));
+            }
 
             y[0] = y[64]; //step 5
 
@@ -278,7 +330,10 @@ public class GOST3410ParametersGenerator
                                add((TWO.pow(tp-1).multiply(Y)).
                                    divide(q.multiply(Q).multiply(TWO.pow(1024))));
 
-            if (N.mod(TWO).compareTo(ONE)==0) N = N.add(ONE);
+            if (N.mod(TWO).compareTo(ONE)==0)
+            {
+                N = N.add(ONE);
+            }
 
             int k = 0; //step 7
 
@@ -287,7 +342,10 @@ public class GOST3410ParametersGenerator
                 //step 11
                 p = q.multiply(Q).multiply(N.add(BigInteger.valueOf(k))).add(ONE);
 
-                if (p.compareTo(TWO.pow(tp))==1) continue step3; //step 9
+                if (p.compareTo(TWO.pow(tp))==1)
+                {
+                    continue step3; //step 9
+                }
 
                 //step10
                 if ((TWO.modPow(q.multiply(Q).multiply(N.add(BigInteger.valueOf(k))),p).compareTo(ONE)==0) &&
@@ -310,8 +368,15 @@ public class GOST3410ParametersGenerator
     private void procedure_Bb(long x0, long c, BigInteger[] pq)
     {
         //Verify and perform condition: 0<x<2^32; 0<c<2^32; c - odd.
-        while(x0<0 || x0>4294967296L) x0 = init_random.nextInt()*2;
-        while((c<0 || c>4294967296L) || (c/2==0)) c = init_random.nextInt()*2+1;
+        while(x0<0 || x0>4294967296L)
+        {
+            x0 = init_random.nextInt()*2;
+        }
+
+        while((c<0 || c>4294967296L) || (c/2==0))
+        {
+            c = init_random.nextInt()*2+1;
+        }
 
         BigInteger [] qp = new BigInteger[2];
         BigInteger q = null, Q = null, p = null;
@@ -335,12 +400,16 @@ public class GOST3410ParametersGenerator
         {
             //step 3
             for (int j=0; j<32; j++)
+            {
                 y[j+1] = (y[j].multiply(constA32).add(C)).mod(TWO.pow(32));
+            }
 
             //step 4
             BigInteger Y = new BigInteger("0");
             for (int j=0; j<32; j++)
+            {
                 Y = Y.add(y[j].multiply(TWO.pow(32*j)));
+            }
 
             y[0] = y[32]; //step 5
 
@@ -349,7 +418,10 @@ public class GOST3410ParametersGenerator
                                add((TWO.pow(tp-1).multiply(Y)).
                                    divide(q.multiply(Q).multiply(TWO.pow(1024))));
 
-            if (N.mod(TWO).compareTo(ONE)==0) N = N.add(ONE);
+            if (N.mod(TWO).compareTo(ONE)==0)
+            {
+                N = N.add(ONE);
+            }
 
             int k = 0; //step 7
 
@@ -358,7 +430,10 @@ public class GOST3410ParametersGenerator
                 //step 11
                 p = q.multiply(Q).multiply(N.add(BigInteger.valueOf(k))).add(ONE);
 
-                if (p.compareTo(TWO.pow(tp))==1) continue step3; //step 9
+                if (p.compareTo(TWO.pow(tp))==1)
+                {
+                    continue step3; //step 9
+                }
 
                 //step10
                 if ((TWO.modPow(q.multiply(Q).multiply(N.add(BigInteger.valueOf(k))),p).compareTo(ONE)==0) &&
@@ -393,10 +468,14 @@ public class GOST3410ParametersGenerator
 
             if ((d.compareTo(TWO)==-1)||      //  1 < d
                 (d.compareTo(p.subtract(TWO))==1)) //  d < p-1
+            {
                 continue;
+            }
 
             if (d.modPow(p.subtract(ONE).divide(q),p).compareTo(ONE)!=0)
+            {
                 return d.modPow(p.subtract(ONE).divide(q),p);
+            }
         }
     }
 
@@ -419,10 +498,14 @@ public class GOST3410ParametersGenerator
 
             switch(size)
             {
-                case 512:  procedure_A(x0, c, pq, 512); break;
-                case 1024: procedure_B(x0, c, pq); break;
-                default: System.out.println("Ooops! key size 512 or 1024 bit.");
-                         return null;
+            case 512:  
+                procedure_A(x0, c, pq, 512); 
+                break;
+            case 1024: 
+                procedure_B(x0, c, pq); 
+                break;
+            default: 
+                throw new IllegalArgumentException("Ooops! key size 512 or 1024 bit.");
             }
             p = pq[0];  q = pq[1];
             a = procedure_C(p, q);
@@ -437,10 +520,14 @@ public class GOST3410ParametersGenerator
 
             switch(size)
             {
-                case 512:  procedure_Aa(x0L, cL, pq, 512); break;
-                case 1024: procedure_Bb(x0L, cL, pq); break;
-                default: System.out.println("Ooops! key size 512 or 1024 bit.");
-                         return null;
+            case 512:  
+                procedure_Aa(x0L, cL, pq, 512); 
+                break;
+            case 1024: 
+                procedure_Bb(x0L, cL, pq); 
+                break;
+            default: 
+                throw new IllegalStateException("Ooops! key size 512 or 1024 bit.");
             }
             p = pq[0];  q = pq[1];
             a = procedure_C(p, q);
