@@ -3,15 +3,14 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.SerpentEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  */
 public class SerpentTest
     extends CipherTest
 {
-    static Test[]  tests = 
+    static SimpleTest[]  tests = 
             {
                new BlockCipherVectorTest(0, new SerpentEngine(),
                        new KeyParameter(Hex.decode("0000000000000000000000000000000000000000000000000000000000000000")),
@@ -99,9 +98,6 @@ public class SerpentTest
     public static void main(
         String[]    args)
     {
-        SerpentTest    test = new SerpentTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new SerpentTest());
     }
 }

@@ -3,16 +3,14 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.StreamCipher;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * a basic test that takes a stream cipher, key parameter, and an input
  * and output string.
  */
 public class StreamCipherVectorTest
-    implements Test
+    extends SimpleTest
 {
     int                 id;
     StreamCipher        cipher;
@@ -39,7 +37,7 @@ public class StreamCipherVectorTest
         return cipher.getAlgorithmName() + " Vector Test " + id;
     }
 
-    public TestResult perform()
+    public void performTest()
     {
         cipher.init(true, param);
 
@@ -47,41 +45,18 @@ public class StreamCipherVectorTest
 
         cipher.processBytes(input, 0, input.length, out, 0);
 
-        if (!isEqualArray(out, output))
+        if (!areEqual(out, output))
         {
-            return new SimpleTestResult(false,
-                    getName() + ": failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+            fail("failed.", new String(Hex.encode(output)) , new String(Hex.encode(out)));
         }
 
         cipher.init(false, param);
 
         cipher.processBytes(output, 0, output.length, out, 0);
 
-        if (!isEqualArray(input, out))
+        if (!areEqual(input, out))
         {
-            return new SimpleTestResult(false, getName() + ": failed reversal");
+            fail("failed reversal");
         }
-
-        return new SimpleTestResult(true, getName() + ": OKAY");
-    }
-
-    private boolean isEqualArray(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

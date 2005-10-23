@@ -22,6 +22,7 @@ public class RegressionTest
         new GOST3410Test(),
         new ECGOST3410Test(),
         new ECIESTest(),
+        new ECNRTest(),
         new MacTest(),
         new GOST28147MacTest(),
         new RC2Test(),

@@ -3,8 +3,7 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.CAST6Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * cast6 tester - vectors from http://www.ietf.org/rfc/rfc2612.txt
@@ -12,7 +11,7 @@ import org.bouncycastle.util.test.TestResult;
 public class CAST6Test
     extends CipherTest
 {
-    static Test[]  tests = {
+    static SimpleTest[]  tests = {
         new BlockCipherVectorTest(0, new CAST6Engine(),
             new KeyParameter(Hex.decode("2342bb9efa38542c0af75647f29f615d")),
             "00000000000000000000000000000000", 
@@ -40,9 +39,6 @@ public class CAST6Test
     public static void main(
         String[]    args)
     {
-        CAST6Test       test = new CAST6Test();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new CAST6Test());
     }
 }

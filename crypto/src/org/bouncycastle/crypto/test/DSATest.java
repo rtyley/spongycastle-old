@@ -12,15 +12,13 @@ import org.bouncycastle.crypto.params.DSAValidationParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.DSASigner;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * Test based on FIPS 186-2, Appendix 5, an example of DSA.
  */
 public class DSATest
-    implements Test
+    extends SimpleTest
 {
     SecureRandom    random = new SecureRandom()
     {
@@ -75,7 +73,7 @@ public class DSATest
         return "DSA";
     }
 
-    public TestResult perform()
+    public void performTest()
     {
         BigInteger              r = new BigInteger("68076202252361894315274692543577577550894681403");
         BigInteger              s = new BigInteger("1089214853334067536215539335472893651470583479365");
@@ -88,12 +86,12 @@ public class DSATest
 
         if (pValid.getCounter() != 105)
         {
-            return new SimpleTestResult(false, getName() + ": Counter wrong");
+            fail("Counter wrong");
         }
 
         if (!pValue.equals(params.getP()) || !qValue.equals(params.getQ()))
         {
-            return new SimpleTestResult(false, getName() + ": p or q wrong");
+            fail("p or q wrong");
         }
 
         DSAKeyPairGenerator         dsaKeyGen = new DSAKeyPairGenerator();
@@ -114,38 +112,25 @@ public class DSATest
 
         if (!r.equals(sig[0]))
         {
-            return new SimpleTestResult(false, getName()
-                + ": r component wrong." + System.getProperty("line.separator")
-                + " expecting: " + r + System.getProperty("line.separator")
-                + " got      : " + sig[0]);
+            fail("r component wrong.", r, sig[0]);
         }
 
         if (!s.equals(sig[1]))
         {
-            return new SimpleTestResult(false, getName()
-                + ": s component wrong." + System.getProperty("line.separator")
-                + " expecting: " + s + System.getProperty("line.separator")
-                + " got      : " + sig[1]);
+            fail("s component wrong.", s, sig[1]);
         }
 
         dsa.init(false, pair.getPublic());
 
-        if (dsa.verifySignature(message, sig[0], sig[1]))
+        if (!dsa.verifySignature(message, sig[0], sig[1]))
         {
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        else
-        {
-            return new SimpleTestResult(false, getName() + ": verification fails");
+            fail("verification fails");
         }
     }
 
     public static void main(
         String[]    args)
     {
-        DSATest         test = new DSATest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new DSATest());
     }
 }

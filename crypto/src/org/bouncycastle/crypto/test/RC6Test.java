@@ -3,8 +3,7 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.RC6Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * RC6 Test - test vectors from AES Submitted RSA Reference implementation.
@@ -13,7 +12,7 @@ import org.bouncycastle.util.test.TestResult;
 public class RC6Test
     extends CipherTest
 {
-    static Test[]  tests = 
+    static SimpleTest[]  tests = 
             {
                 new BlockCipherVectorTest(0, new RC6Engine(),
                         new KeyParameter(
@@ -60,9 +59,6 @@ public class RC6Test
     public static void main(
         String[]    args)
     {
-        RC6Test         test = new RC6Test();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new RC6Test());
     }
 }

@@ -1,15 +1,16 @@
 package org.bouncycastle.crypto.test;
 
+import java.security.SecureRandom;
+
+import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.Wrapper;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.DESedeWrapEngine;
+import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * DESede tester
@@ -20,7 +21,7 @@ public class DESedeTest
     static String   input1 = "4e6f77206973207468652074696d6520666f7220616c6c20";
     static String   input2 = "4e6f7720697320746865";
 
-    static Test[]  tests =
+    static SimpleTest[]  tests =
             {
                 new BlockCipherVectorTest(0, new DESedeEngine(),
                         new KeyParameter(Hex.decode("0123456789abcdef0123456789abcdef")),
@@ -41,7 +42,7 @@ public class DESedeTest
         super(tests, new DESedeEngine(), new KeyParameter(new byte[16]));
     }
 
-    private TestResult wrapTest(
+    private void wrapTest(
         int     id,
         byte[]  kek,
         byte[]  iv,
@@ -55,14 +56,14 @@ public class DESedeTest
         try
         {
             byte[]  cText = wrapper.wrap(in, 0, in.length);
-            if (!Arrays.areEqual(cText, out))
+            if (!areEqual(cText, out))
             {
-                return new SimpleTestResult(false, getName() + ": failed wrap test " + id  + " expected " + new String(Hex.encode(out)) + " got " + new String(Hex.encode(cText)));
+                fail(": failed wrap test " + id  + " expected " + new String(Hex.encode(out)) + " got " + new String(Hex.encode(cText)));
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed wrap test exception " + e.toString());
+            fail("failed wrap test exception: " + e.toString(), e);
         }
 
         wrapper.init(false, new KeyParameter(kek));
@@ -70,38 +71,63 @@ public class DESedeTest
         try
         {
             byte[]  pText = wrapper.unwrap(out, 0, out.length);
-            if (!Arrays.areEqual(pText, in))
+            if (!areEqual(pText, in))
             {
-                return new SimpleTestResult(false, getName() + ": failed unwrap test " + id  + " expected " + new String(Hex.encode(in)) + " got " + new String(Hex.encode(pText)));
+                fail("failed unwrap test " + id  + " expected " + new String(Hex.encode(in)) + " got " + new String(Hex.encode(pText)));
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed unwrap test exception " + e.toString());
+            fail("failed unwrap test exception: " + e.toString(), e);
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        TestResult      result = super.perform();
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
+        super.performTest();
 
         byte[]  kek1 = Hex.decode("255e0d1c07b646dfb3134cc843ba8aa71f025b7c0838251f");
         byte[]  iv1 = Hex.decode("5dd4cbfc96f5453b");
         byte[]  in1 = Hex.decode("2923bf85e06dd6ae529149f1f1bae9eab3a7da3d860d3e98");
         byte[]  out1 = Hex.decode("690107618ef092b3b48ca1796b234ae9fa33ebb4159604037db5d6a84eb3aac2768c632775a467d4");
-        result = wrapTest(1, kek1, iv1, in1, out1);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
+        
+        wrapTest(1, kek1, iv1, in1, out1);
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+        //
+        // key generation
+        //
+        SecureRandom       random = new SecureRandom();
+        DESedeKeyGenerator keyGen = new DESedeKeyGenerator();
+        
+        keyGen.init(new KeyGenerationParameters(random, 112));
+        
+        byte[] kB = keyGen.generateKey();
+        
+        if (kB.length != 16)
+        {
+            fail("112 bit key wrong length.");
+        }
+        
+        keyGen.init(new KeyGenerationParameters(random, 168));
+        
+        kB = keyGen.generateKey();
+        
+        if (kB.length != 24)
+        {
+            fail("168 bit key wrong length.");
+        }
+        
+        try
+        {
+            keyGen.init(new KeyGenerationParameters(random, 200));
+            
+            fail("invalid key length not detected.");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // expected
+        }
     }
 
     public String getName()
@@ -112,9 +138,6 @@ public class DESedeTest
     public static void main(
         String[]    args)
     {
-        DESedeTest test = new DESedeTest();
-        TestResult result = test.perform();
-
-        System.out.println(result);
+        runTest(new DESedeTest());
     }
 }

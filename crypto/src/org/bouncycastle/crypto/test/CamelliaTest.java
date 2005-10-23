@@ -3,7 +3,7 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.CamelliaEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
+import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.util.test.TestResult;
 
 /**
@@ -12,7 +12,7 @@ import org.bouncycastle.util.test.TestResult;
 public class CamelliaTest
     extends CipherTest
 {
-    static Test[]  tests = 
+    static SimpleTest[]  tests = 
             {
                 new BlockCipherVectorTest(0, new CamelliaEngine(),
                     new KeyParameter(Hex.decode("00000000000000000000000000000000")),

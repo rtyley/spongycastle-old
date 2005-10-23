@@ -4,7 +4,6 @@ import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.TestResult;
 
 /**
  * RC2 tester - vectors from  ftp://ftp.isi.edu/in-notes/rfc2268.txt
@@ -62,9 +61,6 @@ public class RC2Test
     public static void main(
         String[]    args)
     {
-        RC2Test test = new RC2Test();
-        TestResult  result = test.perform();
-
-        System.out.println(result);
+        runTest(new RC2Test());
     }
 }

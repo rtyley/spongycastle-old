@@ -2,17 +2,12 @@ package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
 
 /**
  * RIPEMD160 Digest Test
  */
 public class RIPEMD160DigestTest
-    implements Test
+    extends DigestTest
 {
     final static String[] messages = {
         "",
@@ -38,84 +33,26 @@ public class RIPEMD160DigestTest
 
     final static String million_a_digest = "52783243c1697bdbe16d37f97f68f08325dc1528";
 
-    public String getName()
+    RIPEMD160DigestTest()
     {
-        return "RIPEMD160";
+        super(new RIPEMD160Digest(), messages, digests);
     }
 
-    public TestResult perform()
+    public void performTest()
     {
-        Digest digest = new RIPEMD160Digest();
-        byte[] resBuf = new byte[digest.getDigestSize()];
-
-        for (int i = 0; i < messages.length; i++)
-        {
-            byte[] m = messages[i].getBytes();
-            digest.update(m, 0, m.length);
-            digest.doFinal(resBuf, 0);
-
-            if (!Arrays.areEqual(resBuf, Hex.decode(digests[i])))
-            {
-                return new SimpleTestResult(false, getName() + ": Vector " + i + " failed");
-            }
-        }
-
-        //
-        // test 2
-        //
-        byte[] m = messages[messages.length-1].getBytes();
-
-        digest.update(m, 0, m.length/2);
-
-        // clone the Digest
-        Digest d = new RIPEMD160Digest((RIPEMD160Digest)digest);
-
-        digest.update(m, m.length/2, m.length - m.length/2);
-        digest.doFinal(resBuf, 0);
-
-        if (!Arrays.areEqual(resBuf, Hex.decode(digests[digests.length-1])))
-        {
-            return new SimpleTestResult(false,
-                "RIPEMD160 failing clone test"
-                + System.getProperty("line.separator")
-                + "    expected: " + digests[digests.length-1]
-                + System.getProperty("line.separator")
-                + "    got     : " + new String(Hex.encode(resBuf)));
-        }
-
-        d.update(m, m.length/2, m.length - m.length/2);
-        d.doFinal(resBuf, 0);
-
-        if (!Arrays.areEqual(resBuf, Hex.decode(digests[digests.length-1])))
-        {
-            return new SimpleTestResult(false,
-                "RIPEMD160 failing clone test - part 2"
-                + System.getProperty("line.separator")
-                + "    expected: " +  digests[digests.length-1]
-                + System.getProperty("line.separator")
-                + "    got     : " + new String(Hex.encode(resBuf)));
-        }
-
-        for (int i = 0; i < 1000000; i++)
-        {
-            digest.update((byte)'a');
-        }
-        digest.doFinal(resBuf, 0);
-
-        if (!Arrays.areEqual(resBuf, Hex.decode(million_a_digest)))
-        {
-            return new SimpleTestResult(false, getName() + ": Million a's failed");
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        super.performTest();
+        
+        millionATest(million_a_digest);
     }
 
+    protected Digest cloneDigest(Digest digest)
+    {
+        return new RIPEMD160Digest((RIPEMD160Digest)digest);
+    }
+    
     public static void main(
         String[]    args)
     {
-        RIPEMD160DigestTest test = new RIPEMD160DigestTest();
-        TestResult          result = test.perform();
-
-        System.out.println(result);
+        runTest(new RIPEMD160DigestTest());
     }
 }

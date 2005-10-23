@@ -1,8 +1,6 @@
 package org.bouncycastle.crypto.test;
 
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.crypto.digests.GOST3411Digest;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
@@ -39,7 +37,7 @@ public class GOST28147Test
             0xF,0xE,0xD,0xC,0xB,0xA,0x9,0x8,0x7,0x6,0x5,0x4,0x3,0x2,0x1,0x0
     };
 
-    static Test[]   tests =
+    static SimpleTest[]   tests =
     {   new BlockCipherVectorTest(1, new GOST28147Engine(),
             new KeyParameter(Hex.decode("546d203368656c326973652073736e62206167796967747473656865202c3d73")),
                 input1, output1),
@@ -152,14 +150,10 @@ public class GOST28147Test
         super(tests);
     }
     
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        // main tests
-        TestResult res = super.perform();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
+        super.performTest();
 
         //advanced tests with GOST28147KeyGenerator:
         //encrypt on hesh message; ECB mode:
@@ -181,12 +175,11 @@ public class GOST28147Test
         }
         catch (CryptoException e)
         {
-            return new SimpleTestResult(false, getName()
-                    + ": failed - exception " + e.toString(), e);
+            fail("failed - exception " + e.toString(), e);
         }
         if (out.length != output.length)
         {
-            return new SimpleTestResult(false, getName() + ": failed - "
+            fail("failed - "
                     + "expected " + new String(Hex.encode(output)) + " got "
                     + new String(Hex.encode(out)));
         }
@@ -194,7 +187,7 @@ public class GOST28147Test
         {
             if (out[i] != output[i])
             {
-                return new SimpleTestResult(false, getName() + ": failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+                fail("failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
             }
         }
 
@@ -220,18 +213,17 @@ public class GOST28147Test
         }
         catch (CryptoException e)
         {
-            return new SimpleTestResult(false, getName()
-                    + ": failed - exception " + e.toString(), e);
+            fail("failed - exception " + e.toString(), e);
         }
         if (out.length != output.length)
         {
-            return new SimpleTestResult(false, getName() + ": failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+            fail("failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
         }
         for (int i = 0; i != out.length; i++)
         {
             if (out[i] != output[i])
             {
-                return new SimpleTestResult(false, getName() + ": failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+                fail("failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
             }
         }
 
@@ -251,27 +243,21 @@ public class GOST28147Test
 
         cipher.init(true, param);
         len1 = cipher.processBytes(in, 0, in.length, out, 0);
-        try 
-        {
-            cipher.doFinal(out, len1);
-        }
-        catch (CryptoException e)
-        {
-            return new SimpleTestResult(false, getName()
-                    + ": failed - exception " + e.toString(), e);
-        }
+
+        cipher.doFinal(out, len1);
+
         if (out.length != output.length)
         {
-            return new SimpleTestResult(false, getName() + ": failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+            fail("failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
         }
+        
         for (int i = 0; i != out.length; i++)
         {
             if (out[i] != output[i])
             {
-                return new SimpleTestResult(false, getName() + ": failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+                fail("failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
             }
         }
-
 
         //encrypt on hesh message; OFB mode:
         in     = Hex.decode("bc350e71aa11345709acde");
@@ -288,18 +274,12 @@ public class GOST28147Test
 
         cipher.init(true, param);
         len1 = cipher.processBytes(in, 0, in.length, out, 0);
-        try
-        {
-            cipher.doFinal(out, len1);
-        }
-        catch (CryptoException e)
-        {
-            return new SimpleTestResult(false, getName()
-                    + ": failed - exception " + e.toString(), e);
-        }
+
+        cipher.doFinal(out, len1);
+
         if (out.length != output.length)
         {
-            return new SimpleTestResult(false, getName() + ": failed - " + "expected "
+            fail("failed - " + "expected "
                     + new String(Hex.encode(output)) + " got "
                     + new String(Hex.encode(out)));
         }
@@ -307,11 +287,9 @@ public class GOST28147Test
         {
             if (out[i] != output[i])
             {
-                return new SimpleTestResult(false, getName() + ": failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+                fail("failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
             }
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
     public String getName()
@@ -322,9 +300,6 @@ public class GOST28147Test
     public static void main(
         String[]    args)
     {
-        GOST28147Test    test = new GOST28147Test();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new GOST28147Test());
     }
 }

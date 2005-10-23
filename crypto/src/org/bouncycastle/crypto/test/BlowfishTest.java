@@ -3,8 +3,7 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.engines.BlowfishEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * blowfish tester - vectors from http://www.counterpane.com/vectors.txt
@@ -12,7 +11,7 @@ import org.bouncycastle.util.test.TestResult;
 public class BlowfishTest
     extends CipherTest
 {
-    static Test[]  tests = 
+    static SimpleTest[]  tests = 
             {
                 new BlockCipherVectorTest(0, new BlowfishEngine(),
                         new KeyParameter(Hex.decode("0000000000000000")),
@@ -53,9 +52,6 @@ public class BlowfishTest
     public static void main(
         String[]    args)
     {
-        BlowfishTest    test = new BlowfishTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new BlowfishTest());
     }
 }

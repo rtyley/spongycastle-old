@@ -1,6 +1,10 @@
 package org.bouncycastle.crypto.test;
 
+import java.security.SecureRandom;
+
+import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.engines.DESEngine;
+import org.bouncycastle.crypto.generators.DESKeyGenerator;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
@@ -8,18 +12,17 @@ import org.bouncycastle.crypto.params.DESParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
-class DESParityTest implements Test
+class DESParityTest
+    extends SimpleTest
 {
     public String getName()
     {
         return "DESParityTest";
     }
 
-    public TestResult perform()
+    public void performTest()
     {
         byte[]  k1In = { (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff,
                         (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff };
@@ -37,7 +40,7 @@ class DESParityTest implements Test
         {
             if (k1In[i] != k1Out[i])
             {
-                return new SimpleTestResult(false, getName() + ": Failed " 
+                fail("Failed " 
                     + "got " + new String(Hex.encode(k1In))
                     + " expected " + new String(Hex.encode(k1Out)));
             }
@@ -49,13 +52,34 @@ class DESParityTest implements Test
         {
             if (k2In[i] != k2Out[i])
             {
-                return new SimpleTestResult(false, getName() + ": Failed " 
+                fail("Failed " 
                     + "got " + new String(Hex.encode(k2In))
                     + " expected " + new String(Hex.encode(k2Out)));
             }
         }
+    }
+}
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+class KeyGenTest
+    extends SimpleTest
+{
+    public String getName()
+    {
+        return "KeyGenTest";
+    }
+
+    public void performTest()
+    {
+        DESKeyGenerator keyGen = new DESKeyGenerator();
+        
+        keyGen.init(new KeyGenerationParameters(new SecureRandom(), 56));
+        
+        byte[] kB = keyGen.generateKey();
+        
+        if (kB.length != 8)
+        {
+            fail("DES bit key wrong length.");
+        }
     }
 }
 
@@ -69,7 +93,7 @@ public class DESTest
     static String   input2 = "4e6f7720697320746865";
     static String   input3 = "4e6f7720697320746865aabbcc";
 
-    static Test[]   tests = 
+    static SimpleTest[]   tests = 
             {
                 new BlockCipherVectorTest(0, new DESEngine(),
                         new KeyParameter(Hex.decode("0123456789abcdef")),
@@ -92,7 +116,8 @@ public class DESTest
                 new BlockCipherVectorTest(6, new OFBBlockCipher(new DESEngine(), 64),
                         new ParametersWithIV(new KeyParameter(Hex.decode("0123456789abcdef")), Hex.decode("1234567890abcdef")),
                         input3, "f3096249c7f46e5135f2c0eb8b"),
-                new DESParityTest()
+                new DESParityTest(),
+                new KeyGenTest()
             };
 
     public DESTest()
@@ -108,9 +133,6 @@ public class DESTest
     public static void main(
         String[]    args)
     {
-        DESTest    test = new DESTest();
-        TestResult result = test.perform();
-
-        System.out.println(result);
+        runTest(new DESTest());
     }
 }

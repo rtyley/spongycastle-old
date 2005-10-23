@@ -5,9 +5,7 @@ import org.bouncycastle.crypto.engines.AESLightEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * Test vectors from the NIST standard tests and Brian Gladman's vector set
@@ -17,7 +15,7 @@ import org.bouncycastle.util.test.TestResult;
 public class AESLightTest
     extends CipherTest
 {
-    static Test[]  tests = 
+    static SimpleTest[]  tests = 
             {
                 new BlockCipherVectorTest(0, new AESLightEngine(),
                         new KeyParameter(Hex.decode("80000000000000000000000000000000")),
@@ -105,13 +103,10 @@ public class AESLightTest
         return "AESLight";
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        TestResult      result = super.perform();
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
+        super.performTest();
 
         byte[] keyBytes = new byte[16];
         
@@ -126,7 +121,7 @@ public class AESLightTest
             
             _engine.init(true, new KeyParameter(dudKey));
             
-            return new SimpleTestResult(false, getName() + ": failed key length check");
+            fail("failed key length check");
         }
         catch (IllegalArgumentException e)
         {
@@ -139,22 +134,17 @@ public class AESLightTest
 
             _engine.init(true, new ParametersWithIV(null, iv));
             
-            return new SimpleTestResult(false, getName() + ": failed parameter check");
+            fail("failed parameter check");
         }
         catch (IllegalArgumentException e)
         {
             // expected 
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
     public static void main(
         String[]    args)
     {
-        AESLightTest    test = new AESLightTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new AESLightTest());
     }
 }

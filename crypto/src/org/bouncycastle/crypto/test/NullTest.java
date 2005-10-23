@@ -2,20 +2,17 @@ package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.NullEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class NullTest 
     extends CipherTest
 {
-    static Test[]  tests = 
+    static SimpleTest[]  tests = 
     {
-        new BlockCipherVectorTest(0, new AESEngine(),
+        new BlockCipherVectorTest(0, new NullEngine(),
                 new KeyParameter(Hex.decode("00")), "00", "00")
     };
     
@@ -29,8 +26,11 @@ public class NullTest
         return "Null";
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
+        super.performTest();
+        
         BlockCipher engine = new NullEngine();
         
         engine.init(true, null);
@@ -41,7 +41,7 @@ public class NullTest
         
         if (buf[0] != 0)
         {
-            return new SimpleTestResult(false, getName() + ": NullCipher changed data!");
+            fail("NullCipher changed data!");
         }
         
         byte[] shortBuf = new byte[0];
@@ -50,7 +50,7 @@ public class NullTest
         {   
             engine.processBlock(shortBuf, 0, buf, 0);
             
-            return new SimpleTestResult(false, getName() + ": failed short input check");
+            fail("failed short input check");
         }
         catch (DataLengthException e)
         {
@@ -61,22 +61,17 @@ public class NullTest
         {   
             engine.processBlock(buf, 0, shortBuf, 0);
             
-            return new SimpleTestResult(false, getName() + ": failed short output check");
+            fail("failed short output check");
         }
         catch (DataLengthException e)
         {
             // expected 
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
     public static void main(
         String[]    args)
     {
-        NullTest    test = new NullTest();
-        TestResult result = test.perform();
-
-        System.out.println(result);
+        runTest(new NullTest());
     }
 }

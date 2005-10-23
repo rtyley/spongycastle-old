@@ -51,7 +51,7 @@ public class RC2WrapTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed wrap test exception " + e.toString());
+            return new SimpleTestResult(false, getName() + ": failed wrap test exception " + e.toString(), e);
         }
 
         wrapper.init(false, paramsUnwrap);
@@ -66,7 +66,7 @@ public class RC2WrapTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed unwrap test exception " + e.toString());
+            return new SimpleTestResult(false, getName() + ": failed unwrap test exception " + e.toString(), e);
         }
 
         return new SimpleTestResult(true, getName() + ": Okay");
