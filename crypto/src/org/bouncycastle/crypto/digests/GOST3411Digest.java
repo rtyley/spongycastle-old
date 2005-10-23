@@ -229,7 +229,10 @@ public class GOST3411Digest
     {
         LongToBytes(byteCount * 8, L, 0); // get length into L (byteCount * 8 = bitCount)
 
-        while (xBufOff != 0) update((byte)0);
+        while (xBufOff != 0)
+        {
+            update((byte)0);
+        }
 
         processBlock(L, 0);
         processBlock(Sum, 0);
