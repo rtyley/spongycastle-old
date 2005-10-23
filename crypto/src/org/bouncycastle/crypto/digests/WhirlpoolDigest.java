@@ -216,11 +216,6 @@ public final class WhirlpoolDigest implements Digest
         return rv;
     }
 
-    protected void processLengthOfDigestedData(long bitLength, byte[] buf, int offSet)
-    {
-        convertLongToByteArray(bitLength, buf, offSet);
-    }
-
     private void convertLongToByteArray(long inputLong, byte[] outputArray, int offSet)
     {
         for (int i = 0; i < 8; i++)
