@@ -31,6 +31,8 @@ import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
 public class PGPPublicKey
     implements PublicKeyAlgorithmTags
 {
+    private static final int[] MASTER_KEY_CERTIFICATION_TYPES = new int[] { PGPSignature.POSITIVE_CERTIFICATION, PGPSignature.CASUAL_CERTIFICATION, PGPSignature.NO_CERTIFICATION, PGPSignature.DEFAULT_CERTIFICATION };
+    
     PublicKeyPacket publicPk;
     TrustPacket     trustPk;
     List            keySigs = new ArrayList();
@@ -324,24 +326,23 @@ public class PGPPublicKey
         {
             if (this.isMasterKey())
             {
-                Iterator signatures = this.getSignaturesOfType(PGPSignature.POSITIVE_CERTIFICATION);
-                
-                if (signatures.hasNext())
+                for (int i = 0; i != MASTER_KEY_CERTIFICATION_TYPES.length; i++)
                 {
-                    PGPSignature sig = (PGPSignature)signatures.next();
+                    long seconds = getExpirationTimeFromSig(true, MASTER_KEY_CERTIFICATION_TYPES[i]);
                     
-                    return sig.getHashedSubPackets().getKeyExpirationTime();
+                    if (seconds >= 0)
+                    {
+                        return seconds;
+                    }
                 }
             }
             else
             {
-                Iterator signatures = this.getSignaturesOfType(PGPSignature.SUBKEY_BINDING);
+                long seconds = getExpirationTimeFromSig(false, PGPSignature.SUBKEY_BINDING);
                 
-                if (signatures.hasNext())
+                if (seconds >= 0)
                 {
-                    PGPSignature sig = (PGPSignature)signatures.next();
-                    
-                    return sig.getHashedSubPackets().getKeyExpirationTime();
+                    return seconds;
                 }
             }
             
@@ -351,6 +352,25 @@ public class PGPPublicKey
         {
             return (long)publicPk.getValidDays() * 24 * 60 * 60;
         }
+    }
+
+    private long getExpirationTimeFromSig(
+        boolean selfSigned,
+        int signatureType) 
+    {
+        Iterator signatures = this.getSignaturesOfType(signatureType);
+        
+        if (signatures.hasNext())
+        {
+            PGPSignature sig = (PGPSignature)signatures.next();
+
+            if (!selfSigned || sig.getKeyID() == this.getKeyID())
+            {
+                return sig.getHashedSubPackets().getKeyExpirationTime();
+            }
+        }
+        
+        return -1;
     }
     
     /**
