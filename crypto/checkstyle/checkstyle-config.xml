@@ -13,7 +13,7 @@
     <module name="TreeWalker">
 
         <!-- Check that blocks are always used with if, else, while, do, and for. -->
-        <!-- <module name="NeedBraces"/> -->
+        <module name="NeedBraces"/>
 
         <!-- Check that '{' is on a new line with control statements -->
         <module name="LeftCurly">
