@@ -116,7 +116,7 @@ public class SealedObject
 
         this.sealAlg = c.getAlgorithm();
         AlgorithmParameters params = c.getParameters();
-        if ( params != null )
+        if (params != null)
         {
             this.encodedParams = params.getEncoded();
             this.paramsAlg = params.getAlgorithm();
@@ -250,7 +250,7 @@ public class SealedObject
         Cipher cipher = null;
         try
         {
-            if ( provider != null )
+            if (provider != null)
             {
                 cipher = Cipher.getInstance(sealAlg, provider);
             }
@@ -264,7 +264,7 @@ public class SealedObject
             throw new NoSuchAlgorithmException(e.getMessage());
         }
 
-        if ( paramsAlg == null )
+        if (paramsAlg == null)
         {
             cipher.init(Cipher.DECRYPT_MODE, key);
         }
