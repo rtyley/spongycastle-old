@@ -222,8 +222,7 @@ public class GOST28147Engine
         boolean forEncryption,
         byte[]  userKey)
     {
-        if (forEncryption) this.forEncryption = true;
-         else this.forEncryption = false;
+         this.forEncryption = forEncryption;
 
         if (userKey.length != 32)
         {
@@ -232,7 +231,9 @@ public class GOST28147Engine
 
         int key[] = new int[8];
         for(int i=0; i!=8; i++)
+        {
             key[i] = bytesToint(userKey,i*4);
+        }
 
         return key;
     }
@@ -296,7 +297,10 @@ public class GOST28147Engine
           {
             for(int j = 7; j >= 0; j--)
             {
-                if ((k == 2) && (j==0)) break; // break 32 step
+                if ((k == 2) && (j==0))
+                {
+                    break; // break 32 step
+                }
                 tmp = N1;
                 N1 = N2 ^ GOST28147_mainStep(N1, workingKey[j]); // CM2
                 N2 = tmp;
