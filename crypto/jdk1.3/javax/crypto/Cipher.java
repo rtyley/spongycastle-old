@@ -271,8 +271,10 @@ public class Cipher
         int     inputLen)
     throws IllegalStateException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
         return cipherSpi.engineGetOutputSize(inputLen);
     }
@@ -800,14 +802,20 @@ public class Cipher
         byte[]      input)
     throws IllegalStateException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
-        if ( input == null )
+        if (input == null)
+        {
             throw new IllegalArgumentException("Null input buffer");
+        }
 
-        if ( input.length == 0 )
+        if (input.length == 0)
+        {
             return null;
+        }
 
         return cipherSpi.engineUpdate(input, 0, input.length);
     }
@@ -840,8 +848,10 @@ public class Cipher
         int         inputLen)
     throws IllegalStateException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
         if (input == null)
         {
@@ -854,8 +864,10 @@ public class Cipher
             throw new IllegalArgumentException("Bad inputOffset/inputLen");
         }
 
-        if ( inputLen == 0 )
+        if (inputLen == 0)
+        {
             return null;
+        }
 
         return cipherSpi.engineUpdate(input, inputOffset, inputLen);
     }
@@ -895,8 +907,10 @@ public class Cipher
         byte[]  output)
     throws IllegalStateException, ShortBufferException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
         if (input == null)
         {
@@ -914,8 +928,10 @@ public class Cipher
             throw new IllegalArgumentException("Null output passed");
         }
 
-        if ( inputLen == 0 )
+        if (inputLen == 0)
+        {
             return 0;
+        }
 
         return cipherSpi.engineUpdate(input, inputOffset, inputLen, output, 0);
     }
@@ -959,8 +975,10 @@ public class Cipher
         int         outputOffset)
     throws IllegalStateException, ShortBufferException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
         if (input == null)
         {
@@ -1020,8 +1038,10 @@ public class Cipher
     throws java.lang.IllegalStateException, IllegalBlockSizeException,
         BadPaddingException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
         return cipherSpi.engineDoFinal(null, 0, 0);
     }
@@ -1070,8 +1090,10 @@ public class Cipher
     throws IllegalStateException, IllegalBlockSizeException,
          ShortBufferException, BadPaddingException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
         if (output == null)
         {
@@ -1118,10 +1140,12 @@ public class Cipher
         byte[]      input)
     throws java.lang.IllegalStateException, IllegalBlockSizeException, BadPaddingException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
-        if ( input == null )
+        if (input == null)
         {
             throw new IllegalArgumentException("Null input passed");
         }
@@ -1165,8 +1189,10 @@ public class Cipher
         int         inputLen)
     throws IllegalStateException, IllegalBlockSizeException, BadPaddingException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
         if (input == null)
         {
@@ -1229,8 +1255,10 @@ public class Cipher
     throws IllegalStateException, ShortBufferException,
                 IllegalBlockSizeException, BadPaddingException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
         if (input == null)
         {
@@ -1304,8 +1332,10 @@ public class Cipher
     throws IllegalStateException, ShortBufferException,
         IllegalBlockSizeException, BadPaddingException
     {
-        if ( mode != ENCRYPT_MODE && mode != DECRYPT_MODE )
+        if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE)
+        {
             throw new IllegalStateException("Cipher is uninitialised");
+        }
 
         if (input == null)
         {
@@ -1349,8 +1379,10 @@ public class Cipher
         Key   key)
     throws IllegalStateException, IllegalBlockSizeException, InvalidKeyException
     {
-        if ( mode != WRAP_MODE )
+        if (mode != WRAP_MODE)
+        {
             throw new IllegalStateException("Cipher is not initialised for wrapping");
+        }
 
         if (key == null)
         {
@@ -1383,11 +1415,13 @@ public class Cipher
         int         wrappedKeyType)
     throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException
     {
-        if ( mode != UNWRAP_MODE )
+        if (mode != UNWRAP_MODE)
+        {
             throw new IllegalStateException("Cipher is not initialised for unwrapping");
+        }
 
-        if ( wrappedKeyType != SECRET_KEY && wrappedKeyType != PUBLIC_KEY
-            && wrappedKeyType != PRIVATE_KEY )
+        if (wrappedKeyType != SECRET_KEY && wrappedKeyType != PUBLIC_KEY
+            && wrappedKeyType != PRIVATE_KEY)
         {
             throw new IllegalArgumentException("Invalid key type argument");
         }
