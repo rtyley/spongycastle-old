@@ -166,7 +166,7 @@ public class Accuracy
         
         if (micros != null)
         {
-            v.add(new DERTaggedObject(false, 1, seconds));
+            v.add(new DERTaggedObject(false, 1, micros));
         }
 
         return new DERSequence(v);
