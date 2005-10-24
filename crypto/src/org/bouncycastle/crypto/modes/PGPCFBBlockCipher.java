@@ -123,10 +123,14 @@ public class PGPCFBBlockCipher
 
         for (int i = 0; i != FR.length; i++)
         {
-                if (inlineIv)
-                    FR[i] = 0;
-                else
-                    FR[i] = IV[i]; // if simple mode, key is IV (even if this is zero)
+            if (inlineIv)
+            {
+                FR[i] = 0;
+            }
+            else
+            {
+                FR[i] = IV[i]; // if simple mode, key is IV (even if this is zero)
+            }
         }
 
         cipher.reset();
@@ -385,13 +389,16 @@ public class PGPCFBBlockCipher
             throw new DataLengthException("output buffer too short");
         }
         
-        
         cipher.processBlock(FR, 0, FRE, 0);
         for (int n = 0; n < blockSize; n++) 
+        {
             out[outOff + n] = encryptByte(in[inOff + n], n);
+        }
         
         for (int n = 0; n < blockSize; n++) 
+        {
             FR[n] = out[outOff + n];
+        }
         
         return blockSize;
         
@@ -428,10 +435,14 @@ public class PGPCFBBlockCipher
         
         cipher.processBlock(FR, 0, FRE, 0);
         for (int n = 0; n < blockSize; n++) 
+        {
             out[outOff + n] = encryptByte(in[inOff + n], n);
+        }
         
         for (int n = 0; n < blockSize; n++) 
+        {
             FR[n] = in[inOff + n];
+        }
         
         return blockSize;
         

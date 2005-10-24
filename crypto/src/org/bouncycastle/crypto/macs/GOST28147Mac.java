@@ -51,7 +51,9 @@ public class GOST28147Mac
 
         int key[] = new int[8];
         for(int i=0; i!=8; i++)
+        {
             key[i] = bytesToint(userKey,i*4);
+        }
 
         return key;
     }
@@ -170,7 +172,9 @@ public class GOST28147Mac
         System.arraycopy(buf, bufOff, sum, 0, mac.length);
 
         for (int i = 0; i != mac.length; i++)
+        {
             sum[i] = (byte)(sum[i] ^ mac[i]);
+        }
 
         return sum;
     }
@@ -183,8 +187,14 @@ public class GOST28147Mac
             byte[] sumbuf = new byte[buf.length];
             System.arraycopy(buf, 0, sumbuf, 0, mac.length);
 
-            if (firstStep) firstStep = false;
-             else sumbuf = CM5func(buf, 0, mac);
+            if (firstStep)
+            {
+                firstStep = false;
+            }
+            else
+            {
+                sumbuf = CM5func(buf, 0, mac);
+            }
 
             gost28147MacFunc(workingKey, sumbuf, 0, mac, 0);
             bufOff = 0;
@@ -210,8 +220,14 @@ public class GOST28147Mac
                 byte[] sumbuf = new byte[buf.length];
                 System.arraycopy(buf, 0, sumbuf, 0, mac.length);
 
-                if (firstStep) firstStep = false;
-                 else sumbuf = CM5func(buf, 0, mac);
+                if (firstStep)
+                {
+                    firstStep = false;
+                }
+                else
+                {
+                    sumbuf = CM5func(buf, 0, mac);
+                }
 
                 gost28147MacFunc(workingKey, sumbuf, 0, mac, 0);
 
@@ -247,8 +263,14 @@ public class GOST28147Mac
         byte[] sumbuf = new byte[buf.length];
         System.arraycopy(buf, 0, sumbuf, 0, mac.length);
 
-        if (firstStep) firstStep = false;
-         else sumbuf = CM5func(buf, 0, mac);
+        if (firstStep)
+        {
+            firstStep = false;
+        }
+        else
+        {
+            sumbuf = CM5func(buf, 0, mac);
+        }
 
         gost28147MacFunc(workingKey, sumbuf, 0, mac, 0);
 
