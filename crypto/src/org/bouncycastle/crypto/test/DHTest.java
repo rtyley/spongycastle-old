@@ -13,6 +13,7 @@ import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.util.test.SimpleTest;
 
 public class DHTest
@@ -32,18 +33,12 @@ public class DHTest
         return "DH";
     }
 
-    private void testGP(
+    private void testDH(
         int         size,
         BigInteger  g,
         BigInteger  p)
     {
-        DHParameters                dhParams = new DHParameters(p, g);
-
-        DHKeyGenerationParameters   params = new DHKeyGenerationParameters(new SecureRandom(), dhParams);
-
-        DHKeyPairGenerator          kpGen = new DHKeyPairGenerator();
-
-        kpGen.init(params);
+        DHKeyPairGenerator kpGen = getDHKeyPairGenerator(g, p);
 
         //
         // generate first pair
@@ -81,18 +76,12 @@ public class DHTest
         }
     }
 
-    private void testSimple(
+    private void testDHBasic(
         int         size,
         BigInteger  g,
         BigInteger  p)
     {
-        DHParameters                dhParams = new DHParameters(p, g);
-
-        DHKeyGenerationParameters   params = new DHKeyGenerationParameters(new SecureRandom(), dhParams);
-
-        DHBasicKeyPairGenerator     kpGen = new DHBasicKeyPairGenerator();
-
-        kpGen.init(params);
+        DHBasicKeyPairGenerator kpGen = getDHBasicKeyPairGenerator(g, p);
 
         //
         // generate first pair
@@ -127,6 +116,107 @@ public class DHTest
         }
     }
 
+    private void testGPWithRandom(
+        DHKeyPairGenerator kpGen)
+    {
+        //
+        // generate first pair
+        //
+        AsymmetricCipherKeyPair     pair = kpGen.generateKeyPair();
+
+        DHPublicKeyParameters       pu1 = (DHPublicKeyParameters)pair.getPublic();
+        DHPrivateKeyParameters      pv1 = (DHPrivateKeyParameters)pair.getPrivate();
+        //
+        // generate second pair
+        //
+        pair = kpGen.generateKeyPair();
+
+        DHPublicKeyParameters       pu2 = (DHPublicKeyParameters)pair.getPublic();
+        DHPrivateKeyParameters      pv2 = (DHPrivateKeyParameters)pair.getPrivate();
+
+        //
+        // two way
+        //
+        DHAgreement    e1 = new DHAgreement();
+        DHAgreement    e2 = new DHAgreement();
+
+        e1.init(new ParametersWithRandom(pv1, new SecureRandom()));
+        e2.init(new ParametersWithRandom(pv2, new SecureRandom()));
+
+        BigInteger   m1 = e1.calculateMessage();
+        BigInteger   m2 = e2.calculateMessage();
+
+        BigInteger   k1 = e1.calculateAgreement(pu2, m2);
+        BigInteger   k2 = e2.calculateAgreement(pu1, m1);
+        
+        if (!k1.equals(k2))
+        {
+            fail("basic with random 2-way test failed");
+        }
+    }
+    
+    private void testSimpleWithRandom(
+        DHBasicKeyPairGenerator kpGen)
+    {
+        //
+        // generate first pair
+        //
+        AsymmetricCipherKeyPair     pair = kpGen.generateKeyPair();
+
+        DHPublicKeyParameters       pu1 = (DHPublicKeyParameters)pair.getPublic();
+        DHPrivateKeyParameters      pv1 = (DHPrivateKeyParameters)pair.getPrivate();
+        //
+        // generate second pair
+        //
+        pair = kpGen.generateKeyPair();
+
+        DHPublicKeyParameters       pu2 = (DHPublicKeyParameters)pair.getPublic();
+        DHPrivateKeyParameters      pv2 = (DHPrivateKeyParameters)pair.getPrivate();
+
+        //
+        // two way
+        //
+        DHBasicAgreement    e1 = new DHBasicAgreement();
+        DHBasicAgreement    e2 = new DHBasicAgreement();
+
+        e1.init(new ParametersWithRandom(pv1, new SecureRandom()));
+        e2.init(new ParametersWithRandom(pv2, new SecureRandom()));
+
+        BigInteger   k1 = e1.calculateAgreement(pu2);
+        BigInteger   k2 = e2.calculateAgreement(pu1);
+
+        if (!k1.equals(k2))
+        {
+            fail("basic with random 2-way test failed");
+        }
+    }
+
+    private DHBasicKeyPairGenerator getDHBasicKeyPairGenerator(
+        BigInteger g,
+        BigInteger p)
+    {
+        DHParameters                dhParams = new DHParameters(p, g);
+        DHKeyGenerationParameters   params = new DHKeyGenerationParameters(new SecureRandom(), dhParams);
+        DHBasicKeyPairGenerator     kpGen = new DHBasicKeyPairGenerator();
+
+        kpGen.init(params);
+        
+        return kpGen;
+    }
+    
+    private DHKeyPairGenerator getDHKeyPairGenerator(
+        BigInteger g,
+        BigInteger p)
+    {
+        DHParameters                dhParams = new DHParameters(p, g);
+        DHKeyGenerationParameters   params = new DHKeyGenerationParameters(new SecureRandom(), dhParams);
+        DHKeyPairGenerator          kpGen = new DHKeyPairGenerator();
+
+        kpGen.init(params);
+        
+        return kpGen;
+    }
+    
     /**
      * this test is can take quiet a while
      */
@@ -171,32 +261,102 @@ public class DHTest
         DHBasicAgreement    e1 = new DHBasicAgreement();
         DHBasicAgreement    e2 = new DHBasicAgreement();
 
-        e1.init(pv1);
-        e2.init(pv2);
+        e1.init(new ParametersWithRandom(pv1, new SecureRandom()));
+        e2.init(new ParametersWithRandom(pv2, new SecureRandom()));
 
         BigInteger   k1 = e1.calculateAgreement(pu2);
         BigInteger   k2 = e2.calculateAgreement(pu1);
 
         if (!k1.equals(k2))
         {
-            fail("basic " + size + " bit 2-way test failed");
+            fail("basic with " + size + " bit 2-way test failed");
         }
     }
 
     public void performTest()
     {
-        testSimple(512, g512, p512);
-        testSimple(768, g768, p768);
-        testSimple(1024, g1024, p1024);
+        testDHBasic(512, g512, p512);
+        testDHBasic(768, g768, p768);
+        testDHBasic(1024, g1024, p1024);
 
-        testGP(512, g512, p512);
-        testGP(768, g768, p768);
-        testGP(1024, g1024, p1024);
+        testDH(512, g512, p512);
+        testDH(768, g768, p768);
+        testDH(1024, g1024, p1024);
 
         //
         // generation test.
         //
         testGeneration(256);
+        
+        //
+        // with random test
+        //
+        DHBasicKeyPairGenerator     kpBasicGen = getDHBasicKeyPairGenerator(g512, p512);
+        
+        testSimpleWithRandom(kpBasicGen);
+        
+        DHKeyPairGenerator          kpGen = getDHKeyPairGenerator(g512, p512);
+        
+        testGPWithRandom(kpGen);
+        
+        //
+        // parameter tests
+        //
+        DHAgreement             dh = new DHAgreement();
+        AsymmetricCipherKeyPair dhPair = kpGen.generateKeyPair();
+        
+        try
+        {
+            dh.init(dhPair.getPublic());
+            fail("DHAgreement key check failed");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // ignore
+        }
+        
+        DHKeyPairGenerator      kpGen768 = getDHKeyPairGenerator(g768, p768);
+        
+        try
+        {
+            dh.init(dhPair.getPrivate());
+            
+            dh.calculateAgreement((DHPublicKeyParameters)kpGen768.generateKeyPair().getPublic(), BigInteger.valueOf(100));
+            
+            fail("DHAgreement agreement check failed");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // ignore
+        }
+        
+        DHBasicAgreement        dhBasic = new DHBasicAgreement();
+        AsymmetricCipherKeyPair dhBasicPair = kpBasicGen.generateKeyPair();
+ 
+        try
+        {
+            dhBasic.init(dhBasicPair.getPublic());
+            fail("DHBasicAgreement key check failed");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // expected
+        }
+        
+        DHBasicKeyPairGenerator      kpBasicGen768 = getDHBasicKeyPairGenerator(g768, p768);
+        
+        try
+        {
+            dhBasic.init(dhPair.getPrivate());
+            
+            dhBasic.calculateAgreement((DHPublicKeyParameters)kpBasicGen768.generateKeyPair().getPublic());
+            
+            fail("DHBasicAgreement agreement check failed");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // expected
+        }
     }
 
     public static void main(
