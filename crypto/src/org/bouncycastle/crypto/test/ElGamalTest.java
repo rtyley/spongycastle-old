@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.engines.ElGamalEngine;
 import org.bouncycastle.crypto.generators.ElGamalKeyPairGenerator;
 import org.bouncycastle.crypto.generators.ElGamalParametersGenerator;
@@ -11,12 +12,11 @@ import org.bouncycastle.crypto.params.ElGamalKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ElGamalParameters;
 import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class ElGamalTest
-    implements Test
+    extends SimpleTest
 {
     private BigInteger g512 = new BigInteger("153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b410b7a0f12ca1cb9a428cc", 16);
     private BigInteger p512 = new BigInteger("9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd38744d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94bf0573bf047a3aca98cdf3b", 16);
@@ -32,15 +32,13 @@ public class ElGamalTest
         return "ElGamal";
     }
 
-    private TestResult testEnc(
+    private void testEnc(
         int         size,
         BigInteger  g,
         BigInteger  p)
     {
         ElGamalParameters                dhParams = new ElGamalParameters(p, g);
-
         ElGamalKeyGenerationParameters   params = new ElGamalKeyGenerationParameters(new SecureRandom(), dhParams);
-
         ElGamalKeyPairGenerator          kpGen = new ElGamalKeyPairGenerator();
 
         kpGen.init(params);
@@ -56,6 +54,11 @@ public class ElGamalTest
         ElGamalEngine    e = new ElGamalEngine();
 
         e.init(true, pu);
+        
+        if (e.getOutputBlockSize() != size / 4)
+        {
+            fail(size + " getOutputBlockSize() on encryption failed.");
+        }
 
         String  message = "This is a test";
 
@@ -64,20 +67,58 @@ public class ElGamalTest
 
         e.init(false, pv);
 
+        if (e.getOutputBlockSize() != (size / 8) - 1)
+        {
+            fail(size + " getOutputBlockSize() on decryption failed.");
+        }
+        
         pText = e.processBlock(cText, 0, cText.length);
 
         if (!message.equals(new String(pText)))
         {
-            return new SimpleTestResult(false, size + " bit test failed");
+            fail(size + " bit test failed");
         }
-
-        return new SimpleTestResult(true, this.getName() + ": Okay");
+        
+        byte[] bytes = new byte[e.getInputBlockSize() + 2];
+        
+        try
+        {
+            e.processBlock(bytes, 0, bytes.length);
+            
+            fail("out of range block not detected");
+        }
+        catch (DataLengthException ex)
+        {
+            // expected
+        }
+        
+        try
+        {
+            bytes[0] = (byte)0xff;
+            
+            e.processBlock(bytes, 0, bytes.length - 1);
+            
+            fail("out of range block not detected");
+        }
+        catch (DataLengthException ex)
+        {
+            // expected
+        }
+        
+        try
+        {
+            e.processBlock(bytes, 1, bytes.length - 1);
+        }
+        catch (DataLengthException ex)
+        {
+            fail("in range block failed");
+        }
     }
 
     /**
      * this test is can take quiet a while
      */
-    private TestResult testGeneration(
+    private void testGeneration(
         int         size)
     {
         ElGamalParametersGenerator       pGen = new ElGamalParametersGenerator();
@@ -102,7 +143,7 @@ public class ElGamalTest
 
         ElGamalEngine    e = new ElGamalEngine();
 
-        e.init(true, pu);
+        e.init(true, new ParametersWithRandom(pu, new SecureRandom()));
 
         String  message = "This is a test";
 
@@ -115,47 +156,25 @@ public class ElGamalTest
 
         if (!message.equals(new String(pText)))
         {
-            return new SimpleTestResult(false, this.getName() + ": generation test failed");
+            fail("generation test failed");
         }
-
-        return new SimpleTestResult(true, this.getName() + ": Okay");
     }
 
-    public TestResult perform()
+    public void performTest()
     {
-        TestResult      result = testEnc(512, g512, p512);
+        testEnc(512, g512, p512);
+        testEnc(768, g768, p768);
+        testEnc(1024, g1024, p1024);
 
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-        
-        result = testEnc(768, g768, p768);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-        
-        result = testEnc(1024, g1024, p1024);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-        
         //
         // generation test.
         //
-        result = testGeneration(256);
-
-        return result;
+        testGeneration(258);
     }
 
     public static void main(
         String[]    args)
     {
-        ElGamalTest     test = new ElGamalTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new ElGamalTest());
     }
 }
