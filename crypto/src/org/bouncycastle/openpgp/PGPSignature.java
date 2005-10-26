@@ -130,17 +130,7 @@ public class PGPSignature
         byte[]    bytes)
         throws SignatureException
     {
-        if (signatureType == PGPSignature.CANONICAL_TEXT_DOCUMENT)
-        {
-            for (int i = 0; i != bytes.length; i++)
-            {
-                this.update(bytes[i]);
-            }
-        }
-        else
-        {
-            sig.update(bytes);
-        }
+        this.update(bytes, 0, bytes.length);
     }
         
     public void update(
@@ -187,15 +177,7 @@ public class PGPSignature
         PGPPublicKey    key)
         throws PGPException, SignatureException
     {
-        byte[] keyBytes;
-        try
-        {
-            keyBytes = key.publicPk.getEncodedContents();
-        }
-        catch (IOException e)
-        {
-            throw new PGPException("can't get encoding of public key", e);
-        }
+        byte[] keyBytes = getEncodedPublicKey(key);
         
         this.update((byte)0x99);
         this.update((byte)(keyBytes.length >> 8));
@@ -239,30 +221,14 @@ public class PGPSignature
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
-        byte[]    keyBytes;
-        
-        try
-        {
-            keyBytes = masterKey.publicPk.getEncodedContents();
-        }
-        catch (IOException e)
-        {
-            throw new PGPException("exception preparing key.", e);
-        }
+        byte[]    keyBytes = getEncodedPublicKey(masterKey);
 
         this.update((byte)0x99);
         this.update((byte)(keyBytes.length >> 8));
         this.update((byte)(keyBytes.length));
         this.update(keyBytes);
         
-        try
-        {
-            keyBytes = pubKey.publicPk.getEncodedContents();
-        }
-        catch (IOException e)
-        {
-            throw new PGPException("exception preparing key.", e);
-        }
+        keyBytes = getEncodedPublicKey(pubKey);
 
         this.update((byte)0x99);
         this.update((byte)(keyBytes.length >> 8));
@@ -292,16 +258,7 @@ public class PGPSignature
             throw new IllegalStateException("signature is not a key signature");
         }
         
-        byte[]    keyBytes;
-        
-        try
-        {
-            keyBytes = pubKey.publicPk.getEncodedContents();
-        }
-        catch (IOException e)
-        {
-            throw new PGPException("exception preparing key.", e);
-        }
+        byte[] keyBytes = getEncodedPublicKey(pubKey);
 
         this.update((byte)0x99);
         this.update((byte)(keyBytes.length >> 8));
@@ -312,7 +269,7 @@ public class PGPSignature
         
         return sig.verify(this.getSignature());
     }
-    
+
     public int getSignatureType()
     {
          return sigPck.getSignatureType();
@@ -427,5 +384,23 @@ public class PGPSignature
         {
             out.writePacket(trustPck);
         }
+    }
+    
+    private byte[] getEncodedPublicKey(
+        PGPPublicKey pubKey) 
+        throws PGPException
+    {
+        byte[]    keyBytes;
+        
+        try
+        {
+            keyBytes = pubKey.publicPk.getEncodedContents();
+        }
+        catch (IOException e)
+        {
+            throw new PGPException("exception preparing key.", e);
+        }
+        
+        return keyBytes;
     }
 }

@@ -1,8 +1,6 @@
 package org.bouncycastle.openpgp;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -12,9 +10,6 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Date;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.bcpg.MPInteger;
 import org.bouncycastle.bcpg.OnePassSignaturePacket;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
@@ -110,18 +105,7 @@ public class PGPV3SignatureGenerator
         byte[] b) 
         throws SignatureException
     {
-        if (signatureType == PGPSignature.CANONICAL_TEXT_DOCUMENT)
-        {
-            for (int i = 0; i != b.length; i++)
-            {
-                this.update(b[i]);
-            }
-        }
-        else
-        {
-            sig.update(b);
-            dig.update(b);
-        }
+        this.update(b, 0, b.length);
     }
     
     public void update(
@@ -194,27 +178,7 @@ public class PGPV3SignatureGenerator
             }
             else
             {
-                ASN1InputStream aIn =
-                    new ASN1InputStream(new ByteArrayInputStream(sig.sign()));
-
-                DERInteger i1;
-                DERInteger i2;
-
-                try
-                {
-                    ASN1Sequence s = (ASN1Sequence)aIn.readObject();
-
-                    i1 = (DERInteger)s.getObjectAt(0);
-                    i2 = (DERInteger)s.getObjectAt(1);
-                }
-                catch (IOException e)
-                {
-                    throw new PGPException("exception encoding signature", e);
-                }
-
-                sigValues = new MPInteger[2];
-                sigValues[0] = new MPInteger(i1.getValue());
-                sigValues[1] = new MPInteger(i2.getValue());
+                sigValues = PGPUtil.dsaSigToMpi(sig.sign());
             }
 
             byte[] digest = dig.digest();
