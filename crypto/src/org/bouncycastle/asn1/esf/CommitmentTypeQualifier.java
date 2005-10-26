@@ -20,8 +20,8 @@ import org.bouncycastle.asn1.DERSequence;
 public class CommitmentTypeQualifier
     extends ASN1Encodable
 {
-   DERObjectIdentifier commitmentTypeIdentifier;
-   DEREncodable qualifier;
+   private DERObjectIdentifier commitmentTypeIdentifier;
+   private DEREncodable qualifier;
 
    /**
     * Creates a new <code>CommitmentTypeQualifier</code> instance.
@@ -29,27 +29,29 @@ public class CommitmentTypeQualifier
     * @param commitmentTypeIdentifier a <code>CommitmentTypeIdentifier</code> value
     * @param qualifier the qualifier, defined by the above field.
     */
-   public CommitmentTypeQualifier (DERObjectIdentifier commitmentTypeIdentifier,
-                                   DEREncodable qualifier) 
-   {
-      this.commitmentTypeIdentifier = commitmentTypeIdentifier;
-      this.qualifier = qualifier;
-   }
+    public CommitmentTypeQualifier(
+        DERObjectIdentifier commitmentTypeIdentifier,
+        DEREncodable qualifier) 
+    {
+        this.commitmentTypeIdentifier = commitmentTypeIdentifier;
+        this.qualifier = qualifier;
+    }
 
-   /**
-    * Creates a new <code>CommitmentTypeQualifier</code> instance.
-    *
-    * @param as <code>CommitmentTypeQualifier</code> structure
-    * encoded as an ASN1Sequence. 
-    */
-   public CommitmentTypeQualifier (ASN1Sequence as)
-   {
+    /**
+     * Creates a new <code>CommitmentTypeQualifier</code> instance.
+     *
+     * @param as <code>CommitmentTypeQualifier</code> structure
+     * encoded as an ASN1Sequence. 
+     */
+    public CommitmentTypeQualifier(
+        ASN1Sequence as)
+    {
         commitmentTypeIdentifier = (DERObjectIdentifier) as.getObjectAt(0);
         qualifier = as.getObjectAt(1);
     }
 
-   public static CommitmentTypeQualifier getInstance (Object as) 
-   {
+    public static CommitmentTypeQualifier getInstance(Object as)
+    {
         if (as instanceof CommitmentTypeQualifier)
         {
             return (CommitmentTypeQualifier)as;
@@ -60,7 +62,17 @@ public class CommitmentTypeQualifier
         }
 
         throw new IllegalArgumentException("unknown object in getInstance.");
-   }
+    }
+
+    public DERObjectIdentifier getCommitmentTypeIdentifier()
+    {
+        return commitmentTypeIdentifier;
+    }
+    
+    public DEREncodable getQualifier()
+    {
+        return qualifier;
+    }
 
    /**
     * Returns a DER-encodable representation of this instance. 
