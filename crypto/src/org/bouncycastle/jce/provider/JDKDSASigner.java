@@ -32,6 +32,7 @@ import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.DSASigner;
 import org.bouncycastle.crypto.signers.ECDSASigner;
+import org.bouncycastle.crypto.signers.ECNRSigner;
 import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410Key;
@@ -310,6 +311,52 @@ public class JDKDSASigner
         public ecDSA512()
         {
             super("SHA512withECDSA", new SHA512Digest(), new ECDSASigner());
+        }
+    }
+    
+
+    static public class ecNR 
+        extends JDKDSASigner
+    {
+        public ecNR()
+        {
+            super("SHA1withECNR", new SHA1Digest(), new ECNRSigner());
+        }
+    }
+
+    static public class ecNR224 
+        extends JDKDSASigner
+    {
+        public ecNR224()
+        {
+            super("SHA224withECNR", new SHA224Digest(), new ECNRSigner());
+        }
+    }
+
+    static public class ecNR256 
+        extends JDKDSASigner
+    {
+        public ecNR256()
+        {
+            super("SHA256withECNR", new SHA256Digest(), new ECNRSigner());
+        }
+    }
+
+    static public class ecNR384 
+        extends JDKDSASigner
+    {
+        public ecNR384()
+        {
+            super("SHA384withECNR", new SHA384Digest(), new ECNRSigner());
+        }
+    }
+
+    static public class ecNR512 
+        extends JDKDSASigner
+    {
+        public ecNR512()
+        {
+            super("SHA512withECNR", new SHA512Digest(), new ECNRSigner());
         }
     }
 }
