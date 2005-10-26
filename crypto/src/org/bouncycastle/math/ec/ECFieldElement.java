@@ -27,11 +27,15 @@ public abstract class ECFieldElement
     public boolean equals(Object other)
     {
         if (other == this)
+        {
             return true;
+        }
 
         if (!(other instanceof ECFieldElement))
+        {
             return false;
-
+        }
+        
         ECFieldElement o = (ECFieldElement)other;
         return p.equals(o.p) && x.equals(o.x);
     }
