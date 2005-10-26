@@ -134,7 +134,9 @@ public class JCEStreamCipher
     throws NoSuchPaddingException
     {
         if (!padding.equalsIgnoreCase("NoPadding"))
+        {
             throw new NoSuchPaddingException("Padding " + padding + " unknown.");
+        }
     }
 
     protected void engineInit(

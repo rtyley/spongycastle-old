@@ -37,10 +37,14 @@ public abstract class ECPoint
         Object  other)
     {
         if (other == this)
+        {
             return true;
+        }
 
         if (!(other instanceof ECPoint))
+        {
             return false;
+        }
 
         ECPoint o = (ECPoint)other;
 

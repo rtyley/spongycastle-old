@@ -91,8 +91,10 @@ public class CertificatePolicies
     public String getPolicy(int nr)
     {
         if (policies.size() > nr)
+        {
             return ((DERObjectIdentifier)policies.elementAt(nr)).getId();
-
+        }
+        
         return null;
     }
 
@@ -135,7 +137,9 @@ public class CertificatePolicies
         for (int i=0;i<policies.size();i++)
         {
             if (p != null)
+            {
                 p += ", ";
+            }
             p += ((DERObjectIdentifier)policies.elementAt(i)).getId();
         }
         return "CertificatePolicies: "+p;

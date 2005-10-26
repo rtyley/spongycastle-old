@@ -91,7 +91,10 @@ public class V2TBSCertListGenerator
         ASN1Sequence crlEntry)
     {
         if (crlentries == null)
+        {
             crlentries = new Vector();
+        }
+        
         crlentries.addElement(crlEntry);
     }
 
