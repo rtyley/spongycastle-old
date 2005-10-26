@@ -84,4 +84,26 @@ public class OCSPResp
 
         return bOut.toByteArray();
     }
+    
+    public boolean equals(Object o)
+    {
+        if (o == this)
+        {
+            return true;
+        }
+        
+        if (!(o instanceof OCSPResp))
+        {
+            return false;
+        }
+        
+        OCSPResp r = (OCSPResp)o;
+        
+        return resp.equals(r.resp);
+    }
+    
+    public int hashCode()
+    {
+        return resp.hashCode();
+    }
 }
