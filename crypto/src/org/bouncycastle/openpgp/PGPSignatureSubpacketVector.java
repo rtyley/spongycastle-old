@@ -184,6 +184,16 @@ public class PGPSignatureSubpacketVector
         return list;
     }
     
+    /**
+     * Return the number of packets this vector contains.
+     * 
+     * @return size of the packet vector.
+     */
+    public int size()
+    {
+        return packets.length;
+    }
+    
     SignatureSubpacket[] toSubpacketArray()
     {
         return packets;
