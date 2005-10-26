@@ -1,6 +1,7 @@
 package org.bouncycastle.mail.smime.util;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import javax.mail.internet.SharedInputStream;
 public class SharedFileInputStream extends FilterInputStream
     implements SharedInputStream
 {
-    private final String _fileName;
+    private final File _file;
     private final long _start;
     private final long _length;
     
@@ -22,24 +23,31 @@ public class SharedFileInputStream extends FilterInputStream
         String fileName) 
         throws IOException
     {
-        this(fileName, 0, -1);
+        this(new File(fileName), 0, -1);
+    }
+    
+    public SharedFileInputStream(
+        File file) 
+        throws IOException
+    {
+        this(file, 0, -1);
     }
     
     private SharedFileInputStream(
-        String fileName,
+        File file,
         long start,
         long length)
         throws IOException
     {
-        super(new BufferedInputStream(new FileInputStream(fileName)));
+        super(new BufferedInputStream(new FileInputStream(file)));
         
-        _fileName = fileName;
+        _file = file;
         _start = start;
         _length = length;
         
         in.skip(start);
     }
-    
+
     public long getPosition()
     {
         return _position;
@@ -53,16 +61,16 @@ public class SharedFileInputStream extends FilterInputStream
             {
                 if (_length > 0)
                 {
-                    return new SharedFileInputStream(_fileName, _start + start, _length - start);
+                    return new SharedFileInputStream(_file, _start + start, _length - start);
                 }
                 else
                 {
-                    return new SharedFileInputStream(_fileName, _start + start, -1);
+                    return new SharedFileInputStream(_file, _start + start, -1);
                 }
             }
             else
             {
-                return new SharedFileInputStream(_fileName, _start + start, finish - start);
+                return new SharedFileInputStream(_file, _start + start, finish - start);
             }
         }
         catch (IOException e)
