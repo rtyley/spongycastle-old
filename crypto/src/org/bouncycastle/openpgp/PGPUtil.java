@@ -1,6 +1,7 @@
 package org.bouncycastle.openpgp;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,8 +16,12 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.MPInteger;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.S2K;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
@@ -51,6 +56,36 @@ public class PGPUtil
         String    provider)
     {
         defProvider = provider;
+    }
+    
+    static MPInteger[] dsaSigToMpi(
+        byte[] encoding) 
+        throws PGPException
+    {
+        ASN1InputStream aIn =
+            new ASN1InputStream(new ByteArrayInputStream(encoding));
+
+        DERInteger i1;
+        DERInteger i2;
+
+        try
+        {
+            ASN1Sequence s = (ASN1Sequence)aIn.readObject();
+
+            i1 = (DERInteger)s.getObjectAt(0);
+            i2 = (DERInteger)s.getObjectAt(1);
+        }
+        catch (IOException e)
+        {
+            throw new PGPException("exception encoding signature", e);
+        }
+
+        MPInteger[] values = new MPInteger[2];
+        
+        values[0] = new MPInteger(i1.getValue());
+        values[1] = new MPInteger(i2.getValue());
+        
+        return values;
     }
     
     static String getDigestName(

@@ -1,6 +1,5 @@
 package org.bouncycastle.openpgp;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -12,9 +11,6 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Date;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.bcpg.MPInteger;
 import org.bouncycastle.bcpg.OnePassSignaturePacket;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
@@ -119,18 +115,7 @@ public class PGPSignatureGenerator
         byte[]    b) 
         throws SignatureException
     {
-        if (signatureType == PGPSignature.CANONICAL_TEXT_DOCUMENT)
-        {
-            for (int i = 0; i != b.length; i++)
-            {
-                this.update(b[i]);
-            }
-        }
-        else
-        {
-            sig.update(b);
-            dig.update(b);
-        }
+        this.update(b, 0, b.length);
     }
     
     public void update(
@@ -235,7 +220,6 @@ public class PGPSignatureGenerator
         throws PGPException, SignatureException
     {
         MPInteger[]             sigValues;
-        byte[]                  signature;
         int                     version = 4;
         ByteArrayOutputStream   sOut = new ByteArrayOutputStream();
         
@@ -294,27 +278,8 @@ public class PGPSignatureGenerator
             sigValues[0] = new MPInteger(new BigInteger(1, sig.sign()));
         }
         else
-        {
-            ASN1InputStream    aIn = new ASN1InputStream(new ByteArrayInputStream(sig.sign()));
-            
-            DERInteger    i1;
-            DERInteger    i2;
-            
-            try
-            {
-                ASN1Sequence    s = (ASN1Sequence)aIn.readObject();
-
-                i1 = (DERInteger)s.getObjectAt(0);
-                i2 = (DERInteger)s.getObjectAt(1);
-            }
-            catch (IOException e)
-            {
-                throw new PGPException("exception encoding signature", e);
-            }
-            
-            sigValues = new MPInteger[2];
-            sigValues[0] = new MPInteger(i1.getValue());
-            sigValues[1] = new MPInteger(i2.getValue());
+        {   
+            sigValues = PGPUtil.dsaSigToMpi(sig.sign());
         }
         
         byte[]                        digest = dig.digest();
@@ -340,16 +305,7 @@ public class PGPSignatureGenerator
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
-        byte[]    keyBytes;
-        
-        try
-        {
-            keyBytes = pubKey.publicPk.getEncodedContents();
-        }
-        catch (IOException e)
-        {
-            throw new PGPException("exception preparing key.", e);
-        }
+        byte[]    keyBytes = getEncodedPublicKey(pubKey);
 
         this.update((byte)0x99);
         this.update((byte)(keyBytes.length >> 8));
@@ -391,30 +347,14 @@ public class PGPSignatureGenerator
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
-        byte[]    keyBytes;
-        
-        try
-        {
-            keyBytes = masterKey.publicPk.getEncodedContents();
-        }
-        catch (IOException e)
-        {
-            throw new PGPException("exception preparing key.", e);
-        }
+        byte[]    keyBytes = getEncodedPublicKey(masterKey);
 
         this.update((byte)0x99);
         this.update((byte)(keyBytes.length >> 8));
         this.update((byte)(keyBytes.length));
         this.update(keyBytes);
         
-        try
-        {
-            keyBytes = pubKey.publicPk.getEncodedContents();
-        }
-        catch (IOException e)
-        {
-            throw new PGPException("exception preparing key.", e);
-        }
+        keyBytes = getEncodedPublicKey(pubKey);
 
         this.update((byte)0x99);
         this.update((byte)(keyBytes.length >> 8));
@@ -436,6 +376,20 @@ public class PGPSignatureGenerator
         PGPPublicKey    pubKey)
         throws SignatureException, PGPException
     {
+        byte[]    keyBytes = getEncodedPublicKey(pubKey);
+
+        this.update((byte)0x99);
+        this.update((byte)(keyBytes.length >> 8));
+        this.update((byte)(keyBytes.length));
+        this.update(keyBytes);
+        
+        return this.generate();
+    }
+    
+    private byte[] getEncodedPublicKey(
+        PGPPublicKey pubKey) 
+        throws PGPException
+    {
         byte[]    keyBytes;
         
         try
@@ -446,12 +400,7 @@ public class PGPSignatureGenerator
         {
             throw new PGPException("exception preparing key.", e);
         }
-
-        this.update((byte)0x99);
-        this.update((byte)(keyBytes.length >> 8));
-        this.update((byte)(keyBytes.length));
-        this.update(keyBytes);
         
-        return this.generate();
+        return keyBytes;
     }
 }
