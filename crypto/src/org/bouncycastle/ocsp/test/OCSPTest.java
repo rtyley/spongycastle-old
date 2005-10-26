@@ -20,15 +20,15 @@ import org.bouncycastle.ocsp.CertificateID;
 import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
+import org.bouncycastle.ocsp.OCSPRespGenerator;
 import org.bouncycastle.ocsp.Req;
+import org.bouncycastle.ocsp.RespID;
 import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class OCSPTest
-    implements Test
+    extends SimpleTest
 {
     byte[]  testResp1 = Base64.decode(
                 "MIIFnAoBAKCCBZUwggWRBgkrBgEFBQcwAQEEggWCMIIFfjCCARehgZ8wgZwx"
@@ -124,165 +124,206 @@ public class OCSPTest
         return "OCSP";
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        try
+        String          signDN = "O=Bouncy Castle, C=AU";
+        KeyPair         signKP = OCSPTestUtil.makeKeyPair();
+        X509Certificate testCert = OCSPTestUtil.makeCertificate(signKP, signDN, signKP, signDN);
+
+        String          origDN = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+        GeneralName     origName = new GeneralName(new X509Name(origDN));
+
+        //
+        // general id value for our test issuer cert and a serial number.
+        //
+        CertificateID   id = new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1));
+
+        //
+        // basic request generation
+        //
+        OCSPReqGenerator    gen = new OCSPReqGenerator();
+
+        gen.addRequest(
+                new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
+
+        OCSPReq         req = gen.generate();
+
+        if (req.isSigned())
         {
-            String          signDN = "O=Bouncy Castle, C=AU";
-            KeyPair         signKP = OCSPTestUtil.makeKeyPair();
-            X509Certificate testCert = OCSPTestUtil.makeCertificate(signKP, signDN, signKP, signDN);
-
-            String          origDN = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
-            GeneralName     origName = new GeneralName(new X509Name(origDN));
-
-
-            //
-            // general id value for our test issuer cert and a serial number.
-            //
-            CertificateID   id = new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1));
-
-            //
-            // basic request generation
-            //
-            OCSPReqGenerator    gen = new OCSPReqGenerator();
-
-            gen.addRequest(
-                    new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
-
-            OCSPReq         req = gen.generate();
-
-            if (req.isSigned())
-            {
-                return new SimpleTestResult(false, getName() + ": signed but shouldn't be");
-            }
-
-            Req[]           requests = req.getRequestList();
-
-            if (!requests[0].getCertID().equals(id))
-            {
-                return new SimpleTestResult(false, getName() + ": Failed isFor test");
-            }
-
-            //
-            // request generation with signing
-            //
-            X509Certificate[]   chain = new X509Certificate[1];
-
-            gen = new OCSPReqGenerator();
-
-            gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
-            
-            gen.addRequest(
-                    new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
-
-            chain[0] = testCert;
-
-            req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "BC");
-
-            if (!req.isSigned())
-            {
-                return new SimpleTestResult(false, getName() + ": not signed but should be");
-            }
-
-            if (!req.verify(signKP.getPublic(), "BC"))
-            {
-                return new SimpleTestResult(false, getName() + ": signature failed to verify");
-            }
-
-            requests = req.getRequestList();
-
-            if (!requests[0].getCertID().equals(id))
-            {
-                return new SimpleTestResult(false, getName() + ": Failed isFor test");
-            }
-
-            //
-            // request generation with signing and nonce
-            //
-            chain = new X509Certificate[1];
-
-            gen = new OCSPReqGenerator();
-
-            Vector oids = new Vector();
-            Vector values = new Vector();
-            
-            gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
-            
-            oids.addElement(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
-            values.addElement(new X509Extension(false, new DEROctetString(new byte[16])));
-
-            gen.setRequestExtensions(new X509Extensions(oids, values));
-            
-            gen.addRequest(
-                    new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
-
-            chain[0] = testCert;
-
-            req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "BC");
-
-            if (!req.isSigned())
-            {
-                return new SimpleTestResult(false, getName() + ": not signed but should be");
-            }
-
-            if (!req.verify(signKP.getPublic(), "BC"))
-            {
-                return new SimpleTestResult(false, getName() + ": signature failed to verify");
-            }
-
-            requests = req.getRequestList();
-
-            if (!requests[0].getCertID().equals(id))
-            {
-                return new SimpleTestResult(false, getName() + ": Failed isFor test");
-            }
-            
-            //
-            // response parsing - test 1
-            //
-            OCSPResp    response = new OCSPResp(new ByteArrayInputStream(testResp1));
-
-            if (response.getStatus() != 0)
-            {
-                return new SimpleTestResult(false, getName() + ": response status not zero.");
-            }
-
-            BasicOCSPResp       brep = (BasicOCSPResp)response.getResponseObject();
-            chain = brep.getCerts("BC");
-
-            if (!brep.verify(chain[0].getPublicKey(), "BC"))
-            {
-                return new SimpleTestResult(false, getName() + ": response 1 failed to verify.");
-            }
-
-            //
-            // test 2
-            //
-            SingleResp[]        singleResp = brep.getResponses();
-
-            response = new OCSPResp(new ByteArrayInputStream(testResp2));
-
-            if (response.getStatus() != 0)
-            {
-                return new SimpleTestResult(false, getName() + ": response status not zero.");
-            }
-
-            brep = (BasicOCSPResp)response.getResponseObject();
-            chain = brep.getCerts("BC");
-
-            if (!brep.verify(chain[0].getPublicKey(), "BC"))
-            {
-                return new SimpleTestResult(false, getName() + ": response 2 failed to verify.");
-            }
-
-            singleResp = brep.getResponses();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": Exception " + e, e);
+            fail("signed but shouldn't be");
         }
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+        X509Certificate[] certs = req.getCerts("BC");
+        
+        if (certs != null)
+        {
+            fail("null certs expected, but not found");
+        }
+        
+        Req[]           requests = req.getRequestList();
+
+        if (!requests[0].getCertID().equals(id))
+        {
+            fail("Failed isFor test");
+        }
+
+        //
+        // request generation with signing
+        //
+        X509Certificate[]   chain = new X509Certificate[1];
+
+        gen = new OCSPReqGenerator();
+
+        gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
+        
+        gen.addRequest(
+                new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
+
+        chain[0] = testCert;
+
+        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "BC");
+
+        if (!req.isSigned())
+        {
+            fail("not signed but should be");
+        }
+
+        if (!req.verify(signKP.getPublic(), "BC"))
+        {
+            fail("signature failed to verify");
+        }
+
+        requests = req.getRequestList();
+
+        if (!requests[0].getCertID().equals(id))
+        {
+            fail("Failed isFor test");
+        }
+        
+        certs = req.getCerts("BC");
+        
+        if (certs == null)
+        {
+            fail("null certs found");
+        }
+        
+        if (certs.length != 1 || !certs[0].equals(testCert))
+        {
+            fail("incorrect certs found in request");
+        }
+
+        //
+        // encoding test
+        //
+        byte[] reqEnc = req.getEncoded();
+        
+        OCSPReq newReq = new OCSPReq(reqEnc);
+        
+        if (!newReq.verify(signKP.getPublic(), "BC"))
+        {
+            fail("newReq signature failed to verify");
+        }
+        
+        //
+        // request generation with signing and nonce
+        //
+        chain = new X509Certificate[1];
+
+        gen = new OCSPReqGenerator();
+
+        Vector oids = new Vector();
+        Vector values = new Vector();
+        
+        gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
+        
+        oids.addElement(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
+        values.addElement(new X509Extension(false, new DEROctetString(new byte[16])));
+
+        gen.setRequestExtensions(new X509Extensions(oids, values));
+        
+        gen.addRequest(
+                new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
+
+        chain[0] = testCert;
+
+        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "BC");
+
+        if (!req.isSigned())
+        {
+            fail("not signed but should be");
+        }
+
+        if (!req.verify(signKP.getPublic(), "BC"))
+        {
+            fail("signature failed to verify");
+        }
+
+        requests = req.getRequestList();
+
+        if (!requests[0].getCertID().equals(id))
+        {
+            fail("Failed isFor test");
+        }
+        
+        //
+        // response parsing - test 1
+        //
+        OCSPResp    response = new OCSPResp(new ByteArrayInputStream(testResp1));
+
+        if (response.getStatus() != 0)
+        {
+            fail("response status not zero.");
+        }
+
+        BasicOCSPResp       brep = (BasicOCSPResp)response.getResponseObject();
+        chain = brep.getCerts("BC");
+
+        if (!brep.verify(chain[0].getPublicKey(), "BC"))
+        {
+            fail("response 1 failed to verify.");
+        }
+
+        //
+        // test 2
+        //
+        SingleResp[]        singleResp = brep.getResponses();
+
+        response = new OCSPResp(new ByteArrayInputStream(testResp2));
+
+        if (response.getStatus() != 0)
+        {
+            fail("response status not zero.");
+        }
+
+        brep = (BasicOCSPResp)response.getResponseObject();
+        chain = brep.getCerts("BC");
+
+        if (!brep.verify(chain[0].getPublicKey(), "BC"))
+        {
+            fail("response 2 failed to verify.");
+        }
+
+        singleResp = brep.getResponses();
+        
+        //
+        // response generation
+        //
+        OCSPRespGenerator respGen = new OCSPRespGenerator();
+        OCSPResp resp = respGen.generate(OCSPRespGenerator.SUCCESSFUL, response.getResponseObject());
+        
+        if (!resp.getResponseObject().equals(response.getResponseObject()))
+        {
+            fail("response fails to match");
+        }
+        
+        BasicOCSPResp basicResp = (BasicOCSPResp)resp.getResponseObject();
+        RespID respId = new RespID(testCert.getPublicKey());
+
+        if (!basicResp.getResponderId().equals(respId))
+        {
+            fail("responder id doesn't match expected");
+        }
     }
 
     public static void main(
@@ -290,14 +331,6 @@ public class OCSPTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new OCSPTest();
-        TestResult      result = test.perform();
-
-        if (((SimpleTestResult)result).getException() != null)
-        {
-            ((SimpleTestResult)result).getException().printStackTrace();
-        }
-        
-        System.out.println(result.toString());
+        runTest(new OCSPTest());
     }
 }
