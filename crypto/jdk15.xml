@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="crypto1.5" default="build" basedir=".">
+
+    <property name="build.dir" value="build" />
+    <property name="artifacts.dir" value="${build.dir}/artifacts" />
+    <property name="jdk.name" value="jdk1.5" />
+    <property name="src.dir" value="${build.dir}/${jdk.name}" />
+    <property name="target.name" value="jdk15-${release.suffix}" />
+
+    <target name="init">
+        <mkdir dir="${src.dir}" />
+        <copy todir="${src.dir}">
+            <fileset dir="src" includes="**/*.java" />
+            <fileset dir="src" includes="**/*.html" />
+            <fileset dir="test/src" includes="**/*.java" />
+            <fileset dir="test/src" includes="**/*.html" />
+            <fileset dir="test/src" includes="**/*.pem" />
+        </copy>
+        <checkstyle config="checkstyle/bc-checks.xml">
+            <fileset dir="${src.dir}" includes="**/*.java"/>
+            <formatter type="plain"/>
+            <formatter type="xml" toFile="${artifacts.dir}/checkstyle/${jdk.name}-errors.xml"/>
+        </checkstyle>
+    </target>
+
+    <target name="build" depends="init">
+        <ant antfile="bc-build.xml" dir="." />
+        <ant antfile="bc-build.xml" dir="." target="javadoc-libraries" />
+    </target>
+
+    <target name="build-lw" depends="init">
+        <ant antfile="bc-build.xml" dir="." target="build-lw" />
+    </target>
+
+    <target name="build-provider" depends="init">
+        <ant antfile="bc-build.xml" dir="." target="build-provider" />
+        <ant antfile="bc-build.xml" dir="." target="javadoc-provider" />
+    </target>
+
+    <target name="build-test" depends="init">
+        <ant antfile="bc-build.xml" dir="." target="build-test" />
+    </target>
+
+    <target name="test" depends="build-test">
+        <ant antfile="bc-build.xml" dir="." target="test" />
+    </target>
+
+</project>
