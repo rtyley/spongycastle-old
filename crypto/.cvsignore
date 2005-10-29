@@ -6,3 +6,4 @@ verify
 .checkstyle
 .settings
 classes
+build
