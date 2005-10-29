@@ -63,7 +63,6 @@ public class OCSPResp
             }
             catch (Exception e)
             {
-                e.printStackTrace();
                 throw new OCSPException("problem decoding object: " + e, e);
             }
         }
