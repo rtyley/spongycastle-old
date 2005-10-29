@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="crypto.bcbuild" default="build" basedir=".">
+
+    <property environment="env" />
+
+    <property name="build.dir" value="${src.dir}/.." />
+    <property name="artifacts.dir" value="${build.dir}/artifacts" />
+    <property name="artifacts.reports.xml.dir" value="${build.dir}/artifacts/reports/xml" />
+    <property name="artifacts.reports.html.dir" value="${build.dir}/artifacts/reports/html" />
+    <property name="artifacts.jars.dir" value="${artifacts.dir}/jars" />
+
+    <property name="provider.target" value="bcprov-${target.name}" />
+    <property name="provider.target.dir" value="${build.dir}/${provider.target}" />
+    <property name="provider.target.src.dir" value="${provider.target.dir}/src" />
+    <property name="provider.target.docs.dir" value="${provider.target.dir}/docs" />
+
+    <property name="mail.target" value="bcmail-${target.name}" />
+    <property name="mail.target.dir" value="${build.dir}/${mail.target}" />
+    <property name="mail.target.src.dir" value="${mail.target.dir}/src" />
+    <property name="mail.target.docs.dir" value="${mail.target.dir}/docs" />
+
+    <property name="tsp.target" value="bctsp-${target.name}" />
+    <property name="tsp.target.dir" value="${build.dir}/${tsp.target}" />
+    <property name="tsp.target.src.dir" value="${tsp.target.dir}/src" />
+    <property name="tsp.target.docs.dir" value="${tsp.target.dir}/docs" />
+
+    <property name="pg.target" value="bcpg-${target.name}" />
+    <property name="pg.target.dir" value="${build.dir}/${pg.target}" />
+    <property name="pg.target.src.dir" value="${pg.target.dir}/src" />
+    <property name="pg.target.docs.dir" value="${pg.target.dir}/docs" />
+
+
+    <macrodef name="compile">
+        <attribute name="target" />
+        <sequential>
+            <mkdir dir="${build.dir}/@{target}/classes" />
+            <mkdir dir="${artifacts.dir}/@{target}" />
+
+            <javac srcdir="${build.dir}/@{target}/src" destdir="${build.dir}/@{target}/classes">
+                <classpath>
+                    <fileset dir="${artifacts.jars.dir}">
+                        <include name="**/*.jar" />
+                    </fileset>
+                </classpath>
+            </javac>
+            <copy todir="${build.dir}/@{target}/classes">
+                 <fileset dir="${build.dir}/@{target}/src" includes="**/*.pem" />
+            </copy>
+            <jar jarfile="${artifacts.jars.dir}/@{target}.jar">
+                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.class" />
+                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.pem" />
+            </jar>
+        </sequential>
+    </macrodef>
+
+    <target name="build" depends="build-lw, build-libraries, build-test" />
+
+    <target name="build-lw">
+        <property name="lcrypto" value="lcrypto-${target.name}" />
+
+        <!--
+              Lightweight Libraries
+        -->
+        <property name="target.dir" value="${build.dir}/${lcrypto}" />
+        <property name="target.src.dir" value="${target.dir}/src" />
+        <property name="target.classes.dir" value="${target.dir}/classes" />
+        <property name="target.artifacts.dir" value="${build.dir}/artifacts/${target}" />
+
+        <mkdir dir="${target.dir}" />
+        <mkdir dir="${target.src.dir}" />
+        <mkdir dir="${target.classes.dir}" />
+        <mkdir dir="${target.artifacts.dir}" />
+
+        <copy todir="${target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/*.java" />
+                 <include name="org/bouncycastle/math/**/*.java" />
+                 <include name="org/bouncycastle/crypto/**/*.java" />
+                 <include name="org/bouncycastle/util/**/*.java" />
+                 <include name="org/bouncycastle/asn1/**/*.java" />
+                 <include name="org/bouncycastle/bcpg/**/*.java" />
+             </fileset>
+             <fileset dir="${src.dir}" includes="**/*.pem" />
+        </copy>
+
+        <javac srcdir="${target.src.dir}" destdir="${target.classes.dir}">
+        </javac>
+    </target>
+
+    <!--
+          Provider
+    -->
+    <target name="build-provider">
+        <property name="provider" value="bcprov-${target.name}" />
+
+        <mkdir dir="${artifacts.jars.dir}" />
+
+        <mkdir dir="${provider.target.dir}" />
+
+        <copy todir="${provider.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <exclude name="org/bouncycastle/mail/**/*.java" />
+                 <exclude name="org/bouncycastle/cms/**/*.java" />
+                 <exclude name="org/bouncycastle/sasn1/**/*.java" />
+                 <exclude name="org/bouncycastle/tsp/**/*.java" />
+                 <exclude name="org/bouncycastle/openpgp/**/*.java" />
+                 <exclude name="org/bouncycastle/bcpg/**/*.java" />
+             </fileset>
+             <fileset dir="${src.dir}" includes="**/*.pem" />
+        </copy>
+
+        <compile target="${provider}" />
+    </target>
+
+    <target name="build-libraries" depends="build-mail, build-tsp, build-pg" />
+
+    <!--
+          Mail
+    -->
+    <target name="build-mail">
+        <mkdir dir="${mail.target.dir}" />
+
+        <copy todir="${mail.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/mail/**/*.java" />
+                 <include name="org/bouncycastle/cms/**/*.java" />
+                 <include name="org/bouncycastle/sasn1/**/*.java" />
+                 <exclude name="**/*Test.java" />
+                 <exclude name="**/*Tests.java" />
+             </fileset>
+        </copy>
+
+        <compile target="${mail.target}" />
+    </target>
+
+    <!--
+          TSP
+    -->
+    <target name="build-tsp">
+        <mkdir dir="${tsp.target.dir}" />
+
+        <copy todir="${tsp.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/tsp/**/*.java" />
+                 <exclude name="**/*Test.java" />
+                 <exclude name="**/*Tests.java" />
+             </fileset>
+        </copy>
+
+        <compile target="${tsp.target}" />
+    </target>
+
+    <!--
+          PG
+    -->
+    <target name="build-pg">
+        <mkdir dir="${pg.target.dir}" />
+
+        <copy todir="${pg.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/bcpg/**/*.java" />
+                 <include name="org/bouncycastle/openpgp/**/*.java" />
+                 <exclude name="**/*Test.java" />
+                 <exclude name="**/*Tests.java" />
+             </fileset>
+        </copy>
+
+        <compile target="${pg.target}" />
+    </target>
+
+    <target name="build-test">
+        <property name="test.target" value="bctest-${target.name}" />
+
+        <mkdir dir="${artifacts.jars.dir}" />
+
+        <!--
+             Tests
+        -->
+        <property name="test.target.dir" value="${build.dir}/${test.target}" />
+        <property name="test.target.src.dir" value="${test.target.dir}/src" />
+
+        <mkdir dir="${test.target.dir}" />
+
+        <copy todir="${test.target.src.dir}">
+             <fileset dir="${src.dir}" includes="**/test/*.java" />
+             <fileset dir="${src.dir}" includes="**/*.pem" />
+        </copy>
+
+        <compile target="${test.target}" />
+    </target>
+
+    <target name="test" depends="build-test">
+        <junit fork="yes" dir="${basedir}" failureProperty="test.failed">
+            <classpath>
+                <fileset dir="${artifacts.jars.dir}">
+                    <include name="**/*.jar" />
+                </fileset>
+            </classpath>
+
+            <formatter type="xml" />
+            <test name="${testcase}" todir="${artifacts.reports.xml.dir}" if="testcase" />
+            <batchtest todir="${artifacts.reports.xml.dir}" unless="testcase">
+                <fileset dir="${src.dir}">
+                    <include name="**/test/AllTests.java" />
+                </fileset>
+            </batchtest>
+        </junit>
+
+        <junitreport todir="${artifacts.reports.xml.dir}">
+            <fileset dir="${artifacts.reports.xml.dir}">
+                <include name="TEST-*.xml" />
+            </fileset>
+            <report format="frames" todir="${artifacts.reports.html.dir}" />
+        </junitreport>
+    </target>
+
+    <target name="javadoc-libraries" depends="javadoc-mail, javadoc-tsp, javadoc-pg" />
+
+    <!--
+          Provider JavaDoc
+    -->
+    <target name="javadoc-provider">
+        <copy todir="${provider.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/jce/**/test/*.java" />
+                 <include name="org/bouncycastle/x509/**/test/*.java" />
+                 <include name="org/bouncycastle/openssl/**/test/*.java" />
+             </fileset>
+        </copy>
+
+        <javadoc sourcepath="${provider.target.src.dir}"
+                 destdir="${provider.target.docs.dir}"
+                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
+                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
+            <package name="org.bouncycastle.asn1.*" />
+            <package name="org.bouncycastle.crypto.*" />
+            <package name="org.bouncycastle.jce.*" />
+            <package name="org.bouncycastle.openssl.*" />
+            <package name="org.bouncycastle.mozilla.*" />
+            <package name="org.bouncycastle.x509.*" />
+            <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
+            <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
+            <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
+            <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
+            <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
+            <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
+            <classpath>
+                <fileset dir="${artifacts.jars.dir}">
+                    <include name="**/*.jar" />
+                </fileset>
+                <pathelement path="${env.CLASSPATH}" />
+            </classpath>
+        </javadoc>
+    </target>
+
+    <!--
+          Mail JavaDoc
+    -->
+    <target name="javadoc-mail">
+        <copy todir="${mail.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/mail/**/test/*.java" />
+                 <include name="org/bouncycastle/cms/**/test/*.java" />
+                 <include name="org/bouncycastle/sasn1/**/test/*.java" />
+                 <include name="org/bouncycastle/mail/**/*.html" />
+                 <include name="org/bouncycastle/cms/**/*.html" />
+                 <include name="org/bouncycastle/sasn1/**/*.html" />
+             </fileset>
+        </copy>
+
+        <javadoc sourcepath="${mail.target.src.dir}"
+                 destdir="${mail.target.docs.dir}"
+                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
+                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
+            <package name="org.bouncycastle.cms.*" />
+            <package name="org.bouncycastle.mail.*" />
+            <package name="org.bouncycastle.sasn1.*" />
+            <group title="CMS Packages" packages="org.bouncycastle.cms*" />
+            <group title="S/MIME Packages" packages="org.bouncycastle.mail.smime*" />
+            <group title="Streaming ASN.1 Packages" packages="org.bouncycastle.sasn1*" />
+
+            <classpath>
+                <fileset dir="${artifacts.jars.dir}">
+                    <include name="**/*.jar" />
+                </fileset>
+                <pathelement path="${env.CLASSPATH}" />
+            </classpath>
+        </javadoc>
+    </target>
+
+    <!--
+          TSP JavaDoc
+    -->
+    <target name="javadoc-tsp">
+        <copy todir="${tsp.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/tsp/**/test/*.java" />
+                 <include name="org/bouncycastle/tsp/**/*.html" />
+             </fileset>
+        </copy>
+
+        <javadoc sourcepath="${tsp.target.src.dir}"
+                 destdir="${tsp.target.docs.dir}"
+                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
+                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
+            <package name="org.bouncycastle.tsp.*" />
+            <group title="TSP Packages" packages="org.bouncycastle.tsp*" />
+            <classpath>
+                <fileset dir="${artifacts.jars.dir}">
+                    <include name="**/*.jar" />
+                </fileset>
+                <pathelement path="${env.CLASSPATH}" />
+            </classpath>
+        </javadoc>
+    </target>
+
+    <!--
+          PG JavaDoc
+    -->
+    <target name="javadoc-pg">
+        <copy todir="${pg.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/openpgp/**/test/*.java" />
+                 <include name="org/bouncycastle/bcpg/**/test/*.java" />
+                 <include name="org/bouncycastle/openpgp/**/*.html" />
+                 <include name="org/bouncycastle/bcpg/**/*.html" />
+             </fileset>
+        </copy>
+
+        <javadoc sourcepath="${pg.target.src.dir}"
+                 destdir="${pg.target.docs.dir}"
+                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
+                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
+            <package name="org.bouncycastle.openpgp.*" />
+            <package name="org.bouncycastle.bcpg.*" />
+            <group title="BCPG Support Packages" packages="org.bouncycastle.bcpg*" />
+            <group title="OpenPGP Packages" packages="org.bouncycastle.openpgp*" />
+            <classpath>
+                <fileset dir="${artifacts.jars.dir}">
+                    <include name="**/*.jar" />
+                </fileset>
+                <pathelement path="${env.CLASSPATH}" />
+            </classpath>
+        </javadoc>
+    </target>
+</project>
