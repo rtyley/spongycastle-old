@@ -1,50 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <!--
-  Bouncy Castle Master Build File 
-
-  This file will then invoke sub-build files to create all the
-  individual releases.  Currently there are requirements to 
-  build releases for:
-
-  j2me			(jdk1.3 only)
-  provider+lw	(jdk1.0, jdk1.1, jdk1.2, jdk1.3)
-  lw only		(jdk1.0, jdk1.1, jdk1.2, jdk1.3)
-
-  The USER_PROP environment variable must be set to the file name
-  and path of the user_env.prop file
-
-  $RCSfile: build.xml,v $
-  $Author: bouncy $
-  $Date: 2005-07-06 13:02:52 $
-  $Revision: 1.1 $
+ This file assumes you have the mail and activation jars in your classpath.
 -->
+<project name="crypto" default="build1.5" basedir=".">
 
-<project name="bc" default="compile" basedir=".">
-  <property environment="env" />
+    <property name="build.dir" value="build" />
+    <property name="artifacts.dir" value="${build.dir}/artifacts" />
+    <property name="release.suffix" value="131b09" />
+    <property name="release.name" value="1.31b09" />
 
-  <!-- targets -->
+    <taskdef resource="checkstyletask.properties" classpath="../../checkstyle/checkstyle-all-4.0-beta6.jar"/>
 
-  <target name="check">
-  </target>
+    <target name="init">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${artifacts.dir}" />
+        <mkdir dir="${artifacts.dir}/checkstyle" />
+        <mkdir dir="${artifacts.dir}/reports/xml" />
+        <mkdir dir="${artifacts.dir}/reports/html" />
+    </target>
 
-  <target name="clean">
-  </target>
+    <target name="build1.5" depends="init">
+        <ant antfile="jdk15.xml" dir="." />
+    </target>
 
-  <target name="compile">
-  </target>
+    <target name="build1.5-lw" depends="init">
+        <ant antfile="jdk15.xml" dir="." target="build-lw" />
+    </target>
 
-  <target name="package">
-  </target>
+    <target name="build1.5-provider" depends="init">
+        <ant antfile="jdk15.xml" dir="." target="build-provider" />
+    </target>
 
-  <target name="doc">
-  </target>
+    <target name="build1.5-build-test" depends="init">
+        <ant antfile="jdk15.xml" dir="." target="build-test" />
+    </target>
 
-  <target name="test">
-  </target>
-
-  <target name="j2me">
-  </target>
-
-  <target name="preverify">
-  </target>
+    <target name="build1.5-test" depends="init">
+        <ant antfile="jdk15.xml" dir="." target="test" />
+    </target>
 
 </project>
