@@ -236,8 +236,8 @@ public class SMIMESignedGenerator
     {
         try
         {
-           MimeBodyPart sig = new MimeBodyPart();
-            
+            MimeBodyPart sig = new MimeBodyPart();
+
             sig.setContent(new ContentSigner(content, false, sigProvider), DETACHED_SIGNATURE_TYPE);
             sig.addHeader("Content-Type", DETACHED_SIGNATURE_TYPE);
             sig.addHeader("Content-Disposition", "attachment; filename=\"smime.p7s\"");
