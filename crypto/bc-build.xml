@@ -5,9 +5,8 @@
     <property environment="env" />
 
     <property name="build.dir" value="${src.dir}/.." />
-    <property name="artifacts.dir" value="${build.dir}/artifacts" />
-    <property name="artifacts.reports.xml.dir" value="${build.dir}/artifacts/reports/xml" />
-    <property name="artifacts.reports.html.dir" value="${build.dir}/artifacts/reports/html" />
+    <property name="artifacts.reports.xml.dir" value="${artifacts.dir}/reports/xml" />
+    <property name="artifacts.reports.html.dir" value="${artifacts.dir}/reports/html" />
     <property name="artifacts.jars.dir" value="${artifacts.dir}/jars" />
 
     <property name="provider.target" value="bcprov-${target.name}" />
@@ -54,6 +53,26 @@
         </sequential>
     </macrodef>
 
+    <macrodef name="compileDoc">
+        <attribute name="srcDir" />
+        <attribute name="docsDir" />
+        <element name="docElements" />
+        <sequential>
+        <javadoc sourcepath="@{srcDir}"
+                 destdir="@{docsDir}"
+                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
+                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
+            <docElements/>
+            <classpath>
+                <fileset dir="${artifacts.jars.dir}">
+                    <include name="**/*.jar" />
+                </fileset>
+                <pathelement path="${env.CLASSPATH}" />
+            </classpath>
+        </javadoc>
+        </sequential>
+    </macrodef>
+
     <target name="build" depends="build-lw, build-libraries, build-test" />
 
     <target name="build-lw">
@@ -65,7 +84,7 @@
         <property name="target.dir" value="${build.dir}/${lcrypto}" />
         <property name="target.src.dir" value="${target.dir}/src" />
         <property name="target.classes.dir" value="${target.dir}/classes" />
-        <property name="target.artifacts.dir" value="${build.dir}/artifacts/${target}" />
+        <property name="target.artifacts.dir" value="${artifacts.dir}/${lcrypto}" />
 
         <mkdir dir="${target.dir}" />
         <mkdir dir="${target.src.dir}" />
@@ -95,11 +114,11 @@
         <property name="provider" value="bcprov-${target.name}" />
 
         <mkdir dir="${artifacts.jars.dir}" />
-
         <mkdir dir="${provider.target.dir}" />
 
         <copy todir="${provider.target.src.dir}">
              <fileset dir="${src.dir}">
+                 <exclude name="org/bouncycastle/**/test/*.java" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
@@ -108,6 +127,7 @@
                  <exclude name="org/bouncycastle/bcpg/**/*.java" />
              </fileset>
              <fileset dir="${src.dir}" includes="**/*.pem" />
+             <fileset dir="${src.dir}" includes="org/bouncycastle/util/test/*.java" />
         </copy>
 
         <compile target="${provider}" />
@@ -229,29 +249,22 @@
              </fileset>
         </copy>
 
-        <javadoc sourcepath="${provider.target.src.dir}"
-                 destdir="${provider.target.docs.dir}"
-                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
-                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
-            <package name="org.bouncycastle.asn1.*" />
-            <package name="org.bouncycastle.crypto.*" />
-            <package name="org.bouncycastle.jce.*" />
-            <package name="org.bouncycastle.openssl.*" />
-            <package name="org.bouncycastle.mozilla.*" />
-            <package name="org.bouncycastle.x509.*" />
-            <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
-            <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
-            <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
-            <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
-            <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
-            <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
-            <classpath>
-                <fileset dir="${artifacts.jars.dir}">
-                    <include name="**/*.jar" />
-                </fileset>
-                <pathelement path="${env.CLASSPATH}" />
-            </classpath>
-        </javadoc>
+        <compileDoc srcDir="${provider.target.src.dir}" docsDir="${provider.target.docs.dir}">
+            <docElements>
+                <package name="org.bouncycastle.asn1.*" />
+                <package name="org.bouncycastle.crypto.*" />
+                <package name="org.bouncycastle.jce.*" />
+                <package name="org.bouncycastle.openssl.*" />
+                <package name="org.bouncycastle.mozilla.*" />
+                <package name="org.bouncycastle.x509.*" />
+                <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
+                <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
+                <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
+                <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
+                <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
+                <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
+            </docElements>
+        </compileDoc>
     </target>
 
     <!--
@@ -269,24 +282,16 @@
              </fileset>
         </copy>
 
-        <javadoc sourcepath="${mail.target.src.dir}"
-                 destdir="${mail.target.docs.dir}"
-                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
-                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
-            <package name="org.bouncycastle.cms.*" />
-            <package name="org.bouncycastle.mail.*" />
-            <package name="org.bouncycastle.sasn1.*" />
-            <group title="CMS Packages" packages="org.bouncycastle.cms*" />
-            <group title="S/MIME Packages" packages="org.bouncycastle.mail.smime*" />
-            <group title="Streaming ASN.1 Packages" packages="org.bouncycastle.sasn1*" />
-
-            <classpath>
-                <fileset dir="${artifacts.jars.dir}">
-                    <include name="**/*.jar" />
-                </fileset>
-                <pathelement path="${env.CLASSPATH}" />
-            </classpath>
-        </javadoc>
+        <compileDoc srcDir="${mail.target.src.dir}" docsDir="${mail.target.docs.dir}">
+            <docElements>
+                <package name="org.bouncycastle.cms.*" />
+                <package name="org.bouncycastle.mail.*" />
+                <package name="org.bouncycastle.sasn1.*" />
+                <group title="CMS Packages" packages="org.bouncycastle.cms*" />
+                <group title="S/MIME Packages" packages="org.bouncycastle.mail.smime*" />
+                <group title="Streaming ASN.1 Packages" packages="org.bouncycastle.sasn1*" />
+            </docElements>
+        </compileDoc>
     </target>
 
     <!--
@@ -300,19 +305,12 @@
              </fileset>
         </copy>
 
-        <javadoc sourcepath="${tsp.target.src.dir}"
-                 destdir="${tsp.target.docs.dir}"
-                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
-                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
-            <package name="org.bouncycastle.tsp.*" />
-            <group title="TSP Packages" packages="org.bouncycastle.tsp*" />
-            <classpath>
-                <fileset dir="${artifacts.jars.dir}">
-                    <include name="**/*.jar" />
-                </fileset>
-                <pathelement path="${env.CLASSPATH}" />
-            </classpath>
-        </javadoc>
+        <compileDoc srcDir="${tsp.target.src.dir}" docsDir="${tsp.target.docs.dir}">
+            <docElements>
+                <package name="org.bouncycastle.tsp.*" />
+                <group title="TSP Packages" packages="org.bouncycastle.tsp*" />
+            </docElements>
+        </compileDoc>
     </target>
 
     <!--
@@ -328,20 +326,13 @@
              </fileset>
         </copy>
 
-        <javadoc sourcepath="${pg.target.src.dir}"
-                 destdir="${pg.target.docs.dir}"
-                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
-                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
-            <package name="org.bouncycastle.openpgp.*" />
-            <package name="org.bouncycastle.bcpg.*" />
-            <group title="BCPG Support Packages" packages="org.bouncycastle.bcpg*" />
-            <group title="OpenPGP Packages" packages="org.bouncycastle.openpgp*" />
-            <classpath>
-                <fileset dir="${artifacts.jars.dir}">
-                    <include name="**/*.jar" />
-                </fileset>
-                <pathelement path="${env.CLASSPATH}" />
-            </classpath>
-        </javadoc>
+        <compileDoc srcDir="${pg.target.src.dir}" docsDir="${pg.target.docs.dir}">
+            <docElements>
+                <package name="org.bouncycastle.openpgp.*" />
+                <package name="org.bouncycastle.bcpg.*" />
+                <group title="BCPG Support Packages" packages="org.bouncycastle.bcpg*" />
+                <group title="OpenPGP Packages" packages="org.bouncycastle.openpgp*" />
+            </docElements>
+        </compileDoc>
     </target>
 </project>
