@@ -21,6 +21,7 @@ then
 
     mkdir lcrypto-jdk13-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/LICENSE.java src/org/bouncycastle/math src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1 | (cd lcrypto-jdk13-$base; tar xf -)
+    (cd test; tar cf - src/org/bouncycastle/crypto src/org/bouncycastle/asn1 | (cd ../lcrypto-jdk13-$base; tar xf -))
 
     (
         cd lcrypto-jdk13-$base;
@@ -51,6 +52,7 @@ then
             org.bouncycastle.asn1.cmp \
             org.bouncycastle.asn1.cms \
             org.bouncycastle.asn1.cryptopro \
+            org.bouncycastle.asn1.esf \
             org.bouncycastle.asn1.ess \
             org.bouncycastle.asn1.misc \
             org.bouncycastle.asn1.mozilla \
@@ -94,8 +96,11 @@ then
 
     mkdir jce-jdk13-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src | (cd jce-jdk13-$base; tar xf -)
+    (cd test/src; tar cf - * | (cd ../../jce-jdk13-$base/src; tar xf -))
     (cd jdk1.4; tar cf - * | (cd ../jce-jdk13-$base/src; tar xf -))
+    (cd test/jdk1.4; tar cf - * | (cd ../../jce-jdk13-$base/src; tar xf -))
     (cd jdk1.3; tar cf - * | (cd ../jce-jdk13-$base/src; tar xf -))
+    (cd test/jdk1.3; tar cf - * | (cd ../../jce-jdk13-$base/src; tar xf -))
     (
     cd jce-jdk13-$base; mkdir classes; mkdir docs;
 
@@ -133,6 +138,7 @@ then
         org.bouncycastle.asn1.cmp \
         org.bouncycastle.asn1.cms \
         org.bouncycastle.asn1.cryptopro \
+        org.bouncycastle.asn1.esf \
         org.bouncycastle.asn1.ess \
         org.bouncycastle.asn1.misc \
         org.bouncycastle.asn1.mozilla \
@@ -195,7 +201,7 @@ then
     java -classpath classes org.bouncycastle.mozilla.test.SPKACTest
     java -classpath classes org.bouncycastle.asn1.test.RegressionTest
     java -classpath classes org.bouncycastle.openssl.test.ReaderTest
-    java -classpath classes org.bouncycastle.util.encoders.test.EncoderTestSuite
+    java -classpath classes org.bouncycastle.util.encoders.test.AllTests
 
     #
     # create the test jar
@@ -255,7 +261,9 @@ then
 
     mkdir bcpg-jdk13-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/bcpg src/org/bouncycastle/openpgp | (cd bcpg-jdk13-$base; tar xf -)
+    (cd test; tar cf - src/ | (cd ../bcpg-jdk13-$base; tar xf -))
     (cd jdk1.3; tar cf - org | (cd ../bcpg-jdk13-$base/src; tar xf -))
+    (cd test/jdk1.3; tar cf - org | (cd ../../bcpg-jdk13-$base/src; tar xf -))
     (
     cd bcpg-jdk13-$base; mkdir classes; mkdir docs;
 
@@ -308,7 +316,9 @@ then
 
     mkdir bcmail-jdk13-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/mail src/org/bouncycastle/cms src/org/bouncycastle/sasn1 | (cd bcmail-jdk13-$base; tar xf -)
+    (cd test; tar cf - src/org/bouncycastle/mail src/org/bouncycastle/cms src/org/bouncycastle/sasn1 | (cd ../bcmail-jdk13-$base; tar xf -))
     (cd jdk1.3; tar cf - org | (cd ../bcmail-jdk13-$base/src; tar xf -))
+    (cd test/jdk1.3; tar cf - org | (cd ../../bcmail-jdk13-$base/src; tar xf -))
     (
     cd bcmail-jdk13-$base; mkdir classes; mkdir docs;
 
@@ -326,7 +336,7 @@ then
         -header "$HEADER" \
         -group "CMS Packages" "org.bouncycastle.cms*" \
         -group "S/MIME Packages" "org.bouncycastle.mail.smime*" \
-        -classpath classes:../jce-jdk13-$base/classes \
+        -classpath classes:../jce-jdk13-$base/classes:$CLASSPATH \
         -d docs -sourcepath src \
         org.bouncycastle.cms \
         org.bouncycastle.cms.test \
@@ -339,7 +349,7 @@ then
 
     echo "compiling"
 
-    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:../../../../jce-jdk13-$base/classes */*.java */*/*.java */*/*/*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:../../../../jce-jdk13-$base/classes:$CLASSPATH */*.java */*/*.java */*/*/*.java)
     cat > classes/mail.mf <<%
 Manifest-Version: 1.0
 Extension-Name: org.bouncycastle.bcmail
@@ -351,9 +361,9 @@ Implementation-Version: $version.0
 %
 
     (cd classes; jar cmf mail.mf ../../bcmail-jdk13-$base.jar org)
-    java -classpath ../jce-jdk13-$base/classes:classes org.bouncycastle.cms.test.AllTests
-    java -classpath ../jce-jdk13-$base/classes:classes org.bouncycastle.mail.smime.test.AllTests
-    java -classpath ../jce-jdk13-$base/classes:classes org.bouncycastle.sasn1.test.RegressionTest
+    java -classpath ../jce-jdk13-$base/classes:classes:$CLASSPATH org.bouncycastle.cms.test.AllTests
+    java -classpath ../jce-jdk13-$base/classes:classes:$CLASSPATH org.bouncycastle.mail.smime.test.AllTests
+    java -classpath ../jce-jdk13-$base/classes:classes:$CLASSPATH org.bouncycastle.sasn1.test.AllTests
 
     )
 
@@ -365,8 +375,10 @@ then
     echo "making TSP release"
 
     mkdir bctsp-jdk13-$base
-    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/tsp | (cd bctsp-jdk13-$base; tar xf -)
+    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/tsp test/src/org/bouncycastle/tsp | (cd bctsp-jdk13-$base; tar xf -)
+    (cd test; tar cf - src/org/bouncycastle/tsp | (cd ../bctsp-jdk13-$base; tar xf -))
     (cd jdk1.3; tar cf - org | (cd ../bctsp-jdk13-$base/src; tar xf -))
+    (cd test/jdk1.3; tar cf - org | (cd ../../bctsp-jdk13-$base/src; tar xf -))
     (
     cd bctsp-jdk13-$base; mkdir classes; mkdir docs;
 
