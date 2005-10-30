@@ -325,8 +325,82 @@ public class CMSEnvelopedDataStreamGenerator
         String       provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
+        SecretKey           encKey = keyGen.generateKey();
+        AlgorithmParameters params;
+        
         try
         {
+            AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, provider);
+
+            if (encryptionOID.equals(RC2_CBC))
+            {
+                byte[]  iv = new byte[8];
+
+                //
+                // mix in a bit extra...
+                //
+                rand.setSeed(System.currentTimeMillis());
+
+                rand.nextBytes(iv);
+
+                try
+                {
+                    pGen.init(new RC2ParameterSpec(encKey.getEncoded().length * 8, iv));
+                }
+                catch (InvalidAlgorithmParameterException e)
+                {
+                    throw new CMSException("parameters generation error: " + e, e);
+                }
+            }
+            
+            params = pGen.generateParameters();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            params = null;
+        }
+        
+        Iterator            it = recipientInfs.iterator();
+        ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
+        
+        while (it.hasNext())
+        {
+            RecipientInf            recipient = (RecipientInf)it.next();
+
+            try
+            {
+                recipientInfos.add(recipient.toRecipientInfo(encKey, provider));
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("encoding error.", e);
+            }
+            catch (InvalidKeyException e)
+            {
+                throw new CMSException("key inappropriate for algorithm.", e);
+            }
+            catch (GeneralSecurityException e)
+            {
+                throw new CMSException("error making encrypted content.", e);
+            }
+        }
+        
+        return open(out, encryptionOID, encKey, params, recipientInfos, provider);
+    }
+        
+    protected OutputStream open(
+        OutputStream        out,
+        String              encryptionOID,
+        SecretKey           encKey,
+        AlgorithmParameters params,
+        ASN1EncodableVector recipientInfos,
+        String              provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        try
+        {
+            AlgorithmIdentifier encAlgId = getAlgorithmIdentifier(encryptionOID, params);
+            
             //
             // ContentInfo
             //
@@ -335,83 +409,16 @@ public class CMSEnvelopedDataStreamGenerator
             cGen.addObject(new Asn1ObjectIdentifier(CMSObjectIdentifiers.envelopedData.getId()));
             
             //
-            // Signed Data
+            // Encrypted Data
             //
             BerSequenceGenerator envGen = new BerSequenceGenerator(cGen.getRawOutputStream(), 0, true);
             
             envGen.addObject(getVersion());
-    
-            AlgorithmIdentifier     encAlgId;
-            SecretKey               encKey;
 
-            Cipher              cipher = Cipher.getInstance(encryptionOID, provider);
-            AlgorithmParameters params;
-            DEREncodable        asn1Params;
-            
-            encKey = keyGen.generateKey();
-
-            Iterator            it = recipientInfs.iterator();
-            ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
-            
-            while (it.hasNext())
-            {
-                RecipientInf            recipient = (RecipientInf)it.next();
-
-                try
-                {
-                    recipientInfos.add(recipient.toRecipientInfo(encKey, provider));
-                }
-                catch (IOException e)
-                {
-                    throw new CMSException("encoding error.", e);
-                }
-                catch (InvalidKeyException e)
-                {
-                    throw new CMSException("key inappropriate for algorithm.", e);
-                }
-                catch (GeneralSecurityException e)
-                {
-                    throw new CMSException("error making encrypted content.", e);
-                }
-            }
-            
             envGen.getRawOutputStream().write(new DERSet(recipientInfos).getEncoded());
+
+            Cipher cipher = Cipher.getInstance(encryptionOID, provider);
             
-            try
-            {
-                AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, provider);
-
-                if (encryptionOID.equals(RC2_CBC))
-                {
-                    byte[]  iv = new byte[8];
-
-                    //
-                    // mix in a bit extra...
-                    //
-                    rand.setSeed(System.currentTimeMillis());
-
-                    rand.nextBytes(iv);
-
-                    pGen.init(new RC2ParameterSpec(encKey.getEncoded().length * 8, iv));
-                }
-                
-                params = pGen.generateParameters();
-
-                ByteArrayInputStream        bIn = new ByteArrayInputStream(params.getEncoded("ASN.1"));
-                ASN1InputStream             aIn = new ASN1InputStream(bIn);
-
-                asn1Params = aIn.readObject();
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                params = null;
-                asn1Params = new DERNull();
-            }
-
-            encAlgId = new AlgorithmIdentifier(
-                                new DERObjectIdentifier(encryptionOID),
-                                asn1Params);
-
             cipher.init(Cipher.ENCRYPT_MODE, encKey, params);
 
             BerSequenceGenerator eiGen = new BerSequenceGenerator(envGen.getRawOutputStream());
@@ -455,6 +462,27 @@ public class CMSEnvelopedDataStreamGenerator
         {
             throw new CMSException("exception decoding algorithm parameters.", e);
         }
+    }
+
+    private AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
+    {
+        DEREncodable asn1Params;
+        if (params != null)
+        {
+            ByteArrayInputStream        bIn = new ByteArrayInputStream(params.getEncoded("ASN.1"));
+            ASN1InputStream             aIn = new ASN1InputStream(bIn);
+      
+            asn1Params = aIn.readObject();
+        }
+        else
+        {
+            asn1Params = new DERNull();
+        }
+        
+        AlgorithmIdentifier  encAlgId = new AlgorithmIdentifier(
+                new DERObjectIdentifier(encryptionOID),
+                asn1Params);
+        return encAlgId;
     }
     
     /**
