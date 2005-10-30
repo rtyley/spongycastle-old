@@ -17,6 +17,7 @@ import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -165,14 +166,18 @@ public class CMSSignedDataParser
             else
             {
                 //
-                // content passed in, need to read past empty encapsulated content info object
+                // content passed in, need to read past empty encapsulated content info object if present
                 //
                 Asn1OctetString octs = (Asn1OctetString)_signedData.getEncapContentInfo().getContent(BerTag.OCTET_STRING);
-                InputStream     in = octs.getOctetStream();
                 
-                while (in.read() >= 0)
+                if (octs != null)
                 {
-                    // ignore
+                    InputStream     in = octs.getOctetStream();
+                    
+                    while (in.read() >= 0)
+                    {
+                        // ignore
+                    }
                 }
             }
         }
@@ -204,7 +209,7 @@ public class CMSSignedDataParser
     {
         if (_signerInfoStore == null)
         {
-            ArrayList signerInfos = new ArrayList();
+            List      signerInfos = new ArrayList();
             Map       hashes = new HashMap();
             
             Iterator  it = _digests.keySet().iterator();
@@ -256,7 +261,7 @@ public class CMSSignedDataParser
     {
         if (_certStore == null)
         {
-            ArrayList               certsAndcrls = new ArrayList();
+            List                    certsAndcrls = new ArrayList();
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
             CertificateFactory      cf;
 

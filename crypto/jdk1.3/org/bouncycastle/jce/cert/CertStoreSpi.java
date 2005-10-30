@@ -38,7 +38,7 @@ public abstract class CertStoreSpi
      * @exception InvalidAlgorithmParameterException if the initialization
      * parameters are inappropriate for this <code>CertStoreSpi</code>
      */
-    public CertStoreSpi( CertStoreParameters params )
+    public CertStoreSpi(CertStoreParameters params)
     throws InvalidAlgorithmParameterException {}
 
     /**
@@ -68,7 +68,7 @@ public abstract class CertStoreSpi
      *
      * @exception CertStoreException if an exception occurs 
      */
-    public abstract Collection engineGetCertificates( CertSelector selector )
+    public abstract Collection engineGetCertificates(CertSelector selector)
     throws CertStoreException;
 
     /**
@@ -98,7 +98,7 @@ public abstract class CertStoreSpi
      *
      * @exception CertStoreException if an exception occurs 
      */
-    public abstract Collection engineGetCRLs( CRLSelector selector )
+    public abstract Collection engineGetCRLs(CRLSelector selector)
     throws CertStoreException;
 }
 

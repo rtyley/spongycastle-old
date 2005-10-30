@@ -11,6 +11,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
@@ -140,7 +141,7 @@ public class CreateSignedMultipartMail
         X509Certificate     origCert = makeCertificate(
                                         origKP, origDN, signKP, signDN);
 
-        ArrayList           certList = new ArrayList();
+        List                certList = new ArrayList();
 
         certList.add(origCert);
         certList.add(signCert);

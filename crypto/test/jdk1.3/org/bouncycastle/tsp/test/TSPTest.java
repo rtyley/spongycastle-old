@@ -25,6 +25,8 @@ import org.bouncycastle.jce.cert.CertStore;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class TSPTest
@@ -57,7 +59,7 @@ public class TSPTest
 
 
             
-            java.util.ArrayList certList = new java.util.ArrayList();
+            List certList = new java.util.ArrayList();
             certList.add(origCert);
             certList.add(signCert);
 

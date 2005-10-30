@@ -3,29 +3,26 @@ package org.bouncycastle.jce.provider.test;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.security.Security;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertPathBuilder;
+import org.bouncycastle.jce.cert.CertPathBuilderResult;
+import org.bouncycastle.jce.cert.PKIXBuilderParameters;
+import org.bouncycastle.jce.cert.X509CertSelector;
+import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import org.bouncycastle.jce.cert.TrustAnchor;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERInputStream;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.cert.CertPathBuilder;
-import org.bouncycastle.jce.cert.CertPathBuilderResult;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
-import org.bouncycastle.jce.cert.PKIXBuilderParameters;
-import org.bouncycastle.jce.cert.TrustAnchor;
-import org.bouncycastle.jce.cert.X509CertSelector;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
-
 
 /*
  * These tests are taken from the NIST X.509 Validation Test Suite
@@ -36,8 +33,9 @@ import org.bouncycastle.util.test.TestResult;
  * 
  */
 
-public class NISTCertPathTest implements Test {
-    
+public class NISTCertPathTest 
+    implements Test 
+{    
     private static final String TEST_POLICY_1 = "2.16.840.1.101.3.1.48.1";
     private static final String TEST_POLICY_2 = "2.16.840.1.101.3.1.48.2";
     private static final String TEST_POLICY_3 = "2.16.840.1.101.3.1.48.3";
@@ -86,28 +84,15 @@ public class NISTCertPathTest implements Test {
     private int             testCount;
     private Vector          testFail;
     private StringBuffer    resultBuf;
-    
-    /*  
-     *  
-     *  CONSTRUCTORS
-     *  
-     */ 
-    
-    
-    
-    /*  
-     *  
-     *  BUSINESS METHODS
-     *  
-     */ 
-    
-    
-    public String getName() {
+ 
+    public String getName() 
+    {
         return "NISTCertPathTest";
     }
     
     
-    public TestResult perform() {
+    public TestResult perform() 
+    {
         init();
         
         test(" 1", TEST_1_DATA , true , false);
@@ -276,211 +261,212 @@ public class NISTCertPathTest implements Test {
             return new SimpleTestResult(true, "NISTCertPathTest: Okay");
         }
 
-        return new SimpleTestResult(false, resultBuf.toString());
+        return new SimpleTestResult(testFail.isEmpty(), resultBuf.toString());
     }
     
-    
-    /*  
-     *  
-     *  INTERNAL METHODS
-     *  
-     */ 
-    
-    
-    private final void init() {
-        try {
-            fact        = CertificateFactory.getInstance("X.509", "BC");
-            trustedCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(Base64.decode(Trust_Anchor_CP_01_01_crt)));
-            trustedCRL  = (X509CRL)fact.generateCRL(new ByteArrayInputStream(Base64.decode(Trust_Anchor_CRL_CP_01_01_crl)));
-            trustedSet  = new HashSet();
-            
-            byte[] _ncBytes  = null;
+    private final void init()
+    {
+        try
+        {
+            fact = CertificateFactory.getInstance("X.509", "BC");
+            trustedCert = (X509Certificate)fact
+                    .generateCertificate(new ByteArrayInputStream(Base64
+                            .decode(Trust_Anchor_CP_01_01_crt)));
+            trustedCRL = (X509CRL)fact.generateCRL(new ByteArrayInputStream(
+                    Base64.decode(Trust_Anchor_CRL_CP_01_01_crl)));
+            trustedSet = new HashSet();
+
+            byte[] _ncBytes = null;
             byte[] _octBytes = trustedCert.getExtensionValue("2.5.29.30");
-            if(_octBytes != null) {
-                DERInputStream _ais = new DERInputStream(new ByteArrayInputStream(_octBytes));
-                ASN1OctetString _oct = ASN1OctetString.getInstance(_ais.readObject());
+            if (_octBytes != null)
+            {
+                ASN1InputStream _ais = new ASN1InputStream(
+                        new ByteArrayInputStream(_octBytes));
+                ASN1OctetString _oct = ASN1OctetString.getInstance(_ais
+                        .readObject());
                 _ais.close();
                 _ncBytes = _oct.getOctets();
             }
-            
+
             trustedSet.add(new TrustAnchor(trustedCert, _ncBytes));
-            testCount   = 0;
-            testFail    = new Vector();
-            resultBuf   = new StringBuffer();
+            testCount = 0;
+            testFail = new Vector();
+            resultBuf = new StringBuffer();
         }
-        catch(Exception ex) {
+        catch (Exception ex)
+        {
             ex.printStackTrace();
             throw new RuntimeException(ex.getMessage());
         }
     }
-    
-    private final X509Certificate decodeCertificate(String _str) 
-        throws GeneralSecurityException {
-        
-        return (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(Base64.decode(_str)));
+
+    private final X509Certificate decodeCertificate(String _str)
+            throws GeneralSecurityException
+    {
+
+        return (X509Certificate)fact
+                .generateCertificate(new ByteArrayInputStream(Base64
+                        .decode(_str)));
     }
-    
-    private final X509CRL decodeCRL(String _str) 
-        throws GeneralSecurityException {
-        
-        return (X509CRL)fact.generateCRL(new ByteArrayInputStream(Base64.decode(_str)));
+
+    private final X509CRL decodeCRL(String _str)
+            throws GeneralSecurityException
+    {
+
+        return (X509CRL)fact.generateCRL(new ByteArrayInputStream(Base64
+                .decode(_str)));
     }
-    
-    private final void log(Exception ex) {
-        if(debug) {
+
+    private final void log(Exception ex)
+    {
+        if (debug)
+        {
             System.out.print("NISTCertPathTest -- ");
             ex.printStackTrace();
         }
     }
-    
-    private final void log(Object _obj) {
-        if(debug) {
+
+    private final void log(Object _obj)
+    {
+        if (debug)
+        {
             System.out.println("NISTCertPathTest -- " + _obj.toString());
         }
     }
-    
-    private final void log(String _msg) {
-        if(debug) {
+
+    private final void log(String _msg)
+    {
+        if (debug)
+        {
             System.out.println("NISTCertPathTest -- " + _msg);
         }
     }
-    
-    private final CertStore makeCertStore(String[] _strs) 
-        throws GeneralSecurityException {
-        
+
+    private final CertStore makeCertStore(String[] _strs)
+            throws GeneralSecurityException
+    {
+
         Vector _vec = new Vector();
         _vec.addElement(trustedCRL);
-        
-        for(int i = 0; i < _strs.length; i++) {
-            if(_strs[i].startsWith("MIIC")) {
-                _vec.addElement(fact.generateCertificate(new ByteArrayInputStream(Base64.decode(_strs[i]))));
+
+        for (int i = 0; i < _strs.length; i++)
+        {
+            if (_strs[i].startsWith("MIIC"))
+            {
+                _vec.addElement(fact
+                        .generateCertificate(new ByteArrayInputStream(Base64
+                                .decode(_strs[i]))));
             }
-            else if(_strs[i].startsWith("MIIB")) {
-                _vec.addElement(fact.generateCRL(new ByteArrayInputStream(Base64.decode(_strs[i]))));
+            else if (_strs[i].startsWith("MIIB"))
+            {
+                _vec.addElement(fact.generateCRL(new ByteArrayInputStream(
+                        Base64.decode(_strs[i]))));
             }
-            else {
+            else
+            {
                 throw new IllegalArgumentException("Invalid certificate or crl");
             }
         }
-        
+
         // Insert elements backwards to muck up forward ordering dependency
         Vector _vec2 = new Vector();
-        for(int i = _vec.size() - 1; i >= 0; i--) {
+        for (int i = _vec.size() - 1; i >= 0; i--)
+        {
             _vec2.add(_vec.elementAt(i));
         }
-        
-        return CertStore.getInstance("Collection", new CollectionCertStoreParameters(_vec2), "BC");
+
+        return CertStore.getInstance("Collection",
+                new CollectionCertStoreParameters(_vec2), "BC");
     }
-    
-    private void test(String _name, 
-                      String[] _data, 
-                      boolean _accept, 
-                      boolean _debug) {
-        
+
+    private void test(String _name, String[] _data, boolean _accept,
+            boolean _debug)
+    {
+
         test(_name, _data, null, false, _accept, _debug);
     }
-    
-    private void test(String _name, 
-                      String[] _data, 
-                      boolean _explicit, 
-                      boolean _accept, 
-                      boolean _debug) {
-        
+
+    private void test(String _name, String[] _data, boolean _explicit,
+            boolean _accept, boolean _debug)
+    {
+
         test(_name, _data, null, _explicit, _accept, _debug);
     }
-    
-    private void test(String _name, 
-                     String[] _data, 
-                     Set _ipolset, 
-                     boolean _explicit, 
-                     boolean _accept, 
-                     boolean _debug) {
-        
+
+    private void test(String _name, String[] _data, Set _ipolset,
+            boolean _explicit, boolean _accept, boolean _debug)
+    {
+
         testCount++;
         debug = _debug;
         boolean _pass = true;
-        
-        try {
-            CertPathBuilder  _cpb    = CertPathBuilder.getInstance("PKIX", "BC");
-            X509Certificate  _ee     = decodeCertificate(_data[_data.length - 1]);
-            X509CertSelector _select = new X509CertSelector();
-            _select.setSubject(((X509Principal)_ee.getSubjectDN()).getEncoded());
 
-            PKIXBuilderParameters _param = new PKIXBuilderParameters(trustedSet, _select);
+        try
+        {
+            CertPathBuilder _cpb = CertPathBuilder.getInstance("PKIX", "BC");
+            X509Certificate _ee = decodeCertificate(_data[_data.length - 1]);
+            X509CertSelector _select = new X509CertSelector();
+            _select.setSubject(PrincipalUtil.getSubjectX509Principal(_ee).getEncoded());
+
+            PKIXBuilderParameters _param = new PKIXBuilderParameters(
+                    trustedSet, _select);
             _param.setExplicitPolicyRequired(_explicit);
             _param.addCertStore(makeCertStore(_data));
             _param.setRevocationEnabled(true);
-            if(_ipolset != null) {
+            if (_ipolset != null)
+            {
                 _param.setInitialPolicies(_ipolset);
             }
 
             CertPathBuilderResult _result = _cpb.build(_param);
-            
-            if(_accept) {
+
+            if (_accept)
+            {
                 log(_result);
             }
-            else {
-                log("Accept when it should reject");
+            else
+            {
+                System.out.println("Accept when it should reject");
                 _pass = false;
                 testFail.addElement(_name);
             }
-         }
-         catch(Exception ex) {
-            if(_accept) {
+        }
+        catch (Exception ex)
+        {
+            if (_accept)
+            {
                 log("Reject when it should accept");
                 log(ex);
                 _pass = false;
                 testFail.addElement(_name);
             }
         }
-        
-        resultBuf.append("NISTCertPathTest -- " + _name + ": " + (_pass ? "\n" : "Failed.\n"));
+
+        resultBuf.append("NISTCertPathTest -- " + _name + ": "
+                + (_pass ? "\n" : "Failed.\n"));
     }
     
-    /*  
-     *  
-     *  MAIN
-     *  
-     */ 
-    
-    public static void main(String _args[]) {
-        try {
+    public static void main(String _args[])
+    {
+        try
+        {
             Security.addProvider(new BouncyCastleProvider());
-            
-            Test       _test   = new NISTCertPathTest();
+
+            Test _test = new NISTCertPathTest();
             TestResult _result = _test.perform();
-            
+
             System.out.println(_result.toString());
         }
-        catch(Exception ex) {
+        catch (Exception ex)
+        {
             ex.printStackTrace();
         }
     }
-    
-
-
-
-
-
-
-
-
-
-
-
-
-    /*  
-     *  
-     *  TEST DATA
-     *  
-     */ 
-
     
     /*  
      *  Trust Anchor
      *  
      */ 
-
     public static final String Trust_Anchor_CP_01_01_crt = 
         "MIICbDCCAdWgAwIBAgIDAYafMA0GCSqGSIb3DQEBBQUAMF4xCzAJBgNVBAYTAlVTMRgwFg" +
         "YDVQQKEw9VLlMuIEdvdmVybm1lbnQxDDAKBgNVBAsTA0RvRDEQMA4GA1UECxMHVGVzdGlu" +
@@ -5226,5 +5212,4 @@ public class NISTCertPathTest implements Test {
         Intermediate_CRL_RL_09_01_crl,
         End_Certificate_RL_09_01_crt
     };
-
 }

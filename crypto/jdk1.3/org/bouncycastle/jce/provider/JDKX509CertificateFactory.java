@@ -283,7 +283,7 @@ public class JDKX509CertificateFactory
         throws CertificateException
     {
         Certificate     cert;
-        ArrayList       certs = new ArrayList();
+        List            certs = new ArrayList();
 
         while ((cert = engineGenerateCertificate(inStream)) != null)
         {
@@ -351,7 +351,7 @@ public class JDKX509CertificateFactory
         InputStream inStream)
     throws CertificateException
     {
-        return engineGenerateCertPath( inStream, "PkiPath" );
+        return engineGenerateCertPath(inStream, "PkiPath");
     }
 
     public CertPath engineGenerateCertPath(
@@ -359,7 +359,7 @@ public class JDKX509CertificateFactory
         String encoding)
     throws CertificateException
     {
-        return new PKIXCertPath( inStream, encoding );
+        return new PKIXCertPath(inStream, encoding);
     }
 
     public CertPath engineGenerateCertPath(
@@ -368,16 +368,17 @@ public class JDKX509CertificateFactory
     {
         Iterator iter = certificates.iterator();
         Object obj;
-        while ( iter.hasNext() )
+        while (iter.hasNext())
         {
             obj = iter.next();
-            if ( obj != null ) {
-                if ( ! ( obj instanceof X509Certificate ) )
+            if (obj != null) 
+            {
+                if (! (obj instanceof X509Certificate))
                 {
-                    throw new CertificateException( "list contains none X509Certificate object while creating CertPath\n" + obj.toString() );
+                    throw new CertificateException("list contains none X509Certificate object while creating CertPath\n" + obj.toString());
                 }
             }
         }
-        return new PKIXCertPath( certificates );
+        return new PKIXCertPath(certificates);
     }
 }

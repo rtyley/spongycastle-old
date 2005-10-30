@@ -38,7 +38,7 @@ public class JCESecretKeyFactory
         KeySpec keySpec)
     throws InvalidKeySpecException
     {
-        if ( keySpec instanceof SecretKeySpec )
+        if (keySpec instanceof SecretKeySpec)
         {
             return (SecretKey)keySpec;
         }
@@ -201,7 +201,7 @@ public class JCESecretKeyFactory
             KeySpec keySpec)
         throws InvalidKeySpecException
         {
-            if ( keySpec instanceof DESKeySpec )
+            if (keySpec instanceof DESKeySpec)
             {
                 DESKeySpec desKeySpec = (DESKeySpec)keySpec;
                 return new SecretKeySpec(desKeySpec.getKey(), "DES");
@@ -270,7 +270,7 @@ public class JCESecretKeyFactory
             KeySpec keySpec)
         throws InvalidKeySpecException
         {
-            if ( keySpec instanceof DESedeKeySpec )
+            if (keySpec instanceof DESedeKeySpec)
             {
                 DESedeKeySpec desKeySpec = (DESedeKeySpec)keySpec;
                 return new SecretKeySpec(desKeySpec.getKey(), "DESede");

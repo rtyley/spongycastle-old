@@ -12,6 +12,7 @@ import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.util.Properties;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.ArrayList;
 
 import javax.mail.Message;
@@ -40,21 +41,32 @@ import org.bouncycastle.asn1.cms.AttributeTable;
 /**
  * Example that sends a signed and encrypted mail message.
  */
-public class SendSignedAndEncryptedMail {
-    public static void main(String args[]) {
-        if (args.length != 5) {
-            System.err.println("usage: EncryptMail <pkcs12Keystore> <password> <keyalias> <smtp server> <email address>");
+public class SendSignedAndEncryptedMail
+{
+    public static void main(String args[])
+    {
+        if (args.length != 5)
+        {
+            System.err
+                    .println("usage: SendSignedAndEncryptedMail <pkcs12Keystore> <password> <keyalias> <smtp server> <email address>");
             System.exit(0);
         }
 
-        try {
-            MailcapCommandMap mailcap = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
+        try
+        {
+            MailcapCommandMap mailcap = (MailcapCommandMap)CommandMap
+                    .getDefaultCommandMap();
 
-            mailcap.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
-            mailcap.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
-            mailcap.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
-            mailcap.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
-            mailcap.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
+            mailcap
+                    .addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
+            mailcap
+                    .addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
+            mailcap
+                    .addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
+            mailcap
+                    .addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
+            mailcap
+                    .addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
 
             CommandMap.setDefaultCommandMap(mailcap);
 
@@ -67,9 +79,12 @@ public class SendSignedAndEncryptedMail {
             Certificate[] chain = keystore.getCertificateChain(args[2]);
 
             /* Get the private key to sign the message with */
-            PrivateKey privateKey = (PrivateKey) keystore.getKey(args[2], args[1].toCharArray());
-            if (privateKey == null) {
-                throw new Exception("cannot find private key for alias: " + args[2]);
+            PrivateKey privateKey = (PrivateKey)keystore.getKey(args[2],
+                    args[1].toCharArray());
+            if (privateKey == null)
+            {
+                throw new Exception("cannot find private key for alias: "
+                        + args[2]);
             }
 
             /* Create the message to sign and encrypt */
@@ -79,7 +94,8 @@ public class SendSignedAndEncryptedMail {
 
             MimeMessage body = new MimeMessage(session);
             body.setFrom(new InternetAddress(args[4]));
-            body.setRecipient(Message.RecipientType.TO, new InternetAddress(args[4]));
+            body.setRecipient(Message.RecipientType.TO, new InternetAddress(
+                    args[4]));
             body.setSubject("example encrypted message");
             body.setContent("example encrypted message", "text/plain");
             body.saveChanges();
@@ -92,17 +108,23 @@ public class SendSignedAndEncryptedMail {
 
             ASN1EncodableVector attributes = new ASN1EncodableVector();
             attributes.add(new SMIMEEncryptionKeyPreferenceAttribute(
-                new IssuerAndSerialNumber(new X509Name(((X509Certificate) chain[0]).getIssuerDN().getName()), ((X509Certificate) chain[0]).getSerialNumber()))
-            );
+                    new IssuerAndSerialNumber(
+                            new X509Name(((X509Certificate)chain[0])
+                                    .getIssuerDN().getName()),
+                            ((X509Certificate)chain[0]).getSerialNumber())));
             attributes.add(new SMIMECapabilitiesAttribute(capabilities));
 
             SMIMESignedGenerator signer = new SMIMESignedGenerator();
-            signer.addSigner(privateKey, (X509Certificate) chain[0], "DSA".equals(privateKey.getAlgorithm()) ?
-                SMIMESignedGenerator.DIGEST_SHA1 : SMIMESignedGenerator.DIGEST_MD5,
-                new AttributeTable(attributes), null);
+            signer
+                    .addSigner(
+                            privateKey,
+                            (X509Certificate)chain[0],
+                            "DSA".equals(privateKey.getAlgorithm()) ? SMIMESignedGenerator.DIGEST_SHA1
+                                    : SMIMESignedGenerator.DIGEST_MD5,
+                            new AttributeTable(attributes), null);
 
             /* Add the list of certs to the generator */
-            ArrayList certList = new ArrayList();
+            List certList = new ArrayList();
             certList.add(chain[0]);
             CertStore certs = CertStore.getInstance("Collection",
                     new CollectionCertStoreParameters(certList), "BC");
@@ -114,8 +136,9 @@ public class SendSignedAndEncryptedMail {
 
             /* Set all original MIME headers in the signed message */
             Enumeration headers = body.getAllHeaderLines();
-            while (headers.hasMoreElements()) {
-                signedMessage.addHeaderLine((String) headers.nextElement());
+            while (headers.hasMoreElements())
+            {
+                signedMessage.addHeaderLine((String)headers.nextElement());
             }
 
             /* Set the content of the signed message */
@@ -124,32 +147,46 @@ public class SendSignedAndEncryptedMail {
 
             /* Create the encrypter */
             SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
-            encrypter.addKeyTransRecipient((X509Certificate) chain[0]);
+            encrypter.addKeyTransRecipient((X509Certificate)chain[0]);
 
             /* Encrypt the message */
-            MimeBodyPart encryptedPart = encrypter.generate(signedMessage, SMIMEEnvelopedGenerator.RC2_CBC, "BC");
+            MimeBodyPart encryptedPart = encrypter.generate(signedMessage,
+                    SMIMEEnvelopedGenerator.RC2_CBC, "BC");
 
-            /* Create a new MimeMessage that contains the encrypted and signed content */
+            /*
+             * Create a new MimeMessage that contains the encrypted and signed
+             * content
+             */
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             encryptedPart.writeTo(out);
 
-            MimeMessage encryptedMessage = new MimeMessage(session, new ByteArrayInputStream(out.toByteArray()));
+            MimeMessage encryptedMessage = new MimeMessage(session,
+                    new ByteArrayInputStream(out.toByteArray()));
 
             /* Set all original MIME headers in the encrypted message */
             headers = body.getAllHeaderLines();
-            while (headers.hasMoreElements()) {
-                String headerLine = (String) headers.nextElement();
-                /* Make sure not to override any content-* headers from the original message */
-                if (! headerLine.toLowerCase().startsWith("content-")) {
+            while (headers.hasMoreElements())
+            {
+                String headerLine = (String)headers.nextElement();
+                /*
+                 * Make sure not to override any content-* headers from the
+                 * original message
+                 */
+                if (!headerLine.toLowerCase().startsWith("content-"))
+                {
                     encryptedMessage.addHeaderLine(headerLine);
                 }
             }
 
             Transport.send(encryptedMessage);
-        } catch (SMIMEException ex) {
+        }
+        catch (SMIMEException ex)
+        {
             ex.getUnderlyingException().printStackTrace(System.err);
             ex.printStackTrace(System.err);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             ex.printStackTrace(System.err);
         }
     }

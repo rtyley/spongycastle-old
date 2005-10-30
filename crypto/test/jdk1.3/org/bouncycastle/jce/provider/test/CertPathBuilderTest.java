@@ -46,25 +46,25 @@ public class CertPathBuilderTest
             X509CRL rootCrl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(CertPathTest.rootCrlBin));
             X509CRL interCrl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(CertPathTest.interCrlBin));
             List list = new ArrayList();
-            list.add( rootCert );
-            list.add( interCert );
-            list.add( finalCert );
-            list.add( rootCrl );
-            list.add( interCrl );
-            CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters( list );
+            list.add(rootCert);
+            list.add(interCert);
+            list.add(finalCert);
+            list.add(rootCrl);
+            list.add(interCrl);
+            CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
             CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
             Calendar validDate = Calendar.getInstance();
             validDate.set(2002,2,21,2,21,10);
 
                 //Searching for rootCert by subjectDN without CRL
             Set trust = new HashSet();
-            trust.add( new TrustAnchor( rootCert, null ) );
+            trust.add(new TrustAnchor(rootCert, null));
             CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","BC");
             X509CertSelector targetConstraints = new X509CertSelector();
-            targetConstraints.setSubject( finalCert.getSubjectDN().getName() );
-            PKIXBuilderParameters params = new PKIXBuilderParameters( trust, targetConstraints );
-            params.addCertStore( store );
-            params.setDate( validDate.getTime() );
+            targetConstraints.setSubject(finalCert.getSubjectDN().getName());
+            PKIXBuilderParameters params = new PKIXBuilderParameters(trust, targetConstraints);
+            params.addCertStore(store);
+            params.setDate(validDate.getTime());
             PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) cpb.build(params);
             CertPath                  path = result.getCertPath();
             

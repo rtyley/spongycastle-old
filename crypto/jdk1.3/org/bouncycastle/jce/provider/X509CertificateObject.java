@@ -330,7 +330,7 @@ public class X509CertificateObject
     {
         if (this.getVersion() == 3)
         {
-            HashSet         set = new HashSet();
+            Set             set = new HashSet();
             X509Extensions  extensions = c.getTBSCertificate().getExtensions();
 
             if (extensions != null)
@@ -404,7 +404,7 @@ public class X509CertificateObject
     {
         if (this.getVersion() == 3)
         {
-            HashSet         set = new HashSet();
+            Set             set = new HashSet();
             X509Extensions  extensions = c.getTBSCertificate().getExtensions();
 
             if (extensions != null)

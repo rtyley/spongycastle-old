@@ -16,6 +16,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -85,13 +86,30 @@ public class OCSPReq
         this.req = OCSPRequest.getInstance(
                         new ASN1InputStream(in).readObject());
     }
-    
 
+    /**
+     * Return the DER encoding of the tbsRequest field.
+     * @return DER encoding of tbsRequest
+     * @throws OCSPException in the event of an encoding error.
+     */
+    public byte[] getTBSRequest()
+        throws OCSPException
+    {
+        try
+        {
+            return req.getTbsRequest().getEncoded();
+        }
+        catch (IOException e)
+        {
+            throw new OCSPException("problem encoding tbsRequest", e);
+        }
+    }
+    
     public int getVersion()
     {
         return req.getTbsRequest().getVersion().getValue().intValue() + 1;
     }
-
+    
     public GeneralName getRequestorName()
     {
         return GeneralName.getInstance(req.getTbsRequest().getRequestorName());
@@ -138,11 +156,11 @@ public class OCSPReq
         return req.getOptionalSignature().getSignature().getBytes();
     }
     
-    private ArrayList getCertList(
+    private List getCertList(
         String provider) 
         throws OCSPException, NoSuchProviderException
     {
-        ArrayList             certs = new ArrayList();
+        List                  certs = new ArrayList();
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         ASN1OutputStream      aOut = new ASN1OutputStream(bOut);
         CertificateFactory    cf;
@@ -201,7 +219,7 @@ public class OCSPReq
             return null;
         }
     
-        ArrayList    certs = this.getCertList(provider);
+        List         certs = this.getCertList(provider);
         
         return (X509Certificate[])certs.toArray(new X509Certificate[certs.size()]);
     }
@@ -309,7 +327,7 @@ public class OCSPReq
     public boolean hasUnsupportedCriticalExtension()
     {
         Set extns = getCriticalExtensionOIDs();
-        if ( extns != null && !extns.isEmpty() )
+        if (extns != null && !extns.isEmpty())
         {
             return true;
         }
@@ -319,7 +337,7 @@ public class OCSPReq
 
     private Set getExtensionOIDs(boolean critical)
     {
-        HashSet         set = new HashSet();
+        Set             set = new HashSet();
         X509Extensions  extensions = this.getRequestExtensions();
         
         if (extensions != null)

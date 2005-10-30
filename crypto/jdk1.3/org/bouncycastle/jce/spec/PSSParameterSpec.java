@@ -23,7 +23,7 @@ public class PSSParameterSpec
      */
     public PSSParameterSpec(int saltLen)
     {
-        if ( saltLen < 0 )
+        if (saltLen < 0)
         {
             throw new IllegalArgumentException("Salt length must be >= 0");
         }

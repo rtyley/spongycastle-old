@@ -44,7 +44,7 @@ public abstract class CertPathBuilderSpi
      * @exception parametersInvalidAlgorithmParameterException if the
      * specified parameters are inappropriate for this CertPathBuilder
      */
-    public abstract CertPathBuilderResult engineBuild( CertPathParameters params )
+    public abstract CertPathBuilderResult engineBuild(CertPathParameters params)
     throws CertPathBuilderException,
     InvalidAlgorithmParameterException;
 }

@@ -37,57 +37,67 @@ public class PKIXCertPathBuilderResult extends PKIXCertPathValidatorResult
     /**
      * Creates an instance of <code>PKIXCertPathBuilderResult</code>
      * containing the specified parameters.
-     *
-     * @param certPath the validated <code>CertPath</code>
-     * @param trustAnchor a <code>TrustAnchor</code> describing the CA that
-     * served as a trust anchor for the certification path
-     * @param policyTree the immutable valid policy tree, or <code>null</code>
-     * if there are no valid policies
-     * @param subjectPublicKey the public key of the subject
-     *
-     * @exception NullPointerException if the <code>certPath</code>, 
-     * <code>trustAnchor</code> or <code>subjectPublicKey</code> parameters 
-     * are <code>null</code>
+     * 
+     * @param certPath
+     *            the validated <code>CertPath</code>
+     * @param trustAnchor
+     *            a <code>TrustAnchor</code> describing the CA that served as
+     *            a trust anchor for the certification path
+     * @param policyTree
+     *            the immutable valid policy tree, or <code>null</code> if
+     *            there are no valid policies
+     * @param subjectPublicKey
+     *            the public key of the subject
+     * 
+     * @exception NullPointerException
+     *                if the <code>certPath</code>, <code>trustAnchor</code>
+     *                or <code>subjectPublicKey</code> parameters are
+     *                <code>null</code>
      */
-    public PKIXCertPathBuilderResult(CertPath certPath, TrustAnchor trustAnchor,
-                     PolicyNode policyTree, PublicKey subjectPublicKey)
+    public PKIXCertPathBuilderResult(
+        CertPath certPath,
+        TrustAnchor trustAnchor,
+        PolicyNode policyTree,
+        PublicKey subjectPublicKey)
     {
-    super(trustAnchor, policyTree, subjectPublicKey);
-    if ( certPath == null )
-        throw new NullPointerException( "certPath must be non-null" );
-    this.certPath = certPath;
+        super(trustAnchor, policyTree, subjectPublicKey);
+        if (certPath == null)
+        {
+            throw new NullPointerException("certPath must be non-null");
+        }
+        this.certPath = certPath;
     }
 
     /**
-     * Returns the built and validated certification path. The 
+     * Returns the built and validated certification path. The
      * <code>CertPath</code> object does not include the trust anchor.
-     * Instead, use the {@link #getTrustAnchor() getTrustAnchor()} method to 
-     * obtain the <code>TrustAnchor</code> that served as the trust anchor
-     * for the certification path.
-     *
-     * @return the built and validated <code>CertPath</code> (never 
-     * <code>null</code>)
+     * Instead, use the {@link #getTrustAnchor() getTrustAnchor()} method to
+     * obtain the <code>TrustAnchor</code> that served as the trust anchor for
+     * the certification path.
+     * 
+     * @return the built and validated <code>CertPath</code> (never
+     *         <code>null</code>)
      */
     public CertPath getCertPath()
     {
-    return certPath;
+        return certPath;
     }
 
     /**
-     * Return a printable representation of this 
+     * Return a printable representation of this
      * <code>PKIXCertPathBuilderResult</code>.
-     *
+     * 
      * @return a <code>String</code> describing the contents of this
      *         <code>PKIXCertPathBuilderResult</code>
      */
     public String toString()
     {
-    StringBuffer s = new StringBuffer();
-    s.append( "PKIXCertPathBuilderResult: [\n" );
-    s.append( "  Certification Path: " + getCertPath() + "\n" );
-    s.append( "  Trust Anchor: " + getTrustAnchor() + "\n" );
-    s.append( "  Policy Tree: " + getPolicyTree() + "\n" );
-    s.append( "  Subject Public Key: " + getPublicKey() + "\n]");
-    return s.toString();
+        StringBuffer s = new StringBuffer();
+        s.append("PKIXCertPathBuilderResult: [\n");
+        s.append("  Certification Path: " + getCertPath() + "\n");
+        s.append("  Trust Anchor: " + getTrustAnchor() + "\n");
+        s.append("  Policy Tree: " + getPolicyTree() + "\n");
+        s.append("  Subject Public Key: " + getPublicKey() + "\n]");
+        return s.toString();
     }
 }
