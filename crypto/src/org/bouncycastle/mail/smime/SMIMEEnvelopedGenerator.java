@@ -2,6 +2,7 @@ package org.bouncycastle.mail.smime;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
@@ -10,10 +11,12 @@ import java.security.cert.X509Certificate;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
 import org.bouncycastle.cms.CMSException;
@@ -37,7 +40,6 @@ import org.bouncycastle.cms.CMSException;
 public class SMIMEEnvelopedGenerator
     extends SMIMEGenerator
 {
-    private static final String ENCRYPTED_CONTENT_TYPE = "application/pkcs7-mime; name=\"smime.p7m\"; smime-type=enveloped-data";
     public static final String  DES_EDE3_CBC    = CMSEnvelopedDataGenerator.DES_EDE3_CBC;
     public static final String  RC2_CBC         = CMSEnvelopedDataGenerator.RC2_CBC;
     public static final String  IDEA_CBC        = CMSEnvelopedDataGenerator.IDEA_CBC;
@@ -47,7 +49,9 @@ public class SMIMEEnvelopedGenerator
     public static final String  AES192_CBC      = CMSEnvelopedDataGenerator.AES192_CBC;
     public static final String  AES256_CBC      = CMSEnvelopedDataGenerator.AES256_CBC;
 
-    private CMSEnvelopedDataStreamGenerator fact;
+    private static final String ENCRYPTED_CONTENT_TYPE = "application/pkcs7-mime; name=\"smime.p7m\"; smime-type=enveloped-data";
+    
+    private EnvelopedGenerator fact;
 
     static
     {
@@ -64,7 +68,7 @@ public class SMIMEEnvelopedGenerator
      */
     public SMIMEEnvelopedGenerator()
     {
-        fact = new CMSEnvelopedDataStreamGenerator();
+        fact = new EnvelopedGenerator();
     }
 
     /**
@@ -208,6 +212,8 @@ public class SMIMEEnvelopedGenerator
         private final int    _keySize;
         private final String _provider;
         
+        private boolean _firstTime = true;
+        
         ContentEncryptor(
             MimeBodyPart content,
             String       encryptionOid,
@@ -223,18 +229,26 @@ public class SMIMEEnvelopedGenerator
         public void write(OutputStream out)
             throws IOException
         {
-            
             OutputStream encrypted;
             
             try
             {
-                if (_keySize == 0)  // use the default
+                if (_firstTime)
                 {
-                    encrypted = fact.open(out, _encryptionOid, _provider);
+                    if (_keySize == 0)  // use the default
+                    {
+                        encrypted = fact.open(out, _encryptionOid, _provider);
+                    }
+                    else
+                    {
+                        encrypted = fact.open(out, _encryptionOid, _keySize, _provider);
+                    }
+                    
+                    _firstTime = false;
                 }
                 else
                 {
-                    encrypted = fact.open(out, _encryptionOid, _keySize, _provider);
+                    encrypted = fact.regenerate(out, _provider);
                 }
             
                 _content.writeTo(encrypted);
@@ -257,6 +271,40 @@ public class SMIMEEnvelopedGenerator
             {
                 throw new IOException(e.toString());
             }
+        }
+    }
+    
+    private class EnvelopedGenerator
+        extends CMSEnvelopedDataStreamGenerator
+    {
+        private String _encryptionOID;
+        private SecretKey _encKey;
+        private AlgorithmParameters _params;
+        private ASN1EncodableVector _recipientInfos;
+
+        protected OutputStream open(
+            OutputStream        out,
+            String              encryptionOID,
+            SecretKey           encKey,
+            AlgorithmParameters params,
+            ASN1EncodableVector recepientInfos,
+            String              provider)
+            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+        {
+            _encryptionOID = encryptionOID;
+            _encKey = encKey;
+            _params = params;
+            _recipientInfos = recepientInfos;
+            
+            return super.open(out, encryptionOID, encKey, params, recepientInfos, provider);
+        }
+        
+        OutputStream regenerate(
+            OutputStream out,
+            String       provider)
+            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+        {
+            return super.open(out, _encryptionOID, _encKey, _params, _recipientInfos, provider);
         }
     }
 }
