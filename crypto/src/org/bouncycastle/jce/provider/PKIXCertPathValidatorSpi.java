@@ -750,7 +750,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         {
             if (sign != null)
             {
-                workingIssuerName = sign.getSubjectX500Principal();
+                workingIssuerName = getSubjectPrincipal(sign);
                 workingPublicKey = sign.getPublicKey();
             }
             else
@@ -851,7 +851,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
                 try
                 {
-                    crlselect.addIssuerName(cert.getIssuerX500Principal().getEncoded());
+                    crlselect.addIssuerName(getIssuerPrincipal(cert).getEncoded());
                 }
                 catch (IOException e)
                 {
@@ -932,7 +932,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
                             try
                             {
-                                baseSelect.addIssuerName(crl.getIssuerX500Principal().getEncoded());
+                                baseSelect.addIssuerName(getIssuerPrincipal(crl).getEncoded());
                             }
                             catch (IOException e)
                             {
@@ -1006,10 +1006,10 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             //
             // (a) (4) name chaining
             //
-            if (!cert.getIssuerX500Principal().equals(workingIssuerName))
+            if (!getIssuerPrincipal(cert).equals(workingIssuerName))
             {
                 throw new CertPathValidatorException(
-                            "IssuerName(" + cert.getIssuerX500Principal() +
+                            "IssuerName(" + getIssuerPrincipal(cert) +
                             ") does not match SubjectName(" + workingIssuerName +
                             ") of signing certificate", null, certPath, index);
             }
@@ -1019,7 +1019,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             //
             if (!(isSelfIssued(cert) && (i < n)))
             {
-                X500Principal principal = cert.getSubjectX500Principal();
+                X500Principal principal = getSubjectPrincipal(cert);
                 ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(principal.getEncoded()));
                 ASN1Sequence    dns;
 
@@ -1553,7 +1553,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             workingPublicKey = sign.getPublicKey();
             try
             {
-                workingIssuerName = sign.getSubjectX500Principal();
+                workingIssuerName = getSubjectPrincipal(sign);
             }
             catch (IllegalArgumentException ex)
             {
@@ -1879,7 +1879,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
         try
         {
-            certSelectX509.setSubject(cert.getIssuerX500Principal().getEncoded());
+            certSelectX509.setSubject(getIssuerPrincipal(cert).getEncoded());
         }
         catch (IOException ex)
         {
@@ -1906,7 +1906,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             {
                 try
                 {
-                    X500Principal certIssuer = cert.getIssuerX500Principal();
+                    X500Principal certIssuer = getIssuerPrincipal(cert);
                     X500Principal caName = new X500Principal(trust.getCAName());
                     if (certIssuer.equals(caName))
                     {
@@ -1947,5 +1947,20 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
 
         return trust;
+    }
+    
+    private X500Principal getIssuerPrincipal(X509CRL crl)
+    {
+        return crl.getIssuerX500Principal();
+    }
+
+    private X500Principal getIssuerPrincipal(X509Certificate cert)
+    {
+        return cert.getIssuerX500Principal();
+    }
+
+    private X500Principal getSubjectPrincipal(X509Certificate cert)
+    {
+        return cert.getSubjectX500Principal();
     }
 }
