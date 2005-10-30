@@ -729,6 +729,11 @@ public final class BouncyCastleProvider extends Provider
         put("Signature.SHA256WITHECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA256");
         put("Signature.SHA384WITHECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA384");
         put("Signature.SHA512WITHECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA512");
+        put("Signature.SHA1WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR");
+        put("Signature.SHA224WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR224");
+        put("Signature.SHA256WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR256");
+        put("Signature.SHA384WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR384");
+        put("Signature.SHA512WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR512");
         put("Signature.SHA1withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$SHA1WithRSAEncryption");
         put("Signature.MD5withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$MD5WithRSAEncryption");
         put("Signature.RIPEMD160withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$RIPEMD160WithRSAEncryption");
