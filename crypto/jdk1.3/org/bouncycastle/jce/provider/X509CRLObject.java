@@ -57,7 +57,7 @@ public class X509CRLObject
     public boolean hasUnsupportedCriticalExtension()
     {
         Set extns = getCriticalExtensionOIDs();
-        if ( extns != null && !extns.isEmpty() )
+        if (extns != null && !extns.isEmpty())
         {
             return true;
         }
@@ -69,7 +69,7 @@ public class X509CRLObject
     {
         if (this.getVersion() == 2)
         {
-            HashSet         set = new HashSet();
+            Set             set = new HashSet();
             X509Extensions  extensions = c.getTBSCertList().getExtensions();
             Enumeration     e = extensions.oids();
 
@@ -160,7 +160,7 @@ public class X509CRLObject
         InvalidKeyException, NoSuchProviderException,
         SignatureException
     {
-        if ( !c.getSignatureAlgorithm().equals(c.getTBSCertList().getSignature()) )
+        if (!c.getSignatureAlgorithm().equals(c.getTBSCertList().getSignature()))
         {
             throw new CRLException("Signature algorithm on CertifcateList does not match TBSCertList.");
         }
@@ -169,7 +169,7 @@ public class X509CRLObject
 
         sig.initVerify(key);
         sig.update(this.getTBSCertList());
-        if ( !sig.verify(this.getSignature()) )
+        if (!sig.verify(this.getSignature()))
         {
             throw new SignatureException("CRL does not verify with supplied public key.");
         }
@@ -204,11 +204,12 @@ public class X509CRLObject
     {
         TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
 
-        if ( certs != null )
+        if (certs != null)
         {
-            for ( int i = 0; i < certs.length; i++ )
+            for (int i = 0; i < certs.length; i++)
             {
-                if ( certs[i].getUserCertificate().getValue().equals(serialNumber) ) {
+                if (certs[i].getUserCertificate().getValue().equals(serialNumber)) 
+                {
                     return new X509CRLEntryObject(certs[i]);
                 }
             }
@@ -221,10 +222,10 @@ public class X509CRLObject
     {
         TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
 
-        if ( certs != null )
+        if (certs != null)
         {
-            HashSet set = new HashSet();
-            for ( int i = 0; i < certs.length; i++ )
+            Set set = new HashSet();
+            for (int i = 0; i < certs.length; i++)
             {
                 set.add(new X509CRLEntryObject(certs[i]));
 
@@ -264,7 +265,7 @@ public class X509CRLObject
         Provider    prov = Security.getProvider("BC");
         String        algName = prov.getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
 
-        if ( algName != null )
+        if (algName != null)
         {
             return algName;
         }
@@ -277,7 +278,7 @@ public class X509CRLObject
         for (int i = 0; i != provs.length; i++)
         {
             algName = provs[i].getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
-            if ( algName != null )
+            if (algName != null)
             {
                 return algName;
             }
@@ -295,7 +296,7 @@ public class X509CRLObject
     {
         ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
 
-        if ( c.getSignatureAlgorithm().getParameters() != null )
+        if (c.getSignatureAlgorithm().getParameters() != null)
         {
             try
             {
@@ -333,20 +334,20 @@ public class X509CRLObject
      */
     public boolean isRevoked(Certificate cert)
     {
-        if ( !cert.getType().equals("X.509") )
+        if (!cert.getType().equals("X.509"))
         {
             throw new RuntimeException("X.509 CRL used with non X.509 Cert");
         }
 
         TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
 
-        if ( certs != null )
+        if (certs != null)
         {
             BigInteger serial = ((X509Certificate)cert).getSerialNumber();
 
-            for ( int i = 0; i < certs.length; i++ )
+            for (int i = 0; i < certs.length; i++)
             {
-                if ( certs[i].getUserCertificate().getValue().equals(serial) )
+                if (certs[i].getUserCertificate().getValue().equals(serial))
                 {
                     return true;
                 }

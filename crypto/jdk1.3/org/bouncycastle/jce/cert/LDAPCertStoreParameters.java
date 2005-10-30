@@ -37,77 +37,85 @@ public class LDAPCertStoreParameters implements CertStoreParameters
      */
     public LDAPCertStoreParameters()
     {
-    this("localhost", LDAP_DEFAULT_PORT);
+        this("localhost", LDAP_DEFAULT_PORT);
     }
 
     /**
      * Creates an instance of <code>LDAPCertStoreParameters</code> with the
      * specified server name and a default port of 389.
-     *
-     * @param serverName the DNS name of the LDAP server
-     *
-     * @exception NullPointerException if <code>serverName</code> is
-     * <code>null</code>
+     * 
+     * @param serverName
+     *            the DNS name of the LDAP server
+     * 
+     * @exception NullPointerException
+     *                if <code>serverName</code> is <code>null</code>
      */
     public LDAPCertStoreParameters(String serverName)
     {
-    this(serverName, LDAP_DEFAULT_PORT);
+        this(serverName, LDAP_DEFAULT_PORT);
     }
 
     /**
      * Creates an instance of <code>LDAPCertStoreParameters</code> with the
      * specified parameter values.
-     *
-     * @param serverName the DNS name of the LDAP server
-     * @param port the port number of the LDAP server
-     *
-     * @exception NullPointerException if <code>serverName</code> is
-     * <code>null</code>
+     * 
+     * @param serverName
+     *            the DNS name of the LDAP server
+     * @param port
+     *            the port number of the LDAP server
+     * 
+     * @exception NullPointerException
+     *                if <code>serverName</code> is <code>null</code>
      */
     public LDAPCertStoreParameters(String serverName, int port)
     {
         if (serverName == null)
+        {
             throw new NullPointerException("serverName must be non-null");
-    this.serverName = serverName;
-    this.port = port;
+        }
+        this.serverName = serverName;
+        this.port = port;
     }
 
     /**
      * Returns the DNS name of the LDAP server.
-     *
+     * 
      * @return the name (not <code>null</code>)
      */
     public String getServerName()
     {
-    return serverName;
+        return serverName;
     }
 
     /**
      * Returns the port number of the LDAP server.
-     *
+     * 
      * @return the port number
      */
     public int getPort()
     {
-    return port;
+        return port;
     }
 
     /**
-     * Returns a copy of this object. Changes to the copy will not affect
-     * the original and vice versa.<br />
+     * Returns a copy of this object. Changes to the copy will not affect the
+     * original and vice versa.<br />
      * <br />
-     * Note: this method currently performs a shallow copy of the object
-     * (simply calls <code>Object.clone()</code>). This may be changed in a 
-     * future revision to perform a deep copy if new parameters are added 
-     * that should not be shared.
-     *
+     * Note: this method currently performs a shallow copy of the object (simply
+     * calls <code>Object.clone()</code>). This may be changed in a future
+     * revision to perform a deep copy if new parameters are added that should
+     * not be shared.
+     * 
      * @return the copy
      */
     public Object clone()
     {
-        try {
+        try
+        {
             return super.clone();
-        } catch (CloneNotSupportedException e) {
+        }
+        catch (CloneNotSupportedException e)
+        {
             /* Cannot happen */
             throw new InternalError(e.toString());
         }
@@ -115,7 +123,7 @@ public class LDAPCertStoreParameters implements CertStoreParameters
 
     /**
      * Returns a formatted string describing the parameters.
-     *
+     * 
      * @return a formatted string describing the parameters
      */
     public String toString()

@@ -117,7 +117,8 @@ public class PKIXPolicyNode
         _buf.append(validPolicy);
         _buf.append(" {\n");
         
-        for(int i = 0; i < children.size(); i++) {
+        for(int i = 0; i < children.size(); i++) 
+        {
             _buf.append(((PKIXPolicyNode)children.get(i)).toString(_indent + "    "));
         }
         
@@ -133,14 +134,14 @@ public class PKIXPolicyNode
     
     public PKIXPolicyNode copy()
     {
-        HashSet _expectedPolicies = new HashSet();
+        Set _expectedPolicies = new HashSet();
         Iterator _iter = expectedPolicies.iterator();
         while (_iter.hasNext())
         {
             _expectedPolicies.add(new String((String)_iter.next()));
         }
         
-        HashSet _policyQualifiers = new HashSet();
+        Set _policyQualifiers = new HashSet();
         _iter = policyQualifiers.iterator();
         while (_iter.hasNext())
         {

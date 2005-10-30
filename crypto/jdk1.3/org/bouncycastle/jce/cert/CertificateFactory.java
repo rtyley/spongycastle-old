@@ -133,7 +133,7 @@ public class CertificateFactory
     public final CertPath generateCertPath(List certificates)
     throws CertificateException
     {
-        return certFacSpi.engineGenerateCertPath( certificates );
+        return certFacSpi.engineGenerateCertPath(certificates);
     }
 
     public static final CertificateFactory getInstance(String type)

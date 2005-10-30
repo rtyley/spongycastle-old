@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -61,10 +62,10 @@ import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 public class CMSSignedDataGenerator
 {
     CertStore                   certStore;
-    ArrayList                   certs = new ArrayList();
-    ArrayList                   crls = new ArrayList();
-    ArrayList                   signerInfs = new ArrayList();
-    ArrayList                   signers = new ArrayList();
+    List                        certs = new ArrayList();
+    List                        crls = new ArrayList();
+    List                        signerInfs = new ArrayList();
+    List                        signers = new ArrayList();
 
     /**
      * Default type for the signed data.

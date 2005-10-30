@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.security.Principal;
 import org.bouncycastle.jce.cert.CertSelector;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERSequence;
@@ -15,8 +16,8 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.V2Form;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.PrincipalUtil;
 
 /**
  * Carrying class for an attribute certificate issuer.
@@ -34,7 +35,7 @@ public class AttributeCertificateIssuer
     {
         form = issuer.getIssuer();
     }
-    
+
     public AttributeCertificateIssuer(
         X509Principal principal) 
     {        
@@ -56,7 +57,7 @@ public class AttributeCertificateIssuer
         
         GeneralName[]   names = name.getNames();
         
-        ArrayList   l = new ArrayList(names.length);
+        List        l = new ArrayList(names.length);
         
         for (int i = 0; i != names.length; i++)
         {
@@ -84,7 +85,7 @@ public class AttributeCertificateIssuer
     public Principal[] getPrincipals()
     {
         Object[]    p = this.getNames();
-        ArrayList   l = new ArrayList();
+        List        l = new ArrayList();
         
         for (int i = 0; i != p.length; i++)
         {
@@ -93,7 +94,7 @@ public class AttributeCertificateIssuer
                 l.add(p[i]);
             }
         }
-        
+
         return (Principal[])l.toArray(new Principal[l.size()]);
     }
     
@@ -150,15 +151,8 @@ public class AttributeCertificateIssuer
                 V2Form issuer = (V2Form)form;
                 if (issuer.getBaseCertificateID() != null)
                 {
-                    if (issuer.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber())
-                        && matchesDN(PrincipalUtil.getIssuerX509Principal(x509Cert), issuer.getBaseCertificateID().getIssuer()))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return issuer.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber())
+                        && matchesDN(PrincipalUtil.getIssuerX509Principal(x509Cert), issuer.getBaseCertificateID().getIssuer());
                 }
                 
                 GeneralNames name = issuer.getIssuerName();
@@ -175,12 +169,12 @@ public class AttributeCertificateIssuer
                     return true;
                 }
             }
+    
+            return false;
         }
         catch (CertificateEncodingException e)
         {
             return false;
         }
-
-        return false;
     }
 }

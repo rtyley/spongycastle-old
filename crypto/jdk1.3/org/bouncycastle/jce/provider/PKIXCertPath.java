@@ -52,7 +52,7 @@ public  class PKIXCertPath
         encodings.add("PkiPath");
         encodings.add("PEM");
         encodings.add("PKCS7");
-        certPathEncodings = Collections.unmodifiableList( encodings );
+        certPathEncodings = Collections.unmodifiableList(encodings);
     }
     
     private List certificates;
@@ -94,7 +94,7 @@ public  class PKIXCertPath
             }
             
             // find end-entity cert
-            ArrayList       retList = new ArrayList(certs.size());
+            List       retList = new ArrayList(certs.size());
             
             for (int i = 0; i < certs.size(); i++)
             {
@@ -167,7 +167,7 @@ public  class PKIXCertPath
      * a CertificateFactory to create CertPaths.
      * @param type the standard name of the type of Certificatesin this path
      **/
-    PKIXCertPath( List certificates )
+    PKIXCertPath(List certificates)
     {
         super("X.509");
         this.certificates = sortCerts(new ArrayList(certificates));
@@ -186,37 +186,45 @@ public  class PKIXCertPath
         throws CertificateException
     {
         super("X.509");
-        try {
-            if (encoding.equalsIgnoreCase( "PkiPath" ))
+        try
+        {
+            if (encoding.equalsIgnoreCase("PkiPath"))
             {
                 ASN1InputStream derInStream = new ASN1InputStream(inStream);
                 DERObject derObject = derInStream.readObject();
-                if ( derObject == null || ! ( derObject instanceof ASN1Sequence ) )
+                if (derObject == null || !(derObject instanceof ASN1Sequence))
                 {
-                    throw new CertificateException("input stream does not contain a ASN1 SEQUENCE while reading PkiPath encoded data to load CertPath" );
+                    throw new CertificateException(
+                            "input stream does not contain a ASN1 SEQUENCE while reading PkiPath encoded data to load CertPath");
                 }
                 Enumeration e = ((ASN1Sequence)derObject).getObjects();
                 InputStream certInStream;
                 ByteArrayOutputStream outStream;
                 DEROutputStream derOutStream;
                 certificates = new ArrayList();
-                CertificateFactory certFactory= CertificateFactory.getInstance( "X.509", "BC" );
-                while ( e.hasMoreElements() ) {
+                CertificateFactory certFactory = CertificateFactory
+                        .getInstance("X.509", "BC");
+                while (e.hasMoreElements())
+                {
                     outStream = new ByteArrayOutputStream();
                     derOutStream = new DEROutputStream(outStream);
-        
+
                     derOutStream.writeObject(e.nextElement());
                     derOutStream.close();
-    
-                    certInStream = new ByteArrayInputStream(outStream.toByteArray());
-                    certificates.add(0,certFactory.generateCertificate(certInStream));
+
+                    certInStream = new ByteArrayInputStream(outStream
+                            .toByteArray());
+                    certificates.add(0, certFactory
+                            .generateCertificate(certInStream));
                 }
             }
-            else if (encoding.equalsIgnoreCase("PKCS7") || encoding.equalsIgnoreCase("PEM"))
+            else if (encoding.equalsIgnoreCase("PKCS7")
+                    || encoding.equalsIgnoreCase("PEM"))
             {
                 inStream = new BufferedInputStream(inStream);
                 certificates = new ArrayList();
-                CertificateFactory certFactory= CertificateFactory.getInstance( "X.509", "BC" );
+                CertificateFactory certFactory = CertificateFactory
+                        .getInstance("X.509", "BC");
                 Certificate cert = null;
                 while ((cert = certFactory.generateCertificate(inStream)) != null)
                 {
@@ -225,16 +233,21 @@ public  class PKIXCertPath
             }
             else
             {
-                throw new CertificateException( "unsupported encoding: " + encoding);
+                throw new CertificateException("unsupported encoding: "
+                        + encoding);
             }
         }
-        catch (IOException ex) 
+        catch (IOException ex)
         {
-            throw new CertificateException( "IOException throw while decoding CertPath:\n" + ex.toString() ); 
+            throw new CertificateException(
+                    "IOException throw while decoding CertPath:\n"
+                            + ex.toString());
         }
-        catch (NoSuchProviderException ex ) 
+        catch (NoSuchProviderException ex)
         {
-            throw new CertificateException( "BouncyCastle provider not found while trying to get a CertificateFactory:\n" + ex.toString() ); 
+            throw new CertificateException(
+                    "BouncyCastle provider not found while trying to get a CertificateFactory:\n"
+                            + ex.toString());
         }
 
         this.certificates = sortCerts(certificates);
@@ -264,12 +277,12 @@ public  class PKIXCertPath
         throws CertificateEncodingException
     {
         Iterator iter = getEncodings();
-        if ( iter.hasNext() )
+        if (iter.hasNext())
         {
             Object enc = iter.next();
-            if ( enc instanceof String )
+            if (enc instanceof String)
             {
-            return getEncoded((String)enc);
+                return getEncoded((String)enc);
             }
         }
         return null;
@@ -293,7 +306,7 @@ public  class PKIXCertPath
             ASN1EncodableVector v = new ASN1EncodableVector();
     
             ListIterator iter = certificates.listIterator(certificates.size());
-            while ( iter.hasPrevious() )
+            while (iter.hasPrevious())
             {
                 v.add(toASN1Object((X509Certificate)iter.previous()));
             }
@@ -367,7 +380,7 @@ public  class PKIXCertPath
      * @return the DERObject
      **/
     private DERObject toASN1Object(
-        X509Certificate cert )
+        X509Certificate cert)
         throws CertificateEncodingException
     {
         try

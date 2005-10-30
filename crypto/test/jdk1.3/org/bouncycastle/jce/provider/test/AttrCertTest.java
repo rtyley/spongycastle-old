@@ -14,6 +14,7 @@ import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -132,7 +133,7 @@ public class AttrCertTest
             // search test
             //
             
-            ArrayList                   list = new ArrayList();
+            List                        list = new ArrayList();
             
             list.add(sCert);
             

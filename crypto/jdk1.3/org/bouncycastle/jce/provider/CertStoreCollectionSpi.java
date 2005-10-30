@@ -19,12 +19,14 @@ public class CertStoreCollectionSpi extends CertStoreSpi
 {
     private CollectionCertStoreParameters params;
 
-    public CertStoreCollectionSpi( CertStoreParameters params )
+    public CertStoreCollectionSpi(CertStoreParameters params)
         throws InvalidAlgorithmParameterException
     {
-        super( params );
-        if ( ! ( params instanceof CollectionCertStoreParameters ) )
-        throw new InvalidAlgorithmParameterException( "org.bouncycastle.jce.provider.CertStoreCollectionSpi: parameter must be a CollectionCertStoreParameters object\n" +  params.toString() );
+        super(params);
+        if (! (params instanceof CollectionCertStoreParameters))
+        {
+            throw new InvalidAlgorithmParameterException("org.bouncycastle.jce.provider.CertStoreCollectionSpi: parameter must be a CollectionCertStoreParameters object\n" +  params.toString());
+        }
         this.params = (CollectionCertStoreParameters)params;
     }
 

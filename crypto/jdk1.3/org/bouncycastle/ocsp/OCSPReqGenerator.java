@@ -12,6 +12,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -30,10 +31,11 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.jce.X509Principal;
 
 public class OCSPReqGenerator
 {
-    private ArrayList       list = new ArrayList();
+    private List            list = new ArrayList();
     private GeneralName     requestorName = null;
     private X509Extensions  requestExtensions = null;
 
@@ -73,7 +75,9 @@ public class OCSPReqGenerator
     }
 
     /**
-     * add a request for the given issuerCert using the given hash algorithm.
+     * Add a request for the given CertificateID.
+     * 
+     * @param certId certificate ID of interest
      */
     public void addRequest(
         CertificateID   certId)
@@ -81,11 +85,35 @@ public class OCSPReqGenerator
         list.add(new RequestObject(certId, null));
     }
 
+    /**
+     * Add a request with extensions
+     * 
+     * @param certId certificate ID of interest
+     * @param singleRequestExtensions the extensions to attach to the request
+     */
     public void addRequest(
         CertificateID   certId,
-        X509Extensions  requestExtensions)
+        X509Extensions  singleRequestExtensions)
     {
-        list.add(new RequestObject(certId, requestExtensions));
+        list.add(new RequestObject(certId, singleRequestExtensions));
+    }
+
+    /**
+     * Set the requestor name to the passed in X509Principal
+     * 
+     * @param requestorName a X509Principal representing the requestor name.
+     */
+    public void setRequestorName(
+        X509Principal        requestorName)
+    {
+        try
+        {
+            this.requestorName = new GeneralName(GeneralName.directoryName, new X509Principal(requestorName.getEncoded()));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("cannot encode principal: " + e);
+        }
     }
 
     public void setRequestorName(
@@ -93,7 +121,7 @@ public class OCSPReqGenerator
     {
         this.requestorName = requestorName;
     }
-
+    
     public void setRequestExtensions(
         X509Extensions      requestExtensions)
     {
