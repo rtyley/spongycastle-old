@@ -1,28 +1,25 @@
 package org.bouncycastle.tsp.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import junit.framework.TestCase;
+
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cmp.PKIStatus;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 
 /**
  * Test Cases
  */
 public class ParseTest
-    implements Test
+    extends TestCase
 {
     private byte[] sha1Request = Base64.decode(
           "MDACAQEwITAJBgUrDgMCGgUABBT5UbEBmJssO3RxcQtOePxNvfoMpgIIC+Gv"
@@ -176,7 +173,7 @@ public class ParseTest
         return "ParseTest";
     }
 
-    private TestResult requestParse(
+    private void requestParse(
         byte[]  request,
         String  algorithm) 
         throws IOException
@@ -185,7 +182,7 @@ public class ParseTest
         
         if (!req.getMessageImprintAlgOID().equals(algorithm))
         {
-            return new SimpleTestResult(false, getName() + ": failed to get expected algorithm - got " 
+            fail("failed to get expected algorithm - got " 
                     + req.getMessageImprintAlgOID() + " not " + algorithm);
         }
         
@@ -193,30 +190,36 @@ public class ParseTest
         {
             if (!req.getReqPolicy().equals(TSPTestUtil.EuroPKI_TSA_Test_Policy.getId()))
             {
-                return new SimpleTestResult(false, getName() + ": " + algorithm + " failed policy check.");
+                fail("" + algorithm + " failed policy check.");
             }
             
             if (request == ripemd160Request)
             {
                 if (!req.getCertReq())
                 {
-                    return new SimpleTestResult(false, getName() + ": " + algorithm + " failed certReq check.");
+                    fail("" + algorithm + " failed certReq check.");
                 }
             }
         }
+        
+        assertEquals("version not 1", 1, req.getVersion());
+        
+        assertNull("critical extensions found when none expected", req.getCriticalExtensionOIDs());
+        
+        assertNull("non-critical extensions found when none expected", req.getNonCriticalExtensionOIDs());
         
         if (request != sha1noNonse)
         {
             if (req.getNonce() == null)
             {
-                return new SimpleTestResult(false, getName() + ": " + algorithm + " nonse not found when one expected.");
+                fail("" + algorithm + " nonse not found when one expected.");
             }
         }
         else
         {
             if (req.getNonce() != null)
             {
-                return new SimpleTestResult(false, getName() + ": " + algorithm + " nonse not found when one not expected.");
+                fail("" + algorithm + " nonse not found when one not expected.");
             } 
         }
         
@@ -226,18 +229,16 @@ public class ParseTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": validation exception.");
+            fail("validation exception.");
         }
         
         if (!Arrays.areEqual(req.getEncoded(), request))
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed encode check."); 
+            fail("" + algorithm + " failed encode check."); 
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    private TestResult responseParse(
+    private void responseParse(
         byte[]  request,
         byte[]  response,
         String  algorithm) 
@@ -253,11 +254,9 @@ public class ParseTest
         resp.validate(req);
 
         resp.getTimeStampToken().validate(cert, "BC");
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    private TestResult unacceptableResponseParse(
+    private void unacceptableResponseParse(
         byte[]  response) 
         throws Exception
     {
@@ -265,18 +264,16 @@ public class ParseTest
 
         if (resp.getStatus() != PKIStatus.REJECTION)
         {
-            return new SimpleTestResult(false, getName() + ": request not rejected.");
+            fail("request not rejected.");
         }
         
         if (resp.getFailInfo().intValue() != PKIFailureInfo.UNACCEPTED_POLICY)
         {
-            return new SimpleTestResult(false, getName() + ": request not rejected.");
+            fail("request not rejected.");
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    private TestResult generalizedTimeParse(
+    private void generalizedTimeParse(
         byte[]  response) 
         throws Exception
     {
@@ -284,82 +281,33 @@ public class ParseTest
 
         if (resp.getStatus() != PKIStatus.GRANTED)
         {
-            return new SimpleTestResult(false, getName() + ": request not rejected.");
+            fail("request not rejected.");
         }
+    }
+    
+    public void testParsing()
+        throws Exception
+    { 
+        requestParse(sha1Request, TSPAlgorithms.SHA1);
         
-        return new SimpleTestResult(true, getName() + ": Okay");
+        requestParse(sha1noNonse, TSPAlgorithms.SHA1);
+
+        requestParse(md5Request, TSPAlgorithms.MD5);
+
+        requestParse(ripemd160Request, TSPAlgorithms.RIPEMD160);
+
+        responseParse(sha1Request, sha1Response, TSPAlgorithms.SHA1);
+
+        responseParse(sha1noNonse, sha1noNonseResponse, TSPAlgorithms.SHA1);
+
+        responseParse(md5Request, md5Response, TSPAlgorithms.MD5);
+
+        unacceptableResponseParse(unacceptablePolicy);
+
+        generalizedTimeParse(generalizedTime);
     }
     
-    /* (non-Javadoc)
-     * @see org.bouncycastle.util.test.Test#perform()
-     */
-    public TestResult perform()
-    {
-        try
-        {   
-            TestResult  res = requestParse(sha1Request, TSPAlgorithms.SHA1);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = requestParse(sha1noNonse, TSPAlgorithms.SHA1);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = requestParse(md5Request, TSPAlgorithms.MD5);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = requestParse(ripemd160Request, TSPAlgorithms.RIPEMD160);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = responseParse(sha1Request, sha1Response, TSPAlgorithms.SHA1);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = responseParse(sha1noNonse, sha1noNonseResponse, TSPAlgorithms.SHA1);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = responseParse(md5Request, md5Response, TSPAlgorithms.MD5);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-
-            res = unacceptableResponseParse(unacceptablePolicy);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-
-            res = generalizedTimeParse(generalizedTime);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": Exception - " + e.toString(), e);
-        }
-    }
-    
-    public TestResult parse(
+    public void parse(
         byte[]  encoded,
         boolean tokenPresent)
         throws Exception
@@ -368,19 +316,7 @@ public class ParseTest
 
         if (tokenPresent && response.getTimeStampToken() == null)
         {
-            return new SimpleTestResult(false, getName() + ": token not found when expected.");
+            fail("token not found when expected.");
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
-    }
-    
-    public static void main(String[] args)
-    {
-        Security.addProvider(new BouncyCastleProvider());
-
-        Test            test = new ParseTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
     }
 }

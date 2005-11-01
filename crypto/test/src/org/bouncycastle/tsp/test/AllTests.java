@@ -1,27 +1,16 @@
 package org.bouncycastle.tsp.test;
 
-import org.bouncycastle.util.test.SimpleTestResult;
+import java.security.Security;
 
-import junit.framework.*;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class AllTests
     extends TestCase
 {
-    public void testOpenPGP()
-    {   
-        org.bouncycastle.util.test.Test[] tests = RegressionTest.tests;
-        
-        for (int i = 0; i != tests.length; i++)
-        {
-            SimpleTestResult  result = (SimpleTestResult)tests[i].perform();
-            
-            if (!result.isSuccessful())
-            {
-                fail(result.toString());
-            }
-        }
-    }
-    
     public static void main (String[] args)
     {
         junit.textui.TestRunner.run(suite());
@@ -29,9 +18,12 @@ public class AllTests
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("OpenPGP Tests");
+        Security.addProvider(new BouncyCastleProvider());
         
-        suite.addTestSuite(AllTests.class);
+        TestSuite suite = new TestSuite("TSP Tests");
+        
+        suite.addTestSuite(ParseTest.class);
+        suite.addTestSuite(TSPTest.class);
         
         return suite;
     }

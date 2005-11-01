@@ -35,7 +35,7 @@ import org.bouncycastle.util.encoders.Base64;
 public class TSPTestUtil
 {
 
-    public static SecureRandom rand;
+    public static SecureRandom rand = new SecureRandom();
 
     public static KeyPairGenerator kpg;
 
@@ -49,7 +49,7 @@ public class TSPTestUtil
 
     public static KeyGenerator rc2128kg;
 
-    public static BigInteger serialNumber;
+    public static BigInteger serialNumber = BigInteger.ONE;
 
     public static final boolean DEBUG = true;
 
