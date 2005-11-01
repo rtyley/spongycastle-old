@@ -43,6 +43,16 @@ public class TimeStampTokenInfo
         return genTime;
     }
 
+    public GenTimeAccuracy getGenTimeAccuracy()
+    {
+        if (this.getAccuracy() != null)
+        {
+            return new GenTimeAccuracy(this.getAccuracy());
+        }
+        
+        return null;
+    }
+    
     public String getPolicy()
     {
         return tstInfo.getPolicy().getId();
