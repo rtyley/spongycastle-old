@@ -26,8 +26,7 @@ import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
-
-import com.sun.mail.util.CRLFOutputStream;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 
 /**
  * general class for generating a pkcs7-signature message.
