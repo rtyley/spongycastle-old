@@ -6,7 +6,9 @@
     <property name="jdk.name" value="jdk1.4" />
     <property name="src.dir" value="${build.dir}/${jdk.name}" />
     <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
-    <property name="target.name" value="jdk14-${release.suffix}" />
+    <property name="target.prefix" value="jdk14" />
+
+    <taskdef resource="checkstyletask.properties" />
 
     <target name="init">
         <mkdir dir="${src.dir}" />
@@ -34,13 +36,11 @@
             <fileset dir="jdk1.4" includes="**/*.java" />
             <fileset dir="test/jdk1.4" includes="**/*.java" />
         </copy>
-    	<!--
         <checkstyle config="checkstyle/bc-checks.xml">
             <fileset dir="${src.dir}" includes="**/*.java"/>
             <formatter type="plain"/>
             <formatter type="xml" toFile="${artifacts.dir}/checkstyle/${jdk.name}-errors.xml"/>
         </checkstyle>
-        -->
     </target>
 
     <target name="build" depends="init">
@@ -63,6 +63,10 @@
 
     <target name="test" depends="build-test">
         <ant antfile="bc-build.xml" dir="." target="test" />
+    </target>
+
+    <target name="test-lw" depends="build-test">
+        <ant antfile="bc-build.xml" dir="." target="test-lw" />
     </target>
 
 </project>
