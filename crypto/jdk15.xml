@@ -6,7 +6,9 @@
     <property name="jdk.name" value="jdk1.5" />
     <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
     <property name="src.dir" value="${build.dir}/${jdk.name}" />
-    <property name="target.name" value="jdk15-${release.suffix}" />
+    <property name="target.prefix" value="jdk15" />
+
+    <taskdef resource="checkstyletask.properties" />
 
     <target name="init">
         <mkdir dir="${src.dir}" />
@@ -50,6 +52,10 @@
 
     <target name="test" depends="build-test">
         <ant antfile="bc-build.xml" dir="." target="test" />
+    </target>
+
+    <target name="test-lw" depends="build-test">
+        <ant antfile="bc-build.xml" dir="." target="test-lw" />
     </target>
 
 </project>
