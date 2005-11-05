@@ -91,7 +91,7 @@ public class ArmoredOutputStream
     String          footerStart = "-----END PGP ";
     String          footerTail = "-----";
 
-    String          version = "BCPG v1.31";
+    String          version = "BCPG v@RELEASE_NAME@";
     
     Hashtable       headers = new Hashtable();
     
