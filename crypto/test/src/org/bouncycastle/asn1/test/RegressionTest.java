@@ -22,6 +22,15 @@ public class RegressionTest
         new MiscTest(),
         new SMIMETest(),
         new X9Test(),
+        new MonetaryValueUnitTest(),
+        new BiometricDataUnitTest(),
+        new Iso4217CurrencyCodeUnitTest(),
+        new SemanticsInformationUnitTest(),
+        new QCStatementUnitTest(),
+        new TypeOfBiometricDataUnitTest(),
+        new SignerLocationUnitTest(),
+        new CommitmentTypeQualifierUnitTest(),
+        new CommitmentTypeIndicationUnitTest(),
         new EncryptedPrivateKeyInfoTest()
     };
 
