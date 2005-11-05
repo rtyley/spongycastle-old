@@ -35,13 +35,13 @@ public class SignerLocation
             switch (o.getTagNo())
             {
             case 0:
-                this.countryName = DERUTF8String.getInstance(o, false);
+                this.countryName = DERUTF8String.getInstance(o, true);
                 break;
             case 1:
-                this.localityName = DERUTF8String.getInstance(o, false);
+                this.localityName = DERUTF8String.getInstance(o, true);
                 break;
             case 2:
-                this.postalAddress = ASN1Sequence.getInstance(o, false);
+                this.postalAddress = ASN1Sequence.getInstance(o, true);
                 if (postalAddress != null && postalAddress.size() > 6)
                 {
                     throw new IllegalArgumentException("postal address must contain less than 6 strings");
@@ -113,6 +113,13 @@ public class SignerLocation
      *       postalAddress      [2] PostalAddress OPTIONAL }
      *
      *   PostalAddress ::= SEQUENCE SIZE(1..6) OF DirectoryString
+     *   
+     *   DirectoryString ::= CHOICE {
+     *         teletexString           TeletexString (SIZE (1..MAX)),
+     *         printableString         PrintableString (SIZE (1..MAX)),
+     *         universalString         UniversalString (SIZE (1..MAX)),
+     *         utf8String              UTF8String (SIZE (1.. MAX)),
+     *         bmpString               BMPString (SIZE (1..MAX)) }
      * </pre>
      */
     public DERObject toASN1Object()
@@ -121,20 +128,19 @@ public class SignerLocation
 
         if (countryName != null)
         {
-            v.add(new DERTaggedObject(false, 0, countryName));
+            v.add(new DERTaggedObject(true, 0, countryName));
         }
 
         if (localityName != null)
         {
-            v.add(new DERTaggedObject(false, 1, localityName));
+            v.add(new DERTaggedObject(true, 1, localityName));
         }
 
         if (postalAddress != null)
         {
-            v.add(new DERTaggedObject(false, 2, postalAddress));
+            v.add(new DERTaggedObject(true, 2, postalAddress));
         }
 
         return new DERSequence(v);
     }
-
 }
