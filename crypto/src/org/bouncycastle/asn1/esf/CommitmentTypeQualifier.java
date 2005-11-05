@@ -14,7 +14,7 @@ import org.bouncycastle.asn1.DERSequence;
  * <pre>
  *   CommitmentTypeQualifier ::= SEQUENCE {
  *       commitmentTypeIdentifier  CommitmentTypeIdentifier,
- *       qualifier          ANY DEFINED BY commitmentTypeIdentifier }
+ *       qualifier          ANY DEFINED BY commitmentTypeIdentifier OPTIONAL }
  * </pre>
  */
 public class CommitmentTypeQualifier
@@ -23,6 +23,17 @@ public class CommitmentTypeQualifier
    private DERObjectIdentifier commitmentTypeIdentifier;
    private DEREncodable qualifier;
 
+   /**
+    * Creates a new <code>CommitmentTypeQualifier</code> instance.
+    *
+    * @param commitmentTypeIdentifier a <code>CommitmentTypeIdentifier</code> value
+    */
+    public CommitmentTypeQualifier(
+        DERObjectIdentifier commitmentTypeIdentifier)
+    {
+        this(commitmentTypeIdentifier, null);
+    }
+    
    /**
     * Creates a new <code>CommitmentTypeQualifier</code> instance.
     *
@@ -46,13 +57,17 @@ public class CommitmentTypeQualifier
     public CommitmentTypeQualifier(
         ASN1Sequence as)
     {
-        commitmentTypeIdentifier = (DERObjectIdentifier) as.getObjectAt(0);
-        qualifier = as.getObjectAt(1);
+        commitmentTypeIdentifier = (DERObjectIdentifier)as.getObjectAt(0);
+        
+        if (as.size() > 1)
+        {
+            qualifier = as.getObjectAt(1);
+        }
     }
 
     public static CommitmentTypeQualifier getInstance(Object as)
     {
-        if (as instanceof CommitmentTypeQualifier)
+        if (as instanceof CommitmentTypeQualifier || as == null)
         {
             return (CommitmentTypeQualifier)as;
         }
@@ -83,7 +98,10 @@ public class CommitmentTypeQualifier
    {
       ASN1EncodableVector dev = new ASN1EncodableVector();
       dev.add(commitmentTypeIdentifier);
-      dev.add(qualifier);
+      if (qualifier != null)
+      {
+          dev.add(qualifier);
+      }
 
       return new DERSequence(dev);
    }
