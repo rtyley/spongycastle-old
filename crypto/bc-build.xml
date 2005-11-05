@@ -13,33 +13,34 @@
     <property name="artifacts.jars.dir" value="${artifacts.dir}/jars" />
 
     <property name="provider.target" value="bcprov-${target.name}" />
-    <property name="provider.target.dir" value="${build.dir}/${provider.target}" />
+    <property name="provider.target.dir" value="${artifacts.dir}/${provider.target}" />
     <property name="provider.target.src.dir" value="${provider.target.dir}/src" />
     <property name="provider.target.docs.dir" value="${provider.target.dir}/docs" />
 
     <property name="mail.target" value="bcmail-${target.name}" />
-    <property name="mail.target.dir" value="${build.dir}/${mail.target}" />
+    <property name="mail.target.dir" value="${artifacts.dir}/${mail.target}" />
     <property name="mail.target.src.dir" value="${mail.target.dir}/src" />
     <property name="mail.target.docs.dir" value="${mail.target.dir}/docs" />
 
     <property name="tsp.target" value="bctsp-${target.name}" />
-    <property name="tsp.target.dir" value="${build.dir}/${tsp.target}" />
+    <property name="tsp.target.dir" value="${artifacts.dir}/${tsp.target}" />
     <property name="tsp.target.src.dir" value="${tsp.target.dir}/src" />
     <property name="tsp.target.docs.dir" value="${tsp.target.dir}/docs" />
 
     <property name="pg.target" value="bcpg-${target.name}" />
-    <property name="pg.target.dir" value="${build.dir}/${pg.target}" />
+    <property name="pg.target.dir" value="${artifacts.dir}/${pg.target}" />
     <property name="pg.target.src.dir" value="${pg.target.dir}/src" />
     <property name="pg.target.docs.dir" value="${pg.target.dir}/docs" />
 
 
     <macrodef name="compile">
         <attribute name="target" />
+        <element name="manifestElements" />
         <sequential>
             <mkdir dir="${build.dir}/@{target}/classes" />
             <mkdir dir="${artifacts.dir}/@{target}" />
 
-            <javac srcdir="${build.dir}/@{target}/src" destdir="${build.dir}/@{target}/classes">
+            <javac srcdir="${artifacts.dir}/@{target}/src" destdir="${build.dir}/@{target}/classes">
                 <classpath>
                     <fileset dir="${artifacts.jars.dir}">
                         <include name="**/*.jar" />
@@ -47,9 +48,12 @@
                 </classpath>
             </javac>
             <copy todir="${build.dir}/@{target}/classes">
-                 <fileset dir="${build.dir}/@{target}/src" includes="**/*.pem" />
+                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.pem" />
             </copy>
             <jar jarfile="${artifacts.jars.dir}/@{target}.jar">
+                <manifest>
+                    <manifestElements/>
+                </manifest>
                 <fileset dir="${build.dir}/@{target}/classes" includes="**/*.class" />
                 <fileset dir="${build.dir}/@{target}/classes" includes="**/*.pem" />
             </jar>
@@ -148,7 +152,17 @@
              <fileset dir="${src.dir}" includes="org/bouncycastle/util/test/*.java" />
         </copy>
 
-        <compile target="${provider}" />
+        <compile target="${provider}">
+            <manifestElements>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Extension-Name" value="org.bouncycastle.bcprovider" />
+                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                <attribute name="Specification-Version" value="1.1" />
+                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                <attribute name="Implementation-Version" value="${release.name}.0" />
+            </manifestElements>
+        </compile>
     </target>
 
     <target name="build-libraries" depends="build-mail, build-tsp, build-pg" />
@@ -171,7 +185,17 @@
              </fileset>
         </copy>
 
-        <compile target="${mail.target}" />
+        <compile target="${mail.target}">
+            <manifestElements>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Extension-Name" value="org.bouncycastle.bcmail" />
+                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                <attribute name="Specification-Version" value="1.1" />
+                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                <attribute name="Implementation-Version" value="${release.name}.0" />
+            </manifestElements>
+        </compile>
     </target>
 
     <!--
@@ -190,7 +214,17 @@
              </fileset>
         </copy>
 
-        <compile target="${tsp.target}" />
+        <compile target="${tsp.target}">
+            <manifestElements>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Extension-Name" value="org.bouncycastle.bctsp" />
+                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                <attribute name="Specification-Version" value="1.1" />
+                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                <attribute name="Implementation-Version" value="${release.name}.0" />
+            </manifestElements>
+        </compile>
     </target>
 
     <!--
@@ -199,18 +233,33 @@
     <target name="build-pg">
         <mkdir dir="${pg.target.dir}" />
 
+        <filter token="RELEASE_NAME" value="${release.name}" />
+
         <copyStandardFiles toDir="${pg.target.dir}" />
+
+        <copy todir="${pg.target.src.dir}" filtering="true">
+             <fileset dir="${src.dir}" includes="org/bouncycastle/bcpg/**/*.java" />
+        </copy>
 
         <copy todir="${pg.target.src.dir}">
              <fileset dir="${src.dir}">
-                 <include name="org/bouncycastle/bcpg/**/*.java" />
                  <include name="org/bouncycastle/openpgp/**/*.java" />
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
              </fileset>
         </copy>
 
-        <compile target="${pg.target}" />
+        <compile target="${pg.target}">
+            <manifestElements>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Extension-Name" value="org.bouncycastle.bcpg" />
+                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                <attribute name="Specification-Version" value="1.1" />
+                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                <attribute name="Implementation-Version" value="${release.name}.0" />
+            </manifestElements>
+        </compile>
     </target>
 
     <target name="build-test">
@@ -221,7 +270,7 @@
         <!--
              Tests
         -->
-        <property name="test.target.dir" value="${build.dir}/${test.target}" />
+        <property name="test.target.dir" value="${artifacts.dir}/${test.target}" />
         <property name="test.target.src.dir" value="${test.target.dir}/src" />
 
         <mkdir dir="${test.target.dir}" />
@@ -233,7 +282,17 @@
              <fileset dir="${src.dir}" includes="**/*.pem" />
         </copy>
 
-        <compile target="${test.target}" />
+        <compile target="${test.target}">
+            <manifestElements>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Extension-Name" value="org.bouncycastle.bctest" />
+                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                <attribute name="Specification-Version" value="1.1" />
+                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                <attribute name="Implementation-Version" value="${release.name}.0" />
+            </manifestElements>
+        </compile>
     </target>
 
     <target name="test" depends="build-test">
