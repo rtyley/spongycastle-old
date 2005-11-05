@@ -19,11 +19,10 @@ import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPBEEncryptedData;
 
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
-public class PGPPBETest implements Test
+public class PGPPBETest
+    extends SimpleTest
 {
     byte[] enc1 = Base64.decode(
             "jA0EAwMC5M5wWBP2HBZgySvUwWFAmMRLn7dWiZN6AkQMvpE3b6qwN3SSun7zInw2"
@@ -32,24 +31,6 @@ public class PGPPBETest implements Test
     byte[] enc1crc = Base64.decode("H66L");
 
     char[] pass = { 'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd' };
-
-    private boolean notEqual(byte[] b1, byte[] b2)
-    {
-        if (b1.length != b2.length)
-        {
-            return true;
-        }
-
-        for (int i = 0; i != b2.length; i++)
-        {
-            if (b1[i] != b2[i])
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     /**
      * decrypt the passed in message stream
@@ -89,135 +70,127 @@ public class PGPPBETest implements Test
         return bOut.toByteArray();
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        try
+        byte[] out = decryptMessage(enc1);
+
+        if (out[0] != 'h' || out[1] != 'e' || out[2] != 'l')
         {
-            byte[] out = decryptMessage(enc1);
-
-            if (out[0] != 'h' || out[1] != 'e' || out[2] != 'l')
-            {
-                return new SimpleTestResult(false, getName() + ": wrong plain text in packet");
-            }
-            
-            //
-            // create a PBE encrypted message and read it back.
-            //
-            byte[]    text = { (byte)'h', (byte)'e', (byte)'l', (byte)'l', (byte)'o', (byte)' ', (byte)'w', (byte)'o', (byte)'r', (byte)'l', (byte)'d', (byte)'!', (byte)'\n' };
-            
-            //
-            // encryption step - convert to literal data, compress, encode.
-            //
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            
-            PGPCompressedDataGenerator comData = new PGPCompressedDataGenerator(
-                                                                    PGPCompressedData.ZIP);
-                                                                    
-            PGPLiteralDataGenerator    lData = new PGPLiteralDataGenerator();
-
-            OutputStream    ldOut = lData.open(comData.open(bOut),
-                                                  PGPLiteralData.BINARY, 
-                                                  PGPLiteralData.CONSOLE, 
-                                                  text.length,
-                                                  new Date());
-            
-            ldOut.write(text);
-
-            lData.close();
-            
-            comData.close();
-
-            //
-            // encrypt
-            //
-            ByteArrayOutputStream        cbOut = new ByteArrayOutputStream();
-            PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), "BC");
-            
-            cPk.addMethod(pass);
-            
-            OutputStream    cOut = cPk.open(cbOut, bOut.toByteArray().length);
-
-            cOut.write(bOut.toByteArray());
-
-            cOut.close();
-
-            out = decryptMessage(cbOut.toByteArray());
-
-            if (notEqual(out, text))
-            {
-                return new SimpleTestResult(false, getName() + ": wrong plain text in generated packet");
-            }
-            
-            //
-            // encrypt - partial packet style.
-            //
-            SecureRandom    rand = new SecureRandom();
-            byte[]    test = new byte[1233];
-            
-            rand.nextBytes(test);
-            
-            bOut = new ByteArrayOutputStream();
-            
-            comData = new PGPCompressedDataGenerator(
-                                     PGPCompressedData.ZIP);
-                                                                    
-            lData = new PGPLiteralDataGenerator();
-
-            ldOut = lData.open(comData.open(bOut),
-                                     PGPLiteralData.BINARY, 
-                                     PGPLiteralData.CONSOLE, 
-                                     new Date(),
-                                     new byte[16]);
-
-            
-            ldOut.write(test);
-
-            lData.close();
-            
-            comData.close();
-
-            cbOut = new ByteArrayOutputStream();
-            cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, rand, "BC");
-            
-            cPk.addMethod(pass);
-            
-            cOut = cPk.open(cbOut, new byte[16]);
-
-            cOut.write(bOut.toByteArray());
-
-            cPk.close();
-
-            out = decryptMessage(cbOut.toByteArray());
-            if (notEqual(out, test))
-            {
-                return new SimpleTestResult(false, getName() + ": wrong plain text in generated packet");
-            }
-            
-            //
-            // with integrity packet
-            //
-            cbOut = new ByteArrayOutputStream();
-            cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, true, rand, "BC");
-            
-            cPk.addMethod(pass);
-            
-            cOut = cPk.open(cbOut, new byte[16]);
-
-            cOut.write(bOut.toByteArray());
-
-            cPk.close();
-
-            out = decryptMessage(cbOut.toByteArray());
-            if (notEqual(out, test))
-            {
-                return new SimpleTestResult(false, getName() + ": wrong plain text in generated packet");
-            }
-            return new SimpleTestResult(true, getName() + ": Okay");
+            fail("wrong plain text in packet");
         }
-        catch (Exception e)
+        
+        //
+        // create a PBE encrypted message and read it back.
+        //
+        byte[]    text = { (byte)'h', (byte)'e', (byte)'l', (byte)'l', (byte)'o', (byte)' ', (byte)'w', (byte)'o', (byte)'r', (byte)'l', (byte)'d', (byte)'!', (byte)'\n' };
+        
+        //
+        // encryption step - convert to literal data, compress, encode.
+        //
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        
+        PGPCompressedDataGenerator comData = new PGPCompressedDataGenerator(
+                                                                PGPCompressedData.ZIP);
+                                                                
+        PGPLiteralDataGenerator    lData = new PGPLiteralDataGenerator();
+
+        OutputStream    ldOut = lData.open(comData.open(bOut),
+                                              PGPLiteralData.BINARY, 
+                                              PGPLiteralData.CONSOLE, 
+                                              text.length,
+                                              new Date());
+        
+        ldOut.write(text);
+
+        lData.close();
+        
+        comData.close();
+
+        //
+        // encrypt
+        //
+        ByteArrayOutputStream        cbOut = new ByteArrayOutputStream();
+        PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), "BC");
+        
+        cPk.addMethod(pass);
+        
+        OutputStream    cOut = cPk.open(cbOut, bOut.toByteArray().length);
+
+        cOut.write(bOut.toByteArray());
+
+        cOut.close();
+
+        out = decryptMessage(cbOut.toByteArray());
+
+        if (!areEqual(out, text))
         {
-            e.printStackTrace();
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
+            fail("wrong plain text in generated packet");
+        }
+        
+        //
+        // encrypt - partial packet style.
+        //
+        SecureRandom    rand = new SecureRandom();
+        byte[]    test = new byte[1233];
+        
+        rand.nextBytes(test);
+        
+        bOut = new ByteArrayOutputStream();
+        
+        comData = new PGPCompressedDataGenerator(
+                                 PGPCompressedData.ZIP);
+                                                                
+        lData = new PGPLiteralDataGenerator();
+
+        ldOut = lData.open(comData.open(bOut),
+                                 PGPLiteralData.BINARY, 
+                                 PGPLiteralData.CONSOLE, 
+                                 new Date(),
+                                 new byte[16]);
+
+        
+        ldOut.write(test);
+
+        lData.close();
+        
+        comData.close();
+
+        cbOut = new ByteArrayOutputStream();
+        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, rand, "BC");
+        
+        cPk.addMethod(pass);
+        
+        cOut = cPk.open(cbOut, new byte[16]);
+
+        cOut.write(bOut.toByteArray());
+
+        cPk.close();
+
+        out = decryptMessage(cbOut.toByteArray());
+        if (!areEqual(out, test))
+        {
+            fail("wrong plain text in generated packet");
+        }
+        
+        //
+        // with integrity packet
+        //
+        cbOut = new ByteArrayOutputStream();
+        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, true, rand, "BC");
+        
+        cPk.addMethod(pass);
+        
+        cOut = cPk.open(cbOut, new byte[16]);
+
+        cOut.write(bOut.toByteArray());
+
+        cPk.close();
+
+        out = decryptMessage(cbOut.toByteArray());
+        if (!areEqual(out, test))
+        {
+            fail("wrong plain text in generated packet");
         }
     }
 
@@ -226,13 +199,11 @@ public class PGPPBETest implements Test
         return "PGPPBETest";
     }
 
-    public static void main(String[] args)
+    public static void main(
+        String[]    args)
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test test = new PGPPBETest();
-        TestResult result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new PGPPBETest());
     }
 }
