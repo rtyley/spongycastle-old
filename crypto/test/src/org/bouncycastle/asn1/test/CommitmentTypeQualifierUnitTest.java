@@ -71,8 +71,8 @@ public class CommitmentTypeQualifierUnitTest
         ASN1Encodable           qualifier)
     {
         if (!ctq.getCommitmentTypeIdentifier().equals(commitmentTypeId))
-        { throw new IllegalArgumentException();
-            //fail("commitmentTypeIds don't match.");
+        {
+            fail("commitmentTypeIds don't match.");
         }
         
         if (qualifier != null)
