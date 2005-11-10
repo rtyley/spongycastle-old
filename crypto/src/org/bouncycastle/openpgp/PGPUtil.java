@@ -320,6 +320,9 @@ public class PGPUtil
                 {        
                     switch (s2k.getHashAlgorithm())
                     {
+                    case HashAlgorithmTags.MD5:
+                        digest = MessageDigest.getInstance("MD5", provider);
+                        break;
                     case HashAlgorithmTags.SHA1:
                         digest = MessageDigest.getInstance("SHA1", provider);
                         break;
