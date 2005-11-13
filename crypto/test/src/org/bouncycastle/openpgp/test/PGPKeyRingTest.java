@@ -4,9 +4,11 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Date;
 import java.util.Iterator;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.openpgp.PGPEncryptedData;
 import org.bouncycastle.openpgp.PGPException;
@@ -21,12 +23,10 @@ import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class PGPKeyRingTest
-    implements Test
+    extends SimpleTest
 {
     byte[] pub1 = Base64.decode(
         "mQGiBEA83v0RBADzKVLVCnpWQxX0LCsevw/3OLs0H7MOcLBQ4wMO9sYmzGYn"
@@ -861,1118 +861,888 @@ public class PGPKeyRingTest
 
     public char[] sec10pass = "test".toCharArray();
     
-    private boolean notEqual(
-        byte[]    b1,
-        byte[]    b2)
+    public void test1()
+        throws Exception
     {
-        if (b1.length != b2.length)
-        {
-            return true;
-        }
+        PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub1);
+
+        int                                        count = 0;
+
+        Iterator    rIt = pubRings.getKeyRings();
         
-        for (int i = 0; i != b2.length; i++)
+        while (rIt.hasNext())
         {
-            if (b1[i] != b2[i])
+            PGPPublicKeyRing                    pgpPub = (PGPPublicKeyRing)rIt.next();
+
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpPub.getEncoded();
+            
+            pgpPub = new PGPPublicKeyRing(bytes);
+            
+            Iterator    it = pgpPub.getPublicKeys();
+            while (it.hasNext())
             {
-                return true;
+                keyCount++;
+
+                PGPPublicKey    pubKey = (PGPPublicKey)it.next();
+                
+                Iterator   sIt = pubKey.getSignatures();
+                while (sIt.hasNext())
+                {
+                    ((PGPSignature)sIt.next()).getSignatureType();
+                }
+            }
+            
+            if (keyCount != 2)
+            {
+                fail("wrong number of public keys");
             }
         }
         
-        return false;
+        if (count != 1)
+        {
+            fail("wrong number of public keyrings");
+        }
+        
+        //
+        // exact match
+        //
+        rIt = pubRings.getKeyRings("test (Test key) <test@ubicall.com>");
+        count = 0;
+        while (rIt.hasNext())
+        {
+            count++;
+            rIt.next();
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of public keyrings on exact match");
+        }
+        
+        //
+        // partial match 1 expected
+        //
+        rIt = pubRings.getKeyRings("test", true);
+        count = 0;
+        while (rIt.hasNext())
+        {
+            count++;
+            rIt.next();
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of public keyrings on partial match 1");
+        }
+        
+        //
+        // partial match 0 expected
+        //
+        rIt = pubRings.getKeyRings("XXX", true);
+        count = 0;
+        while (rIt.hasNext())
+        {
+            count++;
+            rIt.next();
+        }
+        
+        if (count != 0)
+        {
+            fail("wrong number of public keyrings on partial match 0");
+        }
+        
+        PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec1);
+
+        rIt = secretRings.getKeyRings();
+        count = 0;
+        
+        while (rIt.hasNext())
+        {
+            PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
+    
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpSec.getEncoded();
+            
+            pgpSec = new PGPSecretKeyRing(bytes);
+            
+            Iterator    it = pgpSec.getSecretKeys();
+            while (it.hasNext())
+            {
+                keyCount++;
+
+                PGPSecretKey    k = (PGPSecretKey)it.next();
+                PGPPublicKey    pk = k.getPublicKey();
+                
+                pk.getSignatures();
+                
+                byte[] pkBytes = pk.getEncoded();
+                
+                PGPPublicKeyRing  pkR = new PGPPublicKeyRing(pkBytes);
+            }
+            
+            if (keyCount != 2)
+            {
+                fail("wrong number of secret keys");
+            }
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of secret keyrings");
+        }
+        
+        //
+        // exact match
+        //
+        rIt = secretRings.getKeyRings("test (Test key) <test@ubicall.com>");
+        count = 0;
+        while (rIt.hasNext())
+        {
+            count++;
+            rIt.next();
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of secret keyrings on exact match");
+        }
+        
+        //
+        // partial match 1 expected
+        //
+        rIt = secretRings.getKeyRings("test", true);
+        count = 0;
+        while (rIt.hasNext())
+        {
+            count++;
+            rIt.next();
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of secret keyrings on partial match 1");
+        }
+        
+        //
+        // exact match 0 expected
+        //
+        rIt = secretRings.getKeyRings("test", false);
+        count = 0;
+        while (rIt.hasNext())
+        {
+            count++;
+            rIt.next();
+        }
+        
+        if (count != 0)
+        {
+            fail("wrong number of secret keyrings on partial match 0");
+        }
     }
     
-    public TestResult test1()
+    public void test2()
+        throws Exception
     {
-        try
+        PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub2);
+
+        int                            count = 0;
+
+        byte[]    encRing = pubRings.getEncoded();
+
+        pubRings = new PGPPublicKeyRingCollection(encRing);
+        
+        Iterator    rIt = pubRings.getKeyRings();
+        
+        while (rIt.hasNext())
         {
-            PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub1);
-
-            int                                        count = 0;
-
-            Iterator    rIt = pubRings.getKeyRings();
+            PGPPublicKeyRing        pgpPub = (PGPPublicKeyRing)rIt.next();
             
-            while (rIt.hasNext())
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpPub.getEncoded();
+            
+            pgpPub = new PGPPublicKeyRing(bytes);
+            
+            Iterator    it = pgpPub.getPublicKeys();
+            while (it.hasNext())
             {
-                PGPPublicKeyRing                    pgpPub = (PGPPublicKeyRing)rIt.next();
+                PGPPublicKey    pk = (PGPPublicKey)it.next();
+                
+                byte[] pkBytes = pk.getEncoded();
+                
+                PGPPublicKeyRing  pkR = new PGPPublicKeyRing(pkBytes);
+                
+                keyCount++;
+            }
+            
+            if (keyCount != 2)
+            {
+                fail("wrong number of public keys");
+            }
+        }
+        
+        if (count != 2)
+        {
+            fail("wrong number of public keyrings");
+        }
+        
+        PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec2);
 
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpPub.getEncoded();
-                
-                pgpPub = new PGPPublicKeyRing(bytes);
-                
-                Iterator    it = pgpPub.getPublicKeys();
-                while (it.hasNext())
+        rIt = secretRings.getKeyRings();
+        count = 0;
+        
+        encRing = secretRings.getEncoded();
+        
+        secretRings = new PGPSecretKeyRingCollection(encRing);
+        
+        while (rIt.hasNext())
+        {
+            PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
+    
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpSec.getEncoded();
+            
+            pgpSec = new PGPSecretKeyRing(bytes);
+            
+            Iterator    it = pgpSec.getSecretKeys();
+            while (it.hasNext())
+            {
+                keyCount++;
+
+                PGPSecretKey    k = (PGPSecretKey)it.next();
+                PGPPublicKey    pk = k.getPublicKey();
+
+                if (pk.getKeyID() == -1413891222336124627L)
                 {
-                    keyCount++;
-
-                    PGPPublicKey    pubKey = (PGPPublicKey)it.next();
-                    
-                    Iterator   sIt = pubKey.getSignatures();
+                    int         sCount = 0;
+                    Iterator    sIt = pk.getSignaturesOfType(PGPSignature.SUBKEY_BINDING);
                     while (sIt.hasNext())
                     {
-                        ((PGPSignature)sIt.next()).getSignatureType();
+                        int type = ((PGPSignature)sIt.next()).getSignatureType();
+                        if (type != PGPSignature.SUBKEY_BINDING)
+                        {
+                            fail("failed to return correct signature type");
+                        }
+                        sCount++;
+                    }
+                    
+                    if (sCount != 1)
+                    {
+                        fail("failed to find binding signature");
                     }
                 }
                 
-                if (keyCount != 2)
+                pk.getSignatures();
+                
+                if (k.getKeyID() == -4049084404703773049L
+                     || k.getKeyID() == -1413891222336124627L)
                 {
-                    return new SimpleTestResult(false, getName() + ": wrong number of public keys");
+                    k.extractPrivateKey(sec2pass1, "BC");
+                }
+                else if (k.getKeyID() == -6498553574938125416L
+                    || k.getKeyID() == 59034765524361024L)
+                {
+                    k.extractPrivateKey(sec2pass2, "BC");
                 }
             }
             
-            if (count != 1)
+            if (keyCount != 2)
             {
-                return new SimpleTestResult(false, getName() + ": wrong number of public keyrings");
+                fail("wrong number of secret keys");
             }
-            
-            //
-            // exact match
-            //
-            rIt = pubRings.getKeyRings("test (Test key) <test@ubicall.com>");
-            count = 0;
-            while (rIt.hasNext())
-            {
-                count++;
-                rIt.next();
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of public keyrings on exact match");
-            }
-            
-            //
-            // partial match 1 expected
-            //
-            rIt = pubRings.getKeyRings("test", true);
-            count = 0;
-            while (rIt.hasNext())
-            {
-                count++;
-                rIt.next();
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of public keyrings on partial match 1");
-            }
-            
-            //
-            // partial match 0 expected
-            //
-            rIt = pubRings.getKeyRings("XXX", true);
-            count = 0;
-            while (rIt.hasNext())
-            {
-                count++;
-                rIt.next();
-            }
-            
-            if (count != 0)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of public keyrings on partial match 0");
-            }
-            
-            PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec1);
-
-            rIt = secretRings.getKeyRings();
-            count = 0;
-            
-            while (rIt.hasNext())
-            {
-                PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
-        
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpSec.getEncoded();
-                
-                pgpSec = new PGPSecretKeyRing(bytes);
-                
-                Iterator    it = pgpSec.getSecretKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    PGPSecretKey    k = (PGPSecretKey)it.next();
-                    PGPPublicKey    pk = k.getPublicKey();
-                    
-                    pk.getSignatures();
-                    
-                    byte[] pkBytes = pk.getEncoded();
-                    
-                    PGPPublicKeyRing  pkR = new PGPPublicKeyRing(pkBytes);
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of secret keys");
-                }
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings");
-            }
-            
-            //
-            // exact match
-            //
-            rIt = secretRings.getKeyRings("test (Test key) <test@ubicall.com>");
-            count = 0;
-            while (rIt.hasNext())
-            {
-                count++;
-                rIt.next();
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings on exact match");
-            }
-            
-            //
-            // partial match 1 expected
-            //
-            rIt = secretRings.getKeyRings("test", true);
-            count = 0;
-            while (rIt.hasNext())
-            {
-                count++;
-                rIt.next();
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings on partial match 1");
-            }
-            
-            //
-            // exact match 0 expected
-            //
-            rIt = secretRings.getKeyRings("test", false);
-            count = 0;
-            while (rIt.hasNext())
-            {
-                count++;
-                rIt.next();
-            }
-            
-            if (count != 0)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings on partial match 0");
-            }
-            return new SimpleTestResult(true, getName() + ": Okay");
         }
-        catch (Exception e)
+        
+        if (count != 2)
         {
-            if (e instanceof PGPException)
-            {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
-            }
-            else
-            {
-                e.printStackTrace();
-            }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
+            fail("wrong number of secret keyrings");
         }
     }
     
-    public TestResult test2()
+    public void test3()
+        throws Exception
     {
-        try
-        {
-            PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub2);
+        PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub3);
 
-            int                            count = 0;
+        int                                        count = 0;
 
-            byte[]    encRing = pubRings.getEncoded();
+        byte[]    encRing = pubRings.getEncoded();
 
-            pubRings = new PGPPublicKeyRingCollection(encRing);
-            
-            Iterator    rIt = pubRings.getKeyRings();
-            
-            while (rIt.hasNext())
-            {
-                PGPPublicKeyRing        pgpPub = (PGPPublicKeyRing)rIt.next();
-                
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpPub.getEncoded();
-                
-                pgpPub = new PGPPublicKeyRing(bytes);
-                
-                Iterator    it = pgpPub.getPublicKeys();
-                while (it.hasNext())
-                {
-                    PGPPublicKey    pk = (PGPPublicKey)it.next();
-                    
-                    byte[] pkBytes = pk.getEncoded();
-                    
-                    PGPPublicKeyRing  pkR = new PGPPublicKeyRing(pkBytes);
-                    
-                    keyCount++;
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of public keys");
-                }
-            }
-            
-            if (count != 2)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of public keyrings");
-            }
-            
-            PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec2);
-
-            rIt = secretRings.getKeyRings();
-            count = 0;
-            
-            encRing = secretRings.getEncoded();
-            
-            secretRings = new PGPSecretKeyRingCollection(encRing);
-            
-            while (rIt.hasNext())
-            {
-                PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
+        pubRings = new PGPPublicKeyRingCollection(encRing);
         
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpSec.getEncoded();
-                
-                pgpSec = new PGPSecretKeyRing(bytes);
-                
-                Iterator    it = pgpSec.getSecretKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    PGPSecretKey    k = (PGPSecretKey)it.next();
-                    PGPPublicKey    pk = k.getPublicKey();
-
-                    if (pk.getKeyID() == -1413891222336124627L)
-                    {
-                        int         sCount = 0;
-                        Iterator    sIt = pk.getSignaturesOfType(PGPSignature.SUBKEY_BINDING);
-                        while (sIt.hasNext())
-                        {
-                            int type = ((PGPSignature)sIt.next()).getSignatureType();
-                            if (type != PGPSignature.SUBKEY_BINDING)
-                            {
-                                return new SimpleTestResult(false, getName() + ": failed to return correct signature type");
-                            }
-                            sCount++;
-                        }
-                        
-                        if (sCount != 1)
-                        {
-                            return new SimpleTestResult(false, getName() + ": failed to find binding signature");
-                        }
-                    }
-                    
-                    pk.getSignatures();
-                    
-                    if (k.getKeyID() == -4049084404703773049L
-                         || k.getKeyID() == -1413891222336124627L)
-                    {
-                        k.extractPrivateKey(sec2pass1, "BC");
-                    }
-                    else if (k.getKeyID() == -6498553574938125416L
-                        || k.getKeyID() == 59034765524361024L)
-                    {
-                        k.extractPrivateKey(sec2pass2, "BC");
-                    }
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of secret keys");
-                }
-            }
-            
-            if (count != 2)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
+        Iterator    rIt = pubRings.getKeyRings();
+        
+        while (rIt.hasNext())
         {
-            if (e instanceof PGPException)
+            PGPPublicKeyRing                    pgpPub = (PGPPublicKeyRing)rIt.next();
+            
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpPub.getEncoded();
+            
+            pgpPub = new PGPPublicKeyRing(bytes);
+            
+            Iterator    it = pgpPub.getPublicKeys();
+            while (it.hasNext())
             {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
+                keyCount++;
+
+                PGPPublicKey pubK = (PGPPublicKey)it.next();
+                
+                pubK.getSignatures();
             }
-            else
+            
+            if (keyCount != 2)
             {
-                e.printStackTrace();
+                fail("wrong number of public keys");
             }
-            return new SimpleTestResult(false, getName() + ": exception - "+ e);
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of public keyrings");
+        }
+        
+        PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec3);
+
+        rIt = secretRings.getKeyRings();
+        count = 0;
+        
+        encRing = secretRings.getEncoded();
+        
+        secretRings = new PGPSecretKeyRingCollection(encRing);
+        
+        while (rIt.hasNext())
+        {
+            PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
+    
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpSec.getEncoded();
+            
+            pgpSec = new PGPSecretKeyRing(bytes);
+            
+            Iterator    it = pgpSec.getSecretKeys();
+            while (it.hasNext())
+            {
+                keyCount++;
+
+                PGPSecretKey    k = (PGPSecretKey)it.next();
+
+                k.extractPrivateKey(sec3pass1, "BC");
+            }
+            
+            if (keyCount != 2)
+            {
+                fail("wrong number of secret keys");
+            }
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of secret keyrings");
         }
     }
     
-    public TestResult test3()
+    public void test4()
+        throws Exception
     {
-        try
-        {
-            PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub3);
+        PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec4);
 
-            int                                        count = 0;
-
-            byte[]    encRing = pubRings.getEncoded();
-
-            pubRings = new PGPPublicKeyRingCollection(encRing);
-            
-            Iterator    rIt = pubRings.getKeyRings();
-            
-            while (rIt.hasNext())
-            {
-                PGPPublicKeyRing                    pgpPub = (PGPPublicKeyRing)rIt.next();
-                
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpPub.getEncoded();
-                
-                pgpPub = new PGPPublicKeyRing(bytes);
-                
-                Iterator    it = pgpPub.getPublicKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    PGPPublicKey pubK = (PGPPublicKey)it.next();
-                    
-                    pubK.getSignatures();
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of public keys");
-                }
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of public keyrings");
-            }
-            
-            PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec3);
-
-            rIt = secretRings.getKeyRings();
-            count = 0;
-            
-            encRing = secretRings.getEncoded();
-            
-            secretRings = new PGPSecretKeyRingCollection(encRing);
-            
-            while (rIt.hasNext())
-            {
-                PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
+        Iterator    rIt = secretRings.getKeyRings();
+        int            count = 0;
         
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpSec.getEncoded();
-                
-                pgpSec = new PGPSecretKeyRing(bytes);
-                
-                Iterator    it = pgpSec.getSecretKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    PGPSecretKey    k = (PGPSecretKey)it.next();
-
-                    k.extractPrivateKey(sec3pass1, "BC");
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of secret keys");
-                }
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
+        byte[]    encRing = secretRings.getEncoded();
+        
+        secretRings = new PGPSecretKeyRingCollection(encRing);
+        
+        while (rIt.hasNext())
         {
-            if (e instanceof PGPException)
+            PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
+    
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpSec.getEncoded();
+            
+            pgpSec = new PGPSecretKeyRing(bytes);
+            
+            Iterator    it = pgpSec.getSecretKeys();
+            while (it.hasNext())
             {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
+                keyCount++;
+
+                PGPSecretKey    k = (PGPSecretKey)it.next();
+
+                k.extractPrivateKey(sec3pass1, "BC");
             }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
+            
+            if (keyCount != 2)
+            {
+                fail("wrong number of secret keys");
+            }
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of secret keyrings");
+        }
+    }
+
+    public void test5()
+        throws Exception
+    {
+        PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub5);
+
+        int                           count = 0;
+
+        byte[]    encRing = pubRings.getEncoded();
+
+        pubRings = new PGPPublicKeyRingCollection(encRing);
+        
+        Iterator    rIt = pubRings.getKeyRings();
+        
+        while (rIt.hasNext())
+        {
+            PGPPublicKeyRing                    pgpPub = (PGPPublicKeyRing)rIt.next();
+            
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpPub.getEncoded();
+            
+            pgpPub = new PGPPublicKeyRing(bytes);
+            
+            Iterator    it = pgpPub.getPublicKeys();
+            while (it.hasNext())
+            {
+                keyCount++;
+
+                it.next();
+            }
+            
+            if (keyCount != 2)
+            {
+                fail("wrong number of public keys");
+            }
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of public keyrings");
+        }
+        
+        PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec5);
+
+        rIt = secretRings.getKeyRings();
+        count = 0;
+        
+        encRing = secretRings.getEncoded();
+        
+        secretRings = new PGPSecretKeyRingCollection(encRing);
+        
+        while (rIt.hasNext())
+        {
+            PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
+    
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpSec.getEncoded();
+            
+            pgpSec = new PGPSecretKeyRing(bytes);
+            
+            Iterator    it = pgpSec.getSecretKeys();
+            while (it.hasNext())
+            {
+                keyCount++;
+
+                PGPSecretKey    k = (PGPSecretKey)it.next();
+
+                k.extractPrivateKey(sec5pass1, "BC");
+            }
+            
+            if (keyCount != 2)
+            {
+                fail("wrong number of secret keys");
+            }
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of secret keyrings");
         }
     }
     
-    public TestResult test4()
+    public void test6()
+        throws Exception
     {
-        try
+        PGPPublicKeyRingCollection  pubRings = new PGPPublicKeyRingCollection(pub6);
+        Iterator                    rIt = pubRings.getKeyRings();
+
+        while (rIt.hasNext())
         {
-            PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec4);
-
-            Iterator    rIt = secretRings.getKeyRings();
-            int            count = 0;
-            
-            byte[]    encRing = secretRings.getEncoded();
-            
-            secretRings = new PGPSecretKeyRingCollection(encRing);
-            
-            while (rIt.hasNext())
-            {
-                PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
-        
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpSec.getEncoded();
-                
-                pgpSec = new PGPSecretKeyRing(bytes);
-                
-                Iterator    it = pgpSec.getSecretKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    PGPSecretKey    k = (PGPSecretKey)it.next();
-
-                    k.extractPrivateKey(sec3pass1, "BC");
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of secret keys");
-                }
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
-        {
-            if (e instanceof PGPException)
-            {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
-            }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
-        }
-    }
-
-    public TestResult test5()
-    {
-        try
-        {
-            PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub5);
-
-            int                                        count = 0;
-
-            byte[]    encRing = pubRings.getEncoded();
-
-            pubRings = new PGPPublicKeyRingCollection(encRing);
-            
-            Iterator    rIt = pubRings.getKeyRings();
-            
-            while (rIt.hasNext())
-            {
-                PGPPublicKeyRing                    pgpPub = (PGPPublicKeyRing)rIt.next();
-                
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpPub.getEncoded();
-                
-                pgpPub = new PGPPublicKeyRing(bytes);
-                
-                Iterator    it = pgpPub.getPublicKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    it.next();
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of public keys");
-                }
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of public keyrings");
-            }
-            
-            PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec5);
-
-            rIt = secretRings.getKeyRings();
-            count = 0;
-            
-            encRing = secretRings.getEncoded();
-            
-            secretRings = new PGPSecretKeyRingCollection(encRing);
-            
-            while (rIt.hasNext())
-            {
-                PGPSecretKeyRing                    pgpSec = (PGPSecretKeyRing)rIt.next();
-        
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpSec.getEncoded();
-                
-                pgpSec = new PGPSecretKeyRing(bytes);
-                
-                Iterator    it = pgpSec.getSecretKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    PGPSecretKey    k = (PGPSecretKey)it.next();
-
-                    k.extractPrivateKey(sec5pass1, "BC");
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of secret keys");
-                }
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
-        {
-            if (e instanceof PGPException)
-            {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
-            }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
-        }
-    }
-    
-    public TestResult test6()
-    {
-        try
-        {
-            PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub6);
-            Iterator                    rIt = pubRings.getKeyRings();
-
-            while (rIt.hasNext())
-            {
-                PGPPublicKeyRing    pgpPub = (PGPPublicKeyRing)rIt.next();
-                Iterator            it = pgpPub.getPublicKeys();
-                while (it.hasNext())
-                {
-                    PGPPublicKey    k = (PGPPublicKey)it.next();
-
-                    if (k.getKeyID() == 0x5ce086b5b5a18ff4L)
-                    {
-                        int             count = 0;
-                        Iterator        sIt = k.getSignaturesOfType(PGPSignature.SUBKEY_REVOCATION);
-                        while (sIt.hasNext())
-                        {
-                            PGPSignature sig = (PGPSignature)sIt.next();
-                            count++;
-                        }
-                        
-                        if (count != 1)
-                        {
-                            return new SimpleTestResult(false, getName() + ": wrong number of revocations in test6.");
-                        }
-                    }
-                }
-            }
-            
-            byte[]    encRing = pubRings.getEncoded();
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
-        {
-            if (e instanceof PGPException)
-            {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
-            }
-            e.printStackTrace();
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
-        }
-    }
-
-    public TestResult test7()
-    {
-        try
-        {
-            PGPPublicKeyRing    pgpPub = new PGPPublicKeyRing(pub7);
+            PGPPublicKeyRing    pgpPub = (PGPPublicKeyRing)rIt.next();
             Iterator            it = pgpPub.getPublicKeys();
-            PGPPublicKey        masterKey = null;
-
             while (it.hasNext())
             {
                 PGPPublicKey    k = (PGPPublicKey)it.next();
 
-                if (k.isMasterKey())
+                if (k.getKeyID() == 0x5ce086b5b5a18ff4L)
                 {
-                    masterKey = k;
-                    continue;
-                }
-                
-                int             count = 0;
-                PGPSignature    sig = null;
-                Iterator        sIt = k.getSignaturesOfType(PGPSignature.SUBKEY_REVOCATION);
-
-                while (sIt.hasNext())
-                {
-                    sig = (PGPSignature)sIt.next();
-                    count++;
-                }
-                    
-                if (count != 1)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of revocations in test7.");
-                }
-
-                sig.initVerify(masterKey, "BC");
-                                                                                
-                if (!sig.verifyCertification(k))
-                {
-                    return new SimpleTestResult(false, getName() + ": failed to verify revocation certification");
-                }
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
-        {
-            if (e instanceof PGPException)
-            {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
-            }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
-        }
-    }
-
-    public TestResult test8()
-    {
-        try
-        {
-            PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub8);
-
-            int                           count = 0;
-
-            byte[]    encRing = pubRings.getEncoded();
-
-            pubRings = new PGPPublicKeyRingCollection(encRing);
-            
-            Iterator    rIt = pubRings.getKeyRings();
-            
-            while (rIt.hasNext())
-            {
-                PGPPublicKeyRing          pgpPub = (PGPPublicKeyRing)rIt.next();
-                
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpPub.getEncoded();
-                
-                pgpPub = new PGPPublicKeyRing(bytes);
-                
-                Iterator    it = pgpPub.getPublicKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    it.next();
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of public keys");
-                }
-            }
-            
-            if (count != 2)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of public keyrings");
-            }
-            
-            PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec8);
-
-            rIt = secretRings.getKeyRings();
-            count = 0;
-            
-            encRing = secretRings.getEncoded();
-            
-            secretRings = new PGPSecretKeyRingCollection(encRing);
-            
-            while (rIt.hasNext())
-            {
-                PGPSecretKeyRing         pgpSec = (PGPSecretKeyRing)rIt.next();
-        
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpSec.getEncoded();
-                
-                pgpSec = new PGPSecretKeyRing(bytes);
-                
-                Iterator    it = pgpSec.getSecretKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    PGPSecretKey    k = (PGPSecretKey)it.next();
-
-                    k.extractPrivateKey(sec8pass, "BC");
-                }
-                
-                if (keyCount != 2)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of secret keys");
-                }
-            }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
-        {
-            if (e instanceof PGPException)
-            {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
-            }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
-        }
-    }
-    
-    public TestResult test9()
-    {
-        try
-        {   
-            PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec9);
-
-            Iterator    rIt = secretRings.getKeyRings();
-            int         count = 0;
-            
-            byte[] encRing = secretRings.getEncoded();
-            
-            secretRings = new PGPSecretKeyRingCollection(encRing);
-            
-            while (rIt.hasNext())
-            {
-                PGPSecretKeyRing         pgpSec = (PGPSecretKeyRing)rIt.next();
-        
-                count++;
-                
-                int    keyCount = 0;
-                
-                byte[]    bytes = pgpSec.getEncoded();
-                
-                pgpSec = new PGPSecretKeyRing(bytes);
-                
-                Iterator    it = pgpSec.getSecretKeys();
-                while (it.hasNext())
-                {
-                    keyCount++;
-
-                    PGPSecretKey    k = (PGPSecretKey)it.next();
-
-                    PGPPrivateKey   pKey = k.extractPrivateKey(sec9pass, "BC");
-                    if (keyCount == 1 && pKey != null)
+                    int             count = 0;
+                    Iterator        sIt = k.getSignaturesOfType(PGPSignature.SUBKEY_REVOCATION);
+                    while (sIt.hasNext())
                     {
-                        return new SimpleTestResult(false, getName() + ": primary secret key found, null expected");
+                        PGPSignature sig = (PGPSignature)sIt.next();
+                        count++;
+                    }
+                    
+                    if (count != 1)
+                    {
+                        fail("wrong number of revocations in test6.");
                     }
                 }
-                
-                if (keyCount != 3)
-                {
-                    return new SimpleTestResult(false, getName() + ": wrong number of secret keys");
-                }
             }
-            
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": wrong number of secret keyrings");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
         }
-        catch (Exception e)
-        {
-            if (e instanceof PGPException)
-            {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
-            }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
-        }
-    }
-    
-    public TestResult test10()
-    {
-        try
-        {   
-            PGPSecretKeyRing    secretRing = new PGPSecretKeyRing(sec10);
-            Iterator            secretKeys = secretRing.getSecretKeys();
-            
-            while (secretKeys.hasNext())
-            {
-                PGPPublicKey pubKey = ((PGPSecretKey)secretKeys.next()).getPublicKey();
-                
-                if (pubKey.getValidDays() != 28)
-                {
-                    return new SimpleTestResult(false, getName() + ": days wrong on secret key ring");
-                }
-                
-                if (pubKey.getValidSeconds() != 28 * 24 * 60 * 60)
-                {
-                    return new SimpleTestResult(false, getName() + ": seconds wrong on secret key ring");
-                }
-            }
-            
-            PGPPublicKeyRing    publicRing = new PGPPublicKeyRing(pub10);
-            Iterator            publicKeys = publicRing.getPublicKeys();
-            
-            while (publicKeys.hasNext())
-            {
-                PGPPublicKey pubKey = (PGPPublicKey)publicKeys.next();
-
-                if (pubKey.getValidDays() != 28)
-                {
-                    return new SimpleTestResult(false, getName() + ": days wrong on public key ring");
-                }
-                
-                if (pubKey.getValidSeconds() != 28 * 24 * 60 * 60)
-                {
-                    return new SimpleTestResult(false, getName() + ": seconds wrong on public key ring");
-                }
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
-        {
-            if (e instanceof PGPException)
-            {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
-            }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
-        }
+        
+        byte[]    encRing = pubRings.getEncoded();
     }
 
-    public TestResult generateTest()
+    public void test7()
+        throws Exception
     {
-        try
+        PGPPublicKeyRing    pgpPub = new PGPPublicKeyRing(pub7);
+        Iterator            it = pgpPub.getPublicKeys();
+        PGPPublicKey        masterKey = null;
+
+        while (it.hasNext())
         {
-            char[]                    passPhrase = "hello".toCharArray();
-            KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
-        
-            dsaKpg.initialize(512);
-        
-            //
-            // this takes a while as the key generator has to generate some DSA params
-            // before it generates the key.
-            //
-            KeyPair                    dsaKp = dsaKpg.generateKeyPair();
-        
-            KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", "BC");
-            BigInteger             g = new BigInteger("153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b410b7a0f12ca1cb9a428cc", 16);
-            BigInteger             p = new BigInteger("9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd38744d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94bf0573bf047a3aca98cdf3b", 16);
-            
-            ElGamalParameterSpec         elParams = new ElGamalParameterSpec(p, g);
-            
-            elgKpg.initialize(elParams);
-        
-            //
-            // this is quicker because we are using pregenerated parameters.
-            //
-            KeyPair                    elgKp = elgKpg.generateKeyPair();
-            PGPKeyPair        dsaKeyPair = new PGPKeyPair(PGPPublicKey.DSA, dsaKp, new Date(), "BC");
-            PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date(), "BC");
-        
-            PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
-                    "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
-        
-            keyRingGen.addSubKey(elgKeyPair);
-        
-            PGPSecretKeyRing    keyRing = keyRingGen.generateSecretKeyRing();
-            
-            PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
-            
-            PGPPublicKey            vKey = null;
-            PGPPublicKey            sKey = null;
-            
-            Iterator                    it = pubRing.getPublicKeys();
-            while (it.hasNext())
+            PGPPublicKey    k = (PGPPublicKey)it.next();
+
+            if (k.isMasterKey())
             {
-                PGPPublicKey    pk = (PGPPublicKey)it.next();
-                if (pk.isMasterKey())
-                {
-                    vKey = pk;
-                }
-                else
-                {
-                    sKey = pk;
-                }
+                masterKey = k;
+                continue;
             }
             
-            Iterator    sIt = sKey.getSignatures();
+            int             count = 0;
+            PGPSignature    sig = null;
+            Iterator        sIt = k.getSignaturesOfType(PGPSignature.SUBKEY_REVOCATION);
+
             while (sIt.hasNext())
             {
-                PGPSignature    sig = (PGPSignature)sIt.next();
+                sig = (PGPSignature)sIt.next();
+                count++;
+            }
                 
-                if (sig.getKeyID() == vKey.getKeyID()
-                    && sig.getSignatureType() == PGPSignature.SUBKEY_BINDING)
-                {
-                    sig.initVerify(vKey, "BC");
-
-                    if (!sig.verifyCertification(vKey, sKey))
-                    {
-                        return new SimpleTestResult(false, getName() + ": failed to verify sub-key signature.");
-                    }
-                }
-            }
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
-        {
-            if (e instanceof PGPException)
+            if (count != 1)
             {
-                if (((PGPException)e).getUnderlyingException() != null)
-                {
-                    ((PGPException)e).getUnderlyingException().printStackTrace();
-                }
+                fail("wrong number of revocations in test7.");
             }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
+
+            sig.initVerify(masterKey, "BC");
+                                                                            
+            if (!sig.verifyCertification(k))
+            {
+                fail("failed to verify revocation certification");
+            }
+        }
+    }
+
+    public void test8()
+        throws Exception
+    {
+        PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(pub8);
+
+        int                           count = 0;
+
+        byte[]    encRing = pubRings.getEncoded();
+
+        pubRings = new PGPPublicKeyRingCollection(encRing);
+        
+        Iterator    rIt = pubRings.getKeyRings();
+        
+        while (rIt.hasNext())
+        {
+            PGPPublicKeyRing          pgpPub = (PGPPublicKeyRing)rIt.next();
+            
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpPub.getEncoded();
+            
+            pgpPub = new PGPPublicKeyRing(bytes);
+            
+            Iterator    it = pgpPub.getPublicKeys();
+            while (it.hasNext())
+            {
+                keyCount++;
+
+                it.next();
+            }
+            
+            if (keyCount != 2)
+            {
+                fail("wrong number of public keys");
+            }
+        }
+        
+        if (count != 2)
+        {
+            fail("wrong number of public keyrings");
+        }
+        
+        PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec8);
+
+        rIt = secretRings.getKeyRings();
+        count = 0;
+        
+        encRing = secretRings.getEncoded();
+        
+        secretRings = new PGPSecretKeyRingCollection(encRing);
+        
+        while (rIt.hasNext())
+        {
+            PGPSecretKeyRing         pgpSec = (PGPSecretKeyRing)rIt.next();
+    
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpSec.getEncoded();
+            
+            pgpSec = new PGPSecretKeyRing(bytes);
+            
+            Iterator    it = pgpSec.getSecretKeys();
+            while (it.hasNext())
+            {
+                keyCount++;
+
+                PGPSecretKey    k = (PGPSecretKey)it.next();
+
+                k.extractPrivateKey(sec8pass, "BC");
+            }
+            
+            if (keyCount != 2)
+            {
+                fail("wrong number of secret keys");
+            }
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of secret keyrings");
         }
     }
     
-    public TestResult perform()
+    public void test9()
+        throws Exception
+    { 
+        PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec9);
+
+        Iterator    rIt = secretRings.getKeyRings();
+        int         count = 0;
+        
+        byte[] encRing = secretRings.getEncoded();
+        
+        secretRings = new PGPSecretKeyRingCollection(encRing);
+        
+        while (rIt.hasNext())
+        {
+            PGPSecretKeyRing         pgpSec = (PGPSecretKeyRing)rIt.next();
+    
+            count++;
+            
+            int    keyCount = 0;
+            
+            byte[]    bytes = pgpSec.getEncoded();
+            
+            pgpSec = new PGPSecretKeyRing(bytes);
+            
+            Iterator    it = pgpSec.getSecretKeys();
+            while (it.hasNext())
+            {
+                keyCount++;
+
+                PGPSecretKey    k = (PGPSecretKey)it.next();
+
+                PGPPrivateKey   pKey = k.extractPrivateKey(sec9pass, "BC");
+                if (keyCount == 1 && pKey != null)
+                {
+                    fail("primary secret key found, null expected");
+                }
+            }
+            
+            if (keyCount != 3)
+            {
+                fail("wrong number of secret keys");
+            }
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of secret keyrings");
+        }
+    }
+    
+    public void test10()
+        throws Exception
+    { 
+        PGPSecretKeyRing    secretRing = new PGPSecretKeyRing(sec10);
+        Iterator            secretKeys = secretRing.getSecretKeys();
+        
+        while (secretKeys.hasNext())
+        {
+            PGPPublicKey pubKey = ((PGPSecretKey)secretKeys.next()).getPublicKey();
+            
+            if (pubKey.getValidDays() != 28)
+            {
+                fail("days wrong on secret key ring");
+            }
+            
+            if (pubKey.getValidSeconds() != 28 * 24 * 60 * 60)
+            {
+                fail("seconds wrong on secret key ring");
+            }
+        }
+        
+        PGPPublicKeyRing    publicRing = new PGPPublicKeyRing(pub10);
+        Iterator            publicKeys = publicRing.getPublicKeys();
+        
+        while (publicKeys.hasNext())
+        {
+            PGPPublicKey pubKey = (PGPPublicKey)publicKeys.next();
+
+            if (pubKey.getValidDays() != 28)
+            {
+                fail("days wrong on public key ring");
+            }
+            
+            if (pubKey.getValidSeconds() != 28 * 24 * 60 * 60)
+            {
+                fail("seconds wrong on public key ring");
+            }
+        }
+    }
+
+    public void generateTest()
+        throws Exception
     {
-        TestResult    res = test1();
-        if (!res.isSuccessful())
+        char[]              passPhrase = "hello".toCharArray();
+        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
+    
+        dsaKpg.initialize(512);
+    
+        //
+        // this takes a while as the key generator has to generate some DSA params
+        // before it generates the key.
+        //
+        KeyPair                    dsaKp = dsaKpg.generateKeyPair();
+    
+        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", "BC");
+        BigInteger             g = new BigInteger("153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b410b7a0f12ca1cb9a428cc", 16);
+        BigInteger             p = new BigInteger("9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd38744d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94bf0573bf047a3aca98cdf3b", 16);
+        
+        ElGamalParameterSpec         elParams = new ElGamalParameterSpec(p, g);
+        
+        elgKpg.initialize(elParams);
+    
+        //
+        // this is quicker because we are using pregenerated parameters.
+        //
+        KeyPair                    elgKp = elgKpg.generateKeyPair();
+        PGPKeyPair        dsaKeyPair = new PGPKeyPair(PGPPublicKey.DSA, dsaKp, new Date(), "BC");
+        PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date(), "BC");
+    
+        PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
+                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+    
+        keyRingGen.addSubKey(elgKeyPair);
+    
+        PGPSecretKeyRing    keyRing = keyRingGen.generateSecretKeyRing();
+        
+        PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
+        
+        PGPPublicKey            vKey = null;
+        PGPPublicKey            sKey = null;
+        
+        Iterator                    it = pubRing.getPublicKeys();
+        while (it.hasNext())
         {
-            return res;
-        }
- 
-        res = test2();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
- 
-        res = test3();
-        if (!res.isSuccessful())
-        {
-            return res;
+            PGPPublicKey    pk = (PGPPublicKey)it.next();
+            if (pk.isMasterKey())
+            {
+                vKey = pk;
+            }
+            else
+            {
+                sKey = pk;
+            }
         }
         
-        res = test4();
-        if (!res.isSuccessful())
+        Iterator    sIt = sKey.getSignatures();
+        while (sIt.hasNext())
         {
-            return res;
-        }
+            PGPSignature    sig = (PGPSignature)sIt.next();
+            
+            if (sig.getKeyID() == vKey.getKeyID()
+                && sig.getSignatureType() == PGPSignature.SUBKEY_BINDING)
+            {
+                sig.initVerify(vKey, "BC");
 
-        res = test5();
-        if (!res.isSuccessful())
-        {
-            return res;
+                if (!sig.verifyCertification(vKey, sKey))
+                {
+                    fail("failed to verify sub-key signature.");
+                }
+            }
         }
-        
-        res = test6();
-        if (!res.isSuccessful())
+    }
+    
+    public void performTest()
+        throws Exception
+    {
+        try
         {
-            return res;
+            test1();
+            test2();
+            test3();
+            test4();
+            test5();
+            test6();
+    //      test7();
+            test8();
+            test9();
+            test10();
+            generateTest();
         }
-
-//        res = test7();
-//        if (!res.isSuccessful())
-//        {
-//            return res;
-//        }
-        
-        res = test8();
-        if (!res.isSuccessful())
+        catch (PGPException e)
         {
-            return res;
+            if (((PGPException)e).getUnderlyingException() != null)
+            {
+                Exception ex = ((PGPException)e).getUnderlyingException();
+                fail("exception: " + ex, ex);
+            }
         }
-        
-        res = test9();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = test10();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        return generateTest();
     }
 
     public String getName()
@@ -1983,9 +1753,8 @@ public class PGPKeyRingTest
     public static void main(
         String[]    args)
     {
-        Test            test = new PGPKeyRingTest();
-        TestResult      result = test.perform();
+        Security.addProvider(new BouncyCastleProvider());
 
-        System.out.println(result.toString());
+        runTest(new PGPKeyRingTest());
     }
 }

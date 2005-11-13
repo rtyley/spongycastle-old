@@ -36,11 +36,10 @@ import org.bouncycastle.openpgp.PGPUserAttributeSubpacketVector;
 import org.bouncycastle.openpgp.PGPUtil;
 
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
-public class PGPDSATest implements Test
+public class PGPDSATest
+    extends SimpleTest
 {
     byte[] testPubKey =
         Base64.decode(
@@ -299,9 +298,8 @@ public class PGPDSATest implements Test
      * 
      * @param sKey
      * @param pgpPrivKey
-     * @return test result
      */
-    public TestResult generateTest(
+    public void generateTest(
         PGPSecretKeyRing sKey,
         PGPPublicKey     pgpPubKey,
         PGPPrivateKey    pgpPrivKey)
@@ -371,241 +369,226 @@ public class PGPDSATest implements Test
 
         if (!ops.verify(p3.get(0)))
         {
-            return new SimpleTestResult(false, getName() + ": Failed generated signature check");
+            fail("Failed generated signature check");
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        try
+        String file = null;
+        KeyFactory fact = KeyFactory.getInstance("DSA", "BC");
+        PGPPublicKey pubKey = null;
+        PrivateKey privKey = null;
+        
+        PGPUtil.setDefaultProvider("BC");
+
+        //
+        // Read the public key
+        //
+        PGPPublicKeyRing        pgpPub = new PGPPublicKeyRing(testPubKey);
+
+        pubKey = pgpPub.getPublicKey();
+
+        //
+        // Read the private key
+        //
+        PGPSecretKeyRing        sKey = new PGPSecretKeyRing(testPrivKey);
+        PGPPrivateKey           pgpPrivKey = sKey.getSecretKey().extractPrivateKey(pass, "BC");
+        
+        //
+        // test signature message
+        //
+        PGPObjectFactory        pgpFact = new PGPObjectFactory(sig1);
+
+        PGPCompressedData       c1 = (PGPCompressedData)pgpFact.nextObject();
+
+        pgpFact = new PGPObjectFactory(c1.getDataStream());
+        
+        PGPOnePassSignatureList p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
+        
+        PGPOnePassSignature     ops = p1.get(0);
+        
+        PGPLiteralData          p2 = (PGPLiteralData)pgpFact.nextObject();
+
+        InputStream             dIn = p2.getInputStream();
+        int                     ch;
+
+        ops.initVerify(pubKey, "BC");
+        
+        while ((ch = dIn.read()) >= 0)
         {
-            String file = null;
-            KeyFactory fact = KeyFactory.getInstance("DSA", "BC");
-            PGPPublicKey pubKey = null;
-            PrivateKey privKey = null;
-            
-            PGPUtil.setDefaultProvider("BC");
+            ops.update((byte)ch);
+        }
 
-            //
-            // Read the public key
-            //
-            PGPPublicKeyRing        pgpPub = new PGPPublicKeyRing(testPubKey);
+        PGPSignatureList        p3 = (PGPSignatureList)pgpFact.nextObject();
 
-            pubKey = pgpPub.getPublicKey();
+        if (!ops.verify(p3.get(0)))
+        {
+            fail("Failed signature check");
+        }
+        
+        //
+        // signature generation
+        //
+        generateTest(sKey, pubKey, pgpPrivKey);
+        
+        //
+        // signature generation - canonical text
+        //
+        String                      data = "hello world!";
+        ByteArrayOutputStream       bOut = new ByteArrayOutputStream();
+        ByteArrayInputStream        testIn = new ByteArrayInputStream(data.getBytes());
+        PGPSignatureGenerator       sGen = new PGPSignatureGenerator(PGPPublicKey.DSA, PGPUtil.SHA1, "BC");
 
-            //
-            // Read the private key
-            //
-            PGPSecretKeyRing        sKey = new PGPSecretKeyRing(testPrivKey);
-            PGPPrivateKey           pgpPrivKey = sKey.getSecretKey().extractPrivateKey(pass, "BC");
-            
-            //
-            // test signature message
-            //
-            PGPObjectFactory        pgpFact = new PGPObjectFactory(sig1);
+        sGen.initSign(PGPSignature.CANONICAL_TEXT_DOCUMENT, pgpPrivKey);
 
-            PGPCompressedData       c1 = (PGPCompressedData)pgpFact.nextObject();
+        PGPCompressedDataGenerator  cGen = new PGPCompressedDataGenerator(
+                                                                PGPCompressedData.ZIP);
 
-            pgpFact = new PGPObjectFactory(c1.getDataStream());
-            
-            PGPOnePassSignatureList p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
-            
-            PGPOnePassSignature     ops = p1.get(0);
-            
-            PGPLiteralData          p2 = (PGPLiteralData)pgpFact.nextObject();
+        BCPGOutputStream            bcOut = new BCPGOutputStream(cGen.open(bOut));
 
-            InputStream             dIn = p2.getInputStream();
-            int                     ch;
+        sGen.generateOnePassVersion(false).encode(bcOut);
 
-            ops.initVerify(pubKey, "BC");
-            
-            while ((ch = dIn.read()) >= 0)
-            {
-                ops.update((byte)ch);
-            }
-
-            PGPSignatureList        p3 = (PGPSignatureList)pgpFact.nextObject();
-
-            if (!ops.verify(p3.get(0)))
-            {
-                return new SimpleTestResult(false, getName() + ": Failed signature check");
-            }
-            
-            //
-            // signature generation
-            //
-            TestResult  res = generateTest(sKey, pubKey, pgpPrivKey);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            //
-            // signature generation - canonical text
-            //
-            String                      data = "hello world!";
-            ByteArrayOutputStream       bOut = new ByteArrayOutputStream();
-            ByteArrayInputStream        testIn = new ByteArrayInputStream(data.getBytes());
-            PGPSignatureGenerator       sGen = new PGPSignatureGenerator(PGPPublicKey.DSA, PGPUtil.SHA1, "BC");
+        PGPLiteralDataGenerator     lGen = new PGPLiteralDataGenerator();
+        OutputStream                lOut = lGen.open(bcOut, PGPLiteralData.TEXT, "_CONSOLE", data.getBytes().length, new Date());
     
-            sGen.initSign(PGPSignature.CANONICAL_TEXT_DOCUMENT, pgpPrivKey);
-
-            PGPCompressedDataGenerator  cGen = new PGPCompressedDataGenerator(
-                                                                    PGPCompressedData.ZIP);
-
-            BCPGOutputStream            bcOut = new BCPGOutputStream(cGen.open(bOut));
-
-            sGen.generateOnePassVersion(false).encode(bcOut);
-
-            PGPLiteralDataGenerator     lGen = new PGPLiteralDataGenerator();
-            OutputStream                lOut = lGen.open(bcOut, PGPLiteralData.TEXT, "_CONSOLE", data.getBytes().length, new Date());
-        
-            while ((ch = testIn.read()) >= 0)
-            {
-                lOut.write(ch);
-                sGen.update((byte)ch);
-            }
-
-            sGen.generate().encode(bcOut);
-
-            lGen.close();
-
-            cGen.close();
-
-            //
-            // verify generated signature - canconical text
-            //
-            pgpFact = new PGPObjectFactory(bOut.toByteArray());
-
-            c1 = (PGPCompressedData)pgpFact.nextObject();
-
-            pgpFact = new PGPObjectFactory(c1.getDataStream());
-        
-            p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
-        
-            ops = p1.get(0);
-        
-            p2 = (PGPLiteralData)pgpFact.nextObject();
-
-            dIn = p2.getInputStream();
-
-            ops.initVerify(pubKey, "BC");
-        
-            while ((ch = dIn.read()) >= 0)
-            {
-                ops.update((byte)ch);
-            }
-
-            p3 = (PGPSignatureList)pgpFact.nextObject();
-
-            if (!ops.verify(p3.get(0)))
-            {
-                return new SimpleTestResult(false, getName() + ": Failed generated signature check");
-            }
-            
-            //
-            // Read the public key with user attributes
-            //
-            pgpPub = new PGPPublicKeyRing(testPubWithUserAttr);
-
-            pubKey = pgpPub.getPublicKey();
-
-            Iterator it = pubKey.getUserAttributes();
-            int      count = 0;
-            while (it.hasNext())
-            {
-                PGPUserAttributeSubpacketVector attributes = (PGPUserAttributeSubpacketVector)it.next();
-                
-                Iterator    sigs = pubKey.getSignaturesForUserAttribute(attributes);
-                int sigCount = 0;
-                while (sigs.hasNext())
-                {
-                    sigs.next();
-                    
-                    sigCount++;
-                }
-                
-                if (sigCount != 1)
-                {
-                    return new SimpleTestResult(false, getName() + ": Failed user attributes signature check");
-                }
-                count++;
-            }
-
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": Failed user attributes check");
-            }
-
-            byte[]  pgpPubBytes = pgpPub.getEncoded();
-
-            pgpPub = new PGPPublicKeyRing(pgpPubBytes);
-
-               pubKey = pgpPub.getPublicKey();
-
-            it = pubKey.getUserAttributes();
-            count = 0;
-            while (it.hasNext())
-            {
-                it.next();
-                count++;
-            }
-
-            if (count != 1)
-            {
-                return new SimpleTestResult(false, getName() + ": Failed user attributes reread");
-            }
-
-            //
-            // reading test extra data - key with edge condition for DSA key password.
-            //
-            char []   passPhrase = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-
-            sKey = new PGPSecretKeyRing(testPrivKey2);
-            pgpPrivKey = sKey.getSecretKey().extractPrivateKey(passPhrase, "BC");
-
-            byte[]    bytes = pgpPrivKey.getKey().getEncoded();
-            
-            //
-            // reading test - aes256 encrypted passphrase.
-            //
-            sKey = new PGPSecretKeyRing(aesSecretKey);
-            pgpPrivKey = sKey.getSecretKey().extractPrivateKey(pass, "BC");
-
-            bytes = pgpPrivKey.getKey().getEncoded();
-            
-            //
-            // reading test - twofish encrypted passphrase.
-            //
-            sKey = new PGPSecretKeyRing(twofishSecretKey);
-            pgpPrivKey = sKey.getSecretKey().extractPrivateKey(pass, "BC");
-
-            bytes = pgpPrivKey.getKey().getEncoded();
-            
-            //
-            // use of PGPKeyPair
-            //
-            KeyPairGenerator    kpg = KeyPairGenerator.getInstance("DSA", "BC");
-            
-            kpg.initialize(512);
-            
-            KeyPair kp = kpg.generateKeyPair();
-            
-            PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.DSA , kp.getPublic(), kp.getPrivate(), new Date(), "BC");
-            
-            PGPPublicKey k1 = pgpKp.getPublicKey();
-            
-            PGPPrivateKey k2 = pgpKp.getPrivateKey();
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
+        while ((ch = testIn.read()) >= 0)
         {
-            e.printStackTrace();
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
+            lOut.write(ch);
+            sGen.update((byte)ch);
         }
+
+        sGen.generate().encode(bcOut);
+
+        lGen.close();
+
+        cGen.close();
+
+        //
+        // verify generated signature - canconical text
+        //
+        pgpFact = new PGPObjectFactory(bOut.toByteArray());
+
+        c1 = (PGPCompressedData)pgpFact.nextObject();
+
+        pgpFact = new PGPObjectFactory(c1.getDataStream());
+    
+        p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
+    
+        ops = p1.get(0);
+    
+        p2 = (PGPLiteralData)pgpFact.nextObject();
+
+        dIn = p2.getInputStream();
+
+        ops.initVerify(pubKey, "BC");
+    
+        while ((ch = dIn.read()) >= 0)
+        {
+            ops.update((byte)ch);
+        }
+
+        p3 = (PGPSignatureList)pgpFact.nextObject();
+
+        if (!ops.verify(p3.get(0)))
+        {
+            fail("Failed generated signature check");
+        }
+        
+        //
+        // Read the public key with user attributes
+        //
+        pgpPub = new PGPPublicKeyRing(testPubWithUserAttr);
+
+        pubKey = pgpPub.getPublicKey();
+
+        Iterator it = pubKey.getUserAttributes();
+        int      count = 0;
+        while (it.hasNext())
+        {
+            PGPUserAttributeSubpacketVector attributes = (PGPUserAttributeSubpacketVector)it.next();
+            
+            Iterator    sigs = pubKey.getSignaturesForUserAttribute(attributes);
+            int sigCount = 0;
+            while (sigs.hasNext())
+            {
+                sigs.next();
+                
+                sigCount++;
+            }
+            
+            if (sigCount != 1)
+            {
+                fail("Failed user attributes signature check");
+            }
+            count++;
+        }
+
+        if (count != 1)
+        {
+            fail("Failed user attributes check");
+        }
+
+        byte[]  pgpPubBytes = pgpPub.getEncoded();
+
+        pgpPub = new PGPPublicKeyRing(pgpPubBytes);
+
+           pubKey = pgpPub.getPublicKey();
+
+        it = pubKey.getUserAttributes();
+        count = 0;
+        while (it.hasNext())
+        {
+            it.next();
+            count++;
+        }
+
+        if (count != 1)
+        {
+            fail("Failed user attributes reread");
+        }
+
+        //
+        // reading test extra data - key with edge condition for DSA key password.
+        //
+        char []   passPhrase = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+        sKey = new PGPSecretKeyRing(testPrivKey2);
+        pgpPrivKey = sKey.getSecretKey().extractPrivateKey(passPhrase, "BC");
+
+        byte[]    bytes = pgpPrivKey.getKey().getEncoded();
+        
+        //
+        // reading test - aes256 encrypted passphrase.
+        //
+        sKey = new PGPSecretKeyRing(aesSecretKey);
+        pgpPrivKey = sKey.getSecretKey().extractPrivateKey(pass, "BC");
+
+        bytes = pgpPrivKey.getKey().getEncoded();
+        
+        //
+        // reading test - twofish encrypted passphrase.
+        //
+        sKey = new PGPSecretKeyRing(twofishSecretKey);
+        pgpPrivKey = sKey.getSecretKey().extractPrivateKey(pass, "BC");
+
+        bytes = pgpPrivKey.getKey().getEncoded();
+        
+        //
+        // use of PGPKeyPair
+        //
+        KeyPairGenerator    kpg = KeyPairGenerator.getInstance("DSA", "BC");
+        
+        kpg.initialize(512);
+        
+        KeyPair kp = kpg.generateKeyPair();
+        
+        PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.DSA , kp.getPublic(), kp.getPrivate(), new Date(), "BC");
+        
+        PGPPublicKey k1 = pgpKp.getPublicKey();
+        
+        PGPPrivateKey k2 = pgpKp.getPrivateKey();
     }
 
     public String getName()
@@ -613,13 +596,11 @@ public class PGPDSATest implements Test
         return "PGPDSATest";
     }
 
-    public static void main(String[] args)
+    public static void main(
+        String[]    args)
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test test = new PGPDSATest();
-        TestResult result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new PGPSignatureTest());
     }
 }
