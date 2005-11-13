@@ -1,6 +1,7 @@
 package org.bouncycastle.openpgp;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.bouncycastle.bcpg.SignatureSubpacket;
@@ -11,6 +12,7 @@ import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.bcpg.sig.PreferredAlgorithms;
 import org.bouncycastle.bcpg.sig.PrimaryUserID;
 import org.bouncycastle.bcpg.sig.Revocable;
+import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 import org.bouncycastle.bcpg.sig.SignatureExpirationTime;
 import org.bouncycastle.bcpg.sig.SignerUserID;
 import org.bouncycastle.bcpg.sig.TrustSignature;
@@ -74,6 +76,19 @@ public class PGPSignatureSubpacketGenerator
         long        seconds)
     {
         list.add(new SignatureExpirationTime(isCritical, seconds));
+    }
+    
+    /**
+     * Set the creation time for the signature.
+     * <p>
+     * Note: this overrides the generation of a creation time when the signature
+     * is generated.
+     */
+    public void setSignatureCreationTime(
+        boolean isCritical, 
+        Date    date)
+    {
+        list.add(new SignatureCreationTime(isCritical, date));
     }
     
     public void setPreferredHashAlgorithms(

@@ -173,11 +173,13 @@ public class PGPSignatureSubpacketVector
         
         int[]    list = new int[count];
         
+        count = 0;
+        
         for (int i = 0; i != packets.length; i++)
         {
             if (packets[i].isCritical())
             {
-                list[i] = packets[i].getType();
+                list[count++] = packets[i].getType();
             }
         }
         
