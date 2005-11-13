@@ -42,11 +42,10 @@ import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPUtil;
 
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
-public class PGPDSAElGamalTest implements Test
+public class PGPDSAElGamalTest
+    extends SimpleTest
 {
 
     byte[] testPubKeyRing =
@@ -125,27 +124,7 @@ public class PGPDSAElGamalTest implements Test
          + "dyiThf6TK3W29Yy/T6x45Ws5zOasaJdsFKM=");    
     char[] pass = { 'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd' };
     
-    private boolean notEqual(
-        byte[]    b1,
-        byte[]    b2)
-    {
-        if (b1.length != b2.length)
-        {
-            return true;
-        }
-        
-        for (int i = 0; i != b2.length; i++)
-        {
-            if (b1[i] != b2[i])
-            {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    public TestResult perform()
+    public void performTest()
     {
         try
         {
@@ -166,7 +145,7 @@ public class PGPDSAElGamalTest implements Test
 
             if (pubKey.getBitStrength() != 1024)
             {
-                return new SimpleTestResult(false, getName() + ": failed - key strength reported incorrectly.");
+                fail("failed - key strength reported incorrectly.");
             }
 
             //
@@ -236,7 +215,7 @@ public class PGPDSAElGamalTest implements Test
 
             if (!ops.verify(p3.get(0)))
             {
-                return new SimpleTestResult(false, getName() + ": Failed generated signature check");
+                fail("Failed generated signature check");
             }
             
             //
@@ -261,7 +240,7 @@ public class PGPDSAElGamalTest implements Test
                     pgpKeyID = pgpKey.getKeyID();
                     if (pgpKey.getBitStrength() != 1024)
                     {
-                        return new SimpleTestResult(false, getName() + ": failed - key strength reported incorrectly.");
+                        fail("failed - key strength reported incorrectly.");
                     }
                     
                     //
@@ -285,9 +264,9 @@ public class PGPDSAElGamalTest implements Test
             
             out = c.doFinal(out);
             
-            if (notEqual(in, out))
+            if (!areEqual(in, out))
             {
-                return new SimpleTestResult(false, getName() + ": decryption failed.");
+                fail("decryption failed.");
             }
 
             //
@@ -325,9 +304,9 @@ public class PGPDSAElGamalTest implements Test
                 bOut.write(ch);
             }
 
-            if (notEqual(bOut.toByteArray(), text))
+            if (!areEqual(bOut.toByteArray(), text))
             {
-                return new SimpleTestResult(false, getName() + ": wrong plain text in decrypted packet");
+                fail("wrong plain text in decrypted packet");
             }
             
             //
@@ -377,12 +356,12 @@ public class PGPDSAElGamalTest implements Test
 
             if (!ops.verify(p3.get(0)))
             {
-                return new SimpleTestResult(false, getName() + ": Failed signature check");
+                fail("Failed signature check");
             }
             
-            if (notEqual(bOut.toByteArray(), text))
+            if (!areEqual(bOut.toByteArray(), text))
             {
-                return new SimpleTestResult(false, getName() + ": wrong plain text in decrypted packet");
+                fail("wrong plain text in decrypted packet");
             }
             
             //
@@ -419,9 +398,9 @@ public class PGPDSAElGamalTest implements Test
 
             out = bOut.toByteArray();
 
-            if (notEqual(out, text))
+            if (!areEqual(out, text))
             {
-                return new SimpleTestResult(false, getName() + ": wrong plain text in generated packet");
+                fail("wrong plain text in generated packet");
             }
             
             //
@@ -443,17 +422,14 @@ public class PGPDSAElGamalTest implements Test
             PGPPublicKey k1 = pgpKp.getPublicKey();
             
             PGPPrivateKey k2 = pgpKp.getPrivateKey();
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             if (e instanceof PGPException)
             {
-                ((PGPException)e).getUnderlyingException().printStackTrace();
+                fail("exception: " + e.getMessage(), ((PGPException)e).getUnderlyingException());
             }
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
+            fail("exception - " + e.toString());
         }
     }
 
@@ -462,13 +438,11 @@ public class PGPDSAElGamalTest implements Test
         return "PGPDSAElGamalTest";
     }
 
-    public static void main(String[] args)
+    public static void main(
+        String[]    args)
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test test = new PGPDSAElGamalTest();
-        TestResult result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new PGPDSAElGamalTest());
     }
 }

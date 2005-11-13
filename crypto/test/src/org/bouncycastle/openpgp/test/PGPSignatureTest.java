@@ -10,8 +10,11 @@ import java.security.Security;
 import java.security.SignatureException;
 import java.util.Date;
 
+import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
+import org.bouncycastle.bcpg.SignatureSubpacketTags;
+import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
@@ -35,6 +38,11 @@ import org.bouncycastle.util.test.SimpleTest;
 public class PGPSignatureTest
     extends SimpleTest
 {
+    private static final int[] NO_PREFERENCES = null;
+    private static final int[] PREFERRED_SYMMETRIC_ALGORITHMS = new int[] { SymmetricKeyAlgorithmTags.AES_128, SymmetricKeyAlgorithmTags.TRIPLE_DES };
+    private static final int[] PREFERRED_HASH_ALGORITHMS = new int[] { HashAlgorithmTags.SHA1, HashAlgorithmTags.SHA256 };
+    private static final int[] PREFERRED_COMPRESSION_ALGORITHMS = new int[] { CompressionAlgorithmTags.ZLIB };
+    
     private static final int TEST_EXPIRATION_TIME = 10000;
     private static final String TEST_USER_ID = "test user id";
     private static final byte[] TEST_DATA = "hello world!\nhello world!\n".getBytes();
@@ -138,8 +146,11 @@ public class PGPSignatureTest
         PGPSignatureSubpacketGenerator    unhashedGen = new PGPSignatureSubpacketGenerator();
         PGPSignatureSubpacketGenerator    hashedGen = new PGPSignatureSubpacketGenerator();
         
-        hashedGen.setSignatureExpirationTime(false, 10000);
+        hashedGen.setSignatureExpirationTime(false, TEST_EXPIRATION_TIME);
         hashedGen.setSignerUserID(true, TEST_USER_ID);
+        hashedGen.setPreferredCompressionAlgorithms(false, PREFERRED_COMPRESSION_ALGORITHMS);
+        hashedGen.setPreferredHashAlgorithms(false, PREFERRED_HASH_ALGORITHMS);
+        hashedGen.setPreferredSymmetricAlgorithms(false, PREFERRED_SYMMETRIC_ALGORITHMS);
 
         sGen.setHashedSubpackets(hashedGen.generate());
         sGen.setUnhashedSubpackets(unhashedGen.generate());
@@ -156,6 +167,11 @@ public class PGPSignatureTest
         PGPSignatureSubpacketVector hashedPcks = sig.getHashedSubPackets();
         PGPSignatureSubpacketVector unhashedPcks = sig.getHashedSubPackets();
         
+        if (hashedPcks.size() != 7)
+        {
+            fail("wrong number of hashed packets found.");
+        }
+        
         if (!hashedPcks.getSignerUserID().equals(TEST_USER_ID))
         {
             fail("test userid not matching");
@@ -166,6 +182,35 @@ public class PGPSignatureTest
             fail("test signature expiration time not matching");
         }
         
+        if (hashedPcks.getIssuerKeyID() != secretDSAKey.getKeyID())
+        {
+            fail("wrong issuer key ID found in certification");
+        }
+        
+        int[] prefAlgs = hashedPcks.getPreferredCompressionAlgorithms();
+        preferredAlgorithmCheck("compression", PREFERRED_COMPRESSION_ALGORITHMS, prefAlgs);
+
+        prefAlgs = hashedPcks.getPreferredHashAlgorithms();
+        preferredAlgorithmCheck("hash", PREFERRED_HASH_ALGORITHMS, prefAlgs);
+        
+        prefAlgs = hashedPcks.getPreferredSymmetricAlgorithms();
+        preferredAlgorithmCheck("symmetric", PREFERRED_SYMMETRIC_ALGORITHMS, prefAlgs);
+        
+        int[] criticalHashed = hashedPcks.getCriticalTags();
+        
+        if (criticalHashed.length != 1)
+        {
+            fail("wrong number of critical packets found.");
+        }
+        
+        if (criticalHashed[0] != SignatureSubpacketTags.SIGNER_USER_ID)
+        {
+            fail("wrong critical packet found in tag list.");
+        }
+        
+        //
+        // no packets passed
+        //
         sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, "BC");
         
         sGen.initSign(PGPSignature.SUBKEY_BINDING, pgpPrivDSAKey);
@@ -205,6 +250,80 @@ public class PGPSignatureTest
         catch (IllegalStateException e)
         {
             // expected
+        }
+        
+        //
+        // override hash packets
+        //
+        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, "BC");
+        
+        sGen.initSign(PGPSignature.SUBKEY_BINDING, pgpPrivDSAKey);
+
+        hashedGen = new PGPSignatureSubpacketGenerator();
+        
+        hashedGen.setSignatureCreationTime(false, new Date(0L));
+        
+        sGen.setHashedSubpackets(hashedGen.generate());
+        
+        sGen.setUnhashedSubpackets(null);
+
+        sig = sGen.generateCertification(TEST_USER_ID, secretKey.getPublicKey());
+        
+        sig.initVerify(secretDSAKey.getPublicKey(), "BC");
+        
+        if (!sig.verifyCertification(TEST_USER_ID, secretKey.getPublicKey()))
+        {
+            fail("subkey binding verification failed.");
+        }
+        
+        hashedPcks = sig.getHashedSubPackets();
+        
+        if (hashedPcks.size() != 2)
+        {
+            fail("found wrong number of hashed packets in override test");
+        }
+        
+        if (!hashedPcks.getSignatureCreationTime().equals(new Date(0L)))
+        {
+            fail("creation of overriden date failed.");
+        }
+        
+        prefAlgs = hashedPcks.getPreferredCompressionAlgorithms();
+        preferredAlgorithmCheck("compression", NO_PREFERENCES, prefAlgs);
+
+        prefAlgs = hashedPcks.getPreferredHashAlgorithms();
+        preferredAlgorithmCheck("hash", NO_PREFERENCES, prefAlgs);
+        
+        prefAlgs = hashedPcks.getPreferredSymmetricAlgorithms();
+        preferredAlgorithmCheck("symmetric", NO_PREFERENCES, prefAlgs);
+        
+        if (hashedPcks.getKeyExpirationTime() != 0)
+        {
+            fail("unexpected key expiration time found");
+        }
+        
+        if (hashedPcks.getSignatureExpirationTime() != 0)
+        {
+            fail("unexpected signature expiration time found");
+        }
+        
+        if (hashedPcks.getSignerUserID() != null)
+        {
+            fail("unexpected signer user ID found");
+        }
+        
+        criticalHashed = hashedPcks.getCriticalTags();
+        
+        if (criticalHashed.length != 0)
+        {
+            fail("critical packets found when none expected");
+        }
+        
+        unhashedPcks = sig.getUnhashedSubPackets();
+        
+        if (unhashedPcks.size() != 0)
+        {
+            fail("found non-zero unhashed packets in override test");
         }
         
         //
@@ -254,6 +373,35 @@ public class PGPSignatureTest
         testTextSig(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, secretKey.getPublicKey(), pgpPrivKey, TEST_DATA, TEST_DATA_WITH_CRLF);
         testTextSigV3(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, secretKey.getPublicKey(), pgpPrivKey, TEST_DATA_WITH_CRLF, TEST_DATA_WITH_CRLF);
         testTextSigV3(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, secretKey.getPublicKey(), pgpPrivKey, TEST_DATA, TEST_DATA_WITH_CRLF);
+    }
+
+    private void preferredAlgorithmCheck(
+        String type,
+        int[] expected,  
+        int[] prefAlgs)
+    {
+        if (expected == null)
+        {
+            if (prefAlgs != null)
+            {
+                fail("preferences for " + type + " found when none expected");
+            }
+        }
+        else
+        {   
+            if (prefAlgs.length != expected.length)
+            {
+                fail("wrong number of preferred " + type + " algorithms found");
+            }
+            
+            for (int i = 0; i != expected.length; i++)
+            {
+                if (expected[i] != prefAlgs[i])
+                {
+                    fail("wrong algorithm found for " + type + ": expected " + expected[i] + " got " + prefAlgs);
+                }
+            }
+        }
     }
 
     private void testSig(
