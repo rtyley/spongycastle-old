@@ -11,6 +11,7 @@
     <property name="artifacts.reports.xml.dir" value="${artifacts.dir}/reports/xml" />
     <property name="artifacts.reports.html.dir" value="${artifacts.dir}/reports/html" />
     <property name="artifacts.jars.dir" value="${artifacts.dir}/jars" />
+    <property name="artifacts.docs.dir" value="${artifacts.dir}/javadoc" />
 
     <property name="provider.target" value="bcprov-${target.name}" />
     <property name="provider.target.dir" value="${artifacts.dir}/${provider.target}" />
@@ -182,6 +183,7 @@
                  <include name="org/bouncycastle/sasn1/**/*.java" />
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
+                 <exclude name="**/test/*.java" />
              </fileset>
         </copy>
 
@@ -211,6 +213,7 @@
                  <include name="org/bouncycastle/tsp/**/*.java" />
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
+                 <exclude name="**/test/*.java" />
              </fileset>
         </copy>
 
@@ -246,6 +249,7 @@
                  <include name="org/bouncycastle/openpgp/**/*.java" />
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
+                 <exclude name="**/test/*.java" />
              </fileset>
         </copy>
 
@@ -361,7 +365,7 @@
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${provider.target.src.dir}" docsDir="${provider.target.docs.dir}">
+        <compileDoc srcDir="${provider.target.src.dir}" docsDir="${artifacts.docs.dir}/bcprov">
             <docElements>
                 <package name="org.bouncycastle.asn1.*" />
                 <package name="org.bouncycastle.crypto.*" />
@@ -377,6 +381,10 @@
                 <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
             </docElements>
         </compileDoc>
+
+        <copy todir="${provider.target.docs.dir}">
+             <fileset dir="${artifacts.docs.dir}/bcprov" />
+        </copy>
     </target>
 
     <!--
@@ -394,7 +402,7 @@
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${mail.target.src.dir}" docsDir="${mail.target.docs.dir}">
+        <compileDoc srcDir="${mail.target.src.dir}" docsDir="${artifacts.docs.dir}/bcmail">
             <docElements>
                 <package name="org.bouncycastle.cms.*" />
                 <package name="org.bouncycastle.mail.*" />
@@ -404,6 +412,10 @@
                 <group title="Streaming ASN.1 Packages" packages="org.bouncycastle.sasn1*" />
             </docElements>
         </compileDoc>
+
+        <copy todir="${mail.target.docs.dir}">
+             <fileset dir="${artifacts.docs.dir}/bcmail" />
+        </copy>
     </target>
 
     <!--
@@ -417,12 +429,16 @@
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${tsp.target.src.dir}" docsDir="${tsp.target.docs.dir}">
+        <compileDoc srcDir="${tsp.target.src.dir}" docsDir="${artifacts.docs.dir}/bctsp">
             <docElements>
                 <package name="org.bouncycastle.tsp.*" />
                 <group title="TSP Packages" packages="org.bouncycastle.tsp*" />
             </docElements>
         </compileDoc>
+
+        <copy todir="${tsp.target.docs.dir}">
+             <fileset dir="${artifacts.docs.dir}/bctsp" />
+        </copy>
     </target>
 
     <!--
@@ -438,7 +454,7 @@
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${pg.target.src.dir}" docsDir="${pg.target.docs.dir}">
+        <compileDoc srcDir="${pg.target.src.dir}" docsDir="${artifacts.docs.dir}/bcpg">
             <docElements>
                 <package name="org.bouncycastle.openpgp.*" />
                 <package name="org.bouncycastle.bcpg.*" />
@@ -446,5 +462,9 @@
                 <group title="OpenPGP Packages" packages="org.bouncycastle.openpgp*" />
             </docElements>
         </compileDoc>
+
+        <copy todir="${pg.target.docs.dir}">
+             <fileset dir="${artifacts.docs.dir}/bcpg" />
+       </copy>
     </target>
 </project>
