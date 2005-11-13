@@ -10,9 +10,7 @@ import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * Test the reading and writing of EncryptedPrivateKeyInfo objects using
@@ -24,7 +22,7 @@ import org.bouncycastle.util.test.TestResult;
  * (without quotes). They should all yield the same PrivateKeyInfo object.
  */
 public class EncryptedPrivateKeyInfoTest
-    implements Test
+    extends SimpleTest
 {
     static byte[] sample1 = Base64.decode(
         "MIIBozA9BgkqhkiG9w0BBQ0wMDAbBgkqhkiG9w0BBQwwDgQIfWBDXwLp4K4CAggA"
@@ -65,13 +63,13 @@ public class EncryptedPrivateKeyInfoTest
         return "EncryptedPrivateKeyInfoTest";
     }
 
-    private TestResult test(
+    private void test(
         int     id,
         byte[]  sample)
     {
         ByteArrayInputStream    bIn = new ByteArrayInputStream(sample);
         ASN1InputStream         aIn = new ASN1InputStream(bIn);
-        EncryptedPrivateKeyInfo info;
+        EncryptedPrivateKeyInfo info = null;
 
         try
         {
@@ -79,9 +77,9 @@ public class EncryptedPrivateKeyInfoTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": test " + id + " failed construction - exception " + e.toString());
+            fail("test " + id + " failed construction - exception " + e.toString(), e);
         }
-    
+
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         DEROutputStream         dOut = new DEROutputStream(bOut);
 
@@ -91,7 +89,7 @@ public class EncryptedPrivateKeyInfoTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": test " + id + " failed writing - exception " + e.toString());
+            fail("test " + id + " failed writing - exception " + e.toString(), e);
         }
 
         byte[]  bytes = bOut.toByteArray();
@@ -105,12 +103,11 @@ public class EncryptedPrivateKeyInfoTest
 
                 DERObject   obj = aIn.readObject();
     
-                return new SimpleTestResult(false, getName() + ": test " + id + " length mismatch - expected " + sample.length + System.getProperty("line.separator") + ASN1Dump.dumpAsString(info) + " got " + bytes.length + System.getProperty("line.separator") + ASN1Dump.dumpAsString(obj));
+                fail("test " + id + " length mismatch - expected " + sample.length + System.getProperty("line.separator") + ASN1Dump.dumpAsString(info) + " got " + bytes.length + System.getProperty("line.separator") + ASN1Dump.dumpAsString(obj));
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                return new SimpleTestResult(false, getName() + ": test " + id + " length mismatch - exception " + e.toString());
+                fail("test " + id + " length mismatch - exception " + e.toString());
             }
         }
 
@@ -118,43 +115,22 @@ public class EncryptedPrivateKeyInfoTest
         {
             if (bytes[i] != sample[i])
             {
-                return new SimpleTestResult(false, getName() + ": test " + id + " data mismatch");
+                fail("test " + id + " data mismatch");
             }
         }
-
-        return new SimpleTestResult(true, getName() + ": test " + id + " Okay");
     }
 
-    public TestResult perform()
+    public void performTest()
     {
-        TestResult  result = test(0, sample1);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = test(1, sample2);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = test(2, sample3);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        test(0, sample1);
+        test(1, sample2);
+        test(2, sample3);
     }
+
 
     public static void main(
         String[]    args)
     {
-        Test    test = new EncryptedPrivateKeyInfoTest();
-
-        TestResult  result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new EncryptedPrivateKeyInfoTest());
     }
 }

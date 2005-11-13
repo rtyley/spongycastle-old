@@ -4,18 +4,18 @@ import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.AttCertIssuer;
+import org.bouncycastle.asn1.x509.AttCertValidityPeriod;
 import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
-import org.bouncycastle.asn1.x509.AttCertIssuer;
-import org.bouncycastle.asn1.x509.AttCertValidityPeriod;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -33,12 +33,10 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class CertificateTest
-    implements Test
+    extends SimpleTest
 {
     //
     // server.crt
@@ -221,289 +219,219 @@ public class CertificateTest
         return "Certificate";
     }
 
-    public TestResult checkCertificate(
+    public void checkCertificate(
         int     id,
         byte[]  cert)
+        throws Exception
     {
         ByteArrayInputStream    bIn;
         ASN1InputStream         aIn;
         String                  dump = "";
 
-        try
+        bIn = new ByteArrayInputStream(cert);
+        aIn = new ASN1InputStream(bIn);
+
+        ASN1Sequence      seq = (ASN1Sequence)aIn.readObject();
+        dump = ASN1Dump.dumpAsString(seq);
+
+        X509CertificateStructure    obj = new X509CertificateStructure(seq);
+        TBSCertificateStructure     tbsCert = obj.getTBSCertificate();
+        
+        if (!tbsCert.getSubject().toString().equals(subjects[id - 1]))
         {
-            bIn = new ByteArrayInputStream(cert);
-            aIn = new ASN1InputStream(bIn);
-
-            ASN1Sequence      seq = (ASN1Sequence)aIn.readObject();
-            dump = ASN1Dump.dumpAsString(seq);
-
-            X509CertificateStructure    obj = new X509CertificateStructure(seq);
-            TBSCertificateStructure     tbsCert = obj.getTBSCertificate();
-            
-            if (!tbsCert.getSubject().toString().equals(subjects[id - 1]))
+            fail("failed subject test for certificate id " + id);
+        }
+        
+        if (tbsCert.getVersion() == 3)
+        {
+            X509Extensions                ext = tbsCert.getExtensions();
+            if (ext != null)
             {
-                return new SimpleTestResult(false, getName() + ": failed subject test for certificate id " + id);
-            }
-            
-            if (tbsCert.getVersion() == 3)
-            {
-                X509Extensions                ext = tbsCert.getExtensions();
-                if (ext != null)
+                Enumeration    en = ext.oids();
+                while (en.hasMoreElements())
                 {
-                    Enumeration    en = ext.oids();
-                    while (en.hasMoreElements())
+                    DERObjectIdentifier    oid = (DERObjectIdentifier)en.nextElement();
+                    X509Extension            extVal = ext.getExtension(oid);
+                    
+                    ASN1OctetString        oct = extVal.getValue();
+                    ASN1InputStream        extIn = new ASN1InputStream(new ByteArrayInputStream(oct.getOctets()));
+                    
+                    if (oid.equals(X509Extensions.SubjectKeyIdentifier))
                     {
-                        DERObjectIdentifier    oid = (DERObjectIdentifier)en.nextElement();
-                        X509Extension            extVal = ext.getExtension(oid);
+                        SubjectKeyIdentifier si = SubjectKeyIdentifier.getInstance(extIn.readObject());
+                    }
+                    else if (oid.equals(X509Extensions.KeyUsage))
+                    {
+                        DERBitString ku = KeyUsage.getInstance(extIn.readObject());
+                    }
+                    else if (oid.equals(X509Extensions.ExtendedKeyUsage))
+                    {
+                        ExtendedKeyUsage ku = ExtendedKeyUsage.getInstance(extIn.readObject());
                         
-                        ASN1OctetString        oct = extVal.getValue();
-                        ASN1InputStream        extIn = new ASN1InputStream(new ByteArrayInputStream(oct.getOctets()));
+                        ASN1Sequence    sq = (ASN1Sequence)ku.getDERObject();
+                        for (int i = 0; i != sq.size(); i++)
+                        {
+                            DERObjectIdentifier    p = KeyPurposeId.getInstance(sq.getObjectAt(i));
+                        }
+                    }
+                    else if (oid.equals(X509Extensions.SubjectAlternativeName))
+                    {
+                        GeneralNames    gn = GeneralNames.getInstance(extIn.readObject());
                         
-                        if (oid.equals(X509Extensions.SubjectKeyIdentifier))
+                        ASN1Sequence    sq = (ASN1Sequence)gn.getDERObject();
+                        for (int i = 0; i != sq.size(); i++)
                         {
-                            SubjectKeyIdentifier si = SubjectKeyIdentifier.getInstance(extIn.readObject());
+                            GeneralName    n = GeneralName.getInstance(sq.getObjectAt(i));
                         }
-                        else if (oid.equals(X509Extensions.KeyUsage))
+                    }
+                    else if (oid.equals(X509Extensions.IssuerAlternativeName))
+                    {
+                        GeneralNames    gn = GeneralNames.getInstance(extIn.readObject());
+                        
+                        ASN1Sequence    sq = (ASN1Sequence)gn.getDERObject();
+                        for (int i = 0; i != sq.size(); i++)
                         {
-                            DERBitString ku = KeyUsage.getInstance(extIn.readObject());
+                            GeneralName    n = GeneralName.getInstance(sq.getObjectAt(i));
                         }
-                        else if (oid.equals(X509Extensions.ExtendedKeyUsage))
+                    }
+                    else if (oid.equals(X509Extensions.CRLDistributionPoints))
+                    {
+                        CRLDistPoint    p = CRLDistPoint.getInstance(extIn.readObject());
+                        
+                        DistributionPoint[] points = p.getDistributionPoints();
+                        for (int i = 0; i != points.length; i++)
                         {
-                            ExtendedKeyUsage ku = ExtendedKeyUsage.getInstance(extIn.readObject());
-                            
-                            ASN1Sequence    sq = (ASN1Sequence)ku.getDERObject();
-                            for (int i = 0; i != sq.size(); i++)
-                            {
-                                DERObjectIdentifier    p = KeyPurposeId.getInstance(sq.getObjectAt(i));
-                            }
+                            // do nothing
                         }
-                        else if (oid.equals(X509Extensions.SubjectAlternativeName))
+                    }
+                    else if (oid.equals(X509Extensions.CertificatePolicies))
+                    {
+                        ASN1Sequence    cp = (ASN1Sequence)extIn.readObject();
+                        
+                        for (int i = 0; i != cp.size(); i++)
                         {
-                            GeneralNames    gn = GeneralNames.getInstance(extIn.readObject());
-                            
-                            ASN1Sequence    sq = (ASN1Sequence)gn.getDERObject();
-                            for (int i = 0; i != sq.size(); i++)
-                            {
-                                GeneralName    n = GeneralName.getInstance(sq.getObjectAt(i));
-                            }
+                            PolicyInformation.getInstance(cp.getObjectAt(i));
                         }
-                        else if (oid.equals(X509Extensions.IssuerAlternativeName))
-                        {
-                            GeneralNames    gn = GeneralNames.getInstance(extIn.readObject());
-                            
-                            ASN1Sequence    sq = (ASN1Sequence)gn.getDERObject();
-                            for (int i = 0; i != sq.size(); i++)
-                            {
-                                GeneralName    n = GeneralName.getInstance(sq.getObjectAt(i));
-                            }
-                        }
-                        else if (oid.equals(X509Extensions.CRLDistributionPoints))
-                        {
-                            CRLDistPoint    p = CRLDistPoint.getInstance(extIn.readObject());
-                            
-                            DistributionPoint[] points = p.getDistributionPoints();
-                            for (int i = 0; i != points.length; i++)
-                            {
-                                // do nothing
-                            }
-                        }
-                        else if (oid.equals(X509Extensions.CertificatePolicies))
-                        {
-                            ASN1Sequence    cp = (ASN1Sequence)extIn.readObject();
-                            
-                            for (int i = 0; i != cp.size(); i++)
-                            {
-                                PolicyInformation.getInstance(cp.getObjectAt(i));
-                            }
-                        }
-                        else if (oid.equals(X509Extensions.AuthorityKeyIdentifier))
-                        {
-                            AuthorityKeyIdentifier    auth = AuthorityKeyIdentifier.getInstance(extIn.readObject());
-                        }
-                        else if (oid.equals(X509Extensions.BasicConstraints))
-                        {
-                            BasicConstraints    bc = BasicConstraints.getInstance(extIn.readObject());
-                        }
-                        else
-                        {
-                            //System.out.println(oid.getId());
-                        }
+                    }
+                    else if (oid.equals(X509Extensions.AuthorityKeyIdentifier))
+                    {
+                        AuthorityKeyIdentifier    auth = AuthorityKeyIdentifier.getInstance(extIn.readObject());
+                    }
+                    else if (oid.equals(X509Extensions.BasicConstraints))
+                    {
+                        BasicConstraints    bc = BasicConstraints.getInstance(extIn.readObject());
+                    }
+                    else
+                    {
+                        //System.out.println(oid.getId());
                     }
                 }
             }
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return new SimpleTestResult(false, dump + System.getProperty("line.separator") + getName() + ": " + id + " failed - exception " + e.toString());
-        }
-
-        return new SimpleTestResult(true, getName() + ": " + id + " Okay");
     }
 
 
-    public TestResult checkAttributeCertificate(
+    public void checkAttributeCertificate(
         int     id,
         byte[]  cert)
+        throws Exception
     {
         ByteArrayInputStream bIn;
         ASN1InputStream aIn;
         String dump = "";
 
-        try
+        bIn = new ByteArrayInputStream(cert);
+        aIn = new ASN1InputStream(bIn);
+
+        ASN1Sequence seq = (ASN1Sequence) aIn.readObject();
+        dump = ASN1Dump.dumpAsString(seq);
+
+        AttributeCertificate obj = new AttributeCertificate(seq);
+        AttributeCertificateInfo acInfo = obj.getAcinfo();
+
+        // Version
+        if (!(acInfo.getVersion().equals(new DERInteger(1)))
+                && (!(acInfo.getVersion().equals(new DERInteger(2)))))
         {
-            bIn = new ByteArrayInputStream(cert);
-            aIn = new ASN1InputStream(bIn);
-
-            ASN1Sequence seq = (ASN1Sequence) aIn.readObject();
-            dump = ASN1Dump.dumpAsString(seq);
-
-            AttributeCertificate obj = new AttributeCertificate(seq);
-            AttributeCertificateInfo acInfo = obj.getAcinfo();
-
-            // Version
-            if (!(acInfo.getVersion().equals(new DERInteger(1)))
-                    && (!(acInfo.getVersion().equals(new DERInteger(2)))))
-            {
-                return new SimpleTestResult(false,
-                        "failed AC Version test for id " + id);
-            }
-
-            // Holder
-            Holder h = acInfo.getHolder();
-            if (h == null)
-            {
-                return new SimpleTestResult(false,
-                        "failed AC Holder test, it's null, for id " + id);
-            }
-
-            // Issuer
-            AttCertIssuer aci = acInfo.getIssuer();
-            if (aci == null)
-            {
-                return new SimpleTestResult(false,
-                        "failed AC Issuer test, it's null, for id " + id);
-            }
-
-            // Signature
-            AlgorithmIdentifier sig = acInfo.getSignature();
-            if (sig == null)
-            {
-                return new SimpleTestResult(false,
-                        "failed AC Signature test for id " + id);
-            }
-
-            // Serial
-            DERInteger serial = acInfo.getSerialNumber();
-
-            // Validity
-            AttCertValidityPeriod validity = acInfo.getAttrCertValidityPeriod();
-            if (validity == null)
-            {
-                return new SimpleTestResult(false,
-                        "failed AC AttCertValidityPeriod test for id " + id);
-            }
-
-            // Attributes
-            ASN1Sequence attribSeq = acInfo.getAttributes();
-            Attribute att[] = new Attribute[attribSeq.size()];
-            for (int i = 0; i < attribSeq.size(); i++)
-            {
-                att[i] = Attribute.getInstance(attribSeq.getObjectAt(i));
-            }
-
-            // IssuerUniqueId
-            // TODO, how to best test?
-
-            // X509 Extensions
-            X509Extensions ext = acInfo.getExtensions();
-            if (ext != null)
-            {
-                Enumeration en = ext.oids();
-                while (en.hasMoreElements())
-                {
-                    DERObjectIdentifier oid = (DERObjectIdentifier) en
-                            .nextElement();
-                    X509Extension extVal = ext.getExtension(oid);
-                }
-            }
-
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return new SimpleTestResult(false, dump
-                    + System.getProperty("line.separator") + getName() + ": "
-                    + id + " failed - exception " + e.toString());
+            fail(
+                    "failed AC Version test for id " + id);
         }
 
-        return new SimpleTestResult(true, getName() + ": " + id + " Okay");
+        // Holder
+        Holder h = acInfo.getHolder();
+        if (h == null)
+        {
+            fail(
+                    "failed AC Holder test, it's null, for id " + id);
+        }
+
+        // Issuer
+        AttCertIssuer aci = acInfo.getIssuer();
+        if (aci == null)
+        {
+            fail(
+                    "failed AC Issuer test, it's null, for id " + id);
+        }
+
+        // Signature
+        AlgorithmIdentifier sig = acInfo.getSignature();
+        if (sig == null)
+        {
+            fail(
+                    "failed AC Signature test for id " + id);
+        }
+
+        // Serial
+        DERInteger serial = acInfo.getSerialNumber();
+
+        // Validity
+        AttCertValidityPeriod validity = acInfo.getAttrCertValidityPeriod();
+        if (validity == null)
+        {
+            fail("failed AC AttCertValidityPeriod test for id " + id);
+        }
+
+        // Attributes
+        ASN1Sequence attribSeq = acInfo.getAttributes();
+        Attribute att[] = new Attribute[attribSeq.size()];
+        for (int i = 0; i < attribSeq.size(); i++)
+        {
+            att[i] = Attribute.getInstance(attribSeq.getObjectAt(i));
+        }
+
+        // IssuerUniqueId
+        // TODO, how to best test?
+
+        // X509 Extensions
+        X509Extensions ext = acInfo.getExtensions();
+        if (ext != null)
+        {
+            Enumeration en = ext.oids();
+            while (en.hasMoreElements())
+            {
+                DERObjectIdentifier oid = (DERObjectIdentifier) en
+                        .nextElement();
+                X509Extension extVal = ext.getExtension(oid);
+            }
+        }
     }
 
-
-
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        TestResult  res;
-
-        res = checkCertificate(1, cert1);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(2, cert2);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(3, cert3);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(4, cert4);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(5, cert5);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(6, cert6);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(7, cert7);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-    res = checkAttributeCertificate(8,cert8);
-    if (!res.isSuccessful())
-    {
-        return res;
-    }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        checkCertificate(1, cert1);
+        checkCertificate(2, cert2);
+        checkCertificate(3, cert3);
+        checkCertificate(4, cert4);
+        checkCertificate(5, cert5);
+        checkCertificate(6, cert6);
+        checkCertificate(7, cert7);
+        checkAttributeCertificate(8,cert8);
     }
 
     public static void main(
         String[]    args)
     {
-        Test    test = new CertificateTest();
-
-        TestResult  result = test.perform();
-
-        System.out.println(result);
+        runTest(new CertificateTest());
     }
 }
