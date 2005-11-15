@@ -69,7 +69,7 @@ public class SMIMETestUtil
         }
         catch (Exception ex)
         {
-            log(ex);
+            throw new RuntimeException(ex.toString());
         }
     }
 
@@ -218,21 +218,5 @@ public class SMIMETestUtil
         BigInteger _tmp = serialNumber;
         serialNumber = serialNumber.add(new BigInteger("1"));
         return _tmp;
-    }
-
-    public static void log(Exception _ex)
-    {
-        if (DEBUG)
-        {
-            _ex.printStackTrace();
-        }
-    }
-
-    public static void log(String _msg)
-    {
-        if (DEBUG)
-        {
-            System.out.println(_msg);
-        }
     }
 }
