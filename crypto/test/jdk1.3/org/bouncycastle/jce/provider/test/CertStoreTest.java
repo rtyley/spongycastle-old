@@ -2,17 +2,19 @@ package org.bouncycastle.jce.provider.test;
  
 import java.io.ByteArrayInputStream;
 import java.security.Security;
+
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.cert.CertStore;
+import java.security.cert.CertificateFactory;
+import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
+import org.bouncycastle.jce.cert.X509CRLSelector;
+import org.bouncycastle.jce.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
-import org.bouncycastle.jce.cert.X509CRLSelector;
-import org.bouncycastle.jce.cert.X509CertSelector;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
@@ -57,7 +59,8 @@ public class CertStoreTest
 
             // Searching for rootCert by subjectDN
             X509CertSelector targetConstraints = new X509CertSelector();
-            targetConstraints.setSubject(rootCert.getSubjectDN().getName());
+            targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert)
+                    .getName());
             Collection certs = store.getCertificates(targetConstraints);
             if (certs.size() != 1 || !certs.contains(rootCert))
             {
@@ -67,8 +70,8 @@ public class CertStoreTest
 
             // Searching for rootCert by subjectDN encoded as byte
             targetConstraints = new X509CertSelector();
-            targetConstraints.setSubject(rootCert.getSubjectDN().getName());
-            targetConstraints.setSubject(targetConstraints.getSubjectAsBytes());
+            targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert)
+                    .getEncoded());
             certs = store.getCertificates(targetConstraints);
             if (certs.size() != 1 || !certs.contains(rootCert))
             {
@@ -89,7 +92,8 @@ public class CertStoreTest
 
             // Searching for interCert by issuerDN
             targetConstraints = new X509CertSelector();
-            targetConstraints.setIssuer(rootCert.getSubjectDN().getName());
+            targetConstraints.setIssuer(PrincipalUtil.getSubjectX509Principal(rootCert)
+                    .getEncoded());
             certs = store.getCertificates(targetConstraints);
             if (certs.size() != 2)
             {
@@ -109,7 +113,8 @@ public class CertStoreTest
 
             // Searching for rootCrl by issuerDN
             X509CRLSelector targetConstraintsCRL = new X509CRLSelector();
-            targetConstraintsCRL.addIssuerName(rootCrl.getIssuerDN().getName());
+            targetConstraintsCRL.addIssuerName(PrincipalUtil.getIssuerX509Principal(rootCrl)
+                    .getEncoded());
             Collection crls = store.getCRLs(targetConstraintsCRL);
             if (crls.size() != 1 || !crls.contains(rootCrl))
             {
@@ -119,9 +124,8 @@ public class CertStoreTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             return new SimpleTestResult(false, this.getName()
-                    + ": exception - " + e.toString());
+                    + ": exception - " + e.toString(), e);
         }
 
         return new SimpleTestResult(true, this.getName() + ": Okay");
@@ -136,8 +140,8 @@ public class CertStoreTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test test = new CertStoreTest();
-        TestResult result = test.perform();
+        Test            test = new CertStoreTest();
+        TestResult        result = test.perform();
 
         System.out.println(result.toString());
     }

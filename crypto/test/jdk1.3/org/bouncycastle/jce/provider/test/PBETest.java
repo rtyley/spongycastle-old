@@ -509,11 +509,6 @@ public class PBETest implements Test
         Test            test = new PBETest();
         TestResult      result = test.perform();
         
-        if (((SimpleTestResult)result).getException() != null)
-        {
-            ((SimpleTestResult)result).getException().printStackTrace();
-        }
-
         System.out.println(result.toString());
     }
 }
