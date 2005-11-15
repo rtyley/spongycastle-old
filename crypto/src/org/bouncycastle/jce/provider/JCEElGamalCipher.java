@@ -3,23 +3,30 @@ package org.bouncycastle.jce.provider;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.MGF1ParameterSpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.interfaces.DHKey;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.BufferedAsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.encodings.ISO9796d1Encoding;
+import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.ElGamalEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
@@ -30,25 +37,31 @@ import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
 public class JCEElGamalCipher extends WrapCipherSpi
 {
     private BufferedAsymmetricBlockCipher   cipher;
-    private boolean                         publicKeyOnly = false;
-    private boolean                         privateKeyOnly = false;
+    private AlgorithmParameterSpec          paramSpec;
+    private AlgorithmParameters             engineParams;
 
     public JCEElGamalCipher(
         AsymmetricBlockCipher   engine)
     {
         cipher = new BufferedAsymmetricBlockCipher(engine);
     }
-
-    public JCEElGamalCipher(
-        boolean                 publicKeyOnly,
-        boolean                 privateKeyOnly,
-        AsymmetricBlockCipher   engine)
+   
+    private void initFromSpec(
+        OAEPParameterSpec pSpec) 
+        throws NoSuchPaddingException
     {
-        this.publicKeyOnly = publicKeyOnly;
-        this.privateKeyOnly = privateKeyOnly;
-        cipher = new BufferedAsymmetricBlockCipher(engine);
-    }
+        MGF1ParameterSpec   mgfParams = (MGF1ParameterSpec)pSpec.getMGFParameters();
+        Digest              digest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
         
+        if (digest == null)
+        {
+            throw new NoSuchPaddingException("no match on OAEP constructor for digest algorithm: "+ mgfParams.getDigestAlgorithm());
+        }
+
+        cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine(), digest, ((PSource.PSpecified)pSpec.getPSource()).getValue()));        
+        paramSpec = pSpec;
+    }
+    
     protected int engineGetBlockSize() 
     {
         return cipher.getInputBlockSize();
@@ -86,13 +99,36 @@ public class JCEElGamalCipher extends WrapCipherSpi
 
     protected AlgorithmParameters engineGetParameters() 
     {
-        return null;
+        if (engineParams == null)
+        {
+            if (paramSpec != null)
+            {
+                try
+                {
+                    engineParams = AlgorithmParameters.getInstance("OAEP", "BC");
+                    engineParams.init(paramSpec);
+                }
+                catch (Exception e)
+                {
+                    throw new RuntimeException(e.toString());
+                }
+            }
+        }
+
+        return engineParams;
     }
 
     protected void engineSetMode(
-        String  mode) 
+        String  mode)
         throws NoSuchAlgorithmException
     {
+        String md = mode.toUpperCase();
+        
+        if (md.equals("NONE") || md.equals("ECB"))
+        {
+            return;
+        }
+        
         throw new NoSuchAlgorithmException("can't support mode " + mode);
     }
 
@@ -100,7 +136,52 @@ public class JCEElGamalCipher extends WrapCipherSpi
         String  padding) 
         throws NoSuchPaddingException
     {
-        throw new NoSuchPaddingException(padding + " unavailable with ElGamal.");
+        String pad = padding.toUpperCase();
+
+        if (pad.equals("NOPADDING"))
+        {
+            cipher = new BufferedAsymmetricBlockCipher(new ElGamalEngine());
+        }
+        else if (pad.equals("PKCS1PADDING"))
+        {
+            cipher = new BufferedAsymmetricBlockCipher(new PKCS1Encoding(new ElGamalEngine()));
+        }
+        else if (pad.equals("ISO9796-1PADDING"))
+        {
+            cipher = new BufferedAsymmetricBlockCipher(new ISO9796d1Encoding(new ElGamalEngine()));
+        }
+        else if (pad.equals("OAEPPADDING"))
+        {
+            initFromSpec(OAEPParameterSpec.DEFAULT);
+        }
+        else if (pad.equals("OAEPWITHMD5ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("MD5", "MGF1", new MGF1ParameterSpec("MD5"), PSource.PSpecified.DEFAULT));
+        }
+        else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING"))
+        {
+            initFromSpec(OAEPParameterSpec.DEFAULT);
+        }
+        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), PSource.PSpecified.DEFAULT));
+        }
+        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT));
+        }
+        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, PSource.PSpecified.DEFAULT));
+        }
+        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, PSource.PSpecified.DEFAULT));
+        }
+        else
+        {
+            throw new NoSuchPaddingException(padding + " unavailable with ElGamal.");
+        }
     }
 
     protected void engineInit(
@@ -148,7 +229,7 @@ public class JCEElGamalCipher extends WrapCipherSpi
             cipher.init(false, param);
             break;
         default:
-            System.out.println("eeek!");
+            throw new InvalidParameterException("unknown opmode " + opmode + " passed to ElGamal");
         }
     }
 

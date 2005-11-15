@@ -78,8 +78,7 @@ public class JDKISOSignature
         }
         catch (Exception e)
         {
-e.printStackTrace();
-            throw new SignatureException(e.getMessage());
+            throw new SignatureException(e.toString());
         }
     }
 

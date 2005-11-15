@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -49,18 +50,16 @@ public class JCERSACipher extends WrapCipherSpi
     public JCERSACipher(
         OAEPParameterSpec  pSpec)
     {
-        MGF1ParameterSpec   mgfParams = (MGF1ParameterSpec)pSpec.getMGFParameters();
-        Digest              digest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
-        
-        if (digest == null)
+        try
         {
-            throw new IllegalArgumentException("no match on OAEP constructor for digest algorithm: "+ mgfParams.getDigestAlgorithm());
+            initFromSpec(pSpec);
         }
-
-        cipher = new OAEPEncoding(new RSAEngine(), digest, ((PSource.PSpecified)pSpec.getPSource()).getValue());        
-        paramSpec = pSpec;
+        catch (NoSuchPaddingException e)
+        {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
-    
+
     public JCERSACipher(
         boolean                 publicKeyOnly,
         boolean                 privateKeyOnly,
@@ -71,6 +70,22 @@ public class JCERSACipher extends WrapCipherSpi
         cipher = engine;
     }
      
+    private void initFromSpec(
+        OAEPParameterSpec pSpec) 
+        throws NoSuchPaddingException
+    {
+        MGF1ParameterSpec   mgfParams = (MGF1ParameterSpec)pSpec.getMGFParameters();
+        Digest              digest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+        
+        if (digest == null)
+        {
+            throw new NoSuchPaddingException("no match on OAEP constructor for digest algorithm: "+ mgfParams.getDigestAlgorithm());
+        }
+
+        cipher = new OAEPEncoding(new RSAEngine(), digest, ((PSource.PSpecified)pSpec.getPSource()).getValue());        
+        paramSpec = pSpec;
+    }
+    
     protected int engineGetBlockSize() 
     {
         try
@@ -145,6 +160,26 @@ public class JCERSACipher extends WrapCipherSpi
         String  mode)
         throws NoSuchAlgorithmException
     {
+        String md = mode.toUpperCase();
+        
+        if (md.equals("NONE") || md.equals("ECB"))
+        {
+            return;
+        }
+        
+        if (md.equals("1"))
+        {
+            privateKeyOnly = true;
+            publicKeyOnly = false;
+            return;
+        }
+        else if (md.equals("2"))
+        {
+            privateKeyOnly = false;
+            publicKeyOnly = true;
+            return;
+        }
+        
         throw new NoSuchAlgorithmException("can't support mode " + mode);
     }
 
@@ -152,7 +187,52 @@ public class JCERSACipher extends WrapCipherSpi
         String  padding) 
         throws NoSuchPaddingException
     {
-        throw new NoSuchPaddingException(padding + " unavailable with RSA.");
+        String pad = padding.toUpperCase();
+
+        if (pad.equals("NOPADDING"))
+        {
+            cipher = new RSAEngine();
+        }
+        else if (pad.equals("PKCS1PADDING"))
+        {
+            cipher = new PKCS1Encoding(new RSAEngine());
+        }
+        else if (pad.equals("ISO9796-1PADDING"))
+        {
+            cipher = new ISO9796d1Encoding(new RSAEngine());
+        }
+        else if (pad.equals("OAEPWITHMD5ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("MD5", "MGF1", new MGF1ParameterSpec("MD5"), PSource.PSpecified.DEFAULT));
+        }
+        else if (pad.equals("OAEPPADDING"))
+        {
+            initFromSpec(OAEPParameterSpec.DEFAULT);
+        }
+        else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING"))
+        {
+            initFromSpec(OAEPParameterSpec.DEFAULT);
+        }
+        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), PSource.PSpecified.DEFAULT));
+        }
+        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT));
+        }
+        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, PSource.PSpecified.DEFAULT));
+        }
+        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING"))
+        {
+            initFromSpec(new OAEPParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, PSource.PSpecified.DEFAULT));
+        }
+        else
+        {
+            throw new NoSuchPaddingException(padding + " unavailable with RSA.");
+        }
     }
 
     protected void engineInit(
@@ -252,7 +332,7 @@ public class JCERSACipher extends WrapCipherSpi
             cipher.init(false, param);
             break;
         default:
-            System.out.println("eeek!");
+            throw new InvalidParameterException("unknown opmode " + opmode + " passed to RSA");
         }
     }
 
@@ -486,51 +566,6 @@ public class JCERSACipher extends WrapCipherSpi
         public OAEPPadding()
         {
             super(OAEPParameterSpec.DEFAULT);
-        }
-    }
-
-    static public class MD5OAEPPadding
-        extends JCERSACipher
-    {
-        public MD5OAEPPadding()
-        {
-            super(new OAEPParameterSpec("MD5", "MGF1", new MGF1ParameterSpec("MD5"), PSource.PSpecified.DEFAULT));
-        }
-    }
-    
-    static public class SHA224OAEPPadding
-        extends JCERSACipher
-    {
-        public SHA224OAEPPadding()
-        {
-            super(new OAEPParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), PSource.PSpecified.DEFAULT));
-        }
-    }
-    
-    static public class SHA256OAEPPadding
-        extends JCERSACipher
-    {
-        public SHA256OAEPPadding()
-        {
-            super(new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT));
-        }
-    }
-
-    static public class SHA384OAEPPadding
-        extends JCERSACipher
-    {
-        public SHA384OAEPPadding()
-        {
-            super(new OAEPParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, PSource.PSpecified.DEFAULT));
-        }
-    }
-    
-    static public class SHA512OAEPPadding
-        extends JCERSACipher
-    {
-        public SHA512OAEPPadding()
-        {
-            super(new OAEPParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, PSource.PSpecified.DEFAULT));
         }
     }
     

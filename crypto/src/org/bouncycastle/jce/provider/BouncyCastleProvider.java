@@ -259,14 +259,9 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.RSA/OAEP", "org.bouncycastle.jce.provider.JCERSACipher$OAEPPadding");
         put("Cipher.1.2.840.113549.1.1.7", "org.bouncycastle.jce.provider.JCERSACipher$OAEPPadding");
         put("Cipher.RSA/ISO9796-1", "org.bouncycastle.jce.provider.JCERSACipher$ISO9796d1Padding");
-        put("Alg.Alias.Cipher.RSA/NONE/OAEPWithSHA1AndMGF1Padding","RSA/OAEP");
-        put("Cipher.RSA/NONE/OAEPWithMD5AndMGF1Padding","org.bouncycastle.jce.provider.JCERSACipher$MD5OAEPPadding");
-        put("Cipher.RSA/NONE/OAEPWithSHA224AndMGF1Padding","org.bouncycastle.jce.provider.JCERSACipher$SHA224OAEPPadding");
-        put("Cipher.RSA/NONE/OAEPWithSHA256AndMGF1Padding","org.bouncycastle.jce.provider.JCERSACipher$SHA256OAEPPadding");
-        put("Cipher.RSA/NONE/OAEPWithSHA384AndMGF1Padding","org.bouncycastle.jce.provider.JCERSACipher$SHA384OAEPPadding");
-        put("Cipher.RSA/NONE/OAEPWithSHA512AndMGF1Padding","org.bouncycastle.jce.provider.JCERSACipher$SHA512OAEPPadding");
 
         put("Cipher.ECIES", "org.bouncycastle.jce.provider.JCEIESCipher$ECIES");
+        put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
         put("Cipher.ELGAMAL", "org.bouncycastle.jce.provider.JCEElGamalCipher$NoPadding");
         put("Cipher.ELGAMAL/PKCS1", "org.bouncycastle.jce.provider.JCEElGamalCipher$PKCS1v1_5Padding");
 
@@ -275,21 +270,6 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher.RSA//PKCS1PADDING", "RSA/PKCS1");
         put("Alg.Alias.Cipher.RSA//OAEPPADDING", "RSA/OAEP");
         put("Alg.Alias.Cipher.RSA//ISO9796-1PADDING", "RSA/ISO9796-1");
-        put("Alg.Alias.Cipher.RSA/ECB/NOPADDING", "RSA");
-        put("Alg.Alias.Cipher.RSA/ECB/PKCS1PADDING", "RSA/PKCS1");
-        put("Alg.Alias.Cipher.RSA/ECB/OAEPPADDING", "RSA/OAEP");
-        put("Alg.Alias.Cipher.RSA/ECB/ISO9796-1PADDING", "RSA/ISO9796-1");
-        put("Alg.Alias.Cipher.RSA/NONE/NOPADDING", "RSA");
-        put("Alg.Alias.Cipher.RSA/NONE/PKCS1PADDING", "RSA/PKCS1");
-        put("Alg.Alias.Cipher.RSA/NONE/OAEPPADDING", "RSA/OAEP");
-        put("Alg.Alias.Cipher.RSA/NONE/ISO9796-1PADDING", "RSA/ISO9796-1");
-        put("Alg.Alias.Cipher.RSA/1/PKCS1PADDING", "RSA/1");
-        put("Alg.Alias.Cipher.RSA/2/PKCS1PADDING", "RSA/2");
-        put("Alg.Alias.Cipher.RSA/ECB/OAEPWithMD5AndMGF1Padding","RSA/NONE/OAEPWithMD5AndMGF1Padding");
-        put("Alg.Alias.Cipher.RSA/ECB/OAEPWithSHA224AndMGF1Padding","RSA/NONE/OAEPWithSHA224AndMGF1Padding");
-        put("Alg.Alias.Cipher.RSA/ECB/OAEPWithSHA256AndMGF1Padding","RSA/NONE/OAEPWithSHA256AndMGF1Padding");
-        put("Alg.Alias.Cipher.RSA/ECB/OAEPWithSHA384AndMGF1Padding","RSA/NONE/OAEPWithSHA384AndMGF1Padding");
-        put("Alg.Alias.Cipher.RSA/ECB/OAEPWithSHA512AndMGF1Padding","RSA/NONE/OAEPWithSHA512AndMGF1Padding");
         
         put("Alg.Alias.Cipher.ELGAMAL/ECB/PKCS1PADDING", "ELGAMAL/PKCS1");
         put("Alg.Alias.Cipher.ELGAMAL/NONE/PKCS1PADDING", "ELGAMAL/PKCS1");
@@ -574,9 +554,25 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.SecretKeyFactory.PBEWITHSHA-256AND192BITAES-CBC-BC","PBEWITHSHA256AND192BITAES-CBC-BC");
         put("Alg.Alias.SecretKeyFactory.PBEWITHSHA-256AND256BITAES-CBC-BC","PBEWITHSHA256AND256BITAES-CBC-BC");
 
-        //
-        // MAC's
-        //
+        addMacAlgorithms();
+
+        addMessageDigestAlgorithms();
+
+        addSignatureAlgorithms();
+
+    // Certification Path API
+        put("CertPathValidator.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathValidatorSpi");
+        put("CertPathValidator.PKIX ValidationAlgorithm", "RFC2459");
+        put("CertPathBuilder.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi");
+        put("CertPathBuilder.PKIX ValidationAlgorithm", "RFC2459");
+        put("CertStore.Collection", "org.bouncycastle.jce.provider.CertStoreCollectionSpi");
+    }
+    
+    //
+    // macs
+    //
+    private void addMacAlgorithms()
+    {
         put("Mac.DESMAC", "org.bouncycastle.jce.provider.JCEMac$DES");
         put("Alg.Alias.Mac.DES", "DESMAC");
         put("Mac.DESMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESCFB8");
@@ -586,6 +582,15 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Mac.DESEDE", "DESEDEMAC");
         put("Mac.DESEDEMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESedeCFB8");
         put("Alg.Alias.Mac.DESEDE/CFB8", "DESEDEMAC/CFB8");
+        
+        put("Mac.DESWITHISO9797", "org.bouncycastle.jce.provider.JCEMac$ISO9797_DES");
+        put("Alg.Alias.Mac.DESISO9797MAC", "DESWITHISO9797");
+        
+        put("Mac.DESEDEMAC64", "org.bouncycastle.jce.provider.JCEMac$DESede64");
+        put("Alg.Alias.Mac.DESEDE64", "DESEDEMAC64");
+        
+        put("Mac.ISO9797ALG3MAC", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
+        put("Alg.Alias.Mac.ISO9797ALG3", "ISO9797ALG3MAC");
 
         put("Mac.SKIPJACKMAC", "org.bouncycastle.jce.provider.JCEMac$Skipjack");
         put("Alg.Alias.Mac.SKIPJACK", "SKIPJACKMAC");
@@ -666,10 +671,13 @@ public final class BouncyCastleProvider extends Provider
         put("Mac.PBEWITHHMACSHA1", "org.bouncycastle.jce.provider.JCEMac$PBEWithSHA");
         put("Mac.PBEWITHHMACRIPEMD160", "org.bouncycastle.jce.provider.JCEMac$PBEWithRIPEMD160");
         put("Alg.Alias.Mac.1.3.14.3.2.26", "PBEWITHHMACSHA");
-
-        //
-        // MessageDigests
-        //
+    }
+    
+    //
+    // message digests
+    //
+    private void addMessageDigestAlgorithms()
+    {
         put("MessageDigest.SHA-1", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA1");
         put("Alg.Alias.MessageDigest.SHA1", "SHA-1");
         put("Alg.Alias.MessageDigest.SHA", "SHA-1");
@@ -708,10 +716,13 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.MessageDigest.GOST", "GOST3411");
         put("Alg.Alias.MessageDigest.GOST-3411", "GOST3411");
         put("Alg.Alias.MessageDigest." + CryptoProObjectIdentifiers.gostR3411, "GOST3411");
-
-        //
-        // signature algorithms.
-        //
+    }
+    
+    //
+    // signature algorithms.
+    //
+    private void addSignatureAlgorithms()
+    {
         put("Signature.MD2WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD2WithRSAEncryption");
         put("Signature.MD4WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD4WithRSAEncryption");
         put("Signature.MD5WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD5WithRSAEncryption");
@@ -864,12 +875,5 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.GOST3411WITHGOST3410", "GOST3410");
         put("Alg.Alias.Signature.GOST3411WithGOST3410", "GOST3410");
         put("Alg.Alias.Signature." + CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, "GOST3410");
-
-    // Certification Path API
-        put("CertPathValidator.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathValidatorSpi");
-        put("CertPathValidator.PKIX ValidationAlgorithm", "RFC2459");
-        put("CertPathBuilder.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi");
-        put("CertPathBuilder.PKIX ValidationAlgorithm", "RFC2459");
-        put("CertStore.Collection", "org.bouncycastle.jce.provider.CertStoreCollectionSpi");
     }
 }

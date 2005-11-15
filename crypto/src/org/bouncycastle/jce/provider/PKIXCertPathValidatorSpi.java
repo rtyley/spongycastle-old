@@ -1829,6 +1829,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     private final Collection findCRLs(
         X509CRLSelector crlSelect,
         List            crlStores)
+        throws CertPathValidatorException
     {
         Set crls = new HashSet();
         Iterator iter = crlStores.iterator();
@@ -1843,7 +1844,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             }
             catch (CertStoreException ex)
             {
-                ex.printStackTrace();
+                throw new CertPathValidatorException(ex);
             }
         }
 
@@ -1883,8 +1884,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
         catch (IOException ex)
         {
-            ex.printStackTrace();
-            return null;
+            throw new CertPathValidatorException(ex);
         }
 
         while (iter.hasNext() && trust == null)
