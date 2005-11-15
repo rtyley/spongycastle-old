@@ -93,7 +93,7 @@ public class AESTest
     
     private BlockCipher _engine = new AESEngine();
 
-    AESTest()
+    public AESTest()
     {
         super(tests, new AESEngine(), new KeyParameter(new byte[16]));
     }

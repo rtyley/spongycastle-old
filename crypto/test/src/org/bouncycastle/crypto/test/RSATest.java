@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.test;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.security.Security;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -13,12 +14,10 @@ import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class RSATest
-    implements Test
+    extends SimpleTest
 {
     static BigInteger  mod = new BigInteger("b259d2d6e627a768c94be36164c2d9fc79d97aab9253140e5bf17751197731d6f7540d2509e7b9ffee0a70a6e26d56e92d2edd7f85aba85600b69089f35f6bdbf3c298e05842535d9f064e6b0391cb7d306e0a2d20c4dfb4e7b49a9640bdea26c10ad69c3f05007ce2513cee44cfe01998e62b6c3637d3fc0391079b26ee36d5", 16);
     static BigInteger  pubExp = new BigInteger("11", 16);
@@ -41,7 +40,7 @@ public class RSATest
         return "RSA";
     }
 
-    public TestResult perform()
+    public void performTest()
     {
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod, pubExp);
         RSAKeyParameters    privParameters = new RSAPrivateCrtKeyParameters(mod, pubExp, privExp, p, q, pExp, qExp, crtCoef);
@@ -60,7 +59,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("RSA: failed - exception " + e.toString());
         }
 
         eng.init(false, privParameters);
@@ -71,12 +70,12 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         if (!edgeInput.equals(new String(Hex.encode(data))))
         {
-            return new SimpleTestResult(false, "RSA: failed RAW edge Test");
+            fail("failed RAW edge Test");
         }
 
         data = Hex.decode(input);
@@ -89,7 +88,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         eng.init(false, privParameters);
@@ -100,12 +99,12 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         if (!input.equals(new String(Hex.encode(data))))
         {
-            return new SimpleTestResult(false, "RSA: failed RAW Test");
+            fail("failed RAW Test");
         }
 
         //
@@ -121,7 +120,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         eng.init(false, privParameters);
@@ -132,12 +131,12 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         if (!input.equals(new String(Hex.encode(data))))
         {
-            return new SimpleTestResult(false, "RSA: failed PKCS1 public/private Test");
+            fail("failed PKCS1 public/private Test");
         }
 
         //
@@ -153,7 +152,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         eng.init(false, pubParameters);
@@ -164,12 +163,12 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         if (!input.equals(new String(Hex.encode(data))))
         {
-            return new SimpleTestResult(false, "RSA: failed PKCS1 private/public Test");
+            fail("failed PKCS1 private/public Test");
         }
 
         //
@@ -185,7 +184,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         eng.init(false, privParameters);
@@ -196,12 +195,12 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         if (!input.equals(new String(Hex.encode(data))))
         {
-            return new SimpleTestResult(false, "RSA: failed OAEP Test");
+            fail("failed OAEP Test");
         }
 
         //
@@ -219,7 +218,7 @@ public class RSATest
 
         if (((RSAKeyParameters)pair.getPublic()).getModulus().bitLength() < 768)
         {
-            return new SimpleTestResult(false, "RSA: failed key generation (768) length test");
+            fail("failed key generation (768) length test");
         }
 
         eng.init(true, pair.getPublic());
@@ -230,7 +229,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         eng.init(false, pair.getPrivate());
@@ -241,12 +240,12 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         if (!input.equals(new String(Hex.encode(data))))
         {
-            return new SimpleTestResult(false, "RSA: failed key generation (768) Test");
+            fail("failed key generation (768) Test");
         }
 
         genParam = new RSAKeyGenerationParameters(BigInteger.valueOf(0x11), new SecureRandom(), 1024, 25);
@@ -258,7 +257,7 @@ public class RSATest
 
         if (((RSAKeyParameters)pair.getPublic()).getModulus().bitLength() < 1024)
         {
-            return new SimpleTestResult(false, "RSA: failed key generation (1024) length test");
+            fail("failed key generation (1024) length test");
         }
 
         try
@@ -267,7 +266,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         eng.init(false, pair.getPrivate());
@@ -278,23 +277,19 @@ public class RSATest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, "RSA: failed - exception " + e.toString());
+            fail("failed - exception " + e.toString());
         }
 
         if (!input.equals(new String(Hex.encode(data))))
         {
-            return new SimpleTestResult(false, "RSA: failed key generation (1024) test");
+            fail("failed key generation (1024) test");
         }
-
-        return new SimpleTestResult(true, "RSA: Okay");
     }
+
 
     public static void main(
         String[]    args)
     {
-        RSATest         test = new RSATest();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new RSATest());
     }
 }
