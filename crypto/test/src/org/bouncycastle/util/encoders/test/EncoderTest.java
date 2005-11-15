@@ -1,35 +1,22 @@
 package org.bouncycastle.util.encoders.test;
 
-import java.util.*;
-import org.bouncycastle.util.encoders.*;
-import org.bouncycastle.util.test.*;
+import java.util.Arrays;
+import java.util.Random;
+
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class EncoderTest
-    implements Test
+    extends SimpleTest
 {
     public static final boolean DEBUG = true;
 
-    public static void main(String[] _args)
-    {
-        EncoderTest _test = new EncoderTest();
-        System.out.println(_test.testBase64());
-        System.out.println(_test.testHex());
-    }
 
-    public static void log(Exception _ex)
+    public static void main(
+        String[]    args)
     {
-        if(DEBUG)
-    {
-            _ex.printStackTrace();
-        }
-    }
-
-    public static void log(String _msg)
-    {
-        if(DEBUG)
-    {
-            System.out.println(_msg);
-        }
+        runTest(new EncoderTest());
     }
 
     public String getName()
@@ -43,13 +30,14 @@ public class EncoderTest
      *
      */
 
-    public TestResult perform()
+    public void performTest()
     {
-        return testBase64();
+        testHex();
+        testBase64();
     }
     
     
-    public TestResult testBase64()
+    public void testBase64()
     {
         try
         {
@@ -79,22 +67,22 @@ public class EncoderTest
             
             if(!Arrays.equals(_orig1024, _dec1024))
             {
-                return new SimpleTestResult(false, "Failed Base64 test");
+                fail("Failed Base64 test");
             }
             
             if(!Arrays.equals(_orig2048, _dec2048))
             {
-                return new SimpleTestResult(false, "Failed Base64 test");
+                fail("Failed Base64 test");
             }
             
             if(!Arrays.equals(_orig4096, _dec4096))
             {
-                return new SimpleTestResult(false, "Failed Base64 test");
+                fail("Failed Base64 test");
             }
             
             if(!Arrays.equals(_orig8192, _dec8192))
             {
-                return new SimpleTestResult(false, "Failed Base64 test");
+                fail("Failed Base64 test");
             }
             
             
@@ -123,35 +111,32 @@ public class EncoderTest
             
             if(!Arrays.equals(_orig1025, _dec1025))
             {
-                return new SimpleTestResult(false, "Failed Base64 test");
+                fail("Failed Base64 test");
             }
             
             if(!Arrays.equals(_orig2049, _dec2049))
             {
-                return new SimpleTestResult(false, "Failed Base64 test");
+                fail("Failed Base64 test");
             }
             
             if(!Arrays.equals(_orig4097, _dec4097))
             {
-                return new SimpleTestResult(false, "Failed Base64 test");
+                fail("Failed Base64 test");
             }
             
             if(!Arrays.equals(_orig8193, _dec8193))
             {
-                return new SimpleTestResult(false, "Failed Base64 test");
+                fail("Failed Base64 test");
             }
-            
-            return new SimpleTestResult(true, "Passed Base64 test");
         }
         catch(Exception ex)
         {
-            log(ex);
-            return new SimpleTestResult(false, "Failed Base64 test");
+            fail("Failed Base64 test");
         }
     }
 
 
-    public TestResult testHex()
+    public void testHex()
     {
         try
         {
@@ -181,22 +166,22 @@ public class EncoderTest
             
             if(!Arrays.equals(_orig1024, _dec1024))
             {
-                return new SimpleTestResult(false, "Failed Hex test");
+                fail("Failed Hex test");
             }
             
             if(!Arrays.equals(_orig2048, _dec2048))
             {
-                return new SimpleTestResult(false, "Failed Hex test");
+                fail("Failed Hex test");
             }
             
             if(!Arrays.equals(_orig4096, _dec4096))
             {
-                return new SimpleTestResult(false, "Failed Hex test");
+                fail("Failed Hex test");
             }
             
             if(!Arrays.equals(_orig8192, _dec8192))
             {
-                return new SimpleTestResult(false, "Failed Hex test");
+                fail("Failed Hex test");
             }
             
             
@@ -224,30 +209,27 @@ public class EncoderTest
             
             if(!Arrays.equals(_orig1025, _dec1025))
             {
-                return new SimpleTestResult(false, "Failed Hex test");
+                fail("Failed Hex test");
             }
             
             if(!Arrays.equals(_orig2049, _dec2049))
             {
-                return new SimpleTestResult(false, "Failed Hex test");
+                fail("Failed Hex test");
             }
             
             if(!Arrays.equals(_orig4097, _dec4097))
             {
-                return new SimpleTestResult(false, "Failed Hex test");
+                fail("Failed Hex test");
             }
             
             if(!Arrays.equals(_orig8193, _dec8193))
             {
-                return new SimpleTestResult(false, "Failed Hex test");
+                fail("Failed Hex test");
             }
-            
-            return new SimpleTestResult(true, "Passed Hex test");
         }
         catch(Exception ex)
         {
-            log(ex);
-            return new SimpleTestResult(false, "Failed Hex test");
+            fail("Failed Hex test");
         }
     }
 }

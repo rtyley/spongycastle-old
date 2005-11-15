@@ -21,9 +21,7 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * Exercise the various key stores, making sure we at least get back what we put in!
@@ -31,7 +29,7 @@ import org.bouncycastle.util.test.TestResult;
  * This tests both the PKCS12 key store.
  */
 public class PKCS12StoreTest
-    implements Test
+    extends SimpleTest
 {
     static char[]   passwd = { 'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd' };
 
@@ -450,7 +448,7 @@ public class PKCS12StoreTest
         return cert;
     }
 
-    public TestResult testPKCS12Store()
+    public void testPKCS12Store()
     {
         BigInteger  mod = new BigInteger("bb1be8074e4787a8d77967f1575ef72dd7582f9b3347724413c021beafad8f32dba5168e280cbf284df722283dad2fd4abc750e3d6487c2942064e2d8d80641aa5866d1f6f1f83eec26b9b46fecb3b1c9856a303148a5cc899c642fb16f3d9d72f52526c751dc81622c420c82e2cfda70fe8d13f16cc7d6a613a5b2a2b5894d1", 16);
 
@@ -477,29 +475,29 @@ public class PKCS12StoreTest
 
             if (!((RSAPrivateKey)key).getModulus().equals(mod))
             {
-                return new SimpleTestResult(false, getName() + ": Modulus doesn't match.");
+                fail("Modulus doesn't match.");
             }
 
             Certificate[]    ch = store.getCertificateChain(pName);
 
             if (ch.length != 3)
             {
-                return new SimpleTestResult(false, getName() + ": chain was wrong length");
+                fail("chain was wrong length");
             }
 
             if (!((X509Certificate)ch[0]).getSerialNumber().equals(new BigInteger("96153094170511488342715101755496684211")))
             {
-                return new SimpleTestResult(false, getName() + ": chain[0] wrong certificate.");
+                fail("chain[0] wrong certificate.");
             }
 
             if (!((X509Certificate)ch[1]).getSerialNumber().equals(new BigInteger("279751514312356623147411505294772931957")))
             {
-                return new SimpleTestResult(false, getName() + ": chain[1] wrong certificate.");
+                fail("chain[1] wrong certificate.");
             }
 
             if (!((X509Certificate)ch[2]).getSerialNumber().equals(new BigInteger("11341398017")))
             {
-                return new SimpleTestResult(false, getName() + ": chain[2] wrong certificate.");
+                fail("chain[2] wrong certificate.");
             }
 
             //
@@ -517,14 +515,14 @@ public class PKCS12StoreTest
 
             if (!((RSAPrivateKey)key).getModulus().equals(mod))
             {
-                return new SimpleTestResult(false, getName() + ": Modulus doesn't match.");
+                fail("Modulus doesn't match.");
             }
 
             store.deleteEntry(pName);
 
             if (store.getKey(pName, null) != null)
             {
-                return new SimpleTestResult(false, getName() + ": Failed deletion test.");
+                fail("Failed deletion test.");
             }
 
             //
@@ -534,7 +532,7 @@ public class PKCS12StoreTest
             
             if (store.getCertificateChain("testCert") != null)
             {
-                return new SimpleTestResult(false, getName() + ": Failed null chain test.");
+                fail("Failed null chain test.");
             }
             
             //
@@ -547,7 +545,7 @@ public class PKCS12StoreTest
 
             if (store.getCertificate("37") == null)
             {
-                return new SimpleTestResult(false, getName() + ": Failed to find UTF cert.");
+                fail("Failed to find UTF cert.");
             }
 
             //
@@ -570,8 +568,8 @@ public class PKCS12StoreTest
             //
             // set up the keys
             //
-            PrivateKey          privKey;
-            PublicKey           pubKey;
+            PrivateKey          privKey = null;
+            PublicKey           pubKey = null;
 
             try
             {
@@ -582,7 +580,7 @@ public class PKCS12StoreTest
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": error setting up keys - " + e.toString());
+                fail("error setting up keys - " + e.toString());
             }
 
             Certificate[] chain = new Certificate[1];
@@ -627,7 +625,7 @@ public class PKCS12StoreTest
             
             if (ch.length != 1)
             {
-                return new SimpleTestResult(false, getName() + ": no cert found in pkcs12noFriendly");
+                fail("no cert found in pkcs12noFriendly");
             }
             
             //
@@ -661,7 +659,7 @@ public class PKCS12StoreTest
             ch = store.getCertificateChain(pName);
             if (ch.length != 2)
             {
-                return new SimpleTestResult(false, getName() + ": Certificate chain wrong length");
+                fail("Certificate chain wrong length");
             }
 
             store.store(new ByteArrayOutputStream(), storagePassword);
@@ -673,12 +671,10 @@ public class PKCS12StoreTest
             stream = new ByteArrayInputStream(pkcs12nopass);
             
             store.load(stream, "".toCharArray());
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString(), e);
+            fail("exception - " + e.toString(), e);
         }
     }
 
@@ -687,16 +683,9 @@ public class PKCS12StoreTest
         return "PKCS12Store";
     }
 
-    public TestResult perform()
+    public void performTest()
     {
-        TestResult  result = testPKCS12Store();
-
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        testPKCS12Store();
     }
 
     public static void main(
@@ -704,14 +693,6 @@ public class PKCS12StoreTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new PKCS12StoreTest();
-        TestResult      result = test.perform();
-
-        if (((SimpleTestResult)result).getException() != null)
-        {
-            ((SimpleTestResult)result).getException().printStackTrace();
-        }
-        
-        System.out.println(result.toString());
+        runTest(new PKCS12StoreTest());
     }
 }

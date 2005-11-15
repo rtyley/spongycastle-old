@@ -28,12 +28,10 @@ import org.bouncycastle.x509.X509V2AttributeCertificateGenerator;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class AttrCertTest
-    implements Test
+    extends SimpleTest
 {
     byte[]  attrCert = Base64.decode(
             "MIIHQDCCBqkCAQEwgZChgY2kgYowgYcxHDAaBgkqhkiG9w0BCQEWDW1sb3JjaEB2"
@@ -119,181 +117,166 @@ public class AttrCertTest
         return "AttrCertTest";
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        try
+        X509AttributeCertificate    aCert = new X509V2AttributeCertificate(attrCert);
+        CertificateFactory          fact = CertificateFactory.getInstance("X.509","BC");
+        
+        X509Certificate             sCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signCert));
+        
+        aCert.verify(sCert.getPublicKey(), "BC");
+        
+        //
+        // search test
+        //
+        
+        List      list = new ArrayList();
+        
+        list.add(sCert);
+        
+        CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
+        CertStore store = CertStore.getInstance("Collection", ccsp);
+        
+        Collection certs = store.getCertificates(aCert.getIssuer());
+        if (certs.size() != 1 || !certs.contains(sCert))
         {
-            X509AttributeCertificate    aCert = new X509V2AttributeCertificate(attrCert);
-            CertificateFactory          fact = CertificateFactory.getInstance("X.509","BC");
-            
-            X509Certificate             sCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signCert));
-            
-            aCert.verify(sCert.getPublicKey(), "BC");
-            
-            //
-            // search test
-            //
-            
-            List      list = new ArrayList();
-            
-            list.add(sCert);
-            
-            CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
-            CertStore store = CertStore.getInstance("Collection", ccsp);
-            
-            Collection certs = store.getCertificates(aCert.getIssuer());
-            if (certs.size() != 1 || !certs.contains(sCert))
-            {
-                return new SimpleTestResult(false,  this.getName() + ": sCert not found by issuer");
-            }
-            
-            X509Attribute[] attrs = aCert.getAttributes("1.3.6.1.4.1.6760.8.1.1");
-            if (attrs == null || attrs.length != 1)
-            {
-                return new SimpleTestResult(false, this.getName() + ": attribute not found");
-            }
-            
-            //
-            // reencode test
-            //
-            aCert = new X509V2AttributeCertificate(aCert.getEncoded());
-            
-            aCert.verify(sCert.getPublicKey(), "BC");
-            
-            X509AttributeCertificate saCert = new X509V2AttributeCertificate(new ByteArrayInputStream(aCert.getEncoded()));
-            
-            if (!aCert.getNotAfter().equals(saCert.getNotAfter()))
-            {
-                return new SimpleTestResult(false, getName() + ": failed date comparison");
-            }
-            
-            // base generator test
-            
-            //
-            // a sample key pair.
-            //
-            RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
-                new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
-                new BigInteger("11", 16));
-
-            RSAPrivateCrtKeySpec privKeySpec = new RSAPrivateCrtKeySpec(
-                new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
-                new BigInteger("11", 16),
-                new BigInteger("9f66f6b05410cd503b2709e88115d55daced94d1a34d4e32bf824d0dde6028ae79c5f07b580f5dce240d7111f7ddb130a7945cd7d957d1920994da389f490c89", 16),
-                new BigInteger("c0a0758cdf14256f78d4708c86becdead1b50ad4ad6c5c703e2168fbf37884cb", 16),
-                new BigInteger("f01734d7960ea60070f1b06f2bb81bfac48ff192ae18451d5e56c734a5aab8a5", 16),
-                new BigInteger("b54bb9edff22051d9ee60f9351a48591b6500a319429c069a3e335a1d6171391", 16),
-                new BigInteger("d3d83daf2a0cecd3367ae6f8ae1aeb82e9ac2f816c6fc483533d8297dd7884cd", 16),
-                new BigInteger("b8f52fc6f38593dabb661d3f50f8897f8106eee68b1bce78a95b132b4e5b5d19", 16));
-
-            //
-            // set up the keys
-            //
-            PrivateKey          privKey;
-            PublicKey           pubKey;
-
-            try
-            {
-                KeyFactory  kFact = KeyFactory.getInstance("RSA", "BC");
-
-                privKey = kFact.generatePrivate(privKeySpec);
-                pubKey = kFact.generatePublic(pubKeySpec);
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(false, getName() + ": error setting up keys - " + e.toString());
-            }
-            
-            X509V2AttributeCertificateGenerator gen = new X509V2AttributeCertificateGenerator();
-            
-            gen.addAttribute(attrs[0]);
-            gen.setHolder(aCert.getHolder());
-            gen.setIssuer(aCert.getIssuer());
-            gen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
-            gen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-            gen.setSerialNumber(aCert.getSerialNumber());
-            gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
-            
-            aCert = gen.generateCertificate(privKey, "BC");
-            
-            aCert.checkValidity();
-            
-            aCert.verify(pubKey, "BC");
-            
-            // as the issuer is the same this should still work (even though it is not
-            // technically correct
-            
-            certs = store.getCertificates(aCert.getIssuer());
-            if (certs.size() != 1 || !certs.contains(sCert))
-            {
-                return new SimpleTestResult(false,  this.getName() + ": sCert not found by issuer");
-            }
-            
-            attrs = aCert.getAttributes("1.3.6.1.4.1.6760.8.1.1");
-            if (attrs == null || attrs.length != 1)
-            {
-                return new SimpleTestResult(false, this.getName() + ": attribute not found");
-            }
-            
-            //
-            // reencode test
-            //
-            aCert = new X509V2AttributeCertificate(aCert.getEncoded());
-            
-            aCert.verify(pubKey, "BC");
-            
-            AttributeCertificateIssuer  issuer = aCert.getIssuer();
-            
-            Principal[] principals = issuer.getPrincipals();
-            
-            AttributeCertificateHolder  holder = aCert.getHolder();
-            
-            principals = holder.getEntityNames();
-            if (principals == null)
-            {
-                return new SimpleTestResult(false, getName() + ": entity names not found.");
-            }
-            
-            //
-            // extension test
-            //
-            
-            if (aCert.hasUnsupportedCriticalExtension())
-            {
-                return new SimpleTestResult(false, getName() + ": unsupported extensions found with no extensions");
-            }
-            
-            gen.addExtension("1.1", true, new DEROctetString(new byte[10]));
-            
-            gen.addExtension("2.2", false, new DEROctetString(new byte[10]));
-            
-            aCert = gen.generateCertificate(privKey, "BC");
-            
-            Set exts = aCert.getCriticalExtensionOIDs();
-            
-            if (exts.size() != 1 || !exts.contains("1.1"))
-            {
-                return new SimpleTestResult(false, getName() + ": critical extension test failed");
-            }
-
-            exts = aCert.getNonCriticalExtensionOIDs();
-            
-            if (exts.size() != 1 || !exts.contains("2.2"))
-            {
-                return new SimpleTestResult(false, getName() + ": non-critical extension test failed");
-            }
-            
-            if (!aCert.hasUnsupportedCriticalExtension())
-            {
-                return new SimpleTestResult(false, getName() + ": unsupported extensions not found");
-            }
+            fail("sCert not found by issuer");
         }
-        catch (Exception e)
+        
+        X509Attribute[] attrs = aCert.getAttributes("1.3.6.1.4.1.6760.8.1.1");
+        if (attrs == null || attrs.length != 1)
         {
-            return new SimpleTestResult(false, getName() + ": exception + " + e.toString(), e);
+            fail("attribute not found");
+        }
+        
+        //
+        // reencode test
+        //
+        aCert = new X509V2AttributeCertificate(aCert.getEncoded());
+        
+        aCert.verify(sCert.getPublicKey(), "BC");
+        
+        X509AttributeCertificate saCert = new X509V2AttributeCertificate(new ByteArrayInputStream(aCert.getEncoded()));
+        
+        if (!aCert.getNotAfter().equals(saCert.getNotAfter()))
+        {
+            fail("failed date comparison");
+        }
+        
+        // base generator test
+        
+        //
+        // a sample key pair.
+        //
+        RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
+            new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
+            new BigInteger("11", 16));
+
+        RSAPrivateCrtKeySpec privKeySpec = new RSAPrivateCrtKeySpec(
+            new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
+            new BigInteger("11", 16),
+            new BigInteger("9f66f6b05410cd503b2709e88115d55daced94d1a34d4e32bf824d0dde6028ae79c5f07b580f5dce240d7111f7ddb130a7945cd7d957d1920994da389f490c89", 16),
+            new BigInteger("c0a0758cdf14256f78d4708c86becdead1b50ad4ad6c5c703e2168fbf37884cb", 16),
+            new BigInteger("f01734d7960ea60070f1b06f2bb81bfac48ff192ae18451d5e56c734a5aab8a5", 16),
+            new BigInteger("b54bb9edff22051d9ee60f9351a48591b6500a319429c069a3e335a1d6171391", 16),
+            new BigInteger("d3d83daf2a0cecd3367ae6f8ae1aeb82e9ac2f816c6fc483533d8297dd7884cd", 16),
+            new BigInteger("b8f52fc6f38593dabb661d3f50f8897f8106eee68b1bce78a95b132b4e5b5d19", 16));
+
+        //
+        // set up the keys
+        //
+        PrivateKey          privKey;
+        PublicKey           pubKey;
+
+        KeyFactory  kFact = KeyFactory.getInstance("RSA", "BC");
+
+        privKey = kFact.generatePrivate(privKeySpec);
+        pubKey = kFact.generatePublic(pubKeySpec);
+        
+        X509V2AttributeCertificateGenerator gen = new X509V2AttributeCertificateGenerator();
+        
+        gen.addAttribute(attrs[0]);
+        gen.setHolder(aCert.getHolder());
+        gen.setIssuer(aCert.getIssuer());
+        gen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
+        gen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
+        gen.setSerialNumber(aCert.getSerialNumber());
+        gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
+        
+        aCert = gen.generateCertificate(privKey, "BC");
+        
+        aCert.checkValidity();
+        
+        aCert.verify(pubKey, "BC");
+        
+        // as the issuer is the same this should still work (even though it is not
+        // technically correct
+        
+        certs = store.getCertificates(aCert.getIssuer());
+        if (certs.size() != 1 || !certs.contains(sCert))
+        {
+            fail("sCert not found by issuer");
+        }
+        
+        attrs = aCert.getAttributes("1.3.6.1.4.1.6760.8.1.1");
+        if (attrs == null || attrs.length != 1)
+        {
+            fail("attribute not found");
+        }
+        
+        //
+        // reencode test
+        //
+        aCert = new X509V2AttributeCertificate(aCert.getEncoded());
+        
+        aCert.verify(pubKey, "BC");
+        
+        AttributeCertificateIssuer  issuer = aCert.getIssuer();
+        
+        Principal[] principals = issuer.getPrincipals();
+        
+        AttributeCertificateHolder  holder = aCert.getHolder();
+        
+        principals = holder.getEntityNames();
+        if (principals == null)
+        {
+            fail("entity names not found.");
+        }
+        
+        //
+        // extension test
+        //
+        
+        if (aCert.hasUnsupportedCriticalExtension())
+        {
+            fail("unsupported extensions found with no extensions");
+        }
+        
+        gen.addExtension("1.1", true, new DEROctetString(new byte[10]));
+        
+        gen.addExtension("2.2", false, new DEROctetString(new byte[10]));
+        
+        aCert = gen.generateCertificate(privKey, "BC");
+        
+        Set exts = aCert.getCriticalExtensionOIDs();
+        
+        if (exts.size() != 1 || !exts.contains("1.1"))
+        {
+            fail("critical extension test failed");
         }
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+        exts = aCert.getNonCriticalExtensionOIDs();
+        
+        if (exts.size() != 1 || !exts.contains("2.2"))
+        {
+            fail("non-critical extension test failed");
+        }
+        
+        if (!aCert.hasUnsupportedCriticalExtension())
+        {
+            fail("unsupported extensions not found");
+        }
     }
 
     public static void main(
@@ -301,15 +284,6 @@ public class AttrCertTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test    test = new AttrCertTest();
-
-        TestResult  result = test.perform();
-
-        System.out.println(result);
-        
-        if (((SimpleTestResult)result).getException() != null)
-        {
-            ((SimpleTestResult)result).getException().printStackTrace();
-        }
+        runTest(new AttrCertTest());
     }
 }

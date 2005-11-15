@@ -179,7 +179,6 @@ public class PKCS7SignedDataTest
         }
         catch (Exception e)
         {
-e.printStackTrace();
             return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
         }
     }
@@ -306,7 +305,6 @@ e.printStackTrace();
         }
         catch (Exception e)
         {
-e.printStackTrace();
             return new SimpleTestResult(false, getName() + ": error setting generating cert - " + e.toString());
         }
 

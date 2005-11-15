@@ -22,9 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * basic test class for key generation for a DES-EDE block cipher, basically
@@ -32,7 +30,7 @@ import org.bouncycastle.util.test.TestResult;
  * correctness of the implementation is shown in the lightweight test classes.
  */
 public class DESedeTest
-    implements Test
+    extends SimpleTest
 {
     static String[] cipherTests1 =
     {
@@ -133,7 +131,7 @@ public class DESedeTest
         return true;
     }
 
-    private TestResult wrapTest(
+    private void wrapTest(
         int     id,
         byte[]  kek,
         byte[]  iv,
@@ -151,13 +149,12 @@ public class DESedeTest
                 byte[]  cText = wrapper.wrap(new SecretKeySpec(in, "DESEDE"));
                 if (!equalArray(cText, out))
                 {
-                    return new SimpleTestResult(false, getName() + ": failed wrap test " + id  + " expected " + new String(Hex.encode(out)) + " got " + new String(Hex.encode(cText)));
+                    fail("failed wrap test " + id  + " expected " + new String(Hex.encode(out)) + " got " + new String(Hex.encode(cText)));
                 }
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                return new SimpleTestResult(false, getName() + ": failed wrap test exception " + e.toString());
+                fail("failed wrap test exception " + e.toString());
             }
 
             wrapper.init(Cipher.UNWRAP_MODE, new SecretKeySpec(kek, "DESEDE"));
@@ -167,32 +164,30 @@ public class DESedeTest
                 Key  pText = wrapper.unwrap(out, "DESede", Cipher.SECRET_KEY);
                 if (!equalArray(pText.getEncoded(), in))
                 {
-                    return new SimpleTestResult(false, getName() + ": failed unwrap test " + id  + " expected " + new String(Hex.encode(in)) + " got " + new String(Hex.encode(pText.getEncoded())));
+                    fail("failed unwrap test " + id  + " expected " + new String(Hex.encode(in)) + " got " + new String(Hex.encode(pText.getEncoded())));
                 }
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": failed unwrap test exception " + e.toString());
+                fail("failed unwrap test exception " + e.toString());
             }
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
-            return new SimpleTestResult(false, getName() + ": failed exception " + ex.toString());
+            fail("failed exception " + ex.toString());
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
-    public TestResult test(
+    public void test(
         int         strength,
         byte[]      input,
         byte[]      output)
     {
-        Key                     key;
+        Key                     key = null;
         KeyGenerator            keyGen;
         SecureRandom            rand;
-        Cipher                  in, out;
+        Cipher                  in = null;
+        Cipher                  out = null;
         CipherInputStream       cIn;
         CipherOutputStream      cOut;
         ByteArrayInputStream    bIn;
@@ -214,7 +209,7 @@ public class DESedeTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": DESEDE failed initialisation - " + e.toString());
+            fail("DESEDE failed initialisation - " + e.toString());
         }
 
         try
@@ -223,7 +218,7 @@ public class DESedeTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": DESEDE failed initialisation - " + e.toString());
+            fail("DESEDE failed initialisation - " + e.toString());
         }
 
         //
@@ -244,7 +239,7 @@ public class DESedeTest
         }
         catch (IOException e)
         {
-            return new SimpleTestResult(false, getName() + ": DESEDE failed encryption - " + e.toString());
+            fail("DESEDE failed encryption - " + e.toString());
         }
 
         byte[]    bytes;
@@ -253,7 +248,7 @@ public class DESedeTest
 
         if (!equalArray(bytes, output))
         {
-            return new SimpleTestResult(false, getName() + ": DESEDE failed encryption - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(bytes)));
+            fail("DESEDE failed encryption - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(bytes)));
         }
 
         //
@@ -277,12 +272,12 @@ public class DESedeTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": DESEDE failed encryption - " + e.toString());
+            fail("DESEDE failed encryption - " + e.toString());
         }
 
         if (!equalArray(bytes, input))
         {
-            return new SimpleTestResult(false, getName() + ": DESEDE failed decryption - expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(bytes)));
+            fail("DESEDE failed decryption - expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(bytes)));
         }
 
         //
@@ -295,28 +290,20 @@ public class DESedeTest
 
             if (!equalArray(key.getEncoded(), keySpec.getKey(), 16))
             {
-                return new SimpleTestResult(false, getName() + ": DESEDE KeySpec does not match key.");
+                fail("DESEDE KeySpec does not match key.");
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": DESEDE failed keyspec - " + e.toString());
+            fail("DESEDE failed keyspec - " + e.toString());
         }
-
-        return new SimpleTestResult(true, getName() + ": DESEDE Okay");
     }
 
-    public TestResult perform()
+    public void performTest()
     {
-        TestResult  result;
-
         for (int i = 0; i != cipherTests1.length; i += 2)
         {
-            result = test(Integer.parseInt(cipherTests1[i]), input1, Hex.decode(cipherTests1[i + 1]));
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
+            test(Integer.parseInt(cipherTests1[i]), input1, Hex.decode(cipherTests1[i + 1]));
         }
 
         byte[]  kek1 = Hex.decode("255e0d1c07b646dfb3134cc843ba8aa71f025b7c0838251f");
@@ -324,13 +311,7 @@ public class DESedeTest
         byte[]  in1 = Hex.decode("2923bf85e06dd6ae529149f1f1bae9eab3a7da3d860d3e98");
         byte[]  out1 = Hex.decode("690107618ef092b3b48ca1796b234ae9fa33ebb4159604037db5d6a84eb3aac2768c632775a467d4");
 
-        result = wrapTest(1, kek1, iv1, in1, out1);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        wrapTest(1, kek1, iv1, in1, out1);
     }
 
     public static void main(
@@ -338,9 +319,6 @@ public class DESedeTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new DESedeTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new DESedeTest());
     }
 }

@@ -18,15 +18,13 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * basic test class for the AES cipher vectors from FIPS-197
  */
 public class AESTest
-    implements Test
+    extends SimpleTest
 {
     static String[] cipherTests =
     {
@@ -49,31 +47,12 @@ public class AESTest
         return "AES";
     }
 
-    private boolean equalArray(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public TestResult test(
+    public void test(
         int         strength,
         byte[]      keyBytes,
         byte[]      input,
         byte[]      output)
+        throws Exception
     {
         Key                     key;
         Cipher                  in, out;
@@ -82,18 +61,18 @@ public class AESTest
         ByteArrayInputStream    bIn;
         ByteArrayOutputStream   bOut;
 
+        key = new SecretKeySpec(keyBytes, "AES");
+
+        in = Cipher.getInstance("AES/ECB/NoPadding", "BC");
+        out = Cipher.getInstance("AES/ECB/NoPadding", "BC");
+        
         try
         {
-            key = new SecretKeySpec(keyBytes, "AES");
-
-            in = Cipher.getInstance("AES/ECB/NoPadding", "BC");
-            out = Cipher.getInstance("AES/ECB/NoPadding", "BC");
-
             out.init(Cipher.ENCRYPT_MODE, key);
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": AES failed initialisation - " + e.toString(), e);
+            fail("AES failed initialisation - " + e.toString(), e);
         }
 
         try
@@ -102,7 +81,7 @@ public class AESTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": AES failed initialisation - " + e.toString(), e);
+            fail("AES failed initialisation - " + e.toString(), e);
         }
 
         //
@@ -123,16 +102,16 @@ public class AESTest
         }
         catch (IOException e)
         {
-            return new SimpleTestResult(false, getName() + ": AES failed encryption - " + e.toString(), e);
+            fail("AES failed encryption - " + e.toString(), e);
         }
 
         byte[]    bytes;
 
         bytes = bOut.toByteArray();
 
-        if (!equalArray(bytes, output))
+        if (!areEqual(bytes, output))
         {
-            return new SimpleTestResult(false, getName() + ": AES failed encryption - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(bytes)));
+            fail("AES failed encryption - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(bytes)));
         }
 
         //
@@ -156,67 +135,57 @@ public class AESTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": AES failed encryption - " + e.toString(), e);
+            fail("AES failed encryption - " + e.toString(), e);
         }
 
-        if (!equalArray(bytes, input))
+        if (!areEqual(bytes, input))
         {
-            return new SimpleTestResult(false, getName() + ": AES failed decryption - expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(bytes)));
+            fail("AES failed decryption - expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(bytes)));
         }
-
-        return new SimpleTestResult(true, getName() + ": AES Okay");
     }
 
-    private TestResult wrapTest(
+    private void wrapTest(
         int     id,
         byte[]  kek,
         byte[]  in,
         byte[]  out)
+        throws Exception
     {
+        Cipher wrapper = Cipher.getInstance("AESWrap", "BC");
+
+        wrapper.init(Cipher.WRAP_MODE, new SecretKeySpec(kek, "AES"));
+
         try
         {
-            Cipher wrapper = Cipher.getInstance("AESWrap", "BC");
-
-            wrapper.init(Cipher.WRAP_MODE, new SecretKeySpec(kek, "AES"));
-
-            try
+            byte[]  cText = wrapper.wrap(new SecretKeySpec(in, "AES"));
+            if (!areEqual(cText, out))
             {
-                byte[]  cText = wrapper.wrap(new SecretKeySpec(in, "AES"));
-                if (!equalArray(cText, out))
-                {
-                    return new SimpleTestResult(false, getName() + ": failed wrap test " + id  + " expected " + new String(Hex.encode(out)) + " got " + new String(Hex.encode(cText)));
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                return new SimpleTestResult(false, getName() + ": failed wrap test exception " + e.toString(), e);
-            }
-
-            wrapper.init(Cipher.UNWRAP_MODE, new SecretKeySpec(kek, "AES"));
-
-            try
-            {
-                Key  pText = wrapper.unwrap(out, "AES", Cipher.SECRET_KEY);
-                if (!equalArray(pText.getEncoded(), in))
-                {
-                    return new SimpleTestResult(false, getName() + ": failed unwrap test " + id  + " expected " + new String(Hex.encode(in)) + " got " + new String(Hex.encode(pText.getEncoded())));
-                }
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(false, getName() + ": failed unwrap test exception " + e.toString(), e);
+                fail("failed wrap test " + id  + " expected " + new String(Hex.encode(out)) + " got " + new String(Hex.encode(cText)));
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed exception " + ex.toString(), ex);
+            fail("failed wrap test exception " + e.toString(), e);
         }
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+        wrapper.init(Cipher.UNWRAP_MODE, new SecretKeySpec(kek, "AES"));
+
+        try
+        {
+            Key  pText = wrapper.unwrap(out, "AES", Cipher.SECRET_KEY);
+            if (!areEqual(pText.getEncoded(), in))
+            {
+                fail("failed unwrap test " + id  + " expected " + new String(Hex.encode(in)) + " got " + new String(Hex.encode(pText.getEncoded())));
+            }
+        }
+        catch (Exception e)
+        {
+            fail("failed unwrap test exception " + e.toString(), e);
+        }
     }
 
-    private TestResult oidTest()
+    private void oidTest()
+        throws Exception
     {
         String[] oids = {
                 NISTObjectIdentifiers.id_aes128_ECB.getId(),
@@ -248,85 +217,60 @@ public class AESTest
                 "AES/CFB/PKCS7Padding"
         };
         
-        try
+        byte[]          data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        IvParameterSpec ivSpec = new IvParameterSpec(new byte[16]);
+        
+        for (int i = 0; i != oids.length; i++)
         {
+            Cipher c1 = Cipher.getInstance(oids[i], "BC");
+            Cipher c2 = Cipher.getInstance(names[i], "BC");
+            KeyGenerator kg = KeyGenerator.getInstance(oids[i], "BC");
             
-            byte[]          data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-            IvParameterSpec ivSpec = new IvParameterSpec(new byte[16]);
+            SecretKey k = kg.generateKey();
             
-            for (int i = 0; i != oids.length; i++)
+            if (names[i].startsWith("AES/ECB"))
             {
-                Cipher c1 = Cipher.getInstance(oids[i], "BC");
-                Cipher c2 = Cipher.getInstance(names[i], "BC");
-                KeyGenerator kg = KeyGenerator.getInstance(oids[i], "BC");
-                
-                SecretKey k = kg.generateKey();
-                
-                if (names[i].startsWith("AES/ECB"))
-                {
-                    c1.init(Cipher.ENCRYPT_MODE, k);
-                    c2.init(Cipher.DECRYPT_MODE, k);
-                }
-                else
-                {
-                    c1.init(Cipher.ENCRYPT_MODE, k, ivSpec);
-                    c2.init(Cipher.DECRYPT_MODE, k, ivSpec);
-                }
+                c1.init(Cipher.ENCRYPT_MODE, k);
+                c2.init(Cipher.DECRYPT_MODE, k);
+            }
+            else
+            {
+                c1.init(Cipher.ENCRYPT_MODE, k, ivSpec);
+                c2.init(Cipher.DECRYPT_MODE, k, ivSpec);
+            }
 
-                byte[] result = c2.doFinal(c1.doFinal(data));
-                
-                if (!equalArray(data, result))
-                {
-                    return new SimpleTestResult(false, getName() + ": failed OID test");
-                }
-                
-                if (k.getEncoded().length != (16 + ((i / 4) * 8)))
-                {
-                    return new SimpleTestResult(false, getName() + ": failed key length test");
-                }
+            byte[] result = c2.doFinal(c1.doFinal(data));
+            
+            if (!areEqual(data, result))
+            {
+                fail("failed OID test");
+            }
+            
+            if (k.getEncoded().length != (16 + ((i / 4) * 8)))
+            {
+                fail("failed key length test");
             }
         }
-        catch (Exception ex)
-        {
-            return new SimpleTestResult(false, getName() + ": failed exception " + ex.toString(), ex);
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        TestResult  result;
-
         for (int i = 0; i != cipherTests.length; i += 4)
         {
-            result = test(Integer.parseInt(cipherTests[i]), 
+            test(Integer.parseInt(cipherTests[i]), 
                             Hex.decode(cipherTests[i + 1]),
                             Hex.decode(cipherTests[i + 2]),
                             Hex.decode(cipherTests[i + 3]));
-
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
         }
 
         byte[]  kek1 = Hex.decode("000102030405060708090a0b0c0d0e0f");
         byte[]  in1 = Hex.decode("00112233445566778899aabbccddeeff");
         byte[]  out1 = Hex.decode("1fa68b0a8112b447aef34bd8fb5a7b829d3e862371d2cfe5");
-        result = wrapTest(1, kek1, in1, out1);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
+        
+        wrapTest(1, kek1, in1, out1);
 
-        result = oidTest();
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        oidTest();
     }
 
     public static void main(
@@ -334,9 +278,6 @@ public class AESTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new AESTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new AESTest());
     }
 }

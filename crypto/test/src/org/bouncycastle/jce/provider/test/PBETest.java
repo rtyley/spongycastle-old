@@ -22,18 +22,17 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * test out the various PBE modes, making sure the JCE implementations
  * are compatible woth the light weight ones.
  */
-public class PBETest implements Test
+public class PBETest
+    extends SimpleTest
 {
     private class OpenSSLTest
-        implements Test
+        extends SimpleTest
     {
         char[]    password;
         String    baseAlgorithm;
@@ -59,7 +58,7 @@ public class PBETest implements Test
             return "OpenSSLPBE";
         }
     
-        public TestResult perform()
+        public void performTest()
         {
             byte[] salt = new byte[16];
             int    iCount = 100;
@@ -110,20 +109,18 @@ public class PBETest implements Test
                 
                 if (!arrayEquals(salt, dec))
                 {
-                    return new SimpleTestResult(false, getName() + ": " + algorithm + "failed encryption/decryption test");
+                    fail("" + algorithm + "failed encryption/decryption test");
                 }
-                
-                return new SimpleTestResult(true, getName() + ": Okay");
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": " + algorithm + " failed - exception " + e, e);
+                fail("" + algorithm + " failed - exception " + e, e);
             }
         }
     }
     
     private class PKCS12Test
-        implements Test
+        extends SimpleTest
     {
         char[]    password;
         String    baseAlgorithm;
@@ -152,7 +149,7 @@ public class PBETest implements Test
             return "PKCS12PBE";
         }
     
-        public TestResult perform()
+        public void performTest()
         {
             byte[] salt = new byte[digest.getDigestSize()];
             int    iCount = 100;
@@ -200,7 +197,7 @@ public class PBETest implements Test
                 
                 if (!arrayEquals(salt, dec))
                 {
-                    return new SimpleTestResult(false, getName() + ": " + algorithm + "failed encryption/decryption test");
+                    fail("" + algorithm + "failed encryption/decryption test");
                 }
                 
                 //
@@ -211,12 +208,12 @@ public class PBETest implements Test
                 
                 if (!arrayEquals(salt, spec.getSalt()))
                 {
-                    return new SimpleTestResult(false, getName() + ": " + algorithm + "failed salt test");
+                    fail("" + algorithm + "failed salt test");
                 }
                 
                 if (iCount != spec.getIterationCount())
                 {
-                    return new SimpleTestResult(false, getName() + ": " + algorithm + "failed count test");
+                    fail("" + algorithm + "failed count test");
                 }
                 
                 //
@@ -230,14 +227,12 @@ public class PBETest implements Test
                 
                 if (!arrayEquals(salt, dec))
                 {
-                    return new SimpleTestResult(false, getName() + ": " + algorithm + "failed encryption/decryption test");
+                    fail("" + algorithm + "failed encryption/decryption test");
                 }
-                
-                return new SimpleTestResult(true, getName() + ": Okay");
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": " + algorithm + " failed - exception " + e, e);
+                fail("" + algorithm + " failed - exception " + e, e);
             }
         }
     }
@@ -325,13 +320,13 @@ public class PBETest implements Test
         return true;
     }
 
-    public TestResult testPBEHMac(
+    public void testPBEHMac(
         String  hmacName,
         byte[]  output)
     {
-        SecretKey           key;
+        SecretKey           key = null;
         byte[]              out;
-        Mac                 mac;
+        Mac                 mac = null;
 
         try
         {
@@ -343,7 +338,7 @@ public class PBETest implements Test
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": Failed - exception " + e.toString(), e);
+            fail("Failed - exception " + e.toString(), e);
         }
 
         try
@@ -352,7 +347,7 @@ public class PBETest implements Test
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": Failed - exception " + e.toString(), e);
+            fail("Failed - exception " + e.toString(), e);
         }
 
         mac.reset();
@@ -363,185 +358,156 @@ public class PBETest implements Test
 
         if (!arrayEquals(out, output))
         {
-            return new SimpleTestResult(false, getName() + ": Failed - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+            fail("Failed - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
         byte[] input = Hex.decode("1234567890abcdefabcdef1234567890fedbca098765");
 
-        try
+        //
+        // DES
+        //
+        Cipher  cEnc = Cipher.getInstance("DES/CBC/PKCS7Padding", "BC");
+
+        cEnc.init(Cipher.ENCRYPT_MODE,
+            new SecretKeySpec(Hex.decode("30e69252758e5346"), "DES"),
+            new IvParameterSpec(Hex.decode("7c1c1ab9c454a688")));
+
+        byte[]  out = cEnc.doFinal(input);
+
+        char[]  password = { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
+
+        Cipher  cDec = makePBECipherUsingParam(
+                            "PBEWithSHA1AndDES",
+                            Cipher.DECRYPT_MODE,
+                            password,
+                            Hex.decode("7d60435f02e9e0ae"),
+                            2048);
+
+        byte[]  in = cDec.doFinal(out);
+
+        if (!arrayEquals(input, in))
         {
-            //
-            // DES
-            //
-            Cipher  cEnc = Cipher.getInstance("DES/CBC/PKCS7Padding", "BC");
-
-            cEnc.init(Cipher.ENCRYPT_MODE,
-                new SecretKeySpec(Hex.decode("30e69252758e5346"), "DES"),
-                new IvParameterSpec(Hex.decode("7c1c1ab9c454a688")));
-
-            byte[]  out = cEnc.doFinal(input);
-
-            char[]  password = { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
-
-            Cipher  cDec = makePBECipherUsingParam(
-                                "PBEWithSHA1AndDES",
-                                Cipher.DECRYPT_MODE,
-                                password,
-                                Hex.decode("7d60435f02e9e0ae"),
-                                2048);
-
-            byte[]  in = cDec.doFinal(out);
-
-            if (!arrayEquals(input, in))
-            {
-                return new SimpleTestResult(false, getName() + ": DES failed");
-            }
-
-            cDec = makePBECipherWithoutParam(
-                    "PBEWithSHA1AndDES",
-                    Cipher.DECRYPT_MODE,
-                    password,
-                    Hex.decode("7d60435f02e9e0ae"),
-                    2048);
-
-            in = cDec.doFinal(out);
-            
-            if (!arrayEquals(input, in))
-            {
-                return new SimpleTestResult(false, getName() + ": DES failed without param");
-            }
-            
-            //
-            // DESede
-            //
-            cEnc = Cipher.getInstance("DESede/CBC/PKCS7Padding", "BC");
-
-            cEnc.init(Cipher.ENCRYPT_MODE,
-                new SecretKeySpec(Hex.decode("732f2d33c801732b7206756cbd44f9c1c103ddd97c7cbe8e"), "DES"),
-                new IvParameterSpec(Hex.decode("b07bf522c8d608b8")));
-
-            out = cEnc.doFinal(input);
-
-            cDec = makePBECipherUsingParam(
-                                "PBEWithSHAAnd3-KeyTripleDES-CBC",
-                                Cipher.DECRYPT_MODE,
-                                password,
-                                Hex.decode("7d60435f02e9e0ae"),
-                                2048);
-
-            in = cDec.doFinal(out);
-
-            if (!arrayEquals(input, in))
-            {
-                return new SimpleTestResult(false, getName() + ": DESede failed");
-            }
-
-            //
-            // 40Bit RC2
-            //
-            cEnc = Cipher.getInstance("RC2/CBC/PKCS7Padding", "BC");
-
-            cEnc.init(Cipher.ENCRYPT_MODE,
-                new SecretKeySpec(Hex.decode("732f2d33c8"), "RC2"),
-                new IvParameterSpec(Hex.decode("b07bf522c8d608b8")));
-
-            out = cEnc.doFinal(input);
-
-            cDec = makePBECipherUsingParam(
-                                "PBEWithSHAAnd40BitRC2-CBC",
-                                Cipher.DECRYPT_MODE,
-                                password,
-                                Hex.decode("7d60435f02e9e0ae"),
-                                2048);
-
-            in = cDec.doFinal(out);
-
-            if (!arrayEquals(input, in))
-            {
-                return new SimpleTestResult(false, getName() + ": RC2 failed");
-            }
-
-            //
-            // 128bit RC4
-            //
-            cEnc = Cipher.getInstance("RC4", "BC");
-
-            cEnc.init(Cipher.ENCRYPT_MODE,
-                new SecretKeySpec(Hex.decode("732f2d33c801732b7206756cbd44f9c1"), "RC4"));
-
-            out = cEnc.doFinal(input);
-
-            cDec = makePBECipherUsingParam(
-                                "PBEWithSHAAnd128BitRC4",
-                                Cipher.DECRYPT_MODE,
-                                password,
-                                Hex.decode("7d60435f02e9e0ae"),
-                                2048);
-
-            in = cDec.doFinal(out);
-
-            if (!arrayEquals(input, in))
-            {
-                return new SimpleTestResult(false, getName() + ": RC4 failed");
-            }
-
-            cDec = makePBECipherWithoutParam(
-                    "PBEWithSHAAnd128BitRC4",
-                    Cipher.DECRYPT_MODE,
-                    password,
-                    Hex.decode("7d60435f02e9e0ae"),
-                    2048);
-
-            in = cDec.doFinal(out);
-            
-            if (!arrayEquals(input, in))
-            {
-                return new SimpleTestResult(false, getName() + ": RC4 failed without param");
-            }
-
-            for (int i = 0; i != pkcs12Tests.length; i++)
-            {
-                TestResult  res = pkcs12Tests[i].perform();
-                if (!res.isSuccessful())
-                {
-                    return res;
-                }
-            }
-            
-            for (int i = 0; i != openSSLTests.length; i++)
-            {
-                TestResult  res = openSSLTests[i].perform();
-                if (!res.isSuccessful())
-                {
-                    return res;
-                }
-            }
-
-            TestResult res = testPBEHMac("PBEWithHMacSHA1", hMac1);
-
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = testPBEHMac("PBEWithHMacRIPEMD160", hMac2);
-
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
+            fail("DES failed");
         }
-        catch (Exception e)
+
+        cDec = makePBECipherWithoutParam(
+                "PBEWithSHA1AndDES",
+                Cipher.DECRYPT_MODE,
+                password,
+                Hex.decode("7d60435f02e9e0ae"),
+                2048);
+
+        in = cDec.doFinal(out);
+        
+        if (!arrayEquals(input, in))
         {
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString(), e);
+            fail("DES failed without param");
         }
+        
+        //
+        // DESede
+        //
+        cEnc = Cipher.getInstance("DESede/CBC/PKCS7Padding", "BC");
+
+        cEnc.init(Cipher.ENCRYPT_MODE,
+            new SecretKeySpec(Hex.decode("732f2d33c801732b7206756cbd44f9c1c103ddd97c7cbe8e"), "DES"),
+            new IvParameterSpec(Hex.decode("b07bf522c8d608b8")));
+
+        out = cEnc.doFinal(input);
+
+        cDec = makePBECipherUsingParam(
+                            "PBEWithSHAAnd3-KeyTripleDES-CBC",
+                            Cipher.DECRYPT_MODE,
+                            password,
+                            Hex.decode("7d60435f02e9e0ae"),
+                            2048);
+
+        in = cDec.doFinal(out);
+
+        if (!arrayEquals(input, in))
+        {
+            fail("DESede failed");
+        }
+
+        //
+        // 40Bit RC2
+        //
+        cEnc = Cipher.getInstance("RC2/CBC/PKCS7Padding", "BC");
+
+        cEnc.init(Cipher.ENCRYPT_MODE,
+            new SecretKeySpec(Hex.decode("732f2d33c8"), "RC2"),
+            new IvParameterSpec(Hex.decode("b07bf522c8d608b8")));
+
+        out = cEnc.doFinal(input);
+
+        cDec = makePBECipherUsingParam(
+                            "PBEWithSHAAnd40BitRC2-CBC",
+                            Cipher.DECRYPT_MODE,
+                            password,
+                            Hex.decode("7d60435f02e9e0ae"),
+                            2048);
+
+        in = cDec.doFinal(out);
+
+        if (!arrayEquals(input, in))
+        {
+            fail("RC2 failed");
+        }
+
+        //
+        // 128bit RC4
+        //
+        cEnc = Cipher.getInstance("RC4", "BC");
+
+        cEnc.init(Cipher.ENCRYPT_MODE,
+            new SecretKeySpec(Hex.decode("732f2d33c801732b7206756cbd44f9c1"), "RC4"));
+
+        out = cEnc.doFinal(input);
+
+        cDec = makePBECipherUsingParam(
+                            "PBEWithSHAAnd128BitRC4",
+                            Cipher.DECRYPT_MODE,
+                            password,
+                            Hex.decode("7d60435f02e9e0ae"),
+                            2048);
+
+        in = cDec.doFinal(out);
+
+        if (!arrayEquals(input, in))
+        {
+            fail("RC4 failed");
+        }
+
+        cDec = makePBECipherWithoutParam(
+                "PBEWithSHAAnd128BitRC4",
+                Cipher.DECRYPT_MODE,
+                password,
+                Hex.decode("7d60435f02e9e0ae"),
+                2048);
+
+        in = cDec.doFinal(out);
+        
+        if (!arrayEquals(input, in))
+        {
+            fail("RC4 failed without param");
+        }
+
+        for (int i = 0; i != pkcs12Tests.length; i++)
+        {
+            pkcs12Tests[i].perform();
+        }
+        
+        for (int i = 0; i != openSSLTests.length; i++)
+        {
+            openSSLTests[i].perform();
+        }
+
+        testPBEHMac("PBEWithHMacSHA1", hMac1);
+        testPBEHMac("PBEWithHMacRIPEMD160", hMac2);
     }
 
     public String getName()
@@ -549,19 +515,12 @@ public class PBETest implements Test
         return "PBETest";
     }
 
+
     public static void main(
         String[]    args)
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new PBETest();
-        TestResult      result = test.perform();
-
-        if (((SimpleTestResult)result).getException() != null)
-        {
-            ((SimpleTestResult)result).getException().printStackTrace();
-        }
-
-        System.out.println(result.toString());
+        runTest(new PBETest());
     }
 }

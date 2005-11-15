@@ -28,6 +28,16 @@ public class MacTest
     static byte[]   output2 = Hex.decode("58d2e77e");
     static byte[]   output3 = Hex.decode("cd647403");
 
+    static byte[]   keyBytesISO9797 = Hex.decode("7CA110454A1A6E570131D9619DC1376E");
+    
+    static byte[]   inputISO9797 = "Hello World !!!!".getBytes(); 
+    
+    static byte[]   outputISO9797 = Hex.decode("F09B856213BAB83B");
+    
+    static byte[]   inputDesEDE64 = "Hello World !!!!".getBytes(); 
+    
+    static byte[]   outputDesEDE64 = Hex.decode("862304d33af01096");
+    
     public MacTest()
     {
     }
@@ -83,6 +93,42 @@ public class MacTest
         if (!areEqual(out, output3))
         {
             fail("Failed - expected " + new String(Hex.encode(output3)) + " got " + new String(Hex.encode(out)));
+        }
+        
+        //
+        // ISO9797 algorithm 3 using DESEDE
+        //
+        key = new SecretKeySpec(keyBytesISO9797, "DESEDE");
+        
+        mac = Mac.getInstance("ISO9797ALG3", "BC");
+
+        mac.init(key);
+
+        mac.update(inputISO9797, 0, inputISO9797.length);
+
+        out = mac.doFinal();
+
+        if (!areEqual(out, outputISO9797))
+        {
+            fail("Failed - expected " + new String(Hex.encode(outputISO9797)) + " got " + new String(Hex.encode(out)));
+        }
+        
+        //
+        // 64bit DESede Mac
+        //
+        key = new SecretKeySpec(keyBytesISO9797, "DESEDE");
+        
+        mac = Mac.getInstance("DESEDE64", "BC");
+
+        mac.init(key);
+
+        mac.update(inputDesEDE64, 0, inputDesEDE64.length);
+
+        out = mac.doFinal();
+
+        if (!areEqual(out, outputDesEDE64))
+        {
+            fail("Failed - expected " + new String(Hex.encode(outputDesEDE64)) + " got " + new String(Hex.encode(out)));
         }
     }
 

@@ -9,6 +9,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -29,12 +30,10 @@ import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class RSATest
-    implements Test
+    extends SimpleTest
 {
     /**
      * a fake random number generator - we just want to make sure the random numbers
@@ -65,27 +64,6 @@ public class RSATest
             System.arraycopy(seed, 0, bytes, offset, bytes.length - offset);
         }
     }
-
-    private boolean arrayEquals(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
 
     private RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
         new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
@@ -123,435 +101,446 @@ public class RSATest
             new BigInteger("97fc25484b5a415eaa63c03e6efa8dafe9a1c8b004d9ee6e80548fefd6f2ce44ee5cb117e77e70285798f57d137566ce8ea4503b13e0f1b5ed5ca6942537c4aa96b2a395782a4cb5b58d0936e0b0fa63b1192954d39ced176d71ef32c6f42c84e2e19f9d4dd999c2151b032b97bd22aa73fd8c5bcd15a2dca4046d5acc997021", 16),
             new BigInteger("4bb8064e1eff7e9efc3c4578fcedb59ca4aef0993a8312dfdcb1b3decf458aa6650d3d0866f143cbf0d3825e9381181170a0a1651eefcd7def786b8eb356555d9fa07c85b5f5cbdd74382f1129b5e36b4166b6cc9157923699708648212c484958351fdc9cf14f218dbe7fbf7cbd93a209a4681fe23ceb44bab67d66f45d1c9d", 16));
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        try
+        KeyFactory          fact;
+        byte[]              input = new byte[]
+                                { (byte)0x54, (byte)0x85, (byte)0x9b, (byte)0x34, (byte)0x2c, (byte)0x49, (byte)0xea, (byte)0x2a };
+        byte[][]            output = new byte[][]
+                                {
+                                    Hex.decode("8b427f781a2e59dd9def386f1956b996ee07f48c96880e65a368055ed8c0a8831669ef7250b40918b2b1d488547e72c84540e42bd07b03f14e226f04fbc2d929"),
+                                    Hex.decode("2ec6e1a1711b6c7b8cd3f6a25db21ab8bb0a5f1d6df2ef375fa708a43997730ffc7c98856dbbe36edddcdd1b2d2a53867d8355af94fea3aeec128da908e08f4c"),
+                                    Hex.decode("0850ac4e5a8118323200c8ed1e5aaa3d5e635172553ccac66a8e4153d35c79305c4440f11034ab147fccce21f18a50cf1c0099c08a577eb68237a91042278965"),
+                                    Hex.decode("1c9649bdccb51056751fe43837f4eb43bada472accf26f65231666d5de7d11950d8379b3596dfdf75c6234274896fa8d18ad0865d3be2ac4d6687151abdf01e93941dcef18fa63186c9351d1506c89d09733c5ff4304208c812bdd21a50f56fde115e629e0e973721c9fcc87e89295a79853dee613962a0b2f2fc57163fd99057a3c776f13c20c26407eb8863998d7e53b543ba8d0a295a9a68d1a149833078c9809ad6a6dad7fc22a95ad615a73138c54c018f40d99bf8eeecd45f5be526f2d6b01aeb56381991c1ab31a2e756f15e052b9cd5638b2eff799795c5bae493307d5eb9f8c21d438de131fe505a4e7432547ab19224094f9e4be1968bd0793b79d"),
+                                    Hex.decode("4c4afc0c24dddaedd4f9a3b23be30d35d8e005ffd36b3defc5d18acc830c3ed388ce20f43a00e614fd087c814197bc9fc2eff9ad4cc474a7a2ef3ed9c0f0a55eb23371e41ee8f2e2ed93ea3a06ca482589ab87e0d61dcffda5eea1241408e43ea1108726cdb87cc3aa5e9eaaa9f72507ca1352ac54a53920c94dccc768147933d8c50aefd9d1da10522a40133cd33dbc0524669e70f771a88d65c4716d471cd22b08b9f01f24e4e9fc7ffbcfa0e0a7aed47b345826399b26a73be112eb9c5e06fc6742fc3d0ef53d43896403c5105109cfc12e6deeaf4a48ba308e039774b9bdb31a9b9e133c81c321630cf0b4b2d1f90717b24c3268e1fea681ea9cdc709342"),
+                                    Hex.decode("06b5b26bd13515f799e5e37ca43cace15cd82fd4bf36b25d285a6f0998d97c8cb0755a28f0ae66618b1cd03e27ac95eaaa4882bc6dc0078cd457d4f7de4154173a9c7a838cfc2ac2f74875df462aae0cfd341645dc51d9a01da9bdb01507f140fa8a016534379d838cc3b2a53ac33150af1b242fc88013cb8d914e66c8182864ee6de88ce2879d4c05dd125409620a96797c55c832fb2fb31d4310c190b8ed2c95fdfda2ed87f785002faaec3f35ec05cf70a3774ce185e4882df35719d582dd55ac31257344a9cba95189dcbea16e8c6cb7a235a0384bc83b6183ca8547e670fe33b1b91725ae0c250c9eca7b5ba78bd77145b70270bf8ac31653006c02ca9c"),
+                                    Hex.decode("135f1be3d045526235bf9d5e43499d4ee1bfdf93370769ae56e85dbc339bc5b7ea3bee49717497ee8ac3f7cd6adb6fc0f17812390dcd65ac7b87fef7970d9ff9"),
+                                    Hex.decode("03c05add1e030178c352face07cafc9447c8f369b8f95125c0d311c16b6da48ca2067104cce6cd21ae7b163cd18ffc13001aecebdc2eb02b9e92681f84033a98"),
+                                    Hex.decode("00319bb9becb49f3ed1bca26d0fcf09b0b0a508e4d0bd43b350f959b72cd25b3af47d608fdcd248eada74fbe19990dbeb9bf0da4b4e1200243a14e5cab3f7e610c")
+                                };
+        SecureRandom        rand = new FixedSecureRandom();
+
+
+        fact = KeyFactory.getInstance("RSA", "BC");
+
+        PrivateKey  privKey = fact.generatePrivate(privKeySpec);
+        PublicKey   pubKey = fact.generatePublic(pubKeySpec);
+        
+        PrivateKey  priv2048Key = fact.generatePrivate(priv2048KeySpec);
+        PublicKey   pub2048Key = fact.generatePublic(pub2048KeySpec);
+
+        //
+        // No Padding
+        //
+        Cipher c = Cipher.getInstance("RSA", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        byte[]  out = c.doFinal(input);
+
+        if (!areEqual(out, output[0]))
         {
-            KeyFactory          fact;
-            byte[]              input = new byte[]
-                                    { (byte)0x54, (byte)0x85, (byte)0x9b, (byte)0x34, (byte)0x2c, (byte)0x49, (byte)0xea, (byte)0x2a };
-            byte[][]            output = new byte[][]
-                                    {
-                                        Hex.decode("8b427f781a2e59dd9def386f1956b996ee07f48c96880e65a368055ed8c0a8831669ef7250b40918b2b1d488547e72c84540e42bd07b03f14e226f04fbc2d929"),
-                                        Hex.decode("2ec6e1a1711b6c7b8cd3f6a25db21ab8bb0a5f1d6df2ef375fa708a43997730ffc7c98856dbbe36edddcdd1b2d2a53867d8355af94fea3aeec128da908e08f4c"),
-                                        Hex.decode("0850ac4e5a8118323200c8ed1e5aaa3d5e635172553ccac66a8e4153d35c79305c4440f11034ab147fccce21f18a50cf1c0099c08a577eb68237a91042278965"),
-                                        Hex.decode("1c9649bdccb51056751fe43837f4eb43bada472accf26f65231666d5de7d11950d8379b3596dfdf75c6234274896fa8d18ad0865d3be2ac4d6687151abdf01e93941dcef18fa63186c9351d1506c89d09733c5ff4304208c812bdd21a50f56fde115e629e0e973721c9fcc87e89295a79853dee613962a0b2f2fc57163fd99057a3c776f13c20c26407eb8863998d7e53b543ba8d0a295a9a68d1a149833078c9809ad6a6dad7fc22a95ad615a73138c54c018f40d99bf8eeecd45f5be526f2d6b01aeb56381991c1ab31a2e756f15e052b9cd5638b2eff799795c5bae493307d5eb9f8c21d438de131fe505a4e7432547ab19224094f9e4be1968bd0793b79d"),
-                                        Hex.decode("4c4afc0c24dddaedd4f9a3b23be30d35d8e005ffd36b3defc5d18acc830c3ed388ce20f43a00e614fd087c814197bc9fc2eff9ad4cc474a7a2ef3ed9c0f0a55eb23371e41ee8f2e2ed93ea3a06ca482589ab87e0d61dcffda5eea1241408e43ea1108726cdb87cc3aa5e9eaaa9f72507ca1352ac54a53920c94dccc768147933d8c50aefd9d1da10522a40133cd33dbc0524669e70f771a88d65c4716d471cd22b08b9f01f24e4e9fc7ffbcfa0e0a7aed47b345826399b26a73be112eb9c5e06fc6742fc3d0ef53d43896403c5105109cfc12e6deeaf4a48ba308e039774b9bdb31a9b9e133c81c321630cf0b4b2d1f90717b24c3268e1fea681ea9cdc709342"),
-                                        Hex.decode("06b5b26bd13515f799e5e37ca43cace15cd82fd4bf36b25d285a6f0998d97c8cb0755a28f0ae66618b1cd03e27ac95eaaa4882bc6dc0078cd457d4f7de4154173a9c7a838cfc2ac2f74875df462aae0cfd341645dc51d9a01da9bdb01507f140fa8a016534379d838cc3b2a53ac33150af1b242fc88013cb8d914e66c8182864ee6de88ce2879d4c05dd125409620a96797c55c832fb2fb31d4310c190b8ed2c95fdfda2ed87f785002faaec3f35ec05cf70a3774ce185e4882df35719d582dd55ac31257344a9cba95189dcbea16e8c6cb7a235a0384bc83b6183ca8547e670fe33b1b91725ae0c250c9eca7b5ba78bd77145b70270bf8ac31653006c02ca9c"),
-                                        Hex.decode("135f1be3d045526235bf9d5e43499d4ee1bfdf93370769ae56e85dbc339bc5b7ea3bee49717497ee8ac3f7cd6adb6fc0f17812390dcd65ac7b87fef7970d9ff9"),
-                                        Hex.decode("03c05add1e030178c352face07cafc9447c8f369b8f95125c0d311c16b6da48ca2067104cce6cd21ae7b163cd18ffc13001aecebdc2eb02b9e92681f84033a98"),
-                                        Hex.decode("00319bb9becb49f3ed1bca26d0fcf09b0b0a508e4d0bd43b350f959b72cd25b3af47d608fdcd248eada74fbe19990dbeb9bf0da4b4e1200243a14e5cab3f7e610c")
-                                    };
-            SecureRandom        rand = new FixedSecureRandom();
-
-
-            fact = KeyFactory.getInstance("RSA", "BC");
-
-            PrivateKey  privKey = fact.generatePrivate(privKeySpec);
-            PublicKey   pubKey = fact.generatePublic(pubKeySpec);
-            
-            PrivateKey  priv2048Key = fact.generatePrivate(priv2048KeySpec);
-            PublicKey   pub2048Key = fact.generatePublic(pub2048KeySpec);
-
-            //
-            // No Padding
-            //
-            Cipher c = Cipher.getInstance("RSA", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
-
-            byte[]  out = c.doFinal(input);
-
-            if (!arrayEquals(out, output[0]))
-            {
-                return new SimpleTestResult(false, "NoPadding test failed on encrypt expected " + new String(Hex.encode(output[0])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c.init(Cipher.DECRYPT_MODE, privKey);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "NoPadding test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-
-            //
-            // No Padding - incremental
-            //
-            c = Cipher.getInstance("RSA", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
-
-            c.update(input);
-
-            out = c.doFinal();
-
-            if (!arrayEquals(out, output[0]))
-            {
-                return new SimpleTestResult(false, "NoPadding test failed on encrypt expected " + new String(Hex.encode(output[0])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c.init(Cipher.DECRYPT_MODE, privKey);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "NoPadding test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-
-            //
-            // No Padding - maximum length
-            //
-            c = Cipher.getInstance("RSA", "BC");
-
-            byte[]  modBytes = ((RSAPublicKey)pubKey).getModulus().toByteArray();
-            byte[]  maxInput = new byte[modBytes.length - 1];
-
-            maxInput[0] |= 0x7f;
-
-            c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
-
-            out = c.doFinal(maxInput);
-
-            c.init(Cipher.DECRYPT_MODE, privKey);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, maxInput))
-            {
-                return new SimpleTestResult(false, "NoPadding test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-
-            //
-            // PKCS1 V 1.5
-            //
-            c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
-
-            out = c.doFinal(input);
-
-            if (!arrayEquals(out, output[1]))
-            {
-                return new SimpleTestResult(false, "PKCS1 test failed on encrypt expected " + new String(Hex.encode(output[1])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c.init(Cipher.DECRYPT_MODE, privKey);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "PKCS1 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-
-            //
-            // OAEP - SHA1
-            //
-            c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
-
-            out = c.doFinal(input);
-
-            if (!arrayEquals(out, output[2]))
-            {
-                return new SimpleTestResult(false, "OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
-            
-            c.init(Cipher.DECRYPT_MODE, privKey);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "OAEP test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-            
-            AlgorithmParameters oaepP = c.getParameters();
-            
-            if (!arrayEquals(oaepP.getEncoded(), 
-                    new RSAESOAEPparams(
-                            new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull()), 
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull())),
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
-            {
-                return new SimpleTestResult(false, "OAEP test failed default sha-1 parameters");
-            }
-            
-            //
-            // OAEP - SHA224
-            //
-            c = Cipher.getInstance("RSA/NONE/OAEPWithSHA224AndMGF1Padding", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
-
-            out = c.doFinal(input);
-
-            if (!arrayEquals(out, output[3]))
-            {
-                return new SimpleTestResult(false, "OAEP SHA-224 test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c.init(Cipher.DECRYPT_MODE, priv2048Key);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "OAEP SHA-224 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-            
-            oaepP = c.getParameters();
-            
-            if (!arrayEquals(oaepP.getEncoded(), 
-                    new RSAESOAEPparams(
-                            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull()), 
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull())),
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
-            {
-                return new SimpleTestResult(false, "OAEP test failed default sha-224 parameters");
-            }
-            
-            //
-            // OAEP - SHA 256
-            //
-            c = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
-
-            out = c.doFinal(input);
-
-            if (!arrayEquals(out, output[4]))
-            {
-                return new SimpleTestResult(false, "OAEP SHA-256 test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c.init(Cipher.DECRYPT_MODE, priv2048Key);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "OAEP SHA-256 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-            
-            oaepP = c.getParameters();
-            
-            if (!arrayEquals(oaepP.getEncoded(), 
-                    new RSAESOAEPparams(
-                            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull()), 
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull())),
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
-            {
-                return new SimpleTestResult(false, "OAEP test failed default sha-256 parameters");
-            }
-            
-            //
-            // OAEP - SHA 384
-            //
-            c = Cipher.getInstance("RSA/NONE/OAEPWithSHA384AndMGF1Padding", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
-
-            out = c.doFinal(input);
-
-            if (!arrayEquals(out, output[5]))
-            {
-                return new SimpleTestResult(false, "OAEP SHA-384 test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c.init(Cipher.DECRYPT_MODE, priv2048Key);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "OAEP SHA-384 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-            
-            oaepP = c.getParameters();
-            
-            if (!arrayEquals(oaepP.getEncoded(), 
-                    new RSAESOAEPparams(
-                            new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull()), 
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull())),
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
-            {
-                return new SimpleTestResult(false, "OAEP test failed default sha-384 parameters");
-            }
-            
-            //
-            // OAEP - MD5
-            //
-            c = Cipher.getInstance("RSA/NONE/OAEPWithMD5AndMGF1Padding", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
-
-            out = c.doFinal(input);
-
-            if (!arrayEquals(out, output[6]))
-            {
-                return new SimpleTestResult(false, "OAEP MD5 test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c.init(Cipher.DECRYPT_MODE, privKey);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "OAEP MD5 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-            
-            oaepP = c.getParameters();
-            
-            if (!arrayEquals(oaepP.getEncoded(), 
-                    new RSAESOAEPparams(
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.md5, new DERNull()), 
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(PKCSObjectIdentifiers.md5, new DERNull())),
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
-            {
-                return new SimpleTestResult(false, "OAEP test failed default md5 parameters");
-            }
-            
-            //
-            // OAEP - SHA1 with default parameters
-            //
-            c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pubKey, OAEPParameterSpec.DEFAULT, rand);
-
-            out = c.doFinal(input);
-
-            if (!arrayEquals(out, output[2]))
-            {
-                return new SimpleTestResult(false, "OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
-            
-            c.init(Cipher.DECRYPT_MODE, privKey);
-
-            out = c.doFinal(out);
-            
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "OAEP test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-            
-            oaepP = c.getParameters();
-            
-            if (!arrayEquals(oaepP.getEncoded(), new byte[] { 0x30, 0x00 }))
-            {
-                return new SimpleTestResult(false, "OAEP test failed default parameters");
-            }
-
-            //
-            // OAEP - SHA1 with specified string
-            //
-            c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, pubKey, new OAEPParameterSpec("SHA1", "MGF1", new MGF1ParameterSpec("SHA1"), new PSource.PSpecified(new byte[] { 1, 2, 3, 4, 5 })), rand);
-
-            out = c.doFinal(input);
-
-            oaepP = c.getParameters();
-            
-            if (!arrayEquals(oaepP.getEncoded(), 
-                    new RSAESOAEPparams(
-                            new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull()), 
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull())),
-                            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[] { 1, 2, 3, 4, 5 }))).getEncoded()))
-            {
-                return new SimpleTestResult(false, "OAEP test failed changed sha-1 parameters");
-            }
-            
-            if (!arrayEquals(out, output[7]))
-            {
-                return new SimpleTestResult(false, "OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
-            
-            c.init(Cipher.DECRYPT_MODE, privKey, oaepP);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "OAEP test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-            
-            //
-            // ISO9796-1
-            //
-            byte[]      isoInput =  Hex.decode("fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210");
-            PrivateKey  isoPrivKey = fact.generatePrivate(isoPrivKeySpec);
-            PublicKey   isoPubKey = fact.generatePublic(isoPubKeySpec);
-
-            c = Cipher.getInstance("RSA/NONE/ISO9796-1Padding", "BC");
-
-            c.init(Cipher.ENCRYPT_MODE, isoPrivKey);
-
-            out = c.doFinal(isoInput);
-
-            if (!arrayEquals(out, output[8]))
-            {
-                return new SimpleTestResult(false, "ISO9796-1 test failed on encrypt expected " + new String(Hex.encode(output[3])) + " got " + new String(Hex.encode(out)));
-            }
-
-            c.init(Cipher.DECRYPT_MODE, isoPubKey);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, isoInput))
-            {
-                return new SimpleTestResult(false, "ISO9796-1 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-
-            //
-            //
-            // generation with parameters test.
-            //
-            KeyPairGenerator keyPairGen =
-                    KeyPairGenerator.getInstance("RSA", "BC");
-
-            //
-            // 768 bit RSA with e = 2^16-1
-            //
-            keyPairGen.initialize(
-                new RSAKeyGenParameterSpec(768,
-                BigInteger.valueOf(65537)),
-                new SecureRandom());
-
-            KeyPair kp = keyPairGen.generateKeyPair();
-
-            pubKey = kp.getPublic();
-            privKey = kp.getPrivate();
-
-            c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
-
-            out = c.doFinal(input);
-
-            c.init(Cipher.DECRYPT_MODE, privKey);
-
-            out = c.doFinal(out);
-
-            if (!arrayEquals(out, input))
-            {
-                return new SimpleTestResult(false, "key generation test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
-            }
-
-            return new SimpleTestResult(true, getName() + ": Okay");
+            fail("NoPadding test failed on encrypt expected " + new String(Hex.encode(output[0])) + " got " + new String(Hex.encode(out)));
         }
-        catch (Exception e)
-        { e.printStackTrace();
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
+
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("NoPadding test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+
+        //
+        // No Padding - incremental
+        //
+        c = Cipher.getInstance("RSA", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        c.update(input);
+
+        out = c.doFinal();
+
+        if (!areEqual(out, output[0]))
+        {
+            fail("NoPadding test failed on encrypt expected " + new String(Hex.encode(output[0])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("NoPadding test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+
+        //
+        // No Padding - maximum length
+        //
+        c = Cipher.getInstance("RSA", "BC");
+
+        byte[]  modBytes = ((RSAPublicKey)pubKey).getModulus().toByteArray();
+        byte[]  maxInput = new byte[modBytes.length - 1];
+
+        maxInput[0] |= 0x7f;
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        out = c.doFinal(maxInput);
+
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, maxInput))
+        {
+            fail("NoPadding test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+
+        //
+        // PKCS1 V 1.5
+        //
+        c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        out = c.doFinal(input);
+
+        if (!areEqual(out, output[1]))
+        {
+            fail("PKCS1 test failed on encrypt expected " + new String(Hex.encode(output[1])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("PKCS1 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+
+        //
+        // OAEP - SHA1
+        //
+        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        out = c.doFinal(input);
+
+        if (!areEqual(out, output[2]))
+        {
+            fail("OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
+        
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("OAEP test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+        
+        AlgorithmParameters oaepP = c.getParameters();
+        
+        if (!areEqual(oaepP.getEncoded(), 
+                new RSAESOAEPparams(
+                        new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull()), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull())),
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
+        {
+            fail("OAEP test failed default sha-1 parameters");
+        }
+        
+        //
+        // OAEP - SHA224
+        //
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA224AndMGF1Padding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
+
+        out = c.doFinal(input);
+
+        if (!areEqual(out, output[3]))
+        {
+            fail("OAEP SHA-224 test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c.init(Cipher.DECRYPT_MODE, priv2048Key);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("OAEP SHA-224 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+        
+        oaepP = c.getParameters();
+        
+        if (!areEqual(oaepP.getEncoded(), 
+                new RSAESOAEPparams(
+                        new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull()), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull())),
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
+        {
+            fail("OAEP test failed default sha-224 parameters");
+        }
+        
+        //
+        // OAEP - SHA 256
+        //
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
+
+        out = c.doFinal(input);
+
+        if (!areEqual(out, output[4]))
+        {
+            fail("OAEP SHA-256 test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c.init(Cipher.DECRYPT_MODE, priv2048Key);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("OAEP SHA-256 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+        
+        oaepP = c.getParameters();
+        
+        if (!areEqual(oaepP.getEncoded(), 
+                new RSAESOAEPparams(
+                        new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull()), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull())),
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
+        {
+            fail("OAEP test failed default sha-256 parameters");
+        }
+        
+        //
+        // OAEP - SHA 384
+        //
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA384AndMGF1Padding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
+
+        out = c.doFinal(input);
+
+        if (!areEqual(out, output[5]))
+        {
+            fail("OAEP SHA-384 test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c.init(Cipher.DECRYPT_MODE, priv2048Key);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("OAEP SHA-384 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+        
+        oaepP = c.getParameters();
+        
+        if (!areEqual(oaepP.getEncoded(), 
+                new RSAESOAEPparams(
+                        new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull()), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull())),
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
+        {
+            fail("OAEP test failed default sha-384 parameters");
+        }
+        
+        //
+        // OAEP - MD5
+        //
+        c = Cipher.getInstance("RSA/NONE/OAEPWithMD5AndMGF1Padding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        out = c.doFinal(input);
+
+        if (!areEqual(out, output[6]))
+        {
+            fail("OAEP MD5 test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("OAEP MD5 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+        
+        oaepP = c.getParameters();
+        
+        if (!areEqual(oaepP.getEncoded(), 
+                new RSAESOAEPparams(
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.md5, new DERNull()), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(PKCSObjectIdentifiers.md5, new DERNull())),
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
+        {
+            fail("OAEP test failed default md5 parameters");
+        }
+        
+        //
+        // OAEP - SHA1 with default parameters
+        //
+        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, OAEPParameterSpec.DEFAULT, rand);
+
+        out = c.doFinal(input);
+
+        if (!areEqual(out, output[2]))
+        {
+            fail("OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
+        
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+        
+        if (!areEqual(out, input))
+        {
+            fail("OAEP test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+        
+        oaepP = c.getParameters();
+        
+        if (!areEqual(oaepP.getEncoded(), new byte[] { 0x30, 0x00 }))
+        {
+            fail("OAEP test failed default parameters");
+        }
+
+        //
+        // OAEP - SHA1 with specified string
+        //
+        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, new OAEPParameterSpec("SHA1", "MGF1", new MGF1ParameterSpec("SHA1"), new PSource.PSpecified(new byte[] { 1, 2, 3, 4, 5 })), rand);
+
+        out = c.doFinal(input);
+
+        oaepP = c.getParameters();
+        
+        if (!areEqual(oaepP.getEncoded(), 
+                new RSAESOAEPparams(
+                        new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull()), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull())),
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[] { 1, 2, 3, 4, 5 }))).getEncoded()))
+        {
+            fail("OAEP test failed changed sha-1 parameters");
+        }
+        
+        if (!areEqual(out, output[7]))
+        {
+            fail("OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
+        
+        c.init(Cipher.DECRYPT_MODE, privKey, oaepP);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("OAEP test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+        
+        //
+        // ISO9796-1
+        //
+        byte[]      isoInput =  Hex.decode("fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210");
+        PrivateKey  isoPrivKey = fact.generatePrivate(isoPrivKeySpec);
+        PublicKey   isoPubKey = fact.generatePublic(isoPubKeySpec);
+
+        c = Cipher.getInstance("RSA/NONE/ISO9796-1Padding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, isoPrivKey);
+
+        out = c.doFinal(isoInput);
+
+        if (!areEqual(out, output[8]))
+        {
+            fail("ISO9796-1 test failed on encrypt expected " + new String(Hex.encode(output[3])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c.init(Cipher.DECRYPT_MODE, isoPubKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, isoInput))
+        {
+            fail("ISO9796-1 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+
+        //
+        //
+        // generation with parameters test.
+        //
+        KeyPairGenerator keyPairGen =
+                KeyPairGenerator.getInstance("RSA", "BC");
+
+        //
+        // 768 bit RSA with e = 2^16-1
+        //
+        keyPairGen.initialize(
+            new RSAKeyGenParameterSpec(768,
+            BigInteger.valueOf(65537)),
+            new SecureRandom());
+
+        KeyPair kp = keyPairGen.generateKeyPair();
+
+        pubKey = kp.getPublic();
+        privKey = kp.getPrivate();
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        out = c.doFinal(input);
+
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("key generation test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+
+        //
+        // comparison check
+        //
+        KeyFactory keyFact = KeyFactory.getInstance("RSA", "BC");
+        
+        RSAPrivateCrtKey crtKey = (RSAPrivateCrtKey)keyFact.translateKey(privKey);
+        
+        if (!privKey.equals(crtKey))
+        {
+            fail("private key equality check failed");
+        }
+        
+        RSAPublicKey copyKey = (RSAPublicKey)keyFact.translateKey(pubKey);
+        
+        if (!pubKey.equals(copyKey))
+        {
+            fail("public key equality check failed");
         }
     }
 
@@ -565,9 +554,6 @@ public class RSATest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new RSATest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new RSATest());
     }
 }

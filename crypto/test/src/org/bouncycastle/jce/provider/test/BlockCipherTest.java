@@ -30,16 +30,14 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * basic test class for a block cipher, basically this just exercises the provider, and makes sure we
  * are behaving sensibly, correctness of the implementation is shown in the lightweight test classes.
  */
 public class BlockCipherTest
-    implements Test
+    extends SimpleTest
 {
     static String[] cipherTests1 =
     {
@@ -315,35 +313,16 @@ public class BlockCipherTest
         return "BlockCipher";
     }
 
-    private boolean equalArray(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public TestResult test(
+    public void test(
         String      algorithm,
         byte[]      input,
         byte[]      output)
     {
-        Key                     key;
+        Key                     key = null;
         KeyGenerator            keyGen;
         SecureRandom            rand;
-        Cipher                  in, out;
+        Cipher                  in = null;
+        Cipher                  out = null;
         CipherInputStream       cIn;
         CipherOutputStream      cOut;
         ByteArrayInputStream    bIn;
@@ -395,8 +374,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed initialisation - " + e.toString());
+            fail("" + algorithm + " failed initialisation - " + e.toString());
         }
 
         //
@@ -431,7 +409,7 @@ public class BlockCipherTest
                         byte[]  nIv = new byte[iv.length - 1];
 
                         in.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(nIv));
-                        return new SimpleTestResult(false, getName() + ": failed to pick up short IV");
+                        fail("failed to pick up short IV");
                     }
                     catch (InvalidAlgorithmParameterException e)
                     {
@@ -452,7 +430,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed initialisation - " + e.toString());
+            fail("" + algorithm + " failed initialisation - " + e.toString());
         }
 
         //
@@ -473,16 +451,16 @@ public class BlockCipherTest
         }
         catch (IOException e)
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed encryption - " + e.toString());
+            fail("" + algorithm + " failed encryption - " + e.toString());
         }
 
         byte[]    bytes;
 
         bytes = bOut.toByteArray();
 
-        if (!equalArray(bytes, output))
+        if (!areEqual(bytes, output))
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed encryption - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(bytes)));
+            fail("" + algorithm + " failed encryption - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(bytes)));
         }
 
         //
@@ -506,20 +484,18 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed decryption - " + e.toString());
+            fail("" + algorithm + " failed decryption - " + e.toString());
         }
 
-        if (!equalArray(bytes, input))
+        if (!areEqual(bytes, input))
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed decryption - expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(bytes)));
+            fail("" + algorithm + " failed decryption - expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(bytes)));
         }
-
-        return new SimpleTestResult(true, getName() + ": " + algorithm + " Okay");
     }
 
-    private TestResult testExceptions()
+    private void testExceptions()
     {
-        SecretKeyFactory skF;
+        SecretKeyFactory skF = null;
         
         try
         {
@@ -527,7 +503,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
         
         KeySpec ks = null;
@@ -538,7 +514,7 @@ public class BlockCipherTest
         {
             skF.getKeySpec(null, null);
             
-            return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
+            fail("failed exception test - no exception thrown");
         }
         catch (InvalidKeySpecException e)
         {
@@ -546,14 +522,14 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+            fail("failed exception test.", e);
         }
         try
         {
             ks = (KeySpec)new DESedeKeySpec(bb);
             skF.getKeySpec(null, ks.getClass());
             
-            return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
+            fail("failed exception test - no exception thrown");
         }
         catch (InvalidKeySpecException e)
         {
@@ -561,7 +537,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+            fail("failed exception test.", e);
         }
         try
         {
@@ -573,7 +549,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+            fail("failed exception test.", e);
         }
         
         try
@@ -583,7 +559,7 @@ public class BlockCipherTest
             {
                 kg.init(Integer.MIN_VALUE, new SecureRandom());
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
+                fail("failed exception test - no exception thrown");
             }
             catch (InvalidParameterException e)
             {
@@ -591,12 +567,12 @@ public class BlockCipherTest
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+                fail("failed exception test.", e);
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -607,7 +583,7 @@ public class BlockCipherTest
             {
                 skF.translateKey(null);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
+                fail("failed exception test - no exception thrown");
             }
             catch (InvalidKeyException e)
             {
@@ -615,12 +591,12 @@ public class BlockCipherTest
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+                fail("failed exception test.", e);
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
         
         try
@@ -641,7 +617,7 @@ public class BlockCipherTest
                 // that cannot be determined from the given key
                 cipher.init(Cipher.DECRYPT_MODE, cipherKey, (SecureRandom)null);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no InvalidKeyException thrown");
+                fail("failed exception test - no InvalidKeyException thrown");
             }
             catch (InvalidKeyException e)
             {
@@ -650,7 +626,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -666,7 +642,7 @@ public class BlockCipherTest
                 // key is inappropriate for initializing this cipher
                 cipher.init(Cipher.ENCRYPT_MODE, cipherKey);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no InvalidKeyException thrown");
+                fail("failed exception test - no InvalidKeyException thrown");
             }
             catch (InvalidKeyException e)
             {
@@ -675,7 +651,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -691,7 +667,7 @@ public class BlockCipherTest
                 // key is inappropriate for initializing this cipher
                 cipher.init(Cipher.ENCRYPT_MODE, cipherKey);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no InvalidKeyException thrown");
+                fail("failed exception test - no InvalidKeyException thrown");
             }
             catch (InvalidKeyException e)
             {
@@ -700,7 +676,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
         
 
@@ -724,7 +700,7 @@ public class BlockCipherTest
                 // small to hold the result
                 ecipher.update(new byte[20], 0, 20, cipherText);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no ShortBufferException thrown");
+                fail("failed exception test - no ShortBufferException thrown");
             }
             catch (ShortBufferException e)
             {
@@ -733,7 +709,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -747,13 +723,12 @@ public class BlockCipherTest
             SecretKey key = keyGen.generateKey();
             if (key == null)
             {
-                return new SimpleTestResult(false, getName() + ": key is null!");
+                fail("key is null!");
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName()
-                    + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -772,13 +747,12 @@ public class BlockCipherTest
             
             if (iv.length != 10)
             {
-                return new SimpleTestResult(false, getName() + ": parameters encoding wrong length - "  + iv.length);
+                fail("parameters encoding wrong length - "  + iv.length);
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName()
-                    + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -794,7 +768,7 @@ public class BlockCipherTest
             // IOException on decoding errors, but BC throws ClassCastException.
             algParams.init(encoding, "ASN.1");
 
-            return new SimpleTestResult(false, getName() + ": failed exception test - no IOException thrown");
+            fail("failed exception test - no IOException thrown");
         }
         catch (IOException e)
         {
@@ -802,34 +776,20 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            fail("unexpected exception.", e);
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult perform()
+    public void performTest()
     {
         for (int i = 0; i != cipherTests1.length; i += 2)
         {
-            TestResult  result;
-
-            result = test(cipherTests1[i], input1, Hex.decode(cipherTests1[i + 1]));
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
+            test(cipherTests1[i], input1, Hex.decode(cipherTests1[i + 1]));
         }
 
         for (int i = 0; i != cipherTests2.length; i += 2)
         {
-            TestResult  result;
-
-            result = test(cipherTests2[i], input2, Hex.decode(cipherTests2[i + 1]));
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
+            test(cipherTests2[i], input2, Hex.decode(cipherTests2[i + 1]));
         }
 
         //
@@ -843,24 +803,17 @@ public class BlockCipherTest
             
             c.doFinal(new byte[4]);
             
-            new SimpleTestResult(false, getName() + ": CTS failed to throw exception");
+            fail("CTS failed to throw exception");
         }
         catch (Exception e)
         {
             if (!(e instanceof IllegalBlockSizeException))
             {
-                return new SimpleTestResult(false, getName() + ": CTS exception test - " + e, e);
+                fail("CTS exception test - " + e, e);
             }
         }
         
-        TestResult res = testExceptions();
-
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
+        testExceptions();
     }
 
     public static void main(
@@ -868,9 +821,6 @@ public class BlockCipherTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new BlockCipherTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new BlockCipherTest());
     }
 }
