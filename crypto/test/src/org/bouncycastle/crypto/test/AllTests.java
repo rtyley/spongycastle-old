@@ -1,8 +1,10 @@
 package org.bouncycastle.crypto.test;
 
-import org.bouncycastle.util.test.SimpleTestResult;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
-import junit.framework.*;
+import org.bouncycastle.util.test.SimpleTestResult;
 
 public class AllTests
     extends TestCase
@@ -29,7 +31,7 @@ public class AllTests
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("Crypto Tests");
+        TestSuite suite = new TestSuite("Lightweight Crypto Tests");
         
         suite.addTestSuite(AllTests.class);
         
