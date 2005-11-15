@@ -123,7 +123,7 @@ public class NetscapeCertRequest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            throw new IllegalArgumentException(e.toString());
         }
     }
 
