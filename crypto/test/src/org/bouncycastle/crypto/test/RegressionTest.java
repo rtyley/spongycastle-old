@@ -43,6 +43,7 @@ public class RegressionTest
         new IDEATest(),
         new RSATest(),
         new ISO9796Test(),
+        new ISO9797Alg3MacTest(),
         new MD2DigestTest(),
         new MD4DigestTest(),
         new MD5DigestTest(),
