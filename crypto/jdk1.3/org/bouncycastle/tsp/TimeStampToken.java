@@ -21,7 +21,6 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.tsp.TSPValidationException;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.ContentInfo;
@@ -51,14 +50,14 @@ public class TimeStampToken
         this(new CMSSignedData(contentInfo));
     }   
     
-    TimeStampToken(CMSSignedData signedData)
+    public TimeStampToken(CMSSignedData signedData)
         throws TSPException, IOException
     {
         this.tsToken = signedData;
 
         if (!this.tsToken.getSignedContentTypeOID().equals(PKCSObjectIdentifiers.id_ct_TSTInfo.getId()))
         {
-            throw new TSPValidationException("signedData object not for a time stamp.");
+            throw new TSPValidationException("ContentInfo object not for a time stamp.");
         }
         
         Collection signers = tsToken.getSignerInfos().getSigners();
@@ -79,8 +78,7 @@ public class TimeStampToken
 
             content.write(bOut);
 
-            ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(
-                    bOut.toByteArray()));
+            ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(bOut.toByteArray()));
 
             this.tstInfo = new TimeStampTokenInfo(TSTInfo.getInstance(aIn.readObject()));
             
@@ -220,5 +218,16 @@ public class TimeStampToken
     public CMSSignedData toCMSSignedData()
     {
         return tsToken;
+    }
+    
+    /**
+     * Return a ASN.1 encoded byte stream representing the encoded object.
+     * 
+     * @throws IOException if encoding fails.
+     */
+    public byte[] getEncoded() 
+        throws IOException
+    {
+        return tsToken.getEncoded();
     }
 }
