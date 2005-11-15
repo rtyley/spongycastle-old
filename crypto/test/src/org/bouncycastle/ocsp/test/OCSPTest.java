@@ -5,8 +5,12 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -25,6 +29,7 @@ import org.bouncycastle.ocsp.Req;
 import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 public class OCSPTest
     extends SimpleTest
@@ -233,11 +238,15 @@ public class OCSPTest
 
         Vector oids = new Vector();
         Vector values = new Vector();
+        byte[] sampleNonce = new byte[16];
+        Random rand = new Random();
+        
+        rand.nextBytes(sampleNonce);
         
         gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
         
         oids.addElement(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
-        values.addElement(new X509Extension(false, new DEROctetString(new byte[16])));
+        values.addElement(new X509Extension(false, new DEROctetString(new DEROctetString(sampleNonce))));
 
         gen.setRequestExtensions(new X509Extensions(oids, values));
         
@@ -257,7 +266,41 @@ public class OCSPTest
         {
             fail("signature failed to verify");
         }
+        
+        //
+        // extension check.
+        //
+        Set extOids = req.getCriticalExtensionOIDs();
+        
+        if (extOids.size() != 0)
+        {
+            fail("wrong number of critical extensions in OCSP request.");
+        }
 
+        extOids = req.getNonCriticalExtensionOIDs();
+        
+        if (extOids.size() != 1)
+        {
+            fail("wrong number of non-critical extensions in OCSP request.");
+        }
+        
+        byte[] extValue = req.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nonce.getId());
+        
+        ASN1Encodable extObj = X509ExtensionUtil.fromExtensionValue(extValue);
+        
+        if (!(extObj instanceof ASN1OctetString))
+        {
+            fail("wrong extension type found.");
+        }
+        
+        if (!areEqual(((ASN1OctetString)extObj).getOctets(), sampleNonce))
+        {
+            fail("wrong extension value found.");
+        }
+        
+        //
+        // request list check
+        //
         requests = req.getRequestList();
 
         if (!requests[0].getCertID().equals(id))
