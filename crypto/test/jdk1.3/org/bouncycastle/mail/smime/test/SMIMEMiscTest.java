@@ -2,6 +2,7 @@ package org.bouncycastle.mail.smime.test;
 
 import java.io.ByteArrayOutputStream;
 import java.security.KeyPair;
+import java.security.Security;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
@@ -11,9 +12,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
@@ -23,15 +21,14 @@ import junit.framework.TestSuite;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
-import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
 
@@ -91,12 +88,14 @@ public class SMIMEMiscTest
 
     public static void main(String args[]) 
     {
+        Security.addProvider(new BouncyCastleProvider());
+        
         junit.textui.TestRunner.run(SMIMEMiscTest.class);
     }
 
     public static Test suite() 
     {
-        return new TestSuite(SMIMEMiscTest.class);
+        return new SMIMETestSetup(new TestSuite(SMIMEMiscTest.class));
     }
     
     public void testSHA256WithRSAParserEncryptedWithAES()
@@ -115,7 +114,6 @@ public class SMIMEMiscTest
         encGen.addKeyTransRecipient(origCert);
 
         MimeBodyPart   mp = encGen.generate(msg, SMIMEEnvelopedGenerator.AES128_CBC, "BC");
-        
         ASN1EncodableVector signedAttrs = generateSignedAttributes();
     
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
@@ -125,96 +123,46 @@ public class SMIMEMiscTest
 
         MimeMultipart     smm = gen.generate(mp, "BC");
         SMIMESignedParser s = new SMIMESignedParser(smm);
-        
+
         certs = s.getCertificatesAndCRLs("Collection", "BC");
 
-        verifyMessageBytes(msg, s.getContent());
+        verifyMessageBytes(mp, s.getContent());
     
         verifySigners(certs, s.getSignerInfos());
     }
     
-    private MimeBodyPart generateBinaryPart() throws MessagingException
-    {
-        byte[] content = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 10, 11, 12, 13, 14, 10, 10, 15, 16 };   
-        InternetHeaders ih = new InternetHeaders();
-        
-        ih.setHeader("Content-Transfer-Encoding", "binary");
-        MimeBodyPart  msg = new MimeBodyPart(ih, content);
-        
-        return msg;
-    }
-    
-    private MimeMultipart generateMultiPartRsa(String digestOid, MimeBodyPart msg) 
+    public void testSHA256WithRSAParserCompressed()
         throws Exception
     {
         List certList = new ArrayList();
-    
+        
         certList.add(origCert);
         certList.add(signCert);
     
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
     
-        ASN1EncodableVector signedAttrs = generateSignedAttributes();
-    
-        SMIMESignedGenerator gen = new SMIMESignedGenerator();
-    
-        gen.addSigner(origKP.getPrivate(), origCert, digestOid, new AttributeTable(signedAttrs), null);   
-        gen.addCertificatesAndCRLs(certs);
-
-        return gen.generate(msg, "BC");
-    }
-    
-    private MimeBodyPart generateEncapsulatedRsa(String digestOid, MimeBodyPart msg) 
-        throws Exception
-    {
-        List certList = new ArrayList();
-    
-        certList.add(origCert);
-        certList.add(signCert);
-    
-        CertStore certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
-    
-        ASN1EncodableVector signedAttrs = generateSignedAttributes();
-    
-        SMIMESignedGenerator gen = new SMIMESignedGenerator();
-    
-        gen.addSigner(origKP.getPrivate(), origCert, digestOid, new AttributeTable(signedAttrs), null);   
-        gen.addCertificatesAndCRLs(certs);
-    
-        return gen.generateEncapsulated(msg, "BC");
-    }
-    
-    public void testCertificateManagement()
-        throws Exception
-    {
-        List           certList = new ArrayList();
-
-        certList.add(origCert);
-        certList.add(signCert);
-
-        CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
-
-        SMIMESignedGenerator gen = new SMIMESignedGenerator();
-
-        gen.addCertificatesAndCRLs(certs);
+        SMIMECompressedGenerator  cGen = new SMIMECompressedGenerator();
         
-        MimeBodyPart smm = gen.generateCertificateManagement("BC");
-
-        SMIMESigned s = new  SMIMESigned(smm);
-
+        MimeBodyPart   mp = cGen.generate(msg, SMIMECompressedGenerator.ZLIB);
+        
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+    
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+    
+        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);   
+        gen.addCertificatesAndCRLs(certs);
+    
+        MimeMultipart     smm = gen.generate(mp, "BC");
+        SMIMESignedParser s = new SMIMESignedParser(smm);
+        
         certs = s.getCertificatesAndCRLs("Collection", "BC");
+    
+        verifyMessageBytes(mp, s.getContent());
+    
+        verifySigners(certs, s.getSignerInfos());
+    }
 
-        assertEquals(2, certs.getCertificates(null).size());
-    }
-    
-    private String getDigestOid(SignerInformationStore s)
-    {
-        return ((SignerInformation)s.getSigners().iterator().next()).getDigestAlgOID();
-    }
-    
     private void verifySigners(CertStore certs, SignerInformationStore signers) 
         throws Exception
     {
