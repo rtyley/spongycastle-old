@@ -3,6 +3,7 @@ package org.bouncycastle.jce.provider;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -495,7 +496,7 @@ public class JCEBlockCipher extends WrapCipherSpi
                 cipher.init(false, param);
                 break;
             default:
-                throw new InvalidKeyException("opmode not recognised");
+                throw new InvalidParameterException("unknown opmode " + opmode + " passed");
             }
         }
         catch (Exception e)

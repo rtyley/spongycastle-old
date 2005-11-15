@@ -22,6 +22,7 @@ import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
 import org.bouncycastle.crypto.macs.GOST28147Mac;
 import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.crypto.macs.ISO9797Alg3Mac;
 import org.bouncycastle.crypto.macs.OldHMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
@@ -288,6 +289,31 @@ public class JCEMac
         public RC5CFB8()
         {
             super(new CFBBlockCipherMac(new RC532Engine()));
+        }
+    }
+    
+    
+    /**
+     * DESede64
+     */
+    public static class DESede64
+        extends JCEMac
+    {
+        public DESede64()
+        {
+            super(new CBCBlockCipherMac(new DESedeEngine(), 64));
+        }
+    }
+    
+    /**
+     * DES9797Alg3
+     */
+    public static class DES9797Alg3
+        extends JCEMac
+    {
+        public DES9797Alg3()
+        {
+            super(new ISO9797Alg3Mac(new DESEngine()));
         }
     }
 

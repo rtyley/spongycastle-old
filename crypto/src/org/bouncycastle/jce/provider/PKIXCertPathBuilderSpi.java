@@ -55,7 +55,14 @@ public class PKIXCertPathBuilderSpi
             throw new CertPathBuilderException("targetCertConstraints must be non-null for CertPath building");
         }
 
-        targets = findCertificates(certSelect, pkixParams.getCertStores());
+        try
+        {
+            targets = findCertificates(certSelect, pkixParams.getCertStores());
+        }
+        catch (CertStoreException e)
+        {
+            throw new CertPathBuilderException(e);
+        }
 
         if (targets.isEmpty())
         {
@@ -258,7 +265,8 @@ public class PKIXCertPathBuilderSpi
      **/
     private final Collection findCertificates(
         CertSelector    certSelect,
-        List            certStores)
+        List            certStores) 
+        throws CertStoreException
     {
         Set certs = new HashSet();
         Iterator iter = certStores.iterator();
@@ -267,14 +275,7 @@ public class PKIXCertPathBuilderSpi
         {
             CertStore   certStore = (CertStore)iter.next();
 
-            try
-            {
-                certs.addAll(certStore.getCertificates(certSelect));
-            }
-            catch (CertStoreException ex)
-            {
-                ex.printStackTrace();
-            }
+            certs.addAll(certStore.getCertificates(certSelect));
         }
 
         return certs;
@@ -312,7 +313,16 @@ public class PKIXCertPathBuilderSpi
             throw new CertPathValidatorException("Issuer not found", null, null, -1);
         }
 
-        Iterator iter = findCertificates(certSelect, certStores).iterator();
+        Iterator iter;
+        try
+        {
+            iter = findCertificates(certSelect, certStores).iterator();
+        }
+        catch (CertStoreException e)
+        {
+            throw new CertPathValidatorException(e);
+        }
+        
         X509Certificate issuer = null;
         while (iter.hasNext() && issuer == null)
         {
