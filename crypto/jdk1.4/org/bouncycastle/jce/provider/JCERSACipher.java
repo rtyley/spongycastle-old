@@ -5,6 +5,7 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -19,6 +20,7 @@ import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.digests.SHA224Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
@@ -32,6 +34,8 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 public class JCERSACipher extends WrapCipherSpi
 {
     private AsymmetricBlockCipher   cipher;
+    private AlgorithmParameterSpec  paramSpec;
+    private AlgorithmParameters     engineParams;
     private boolean                 publicKeyOnly = false;
     private boolean                 privateKeyOnly = false;
     private ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
@@ -103,20 +107,102 @@ public class JCERSACipher extends WrapCipherSpi
 
     protected AlgorithmParameters engineGetParameters() 
     {
-        return null;
+        if (engineParams == null)
+        {
+            if (paramSpec != null)
+            {
+                try
+                {
+                    engineParams = AlgorithmParameters.getInstance("OAEP", "BC");
+                    engineParams.init(paramSpec);
+                }
+                catch (Exception e)
+                {
+                    throw new RuntimeException(e.toString());
+                }
+            }
+        }
+
+        return engineParams;
     }
 
     protected void engineSetMode(
-        String  mode) 
+        String  mode)
+        throws NoSuchAlgorithmException
     {
-        throw new IllegalArgumentException("can't support mode " + mode);
+        String md = mode.toUpperCase();
+        
+        if (md.equals("NONE") || md.equals("ECB"))
+        {
+            return;
+        }
+        
+        if (md.equals("1"))
+        {
+            privateKeyOnly = true;
+            publicKeyOnly = false;
+            return;
+        }
+        else if (md.equals("2"))
+        {
+            privateKeyOnly = false;
+            publicKeyOnly = true;
+            return;
+        }
+        
+        throw new NoSuchAlgorithmException("can't support mode " + mode);
     }
 
     protected void engineSetPadding(
         String  padding) 
         throws NoSuchPaddingException
     {
-        throw new NoSuchPaddingException(padding + " unavailable with RSA.");
+        String pad = padding.toUpperCase();
+
+        if (pad.equals("NOPADDING"))
+        {
+            cipher = new RSAEngine();
+        }
+        else if (pad.equals("PKCS1PADDING"))
+        {
+            cipher = new PKCS1Encoding(new RSAEngine());
+        }
+        else if (pad.equals("OAEPPADDING"))
+        {
+            cipher = new OAEPEncoding(new RSAEngine());
+        }
+        else if (pad.equals("ISO9796-1PADDING"))
+        {
+            cipher = new ISO9796d1Encoding(new RSAEngine());
+        }
+        else if (pad.equals("OAEPWITHMD5ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSAEngine(), new MD5Digest());
+        }
+        else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSAEngine(), new SHA1Digest());
+        }
+        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSAEngine(), new SHA224Digest());
+        }
+        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSAEngine(), new SHA256Digest());
+        }
+        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSAEngine(), new SHA384Digest());
+        }
+        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSAEngine(), new SHA512Digest());
+        }
+        else
+        {
+            throw new NoSuchPaddingException(padding + " unavailable with RSA.");
+        }
     }
 
     protected void engineInit(
@@ -394,51 +480,6 @@ public class JCERSACipher extends WrapCipherSpi
         public OAEPPadding()
         {
             super(new OAEPEncoding(new RSAEngine()));
-        }
-    }
-
-    static public class MD5OAEPPadding
-        extends JCERSACipher
-    {
-        public MD5OAEPPadding()
-        {
-            super(new OAEPEncoding(new RSAEngine(), new MD5Digest()));
-        }
-    }
-    
-    static public class SHA224OAEPPadding
-        extends JCERSACipher
-    {
-        public SHA224OAEPPadding()
-        {
-            super(new OAEPEncoding(new RSAEngine(), new SHA224Digest()));
-        }
-    }
-    
-    static public class SHA256OAEPPadding
-        extends JCERSACipher
-    {
-        public SHA256OAEPPadding()
-        {
-            super(new OAEPEncoding(new RSAEngine(), new SHA256Digest()));
-        }
-    }
-
-    static public class SHA384OAEPPadding
-        extends JCERSACipher
-    {
-        public SHA384OAEPPadding()
-        {
-            super(new OAEPEncoding(new RSAEngine(), new SHA384Digest()));
-        }
-    }
-    
-    static public class SHA512OAEPPadding
-        extends JCERSACipher
-    {
-        public SHA512OAEPPadding()
-        {
-            super(new OAEPEncoding(new RSAEngine(), new SHA512Digest()));
         }
     }
     
