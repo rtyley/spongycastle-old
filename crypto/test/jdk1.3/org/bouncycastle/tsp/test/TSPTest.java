@@ -1,9 +1,23 @@
 package org.bouncycastle.tsp.test;
 
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+
+import junit.framework.TestCase;
+
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.tsp.GenTimeAccuracy;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TSPValidationException;
 import org.bouncycastle.tsp.TimeStampRequest;
@@ -12,41 +26,15 @@ import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampResponseGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenGenerator;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.Security;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
-import java.security.cert.X509Certificate;
-import org.bouncycastle.jce.cert.CertStore;
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashSet;
+import org.bouncycastle.tsp.TimeStampTokenInfo;
+import org.bouncycastle.util.Arrays;
 
 public class TSPTest
-    implements Test
+    extends TestCase
 {
-    /* (non-Javadoc)
-     * @see org.bouncycastle.util.test.Test#getName()
-     */
-    public String getName()
+    public void testGeneral()
+        throws Exception
     {
-        return "TSPTest";
-    }
-
-    /* (non-Javadoc)
-     * @see org.bouncycastle.util.test.Test#perform()
-     */
-    public TestResult perform()
-    {
-        try
-        {
             String signDN = "O=Bouncy Castle, C=AU";
             KeyPair signKP = TSPTestUtil.makeKeyPair();
             X509Certificate signCert = TSPTestUtil.makeCACertificate(signKP,
@@ -59,52 +47,26 @@ public class TSPTest
 
 
             
-            List certList = new java.util.ArrayList();
+            List certList = new ArrayList();
             certList.add(origCert);
             certList.add(signCert);
 
             CertStore certs = CertStore.getInstance("Collection",
                     new CollectionCertStoreParameters(certList), "BC");
             
-            TestResult  res = basicTest(origKP.getPrivate(), origCert, certs);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = responseValidationTest(origKP.getPrivate(), origCert, certs);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = incorrectHashTest(origKP.getPrivate(), origCert, certs);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = badAlgorithmTest(origKP.getPrivate(), origCert, certs);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = badPolicyTest(origKP.getPrivate(), origCert, certs);
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": Exception - " + e.toString(), e);
-        }
+            basicTest(origKP.getPrivate(), origCert, certs);     
+            responseValidationTest(origKP.getPrivate(), origCert, certs);
+            incorrectHashTest(origKP.getPrivate(), origCert, certs);
+            badAlgorithmTest(origKP.getPrivate(), origCert, certs);
+            badPolicyTest(origKP.getPrivate(), origCert, certs);
+            tokenEncodingTest(origKP.getPrivate(), origCert, certs);
+            certReqTest(origKP.getPrivate(), origCert, certs);
+            testAccuracyZeroCerts(origKP.getPrivate(), origCert, certs);
+            testAccuracyWithCertsAndOrdering(origKP.getPrivate(), origCert, certs);
+            testNoNonse(origKP.getPrivate(), origCert, certs);
     }
     
-    public TestResult basicTest(
+    private void basicTest(
         PrivateKey      privateKey,
         X509Certificate cert,
         CertStore       certs)
@@ -126,26 +88,14 @@ public class TSPTest
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        try
-        {
-            tsToken.validate(cert, "BC");
-        }
-        catch (TSPValidationException e)
-        {
-            return new SimpleTestResult(false, getName() + ": validation of token failed.");
-        }
+        tsToken.validate(cert, "BC");
 
         AttributeTable  table = tsToken.getSignedAttributes();
 
-        if (table.get(PKCSObjectIdentifiers.id_aa_signingCertificate) == null)
-        {
-            return new SimpleTestResult(false, getName() + ": no signingCertificate attribute found.");
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        assertNotNull("no signingCertificate attribute found", table.get(PKCSObjectIdentifiers.id_aa_signingCertificate));
     }
     
-    public TestResult responseValidationTest(
+    private void responseValidationTest(
         PrivateKey      privateKey,
         X509Certificate cert,
         CertStore       certs)
@@ -167,26 +117,12 @@ public class TSPTest
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        try
-        {
-            tsToken.validate(cert, "BC");
-        }
-        catch (TSPValidationException e)
-        {
-            return new SimpleTestResult(false, getName() + ": verification of token failed in response validation.");
-        }
+        tsToken.validate(cert, "BC");
         
         //
         // check validation
         //
-        try
-        {
-            tsResp.validate(request);
-        }
-        catch (TSPValidationException e)
-        {
-            return new SimpleTestResult(false, getName() + ": response validation failed - " + e.getMessage());
-        }
+        tsResp.validate(request);
         
         try
         {
@@ -194,7 +130,7 @@ public class TSPTest
             
             tsResp.validate(request);
             
-            return new SimpleTestResult(false, getName() + ": response validation failed on invalid nonce.");
+            fail("response validation failed on invalid nonce.");
         }
         catch (TSPValidationException e)
         {
@@ -207,7 +143,7 @@ public class TSPTest
             
             tsResp.validate(request);
             
-            return new SimpleTestResult(false, getName() + ": response validation failed on wrong digest.");
+            fail("response validation failed on wrong digest.");
         }
         catch (TSPValidationException e)
         {
@@ -220,17 +156,15 @@ public class TSPTest
             
             tsResp.validate(request);
             
-            return new SimpleTestResult(false, getName() + ": response validation failed on wrong digest.");
+            fail("response validation failed on wrong digest.");
         }
         catch (TSPValidationException e)
         {
             // ignore
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult incorrectHashTest(
+    private void incorrectHashTest(
         PrivateKey      privateKey,
         X509Certificate cert,
         CertStore       certs)
@@ -254,25 +188,23 @@ public class TSPTest
 
         if (tsToken != null)
         {
-            return new SimpleTestResult(false, getName() + ": incorrectHash - token not null.");
+            fail("incorrectHash - token not null.");
         }
         
         PKIFailureInfo  failInfo = tsResp.getFailInfo();
         
         if (failInfo == null)
         {
-            return new SimpleTestResult(false, getName() + ": incorrectHash - failInfo set to null.");
+            fail("incorrectHash - failInfo set to null.");
         }
         
         if (failInfo.intValue() != PKIFailureInfo.BAD_DATA_FORMAT)
         {
-            return new SimpleTestResult(false, getName() + ": incorrectHash - wrong failure info returned.");
+            fail("incorrectHash - wrong failure info returned.");
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult badAlgorithmTest(
+    private void badAlgorithmTest(
         PrivateKey      privateKey,
         X509Certificate cert,
         CertStore       certs)
@@ -296,25 +228,23 @@ public class TSPTest
 
         if (tsToken != null)
         {
-            return new SimpleTestResult(false, getName() + ": badAlgorithm - token not null.");
+            fail("badAlgorithm - token not null.");
         }
 
         PKIFailureInfo  failInfo = tsResp.getFailInfo();
         
         if (failInfo == null)
         {
-            return new SimpleTestResult(false, getName() + ": badAlgorithm - failInfo set to null.");
+            fail("badAlgorithm - failInfo set to null.");
         }
         
         if (failInfo.intValue() != PKIFailureInfo.BAD_ALG)
         {
-            return new SimpleTestResult(false, getName() + ": badAlgorithm - wrong failure info returned.");
+            fail("badAlgorithm - wrong failure info returned.");
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult badPolicyTest(
+    private void badPolicyTest(
         PrivateKey      privateKey,
         X509Certificate cert,
         CertStore       certs)
@@ -341,59 +271,61 @@ public class TSPTest
 
         if (tsToken != null)
         {
-            return new SimpleTestResult(false, getName() + ": badPolicy - token not null.");
+            fail("badPolicy - token not null.");
         }
 
         PKIFailureInfo  failInfo = tsResp.getFailInfo();
         
         if (failInfo == null)
         {
-            return new SimpleTestResult(false, getName() + ": badPolicy - failInfo set to null.");
+            fail("badPolicy - failInfo set to null.");
         }
         
         if (failInfo.intValue() != PKIFailureInfo.UNACCEPTED_POLICY)
         {
-            return new SimpleTestResult(false, getName() + ": badPolicy - wrong failure info returned.");
+            fail("badPolicy - wrong failure info returned.");
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult certReqTest(
+    private void certReqTest(
         PrivateKey      privateKey,
         X509Certificate cert,
         CertStore       certs)
         throws Exception
     {
         TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
-                privateKey, cert, TSPAlgorithms.SHA1, "1.2");
+                privateKey, cert, TSPAlgorithms.MD5, "1.2");
         
         tsTokenGen.setCertificatesAndCRLs(certs);
-
-        TimeStampRequestGenerator   reqGen = new TimeStampRequestGenerator();
+        
+        TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
         
         //
         // request with certReq false
         //
         reqGen.setCertReq(false);
         
-        TimeStampRequest            request = reqGen.generate("1.2.3.4.5", new byte[20]);
+        TimeStampRequest          request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20], BigInteger.valueOf(100));
 
-        TimeStampResponseGenerator  tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
+        TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse           tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
-
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
-
+        
+        assertNull(tsToken.getTimeStampInfo().getGenTimeAccuracy());  // check for abscence of accuracy
+        
+        assertEquals("1.2", tsToken.getTimeStampInfo().getPolicy());
+        
         try
         {
             tsToken.validate(cert, "BC");
         }
         catch (TSPValidationException e)
         {
-            return new SimpleTestResult(false, getName() + ": certReq(false) verification of token failed.");
+            fail("certReq(false) verification of token failed.");
         }
 
         CertStore   respCerts = tsToken.getCertificatesAndCRLs("Collection", "BC");
@@ -402,48 +334,230 @@ public class TSPTest
         
         if (!certsColl.isEmpty())
         {
-            return new SimpleTestResult(false, getName() + ": certReq(false) found certificates in response.");
+            fail("certReq(false) found certificates in response.");
         }
+    }
+    
+    
+    private void tokenEncodingTest(
+        PrivateKey      privateKey,
+        X509Certificate cert,
+        CertStore       certs)
+        throws Exception
+    {
+        TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
+                privateKey, cert, TSPAlgorithms.SHA1, "1.2.3.4.5.6");
         
-        //
-        // request with certReq true
-        //
-        reqGen.setCertReq(true);
-        
-        request = reqGen.generate("1.2.3.4.5", new byte[20]);
+        tsTokenGen.setCertificatesAndCRLs(certs);
 
-        tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
-
-        tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampRequestGenerator  reqGen = new TimeStampRequestGenerator();
+        TimeStampRequest           request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20], BigInteger.valueOf(100));
+        TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
+        TimeStampResponse          tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
-        tsToken = tsResp.getTimeStampToken();
+        TimeStampResponse tsResponse = new TimeStampResponse(tsResp.getEncoded());
 
-        try
+        if (!Arrays.areEqual(tsResponse.getEncoded(), tsResp.getEncoded())
+            || !Arrays.areEqual(tsResponse.getTimeStampToken().getEncoded(),
+                        tsResp.getTimeStampToken().getEncoded()))
         {
-            tsToken.validate(cert, "BC");
+            fail();
         }
-        catch (TSPValidationException e)
-        {
-            return new SimpleTestResult(false, getName() + ": certReq(true) verification of token failed.");
-        }
-        
-        if (certsColl.isEmpty())
-        {
-            return new SimpleTestResult(false, getName() + ": certReq(false) no certificates found.");
-        }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public static void main(String[] args)
+    private void testAccuracyZeroCerts(
+        PrivateKey      privateKey,
+        X509Certificate cert,
+        CertStore       certs)
+        throws Exception
     {
-        Security.addProvider(new BouncyCastleProvider());
+        TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
+                privateKey, cert, TSPAlgorithms.MD5, "1.2");
+        
+        tsTokenGen.setCertificatesAndCRLs(certs);
 
-        Test            test = new TSPTest();
-        TestResult      result = test.perform();
+        tsTokenGen.setAccuracySeconds(1);
+        tsTokenGen.setAccuracyMillis(2);
+        tsTokenGen.setAccuracyMicros(3);
+        
+        TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
+        TimeStampRequest          request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20], BigInteger.valueOf(100));
 
-        System.out.println(result.toString());
+        TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
+
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+
+        tsResp = new TimeStampResponse(tsResp.getEncoded());
+
+        TimeStampToken  tsToken = tsResp.getTimeStampToken();
+
+        tsToken.validate(cert, "BC");
+        
+        //
+        // check validation
+        //
+        tsResp.validate(request);
+
+        //
+        // check tstInfo
+        //
+        TimeStampTokenInfo tstInfo = tsToken.getTimeStampInfo();
+        
+        //
+        // check accuracy
+        //
+        GenTimeAccuracy accuracy = tstInfo.getGenTimeAccuracy();
+        
+        assertEquals(1, accuracy.getSeconds());
+        assertEquals(2, accuracy.getMillis());
+        assertEquals(3, accuracy.getMicros());
+        
+        assertEquals(new BigInteger("23"), tstInfo.getSerialNumber());
+        
+        assertEquals("1.2", tstInfo.getPolicy());
+        
+        //
+        // test certReq
+        //
+        CertStore store = tsToken.getCertificatesAndCRLs("Collection", "BC");
+        
+        Collection certificates = store.getCertificates(null);
+        
+        assertEquals(0, certificates.size());
     }
+    
+    private void testAccuracyWithCertsAndOrdering(
+        PrivateKey      privateKey,
+        X509Certificate cert,
+        CertStore       certs)
+        throws Exception
+    {
+        TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
+                privateKey, cert, TSPAlgorithms.MD5, "1.2.3");
+        
+        tsTokenGen.setCertificatesAndCRLs(certs);
+
+        tsTokenGen.setAccuracySeconds(3);
+        tsTokenGen.setAccuracyMillis(1);
+        tsTokenGen.setAccuracyMicros(2);
+        
+        tsTokenGen.setOrdering(true);
+        
+        TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
+        
+        reqGen.setCertReq(true);
+        
+        TimeStampRequest          request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20], BigInteger.valueOf(100));
+
+        assertTrue(request.getCertReq());
+        
+        TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
+
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+
+        tsResp = new TimeStampResponse(tsResp.getEncoded());
+
+        TimeStampToken  tsToken = tsResp.getTimeStampToken();
+
+        tsToken.validate(cert, "BC");
+        
+        //
+        // check validation
+        //
+        tsResp.validate(request);
+
+        //
+        // check tstInfo
+        //
+        TimeStampTokenInfo tstInfo = tsToken.getTimeStampInfo();
+        
+        //
+        // check accuracy
+        //
+        GenTimeAccuracy accuracy = tstInfo.getGenTimeAccuracy();
+        
+        assertEquals(3, accuracy.getSeconds());
+        assertEquals(1, accuracy.getMillis());
+        assertEquals(2, accuracy.getMicros());
+        
+        assertEquals(new BigInteger("23"), tstInfo.getSerialNumber());
+        
+        assertEquals("1.2.3", tstInfo.getPolicy());
+        
+        assertEquals(true, tstInfo.isOrdered());
+        
+        assertEquals(tstInfo.getNonce(), BigInteger.valueOf(100));
+        
+        //
+        // test certReq
+        //
+        CertStore store = tsToken.getCertificatesAndCRLs("Collection", "BC");
+        
+        Collection certificates = store.getCertificates(null);
+        
+        assertEquals(2, certificates.size());
+    }   
+    
+    private void testNoNonse(
+        PrivateKey      privateKey,
+        X509Certificate cert,
+        CertStore       certs)
+        throws Exception
+    {
+        TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
+                privateKey, cert, TSPAlgorithms.MD5, "1.2.3");
+        
+        tsTokenGen.setCertificatesAndCRLs(certs);
+        
+        TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
+        TimeStampRequest          request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20]);
+
+        assertFalse(request.getCertReq());
+        
+        TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
+
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("24"), new Date(), "BC");
+
+        tsResp = new TimeStampResponse(tsResp.getEncoded());
+
+        TimeStampToken  tsToken = tsResp.getTimeStampToken();
+
+        tsToken.validate(cert, "BC");
+        
+        //
+        // check validation
+        //
+        tsResp.validate(request);
+
+        //
+        // check tstInfo
+        //
+        TimeStampTokenInfo tstInfo = tsToken.getTimeStampInfo();
+        
+        //
+        // check accuracy
+        //
+        GenTimeAccuracy accuracy = tstInfo.getGenTimeAccuracy();
+        
+        assertNull(accuracy);
+        
+        assertEquals(new BigInteger("24"), tstInfo.getSerialNumber());
+        
+        assertEquals("1.2.3", tstInfo.getPolicy());
+        
+        assertEquals(false, tstInfo.isOrdered());
+        
+        assertNull(tstInfo.getNonce());
+        
+        //
+        // test certReq
+        //
+        CertStore store = tsToken.getCertificatesAndCRLs("Collection", "BC");
+        
+        Collection certificates = store.getCertificates(null);
+        
+        assertEquals(0, certificates.size());
+    } 
 }
