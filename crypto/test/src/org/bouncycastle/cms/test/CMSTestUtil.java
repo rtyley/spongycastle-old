@@ -83,9 +83,9 @@ public class CMSTestUtil
             
             serialNumber = new BigInteger("1");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            ex.printStackTrace();
+            throw new RuntimeException(ex.toString());
         }
     }
     

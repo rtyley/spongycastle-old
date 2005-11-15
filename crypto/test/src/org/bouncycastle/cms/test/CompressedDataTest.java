@@ -43,22 +43,6 @@ public class CompressedDataTest
         return new CMSTestSetup(new TestSuite(CompressedDataTest.class));
     }
 
-    public void log(Exception _ex)
-    {
-        if (DEBUG)
-        {
-            _ex.printStackTrace();
-        }
-    }
-
-    public void log(String _msg)
-    {
-        if (DEBUG)
-        {
-            System.out.println(_msg);
-        }
-    }
-
     public void setUp()
     {
 

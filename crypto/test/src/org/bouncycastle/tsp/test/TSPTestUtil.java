@@ -84,7 +84,7 @@ public class TSPTestUtil
         }
         catch (Exception ex)
         {
-            log(ex);
+            throw new RuntimeException(ex.toString());
         }
     }
 
@@ -253,21 +253,5 @@ public class TSPTestUtil
         BigInteger _tmp = serialNumber;
         serialNumber = serialNumber.add(BigInteger.ONE);
         return _tmp;
-    }
-
-    public static void log(Exception _ex)
-    {
-        if (DEBUG)
-        {
-            _ex.printStackTrace();
-        }
-    }
-
-    public static void log(String _msg)
-    {
-        if (DEBUG)
-        {
-            System.out.println(_msg);
-        }
     }
 }
