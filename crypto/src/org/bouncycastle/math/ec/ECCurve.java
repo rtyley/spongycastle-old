@@ -82,7 +82,7 @@ public abstract class ECCurve
                     throw new RuntimeException("Invalid point compression");
                 }
 
-                int bit0 = (beta.toBigInteger().testBit(0) ? 0 : 1);
+                int bit0 = (beta.toBigInteger().testBit(0) ? 1 : 0);
 
                 if (bit0 == ytilde)
                 {

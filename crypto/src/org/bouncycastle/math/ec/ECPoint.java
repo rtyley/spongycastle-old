@@ -149,11 +149,11 @@ public abstract class ECPoint
     
                 if (this.getY().toBigInteger().testBit(0))
                 {
-                    PC = 0x02;
+                    PC = 0x03;
                 }
                 else
                 {
-                    PC = 0x03;
+                    PC = 0x02;
                 }
     
                 byte[]  X = intToBytes(this.getX().toBigInteger(), qLength);
