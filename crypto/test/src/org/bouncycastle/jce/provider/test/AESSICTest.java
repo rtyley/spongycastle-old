@@ -9,16 +9,14 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * test vectors based on NIST Special Publication 800-38A,
  * "Recommendation for Block Cipher Modes of Operation"
  */
 public class AESSICTest
-    implements Test
+    extends SimpleTest
 {
     private byte[][]    keys =
                         {
@@ -62,117 +60,85 @@ public class AESSICTest
         return "AESSIC";
     }
 
-    private boolean sameAs(
-        byte[]  a,
-        byte[]  b)
+    public void performTest()
+        throws Exception
     {
-        if (a.length != b.length)
-        {
-            return false;
-        }
+        Cipher c = Cipher.getInstance("AES/SIC/NoPadding", "BC");
 
-        for (int i = 0; i != a.length; i++)
+        //
+        // NIST vectors
+        //
+        for (int i = 0; i != keys.length; i++)
         {
-            if (a[i] != b[i])
+            Key sk = new SecretKeySpec(keys[i], "AES");
+            c.init(
+                Cipher.ENCRYPT_MODE, sk,
+            new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF")));
+
+            for (int j = 0; j != plain.length; j++)
             {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public TestResult perform()
-    {
-        try
-        {
-            Cipher c = Cipher.getInstance("AES/SIC/NoPadding", "BC");
-
-
-            //
-            // NIST vectors
-            //
-            for (int i = 0; i != keys.length; i++)
-            {
-                Key sk = new SecretKeySpec(keys[i], "AES");
-                c.init(
-                    Cipher.ENCRYPT_MODE, sk,
-                new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF")));
-
-                for (int j = 0; j != plain.length; j++)
+                byte[] crypt = c.update(plain[j]);
+                if (!areEqual(crypt, cipher[i][j]))
                 {
-                    byte[] crypt = c.update(plain[j]);
-                    if (!sameAs(crypt, cipher[i][j]))
-                    {
-                        return new SimpleTestResult(false, getName() + ": AESSIC encrypt failed: key " + i + " block " + j);
-                    }
-                }
-
-                c.init(
-                    Cipher.DECRYPT_MODE, sk,
-                new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF")));
-
-                for (int j = 0; j != plain.length; j++)
-                {
-                    byte[] crypt = c.update(cipher[i][j]);
-                    if (!sameAs(crypt, plain[j]))
-                    {
-                        return new SimpleTestResult(false, getName() + ": AESSIC decrypt failed: key " + i + " block " + j);
-                    }
+                    fail("AESSIC encrypt failed: key " + i + " block " + j);
                 }
             }
 
-            //
-            // check CTR also recognised.
-            //
-            c = Cipher.getInstance("AES/CTR/NoPadding", "BC");
-
-            Key sk = new SecretKeySpec(Hex.decode("2B7E151628AED2A6ABF7158809CF4F3C"), "AES");
-
             c.init(
-                Cipher.ENCRYPT_MODE, sk,
-                new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFD0001")));
+                Cipher.DECRYPT_MODE, sk,
+            new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF")));
 
-            byte[] crypt = c.doFinal(Hex.decode("00000000000000000000000000000000"));
-
-            if (!sameAs(crypt, 
-                        Hex.decode("D23513162B02D0F72A43A2FE4A5F97AB")))
+            for (int j = 0; j != plain.length; j++)
             {
-                return new SimpleTestResult(false, getName() + ": AESSIC failed test 2");
-            }
-            
-            //
-            // check partial block processing
-            //
-            c = Cipher.getInstance("AES/CTR/NoPadding", "BC");
-
-            sk = new SecretKeySpec(Hex.decode("2B7E151628AED2A6ABF7158809CF4F3C"), "AES");
-
-            c.init(
-                Cipher.ENCRYPT_MODE, sk,
-                new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFD0001")));
-
-            crypt = c.doFinal(Hex.decode("12345678"));
-
-            c.init(
-                    Cipher.DECRYPT_MODE, sk,
-                    new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFD0001")));
-            
-            crypt = c.doFinal(crypt);
-            
-            if (!sameAs(crypt, 
-                        Hex.decode("12345678")))
-            {
-                return new SimpleTestResult(false, getName() + ": AESSIC failed partial test");
+                byte[] crypt = c.update(cipher[i][j]);
+                if (!areEqual(crypt, plain[j]))
+                {
+                    fail("AESSIC decrypt failed: key " + i + " block " + j);
+                }
             }
         }
-        catch(Exception e)
+
+        //
+        // check CTR also recognised.
+        //
+        c = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+
+        Key sk = new SecretKeySpec(Hex.decode("2B7E151628AED2A6ABF7158809CF4F3C"), "AES");
+
+        c.init(
+            Cipher.ENCRYPT_MODE, sk,
+            new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFD0001")));
+
+        byte[] crypt = c.doFinal(Hex.decode("00000000000000000000000000000000"));
+
+        if (!areEqual(crypt, Hex.decode("D23513162B02D0F72A43A2FE4A5F97AB")))
         {
-            e.printStackTrace();
-            return new SimpleTestResult(false, getName() + ": AESSIC failed " + e.toString());
+            fail("AESSIC failed test 2");
         }
+        
+        //
+        // check partial block processing
+        //
+        c = Cipher.getInstance("AES/CTR/NoPadding", "BC");
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+        sk = new SecretKeySpec(Hex.decode("2B7E151628AED2A6ABF7158809CF4F3C"), "AES");
+
+        c.init(
+            Cipher.ENCRYPT_MODE, sk,
+            new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFD0001")));
+
+        crypt = c.doFinal(Hex.decode("12345678"));
+
+        c.init(
+                Cipher.DECRYPT_MODE, sk,
+                new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFD0001")));
+        
+        crypt = c.doFinal(crypt);
+        
+        if (!areEqual(crypt, Hex.decode("12345678")))
+        {
+            fail("AESSIC failed partial test");
+        }
     }
 
     public static void main(
@@ -180,9 +146,6 @@ public class AESSICTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new AESSICTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new AESSICTest());
     }
 }

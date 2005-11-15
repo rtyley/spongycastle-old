@@ -7,6 +7,7 @@ import java.security.*;
 
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
@@ -18,12 +19,10 @@ import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class ECDSA5Test
-    implements Test
+    extends SimpleTest
 {
     SecureRandom    random = new SecureRandom()
     {
@@ -45,14 +44,34 @@ public class ECDSA5Test
             }
         }
     };
+    
+    private void decodeTest()
+    {
+        EllipticCurve curve = new EllipticCurve(
+                new ECFieldFp(new BigInteger("6277101735386680763835789423207666416083908700390324961279")), // q
+                new BigInteger("fffffffffffffffffffffffffffffffefffffffffffffffc", 16), // a
+                new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1", 16)); // b
+
+        ECPoint p = ECPointUtil.decodePoint(curve, Hex.decode("03188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012"));
+
+        if (!p.getAffineX().equals(new BigInteger("188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012", 16)))
+        {
+            fail("x uncompressed incorrectly");
+        }
+
+        if (!p.getAffineY().equals(new BigInteger("7192b95ffc8da78631011ed6b24cdd573f977a11e794811", 16)))
+        {
+            fail("y uncompressed incorrectly");
+        }
+    }
 
     /**
      * X9.62 - 1998,<br>
      * J.3.2, Page 155, ECDSA over the field Fp<br>
      * an example with 239 bit prime
      */
-    private class ECDSA239bitPrime
-        implements Test
+    private void testECDSA239bitPrime()
+        throws Exception
     {
         BigInteger r = new BigInteger("308636143175167811492622547300668018854959378758531778147462058306432176");
         BigInteger s = new BigInteger("323813553209797357708078776831250505931891051755007842781978505179448783");
@@ -67,152 +86,110 @@ public class ECDSA5Test
             }
         };
 
-        public String getName()
+        EllipticCurve curve = new EllipticCurve(
+            new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
+            new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+            new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+
+        ECParameterSpec spec = new ECParameterSpec(
+            curve,
+            ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+            new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
+            1); // h
+        
+
+        ECPrivateKeySpec priKey = new ECPrivateKeySpec(
+            new BigInteger("876300101507107567501066130761671078357010671067781776716671676178726717"), // d
+            spec);
+
+        ECPublicKeySpec pubKey = new ECPublicKeySpec(
+            ECPointUtil.decodePoint(curve, Hex.decode("025b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c70")), // Q
+            spec);
+
+        Signature           sgr = Signature.getInstance("ECDSA", "BC");
+        KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
+        PrivateKey          sKey = f.generatePrivate(priKey);
+        PublicKey           vKey = f.generatePublic(pubKey);
+
+        sgr.initSign(sKey, k);
+
+        byte[] message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
+
+        sgr.update(message);
+
+        byte[]  sigBytes = sgr.sign();
+
+        sgr.initVerify(vKey);
+
+        sgr.update(message);
+
+        if (!sgr.verify(sigBytes))
         {
-            return "ECDSA5 239 bit prime";
+            fail("239 Bit EC verification failed");
         }
 
-        public TestResult perform()
+        BigInteger[]  sig = derDecode(sigBytes);
+
+        if (!r.equals(sig[0]))
         {
-            try
-            {
-                EllipticCurve curve = new EllipticCurve(
-                    new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
-                    new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
-                    new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
 
-                ECParameterSpec spec = new ECParameterSpec(
-                    curve,
-                    ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
-                    new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
-                    1); // h
-                
-
-                ECPrivateKeySpec priKey = new ECPrivateKeySpec(
-                    new BigInteger("876300101507107567501066130761671078357010671067781776716671676178726717"), // d
-                    spec);
-
-                ECPublicKeySpec pubKey = new ECPublicKeySpec(
-                    ECPointUtil.decodePoint(curve, Hex.decode("025b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c70")), // Q
-                    spec);
-
-                Signature           sgr = Signature.getInstance("ECDSA", "BC");
-                KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
-                PrivateKey          sKey = f.generatePrivate(priKey);
-                PublicKey           vKey = f.generatePublic(pubKey);
-
-                sgr.initSign(sKey, k);
-
-                byte[] message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
-
-                sgr.update(message);
-
-                byte[]  sigBytes = sgr.sign();
-
-                sgr.initVerify(vKey);
-
-                sgr.update(message);
-
-                if (!sgr.verify(sigBytes))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": 239 Bit EC verification failed");
-                }
-
-                BigInteger[]  sig = derDecode(sigBytes);
-
-                if (!r.equals(sig[0]))
-                {
-                    return new SimpleTestResult(false, getName()
-                        + ": r component wrong." + System.getProperty("line.separator")
-                        + " expecting: " + r + System.getProperty("line.separator")
-                        + " got      : " + sig[0]);
-                }
-
-                if (!s.equals(sig[1]))
-                {
-                    return new SimpleTestResult(false, getName()
-                        + ": s component wrong." + System.getProperty("line.separator")
-                        + " expecting: " + s + System.getProperty("line.separator")
-                        + " got      : " + sig[1]);
-                }
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(false, this.getName() + ": exception - " + e.toString());
-            }
-
-            return new SimpleTestResult(true, this.getName() + ": Okay");
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
         }
     }
 
-    private class GenerationTest
-        implements Test
+    private void testGeneration()
+        throws Exception
     {
-        public String getName()
+        //
+        // ECDSA generation test
+        //
+        byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+        Signature s = Signature.getInstance("ECDSA", "BC");
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        EllipticCurve curve = new EllipticCurve(
+            new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
+            new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+            new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+
+        ECParameterSpec ecSpec = new ECParameterSpec(
+            curve,
+            ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+            new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
+            1); // h
+
+        g.initialize(ecSpec, new SecureRandom());
+
+        KeyPair p = g.generateKeyPair();
+
+        PrivateKey sKey = p.getPrivate();
+        PublicKey  vKey = p.getPublic();
+
+        s.initSign(sKey);
+
+        s.update(data);
+
+        byte[] sigBytes = s.sign();
+
+        s = Signature.getInstance("ECDSA", "BC");
+
+        s.initVerify(vKey);
+
+        s.update(data);
+
+        if (!s.verify(sigBytes))
         {
-            return "EC/ECDSA Generation";
-        }
-
-        public TestResult perform()
-        {
-            try
-            {
-                //
-                // ECDSA generation test
-                //
-                byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-                Signature s = Signature.getInstance("ECDSA", "BC");
-                KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
-
-                EllipticCurve curve = new EllipticCurve(
-                    new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
-                    new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
-                    new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
-
-                ECParameterSpec ecSpec = new ECParameterSpec(
-                    curve,
-                    ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
-                    new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
-                    1); // h
-
-                g.initialize(ecSpec, new SecureRandom());
-
-                KeyPair p = g.generateKeyPair();
-
-                PrivateKey sKey = p.getPrivate();
-                PublicKey  vKey = p.getPublic();
-
-                s.initSign(sKey);
-
-                s.update(data);
-
-                byte[] sigBytes = s.sign();
-
-                s = Signature.getInstance("ECDSA", "BC");
-
-                s.initVerify(vKey);
-
-                s.update(data);
-
-                if (!s.verify(sigBytes))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": ECDSA verification failed");
-                }
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(false, this.getName() + ": exception - " + e.toString());
-            }
-
-            return new SimpleTestResult(true, this.getName() + ": Okay");
+            fail("ECDSA verification failed");
         }
     }
-
-    Test tests[] =
-    {
-        new ECDSA239bitPrime(),
-        new GenerationTest()
-    };
 
     protected BigInteger[] derDecode(
         byte[]  encoding)
@@ -235,39 +212,12 @@ public class ECDSA5Test
         return "ECDSA5";
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        for (int i = 0; i != tests.length; i++)
-        {
-            TestResult  result = tests[i].perform();
-
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
-        }
-
-        return new SimpleTestResult(true, "ECDSA5: Okay");
-    }
-
-    private boolean arrayEquals(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        decodeTest();
+        testECDSA239bitPrime();
+        testGeneration();
     }
 
     public static void main(
@@ -275,9 +225,6 @@ public class ECDSA5Test
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new ECDSA5Test();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new ECDSA5Test());
     }
 }

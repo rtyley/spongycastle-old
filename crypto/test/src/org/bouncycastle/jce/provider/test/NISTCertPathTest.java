@@ -3,7 +3,16 @@ package org.bouncycastle.jce.provider.test;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.security.Security;
-import java.security.cert.*;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertPathBuilderResult;
+import java.security.cert.CertStore;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509CRL;
+import java.security.cert.X509CertSelector;
+import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
@@ -12,9 +21,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 
 /*
@@ -27,7 +34,7 @@ import org.bouncycastle.util.test.TestResult;
  */
 
 public class NISTCertPathTest 
-    implements Test 
+    extends SimpleTest 
 {    
     private static final String TEST_POLICY_1 = "2.16.840.1.101.3.1.48.1";
     private static final String TEST_POLICY_2 = "2.16.840.1.101.3.1.48.2";
@@ -70,7 +77,6 @@ public class NISTCertPathTest
     
     private CertificateFactory fact;
     
-    private boolean         debug;
     private X509Certificate trustedCert;
     private X509CRL         trustedCRL;
     private Set             trustedSet;
@@ -84,7 +90,7 @@ public class NISTCertPathTest
     }
     
     
-    public TestResult perform() 
+    public void performTest() 
     {
         init();
         
@@ -249,12 +255,10 @@ public class NISTCertPathTest
         test("76", TEST_76_DATA, false, false);
         
         resultBuf.append("NISTCertPathTest -- Failed: " + testFail.size() + "/" + testCount + "\n");
-        if (testFail.isEmpty())
+        if (!testFail.isEmpty())
         {
-            return new SimpleTestResult(true, "NISTCertPathTest: Okay");
+            fail(resultBuf.toString());
         }
-
-        return new SimpleTestResult(testFail.isEmpty(), resultBuf.toString());
     }
     
     private final void init()
@@ -288,7 +292,6 @@ public class NISTCertPathTest
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
             throw new RuntimeException(ex.getMessage());
         }
     }
@@ -308,31 +311,6 @@ public class NISTCertPathTest
 
         return (X509CRL)fact.generateCRL(new ByteArrayInputStream(Base64
                 .decode(_str)));
-    }
-
-    private final void log(Exception ex)
-    {
-        if (debug)
-        {
-            System.out.print("NISTCertPathTest -- ");
-            ex.printStackTrace();
-        }
-    }
-
-    private final void log(Object _obj)
-    {
-        if (debug)
-        {
-            System.out.println("NISTCertPathTest -- " + _obj.toString());
-        }
-    }
-
-    private final void log(String _msg)
-    {
-        if (debug)
-        {
-            System.out.println("NISTCertPathTest -- " + _msg);
-        }
     }
 
     private final CertStore makeCertStore(String[] _strs)
@@ -391,7 +369,6 @@ public class NISTCertPathTest
     {
 
         testCount++;
-        debug = _debug;
         boolean _pass = true;
 
         try
@@ -413,11 +390,7 @@ public class NISTCertPathTest
 
             CertPathBuilderResult _result = _cpb.build(_param);
 
-            if (_accept)
-            {
-                log(_result);
-            }
-            else
+            if (!_accept)
             {
                 System.out.println("Accept when it should reject");
                 _pass = false;
@@ -428,8 +401,7 @@ public class NISTCertPathTest
         {
             if (_accept)
             {
-                log("Reject when it should accept");
-                log(ex);
+                System.out.println("Reject when it should accept");
                 _pass = false;
                 testFail.addElement(_name);
             }
@@ -439,21 +411,13 @@ public class NISTCertPathTest
                 + (_pass ? "\n" : "Failed.\n"));
     }
     
-    public static void main(String _args[])
+
+    public static void main(
+        String[]    args)
     {
-        try
-        {
-            Security.addProvider(new BouncyCastleProvider());
+        Security.addProvider(new BouncyCastleProvider());
 
-            Test _test = new NISTCertPathTest();
-            TestResult _result = _test.perform();
-
-            System.out.println(_result.toString());
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
+        runTest(new NISTCertPathTest());
     }
     
     /*  
