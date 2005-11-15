@@ -229,8 +229,7 @@ public class DHTest
         }
         catch (Exception e)
         {
-e.printStackTrace();
-                return new SimpleTestResult(false, size + " bit 2-way test failed - exception: " + e);
+            return new SimpleTestResult(false, size + " bit 2-way test failed - exception: " + e);
         }
 
         return new SimpleTestResult(true, this.getName() + ": Okay");

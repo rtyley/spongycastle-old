@@ -208,11 +208,6 @@ public class PSSTest
         Test            test = new PSSTest();
         TestResult      result = test.perform();
         
-        if (((SimpleTestResult)result).getException() != null)
-        {
-            ((SimpleTestResult)result).getException().printStackTrace();
-        }
-        
         System.out.println(result.toString());
     }
 }

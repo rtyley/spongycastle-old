@@ -229,7 +229,6 @@ public class ECIESTest
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
             return new SimpleTestResult(false, this.getName() + ": stream cipher test exception " + ex.toString());
         }
 
