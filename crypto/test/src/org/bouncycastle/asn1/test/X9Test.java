@@ -7,9 +7,7 @@ import java.math.BigInteger;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.util.test.SimpleTestResult;
+import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERObject;
@@ -25,14 +23,14 @@ import org.bouncycastle.asn1.x9.X9ECPoint;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
 public class X9Test
-    implements Test
+    extends SimpleTest
 {
-    private byte[] namedPub = Base64.decode("MBowEwYHKoZIzj0CAQYIKoZIzj0DAQEDAwACAQ==");
+    private byte[] namedPub = Base64.decode("MBowEwYHKoZIzj0CAQYIKoZIzj0DAQEDAwADAQ==");
     private byte[] expPub = Base64.decode(
             "MIHcMIHUBgcqhkjOPQIBMIHIAgEBMCkGByqGSM49AQECHn///////////////3///////4AAAA"
           + "AAAH///////zBXBB5///////////////9///////+AAAAAAAB///////wEHiVXBfoqMGZUsfTL"
           + "A9anUKMMJQEC1JiHF9m6FattPgMVAH1zdBaP/jRxtgqFdoahlHXTv6L/BB8DZ2iujhi7ks/PAF"
-          + "yUmqLG2UhT0OZgu/hUsclQX+laAh5///////////////9///+XXetBs6YFfDxDIUZSZVEDAwAC"
+          + "yUmqLG2UhT0OZgu/hUsclQX+laAh5///////////////9///+XXetBs6YFfDxDIUZSZVEDAwAD"
           + "AQ==");
 
     private byte[] namedPriv = Base64.decode("MCICAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQEECDAGAgEBBAEK");
@@ -43,27 +41,7 @@ public class X9Test
           + "/PAFyUmqLG2UhT0OZgu/hUsclQX+laAh5///////////////9///+XXetBs6YFfDxDIUZSZVEE"
           + "CDAGAgEBBAEU");
     
-    private boolean isSameAs(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-        
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    private TestResult encodePublicKey()
+    private void encodePublicKey()
         throws Exception
     {
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
@@ -79,9 +57,9 @@ public class X9Test
 
         SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), p.getOctets());
 
-        if (!isSameAs(info.getEncoded(), namedPub))
+        if (!areEqual(info.getEncoded(), namedPub))
         {
-            return new SimpleTestResult(false, getName() + ": failed public named generation");
+            fail("failed public named generation");
         }
         
         ASN1InputStream         aIn = new ASN1InputStream(new ByteArrayInputStream(namedPub));
@@ -89,7 +67,7 @@ public class X9Test
         
         if (!info.equals(o))
         {
-            return new SimpleTestResult(false, getName() + ": failed public named equality");
+            fail("failed public named equality");
         }
         
         //
@@ -99,9 +77,9 @@ public class X9Test
         
         info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), p.getOctets());
 
-        if (!isSameAs(info.getEncoded(), expPub))
+        if (!areEqual(info.getEncoded(), expPub))
         {
-            return new SimpleTestResult(false, getName() + ": failed public explicit generation");
+            fail("failed public explicit generation");
         }
         
         aIn = new ASN1InputStream(new ByteArrayInputStream(expPub));
@@ -109,13 +87,11 @@ public class X9Test
         
         if (!info.equals(o))
         {
-            return new SimpleTestResult(false, getName() + ": failed public explicit equality");
+            fail("failed public explicit equality");
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    private TestResult encodePrivateKey()
+    private void encodePrivateKey()
         throws Exception
     {
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
@@ -131,9 +107,9 @@ public class X9Test
 
         PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), new ECPrivateKeyStructure(BigInteger.valueOf(10)).getDERObject());
 
-        if (!isSameAs(info.getEncoded(), namedPriv))
+        if (!areEqual(info.getEncoded(), namedPriv))
         {
-            return new SimpleTestResult(false, getName() + ": failed private named generation");
+            fail("failed private named generation");
         }
         
         ASN1InputStream         aIn = new ASN1InputStream(new ByteArrayInputStream(namedPriv));
@@ -141,7 +117,7 @@ public class X9Test
         
         if (!info.equals(o))
         {
-            return new SimpleTestResult(false, getName() + ": failed private named equality");
+            fail("failed private named equality");
         }
         
         //
@@ -151,9 +127,9 @@ public class X9Test
         
         info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), new ECPrivateKeyStructure(BigInteger.valueOf(20)).toASN1Object());
 
-        if (!isSameAs(info.getEncoded(), expPriv))
+        if (!areEqual(info.getEncoded(), expPriv))
         {
-            return new SimpleTestResult(false, getName() + ": failed private explicit generation");
+            fail("failed private explicit generation");
         }
         
         aIn = new ASN1InputStream(new ByteArrayInputStream(expPriv));
@@ -161,29 +137,15 @@ public class X9Test
         
         if (!info.equals(o))
         {
-            return new SimpleTestResult(false, getName() + ": failed private explicit equality");
+            fail("failed private explicit equality");
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        try
-        {
-            TestResult  res = encodePublicKey();
-            
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            return encodePrivateKey();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": failed - exception " + e.toString(), e);
-        }
+        encodePublicKey();
+        encodePrivateKey();
     }
 
     public String getName()
@@ -191,12 +153,10 @@ public class X9Test
         return "X9";
     }
 
-    public static void main(
-        String[] args)
-    {
-        X9Test    test = new X9Test();
-        TestResult      result = test.perform();
 
-        System.out.println(result);
+    public static void main(
+        String[]    args)
+    {
+        runTest(new X9Test());
     }
 }
