@@ -266,7 +266,7 @@ public class SignaturePacket
     {
         byte[]    trailer = null;
         
-        if (version == 3)
+        if (version == 3 || version == 2)
         {
             trailer = new byte[5];
             
