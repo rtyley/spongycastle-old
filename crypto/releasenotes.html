@@ -25,11 +25,13 @@ to conform the algorithms to the JCE framework.
 Release 1.31
 <h3>2.1.2 Defects Fixed</h3>
 <ul>
-<li>getCriticalExtensionOIDs on an X.509 attribute certificate was return the non-critical set. This has been fixed.
+<li>getCriticalExtensionOIDs on an X.509 attribute certificate was returning the non-critical set. This has been fixed.
 <li>Encoding uncompressed ECDSA keys could occasionally introduce an extra leading zero byte. This has been fixed.
 <li>Expiry times for OpenPGP master keys are now recognised across the range of possible certifications.
 <li>PGP 2 keys can now be decrypted by the the OpenPGP library.
 <li>PGP 2 signature packets threw an exception on trailer processing. This has been been fixed.
+<li>Attempting to retrieve signature subpackets from an OpenPGP version 3 signature would throw a null pointer exception. This has been fixed.
+<li>Another occasional defect in EC point encoding has been fixed.
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
@@ -37,7 +39,6 @@ Release 1.31
 <li>Additional ASN.1 message support has been added for RFC 3739 in the org.bouncycastle.x509.qualified package.
 <li>Support has been added for Mac algorithm 3 from ISO 9797 to both the lightweight APIs and the provider.
 <li>The provider now supports the DESEDE64 MAC algorithm.
-<li>Another occasional defect in EC point encoding has been fixed.
 </ul>
 
 <h3>2.2.1 Version</h3>
