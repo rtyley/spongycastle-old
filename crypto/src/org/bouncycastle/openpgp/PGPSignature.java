@@ -17,6 +17,7 @@ import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.MPInteger;
 import org.bouncycastle.bcpg.SignaturePacket;
+import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.TrustPacket;
 
 /**
@@ -85,6 +86,16 @@ public class PGPSignature
         }
     }
 
+    /**
+     * Return the OpenPGP version number for this signature.
+     * 
+     * @return signature version number.
+     */
+    public int getVersion()
+    {
+        return sigPck.getVersion();
+    }
+    
     public void initVerify(
         PGPPublicKey    pubKey,
         String          provider)
@@ -301,12 +312,22 @@ public class PGPSignature
     
     public PGPSignatureSubpacketVector getHashedSubPackets()
     {
-        return new PGPSignatureSubpacketVector(sigPck.getHashedSubPackets());
+        return createSubpacketVector(sigPck.getHashedSubPackets());
     }
-    
+
     public PGPSignatureSubpacketVector getUnhashedSubPackets()
     {
-        return new PGPSignatureSubpacketVector(sigPck.getUnhashedSubPackets());
+        return createSubpacketVector(sigPck.getUnhashedSubPackets());
+    }
+    
+    private PGPSignatureSubpacketVector createSubpacketVector(SignatureSubpacket[] pcks)
+    {
+        if (pcks != null)
+        {
+            return new PGPSignatureSubpacketVector(pcks);
+        }
+        
+        return null;
     }
     
     public byte[] getSignature()
