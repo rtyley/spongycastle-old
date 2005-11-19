@@ -87,6 +87,9 @@ public class PGPSignatureTest
 
     char[]    rsaPass = "2002 Buffalo Sabres".toCharArray();
 
+    byte[]    nullPacketsSubKeyBinding = Base64.decode(
+            "iDYEGBECAAAAACp9AJ9PlJCrFpi+INwG7z61eku2Wg1HaQCgl33X5Egj+Kf7F9CXIWj2iFCvQDo=");
+    
     public void performTest()
         throws Exception
     {
@@ -156,7 +159,7 @@ public class PGPSignatureTest
         sGen.setUnhashedSubpackets(unhashedGen.generate());
         
         sig = sGen.generateCertification(secretDSAKey.getPublicKey(), secretKey.getPublicKey());
-        
+
         sig.initVerify(secretDSAKey.getPublicKey(), "BC");
         
         if (!sig.verifyCertification(secretDSAKey.getPublicKey(), secretKey.getPublicKey()))
@@ -373,6 +376,55 @@ public class PGPSignatureTest
         testTextSig(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, secretKey.getPublicKey(), pgpPrivKey, TEST_DATA, TEST_DATA_WITH_CRLF);
         testTextSigV3(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, secretKey.getPublicKey(), pgpPrivKey, TEST_DATA_WITH_CRLF, TEST_DATA_WITH_CRLF);
         testTextSigV3(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, secretKey.getPublicKey(), pgpPrivKey, TEST_DATA, TEST_DATA_WITH_CRLF);
+        
+        // special cases
+        //
+        testMissingSubpackets(nullPacketsSubKeyBinding);
+        
+        testMissingSubpackets(generateV3BinarySig(pgpPrivKey, PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1));
+    }
+
+    private void testMissingSubpackets(byte[] signature) 
+        throws IOException
+    {
+        PGPObjectFactory f = new PGPObjectFactory(signature);
+        Object           obj = f.nextObject();
+        
+        while (!(obj instanceof PGPSignatureList))
+        {
+            obj = f.nextObject();
+            if (obj instanceof PGPLiteralData)
+            {
+                InputStream in = ((PGPLiteralData)obj).getDataStream();
+                while (in.read() >= 0)
+                {
+                    // do nothing
+                }
+            }
+        }
+        
+        PGPSignature     sig = ((PGPSignatureList)obj).get(0);
+        
+        if (sig.getVersion() > 3)
+        {
+            PGPSignatureSubpacketVector v = sig.getHashedSubPackets();
+            
+            if (v.getKeyExpirationTime() != 0)
+            {
+                fail("key expiration time not zero for missing subpackets");
+            }
+        }
+        else
+        {
+            if (sig.getHashedSubPackets() != null)
+            {
+                fail("hashed sub packets found when none expected");
+            }
+            if (sig.getUnhashedSubPackets() != null)
+            {
+                fail("unhashed sub packets found when none expected");
+            }
+        }
     }
 
     private void preferredAlgorithmCheck(
@@ -482,6 +534,14 @@ public class PGPSignatureTest
         PGPPrivateKey privKey)
         throws Exception
     {            
+        byte[] bytes = generateV3BinarySig(privKey, encAlgorithm, hashAlgorithm);
+    
+        verifySignature(bytes, hashAlgorithm, pubKey, TEST_DATA);
+    }
+
+    private byte[] generateV3BinarySig(PGPPrivateKey privKey, int encAlgorithm, int hashAlgorithm) 
+        throws Exception
+    {
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         ByteArrayInputStream    testIn = new ByteArrayInputStream(TEST_DATA);
         PGPV3SignatureGenerator sGen = new PGPV3SignatureGenerator(encAlgorithm, hashAlgorithm, "BC");
@@ -505,8 +565,8 @@ public class PGPSignatureTest
         lGen.close();
     
         sGen.generate().encode(bOut);
-    
-        verifySignature(bOut.toByteArray(), hashAlgorithm, pubKey, TEST_DATA);
+        
+        return bOut.toByteArray();
     }
     
     private void testTextSigV3(
