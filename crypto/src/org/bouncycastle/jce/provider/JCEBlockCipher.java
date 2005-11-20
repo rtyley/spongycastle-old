@@ -46,6 +46,7 @@ import org.bouncycastle.crypto.params.ParametersWithSBox;
 import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.crypto.params.RC5Parameters;
 import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
+import org.bouncycastle.util.encoders.Hex;
 
 public class JCEBlockCipher extends WrapCipherSpi
     implements PBE
@@ -164,93 +165,93 @@ public class JCEBlockCipher extends WrapCipherSpi
         if (modeName.equals("ECB"))
         {
             ivLength = 0;
-            cipher = new PaddedBufferedBlockCipher(cipher.getUnderlyingCipher());
+            cipher = new PaddedBufferedBlockCipher(baseEngine);
         }
         else if (modeName.equals("CBC"))
         {
-            ivLength = cipher.getUnderlyingCipher().getBlockSize();
+            ivLength = baseEngine.getBlockSize();
             cipher = new PaddedBufferedBlockCipher(
-                            new CBCBlockCipher(cipher.getUnderlyingCipher()));
+                            new CBCBlockCipher(baseEngine));
         }
         else if (modeName.startsWith("OFB"))
         {
-            ivLength = cipher.getUnderlyingCipher().getBlockSize();
+            ivLength = baseEngine.getBlockSize();
             if (modeName.length() != 3)
             {
                 int wordSize = Integer.parseInt(modeName.substring(3));
 
                 cipher = new PaddedBufferedBlockCipher(
-                                new OFBBlockCipher(cipher.getUnderlyingCipher(), wordSize));
+                                new OFBBlockCipher(baseEngine, wordSize));
             }
             else
             {
                 cipher = new PaddedBufferedBlockCipher(
-                        new OFBBlockCipher(cipher.getUnderlyingCipher(), 8 * cipher.getBlockSize()));
+                        new OFBBlockCipher(baseEngine, 8 * baseEngine.getBlockSize()));
             }
         }
         else if (modeName.startsWith("CFB"))
         {
-            ivLength = cipher.getUnderlyingCipher().getBlockSize();
+            ivLength = baseEngine.getBlockSize();
             if (modeName.length() != 3)
             {
                 int wordSize = Integer.parseInt(modeName.substring(3));
 
                 cipher = new PaddedBufferedBlockCipher(
-                                new CFBBlockCipher(cipher.getUnderlyingCipher(), wordSize));
+                                new CFBBlockCipher(baseEngine, wordSize));
             }
             else
             {
                 cipher = new PaddedBufferedBlockCipher(
-                        new CFBBlockCipher(cipher.getUnderlyingCipher(), 8 * cipher.getBlockSize()));
+                        new CFBBlockCipher(baseEngine, 8 * baseEngine.getBlockSize()));
             }
         }
         else if (modeName.startsWith("PGP"))
         {
             if (modeName.equalsIgnoreCase("PGPCFBwithIV"))
             {
-                ivLength = cipher.getUnderlyingCipher().getBlockSize();
+                ivLength = baseEngine.getBlockSize();
                 cipher = new PaddedBufferedBlockCipher(
-                    new PGPCFBBlockCipher(cipher.getUnderlyingCipher(), true));
+                    new PGPCFBBlockCipher(baseEngine, true));
             }
             else
             {
-                ivLength = cipher.getUnderlyingCipher().getBlockSize();
+                ivLength = baseEngine.getBlockSize();
                 cipher = new PaddedBufferedBlockCipher(
-                    new PGPCFBBlockCipher(cipher.getUnderlyingCipher(), false));
+                    new PGPCFBBlockCipher(baseEngine, false));
             }
         }
         else if (modeName.equalsIgnoreCase("OpenPGPCFB"))
         {
             ivLength = 0;
             cipher = new PaddedBufferedBlockCipher(
-                new OpenPGPCFBBlockCipher(cipher.getUnderlyingCipher()));
+                new OpenPGPCFBBlockCipher(baseEngine));
         }
         else if (modeName.startsWith("SIC"))
         {
-            ivLength = cipher.getUnderlyingCipher().getBlockSize();
+            ivLength = baseEngine.getBlockSize();
             if (ivLength < 16)
             {
                 throw new IllegalArgumentException("Warning: SIC-Mode can become a twotime-pad if the blocksize of the cipher is too small. Use a cipher with a block size of at least 128 bits (e.g. AES)");
             }
             cipher = new BufferedBlockCipher(
-                        new SICBlockCipher(cipher.getUnderlyingCipher()));
+                        new SICBlockCipher(baseEngine));
         }
         else if (modeName.startsWith("CTR"))
         {
-            ivLength = cipher.getUnderlyingCipher().getBlockSize();
+            ivLength = baseEngine.getBlockSize();
             cipher = new BufferedBlockCipher(
-                        new SICBlockCipher(cipher.getUnderlyingCipher()));
+                        new SICBlockCipher(baseEngine));
         }
         else if (modeName.startsWith("GOFB"))
         {
-            ivLength = cipher.getUnderlyingCipher().getBlockSize();
+            ivLength = baseEngine.getBlockSize();
             cipher = new BufferedBlockCipher(
-                        new GOFBBlockCipher(cipher.getUnderlyingCipher()));
+                        new GOFBBlockCipher(baseEngine));
         }
         else if (modeName.startsWith("CTS"))
         {
-            ivLength = cipher.getUnderlyingCipher().getBlockSize();
-            cipher = new CTSBlockCipher(new CBCBlockCipher(cipher.getUnderlyingCipher()));
+            ivLength = baseEngine.getBlockSize();
+            cipher = new CTSBlockCipher(new CBCBlockCipher(baseEngine));
         }
         else
         {
@@ -307,7 +308,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             throw new NoSuchPaddingException("Padding " + padding + " unknown.");
         }
     }
-
+private int opmode;
     protected void engineInit(
         int                     opmode,
         Key                     key,
@@ -316,7 +317,7 @@ public class JCEBlockCipher extends WrapCipherSpi
     throws InvalidKeyException, InvalidAlgorithmParameterException
     {
         CipherParameters        param;
-        
+        this.opmode = opmode;
         this.pbeSpec = null;
         this.pbeAlgorithm = null;
         this.engineParams = null;
