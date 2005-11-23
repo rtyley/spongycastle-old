@@ -49,7 +49,8 @@ public class RegressionTest
         new CertPathValidatorTest(),
         new CertPathBuilderTest(),
         new ECEncodingTest(),
-        new NISTCertPathTest()
+        new NISTCertPathTest(),
+        new SlotTwoTest()
     };
 
     public static void main(
