@@ -366,7 +366,14 @@ public class PGPPublicKey
 
             if (!selfSigned || sig.getKeyID() == this.getKeyID())
             {
-                return sig.getHashedSubPackets().getKeyExpirationTime();
+                PGPSignatureSubpacketVector hashed = sig.getHashedSubPackets();
+                
+                if (hashed != null)
+                {
+                    return hashed.getKeyExpirationTime();
+                }
+                
+                return 0;
             }
         }
         
