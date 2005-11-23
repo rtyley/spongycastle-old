@@ -92,22 +92,9 @@ public class JCEDHPublicKey
 
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
         SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.dhpublicnumber, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL()).getDERObject()), new DERInteger(y));
 
-        try
-        {
-            dOut.writeObject(info);
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Error encoding DH public key");
-        }
-
-        return bOut.toByteArray();
-
+        return info.getDEREncoded();
     }
 
     public DHParameterSpec getParams()

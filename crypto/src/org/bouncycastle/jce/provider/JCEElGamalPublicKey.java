@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,7 +11,6 @@ import javax.crypto.spec.DHPublicKeySpec;
 
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -102,21 +100,9 @@ public class JCEElGamalPublicKey
 
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
         SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(elSpec.getP(), elSpec.getG()).getDERObject()), new DERInteger(y));
 
-        try
-        {
-            dOut.writeObject(info);
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Error encoding ElGamal public key");
-        }
-
-        return bOut.toByteArray();
+        return info.getDEREncoded();
     }
 
     public ElGamalParameterSpec getParameters()

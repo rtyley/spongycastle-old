@@ -90,21 +90,9 @@ public class JDKDSAPrivateKey
      */
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
         PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).getDERObject()), new DERInteger(getX()));
 
-        try
-        {
-            dOut.writeObject(info);
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Error encoding DSA private key");
-        }
-
-        return bOut.toByteArray();
+        return info.getDEREncoded();
     }
 
     public DSAParams getParams()

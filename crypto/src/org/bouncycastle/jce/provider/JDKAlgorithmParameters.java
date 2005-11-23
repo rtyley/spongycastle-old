@@ -20,7 +20,6 @@ import javax.crypto.spec.RC2ParameterSpec;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
@@ -54,12 +53,14 @@ public abstract class JDKAlgorithmParameters
         private byte[]  iv;
 
         protected byte[] engineGetEncoded() 
+            throws IOException
         {
             return engineGetEncoded("ASN.1");
         }
 
         protected byte[] engineGetEncoded(
             String format) 
+            throws IOException
         {
             if (format == null)
             {
@@ -75,19 +76,7 @@ public abstract class JDKAlgorithmParameters
             }
             else if (format.equals("ASN.1"))
             {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        dOut = new ASN1OutputStream(bOut);
-
-                try
-                {
-                    dOut.writeObject(new DEROctetString(engineGetEncoded("RAW")));
-                }
-                catch (IOException e)
-                {
-                    return null;
-                }
-
-                return bOut.toByteArray();
+                return new DEROctetString(engineGetEncoded("RAW")).getEncoded();
             }
 
             return null;
@@ -183,12 +172,14 @@ public abstract class JDKAlgorithmParameters
         private byte[]  iv;
 
         protected byte[] engineGetEncoded() 
+            throws IOException
         {
             return engineGetEncoded("ASN.1");
         }
 
         protected byte[] engineGetEncoded(
             String format) 
+            throws IOException
         {
             if (format == null)
             {
@@ -204,19 +195,7 @@ public abstract class JDKAlgorithmParameters
             }
             else if (format.equals("ASN.1"))
             {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        dOut = new ASN1OutputStream(bOut);
-
-                try
-                {
-                    dOut.writeObject(new IDEACBCPar(engineGetEncoded("RAW")));
-                }
-                catch (IOException e)
-                {
-                    return null;
-                }
-
-                return bOut.toByteArray();
+                new IDEACBCPar(engineGetEncoded("RAW")).getEncoded();
             }
 
             return null;
@@ -338,6 +317,7 @@ public abstract class JDKAlgorithmParameters
 
         protected byte[] engineGetEncoded(
             String format) 
+            throws IOException
         {
             if (format.equals("RAW"))
             {
@@ -345,26 +325,14 @@ public abstract class JDKAlgorithmParameters
             }
             else if (format.equals("ASN.1"))
             {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        dOut = new ASN1OutputStream(bOut);
-
-                try
+                if (parameterVersion == -1)
                 {
-                    if (parameterVersion == -1)
-                    {
-                        dOut.writeObject(new RC2CBCParameter(engineGetEncoded()));
-                    }
-                    else
-                    {
-                        dOut.writeObject(new RC2CBCParameter(parameterVersion, engineGetEncoded()));
-                    }
+                    return new RC2CBCParameter(engineGetEncoded()).getEncoded();
                 }
-                catch (IOException e)
+                else
                 {
-                    return null;
+                    return new RC2CBCParameter(parameterVersion, engineGetEncoded()).getEncoded();
                 }
-
-                return bOut.toByteArray();
             }
 
             return null;
@@ -488,6 +456,7 @@ public abstract class JDKAlgorithmParameters
 
         protected byte[] engineGetEncoded(
             String format) 
+            throws IOException 
         {
             if (format.equals("RAW"))
             {
@@ -495,19 +464,7 @@ public abstract class JDKAlgorithmParameters
             }
             else if (format.equals("ASN.1"))
             {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        dOut = new ASN1OutputStream(bOut);
-
-                try
-                {
-                    dOut.writeObject(new CAST5CBCParameters(engineGetEncoded(), keyLength));
-                }
-                catch (IOException e)
-                {
-                    return null;
-                }
-
-                return bOut.toByteArray();
+                return new CAST5CBCParameters(engineGetEncoded(), keyLength).getEncoded();
             }
 
             return null;
@@ -1398,6 +1355,7 @@ public abstract class JDKAlgorithmParameters
          * Return the PKCS#1 ASN.1 structure RSA-ES-OAEP-params.
          */
         protected byte[] engineGetEncoded() 
+            throws IOException
         {
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
             DEROutputStream         dOut = new DEROutputStream(bOut);
@@ -1410,21 +1368,13 @@ public abstract class JDKAlgorithmParameters
                                                 PKCSObjectIdentifiers.id_mgf1, 
                                                 new AlgorithmIdentifier(JCEDigestUtil.getOID(mgfSpec.getDigestAlgorithm()), new DERNull()));
             RSASSAPSSparams     pssP = new RSASSAPSSparams(hashAlgorithm, maskGenAlgorithm, new DERInteger(pssSpec.getSaltLength()), new DERInteger(pssSpec.getTrailerField()));
-            try
-            {
-                dOut.writeObject(pssP);
-                dOut.close();
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("Error encoding PSSParameters");
-            }
-    
-            return bOut.toByteArray();
+            
+            return pssP.getEncoded("DER");
         }
     
         protected byte[] engineGetEncoded(
             String format) 
+            throws IOException
         {
             if (format.equalsIgnoreCase("X.509")
                     || format.equalsIgnoreCase("ASN.1"))

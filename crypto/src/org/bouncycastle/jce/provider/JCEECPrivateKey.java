@@ -218,8 +218,6 @@ public class JCEECPrivateKey
      */
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
         X962Parameters          params = null;
 
         if (ecSpec instanceof ECNamedCurveSpec)
@@ -250,17 +248,7 @@ public class JCEECPrivateKey
             info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), new ECPrivateKeyStructure(this.getS()).getDERObject());
         }
 
-        try
-        {
-            dOut.writeObject(info);
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Error encoding EC private key");
-        }
-
-        return bOut.toByteArray();
+        return info.getDEREncoded();
     }
 
     public ECParameterSpec getParams()

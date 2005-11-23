@@ -110,21 +110,9 @@ public class JCEElGamalPrivateKey
      */
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
         PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(elSpec.getP(), elSpec.getG()).getDERObject()), new DERInteger(getX()));
 
-        try
-        {
-            dOut.writeObject(info);
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Error encoding ElGamal private key");
-        }
-
-        return bOut.toByteArray();
+        return info.getDEREncoded();
     }
 
     public ElGamalParameterSpec getParameters()

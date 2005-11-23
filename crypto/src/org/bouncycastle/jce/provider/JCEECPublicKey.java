@@ -271,8 +271,6 @@ public class JCEECPublicKey
 
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
         ASN1Encodable           params = null;
 
         if (algorithm.equals("ECGOST3410"))
@@ -332,17 +330,7 @@ public class JCEECPublicKey
             info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), p.getOctets());
         }
         
-        try
-        {
-            dOut.writeObject(info);
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Error encoding EC public key");
-        }
-
-        return bOut.toByteArray();
+        return info.getDEREncoded();
     }
 
     public ECParameterSpec getParams()

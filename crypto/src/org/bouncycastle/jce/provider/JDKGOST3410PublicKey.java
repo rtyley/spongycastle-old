@@ -1,13 +1,11 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.GOST3410NamedParameters;
 import org.bouncycastle.asn1.cryptopro.GOST3410ParamSetParameters;
@@ -106,8 +104,6 @@ public class JDKGOST3410PublicKey
 
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
         SubjectPublicKeyInfo    info;
         byte[]                  keyEnc = this.getY().toByteArray();
         byte[]                  keyBytes;
@@ -142,18 +138,7 @@ public class JDKGOST3410PublicKey
             info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_94), new DEROctetString(keyBytes));
         }
 
-        try
-        {
-            dOut.writeObject(info);
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Error encoding GOST3410 public key");
-        }
-
-        return bOut.toByteArray();
-
+        return info.getDEREncoded();
     }
 
     public GOST3410Params getParameters()
