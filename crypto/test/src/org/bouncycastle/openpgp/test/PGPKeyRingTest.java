@@ -860,6 +860,34 @@ public class PGPKeyRingTest
        + "Lx0AoMdnFMZmTMLHn8scUW2j9XO312tmsAIAAA==");
 
     public char[] sec10pass = "test".toCharArray();
+   
+    public byte[] subKeyBindingKey = Base64.decode(
+            "mQGiBDWagYwRBAD7UcH4TAIp7tmUoHBNxVxCVz2ZrNo79M6fV63riOiH2uDxfIpr"
+          + "IrL0cM4ehEKoqlhngjDhX60eJrOw1nC5BpYZRnDnyDYT4wTWRguxObzGq9pqA1dM"
+          + "oPTJhkFZVIBgFY99/ULRqaUYIhFGgBtnwS70J8/L/PGVc3DmWRLMkTDjSQCg/5Nh"
+          + "MCjMK++MdYMcMl/ziaKRT6EEAOtw6PnU9afdohbpx9CK4UvCCEagfbnUtkSCQKSk"
+          + "6cUp6VsqyzY0pai/BwJ3h4apFMMMpVrtBAtchVgqo4xTr0Sve2j0k+ase6FSImiB"
+          + "g+AR7hvTUTcBjwtIExBc8TuCTqmn4GG8F7UMdl5Z0AZYj/FfAQYaRVZYP/pRVFNx"
+          + "Lw65BAC/Fi3qgiGCJFvXnHIckTfcAmZnKSEXWY9NJ4YQb4+/nH7Vsw0wR/ZObUHR"
+          + "bWgTc9Vw1uZIMe0XVj6Yk1dhGRehUnrm3mE7UJxu7pgkBCbFECFSlSSqP4MEJwZV"
+          + "09YP/msu50kjoxyoTpt+16uX/8B4at24GF1aTHBxwDLd8X0QWrQsTWVycmlsbCBM"
+          + "eW5jaCBDTEVBUiBzeXN0ZW0gREggPGNsZWFyQG1sLmNvbT6JAEsEEBECAAsFAjWa"
+          + "gYwECwMBAgAKCRDyAGjiP47/XanfAKCs6BPURWVQlGh635VgL+pdkUVNUwCdFcNa"
+          + "1isw+eAcopXPMj6ACOapepu5Ag0ENZqBlBAIAPZCV7cIfwgXcqK61qlC8wXo+VMR"
+          + "OU+28W65Szgg2gGnVqMU6Y9AVfPQB8bLQ6mUrfdMZIZJ+AyDvWXpF9Sh01D49Vlf"
+          + "3HZSTz09jdvOmeFXklnN/biudE/F/Ha8g8VHMGHOfMlm/xX5u/2RXscBqtNbno2g"
+          + "pXI61Brwv0YAWCvl9Ij9WE5J280gtJ3kkQc2azNsOA1FHQ98iLMcfFstjvbzySPA"
+          + "Q/ClWxiNjrtVjLhdONM0/XwXV0OjHRhs3jMhLLUq/zzhsSlAGBGNfISnCnLWhsQD"
+          + "GcgHKXrKlQzZlp+r0ApQmwJG0wg9ZqRdQZ+cfL2JSyIZJrqrol7DVekyCzsAAgIH"
+          + "/RYtVo+HROZ6jrNjrATEwQm1fUQrk6n5+2dniN881lF0CNkB4NkHw1Xxz4Ejnu/0"
+          + "iLg8fkOAsmanOsKpOkRtqUnVpsVL5mLJpFEyCY5jbcfj+KY9/25bs0ga7kLHNZia"
+          + "zbCxJdF+W179z3nudQxRaXG/0XISIH7ziZbSVni69sKc1osk1+OoOMbSuZ86z535"
+          + "Pln4fXclkFE927HxfbWoO+60hkOLKh7x+8fC82b3x9vCETujEaxrscO2xS7/MYXP"
+          + "8t1ffriTDmhuIuQS2q4fLgeWdqrODrMhrD8Dq7e558gzp30ZCqpiS7EmKGczL7B8"
+          + "gXxbBCVSTxYMJheXt2xMXsuJAD8DBRg1moGU8gBo4j+O/10RAgWdAKCPhaFIXuC8"
+          + "/cdiNMxTDw9ug3De5QCfYXmDzRSFUu/nrCi8yz/l09wsnxo=");
+    
+    public byte[] subKeyBindingCheckSum = Base64.decode("=3HU+");
     
     public void test1()
         throws Exception
@@ -1718,6 +1746,23 @@ public class PGPKeyRingTest
         }
     }
     
+    private void test11()
+        throws Exception
+    {
+        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(subKeyBindingKey);
+        Iterator         it = pubRing.getPublicKeys();
+        
+        while (it.hasNext())
+        {
+            PGPPublicKey key = (PGPPublicKey)it.next();
+            
+            if (key.getValidSeconds() != 0)
+            {
+                fail("expiration time non-zero");
+            }
+        }
+    }
+    
     public void performTest()
         throws Exception
     {
@@ -1733,6 +1778,7 @@ public class PGPKeyRingTest
             test8();
             test9();
             test10();
+            test11();
             generateTest();
         }
         catch (PGPException e)
