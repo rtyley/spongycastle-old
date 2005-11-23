@@ -12,6 +12,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -227,13 +228,9 @@ public class JDKDigestSignature
         byte[]  hash)
         throws IOException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
         DigestInfo              dInfo = new DigestInfo(algId, hash);
 
-        dOut.writeObject(dInfo);
-
-        return bOut.toByteArray();
+        return dInfo.getEncoded(ASN1Encodable.DER);
     }
 
     private DigestInfo derDecode(

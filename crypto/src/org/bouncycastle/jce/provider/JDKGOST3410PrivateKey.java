@@ -145,17 +145,7 @@ public class JDKGOST3410PrivateKey
             info = new PrivateKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_94), new DEROctetString(keyBytes));
         }
         
-        try
-        {
-            dOut.writeObject(info);
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Error encoding GOST3410 private key");
-        }
-
-        return bOut.toByteArray();
+        return info.getDEREncoded();
     }
 
     public GOST3410Params getParameters()
