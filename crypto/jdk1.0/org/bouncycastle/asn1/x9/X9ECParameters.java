@@ -23,13 +23,13 @@ public class X9ECParameters
     private static BigInteger   ONE = BigInteger.valueOf(1);
 
     private X9FieldID           fieldID;
-	private ECCurve             curve;
-	private ECPoint             g;
-	private BigInteger          n;
-	private BigInteger          h;
+    private ECCurve             curve;
+    private ECPoint             g;
+    private BigInteger          n;
+    private BigInteger          h;
     private byte[]              seed;
 
-	public X9ECParameters(
+    public X9ECParameters(
         ASN1Sequence  seq)
     {
         if (!(seq.getObjectAt(0) instanceof DERInteger)
@@ -43,44 +43,44 @@ public class X9ECParameters
                         (ASN1Sequence)seq.getObjectAt(2));
 
         this.curve = x9c.getCurve();
-		this.g = new X9ECPoint(curve, (ASN1OctetString)seq.getObjectAt(3)).getPoint();
-		this.n = ((DERInteger)seq.getObjectAt(4)).getValue();
+        this.g = new X9ECPoint(curve, (ASN1OctetString)seq.getObjectAt(3)).getPoint();
+        this.n = ((DERInteger)seq.getObjectAt(4)).getValue();
         this.seed = x9c.getSeed();
 
         if (seq.size() == 6)
         {
-		    this.h = ((DERInteger)seq.getObjectAt(5)).getValue();
+            this.h = ((DERInteger)seq.getObjectAt(5)).getValue();
         }
     }
 
-	public X9ECParameters(
-		ECCurve     curve,
-		ECPoint     g,
-		BigInteger  n)
-	{
+    public X9ECParameters(
+        ECCurve     curve,
+        ECPoint     g,
+        BigInteger  n)
+    {
         this(curve, g, n, ONE, null);
-	}
+    }
 
-	public X9ECParameters(
-		ECCurve     curve,
-		ECPoint     g,
-		BigInteger  n,
+    public X9ECParameters(
+        ECCurve     curve,
+        ECPoint     g,
+        BigInteger  n,
         BigInteger  h)
-	{
+    {
         this(curve, g, n, h, null);
-	}
+    }
 
-	public X9ECParameters(
-		ECCurve     curve,
-		ECPoint     g,
-		BigInteger  n,
+    public X9ECParameters(
+        ECCurve     curve,
+        ECPoint     g,
+        BigInteger  n,
         BigInteger  h,
         byte[]      seed)
-	{
-		this.curve = curve;
-		this.g = g;
-		this.n = n;
-		this.h = h;
+    {
+        this.curve = curve;
+        this.g = g;
+        this.n = n;
+        this.h = h;
         this.seed = seed;
 
         if (curve instanceof ECCurveFp)
@@ -91,32 +91,32 @@ public class X9ECParameters
         {
             this.fieldID = new X9FieldID(characteristic_two_field, null);
         }
-	}
+    }
 
-	public ECCurve getCurve()
-	{
-		return curve;
-	}
+    public ECCurve getCurve()
+    {
+        return curve;
+    }
 
-	public ECPoint getG()
-	{
-		return g;
-	}
+    public ECPoint getG()
+    {
+        return g;
+    }
 
-	public BigInteger getN()
-	{
-		return n;
-	}
+    public BigInteger getN()
+    {
+        return n;
+    }
 
-	public BigInteger getH()
-	{
-		return h;
-	}
+    public BigInteger getH()
+    {
+        return h;
+    }
 
-	public byte[] getSeed()
-	{
-		return seed;
-	}
+    public byte[] getSeed()
+    {
+        return seed;
+    }
 
     /**
      * <pre>

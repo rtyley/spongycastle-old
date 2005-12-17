@@ -13,73 +13,73 @@ public class SecureRandom
 {
     private static  SecureRandom rand = new SecureRandom();
 
-	private byte[] seed;
+    private byte[] seed;
 
     private long        counter = 1;
     private SHA1Digest  digest = new SHA1Digest();
     private byte[]      state = new byte[digest.getDigestSize()];
 
-	// public constructors
-	public SecureRandom()
-	{
-		super(0);
+    // public constructors
+    public SecureRandom()
+    {
+        super(0);
         setSeed(System.currentTimeMillis());
-	}
+    }
 
-	public SecureRandom(
+    public SecureRandom(
         byte[] inSeed)
-	{
-		super(0);
-		setSeed(inSeed);
-	}
+    {
+        super(0);
+        setSeed(inSeed);
+    }
 
-	// protected constructors
-	// protected SecureRandom(SecureRandomSpi srs, Provider provider);
+    // protected constructors
+    // protected SecureRandom(SecureRandomSpi srs, Provider provider);
 
-	// public class methods
-	public static SecureRandom getInstance(String algorithm)
-	{
-		return new SecureRandom();
-	}
+    // public class methods
+    public static SecureRandom getInstance(String algorithm)
+    {
+        return new SecureRandom();
+    }
 
-	public static SecureRandom getInstance(String algorithm, String provider)
-	{
-		return new SecureRandom();
-	}
+    public static SecureRandom getInstance(String algorithm, String provider)
+    {
+        return new SecureRandom();
+    }
 
-	public static byte[] getSeed(
+    public static byte[] getSeed(
         int numBytes)
-	{
-		byte[] rv = new byte[numBytes];
+    {
+        byte[] rv = new byte[numBytes];
 
-		rand.setSeed(System.currentTimeMillis());
-		rand.nextBytes(rv);
+        rand.setSeed(System.currentTimeMillis());
+        rand.nextBytes(rv);
 
-		return rv;
-	}
+        return rv;
+    }
 
-	// public instance methods
-	public byte[] generateSeed(
+    // public instance methods
+    public byte[] generateSeed(
         int numBytes)
-	{
-		byte[] rv = new byte[numBytes];
-	
-		nextBytes(rv);	
+    {
+        byte[] rv = new byte[numBytes];
+    
+        nextBytes(rv);    
 
-		return rv;
-	}
+        return rv;
+    }
 
-	// public final Provider getProvider();
-	public void setSeed(
+    // public final Provider getProvider();
+    public void setSeed(
         byte[] inSeed)
-	{
+    {
         digest.update(inSeed, 0, inSeed.length);
-	}
-		
-	// public methods overriding random
-	public void nextBytes(
+    }
+        
+    // public methods overriding random
+    public void nextBytes(
         byte[] bytes)
-	{
+    {
         int     stateOff = 0;
 
         digest.doFinal(state, 0);
@@ -102,16 +102,16 @@ public class SecureRandom
 
         digest.update(b, 0, b.length);
         digest.update(state, 0, state.length);
-	}
+    }
 
-	public void setSeed(
+    public void setSeed(
         long rSeed)
-	{
+    {
         if (rSeed != 0)
         {
-		    setSeed(longToBytes(rSeed));
+            setSeed(longToBytes(rSeed));
         }
-	}
+    }
 
     private byte[]  intBytes = new byte[4];
 

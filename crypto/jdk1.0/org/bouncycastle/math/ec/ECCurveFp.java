@@ -38,7 +38,9 @@ public class ECCurveFp extends ECCurve
             ECFieldElement alpha = x.multiply(x.square()).add(x.multiply(a).add(b));
             ECFieldElement beta = alpha.sqrt();
             if ( beta == null )
+            {
                 throw new RuntimeException("Invalid point compression");
+            }
 
             int bit0 = (beta.toBigInteger().testBit(0) ? 0 : 1);
 

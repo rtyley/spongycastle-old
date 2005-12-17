@@ -29,7 +29,7 @@ class eos extends DERObject
 public class BERInputStream
     extends DERInputStream
 {
-	private DERObject END_OF_STREAM = new eos();
+    private DERObject END_OF_STREAM = new eos();
 
     public BERInputStream(
         InputStream is)
@@ -50,10 +50,10 @@ public class BERInputStream
 
         while ((b = read()) >= 0)
         {
-			if (b1 == 0 && b == 0)
-			{
-				break;
-			}
+            if (b1 == 0 && b == 0)
+            {
+                break;
+            }
 
             bOut.write(b1);
             b1 = b;
@@ -62,33 +62,33 @@ public class BERInputStream
         return bOut.toByteArray();
     }
 
-	private BERConstructedOctetString buildConstructedOctetString(
-		DEROctetString	o1,
-		DEROctetString	o2)
-		throws IOException
-	{
+    private BERConstructedOctetString buildConstructedOctetString(
+        DEROctetString    o1,
+        DEROctetString    o2)
+        throws IOException
+    {
         Vector                  octs = new Vector();
 
-		if (o1 != null)
-		{
+        if (o1 != null)
+        {
             octs.addElement(o1);
             octs.addElement(o2);
-		}
+        }
 
-		for (;;)
-		{
-			DERObject		o = readObject();
+        for (;;)
+        {
+            DERObject        o = readObject();
 
-			if (o == END_OF_STREAM)
-			{
-				break;
-			}
+            if (o == END_OF_STREAM)
+            {
+                break;
+            }
 
             octs.addElement(o);
-		}
+        }
 
-		return new BERConstructedOctetString(octs);
-	}
+        return new BERConstructedOctetString(octs);
+    }
 
     public DERObject readObject()
         throws IOException
@@ -112,47 +112,47 @@ public class BERInputStream
             case SEQUENCE | CONSTRUCTED:
                 BERConstructedSequence  seq = new BERConstructedSequence();
     
-				for (;;)
-				{
-					DERObject   obj = readObject();
+                for (;;)
+                {
+                    DERObject   obj = readObject();
 
-					if (obj == END_OF_STREAM)
-					{
-						break;
-					}
+                    if (obj == END_OF_STREAM)
+                    {
+                        break;
+                    }
 
-					seq.addObject(obj);
-				}
-				return seq;
+                    seq.addObject(obj);
+                }
+                return seq;
             case OCTET_STRING | CONSTRUCTED:
-				return buildConstructedOctetString(null, null);
+                return buildConstructedOctetString(null, null);
             default:
                 if ((tag & (TAGGED | CONSTRUCTED)) != 0)  
                 {
-					// with tagged object tag number is bottom 4 bits
+                    // with tagged object tag number is bottom 4 bits
                     BERTaggedObject tagObj = new BERTaggedObject(tag & 0x0f, readObject());
-					DERObject		o = readObject();
+                    DERObject        o = readObject();
 
-					if (o == END_OF_STREAM)
-					{
-						return tagObj;
-					}
-					else if (o instanceof DEROctetString
-							&& tagObj.getObject() instanceof DEROctetString)
-					{
-						//
-						// it's an implicit object - mark it as so...
-						//
-						tagObj = new BERTaggedObject(false, tag & 0x0f, 
-										buildConstructedOctetString((DEROctetString)tagObj.getObject(), (DEROctetString)o));
+                    if (o == END_OF_STREAM)
+                    {
+                        return tagObj;
+                    }
+                    else if (o instanceof DEROctetString
+                            && tagObj.getObject() instanceof DEROctetString)
+                    {
+                        //
+                        // it's an implicit object - mark it as so...
+                        //
+                        tagObj = new BERTaggedObject(false, tag & 0x0f, 
+                                        buildConstructedOctetString((DEROctetString)tagObj.getObject(), (DEROctetString)o));
 
-						return tagObj;
-					}
+                        return tagObj;
+                    }
 
-					throw new IOException("truncated tagged object");
+                    throw new IOException("truncated tagged object");
                 }
     
-            	bytes = readIndefiniteLengthFully();
+                bytes = readIndefiniteLengthFully();
 
                 return buildObject(tag, bytes);
             }
@@ -168,7 +168,7 @@ public class BERInputStream
     
             readFully(bytes);
     
-			return buildObject(tag, bytes);
+            return buildObject(tag, bytes);
         }
     }
 }
