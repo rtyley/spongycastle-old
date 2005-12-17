@@ -24,6 +24,7 @@ public class SlotTwoTest
     public void performTest() 
         throws Exception
     {
+        Security.removeProvider("BC");
         Security.insertProviderAt(new BouncyCastleProvider(), 2);
 
         KeyGenerator keyGen = KeyGenerator.getInstance("DESede", "BC");
@@ -38,6 +39,9 @@ public class SlotTwoTest
         testDesEde(key, "CTR", "PKCS7Padding");
         testDesEde(key, "OFB", "PKCS7Padding");
         testDesEde(key, "CFB", "PKCS7Padding");
+        
+        Security.removeProvider("BC");
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     private void testDesEde(

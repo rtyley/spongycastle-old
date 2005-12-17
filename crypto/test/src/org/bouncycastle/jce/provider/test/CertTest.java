@@ -12,6 +12,7 @@ import java.security.Security;
 import java.security.cert.CRL;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
@@ -28,6 +29,7 @@ import java.util.Iterator;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -52,12 +54,10 @@ import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class CertTest
-    implements Test
+    extends SimpleTest
 {
     //
     // server.crt
@@ -339,27 +339,27 @@ public class CertTest
         + "PHayXOw=");
 
     byte[] nameCert = Base64.decode(
-            "MIIEFjCCA3+gAwIBAgIEdS8BozANBgkqhkiG9w0BAQUFADBKMQswCQYDVQQGEwJE" +
-            "RTERMA8GA1UEChQIREFURVYgZUcxKDAMBgcCggYBCgcUEwExMBgGA1UEAxQRQ0Eg" +
-            "REFURVYgRDAzIDE6UE4wIhgPMjAwMTA1MTAxMDIyNDhaGA8yMDA0MDUwOTEwMjI0" +
-            "OFowgYQxCzAJBgNVBAYTAkRFMQ8wDQYDVQQIFAZCYXllcm4xEjAQBgNVBAcUCU7I" +
-            "dXJuYmVyZzERMA8GA1UEChQIREFURVYgZUcxHTAbBgNVBAUTFDAwMDAwMDAwMDA4" +
-            "OTU3NDM2MDAxMR4wHAYDVQQDFBVEaWV0bWFyIFNlbmdlbmxlaXRuZXIwgaEwDQYJ" +
-            "KoZIhvcNAQEBBQADgY8AMIGLAoGBAJLI/LJLKaHoMk8fBECW/od8u5erZi6jI8Ug" +
-            "C0a/LZyQUO/R20vWJs6GrClQtXB+AtfiBSnyZOSYzOdfDI8yEKPEv8qSuUPpOHps" +
-            "uNCFdLZF1vavVYGEEWs2+y+uuPmg8q1oPRyRmUZ+x9HrDvCXJraaDfTEd9olmB/Z" +
-            "AuC/PqpjAgUAwAAAAaOCAcYwggHCMAwGA1UdEwEB/wQCMAAwDwYDVR0PAQH/BAUD" +
-            "AwdAADAxBgNVHSAEKjAoMCYGBSskCAEBMB0wGwYIKwYBBQUHAgEWD3d3dy56cy5k" +
-            "YXRldi5kZTApBgNVHREEIjAggR5kaWV0bWFyLnNlbmdlbmxlaXRuZXJAZGF0ZXYu" +
-            "ZGUwgYQGA1UdIwR9MHuhc6RxMG8xCzAJBgNVBAYTAkRFMT0wOwYDVQQKFDRSZWd1" +
-            "bGllcnVuZ3NiZWjIb3JkZSBmyHVyIFRlbGVrb21tdW5pa2F0aW9uIHVuZCBQb3N0" +
-            "MSEwDAYHAoIGAQoHFBMBMTARBgNVBAMUCjVSLUNBIDE6UE6CBACm8LkwDgYHAoIG" +
-            "AQoMAAQDAQEAMEcGA1UdHwRAMD4wPKAUoBKGEHd3dy5jcmwuZGF0ZXYuZGWiJKQi" +
-            "MCAxCzAJBgNVBAYTAkRFMREwDwYDVQQKFAhEQVRFViBlRzAWBgUrJAgDBAQNMAsT" +
-            "A0VVUgIBBQIBATAdBgNVHQ4EFgQUfv6xFP0xk7027folhy+ziZvBJiwwLAYIKwYB" +
-            "BQUHAQEEIDAeMBwGCCsGAQUFBzABhhB3d3cuZGlyLmRhdGV2LmRlMA0GCSqGSIb3" +
-            "DQEBBQUAA4GBAEOVX6uQxbgtKzdgbTi6YLffMftFr2mmNwch7qzpM5gxcynzgVkg" +
-            "pnQcDNlm5AIbS6pO8jTCLfCd5TZ5biQksBErqmesIl3QD+VqtB+RNghxectZ3VEs" +
+            "MIIEFjCCA3+gAwIBAgIEdS8BozANBgkqhkiG9w0BAQUFADBKMQswCQYDVQQGEwJE"+
+            "RTERMA8GA1UEChQIREFURVYgZUcxKDAMBgcCggYBCgcUEwExMBgGA1UEAxQRQ0Eg"+
+            "REFURVYgRDAzIDE6UE4wIhgPMjAwMTA1MTAxMDIyNDhaGA8yMDA0MDUwOTEwMjI0"+
+            "OFowgYQxCzAJBgNVBAYTAkRFMQ8wDQYDVQQIFAZCYXllcm4xEjAQBgNVBAcUCU7I"+
+            "dXJuYmVyZzERMA8GA1UEChQIREFURVYgZUcxHTAbBgNVBAUTFDAwMDAwMDAwMDA4"+
+            "OTU3NDM2MDAxMR4wHAYDVQQDFBVEaWV0bWFyIFNlbmdlbmxlaXRuZXIwgaEwDQYJ"+
+            "KoZIhvcNAQEBBQADgY8AMIGLAoGBAJLI/LJLKaHoMk8fBECW/od8u5erZi6jI8Ug"+
+            "C0a/LZyQUO/R20vWJs6GrClQtXB+AtfiBSnyZOSYzOdfDI8yEKPEv8qSuUPpOHps"+
+            "uNCFdLZF1vavVYGEEWs2+y+uuPmg8q1oPRyRmUZ+x9HrDvCXJraaDfTEd9olmB/Z"+
+            "AuC/PqpjAgUAwAAAAaOCAcYwggHCMAwGA1UdEwEB/wQCMAAwDwYDVR0PAQH/BAUD"+
+            "AwdAADAxBgNVHSAEKjAoMCYGBSskCAEBMB0wGwYIKwYBBQUHAgEWD3d3dy56cy5k"+
+            "YXRldi5kZTApBgNVHREEIjAggR5kaWV0bWFyLnNlbmdlbmxlaXRuZXJAZGF0ZXYu"+
+            "ZGUwgYQGA1UdIwR9MHuhc6RxMG8xCzAJBgNVBAYTAkRFMT0wOwYDVQQKFDRSZWd1"+
+            "bGllcnVuZ3NiZWjIb3JkZSBmyHVyIFRlbGVrb21tdW5pa2F0aW9uIHVuZCBQb3N0"+
+            "MSEwDAYHAoIGAQoHFBMBMTARBgNVBAMUCjVSLUNBIDE6UE6CBACm8LkwDgYHAoIG"+
+            "AQoMAAQDAQEAMEcGA1UdHwRAMD4wPKAUoBKGEHd3dy5jcmwuZGF0ZXYuZGWiJKQi"+
+            "MCAxCzAJBgNVBAYTAkRFMREwDwYDVQQKFAhEQVRFViBlRzAWBgUrJAgDBAQNMAsT"+
+            "A0VVUgIBBQIBATAdBgNVHQ4EFgQUfv6xFP0xk7027folhy+ziZvBJiwwLAYIKwYB"+
+            "BQUHAQEEIDAeMBwGCCsGAQUFBzABhhB3d3cuZGlyLmRhdGV2LmRlMA0GCSqGSIb3"+
+            "DQEBBQUAA4GBAEOVX6uQxbgtKzdgbTi6YLffMftFr2mmNwch7qzpM5gxcynzgVkg"+
+            "pnQcDNlm5AIbS6pO8jTCLfCd5TZ5biQksBErqmesIl3QD+VqtB+RNghxectZ3VEs"+
     "nCUtcE7tJ8O14qwCb3TxS9dvIUFiVi4DjbxX46TdcTbTaK8/qr6AIf+l");
     
     byte[] probSelfSignedCert = Base64.decode(
@@ -490,7 +490,7 @@ public class CertTest
         return "CertTest";
     }
 
-    public TestResult checkCertificate(
+    public void checkCertificate(
         int     id,
         byte[]  bytes)
     {
@@ -510,13 +510,12 @@ public class CertTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, dump + System.getProperty("line.separator") + getName() + ": " + id + " failed - exception " + e.toString(), e);
+            fail(dump + System.getProperty("line.separator") + getName() + ": "+ id + " failed - exception " + e.toString(), e);
         }
 
-        return new SimpleTestResult(true, getName() + ": " + id + " Okay");
     }
 
-    public TestResult checkNameCertificate(
+    public void checkNameCertificate(
         int     id,
         byte[]  bytes)
     {
@@ -534,19 +533,18 @@ public class CertTest
             PublicKey    k = cert.getPublicKey();
             if (!cert.getIssuerDN().toString().equals("C=DE,O=DATEV eG,0.2.262.1.10.7.20=1+CN=CA DATEV D03 1:PN"))
             {
-                return new SimpleTestResult(false, getName() + ": " + id + " failed - name test.");
+                fail(id + " failed - name test.");
             }
             // System.out.println(cert);
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, dump + System.getProperty("line.separator") + getName() + ": " + id + " failed - exception " + e.toString(), e);
+            fail(dump + System.getProperty("line.separator") + getName() + ": "+ id + " failed - exception " + e.toString(), e);
         }
 
-        return new SimpleTestResult(true, getName() + ": " + id + " Okay");
     }
 
-    public TestResult checkKeyUsage(
+    public void checkKeyUsage(
         int     id,
         byte[]  bytes)
     {
@@ -565,21 +563,20 @@ public class CertTest
 
             if (cert.getKeyUsage()[7])
             {
-                return new SimpleTestResult(false, getName() + ": error generating cert - key usage wrong.");
+                fail("error generating cert - key usage wrong.");
             }
 
             // System.out.println(cert);
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, dump + System.getProperty("line.separator") + getName() + ": " + id + " failed - exception " + e.toString(), e);
+            fail(dump + System.getProperty("line.separator") + getName() + ": "+ id + " failed - exception " + e.toString(), e);
         }
 
-        return new SimpleTestResult(true, getName() + ": " + id + " Okay");
     }
 
 
-    public TestResult checkSelfSignedCertificate(
+    public void checkSelfSignedCertificate(
         int     id,
         byte[]  bytes)
     {
@@ -601,16 +598,16 @@ public class CertTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, dump + System.getProperty("line.separator") + getName() + ": " + id + " failed - exception " + e.toString(), e);
+            fail(dump + System.getProperty("line.separator") + getName() + ": "+ id + " failed - exception " + e.toString(), e);
         }
 
-        return new SimpleTestResult(true, getName() + ": " + id + " Okay");
     }
 
     /**
      * we generate a self signed certificate for the sake of testing - RSA
      */
-    public TestResult checkCreation1()
+    public void checkCreation1()
+        throws Exception
     {
         //
         // a sample key pair.
@@ -636,17 +633,10 @@ public class CertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        try
-        {
-            KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
 
-            privKey = fact.generatePrivate(privKeySpec);
-            pubKey = fact.generatePublic(pubKeySpec);
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": error setting up keys - " + e.toString());
-        }
+        privKey = fact.generatePrivate(privKeySpec);
+        pubKey = fact.generatePublic(pubKeySpec);
 
         //
         // distinguished name table.
@@ -691,21 +681,14 @@ public class CertTest
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
-        try
-        {
-            X509Certificate cert = certGen.generateX509Certificate(privKey);
+        X509Certificate cert = certGen.generateX509Certificate(privKey);
 
-            cert.checkValidity(new Date());
+        cert.checkValidity(new Date());
 
-            cert.verify(pubKey);
+        cert.verify(pubKey);
 
-            Set dummySet = cert.getNonCriticalExtensionOIDs();
-            dummySet = cert.getNonCriticalExtensionOIDs();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": error setting generating cert - " + e.toString());
-        }
+        Set dummySet = cert.getNonCriticalExtensionOIDs();
+        dummySet = cert.getNonCriticalExtensionOIDs();
 
         //
         // create the certificate - version 3 - with extensions
@@ -726,49 +709,42 @@ public class CertTest
         certGen.addExtension("2.5.29.17", true,
             new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
 
-        try
+        cert = certGen.generateX509Certificate(privKey);
+
+        cert.checkValidity(new Date());
+
+        cert.verify(pubKey);
+
+        ByteArrayInputStream   sbIn = new ByteArrayInputStream(cert.getEncoded());
+        ASN1InputStream        sdIn = new ASN1InputStream(sbIn);
+        ByteArrayInputStream   bIn = new ByteArrayInputStream(cert.getEncoded());
+        CertificateFactory     certFact = CertificateFactory.getInstance("X.509", "BC");
+
+        cert = (X509Certificate)certFact.generateCertificate(bIn);
+
+        if (!cert.getKeyUsage()[7])
         {
-            X509Certificate cert = certGen.generateX509Certificate(privKey);
-
-            cert.checkValidity(new Date());
-
-            cert.verify(pubKey);
-
-            ByteArrayInputStream   sbIn = new ByteArrayInputStream(cert.getEncoded());
-            ASN1InputStream        sdIn = new ASN1InputStream(sbIn);
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(cert.getEncoded());
-            CertificateFactory     fact = CertificateFactory.getInstance("X.509", "BC");
-
-            cert = (X509Certificate)fact.generateCertificate(bIn);
-
-            if (!cert.getKeyUsage()[7])
-            {
-                return new SimpleTestResult(false, getName() + ": error generating cert - key usage wrong.");
-            }
-            
-            List l = cert.getExtendedKeyUsage();
-            if (!l.get(0).equals(KeyPurposeId.anyExtendedKeyUsage.getId()))
-            {
-                return new SimpleTestResult(false, getName() + ": failed extended key usage test");
-            }
-
-            Collection c = cert.getSubjectAlternativeNames();
-            Iterator   it = c.iterator();
-            while (it.hasNext())
-            {
-                List    gn = (List)it.next();
-                if (!gn.get(1).equals("test@test.test"))
-                {
-                    return new SimpleTestResult(false, getName() + ": failed subject alternative names test");
-                }
-            }
-
-            // System.out.println(cert);
+            fail("error generating cert - key usage wrong.");
         }
-        catch (Exception e)
+        
+        List l = cert.getExtendedKeyUsage();
+        if (!l.get(0).equals(KeyPurposeId.anyExtendedKeyUsage.getId()))
         {
-            return new SimpleTestResult(false, getName() + ": error setting generating cert - " + e.toString(), e);
+            fail("failed extended key usage test");
         }
+
+        Collection c = cert.getSubjectAlternativeNames();
+        Iterator   it = c.iterator();
+        while (it.hasNext())
+        {
+            List    gn = (List)it.next();
+            if (!gn.get(1).equals("test@test.test"))
+            {
+                fail("failed subject alternative names test");
+            }
+        }
+
+        // System.out.println(cert);
 
         //
         // create the certificate - version 1
@@ -783,37 +759,28 @@ public class CertTest
         certGen1.setPublicKey(pubKey);
         certGen1.setSignatureAlgorithm("MD5WithRSAEncryption");
 
-        try
+        cert = certGen1.generateX509Certificate(privKey);
+
+        cert.checkValidity(new Date());
+
+        cert.verify(pubKey);
+
+        bIn = new ByteArrayInputStream(cert.getEncoded());
+        certFact = CertificateFactory.getInstance("X.509", "BC");
+
+        cert = (X509Certificate)certFact.generateCertificate(bIn);
+
+        // System.out.println(cert);
+        if (!cert.getIssuerDN().equals(cert.getSubjectDN()))
         {
-            X509Certificate cert = certGen1.generateX509Certificate(privKey);
-
-            cert.checkValidity(new Date());
-
-            cert.verify(pubKey);
-
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
-
-            cert = (X509Certificate)fact.generateCertificate(bIn);
-
-            // System.out.println(cert);
-            if (!cert.getIssuerDN().equals(cert.getSubjectDN()))
-            {
-                return new SimpleTestResult(false, getName() + ": name comparison fails");
-            }
+            fail("name comparison fails");
         }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": error setting generating cert - " + e.toString());
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
     /**
      * we generate a self signed certificate for the sake of testing - DSA
      */
-    public TestResult checkCreation2()
+    public void checkCreation2()
     {
         //
         // set up the keys
@@ -834,7 +801,8 @@ public class CertTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": error setting up keys - " + e.toString());
+            fail("error setting up keys - " + e.toString());
+            return;
         }
 
         //
@@ -882,7 +850,7 @@ public class CertTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": error setting generating cert - " + e.toString());
+            fail("error setting generating cert - " + e.toString());
         }
 
         //
@@ -915,16 +883,15 @@ public class CertTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": error setting generating cert - " + e.toString());
+            fail("error setting generating cert - " + e.toString());
         }
 
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
     /**
      * we generate a self signed certificate for the sake of testing - ECDSA
      */
-    public TestResult checkCreation3()
+    public void checkCreation3()
     {
         ECCurve curve = new ECCurve.Fp(
             new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
@@ -960,7 +927,8 @@ public class CertTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": error setting up keys - " + e.toString());
+            fail("error setting up keys - " + e.toString());
+            return;
         }
 
         //
@@ -990,7 +958,7 @@ public class CertTest
 
         if (!s.equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne,ST=Victoria,E=feedback-crypto@bouncycastle.org"))
         {
-            return new SimpleTestResult(false, getName() + ": ordered X509Principal test failed - s = " + s + ".");
+            fail("ordered X509Principal test failed - s = " + s + ".");
         }
 
         p = new X509Principal(attrs);
@@ -1001,7 +969,7 @@ public class CertTest
         //
         if (!s.equals("O=The Legion of the Bouncy Castle,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU") && !s.equals("ST=Victoria,L=Melbourne,C=AU,E=feedback-crypto@bouncycastle.org,O=The Legion of the Bouncy Castle"))
         {
-            return new SimpleTestResult(false, getName() + ": unordered X509Principal test failed.");
+            fail("unordered X509Principal test failed.");
         }
 
         //
@@ -1051,27 +1019,26 @@ public class CertTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": error setting generating cert - " + e.toString());
+            fail("error setting generating cert - " + e.toString());
         }
 
         X509Principal pr = new X509Principal("O=\"The Bouncy Castle, The Legion of\",E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU");
 
         if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU"))
         {
-            return new SimpleTestResult(false, getName() + ": string based X509Principal test failed.");
+            fail("string based X509Principal test failed.");
         }
 
         pr = new X509Principal("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU");
 
         if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU"))
         {
-            return new SimpleTestResult(false, getName() + ": string based X509Principal test failed.");
+            fail("string based X509Principal test failed.");
         }
 
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
-    public TestResult checkCRL(
+    public void checkCRL(
         int     id,
         byte[]  bytes)
     {
@@ -1090,13 +1057,12 @@ public class CertTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, dump + System.getProperty("line.separator") + getName() + ": " + id + " failed - exception " + e.toString(), e);
+            fail(dump + System.getProperty("line.separator") + getName() + ": "+ id + " failed - exception " + e.toString(), e);
         }
 
-        return new SimpleTestResult(true, getName() + ": " + id + " Okay");
     }
 
-    public TestResult checkCRLCreation()
+    public void checkCRLCreation()
     {
         try
         {
@@ -1119,14 +1085,14 @@ public class CertTest
             
             if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
             {
-                return new SimpleTestResult(false, getName() + ": failed CRL issuer test");
+                fail("failed CRL issuer test");
             }
             
             byte[] authExt = crl.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
             
             if (authExt == null)
             {
-                return new SimpleTestResult(false, getName() + ": failed to find CRL extension");
+                fail("failed to find CRL extension");
             }
             
             AuthorityKeyIdentifier authId = new AuthorityKeyIdentifierStructure(authExt);
@@ -1135,17 +1101,17 @@ public class CertTest
             
             if (entry == null)
             {
-                return new SimpleTestResult(false, getName() + ": failed to find CRL entry");
+                fail("failed to find CRL entry");
             }
             
             if (!entry.getSerialNumber().equals(BigInteger.ONE))
             {
-                return new SimpleTestResult(false, getName() + ": CRL cert serial number does not match");
+                fail("CRL cert serial number does not match");
             }
             
             if (!entry.hasExtensions())
             {
-                return new SimpleTestResult(false, getName() + ": CRL entry extension not found");
+                fail("CRL entry extension not found");
             }
 
             byte[]  ext = entry.getExtensionValue(X509Extensions.ReasonCode.getId());
@@ -1156,26 +1122,25 @@ public class CertTest
                                                                            
                 if (reasonCode.getValue().intValue() != CRLReason.privilegeWithdrawn)
                 {
-                    return new SimpleTestResult(false, getName() + ": CRL entry reasonCode wrong");
+                    fail("CRL entry reasonCode wrong");
                 }
             }
             else
             {
-                return new SimpleTestResult(false, getName() + ": CRL entry reasonCode not found");
+                fail("CRL entry reasonCode not found");
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": CRLCreation failed - exception " + e.toString(), e);
+            fail("CRLCreation failed - exception " + e.toString(), e);
         }
-
-        return new SimpleTestResult(true, getName() + ": CRLCreation Okay");
     }
     
     /**
      * we generate a self signed certificate for the sake of testing - GOST3410
      */
-    public TestResult checkCreation4()
+    public void checkCreation4()
+        throws Exception
     {
         //
         // set up the keys
@@ -1183,22 +1148,15 @@ public class CertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        try
-        {
-            KeyPairGenerator    g = KeyPairGenerator.getInstance("GOST3410", "BC");
-            GOST3410ParameterSpec gost3410P = new GOST3410ParameterSpec("GostR3410-94-CryptoPro-A");
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("GOST3410", "BC");
+        GOST3410ParameterSpec gost3410P = new GOST3410ParameterSpec("GostR3410-94-CryptoPro-A");
 
-            g.initialize(gost3410P, new SecureRandom());
+        g.initialize(gost3410P, new SecureRandom());
 
-            KeyPair p = g.generateKeyPair();
+        KeyPair p = g.generateKeyPair();
 
-            privKey = p.getPrivate();
-            pubKey = p.getPublic();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": error setting up keys - " + e.toString());
-        }
+        privKey = p.getPrivate();
+        pubKey = p.getPublic();
 
         //
         // distinguished name table.
@@ -1228,183 +1186,189 @@ public class CertTest
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("GOST3411withGOST3410");
 
-        try
-        {
-            X509Certificate cert = certGen.generateX509Certificate(privKey);
+        X509Certificate cert = certGen.generateX509Certificate(privKey);
 
-            cert.checkValidity(new Date());
+        cert.checkValidity(new Date());
 
-            //
-            // check verifies in general
-            //
-            cert.verify(pubKey);
+        //
+        // check verifies in general
+        //
+        cert.verify(pubKey);
 
-            //
-            // check verifies with contained key
-            //
-            cert.verify(cert.getPublicKey());
-            
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
+        //
+        // check verifies with contained key
+        //
+        cert.verify(cert.getPublicKey());
+        
+        ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
+        CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
 
-            cert = (X509Certificate)fact.generateCertificate(bIn);
+        cert = (X509Certificate)fact.generateCertificate(bIn);
 
-            //System.out.println(cert);
+        //System.out.println(cert);
 
-            //check getEncoded()
-            byte[]  bytesch = cert.getEncoded();
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": error setting generating cert - " + e.toString(), e);
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        //check getEncoded()
+        byte[]  bytesch = cert.getEncoded();
     }
     
-    public TestResult perform()
+    public void checkCreation5()
+        throws Exception
     {
-        TestResult  res;
+        //
+        // a sample key pair.
+        //
+        RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
+            new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
+            new BigInteger("11", 16));
+    
+        RSAPrivateCrtKeySpec privKeySpec = new RSAPrivateCrtKeySpec(
+            new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
+            new BigInteger("11", 16),
+            new BigInteger("9f66f6b05410cd503b2709e88115d55daced94d1a34d4e32bf824d0dde6028ae79c5f07b580f5dce240d7111f7ddb130a7945cd7d957d1920994da389f490c89", 16),
+            new BigInteger("c0a0758cdf14256f78d4708c86becdead1b50ad4ad6c5c703e2168fbf37884cb", 16),
+            new BigInteger("f01734d7960ea60070f1b06f2bb81bfac48ff192ae18451d5e56c734a5aab8a5", 16),
+            new BigInteger("b54bb9edff22051d9ee60f9351a48591b6500a319429c069a3e335a1d6171391", 16),
+            new BigInteger("d3d83daf2a0cecd3367ae6f8ae1aeb82e9ac2f816c6fc483533d8297dd7884cd", 16),
+            new BigInteger("b8f52fc6f38593dabb661d3f50f8897f8106eee68b1bce78a95b132b4e5b5d19", 16));
+    
+        //
+        // set up the keys
+        //
+        SecureRandom        rand = new SecureRandom();
+        PrivateKey          privKey;
+        PublicKey           pubKey;
+    
+        KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+    
+        privKey = fact.generatePrivate(privKeySpec);
+        pubKey = fact.generatePublic(pubKeySpec);
+    
+        //
+        // distinguished name table.
+        //
+        Hashtable                   attrs = new Hashtable();
+    
+        attrs.put(X509Principal.C, "AU");
+        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
+        attrs.put(X509Principal.L, "Melbourne");
+        attrs.put(X509Principal.ST, "Victoria");
+        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+    
+        Vector                      ord = new Vector();
+        Vector                      values = new Vector();
+    
+        ord.addElement(X509Principal.C);
+        ord.addElement(X509Principal.O);
+        ord.addElement(X509Principal.L);
+        ord.addElement(X509Principal.ST);
+        ord.addElement(X509Principal.E);
+    
+        values.addElement("AU");
+        values.addElement("The Legion of the Bouncy Castle");
+        values.addElement("Melbourne");
+        values.addElement("Victoria");
+        values.addElement("feedback-crypto@bouncycastle.org");
+    
+        //
+        // create base certificate - version 3
+        //
+        X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
+    
+        certGen.setSerialNumber(BigInteger.valueOf(1));
+        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
+        certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
+        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setPublicKey(pubKey);
+        certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
+        certGen.addExtension("2.5.29.15", true,
+            new X509KeyUsage(X509KeyUsage.encipherOnly));
+        certGen.addExtension("2.5.29.37", true,
+            new DERSequence(KeyPurposeId.anyExtendedKeyUsage));
+        certGen.addExtension("2.5.29.17", true,
+            new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
+    
+        X509Certificate baseCert = certGen.generateX509Certificate(privKey);
+        
+        //
+        // copy certificate
+        //
+        certGen = new X509V3CertificateGenerator();
+        
+        certGen.setSerialNumber(BigInteger.valueOf(1));
+        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
+        certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
+        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setPublicKey(pubKey);
+        certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
 
-        res = checkCertificate(1, cert1);
-        if (!res.isSuccessful())
+        certGen.copyAndAddExtension(new DERObjectIdentifier("2.5.29.15"), true, baseCert);
+        certGen.copyAndAddExtension("2.5.29.37", false, baseCert);
+        
+        X509Certificate cert = certGen.generateX509Certificate(privKey);
+        
+        cert.checkValidity(new Date());
+    
+        cert.verify(pubKey);
+    
+        if (!areEqual(baseCert.getExtensionValue("2.5.29.15"), cert.getExtensionValue("2.5.29.15")))
         {
-            return res;
-        }
-
-        res = checkCertificate(2, cert2);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(4, cert4);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(5, cert5);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(6, oldEcdsa);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCertificate(7, cert7);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkKeyUsage(8, keyUsage);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkSelfSignedCertificate(9, uncompressedPtEC);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkNameCertificate(10, nameCert);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkSelfSignedCertificate(11, probSelfSignedCert);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkSelfSignedCertificate(12, gostCA1);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkSelfSignedCertificate(13, gostCA2);
-        if (!res.isSuccessful())
-        {
-            return res;
+            fail("2.5.29.15 differs");
         }
         
-        res = checkSelfSignedCertificate(14, gost341094base);
-        if (!res.isSuccessful())
+        if (!areEqual(baseCert.getExtensionValue("2.5.29.37"), cert.getExtensionValue("2.5.29.37")))
         {
-            return res;
-        }
-
-        res = checkSelfSignedCertificate(15, gost34102001base);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkSelfSignedCertificate(16, gost341094A);
-        if (!res.isSuccessful())
-        {
-            return res;
+            fail("2.5.29.37 differs");
         }
         
-        res = checkSelfSignedCertificate(17, gost341094B);
-        if (!res.isSuccessful())
+        //
+        // exception test
+        //
+        try
         {
-            return res;
+            certGen.copyAndAddExtension("2.5.99.99", true, baseCert);
+            
+            fail("exception not thrown on dud extension copy");
         }
-
-        res = checkSelfSignedCertificate(17, gost34102001A);
-        if (!res.isSuccessful())
+        catch (CertificateParsingException e)
         {
-            return res;
+            // expected
         }
+    }
+    
+    public void performTest()
+        throws Exception
+    {
+        checkCertificate(1, cert1);
+        checkCertificate(2, cert2);
+        checkCertificate(4, cert4);
+        checkCertificate(5, cert5);
+        checkCertificate(6, oldEcdsa);
+        checkCertificate(7, cert7);
         
-        res = checkCRL(1, crl1);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCreation1();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCreation2();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCreation3();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = checkCRLCreation();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
+        checkKeyUsage(8, keyUsage);
+        checkSelfSignedCertificate(9, uncompressedPtEC);
+        checkNameCertificate(10, nameCert);
         
-        res = checkCreation4();
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
+        checkSelfSignedCertificate(11, probSelfSignedCert);
+        checkSelfSignedCertificate(12, gostCA1);
+        checkSelfSignedCertificate(13, gostCA2);
+        checkSelfSignedCertificate(14, gost341094base);
+        checkSelfSignedCertificate(15, gost34102001base);
+        checkSelfSignedCertificate(16, gost341094A);
+        checkSelfSignedCertificate(17, gost341094B);
+        checkSelfSignedCertificate(17, gost34102001A);
         
-        return new SimpleTestResult(true, getName() + ": Okay");
+        checkCRL(1, crl1);
+        
+        checkCreation1();
+        checkCreation2();
+        checkCreation3();
+        checkCreation4();
+        checkCreation5();
+        
+        checkCRLCreation();
     }
 
     public static void main(
@@ -1412,10 +1376,6 @@ public class CertTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test    test = new CertTest();
-
-        TestResult  result = test.perform();
-
-        System.out.println(result);
+        runTest(new CertTest());
     }
 }

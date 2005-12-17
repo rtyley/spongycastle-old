@@ -1,5 +1,6 @@
 package org.bouncycastle.mail.smime.test;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.KeyPair;
@@ -68,11 +69,15 @@ public class SMIMEEnvelopedTest
     public static Test suite() 
         throws Exception 
     {
-        init();
-        
         return new SMIMETestSetup(new TestSuite(SMIMEEnvelopedTest.class));
     }
 
+    public void setUp()
+        throws Exception
+    {
+        init();
+    }
+    
     public void testHeaders()
         throws Exception
     {
