@@ -58,6 +58,7 @@ src/org/bouncycastle/util src/org/bouncycastle/bcpg src/org/bouncycastle/asn1 | 
     org.bouncycastle.asn1.cmp \
     org.bouncycastle.asn1.cms \
     org.bouncycastle.asn1.cryptopro \
+    org.bouncycastle.asn1.esf \
     org.bouncycastle.asn1.ess \
     org.bouncycastle.asn1.misc \
     org.bouncycastle.asn1.mozilla \

@@ -41,7 +41,7 @@
             <mkdir dir="${build.dir}/@{target}/classes" />
             <mkdir dir="${artifacts.dir}/@{target}" />
 
-            <javac srcdir="${artifacts.dir}/@{target}/src" destdir="${build.dir}/@{target}/classes">
+            <javac srcdir="${artifacts.dir}/@{target}/src" destdir="${build.dir}/@{target}/classes" debug="${release.debug}">
                 <classpath>
                     <fileset dir="${artifacts.jars.dir}">
                         <include name="**/*.jar" />
@@ -66,6 +66,7 @@
         <attribute name="docsDir" />
         <element name="docElements" />
         <sequential>
+        <mkdir dir="@{docsDir}" />
         <javadoc sourcepath="@{srcDir}"
                  destdir="@{docsDir}"
                  windowtitle="Bouncy Castle Library ${release.name} API Specification"
@@ -124,7 +125,7 @@
              <fileset dir="${src.dir}" includes="**/*.pem" />
         </copy>
 
-        <javac srcdir="${target.src.dir}" destdir="${target.classes.dir}">
+        <javac srcdir="${target.src.dir}" destdir="${target.classes.dir}" debug="${release.debug}">
         </javac>
     </target>
 
@@ -135,6 +136,7 @@
         <property name="provider" value="bcprov-${target.name}" />
 
         <mkdir dir="${artifacts.jars.dir}" />
+        <delete dir="${provider.target.dir}" />
         <mkdir dir="${provider.target.dir}" />
 
         <copyStandardFiles toDir="${provider.target.dir}" />
@@ -142,6 +144,8 @@
         <copy todir="${provider.target.src.dir}">
              <fileset dir="${src.dir}">
                  <exclude name="org/bouncycastle/**/test/*.java" />
+                 <exclude name="org/bouncycastle/**/test/nist/*.java" />
+                 <exclude name="org/bouncycastle/**/test/*.pem" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
@@ -149,7 +153,6 @@
                  <exclude name="org/bouncycastle/openpgp/**/*.java" />
                  <exclude name="org/bouncycastle/bcpg/**/*.java" />
              </fileset>
-             <fileset dir="${src.dir}" includes="**/*.pem" />
              <fileset dir="${src.dir}" includes="org/bouncycastle/util/test/*.java" />
         </copy>
 
@@ -283,6 +286,7 @@
 
         <copy todir="${test.target.src.dir}">
              <fileset dir="${src.dir}" includes="**/test/*.java" />
+             <fileset dir="${src.dir}" includes="**/test/nist/*.java" />
              <fileset dir="${src.dir}" includes="**/*.pem" />
         </copy>
 
@@ -306,6 +310,7 @@
                     <include name="**/*.jar" />
                 </fileset>
             </classpath>
+            <sysproperty key="bc.test.data.home" value="test/data" />
 
             <formatter type="xml" />
             <test name="${testcase}" todir="${artifacts.reports.xml.dir}" if="testcase" />
@@ -465,6 +470,34 @@
 
         <copy todir="${pg.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/bcpg" />
+       </copy>
+    </target>
+
+    <!--
+          Light Weight JavaDoc
+    -->
+    <target name="javadoc-lw">
+        <copy todir="${lcrypto.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/crypto/**/test/*.java" />
+                 <include name="org/bouncycastle/asn1/**/test/*.java" />
+             </fileset>
+        </copy>
+
+        <compileDoc srcDir="${lcrypto.target.src.dir}" docsDir="${artifacts.docs.dir}/lcrypto">
+            <docElements>
+                <package name="org.bouncycastle.asn1.*" />
+                <package name="org.bouncycastle.crypto.*" />
+                <package name="org.bouncycastle.math.*" />
+                <package name="org.bouncycastle.util.*" />
+                <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
+                <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
+                <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
+            </docElements>
+        </compileDoc>
+
+        <copy todir="${lcrypto.target.docs.dir}">
+             <fileset dir="${artifacts.docs.dir}/lcrypto" />
        </copy>
     </target>
 </project>

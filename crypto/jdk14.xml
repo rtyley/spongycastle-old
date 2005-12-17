@@ -8,8 +8,6 @@
     <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
     <property name="target.prefix" value="jdk14" />
 
-    <taskdef resource="checkstyletask.properties" />
-
     <target name="init">
         <mkdir dir="${src.dir}" />
         <mkdir dir="${artifacts.dir}" />
@@ -36,11 +34,18 @@
             <fileset dir="jdk1.4" includes="**/*.java" />
             <fileset dir="test/jdk1.4" includes="**/*.java" />
         </copy>
+    </target>
+
+    <target name="checkstyle-on" if="checkstyle.on">
+        <taskdef resource="checkstyletask.properties" />
         <checkstyle config="checkstyle/bc-checks.xml">
             <fileset dir="${src.dir}" includes="**/*.java"/>
             <formatter type="plain"/>
             <formatter type="xml" toFile="${artifacts.dir}/checkstyle/${jdk.name}-errors.xml"/>
         </checkstyle>
+    </target>
+    
+    <target name="checkstyle-off" unless="checkstyle.on">
     </target>
 
     <target name="build" depends="init">
@@ -52,7 +57,7 @@
         <ant antfile="bc-build.xml" dir="." target="build-lw" />
     </target>
 
-    <target name="build-provider" depends="init">
+    <target name="build-provider" depends="init,checkstyle-on,checkstyle-off">
         <ant antfile="bc-build.xml" dir="." target="build-provider" />
         <ant antfile="bc-build.xml" dir="." target="javadoc-provider" />
     </target>
