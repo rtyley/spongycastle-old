@@ -22,8 +22,8 @@ public class CMSTypedStream
         String      oid,
         InputStream in)
     {
-        this._oid = oid;
-        this._in = in;
+        _oid = oid;
+        _in = new FullReaderStream(in);
     }
 
     public String getContentType()
@@ -47,5 +47,49 @@ public class CMSTypedStream
         }
         
         _in.close();
+    }
+    
+    private class FullReaderStream
+        extends InputStream
+    {
+        InputStream _in;
+        
+        FullReaderStream(
+            InputStream in)
+        {
+            _in = in;
+        }
+        
+        public int read() 
+            throws IOException
+        {
+            return _in.read();
+        }
+        
+        public int read(
+            byte[] buf,
+            int    off,
+            int    len) 
+            throws IOException
+        {
+            int    rd = 0;
+            int    total = 0;
+            
+            while (len != 0 && (rd = _in.read(buf, off, len)) > 0)
+            {
+                off += rd;
+                len -= rd;
+                total += rd;
+            }
+            
+            if (total > 0)
+            {
+                return total;
+            }
+            else
+            {
+                return -1;
+            }
+        }
     }
 }

@@ -70,6 +70,12 @@ import org.bouncycastle.sasn1.cms.SignedDataParser;
  *          System.out.println("verify returns: " + signer.verify(cert, "BC"));
  *      }
  * </pre>
+ *  Note also: this class does not introduce buffering - if you are processing large files you should create
+ *  the parser with:
+ *  <pre>
+ *          CMSSignedDataParser     ep = new CMSSignedDataParser(new BufferedInputStream(encapSigData, bufSize));
+ *  </pre>
+ *  where bufSize is a suitably large buffer size.
  */
 public class CMSSignedDataParser
     extends CMSContentInfoParser

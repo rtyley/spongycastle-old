@@ -15,10 +15,16 @@ import org.bouncycastle.sasn1.cms.ContentInfoParser;
 /**
  * Class for reading a CMS Compressed Data stream.
  * <pre>
- *     CMSCompressedDataParser cp = new CMSCompressedDataParser(bOut.toByteArray());
+ *     CMSCompressedDataParser cp = new CMSCompressedDataParser(inputStream);
  *      
  *     process(cp.getContent().getContentStream());
  * </pre>
+ *  Note: this class does not introduce buffering - if you are processing large files you should create
+ *  the parser with:
+ *  <pre>
+ *      CMSCompressedDataParser     ep = new CMSCompressedDataParser(new BufferedInputStream(inputStream, bufSize));
+ *  </pre>
+ *  where bufSize is a suitably large buffer size.
  */
 public class CMSCompressedDataParser
     extends CMSContentInfoParser
