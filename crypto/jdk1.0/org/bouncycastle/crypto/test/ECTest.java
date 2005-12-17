@@ -94,7 +94,7 @@ class ECDSA192bitPrime
             params);
 
         ecdsa.init(false, pubKey);
-        if ( ecdsa.verifySignature(message, sig[0], sig[1]) )
+        if (ecdsa.verifySignature(message, sig[0], sig[1]))
         {
             return new SimpleTestResult(true, getName() + ": Okay");
         }

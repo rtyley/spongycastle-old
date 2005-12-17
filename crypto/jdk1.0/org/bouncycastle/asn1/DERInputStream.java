@@ -63,20 +63,20 @@ public class DERInputStream
 
         while ((left -= read(bytes, bytes.length - left, left)) != 0)
         {
-            ;
+            // do nothing
         }
     }
 
-	/**
-	 * build an object given its tag and a byte stream to construct it
-	 * from.
-	 */
+    /**
+     * build an object given its tag and a byte stream to construct it
+     * from.
+     */
     protected DERObject buildObject(
-		int	tag,
-		byte[]	bytes)
-		throws IOException
-	{
-		switch (tag)
+        int    tag,
+        byte[]    bytes)
+        throws IOException
+    {
+        switch (tag)
         {
         case NULL:
             return null;   
@@ -227,7 +227,7 @@ public class DERInputStream
 
             return new DERUnknownTag(tag, bytes);
         }
-	}
+    }
 
     public DERObject readObject()
         throws IOException
@@ -243,6 +243,6 @@ public class DERInputStream
 
         readFully(bytes);
 
-		return buildObject(tag, bytes);
-	}
+        return buildObject(tag, bytes);
+    }
 }

@@ -15,16 +15,16 @@ public class Dump
         BERInputStream  bIn = new BERInputStream(fIn);
         Object          obj = null;
 
-		try
-		{
-			while ((obj = bIn.readObject()) != null)
-			{
-				System.out.println(ASN1Dump.dumpAsString(obj));
-			}
-		}
-		catch (EOFException e)
-		{
-			// ignore
-		}
+        try
+        {
+            while ((obj = bIn.readObject()) != null)
+            {
+                System.out.println(ASN1Dump.dumpAsString(obj));
+            }
+        }
+        catch (EOFException e)
+        {
+            // ignore
+        }
     }
 }

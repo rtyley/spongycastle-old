@@ -36,7 +36,7 @@ class EOCObject
 public class ASN1InputStream
     extends DERInputStream
 {
-	private DERObject END_OF_STREAM = new EOCObject();
+    private DERObject END_OF_STREAM = new EOCObject();
 
     public ASN1InputStream(
         InputStream is)
@@ -106,16 +106,16 @@ public class ASN1InputStream
         }
     }
 
-	/**
-	 * build an object given its tag and a byte stream to construct it
-	 * from.
-	 */
+    /**
+     * build an object given its tag and a byte stream to construct it
+     * from.
+     */
     protected DERObject buildObject(
-		int	    tag,
-		byte[]	bytes)
-		throws IOException
-	{
-		switch (tag)
+        int        tag,
+        byte[]    bytes)
+        throws IOException
+    {
+        switch (tag)
         {
         case NULL:
             return new DERNull();   
@@ -236,7 +236,7 @@ public class ASN1InputStream
 
             return new DERUnknownTag(tag, bytes);
         }
-	}
+    }
 
     /**
      * read a string of bytes representing an indefinite length object.
@@ -251,10 +251,10 @@ public class ASN1InputStream
 
         while ((b = read()) >= 0)
         {
-			if (b1 == 0 && b == 0)
-			{
-				break;
-			}
+            if (b1 == 0 && b == 0)
+            {
+                break;
+            }
 
             bOut.write(b1);
             b1 = b;
@@ -263,25 +263,25 @@ public class ASN1InputStream
         return bOut.toByteArray();
     }
 
-	private BERConstructedOctetString buildConstructedOctetString()
-		throws IOException
-	{
+    private BERConstructedOctetString buildConstructedOctetString()
+        throws IOException
+    {
         Vector                  octs = new Vector();
 
-		for (;;)
-		{
-			DERObject		o = readObject();
+        for (;;)
+        {
+            DERObject        o = readObject();
 
-			if (o == END_OF_STREAM)
-			{
-				break;
-			}
+            if (o == END_OF_STREAM)
+            {
+                break;
+            }
 
             octs.addElement(o);
-		}
+        }
 
-		return new BERConstructedOctetString(octs);
-	}
+        return new BERConstructedOctetString(octs);
+    }
 
     public DERObject readObject()
         throws IOException
@@ -303,35 +303,35 @@ public class ASN1InputStream
             case SEQUENCE | CONSTRUCTED:
                 ASN1EncodableVector  v = new ASN1EncodableVector();
     
-				for (;;)
-				{
-					DERObject   obj = readObject();
+                for (;;)
+                {
+                    DERObject   obj = readObject();
 
-					if (obj == END_OF_STREAM)
-					{
-						break;
-					}
+                    if (obj == END_OF_STREAM)
+                    {
+                        break;
+                    }
 
-					v.add(obj);
-				}
-				return new BERSequence(v);
+                    v.add(obj);
+                }
+                return new BERSequence(v);
             case SET | CONSTRUCTED:
                 v = new ASN1EncodableVector();
     
-				for (;;)
-				{
-					DERObject   obj = readObject();
+                for (;;)
+                {
+                    DERObject   obj = readObject();
 
-					if (obj == END_OF_STREAM)
-					{
-						break;
-					}
+                    if (obj == END_OF_STREAM)
+                    {
+                        break;
+                    }
 
-					v.add(obj);
-				}
-				return new BERSet(v);
+                    v.add(obj);
+                }
+                return new BERSet(v);
             case OCTET_STRING | CONSTRUCTED:
-				return buildConstructedOctetString();
+                return buildConstructedOctetString();
             default:
                 //
                 // with tagged object tag number is bottom 5 bits
@@ -356,9 +356,9 @@ public class ASN1InputStream
                     //
                     // either constructed or explicitly tagged
                     //
-					DERObject		dObj = readObject();
+                    DERObject        dObj = readObject();
 
-					if (dObj == END_OF_STREAM)     // empty tag!
+                    if (dObj == END_OF_STREAM)     // empty tag!
                     {
                         return new DERTaggedObject(tag & 0x1f);
                     }
@@ -405,7 +405,7 @@ public class ASN1InputStream
     
             readFully(bytes);
     
-			return buildObject(tag, bytes);
+            return buildObject(tag, bytes);
         }
     }
 }

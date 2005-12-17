@@ -25,14 +25,14 @@ public class ASN1Dump
             String          tab = indent + TAB;
 
             buf.append(indent);
-			if (obj instanceof BERConstructedSequence)
-			{
-	            buf.append("BER ConstructedSequence");
-			}
-			else
-			{
-	            buf.append("ConstructedSequence");
-			}
+            if (obj instanceof BERConstructedSequence)
+            {
+                buf.append("BER ConstructedSequence");
+            }
+            else
+            {
+                buf.append("ConstructedSequence");
+            }
             buf.append(System.getProperty("line.separator"));
 
             while (e.hasMoreElements())
@@ -62,14 +62,14 @@ public class ASN1Dump
             String          tab = indent + TAB;
 
             buf.append(indent);
-			if (obj instanceof BERTaggedObject)
-			{
-            	buf.append("BER Tagged [");
-			}
-			else
-			{
-            	buf.append("Tagged [");
-			}
+            if (obj instanceof BERTaggedObject)
+            {
+                buf.append("BER Tagged [");
+            }
+            else
+            {
+                buf.append("Tagged [");
+            }
 
             DERTaggedObject o = (DERTaggedObject)obj;
 
@@ -215,15 +215,15 @@ public class ASN1Dump
     public static String dumpAsString(
         Object   obj)
     {
-		if (obj instanceof DERObject)
-		{
-        	return _dumpAsString("", (DERObject)obj);
-		}
-		else if (obj instanceof DEREncodable)
-		{
-        	return _dumpAsString("", ((DEREncodable)obj).getDERObject());
-		}
+        if (obj instanceof DERObject)
+        {
+            return _dumpAsString("", (DERObject)obj);
+        }
+        else if (obj instanceof DEREncodable)
+        {
+            return _dumpAsString("", ((DEREncodable)obj).getDERObject());
+        }
 
-		return "unknown object type " + obj.toString();
+        return "unknown object type " + obj.toString();
     }
 }

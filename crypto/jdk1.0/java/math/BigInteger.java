@@ -349,7 +349,7 @@ public class BigInteger
         }
         else
         {
-            for (; ; )
+            for (; ;)
             {
                 for (int i = 0; i < BYTES_PER_INT; i++)
                 {
@@ -717,7 +717,7 @@ public class BigInteger
             int cStart = 0;
             int iCountStart = 0;
 
-            for (; ; )
+            for (; ;)
             {
                 int cmp = compareTo(xStart, x, cStart, c);
 
@@ -852,19 +852,28 @@ public class BigInteger
     public boolean equals(Object val)
     {
         if (val == this)
+        {
             return true;
+        }
 
         if (!(val instanceof BigInteger))
+        {
             return false;
+        }
+
         BigInteger biggie = (BigInteger)val;
 
         if (biggie.sign != sign || biggie.magnitude.length != magnitude.length)
+        {
             return false;
+        }
 
         for (int i = 0; i < magnitude.length; i++)
         {
             if (biggie.magnitude[i] != magnitude[i])
+            {
                 return false;
+            }
         }
 
         return true;
@@ -1459,7 +1468,7 @@ public class BigInteger
         int nMinus1 = n - 1;
         long y_0 = y[n - 1] & IMASK;
 
-        // 1. a = 0 (Notation: a = (a_{n} a_{n-1} ... a_{0})_{b} )
+        // 1. a = 0 (Notation: a = (a_{n} a_{n-1} ... a_{0})_{b})
         for (int i = 0; i <= n; i++)
         {
             a[i] = 0;
@@ -1517,7 +1526,7 @@ public class BigInteger
 
     public BigInteger negate()
     {
-        return new BigInteger( -sign, magnitude);
+        return new BigInteger(-sign, magnitude);
     }
 
     public BigInteger pow(int exp) throws ArithmeticException
@@ -1576,7 +1585,7 @@ public class BigInteger
             int xStart = 0;
             int cStart = 0;
 
-            for (; ; )
+            for (; ;)
             {
                 int cmp = compareTo(xStart, x, cStart, c);
 
@@ -1717,7 +1726,7 @@ public class BigInteger
 
         if (n < 0)
         {
-            return shiftRight( -n);
+            return shiftRight(-n);
         }
 
         return new BigInteger(sign, shiftLeft(magnitude, n));
@@ -1796,12 +1805,12 @@ public class BigInteger
 
         if (n < 0)
         {
-            return shiftLeft( -n);
+            return shiftLeft(-n);
         }
 
         if (n >= bitLength())
         {
-            return (this.sign < 0 ? valueOf( -1) : BigInteger.ZERO);
+            return this.sign < 0 ? valueOf(-1) : BigInteger.ZERO;
         }
 
         int[] res = new int[this.magnitude.length];
@@ -1998,9 +2007,13 @@ public class BigInteger
             {
                 b = u.mod(base);
                 if (b.equals(BigInteger.ZERO))
+                {
                     S.push("0");
+                }
                 else
+                {
                     S.push(Integer.toString(b.magnitude[0], rdx));
+                }
                 u = u.divide(base);
             }
             // Then pop the stack
@@ -2009,12 +2022,18 @@ public class BigInteger
         }
         // Strip leading zeros.
         while (s.length() > 1 && s.charAt(0) == '0')
+        {
             s = s.substring(1);
+        }
 
         if (s.length() == 0)
+        {
             s = "0";
+        }
         else if (sign == -1)
+        {
             s = "-" + s;
+        }
 
         return s;
     }

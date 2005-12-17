@@ -55,7 +55,7 @@ public class AESTest
     public static void main(
         String[]    args)
     {
-        AESTest    		test = new AESTest();
+        AESTest            test = new AESTest();
         TestResult      result = test.perform();
 
         System.out.println(result);

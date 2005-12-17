@@ -32,16 +32,16 @@ import org.bouncycastle.asn1.DERUTCTime;
  */
 
 public class TBSCertList
-	implements DEREncodable
+    implements DEREncodable
 {
     ASN1Sequence  seq;
 
     DERInteger              version;
     AlgorithmIdentifier     signature;
     X509Name                issuer;
-	DERUTCTime				thisUpdate;
-	DERUTCTime				nextUpdate;
-	CRLEntry[]				revokedCertificates;
+    DERUTCTime                thisUpdate;
+    DERUTCTime                nextUpdate;
+    CRLEntry[]                revokedCertificates;
     X509Extensions          crlExtensions;
 
     public TBSCertList(
@@ -51,7 +51,7 @@ public class TBSCertList
 
         this.seq = seq;
 
-        if ( seq.getObjectAt(seqPos) instanceof DERInteger )
+        if (seq.getObjectAt(seqPos) instanceof DERInteger)
         {
             version = (DERInteger)seq.getObjectAt(seqPos++);
         }
@@ -60,7 +60,7 @@ public class TBSCertList
             version = new DERInteger(0);
         }
 
-        if ( seq.getObjectAt(seqPos) instanceof AlgorithmIdentifier )
+        if (seq.getObjectAt(seqPos) instanceof AlgorithmIdentifier)
         {
             signature = (AlgorithmIdentifier)seq.getObjectAt(seqPos++);
         }
@@ -69,7 +69,7 @@ public class TBSCertList
             signature = new AlgorithmIdentifier((ASN1Sequence)seq.getObjectAt(seqPos++));
         }
 
-        if ( seq.getObjectAt(seqPos) instanceof X509Name )
+        if (seq.getObjectAt(seqPos) instanceof X509Name)
         {
             issuer = (X509Name)seq.getObjectAt(seqPos++);
         }
@@ -80,29 +80,29 @@ public class TBSCertList
 
         thisUpdate = (DERUTCTime)seq.getObjectAt(seqPos++);
 
-		if ( seqPos < seq.size()
-        	&& seq.getObjectAt(seqPos) instanceof DERUTCTime )
+        if (seqPos < seq.size()
+            && seq.getObjectAt(seqPos) instanceof DERUTCTime)
         {
-			nextUpdate = (DERUTCTime)seq.getObjectAt(seqPos++);
+            nextUpdate = (DERUTCTime)seq.getObjectAt(seqPos++);
         }
 
-		if ( seqPos < seq.size()
-			&& !(seq.getObjectAt(seqPos) instanceof DERTaggedObject) )
-		{
-			ASN1Sequence certs = (ASN1Sequence)seq.getObjectAt(seqPos++);
-			revokedCertificates = new CRLEntry[certs.size()];
+        if (seqPos < seq.size()
+            && !(seq.getObjectAt(seqPos) instanceof DERTaggedObject))
+        {
+            ASN1Sequence certs = (ASN1Sequence)seq.getObjectAt(seqPos++);
+            revokedCertificates = new CRLEntry[certs.size()];
 
-			for ( int i = 0; i < revokedCertificates.length; i++ )
-			{
-				revokedCertificates[i] = new CRLEntry((ASN1Sequence)certs.getObjectAt(i));
-			}
-		}
+            for (int i = 0; i < revokedCertificates.length; i++)
+            {
+                revokedCertificates[i] = new CRLEntry((ASN1Sequence)certs.getObjectAt(i));
+            }
+        }
 
-		if ( seqPos < seq.size()
-			&& seq.getObjectAt(seqPos) instanceof DERTaggedObject )
-		{
-			crlExtensions = new X509Extensions((ASN1Sequence)((DERTaggedObject)seq.getObjectAt(seqPos++)).getObject());
-		}
+        if (seqPos < seq.size()
+            && seq.getObjectAt(seqPos) instanceof DERTaggedObject)
+        {
+            crlExtensions = new X509Extensions((ASN1Sequence)((DERTaggedObject)seq.getObjectAt(seqPos++)).getObject());
+        }
     }
 
     public int getVersion()

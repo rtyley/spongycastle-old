@@ -89,43 +89,43 @@ public class DERGeneralizedTime
      * To read in the time and get a date which is compatible with our local
      * time zone.
      */
-	public String getTime()
-	{
-		//
-		// standardise the format.
-		//             
-		if (time.charAt(time.length() - 1) == 'Z')
-		{
-			return time.substring(0, time.length() - 1) + "GMT+00:00";
-		}
-		else
-		{
-			int signPos = time.length() - 5;
-			char sign = time.charAt(signPos);
-			if (sign == '-' || sign == '+')
-			{
-				return time.substring(0, signPos)
-					+ "GMT"
-					+ time.substring(signPos, signPos + 3)
-					+ ":"
-					+ time.substring(signPos + 3);
-			}
-			else
-			{
-				signPos = time.length() - 3;
-				sign = time.charAt(signPos);
-				if (sign == '-' || sign == '+')
-				{
-					return time.substring(0, signPos)
-						+ "GMT"
-						+ time.substring(signPos)
-						+ ":00";
-				}
-			}
-		}            
+    public String getTime()
+    {
+        //
+        // standardise the format.
+        //             
+        if (time.charAt(time.length() - 1) == 'Z')
+        {
+            return time.substring(0, time.length() - 1) + "GMT+00:00";
+        }
+        else
+        {
+            int signPos = time.length() - 5;
+            char sign = time.charAt(signPos);
+            if (sign == '-' || sign == '+')
+            {
+                return time.substring(0, signPos)
+                    + "GMT"
+                    + time.substring(signPos, signPos + 3)
+                    + ":"
+                    + time.substring(signPos + 3);
+            }
+            else
+            {
+                signPos = time.length() - 3;
+                sign = time.charAt(signPos);
+                if (sign == '-' || sign == '+')
+                {
+                    return time.substring(0, signPos)
+                        + "GMT"
+                        + time.substring(signPos)
+                        + ":00";
+                }
+            }
+        }            
 
-		return time;
-	}
+        return time;
+    }
 
     private byte[] getOctets()
     {
