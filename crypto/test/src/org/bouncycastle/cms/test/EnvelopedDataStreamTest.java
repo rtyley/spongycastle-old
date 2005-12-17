@@ -2,6 +2,7 @@ package org.bouncycastle.cms.test;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -31,6 +32,7 @@ import org.bouncycastle.util.encoders.Hex;
 public class EnvelopedDataStreamTest
     extends TestCase
 {
+    private static final int BUFFER_SIZE = 4000;
     private static String          _signDN;
     private static KeyPair         _signKP;
     private static X509Certificate _signCert;
@@ -68,6 +70,12 @@ public class EnvelopedDataStreamTest
             _reciKP   = CMSTestUtil.makeKeyPair();
             _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);       
         }
+    }
+    
+    public void setUp()
+        throws Exception
+    {
+        init();
     }
     
     public void testWorkingData()
@@ -268,6 +276,74 @@ public class EnvelopedDataStreamTest
         assertTrue(bOut.toByteArray().length < unbufferedLength);
     }
     
+    public void testKeyTransAES128Throughput()
+        throws Exception
+    {
+        byte[] data = new byte[40001];
+        
+        for (int i = 0; i != data.length; i++)
+        {
+            data[i] = (byte)(i & 0xff);
+        }
+        
+        //
+        // buffered
+        //
+        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
+    
+        edGen.setBufferSize(BUFFER_SIZE);
+        
+        edGen.addKeyTransRecipient(_reciCert);
+    
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        
+        OutputStream out = edGen.open(bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+    
+        for (int i = 0; i != data.length; i++)
+        {
+            out.write(data[i]);
+        }
+        
+        out.close();
+        
+        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(bOut.toByteArray());
+        RecipientInformationStore  recipients = ep.getRecipientInfos();
+        Collection                 c = recipients.getRecipients();
+        Iterator                   it = c.iterator();
+        
+        if (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+    
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+            
+            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), "BC");
+            
+            InputStream           dataStream = recData.getContentStream();
+            ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+            int                   len;
+            byte[]                buf = new byte[BUFFER_SIZE];
+            int                   count = 0;
+            
+            while (count != 10 && (len = dataStream.read(buf)) > 0)
+            {
+                assertEquals(buf.length, len);
+                
+                dataOut.write(buf);
+                count++;
+            }
+            
+            len = dataStream.read(buf);
+            dataOut.write(buf, 0, len);
+            
+            assertEquals(true, Arrays.equals(data, dataOut.toByteArray()));
+        }
+        else
+        {
+            fail("recipient not found.");
+        }
+    }
+    
     public void testKeyTransAES128()
         throws Exception
     {
@@ -352,8 +428,6 @@ public class EnvelopedDataStreamTest
     public static Test suite()
         throws Exception
     {
-        init();
-        
         return new CMSTestSetup(new TestSuite(EnvelopedDataStreamTest.class));
     }
 }

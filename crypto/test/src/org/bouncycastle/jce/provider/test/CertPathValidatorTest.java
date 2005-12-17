@@ -217,11 +217,11 @@ public class CertPathValidatorTest
         catch (Exception e)
         {
             if (e instanceof CertPathValidatorException 
-                && e.getMessage().startsWith("couldn't validate certificate: java.security.InvalidKeyException: Public key presented not"))
+                && e.getMessage().startsWith("Could not validate certificate signature."))
             {
                 return;
             }
-            fail("unexpected exception");
+            fail("unexpected exception", e);
         }
     }
 
