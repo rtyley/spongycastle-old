@@ -1,131 +1,66 @@
-<!DOCTYPE project [
- 	<!ENTITY Common SYSTEM "common.xml">
-	%Common;
-]>
+<?xml version="1.0" encoding="UTF-8"?>
 
-<!--
-  Bouncy Castle Build Configuration (midp)
+<project name="crypto1.3" default="build" basedir=".">
 
-  This is the JDK 1.3 specific build file.  
+    <property name="build.dir" value="build" />
+    <property name="jdk.name" value="jdk1.3" />
+    <property name="src.dir" value="${build.dir}/${jdk.name}" />
+    <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
+    <property name="target.prefix" value="jdk13" />
 
-  $RCSfile: jdk13.xml,v $
-  $Author: bouncy $
-  $Date: 2005-07-06 13:02:52 $
-  $Revision: 1.1 $
--->
-<project name="jdk13" default="init" basedir=".">
+    <target name="init">
+        <mkdir dir="${src.dir}" />
+        <mkdir dir="${artifacts.dir}" />
+        <mkdir dir="${artifacts.dir}/reports" />
+        <mkdir dir="${artifacts.dir}/reports/xml" />
+        <mkdir dir="${artifacts.dir}/reports/html" />
+        <mkdir dir="${artifacts.dir}/jars" />
+        <mkdir dir="${artifacts.dir}/checkstyle" />
+        <copy todir="${src.dir}">
+            <fileset dir="src">
+                <exclude name="**/ECPointUtil.java" />
+                <exclude name="**/ECNamedCurveSpec.java" />
+                <exclude name="**/BCEC*.java" />
+                <exclude name="**/JCEEC5*.java" />
+            </fileset>
+            <fileset dir="test/src">
+                <exclude name="**/ECDSA5Test.java" />
+                <exclude name="**/NamedCurveTest.java" />
+                <exclude name="**/nist/NistCertPathTest.java" />
+            </fileset>
+            <fileset dir="test/src" includes="**/*.html" />
+            <fileset dir="test/src" includes="**/*.pem" />
+        </copy>
+        <copy todir="${src.dir}" overwrite="true">
+            <fileset dir="jdk1.4" includes="**/*.java" />
+            <fileset dir="test/jdk1.4" includes="**/*.java" />
+        </copy>
+        <copy todir="${src.dir}" overwrite="true">
+            <fileset dir="jdk1.3" includes="**/*.java" />
+            <fileset dir="test/jdk1.3" includes="**/*.java" />
+        </copy>
+    </target>
 
-	<property environment="env" />
-	<property file="${env.CRYPTO_PROP}" />
+    <target name="build" depends="init">
+        <ant antfile="bc-build.xml" dir="." />
+        <ant antfile="bc-build.xml" dir="." target="javadoc-libraries" />
+    </target>
 
-	<property name="junit.jar" value="${env.JUNIT_ROOT}/junit.jar" />
-	<property name="activation.jar" value="${user.mailjars}/activation.jar" />
-	<property name="mail.jar" value="${user.mailjars}/mail.jar" />
-	<property name="mailapi.jar" value="${user.mailjars}/mailapi.jar" />
+    <target name="build-lw" depends="init">
+        <ant antfile="bc-build.xml" dir="." target="build-lw" />
+    </target>
 
-	<!-- Public callable targets -->
-	<target name="clean" depends="common-clean" />
-	<target name="test" depends="common-test" />
-	<target name="dist" depends="common-dist" />
-	<target name="package" depends="common-package" />
-	<target name="compile" depends="local-compile" />
-	<target name="jdoc" depends="common-jdoc" />
+    <target name="build-provider" depends="init">
+        <ant antfile="bc-build.xml" dir="." target="build-provider" />
+        <ant antfile="bc-build.xml" dir="." target="javadoc-provider" />
+    </target>
 
-	<!-- include common targets, properties -->
-	<property name="master.jdk" value="jdk13" />
-	&Common;
+    <target name="build-test" depends="init">
+        <ant antfile="bc-build.xml" dir="." target="build-test" />
+    </target>
 
-	<!-- ** Private properties -->
-	<path id="compile.cp">
-		<pathelement location="${master.classes}" />
-		<pathelement location="${junit.jar}" />
-		<pathelement location="${activation.jar}" />
-		<pathelement location="${mail.jar}" />
-		<pathelement location="${mailapi.jar}" />
-	</path>
-
-	<!-- *** Private Targets *** -->
-	<target name="local-compile" >
-		<antcall target="jdk13compat-java" />
-		<antcall target="part1-compile" />
-		<antcall target="jdk13compat-bc" />
-		<antcall target="part2-compile" />
-		<antcall target="jdk13compat-test" />
-	</target>
-
-	<target name="jdk13compat-java" depends="init" >
-		<javac srcdir="${master.home}/jdk1.3" 
-			destdir="${master.classes}" 
-			includes="java/**" >
-			<classpath refid = "compile.cp" />
-		</javac>
-	</target>
-
-	<target name="jdk13compat-bc" depends="init" >
-		<javac srcdir="${master.home}/jdk1.3" 
-			destdir="${master.classes}" 
-			includes="org/**" 
-			excludes="org/bouncycastle/jce/provider/test/**" >
-			<classpath refid = "compile.cp" />
-		</javac>
-	</target>
-
-	<target name="jdk13compat-test" depends="init" >
-		<javac srcdir="${master.home}/jdk1.3" 
-			destdir="${master.classes}" 
-			includes="org/bouncycastle/jce/provider/test/**" >
-			<classpath refid = "compile.cp" />
-		</javac>
-	</target>
-
-	<target name="part1-compile" >
-		<javac srcdir="${master.src}"
-			destdir="${master.classes}">
-			<classpath refid = "compile.cp" />
-			<include name="org/bouncycastle/asn1/**" />
-			<include name="org/bouncycastle/crypto/**" />
-			<include name="org/bouncycastle/math/**" />
-			<include name="org/bouncycastle/openssl/**" />
-			<include name="org/bouncycastle/util/**" />
-			<include name="org/bouncycastle/jce/interfaces" />
-			<include name="org/bouncycastle/jce/netscape" />
-			<include name="org/bouncycastle/jce/spec" />
-			<include name="org/bouncycastle/jce/provider/JDKX509CertFactory.java" />
-			<include name="org/bouncycastle/jce/provider/X509CRLObject.java" />
-			<include name="org/bouncycastle/jce/provider/X509CertificateObject.java" />
-		</javac>
-	</target>
-
-	<target name="part2-compile" >
-		<javac srcdir="${master.src}"
-			destdir="${master.classes}">
-			<classpath refid = "compile.cp" />
-			<include name="org/bouncycastle/jce/**" />
-			<include name="org/bouncycastle/jce/cms/**" />
-			<include name="org/bouncycastle/mail/**" />
-			<exclude name="org/bouncycastle/jce/provider/test/**" />
-		</javac>
-	</target>
-
-
-	<target name="cast" depends="compile" >
-		<java classname="org.bouncycastle.crypto.test.CAST6Test"
-			classpathref="compile.cp"
-			fork="yes" />
-	</target>
-
-	<target name="profile" depends="compile" >
-		<java classname="intuitive.audit.Audit"
-			fork="yes" >
-			<jvmarg line="-classic -Xrunoii" />
-			<!-- <arg line="-offlineprofiling:initialDelay=5,delay=10,directory=f:/profiles,filename=rsa,appendTime=false,includeCPU=true -startCPUprofiler:type=sampler,displayPrecision=method,samplingPeriod=5 org.bouncycastle.crypto.test.RSATest" /> -->
-			<arg line="-offlineprofiling:initialDelay=5,delay=10,directory=c:/usr/tmp/profiles,filename=rsa,appendTime=false,includeCPU=true -startCPUprofiler:type=instrumentation,precision=milli -filter:patternList=(java.lang.Object) org.bouncycastle.crypto.test.RSATest" />
-			<classpath>
-				<pathelement location="${master.classes}" />
-				<pathelement location="c:/OptimizeItProfiler/OptimizeIt41/lib/optit.jar" />
-
-			</classpath>
-		</java>
-	</target>
+    <target name="test" depends="build-test">
+        <ant antfile="bc-build.xml" dir="." target="test" />
+    </target>
 
 </project>
