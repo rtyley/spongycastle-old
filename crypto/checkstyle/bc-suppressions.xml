@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.0//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
+<suppressions>
+    <suppress checks="GenericIllegalRegexp"
+              files="SendSignedAndEncryptedMail.java" />
+    <suppress checks="GenericIllegalRegexp" files="KeyBasedFileProcessor.java" />
+    <suppress checks="GenericIllegalRegexp" files="KeyBasedLargeFileProcessor.java" />
+    <suppress checks="GenericIllegalRegexp" files="PubringDump.java" />
+    <suppress checks="GenericIllegalRegexp" files="DESExample.java" />
+    <suppress checks="GenericIllegalRegexp" files="SimpleTest.java" />
+    <suppress checks="GenericIllegalRegexp" files="RegressionTest.java" />
+    <suppress checks="GenericIllegalRegexp" files="PGPPubringDump.java" />
+    <suppress checks="GenericIllegalRegexp" files="PGPDumpEngine.java" />
+</suppressions>

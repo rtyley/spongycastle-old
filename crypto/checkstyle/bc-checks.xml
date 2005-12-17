@@ -10,6 +10,10 @@
         <property name="min" value="250"/>
     </module>
 
+    <module name="SuppressionFilter">
+        <property name="file" value="checkstyle/bc-suppressions.xml"/>
+    </module>
+
     <module name="TreeWalker">
 
         <!-- Check that blocks are always used with if, else, while, do, and for. -->
@@ -28,7 +32,9 @@
         <module name="ParenPad"/>
 
         <!-- Checking Import Statements -->
-        <module name="IllegalImport"/>
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="sun, com.sun, com"/>
+        </module>
         <!-- defaults to sun.* packages -->
 <!--
         <module name="RedundantImport"/>
@@ -123,5 +129,9 @@
 
         <!-- Used with the suppression comment filter -->
         <module name="FileContentsHolder"/>
+
+        <module name="GenericIllegalRegexp">
+            <property name="format" value="\.printStackTrace"/>
+        </module>
     </module>
 </module>
