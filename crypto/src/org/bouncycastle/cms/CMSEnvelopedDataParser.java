@@ -56,6 +56,13 @@ import org.bouncycastle.sasn1.cms.EnvelopedDataParser;
  *          
  *          processDataStream(recData.getContentStream());
  *      }
+ *  </pre>
+ *  Note: this class does not introduce buffering - if you are processing large files you should create
+ *  the parser with:
+ *  <pre>
+ *          CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(new BufferedInputStream(inputStream, bufSize));
+ *  </pre>
+ *  where bufSize is a suitably large buffer size.
  */
 public class CMSEnvelopedDataParser
     extends CMSContentInfoParser
