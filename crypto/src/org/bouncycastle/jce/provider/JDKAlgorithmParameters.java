@@ -195,7 +195,7 @@ public abstract class JDKAlgorithmParameters
             }
             else if (format.equals("ASN.1"))
             {
-                new IDEACBCPar(engineGetEncoded("RAW")).getEncoded();
+                return new IDEACBCPar(engineGetEncoded("RAW")).getEncoded();
             }
 
             return null;
