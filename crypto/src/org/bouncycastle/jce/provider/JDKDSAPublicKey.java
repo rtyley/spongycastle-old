@@ -53,7 +53,7 @@ public class JDKDSAPublicKey
     JDKDSAPublicKey(
         SubjectPublicKeyInfo    info)
     {
-        DSAParameter             params = new DSAParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
+        DSAParameter            params = new DSAParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
         DERInteger              derY = null;
 
         try
