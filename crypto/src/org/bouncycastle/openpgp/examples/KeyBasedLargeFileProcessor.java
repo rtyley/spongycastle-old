@@ -1,5 +1,7 @@
 package org.bouncycastle.openpgp.examples;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -83,7 +85,6 @@ public class KeyBasedLargeFileProcessor
         {
             PGPPublicKeyRing    kRing = (PGPPublicKeyRing)rIt.next();    
             Iterator            kIt = kRing.getPublicKeys();
-            boolean             encryptionKeyFound = false;
             
             while (key == null && kIt.hasNext())
             {
@@ -188,23 +189,27 @@ public class KeyBasedLargeFileProcessor
             
             PGPCompressedData   cData = (PGPCompressedData)plainFact.nextObject();
     
-            PGPObjectFactory    pgpFact = new PGPObjectFactory(cData.getDataStream());
+            InputStream         compressedStream = new BufferedInputStream(cData.getDataStream());
+            PGPObjectFactory    pgpFact = new PGPObjectFactory(compressedStream);
             
             Object              message = pgpFact.nextObject();
             
             if (message instanceof PGPLiteralData)
             {
-                PGPLiteralData      ld = (PGPLiteralData)message;
+                PGPLiteralData       ld = (PGPLiteralData)message;
                 
-                FileOutputStream    fOut = new FileOutputStream(ld.getFileName());
+                FileOutputStream     fOut = new FileOutputStream(ld.getFileName());
+                BufferedOutputStream bOut = new BufferedOutputStream(fOut);
                 
                 InputStream    unc = ld.getInputStream();
                 int    ch;
                 
                 while ((ch = unc.read()) >= 0)
                 {
-                    fOut.write(ch);
+                    bOut.write(ch);
                 }
+
+                bOut.close();
             }
             else if (message instanceof PGPOnePassSignatureList)
             {
