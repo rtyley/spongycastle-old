@@ -16,8 +16,6 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.DERBMPString;
-import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
-import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -33,7 +31,7 @@ import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 /**
  * Example of how to set up a certificiate chain and a PKCS 12 store for
  * a private individual - obviously you'll need to generate your own keys,
- * and you may need to modify the NetscapeCertType extension or add a key
+ * and you may need to add a NetscapeCertType extension or add a key
  * usage extension depending on your application, but you should get the
  * idea! As always this is just an example...
  */
@@ -236,11 +234,6 @@ public class PKCS12Example
             X509Extensions.AuthorityKeyIdentifier,
             false,
             new AuthorityKeyIdentifierStructure(caPubKey));
-
-        v3CertGen.addExtension(
-            MiscObjectIdentifiers.netscapeCertType,
-            false,
-            new NetscapeCertType(NetscapeCertType.objectSigning | NetscapeCertType.smime));
 
         X509Certificate cert = v3CertGen.generateX509Certificate(caPrivKey);
 
