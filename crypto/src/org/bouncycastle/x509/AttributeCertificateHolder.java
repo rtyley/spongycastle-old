@@ -8,7 +8,6 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.Holder;
 import org.bouncycastle.asn1.x509.IssuerSerial;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 
@@ -40,6 +39,7 @@ import javax.security.auth.x500.X500Principal;
  *                 -- for example, an executable
  *  }
  * </pre>
+ * This holder currently supports use of the baseCertificateID and the entityName.
  */
 public class AttributeCertificateHolder 
     implements CertSelector
@@ -67,26 +67,31 @@ public class AttributeCertificateHolder
             throw new CertificateParsingException(e.getMessage());
         }
         
-        holder = new org.bouncycastle.asn1.x509.Holder(new IssuerSerial(new GeneralNames(new DERSequence(new GeneralName(new X509Principal(name)))), new DERInteger(cert.getSerialNumber())));
+        holder = new Holder(new IssuerSerial(generateGeneralNames(name), new DERInteger(cert.getSerialNumber())));
     }
     
     public AttributeCertificateHolder(
         X509Principal principal) 
     {        
-        holder = new org.bouncycastle.asn1.x509.Holder(new GeneralNames(new DERSequence(new GeneralName(principal))));
+        holder = new Holder(generateGeneralNames(principal));
     }
-    
+
     public AttributeCertificateHolder(
         X500Principal principal) 
     {
         try
         {
-            holder = new Holder(new GeneralNames(new DERSequence(new GeneralName(new X509Principal(principal.getEncoded())))));
+            holder = new Holder(generateGeneralNames(new X509Principal(principal.getEncoded())));
         }
         catch (IOException e)
         {
             throw new IllegalArgumentException("Can't process principal");
         }
+    }
+    
+    private GeneralNames generateGeneralNames(X509Principal principal)
+    {
+        return new GeneralNames(new DERSequence(new GeneralName(principal)));
     }
     
     private boolean matchesDN(X509Principal subject, GeneralNames targets)
@@ -122,11 +127,11 @@ public class AttributeCertificateHolder
         
         for (int i = 0; i != names.length; i++)
         {
-            if (names[i].getName() instanceof X509Name)
+            if (names[i].getTagNo() == GeneralName.directoryName)
             {
                 try
                 {
-                    l.add(new X500Principal(((X509Name)names[i].getName()).getEncoded()));
+                    l.add(new X500Principal(((ASN1Encodable)names[i].getName()).getEncoded()));
                 }
                 catch (IOException e)
                 {
@@ -134,7 +139,7 @@ public class AttributeCertificateHolder
                 }
             }
         }
-        
+
         return l.toArray(new Object[l.size()]);
     }
     
