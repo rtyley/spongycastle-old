@@ -563,7 +563,7 @@ public class NistCertPathTest
         }
         catch (Exception e)
         {
-            throw new IllegalStateException("exception loading certificate: " + certName, e);
+            throw new IllegalStateException("exception loading certificate: " + certName);
         }
     }
     
@@ -592,7 +592,7 @@ public class NistCertPathTest
         }
         catch (Exception e)
         {
-            throw new IllegalStateException("exception loading CRL: " + crlName, e);
+            throw new IllegalStateException("exception loading CRL: " + crlName);
         }
     }
 
