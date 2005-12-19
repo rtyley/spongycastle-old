@@ -106,4 +106,20 @@ public class JDKDSAPublicKey
 
         return buf.toString();
     }
+    
+    public boolean equals(
+        Object o)
+    {
+        if (!(o instanceof DSAPublicKey))
+        {
+            return false;
+        }
+        
+        DSAPublicKey other = (DSAPublicKey)o;
+        
+        return this.getY().equals(other.getY()) 
+            && this.getParams().getG().equals(other.getParams().getG()) 
+            && this.getParams().getP().equals(other.getParams().getP()) 
+            && this.getParams().getQ().equals(other.getParams().getQ());
+    }
 }

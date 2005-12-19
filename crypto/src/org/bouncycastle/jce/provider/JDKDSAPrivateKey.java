@@ -1,7 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPrivateKey;
@@ -15,7 +13,6 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
@@ -105,6 +102,22 @@ public class JDKDSAPrivateKey
         return x;
     }
 
+    public boolean equals(
+        Object o)
+    {
+        if (!(o instanceof DSAPrivateKey))
+        {
+            return false;
+        }
+        
+        DSAPrivateKey other = (DSAPrivateKey)o;
+        
+        return this.getX().equals(other.getX()) 
+            && this.getParams().getG().equals(other.getParams().getG()) 
+            && this.getParams().getP().equals(other.getParams().getP()) 
+            && this.getParams().getQ().equals(other.getParams().getQ());
+    }
+    
     public void setBagAttribute(
         DERObjectIdentifier oid,
         DEREncodable        attribute)
