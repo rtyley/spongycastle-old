@@ -25,10 +25,14 @@ import org.bouncycastle.x509.X509Attribute;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
 import org.bouncycastle.x509.X509V2AttributeCertificateGenerator;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -252,6 +256,41 @@ public class AttrCertTest
         {
             fail("generated holder not matching holder certificate");
         }
+        
+        X509Attribute[] attrs = aCert.getAttributes("2.5.24.72");
+        
+        if (attrs == null)
+        {
+            fail("attributes related to 2.5.24.72 not found");
+        }
+        
+        X509Attribute attr = attrs[0];
+        
+        if (!attr.getOID().equals("2.5.24.72"))
+        {
+            fail("attribute oid mismatch");
+        }
+        
+        ASN1Encodable[] values = attr.getValues();
+        
+        GeneralName role = GeneralNames.getInstance(values[0]).getNames()[0];
+        
+        if (role.getTagNo() != GeneralName.rfc822Name)
+        {
+            fail("wrong general name type found in role");
+        }
+        
+        if (!((DERString)role.getName()).getString().equals("DAU123456789"))
+        {
+            fail("wrong general name value found in role");
+        }
+        
+        X509Certificate             sCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(holderCertWithBaseCertificateID));
+        
+        if (holder.match(sCert))
+        {
+            fail("generated holder matching wrong certificate");
+        }
     }
     
     private void testGenerateWithPrincipal()
@@ -324,7 +363,15 @@ public class AttrCertTest
         {
             fail("generated holder not matching holder certificate");
         }
+        
+        X509Certificate             sCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(holderCertWithBaseCertificateID));
+        
+        if (holder.match(sCert))
+        {
+            fail("principal generated holder matching wrong certificate");
+        }
     }
+    
     public void performTest()
         throws Exception
     {
@@ -473,7 +520,7 @@ public class AttrCertTest
         
         gen.addExtension("1.1", true, new DEROctetString(new byte[10]));
         
-        gen.addExtension("2.2", false, new DEROctetString(new byte[10]));
+        gen.addExtension("2.2", false, new DEROctetString(new byte[20]));
         
         aCert = gen.generateCertificate(privKey, "BC");
         
@@ -494,6 +541,14 @@ public class AttrCertTest
         if (!aCert.hasUnsupportedCriticalExtension())
         {
             fail("unsupported extensions not found");
+        }
+        
+        byte[]        extString = aCert.getExtensionValue("1.1");
+        ASN1Encodable extValue = X509ExtensionUtil.fromExtensionValue(extString);
+        
+        if (!extValue.equals(new DEROctetString(new byte[10])))
+        {
+            fail("wrong extension value found for 1.1");
         }
         
         testCertWithBaseCertificateID();
