@@ -1449,9 +1449,9 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             break;
                         case 1:
                             tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
-                            if (tmpInt < inhibitAnyPolicy)
+                            if (tmpInt < policyMapping)
                             {
-                                inhibitAnyPolicy = tmpInt;
+                                policyMapping = tmpInt;
                             }
                         break;
                         }
