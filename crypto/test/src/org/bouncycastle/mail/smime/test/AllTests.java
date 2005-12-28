@@ -1,19 +1,13 @@
 package org.bouncycastle.mail.smime.test;
 
-import java.security.Security;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class AllTests
 {
     public static void main (String[] args)
         throws Exception
     {
-        Security.addProvider(new BouncyCastleProvider());
-
         junit.textui.TestRunner.run (suite());
     }
     

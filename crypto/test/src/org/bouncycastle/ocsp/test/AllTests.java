@@ -1,9 +1,12 @@
 package org.bouncycastle.ocsp.test;
 
+import java.security.Security;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTestResult;
 
 public class AllTests
@@ -11,6 +14,8 @@ public class AllTests
 {
     public void testOCSP()
     {   
+        Security.addProvider(new BouncyCastleProvider());
+        
         org.bouncycastle.util.test.Test[] tests = new org.bouncycastle.util.test.Test[] { new OCSPTest() };
         
         for (int i = 0; i != tests.length; i++)
