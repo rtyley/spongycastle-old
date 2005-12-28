@@ -1,5 +1,8 @@
 package org.bouncycastle.openssl.test;
 
+import java.security.Security;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTestResult;
 
 import junit.framework.*;
@@ -9,6 +12,8 @@ public class AllTests
 {
     public void testOpenSSL()
     {   
+        Security.addProvider(new BouncyCastleProvider());
+        
         org.bouncycastle.util.test.Test[] tests = new org.bouncycastle.util.test.Test[] { new ReaderTest() };
         
         for (int i = 0; i != tests.length; i++)

@@ -1,5 +1,8 @@
 package org.bouncycastle.jce.provider.test;
 
+import java.security.Security;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTestResult;
 
 import junit.framework.*;
@@ -9,6 +12,8 @@ public class AllTests
 {
     public void testJCE()
     {   
+        Security.addProvider(new BouncyCastleProvider());
+        
         org.bouncycastle.util.test.Test[] tests = RegressionTest.tests;
         
         for (int i = 0; i != tests.length; i++)
