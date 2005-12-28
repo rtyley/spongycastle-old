@@ -16,6 +16,7 @@ public class AllTests
         
         suite.addTestSuite(Asn1SequenceTest.class);
         suite.addTestSuite(OctetStringTest.class);
+        suite.addTestSuite(OIDTest.class);
         
         return suite;
     }
