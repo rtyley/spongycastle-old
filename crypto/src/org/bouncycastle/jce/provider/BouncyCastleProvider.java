@@ -35,7 +35,7 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
  */
 public final class BouncyCastleProvider extends Provider
 {
-    private static String info = "BouncyCastle Security Provider v1.31b";
+    private static String info = "BouncyCastle Security Provider v1.31";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -46,7 +46,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.305, info);
+        super(PROVIDER_NAME, 1.31, info);
 
         //
         // KeyStore
