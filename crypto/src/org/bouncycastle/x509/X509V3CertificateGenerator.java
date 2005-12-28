@@ -166,7 +166,7 @@ public class X509V3CertificateGenerator
         }
         catch (Exception e)
         {
-            throw new IllegalArgumentException("Unknown signature type requested");
+            throw new IllegalArgumentException("Unknown signature type requested: " + signatureAlgorithm);
         }
 
         sigAlgId = new AlgorithmIdentifier(this.sigOID, new DERNull());
