@@ -10,24 +10,61 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
+
 
 /**
  * X.690 test example
  */
 public class OIDTest
-    implements Test
+    extends SimpleTest
 {
-    byte[]    req = Hex.decode("0603813403");
+    byte[]    req1 = Hex.decode("0603813403");
+    byte[]    req2 = Hex.decode("06082A36FFFFFFDD6311");
 
     public String getName()
     {
         return "OID";
     }
     
-    private TestResult valueCheck(
+    private void recodeCheck(
+        String oid, 
+        byte[] enc) 
+        throws IOException
+    {
+        ByteArrayInputStream     bIn = new ByteArrayInputStream(enc);
+        ASN1InputStream          aIn = new ASN1InputStream(bIn);
+
+        DERObjectIdentifier      o = new DERObjectIdentifier(oid);
+        DERObjectIdentifier      encO = (DERObjectIdentifier)aIn.readObject();
+        
+        if (!o.equals(encO))
+        {
+            fail("oid ID didn't match", o, encO);
+        }
+        
+        ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
+        DEROutputStream          dOut = new DEROutputStream(bOut);
+
+        dOut.writeObject(o);
+
+        byte[]                    bytes = bOut.toByteArray();
+
+        if (bytes.length != enc.length)
+        {
+            fail("failed length test");
+        }
+
+        for (int i = 0; i != enc.length; i++)
+        {
+            if (bytes[i] != enc[i])
+            {
+                fail("failed comparison test", new String(Hex.encode(enc)), new String(Hex.encode(bytes)));
+            }
+        }
+    }
+    
+    private void valueCheck(
         String  oid)
         throws IOException
     {
@@ -44,68 +81,24 @@ public class OIDTest
         
         if (!o.getId().equals(oid))
         {
-            return new SimpleTestResult(false, getName() + ": failed oid check for " + oid);
+            fail("failed oid check for " + oid);
         }
-            
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult perform()
+    public void performTest()
+        throws IOException
     {
-        try
-        {
-            ByteArrayInputStream     bIn = new ByteArrayInputStream(req);
-            ASN1InputStream          aIn = new ASN1InputStream(bIn);
-
-            DERObjectIdentifier      o = new DERObjectIdentifier("2.100.3");
-
-            ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-            DEROutputStream          dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(o);
-
-            byte[]                    bytes = bOut.toByteArray();
-
-            if (bytes.length != req.length)
-            {
-                return new SimpleTestResult(false, getName() + ": failed length test");
-            }
-
-            for (int i = 0; i != req.length; i++)
-            {
-                if (bytes[i] != req[i])
-                {
-                    return new SimpleTestResult(false, getName() + ": failed comparison test");
-                }
-            }
-            
-            TestResult res = valueCheck(PKCSObjectIdentifiers.pkcs_9_at_contentType.getId());
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-            
-            res = valueCheck("1.1.127.32512.8323072.2130706432.545460846592.139637976727552.35747322042253312.9151314442816847872");
-            if (!res.isSuccessful())
-            {
-                return res;
-            }
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": Exception - " + e.toString());
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        recodeCheck("2.100.3", req1);
+        recodeCheck("1.2.54.34359733987.17", req2);
+        
+        valueCheck(PKCSObjectIdentifiers.pkcs_9_at_contentType.getId());
+        valueCheck("1.1.127.32512.8323072.2130706432.545460846592.139637976727552.35747322042253312.9151314442816847872");
+        valueCheck("1.2.123.12345678901.1.1.1");
     }
 
     public static void main(
         String[]    args)
     {
-        Test    test = new OIDTest();
-
-        TestResult  result = test.perform();
-
-        System.out.println(result);
+        runTest(new OIDTest());
     }
 }
