@@ -23,12 +23,10 @@ import java.util.Set;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class CertPathValidatorTest
-    implements Test
+    extends SimpleTest
 {
     private byte[] AC_PR = Base64.decode(
            "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpNSUlFU1RDQ0F6R2dBd0lC"
@@ -137,102 +135,93 @@ public class CertPathValidatorTest
         + "GkeB/m+FArTwRbwpqhCNTwZywOp0eDosgPjCX1t53BB/m/2EYkRiYdDGsot0"
         + "kQPOVGSjQSQ4+/D+TM8=");
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        try
-        {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
 
-                // initialise CertStore
-            X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.rootCertBin));
-            X509Certificate interCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.interCertBin));
-            X509Certificate finalCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.finalCertBin));
-            X509CRL rootCrl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(CertPathTest.rootCrlBin));
-            X509CRL interCrl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(CertPathTest.interCrlBin));
-            List list = new ArrayList();
-            list.add(rootCert);
-            list.add(interCert);
-            list.add(finalCert);
-            list.add(rootCrl);
-            list.add(interCrl);
-            CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
-            CertStore store = CertStore.getInstance("Collection", ccsp);
-            Calendar validDate = Calendar.getInstance();
-            validDate.set(2002,2,21,2,21,10);
+            // initialise CertStore
+        X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.rootCertBin));
+        X509Certificate interCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.interCertBin));
+        X509Certificate finalCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.finalCertBin));
+        X509CRL rootCrl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(CertPathTest.rootCrlBin));
+        X509CRL interCrl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(CertPathTest.interCrlBin));
+        List list = new ArrayList();
+        list.add(rootCert);
+        list.add(interCert);
+        list.add(finalCert);
+        list.add(rootCrl);
+        list.add(interCrl);
+        CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
+        CertStore store = CertStore.getInstance("Collection", ccsp);
+        Calendar validDate = Calendar.getInstance();
+        validDate.set(2002,2,21,2,21,10);
 
-                //validating path
-            List certchain = new ArrayList();
-            certchain.add(finalCert);
-            certchain.add(interCert);
-            CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
-            Set trust = new HashSet();
-            trust.add(new TrustAnchor(rootCert, null));
+            //validating path
+        List certchain = new ArrayList();
+        certchain.add(finalCert);
+        certchain.add(interCert);
+        CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
+        Set trust = new HashSet();
+        trust.add(new TrustAnchor(rootCert, null));
 
-            CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
-            PKIXParameters param = new PKIXParameters(trust);
-            param.addCertStore(store);
-            param.setDate(validDate.getTime());
-            PKIXCertPathValidatorResult result =
-                (PKIXCertPathValidatorResult) cpv.validate(cp, param);
-            PolicyNode policyTree = result.getPolicyTree();
-            PublicKey subjectPublicKey = result.getPublicKey();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return new SimpleTestResult(false, this.getName() + ": exception - " + e.toString());
-        }
+        CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
+        PKIXParameters param = new PKIXParameters(trust);
+        param.addCertStore(store);
+        param.setDate(validDate.getTime());
+        PKIXCertPathValidatorResult result =
+            (PKIXCertPathValidatorResult) cpv.validate(cp, param);
+        PolicyNode policyTree = result.getPolicyTree();
+        PublicKey subjectPublicKey = result.getPublicKey();
 
         //
         // invalid path containing a valid one test
         //
         try
         {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
-
                 // initialise CertStore
-            X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(AC_RAIZ_ICPBRASIL));
-            X509Certificate interCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(AC_PR));
-            X509Certificate finalCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(schefer));
+            rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(AC_RAIZ_ICPBRASIL));
+            interCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(AC_PR));
+            finalCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(schefer));
     
-            List list = new ArrayList();
+            list = new ArrayList();
             list.add(rootCert);
             list.add(interCert);
             list.add(finalCert);
 
-            CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
-            CertStore store = CertStore.getInstance("Collection", ccsp);
-            Calendar validDate = Calendar.getInstance();
+            ccsp = new CollectionCertStoreParameters(list);
+            store = CertStore.getInstance("Collection", ccsp);
+            validDate = Calendar.getInstance();
             validDate.set(2004,2,21,2,21,10);
     
                 //validating path
-            List certchain = new ArrayList();
+            certchain = new ArrayList();
             certchain.add(finalCert);
             certchain.add(interCert);
-            CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
-            Set trust = new HashSet();
+            cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
+            trust = new HashSet();
             trust.add(new TrustAnchor(rootCert, null));
 
-            CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
-            PKIXParameters param = new PKIXParameters(trust);
+            cpv = CertPathValidator.getInstance("PKIX","BC");
+            param = new PKIXParameters(trust);
             param.addCertStore(store);
             param.setRevocationEnabled(false);
             param.setDate(validDate.getTime());
-            PKIXCertPathValidatorResult result =
-                (PKIXCertPathValidatorResult) cpv.validate(cp, param);
-            PolicyNode policyTree = result.getPolicyTree();
-            PublicKey subjectPublicKey = result.getPublicKey();
             
-            return new SimpleTestResult(false, this.getName() + ": Invalid path validated");
+            result =(PKIXCertPathValidatorResult) cpv.validate(cp, param);
+            policyTree = result.getPolicyTree();
+            subjectPublicKey = result.getPublicKey();
+            
+            fail("Invalid path validated");
         }
         catch (Exception e)
         {
             if (e instanceof CertPathValidatorException 
-                && e.getMessage().startsWith("couldn't validate certificate: java.security.InvalidKeyException: Public key presented not"))
+                && e.getMessage().startsWith("Could not validate certificate signature."))
             {
-                return new SimpleTestResult(true, this.getName() + ": Okay");
+                return;
             }
-            return new SimpleTestResult(false, this.getName() + ": exception " + e, e);
+            fail("unexpected exception", e);
         }
     }
 
@@ -242,14 +231,11 @@ public class CertPathValidatorTest
     }
 
     public static void main(
-        String[] args)
+        String[]    args)
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new CertPathValidatorTest();
-        TestResult        result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new CertPathValidatorTest());
     }
 }
 
