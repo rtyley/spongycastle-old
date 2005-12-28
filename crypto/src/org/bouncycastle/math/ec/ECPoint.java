@@ -141,7 +141,7 @@ public abstract class ECPoint
          */
         public byte[] getEncoded()
         {
-            int qLength = getQLength(getX().p);
+            int qLength = getQLength(this.getX().p);
             
             if (withCompression)
             {
