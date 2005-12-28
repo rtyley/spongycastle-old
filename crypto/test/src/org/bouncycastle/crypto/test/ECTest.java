@@ -39,9 +39,9 @@ public class ECTest
         {
             public void nextBytes(byte[] bytes)
             {
-                byte[] k = new BigInteger("6140507067065001063065065565667405560006161556565665656654").toByteArray();
+                byte[] vals = new BigInteger("6140507067065001063065065565667405560006161556565665656654").toByteArray();
 
-                System.arraycopy(k, k.length-bytes.length, bytes, 0, bytes.length);
+                System.arraycopy(vals, vals.length-bytes.length, bytes, 0, bytes.length);
             }
         };
 
@@ -135,9 +135,9 @@ public class ECTest
         {
             public void nextBytes(byte[] bytes)
             {
-                byte[] k = new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655").toByteArray();
+                byte[] vals = new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655").toByteArray();
 
-                System.arraycopy(k, k.length-bytes.length, bytes, 0, bytes.length);
+                System.arraycopy(vals, vals.length-bytes.length, bytes, 0, bytes.length);
             }
         };
 
