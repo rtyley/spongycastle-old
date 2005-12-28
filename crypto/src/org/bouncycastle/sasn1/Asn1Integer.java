@@ -6,7 +6,7 @@ import java.math.BigInteger;
 public class Asn1Integer
     extends DerObject
 {
-    private final BigInteger _value;
+    private BigInteger _value;
     
     protected Asn1Integer(
         int                baseTag,

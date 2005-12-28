@@ -9,7 +9,7 @@ import java.io.OutputStream;
 public class DerObject
     extends Asn1Object
 {
-    private final byte[] _content;
+    private byte[] _content;
     
     DerObject(
         int    baseTag,

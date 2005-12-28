@@ -90,21 +90,21 @@ public class Asn1ObjectIdentifier
         long            fieldValue)
         throws IOException
     {
-        if (fieldValue >= (1 << 7))
+        if (fieldValue >= (1L << 7))
         {
-            if (fieldValue >= (1 << 14))
+            if (fieldValue >= (1L << 14))
             {
-                if (fieldValue >= (1 << 21))
+                if (fieldValue >= (1L << 21))
                 {
-                    if (fieldValue >= (1 << 28))
+                    if (fieldValue >= (1L << 28))
                     {
-                        if (fieldValue >= (1 << 35))
+                        if (fieldValue >= (1L << 35))
                         {
-                            if (fieldValue >= (1 << 42))
+                            if (fieldValue >= (1L << 42))
                             {
-                                if (fieldValue >= (1 << 49))
+                                if (fieldValue >= (1L << 49))
                                 {
-                                    if (fieldValue >= (1 << 56))
+                                    if (fieldValue >= (1L << 56))
                                     {
                                         out.write((int)(fieldValue >> 56) | 0x80);
                                     }
