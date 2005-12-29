@@ -55,6 +55,11 @@
         <ant antfile="bc-build.xml" dir="." target="javadoc-provider" />
     </target>
 
+    <target name="build-jce" depends="init">
+        <ant antfile="bc-build.xml" dir="." target="build-jce" />
+        <ant antfile="bc-build.xml" dir="." target="javadoc-jce" />
+    </target>
+
     <target name="build-test" depends="init">
         <ant antfile="bc-build.xml" dir="." target="build-test" />
     </target>
