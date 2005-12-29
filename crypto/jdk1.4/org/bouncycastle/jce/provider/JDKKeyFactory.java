@@ -232,7 +232,7 @@ public abstract class JDKKeyFactory
         }
         else
         {
-            throw new RuntimeException("algorithm identifier in key not recognised");
+            throw new RuntimeException("algorithm identifier " + algId.getObjectId() + " in key not recognised");
         }
     }
 
@@ -285,7 +285,7 @@ public abstract class JDKKeyFactory
         }
         else
         {
-            throw new RuntimeException("algorithm identifier in key not recognised");
+            throw new RuntimeException("algorithm identifier " + algId.getObjectId() + " in key not recognised");
         }
     }
 
@@ -333,7 +333,7 @@ public abstract class JDKKeyFactory
                 return new JCERSAPrivateKey((RSAPrivateKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     
         protected PublicKey engineGeneratePublic(
@@ -357,7 +357,7 @@ public abstract class JDKKeyFactory
                 return new JCERSAPublicKey((RSAPublicKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     }
 
@@ -389,7 +389,7 @@ public abstract class JDKKeyFactory
                 return new JCEDHPrivateKey((DHPrivateKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     
         protected PublicKey engineGeneratePublic(
@@ -413,7 +413,7 @@ public abstract class JDKKeyFactory
                 return new JCEDHPublicKey((DHPublicKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     }
 
@@ -445,7 +445,7 @@ public abstract class JDKKeyFactory
                 return new JDKDSAPrivateKey((DSAPrivateKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     
         protected PublicKey engineGeneratePublic(
@@ -469,7 +469,7 @@ public abstract class JDKKeyFactory
                 return new JDKDSAPublicKey((DSAPublicKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     }
 
@@ -501,7 +501,7 @@ public abstract class JDKKeyFactory
                 return new JDKGOST3410PrivateKey((GOST3410PrivateKeySpec)keySpec);
             }
             
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
         
         protected PublicKey engineGeneratePublic(
@@ -525,7 +525,7 @@ public abstract class JDKKeyFactory
                 return new JDKGOST3410PublicKey((GOST3410PublicKeySpec)keySpec);
             }
             
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     }
     
@@ -558,7 +558,7 @@ public abstract class JDKKeyFactory
                 return new JCEElGamalPrivateKey((ElGamalPrivateKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     
         protected PublicKey engineGeneratePublic(
@@ -582,7 +582,7 @@ public abstract class JDKKeyFactory
                 return new JCEElGamalPublicKey((ElGamalPublicKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     }
 
@@ -623,7 +623,7 @@ public abstract class JDKKeyFactory
                 return new JCEECPrivateKey(algorithm, (ECPrivateKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     
         protected PublicKey engineGeneratePublic(
@@ -647,7 +647,7 @@ public abstract class JDKKeyFactory
                 return new JCEECPublicKey(algorithm, (ECPublicKeySpec)keySpec);
             }
     
-            throw new InvalidKeySpecException("Unknown KeySpec type.");
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     }
 
