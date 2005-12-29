@@ -34,6 +34,7 @@ Release 1.31
 <li>Another occasional defect in EC point encoding has been fixed.
 <li>In some cases AttributeCertificateHolder.getIssuer() would return an empty array for attribute certificates using the BaseCertificateID.
 This has been fixed.
+<li>OIDs with extremely large components would sometimes reencode with unecessary bytes in their encoding. The optimal DER encoding will now be produced instead.
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
