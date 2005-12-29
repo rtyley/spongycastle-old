@@ -20,7 +20,11 @@ then
     echo "making lightweight release"
 
     mkdir lcrypto-jdk12-$base
-    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/LICENSE.java src/org/bouncycastle/math src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1 | (cd lcrypto-jdk12-$base; tar xf -)
+    tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/LICENSE.java \
+    src/org/bouncycastle/math src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1 \
+     | (cd lcrypto-jdk12-$base; tar xf -)
+    (cd test; tar cf - src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1) \
+     | (cd lcrypto-jdk12-$base; tar xf -)
     (
         cd lcrypto-jdk12-$base;
 
@@ -29,6 +33,7 @@ then
         rm -rf src/org/bouncycastle/jce
         rm -rf src/org/bouncycastle/ocsp
         rm -rf src/org/bouncycastle/openpgp
+        find src -name AllTests.java -exec rm {} \;
 
         (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
             -header "$HEADER" \
@@ -96,8 +101,11 @@ then
 
     mkdir jce-jdk12-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src | (cd jce-jdk12-$base; tar xf -)
+    (cd test; tar cf - src | (cd ../jce-jdk12-$base; tar xf -))
     (cd jdk1.4; tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
+    (cd test/jdk1.4; tar cf - * | (cd ../../jce-jdk12-$base/src; tar xf -))
     (cd jdk1.3; tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
+    (cd test/jdk1.3; tar cf - * | (cd ../../jce-jdk12-$base/src; tar xf -))
     (cd jdk1.2; tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
 
     (
@@ -114,6 +122,7 @@ then
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
     rm -rf src/org/bouncycastle/jce/spec/ECNamedCurveSpec.java
     rm -rf src/org/bouncycastle/util/encoders/test/*.java
+    find src -name AllTests.java -exec rm {} \;
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -222,6 +231,7 @@ then
 
     mkdir bcpg-jdk12-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/bcpg src/org/bouncycastle/openpgp | (cd bcpg-jdk12-$base; tar xf -)
+    (cd test/src; tar cf - org/bouncycastle/openpgp | (cd ../../bcpg-jdk12-$base/src; tar xf -))
     (cd jdk1.2; tar cf - * | (cd ../bcpg-jdk12-$base/src; tar xf -))
     (
     cd bcpg-jdk12-$base; mkdir classes; mkdir docs;
@@ -235,6 +245,7 @@ then
     rm -rf src/org/bouncycastle/mail
     rm -rf src/org/bouncycastle/cms
     rm -rf src/org/bouncycastle/sasn1
+    find src -name AllTests.java -exec rm {} \;
 
     javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -250,6 +261,12 @@ then
         org.bouncycastle.openpgp.test > /dev/null \
 
     echo "compiling"
+
+    ed src/org/bouncycastle/bcpg/ArmoredOutputStream.java <<%
+/@RELEASE_NAME@/s//$version/
+w
+q
+%
 
     (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:../../../../jce-jdk12-$base/classes */*.java */*/*.java)
     cat > classes/pg.mf <<%
