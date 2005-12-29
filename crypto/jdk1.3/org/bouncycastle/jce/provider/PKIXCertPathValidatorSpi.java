@@ -7,7 +7,33 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
-import java.security.cert.*;
+import java.security.cert.CRL;
+
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.cert.CertPath;
+import org.bouncycastle.jce.cert.CertPathParameters;
+import org.bouncycastle.jce.cert.CertPathValidatorException;
+import org.bouncycastle.jce.cert.CertPathValidatorResult;
+import org.bouncycastle.jce.cert.CertPathValidatorSpi;
+import org.bouncycastle.jce.cert.CertSelector;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
+
+import java.security.cert.CRLException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import org.bouncycastle.jce.cert.PKIXCertPathChecker;
+import org.bouncycastle.jce.cert.PKIXCertPathValidatorResult;
+import org.bouncycastle.jce.cert.PKIXParameters;
+import org.bouncycastle.jce.cert.PolicyQualifierInfo;
+import org.bouncycastle.jce.cert.TrustAnchor;
+import java.security.cert.X509CRL;
+import java.security.cert.X509CRLEntry;
+import org.bouncycastle.jce.cert.X509CRLSelector;
+import org.bouncycastle.jce.cert.X509CertSelector;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -17,9 +43,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.jce.*;
-import org.bouncycastle.jce.cert.*;
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DEREnumerated;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -470,7 +504,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     private boolean isAnyPolicy(
         Set policySet)
     {
-        return (policySet.contains(ANY_POLICY) || (policySet.size() == 0));
+        return policySet == null || policySet.contains(ANY_POLICY) || policySet.isEmpty();
     }
 
     private AlgorithmIdentifier getAlgorithmIdentifier(
@@ -642,11 +676,11 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         //
         // (d)
         // 
-        TrustAnchor trust = findTrustAnchor((X509Certificate)certs.get(certs.size() - 1),paramsPKIX.getTrustAnchors());
+        TrustAnchor trust = findTrustAnchor((X509Certificate)certs.get(certs.size() - 1), certPath, certs.size() - 1, paramsPKIX.getTrustAnchors());
 
         if (trust == null)
         {
-            throw new CertPathValidatorException("TrustAnchor for CertPath not found", null, certPath, 0);
+            throw new CertPathValidatorException("TrustAnchor for CertPath not found.", null, certPath, -1);
         }
         
         //
@@ -831,14 +865,25 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 // (a) (1)
                 //
                 cert.verify(workingPublicKey, "BC");
+            }
+            catch (GeneralSecurityException e)
+            {
+                throw new CertPathValidatorException("Could not validate certificate signature.", e, certPath, index);
+            }
 
+            try
+            {
                 // (a) (2)
                 //
                 cert.checkValidity(validDate);
             }
-            catch (GeneralSecurityException e)
+            catch (CertificateExpiredException e)
             {
-                throw new CertPathValidatorException("couldn't validate certificate: " + e);
+                throw new CertPathValidatorException("Could not validate certificate: " + e.getMessage(), e, certPath, index);
+            }
+            catch (CertificateNotYetValidException e)
+            {
+                throw new CertPathValidatorException("Could not validate certificate: " + e.getMessage(), e, certPath, index);
             }
 
             //
@@ -851,11 +896,11 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
                 try
                 {
-                    crlselect.addIssuerName(getIssuerPrincipal(cert).getEncoded());
+                    crlselect.addIssuerName(getEncodedIssuerPrincipal(cert).getEncoded());
                 }
                 catch (IOException e)
                 {
-                    throw new CertPathValidatorException("can't extract issuer from certificate: " + e);
+                    throw new CertPathValidatorException("Cannot extract issuer from certificate: " + e);
                 }
 
                 crlselect.setCertificateChecking(cert);
@@ -1006,10 +1051,10 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             //
             // (a) (4) name chaining
             //
-            if (!getIssuerPrincipal(cert).equals(workingIssuerName))
+            if (!getEncodedIssuerPrincipal(cert).equals(workingIssuerName))
             {
                 throw new CertPathValidatorException(
-                            "IssuerName(" + getIssuerPrincipal(cert) +
+                            "IssuerName(" + getEncodedIssuerPrincipal(cert) +
                             ") does not match SubjectName(" + workingIssuerName +
                             ") of signing certificate", null, certPath, index);
             }
@@ -1100,7 +1145,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     }
                 }
 
-                if (acceptablePolicies == null)
+                if (acceptablePolicies == null || acceptablePolicies.contains(ANY_POLICY))
                 {
                     acceptablePolicies = pols;
                 }
@@ -1133,7 +1178,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     {
                         PolicyInformation   pInfo = PolicyInformation.getInstance(e.nextElement());
 
-                        if (!ANY_POLICY.equals(pInfo.getPolicyIdentifier().getId()))
+                        if (ANY_POLICY.equals(pInfo.getPolicyIdentifier().getId()))
                         {
                             Set    _apq   = getQualifierSet(pInfo.getPolicyQualifiers());
                             List      _nodes = policyNodes[i - 1];
@@ -1233,24 +1278,6 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         node.setCritical(critical);
                     }
                 }
-
-                //
-                // (d) (3)
-                //
-                for (int j = (i - 1); j >= 0; j--)
-                {
-                    List      _nodes = policyNodes[j];
-
-                    for (int k = 0; k < _nodes.size(); k++)
-                    {
-                        PKIXPolicyNode node = (PKIXPolicyNode)_nodes.get(k);
-
-                        if (!node.hasChildren())
-                        {
-                            validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, node);
-                        }
-                    }
-                }
             }
 
             // 
@@ -1264,12 +1291,9 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             //
             // (f)
             //
-            if (!((explicitPolicy > 0) || (validPolicyTree != null)))
+            if (explicitPolicy <= 0 && validPolicyTree == null)
             {
-                if (!isAnyPolicy(acceptablePolicies))
-                {
-                    throw new CertPathValidatorException("Failure in process (f)");
-                }
+                throw new CertPathValidatorException("No valid policy tree found when one expected.");
             }
 
             //
@@ -1429,9 +1453,9 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             break;
                         case 1:
                             tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
-                            if (tmpInt < inhibitAnyPolicy)
+                            if (tmpInt < policyMapping)
                             {
-                                inhibitAnyPolicy = tmpInt;
+                                policyMapping = tmpInt;
                             }
                         break;
                         }
@@ -1659,6 +1683,10 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         //
         if (validPolicyTree == null)
         { 
+            if (paramsPKIX.isExplicitPolicyRequired())
+            {
+                throw new CertPathValidatorException("Explicit policy requested but none available.");
+            }
             intersection = null;
         }
         else if (isAnyPolicy(userInitialPolicySet)) // (g) (ii)
@@ -1667,7 +1695,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             {
                 if (acceptablePolicies.isEmpty())
                 {
-                    throw new CertPathValidatorException("Explicit policy requested but none avaliable");
+                    throw new CertPathValidatorException("Explicit policy requested but none available.");
                 }
                 else
                 {
@@ -1727,10 +1755,9 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         else
         {
             //
-            // (g) (iii) - what's described in the RFC makes no sense, here's
-            // one persons interpretation...
+            // (g) (iii)
             //
-            
+
             //
             // (g) (iii) 1
             //
@@ -1749,7 +1776,11 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         Iterator _iter = _node.getChildren();
                         while (_iter.hasNext())
                         {
-                            _validPolicyNodeSet.add(_iter.next());
+                            PKIXPolicyNode _c_node = (PKIXPolicyNode)_iter.next();
+                            if (!ANY_POLICY.equals(_c_node.getValidPolicy()))
+                            {
+                                _validPolicyNodeSet.add(_c_node);
+                            }
                         }
                     }
                 }
@@ -1763,20 +1794,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             {
                 PKIXPolicyNode _node = (PKIXPolicyNode)_vpnsIter.next();
                 String _validPolicy = _node.getValidPolicy();
-                
+
                 if (!userInitialPolicySet.contains(_validPolicy))
-                {
-                    validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, _node);
-                }
-            }
-            
-            _vpnsIter = _validPolicyNodeSet.iterator();
-            while (_vpnsIter.hasNext())
-            {
-                PKIXPolicyNode _node = (PKIXPolicyNode)_vpnsIter.next();
-                String _validPolicy = _node.getValidPolicy();
-                
-                if (!acceptablePolicies.contains(_validPolicy))
                 {
                     validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, _node);
                 }
@@ -1804,52 +1823,13 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             
             intersection = validPolicyTree;
         }
-        
-        if ((explicitPolicy > 0) || (intersection != null) || isAnyPolicy(acceptablePolicies))
+ 
+        if ((explicitPolicy > 0) || (intersection != null))
         {
             return new PKIXCertPathValidatorResult(trust, intersection, workingPublicKey);
         }
 
-        throw new CertPathValidatorException("Path processing failed");
-    }
-
-    private X509Principal getIssuerPrincipal(X509CRL crl)
-        throws CertPathValidatorException
-    {
-        try
-        {
-            return PrincipalUtil.getIssuerX509Principal(crl);
-        }
-        catch (CRLException e)
-        {
-            throw new CertPathValidatorException("exception processing crl: " + e);
-        }
-    }
-
-    private X509Principal getIssuerPrincipal(X509Certificate cert)
-        throws CertPathValidatorException
-    {
-        try
-        {
-            return PrincipalUtil.getIssuerX509Principal(cert);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new CertPathValidatorException("exception processing cert: " + e);
-        }
-    }
-
-    private X509Principal getSubjectPrincipal(X509Certificate cert)
-        throws CertPathValidatorException
-    {
-        try
-        {
-            return PrincipalUtil.getSubjectX509Principal(cert);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new CertPathValidatorException("exception processing cert: " + e);
-        }
+        throw new CertPathValidatorException("Path processing failed on policy.", null, certPath, index);
     }
 
     /**
@@ -1868,6 +1848,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     private final Collection findCRLs(
         X509CRLSelector crlSelect,
         List            crlStores)
+        throws CertPathValidatorException
     {
         Set crls = new HashSet();
         Iterator iter = crlStores.iterator();
@@ -1882,7 +1863,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             }
             catch (CertStoreException ex)
             {
-                ex.printStackTrace();
+                throw new CertPathValidatorException(ex);
             }
         }
 
@@ -1906,6 +1887,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
      **/
     final TrustAnchor findTrustAnchor(
         X509Certificate cert,
+        CertPath        certPath,
+        int             index,
         Set             trustAnchors) 
         throws CertPathValidatorException
     {
@@ -1918,12 +1901,11 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
         try
         {
-            certSelectX509.setSubject(getIssuerPrincipal(cert).getEncoded());
+            certSelectX509.setSubject(getEncodedIssuerPrincipal(cert).getEncoded());
         }
         catch (IOException ex)
         {
-            ex.printStackTrace();
-            return null;
+            throw new CertPathValidatorException(ex);
         }
 
         while (iter.hasNext() && trust == null)
@@ -1945,7 +1927,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             {
                 try
                 {
-                    X509Principal certIssuer = getIssuerPrincipal(cert);
+                    X509Principal certIssuer = getEncodedIssuerPrincipal(cert);
                     X509Principal caName = new X509Principal(trust.getCAName());
                     if (certIssuer.equals(caName))
                     {
@@ -1982,9 +1964,48 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     
         if (trust == null && invalidKeyEx != null)
         {
-            throw new CertPathValidatorException("TrustAnchor found put certificate validation failed",invalidKeyEx);
+            throw new CertPathValidatorException("TrustAnchor found but certificate validation failed.", invalidKeyEx, certPath, index);
         }
 
         return trust;
+    }
+    
+    private X509Principal getIssuerPrincipal(X509CRL crl)
+        throws CertPathValidatorException
+    {
+        try
+        {
+            return PrincipalUtil.getIssuerX509Principal(crl);
+        }
+        catch (CRLException e)
+        {
+            throw new CertPathValidatorException("cannot extract issuer from CRL: " + e.toString());
+        }
+    }
+
+    private X509Principal getEncodedIssuerPrincipal(X509Certificate cert)
+        throws CertPathValidatorException
+    {
+        try
+        {
+            return PrincipalUtil.getIssuerX509Principal(cert);
+        }
+        catch (CertificateEncodingException e)
+        {
+            throw new CertPathValidatorException("cannot extract issuer from cert: " + e.toString());
+        }
+    }
+
+    private X509Principal getSubjectPrincipal(X509Certificate cert)
+        throws CertPathValidatorException
+    {
+        try
+        {
+            return PrincipalUtil.getSubjectX509Principal(cert);
+        }
+        catch (CertificateEncodingException e)
+        {
+            throw new CertPathValidatorException("cannot extract subject from cert: " + e.toString());
+        }
     }
 }
