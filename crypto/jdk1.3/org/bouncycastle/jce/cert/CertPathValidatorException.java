@@ -155,21 +155,17 @@ public class CertPathValidatorException extends GeneralSecurityException
     {
         String message = super.getMessage();
 
-        if (message == null && cause == null)
-        {
-            return null;
-        }
-
-        StringBuffer s = new StringBuffer();
         if (message != null)
         {
-            s.append(message + "\n");
+            return message;
         }
+
         if (cause != null)
         {
-            s.append("Cause:\n" + cause.getMessage() + "\n");
+            return cause.getMessage();
         }
-        return s.toString();
+        
+        return null;
     }
 
     /**
