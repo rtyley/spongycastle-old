@@ -13,6 +13,11 @@
     <property name="artifacts.jars.dir" value="${artifacts.dir}/jars" />
     <property name="artifacts.docs.dir" value="${artifacts.dir}/javadoc" />
 
+    <property name="jce.target" value="jce-${target.name}" />
+    <property name="jce.target.dir" value="${artifacts.dir}/${jce.target}" />
+    <property name="jce.target.src.dir" value="${jce.target.dir}/src" />
+    <property name="jce.target.docs.dir" value="${jce.target.dir}/docs" />
+
     <property name="provider.target" value="bcprov-${target.name}" />
     <property name="provider.target.dir" value="${artifacts.dir}/${provider.target}" />
     <property name="provider.target.src.dir" value="${provider.target.dir}/src" />
@@ -33,6 +38,11 @@
     <property name="pg.target.src.dir" value="${pg.target.dir}/src" />
     <property name="pg.target.docs.dir" value="${pg.target.dir}/docs" />
 
+    <property name="lcrypto.target" value="lcrypto-${target.name}" />
+    <property name="lcrypto.target.dir" value="${artifacts.dir}/${lcrypto.target}" />
+    <property name="lcrypto.target.src.dir" value="${lcrypto.target.dir}/src" />
+    <property name="lcrypto.target.classes.dir" value="${lcrypto.target.dir}/classes" />
+    <property name="lcrypto.target.docs.dir" value="${lcrypto.target.dir}/docs" />
 
     <macrodef name="compile">
         <attribute name="target" />
@@ -96,24 +106,17 @@
     <target name="build" depends="build-lw, build-libraries, build-test" />
 
     <target name="build-lw">
-        <property name="lcrypto" value="lcrypto-${target.name}" />
-
         <!--
               Lightweight Libraries
         -->
-        <property name="target.dir" value="${build.dir}/${lcrypto}" />
-        <property name="target.src.dir" value="${target.dir}/src" />
-        <property name="target.classes.dir" value="${target.dir}/classes" />
-        <property name="target.artifacts.dir" value="${artifacts.dir}/${lcrypto}" />
 
-        <mkdir dir="${target.dir}" />
-        <mkdir dir="${target.src.dir}" />
-        <mkdir dir="${target.classes.dir}" />
-        <mkdir dir="${target.artifacts.dir}" />
+        <mkdir dir="${lcrypto.target.dir}" />
+        <mkdir dir="${lcrypto.target.src.dir}" />
+        <mkdir dir="${lcrypto.target.classes.dir}" />
 
-        <copyStandardFiles toDir="${target.dir}" />
+        <copyStandardFiles toDir="${lcrypto.target.dir}" />
 
-        <copy todir="${target.src.dir}">
+        <copy todir="${lcrypto.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/*.java" />
                  <include name="org/bouncycastle/math/**/*.java" />
@@ -122,10 +125,9 @@
                  <include name="org/bouncycastle/asn1/**/*.java" />
                  <include name="org/bouncycastle/bcpg/**/*.java" />
              </fileset>
-             <fileset dir="${src.dir}" includes="**/*.pem" />
         </copy>
 
-        <javac srcdir="${target.src.dir}" destdir="${target.classes.dir}" debug="${release.debug}">
+        <javac srcdir="${lcrypto.target.src.dir}" destdir="${lcrypto.target.classes.dir}" debug="${release.debug}">
         </javac>
     </target>
 
@@ -160,6 +162,46 @@
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
                 <attribute name="Extension-Name" value="org.bouncycastle.bcprovider" />
+                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                <attribute name="Specification-Version" value="1.1" />
+                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                <attribute name="Implementation-Version" value="${release.name}.0" />
+            </manifestElements>
+        </compile>
+    </target>
+
+    <!--
+          JCE
+    -->
+    <target name="build-jce">
+        <property name="jce" value="jce-${target.name}" />
+
+        <mkdir dir="${artifacts.jars.dir}" />
+        <delete dir="${jce.target.dir}" />
+        <mkdir dir="${jce.target.dir}" />
+
+        <copyStandardFiles toDir="${jce.target.dir}" />
+
+        <copy todir="${jce.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <exclude name="org/bouncycastle/**/test/*.java" />
+                 <exclude name="org/bouncycastle/**/test/nist/*.java" />
+                 <exclude name="org/bouncycastle/**/test/*.pem" />
+                 <exclude name="org/bouncycastle/mail/**/*.java" />
+                 <exclude name="org/bouncycastle/cms/**/*.java" />
+                 <exclude name="org/bouncycastle/sasn1/**/*.java" />
+                 <exclude name="org/bouncycastle/tsp/**/*.java" />
+                 <exclude name="org/bouncycastle/openpgp/**/*.java" />
+                 <exclude name="org/bouncycastle/bcpg/**/*.java" />
+             </fileset>
+             <fileset dir="${src.dir}" includes="org/bouncycastle/util/test/*.java" />
+        </copy>
+
+        <compile target="${jce}">
+            <manifestElements>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Extension-Name" value="org.bouncycastle.bcjce" />
                 <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                 <attribute name="Specification-Version" value="1.1" />
                 <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
@@ -269,14 +311,14 @@
         </compile>
     </target>
 
+    <!--
+         Tests
+    -->
     <target name="build-test">
         <property name="test.target" value="bctest-${target.name}" />
 
         <mkdir dir="${artifacts.jars.dir}" />
 
-        <!--
-             Tests
-        -->
         <property name="test.target.dir" value="${artifacts.dir}/${test.target}" />
         <property name="test.target.src.dir" value="${test.target.dir}/src" />
 
@@ -303,7 +345,7 @@
         </compile>
     </target>
 
-    <target name="test" depends="build-test">
+    <target name="test">
         <junit fork="yes" dir="${basedir}" failureProperty="test.failed">
             <classpath>
                 <fileset dir="${artifacts.jars.dir}">
@@ -317,6 +359,7 @@
             <batchtest todir="${artifacts.reports.xml.dir}" unless="testcase">
                 <fileset dir="${src.dir}">
                     <include name="**/test/AllTests.java" />
+                    <include name="**/nist/NistCertPathTest.java" />
                 </fileset>
             </batchtest>
         </junit>
@@ -329,7 +372,7 @@
         </junitreport>
     </target>
 
-    <target name="test-lw" depends="build-test">
+    <target name="test-lw">
         <junit fork="yes" dir="${basedir}" failureProperty="test.failed">
             <classpath>
                 <fileset dir="${artifacts.jars.dir}">
@@ -389,6 +432,39 @@
 
         <copy todir="${provider.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/bcprov" />
+        </copy>
+    </target>
+
+    <target name="javadoc-jce">
+        <copy todir="${jce.target.src.dir}">
+             <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/jce/**/test/*.java" />
+                 <include name="org/bouncycastle/x509/**/test/*.java" />
+                 <include name="org/bouncycastle/openssl/**/test/*.java" />
+             </fileset>
+        </copy>
+
+        <compileDoc srcDir="${jce.target.src.dir}" docsDir="${artifacts.docs.dir}/jce">
+            <docElements>
+                <package name="org.bouncycastle.asn1.*" />
+                <package name="org.bouncycastle.crypto.*" />
+                <package name="org.bouncycastle.jce.*" />
+                <package name="org.bouncycastle.openssl.*" />
+                <package name="org.bouncycastle.mozilla.*" />
+                <package name="org.bouncycastle.x509.*" />
+                <package name="javax.crypto.*" />
+                <group title="JCE Package" packages="javax.crypto*" />
+                <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
+                <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
+                <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
+                <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
+                <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
+                <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
+            </docElements>
+        </compileDoc>
+
+        <copy todir="${jce.target.docs.dir}">
+             <fileset dir="${artifacts.docs.dir}/jce" />
         </copy>
     </target>
 
