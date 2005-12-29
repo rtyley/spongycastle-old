@@ -43,11 +43,13 @@
 
     <target name="build" depends="init">
         <ant antfile="bc-build.xml" dir="." />
+        <ant antfile="bc-build.xml" dir="." target="javadoc-lw" />
         <ant antfile="bc-build.xml" dir="." target="javadoc-libraries" />
     </target>
 
     <target name="build-lw" depends="init">
         <ant antfile="bc-build.xml" dir="." target="build-lw" />
+        <ant antfile="bc-build.xml" dir="." target="javadoc-lw" />
     </target>
 
     <target name="build-provider" depends="init">
