@@ -1,15 +1,10 @@
 package org.bouncycastle.sasn1.test;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.sasn1.Asn1InputStream;
 import org.bouncycastle.sasn1.Asn1ObjectIdentifier;
@@ -61,18 +56,13 @@ public class OIDTest
         String  oid)
         throws IOException
     {
-        DERObjectIdentifier     o = new DERObjectIdentifier(oid);
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
+        Asn1ObjectIdentifier    o = new Asn1ObjectIdentifier(oid);
+        ByteArrayInputStream    bIn = new ByteArrayInputStream(o.getEncoded());
+        Asn1InputStream         aIn = new Asn1InputStream(bIn);
         
-        aOut.writeObject(o);
+        o = (Asn1ObjectIdentifier)aIn.readObject();
         
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(bOut.toByteArray());
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
-        
-        o = (DERObjectIdentifier)aIn.readObject();
-        
-        if (!o.getId().equals(oid))
+        if (!o.toString().equals(oid))
         {
             fail("failed oid check for " + oid);
         }
