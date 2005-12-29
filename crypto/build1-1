@@ -21,11 +21,13 @@ then
 
     mkdir lcrypto-jdk11-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/LICENSE.java src/org/bouncycastle/math src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1 | (cd lcrypto-jdk11-$base; tar xf -)
+    (cd test; tar cf - src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1) | (cd lcrypto-jdk11-$base; tar xf -)
     (cd jdk1.1; tar cf - org/bouncycastle/asn1/* | (cd ../lcrypto-jdk11-$base/src; tar xf -))
     rm -f lcrypto-jdk11-$base/src/org/bouncycastle/crypto/test/AESVector*
 
     (
         cd lcrypto-jdk11-$base;
+        find src -name AllTests.java -exec rm {} \;
 
         mkdir classes; mkdir docs;
 
@@ -80,7 +82,10 @@ then
 
         echo "compiling"
 
-        (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip *.java ; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */*.java; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */p*/*.java; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */[adegimstu]*/*.java )
+        (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip *.java ; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */*.java; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */p*/*.java
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */[ade]*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */[gim]*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */[stu]*/*.java )
 
         echo "lightweight regression test"
         java -classpath classes:$JDK11PATH/lib/classes.zip org.bouncycastle.crypto.test.RegressionTest
@@ -95,8 +100,11 @@ then
 
     mkdir jce-jdk11-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src | (cd jce-jdk11-$base; tar xf -)
+    (cd test/src; tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
     (cd jdk1.4; tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
+    (cd test/jdk1.4; tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
     (cd jdk1.3; tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
+    (cd test/jdk1.3; tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
     (cd jdk1.2; tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
     (cd jdk1.1; tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
 
@@ -116,6 +124,9 @@ then
     rm -rf src/org/bouncycastle/jce/ECPointUtil.java
     rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
+    rm -rf src/org/bouncycastle/jce/provider/test/ECEncodingTest.java
+    rm -rf src/org/bouncycastle/jce/provider/test/ECNRTest.java
+    rm -rf src/org/bouncycastle/jce/provider/test/IESTest.java
     rm -rf src/org/bouncycastle/jce/provider/test/AttrCertTest.java
     rm -rf src/org/bouncycastle/jce/spec/ECNamedCurveSpec.java
     rm -rf src/org/bouncycastle/mail
@@ -126,6 +137,7 @@ then
     rm -rf src/org/bouncycastle/sasn1/test
     rm -rf src/org/bouncycastle/tsp
     rm -rf src/org/bouncycastle/util/encoders/test
+    find src -name AllTests.java -exec rm {} \;
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -235,6 +247,7 @@ then
 
     mkdir bcpg-jdk11-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/bcpg src/org/bouncycastle/openpgp | (cd bcpg-jdk11-$base; tar xf -)
+    (cd test/src; tar cf - org/bouncycastle/openpgp | (cd ../../bcpg-jdk11-$base/src; tar xf -))
     (cd jdk1.1; tar cf - org/bouncycastle/openpgp | (cd ../bcpg-jdk11-$base/src; tar xf -))
     (
     cd bcpg-jdk11-$base; mkdir classes; mkdir docs;
@@ -258,6 +271,11 @@ then
         org.bouncycastle.openpgp.examples \
         org.bouncycastle.openpgp.test > /dev/null \
 
+    ed src/org/bouncycastle/bcpg/ArmoredOutputStream.java <<%
+/@RELEASE_NAME@/s//$version/
+w
+q
+%
     echo "compiling"
 
     (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:../../../../jce-jdk11-$base/classes:$JDK11PATH/lib/classes.zip */*.java */*/*.java)
