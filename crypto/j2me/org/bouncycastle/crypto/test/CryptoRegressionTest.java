@@ -27,6 +27,7 @@ public class CryptoRegressionTest
         new CAST5Test(),
         new CAST6Test(),
         new IDEATest(),
+        new CamelliaTest(),
         new RSATest(),
         new ISO9796Test(),
         new MD2DigestTest(),
