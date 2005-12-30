@@ -36,8 +36,8 @@ src/org/bouncycastle/crypto/macs \
 src/org/bouncycastle/crypto/modes \
 src/org/bouncycastle/crypto/params \
 src/org/bouncycastle/crypto/signers \
-src/org/bouncycastle/crypto/test \
 src/org/bouncycastle/util src/org/bouncycastle/bcpg src/org/bouncycastle/asn1 | (cd lcrypto-j2me-$base; tar xf -)
+    (cd test; tar cf - src/org/bouncycastle/crypto/test | (cd ../lcrypto-j2me-$base; tar xf -))
     (cd j2me; tar cf - * | (cd ../lcrypto-j2me-$base; cd src; tar xf -))
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/util/Dump.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AESVectorFileTest.java
