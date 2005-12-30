@@ -75,7 +75,7 @@ public abstract class SimpleTest
         out.println(result.toString());
         if (result.getException() != null)
         {
-            result.getException().printStackTrace(out);
+            result.getException().printStackTrace();
         }
     }
 
