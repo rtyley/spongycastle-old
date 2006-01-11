@@ -50,6 +50,7 @@ public class RegressionTest
         new CertPathBuilderTest(),
         new ECEncodingTest(),
         new NISTCertPathTest(),
+        new PKIXPolicyMappingTest(),
         new SlotTwoTest()
     };
 
