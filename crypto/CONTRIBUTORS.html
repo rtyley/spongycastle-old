@@ -38,7 +38,7 @@ version of the collections API available. For further details see
 <a href="http://sourceforge.net/projects/jcf/">http://sourceforge.net/projects/jcf/</a>
 <li>Carmen Bastiaans &lt;cbastiaa&#064;microbits.com.au&gt; - fixing the improper
 null pointer problem in the setting of certifcates in the PKCS12 key store.
-<li>Tomas Gustavsson &lt;tomasg&#064;primekey.se&gt; - initial implementation of the AuthorityInformationAccess, SubjectKeyIdentifier, AuthorityKeyIdentifier, CRLNumber, CRLReason, CertificatePolicies, V2TBSCertListGenerator, and X509V2CRLGenerator classes in the ASN.1 library. Additions to GeneralName class, other bug fixes in the X.509 package. Initial implementation of the CertificationRequest classes. getRevocationReason() patch for OCSP.
+<li>Tomas Gustavsson &lt;tomasg&#064;primekey.se&gt; - initial implementation of the AuthorityInformationAccess, SubjectKeyIdentifier, AuthorityKeyIdentifier, CRLNumber, CRLReason, CertificatePolicies, V2TBSCertListGenerator, and X509V2CRLGenerator classes in the ASN.1 library. Additions to GeneralName class, other bug fixes in the X.509 package. Initial implementation of the CertificationRequest classes. getRevocationReason() patch for OCSP. Patch to SemanticsInformation to prevent ClassCastException.
 <li>Eugen Kuleshov &lt;euxx&#064;hotmail.com&gt; - optimisations for Blowfish, assitance with PKCS12/keytool interoperability.
 <li>Megan Woods &lt;meganwoods&#064;sekurafile.com&gt; - initial implimentation of
 ECIES.
@@ -186,7 +186,7 @@ SecureRandom.
 <li>Brian O'Rourke &lt;brianorourke&#064gmail.com&gt; - patch for signature creation time override in OpenPGP.
 <li>Andreas Schwier &lt;andreas.schwier&#064cardcontact.de&gt; - initial implementation of ISO9797 MAC Algorithm 3, addition of DES-EDE 64 MAC to the provider, fix to EC point encoding.
 <li>David Josse &lt;david.josse&#064transacttools.net&gt; Patch for trailer function in version 2 signature packets.
-<li>Kishimoto Kazuhiko &lt;kazu-k&#064hi-ho.ne.jp&gt; RFC 3280 updates to policy processiing in the CertPath validator.
+<li>Kishimoto Kazuhiko &lt;kazu-k&#064hi-ho.ne.jp&gt; RFC 3280 updates to policy processing in the CertPath validator. Additional test data not covered by NIST.
 <li>Lawrence Tan &lt;lwrnctan&#064gmail.com&gt Large field OID sample test data.
 </ul>
 </body>
