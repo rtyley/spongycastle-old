@@ -728,17 +728,24 @@ public class X509Name
             return true;
         }
 
-        if (_obj == null || !(_obj instanceof X509Name))
+        if (!(_obj instanceof X509Name || _obj instanceof ASN1Sequence))
+        {
+            return false;
+        }
+        
+        DERObject derO = ((DEREncodable)_obj).getDERObject();
+        
+        if (this.getDERObject().equals(derO))
+        {
+            return true;
+        }
+        
+        if (!(_obj instanceof X509Name))
         {
             return false;
         }
         
         X509Name _oxn          = (X509Name)_obj;
-        
-        if (this.getDERObject().equals(_oxn.getDERObject()))
-        {
-            return true;
-        }
         
         int      _orderingSize = ordering.size();
 

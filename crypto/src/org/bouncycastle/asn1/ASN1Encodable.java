@@ -62,14 +62,14 @@ public abstract class ASN1Encodable
     public boolean equals(
         Object  o)
     {
-        if ((o == null) || !(o instanceof ASN1Encodable))
+        if ((o == null) || !(o instanceof DEREncodable))
         {
             return false;
         }
 
-        ASN1Encodable other = (ASN1Encodable)o;
+        DEREncodable other = (DEREncodable)o;
 
-        return this.toASN1Object().equals(other.toASN1Object());
+        return this.toASN1Object().equals(other.getDERObject());
     }
 
     public DERObject getDERObject()

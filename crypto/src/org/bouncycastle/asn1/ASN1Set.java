@@ -148,12 +148,24 @@ abstract public class ASN1Set
     public boolean equals(
         Object  o)
     {
-        if (o == null || !(o instanceof ASN1Set))
+        if (o == this)
+        {
+            return true;
+        }
+        
+        if (!(o instanceof DEREncodable))
         {
             return false;
         }
 
-        ASN1Set   other = (ASN1Set)o;
+        DERObject      dObj = ((DEREncodable)o).getDERObject();
+        
+        if (!(dObj instanceof ASN1Set))
+        {
+            return false;
+        }
+
+        ASN1Set   other = (ASN1Set)dObj;
 
         if (this.size() != other.size())
         {
