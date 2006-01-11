@@ -1,6 +1,9 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
@@ -51,7 +54,8 @@ public class QCStatementUnitTest
     private void checkConstruction(
          QCStatement mv,
          DERObjectIdentifier statementId,
-         ASN1Encodable statementInfo)
+         ASN1Encodable statementInfo) 
+         throws IOException
     {
         checkStatement(mv, statementId, statementInfo);
         
@@ -59,7 +63,9 @@ public class QCStatementUnitTest
         
         checkStatement(mv, statementId, statementInfo);
         
-        ASN1Sequence seq = (ASN1Sequence)mv.toASN1Object();
+        ASN1InputStream aIn = new ASN1InputStream(mv.toASN1Object().getEncoded());
+
+        ASN1Sequence seq = (ASN1Sequence)aIn.readObject();
         
         mv = QCStatement.getInstance(seq);
         
@@ -70,6 +76,7 @@ public class QCStatementUnitTest
         QCStatement         qcs,
         DERObjectIdentifier statementId,
         ASN1Encodable       statementInfo)
+        throws IOException
     {
         if (!qcs.getStatementId().equals(statementId))
         {

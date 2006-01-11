@@ -1,6 +1,9 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -125,7 +128,8 @@ public class SignerLocationUnitTest
         SignerLocation sl,
         DERUTF8String  countryName,
         DERUTF8String  localityName,
-        ASN1Sequence   postalAddress)
+        ASN1Sequence   postalAddress) 
+        throws IOException
     {
         checkValues(sl, countryName, localityName, postalAddress);
         
@@ -133,7 +137,9 @@ public class SignerLocationUnitTest
         
         checkValues(sl, countryName, localityName, postalAddress);
         
-        ASN1Sequence seq = (ASN1Sequence)sl.toASN1Object();
+        ASN1InputStream aIn = new ASN1InputStream(sl.toASN1Object().getEncoded());
+
+        ASN1Sequence seq = (ASN1Sequence)aIn.readObject();
         
         sl = SignerLocation.getInstance(seq);
         

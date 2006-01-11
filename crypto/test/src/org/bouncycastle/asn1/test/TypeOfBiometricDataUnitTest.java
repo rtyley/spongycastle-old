@@ -1,5 +1,8 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.qualified.TypeOfBiometricData;
@@ -84,6 +87,7 @@ public class TypeOfBiometricDataUnitTest
 
     private void checkPredefinedType(
         int predefinedType)
+        throws IOException
     {
         TypeOfBiometricData type = new TypeOfBiometricData(predefinedType);
 
@@ -93,8 +97,10 @@ public class TypeOfBiometricDataUnitTest
         
         checkPredefined(type, predefinedType);
         
-        DERObject obj = type.toASN1Object();
-        
+        ASN1InputStream aIn = new ASN1InputStream(type.toASN1Object().getEncoded());
+
+        DERObject obj = aIn.readObject();
+
         type = TypeOfBiometricData.getInstance(obj);
         
         checkPredefined(type, predefinedType);

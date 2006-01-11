@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.test;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -74,6 +75,7 @@ public class SemanticsInformationUnitTest
         SemanticsInformation mv,
         DERObjectIdentifier  semanticsIdentifier,
         GeneralName[]        names)
+        throws Exception
     {
         checkStatement(mv, semanticsIdentifier, names);
         
@@ -81,8 +83,10 @@ public class SemanticsInformationUnitTest
         
         checkStatement(mv, semanticsIdentifier, names);
         
-        ASN1Sequence seq = (ASN1Sequence)mv.toASN1Object();
+        ASN1InputStream aIn = new ASN1InputStream(mv.toASN1Object().getEncoded());
         
+        ASN1Sequence seq = (ASN1Sequence)aIn.readObject();
+
         mv = SemanticsInformation.getInstance(seq);
         
         checkStatement(mv, semanticsIdentifier, names);
