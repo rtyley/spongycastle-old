@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -563,7 +565,7 @@ public class NistCertPathTest
         }
         catch (Exception e)
         {
-            throw new IllegalStateException("exception loading certificate: " + certName);
+            throw new IllegalStateException("exception loading certificate " + certName + ": " + e);
         }
     }
     
@@ -622,5 +624,21 @@ public class NistCertPathTest
         }
         
         return dataHome + "/PKITS";
+    }
+    
+    public static void main (String[] args) 
+        throws Exception
+    {
+        junit.textui.TestRunner.run(suite());
+    }
+    
+    public static Test suite() 
+        throws Exception
+    {   
+        TestSuite suite = new TestSuite("NIST CertPath Tests");
+        
+        suite.addTestSuite(NistCertPathTest.class);
+        
+        return suite;
     }
 }
