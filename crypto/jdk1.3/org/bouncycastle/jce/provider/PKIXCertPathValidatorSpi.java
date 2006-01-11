@@ -39,9 +39,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -1338,6 +1340,141 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 }
                 
                 //
+                // (b)
+                //
+                if (pm != null)
+                {
+                    ASN1Sequence mappings = (ASN1Sequence)pm;
+                    Map m_idp = new HashMap();
+                    Set s_idp = new HashSet();
+                    for (int j = 0; j < mappings.size(); j++)
+                    {
+                        ASN1Sequence    mapping = (ASN1Sequence)mappings.getObjectAt(j);
+                        String id_p = ((DERObjectIdentifier)mapping.getObjectAt(0)).getId();
+                        String sd_p = ((DERObjectIdentifier)mapping.getObjectAt(1)).getId();
+                        Set tmp;
+                        if (!m_idp.containsKey(id_p))
+                        {
+                            tmp = new HashSet();
+                            tmp.add(sd_p);
+                            m_idp.put(id_p, tmp);
+                            s_idp.add(id_p);
+                        }
+                        else
+                        {
+                            tmp = (Set)m_idp.get(id_p);
+                            tmp.add(sd_p);
+                        }
+                    }
+
+                    Iterator it_idp = s_idp.iterator();
+                    while (it_idp.hasNext())
+                    {
+                        String id_p = (String)it_idp.next();
+                    
+                        //
+                        // (1)
+                        //
+                        if (policyMapping > 0)
+                        {
+                            boolean idp_found = false;
+                            Iterator nodes_i = policyNodes[i].iterator();
+                            while (nodes_i.hasNext())
+                            {
+                                PKIXPolicyNode node = (PKIXPolicyNode)nodes_i
+                                        .next();
+                                if (node.getValidPolicy().equals(id_p))
+                                {
+                                    idp_found = true;
+                                    node.expectedPolicies = (Set)m_idp
+                                            .get(id_p);
+                                    break;
+                                }
+                            }
+
+                            if (!idp_found)
+                            {
+                                nodes_i = policyNodes[i].iterator();
+                                while (nodes_i.hasNext())
+                                {
+                                    PKIXPolicyNode node = (PKIXPolicyNode)nodes_i.next();
+                                    if (ANY_POLICY.equals(node.getValidPolicy()))
+                                    {
+                                        Set pq = null;
+                                        ASN1Sequence policies = (ASN1Sequence)getExtensionValue(
+                                                cert, CERTIFICATE_POLICIES);
+                                        Enumeration e = policies.getObjects();
+                                        while (e.hasMoreElements())
+                                        {
+                                            PolicyInformation pinfo = PolicyInformation.getInstance(e.nextElement());
+                                            if (ANY_POLICY.equals(pinfo.getPolicyIdentifier().getId()))
+                                            {
+                                                pq = getQualifierSet(pinfo.getPolicyQualifiers());
+                                                break;
+                                            }
+                                        }
+                                        boolean ci = false;
+                                        if (cert.getCriticalExtensionOIDs() != null)
+                                        {
+                                            ci = cert.getCriticalExtensionOIDs().contains(CERTIFICATE_POLICIES);
+                                        }
+
+                                        PKIXPolicyNode p_node = (PKIXPolicyNode)node.getParent();
+                                        if (ANY_POLICY.equals(p_node.getValidPolicy()))
+                                        {
+                                            PKIXPolicyNode c_node = new PKIXPolicyNode(
+                                                    new ArrayList(), i,
+                                                    (Set)m_idp.get(id_p),
+                                                    p_node, pq, id_p, ci);
+                                            p_node.addChild(c_node);
+                                            policyNodes[i].add(c_node);
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+
+                        //
+                        // (2)
+                        //
+                        }
+                        else if (policyMapping <= 0)
+                        {
+                            Iterator nodes_i = policyNodes[i].iterator();
+                            while (nodes_i.hasNext())
+                            {
+                                PKIXPolicyNode node = (PKIXPolicyNode)nodes_i
+                                        .next();
+                                if (node.getValidPolicy().equals(id_p))
+                                {
+                                    PKIXPolicyNode p_node = (PKIXPolicyNode)node
+                                            .getParent();
+                                    p_node.removeChild(node);
+                                    nodes_i.remove();
+                                    for (int k = (i - 1); k >= 0; k--)
+                                    {
+                                        List nodes = policyNodes[k];
+                                        for (int l = 0; l < nodes.size(); l++)
+                                        {
+                                            PKIXPolicyNode node2 = (PKIXPolicyNode)nodes
+                                                    .get(l);
+                                            if (!node2.hasChildren())
+                                            {
+                                                validPolicyTree = removePolicyNode(
+                                                        validPolicyTree,
+                                                        policyNodes, node2);
+                                                if (validPolicyTree == null)
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                //
                 // (g) handle the name constraints extension
                 //
                 ASN1Sequence ncSeq = (ASN1Sequence)getExtensionValue(cert, NAME_CONSTRAINTS);
@@ -1728,7 +1865,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         
                         if (!acceptablePolicies.contains(_validPolicy))
                         {
-                            validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, _node);
+                            //validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, _node);
                         }
                     }
                     if (validPolicyTree != null)
