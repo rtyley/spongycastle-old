@@ -134,12 +134,24 @@ public abstract class ASN1Sequence
     public boolean equals(
         Object  o)
     {
-        if (o == null || !(o instanceof ASN1Sequence))
+        if (o == this)
+        {
+            return true;
+        }
+        
+        if (!(o instanceof DEREncodable))
         {
             return false;
         }
 
-        ASN1Sequence   other = (ASN1Sequence)o;
+        DERObject      dObj = ((DEREncodable)o).getDERObject();
+        
+        if (!(dObj instanceof ASN1Sequence))
+        {
+            return false;
+        }
+        
+        ASN1Sequence   other = (ASN1Sequence)dObj;
 
         if (this.size() != other.size())
         {

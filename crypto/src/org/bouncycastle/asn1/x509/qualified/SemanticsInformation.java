@@ -70,9 +70,9 @@ public class SemanticsInformation extends ASN1Encodable
         {
             ASN1Sequence generalNameSeq = ASN1Sequence.getInstance(object);
             nameRegistrationAuthorities = new GeneralName[generalNameSeq.size()];
-            for (int i= 0; i< generalNameSeq.size();i++)
+            for (int i= 0; i < generalNameSeq.size(); i++)
             {
-                nameRegistrationAuthorities[i] = (GeneralName)generalNameSeq.getObjectAt(i);
+                nameRegistrationAuthorities[i] = GeneralName.getInstance(generalNameSeq.getObjectAt(i));
             } 
         }
     }
