@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.test;
 
 import java.util.Random;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERIA5String;
@@ -72,6 +73,7 @@ public class BiometricDataUnitTest
         AlgorithmIdentifier hashAlgorithm,
         ASN1OctetString dataHash, 
         DERIA5String dataUri)
+        throws Exception
     {
         checkValues(bd, dataType, hashAlgorithm, dataHash, dataUri);
 
@@ -79,7 +81,9 @@ public class BiometricDataUnitTest
 
         checkValues(bd, dataType, hashAlgorithm, dataHash, dataUri);
 
-        ASN1Sequence seq = (ASN1Sequence)bd.toASN1Object();
+        ASN1InputStream aIn = new ASN1InputStream(bd.toASN1Object().getEncoded());
+
+        ASN1Sequence seq = (ASN1Sequence)aIn.readObject();
 
         bd = BiometricData.getInstance(seq);
 

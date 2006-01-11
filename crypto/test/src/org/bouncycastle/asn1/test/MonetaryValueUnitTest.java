@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1.test;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
 import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
@@ -29,7 +30,9 @@ public class MonetaryValueUnitTest
         
         checkValues(mv, TEST_AMOUNT, ZERO_EXPONENT);
         
-        ASN1Sequence seq = (ASN1Sequence)mv.toASN1Object();
+        ASN1InputStream aIn = new ASN1InputStream(mv.toASN1Object().getEncoded());
+
+        ASN1Sequence seq = (ASN1Sequence)aIn.readObject();
         
         mv = MonetaryValue.getInstance(seq);
         
