@@ -31,7 +31,9 @@ public class RegressionTest
         new SignerLocationUnitTest(),
         new CommitmentTypeQualifierUnitTest(),
         new CommitmentTypeIndicationUnitTest(),
-        new EncryptedPrivateKeyInfoTest()
+        new EncryptedPrivateKeyInfoTest(),
+        new DataGroupHashUnitTest(),
+        new LDSSecurityObjectUnitTest()
     };
 
     public static void main(
