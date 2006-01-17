@@ -1026,7 +1026,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             IssuingDistributionPoint    p = IssuingDistributionPoint.getInstance(idp);
                             BasicConstraints    bc = BasicConstraints.getInstance(getExtensionValue(cert, BASIC_CONSTRAINTS));
                             
-                            if (p.onlyContainsUserCerts() && (bc == null || bc.isCA()))
+                            if (p.onlyContainsUserCerts() && (bc != null && bc.isCA()))
                             {
                                 throw new CertPathValidatorException("CA Cert CRL only contains user certificates");
                             }
