@@ -18,8 +18,6 @@ import java.security.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -55,7 +53,6 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.sasn1.Asn1Integer;
 import org.bouncycastle.sasn1.Asn1ObjectIdentifier;
 import org.bouncycastle.sasn1.BerOctetStringGenerator;
@@ -82,25 +79,8 @@ import org.bouncycastle.sasn1.BerSequenceGenerator;
  * </pre>
  */
 public class CMSSignedDataStreamGenerator
+    extends CMSSignedGenerator
 {
-    /**
-     * Default type for the signed data.
-     */
-    public static final String  DATA = PKCSObjectIdentifiers.data.getId();
-    
-    public static final String  DIGEST_SHA1 = "1.3.14.3.2.26";
-    public static final String  DIGEST_SHA224 = NISTObjectIdentifiers.id_sha224.getId();
-    public static final String  DIGEST_SHA256 = NISTObjectIdentifiers.id_sha256.getId();
-    public static final String  DIGEST_SHA384 = NISTObjectIdentifiers.id_sha384.getId();
-    public static final String  DIGEST_SHA512 = NISTObjectIdentifiers.id_sha512.getId();
-    public static final String  DIGEST_MD5 = "1.2.840.113549.2.5";
-    public static final String  DIGEST_GOST3411 = CryptoProObjectIdentifiers.gostR3411.getId();
-
-    public static final String  ENCRYPTION_RSA = "1.2.840.113549.1.1.1";
-    public static final String  ENCRYPTION_DSA = "1.2.840.10040.4.3";
-    public static final String  ENCRYPTION_GOST3410 = CryptoProObjectIdentifiers.gostR3410_94.getId();
-    public static final String  ENCRYPTION_ECGOST3410 = CryptoProObjectIdentifiers.gostR3410_2001.getId();
-    
     private List  _certs = new ArrayList();
     private List  _crls = new ArrayList();
     private List  _signerInfs = new ArrayList();
@@ -397,36 +377,6 @@ public class CMSSignedDataStreamGenerator
         _bufferSize = bufferSize;
     }
     
-    private String getEncOID(
-        PrivateKey key,
-        String     digestOID)
-    {
-        String encOID = null;
-        
-        if (key instanceof RSAPrivateKey || "RSA".equalsIgnoreCase(key.getAlgorithm()))
-        {
-            encOID = ENCRYPTION_RSA;
-        }
-        else if (key instanceof DSAPrivateKey || "DSA".equalsIgnoreCase(key.getAlgorithm()))
-        {
-            encOID = ENCRYPTION_DSA;
-            if (!digestOID.equals(DIGEST_SHA1))
-            {
-                throw new IllegalArgumentException("can't mix DSA with anything but SHA1");
-            }
-        }
-        else if (key instanceof GOST3410PrivateKey || "GOST3410".equalsIgnoreCase(key.getAlgorithm()))
-        {
-            encOID = ENCRYPTION_GOST3410;
-        }
-        else if ("ECGOST3410".equalsIgnoreCase(key.getAlgorithm()))
-        {
-            encOID = ENCRYPTION_ECGOST3410;
-        }
-        
-        return encOID;
-    }
-    
     /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
@@ -460,26 +410,10 @@ public class CMSSignedDataStreamGenerator
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
         String        encOID = getEncOID(key, digestOID);
-        Signature     sig;
-        MessageDigest dig;
-        
-        if (sigProvider != null)
-        {
-            sig = Signature.getInstance(CMSUtils.getDigestAlgName(digestOID) + "with" + CMSUtils.getEncryptionAlgName(encOID), sigProvider);
-            try
-            {
-                dig = MessageDigest.getInstance(CMSUtils.getDigestAlgName(digestOID), sigProvider);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                dig = MessageDigest.getInstance(CMSUtils.getDigestAlgName(digestOID));
-            }
-        }
-        else
-        {
-            sig = Signature.getInstance(CMSUtils.getDigestAlgName(digestOID) + "with" + CMSUtils.getEncryptionAlgName(encOID));
-            dig = MessageDigest.getInstance(CMSUtils.getDigestAlgName(digestOID));
-        }  
+        String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
+        String        signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
+        Signature     sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+        MessageDigest dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);
  
         sig.initSign(key);
 

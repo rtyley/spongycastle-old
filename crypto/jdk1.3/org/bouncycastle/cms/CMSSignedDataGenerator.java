@@ -17,15 +17,26 @@ import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -35,14 +46,11 @@ import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.cms.Time;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -60,6 +68,7 @@ import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
  * </pre>
  */
 public class CMSSignedDataGenerator
+    extends CMSSignedGenerator
 {
     CertStore                   certStore;
     List                        certs = new ArrayList();
@@ -67,24 +76,6 @@ public class CMSSignedDataGenerator
     List                        signerInfs = new ArrayList();
     List                        signers = new ArrayList();
 
-    /**
-     * Default type for the signed data.
-     */
-    public static final String  DATA = PKCSObjectIdentifiers.data.getId();
-    
-    public static final String  DIGEST_SHA1 = "1.3.14.3.2.26";
-    public static final String  DIGEST_SHA224 = NISTObjectIdentifiers.id_sha224.getId();
-    public static final String  DIGEST_SHA256 = NISTObjectIdentifiers.id_sha256.getId();
-    public static final String  DIGEST_SHA384 = NISTObjectIdentifiers.id_sha384.getId();
-    public static final String  DIGEST_SHA512 = NISTObjectIdentifiers.id_sha512.getId();
-    public static final String  DIGEST_MD5 = "1.2.840.113549.2.5";
-    public static final String  DIGEST_GOST3411 = CryptoProObjectIdentifiers.gostR3411.getId();
-
-    public static final String  ENCRYPTION_RSA = "1.2.840.113549.1.1.1";
-    public static final String  ENCRYPTION_DSA = "1.2.840.10040.4.3";
-    public static final String  ENCRYPTION_GOST3410 = CryptoProObjectIdentifiers.gostR3410_94.getId();
-    public static final String  ENCRYPTION_ECGOST3410 = CryptoProObjectIdentifiers.gostR3410_2001.getId();
-    
     static class DigOutputStream
         extends OutputStream
     {
@@ -225,80 +216,7 @@ public class CMSSignedDataGenerator
         AttributeTable getUnsignedAttributes()
         {
             return unsAttr;
-        }
-    
-        /**
-         * Return the digest algorithm using one of the standard JCA string
-         * representations rather the the algorithm identifier (if possible).
-         */
-        String getDigestAlgName()
-        {
-            String  digestAlgOID = this.getDigestAlgOID();
-            
-            if (DIGEST_MD5.equals(digestAlgOID))
-            {
-                return "MD5";
-            }
-            else if (DIGEST_SHA1.equals(digestAlgOID))
-            {
-                return "SHA1";
-            }
-            else if (DIGEST_SHA224.equals(digestAlgOID))
-            {
-                return "SHA224";
-            }
-            else if (DIGEST_SHA256.equals(digestAlgOID))
-            {
-                return "SHA256";
-            }
-            else if (DIGEST_SHA384.equals(digestAlgOID))
-            {
-                return "SHA384";
-            }
-            else if (DIGEST_SHA512.equals(digestAlgOID))
-            {
-                return "SHA512";
-            }
-            else if (DIGEST_GOST3411.equals(digestAlgOID))
-            {
-                return "GOST3411";
-            }
-            else
-            {
-                return digestAlgOID;            
-            }
-        }
-        
-        /**
-         * Return the digest encryption algorithm using one of the standard
-         * JCA string representations rather the the algorithm identifier (if
-         * possible).
-         */
-        String getEncryptionAlgName()
-        {
-            String  encryptionAlgOID = this.getEncryptionAlgOID();
-            
-            if (ENCRYPTION_DSA.equals(encryptionAlgOID))
-            {
-                return "DSA";
-            }
-            else if (ENCRYPTION_RSA.equals(encryptionAlgOID))
-            {
-                return "RSA";
-            }
-            else if (ENCRYPTION_GOST3410.equals(encryptionAlgOID))
-            {
-                return "GOST3410";
-            }
-            else if (ENCRYPTION_ECGOST3410.equals(encryptionAlgOID))
-            {
-                return "ECGOST3410";
-            }
-            else
-            {
-                return encryptionAlgOID;            
-            }
-        }    
+        }   
 
         SignerInfo toSignerInfo(
             DERObjectIdentifier contentType,
@@ -324,26 +242,10 @@ public class CMSSignedDataGenerator
 
             ASN1Set         signedAttr = null;
             ASN1Set         unsignedAttr = null;
-            Signature       sig = null;
-            MessageDigest   dig = null;
-
-            if(sigProvider != null)
-            {
-                sig = Signature.getInstance(this.getDigestAlgName() + "with" + this.getEncryptionAlgName(), sigProvider);
-                try
-                {
-                    dig = MessageDigest.getInstance(this.getDigestAlgName(), sigProvider);
-                }
-                catch (NoSuchAlgorithmException e)
-                {
-                    dig = MessageDigest.getInstance(this.getDigestAlgName());
-                }
-            }
-            else
-            {
-                sig = Signature.getInstance(this.getDigestAlgName() + "with" + this.getEncryptionAlgName());
-                dig = MessageDigest.getInstance(this.getDigestAlgName());
-            }                
+            String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
+            String          signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
+            Signature       sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+            MessageDigest   dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
 
             byte[]      hash = null;
 
@@ -487,36 +389,6 @@ public class CMSSignedDataGenerator
      */
     public CMSSignedDataGenerator()
     {
-    }
-
-    private String getEncOID(
-        PrivateKey key,
-        String     digestOID)
-    {
-        String encOID = null;
-        
-        if (key instanceof RSAPrivateKey || "RSA".equalsIgnoreCase(key.getAlgorithm()))
-        {
-            encOID = ENCRYPTION_RSA;
-        }
-        else if (key instanceof DSAPrivateKey || "DSA".equalsIgnoreCase(key.getAlgorithm()))
-        {
-            encOID = ENCRYPTION_DSA;
-            if (!digestOID.equals(DIGEST_SHA1))
-            {
-                throw new IllegalArgumentException("can't mix DSA with anything but SHA1");
-            }
-        }
-        else if (key instanceof GOST3410PrivateKey || "GOST3410".equalsIgnoreCase(key.getAlgorithm()))
-        {
-            encOID = ENCRYPTION_GOST3410;
-        }
-        else if ("ECGOST3410".equalsIgnoreCase(key.getAlgorithm()))
-        {
-            encOID = ENCRYPTION_ECGOST3410;
-        }
-        
-        return encOID;
     }
     
     /**
@@ -847,3 +719,4 @@ public class CMSSignedDataGenerator
         return this.generate(DATA, content, encapsulate, sigProvider);
     }
 }
+
