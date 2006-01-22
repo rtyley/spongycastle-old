@@ -1038,7 +1038,7 @@ public class CertTest
 
     }
 
-    public void checkCRL(
+    private void checkCRL(
         int     id,
         byte[]  bytes)
     {
@@ -1063,76 +1063,70 @@ public class CertTest
     }
 
     public void checkCRLCreation()
+        throws Exception
     {
-        try
+        KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        X509V2CRLGenerator   crlGen = new X509V2CRLGenerator();
+        Date                 now = new Date();
+        KeyPair              pair = kpGen.generateKeyPair();
+        
+        crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
+        
+        crlGen.setThisUpdate(now);
+        crlGen.setNextUpdate(new Date(now.getTime() + 100000));
+        crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
+        
+        crlGen.addCRLEntry(BigInteger.ONE, now, CRLReason.privilegeWithdrawn);
+        
+        crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
+        
+        X509CRL    crl = crlGen.generateX509CRL(pair.getPrivate(), "BC");
+        
+        if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
         {
-            KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "BC");
-            X509V2CRLGenerator   crlGen = new X509V2CRLGenerator();
-            Date                 now = new Date();
-            KeyPair              pair = kpGen.generateKeyPair();
-            
-            crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
-            
-            crlGen.setThisUpdate(now);
-            crlGen.setNextUpdate(new Date(now.getTime() + 100000));
-            crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
-            
-            crlGen.addCRLEntry(BigInteger.ONE, now, CRLReason.privilegeWithdrawn);
-            
-            crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
-            
-            X509CRL    crl = crlGen.generateX509CRL(pair.getPrivate(), "BC");
-            
-            if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
-            {
-                fail("failed CRL issuer test");
-            }
-            
-            byte[] authExt = crl.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
-            
-            if (authExt == null)
-            {
-                fail("failed to find CRL extension");
-            }
-            
-            AuthorityKeyIdentifier authId = new AuthorityKeyIdentifierStructure(authExt);
-            
-            X509CRLEntry entry = crl.getRevokedCertificate(BigInteger.ONE);
-            
-            if (entry == null)
-            {
-                fail("failed to find CRL entry");
-            }
-            
-            if (!entry.getSerialNumber().equals(BigInteger.ONE))
-            {
-                fail("CRL cert serial number does not match");
-            }
-            
-            if (!entry.hasExtensions())
-            {
-                fail("CRL entry extension not found");
-            }
+            fail("failed CRL issuer test");
+        }
+        
+        byte[] authExt = crl.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
+        
+        if (authExt == null)
+        {
+            fail("failed to find CRL extension");
+        }
+        
+        AuthorityKeyIdentifier authId = new AuthorityKeyIdentifierStructure(authExt);
+        
+        X509CRLEntry entry = crl.getRevokedCertificate(BigInteger.ONE);
+        
+        if (entry == null)
+        {
+            fail("failed to find CRL entry");
+        }
+        
+        if (!entry.getSerialNumber().equals(BigInteger.ONE))
+        {
+            fail("CRL cert serial number does not match");
+        }
+        
+        if (!entry.hasExtensions())
+        {
+            fail("CRL entry extension not found");
+        }
 
-            byte[]  ext = entry.getExtensionValue(X509Extensions.ReasonCode.getId());
+        byte[]  ext = entry.getExtensionValue(X509Extensions.ReasonCode.getId());
 
-            if (ext != null)
+        if (ext != null)
+        {
+            DEREnumerated   reasonCode = (DEREnumerated)X509ExtensionUtil.fromExtensionValue(ext);
+                                                                       
+            if (reasonCode.getValue().intValue() != CRLReason.privilegeWithdrawn)
             {
-                DEREnumerated   reasonCode = (DEREnumerated)X509ExtensionUtil.fromExtensionValue(ext);
-                                                                           
-                if (reasonCode.getValue().intValue() != CRLReason.privilegeWithdrawn)
-                {
-                    fail("CRL entry reasonCode wrong");
-                }
-            }
-            else
-            {
-                fail("CRL entry reasonCode not found");
+                fail("CRL entry reasonCode wrong");
             }
         }
-        catch (Exception e)
+        else
         {
-            fail("CRLCreation failed - exception " + e.toString(), e);
+            fail("CRL entry reasonCode not found");
         }
     }
     
