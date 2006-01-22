@@ -13,6 +13,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.DSAParameterSpec;
 import java.util.Date;
 
 import javax.crypto.KeyGenerator;
@@ -27,6 +28,7 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -37,6 +39,8 @@ public class CMSTestUtil
     public static SecureRandom     rand;
     public static KeyPairGenerator kpg;
     public static KeyPairGenerator gostKpg;
+    public static KeyPairGenerator dsaKpg;
+    public static KeyPairGenerator ecDsaKpg;
     public static KeyGenerator     aes192kg;
     public static KeyGenerator     desede128kg;
     public static KeyGenerator     desede192kg;
@@ -51,7 +55,7 @@ public class CMSTestUtil
     {
         try
         {
-            java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            java.security.Security.addProvider(new BouncyCastleProvider());
 
             rand = new SecureRandom();
 
@@ -62,6 +66,17 @@ public class CMSTestUtil
             GOST3410ParameterSpec gost3410P = new GOST3410ParameterSpec(CryptoProObjectIdentifiers.gostR3410_94_CryptoPro_A.getId());
             
             gostKpg.initialize(gost3410P, new SecureRandom());
+            
+            dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
+            DSAParameterSpec dsaSpec = new DSAParameterSpec(
+                        new BigInteger("7434410770759874867539421675728577177024889699586189000788950934679315164676852047058354758883833299702695428196962057871264685291775577130504050839126673"),
+                        new BigInteger("1138656671590261728308283492178581223478058193247"),
+                        new BigInteger("4182906737723181805517018315469082619513954319976782448649747742951189003482834321192692620856488639629011570381138542789803819092529658402611668375788410"));
+
+            dsaKpg.initialize(dsaSpec, new SecureRandom());
+
+            ecDsaKpg = KeyPairGenerator.getInstance("ECDSA", "BC");
+            ecDsaKpg.initialize(239, new SecureRandom());
 
             aes192kg = KeyGenerator.getInstance("AES", "BC");
             aes192kg.init(192, rand);
@@ -122,6 +137,16 @@ public class CMSTestUtil
         return gostKpg.generateKeyPair();
     }
 
+    public static KeyPair makeDsaKeyPair()
+    {
+        return dsaKpg.generateKeyPair();
+    }
+    
+    public static KeyPair makeEcDsaKeyPair()
+    {
+        return ecDsaKpg.generateKeyPair();
+    }
+    
     public static SecretKey makeDesede128Key()
     {
         return desede128kg.generateKey();
@@ -187,9 +212,13 @@ public class CMSTestUtil
         _v3CertGen.setSubjectDN(new X509Name(_subDN));
         _v3CertGen.setPublicKey(_subPub);
         
-        if (_subPub instanceof RSAPublicKey)
+        if (_issPub instanceof RSAPublicKey)
         {
             _v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
+        }
+        else if (_issPub.getAlgorithm().equals("ECDSA"))
+        {
+            _v3CertGen.setSignatureAlgorithm("ECDSAWithSHA1");
         }
         else
         {

@@ -31,11 +31,8 @@ import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.cms.Time;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * an expanded SignerInfo block from a CMS Signed message
@@ -62,7 +59,6 @@ public class SignerInformation
         this.info = info;
         this.sid = new SignerId();
         this.contentType = contentType;
-
 
         try
         {
@@ -169,124 +165,7 @@ public class SignerInformation
         {
             throw new RuntimeException("exception getting encryption parameters " + e);
         }
-    }
-    
-    /**
-     * Return the digest algorithm using one of the standard JCA string
-     * representations rather the the algorithm identifier (if possible).
-     */
-    String getDigestAlgName()
-    {
-        String  digestAlgOID = this.getDigestAlgOID();
-        
-        if (CMSSignedDataGenerator.DIGEST_MD5.equals(digestAlgOID))
-        {
-            return "MD5";
-        }
-        else if (CMSSignedDataGenerator.DIGEST_SHA1.equals(digestAlgOID))
-        {
-            return "SHA1";
-        }
-        else if (CMSSignedDataGenerator.DIGEST_SHA224.equals(digestAlgOID))
-        {
-            return "SHA224";
-        }
-        else if (CMSSignedDataGenerator.DIGEST_SHA256.equals(digestAlgOID))
-        {
-            return "SHA256";
-        }
-        else if (CMSSignedDataGenerator.DIGEST_SHA384.equals(digestAlgOID))
-        {
-            return "SHA384";
-        }
-        else if (CMSSignedDataGenerator.DIGEST_SHA512.equals(digestAlgOID))
-        {
-            return "SHA512";
-        }
-        else if (PKCSObjectIdentifiers.sha1WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA1";
-        }
-        else if (PKCSObjectIdentifiers.sha224WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA224";
-        }
-        else if (PKCSObjectIdentifiers.sha256WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA256";
-        }
-        else if (PKCSObjectIdentifiers.sha384WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA384";
-        }
-        else if (PKCSObjectIdentifiers.sha512WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA512";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd128.getId().equals(digestAlgOID))
-        {
-            return "RIPEMD128";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd160.getId().equals(digestAlgOID))
-        {
-            return "RIPEMD160";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd256.getId().equals(digestAlgOID))
-        {
-            return "RIPEMD256";
-        }
-        else if (CryptoProObjectIdentifiers.gostR3411.getId().equals(digestAlgOID))
-        {
-            return "GOST3411";
-        }
-        else
-        {
-            return digestAlgOID;            
-        }
-    }
-    
-    /**
-     * Return the digest encryption algorithm using one of the standard
-     * JCA string representations rather the the algorithm identifier (if
-     * possible).
-     */
-    String getEncryptionAlgName()
-    {
-        String  encryptionAlgOID = this.getEncryptionAlgOID();
-        
-        if (CMSSignedDataGenerator.ENCRYPTION_DSA.equals(encryptionAlgOID))
-        {
-            return "DSA";
-        }
-        else if ("1.2.840.10040.4.1".equals(encryptionAlgOID))
-        {
-            return "DSA";
-        }
-        else if (CMSSignedDataGenerator.ENCRYPTION_RSA.equals(encryptionAlgOID))
-        {
-            return "RSA";
-        }
-        else if (CMSSignedDataGenerator.ENCRYPTION_GOST3410.equals(encryptionAlgOID))
-        {
-            return "GOST3410";
-        }
-        else if (CMSSignedDataGenerator.ENCRYPTION_ECGOST3410.equals(encryptionAlgOID))
-        {
-            return "ECGOST3410";
-        }
-        else if ("1.2.840.113549.1.1.5".equals(encryptionAlgOID))
-        {
-            return "RSA";
-        }
-        else if (encryptionAlgOID.startsWith(TeleTrusTObjectIdentifiers.teleTrusTRSAsignatureAlgorithm))
-        {
-            return "RSA";
-        }
-        else
-        {
-            return encryptionAlgOID;            
-        }
-    }    
+    }  
 
     /**
      * return a table of the signed attributes - indexed by
@@ -350,26 +229,10 @@ public class SignerInformation
         String          sigProvider)
         throws CMSException, NoSuchAlgorithmException, NoSuchProviderException
     {
-        Signature       sig;
-        MessageDigest   digest;
-        
-        if (sigProvider != null)
-        {
-            sig = Signature.getInstance(this.getDigestAlgName() + "with" + this.getEncryptionAlgName(), sigProvider);
-            try
-            {
-                digest = MessageDigest.getInstance(this.getDigestAlgName(), sigProvider);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                digest = MessageDigest.getInstance(this.getDigestAlgName());
-            }
-        }
-        else
-        {
-            sig = Signature.getInstance(this.getDigestAlgName() + "with" + this.getEncryptionAlgName());
-            digest = MessageDigest.getInstance(this.getDigestAlgName());
-        }
+        String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(this.getDigestAlgOID());
+        String          signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
+        Signature       sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+        MessageDigest   digest = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider); 
         
         try
         {
@@ -502,6 +365,11 @@ public class SignerInformation
         return doVerify(cert.getPublicKey(), attr, sigProvider); 
     }
     
+    /**
+     * Return the base ASN.1 CMS structure that this object contains.
+     * 
+     * @return an object containing a CMS SignerInfo structure.
+     */
     SignerInfo toSignerInfo()
     {
         return info;
@@ -543,3 +411,4 @@ public class SignerInformation
                     signerInformation.contentType, signerInformation.content, null);
     }
 }
+

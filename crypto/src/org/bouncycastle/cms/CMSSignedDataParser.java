@@ -147,9 +147,10 @@ public class CMSSignedDataParser
                 AlgorithmIdentifier id = AlgorithmIdentifier.getInstance(new ASN1InputStream(((DerSequence)o).getEncoded()).readObject());
                 try
                 {
-                    MessageDigest dig = MessageDigest.getInstance(CMSUtils.getDigestAlgName(id.getObjectId().toString()));
+                    String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(id.getObjectId().toString());
+                    MessageDigest dig = MessageDigest.getInstance(digestName);
 
-                    this._digests.put(CMSUtils.getDigestAlgName(id.getObjectId().toString()), dig);
+                    this._digests.put(digestName, dig);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
@@ -233,11 +234,11 @@ public class CMSSignedDataParser
                 
                 while ((o = s.readObject()) != null)
                 {
-                    DerSequence seq = (DerSequence)o;
+                    DerSequence seq = (DerSequence)o;;
+                    SignerInfo  info = SignerInfo.getInstance(new ASN1InputStream(seq.getEncoded()).readObject());
+                    String      digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
                     
-                    SignerInfo info = SignerInfo.getInstance(new ASN1InputStream(seq.getEncoded()).readObject());
-                    
-                    byte[] hash = (byte[])hashes.get(CMSUtils.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId()));
+                    byte[] hash = (byte[])hashes.get(digestName);
                     
                     signerInfos.add(new SignerInformation(info, new DERObjectIdentifier(_signedContent.getContentType()), null, hash));
                 }
