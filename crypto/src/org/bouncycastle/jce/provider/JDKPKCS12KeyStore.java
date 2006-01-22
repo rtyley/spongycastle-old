@@ -324,6 +324,20 @@ public class JDKPKCS12KeyStore
             }
         }
 
+        c = keyCerts.elements();
+        k = keyCerts.keys();
+
+        while (c.hasMoreElements())
+        {
+            Certificate tc = (Certificate)c.nextElement();
+            String      ta = (String)k.nextElement();
+
+            if (tc.equals(cert))
+            {
+                return ta;
+            }
+        }
+        
         return null;
     }
     
