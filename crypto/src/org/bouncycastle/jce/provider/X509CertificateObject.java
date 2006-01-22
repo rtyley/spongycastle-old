@@ -13,6 +13,7 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
@@ -44,6 +45,7 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 
 public class X509CertificateObject
@@ -546,6 +548,39 @@ public class X509CertificateObject
         }
     }
 
+    public boolean equals(
+        Object o)
+    {
+        if (o == this)
+        {
+            return true;
+        }
+        
+        if (!(o instanceof Certificate))
+        {
+            return false;
+        }
+
+        Certificate other = (Certificate)o;
+        
+        try
+        {
+            byte[] b1 = this.getEncoded();
+            byte[] b2 = other.getEncoded();
+            
+            return Arrays.areEqual(b1, b2);
+        }
+        catch (CertificateEncodingException e)
+        {
+            return false;
+        }
+    }
+    
+    public int hashCode()
+    {
+        return c.hashCode();
+    }
+    
     public void setBagAttribute(
         DERObjectIdentifier oid,
         DEREncodable        attribute)
