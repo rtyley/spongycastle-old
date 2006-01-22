@@ -449,233 +449,271 @@ public class PKCS12StoreTest
     }
 
     public void testPKCS12Store()
+        throws Exception
     {
         BigInteger  mod = new BigInteger("bb1be8074e4787a8d77967f1575ef72dd7582f9b3347724413c021beafad8f32dba5168e280cbf284df722283dad2fd4abc750e3d6487c2942064e2d8d80641aa5866d1f6f1f83eec26b9b46fecb3b1c9856a303148a5cc899c642fb16f3d9d72f52526c751dc81622c420c82e2cfda70fe8d13f16cc7d6a613a5b2a2b5894d1", 16);
+        KeyStore store = KeyStore.getInstance("PKCS12", "BC");
+        ByteArrayInputStream stream = new ByteArrayInputStream(pkcs12);
+
+        store.load(stream, passwd);
+
+        Enumeration en = store.aliases();
+        String      pName = null;
+
+        while (en.hasMoreElements())
+        {
+            String  n = (String)en.nextElement();
+            if (store.isKeyEntry(n))
+            {
+                pName = n;
+            }
+        }
+
+        PrivateKey key = (PrivateKey)store.getKey(pName, null);
+
+        if (!((RSAPrivateKey)key).getModulus().equals(mod))
+        {
+            fail("Modulus doesn't match.");
+        }
+
+        Certificate[]    ch = store.getCertificateChain(pName);
+
+        if (ch.length != 3)
+        {
+            fail("chain was wrong length");
+        }
+
+        if (!((X509Certificate)ch[0]).getSerialNumber().equals(new BigInteger("96153094170511488342715101755496684211")))
+        {
+            fail("chain[0] wrong certificate.");
+        }
+
+        if (!((X509Certificate)ch[1]).getSerialNumber().equals(new BigInteger("279751514312356623147411505294772931957")))
+        {
+            fail("chain[1] wrong certificate.");
+        }
+
+        if (!((X509Certificate)ch[2]).getSerialNumber().equals(new BigInteger("11341398017")))
+        {
+            fail("chain[2] wrong certificate.");
+        }
+
+        //
+        // save test
+        //
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        store.store(bOut, passwd);
+
+        stream = new ByteArrayInputStream(bOut.toByteArray());
+
+        store.load(stream, passwd);
+
+        key = (PrivateKey)store.getKey(pName, null);
+
+        if (!((RSAPrivateKey)key).getModulus().equals(mod))
+        {
+            fail("Modulus doesn't match.");
+        }
+
+        store.deleteEntry(pName);
+
+        if (store.getKey(pName, null) != null)
+        {
+            fail("Failed deletion test.");
+        }
+
+        //
+        // cert chain test
+        //
+        store.setCertificateEntry("testCert", ch[2]);
+        
+        if (store.getCertificateChain("testCert") != null)
+        {
+            fail("Failed null chain test.");
+        }
+        
+        //
+        // UTF 8 single cert test
+        //
+        store = KeyStore.getInstance("PKCS12", "BC");
+        stream = new ByteArrayInputStream(certUTF);
+
+        store.load(stream, "user".toCharArray());
+
+        if (store.getCertificate("37") == null)
+        {
+            fail("Failed to find UTF cert.");
+        }
+
+        //
+        // try for a self generated certificate
+        //
+        RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
+            new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
+            new BigInteger("11", 16));
+
+        RSAPrivateCrtKeySpec privKeySpec = new RSAPrivateCrtKeySpec(
+            new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
+            new BigInteger("11", 16),
+            new BigInteger("9f66f6b05410cd503b2709e88115d55daced94d1a34d4e32bf824d0dde6028ae79c5f07b580f5dce240d7111f7ddb130a7945cd7d957d1920994da389f490c89", 16),
+            new BigInteger("c0a0758cdf14256f78d4708c86becdead1b50ad4ad6c5c703e2168fbf37884cb", 16),
+            new BigInteger("f01734d7960ea60070f1b06f2bb81bfac48ff192ae18451d5e56c734a5aab8a5", 16),
+            new BigInteger("b54bb9edff22051d9ee60f9351a48591b6500a319429c069a3e335a1d6171391", 16),
+            new BigInteger("d3d83daf2a0cecd3367ae6f8ae1aeb82e9ac2f816c6fc483533d8297dd7884cd", 16),
+            new BigInteger("b8f52fc6f38593dabb661d3f50f8897f8106eee68b1bce78a95b132b4e5b5d19", 16));
+
+        //
+        // set up the keys
+        //
+        PrivateKey          privKey = null;
+        PublicKey           pubKey = null;
 
         try
         {
-            KeyStore store = KeyStore.getInstance("PKCS12", "BC");
-            ByteArrayInputStream stream = new ByteArrayInputStream(pkcs12);
+            KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
 
-            store.load(stream, passwd);
-
-            Enumeration en = store.aliases();
-            String      pName = null;
-
-            while (en.hasMoreElements())
-            {
-                String  n = (String)en.nextElement();
-                if (store.isKeyEntry(n))
-                {
-                    pName = n;
-                }
-            }
-
-            PrivateKey key = (PrivateKey)store.getKey(pName, null);
-
-            if (!((RSAPrivateKey)key).getModulus().equals(mod))
-            {
-                fail("Modulus doesn't match.");
-            }
-
-            Certificate[]    ch = store.getCertificateChain(pName);
-
-            if (ch.length != 3)
-            {
-                fail("chain was wrong length");
-            }
-
-            if (!((X509Certificate)ch[0]).getSerialNumber().equals(new BigInteger("96153094170511488342715101755496684211")))
-            {
-                fail("chain[0] wrong certificate.");
-            }
-
-            if (!((X509Certificate)ch[1]).getSerialNumber().equals(new BigInteger("279751514312356623147411505294772931957")))
-            {
-                fail("chain[1] wrong certificate.");
-            }
-
-            if (!((X509Certificate)ch[2]).getSerialNumber().equals(new BigInteger("11341398017")))
-            {
-                fail("chain[2] wrong certificate.");
-            }
-
-            //
-            // save test
-            //
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-
-            store.store(bOut, passwd);
-
-            stream = new ByteArrayInputStream(bOut.toByteArray());
-
-            store.load(stream, passwd);
-
-            key = (PrivateKey)store.getKey(pName, null);
-
-            if (!((RSAPrivateKey)key).getModulus().equals(mod))
-            {
-                fail("Modulus doesn't match.");
-            }
-
-            store.deleteEntry(pName);
-
-            if (store.getKey(pName, null) != null)
-            {
-                fail("Failed deletion test.");
-            }
-
-            //
-            // cert chain test
-            //
-            store.setCertificateEntry("testCert", ch[2]);
-            
-            if (store.getCertificateChain("testCert") != null)
-            {
-                fail("Failed null chain test.");
-            }
-            
-            //
-            // UTF 8 single cert test
-            //
-            store = KeyStore.getInstance("PKCS12", "BC");
-            stream = new ByteArrayInputStream(certUTF);
-
-            store.load(stream, "user".toCharArray());
-
-            if (store.getCertificate("37") == null)
-            {
-                fail("Failed to find UTF cert.");
-            }
-
-            //
-            // try for a self generated certificate
-            //
-            RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
-                new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
-                new BigInteger("11", 16));
-
-            RSAPrivateCrtKeySpec privKeySpec = new RSAPrivateCrtKeySpec(
-                new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
-                new BigInteger("11", 16),
-                new BigInteger("9f66f6b05410cd503b2709e88115d55daced94d1a34d4e32bf824d0dde6028ae79c5f07b580f5dce240d7111f7ddb130a7945cd7d957d1920994da389f490c89", 16),
-                new BigInteger("c0a0758cdf14256f78d4708c86becdead1b50ad4ad6c5c703e2168fbf37884cb", 16),
-                new BigInteger("f01734d7960ea60070f1b06f2bb81bfac48ff192ae18451d5e56c734a5aab8a5", 16),
-                new BigInteger("b54bb9edff22051d9ee60f9351a48591b6500a319429c069a3e335a1d6171391", 16),
-                new BigInteger("d3d83daf2a0cecd3367ae6f8ae1aeb82e9ac2f816c6fc483533d8297dd7884cd", 16),
-                new BigInteger("b8f52fc6f38593dabb661d3f50f8897f8106eee68b1bce78a95b132b4e5b5d19", 16));
-
-            //
-            // set up the keys
-            //
-            PrivateKey          privKey = null;
-            PublicKey           pubKey = null;
-
-            try
-            {
-                KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
-
-                privKey = fact.generatePrivate(privKeySpec);
-                pubKey = fact.generatePublic(pubKeySpec);
-            }
-            catch (Exception e)
-            {
-                fail("error setting up keys - " + e.toString());
-            }
-
-            Certificate[] chain = new Certificate[1];
-
-            chain[0] = createCert(pubKey, privKey);
-
-            store = KeyStore.getInstance("PKCS12", "BC");
-
-            store.load(null, null);
-
-            store.setKeyEntry("privateKey", privKey, null, chain);
-
-            store.store(new ByteArrayOutputStream(), passwd);
-
-            //
-            // no friendly name test
-            //
-            store = KeyStore.getInstance("PKCS12", "BC");
-            stream = new ByteArrayInputStream(pkcs12noFriendly);
-
-            store.load(stream, noFriendlyPassword);
-
-            en = store.aliases();
-            pName = null;
-
-            while (en.hasMoreElements())
-            {
-                 String  n = (String)en.nextElement();
-
-                 if (store.isKeyEntry(n))
-                 {
-                     pName = n;
-                 }
-            }
-            
-            ch = store.getCertificateChain(pName);
-
-            for (int i = 0; i != ch.length; i++)
-            {
-                //System.out.println(ch[i]);
-            }
-            
-            if (ch.length != 1)
-            {
-                fail("no cert found in pkcs12noFriendly");
-            }
-            
-            //
-            // failure tests
-            //
-            ch = store.getCertificateChain("dummy");
-            
-            store.getCertificate("dummy");
-
-            //
-            // storage test
-            //
-            store = KeyStore.getInstance("PKCS12", "BC");
-            stream = new ByteArrayInputStream(pkcs12StorageIssue);
-
-            store.load(stream, storagePassword);
-
-            en = store.aliases();
-            pName = null;
-
-            while (en.hasMoreElements())
-            {
-                 String  n = (String)en.nextElement();
-
-                 if (store.isKeyEntry(n))
-                 {
-                     pName = n;
-                 }
-            }
-            
-            ch = store.getCertificateChain(pName);
-            if (ch.length != 2)
-            {
-                fail("Certificate chain wrong length");
-            }
-
-            store.store(new ByteArrayOutputStream(), storagePassword);
-            
-            //
-            // test of reading incorrect zero-length encoding
-            //
-            store = KeyStore.getInstance("PKCS12", "BC");
-            stream = new ByteArrayInputStream(pkcs12nopass);
-            
-            store.load(stream, "".toCharArray());
+            privKey = fact.generatePrivate(privKeySpec);
+            pubKey = fact.generatePublic(pubKeySpec);
         }
         catch (Exception e)
         {
-            fail("exception - " + e.toString(), e);
+            fail("error setting up keys - " + e.toString());
         }
+
+        Certificate[] chain = new Certificate[1];
+
+        chain[0] = createCert(pubKey, privKey);
+
+        store = KeyStore.getInstance("PKCS12", "BC");
+
+        store.load(null, null);
+
+        store.setKeyEntry("privateKey", privKey, null, chain);
+        
+        if (!store.containsAlias("privateKey"))
+        {
+            fail("couldn't find alias privateKey");
+        }
+        
+        if (store.isCertificateEntry("privateKey"))
+        {
+            fail("cert identified as certificate entry");
+        }
+        
+        if (!store.isKeyEntry("privateKey"))
+        {
+            fail("cert not dentified as key entry");
+        }
+        
+        if (!"privateKey".equals(store.getCertificateAlias(chain[0])))
+        {
+            fail("Did not return alias for key certificate privateKey");
+        }
+
+        store.store(new ByteArrayOutputStream(), passwd);
+
+        //
+        // no friendly name test
+        //
+        store = KeyStore.getInstance("PKCS12", "BC");
+        stream = new ByteArrayInputStream(pkcs12noFriendly);
+
+        store.load(stream, noFriendlyPassword);
+
+        en = store.aliases();
+        pName = null;
+
+        while (en.hasMoreElements())
+        {
+             String  n = (String)en.nextElement();
+
+             if (store.isKeyEntry(n))
+             {
+                 pName = n;
+             }
+        }
+        
+        ch = store.getCertificateChain(pName);
+
+        for (int i = 0; i != ch.length; i++)
+        {
+            //System.out.println(ch[i]);
+        }
+        
+        if (ch.length != 1)
+        {
+            fail("no cert found in pkcs12noFriendly");
+        }
+        
+        //
+        // failure tests
+        //
+        ch = store.getCertificateChain("dummy");
+        
+        store.getCertificate("dummy");
+
+        //
+        // storage test
+        //
+        store = KeyStore.getInstance("PKCS12", "BC");
+        stream = new ByteArrayInputStream(pkcs12StorageIssue);
+
+        store.load(stream, storagePassword);
+
+        en = store.aliases();
+        pName = null;
+
+        while (en.hasMoreElements())
+        {
+             String  n = (String)en.nextElement();
+
+             if (store.isKeyEntry(n))
+             {
+                 pName = n;
+             }
+        }
+        
+        ch = store.getCertificateChain(pName);
+        if (ch.length != 2)
+        {
+            fail("Certificate chain wrong length");
+        }
+
+        store.store(new ByteArrayOutputStream(), storagePassword);
+        
+        //
+        // basic certificate check
+        //
+        store.setCertificateEntry("cert", ch[1]);
+        
+        if (!store.containsAlias("cert"))
+        {
+            fail("couldn't find alias cert");
+        }
+        
+        if (!store.isCertificateEntry("cert"))
+        {
+            fail("cert not identified as certificate entry");
+        }
+        
+        if (store.isKeyEntry("cert"))
+        {
+            fail("cert identified as key entry");
+        }
+        
+        if (!"cert".equals(store.getCertificateAlias(ch[1])))
+        {
+            fail("Did not return alias for certificate entry");
+        }
+
+        //
+        // test of reading incorrect zero-length encoding
+        //
+        store = KeyStore.getInstance("PKCS12", "BC");
+        stream = new ByteArrayInputStream(pkcs12nopass);
+        
+        store.load(stream, "".toCharArray());
     }
 
     public String getName()
@@ -684,6 +722,7 @@ public class PKCS12StoreTest
     }
 
     public void performTest()
+        throws Exception
     {
         testPKCS12Store();
     }
