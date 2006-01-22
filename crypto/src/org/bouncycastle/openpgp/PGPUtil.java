@@ -315,20 +315,12 @@ public class PGPUtil
         while (generatedBytes < keyBytes.length)
         {
             if (s2k != null)
-            {        
+            {     
+                String digestName = getS2kDigestName(s2k);
+                
                 try
-                {        
-                    switch (s2k.getHashAlgorithm())
-                    {
-                    case HashAlgorithmTags.MD5:
-                        digest = MessageDigest.getInstance("MD5", provider);
-                        break;
-                    case HashAlgorithmTags.SHA1:
-                        digest = MessageDigest.getInstance("SHA1", provider);
-                        break;
-                    default:
-                        throw new PGPException("unknown hash algorithm: " + s2k.getHashAlgorithm());
-                    }
+                {
+                    digest = getDigestInstance(digestName, provider);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
@@ -391,19 +383,19 @@ public class PGPUtil
             {
                 try
                 {
-                    digest = MessageDigest.getInstance("MD5", provider);
-                    
-                    for (int i = 0; i != loopCount; i++)
-                    {
-                        digest.update((byte)0);
-                    }
-                    
-                    digest.update(pBytes);
+                    digest = getDigestInstance("MD5", provider);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
                     throw new PGPException("can't find MD5 digest", e);
                 }
+                
+                for (int i = 0; i != loopCount; i++)
+                {
+                    digest.update((byte)0);
+                }
+                
+                digest.update(pBytes);
             }
                                 
             byte[]    dig = digest.digest();
@@ -428,6 +420,35 @@ public class PGPUtil
         }
 
         return new SecretKeySpec(keyBytes, algName);
+    }
+
+    private static MessageDigest getDigestInstance(
+        String digestName, 
+        String provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException
+    {
+        try
+        {       
+            return MessageDigest.getInstance(digestName, provider);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            // try falling back
+            return MessageDigest.getInstance(digestName);
+        }
+    }
+
+    private static String getS2kDigestName(S2K s2k) throws PGPException
+    {
+        switch (s2k.getHashAlgorithm())
+        {
+        case HashAlgorithmTags.MD5:
+            return "MD5";
+        case HashAlgorithmTags.SHA1:
+            return "SHA1";
+        default:
+            throw new PGPException("unknown hash algorithm: " + s2k.getHashAlgorithm());
+        }
     }
     
     /**
