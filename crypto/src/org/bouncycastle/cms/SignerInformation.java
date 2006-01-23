@@ -121,6 +121,14 @@ public class SignerInformation
     }
 
     /**
+     * return the version number for this objects underlying SignerInfo structure.
+     */
+    public int getVersion()
+    {
+        return info.getVersion().getValue().intValue();
+    }
+    
+    /**
      * return the object identifier for the signature.
      */
     public String getDigestAlgOID()
