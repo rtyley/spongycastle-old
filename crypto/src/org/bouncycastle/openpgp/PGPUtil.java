@@ -422,7 +422,7 @@ public class PGPUtil
         return new SecretKeySpec(keyBytes, algName);
     }
 
-    private static MessageDigest getDigestInstance(
+    static MessageDigest getDigestInstance(
         String digestName, 
         String provider)
         throws NoSuchProviderException, NoSuchAlgorithmException
