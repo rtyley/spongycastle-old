@@ -46,7 +46,7 @@ public class PGPV3SignatureGenerator
         this.keyAlgorithm = keyAlgorithm;
         this.hashAlgorithm = hashAlgorithm;
         
-        dig = MessageDigest.getInstance(PGPUtil.getDigestName(hashAlgorithm), provider);
+        dig = PGPUtil.getDigestInstance(PGPUtil.getDigestName(hashAlgorithm), provider);
         sig = Signature.getInstance(PGPUtil.getSignatureName(keyAlgorithm, hashAlgorithm), provider);
     }
     
