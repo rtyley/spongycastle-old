@@ -111,7 +111,7 @@ public abstract class ECPoint
          */
         public byte[] getEncoded()
         {
-            int qLength = converter.getQLength(this.getX().p);
+            int qLength = converter.getQLength(((ECFieldElement.Fp)this.getX()).q);
             
             if (withCompression)
             {

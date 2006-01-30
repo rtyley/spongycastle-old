@@ -57,11 +57,18 @@ public class X9FieldElement
     public DERObject toASN1Object()
     {
         // TODO keyon start: Ensures, that field elements are ASN.1 encoded as an OCTET STRING with the same bit length as q (number of elements in the finite field). See X9.62.
-        BigInteger q = f.getQ();
-        int byteCount = converter.getQLength(q);
-        byte[] paddedBigInteger = converter.integerToBytes(f.toBigInteger(), byteCount);
-
-        return new DEROctetString(paddedBigInteger);
+        if (f instanceof ECFieldElement.Fp)
+        {
+            BigInteger q = ((ECFieldElement.Fp)f).getQ();
+            int byteCount = converter.getQLength(q);
+            byte[] paddedBigInteger = converter.integerToBytes(f.toBigInteger(), byteCount);
+    
+            return new DEROctetString(paddedBigInteger);
+        }
+        else
+        {
+            return null;
+        }
         // TODO keyon end: Ensures, that field elements are ASN.1 encoded as an OCTET STRING with the same bit length as q (number of elements in the finite field). See X9.62.
     }
 }
