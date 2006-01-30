@@ -31,6 +31,7 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
@@ -169,7 +170,7 @@ public class X509V3CertificateGenerator
             throw new IllegalArgumentException("Unknown signature type requested: " + signatureAlgorithm);
         }
 
-        sigAlgId = new AlgorithmIdentifier(this.sigOID, new DERNull());
+        sigAlgId = X509Util.getSigAlgID(sigOID);
 
         tbsGen.setSignature(sigAlgId);
     }

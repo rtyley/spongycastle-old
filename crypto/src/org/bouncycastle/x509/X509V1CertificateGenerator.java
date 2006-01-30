@@ -167,7 +167,7 @@ public class X509V1CertificateGenerator
             throw new IllegalArgumentException("Unknown signature type requested");
         }
 
-        sigAlgId = new AlgorithmIdentifier(this.sigOID, new DERNull());
+        sigAlgId = X509Util.getSigAlgID(sigOID);
 
         tbsGen.setSignature(sigAlgId);
     }
