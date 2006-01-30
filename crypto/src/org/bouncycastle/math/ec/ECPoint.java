@@ -2,6 +2,8 @@ package org.bouncycastle.math.ec;
 
 import java.math.BigInteger;
 
+import org.bouncycastle.asn1.x9.X9IntegerConverter;
+
 /**
  * base class for points on elliptic curves.
  */
@@ -10,6 +12,8 @@ public abstract class ECPoint
     ECCurve        curve;
     ECFieldElement x;
     ECFieldElement y;
+    
+    private static X9IntegerConverter converter = new X9IntegerConverter();
 
     protected ECPoint(ECCurve curve, ECFieldElement x, ECFieldElement y)
     {
@@ -33,6 +37,11 @@ public abstract class ECPoint
         return y;
     }
 
+    public boolean isInfinity()
+    {
+        return x == null && y == null;
+    }
+    
     public boolean equals(
         Object  other)
     {
@@ -96,52 +105,13 @@ public abstract class ECPoint
             
             this.withCompression = withCompression;
         }
-        
-        private int getQLength(
-            BigInteger p)
-        {
-            byte[] bytes = p.toByteArray();
-            
-            if (bytes[0] == 0)
-            {
-                return bytes.length - 1;
-            }
-            
-            return bytes.length;
-        }
-            
-        private byte[] intToBytes(
-            BigInteger s,
-            int        qLength)
-        {
-            byte[] bytes = s.toByteArray();
-            
-            if (qLength < bytes.length)
-            {
-                byte[] tmp = new byte[qLength];
-
-                System.arraycopy(bytes, bytes.length - tmp.length, tmp, 0, tmp.length);
-                
-                return tmp;
-            }
-            else if (qLength > bytes.length)
-            {
-                byte[] tmp = new byte[qLength];
-
-                System.arraycopy(bytes, 0, tmp, tmp.length - bytes.length, bytes.length);
-                
-                return tmp; 
-            }
-            
-            return bytes;
-        }
-        
+         
         /**
          * return the field element encoded with point compression. (S 4.3.6)
          */
         public byte[] getEncoded()
         {
-            int qLength = getQLength(this.getX().p);
+            int qLength = converter.getQLength(this.getX().p);
             
             if (withCompression)
             {
@@ -156,7 +126,7 @@ public abstract class ECPoint
                     PC = 0x02;
                 }
     
-                byte[]  X = intToBytes(this.getX().toBigInteger(), qLength);
+                byte[]  X = converter.integerToBytes(this.getX().toBigInteger(), qLength);
                 byte[]  PO = new byte[X.length + 1];
     
                 PO[0] = PC;
@@ -166,8 +136,8 @@ public abstract class ECPoint
             }
             else
             {
-                byte[]  X = intToBytes(this.getX().toBigInteger(), qLength);
-                byte[]  Y = intToBytes(this.getY().toBigInteger(), qLength);
+                byte[]  X = converter.integerToBytes(this.getX().toBigInteger(), qLength);
+                byte[]  Y = converter.integerToBytes(this.getY().toBigInteger(), qLength);
                 byte[]  PO = new byte[X.length + Y.length + 1];
                 
                 PO[0] = 0x04;
@@ -242,19 +212,42 @@ public abstract class ECPoint
     }
     
     /**
-     * Elliptic curve points over Fp
+     * Elliptic curve points over F2m
      */
     public static class F2m extends ECPoint
     {
-
         /**
          * @param curve
          * @param x
          * @param y
          */
-        protected F2m(ECCurve curve, ECFieldElement x, ECFieldElement y)
+        public F2m(ECCurve curve, ECFieldElement x, ECFieldElement y)
         {
             super(curve, x, y);
+
+            if (x != null && !(x instanceof ECFieldElement.F2m))
+            {
+                throw new IllegalArgumentException("wrong field element passed");
+            }
+            
+            if (y != null && !(y instanceof ECFieldElement.F2m))
+            {
+                throw new IllegalArgumentException("wrong field element passed");
+            }
+            
+            // Check if x and y are elements of the same field
+            ECFieldElement.F2m.checkFieldElements(this.x, this.y);
+
+            // Check if x and a are elements of the same field
+            ECFieldElement.F2m.checkFieldElements(this.x, this.curve.getA());
+        }
+
+        /**
+         * Constructor for point at infinity
+         */
+        public F2m(ECCurve curve)
+        {
+            super(curve, null, null);
         }
 
         /* (non-Javadoc)
@@ -262,8 +255,32 @@ public abstract class ECPoint
          */
         public byte[] getEncoded()
         {
-            // TODO Auto-generated method stub
-            return null;
+            if (isInfinity()) 
+            {
+                throw new RuntimeException("Point at infinity cannot be encoded");
+            }
+
+            // TODO keyon start: Fixes the incorrect ASN.1 encoding of org.bouncycastle.math.ec.ECPoint.Fp
+            // Convert the point to a byte[] having correct length according
+            // to X9.62
+            int m = ((ECFieldElement.F2m)x).getM();
+            int byteCount = m/8;
+            if (m % 8 > 0) 
+            {
+                byteCount++;
+            }
+
+            byte[] X = converter.integerToBytes(this.getX().toBigInteger(), byteCount);
+            byte[] Y = converter.integerToBytes(this.getY().toBigInteger(), byteCount);
+
+            byte[]  PO = new byte[byteCount + byteCount + 1];
+
+            PO[0] = 0x04;
+            System.arraycopy(X, 0, PO, 1, byteCount);
+            System.arraycopy(Y, 0, PO, byteCount + 1, byteCount);
+            // TODO keyon end: Fixes the incorrect ASN.1 encoding of org.bouncycastle.math.ec.ECPoint.Fp
+
+            return PO;
         }
 
         /* (non-Javadoc)
@@ -271,8 +288,56 @@ public abstract class ECPoint
          */
         public ECPoint add(ECPoint b)
         {
-            // TODO Auto-generated method stub
-            return null;
+            // Check, if points are on the same curve
+            if (!(curve.equals(b.getCurve())))
+            {
+                throw new IllegalArgumentException("Only points on the same "
+                        + "curve can be added");
+            }
+
+            if (isInfinity())
+            {
+                if (b.isInfinity())
+                {
+                    return new ECPoint.F2m(curve);
+                }
+                return new ECPoint.F2m(b.getCurve(), b.getX(), b.getY());
+            }
+
+            if (b.isInfinity())
+            {
+                return new ECPoint.F2m(curve, x, y);
+            }
+
+            ECFieldElement.F2m.checkFieldElements(x, b.getX());
+            ECFieldElement.F2m x2 = (ECFieldElement.F2m)b.getX();
+            ECFieldElement.F2m y2 = (ECFieldElement.F2m)b.getY();
+
+            // Check if b = this or b = -this
+            if (x.equals(x2))
+            {
+                if (y.equals(y2))
+                {
+                    // this = b, i.e. this must be doubled
+                    return this.twice();
+                }
+                else
+                {
+                    // this = -b, i.e. the result is the point at infinity
+                    return new ECPoint.F2m(curve);
+                }
+            }
+
+            ECFieldElement.F2m lambda
+                = (ECFieldElement.F2m)(y.add(y2)).divide(x.add(x2));
+
+            ECFieldElement.F2m x3
+                = (ECFieldElement.F2m)lambda.square().add(lambda).add(x).add(x2).add(curve.getA());
+
+            ECFieldElement.F2m y3
+                = (ECFieldElement.F2m)lambda.multiply(x.add(x3)).add(x3).add(y);
+
+            return new ECPoint.F2m(curve, x3, y3);
         }
 
         /* (non-Javadoc)
@@ -280,8 +345,10 @@ public abstract class ECPoint
          */
         public ECPoint subtract(ECPoint b)
         {
-            // TODO Auto-generated method stub
-            return null;
+            // Add -b
+            ECPoint.F2m minusB
+                = new ECPoint.F2m(curve, b.getX(), b.getY().negate());
+            return add(minusB);
         }
 
         /* (non-Javadoc)
@@ -289,18 +356,40 @@ public abstract class ECPoint
          */
         public ECPoint twice()
         {
-            // TODO Auto-generated method stub
-            return null;
+            if (isInfinity() || (x.toBigInteger().equals(BigInteger.ZERO))) 
+            {
+                // Twice identity element (point at infinity) is identity
+                // element, and if x1 == null, then (x1, y1) == (x1, x1 + y1)
+                // and hence this = -this and thus 2(x1, y1) == infinity
+                return new ECPoint.F2m(curve);
+            }
+
+            ECFieldElement.F2m lambda
+                = (ECFieldElement.F2m)x.add(y.divide(x));
+
+            ECFieldElement.F2m x3
+                = (ECFieldElement.F2m)lambda.square().add(lambda).
+                    add(curve.getA());
+
+            ECFieldElement.F2m y3
+                = (ECFieldElement.F2m)x.square().add(lambda.multiply(x3)).
+                    add(x3);
+
+            return new ECPoint.F2m(curve, x3, y3);
         }
 
-        /* (non-Javadoc)
-         * @see org.bouncycastle.math.ec.ECPoint#multiply(java.math.BigInteger)
-         */
-        public ECPoint multiply(BigInteger b)
+        public ECPoint multiply(BigInteger k)
         {
-            // TODO Auto-generated method stub
-            return null;
+            ECPoint.F2m p = this;
+            ECPoint.F2m q = new ECPoint.F2m(curve);
+            int t = k.bitLength();
+            for (int i = 0; i < t; i++) {
+                if (k.testBit(i)) {
+                    q = (ECPoint.F2m)q.add(p);
+                }
+                p = (ECPoint.F2m)p.twice();
+            }
+            return q;
         }
-        
     }
 }

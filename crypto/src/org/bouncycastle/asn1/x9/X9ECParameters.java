@@ -89,11 +89,16 @@ public class X9ECParameters
 
         if (curve instanceof ECCurve.Fp)
         {
-            this.fieldID = new X9FieldID(prime_field, ((ECCurve.Fp)curve).getQ());
+            this.fieldID = new X9FieldID(((ECCurve.Fp)curve).getQ());
         }
         else
         {
-            this.fieldID = new X9FieldID(characteristic_two_field, null);
+            if (curve instanceof ECCurve.F2m)
+            {
+                ECCurve.F2m curveF2m = (ECCurve.F2m)curve;
+                this.fieldID = new X9FieldID(curveF2m.getM(), curveF2m.getK1(),
+                    curveF2m.getK2(), curveF2m.getK3());
+            }
         }
     }
 

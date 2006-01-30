@@ -107,11 +107,12 @@ public class X962NamedCurves
 
     /*
      * F2m Curves
-     */
+     *//*
     static final ECCurve c2m163v1 = new ECCurve.F2m(
+        163,
         new BigInteger("0800000000000000000000000000000107"),
         new BigInteger("072546B5435234A422E0789675F432C89435DE5242", 16),
-        new BigInteger("00C9517D06D5240D3CFF38C74B20B6CD4D6F9DD4D9", 16));
+        new BigInteger("00C9517D06D5240D3CFF38C74B20B6CD4D6F9DD4D9", 16));*/
 /*
     static final X9ECParameters c2pnb163v1 = new X9ECParameters(
             c2m163v1,
