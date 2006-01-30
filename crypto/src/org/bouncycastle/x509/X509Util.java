@@ -6,9 +6,11 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
 class X509Util
@@ -52,6 +54,23 @@ class X509Util
         }
         
         return new DERObjectIdentifier(algorithmName);
+    }
+    
+    static AlgorithmIdentifier getSigAlgID(
+        DERObjectIdentifier sigOid)
+    {
+        //
+        // According to RFC 3279, the ASN.1 encoding SHALL (id-dsa-with-sha1) or MUST (ecdsa-with-SHA1) omit the parameters field. 
+        // The parameters field SHALL be NULL for RSA based signature algorithms.
+        //
+        if (sigOid.equals(X9ObjectIdentifiers.ecdsa_with_SHA1) || sigOid.equals(X9ObjectIdentifiers.id_dsa_with_sha1))
+        {
+            return new AlgorithmIdentifier(sigOid);
+        }
+        else
+        {
+            return new AlgorithmIdentifier(sigOid, new DERNull());
+        }
     }
     
     static Iterator getAlgNames()
