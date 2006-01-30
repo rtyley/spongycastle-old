@@ -6,48 +6,15 @@ public abstract class ECFieldElement
     implements ECConstants
 {
     BigInteger x;
-    BigInteger p;
 
-    protected ECFieldElement(BigInteger q, BigInteger x)
+    protected ECFieldElement(BigInteger x)
     {
-        if (x.compareTo(q) >= 0)
-        {
-            throw new IllegalArgumentException("x value too large in field element");
-        }
-
         this.x = x;
-        this.p = q; // curve.getQ();
-    }
-
-    public BigInteger getQ()
-    {
-        return p;
     }
     
     public BigInteger toBigInteger()
     {
         return x;
-    }
-
-    public boolean equals(Object other)
-    {
-        if (other == this)
-        {
-            return true;
-        }
-
-        if (!(other instanceof ECFieldElement))
-        {
-            return false;
-        }
-        
-        ECFieldElement o = (ECFieldElement)other;
-        return p.equals(o.p) && x.equals(o.x);
-    }
-
-    public int hashCode()
-    {
-        return p.hashCode() ^ x.hashCode();
     }
 
     public abstract String         getFieldName();
@@ -62,9 +29,18 @@ public abstract class ECFieldElement
 
     public static class Fp extends ECFieldElement
     {
+        BigInteger q;
+        
         public Fp(BigInteger q, BigInteger x)
         {
-            super(q, x);
+            super(x);
+            
+            if (x.compareTo(q) >= 0)
+            {
+                throw new IllegalArgumentException("x value too large in field element");
+            }
+
+            this.q = q;
         }
 
         /**
@@ -77,39 +53,44 @@ public abstract class ECFieldElement
             return "Fp";
         }
 
+        public BigInteger getQ()
+        {
+            return q;
+        }
+        
         public ECFieldElement add(ECFieldElement b)
         {
-            return new Fp(p, x.add(b.x).mod(p));
+            return new Fp(q, x.add(b.x).mod(q));
         }
 
         public ECFieldElement subtract(ECFieldElement b)
         {
-            return new Fp(p, x.subtract(b.x).mod(p));
+            return new Fp(q, x.subtract(b.x).mod(q));
         }
 
         public ECFieldElement multiply(ECFieldElement b)
         {
-            return new Fp(p, x.multiply(b.x).mod(p));
+            return new Fp(q, x.multiply(b.x).mod(q));
         }
 
         public ECFieldElement divide(ECFieldElement b)
         {
-            return new Fp(p, x.multiply(b.x.modInverse(p)).mod(p));
+            return new Fp(q, x.multiply(b.x.modInverse(q)).mod(q));
         }
 
         public ECFieldElement negate()
         {
-            return new Fp(p, x.negate().mod(p));
+            return new Fp(q, x.negate().mod(q));
         }
 
         public ECFieldElement square()
         {
-            return new Fp(p, x.multiply(x).mod(p));
+            return new Fp(q, x.multiply(x).mod(q));
         }
 
         public ECFieldElement invert()
         {
-            return new Fp(p, x.modInverse(p));
+            return new Fp(q, x.modInverse(q));
         }
 
         // D.1.4 91
@@ -120,15 +101,37 @@ public abstract class ECFieldElement
         public ECFieldElement sqrt()
         {
             // p mod 4 == 3
-            if (p.testBit(1))
+            if (q.testBit(1))
             {
                 // z = g^(u+1) + p, p = 4u + 3
-                ECFieldElement z = new Fp(p, x.modPow(p.shiftRight(2).add(ONE), p));
+                ECFieldElement z = new Fp(q, x.modPow(q.shiftRight(2).add(ONE), q));
 
                 return z.square().equals(this) ? z : null;
             }
 
             throw new RuntimeException("not done yet");
+        }
+        
+
+        public boolean equals(Object other)
+        {
+            if (other == this)
+            {
+                return true;
+            }
+
+            if (!(other instanceof ECFieldElement.Fp))
+            {
+                return false;
+            }
+            
+            ECFieldElement.Fp o = (ECFieldElement.Fp)other;
+            return q.equals(o.q) && x.equals(o.x);
+        }
+
+        public int hashCode()
+        {
+            return q.hashCode() ^ x.hashCode();
         }
     }
 
@@ -194,8 +197,6 @@ public abstract class ECFieldElement
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
         private final int k3;
-
-        private static final BigInteger TWO = BigInteger.valueOf(2);
         
         /**
          * Constructor for PPB.
@@ -215,7 +216,7 @@ public abstract class ECFieldElement
         public F2m(final int m, final int k1, final int k2, final int k3,
                 final BigInteger x)
         {
-            super(TWO, x);
+            super(x);
 
             if ((k2 == 0) && (k3 == 0))
             {
