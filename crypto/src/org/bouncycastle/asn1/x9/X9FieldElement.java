@@ -14,29 +14,25 @@ import org.bouncycastle.math.ec.ECFieldElement;
 public class X9FieldElement
     extends ASN1Encodable
 {
-    private ECFieldElement  f;
+    protected ECFieldElement  f;
+    
+    private static X9IntegerConverter converter = new X9IntegerConverter();
 
-    public X9FieldElement(
-        ECFieldElement  f)
+    public X9FieldElement(ECFieldElement f)
     {
         this.f = f;
     }
-
-    public X9FieldElement(
-        boolean          fP,
-        BigInteger       q,
-        ASN1OctetString  s)
+    
+    public X9FieldElement(BigInteger p, ASN1OctetString s)
     {
-        if (fP)
-        {
-            this.f = new ECFieldElement.Fp(q, new BigInteger(1, s.getOctets()));
-        }
-        else
-        {
-            throw new RuntimeException("not implemented");
-        }
+        this(new ECFieldElement.Fp(p, new BigInteger(1, s.getOctets())));
     }
-
+    
+    public X9FieldElement(int m, int k1, int k2, int k3, ASN1OctetString s)
+    {
+        this(new ECFieldElement.F2m(m, k1, k2, k3, new BigInteger(1, s.getOctets())));
+    }
+    
     public ECFieldElement getValue()
     {
         return f;
@@ -60,6 +56,12 @@ public class X9FieldElement
      */
     public DERObject toASN1Object()
     {
-        return new DEROctetString(f.toBigInteger().toByteArray());
+        // TODO keyon start: Ensures, that field elements are ASN.1 encoded as an OCTET STRING with the same bit length as q (number of elements in the finite field). See X9.62.
+        BigInteger q = f.getQ();
+        int byteCount = converter.getQLength(q);
+        byte[] paddedBigInteger = converter.integerToBytes(f.toBigInteger(), byteCount);
+
+        return new DEROctetString(paddedBigInteger);
+        // TODO keyon end: Ensures, that field elements are ASN.1 encoded as an OCTET STRING with the same bit length as q (number of elements in the finite field). See X9.62.
     }
 }

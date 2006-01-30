@@ -21,12 +21,50 @@ public class X9FieldID
     private DERObjectIdentifier     id;
     private DERObject               parameters;
 
-    public X9FieldID(
-        DERObjectIdentifier id,
-        BigInteger          primeP)
+    /**
+     * Constructor for elliptic curves over prime fields
+     * <code>F<sub>2</sub></code>.
+     * @param primeP The prime <code>p</code> defining the prime field.
+     */
+    public X9FieldID(BigInteger primeP)
     {
-        this.id = id;
+        this.id = prime_field;
         this.parameters = new DERInteger(primeP);
+    }
+
+    /**
+     * Constructor for elliptic curves over binary fields
+     * <code>F<sub>2<sup>m</sup></sub></code>.
+     * @param m  The exponent <code>m</code> of
+     * <code>F<sub>2<sup>m</sup></sub></code>.
+     * @param k1 The integer <code>k1</code> where <code>x<sup>m</sup> +
+     * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
+     * represents the reduction polynomial <code>f(z)</code>.
+     * @param k2 The integer <code>k2</code> where <code>x<sup>m</sup> +
+     * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
+     * represents the reduction polynomial <code>f(z)</code>.
+     * @param k3 The integer <code>k3</code> where <code>x<sup>m</sup> +
+     * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
+     * represents the reduction polynomial <code>f(z)</code>.
+     * @param x The BigInteger representing the value of the field element.
+     */
+    public X9FieldID(int m, int k1, int k2, int k3)
+    {
+        this.id = characteristic_two_field;
+        ASN1EncodableVector fieldIdParams = new ASN1EncodableVector();
+        fieldIdParams.add(new DERInteger(m));
+        if (k2 == 0) {
+            fieldIdParams.add(tpBasis);
+            fieldIdParams.add(new DERInteger(k1));
+        } else {
+            fieldIdParams.add(ppBasis);
+            ASN1EncodableVector pentanomialParams = new ASN1EncodableVector();
+            pentanomialParams.add(new DERInteger(k1));
+            pentanomialParams.add(new DERInteger(k2));
+            pentanomialParams.add(new DERInteger(k3));
+            fieldIdParams.add(new DERSequence(pentanomialParams));
+        }
+        this.parameters = new DERSequence(fieldIdParams);
     }
 
     public X9FieldID(
