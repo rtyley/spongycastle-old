@@ -7,18 +7,7 @@ public class X9IntegerConverter
     public int getQLength(
         BigInteger q)
     {
-        int length = q.bitLength();
-        
-        if (length % 8 != 0)
-        {
-            length = (length + 7) / 8;
-        }
-        else
-        {
-            length = length / 8;
-        }
-        
-        return length;
+        return (q.bitLength() + 7) / 8;
     }
     
     public byte[] integerToBytes(
