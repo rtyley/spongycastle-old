@@ -11,7 +11,9 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.cert.CRLException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
@@ -109,6 +111,18 @@ public class PEMWriter
                 encoding = ((X509Certificate)o).getEncoded();
             }
             catch (CertificateEncodingException e)
+            {
+                throw new IOException("Cannot encode object: " + e.toString());
+            }
+        }
+        else if (o instanceof X509CRL)
+        {
+            type = "X509 CRL";
+            try
+            {
+                encoding = ((X509CRL)o).getEncoded();
+            }
+            catch (CRLException e)
             {
                 throw new IOException("Cannot encode object: " + e.toString());
             }
