@@ -156,7 +156,7 @@ public class X962NamedCurves
     public static X9ECParameters getByName(
         String  name)
     {
-        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(name);
+        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(name.toLowerCase());
 
         if (oid != null)
         {
