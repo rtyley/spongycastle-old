@@ -3,7 +3,19 @@ package org.bouncycastle.cms;
 import java.security.PrivateKey;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.Date;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -74,5 +86,108 @@ public class CMSSignedGenerator
         }
         
         return encOID;
+    }
+    
+    protected ASN1Set getSignedAttributeSet(
+        DERObjectIdentifier contentType, 
+        byte[]              hash, 
+        AttributeTable      attr, 
+        boolean             addDefaultAttributes)
+    {
+        if (attr != null)
+        {
+            ASN1EncodableVector  v = new ASN1EncodableVector();
+
+            if (attr.get(CMSAttributes.contentType) == null)
+            {
+                v.add(new Attribute(CMSAttributes.contentType,
+                                               new DERSet(contentType)));
+            }
+            else
+            {
+                v.add(attr.get(CMSAttributes.contentType));
+            }
+
+            if (attr.get(CMSAttributes.signingTime) == null)
+            {
+                v.add(new Attribute(CMSAttributes.signingTime,
+                                       new DERSet(new Time(new Date()))));
+            }
+            else
+            {
+                v.add(attr.get(CMSAttributes.signingTime));
+            }
+
+            if (hash != null)
+            {
+                v.add(new Attribute(CMSAttributes.messageDigest,
+                    new DERSet(new DEROctetString(hash))));
+            }
+            else
+            {
+                v.add(new Attribute(CMSAttributes.messageDigest,
+                    new DERSet(new DERNull())));
+            }
+            
+            ASN1EncodableVector attrs = attr.toASN1EncodableVector();
+            
+            for (int i = 0; i != attrs.size(); i++)
+            {
+                Attribute           a = Attribute.getInstance(attrs.get(i));
+                DERObjectIdentifier type = a.getAttrType();
+                
+                if (type.equals(CMSAttributes.contentType)
+                    || type.equals(CMSAttributes.signingTime)
+                    || type.equals(CMSAttributes.messageDigest))
+                {
+                    continue;
+                }
+                
+                v.add(a);
+            }
+
+            return new DERSet(v);
+        }
+        else
+        {
+            if (addDefaultAttributes) 
+            {
+                ASN1EncodableVector  v = new ASN1EncodableVector();
+
+                v.add(new Attribute(
+                    CMSAttributes.contentType,
+                        new DERSet(contentType)));
+
+                v.add(new Attribute(
+                    CMSAttributes.signingTime,
+                        new DERSet(new DERUTCTime(new Date()))));
+
+                if (hash != null)
+                {
+                    v.add(new Attribute(CMSAttributes.messageDigest,
+                        new DERSet(new DEROctetString(hash))));
+                }
+                else
+                {
+                    v.add(new Attribute(CMSAttributes.messageDigest,
+                        new DERSet(new DERNull())));
+                }
+
+                return new DERSet(v);
+            }
+        }
+
+        return null;
+    }
+    
+    protected ASN1Set getUnsignedAttributeSet(
+        AttributeTable attr)
+    {
+        if (attr != null)
+        {
+            return new DERSet(attr.toASN1EncodableVector());
+        }
+        
+        return null;
     }
 }
