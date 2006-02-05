@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.math.ec.ECFieldElement;
+import org.bouncycastle.math.ec.ECFieldElement.F2m;
 
 /**
  * class for processing an FieldElement as a DER object.
@@ -38,6 +39,45 @@ public class X9FieldElement
         return f;
     }
 
+    private byte[] mToByteArray(
+        int m)
+    {
+        byte[] v;
+        
+        if (m > 0xff)
+        {
+            if (m > 0xffff)
+            {
+                if (m > 0xffffff)
+                {
+                    v = new byte[4];
+                    
+                    v[3] = (byte)(m >> 24);
+                } 
+                else
+                {
+                    v = new byte[3];
+                }
+                    
+                v[2] = (byte)(m >> 16);
+            } 
+            else
+            {
+                v = new byte[2];
+            }
+                
+            v[1] = (byte)(m >> 8);
+        }
+        else
+        {
+            v = new byte[1];
+        }
+        
+        v[0] = (byte)m;
+        
+        return v;
+    }
+    
     /**
      * Produce an object suitable for an ASN1OutputStream.
      * <pre>
@@ -56,7 +96,6 @@ public class X9FieldElement
      */
     public DERObject toASN1Object()
     {
-        // TODO keyon start: Ensures, that field elements are ASN.1 encoded as an OCTET STRING with the same bit length as q (number of elements in the finite field). See X9.62.
         if (f instanceof ECFieldElement.Fp)
         {
             BigInteger q = ((ECFieldElement.Fp)f).getQ();
@@ -67,8 +106,9 @@ public class X9FieldElement
         }
         else
         {
-            return null;
+            ECFieldElement.F2m element = (F2m)f;
+            
+            return new DEROctetString(mToByteArray(element.getM()));
         }
-        // TODO keyon end: Ensures, that field elements are ASN.1 encoded as an OCTET STRING with the same bit length as q (number of elements in the finite field). See X9.62.
     }
 }
