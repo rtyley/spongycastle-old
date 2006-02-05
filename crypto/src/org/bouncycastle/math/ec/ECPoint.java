@@ -378,13 +378,16 @@ public abstract class ECPoint
             return new ECPoint.F2m(curve, x3, y3);
         }
 
-        public ECPoint multiply(BigInteger k)
+        public ECPoint multiply(
+            BigInteger k)
         {
             ECPoint.F2m p = this;
             ECPoint.F2m q = new ECPoint.F2m(curve);
             int t = k.bitLength();
-            for (int i = 0; i < t; i++) {
-                if (k.testBit(i)) {
+            for (int i = 0; i < t; i++) 
+            {
+                if (k.testBit(i)) 
+                {
                     q = (ECPoint.F2m)q.add(p);
                 }
                 p = (ECPoint.F2m)p.twice();

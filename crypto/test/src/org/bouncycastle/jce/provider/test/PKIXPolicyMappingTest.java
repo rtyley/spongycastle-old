@@ -124,7 +124,7 @@ public class PKIXPolicyMappingTest
         X509Certificate trustCert, 
         X509Certificate intCert, 
         X509Certificate endCert,
-        HashSet         requirePolicies,
+        Set             requirePolicies,
         boolean         okay) 
         throws IOException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException
     {
@@ -142,7 +142,8 @@ public class PKIXPolicyMappingTest
         params.addCertStore(store);
         
         params.setRevocationEnabled(false);
-        if (requirePolicies != null){
+        if (requirePolicies != null)
+        {
             params.setExplicitPolicyRequired(true);
             params.setInitialPolicies(requirePolicies);
         }
@@ -254,7 +255,7 @@ public class PKIXPolicyMappingTest
         ASN1EncodableVector intPolicies     = null;
         Hashtable           map             = null;
         ASN1EncodableVector policies        = null;
-        HashSet             requirePolicies = null;
+        Set                 requirePolicies = null;
         X509Certificate     intCert         = null;
         X509Certificate     endCert         = null;
         
