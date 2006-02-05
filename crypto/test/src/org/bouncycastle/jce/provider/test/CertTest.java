@@ -485,6 +485,25 @@ public class CertTest
             + "q8EYl6iJqXCuR+ozRmH7hPAP3c4KqYSC38TClCgBloLapx/3/WdatctFJW/L"
             + "mcTovpq088927shE");
         
+    private PublicKey dudPublicKey = new PublicKey() 
+    {
+        public String getAlgorithm()
+        {
+            return null;
+        }
+
+        public String getFormat()
+        {
+            return null;
+        }
+
+        public byte[] getEncoded()
+        {
+            return null;
+        }
+
+    };
+    
     public String getName()
     {
         return "CertTest";
@@ -885,7 +904,20 @@ public class CertTest
         {
             fail("error setting generating cert - " + e.toString());
         }
-
+        
+        //
+        // exception test
+        //
+        try
+        {
+            certGen.setPublicKey(dudPublicKey);
+            
+            fail("key without encoding not detected in v1");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // expected
+        }
     }
 
     /**
@@ -1326,6 +1358,19 @@ public class CertTest
             fail("exception not thrown on dud extension copy");
         }
         catch (CertificateParsingException e)
+        {
+            // expected
+        }
+        
+        try
+        {
+            certGen.setPublicKey(dudPublicKey);
+            
+            certGen.generateX509Certificate(privKey);
+            
+            fail("key without encoding not detected in v3");
+        }
+        catch (IllegalArgumentException e)
         {
             // expected
         }
