@@ -1,7 +1,10 @@
 package org.bouncycastle.asn1.cms;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodableVector;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -23,7 +26,7 @@ public class AttributeTable
         {
             Attribute   a = Attribute.getInstance(v.get(i));
 
-            attributes.put(a.getAttrType(), a);
+            addAttribute(a.getAttrType(), a);
         }
     }
 
@@ -34,16 +37,92 @@ public class AttributeTable
         {
             Attribute   a = Attribute.getInstance(s.getObjectAt(i));
 
-            attributes.put(a.getAttrType(), a);
+            addAttribute(a.getAttrType(), a);
         }
     }
 
+    private void addAttribute(
+        DERObjectIdentifier oid,
+        Attribute           a)
+    {
+        Object value = attributes.get(oid);
+        
+        if (value == null)
+        {
+            attributes.put(oid, a);
+        }
+        else
+        {
+            Vector v;
+            
+            if (value instanceof Attribute)
+            {
+                v = new Vector();
+                
+                v.addElement(value);
+                v.addElement(a);
+            }
+            else
+            {
+                v = (Vector)value;
+            
+                v.addElement(a);
+            }
+            
+            attributes.put(oid, v);
+        }
+    }
+    
+    /**
+     * Return the first attribute matching the OBJECT IDENTIFIER oid.
+     * 
+     * @param oid type of attribute required.
+     * @return first attribute found of type oid.
+     */
     public Attribute get(
         DERObjectIdentifier oid)
     {
-        return (Attribute)attributes.get(oid);
+        Object value = attributes.get(oid);
+        
+        if (value instanceof Vector)
+        {
+            return (Attribute)((Vector)value).elementAt(0);
+        }
+        
+        return (Attribute)value;
     }
 
+    /**
+     * Return all the attributes matching the OBJECT IDENTIFIER oid. The vector will be 
+     * empty if there are no attributes of the required type present.
+     * 
+     * @param oid type of attribute required.
+     * @return a vector of all the attributes found of type oid.
+     */
+    public ASN1EncodableVector getAll(
+        DERObjectIdentifier oid)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+        
+        Object value = attributes.get(oid);
+        
+        if (value instanceof Vector)
+        {
+            Enumeration e = ((Vector)value).elements();
+            
+            while (e.hasMoreElements())
+            {
+                v.add((Attribute)e.nextElement());
+            }
+        }
+        else if (value != null)
+        {
+            v.add((Attribute)value);
+        }
+        
+        return v;
+    }
+    
     public Hashtable toHashtable()
     {
         return new Hashtable(attributes);

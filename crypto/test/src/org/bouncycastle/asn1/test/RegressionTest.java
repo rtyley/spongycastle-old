@@ -33,7 +33,8 @@ public class RegressionTest
         new CommitmentTypeIndicationUnitTest(),
         new EncryptedPrivateKeyInfoTest(),
         new DataGroupHashUnitTest(),
-        new LDSSecurityObjectUnitTest()
+        new LDSSecurityObjectUnitTest(),
+        new AttributeTableUnitTest()
     };
 
     public static void main(
