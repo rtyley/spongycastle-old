@@ -325,7 +325,8 @@ public abstract class ECFieldElement
         {
             // Left-shift of a(z)
             BigInteger az = a.shiftLeft(1);
-            if (az.testBit(this.m)) {
+            if (az.testBit(this.m)) 
+            {
                 // If the coefficient of z^m in a(z) equals 1, reduction
                 // modulo f(z) is performed: Add f(z) to to a(z):
                 // Step 1: Unset mth coeffient of a(z)
@@ -336,7 +337,8 @@ public abstract class ECFieldElement
                 // the non-zero coefficients in r(z)
                 az = az.flipBit(0);
                 az = az.flipBit(this.k1);
-                if (this.representation == PPB) {
+                if (this.representation == PPB) 
+                {
                     az = az.flipBit(this.k2);
                     az = az.flipBit(this.k3);
                 }
@@ -374,17 +376,22 @@ public abstract class ECFieldElement
             BigInteger cz;
 
             // Compute c(z) = a(z) * b(z) mod f(z)
-            if (az.testBit(0)) {
+            if (az.testBit(0)) 
+            {
                 cz = bz;
-            } else {
+            } 
+            else 
+            {
                 cz = BigInteger.ZERO;
             }
 
-            for (int i = 1; i < this.m; i++) {
+            for (int i = 1; i < this.m; i++) 
+            {
                 // b(z) := z * b(z) mod f(z)
                 bz = multZModF(bz);
 
-                if (az.testBit(i)) {
+                if (az.testBit(i)) 
+                {
                     // If the coefficient of x^i in a(z) equals 1, b(z) is added
                     // to c(z)
                     cz = cz.xor(bz);
@@ -422,7 +429,8 @@ public abstract class ECFieldElement
 
             // u(z) := a(z)
             BigInteger uz = this.x;
-            if (uz.signum() <= 0) {
+            if (uz.signum() <= 0) 
+            {
                 throw new ArithmeticException("x is zero or negative, " +
                         "inversion is impossible");
             }
@@ -431,7 +439,8 @@ public abstract class ECFieldElement
             BigInteger vz = BigInteger.ONE.shiftLeft(m);
             vz = vz.setBit(0);
             vz = vz.setBit(this.k1);
-            if (this.representation == PPB) {
+            if (this.representation == PPB) 
+            {
                 vz = vz.setBit(this.k2);
                 vz = vz.setBit(this.k3);
             }
@@ -441,12 +450,14 @@ public abstract class ECFieldElement
             BigInteger g2z = BigInteger.ZERO;
 
             // while u != 1
-            while (!(uz.equals(BigInteger.ZERO))) {
+            while (!(uz.equals(BigInteger.ZERO))) 
+            {
                 // j := deg(u(z)) - deg(v(z))
                 int j = uz.bitLength() - vz.bitLength();
 
                 // If j < 0 then: u(z) <-> v(z), g1(z) <-> g2(z), j := -j
-                if (j < 0) {
+                if (j < 0) 
+                {
                     final BigInteger uzCopy = uz;
                     uz = vz;
                     vz = uzCopy;
