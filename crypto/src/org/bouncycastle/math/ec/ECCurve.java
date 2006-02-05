@@ -201,6 +201,22 @@ public abstract class ECCurve
             this.k1 = k1;
             this.k2 = k2;
             this.k3 = k3;
+            
+            if (k1 == 0)
+            {
+                throw new IllegalArgumentException("k1 must be > 0");
+            }
+            
+            if (k2 <= k1)
+            {
+                throw new IllegalArgumentException("k2 must be > k1");
+            }
+            
+            if (k3 <= k2)
+            {
+                throw new IllegalArgumentException("k3 must be > k2");
+            }
+            
             this.a = fromBigInteger(a);
             this.b = fromBigInteger(b);
         }
@@ -274,6 +290,16 @@ public abstract class ECCurve
             return m;
         }
 
+        /**
+         * Return true if curve uses a Trinomial basis.
+         * 
+         * @return true if curve Trinomial, false otherwise.
+         */
+        public boolean isTrinomial()
+        {
+            return k2 == 0 && k3 == 0;
+        }
+        
         public int getK1()
         {
             return k1;
