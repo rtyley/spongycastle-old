@@ -234,7 +234,7 @@ public class CMSSignedDataParser
                 
                 while ((o = s.readObject()) != null)
                 {
-                    DerSequence seq = (DerSequence)o;;
+                    DerSequence seq = (DerSequence)o;
                     SignerInfo  info = SignerInfo.getInstance(new ASN1InputStream(seq.getEncoded()).readObject());
                     String      digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
                     
