@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.test;
 
+import java.util.Hashtable;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
@@ -67,18 +69,32 @@ public class AttributeTableUnitTest
             fail("wrong vector size for type3.");
         }
         
+        vec = table.toASN1EncodableVector();
+        if (vec.size() != 2)
+        {
+            fail("wrong vector size for single.");
+        }
+        
+        Hashtable t = table.toHashtable();
+        
+        if (t.size() != 2)
+        {
+            fail("hashtable wrong size.");
+        }
+        
         // multiple
         
         v = new ASN1EncodableVector();
         
         v.add(new Attribute(type1, new DERSet(type1)));
+        v.add(new Attribute(type1, new DERSet(type2)));
         v.add(new Attribute(type1, new DERSet(type3)));
         v.add(new Attribute(type2, new DERSet(type2)));
         
         table = new AttributeTable(v);
         
         vec = table.getAll(type1);
-        if (vec.size() != 2)
+        if (vec.size() != 3)
         {
             fail("wrong vector size for multiple type1.");
         }
@@ -89,16 +105,28 @@ public class AttributeTableUnitTest
             fail("wrong value retrieved for type1(0)!");
         }
         
-        a = (Attribute)vec.get(0);
-        if (!a.getAttrValues().equals(new DERSet(type1)))
+        a = (Attribute)vec.get(1);
+        if (!a.getAttrValues().equals(new DERSet(type2)))
         {
             fail("wrong value retrieved for type1(1)!");
+        }
+        
+        a = (Attribute)vec.get(2);
+        if (!a.getAttrValues().equals(new DERSet(type3)))
+        {
+            fail("wrong value retrieved for type1(2)!");
         }
         
         vec = table.getAll(type2);
         if (vec.size() != 1)
         {
             fail("wrong vector size for multiple type2.");
+        }
+        
+        vec = table.toASN1EncodableVector();
+        if (vec.size() != 4)
+        {
+            fail("wrong vector size for multiple.");
         }
     }
 
