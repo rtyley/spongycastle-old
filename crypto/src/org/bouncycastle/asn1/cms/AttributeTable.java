@@ -127,4 +127,31 @@ public class AttributeTable
     {
         return new Hashtable(attributes);
     }
+    
+    public ASN1EncodableVector toASN1EncodableVector()
+    {
+        ASN1EncodableVector  v = new ASN1EncodableVector();
+        Enumeration          e = attributes.elements();
+        
+        while (e.hasMoreElements())
+        {
+            Object value = e.nextElement();
+            
+            if (value instanceof Vector)
+            {
+                Enumeration en = ((Vector)value).elements();
+                
+                while (en.hasMoreElements())
+                {
+                    v.add(Attribute.getInstance(en.nextElement()));
+                }
+            }
+            else
+            {
+                v.add(Attribute.getInstance(value));
+            }
+        }
+        
+        return v;
+    }
 }
