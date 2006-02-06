@@ -139,9 +139,25 @@ public class JCEECPublicKey
 
             ecSpec = spec;
 
-            ECCurve.Fp curve = (ECCurve.Fp)spec.getCurve();
-            
-            this.q = new org.bouncycastle.math.ec.ECPoint.Fp(curve, new ECFieldElement.Fp(curve.getQ(), new BigInteger(1, x)), new ECFieldElement.Fp(curve.getQ(), new BigInteger(1, y)));
+            ECCurve curve = spec.getCurve();
+            if (curve instanceof ECCurve.Fp) 
+            {
+                ECCurve.Fp curveFp = (ECCurve.Fp) curve;
+                this.q = new ECPoint.Fp(curveFp, new ECFieldElement.Fp(curveFp.getQ(), new BigInteger(1, x)), new ECFieldElement.Fp(curveFp.getQ(), new BigInteger(1, y)));
+            } 
+            else if (curve instanceof ECCurve.F2m) 
+            {
+                ECCurve.F2m curveF2m = (ECCurve.F2m) curve;
+                int m = curveF2m.getM();
+                int k1 = curveF2m.getK1();
+                int k2 = curveF2m.getK2();
+                int k3 = curveF2m.getK3();
+                this.q = new ECPoint.F2m(curveF2m, new ECFieldElement.F2m(m, k1, k2, k3, new BigInteger(1, x)), new ECFieldElement.F2m(m, k1, k2, k3, new BigInteger(1, y)));
+            }
+            else 
+            {
+                throw new UnsupportedOperationException("Subclass of ECPoint " + curve.getClass().toString() + "not supported");
+            }
         }
         else
         {
@@ -227,12 +243,25 @@ public class JCEECPublicKey
         else
         {
             ECParameterSpec         p = (ECParameterSpec)ecSpec;
-            X9ECParameters          ecP = new X9ECParameters(
-                                            p.getCurve(),
-                                            new org.bouncycastle.math.ec.ECPoint.Fp(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression),
-                                            p.getN(),
-                                            p.getH(),
-                                            p.getSeed());
+
+            ECCurve curve = p.getG().getCurve();
+            ECPoint generator;
+            if (curve instanceof ECCurve.Fp) 
+            {
+                generator = new ECPoint.Fp(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression);
+            } 
+            else if (curve instanceof ECCurve.F2m)
+            {
+                generator = new ECPoint.F2m(p.getG().getCurve(), p.getG().getX(), p.getG().getY());
+            } 
+            else 
+            {
+                throw new UnsupportedOperationException("Subclass of ECPoint " + curve.getClass().toString() + "not supported");
+            }
+
+            X9ECParameters ecP = new X9ECParameters(
+                p.getCurve(), generator, p.getN(), p.getH(), p.getSeed());
+
             params = new X962Parameters(ecP);
         }
 
@@ -264,7 +293,20 @@ public class JCEECPublicKey
         }
         else
         {
-            ASN1OctetString    p = (ASN1OctetString)(new X9ECPoint(new org.bouncycastle.math.ec.ECPoint.Fp(this.getQ().getCurve(), this.getQ().getX(), this.getQ().getY(), withCompression)).getDERObject());
+            ECCurve curve = this.getQ().getCurve();
+            ASN1OctetString p;
+            if (curve instanceof ECCurve.Fp) 
+            {
+                p = (ASN1OctetString)(new X9ECPoint(new ECPoint.Fp(curve, this.getQ().getX(), this.getQ().getY(), withCompression)).getDERObject());
+            } 
+            else if (curve instanceof ECCurve.F2m)
+            {
+                p = (ASN1OctetString)(new X9ECPoint(new ECPoint.F2m(curve, this.getQ().getX(), this.getQ().getY())).getDERObject());
+            } 
+            else 
+            {
+                throw new UnsupportedOperationException("Subclass of ECPoint " + curve.getClass().toString() + "not supported");
+            }
             
             info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), p.getOctets());
         }
