@@ -48,8 +48,10 @@ public abstract class ECCurve
         }
 
         /**
-         * decode a point on this curve which has been encoded using
-         * point compression (X9.62 s 4.2.1 pg 17) returning the point.
+         * Decode a point on this curve from its ASN.1 encoding. The different
+         * encodings are taken account of, including point compression for
+         * <code>F<sub>p</sub><code> (X9.62 s 4.2.1 pg 17).
+         * @return The decoded point.
          */
         public ECPoint decodePoint(byte[] encoded)
         {
@@ -207,14 +209,17 @@ public abstract class ECCurve
                 throw new IllegalArgumentException("k1 must be > 0");
             }
             
-            if (k2 <= k1)
+            if (!isTrinomial())
             {
-                throw new IllegalArgumentException("k2 must be > k1");
-            }
-            
-            if (k3 <= k2)
-            {
-                throw new IllegalArgumentException("k3 must be > k2");
+                if (k2 <= k1)
+                {
+                    throw new IllegalArgumentException("k2 must be > k1");
+                }
+                
+                if (k3 <= k2)
+                {
+                    throw new IllegalArgumentException("k3 must be > k2");
+                }
             }
             
             this.a = fromBigInteger(a);
