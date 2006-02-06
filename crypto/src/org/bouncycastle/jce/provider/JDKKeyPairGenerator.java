@@ -8,6 +8,8 @@ import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.DSAParameterSpec;
+import java.security.spec.ECField;
+import java.security.spec.ECFieldF2m;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -448,9 +450,24 @@ public abstract class JDKKeyPairGenerator
             {
                 java.security.spec.ECParameterSpec p = (java.security.spec.ECParameterSpec)params;
                 this.ecParams = params;
-                ECCurve.Fp curve = new ECCurve.Fp(((ECFieldFp)p.getCurve().getField()).getP(), p.getCurve().getA(), p.getCurve().getB());
-                ECPoint g = new ECPoint.Fp(curve, new ECFieldElement.Fp(curve.getQ(), p.getGenerator().getAffineX()), new ECFieldElement.Fp(curve.getQ(), p.getGenerator().getAffineY()));
-                
+
+                ECCurve curve;
+                ECPoint g;
+                ECField field = p.getCurve().getField();
+
+                if (field instanceof ECFieldFp)
+                {
+                    curve = new ECCurve.Fp(((ECFieldFp)p.getCurve().getField()).getP(), p.getCurve().getA(), p.getCurve().getB());
+                    g = new ECPoint.Fp(curve, new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), p.getGenerator().getAffineX()), new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), p.getGenerator().getAffineY()));
+                }
+                else
+                {
+                    ECFieldF2m fieldF2m = (ECFieldF2m)field;
+                    int m = fieldF2m.getM();
+                    int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
+                    curve = new ECCurve.F2m(m, ks[0], ks[1], ks[2], p.getCurve().getA(), p.getCurve().getB());
+                    g = new ECPoint.F2m(curve, new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineY()));
+                }
                 param = new ECKeyGenerationParameters(new ECDomainParameters(curve, g, p.getOrder(), BigInteger.valueOf(p.getCofactor())), random);
     
                 engine.init(param);
@@ -492,11 +509,26 @@ public abstract class JDKKeyPairGenerator
                 }
 
                 java.security.spec.ECParameterSpec p = (java.security.spec.ECParameterSpec)ecParams;
-                ECCurve.Fp curve = new ECCurve.Fp(((ECFieldFp)p.getCurve().getField()).getP(), p.getCurve().getA(), p.getCurve().getB());
-                ECPoint g = new ECPoint.Fp(curve, new ECFieldElement.Fp(curve.getQ(), p.getGenerator().getAffineX()), new ECFieldElement.Fp(curve.getQ(), p.getGenerator().getAffineY()));
-                
+                ECCurve curve;
+                ECPoint g;
+                ECField field = p.getCurve().getField();
+
+                if (field instanceof ECFieldFp)
+                {
+                    curve = new ECCurve.Fp(((ECFieldFp)p.getCurve().getField()).getP(), p.getCurve().getA(), p.getCurve().getB());
+                    g = new ECPoint.Fp(curve, new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), p.getGenerator().getAffineX()), new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), p.getGenerator().getAffineY()));
+                }
+                else
+                {
+                    ECFieldF2m fieldF2m = (ECFieldF2m)field;
+                    int m = fieldF2m.getM();
+                    int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
+                    curve = new ECCurve.F2m(m, ks[0], ks[1], ks[2], p.getCurve().getA(), p.getCurve().getB());
+                    g = new ECPoint.F2m(curve, new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineY()));
+                }
+
                 param = new ECKeyGenerationParameters(new ECDomainParameters(curve, g, p.getOrder(), BigInteger.valueOf(p.getCofactor())), random);
-    
+
                 engine.init(param);
                 initialised = true;
             }
