@@ -93,6 +93,12 @@ public class AttributeTableUnitTest
         
         table = new AttributeTable(v);
         
+        a = table.get(type1);
+        if (!a.getAttrValues().equals(new DERSet(type1)))
+        {
+            fail("wrong value retrieved for type1 multi get!");
+        }
+        
         vec = table.getAll(type1);
         if (vec.size() != 3)
         {
