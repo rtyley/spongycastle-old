@@ -189,6 +189,148 @@ public class ECTest
         }
     }
 
+
+    /**
+     * X9.62 - 1998,<br>
+     * J.2.1, Page 100, ECDSA over the field F2m<br>
+     * an example with 191 bit binary field
+     */
+    private void testECDSA191bitBinary()
+    {
+        BigInteger r = new BigInteger("87194383164871543355722284926904419997237591535066528048");
+        BigInteger s = new BigInteger("308992691965804947361541664549085895292153777025772063598");
+    
+        SecureRandom    k = new SecureRandom()
+        {
+            public void nextBytes(byte[] bytes)
+            {
+                byte[] vals = new BigInteger("1542725565216523985789236956265265265235675811949404040041").toByteArray();
+    
+                System.arraycopy(vals, vals.length-bytes.length, bytes, 0, bytes.length);
+            }
+        };
+
+        ECCurve.F2m curve = new ECCurve.F2m(
+            191, // m
+            9, //k
+            new BigInteger("2866537B676752636A68F56554E12640276B649EF7526267", 16), // a
+            new BigInteger("2E45EF571F00786F67B0081B9495A3D95462F5DE0AA185EC", 16)); // b
+    
+        ECDomainParameters params = new ECDomainParameters(
+            curve,
+            curve.decodePoint(Hex.decode("0436B3DAF8A23206F9C4F299D7B21A9C369137F2C84AE1AA0D765BE73433B3F95E332932E70EA245CA2418EA0EF98018FB")), // G
+            new BigInteger("1569275433846670190958947355803350458831205595451630533029"), // n
+            BigInteger.valueOf(2)); // h
+    
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("1275552191113212300012030439187146164646146646466749494799"), // d
+            params);
+    
+        ECDSASigner ecdsa = new ECDSASigner();
+        ParametersWithRandom param = new ParametersWithRandom(priKey, k);
+    
+        ecdsa.init(true, param);
+    
+        byte[] message = new BigInteger("968236873715988614170569073515315707566766479517").toByteArray();
+        BigInteger[] sig = ecdsa.generateSignature(message);
+    
+        if (!r.equals(sig[0]))
+        {
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
+    
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+    
+        // Verify the signature
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            curve.decodePoint(Hex.decode("045DE37E756BD55D72E3768CB396FFEB962614DEA4CE28A2E755C0E0E02F5FB132CAF416EF85B229BBB8E1352003125BA1")), // Q
+            params);
+
+        ecdsa.init(false, pubKey);
+        if (!ecdsa.verifySignature(message, sig[0], sig[1]))
+        {
+            fail("signature fails");
+        }
+    }
+
+
+    /**
+     * X9.62 - 1998,<br>
+     * J.2.1, Page 100, ECDSA over the field F2m<br>
+     * an example with 191 bit binary field
+     */
+    private void testECDSA239bitBinary()
+    {
+        BigInteger r = new BigInteger("21596333210419611985018340039034612628818151486841789642455876922391552");
+        BigInteger s = new BigInteger("197030374000731686738334997654997227052849804072198819102649413465737174");
+    
+        SecureRandom    k = new SecureRandom()
+        {
+            public void nextBytes(byte[] bytes)
+            {
+                byte[] vals = new BigInteger("171278725565216523967285789236956265265265235675811949404040041670216363").toByteArray();
+    
+                System.arraycopy(vals, vals.length-bytes.length, bytes, 0, bytes.length);
+            }
+        };
+
+        ECCurve.F2m curve = new ECCurve.F2m(
+            239, // m
+            36, //k
+            new BigInteger("32010857077C5431123A46B808906756F543423E8D27877578125778AC76", 16), // a
+            new BigInteger("790408F2EEDAF392B012EDEFB3392F30F4327C0CA3F31FC383C422AA8C16", 16)); // b
+    
+        ECDomainParameters params = new ECDomainParameters(
+            curve,
+            curve.decodePoint(Hex.decode("0457927098FA932E7C0A96D3FD5B706EF7E5F5C156E16B7E7C86038552E91D61D8EE5077C33FECF6F1A16B268DE469C3C7744EA9A971649FC7A9616305")), // G
+            new BigInteger("220855883097298041197912187592864814557886993776713230936715041207411783"), // n
+            BigInteger.valueOf(4)); // h
+    
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("145642755521911534651321230007534120304391871461646461466464667494947990"), // d
+            params);
+    
+        ECDSASigner ecdsa = new ECDSASigner();
+        ParametersWithRandom param = new ParametersWithRandom(priKey, k);
+    
+        ecdsa.init(true, param);
+    
+        byte[] message = new BigInteger("968236873715988614170569073515315707566766479517").toByteArray();
+        BigInteger[] sig = ecdsa.generateSignature(message);
+    
+        if (!r.equals(sig[0]))
+        {
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
+    
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+    
+        // Verify the signature
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            curve.decodePoint(Hex.decode("045894609CCECF9A92533F630DE713A958E96C97CCB8F5ABB5A688A238DEED6DC2D9D0C94EBFB7D526BA6A61764175B99CB6011E2047F9F067293F57F5")), // Q
+            params);
+
+        ecdsa.init(false, pubKey);
+        if (!ecdsa.verifySignature(message, sig[0], sig[1]))
+        {
+            fail("signature fails");
+        }
+    }
+
     /**
      * key generation test
      */
@@ -303,11 +445,13 @@ public class ECTest
 
     public void performTest()
     {
-        decodeTest();
-        testECDSA192bitPrime();
-        testECDSA239bitPrime();
-        testECDSAKeyGenTest();
-        testECBasicAgreementTest();
+//        decodeTest();
+//        testECDSA192bitPrime();
+//        testECDSA239bitPrime();
+//        testECDSA191bitBinary();
+        testECDSA239bitBinary();
+//        testECDSAKeyGenTest();
+//        testECBasicAgreementTest();
     }
 
 
