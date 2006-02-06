@@ -106,9 +106,10 @@ public class X9FieldElement
         }
         else
         {
-            ECFieldElement.F2m element = (F2m)f;
-            
-            return new DEROctetString(mToByteArray(element.getM()));
+            int byteCount = (((ECFieldElement.F2m)f).getM() % 8) + 1;
+            byte[] paddedBigInteger = converter.integerToBytes(f.toBigInteger(), byteCount);
+
+            return new DEROctetString(paddedBigInteger);
         }
     }
 }
