@@ -301,7 +301,7 @@ public class ECDSA5Test
         throws Exception
     {
         decodeTest();
-        //testECDSA239bitPrime();
+        testECDSA239bitPrime();
         testECDSA239bitBinary();
         testGeneration();
     }
