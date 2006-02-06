@@ -3,8 +3,15 @@ package org.bouncycastle.jce.provider.test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.*;
-
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
+import java.security.spec.ECFieldF2m;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
@@ -17,7 +24,6 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -145,6 +151,85 @@ public class ECDSA5Test
         }
     }
 
+    /**
+     * X9.62 - 1998,<br>
+     * J.2.1, Page 100, ECDSA over the field F2m<br>
+     * an example with 191 bit binary field
+     */
+    private void testECDSA239bitBinary()
+        throws Exception
+    {
+        BigInteger r = new BigInteger("21596333210419611985018340039034612628818151486841789642455876922391552");
+        BigInteger s = new BigInteger("197030374000731686738334997654997227052849804072198819102649413465737174");
+    
+        SecureRandom    k = new SecureRandom()
+        {
+            public void nextBytes(byte[] bytes)
+            {
+                byte[] vals = new BigInteger("171278725565216523967285789236956265265265235675811949404040041670216363").toByteArray();
+
+                System.arraycopy(vals, vals.length-bytes.length, bytes, 0, bytes.length);
+            }
+        };
+
+        EllipticCurve curve = new EllipticCurve(
+            new ECFieldF2m(239, // m
+                           new int[] { 36 }), // k
+            new BigInteger("32010857077C5431123A46B808906756F543423E8D27877578125778AC76", 16), // a
+            new BigInteger("790408F2EEDAF392B012EDEFB3392F30F4327C0CA3F31FC383C422AA8C16", 16)); // b
+    
+        ECParameterSpec params = new ECParameterSpec(
+            curve,
+            ECPointUtil.decodePoint(curve, Hex.decode("0457927098FA932E7C0A96D3FD5B706EF7E5F5C156E16B7E7C86038552E91D61D8EE5077C33FECF6F1A16B268DE469C3C7744EA9A971649FC7A9616305")), // G
+            new BigInteger("220855883097298041197912187592864814557886993776713230936715041207411783"), // n
+            4); // h
+    
+        ECPrivateKeySpec priKeySpec = new ECPrivateKeySpec(
+            new BigInteger("145642755521911534651321230007534120304391871461646461466464667494947990"), // d
+            params);
+        
+        ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(
+            ECPointUtil.decodePoint(curve, Hex.decode("045894609CCECF9A92533F630DE713A958E96C97CCB8F5ABB5A688A238DEED6DC2D9D0C94EBFB7D526BA6A61764175B99CB6011E2047F9F067293F57F5")), // Q
+            params);
+    
+        Signature   sgr = Signature.getInstance("ECDSA", "BC");
+        KeyFactory  f = KeyFactory.getInstance("ECDSA", "BC");
+        PrivateKey  sKey = f.generatePrivate(priKeySpec);
+        PublicKey   vKey = f.generatePublic(pubKeySpec);
+        byte[]      message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
+       
+        sgr.initSign(sKey, k);
+
+        sgr.update(message);
+        
+        byte[]  sigBytes = sgr.sign();
+
+        sgr.initVerify(vKey);
+
+        sgr.update(message);
+
+        if (!sgr.verify(sigBytes))
+        {
+            fail("239 Bit EC verification failed");
+        }
+
+        BigInteger[]  sig = derDecode(sigBytes);
+
+        if (!r.equals(sig[0]))
+        {
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
+
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+    }
+    
     private void testGeneration()
         throws Exception
     {
@@ -216,7 +301,8 @@ public class ECDSA5Test
         throws Exception
     {
         decodeTest();
-        testECDSA239bitPrime();
+        //testECDSA239bitPrime();
+        testECDSA239bitBinary();
         testGeneration();
     }
 
