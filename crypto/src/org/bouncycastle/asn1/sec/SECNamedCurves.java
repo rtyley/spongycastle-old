@@ -175,6 +175,94 @@ public class SECNamedCurves
             sect163r1Seed);
 
     /*
+     * sect233r1 (NIST B-233)
+     */
+    // m = 233, k1 = 74, k2 = 0, k3 = 0
+    static final int sect233r1m = 233;
+    static final int sect233r1k1 = 74;
+    static final int sect233r1k2 = 0;
+    static final int sect233r1k3 = 0;
+
+    // a = 1
+    static final BigInteger sect233r1a = BigInteger.ONE; 
+
+    // b = 066647ede6c332c7f8c0923bb58213b333b20e9ce4281fe115f7d8f90ad
+    static final BigInteger sect233r1b = new BigInteger("066647ede6c332c7f8c0923bb58213b333b20e9ce4281fe115f7d8f90ad", 16); 
+    
+    static final ECCurve sect233r1Curve = new ECCurve.F2m(sect233r1m, sect233r1k1, sect233r1k2, sect233r1k3, sect233r1a, sect233r1b);
+
+    // x = 0fac9dfcbac8313bb2139f1bb755fef65bc391f8b36f8f8eb7371fd558b
+    static final ECFieldElement sect233r1x = new ECFieldElement.F2m(
+        sect233r1m, sect233r1k1, sect233r1k2, sect233r1k3,
+        new BigInteger("0fac9dfcbac8313bb2139f1bb755fef65bc391f8b36f8f8eb7371fd558b", 16));
+
+    // y = 1006a08a41903350678e58528bebf8a0beff867a7ca36716f7e01f81052
+    static final ECFieldElement sect233r1y = new ECFieldElement.F2m(
+        sect233r1m, sect233r1k1, sect233r1k2, sect233r1k3,
+        new BigInteger("1006a08a41903350678e58528bebf8a0beff867a7ca36716f7e01f81052", 16));
+
+    static final ECPoint sect233r1BasePoint = new ECPoint.F2m(
+            sect233r1Curve, sect233r1x, sect233r1y);
+
+    static final BigInteger sect233r1n = new BigInteger("6901746346790563787434755862277025555839812737345013555379383634485463");
+
+    static final BigInteger sect233r1h = new BigInteger("2");
+
+    static final byte[] sect233r1Seed = null;
+    
+    static final X9ECParameters sect233r1 = new X9ECParameters(
+            sect233r1Curve,
+            sect233r1BasePoint,
+            sect233r1n,
+            sect233r1h,
+            sect233r1Seed);
+
+
+    /*
+     * sect283r1 (NIST B-283)
+     */
+    // m = 283, k1 = 5, k2 = 7, k3 = 12
+    static final int sect283r1m = 283;
+    static final int sect283r1k1 = 5;
+    static final int sect283r1k2 = 7;
+    static final int sect283r1k3 = 12;
+
+    // a = 1
+    static final BigInteger sect283r1a = BigInteger.ONE; 
+
+    // b = 27b680ac8b8596da5a4af8a19a0303fca97fd7645309fa2a581485af6263e313b79a2f5
+    static final BigInteger sect283r1b = new BigInteger("27b680ac8b8596da5a4af8a19a0303fca97fd7645309fa2a581485af6263e313b79a2f5", 16); 
+    
+    static final ECCurve sect283r1Curve = new ECCurve.F2m(sect283r1m, sect283r1k1, sect283r1k2, sect283r1k3, sect283r1a, sect283r1b);
+
+    // x = 5f939258db7dd90e1934f8c70b0dfec2eed25b8557eac9c80e2e198f8cdbecd86b12053
+    static final ECFieldElement sect283r1x = new ECFieldElement.F2m(
+        sect283r1m, sect283r1k1, sect283r1k2, sect283r1k3,
+        new BigInteger("5f939258db7dd90e1934f8c70b0dfec2eed25b8557eac9c80e2e198f8cdbecd86b12053", 16));
+
+    // y = 3676854fe24141cb98fe6d4b20d02b4516ff702350eddb0826779c813f0df45be8112f4
+    static final ECFieldElement sect283r1y = new ECFieldElement.F2m(
+        sect283r1m, sect283r1k1, sect283r1k2, sect283r1k3,
+        new BigInteger("3676854fe24141cb98fe6d4b20d02b4516ff702350eddb0826779c813f0df45be8112f4", 16));
+
+    static final ECPoint sect283r1BasePoint = new ECPoint.F2m(
+            sect283r1Curve, sect283r1x, sect283r1y);
+
+    static final BigInteger sect283r1n = new BigInteger("7770675568902916283677847627294075626569625924376904889109196526770044277787378692871");
+
+    static final BigInteger sect283r1h = new BigInteger("2");
+
+    static final byte[] sect283r1Seed = null;
+    
+    static final X9ECParameters sect283r1 = new X9ECParameters(
+            sect283r1Curve,
+            sect283r1BasePoint,
+            sect283r1n,
+            sect283r1h,
+            sect283r1Seed);
+
+
+    /*
      * sect409r1 (NIST - B-409)
      */
     // m = 409, k1 = 87, k2 = 0, k3 = 0
@@ -216,26 +304,80 @@ public class SECNamedCurves
             sect409r1n,
             sect409r1h,
             sect409r1Seed);
+
+
+    /*
+     * sect571r1 (NIST - B-571)
+     */
+    // m = 571, k1 = 2, k2 = 5, k3 = 10
+    static final int sect571r1m = 571;
+    static final int sect571r1k1 = 2;
+    static final int sect571r1k2 = 5;
+    static final int sect571r1k3 = 10;
+
+    // a = 1
+    static final BigInteger sect571r1a = BigInteger.ONE; 
+
+    // b = 2f40e7e2221f295de297117b7f3d62f5c6a97ffcb8ceff1cd6ba8ce4a9a18ad84ffabbd8efa59332be7ad6756a66e294afd185a78ff12aa520e4de739baca0c7ffeff7f2955727a
+    static final BigInteger sect571r1b = new BigInteger("2f40e7e2221f295de297117b7f3d62f5c6a97ffcb8ceff1cd6ba8ce4a9a18ad84ffabbd8efa59332be7ad6756a66e294afd185a78ff12aa520e4de739baca0c7ffeff7f2955727a", 16); 
+
+    static final ECCurve sect571r1Curve = new ECCurve.F2m(sect571r1m, sect571r1k1, sect571r1k2, sect571r1k3, sect571r1a, sect571r1b);
+
+    // x = 303001d34b856296c16c0d40d3cd7750a93d1d2955fa80aa5f40fc8db7b2abdbde53950f4c0d293cdd711a35b67fb1499ae60038614f1394abfa3b4c850d927e1e7769c8eec2d19
+    static final ECFieldElement sect571r1x = new ECFieldElement.F2m(
+            sect571r1m, sect571r1k1, sect571r1k2, sect571r1k3,
+        new BigInteger("303001d34b856296c16c0d40d3cd7750a93d1d2955fa80aa5f40fc8db7b2abdbde53950f4c0d293cdd711a35b67fb1499ae60038614f1394abfa3b4c850d927e1e7769c8eec2d19", 16));
+
+    // y = 37bf27342da639b6dccfffeb73d69d78c6c27a6009cbbca1980f8533921e8a684423e43bab08a576291af8f461bb2a8b3531d2f0485c19b16e2f1516e23dd3c1a4827af1b8ac15b
+    static final ECFieldElement sect571r1y = new ECFieldElement.F2m(
+            sect571r1m, sect571r1k1, sect571r1k2, sect571r1k3,
+        new BigInteger("37bf27342da639b6dccfffeb73d69d78c6c27a6009cbbca1980f8533921e8a684423e43bab08a576291af8f461bb2a8b3531d2f0485c19b16e2f1516e23dd3c1a4827af1b8ac15b", 16));
+
+    static final ECPoint sect571r1BasePoint = new ECPoint.F2m(
+            sect571r1Curve, sect571r1x, sect571r1y);
+
+    static final BigInteger sect571r1n = new BigInteger("3864537523017258344695351890931987344298927329706434998657235251451519142289560424536143999389415773083133881121926944486246872462816813070234528288303332411393191105285703");
+
+    static final BigInteger sect571r1h = new BigInteger("2");
+
+    static final byte[] sect571r1Seed = null;
     
+    static final X9ECParameters sect571r1 = new X9ECParameters(
+            sect571r1Curve,
+            sect571r1BasePoint,
+            sect571r1n,
+            sect571r1h,
+            sect571r1Seed);
+
+
     static final Hashtable objIds = new Hashtable();
     static final Hashtable curves = new Hashtable();
     static final Hashtable names = new Hashtable();
 
     static
     {
+        objIds.put("sect571r1", SECObjectIdentifiers.sect571r1);
         objIds.put("sect409r1", SECObjectIdentifiers.sect409r1);       
+        objIds.put("sect283r1", SECObjectIdentifiers.sect283r1);
+        objIds.put("sect233r1", SECObjectIdentifiers.sect233r1);
         objIds.put("sect163r1", SECObjectIdentifiers.sect163r1);       
         objIds.put("secp521r1", SECObjectIdentifiers.secp521r1);       
         objIds.put("secp256r1", SECObjectIdentifiers.secp256r1);   
         objIds.put("secp224r1", SECObjectIdentifiers.secp224r1); 
 
+        names.put(SECObjectIdentifiers.sect571r1, "sect571r1");
         names.put(SECObjectIdentifiers.sect409r1, "sect409r1");       
+        names.put(SECObjectIdentifiers.sect283r1, "sect283r1");
+        names.put(SECObjectIdentifiers.sect233r1, "sect233r1");
         names.put(SECObjectIdentifiers.sect163r1, "sect163r1");       
         names.put(SECObjectIdentifiers.secp521r1, "secp521r1");       
         names.put(SECObjectIdentifiers.secp256r1, "secp256r1"); 
         names.put(SECObjectIdentifiers.secp224r1, "secp224r1");
 
+        curves.put(SECObjectIdentifiers.sect571r1, sect571r1);
         curves.put(SECObjectIdentifiers.sect409r1, sect409r1);       
+        curves.put(SECObjectIdentifiers.sect283r1, sect283r1);
+        curves.put(SECObjectIdentifiers.sect233r1, sect233r1);
         curves.put(SECObjectIdentifiers.sect163r1, sect163r1);       
         curves.put(SECObjectIdentifiers.secp521r1, secp521r1); 
         curves.put(SECObjectIdentifiers.secp256r1, secp256r1);
