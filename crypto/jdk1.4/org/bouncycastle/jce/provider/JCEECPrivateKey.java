@@ -29,6 +29,8 @@ import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECPoint;
 
 public class JCEECPrivateKey
     implements ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder
@@ -163,13 +165,29 @@ public class JCEECPrivateKey
         else
         {
             ECParameterSpec         p = (ECParameterSpec)ecSpec;
+            ECCurve curve = p.getG().getCurve();
+            ECPoint generator;
             
-            X9ECParameters          ecP = new X9ECParameters(
-                                            p.getCurve(),
-                                            new org.bouncycastle.math.ec.ECPoint.Fp(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression),
-                                            p.getN(),
-                                            p.getH(),
-                                            p.getSeed());
+            if (curve instanceof ECCurve.Fp) 
+            {
+                generator = new ECPoint.Fp(curve, p.getG().getX(), p.getG().getY(), withCompression);
+            } 
+            else if (curve instanceof ECCurve.F2m) 
+            {
+                generator = new ECPoint.F2m(curve, p.getG().getX(), p.getG().getY());
+            }
+            else 
+            {
+                throw new UnsupportedOperationException("Subclass of ECPoint " + curve.getClass().toString() + "not supported");
+            }
+            
+            X9ECParameters ecP = new X9ECParameters(
+                  p.getCurve(),
+                  generator,
+                  p.getN(),
+                  p.getH(),
+                  p.getSeed());
+
             params = new X962Parameters(ecP);
         }
 
