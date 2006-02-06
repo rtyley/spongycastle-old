@@ -445,13 +445,13 @@ public class ECTest
 
     public void performTest()
     {
-//        decodeTest();
-//        testECDSA192bitPrime();
-//        testECDSA239bitPrime();
-//        testECDSA191bitBinary();
+        decodeTest();
+        testECDSA192bitPrime();
+        testECDSA239bitPrime();
+        testECDSA191bitBinary();
         testECDSA239bitBinary();
-//        testECDSAKeyGenTest();
-//        testECBasicAgreementTest();
+        testECDSAKeyGenTest();
+        testECBasicAgreementTest();
     }
 
 
