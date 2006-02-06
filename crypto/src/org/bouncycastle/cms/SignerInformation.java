@@ -12,10 +12,7 @@ import java.security.SignatureException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.util.Hashtable;
-import java.util.Iterator;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Set;
@@ -401,16 +398,7 @@ public class SignerInformation
         
         if (unsignedAttributes != null)
         {
-            Hashtable           ats = unsignedAttributes.toHashtable();
-            Iterator            it = ats.values().iterator();
-            ASN1EncodableVector  v = new ASN1EncodableVector();
-
-            while (it.hasNext())
-            {
-                v.add(Attribute.getInstance(it.next()));
-            }
-
-            unsignedAttr = new DERSet(v);
+            unsignedAttr = new DERSet(unsignedAttributes.toASN1EncodableVector());
         }
         
         return new SignerInformation(
