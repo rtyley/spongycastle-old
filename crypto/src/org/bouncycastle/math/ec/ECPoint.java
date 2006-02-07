@@ -225,21 +225,24 @@ public abstract class ECPoint
         {
             super(curve, x, y);
 
-            if (x != null && !(x instanceof ECFieldElement.F2m))
+            if (x != null && y == null)
             {
                 throw new IllegalArgumentException("wrong field element passed");
             }
             
-            if (y != null && !(y instanceof ECFieldElement.F2m))
+            if (x == null && y != null)
             {
                 throw new IllegalArgumentException("wrong field element passed");
             }
-            
-            // Check if x and y are elements of the same field
-            ECFieldElement.F2m.checkFieldElements(this.x, this.y);
 
-            // Check if x and a are elements of the same field
-            ECFieldElement.F2m.checkFieldElements(this.x, this.curve.getA());
+            if (x != null)
+            {
+                // Check if x and y are elements of the same field
+                ECFieldElement.F2m.checkFieldElements(this.x, this.y);
+    
+                // Check if x and a are elements of the same field
+                ECFieldElement.F2m.checkFieldElements(this.x, this.curve.getA());
+            }
         }
 
         /**
