@@ -66,7 +66,7 @@ public class X9FieldElement
         }
         else
         {
-            int byteCount = (((ECFieldElement.F2m)f).getM() % 8) + 1;
+            int byteCount = (((ECFieldElement.F2m)f).getM() + 7) / 8;
             byte[] paddedBigInteger = converter.integerToBytes(f.toBigInteger(), byteCount);
 
             return new DEROctetString(paddedBigInteger);
