@@ -65,18 +65,8 @@ public class JCEECPrivateKey
         this.d = spec.getD();
         
         ECCurve curve = spec.getParams().getCurve();
-        EllipticCurve ellipticCurve;
-
-        if (curve instanceof ECCurve.Fp)
-        {
-            ellipticCurve = new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), spec.getParams().getSeed());
-        }
-        else
-        {
-            ECCurve.F2m curveF2m = (ECCurve.F2m)curve;
-            int ks[] = {curveF2m.getK1(), curveF2m.getK2(), curveF2m.getK3()};
-            ellipticCurve = new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), spec.getParams().getSeed());
-        }
+        EllipticCurve ellipticCurve = EC5Util.convertCurve(curve, spec.getParams().getSeed());
+        
         this.ecSpec = new ECParameterSpec(
                                 ellipticCurve,
                                 new ECPoint(
@@ -85,7 +75,8 @@ public class JCEECPrivateKey
                                 spec.getParams().getN(),
                                 spec.getParams().getH().intValue());
     }
-    
+
+
     JCEECPrivateKey(
         String              algorithm,
         ECPrivateKeySpec    spec)
@@ -107,19 +98,7 @@ public class JCEECPrivateKey
 
         if (spec == null)
         {
-            ECCurve curve = dp.getCurve();
-            EllipticCurve ellipticCurve;
-
-            if (curve instanceof ECCurve.Fp)
-            {
-                ellipticCurve = new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), dp.getSeed());
-            }
-            else
-            {
-                ECCurve.F2m curveF2m = (ECCurve.F2m)curve;
-                int ks[] = {curveF2m.getK1(), curveF2m.getK2(), curveF2m.getK3()};
-                ellipticCurve = new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), dp.getSeed());
-            }
+            EllipticCurve ellipticCurve = EC5Util.convertCurve(dp.getCurve(), dp.getSeed());
 
             this.ecSpec = new ECParameterSpec(
                             ellipticCurve,
@@ -147,19 +126,7 @@ public class JCEECPrivateKey
 
         if (spec == null)
         {
-            ECCurve curve = dp.getCurve();
-            EllipticCurve ellipticCurve;
-
-            if (curve instanceof ECCurve.Fp)
-            {
-                ellipticCurve = new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), dp.getSeed());
-            }
-            else
-            {
-                ECCurve.F2m curveF2m = (ECCurve.F2m)curve;
-                int ks[] = {curveF2m.getK1(), curveF2m.getK2(), curveF2m.getK3()};
-                ellipticCurve = new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), dp.getSeed());
-            }
+            EllipticCurve ellipticCurve = EC5Util.convertCurve(dp.getCurve(), dp.getSeed());
 
             this.ecSpec = new ECParameterSpec(
                             ellipticCurve,
@@ -171,20 +138,8 @@ public class JCEECPrivateKey
         }
         else
         {
-            ECCurve curve = spec.getCurve();
-            EllipticCurve ellipticCurve;
-
-            if (curve instanceof ECCurve.Fp)
-            {
-                ellipticCurve = new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), spec.getSeed());
-            }
-            else
-            {
-                ECCurve.F2m curveF2m = (ECCurve.F2m)curve;
-                int ks[] = {curveF2m.getK1(), curveF2m.getK2(), curveF2m.getK3()};
-                ellipticCurve = new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), spec.getSeed());
-            }
-
+            EllipticCurve ellipticCurve = EC5Util.convertCurve(spec.getCurve(), spec.getSeed());
+            
             this.ecSpec = new ECParameterSpec(
                                 ellipticCurve,
                                 new ECPoint(
@@ -204,20 +159,7 @@ public class JCEECPrivateKey
         {
             DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
             X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
-
-            ECCurve curve = ecP.getCurve();
-            EllipticCurve ellipticCurve;
-
-            if (curve instanceof ECCurve.Fp)
-            {
-                ellipticCurve = new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), ecP.getSeed());
-            }
-            else
-            {
-                ECCurve.F2m curveF2m = (ECCurve.F2m)curve;
-                int ks[] = {curveF2m.getK1(), curveF2m.getK2(), curveF2m.getK3()};
-                ellipticCurve = new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), ecP.getSeed());
-            }
+            EllipticCurve       ellipticCurve = EC5Util.convertCurve(ecP.getCurve(), ecP.getSeed());
 
             ecSpec = new ECNamedCurveSpec(
                     X962NamedCurves.getName(oid),
@@ -230,21 +172,8 @@ public class JCEECPrivateKey
         }
         else
         {
-            X9ECParameters          ecP = new X9ECParameters((ASN1Sequence)params.getParameters());
-            
-            ECCurve curve = ecP.getCurve();
-            EllipticCurve ellipticCurve;
-
-            if (curve instanceof ECCurve.Fp)
-            {
-                ellipticCurve = new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), ecP.getSeed());
-            }
-            else
-            {
-                ECCurve.F2m curveF2m = (ECCurve.F2m)curve;
-                int ks[] = {curveF2m.getK1(), curveF2m.getK2(), curveF2m.getK3()};
-                ellipticCurve = new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), ecP.getSeed());
-            }
+            X9ECParameters      ecP = new X9ECParameters((ASN1Sequence)params.getParameters());
+            EllipticCurve       ellipticCurve = EC5Util.convertCurve(ecP.getCurve(), ecP.getSeed());
 
             this.ecSpec = new ECParameterSpec(
                 ellipticCurve,
