@@ -495,9 +495,9 @@ public abstract class ECFieldElement
         /**
          * @return the representation of the field
          * <code>F<sub>2<sup>m</sup></sub></code>, either of
-         * {@link ECFieldElement.F2m.TPB ECFieldElement.F2m.TPB} (trinomial
+         * {@link ECFieldElement.F2m.TPB} (trinomial
          * basis representation) or
-         * {@link ECFieldElement.F2m.TPB ECFieldElement.F2m.PPB} (pentanomial
+         * {@link ECFieldElement.F2m.PPB} (pentanomial
          * basis representation).
          */
         public int getRepresentation()
