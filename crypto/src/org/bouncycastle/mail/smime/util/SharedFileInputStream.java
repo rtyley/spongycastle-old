@@ -94,6 +94,11 @@ public class SharedFileInputStream extends FilterInputStream
     {
         int count = 0;
         
+        if (len == 0)
+        {
+            return 0;
+        }
+        
         while (count < len)
         {
             int ch = this.read();
@@ -105,6 +110,11 @@ public class SharedFileInputStream extends FilterInputStream
             
             buf[off + count] = (byte)ch;
             count++;
+        }
+        
+        if (count == 0)
+        {
+            return -1;  // EOF
         }
         
         return count;
