@@ -3,7 +3,16 @@ package org.bouncycastle.jce.provider.test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.AlgorithmParameterGenerator;
+import java.security.AlgorithmParameters;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.DSAPublicKey;
 import java.security.spec.DSAParameterSpec;
@@ -19,12 +28,10 @@ import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class DSATest
-    implements Test
+    extends SimpleTest
 {
     SecureRandom    random = new SecureRandom()
     {
@@ -47,180 +54,163 @@ public class DSATest
         }
     };
 
-    private class CompatTest
-        implements  Test
+    public void testCompat()
+        throws Exception
     {
-        public TestResult perform()
+        Signature           s = Signature.getInstance("DSA", "SUN");
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "SUN");
+        byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+        
+        g.initialize(512, new SecureRandom());
+        
+        KeyPair p = g.generateKeyPair();
+        
+        PrivateKey  sKey = p.getPrivate();
+        PublicKey   vKey = p.getPublic();
+        
+        //
+        // sign SUN - verify with BC 
+        //
+        s.initSign(sKey);
+        
+        s.update(data);
+        
+        byte[]  sigBytes = s.sign();
+        
+        s = Signature.getInstance("DSA", "BC");
+        
+        s.initVerify(vKey);
+        
+        s.update(data);
+        
+        if (!s.verify(sigBytes))
         {
-            try
-            {
-                Signature           s = Signature.getInstance("DSA", "SUN");
-                KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "SUN");
-                byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-
-                g.initialize(512, new SecureRandom());
-
-                KeyPair p = g.generateKeyPair();
-
-                PrivateKey  sKey = p.getPrivate();
-                PublicKey   vKey = p.getPublic();
-
-                //
-                // sign SUN - verify with BC 
-                //
-                s.initSign(sKey);
-
-                s.update(data);
-
-                byte[]  sigBytes = s.sign();
-
-                s = Signature.getInstance("DSA", "BC");
-
-                s.initVerify(vKey);
-
-                s.update(data);
-
-                if (!s.verify(sigBytes))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": SUN -> BC verification failed");
-                }
-
-                //
-                // sign BC - verify with SUN
-                //
-
-                s.initSign(sKey);
-
-                s.update(data);
-
-                sigBytes = s.sign();
-
-                s = Signature.getInstance("DSA", "SUN");
-
-                s.initVerify(vKey);
-
-                s.update(data);
-
-                if (!s.verify(sigBytes))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": BC -> SUN verification failed");
-                }
-
-                //
-                // key encoding test - BC decoding Sun keys
-                //
-                KeyFactory          f = KeyFactory.getInstance("DSA", "BC");
-                X509EncodedKeySpec  x509s = new X509EncodedKeySpec(vKey.getEncoded());
-                DSAPublicKey        k1 = (DSAPublicKey)f.generatePublic(x509s);
-
-                if (!k1.getY().equals(((DSAPublicKey)vKey).getY()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": public number not decoded properly");
-                }
-
-                if (!k1.getParams().getG().equals(((DSAPublicKey)vKey).getParams().getG()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": public generator not decoded properly");
-                }
-
-                if (!k1.getParams().getP().equals(((DSAPublicKey)vKey).getParams().getP()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": public p value not decoded properly");
-                }
-
-                if (!k1.getParams().getQ().equals(((DSAPublicKey)vKey).getParams().getQ()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": public q value not decoded properly");
-                }
-                
-                PKCS8EncodedKeySpec  pkcs8 = new PKCS8EncodedKeySpec(sKey.getEncoded());
-                DSAPrivateKey        k2 = (DSAPrivateKey)f.generatePrivate(pkcs8);
-
-                if (!k2.getX().equals(((DSAPrivateKey)sKey).getX()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": private number not decoded properly");
-                }
-
-                if (!k2.getParams().getG().equals(((DSAPrivateKey)sKey).getParams().getG()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": private generator not decoded properly");
-                }
-
-                if (!k2.getParams().getP().equals(((DSAPrivateKey)sKey).getParams().getP()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": private p value not decoded properly");
-                }
-
-                if (!k2.getParams().getQ().equals(((DSAPrivateKey)sKey).getParams().getQ()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": private q value not decoded properly");
-                }
-                
-                //
-                // key decoding test - SUN decoding BC keys
-                // 
-                f = KeyFactory.getInstance("DSA", "SUN");
-                x509s = new X509EncodedKeySpec(k1.getEncoded());
-
-                vKey = (DSAPublicKey)f.generatePublic(x509s);
-
-                if (!k1.getY().equals(((DSAPublicKey)vKey).getY()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": public number not decoded properly");
-                }
-
-                if (!k1.getParams().getG().equals(((DSAPublicKey)vKey).getParams().getG()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": public generator not decoded properly");
-                }
-
-                if (!k1.getParams().getP().equals(((DSAPublicKey)vKey).getParams().getP()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": public p value not decoded properly");
-                }
-
-                if (!k1.getParams().getQ().equals(((DSAPublicKey)vKey).getParams().getQ()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": public q value not decoded properly");
-                }
-
-                pkcs8 = new PKCS8EncodedKeySpec(k2.getEncoded());
-                sKey = (DSAPrivateKey)f.generatePrivate(pkcs8);
-
-                if (!k2.getX().equals(((DSAPrivateKey)sKey).getX()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": private number not decoded properly");
-                }
-
-                if (!k2.getParams().getG().equals(((DSAPrivateKey)sKey).getParams().getG()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": private generator not decoded properly");
-                }
-
-                if (!k2.getParams().getP().equals(((DSAPrivateKey)sKey).getParams().getP()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": private p value not decoded properly");
-                }
-
-                if (!k2.getParams().getQ().equals(((DSAPrivateKey)sKey).getParams().getQ()))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": private q value not decoded properly");
-                }
-                
-                //
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(false, this.getName() + ": exception - " + e.toString());
-            }
-
-            return new SimpleTestResult(true, this.getName() + ": Okay");
+            fail("SUN -> BC verification failed");
         }
-
-        public String getName()
+        
+        //
+        // sign BC - verify with SUN
+        //
+        
+        s.initSign(sKey);
+        
+        s.update(data);
+        
+        sigBytes = s.sign();
+        
+        s = Signature.getInstance("DSA", "SUN");
+        
+        s.initVerify(vKey);
+        
+        s.update(data);
+        
+        if (!s.verify(sigBytes))
         {
-            return "DSA Compatability Test";
+            fail("BC -> SUN verification failed");
         }
+        
+        //
+        // key encoding test - BC decoding Sun keys
+        //
+        KeyFactory          f = KeyFactory.getInstance("DSA", "BC");
+        X509EncodedKeySpec  x509s = new X509EncodedKeySpec(vKey.getEncoded());
+        DSAPublicKey        k1 = (DSAPublicKey)f.generatePublic(x509s);
+        
+        if (!k1.getY().equals(((DSAPublicKey)vKey).getY()))
+        {
+            fail("public number not decoded properly");
+        }
+        
+        if (!k1.getParams().getG().equals(((DSAPublicKey)vKey).getParams().getG()))
+        {
+            fail("public generator not decoded properly");
+        }
+        
+        if (!k1.getParams().getP().equals(((DSAPublicKey)vKey).getParams().getP()))
+        {
+            fail("public p value not decoded properly");
+        }
+        
+        if (!k1.getParams().getQ().equals(((DSAPublicKey)vKey).getParams().getQ()))
+        {
+            fail("public q value not decoded properly");
+        }
+        
+        PKCS8EncodedKeySpec  pkcs8 = new PKCS8EncodedKeySpec(sKey.getEncoded());
+        DSAPrivateKey        k2 = (DSAPrivateKey)f.generatePrivate(pkcs8);
+        
+        if (!k2.getX().equals(((DSAPrivateKey)sKey).getX()))
+        {
+            fail("private number not decoded properly");
+        }
+        
+        if (!k2.getParams().getG().equals(((DSAPrivateKey)sKey).getParams().getG()))
+        {
+            fail("private generator not decoded properly");
+        }
+        
+        if (!k2.getParams().getP().equals(((DSAPrivateKey)sKey).getParams().getP()))
+        {
+            fail("private p value not decoded properly");
+        }
+        
+        if (!k2.getParams().getQ().equals(((DSAPrivateKey)sKey).getParams().getQ()))
+        {
+            fail("private q value not decoded properly");
+        }
+        
+        //
+        // key decoding test - SUN decoding BC keys
+        // 
+        f = KeyFactory.getInstance("DSA", "SUN");
+        x509s = new X509EncodedKeySpec(k1.getEncoded());
+        
+        vKey = (DSAPublicKey)f.generatePublic(x509s);
+        
+        if (!k1.getY().equals(((DSAPublicKey)vKey).getY()))
+        {
+            fail("public number not decoded properly");
+        }
+        
+        if (!k1.getParams().getG().equals(((DSAPublicKey)vKey).getParams().getG()))
+        {
+            fail("public generator not decoded properly");
+        }
+        
+        if (!k1.getParams().getP().equals(((DSAPublicKey)vKey).getParams().getP()))
+        {
+            fail("public p value not decoded properly");
+        }
+        
+        if (!k1.getParams().getQ().equals(((DSAPublicKey)vKey).getParams().getQ()))
+        {
+            fail("public q value not decoded properly");
+        }
+        
+        pkcs8 = new PKCS8EncodedKeySpec(k2.getEncoded());
+        sKey = (DSAPrivateKey)f.generatePrivate(pkcs8);
+        
+        if (!k2.getX().equals(((DSAPrivateKey)sKey).getX()))
+        {
+            fail("private number not decoded properly");
+        }
+        
+        if (!k2.getParams().getG().equals(((DSAPrivateKey)sKey).getParams().getG()))
+        {
+            fail("private generator not decoded properly");
+        }
+        
+        if (!k2.getParams().getP().equals(((DSAPrivateKey)sKey).getParams().getP()))
+        {
+            fail("private p value not decoded properly");
+        }
+        
+        if (!k2.getParams().getQ().equals(((DSAPrivateKey)sKey).getParams().getQ()))
+        {
+            fail("private q value not decoded properly");
+        }
+        
+        //
     }
 
     /**
@@ -228,8 +218,8 @@ public class DSATest
      * J.3.2, Page 155, ECDSA over the field Fp<br>
      * an example with 239 bit prime
      */
-    private class ECDSA239bitPrime
-        implements Test
+    private void testECDSA239bitPrime()
+        throws Exception
     {
         BigInteger r = new BigInteger("308636143175167811492622547300668018854959378758531778147462058306432176");
         BigInteger s = new BigInteger("323813553209797357708078776831250505931891051755007842781978505179448783");
@@ -243,248 +233,317 @@ public class DSATest
                 System.arraycopy(k, k.length-bytes.length, bytes, 0, bytes.length);
             }
         };
-
-        public String getName()
+        
+        ECCurve curve = new ECCurve.Fp(
+                new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
+                new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+                new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+        
+        ECParameterSpec spec = new ECParameterSpec(
+                curve,
+                curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+                new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
+        
+        
+        ECPrivateKeySpec priKey = new ECPrivateKeySpec(
+                new BigInteger("876300101507107567501066130761671078357010671067781776716671676178726717"), // d
+                spec);
+        
+        ECPublicKeySpec pubKey = new ECPublicKeySpec(
+                curve.decodePoint(Hex.decode("025b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c70")), // Q
+                spec);
+        
+        Signature           sgr = Signature.getInstance("ECDSA", "BC");
+        KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
+        PrivateKey          sKey = f.generatePrivate(priKey);
+        PublicKey           vKey = f.generatePublic(pubKey);
+        
+        sgr.initSign(sKey, k);
+        
+        byte[] message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
+        
+        sgr.update(message);
+        
+        byte[]  sigBytes = sgr.sign();
+        
+        sgr.initVerify(vKey);
+        
+        sgr.update(message);
+        
+        if (!sgr.verify(sigBytes))
         {
-            return "ECDSA 239 bit prime";
+            fail("239 Bit EC verification failed");
         }
-
-        public TestResult perform()
+        
+        BigInteger[]  sig = derDecode(sigBytes);
+        
+        if (!r.equals(sig[0]))
         {
-            try
-            {
-                ECCurve curve = new ECCurve.Fp(
-                    new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
-                    new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
-                    new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
-
-                ECParameterSpec spec = new ECParameterSpec(
-                    curve,
-                    curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
-                    new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
-                
-
-                ECPrivateKeySpec priKey = new ECPrivateKeySpec(
-                    new BigInteger("876300101507107567501066130761671078357010671067781776716671676178726717"), // d
-                    spec);
-
-                ECPublicKeySpec pubKey = new ECPublicKeySpec(
-                    curve.decodePoint(Hex.decode("025b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c70")), // Q
-                    spec);
-
-                Signature           sgr = Signature.getInstance("ECDSA", "BC");
-                KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
-                PrivateKey          sKey = f.generatePrivate(priKey);
-                PublicKey           vKey = f.generatePublic(pubKey);
-
-                sgr.initSign(sKey, k);
-
-                byte[] message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
-
-                sgr.update(message);
-
-                byte[]  sigBytes = sgr.sign();
-
-                sgr.initVerify(vKey);
-
-                sgr.update(message);
-
-                if (!sgr.verify(sigBytes))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": 239 Bit EC verification failed");
-                }
-
-                BigInteger[]  sig = derDecode(sigBytes);
-
-                if (!r.equals(sig[0]))
-                {
-                    return new SimpleTestResult(false, getName()
-                        + ": r component wrong." + System.getProperty("line.separator")
-                        + " expecting: " + r + System.getProperty("line.separator")
-                        + " got      : " + sig[0]);
-                }
-
-                if (!s.equals(sig[1]))
-                {
-                    return new SimpleTestResult(false, getName()
-                        + ": s component wrong." + System.getProperty("line.separator")
-                        + " expecting: " + s + System.getProperty("line.separator")
-                        + " got      : " + sig[1]);
-                }
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(false, this.getName() + ": exception - " + e.toString());
-            }
-
-            return new SimpleTestResult(true, this.getName() + ": Okay");
+            fail("r component wrong." + System.getProperty("line.separator")
+                    + " expecting: " + r + System.getProperty("line.separator")
+                    + " got      : " + sig[0]);
+        }
+        
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                    + " expecting: " + s + System.getProperty("line.separator")
+                    + " got      : " + sig[1]);
         }
     }
 
-    private class GenerationTest
-        implements Test
+    /**
+     * X9.62 - 1998,<br>
+     * J.2.1, Page 100, ECDSA over the field F2m<br>
+     * an example with 191 bit binary field
+     */
+    private void testECDSA239bitBinary()
+        throws Exception
     {
-        public String getName()
+        BigInteger r = new BigInteger("21596333210419611985018340039034612628818151486841789642455876922391552");
+        BigInteger s = new BigInteger("197030374000731686738334997654997227052849804072198819102649413465737174");
+    
+        SecureRandom    k = new SecureRandom()
         {
-            return "EC/ECDSA Generation";
+            public void nextBytes(byte[] bytes)
+            {
+                byte[] vals = new BigInteger("171278725565216523967285789236956265265265235675811949404040041670216363").toByteArray();
+
+                System.arraycopy(vals, vals.length-bytes.length, bytes, 0, bytes.length);
+            }
+        };
+
+        ECCurve curve = new ECCurve.F2m(
+            239, // m
+            36, // k
+            new BigInteger("32010857077C5431123A46B808906756F543423E8D27877578125778AC76", 16), // a
+            new BigInteger("790408F2EEDAF392B012EDEFB3392F30F4327C0CA3F31FC383C422AA8C16", 16)); // b
+    
+        ECParameterSpec params = new ECParameterSpec(
+            curve,
+            curve.decodePoint(Hex.decode("0457927098FA932E7C0A96D3FD5B706EF7E5F5C156E16B7E7C86038552E91D61D8EE5077C33FECF6F1A16B268DE469C3C7744EA9A971649FC7A9616305")), // G
+            new BigInteger("220855883097298041197912187592864814557886993776713230936715041207411783"), // n
+            BigInteger.valueOf(4)); // h
+    
+        ECPrivateKeySpec priKeySpec = new ECPrivateKeySpec(
+            new BigInteger("145642755521911534651321230007534120304391871461646461466464667494947990"), // d
+            params);
+        
+        ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(
+            curve.decodePoint(Hex.decode("045894609CCECF9A92533F630DE713A958E96C97CCB8F5ABB5A688A238DEED6DC2D9D0C94EBFB7D526BA6A61764175B99CB6011E2047F9F067293F57F5")), // Q
+            params);
+    
+        Signature   sgr = Signature.getInstance("ECDSA", "BC");
+        KeyFactory  f = KeyFactory.getInstance("ECDSA", "BC");
+        PrivateKey  sKey = f.generatePrivate(priKeySpec);
+        PublicKey   vKey = f.generatePublic(pubKeySpec);
+        byte[]      message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
+       
+        sgr.initSign(sKey, k);
+
+        sgr.update(message);
+        
+        byte[]  sigBytes = sgr.sign();
+
+        sgr.initVerify(vKey);
+
+        sgr.update(message);
+
+        if (!sgr.verify(sigBytes))
+        {
+            fail("239 Bit EC verification failed");
         }
 
-        public TestResult perform()
+        BigInteger[]  sig = derDecode(sigBytes);
+
+        if (!r.equals(sig[0]))
         {
-            try
-            {
-                Signature           s = Signature.getInstance("DSA", "BC");
-                KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "BC");
-                byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
 
-                g.initialize(512, new SecureRandom());
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+    }
+    
+    private void testGeneration()
+        throws Exception
+    {
+        Signature           s = Signature.getInstance("DSA", "BC");
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "BC");
+        byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
 
-                KeyPair p = g.generateKeyPair();
+        g.initialize(512, new SecureRandom());
 
-                PrivateKey  sKey = p.getPrivate();
-                PublicKey   vKey = p.getPublic();
+        KeyPair p = g.generateKeyPair();
 
-                s.initSign(sKey);
+        PrivateKey  sKey = p.getPrivate();
+        PublicKey   vKey = p.getPublic();
 
-                s.update(data);
+        s.initSign(sKey);
 
-                byte[]  sigBytes = s.sign();
+        s.update(data);
 
-                s = Signature.getInstance("DSA", "BC");
+        byte[]  sigBytes = s.sign();
 
-                s.initVerify(vKey);
+        s = Signature.getInstance("DSA", "BC");
 
-                s.update(data);
+        s.initVerify(vKey);
 
-                if (!s.verify(sigBytes))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": DSA verification failed");
-                }
+        s.update(data);
 
-                //
-                // ECDSA generation test
-                //
-                s = Signature.getInstance("ECDSA", "BC");
-                g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        if (!s.verify(sigBytes))
+        {
+            fail("DSA verification failed");
+        }
 
-                ECCurve curve = new ECCurve.Fp(
-                    new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
-                    new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
-                    new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+        //
+        // ECDSA Fp generation test
+        //
+        s = Signature.getInstance("ECDSA", "BC");
+        g = KeyPairGenerator.getInstance("ECDSA", "BC");
 
-                ECParameterSpec ecSpec = new ECParameterSpec(
-                    curve,
-                    curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
-                    new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
+        ECCurve curve = new ECCurve.Fp(
+            new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
+            new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+            new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
 
-                g.initialize(ecSpec, new SecureRandom());
+        ECParameterSpec ecSpec = new ECParameterSpec(
+            curve,
+            curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+            new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
 
-                p = g.generateKeyPair();
+        g.initialize(ecSpec, new SecureRandom());
 
-                sKey = p.getPrivate();
-                vKey = p.getPublic();
+        p = g.generateKeyPair();
 
-                s.initSign(sKey);
+        sKey = p.getPrivate();
+        vKey = p.getPublic();
 
-                s.update(data);
+        s.initSign(sKey);
 
-                sigBytes = s.sign();
+        s.update(data);
 
-                s = Signature.getInstance("ECDSA", "BC");
+        sigBytes = s.sign();
 
-                s.initVerify(vKey);
+        s = Signature.getInstance("ECDSA", "BC");
 
-                s.update(data);
+        s.initVerify(vKey);
 
-                if (!s.verify(sigBytes))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": ECDSA verification failed");
-                }
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(false, this.getName() + ": exception - " + e.toString());
-            }
+        s.update(data);
 
-            return new SimpleTestResult(true, this.getName() + ": Okay");
+        if (!s.verify(sigBytes))
+        {
+            fail("ECDSA verification failed");
+        }
+        
+        //
+        // ECDSA F2m generation test
+        //
+        s = Signature.getInstance("ECDSA", "BC");
+        g = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        curve = new ECCurve.F2m(
+                239, // m
+                36, // k
+                new BigInteger("32010857077C5431123A46B808906756F543423E8D27877578125778AC76", 16), // a
+                new BigInteger("790408F2EEDAF392B012EDEFB3392F30F4327C0CA3F31FC383C422AA8C16", 16)); // b
+        
+        ecSpec = new ECParameterSpec(
+            curve,
+            curve.decodePoint(Hex.decode("0457927098FA932E7C0A96D3FD5B706EF7E5F5C156E16B7E7C86038552E91D61D8EE5077C33FECF6F1A16B268DE469C3C7744EA9A971649FC7A9616305")), // G
+            new BigInteger("220855883097298041197912187592864814557886993776713230936715041207411783"), // n
+            BigInteger.valueOf(4)); // h
+        
+        g.initialize(ecSpec, new SecureRandom());
+
+        p = g.generateKeyPair();
+
+        sKey = p.getPrivate();
+        vKey = p.getPublic();
+
+        s.initSign(sKey);
+
+        s.update(data);
+
+        sigBytes = s.sign();
+
+        s = Signature.getInstance("ECDSA", "BC");
+
+        s.initVerify(vKey);
+
+        s.update(data);
+
+        if (!s.verify(sigBytes))
+        {
+            fail("ECDSA verification failed");
         }
     }
 
-    private class ParametersTest
-        implements Test
+    private void testParameters()
+        throws Exception
     {
-        public String getName()
+        AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("DSA", "BC");
+        a.init(512, random);
+        AlgorithmParameters params = a.generateParameters();
+        
+        byte[] encodeParams = params.getEncoded();
+        
+        AlgorithmParameters a2 = AlgorithmParameters.getInstance("DSA", "BC");
+        a2.init(encodeParams);
+        
+        // a and a2 should be equivalent!
+        byte[] encodeParams_2 = a2.getEncoded();
+        
+        if (!areEqual(encodeParams, encodeParams_2))
         {
-            return "DSA Parameters";
+            fail("encode/decode parameters failed");
         }
-
-        public TestResult perform()
+        
+        DSAParameterSpec dsaP = (DSAParameterSpec)params.getParameterSpec(DSAParameterSpec.class);
+        
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "BC");
+        g.initialize(dsaP, new SecureRandom());
+        KeyPair p = g.generateKeyPair();
+        
+        PrivateKey  sKey = p.getPrivate();
+        PublicKey   vKey = p.getPublic();
+        
+        Signature           s = Signature.getInstance("DSA", "BC");
+        byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+        
+        s.initSign(sKey);
+        
+        s.update(data);
+        
+        byte[]  sigBytes = s.sign();
+        
+        s = Signature.getInstance("DSA", "BC");
+        
+        s.initVerify(vKey);
+        
+        s.update(data);
+        
+        if (!s.verify(sigBytes))
         {
-            try
-            {
-                AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("DSA", "BC");
-                a.init(512, random);
-                AlgorithmParameters params = a.generateParameters();
-
-                byte[] encodeParams = params.getEncoded();
-
-                AlgorithmParameters a2 = AlgorithmParameters.getInstance("DSA", "BC");
-                a2.init(encodeParams);
-
-                // a and a2 should be equivalent!
-                byte[] encodeParams_2 = a2.getEncoded();
-
-                if (!arrayEquals(encodeParams, encodeParams_2))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": encode/decode parameters failed");
-                }
-
-                DSAParameterSpec dsaP = (DSAParameterSpec)params.getParameterSpec(DSAParameterSpec.class);
-
-                KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "BC");
-                g.initialize(dsaP, new SecureRandom());
-                KeyPair p = g.generateKeyPair();
-
-                PrivateKey  sKey = p.getPrivate();
-                PublicKey   vKey = p.getPublic();
-
-                Signature           s = Signature.getInstance("DSA", "BC");
-                byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-
-                s.initSign(sKey);
-
-                s.update(data);
-
-                byte[]  sigBytes = s.sign();
-
-                s = Signature.getInstance("DSA", "BC");
-
-                s.initVerify(vKey);
-
-                s.update(data);
-
-                if (!s.verify(sigBytes))
-                {
-                    return new SimpleTestResult(false, this.getName() + ": DSA verification failed");
-                }
-
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(false, this.getName() + ": exception - " + e.toString());
-            }
-
-            return new SimpleTestResult(true, this.getName() + ": Okay");
+            fail("DSA verification failed");
         }
     }
 
-    Test tests[] =
+    public void performTest()
+        throws Exception
     {
-        new CompatTest(),
-        new ECDSA239bitPrime(),
-        new GenerationTest(),
-        new ParametersTest()
-    };
+        testCompat();
+        testECDSA239bitPrime();
+        testECDSA239bitBinary();
+        testGeneration();
+        testParameters();
+    }
 
     protected BigInteger[] derDecode(
         byte[]  encoding)
@@ -507,49 +566,11 @@ public class DSATest
         return "DSA/ECDSA";
     }
 
-    public TestResult perform()
-    {
-        for (int i = 0; i != tests.length; i++)
-        {
-            TestResult  result = tests[i].perform();
-
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
-        }
-
-        return new SimpleTestResult(true, "DSA/ECDSA: Okay");
-    }
-
-    private boolean arrayEquals(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public static void main(
         String[]    args)
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new DSATest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new DSATest());
     }
 }
