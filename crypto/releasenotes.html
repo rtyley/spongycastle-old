@@ -27,12 +27,16 @@ Release 1.32
 <ul>
 <li>Further work has been done on RFC 3280 compliance.
 <li>The ASN1Sequence constructor for SemanticsInformation would sometimes through a ClassCastException on reconstruction an object from a byte stream. This has been fixed.
+<li>The SharedInputStream.read(buf, 0, len) method would return 0 at EOF, rather than -1. This has been fixed.
+<li>X9FieldElement could fail to encode a Fp field element correctly. This has been fixed.
 </ul>
 
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
 <li>The ASN.1 library now includes classes for the ICAO Electronic Passport.
 <li>Support has been added to CMS and S/MIME for ECDSA.
+<li>Support has been added for the SEC/NIST elliptic curves.
+<li>Support has been added for elliptic curves over F2m.
 </ul>
 
 <h3>2.2.1 Version</h3>
