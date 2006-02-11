@@ -1,8 +1,11 @@
 package org.bouncycastle.jce;
 
 import java.util.Enumeration;
+import java.util.Vector;
 
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
@@ -31,8 +34,29 @@ public class ECNamedCurveTable
             }
             catch (IllegalArgumentException e)
             {
-                return null; // not an oid.
+                // ignore - not an oid
             }
+        }
+        
+        if (ecP == null)
+        {
+            ecP = SECNamedCurves.getByName(name);
+            if (ecP == null)
+            {
+                try
+                {
+                    ecP = SECNamedCurves.getByOID(new DERObjectIdentifier(name));
+                }
+                catch (IllegalArgumentException e)
+                {
+                    // ignore - not an oid
+                }
+            }
+        }
+        
+        if (ecP == null)
+        {
+            ecP = NISTNamedCurves.getByName(name);
         }
         
         if (ecP == null)
@@ -47,7 +71,6 @@ public class ECNamedCurveTable
                                         ecP.getN(),
                                         ecP.getH(),
                                         ecP.getSeed());
-
     }
 
     /**
@@ -57,6 +80,22 @@ public class ECNamedCurveTable
      */
     public static Enumeration getNames()
     {
-        return X962NamedCurves.getNames();
+        Vector v = new Vector();
+        
+        addEnumeration(v, X962NamedCurves.getNames());
+        addEnumeration(v, SECNamedCurves.getNames());
+        addEnumeration(v, NISTNamedCurves.getNames());
+        
+        return v.elements();
+    }
+
+    private static void addEnumeration(
+        Vector v, 
+        Enumeration e)
+    {
+        while (e.hasMoreElements())
+        {
+            v.addElement(e.nextElement());
+        }
     }
 }
