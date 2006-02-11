@@ -45,8 +45,7 @@ public class X9FieldID
      * represents the reduction polynomial <code>f(z)</code>.
      * @param k3 The integer <code>k3</code> where <code>x<sup>m</sup> +
      * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
-     * represents the reduction polynomial <code>f(z)</code>.
-     * @param x The BigInteger representing the value of the field element.
+     * represents the reduction polynomial <code>f(z)</code>..
      */
     public X9FieldID(int m, int k1, int k2, int k3)
     {
