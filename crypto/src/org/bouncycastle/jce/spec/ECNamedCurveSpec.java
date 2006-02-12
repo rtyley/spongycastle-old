@@ -1,6 +1,7 @@
 package org.bouncycastle.jce.spec;
 
 import java.math.BigInteger;
+import java.security.spec.ECFieldF2m;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
@@ -16,13 +17,48 @@ public class ECNamedCurveSpec
 {
     private String  name;
 
+    private static EllipticCurve convertCurve(
+        ECCurve  curve,
+        byte[]   seed)
+    {
+        if (curve instanceof ECCurve.Fp)
+        {
+            return new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), seed);
+        }
+        else
+        {
+            ECCurve.F2m curveF2m = (ECCurve.F2m)curve;
+            int ks[];
+            
+            if (curveF2m.isTrinomial())
+            {
+                ks = new int[] { curveF2m.getK1() };
+                
+                return new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), seed);
+            }
+            else
+            {
+                ks = new int[] { curveF2m.getK3(), curveF2m.getK2(), curveF2m.getK1() };
+
+                return new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), seed);
+            } 
+        }
+
+    }
+    
+    private static ECPoint convertPoint(
+        org.bouncycastle.math.ec.ECPoint  g)
+    {
+        return new ECPoint(g.getX().toBigInteger(), g.getY().toBigInteger());
+    }
+    
     public ECNamedCurveSpec(
         String                              name,
         ECCurve                             curve,
-        org.bouncycastle.math.ec.ECPoint    G,
+        org.bouncycastle.math.ec.ECPoint    g,
         BigInteger                          n)
     {
-        super(new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger()), new ECPoint(G.getX().toBigInteger(), G.getY().toBigInteger()), n, 1);
+        super(convertCurve(curve, null), convertPoint(g), n, 1);
 
         this.name = name;
     }
@@ -30,10 +66,10 @@ public class ECNamedCurveSpec
     public ECNamedCurveSpec(
         String          name,
         EllipticCurve   curve,
-        ECPoint         G,
+        ECPoint         g,
         BigInteger      n)
     {
-        super(curve, G, n, 1);
+        super(curve, g, n, 1);
 
         this.name = name;
     }
@@ -41,11 +77,11 @@ public class ECNamedCurveSpec
     public ECNamedCurveSpec(
         String                              name,
         ECCurve                             curve,
-        org.bouncycastle.math.ec.ECPoint    G,
+        org.bouncycastle.math.ec.ECPoint    g,
         BigInteger                          n,
         BigInteger                          h)
     {
-        super(new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger()), new ECPoint(G.getX().toBigInteger(), G.getY().toBigInteger()), n, h.intValue());
+        super(convertCurve(curve, null), convertPoint(g), n, h.intValue());
 
         this.name = name;
     }
@@ -53,11 +89,11 @@ public class ECNamedCurveSpec
     public ECNamedCurveSpec(
         String          name,
         EllipticCurve   curve,
-        ECPoint         G,
+        ECPoint         g,
         BigInteger      n,
         BigInteger      h)
     {
-        super(curve, G, n, h.intValue());
+        super(curve, g, n, h.intValue());
 
         this.name = name;
     }
@@ -65,13 +101,13 @@ public class ECNamedCurveSpec
     public ECNamedCurveSpec(
         String                              name,
         ECCurve                             curve,
-        org.bouncycastle.math.ec.ECPoint    G,
+        org.bouncycastle.math.ec.ECPoint    g,
         BigInteger                          n,
         BigInteger                          h,
         byte[]                              seed)
     {
-        super(new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), seed), new ECPoint(G.getX().toBigInteger(), G.getY().toBigInteger()), n, h.intValue());
-
+        super(convertCurve(curve, seed), convertPoint(g), n, h.intValue());
+        
         this.name = name;
     }
 
