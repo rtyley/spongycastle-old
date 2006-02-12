@@ -233,13 +233,13 @@ public class JCEECPublicKey
             if (params.isNamedCurve())
             {
                 DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
-                X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
+                X9ECParameters      ecP = ECUtil.getNamedCurveByOid(oid);
 
                 curve = ecP.getCurve();
                 ellipticCurve = EC5Util.convertCurve(curve, ecP.getSeed());
 
                 ecSpec = new ECNamedCurveSpec(
-                        X962NamedCurves.getName(oid),
+                        ECUtil.getCurveName(oid),
                         ellipticCurve,
                         new ECPoint(
                                 ecP.getG().getX().toBigInteger(),
@@ -314,7 +314,9 @@ public class JCEECPublicKey
         {
             if (ecSpec instanceof ECNamedCurveSpec)
             {
-                params = new X962Parameters(X962NamedCurves.getOID(((ECNamedCurveSpec)ecSpec).getName()));
+                DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
+                
+                params = new X962Parameters(curveOid);
             }
             else
             {

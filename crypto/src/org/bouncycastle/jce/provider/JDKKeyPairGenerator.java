@@ -19,6 +19,8 @@ import javax.crypto.spec.DHParameterSpec;
 
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -496,9 +498,17 @@ public abstract class JDKKeyPairGenerator
                     X9ECParameters  ecP = X962NamedCurves.getByName(((ECGenParameterSpec)params).getName());
                     if (ecP == null)
                     {
-                        throw new InvalidAlgorithmParameterException("unknown curve name: " + ((ECGenParameterSpec)params).getName());
+                        ecP = SECNamedCurves.getByName(((ECGenParameterSpec)params).getName());
+                        if (ecP == null)
+                        {
+                            ecP = NISTNamedCurves.getByName(((ECGenParameterSpec)params).getName());
+                        }
+                        if (ecP == null)
+                        {
+                            throw new InvalidAlgorithmParameterException("unknown curve name: " + ((ECGenParameterSpec)params).getName());
+                        }
                     }
-                    
+
                     this.ecParams = new ECNamedCurveSpec(
                             ((ECGenParameterSpec)params).getName(),
                             ecP.getCurve(),
