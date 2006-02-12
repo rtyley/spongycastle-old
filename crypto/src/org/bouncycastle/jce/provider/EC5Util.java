@@ -31,7 +31,7 @@ public class EC5Util
             }
             else
             {
-                ks = new int[] { curveF2m.getK1(), curveF2m.getK2(), curveF2m.getK3() };
+                ks = new int[] { curveF2m.getK3(), curveF2m.getK2(), curveF2m.getK1() };
                 
                 return new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), seed);
             } 
