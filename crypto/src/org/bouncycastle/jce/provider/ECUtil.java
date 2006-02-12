@@ -4,6 +4,11 @@ import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.x9.X962NamedCurves;
+import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
@@ -120,5 +125,56 @@ public class ECUtil
         }
                         
         throw new InvalidKeyException("can't identify EC private key.");
+    }
+
+    public static DERObjectIdentifier getNamedCurveOid(
+        String name)
+    {
+        DERObjectIdentifier oid = X962NamedCurves.getOID(name);
+        
+        if (oid == null)
+        {
+            oid = SECNamedCurves.getOID(name);
+            if (oid == null)
+            {
+                oid = NISTNamedCurves.getOID(name);
+            }
+        }
+
+        return oid;
+    }
+    
+    public static X9ECParameters getNamedCurveByOid(
+        DERObjectIdentifier oid)
+    {
+        X9ECParameters params = X962NamedCurves.getByOID(oid);
+        
+        if (params == null)
+        {
+            params = SECNamedCurves.getByOID(oid);
+            if (params == null)
+            {
+                params = NISTNamedCurves.getByOID(oid);
+            }
+        }
+
+        return params;
+    }
+
+    public static String getCurveName(
+        DERObjectIdentifier oid)
+    {
+        String name = X962NamedCurves.getName(oid);
+        
+        if (name == null)
+        {
+            name = SECNamedCurves.getName(oid);
+            if (name == null)
+            {
+                name = NISTNamedCurves.getName(oid);
+            }
+        }
+
+        return name;
     }
 }
