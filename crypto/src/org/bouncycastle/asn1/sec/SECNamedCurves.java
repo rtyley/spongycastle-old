@@ -74,7 +74,6 @@ public class SECNamedCurves
         new BigInteger("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5", 16));
 
     static final ECPoint secp256r1BasePoint = new ECPoint.Fp(
-//        secp256r1Curve, secp256r1x, secp256r1y);
         secp256r1Curve, secp256r1x, secp256r1y, false);
 
     static final BigInteger secp256r1n = new BigInteger("115792089210356248762697446949407573529996955224135760342422259061068512044369");
@@ -114,7 +113,6 @@ public class SECNamedCurves
         new BigInteger("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16));
 
     static final ECPoint secp521r1BasePoint = new ECPoint.Fp(
-//        secp521r1Curve, secp521r1x, secp521r1y);
         secp521r1Curve, secp521r1x, secp521r1y, false);
 
     static final BigInteger secp521r1n = new BigInteger("6864797660130609714981900799081393217269435300143305409394463459185543183397655394245057746333217197532963996371363321113864768612440380340372808892707005449");
@@ -159,7 +157,7 @@ public class SECNamedCurves
         new BigInteger("0d51fbc6c71a0094fa2cdd545b11c5c0c797324f1", 16));
 
     static final ECPoint sect163r1BasePoint = new ECPoint.F2m(
-            sect163r1Curve, sect163r1x, sect163r1y);
+            sect163r1Curve, sect163r1x, sect163r1y, false);
 
     static final BigInteger sect163r1n = new BigInteger("5846006549323611672814742442876390689256843201587");
 
@@ -202,7 +200,7 @@ public class SECNamedCurves
         new BigInteger("1006a08a41903350678e58528bebf8a0beff867a7ca36716f7e01f81052", 16));
 
     static final ECPoint sect233r1BasePoint = new ECPoint.F2m(
-            sect233r1Curve, sect233r1x, sect233r1y);
+            sect233r1Curve, sect233r1x, sect233r1y, false);
 
     static final BigInteger sect233r1n = new BigInteger("6901746346790563787434755862277025555839812737345013555379383634485463");
 
@@ -246,7 +244,7 @@ public class SECNamedCurves
         new BigInteger("3676854fe24141cb98fe6d4b20d02b4516ff702350eddb0826779c813f0df45be8112f4", 16));
 
     static final ECPoint sect283r1BasePoint = new ECPoint.F2m(
-            sect283r1Curve, sect283r1x, sect283r1y);
+            sect283r1Curve, sect283r1x, sect283r1y, false);
 
     static final BigInteger sect283r1n = new BigInteger("7770675568902916283677847627294075626569625924376904889109196526770044277787378692871");
 
@@ -290,7 +288,7 @@ public class SECNamedCurves
         new BigInteger("61b1cfab6be5f32bbfa78324ed106a7636b9c5a7bd198d0158aa4f5488d08f38514f1fdf4b4f40d2181b3681c364ba0273c706", 16));
 
     static final ECPoint sect409r1BasePoint = new ECPoint.F2m(
-            sect409r1Curve, sect409r1x, sect409r1y);
+            sect409r1Curve, sect409r1x, sect409r1y, false);
 
     static final BigInteger sect409r1n = new BigInteger("661055968790248598951915308032771039828404682964281219284648798304157774827374805208143723762179110965979867288366567526771");
 
@@ -334,7 +332,7 @@ public class SECNamedCurves
         new BigInteger("37bf27342da639b6dccfffeb73d69d78c6c27a6009cbbca1980f8533921e8a684423e43bab08a576291af8f461bb2a8b3531d2f0485c19b16e2f1516e23dd3c1a4827af1b8ac15b", 16));
 
     static final ECPoint sect571r1BasePoint = new ECPoint.F2m(
-            sect571r1Curve, sect571r1x, sect571r1y);
+            sect571r1Curve, sect571r1x, sect571r1y, false);
 
     static final BigInteger sect571r1n = new BigInteger("3864537523017258344695351890931987344298927329706434998657235251451519142289560424536143999389415773083133881121926944486246872462816813070234528288303332411393191105285703");
 

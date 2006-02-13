@@ -152,7 +152,7 @@ public class JCEECPublicKey
                 int k1 = curveF2m.getK1();
                 int k2 = curveF2m.getK2();
                 int k3 = curveF2m.getK3();
-                this.q = new ECPoint.F2m(curveF2m, new ECFieldElement.F2m(m, k1, k2, k3, new BigInteger(1, x)), new ECFieldElement.F2m(m, k1, k2, k3, new BigInteger(1, y)));
+                this.q = new ECPoint.F2m(curveF2m, new ECFieldElement.F2m(m, k1, k2, k3, new BigInteger(1, x)), new ECFieldElement.F2m(m, k1, k2, k3, new BigInteger(1, y)), false);
             }
             else 
             {
@@ -252,7 +252,7 @@ public class JCEECPublicKey
             } 
             else if (curve instanceof ECCurve.F2m)
             {
-                generator = new ECPoint.F2m(p.getG().getCurve(), p.getG().getX(), p.getG().getY());
+                generator = new ECPoint.F2m(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), false);
             } 
             else 
             {
@@ -301,7 +301,7 @@ public class JCEECPublicKey
             } 
             else if (curve instanceof ECCurve.F2m)
             {
-                p = (ASN1OctetString)(new X9ECPoint(new ECPoint.F2m(curve, this.getQ().getX(), this.getQ().getY())).getDERObject());
+                p = (ASN1OctetString)(new X9ECPoint(new ECPoint.F2m(curve, this.getQ().getX(), this.getQ().getY(), false)).getDERObject());
             } 
             else 
             {
