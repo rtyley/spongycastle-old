@@ -119,7 +119,7 @@ public class NamedCurveTest
     {
         testCurve("prime192v1"); // X9.62
         testCurve("sect571r1"); // sec
-        testCurve("secp224r1");
+        //testCurve("secp224r1");
         //testCurve("B-409");   // nist
         //testCurve("P-521");
     }
