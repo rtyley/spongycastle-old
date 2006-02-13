@@ -468,7 +468,7 @@ public abstract class JDKKeyPairGenerator
                     int m = fieldF2m.getM();
                     int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
                     curve = new ECCurve.F2m(m, ks[0], ks[1], ks[2], p.getCurve().getA(), p.getCurve().getB());
-                    g = new ECPoint.F2m(curve, new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineY()));
+                    g = new ECPoint.F2m(curve, new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineY()), false);
                 }
                 param = new ECKeyGenerationParameters(new ECDomainParameters(curve, g, p.getOrder(), BigInteger.valueOf(p.getCofactor())), random);
     
@@ -534,7 +534,7 @@ public abstract class JDKKeyPairGenerator
                     int m = fieldF2m.getM();
                     int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
                     curve = new ECCurve.F2m(m, ks[0], ks[1], ks[2], p.getCurve().getA(), p.getCurve().getB());
-                    g = new ECPoint.F2m(curve, new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineY()));
+                    g = new ECPoint.F2m(curve, new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineY()), false);
                 }
 
                 param = new ECKeyGenerationParameters(new ECDomainParameters(curve, g, p.getOrder(), BigInteger.valueOf(p.getCofactor())), random);

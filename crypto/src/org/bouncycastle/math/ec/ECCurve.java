@@ -29,7 +29,7 @@ public abstract class ECCurve
     public static class Fp extends ECCurve
     {
         BigInteger q;
-        
+
         public Fp(BigInteger q, BigInteger a, BigInteger b)
         {
             this.q = q;
@@ -208,20 +208,27 @@ public abstract class ECCurve
             {
                 throw new IllegalArgumentException("k1 must be > 0");
             }
-            
-            if (!isTrinomial())
+
+            if (k2 == 0)
+            {
+                if (k3 != 0)
+                {
+                    throw new IllegalArgumentException("k3 must be 0 if k2 == 0");
+                }
+            }
+            else
             {
                 if (k2 <= k1)
                 {
                     throw new IllegalArgumentException("k2 must be > k1");
                 }
-                
+
                 if (k3 <= k2)
                 {
                     throw new IllegalArgumentException("k3 must be > k2");
                 }
             }
-            
+
             this.a = fromBigInteger(a);
             this.b = fromBigInteger(b);
         }
@@ -230,7 +237,7 @@ public abstract class ECCurve
         {
             return new ECFieldElement.F2m(this.m, this.k1, this.k2, this.k3, x);
         }
-        
+
         /* (non-Javadoc)
          * @see org.bouncycastle.math.ec.ECCurve#decodePoint(byte[])
          */
@@ -256,7 +263,7 @@ public abstract class ECCurve
                     new ECFieldElement.F2m(this.m, this.k1, this.k2, this.k3,
                         new BigInteger(1, xEnc)),
                     new ECFieldElement.F2m(this.m, this.k1, this.k2, this.k3,
-                        new BigInteger(1, yEnc)));
+                        new BigInteger(1, yEnc)), false);
                 break;
 
             default:
@@ -321,3 +328,4 @@ public abstract class ECCurve
         }    
     }
 }
+

@@ -216,12 +216,15 @@ public abstract class ECPoint
      */
     public static class F2m extends ECPoint
     {
+        private boolean withCompression = true;
+        
         /**
-         * @param curve
-         * @param x
-         * @param y
+         * @param curve base curve
+         * @param x x point
+         * @param y y point
+         * @param withCompression true if encode with point compression.
          */
-        public F2m(ECCurve curve, ECFieldElement x, ECFieldElement y)
+        public F2m(ECCurve curve, ECFieldElement x, ECFieldElement y, boolean withCompression)
         {
             super(curve, x, y);
 
@@ -243,6 +246,8 @@ public abstract class ECPoint
                 // Check if x and a are elements of the same field
                 ECFieldElement.F2m.checkFieldElements(this.x, this.curve.getA());
             }
+            
+            this.withCompression = withCompression;
         }
 
         /**
@@ -263,27 +268,30 @@ public abstract class ECPoint
                 throw new RuntimeException("Point at infinity cannot be encoded");
             }
 
-            // TODO keyon start: Fixes the incorrect ASN.1 encoding of org.bouncycastle.math.ec.ECPoint.Fp
-            // Convert the point to a byte[] having correct length according
-            // to X9.62
-            int m = ((ECFieldElement.F2m)x).getM();
-            int byteCount = m/8;
-            if (m % 8 > 0) 
+            if (withCompression)
             {
-                byteCount++;
+                throw new RuntimeException("not implemented");
             }
-
-            byte[] X = converter.integerToBytes(this.getX().toBigInteger(), byteCount);
-            byte[] Y = converter.integerToBytes(this.getY().toBigInteger(), byteCount);
-
-            byte[]  PO = new byte[byteCount + byteCount + 1];
-
-            PO[0] = 0x04;
-            System.arraycopy(X, 0, PO, 1, byteCount);
-            System.arraycopy(Y, 0, PO, byteCount + 1, byteCount);
-            // TODO keyon end: Fixes the incorrect ASN.1 encoding of org.bouncycastle.math.ec.ECPoint.Fp
-
-            return PO;
+            else
+            {
+                int m = ((ECFieldElement.F2m)x).getM();
+                int byteCount = m/8;
+                if (m % 8 > 0) 
+                {
+                    byteCount++;
+                }
+    
+                byte[] X = converter.integerToBytes(this.getX().toBigInteger(), byteCount);
+                byte[] Y = converter.integerToBytes(this.getY().toBigInteger(), byteCount);
+    
+                byte[]  PO = new byte[byteCount + byteCount + 1];
+    
+                PO[0] = 0x04;
+                System.arraycopy(X, 0, PO, 1, byteCount);
+                System.arraycopy(Y, 0, PO, byteCount + 1, byteCount);
+    
+                return PO;
+            }
         }
 
         /* (non-Javadoc)
@@ -304,12 +312,12 @@ public abstract class ECPoint
                 {
                     return new ECPoint.F2m(curve);
                 }
-                return new ECPoint.F2m(b.getCurve(), b.getX(), b.getY());
+                return new ECPoint.F2m(b.getCurve(), b.getX(), b.getY(), withCompression);
             }
 
             if (b.isInfinity())
             {
-                return new ECPoint.F2m(curve, x, y);
+                return new ECPoint.F2m(curve, x, y, withCompression);
             }
 
             ECFieldElement.F2m.checkFieldElements(x, b.getX());
@@ -340,7 +348,7 @@ public abstract class ECPoint
             ECFieldElement.F2m y3
                 = (ECFieldElement.F2m)lambda.multiply(x.add(x3)).add(x3).add(y);
 
-            return new ECPoint.F2m(curve, x3, y3);
+            return new ECPoint.F2m(curve, x3, y3, withCompression);
         }
 
         /* (non-Javadoc)
@@ -350,7 +358,7 @@ public abstract class ECPoint
         {
             // Add -b
             ECPoint.F2m minusB
-                = new ECPoint.F2m(curve, b.getX(), b.getY().negate());
+                = new ECPoint.F2m(curve, b.getX(), b.getY().negate(), withCompression);
             return add(minusB);
         }
 
@@ -378,7 +386,7 @@ public abstract class ECPoint
                 = (ECFieldElement.F2m)x.square().add(lambda.multiply(x3)).
                     add(x3);
 
-            return new ECPoint.F2m(curve, x3, y3);
+            return new ECPoint.F2m(curve, x3, y3, withCompression);
         }
 
         public ECPoint multiply(

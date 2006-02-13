@@ -174,7 +174,7 @@ public class JCEECPrivateKey
             } 
             else if (curve instanceof ECCurve.F2m) 
             {
-                generator = new ECPoint.F2m(curve, p.getG().getX(), p.getG().getY());
+                generator = new ECPoint.F2m(curve, p.getG().getX(), p.getG().getY(), false);
             }
             else 
             {
