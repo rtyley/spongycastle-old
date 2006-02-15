@@ -107,7 +107,37 @@ public abstract class ECCurve
                 throw new RuntimeException("Invalid point encoding 0x" + Integer.toString(encoded[0], 16));
             }
 
+            if (!(p.y.square().equals(
+                    p.x.square().multiply(p.x).add(a.multiply(p.x.square())).add(b)))) 
+            {
+                throw new RuntimeException("Invalid point");
+            }
+
             return p;
+        }
+        
+        public boolean equals(
+            Object anObject) 
+        {
+            if (anObject == this) 
+            {
+                return true;
+            }
+
+            if (!(anObject instanceof ECCurve.Fp)) 
+            {
+                return false;
+            }
+
+            ECCurve.Fp other = (ECCurve.Fp) anObject;
+
+            return this.q.equals(other.q) 
+                    && a.equals(other.a) && b.equals(other.b);
+        }
+
+        public int hashCode() 
+        {
+            return a.hashCode() ^ b.hashCode() ^ q.hashCode();
         }
     }
 
@@ -273,7 +303,8 @@ public abstract class ECCurve
             return p;
         }
 
-        public boolean equals(Object anObject)
+        public boolean equals(
+            Object anObject)
         {
             if (anObject == this) 
             {
@@ -287,9 +318,9 @@ public abstract class ECCurve
 
             ECCurve.F2m other = (ECCurve.F2m)anObject;
             
-            return ((this.m == other.m) && (this.k1 == other.k1)
+            return (this.m == other.m) && (this.k1 == other.k1)
                 && (this.k2 == other.k2) && (this.k3 == other.k3)
-                && (a.equals(other.a)) && (b.equals(other.b)));
+                && a.equals(other.a) && b.equals(other.b);
         }
 
         public int hashCode()
