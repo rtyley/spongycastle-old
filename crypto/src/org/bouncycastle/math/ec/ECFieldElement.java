@@ -346,27 +346,6 @@ public abstract class ECFieldElement
             return az;
         }
 
-        /**
-         * Computes the power <code>this^exponent mod f(z)</code>, where <code>f(z)</code> is
-         * the reduction polynomial of <code>this</code>.
-         * @param exponent The exponent to use for potentiation.
-         * @return <code>this^exponent mod f(z)</code>
-         */
-        public ECFieldElement pow(final BigInteger exponent) 
-        {
-                final BigInteger e = exponent;
-                ECFieldElement x = this;
-                for (int i = e.bitLength()-1; i>=0; i--) 
-                {
-                        x = x.square();
-                        if (e.testBit(i)) 
-                        {
-                                x.multiply(this);
-                        }
-                }
-                return x;
-        }
-
         public ECFieldElement add(final ECFieldElement b)
         {
             // No check performed here for performance reasons. Instead the
