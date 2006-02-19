@@ -18,20 +18,20 @@ public class CRLFOutputStream extends FilterOutputStream
     public void write(int i)
         throws IOException
     {
-        if (i == '\n')
+        if(i == '\r')
         {
-            if (lastb != '\r')
+            out.write(newline);
+        }
+        else if(i == '\n')
+        {
+            if(lastb != '\r')
             {
                 out.write(newline);
             }
-            else
-            {
-                out.write(i);
-            }
-        } 
-        else 
+        }
+        else
         {
-            out.write(i);
+           out.write(i);
         }
         
         lastb = i;
