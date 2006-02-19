@@ -1,6 +1,7 @@
 package org.bouncycastle.mail.smime.test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
@@ -8,6 +9,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,7 +24,11 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
@@ -38,6 +44,9 @@ public class SMIMESignedTest
     extends TestCase
 {
     static MimeBodyPart    msg;
+    
+    static MimeBodyPart    msgR;
+    static MimeBodyPart    msgRN;
 
     static String          signDN;
     static KeyPair         signKP;
@@ -62,6 +71,9 @@ public class SMIMESignedTest
         try
         {
             msg      = SMIMETestUtil.makeMimeBodyPart("Hello world!\n");
+            
+            msgR     = SMIMETestUtil.makeMimeBodyPart("Hello world!\r");
+            msgRN    = SMIMETestUtil.makeMimeBodyPart("Hello world!\r\n");
             
             signDN   = "O=Bouncy Castle, C=AU";
             signKP   = SMIMETestUtil.makeKeyPair();  
@@ -144,6 +156,37 @@ public class SMIMESignedTest
         verifyMessageBytes(msg, s.getContent());
 
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+    
+    public void testSHA1WithRSACanonicalization()
+        throws Exception
+    {
+        Date          testTime = new Date();
+        MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA1, msg, testTime); 
+        
+        byte[] sig1 = getEncodedStream(smm);
+    
+        smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA1, msgR, testTime);          
+
+        byte[] sig2 = getEncodedStream(smm);
+
+        assertTrue(Arrays.equals(sig1, sig2));
+        
+        smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA1, msgRN, testTime);          
+
+        byte[] sig3 = getEncodedStream(smm);
+
+        assertTrue(Arrays.equals(sig1, sig3));
+    }
+
+    private byte[] getEncodedStream(MimeMultipart smm) 
+        throws IOException, MessagingException
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        
+        smm.getBodyPart(1).writeTo(bOut);
+        
+        return bOut.toByteArray();
     }
     
     public void testSHA1WithRSAEncapsulated()
@@ -304,7 +347,10 @@ public class SMIMESignedTest
         return msg;
     }
     
-    private MimeMultipart generateMultiPartRsa(String digestOid, MimeBodyPart msg) 
+    private MimeMultipart generateMultiPartRsa(
+        String digestOid, 
+        MimeBodyPart msg,
+        Date         signingTime) 
         throws Exception
     {
         List certList = new ArrayList();
@@ -316,6 +362,11 @@ public class SMIMESignedTest
                         new CollectionCertStoreParameters(certList), "BC");
     
         ASN1EncodableVector signedAttrs = generateSignedAttributes();
+        
+        if (signingTime != null)
+        {
+            signedAttrs.add(new Attribute(CMSAttributes.signingTime, new DERSet(new Time(signingTime))));
+        }
     
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
     
@@ -323,6 +374,12 @@ public class SMIMESignedTest
         gen.addCertificatesAndCRLs(certs);
 
         return gen.generate(msg, "BC");
+    }
+    
+    private MimeMultipart generateMultiPartRsa(String digestOid, MimeBodyPart msg) 
+        throws Exception
+    {
+        return generateMultiPartRsa(digestOid, msg, null);
     }
     
     private MimeBodyPart generateEncapsulatedRsa(String digestOid, MimeBodyPart msg) 
