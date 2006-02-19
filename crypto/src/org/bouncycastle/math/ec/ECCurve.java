@@ -107,12 +107,6 @@ public abstract class ECCurve
                 throw new RuntimeException("Invalid point encoding 0x" + Integer.toString(encoded[0], 16));
             }
 
-            if (!(p.y.square().equals(
-                    p.x.square().multiply(p.x).add(a.multiply(p.x.square())).add(b)))) 
-            {
-                throw new RuntimeException("Invalid point");
-            }
-
             return p;
         }
         
