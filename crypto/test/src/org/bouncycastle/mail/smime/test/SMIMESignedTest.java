@@ -185,7 +185,7 @@ public class SMIMESignedTest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         
         smm.getBodyPart(1).writeTo(bOut);
-        
+
         return bOut.toByteArray();
     }
     
