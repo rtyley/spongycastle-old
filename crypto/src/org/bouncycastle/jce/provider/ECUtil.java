@@ -93,7 +93,7 @@ public class ECUtil
         return res;
     }
 
-    static public AsymmetricKeyParameter generatePublicKeyParameter(
+    static AsymmetricKeyParameter generatePublicKeyParameter(
         PublicKey    key)
         throws InvalidKeyException
     {
@@ -110,7 +110,7 @@ public class ECUtil
         throw new InvalidKeyException("can't identify EC public key.");
     }
 
-    static public AsymmetricKeyParameter generatePrivateKeyParameter(
+    static AsymmetricKeyParameter generatePrivateKeyParameter(
         PrivateKey    key)
         throws InvalidKeyException
     {
