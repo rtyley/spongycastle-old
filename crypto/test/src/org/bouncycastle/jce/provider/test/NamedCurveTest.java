@@ -11,9 +11,12 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Hashtable;
 
 import javax.crypto.KeyAgreement;
 
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.util.test.SimpleTest;
@@ -21,6 +24,17 @@ import org.bouncycastle.util.test.SimpleTest;
 public class NamedCurveTest
     extends SimpleTest
 {
+    private static Hashtable CURVE_NAMES = new Hashtable();
+    
+    static
+    {
+        CURVE_NAMES.put("prime192v1", "prime192v1"); // X9.62
+        CURVE_NAMES.put("sect571r1", "sect571r1"); // sec
+        CURVE_NAMES.put("secp224r1", "secp224r1");
+        CURVE_NAMES.put("B-409", SECNamedCurves.getName(NISTNamedCurves.getOID("B-409")));   // nist
+        CURVE_NAMES.put("P-521", SECNamedCurves.getName(NISTNamedCurves.getOID("P-521")));
+    }
+    
     public void testCurve(
         String name)
         throws Exception
@@ -103,9 +117,10 @@ public class NamedCurveTest
             fail("private key encoding not named curve");
         }
 
-        if (!((ECNamedCurveSpec)privKey.getParams()).getName().equals(name))
+        ECNamedCurveSpec privSpec = (ECNamedCurveSpec)privKey.getParams();
+        if (!privSpec.getName().equals(CURVE_NAMES.get(name)))
         {
-            fail("private key encoding wrong named curve");
+            fail("private key encoding wrong named curve. Expected: " + CURVE_NAMES.get(name) + " got " + privSpec.getName());
         }
     }
 
@@ -119,9 +134,9 @@ public class NamedCurveTest
     {
         testCurve("prime192v1"); // X9.62
         testCurve("sect571r1"); // sec
-        //testCurve("secp224r1");
-        //testCurve("B-409");   // nist
-        //testCurve("P-521");
+        testCurve("secp224r1");
+        testCurve("B-409");   // nist
+        testCurve("P-521");
     }
     
     public static void main(
