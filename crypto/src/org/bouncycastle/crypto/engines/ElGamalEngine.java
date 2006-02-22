@@ -49,6 +49,21 @@ public class ElGamalEngine
         }
 
         this.forEncryption = forEncryption;
+        
+        if (forEncryption)
+        {
+            if (!(key instanceof ElGamalPublicKeyParameters))
+            {
+                throw new IllegalArgumentException("ElGamalPublicKeyParameters are required for encryption.");
+            }
+        }
+        else
+        {
+            if (!(key instanceof ElGamalPrivateKeyParameters))
+            {
+                throw new IllegalArgumentException("ElGamalPrivateKeyParameters are required for decryption.");
+            }
+        }
     }
 
     /**
