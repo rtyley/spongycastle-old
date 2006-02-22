@@ -222,6 +222,16 @@ public abstract class ECPoint
          * @param curve base curve
          * @param x x point
          * @param y y point
+         */
+        public F2m(ECCurve curve, ECFieldElement x, ECFieldElement y)
+        {
+            this(curve, x, y, true);
+        }
+        
+        /**
+         * @param curve base curve
+         * @param x x point
+         * @param y y point
          * @param withCompression true if encode with point compression.
          */
         public F2m(ECCurve curve, ECFieldElement x, ECFieldElement y, boolean withCompression)

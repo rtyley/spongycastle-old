@@ -1,6 +1,7 @@
 package org.bouncycastle.math.ec;
 
 import java.math.BigInteger;
+import java.util.Random;
 
 public abstract class ECFieldElement
     implements ECConstants
@@ -108,9 +109,126 @@ public abstract class ECFieldElement
 
                 return z.square().equals(this) ? z : null;
             }
+            // p mod 4 == 1
+            if (q.testBit(0))
+            {
+                /*
+                 * TODO: Use Lucas sequence to be faster
+                BigInteger Q = this.x;
+                BigInteger P = this.x;
+                BigInteger U, V;
+                while (true)
+                {
+                    while (!(P.multiply(P).subtract(Q.multiply(BigInteger.valueOf(4))).compareTo(BigInteger.ZERO) == 1))
+                    {
+                        P = new BigInteger(this.x.bitLength(), new Random());
+                    }
+                    BigInteger u = q.subtract(BigInteger.ONE).divide(
+                            BigInteger.valueOf(4));
+                    BigInteger result[] = lucasSequence(q, P, Q, u.multiply(
+                            BigInteger.valueOf(2)).add(BigInteger.ONE));
+                    U = result[0];
+                    V = result[1];
+                    if (V.multiply(V).equals(Q.multiply(BigInteger.valueOf(4))))
+                    {
+                        return new Fp(q, V.divide(BigInteger.valueOf(2)));
+                    }
+                    if (!U.equals(BigInteger.ONE))
+                    {
+                        return null;
+                    }
+                }
+ */
+                Random rand = new Random();
+                BigInteger legendreExponent = q.subtract(BigInteger.ONE).divide(BigInteger.valueOf(2));
+                if (!(x.modPow(legendreExponent, q).equals(BigInteger.ONE)))
+                {
+                    return null;
+                }
+                BigInteger fourX = BigInteger.valueOf(4).multiply(x);
+                BigInteger r = new BigInteger(q.bitLength(), rand).mod(q);
+                r = BigInteger.valueOf(2);
+                while (!(r.multiply(r).subtract(fourX).modPow(legendreExponent, q).equals(q.subtract(BigInteger.ONE))))
+                {
+                    r = new BigInteger(q.bitLength(), rand).mod(q);
+                }
+                
+                BigInteger n1 = q.subtract(BigInteger.ONE).divide(BigInteger.valueOf(4));
+                BigInteger n2 = q.add(BigInteger.valueOf(3)).divide(BigInteger.valueOf(4));
+                BigInteger root = x.multiply(BigInteger.valueOf(2).multiply(r).modPow(q.subtract(BigInteger.valueOf(2)), q)).multiply(W(n1, r, x, q).add(W(n2, r, x, q))).mod(q);
+                return new Fp(q, root);
+            }
 
             throw new RuntimeException("not done yet");
         }
+
+        private BigInteger W(BigInteger n, BigInteger r, BigInteger x, BigInteger p)
+        {
+            if (n.equals(BigInteger.ONE))
+            {
+                return r.multiply(r).multiply(x.modPow(q.subtract(BigInteger.valueOf(2)), q)).subtract(BigInteger.valueOf(2)).mod(p);
+            }
+            if (!n.testBit(0))
+            {
+                BigInteger w = W(n.divide(BigInteger.valueOf(2)), r, x, p);
+                return w.multiply(w).subtract(BigInteger.valueOf(2)).mod(p);
+            }
+            BigInteger w1 = W(n.add(BigInteger.ONE).divide(BigInteger.valueOf(2)), r, x, p);
+            BigInteger w2 = W(n.subtract(BigInteger.ONE).divide(BigInteger.valueOf(2)), r, x, p);
+            return w1.multiply(w2).subtract(W(BigInteger.ONE, r, x, p)).mod(p);
+        }
+        
+        /**
+         * Outputs the Lucas sequence values according X9.62 D.1.3 Let P and Q
+         * be nonzero integers. The Lucas sequences U<sub>k</sub> and V<sub>k</sub>
+         * for P, Q are defined by:
+         * 
+         * <p>
+         * U<sub>0</sub> = 0, U<sub>1</sub> = 1, and U<sub>k</sub> = PU<sub>k-1</sub> -
+         * QU<sub>k-2</sub> for k &ge; 2. </br> V<sub>0</sub> = 2, V<sub>1</sub> =
+         * P, and V<sub>k</sub> = PV<sub>k-1</sub> - QV<sub>k-2</sub> for
+         * k &ge; 2.
+         * </p>
+         * 
+         * @param p
+         *            p.
+         * @param P
+         *            P.
+         * @param Q
+         *            Q.
+         * @param k
+         *            k.
+         * @return the value U<sub>k</sub> in index 0 and V<sub>k</sub> in
+         *         index 1.
+         */
+        /* TODO: does not work ??? */
+        /*
+        private BigInteger[] lucasSequence(BigInteger p, BigInteger P,
+                BigInteger Q, BigInteger k) {
+            BigInteger D = P.multiply(P).subtract(
+                    Q.multiply(BigInteger.valueOf(4)));
+            BigInteger U = BigInteger.ONE;
+            BigInteger V = P;
+            BigInteger temp;
+            for (int i = k.bitLength() - 2; i >= 0; i--) {
+                temp = U;
+                U = U.multiply(V).mod(p);
+                V = V.multiply(V).add(D.multiply(temp.multiply(temp))).divide(
+                        BigInteger.valueOf(2)).mod(p);
+                if (k.testBit(i)) {
+                    temp = U;
+                    U = P.multiply(U).add(V).divide(BigInteger.valueOf(2)).mod(
+                            p);
+                    V = P.multiply(V).subtract(D.multiply(temp)).divide(
+                            BigInteger.valueOf(2)).mod(p);
+                }
+            }
+            BigInteger result[] = new BigInteger[2];
+            result[0] = U;
+            result[1] = V;
+            return result;
+        }
+        */
         
 
         public boolean equals(Object other)
