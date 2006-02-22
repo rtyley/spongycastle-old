@@ -4,6 +4,9 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 
@@ -11,16 +14,25 @@ import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
  * utility class for converting java.security RSA objects into their
  * org.bouncycastle.crypto counterparts.
  */
-public class RSAUtil
+class RSAUtil
 {
-    static public RSAKeyParameters generatePublicKeyParameter(
+    static boolean isRsaOid(
+        DERObjectIdentifier algOid)
+    {
+        return algOid.equals(PKCSObjectIdentifiers.rsaEncryption)
+            || algOid.equals(X509ObjectIdentifiers.id_ea_rsa)
+            || algOid.equals(PKCSObjectIdentifiers.id_RSASSA_PSS)
+            || algOid.equals(PKCSObjectIdentifiers.id_RSAES_OAEP);
+    }
+    
+    static RSAKeyParameters generatePublicKeyParameter(
         RSAPublicKey    key)
     {
         return new RSAKeyParameters(false, key.getModulus(), key.getPublicExponent());
 
     }
 
-    static public RSAKeyParameters generatePrivateKeyParameter(
+    static RSAKeyParameters generatePrivateKeyParameter(
         RSAPrivateKey    key)
     {
         if (key instanceof RSAPrivateCrtKey)
