@@ -24,6 +24,14 @@ public class RSAKeyGenerationParameters
             throw new IllegalArgumentException("key strength too small");
         }
 
+        //
+        // public exponent cannot be even
+        //
+        if (!publicExponent.testBit(0)) 
+        {
+                throw new IllegalArgumentException("public exponent cannot be even");
+        }
+        
         this.publicExponent = publicExponent;
         this.certainty = certainty;
     }
