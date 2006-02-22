@@ -1,6 +1,7 @@
 package org.bouncycastle.math.ec;
 
 import java.math.BigInteger;
+import java.util.Random;
 
 /**
  * base class for an elliptic curve
@@ -274,8 +275,17 @@ public abstract class ECCurve
                 // compressed
             case 0x02:
             case 0x03:
-                throw new RuntimeException("Point compression for F2m not " +
-                        "supported");
+                byte[] enc = new byte[encoded.length - 1];
+                System.arraycopy(encoded, 1, enc, 0, enc.length);
+                if (encoded[0] == 0x02) 
+                {
+                        p = decompressPoint(enc, 0);
+                }
+                else 
+                {
+                        p = decompressPoint(enc, 1);
+                }
+                break;
             case 0x04:
                 byte[] xEnc = new byte[(encoded.length - 1) / 2];
                 byte[] yEnc = new byte[(encoded.length - 1) / 2];
@@ -297,6 +307,94 @@ public abstract class ECCurve
             return p;
         }
 
+        /**
+         * Decompresses a compressed point P = (xp, yp) (X9.62 s 4.2.2).
+         * 
+         * @param xEnc
+         *            The encoding of field element xp.
+         * @param ypBit
+         *            ~yp, an indication bit for the decompression of yp.
+         * @return the decompressed point.
+         */
+        private ECPoint decompressPoint(
+            byte[] xEnc, 
+            int ypBit)
+        {
+            ECFieldElement xp = new ECFieldElement.F2m(
+                    this.m, this.k1, this.k2, this.k3, new BigInteger(1, xEnc));
+            ECFieldElement yp = null;
+            if (xp.x.equals(BigInteger.ZERO))
+            {
+                yp = (ECFieldElement.F2m)b;
+                for (int i = 0; i != m; i++)
+                {
+                    yp = yp.square();
+                }
+            }
+            else
+            {
+                ECFieldElement beta = xp.add(a).add(
+                        b.multiply(xp.square().invert()));
+                ECFieldElement z = solveQuadradicEquation(beta);
+                if (z == null)
+                {
+                    throw new RuntimeException("Invalid point compression");
+                }
+                int zBit = 0;
+                if (z.x.testBit(0))
+                {
+                    zBit = 1;
+                }
+                if (zBit != ypBit)
+                {
+                    z.add(new ECFieldElement.F2m(this.m, this.k1, this.k2,
+                            this.k3, BigInteger.ONE));
+                }
+                yp = xp.multiply(z);
+            }
+            
+            return new ECPoint.F2m(this, xp, yp);
+        }
+        
+        /**
+         * Solves a quadratic equation <code>z<sup>2</sup> + z = beta</code>(X9.62
+         * D.1.6) The other solution is <code>z + 1</code>.
+         * 
+         * @param beta
+         *            The value to solve the qradratic equation for.
+         * @return the solution for <code>z<sup>2</sup> + z = beta</code> or
+         *         <code>null</code> if no solution exists.
+         */
+        private ECFieldElement solveQuadradicEquation(ECFieldElement beta)
+        {
+            if (beta.x.equals(BigInteger.ZERO))
+            {
+                return new ECFieldElement.F2m(
+                        this.m, this.k1, this.k2, this.k3, BigInteger.ZERO);
+            }
+            ECFieldElement z = null;
+            ECFieldElement gamma = new ECFieldElement.F2m(this.m, this.k1,
+                    this.k2, this.k3, BigInteger.ZERO);
+            while (gamma.toBigInteger().equals(BigInteger.ZERO))
+            {
+                ECFieldElement t = new ECFieldElement.F2m(this.m, this.k1,
+                        this.k2, this.k3, new BigInteger(m, new Random()));
+                z = new ECFieldElement.F2m(this.m, this.k1, this.k2, this.k3,
+                        BigInteger.ZERO);
+                ECFieldElement w = beta;
+                for (int i = 1; i <= m - 1; i++)
+                {
+                    z = z.square().add(w.square().multiply(t));
+                    w = w.square().add(beta);
+                }
+                if (!w.x.equals(BigInteger.ZERO))
+                {
+                    return null;
+                }
+                gamma = z.square().add(z);
+            }
+            return z;
+        }
         public boolean equals(
             Object anObject)
         {
