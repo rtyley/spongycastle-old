@@ -187,13 +187,14 @@ SecureRandom.
 <li>Andreas Schwier &lt;andreas.schwier&#064cardcontact.de&gt; - initial implementation of ISO9797 MAC Algorithm 3, addition of DES-EDE 64 MAC to the provider, fix to EC point encoding, addition of EC and RSA-PSS OIDs to CMS.
 <li>David Josse &lt;david.josse&#064transacttools.net&gt; - Patch for trailer function in version 2 signature packets.
 <li>Kishimoto Kazuhiko &lt;kazu-k&#064hi-ho.ne.jp&gt; - RFC 3280 updates to policy processing in the CertPath validator. Additional test data not covered by NIST.
-<li>Lawrence Tan &lt;lwrnctan&#064gmail.com&gt - Large field OID sample test data.
+<li>Lawrence Tan &lt;lwrnctan&#064gmail.com&gt - Large field OID sample test data. Missing key types in JDKKeyFactory.
 <li>Carlos Valiente &lt;superdupont&#064gmail.com&gt; - Addition of CRL writing to the PEMWriter class.
 <li>Keyon AG, Martin Christinat, <a href="http://www.keyon.ch">http://www.keyon.ch</a> - fixing incorrect 
 ASN.1 encoding of field elements in X9FieldElement class.
 <li>Olaf Keller, &lt;olaf.keller.bc&#064bluewin.ch&gt; - initial implementation of the elliptic curves over binary fields F2m.
 <li>J&ouml;rg Eichhorn &lt;eichhorn&#064ponton-consulting.de&gt; - patch to fix EOF read on SharedFileInputStream.
-<li>Karsten Ohme &lt;widerstand&#064t-online.de&gt; - addition of equals/hashCode on ECCurve.Fp.
+<li>Karsten Ohme &lt;widerstand&#064t-online.de&gt; - addition of equals/hashCode on ECCurve.Fp. Additional curve type support for Fp, compression for F2m. Extra validation for RSA key creation.
+<li>Carlos Lozano Ruiz &lt;carlos@tradise.com&gt; - patch for <ctrl><m> only handling in CRLFOutputStream.
 </ul>
 </body>
 </html>
