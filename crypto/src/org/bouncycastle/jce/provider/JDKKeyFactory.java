@@ -30,14 +30,13 @@ import javax.crypto.spec.DHPublicKeySpec;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
 import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
@@ -184,48 +183,47 @@ public abstract class JDKKeyFactory
     static PublicKey createPublicKeyFromPublicKeyInfo(
         SubjectPublicKeyInfo         info)
     {
-        AlgorithmIdentifier     algId = info.getAlgorithmId();
+        DERObjectIdentifier     algOid = info.getAlgorithmId().getObjectId();
         
-        if (algId.getObjectId().equals(PKCSObjectIdentifiers.rsaEncryption)
-            || algId.getObjectId().equals(X509ObjectIdentifiers.id_ea_rsa))
+        if (RSAUtil.isRsaOid(algOid))
         {
             return new JCERSAPublicKey(info);
         }
-        else if (algId.getObjectId().equals(PKCSObjectIdentifiers.dhKeyAgreement))
+        else if (algOid.equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
             return new JCEDHPublicKey(info);
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.dhpublicnumber))
+        else if (algOid.equals(X9ObjectIdentifiers.dhpublicnumber))
         {
             return new JCEDHPublicKey(info);
         }
-        else if (algId.getObjectId().equals(OIWObjectIdentifiers.elGamalAlgorithm))
+        else if (algOid.equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
             return new JCEElGamalPublicKey(info);
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa))
+        else if (algOid.equals(X9ObjectIdentifiers.id_dsa))
         {
             return new JDKDSAPublicKey(info);
         }
-        else if (algId.getObjectId().equals(OIWObjectIdentifiers.dsaWithSHA1))
+        else if (algOid.equals(OIWObjectIdentifiers.dsaWithSHA1))
         {
             return new JDKDSAPublicKey(info);
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
+        else if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
             return new JCEECPublicKey(info);
         }
-        else if (algId.getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_94))
+        else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_94))
         {
             return new JDKGOST3410PublicKey(info);
         }
-        else if (algId.getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_2001))
+        else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_2001))
         {
             return new JCEECPublicKey(info);
         }
         else
         {
-            throw new RuntimeException("algorithm identifier " + algId.getObjectId() + " in key not recognised");
+            throw new RuntimeException("algorithm identifier " + algOid + " in key not recognised");
         }
     }
 
@@ -246,39 +244,39 @@ public abstract class JDKKeyFactory
     static PrivateKey createPrivateKeyFromPrivateKeyInfo(
         PrivateKeyInfo      info)
     {
-        AlgorithmIdentifier     algId = info.getAlgorithmId();
+        DERObjectIdentifier     algOid = info.getAlgorithmId().getObjectId();
         
-        if (algId.getObjectId().equals(PKCSObjectIdentifiers.rsaEncryption))
+        if (RSAUtil.isRsaOid(algOid))
         {
               return new JCERSAPrivateCrtKey(info);
         }
-        else if (algId.getObjectId().equals(PKCSObjectIdentifiers.dhKeyAgreement))
+        else if (algOid.equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
               return new JCEDHPrivateKey(info);
         }
-        else if (algId.getObjectId().equals(OIWObjectIdentifiers.elGamalAlgorithm))
+        else if (algOid.equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
               return new JCEElGamalPrivateKey(info);
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa))
+        else if (algOid.equals(X9ObjectIdentifiers.id_dsa))
         {
               return new JDKDSAPrivateKey(info);
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
+        else if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
               return new JCEECPrivateKey(info);
         }
-        else if (algId.getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_94))
+        else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_94))
         {
               return new JDKGOST3410PrivateKey(info);
         }
-        else if (algId.getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_2001))
+        else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_2001))
         {
               return new JCEECPrivateKey(info);
         }
         else
         {
-            throw new RuntimeException("algorithm identifier " + algId.getObjectId() + " in key not recognised");
+            throw new RuntimeException("algorithm identifier " + algOid + " in key not recognised");
         }
     }
 
