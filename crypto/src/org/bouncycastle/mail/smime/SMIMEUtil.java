@@ -99,7 +99,7 @@ public class SMIMEUtil
             out.close();
             in.close();
             
-            return new MimeBodyPart(new SharedFileInputStream(tmp.getCanonicalPath()));
+            return new FileMimeBodyPart(tmp);
         }
         catch (IOException e)
         {
@@ -130,4 +130,30 @@ public class SMIMEUtil
             throw new CertificateParsingException("exception extracting issuer and serial number: " + e);
         }
     }
+    
+    private static class FileMimeBodyPart 
+        extends MimeBodyPart
+     {
+         private final File _file;
+         
+         public FileMimeBodyPart(
+             File file) 
+             throws MessagingException, IOException
+         {
+             super(new SharedFileInputStream(file.getCanonicalPath()));
+             
+             _file = file; 
+         }
+         
+         public void writeTo(
+             OutputStream out) 
+             throws IOException, MessagingException
+         {
+             super.writeTo(out);
+             
+             contentStream.close();
+             
+             _file.delete();
+         }
+     }
 }
