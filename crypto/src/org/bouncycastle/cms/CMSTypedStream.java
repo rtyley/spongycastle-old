@@ -91,5 +91,11 @@ public class CMSTypedStream
                 return -1;
             }
         }
+        
+        public void close() 
+            throws IOException
+        {
+            _in.close();
+        }
     }
 }
