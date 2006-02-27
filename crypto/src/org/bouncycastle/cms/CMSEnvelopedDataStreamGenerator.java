@@ -427,7 +427,7 @@ public class CMSEnvelopedDataStreamGenerator
             
             eiGen.getRawOutputStream().write(encAlgId.getEncoded());
             
-            BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
+            BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, false);
             
             CipherOutputStream      cOut;
             
