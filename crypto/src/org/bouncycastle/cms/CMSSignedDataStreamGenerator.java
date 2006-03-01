@@ -526,12 +526,12 @@ public class CMSSignedDataStreamGenerator
         
         eiGen.addObject(new Asn1ObjectIdentifier(signedContentType));
         
-        BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
-        
         OutputStream digStream;
         
         if (encapsulate)
         {
+            BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
+            
             if (_bufferSize != 0)
             {
                 digStream = octGen.getOctetOutputStream(new byte[_bufferSize]);
@@ -542,9 +542,7 @@ public class CMSSignedDataStreamGenerator
             }
         }
         else
-        {
-            octGen.getOctetOutputStream().close();
-            
+        {   
             digStream = new NullOutputStream();
         }
         
