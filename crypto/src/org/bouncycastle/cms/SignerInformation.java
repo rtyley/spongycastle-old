@@ -46,6 +46,7 @@ public class SignerInformation
     private byte[]                  signature;
     private DERObjectIdentifier     contentType;
     private byte[]                  _digest;
+    private byte[]                  _resultDigest;
 
     SignerInformation(
         SignerInfo          info,
@@ -149,6 +150,19 @@ public class SignerInformation
     }
 
     /**
+     * return the content digest that was calculated during verification.
+     */
+    public byte[] getContentDigest()
+    {
+        if (_resultDigest == null)
+        {
+            throw new IllegalStateException("method can only be called after verify.");
+        }
+        
+        return (byte[])_resultDigest.clone();
+    }
+    
+    /**
      * return the object identifier for the signature.
      */
     public String getEncryptionAlgOID()
@@ -205,7 +219,7 @@ public class SignerInformation
      */
     public byte[] getSignature()
     {
-        return signature;
+        return (byte[])signature.clone();
     }
 
     /**
@@ -247,6 +261,10 @@ public class SignerInformation
             {
                 content.write(
                         new CMSSignedDataGenerator.SigOutputStream(sig));
+                content.write(
+                        new CMSSignedDataGenerator.DigOutputStream(digest));
+
+                _resultDigest = digest.digest();
             }
             else
             {
@@ -264,6 +282,8 @@ public class SignerInformation
                     hash = _digest;
                 }
 
+                _resultDigest = hash;
+                
                 Attribute dig = signedAttrTable.get(
                                 CMSAttributes.messageDigest);
                 Attribute type = signedAttrTable.get(
