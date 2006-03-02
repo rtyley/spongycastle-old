@@ -76,7 +76,12 @@ public class SMIMEUtil
     }
     
     /**
-     * return the MimeBodyPart described in {@link CMSTypedStream} content
+     * return the MimeBodyPart described in {@link CMSTypedStream} content. 
+     * <p>
+     * <b>Note</b>: this requires the creation of a temporary file so the resulting object
+     * is designed to be single use. Once you have called the <code>writeTo()</code> method 
+     * on the body part the file will be deleted.
+     * </p>
      */
     public static MimeBodyPart toMimeBodyPart(
         CMSTypedStream    content)
