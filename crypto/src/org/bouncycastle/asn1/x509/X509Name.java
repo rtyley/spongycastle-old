@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  * <pre>
@@ -244,7 +245,16 @@ public class X509Name
                    ASN1Sequence s = (ASN1Sequence)set.getObjectAt(i);
                    
                    ordering.addElement(s.getObjectAt(0));
-                   values.addElement(((DERString) s.getObjectAt(1)).getString());
+                   
+                   DEREncodable value = s.getObjectAt(1);
+                   if (value instanceof DERString)
+                   {
+                       values.addElement(((DERString)value).getString());
+                   }
+                   else
+                   {
+                       values.addElement("#" + new String(Hex.encode(value.getDERObject().getDEREncoded())));
+                   }
                    added.addElement((i != 0) ? new Boolean(true) : new Boolean(false));
             }
         }
