@@ -1,5 +1,6 @@
 package org.bouncycastle.mail.smime;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -13,20 +14,30 @@ import org.bouncycastle.cms.CMSCompressedDataParser;
 import org.bouncycastle.cms.CMSException;
 
 /**
- * Stream based containing class for an S/MIME pkcs7-mime MimePart.
+ * Stream based containing class for an S/MIME pkcs7-mime compressed MimePart.
  */
 public class SMIMECompressedParser
     extends CMSCompressedDataParser
 {
-    MimePart                message;
+    private final MimePart message;
 
     private static InputStream getInputStream(
-        Part    bodyPart)
+        Part    bodyPart,
+        int     bufferSize)
         throws MessagingException
     {
         try
         {
-            return bodyPart.getInputStream();
+            InputStream in = bodyPart.getInputStream();
+            
+            if (bufferSize == 0)
+            {
+                return new BufferedInputStream(in);
+            }
+            else
+            {
+                return new BufferedInputStream(in, bufferSize);
+            }
         }
         catch (IOException e)
         {
@@ -38,16 +49,46 @@ public class SMIMECompressedParser
         MimeBodyPart    message) 
         throws MessagingException, CMSException
     {
-        super(getInputStream(message));
-
-        this.message = message;
+        this(message, 0);
     }
 
     public SMIMECompressedParser(
         MimeMessage    message) 
         throws MessagingException, CMSException
     {
-        super(getInputStream(message));
+        this(message, 0);
+    }
+    
+    /**
+     * Create a parser from a MimeBodyPart using the passed in buffer size
+     * for reading it.
+     * 
+     * @param message body part to be parsed.
+     * @param bufferSize bufferSoze to be used.
+     */
+    public SMIMECompressedParser(
+        MimeBodyPart    message,
+        int             bufferSize) 
+        throws MessagingException, CMSException
+    {
+        super(getInputStream(message, bufferSize));
+
+        this.message = message;
+    }
+
+    /**
+     * Create a parser from a MimeMessage using the passed in buffer size
+     * for reading it.
+     * 
+     * @param message message to be parsed.
+     * @param bufferSize bufferSoze to be used.
+     */
+    public SMIMECompressedParser(
+        MimeMessage    message,
+        int            bufferSize) 
+        throws MessagingException, CMSException
+    {
+        super(getInputStream(message, bufferSize));
 
         this.message = message;
     }
