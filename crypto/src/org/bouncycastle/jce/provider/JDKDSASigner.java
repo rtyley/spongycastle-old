@@ -269,6 +269,15 @@ public class JDKDSASigner
         }
     }
 
+    static public class noneDSA
+        extends JDKDSASigner
+    {
+        public noneDSA()
+        {
+            super("NONEwithDSA", new NullDigest(), new DSASigner());
+        }
+    }
+    
     static public class ecDSA
         extends JDKDSASigner
     {
@@ -357,6 +366,46 @@ public class JDKDSASigner
         public ecNR512()
         {
             super("SHA512withECNR", new SHA512Digest(), new ECNRSigner());
+        }
+    }
+    
+    private static class NullDigest
+        implements Digest
+    {
+        private ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        
+        public String getAlgorithmName()
+        {
+            return "NULL";
+        }
+    
+        public int getDigestSize()
+        {
+            return bOut.size();
+        }
+    
+        public void update(byte in)
+        {
+            bOut.write(in);
+        }
+    
+        public void update(byte[] in, int inOff, int len)
+        {
+            bOut.write(in, inOff, len);
+        }
+    
+        public int doFinal(byte[] out, int outOff)
+        {
+            byte[] res = bOut.toByteArray();
+            
+            System.arraycopy(res, 0, out, outOff, res.length);
+            
+            return res.length;
+        }
+    
+        public void reset()
+        {
+            bOut.reset();
         }
     }
 }
