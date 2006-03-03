@@ -1,6 +1,7 @@
 package org.bouncycastle.mail.smime.test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.cert.CertStore;
@@ -209,6 +210,22 @@ public class SMIMESignedTest
         verifyMessageBytes(msg, s.getContent());
     
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+    
+    public void testSHA1WithRSAEncapsulatedParserAndFile()
+        throws Exception
+    {
+        File         tmp = File.createTempFile("bcTest", ".mime");
+        MimeBodyPart res = generateEncapsulatedRsa(SMIMESignedGenerator.DIGEST_SHA1, msg);       
+        SMIMESignedParser s = new SMIMESignedParser(res, tmp);
+    
+        verifyMessageBytes(msg, s.getContent());
+    
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+        
+        assertTrue(tmp.exists());
+        
+        assertTrue(tmp.delete());
     }
 
     public void testMD5WithRSA()
