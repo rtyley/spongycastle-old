@@ -735,6 +735,7 @@ public final class BouncyCastleProvider extends Provider
         put("Signature.RIPEMD128WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD128WithRSAEncryption");
         put("Signature.RIPEMD256WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD256WithRSAEncryption");
         put("Signature.DSA", "org.bouncycastle.jce.provider.JDKDSASigner$stdDSA");
+        put("Signature.NONEWITHDSA", "org.bouncycastle.jce.provider.JDKDSASigner$noneDSA");
         put("Signature.ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA");
         put("Signature.SHA224WITHECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA224");
         put("Signature.SHA256WITHECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA256");
@@ -757,6 +758,8 @@ public final class BouncyCastleProvider extends Provider
         put("Signature.SHA384withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA384withRSA");
         put("Signature.SHA512withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA512withRSA");
 
+        put("Alg.Alias.Signature.RAWDSA", "NONEWITHDSA");
+        
         put("Alg.Alias.Signature.SHA1withRSAandMGF1", "SHA1withRSA/PSS");
         put("Alg.Alias.Signature.SHA224withRSAandMGF1", "SHA224withRSA/PSS");
         put("Alg.Alias.Signature.SHA256withRSAandMGF1", "SHA256withRSA/PSS");
