@@ -2,6 +2,7 @@ package org.bouncycastle.cms;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,8 +14,13 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 
+import javax.crypto.Cipher;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
@@ -22,6 +28,7 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -30,6 +37,7 @@ import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.DigestInfo;
 
 /**
  * an expanded SignerInfo block from a CMS Signed message
@@ -259,12 +267,22 @@ public class SignerInformation
             
             if (signedAttributes == null)
             {
-                content.write(
-                        new CMSSignedDataGenerator.SigOutputStream(sig));
-                content.write(
-                        new CMSSignedDataGenerator.DigOutputStream(digest));
-
-                _resultDigest = digest.digest();
+                if (content != null)
+                {
+                    content.write(
+                            new CMSSignedDataGenerator.SigOutputStream(sig));
+                    content.write(
+                            new CMSSignedDataGenerator.DigOutputStream(digest));
+    
+                    _resultDigest = digest.digest();
+                }
+                else
+                {
+                    _resultDigest = _digest;
+                    
+                    // need to decrypt signature and check message bytes
+                    return verifyDigest(_digest, key, this.getSignature(), sigProvider);
+                }
             }
             else
             {
@@ -344,6 +362,92 @@ public class SignerInformation
         {
             throw new CMSException(
                     "invalid signature format in message: + " + e.getMessage(), e);
+        }
+    }
+
+    private boolean isNull(
+        DEREncodable    o)
+    {
+        return (o instanceof ASN1Null) || (o == null);
+    }
+    
+    private DigestInfo derDecode(
+        byte[]  encoding)
+        throws IOException
+    {
+        if (encoding[0] != (DERTags.CONSTRUCTED | DERTags.SEQUENCE))
+        {
+            throw new IOException("not a digest info object");
+        }
+        
+        ASN1InputStream         aIn = new ASN1InputStream(encoding);
+
+        return new DigestInfo((ASN1Sequence)aIn.readObject());
+    }
+    
+    private boolean verifyDigest(
+        byte[]    digest, 
+        PublicKey key,
+        byte[]    signature,
+        String    sigProvider) 
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        String algorithm = CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
+        
+        try
+        {
+            if (algorithm.equals("RSA"))
+            {
+                Cipher c = Cipher.getInstance(algorithm + "/NONE/PKCS1Padding", sigProvider);
+                
+                c.init(Cipher.DECRYPT_MODE, key);
+                
+                DigestInfo digInfo = derDecode(c.doFinal(signature));
+
+                if (!digInfo.getAlgorithmId().getObjectId().equals(digestAlgorithm.getObjectId()))
+                {
+                    return false;
+                }
+             
+                if (!isNull(digInfo.getAlgorithmId().getParameters()))
+                {
+                    return false;
+                }
+
+                byte[]  sigHash = digInfo.getDigest();
+
+                return MessageDigest.isEqual(digest, sigHash);
+            }
+            else if (algorithm.equals("DSA"))
+            {
+                Signature sig = Signature.getInstance("NONEwithDSA", sigProvider);
+                
+                sig.initVerify(key);
+                
+                sig.update(digest);
+                
+                return sig.verify(signature);
+            }
+            else
+            {
+                throw new CMSException("algorithm: " + algorithm + " not supported in base signatures.");
+            }
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw e;
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw e;
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new CMSException("Exception processing signature: " + e, e);
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("Exception decoding signature: " + e, e);
         }
     }
 
