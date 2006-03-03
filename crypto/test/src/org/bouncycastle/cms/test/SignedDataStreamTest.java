@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.KeyPair;
+import java.security.MessageDigest;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
@@ -18,7 +19,12 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
@@ -29,6 +35,7 @@ import org.bouncycastle.util.encoders.Base64;
 public class SignedDataStreamTest
     extends TestCase
 {
+    private static final String TEST_MESSAGE = "Hello World!";
     private static String          _signDN;
     private static KeyPair         _signKP;  
     private static X509Certificate _signCert;
@@ -40,6 +47,9 @@ public class SignedDataStreamTest
     private static String          _reciDN;
     private static KeyPair         _reciKP;
     private static X509Certificate _reciCert;
+    
+    private static KeyPair         _origDsaKP;
+    private static X509Certificate _origDsaCert;
     
     private static boolean _initialised = false;
     
@@ -63,13 +73,16 @@ public class SignedDataStreamTest
             _origKP   = CMSTestUtil.makeKeyPair();
             _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
     
+            _origDsaKP   = CMSTestUtil.makeDsaKeyPair();
+            _origDsaCert = CMSTestUtil.makeCertificate(_origDsaKP, _origDN, _signKP, _signDN);
+            
             _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
             _reciKP   = CMSTestUtil.makeKeyPair();
-            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);      
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);  
         }
     }
     
-    private void verifySignatures(CMSSignedDataParser sp) 
+    private void verifySignatures(CMSSignedDataParser sp, byte[] contentDigest) 
         throws Exception
     {
         CertStore               certs = sp.getCertificatesAndCRLs("Collection", "BC");
@@ -87,7 +100,18 @@ public class SignedDataStreamTest
             X509Certificate cert = (X509Certificate)certIt.next();
     
             assertEquals(true, signer.verify(cert, "BC"));
+            
+            if (contentDigest != null)
+            {
+                assertTrue(MessageDigest.isEqual(contentDigest, signer.getContentDigest()));
+            }
         }
+    }
+    
+    private void verifySignatures(CMSSignedDataParser sp) 
+        throws Exception
+    {
+        verifySignatures(sp, null);
     }
 
     private void verifyEncodedData(ByteArrayOutputStream bOut) throws CMSException, IOException, Exception
@@ -146,6 +170,72 @@ public class SignedDataStreamTest
         verifySignatures(sp);
     }
     
+    public void testSHA1WithRSANoAttributes()
+        throws Exception
+    {
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray(TEST_MESSAGE.getBytes());
+    
+        certList.add(_origCert);
+        certList.add(_signCert);
+    
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+    
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+    
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+    
+        gen.addCertificatesAndCRLs(certs);
+    
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(
+                new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), s.getEncoded());
+        
+        sp.getSignedContent().drain();
+        
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+        
+        verifySignatures(sp, md.digest(TEST_MESSAGE.getBytes()));
+    }
+    
+    public void testDSANoAttributes()
+        throws Exception
+    {
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray(TEST_MESSAGE.getBytes());
+    
+        certList.add(_origDsaCert);
+        certList.add(_signCert);
+    
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+    
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+    
+        gen.addSigner(_origDsaKP.getPrivate(), _origDsaCert, CMSSignedDataGenerator.DIGEST_SHA1);
+    
+        gen.addCertificatesAndCRLs(certs);
+    
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+    
+        CMSSignedDataParser     sp = new CMSSignedDataParser(
+                new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), s.getEncoded());
+        
+        sp.getSignedContent().drain();
+        
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+        
+        verifySignatures(sp, md.digest(TEST_MESSAGE.getBytes()));
+    }
+    
     public void testSHA1WithRSA()
         throws Exception
     {
@@ -166,16 +256,21 @@ public class SignedDataStreamTest
     
         OutputStream sigOut = gen.open(bOut);
     
-        sigOut.write("Hello World!".getBytes());
+        sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
         
         CMSSignedDataParser     sp = new CMSSignedDataParser(
-                new CMSTypedStream(new ByteArrayInputStream("Hello World!".getBytes())), bOut.toByteArray());
+                new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), bOut.toByteArray());
     
         sp.getSignedContent().drain();
         
-        verifySignatures(sp);
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+        
+        verifySignatures(sp, md.digest(TEST_MESSAGE.getBytes()));
         
         //
         // try using existing signer
@@ -190,7 +285,7 @@ public class SignedDataStreamTest
         
         sigOut = gen.open(bOut, true);
     
-        sigOut.write("Hello World!".getBytes());
+        sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
     
@@ -347,7 +442,7 @@ public class SignedDataStreamTest
 
         OutputStream sigOut = gen.open(bOut, true);
 
-        sigOut.write("Hello World!".getBytes());
+        sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
         
@@ -370,7 +465,7 @@ public class SignedDataStreamTest
         
         sigOut = gen.open(bOut, true);
 
-        sigOut.write("Hello World!".getBytes());
+        sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
 
