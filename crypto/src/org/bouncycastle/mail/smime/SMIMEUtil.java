@@ -2,6 +2,7 @@ package org.bouncycastle.mail.smime;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,21 +91,10 @@ public class SMIMEUtil
         try
         {
             File         tmp = File.createTempFile("bcMail", ".mime");        
-            OutputStream out = new FileOutputStream(tmp);
-            InputStream  in = content.getContentStream();
             
-            byte[] buf = new byte[10000];
-            int    len;
+            saveContentToFile(content, tmp);
             
-            while ((len = in.read(buf, 0, buf.length)) > 0)
-            {
-                out.write(buf, 0, len);
-            }
-            
-            out.close();
-            in.close();
-            
-            return new FileMimeBodyPart(tmp);
+            return new FileMimeBodyPart(tmp, true);
         }
         catch (IOException e)
         {
@@ -114,6 +104,56 @@ public class SMIMEUtil
         {
             throw new SMIMEException("can't create part: " + e, e);
         }
+    }
+    
+    /**
+     * Return a file based MimeBodyPart represented by content and backed
+     * by the file represented by file.
+     * 
+     * @param content content stream containing body part.
+     * @param file file to store the decoded body part in.
+     * @return the decoded body part.
+     * @throws SMIMEException
+     */
+    public static MimeBodyPart toMimeBodyPart(
+        CMSTypedStream    content,
+        File              file)
+        throws SMIMEException
+    {
+        try
+        {
+            saveContentToFile(content, file);
+            
+            return new FileMimeBodyPart(file);
+        }
+        catch (IOException e)
+        {
+            throw new SMIMEException("can't save content to file: " + e, e);
+        }
+        catch (MessagingException e)
+        {
+            throw new SMIMEException("can't create part: " + e, e);
+        }
+    }
+
+    private static void saveContentToFile(
+        CMSTypedStream    content,
+        File tmp) 
+        throws FileNotFoundException, IOException
+    {
+        OutputStream out = new FileOutputStream(tmp);
+        InputStream  in = content.getContentStream();
+        
+        byte[] buf = new byte[10000];
+        int    len;
+        
+        while ((len = in.read(buf, 0, buf.length)) > 0)
+        {
+            out.write(buf, 0, len);
+        }
+        
+        out.close();
+        in.close();
     }
     
     /**
@@ -140,25 +180,43 @@ public class SMIMEUtil
         extends MimeBodyPart
      {
          private final File _file;
+         private final boolean _autoDelete;
          
-         public FileMimeBodyPart(
+         FileMimeBodyPart(
              File file) 
              throws MessagingException, IOException
          {
-             super(new SharedFileInputStream(file.getCanonicalPath()));
+             this(file, false);
+         }
+         
+         FileMimeBodyPart(
+             File file,
+             boolean autoDelete) 
+             throws MessagingException, IOException
+         {
+             super(new SharedFileInputStream(file));
              
              _file = file; 
+             _autoDelete = autoDelete; 
          }
          
          public void writeTo(
              OutputStream out) 
              throws IOException, MessagingException
          {
+             if (!_file.exists())
+             {
+                 throw new IOException("file " + _file.getCanonicalPath() + " no longer exists.");
+             }
+             
              super.writeTo(out);
              
              contentStream.close();
              
-             _file.delete();
+             if (_autoDelete)
+             {
+                 _file.delete();
+             }
          }
      }
 }

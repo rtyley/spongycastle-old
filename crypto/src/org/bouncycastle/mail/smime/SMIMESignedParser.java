@@ -168,7 +168,10 @@ public class SMIMESignedParser
     
     /**
      * base constructor for a signed message with encapsulated content.
-     *
+     * <p>
+     * Note: in this case the encapsulated MimeBody part will only be suitable for a single
+     * writeTo - once writeTo has been called the file containing the body part will be deleted.
+     * </p>
      * @exception MessagingException on an error extracting the signature or
      * otherwise processing the message.
      * @exception SMIMEException if the body part encapsulated in the message cannot be extracted.
@@ -187,6 +190,36 @@ public class SMIMESignedParser
         if (cont != null)
         {
             this.content = SMIMEUtil.toMimeBodyPart(cont);
+        }
+    }
+    
+    /**
+     * Constructor for a signed message with encapsulated content. The encapsulated
+     * content, if it exists, is written to the file represented by the File object 
+     * passed in.
+     *
+     * @param message the Part containing the signed content.
+     * @param file the file the encapsulated part is to be written to after it has been decoded.
+     * 
+     * @exception MessagingException on an error extracting the signature or
+     * otherwise processing the message.
+     * @exception SMIMEException if the body part encapsulated in the message cannot be extracted.
+     * @exception CMSException if some other problem occurs.
+     */
+    public SMIMESignedParser(
+        Part message,
+        File file) 
+        throws MessagingException, CMSException, SMIMEException
+    {
+        super(getInputStream(message));
+
+        this.message = message;
+
+        CMSTypedStream  cont = this.getSignedContent();
+
+        if (cont != null)
+        {
+            this.content = SMIMEUtil.toMimeBodyPart(cont, file);
         }
     }
 
