@@ -179,8 +179,8 @@ public final class TwofishEngine
 
     /* Primitive polynomial for GF(256) */
     private static final int GF256_FDBK =   0x169;
-    private static final int GF256_FDBK_2 = 0x169 / 2;
-    private static final int GF256_FDBK_4 = 0x169 / 4;
+    private static final int GF256_FDBK_2 = GF256_FDBK / 2;
+    private static final int GF256_FDBK_4 = GF256_FDBK / 4;
 
     private static final int RS_GF_FDBK = 0x14D; // field generator
 
@@ -343,7 +343,12 @@ public final class TwofishEngine
         int[] sBoxKeys = new int[MAX_KEY_BITS/64]; // 4 
         gSubKeys = new int[TOTAL_SUBKEYS];
 
-        if ((k64Cnt < 1) || (k64Cnt > 4))
+        if (k64Cnt < 1) 
+        {
+            throw new IllegalArgumentException("Key size less than 64 bits");
+        }
+        
+        if (k64Cnt > 4)
         {
             throw new IllegalArgumentException("Key size larger than 256 bits");
         }
