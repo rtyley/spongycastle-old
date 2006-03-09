@@ -19,6 +19,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSEnvelopedDataParser;
@@ -274,6 +276,44 @@ public class EnvelopedDataStreamTest
         verifyData(bOut, CMSEnvelopedDataGenerator.AES128_CBC, data);
 
         assertTrue(bOut.toByteArray().length < unbufferedLength);
+    }
+    
+    public void testKeyTransAES128Der()
+        throws Exception
+    {
+        byte[] data = new byte[2000];
+        
+        for (int i = 0; i != 2000; i++)
+        {
+            data[i] = (byte)(i & 0xff);
+        }
+
+        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
+    
+        edGen.addKeyTransRecipient(_reciCert);
+    
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        
+        OutputStream out = edGen.open(
+                                bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+    
+        for (int i = 0; i != 2000; i++)
+        {
+            out.write(data[i]);
+        }
+        
+        out.close();
+        
+        // convert to DER
+        ASN1InputStream aIn = new ASN1InputStream(bOut.toByteArray());
+        
+        bOut.reset();
+        
+        DEROutputStream dOut = new DEROutputStream(bOut);
+        
+        dOut.writeObject(aIn.readObject());
+  
+        verifyData(bOut, CMSEnvelopedDataGenerator.AES128_CBC, data);
     }
     
     public void testKeyTransAES128Throughput()
