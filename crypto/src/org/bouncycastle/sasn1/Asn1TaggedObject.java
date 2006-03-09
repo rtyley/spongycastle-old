@@ -52,7 +52,14 @@ public class Asn1TaggedObject
                 }
                 else
                 {
-                    return new DerOctetString(BerTag.CONSTRUCTED, ((DefiniteLengthInputStream)this.getRawContentStream()).toByteArray());
+                    if (this.isConstructed())
+                    {
+                        return new DerOctetString(BerTag.CONSTRUCTED, ((DefiniteLengthInputStream)this.getRawContentStream()).toByteArray());
+                    }
+                    else
+                    {
+                        return new DerOctetString(BerTagClass.UNIVERSAL, ((DefiniteLengthInputStream)this.getRawContentStream()).toByteArray());
+                    }
                 }
             }
         }
