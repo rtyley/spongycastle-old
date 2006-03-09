@@ -39,18 +39,6 @@ public class EnvelopedDataParser
         return _version;
     }
 
-    public Asn1Set getDigestAlgorithms() 
-        throws IOException
-    {
-        return (Asn1Set)_seq.readObject();
-    }
-
-    public ContentInfoParser getEncapContentInfo()
-        throws IOException
-    {
-        return new ContentInfoParser((Asn1Sequence)_seq.readObject());
-    }
-
     public Asn1Set getCertificates() 
         throws IOException
     {
