@@ -29,6 +29,7 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.provider.ECUtil;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -43,7 +44,7 @@ public class JCEECPublicKey
     private String          algorithm = "EC";
     private ECPoint         q;
     private Object          ecSpec;
-    private boolean         withCompression = true;
+    private boolean         withCompression;
     private GOST3410PublicKeyAlgParameters       gostParams;
 
     JCEECPublicKey(
@@ -163,14 +164,14 @@ public class JCEECPublicKey
         {
             X962Parameters          params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
             ECCurve                 curve;
-            
+
             if (params.isNamedCurve())
             {
                 DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
-                X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
+                X9ECParameters      ecP = ECUtil.getNamedCurveByOid(oid);
     
                 ecSpec = new ECNamedCurveParameterSpec(
-                                            X962NamedCurves.getName(oid),
+                                            ECUtil.getCurveName(oid),
                                             ecP.getCurve(),
                                             ecP.getG(),
                                             ecP.getN(),
@@ -238,7 +239,7 @@ public class JCEECPublicKey
 
         if (ecSpec instanceof ECNamedCurveParameterSpec)
         {
-            params = new X962Parameters(X962NamedCurves.getOID(((ECNamedCurveParameterSpec)ecSpec).getName()));
+            params = new X962Parameters(ECUtil.getNamedCurveByOid(ECUtil.getNamedCurveOid(((ECNamedCurveParameterSpec)ecSpec).getName())));
         }
         else
         {
@@ -252,7 +253,7 @@ public class JCEECPublicKey
             } 
             else if (curve instanceof ECCurve.F2m)
             {
-                generator = new ECPoint.F2m(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), false);
+                generator = new ECPoint.F2m(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression);
             } 
             else 
             {
@@ -301,7 +302,7 @@ public class JCEECPublicKey
             } 
             else if (curve instanceof ECCurve.F2m)
             {
-                p = (ASN1OctetString)(new X9ECPoint(new ECPoint.F2m(curve, this.getQ().getX(), this.getQ().getY(), false)).getDERObject());
+                p = (ASN1OctetString)(new X9ECPoint(new ECPoint.F2m(curve, this.getQ().getX(), this.getQ().getY(), withCompression)).getDERObject());
             } 
             else 
             {
@@ -408,6 +409,6 @@ public class JCEECPublicKey
 */
     public void setPointFormat(String style)
     {
-       withCompression = !("UNCOMPRESSED".equals(style));
+       withCompression = !("UNCOMPRESSED".equalsIgnoreCase(style));
     }
 }

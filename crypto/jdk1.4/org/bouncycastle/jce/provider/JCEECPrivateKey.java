@@ -26,6 +26,7 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.bouncycastle.jce.provider.ECUtil;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
@@ -38,7 +39,7 @@ public class JCEECPrivateKey
     private String          algorithm = "EC";
     private BigInteger      d;
     private Object          ecSpec;
-    private boolean         withCompression = true;
+    private boolean         withCompression;
 
     private Hashtable   pkcs12Attributes = new Hashtable();
     private Vector      pkcs12Ordering = new Vector();
@@ -97,10 +98,10 @@ public class JCEECPrivateKey
         if (params.isNamedCurve())
         {
             DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
-            X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
+            X9ECParameters      ecP = ECUtil.getNamedCurveByOid(oid);
 
             ecSpec = new ECNamedCurveParameterSpec(
-                                        X962NamedCurves.getName(oid),
+                                        ECUtil.getCurveName(oid),
                                         ecP.getCurve(),
                                         ecP.getG(),
                                         ecP.getN(),
@@ -160,7 +161,7 @@ public class JCEECPrivateKey
 
         if (ecSpec instanceof ECNamedCurveParameterSpec)
         {
-            params = new X962Parameters(X962NamedCurves.getOID(((ECNamedCurveParameterSpec)ecSpec).getName()));
+            params = new X962Parameters(ECUtil.getNamedCurveByOid(ECUtil.getNamedCurveOid(((ECNamedCurveParameterSpec)ecSpec).getName())));
         }
         else
         {
@@ -174,7 +175,7 @@ public class JCEECPrivateKey
             } 
             else if (curve instanceof ECCurve.F2m) 
             {
-                generator = new ECPoint.F2m(curve, p.getG().getX(), p.getG().getY(), false);
+                generator = new ECPoint.F2m(curve, p.getG().getX(), p.getG().getY(), withCompression);
             }
             else 
             {
@@ -307,6 +308,6 @@ public class JCEECPrivateKey
     
     public void setPointFormat(String style)
     {
-       withCompression = !("UNCOMPRESSED".equals(style));
+       withCompression = !("UNCOMPRESSED".equalsIgnoreCase(style));
     }
 }
