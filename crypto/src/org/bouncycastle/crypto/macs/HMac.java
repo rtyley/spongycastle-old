@@ -18,9 +18,9 @@ public class HMac
     private final static byte IPAD = (byte)0x36;
     private final static byte OPAD = (byte)0x5C;
 
-    private Digest digest;
-    private int digestSize;
-    private int blockLength = 64;
+    private final Digest digest;
+    private final int digestSize;
+    private final int blockLength;
     private byte[] inputPad;
     private byte[] outputPad;
 
@@ -49,25 +49,52 @@ public class HMac
         blockLengths.put("Whirlpool", new Integer(64));
     }
     
-    public HMac(
+    private static int getByteLength(
         Digest digest)
     {
-        this.digest = digest;
-        digestSize = digest.getDigestSize();
-        
         Integer  b = (Integer)blockLengths.get(digest.getAlgorithmName());
         
         if (b == null)
         {
-            throw new IllegalArgumentException("unknown digest passed");
+            throw new IllegalArgumentException("unknown digest passed: " + digest.getAlgorithmName());
         }
+        
+        return b.intValue();
+    }
+    
+    /**
+     * Base constructor for one of the standard digest algorithms that the 
+     * byteLength of the algorithm is know for.
+     * 
+     * @param digest the digest.
+     */
+    public HMac(
+        Digest digest)
+    {
+        this(digest, getByteLength(digest));
+    }
 
-        blockLength = b.intValue();
+    /**
+     * Constructor for an unknown digest with it's byteLength. The byteLength is the
+     * size of the block the digest compression function is applied to, as defined in 
+     * RFC2104. For further details see the RFC.
+     * 
+     * @param digest digest function.
+     * @param byteLength byte length to use for padding.
+     */
+    public HMac(
+        Digest digest,
+        int    byteLength)
+    {
+        this.digest = digest;
+        digestSize = digest.getDigestSize();
+
+        this.blockLength = byteLength;
 
         inputPad = new byte[blockLength];
         outputPad = new byte[blockLength];
     }
-
+    
     public String getAlgorithmName()
     {
         return digest.getAlgorithmName() + "/HMAC";
