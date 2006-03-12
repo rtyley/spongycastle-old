@@ -1,7 +1,6 @@
 package org.bouncycastle.cms;
 
 import java.io.ByteArrayInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
@@ -33,21 +32,14 @@ public class CMSCompressedDataParser
         byte[]    compressedData) 
         throws CMSException
     {
-        this(readContentInfo(new ByteArrayInputStream(compressedData)));
+        this(new ByteArrayInputStream(compressedData));
     }
 
     public CMSCompressedDataParser(
         InputStream    compressedData) 
         throws CMSException
     {
-        this(readContentInfo(compressedData));
-    }
-
-    public CMSCompressedDataParser(
-        ContentInfoParser contentInfo)
-        throws CMSException
-    {
-        super(contentInfo);
+        super(compressedData);
     }
 
     public CMSTypedStream  getContent()

@@ -30,7 +30,6 @@ import org.bouncycastle.sasn1.Asn1Sequence;
 import org.bouncycastle.sasn1.Asn1Set;
 import org.bouncycastle.sasn1.BerTag;
 import org.bouncycastle.sasn1.DerSequence;
-import org.bouncycastle.sasn1.cms.ContentInfoParser;
 import org.bouncycastle.sasn1.cms.SignedDataParser;
 
 /**
@@ -91,7 +90,7 @@ public class CMSSignedDataParser
         byte[]      sigBlock)
         throws CMSException
     {
-        this(readContentInfo(new ByteArrayInputStream(sigBlock)));
+        this(new ByteArrayInputStream(sigBlock));
     }
 
     public CMSSignedDataParser(
@@ -99,21 +98,7 @@ public class CMSSignedDataParser
         byte[]          sigBlock)
         throws CMSException
     {
-        this(signedContent, readContentInfo(new ByteArrayInputStream(sigBlock)));
-    }
-
-    /**
-     * base constructor
-     *
-     * @param signedContent the content that was signed.
-     * @param sigData the signature object.
-     */
-    public CMSSignedDataParser(
-        CMSTypedStream  signedContent,
-        InputStream     sigData)
-        throws CMSException
-    {
-        this(signedContent, readContentInfo(sigData));
+        this(signedContent, new ByteArrayInputStream(sigBlock));
     }
 
     /**
@@ -123,12 +108,18 @@ public class CMSSignedDataParser
         InputStream sigData)
         throws CMSException
     {
-        this(readContentInfo(sigData));
+        this(null, sigData);
     }
 
-    CMSSignedDataParser(
+    /**
+     * base constructor
+     *
+     * @param signedContent the content that was signed.
+     * @param sigData the signature object stream.
+     */
+    public CMSSignedDataParser(
         CMSTypedStream  signedContent,
-        ContentInfoParser     sigData) 
+        InputStream     sigData) 
         throws CMSException
     {
         super(sigData);
@@ -157,7 +148,7 @@ public class CMSSignedDataParser
                      //  ignore
                 }
             }
-            
+
             if (_signedContent == null)
             {
                 //
@@ -197,13 +188,6 @@ public class CMSSignedDataParser
         {
             throw new CMSException("no digests could be created for message.");
         }
-    }
-
-    public CMSSignedDataParser(
-        ContentInfoParser sigData) 
-        throws CMSException
-    {
-        this(null, sigData);
     }
 
     /**

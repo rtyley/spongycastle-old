@@ -28,7 +28,6 @@ import org.bouncycastle.sasn1.Asn1TaggedObject;
 import org.bouncycastle.sasn1.BerTag;
 import org.bouncycastle.sasn1.DerObject;
 import org.bouncycastle.sasn1.DerSequence;
-import org.bouncycastle.sasn1.cms.ContentInfoParser;
 import org.bouncycastle.sasn1.cms.EncryptedContentInfoParser;
 import org.bouncycastle.sasn1.cms.EnvelopedDataParser;
 
@@ -78,21 +77,14 @@ public class CMSEnvelopedDataParser
         byte[]    envelopedData) 
         throws CMSException, IOException
     {
-        this(readContentInfo(new ByteArrayInputStream(envelopedData)));
+        this(new ByteArrayInputStream(envelopedData));
     }
 
     public CMSEnvelopedDataParser(
         InputStream    envelopedData) 
         throws CMSException, IOException
     {
-        this(readContentInfo(envelopedData));
-    }
-
-    CMSEnvelopedDataParser(
-        ContentInfoParser contentInfo)
-        throws CMSException, IOException
-    {
-        super(contentInfo);
+        super(envelopedData);
 
         this._attrNotRead = true;
         this._envelopedData = new EnvelopedDataParser((Asn1Sequence)_contentInfo.getContent(BerTag.SEQUENCE));
