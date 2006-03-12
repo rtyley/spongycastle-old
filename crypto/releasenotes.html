@@ -29,6 +29,11 @@ Release 1.32
 <li>The ASN1Sequence constructor for SemanticsInformation would sometimes through a ClassCastException on reconstruction an object from a byte stream. This has been fixed.
 <li>The SharedInputStream.read(buf, 0, len) method would return 0 at EOF, rather than -1. This has been fixed.
 <li>X9FieldElement could fail to encode a Fp field element correctly. This has been fixed.
+<li>The streaming S/MIME API was occasionally leaving temporary files around. This has been fixed. Note: this means that attempting to do more than one writeTo() from an 
+encapsulated MimeBodyPart will now result in an exception, unless the file based constructor for SMIMESignedParser is used.
+<li>An encoding defect in EnvelopedData generation in the CMS streaming, S/MIME API has been fixed.
+<li>DER constructed octet strings could cause exceptions in the streaming ASN.1 library. This has been fixed.
+<li>Several compatability issues connected with EnvelopedData decoding between the streaming CMS library and other libraries have been fixed.
 </ul>
 
 <h3>2.1.3 Additional Features and Functionality</h3>
@@ -38,6 +43,11 @@ Release 1.32
 <li>Support has been added for the SEC/NIST elliptic curves.
 <li>Support has been added for elliptic curves over F2m.
 <li>Support has been added for repeated attributes in CMS and S/MIME messages.
+</ul>
+<h3>2.1.4 Possible compatability issue</h3>
+<ul>
+<li>Previously elliptic curve keys and points were generated with point compression enabled by default.
+Owing to patent issues in some jurisdictions, they are generated with point compression disabled by default.
 </ul>
 
 <h3>2.2.1 Version</h3>
