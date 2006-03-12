@@ -85,12 +85,12 @@ public abstract class ECCurve
 
                 if (bit0 == ytilde)
                 {
-                    p = new ECPoint.Fp(this, x, beta);
+                    p = new ECPoint.Fp(this, x, beta, true);
                 }
                 else
                 {
                     p = new ECPoint.Fp(this, x,
-                        new ECFieldElement.Fp(this.q, q.subtract(beta.toBigInteger())));
+                        new ECFieldElement.Fp(this.q, q.subtract(beta.toBigInteger())), true);
                 }
                 break;
             case 0x04:

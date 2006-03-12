@@ -77,7 +77,7 @@ public abstract class ECPoint
      */
     public static class Fp extends ECPoint
     {
-        private boolean withCompression = true;
+        private boolean withCompression;
         
         /**
          * Create a point which encodes with point compression.
@@ -88,7 +88,7 @@ public abstract class ECPoint
          */
         public Fp(ECCurve curve, ECFieldElement x, ECFieldElement y)
         {
-            super(curve, x, y);
+            this(curve, x, y, false);
         }
 
         /**
@@ -216,7 +216,7 @@ public abstract class ECPoint
      */
     public static class F2m extends ECPoint
     {
-        private boolean withCompression = true;
+        private boolean withCompression;
         
         /**
          * @param curve base curve
@@ -225,7 +225,7 @@ public abstract class ECPoint
          */
         public F2m(ECCurve curve, ECFieldElement x, ECFieldElement y)
         {
-            this(curve, x, y, true);
+            this(curve, x, y, false);
         }
         
         /**
