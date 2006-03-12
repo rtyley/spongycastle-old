@@ -122,6 +122,8 @@ public class SignedDataStreamTest
         sp.getSignedContent().drain();
         
         verifySignatures(sp);
+        
+        sp.close();
     }
     
     public void testSha1EncapsulatedSignature()

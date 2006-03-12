@@ -421,6 +421,8 @@ public class EnvelopedDataStreamTest
             
             assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }
+        
+        ep.close();
     }
     
     public void testAESKEK()
@@ -463,6 +465,8 @@ public class EnvelopedDataStreamTest
             
             assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }
+        
+        ep.close();
     }
     
     public static Test suite()
