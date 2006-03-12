@@ -210,6 +210,8 @@ public class SMIMESignedTest
         verifyMessageBytes(msg, s.getContent());
     
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+        
+        s.close();
     }
     
     public void testSHA1WithRSAEncapsulatedParserAndFile()
@@ -224,6 +226,8 @@ public class SMIMESignedTest
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
         
         assertTrue(tmp.exists());
+        
+        s.close();
         
         assertTrue(tmp.delete());
     }
