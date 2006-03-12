@@ -34,6 +34,7 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.util.test.TestFailedException;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class PKIXPolicyMappingTest
@@ -120,7 +121,8 @@ public class PKIXPolicyMappingTest
         return cert;
     }
     
-    private void testPolicies(
+    private String testPolicies(
+        int             index,
         X509Certificate trustCert, 
         X509Certificate intCert, 
         X509Certificate endCert,
@@ -149,7 +151,7 @@ public class PKIXPolicyMappingTest
         }
         
         CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","BC");  
-        //CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","SUN");  
+//      CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","SUN");  
         PKIXCertPathBuilderResult result = null;
         try
         {
@@ -157,31 +159,39 @@ public class PKIXPolicyMappingTest
             
             if (!okay)
             {
-                fail("path validated when failure expected.");
+                fail(index + ": path validated when failure expected.");
             }
             
-            if (result.getPolicyTree() != null)
-            {
-                System.out.println("OK");
-                System.out.println("policy: " + result.getPolicyTree());
-            }
-            else
-            {
-                System.out.println("OK: policy tree = null");
-            }
+//            if (result.getPolicyTree() != null)
+//            {
+//                System.out.println("OK");
+//                System.out.println("policy: " + result.getPolicyTree());
+//            }
+//            else
+//            {
+//                System.out.println("OK: policy tree = null");
+//            }
+            
+            return "";
+        }
+        catch (TestFailedException e)
+        {
+            throw e;
         }
         catch (Exception e)
         {
             if (okay)
             {
-                fail("path failed to validate when success expected.");
+                fail(index + ": path failed to validate when success expected.");
             }
-            System.out.println(e.getMessage());
+
             Throwable ee = e.getCause();
             if (ee != null)
             {
-                System.out.println(ee.getMessage());
+                return ee.getMessage();
             }
+
+            return e.getMessage();
         }  
     }
     
@@ -262,8 +272,6 @@ public class PKIXPolicyMappingTest
         /**
          * valid test_00
          */
-        System.out.println("");
-        System.out.println("test_00");
         intPolicies = new ASN1EncodableVector();
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
@@ -275,13 +283,12 @@ public class PKIXPolicyMappingTest
         endCert = createEndEntityCert(pubKey, intPrivKey, intPubKey, policies);
         
         requirePolicies = null;
-        testPolicies(trustCert, intCert, endCert, requirePolicies, true);
+        String msg = testPolicies(0, trustCert, intCert, endCert, requirePolicies, true);
+        checkMessage(0, msg, "");
         
         /**
          * test_01
          */
-        System.out.println("");
-        System.out.println("test_01");
         intPolicies = new ASN1EncodableVector();
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
@@ -294,14 +301,12 @@ public class PKIXPolicyMappingTest
         
         requirePolicies = new HashSet();
         requirePolicies.add("2.16.840.1.101.3.2.1.48.1");
-        testPolicies(trustCert, intCert, endCert, requirePolicies, true);
-        
+        msg = testPolicies(1, trustCert, intCert, endCert, requirePolicies, true);
+        checkMessage(1, msg, "");
         
         /**
          * test_02
          */
-        System.out.println("");
-        System.out.println("test_02");
         intPolicies = new ASN1EncodableVector();
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
@@ -314,13 +319,12 @@ public class PKIXPolicyMappingTest
         
         requirePolicies = new HashSet();
         requirePolicies.add("2.5.29.32.0");
-        testPolicies(trustCert, intCert, endCert, requirePolicies, false);
-        
+        msg = testPolicies(2, trustCert, intCert, endCert, requirePolicies, true);
+        checkMessage(2, msg, "");
+   
         /**
          * test_03
          */
-        System.out.println("");
-        System.out.println("test_03");
         intPolicies = new ASN1EncodableVector();
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.16.840.1.101.3.2.1.48.3")));
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.5.29.32.0")));
@@ -334,13 +338,12 @@ public class PKIXPolicyMappingTest
         
         requirePolicies = new HashSet();
         requirePolicies.add("2.16.840.1.101.3.2.1.48.1");
-        testPolicies(trustCert, intCert, endCert, requirePolicies, true);
+        msg = testPolicies(3, trustCert, intCert, endCert, requirePolicies, true);
+        checkMessage(3, msg, "");
         
         /**
          * test_04
          */
-        System.out.println("");
-        System.out.println("test_04");
         intPolicies = new ASN1EncodableVector();
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.16.840.1.101.3.2.1.48.3")));
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.5.29.32.0")));
@@ -354,13 +357,12 @@ public class PKIXPolicyMappingTest
         
         requirePolicies = new HashSet();
         requirePolicies.add("2.16.840.1.101.3.2.1.48.3");
-        testPolicies(trustCert, intCert, endCert, requirePolicies, true);
+        msg = testPolicies(4, trustCert, intCert, endCert, requirePolicies, true);
+        checkMessage(4, msg, "");
         
         /**
          * test_05
          */
-        System.out.println("");
-        System.out.println("test_05");
         intPolicies = new ASN1EncodableVector();
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
@@ -373,13 +375,12 @@ public class PKIXPolicyMappingTest
         
         requirePolicies = new HashSet();
         requirePolicies.add("2.16.840.1.101.3.2.1.48.2");
-        testPolicies(trustCert, intCert, endCert, requirePolicies, false);
+        msg = testPolicies(5, trustCert, intCert, endCert, requirePolicies, false);
+        checkMessage(5, msg, "Path processing failed on policy.");
         
         /**
          * test_06
          */
-        System.out.println("");
-        System.out.println("test_06");
         intPolicies = new ASN1EncodableVector();
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
@@ -392,13 +393,12 @@ public class PKIXPolicyMappingTest
         
         requirePolicies = new HashSet();
         requirePolicies.add("2.16.840.1.101.3.2.1.48.1");
-        testPolicies(trustCert, intCert, endCert, requirePolicies, true);
+        msg = testPolicies(6, trustCert, intCert, endCert, requirePolicies, true);
+        checkMessage(6, msg, "");
         
         /**
          * test_07
          */
-        System.out.println("");
-        System.out.println("test_07");
         intPolicies = new ASN1EncodableVector();
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
@@ -411,13 +411,12 @@ public class PKIXPolicyMappingTest
         
         requirePolicies = new HashSet();
         requirePolicies.add("2.16.840.1.101.3.2.1.48.3");
-        testPolicies(trustCert, intCert, endCert, requirePolicies, false);
+        msg = testPolicies(7, trustCert, intCert, endCert, requirePolicies, false);
+        checkMessage(7, msg, "Path processing failed on policy.");
         
         /**
          * test_08
          */
-        System.out.println("");
-        System.out.println("test_08");
         intPolicies = new ASN1EncodableVector();
         intPolicies.add(new PolicyInformation(new DERObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
@@ -430,9 +429,21 @@ public class PKIXPolicyMappingTest
         
         requirePolicies = new HashSet();
         requirePolicies.add("2.16.840.1.101.3.2.1.48.1");
-        testPolicies(trustCert, intCert, endCert, requirePolicies, false);
+        msg = testPolicies(8, trustCert, intCert, endCert, requirePolicies, false);
+        checkMessage(8, msg, "Path processing failed on policy.");
     }
     
+
+    private void checkMessage(
+        int index, 
+        String msg, 
+        String expected)
+    {
+        if (!msg.equals(expected))
+        {
+            fail("test " + index + " failed got: " + msg + " expected: " + expected);
+        } 
+    }
 
     public static void main(
         String[]    args)
