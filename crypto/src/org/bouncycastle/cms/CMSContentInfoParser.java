@@ -10,16 +10,19 @@ import org.bouncycastle.sasn1.cms.ContentInfoParser;
 public class CMSContentInfoParser
 {
     protected ContentInfoParser _contentInfo;
-    
-    protected static ContentInfoParser readContentInfo(
+    protected InputStream       _data;
+
+    protected CMSContentInfoParser(
         InputStream data)
         throws CMSException
     {
+        _data = data;
+        
         try
         {
             Asn1InputStream in = new Asn1InputStream(data);
-
-            return new ContentInfoParser((Asn1Sequence)in.readObject());
+    
+            _contentInfo = new ContentInfoParser((Asn1Sequence)in.readObject());
         }
         catch (IOException e)
         {
@@ -27,9 +30,12 @@ public class CMSContentInfoParser
         }
     }
     
-    protected CMSContentInfoParser(
-        ContentInfoParser contentInfo)
+    /**
+     * Close the underlying data stream.
+     * @throws IOException if the close fails.
+     */
+    public void close() throws IOException
     {
-        this._contentInfo = contentInfo;
+        _data.close();
     }
 }
