@@ -97,10 +97,10 @@ public class NamedCurveTest
                 return new SimpleTestResult(false, getName() + ": public key encoding (Q test) failed");
             }
 
-//            if (!(pubKey.getParameters() instanceof ECNamedCurveParameterSpec))
-//            {
-//                return new SimpleTestResult(false, getName() + ": public key encoding not named curve");
-//            }
+            if (!(pubKey.getParameters() instanceof ECNamedCurveParameterSpec))
+            {
+                return new SimpleTestResult(false, getName() + ": public key encoding not named curve");
+            }
 
             //
             // private key encoding test
@@ -114,15 +114,15 @@ public class NamedCurveTest
                 return new SimpleTestResult(false, getName() + ": private key encoding (D test) failed");
             }
 
-//            if (!(privKey.getParameters() instanceof ECNamedCurveParameterSpec))
-//            {
-//                return new SimpleTestResult(false, getName() + ": private key encoding not named curve");
-//            }
-//
-//            if (!((ECNamedCurveParameterSpec)privKey.getParameters()).getName().equals(name))
-//            {
-//                return new SimpleTestResult(false, getName() + ": private key encoding wrong named curve");
-//            }
+            if (!(privKey.getParameters() instanceof ECNamedCurveParameterSpec))
+            {
+                return new SimpleTestResult(false, getName() + ": private key encoding not named curve");
+            }
+
+            if (!((ECNamedCurveParameterSpec)privKey.getParameters()).getName().equals(name))
+            {
+                return new SimpleTestResult(false, getName() + ": private key encoding wrong named curve");
+            }
 
             return new SimpleTestResult(true, getName() + ": Okay");
         }
