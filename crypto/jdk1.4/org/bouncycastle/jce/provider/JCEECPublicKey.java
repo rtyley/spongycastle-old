@@ -239,7 +239,9 @@ public class JCEECPublicKey
 
         if (ecSpec instanceof ECNamedCurveParameterSpec)
         {
-            params = new X962Parameters(ECUtil.getNamedCurveByOid(ECUtil.getNamedCurveOid(((ECNamedCurveParameterSpec)ecSpec).getName())));
+            DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveParameterSpec)ecSpec).getName());
+            
+            params = new X962Parameters(curveOid);
         }
         else
         {
