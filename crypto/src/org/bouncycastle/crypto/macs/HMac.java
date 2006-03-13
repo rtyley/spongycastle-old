@@ -4,6 +4,7 @@ import java.util.Hashtable;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.params.KeyParameter;
 
@@ -52,10 +53,15 @@ public class HMac
     private static int getByteLength(
         Digest digest)
     {
+        if (digest instanceof ExtendedDigest)
+        {
+            return ((ExtendedDigest)digest).getByteLength();
+        }
+        
         Integer  b = (Integer)blockLengths.get(digest.getAlgorithmName());
         
         if (b == null)
-        {
+        {       
             throw new IllegalArgumentException("unknown digest passed: " + digest.getAlgorithmName());
         }
         
@@ -74,15 +80,7 @@ public class HMac
         this(digest, getByteLength(digest));
     }
 
-    /**
-     * Constructor for an unknown digest with it's byteLength. The byteLength is the
-     * size of the block the digest compression function is applied to, as defined in 
-     * RFC2104. For further details see the RFC.
-     * 
-     * @param digest digest function.
-     * @param byteLength byte length to use for padding.
-     */
-    public HMac(
+    private HMac(
         Digest digest,
         int    byteLength)
     {

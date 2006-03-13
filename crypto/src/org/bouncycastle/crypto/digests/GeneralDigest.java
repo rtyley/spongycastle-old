@@ -1,14 +1,15 @@
 package org.bouncycastle.crypto.digests;
 
-import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.ExtendedDigest;
 
 /**
  * base implementation of MD4 family style digest as outlined in
  * "Handbook of Applied Cryptography", pages 344 - 347.
  */
 public abstract class GeneralDigest
-    implements Digest
+    implements ExtendedDigest
 {
+    private static final int BYTE_LENGTH = 64;
     private byte[]  xBuf;
     private int     xBufOff;
 
@@ -121,6 +122,11 @@ public abstract class GeneralDigest
         }
     }
 
+    public int getByteLength()
+    {
+        return BYTE_LENGTH;
+    }
+    
     protected abstract void processWord(byte[] in, int inOff);
 
     protected abstract void processLength(long bitLength);

@@ -2,11 +2,8 @@ package org.bouncycastle.crypto.generators;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
@@ -31,7 +28,7 @@ public class PKCS12ParametersGenerator
 
     /**
      * Construct a PKCS 12 Parameters generator. This constructor will
-     * accept MD5, SHA1, RIPEMD160, and SHA256.
+     * accept any digest which also implements ExtendedDigest.
      *
      * @param digest the digest to be used as the source of derived keys.
      * @exception IllegalArgumentException if an unknown digest is passed in.
@@ -40,25 +37,10 @@ public class PKCS12ParametersGenerator
         Digest  digest)
     {
         this.digest = digest;
-        if (digest instanceof MD5Digest)
+        if (digest instanceof ExtendedDigest)
         {
-            u = 128 / 8;
-            v = 512 / 8;
-        }
-        else if (digest instanceof SHA1Digest)
-        {
-            u = 160 / 8;
-            v = 512 / 8;
-        }
-        else if (digest instanceof RIPEMD160Digest)
-        {
-            u = 160 / 8;
-            v = 512 / 8;
-        }
-        else if (digest instanceof SHA256Digest)
-        {
-            u = 256 / 8;
-            v = 512 / 8;
+            u = digest.getDigestSize();
+            v = ((ExtendedDigest)digest).getByteLength();
         }
         else
         {
