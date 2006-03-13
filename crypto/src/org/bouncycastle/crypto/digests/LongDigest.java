@@ -1,13 +1,15 @@
 package org.bouncycastle.crypto.digests;
 
-import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.ExtendedDigest;
 
 /**
  * Base class for SHA-384 and SHA-512.
  */
 public abstract class LongDigest
-    implements Digest
+    implements ExtendedDigest
 {
+    private static final int BYTE_LENGTH = 128;
+    
     private byte[]  xBuf;
     private int     xBufOff;
 
@@ -151,6 +153,11 @@ public abstract class LongDigest
         }
     }
 
+    public int getByteLength()
+    {
+        return BYTE_LENGTH;
+    }
+    
     protected void processWord(
         byte[]  in,
         int     inOff)

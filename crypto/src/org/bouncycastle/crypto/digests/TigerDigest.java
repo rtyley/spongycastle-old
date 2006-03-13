@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.digests;
 
-import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.ExtendedDigest;
 
 /**
  * implementation of Tiger based on:
@@ -8,8 +8,10 @@ import org.bouncycastle.crypto.Digest;
  *  http://www.cs.technion.ac.il/~biham/Reports/Tiger</a>
  */
 public class TigerDigest
-    implements Digest
+    implements ExtendedDigest
 {
+    private static final int BYTE_LENGTH = 64;
+    
     /*
      * S-Boxes.
      */
@@ -855,5 +857,10 @@ public class TigerDigest
         }
 
         byteCount = 0;
+    }
+
+    public int getByteLength()
+    {
+        return BYTE_LENGTH;
     }
 }

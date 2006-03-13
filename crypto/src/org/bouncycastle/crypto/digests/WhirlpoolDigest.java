@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.digests;
 
-import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.util.Arrays;
 
 
@@ -9,8 +9,10 @@ import org.bouncycastle.util.Arrays;
  * and Rijmen.
  *  
  */
-public final class WhirlpoolDigest implements Digest
+public final class WhirlpoolDigest 
+    implements ExtendedDigest
 {
+    private static final int BYTE_LENGTH = 64;
     
     private static final int DIGEST_LENGTH_BYTES = 512 / 8;
     private static final int ROUNDS = 10;
@@ -386,4 +388,9 @@ public final class WhirlpoolDigest implements Digest
         }
         return rv;
     }    
+    
+    public int getByteLength()
+    {
+        return BYTE_LENGTH;
+    }
 }
