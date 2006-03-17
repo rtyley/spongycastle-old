@@ -40,6 +40,7 @@ import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
+import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 public class SMIMESignedTest
     extends TestCase
@@ -207,8 +208,12 @@ public class SMIMESignedTest
         MimeBodyPart res = generateEncapsulatedRsa(SMIMESignedGenerator.DIGEST_SHA1, msg);       
         SMIMESignedParser s = new SMIMESignedParser(res);
 
-        verifyMessageBytes(msg, s.getContent());
+        FileBackedMimeBodyPart content = (FileBackedMimeBodyPart)s.getContent();
+        
+        verifyMessageBytes(msg, content);
     
+        content.dispose();
+        
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
         
         s.close();
