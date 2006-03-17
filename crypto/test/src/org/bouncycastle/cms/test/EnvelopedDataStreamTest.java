@@ -26,6 +26,7 @@ import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSEnvelopedDataParser;
 import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.util.encoders.Base64;
@@ -466,6 +467,51 @@ public class EnvelopedDataStreamTest
             assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }
         
+        ep.close();
+    }
+    
+    public void testTwoAESKEK()
+        throws Exception
+    {
+        byte[]    data = "WallaWallaWashington".getBytes();
+        SecretKey kek1  = CMSTestUtil.makeAES192Key();
+        SecretKey kek2  = CMSTestUtil.makeAES192Key();
+
+        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
+    
+        byte[]  kekId1 = new byte[] { 1, 2, 3, 4, 5 };
+        byte[]  kekId2 = new byte[] { 5, 4, 3, 2, 1 };
+    
+        edGen.addKEKRecipient(kek1, kekId1);
+        edGen.addKEKRecipient(kek2, kekId2);
+    
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        
+        OutputStream out = edGen.open(
+                                bOut,
+                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+        out.write(data);
+        
+        out.close();
+         
+        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(bOut.toByteArray());
+        
+        RecipientInformationStore  recipients = ep.getRecipientInfos();
+    
+        assertEquals(ep.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+        
+        RecipientId                recSel = new RecipientId();
+        
+        recSel.setKeyIdentifier(kekId2);
+        
+        RecipientInformation       recipient = recipients.get(recSel);
+        
+        assertEquals(recipient.getKeyEncryptionAlgOID(), "2.16.840.1.101.3.4.1.25");
+        
+        CMSTypedStream recData = recipient.getContentStream(kek2, "BC");
+        
+        assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
+
         ep.close();
     }
     
