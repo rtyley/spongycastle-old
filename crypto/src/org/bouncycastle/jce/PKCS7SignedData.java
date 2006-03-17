@@ -56,6 +56,7 @@ import org.bouncycastle.jce.provider.X509CertificateObject;
  * <p>
  * This class is pretty close to obsolete, for a much better (and more complete)
  * implementation of PKCS7 have a look at the org.bouncycastle.cms package.
+ * @deprecated this class really is obsolete - use the CMS package.
  */
 public class PKCS7SignedData
     implements PKCSObjectIdentifiers
