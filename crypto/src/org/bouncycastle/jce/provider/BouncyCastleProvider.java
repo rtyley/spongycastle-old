@@ -134,7 +134,13 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.6", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWithSHAAnd3KeyTripleDES", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.id_RSAES_OAEP, "OAEP");
+        
         put("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.id_RSASSA_PSS, "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA1WITHRSAANDMGF1", "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA224WITHRSAANDMGF1", "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA256WITHRSAANDMGF1", "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA384WITHRSAANDMGF1", "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA512WITHRSAANDMGF1", "PSS");
         
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITAES-CBC-BC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND192BITAES-CBC-BC", "PKCS12PBE");

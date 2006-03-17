@@ -32,7 +32,16 @@ import java.util.Vector;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERBoolean;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.misc.NetscapeRevocationURL;
@@ -703,44 +712,47 @@ public class X509CertificateObject
         InvalidKeyException, NoSuchProviderException, SignatureException
     {
         Signature   signature = null;
-
-        if (!c.getSignatureAlgorithm().equals(c.getTBSCertificate().getSignature()))
-        {
-            throw new CertificateException("signature algorithm in TBS cert not same as outer cert");
-        }
-
+        String      sigName = X509SignatureUtil.getSignatureName(c.getSignatureAlgorithm());
+        
         try
         {
-            signature = Signature.getInstance(c.getSignatureAlgorithm().getObjectId().getId(), "BC");
+            signature = Signature.getInstance(sigName, "BC");
         }
         catch (Exception e)
         {
-            signature = Signature.getInstance(c.getSignatureAlgorithm().getObjectId().getId());
+            signature = Signature.getInstance(sigName);
         }
-
-        signature.initVerify(key);
-
-        signature.update(this.getTBSCertificate());
-
-        if (!signature.verify(this.getSignature()))
-        {
-            throw new InvalidKeyException("Public key presented not for certificate signature");
-        }
+        
+        checkSignature(key, signature);
     }
-
+    
     public final void verify(
         PublicKey   key,
         String      sigProvider)
         throws CertificateException, NoSuchAlgorithmException,
         InvalidKeyException, NoSuchProviderException, SignatureException
     {
-        Signature signature = Signature.getInstance(c.getSignatureAlgorithm().getObjectId().getId(), sigProvider);
+        String    sigName = X509SignatureUtil.getSignatureName(c.getSignatureAlgorithm());
+        Signature signature = Signature.getInstance(sigName, sigProvider);
+        
+        checkSignature(key, signature);
+    }
 
+    private void checkSignature(
+        PublicKey key, 
+        Signature signature) 
+        throws CertificateException, NoSuchAlgorithmException, 
+            SignatureException, InvalidKeyException, CertificateEncodingException
+    {
         if (!c.getSignatureAlgorithm().equals(c.getTBSCertificate().getSignature()))
         {
             throw new CertificateException("signature algorithm in TBS cert not same as outer cert");
         }
+
+        DEREncodable params = c.getSignatureAlgorithm().getParameters();
         
+        X509SignatureUtil.setSignatureParameters(signature, params);
+
         signature.initVerify(key);
 
         signature.update(this.getTBSCertificate());
