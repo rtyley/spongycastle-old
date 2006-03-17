@@ -29,8 +29,8 @@ Release 1.32
 <li>The ASN1Sequence constructor for SemanticsInformation would sometimes through a ClassCastException on reconstruction an object from a byte stream. This has been fixed.
 <li>The SharedInputStream.read(buf, 0, len) method would return 0 at EOF, rather than -1. This has been fixed.
 <li>X9FieldElement could fail to encode a Fp field element correctly. This has been fixed.
-<li>The streaming S/MIME API was occasionally leaving temporary files around. This has been fixed. Note: this means that attempting to do more than one writeTo() from an 
-encapsulated MimeBodyPart will now result in an exception, unless the file based constructor for SMIMESignedParser is used.
+<li>The streaming S/MIME API was occasionally leaving temporary files around. The SIMEUtil class responsible for creating the files now returns a FileBackedMimeBodyPart object
+which has a dispose method on it which should allow removal of the file backing the body part.
 <li>An encoding defect in EnvelopedData generation in the CMS streaming, S/MIME API has been fixed.
 <li>DER constructed octet strings could cause exceptions in the streaming ASN.1 library. This has been fixed.
 <li>Several compatability issues connected with EnvelopedData decoding between the streaming CMS library and other libraries have been fixed.
