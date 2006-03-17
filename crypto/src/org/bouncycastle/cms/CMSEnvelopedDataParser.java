@@ -123,8 +123,9 @@ public class CMSEnvelopedDataParser
         //
         // prime the recepients
         //
-        List      infos = new ArrayList();
-        Iterator  it = baseInfos.iterator();
+        List        infos = new ArrayList();
+        Iterator    it = baseInfos.iterator();
+        InputStream dataStream = ((Asn1OctetString)encInfo.getEncryptedContent(BerTag.OCTET_STRING)).getOctetStream();
         
         while (it.hasNext())
         {
@@ -133,12 +134,12 @@ public class CMSEnvelopedDataParser
             if (info.getInfo() instanceof KeyTransRecipientInfo)
             {
                 infos.add(new KeyTransRecipientInformation(
-                            (KeyTransRecipientInfo)info.getInfo(), _encAlg, ((Asn1OctetString)encInfo.getEncryptedContent(BerTag.OCTET_STRING)).getOctetStream()));
+                            (KeyTransRecipientInfo)info.getInfo(), _encAlg, dataStream));
             }
             else if (info.getInfo() instanceof KEKRecipientInfo)
             {
                 infos.add(new KEKRecipientInformation(
-                            (KEKRecipientInfo)info.getInfo(), _encAlg, ((Asn1OctetString)encInfo.getEncryptedContent(BerTag.OCTET_STRING)).getOctetStream()));
+                            (KEKRecipientInfo)info.getInfo(), _encAlg, dataStream));
             }
         }
         
