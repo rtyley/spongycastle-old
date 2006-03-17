@@ -17,7 +17,7 @@ import javax.mail.internet.MimeBodyPart;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.mail.smime.util.SharedFileInputStream;
+import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 public class SMIMEUtil
 {
@@ -77,32 +77,20 @@ public class SMIMEUtil
     }
     
     /**
-     * return the MimeBodyPart described in {@link CMSTypedStream} content. 
-     * <p>
-     * <b>Note</b>: this requires the creation of a temporary file so the resulting object
-     * is designed to be single use. Once you have called the <code>writeTo()</code> method 
-     * on the body part the file will be deleted.
+     * return a file backed MimeBodyPart described in {@link CMSTypedStream} content. 
      * </p>
      */
-    public static MimeBodyPart toMimeBodyPart(
+    public static FileBackedMimeBodyPart toMimeBodyPart(
         CMSTypedStream    content)
         throws SMIMEException
     {
         try
         {
-            File         tmp = File.createTempFile("bcMail", ".mime");        
-            
-            saveContentToFile(content, tmp);
-            
-            return new FileMimeBodyPart(tmp, true);
+            return toMimeBodyPart(content, File.createTempFile("bcMail", ".mime"));
         }
         catch (IOException e)
         {
-            throw new SMIMEException("can't create temporary file: " + e, e);
-        }
-        catch (MessagingException e)
-        {
-            throw new SMIMEException("can't create part: " + e, e);
+            throw new SMIMEException("IOException creating tmp file:" + e.getMessage());
         }
     }
     
@@ -115,7 +103,7 @@ public class SMIMEUtil
      * @return the decoded body part.
      * @throws SMIMEException
      */
-    public static MimeBodyPart toMimeBodyPart(
+    public static FileBackedMimeBodyPart toMimeBodyPart(
         CMSTypedStream    content,
         File              file)
         throws SMIMEException
@@ -124,7 +112,7 @@ public class SMIMEUtil
         {
             saveContentToFile(content, file);
             
-            return new FileMimeBodyPart(file);
+            return new FileBackedMimeBodyPart(file);
         }
         catch (IOException e)
         {
@@ -175,48 +163,4 @@ public class SMIMEUtil
             throw new CertificateParsingException("exception extracting issuer and serial number: " + e);
         }
     }
-    
-    private static class FileMimeBodyPart 
-        extends MimeBodyPart
-     {
-         private final File _file;
-         private final boolean _autoDelete;
-         
-         FileMimeBodyPart(
-             File file) 
-             throws MessagingException, IOException
-         {
-             this(file, false);
-         }
-         
-         FileMimeBodyPart(
-             File file,
-             boolean autoDelete) 
-             throws MessagingException, IOException
-         {
-             super(new SharedFileInputStream(file));
-             
-             _file = file; 
-             _autoDelete = autoDelete; 
-         }
-         
-         public void writeTo(
-             OutputStream out) 
-             throws IOException, MessagingException
-         {
-             if (!_file.exists())
-             {
-                 throw new IOException("file " + _file.getCanonicalPath() + " no longer exists.");
-             }
-             
-             super.writeTo(out);
-             
-             contentStream.close();
-             
-             if (_autoDelete)
-             {
-                 _file.delete();
-             }
-         }
-     }
 }

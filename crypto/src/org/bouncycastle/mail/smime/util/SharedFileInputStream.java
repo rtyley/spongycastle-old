@@ -6,10 +6,14 @@ import java.io.FileInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.mail.internet.SharedInputStream;
 
-public class SharedFileInputStream extends FilterInputStream
+public class SharedFileInputStream 
+    extends FilterInputStream
     implements SharedInputStream
 {
     private final File _file;
@@ -18,6 +22,8 @@ public class SharedFileInputStream extends FilterInputStream
     
     private long _position;
     private long _markedPosition;
+    
+    private List _subStreams = new LinkedList();
     
     public SharedFileInputStream(
         String fileName) 
@@ -57,21 +63,27 @@ public class SharedFileInputStream extends FilterInputStream
     {
         try
         {
+            SharedFileInputStream stream;
+            
             if (finish < 0)
             {
                 if (_length > 0)
                 {
-                    return new SharedFileInputStream(_file, _start + start, _length - start);
+                    stream = new SharedFileInputStream(_file, _start + start, _length - start);
                 }
                 else
                 {
-                    return new SharedFileInputStream(_file, _start + start, -1);
+                    stream = new SharedFileInputStream(_file, _start + start, -1);
                 }
             }
             else
             {
-                return new SharedFileInputStream(_file, _start + start, finish - start);
+                stream = new SharedFileInputStream(_file, _start + start, finish - start);
             }
+            
+            _subStreams.add(stream);
+            
+            return stream;
         }
         catch (IOException e)
         {
@@ -144,5 +156,29 @@ public class SharedFileInputStream extends FilterInputStream
     {
         _position = _markedPosition;
         in.reset();
+    }
+    
+    /**
+     * Close of this stream and any substreams that have been created from it.
+     * @throws IOException on problem closing the main stream.
+     */
+    public void dispose() 
+        throws IOException 
+    {
+        Iterator it = _subStreams.iterator();
+        
+        while (it.hasNext())
+        {
+            try
+            {
+                ((SharedFileInputStream)it.next()).dispose();
+            }
+            catch (IOException e)
+            {
+                // ignore
+            }
+        }
+
+        in.close();
     }
 }
