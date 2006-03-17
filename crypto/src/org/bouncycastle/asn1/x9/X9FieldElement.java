@@ -56,20 +56,9 @@ public class X9FieldElement
      */
     public DERObject toASN1Object()
     {
-        if (f instanceof ECFieldElement.Fp)
-        {
-            BigInteger q = ((ECFieldElement.Fp)f).getQ();
-            int byteCount = converter.getQLength(q);
-            byte[] paddedBigInteger = converter.integerToBytes(f.toBigInteger(), byteCount);
-    
-            return new DEROctetString(paddedBigInteger);
-        }
-        else
-        {
-            int byteCount = (((ECFieldElement.F2m)f).getM() + 7) / 8;
-            byte[] paddedBigInteger = converter.integerToBytes(f.toBigInteger(), byteCount);
+        int byteCount = converter.getByteLength(f);
+        byte[] paddedBigInteger = converter.integerToBytes(f.toBigInteger(), byteCount);
 
-            return new DEROctetString(paddedBigInteger);
-        }
+        return new DEROctetString(paddedBigInteger);
     }
 }

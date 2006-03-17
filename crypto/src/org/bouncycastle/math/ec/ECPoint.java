@@ -111,7 +111,7 @@ public abstract class ECPoint
          */
         public byte[] getEncoded()
         {
-            int qLength = converter.getQLength(((ECFieldElement.Fp)this.getX()).q);
+            int qLength = converter.getByteLength(x);
             
             if (withCompression)
             {
@@ -278,30 +278,45 @@ public abstract class ECPoint
                 throw new RuntimeException("Point at infinity cannot be encoded");
             }
 
+            int byteCount = converter.getByteLength(x);
+            byte[] X = converter.integerToBytes(this.getX().toBigInteger(), byteCount);
+            byte[] PO;
+
             if (withCompression)
             {
-                throw new RuntimeException("not implemented");
+                // See X9.62 4.3.6 and 4.2.2
+                PO = new byte[byteCount + 1];
+
+                PO[0] = 0x02;
+                // X9.62 4.2.2 and 4.3.6:
+                // if x = 0 then ypTilde := 0, else ypTilde is the rightmost
+                // bit of y * x^(-1)
+                // if ypTilde = 0, then PC := 02, else PC := 03
+                // Note: PC === PO[0]
+                if (!(this.getX().toBigInteger().equals(BigInteger.ZERO)))
+                {
+                    if (this.getY().multiply(this.getX().invert())
+                            .toBigInteger().testBit(0))
+                    {
+                        // ypTilde = 1, hence PC = 03
+                        PO[0] = 0x03;
+                    }
+                }
+
+                System.arraycopy(X, 0, PO, 1, byteCount);
             }
             else
             {
-                int m = ((ECFieldElement.F2m)x).getM();
-                int byteCount = m/8;
-                if (m % 8 > 0) 
-                {
-                    byteCount++;
-                }
-    
-                byte[] X = converter.integerToBytes(this.getX().toBigInteger(), byteCount);
                 byte[] Y = converter.integerToBytes(this.getY().toBigInteger(), byteCount);
     
-                byte[]  PO = new byte[byteCount + byteCount + 1];
+                PO = new byte[byteCount + byteCount + 1];
     
                 PO[0] = 0x04;
                 System.arraycopy(X, 0, PO, 1, byteCount);
-                System.arraycopy(Y, 0, PO, byteCount + 1, byteCount);
-    
-                return PO;
+                System.arraycopy(Y, 0, PO, byteCount + 1, byteCount);    
             }
+
+            return PO;
         }
 
         /* (non-Javadoc)
