@@ -7,9 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Principal;
-import java.security.Provider;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CRLException;
@@ -282,29 +280,7 @@ public class X509CRLObject
 
     public String getSigAlgName()
     {
-        Provider    prov = Security.getProvider("BC");
-        String        algName = prov.getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
-
-        if (algName != null)
-        {
-            return algName;
-        }
-
-        Provider[] provs = Security.getProviders();
-
-        //
-        // search every provider looking for a real algorithm
-        //
-        for (int i = 0; i != provs.length; i++)
-        {
-            algName = provs[i].getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
-            if (algName != null)
-            {
-                return algName;
-            }
-        }
-
-        return this.getSigAlgOID();
+        return X509SignatureUtil.getSignatureName(c.getSignatureAlgorithm());
     }
 
     public String getSigAlgOID()
