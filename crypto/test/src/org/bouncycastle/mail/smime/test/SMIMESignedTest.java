@@ -225,6 +225,7 @@ public class SMIMESignedTest
         File         tmp = File.createTempFile("bcTest", ".mime");
         MimeBodyPart res = generateEncapsulatedRsa(SMIMESignedGenerator.DIGEST_SHA1, msg);       
         SMIMESignedParser s = new SMIMESignedParser(res, tmp);
+        FileBackedMimeBodyPart content = (FileBackedMimeBodyPart)s.getContent();
     
         verifyMessageBytes(msg, s.getContent());
     
@@ -234,7 +235,9 @@ public class SMIMESignedTest
         
         s.close();
         
-        assertTrue(tmp.delete());
+        content.dispose();
+        
+        assertFalse(tmp.exists());
     }
 
     public void testMD5WithRSA()
