@@ -1,12 +1,12 @@
 package org.bouncycastle.crypto.digests;
 
-import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.*;
 /**
  * implementation of MD2
  * as outlined in RFC1319 by B.Kaliski from RSA Laboratories April 1992
  */
 public class MD2Digest
-    implements Digest
+    implements ExtendedDigest
 {
     private static final int DIGEST_LENGTH = 16;
 
@@ -227,4 +227,11 @@ public class MD2Digest
       (byte)237,(byte)31,(byte)26,(byte)219,(byte)153,(byte)141,(byte)51,
       (byte)159,(byte)17,(byte)131,(byte)20
     };
+
+   public int getByteLength() 
+   {
+      return 16;
+   }
 }
+
+

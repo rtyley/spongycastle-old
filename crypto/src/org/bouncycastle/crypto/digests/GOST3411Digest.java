@@ -1,7 +1,6 @@
 package org.bouncycastle.crypto.digests;
 
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.*;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithSBox;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
@@ -10,7 +9,7 @@ import org.bouncycastle.crypto.engines.GOST28147Engine;
  * implementation of GOST R 34.11-94
  */
 public class GOST3411Digest
-    implements Digest
+    implements ExtendedDigest
 {
     private static final int    DIGEST_LENGTH = 32;
 
@@ -343,4 +342,11 @@ public class GOST3411Digest
             S[i*2] = (byte)wS[i];
         }
     }
+
+   public int getByteLength() 
+   {
+      return 32;
+   }
 }
+
+
