@@ -112,16 +112,12 @@ public class CertPathBuilderException extends GeneralSecurityException
             return null;
         }
 
-        StringBuffer s = new StringBuffer();
-        if (message != null)
-        {
-            s.append(message + "\n");
-        }
         if (cause != null)
         {
-            s.append("Cause:\n" + cause.getMessage());
+            return cause.getMessage();
         }
-        return s.toString();
+
+        return message;
     }
 
     /**
