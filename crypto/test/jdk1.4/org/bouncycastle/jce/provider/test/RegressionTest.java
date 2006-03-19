@@ -41,6 +41,7 @@ public class RegressionTest
         new CipherStreamTest(),
         new NamedCurveTest(),
         new PKIXTest(),
+        new PKIXPolicyMappingTest(),
         new NetscapeCertRequestTest(),
         new CertPathTest(),
         new CertStoreTest(),
