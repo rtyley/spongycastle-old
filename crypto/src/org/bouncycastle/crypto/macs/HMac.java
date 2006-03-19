@@ -19,9 +19,10 @@ public class HMac
     private final static byte IPAD = (byte)0x36;
     private final static byte OPAD = (byte)0x5C;
 
-    private final Digest digest;
-    private final int digestSize;
-    private final int blockLength;
+    private Digest digest;
+    private int digestSize;
+    private int blockLength;
+    
     private byte[] inputPad;
     private byte[] outputPad;
 

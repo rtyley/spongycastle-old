@@ -283,12 +283,12 @@ public abstract class ECFieldElement
         /**
          * TPB or PPB.
          */
-        private final int representation;
+        private int representation;
 
         /**
          * The exponent <code>m</code> of <code>F<sub>2<sup>m</sup></sub></code>.
          */
-        private final int m;
+        private int m;
 
         /**
          * TPB: The integer <code>k</code> where <code>x<sup>m</sup> +
@@ -298,7 +298,7 @@ public abstract class ECFieldElement
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private final int k1;
+        private int k1;
 
         /**
          * TPB: Always set to <code>0</code><br>
@@ -306,7 +306,7 @@ public abstract class ECFieldElement
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private final int k2;
+        private int k2;
 
         /**
          * TPB: Always set to <code>0</code><br>
@@ -314,7 +314,7 @@ public abstract class ECFieldElement
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private final int k3;
+        private int k3;
         
         /**
          * Constructor for PPB.
@@ -331,8 +331,12 @@ public abstract class ECFieldElement
          * represents the reduction polynomial <code>f(z)</code>.
          * @param x The BigInteger representing the value of the field element.
          */
-        public F2m(final int m, final int k1, final int k2, final int k3,
-                final BigInteger x)
+        public F2m(
+            int m, 
+            int k1, 
+            int k2, 
+            int k3,
+            BigInteger x)
         {
             super(x);
 

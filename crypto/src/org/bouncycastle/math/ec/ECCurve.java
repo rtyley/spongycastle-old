@@ -145,7 +145,7 @@ public abstract class ECCurve
         /**
          * The exponent <code>m</code> of <code>F<sub>2<sup>m</sup></sub></code>.
          */
-        private final int m;
+        private int m;
 
         /**
          * TPB: The integer <code>k</code> where <code>x<sup>m</sup> +
@@ -155,7 +155,7 @@ public abstract class ECCurve
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private final int k1;
+        private int k1;
 
         /**
          * TPB: Always set to <code>0</code><br>
@@ -163,7 +163,7 @@ public abstract class ECCurve
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private final int k2;
+        private int k2;
 
         /**
          * TPB: Always set to <code>0</code><br>
@@ -171,7 +171,7 @@ public abstract class ECCurve
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private final int k3;
+        private int k3;
 
         /**
          * Constructor for Trinomial Polynomial Basis (TPB).
@@ -323,7 +323,7 @@ public abstract class ECCurve
             ECFieldElement xp = new ECFieldElement.F2m(
                     this.m, this.k1, this.k2, this.k3, new BigInteger(1, xEnc));
             ECFieldElement yp = null;
-            if (xp.x.equals(BigInteger.ZERO))
+            if (xp.x.equals(ECConstants.ZERO))
             {
                 yp = (ECFieldElement.F2m)b;
                 for (int i = 0; i < m - 1; i++)
@@ -348,7 +348,7 @@ public abstract class ECCurve
                 if (zBit != ypBit)
                 {
                     z = z.add(new ECFieldElement.F2m(this.m, this.k1, this.k2,
-                            this.k3, BigInteger.ONE));
+                            this.k3, ECConstants.ONE));
                 }
                 yp = xp.multiply(z);
             }
@@ -367,27 +367,27 @@ public abstract class ECCurve
          */
         private ECFieldElement solveQuadradicEquation(ECFieldElement beta)
         {
-            if (beta.x.equals(BigInteger.ZERO))
+            if (beta.x.equals(ECConstants.ZERO))
             {
                 return new ECFieldElement.F2m(
-                        this.m, this.k1, this.k2, this.k3, BigInteger.ZERO);
+                        this.m, this.k1, this.k2, this.k3, ECConstants.ZERO);
             }
             ECFieldElement z = null;
             ECFieldElement gamma = new ECFieldElement.F2m(this.m, this.k1,
-                    this.k2, this.k3, BigInteger.ZERO);
-            while (gamma.toBigInteger().equals(BigInteger.ZERO))
+                    this.k2, this.k3, ECConstants.ZERO);
+            while (gamma.toBigInteger().equals(ECConstants.ZERO))
             {
                 ECFieldElement t = new ECFieldElement.F2m(this.m, this.k1,
                         this.k2, this.k3, new BigInteger(m, new Random()));
                 z = new ECFieldElement.F2m(this.m, this.k1, this.k2, this.k3,
-                        BigInteger.ZERO);
+                        ECConstants.ZERO);
                 ECFieldElement w = beta;
                 for (int i = 1; i <= m - 1; i++)
                 {
                     z = z.square().add(w.square().multiply(t));
                     w = w.square().add(beta);
                 }
-                if (!w.x.equals(BigInteger.ZERO))
+                if (!w.x.equals(ECConstants.ZERO))
                 {
                     return null;
                 }
@@ -395,6 +395,7 @@ public abstract class ECCurve
             }
             return z;
         }
+        
         public boolean equals(
             Object anObject)
         {
@@ -417,7 +418,7 @@ public abstract class ECCurve
 
         public int hashCode()
         {
-            return a.hashCode() ^ b.hashCode() ^ m ^ k1 ^ k2 ^ k3;
+            return this.a.hashCode() ^ this.b.hashCode() ^ m ^ k1 ^ k2 ^ k3;
         }
 
         public int getM()
