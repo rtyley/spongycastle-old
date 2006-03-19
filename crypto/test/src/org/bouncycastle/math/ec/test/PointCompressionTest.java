@@ -3,7 +3,9 @@ package org.bouncycastle.math.ec.test;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
@@ -53,5 +55,10 @@ public class PointCompressionTest
                 assertEquals(CURVES[j] + ": q1 does not equal q2", q1, q2);
             }
         }
+    }
+    
+    public static Test suite()
+    {
+        return new TestSuite(PointCompressionTest.class);
     }
 }
