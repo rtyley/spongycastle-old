@@ -57,11 +57,21 @@ public abstract class ECPoint
 
         ECPoint o = (ECPoint)other;
 
+        if (this.isInfinity() && o.isInfinity())
+        {
+            return true;
+        }
+        
         return x.equals(o.x) && y.equals(o.y);
     }
 
     public int hashCode()
     {
+        if (this.isInfinity())
+        {
+            return 0;
+        }
+        
         return x.hashCode() ^ y.hashCode();
     }
 
@@ -151,10 +161,10 @@ public abstract class ECPoint
         // B.3 pg 62
         public ECPoint add(ECPoint b)
         {
-            ECFieldElement gamma = b.y.subtract(y).divide(b.x.subtract(x));
+            ECFieldElement gamma = b.y.subtract(this.y).divide(b.x.subtract(this.x));
 
-            ECFieldElement x3 = gamma.multiply(gamma).subtract(x).subtract(b.x);
-            ECFieldElement y3 = gamma.multiply(x.subtract(x3)).subtract(y);
+            ECFieldElement x3 = gamma.multiply(gamma).subtract(this.x).subtract(b.x);
+            ECFieldElement y3 = gamma.multiply(this.x.subtract(x3)).subtract(this.y);
 
             return new ECPoint.Fp(curve, x3, y3);
         }
@@ -162,12 +172,12 @@ public abstract class ECPoint
         // B.3 pg 62
         public ECPoint twice()
         {
-            ECFieldElement TWO = curve.fromBigInteger(BigInteger.valueOf(2));
-            ECFieldElement THREE = curve.fromBigInteger(BigInteger.valueOf(3));
-            ECFieldElement gamma = x.multiply(x).multiply(THREE).add(curve.a).divide(y.multiply(TWO));
+            ECFieldElement TWO = this.curve.fromBigInteger(BigInteger.valueOf(2));
+            ECFieldElement THREE = this.curve.fromBigInteger(BigInteger.valueOf(3));
+            ECFieldElement gamma = this.x.multiply(this.x).multiply(THREE).add(curve.a).divide(y.multiply(TWO));
 
-            ECFieldElement x3 = gamma.multiply(gamma).subtract(x.multiply(TWO));
-            ECFieldElement y3 = gamma.multiply(x.subtract(x3)).subtract(y);
+            ECFieldElement x3 = gamma.multiply(gamma).subtract(this.x.multiply(TWO));
+            ECFieldElement y3 = gamma.multiply(this.x.subtract(x3)).subtract(this.y);
                 
             return new ECPoint.Fp(curve, x3, y3);
         }
@@ -273,12 +283,12 @@ public abstract class ECPoint
          */
         public byte[] getEncoded()
         {
-            if (isInfinity()) 
+            if (this.isInfinity()) 
             {
                 throw new RuntimeException("Point at infinity cannot be encoded");
             }
 
-            int byteCount = converter.getByteLength(x);
+            int byteCount = converter.getByteLength(this.x);
             byte[] X = converter.integerToBytes(this.getX().toBigInteger(), byteCount);
             byte[] PO;
 
@@ -293,7 +303,7 @@ public abstract class ECPoint
                 // bit of y * x^(-1)
                 // if ypTilde = 0, then PC := 02, else PC := 03
                 // Note: PC === PO[0]
-                if (!(this.getX().toBigInteger().equals(BigInteger.ZERO)))
+                if (!(this.getX().toBigInteger().equals(ECConstants.ZERO)))
                 {
                     if (this.getY().multiply(this.getX().invert())
                             .toBigInteger().testBit(0))
@@ -325,34 +335,34 @@ public abstract class ECPoint
         public ECPoint add(ECPoint b)
         {
             // Check, if points are on the same curve
-            if (!(curve.equals(b.getCurve())))
+            if (!(this.curve.equals(b.getCurve())))
             {
                 throw new IllegalArgumentException("Only points on the same "
                         + "curve can be added");
             }
 
-            if (isInfinity())
+            if (this.isInfinity())
             {
                 if (b.isInfinity())
                 {
-                    return new ECPoint.F2m(curve);
+                    return new ECPoint.F2m(this.curve);
                 }
                 return new ECPoint.F2m(b.getCurve(), b.getX(), b.getY(), withCompression);
             }
 
             if (b.isInfinity())
             {
-                return new ECPoint.F2m(curve, x, y, withCompression);
+                return new ECPoint.F2m(this.curve, this.x, this.y, withCompression);
             }
 
-            ECFieldElement.F2m.checkFieldElements(x, b.getX());
+            ECFieldElement.F2m.checkFieldElements(this.x, b.getX());
             ECFieldElement.F2m x2 = (ECFieldElement.F2m)b.getX();
             ECFieldElement.F2m y2 = (ECFieldElement.F2m)b.getY();
 
             // Check if b = this or b = -this
-            if (x.equals(x2))
+            if (this.x.equals(x2))
             {
-                if (y.equals(y2))
+                if (this.y.equals(y2))
                 {
                     // this = b, i.e. this must be doubled
                     return this.twice();
@@ -360,18 +370,18 @@ public abstract class ECPoint
                 else
                 {
                     // this = -b, i.e. the result is the point at infinity
-                    return new ECPoint.F2m(curve);
+                    return new ECPoint.F2m(this.curve);
                 }
             }
 
             ECFieldElement.F2m lambda
-                = (ECFieldElement.F2m)(y.add(y2)).divide(x.add(x2));
+                = (ECFieldElement.F2m)(this.y.add(y2)).divide(this.x.add(x2));
 
             ECFieldElement.F2m x3
-                = (ECFieldElement.F2m)lambda.square().add(lambda).add(x).add(x2).add(curve.getA());
+                = (ECFieldElement.F2m)lambda.square().add(lambda).add(this.x).add(x2).add(this.curve.getA());
 
             ECFieldElement.F2m y3
-                = (ECFieldElement.F2m)lambda.multiply(x.add(x3)).add(x3).add(y);
+                = (ECFieldElement.F2m)lambda.multiply(this.x.add(x3)).add(x3).add(this.y);
 
             return new ECPoint.F2m(curve, x3, y3, withCompression);
         }
@@ -392,7 +402,7 @@ public abstract class ECPoint
          */
         public ECPoint twice()
         {
-            if (isInfinity() || (x.toBigInteger().equals(BigInteger.ZERO))) 
+            if (this.isInfinity() || (this.x.toBigInteger().equals(ECConstants.ZERO))) 
             {
                 // Twice identity element (point at infinity) is identity
                 // element, and if x1 == null, then (x1, y1) == (x1, x1 + y1)
@@ -401,17 +411,17 @@ public abstract class ECPoint
             }
 
             ECFieldElement.F2m lambda
-                = (ECFieldElement.F2m)x.add(y.divide(x));
+                = (ECFieldElement.F2m)this.x.add(this.y.divide(this.x));
 
             ECFieldElement.F2m x3
                 = (ECFieldElement.F2m)lambda.square().add(lambda).
-                    add(curve.getA());
+                    add(this.curve.getA());
 
             ECFieldElement.F2m y3
-                = (ECFieldElement.F2m)x.square().add(lambda.multiply(x3)).
+                = (ECFieldElement.F2m)this.x.square().add(lambda.multiply(x3)).
                     add(x3);
 
-            return new ECPoint.F2m(curve, x3, y3, withCompression);
+            return new ECPoint.F2m(this.curve, x3, y3, withCompression);
         }
 
         public ECPoint multiply(
