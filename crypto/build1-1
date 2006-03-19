@@ -22,7 +22,6 @@ then
     mkdir lcrypto-jdk11-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/LICENSE.java src/org/bouncycastle/math src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1 | (cd lcrypto-jdk11-$base; tar xf -)
     (cd test; tar cf - src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1) | (cd lcrypto-jdk11-$base; tar xf -)
-    (cd jdk1.1; tar cf - org/bouncycastle/asn1/* | (cd ../lcrypto-jdk11-$base/src; tar xf -))
     rm -f lcrypto-jdk11-$base/src/org/bouncycastle/crypto/test/AESVector*
 
     (
@@ -123,13 +122,16 @@ then
     rm -rf src/org/bouncycastle/voms
     rm -rf src/org/bouncycastle/jce/ECPointUtil.java
     rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
+    rm -rf src/org/bouncycastle/jce/provider/EC5*.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECEncodingTest.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECNRTest.java
     rm -rf src/org/bouncycastle/jce/provider/test/IESTest.java
     rm -rf src/org/bouncycastle/jce/provider/test/AttrCertTest.java
+    rm -rf src/org/bouncycastle/jce/provider/test/PKIXPolicyMappingTest.java
     rm -rf src/org/bouncycastle/jce/spec/ECNamedCurveSpec.java
     rm -rf src/org/bouncycastle/mail
+    rm -rf src/org/bouncycastle/math/ec/test
     rm -rf src/org/bouncycastle/cms
     rm -rf src/org/bouncycastle/ocsp
     rm -rf src/org/bouncycastle/bcpg
@@ -256,7 +258,7 @@ then
     export PATH
 
     rm src/org/bouncycastle/openpgp/examples/DSAElGamalKeyRingGenerator.java
-    rm src/org/bouncycastle/openpgp/test/AllTests.java
+    rm src/org/bouncycastle/openpgp/examples/AllTests.java
 
     javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -270,6 +272,8 @@ then
         org.bouncycastle.openpgp \
         org.bouncycastle.openpgp.examples \
         org.bouncycastle.openpgp.test > /dev/null \
+
+    rm -rf src/org/bouncycastle/openpgp/test/AllTests.java
 
     ed src/org/bouncycastle/bcpg/ArmoredOutputStream.java <<%
 /@RELEASE_NAME@/s//$version/
