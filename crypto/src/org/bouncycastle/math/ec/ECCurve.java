@@ -326,7 +326,7 @@ public abstract class ECCurve
             if (xp.x.equals(BigInteger.ZERO))
             {
                 yp = (ECFieldElement.F2m)b;
-                for (int i = 0; i != m; i++)
+                for (int i = 0; i < m - 1; i++)
                 {
                     yp = yp.square();
                 }
@@ -347,7 +347,7 @@ public abstract class ECCurve
                 }
                 if (zBit != ypBit)
                 {
-                    z.add(new ECFieldElement.F2m(this.m, this.k1, this.k2,
+                    z = z.add(new ECFieldElement.F2m(this.m, this.k1, this.k2,
                             this.k3, BigInteger.ONE));
                 }
                 yp = xp.multiply(z);
