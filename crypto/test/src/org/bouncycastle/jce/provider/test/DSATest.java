@@ -228,9 +228,9 @@ public class DSATest
         {
             public void nextBytes(byte[] bytes)
             {
-                byte[] k = new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655").toByteArray();
+                byte[] kVal = new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655").toByteArray();
 
-                System.arraycopy(k, k.length-bytes.length, bytes, 0, bytes.length);
+                System.arraycopy(kVal, kVal.length-bytes.length, bytes, 0, bytes.length);
             }
         };
         
