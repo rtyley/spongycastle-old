@@ -26,7 +26,7 @@ Release 1.32
 <h3>2.1.2 Defects Fixed</h3>
 <ul>
 <li>Further work has been done on RFC 3280 compliance.
-<li>The ASN1Sequence constructor for SemanticsInformation would sometimes through a ClassCastException on reconstruction an object from a byte stream. This has been fixed.
+<li>The ASN1Sequence constructor for SemanticsInformation would sometimes throw a ClassCastException on reconstruction an object from a byte stream. This has been fixed.
 <li>The SharedInputStream.read(buf, 0, len) method would return 0 at EOF, rather than -1. This has been fixed.
 <li>X9FieldElement could fail to encode a Fp field element correctly. This has been fixed.
 <li>The streaming S/MIME API was occasionally leaving temporary files around. The SIMEUtil class responsible for creating the files now returns a FileBackedMimeBodyPart object
@@ -34,6 +34,7 @@ which has a dispose method on it which should allow removal of the file backing 
 <li>An encoding defect in EnvelopedData generation in the CMS streaming, S/MIME API has been fixed.
 <li>DER constructed octet strings could cause exceptions in the streaming ASN.1 library. This has been fixed.
 <li>Several compatibility issues connected with EnvelopedData decoding between the streaming CMS library and other libraries have been fixed.
+<li>JDK 1.4 and earlier would sometimes encode named curve parameters explicitly. This has been fixed.
 </ul>
 
 <h3>2.1.3 Additional Features and Functionality</h3>
@@ -45,7 +46,7 @@ which has a dispose method on it which should allow removal of the file backing 
 <li>Support has been added for repeated attributes in CMS and S/MIME messages.
 <li>A wider range of RSA-PSS signature types is now supported for CRL and Certificate verification.
 </ul>
-<h3>2.1.4 Possible compatability issue</h3>
+<h3>2.1.4 Possible compatibility issue</h3>
 <ul>
 <li>Previously elliptic curve keys and points were generated with point compression enabled by default.
 Owing to patent issues in some jurisdictions, they are now generated with point compression disabled by default.
