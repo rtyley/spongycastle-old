@@ -28,7 +28,6 @@
                 <exclude name="**/ECDSA5Test.java" />
                 <exclude name="**/NamedCurveTest.java" />
                 <exclude name="**/nist/NistCertPathTest.java" />
-                <exclude name="**/PKIXPolicyMappingTest.java" />
             </fileset>
             <fileset dir="test/src" includes="**/*.html" />
             <fileset dir="test/src" includes="**/*.pem" />

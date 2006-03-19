@@ -117,8 +117,10 @@ then
     rm -rf src/org/bouncycastle/openpgp
     rm -rf src/org/bouncycastle/tsp
     rm -rf src/org/bouncycastle/sasn1/test
+    rm -rf src/org/bouncycastle/math/ec/test
     rm -rf src/org/bouncycastle/jce/ECPointUtil.java
     rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
+    rm -rf src/org/bouncycastle/jce/provider/EC5*.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
     rm -rf src/org/bouncycastle/jce/spec/ECNamedCurveSpec.java
     rm -rf src/org/bouncycastle/util/encoders/test/*.java
