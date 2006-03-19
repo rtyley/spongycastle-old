@@ -119,41 +119,41 @@ public abstract class ECFieldElement
                 BigInteger U, V;
                 while (true)
                 {
-                    while (!(P.multiply(P).subtract(Q.multiply(BigInteger.valueOf(4))).compareTo(BigInteger.ZERO) == 1))
+                    while (!(P.multiply(P).subtract(Q.multiply(BigInteger.valueOf(4))).compareTo(ECConstants.ZERO) == 1))
                     {
                         P = new BigInteger(this.x.bitLength(), new Random());
                     }
-                    BigInteger u = q.subtract(BigInteger.ONE).divide(
+                    BigInteger u = q.subtract(ECConstants.ONE).divide(
                             BigInteger.valueOf(4));
                     BigInteger result[] = lucasSequence(q, P, Q, u.multiply(
-                            BigInteger.valueOf(2)).add(BigInteger.ONE));
+                            BigInteger.valueOf(2)).add(ECConstants.ONE));
                     U = result[0];
                     V = result[1];
                     if (V.multiply(V).equals(Q.multiply(BigInteger.valueOf(4))))
                     {
                         return new Fp(q, V.divide(BigInteger.valueOf(2)));
                     }
-                    if (!U.equals(BigInteger.ONE))
+                    if (!U.equals(ECConstants.ONE))
                     {
                         return null;
                     }
                 }
  */
                 Random rand = new Random();
-                BigInteger legendreExponent = q.subtract(BigInteger.ONE).divide(BigInteger.valueOf(2));
-                if (!(x.modPow(legendreExponent, q).equals(BigInteger.ONE)))
+                BigInteger legendreExponent = q.subtract(ECConstants.ONE).divide(BigInteger.valueOf(2));
+                if (!(x.modPow(legendreExponent, q).equals(ECConstants.ONE)))
                 {
                     return null;
                 }
                 BigInteger fourX = BigInteger.valueOf(4).multiply(x);
                 BigInteger r = new BigInteger(q.bitLength(), rand).mod(q);
                 r = BigInteger.valueOf(2);
-                while (!(r.multiply(r).subtract(fourX).modPow(legendreExponent, q).equals(q.subtract(BigInteger.ONE))))
+                while (!(r.multiply(r).subtract(fourX).modPow(legendreExponent, q).equals(q.subtract(ECConstants.ONE))))
                 {
                     r = new BigInteger(q.bitLength(), rand).mod(q);
                 }
                 
-                BigInteger n1 = q.subtract(BigInteger.ONE).divide(BigInteger.valueOf(4));
+                BigInteger n1 = q.subtract(ECConstants.ONE).divide(BigInteger.valueOf(4));
                 BigInteger n2 = q.add(BigInteger.valueOf(3)).divide(BigInteger.valueOf(4));
                 BigInteger root = x.multiply(BigInteger.valueOf(2).multiply(r).modPow(q.subtract(BigInteger.valueOf(2)), q)).multiply(W(n1, r, x, q).add(W(n2, r, x, q))).mod(q);
                 return new Fp(q, root);
@@ -164,7 +164,7 @@ public abstract class ECFieldElement
 
         private BigInteger W(BigInteger n, BigInteger r, BigInteger x, BigInteger p)
         {
-            if (n.equals(BigInteger.ONE))
+            if (n.equals(ECConstants.ONE))
             {
                 return r.multiply(r).multiply(x.modPow(q.subtract(BigInteger.valueOf(2)), q)).subtract(BigInteger.valueOf(2)).mod(p);
             }
@@ -173,9 +173,9 @@ public abstract class ECFieldElement
                 BigInteger w = W(n.divide(BigInteger.valueOf(2)), r, x, p);
                 return w.multiply(w).subtract(BigInteger.valueOf(2)).mod(p);
             }
-            BigInteger w1 = W(n.add(BigInteger.ONE).divide(BigInteger.valueOf(2)), r, x, p);
-            BigInteger w2 = W(n.subtract(BigInteger.ONE).divide(BigInteger.valueOf(2)), r, x, p);
-            return w1.multiply(w2).subtract(W(BigInteger.ONE, r, x, p)).mod(p);
+            BigInteger w1 = W(n.add(ECConstants.ONE).divide(BigInteger.valueOf(2)), r, x, p);
+            BigInteger w2 = W(n.subtract(ECConstants.ONE).divide(BigInteger.valueOf(2)), r, x, p);
+            return w1.multiply(w2).subtract(W(ECConstants.ONE, r, x, p)).mod(p);
         }
         
         /**
@@ -207,7 +207,7 @@ public abstract class ECFieldElement
                 BigInteger Q, BigInteger k) {
             BigInteger D = P.multiply(P).subtract(
                     Q.multiply(BigInteger.valueOf(4)));
-            BigInteger U = BigInteger.ONE;
+            BigInteger U = ECConstants.ONE;
             BigInteger V = P;
             BigInteger temp;
             for (int i = k.bitLength() - 2; i >= 0; i--) {
@@ -499,7 +499,7 @@ public abstract class ECFieldElement
             } 
             else 
             {
-                cz = BigInteger.ZERO;
+                cz = ECConstants.ZERO;
             }
 
             for (int i = 1; i < this.m; i++) 
@@ -553,7 +553,7 @@ public abstract class ECFieldElement
             }
 
             // v(z) := f(z)
-            BigInteger vz = BigInteger.ONE.shiftLeft(m);
+            BigInteger vz = ECConstants.ONE.shiftLeft(m);
             vz = vz.setBit(0);
             vz = vz.setBit(this.k1);
             if (this.representation == PPB) 
@@ -563,11 +563,11 @@ public abstract class ECFieldElement
             }
 
             // g1(z) := 1, g2(z) := 0
-            BigInteger g1z = BigInteger.ONE;
-            BigInteger g2z = BigInteger.ZERO;
+            BigInteger g1z = ECConstants.ONE;
+            BigInteger g2z = ECConstants.ZERO;
 
             // while u != 1
-            while (!(uz.equals(BigInteger.ZERO))) 
+            while (!(uz.equals(ECConstants.ZERO))) 
             {
                 // j := deg(u(z)) - deg(v(z))
                 int j = uz.bitLength() - vz.bitLength();
@@ -606,7 +606,7 @@ public abstract class ECFieldElement
 
         public ECFieldElement sqrt()
         {
-            throw new UnsupportedOperationException("Not implemented");
+            throw new RuntimeException("Not implemented");
         }
 
         /**
