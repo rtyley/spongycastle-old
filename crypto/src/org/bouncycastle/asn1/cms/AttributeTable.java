@@ -16,7 +16,7 @@ public class AttributeTable
     public AttributeTable(
         Hashtable  attrs)
     {
-        attributes = new Hashtable(attrs);
+        attributes = copyTable(attrs);
     }
 
     public AttributeTable(
@@ -125,7 +125,7 @@ public class AttributeTable
     
     public Hashtable toHashtable()
     {
-        return new Hashtable(attributes);
+        return copyTable(attributes);
     }
     
     public ASN1EncodableVector toASN1EncodableVector()
@@ -153,5 +153,21 @@ public class AttributeTable
         }
         
         return v;
+    }
+    
+    private Hashtable copyTable(
+        Hashtable in)
+    {
+        Hashtable   out = new Hashtable();
+        Enumeration e = in.keys();
+        
+        while (e.hasMoreElements())
+        {
+            Object key = e.nextElement();
+            
+            out.put(key, in.get(key));
+        }
+        
+        return out;
     }
 }
