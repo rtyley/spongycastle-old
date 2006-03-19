@@ -6,6 +6,7 @@ import java.util.Hashtable;
 
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
@@ -139,7 +140,7 @@ public class SECNamedCurves
     static final int sect163r1k3 = 7;
 
     // a = 1
-    static final BigInteger sect163r1a = BigInteger.ONE; 
+    static final BigInteger sect163r1a = ECConstants.ONE; 
 
     // b = 20a601907b8c953ca1481eb10512f78744a3205fd
     static final BigInteger sect163r1b = new BigInteger("20a601907b8c953ca1481eb10512f78744a3205fd", 16); 
@@ -182,7 +183,7 @@ public class SECNamedCurves
     static final int sect233r1k3 = 0;
 
     // a = 1
-    static final BigInteger sect233r1a = BigInteger.ONE; 
+    static final BigInteger sect233r1a = ECConstants.ONE; 
 
     // b = 066647ede6c332c7f8c0923bb58213b333b20e9ce4281fe115f7d8f90ad
     static final BigInteger sect233r1b = new BigInteger("066647ede6c332c7f8c0923bb58213b333b20e9ce4281fe115f7d8f90ad", 16); 
@@ -226,7 +227,7 @@ public class SECNamedCurves
     static final int sect283r1k3 = 12;
 
     // a = 1
-    static final BigInteger sect283r1a = BigInteger.ONE; 
+    static final BigInteger sect283r1a = ECConstants.ONE; 
 
     // b = 27b680ac8b8596da5a4af8a19a0303fca97fd7645309fa2a581485af6263e313b79a2f5
     static final BigInteger sect283r1b = new BigInteger("27b680ac8b8596da5a4af8a19a0303fca97fd7645309fa2a581485af6263e313b79a2f5", 16); 
@@ -270,7 +271,7 @@ public class SECNamedCurves
     static final int sect409r1k3 = 0;
 
     // a = 1
-    static final BigInteger sect409r1a = BigInteger.ONE; 
+    static final BigInteger sect409r1a = ECConstants.ONE; 
 
     // b = 21a5c2c8ee9feb5c4b9a753b7b476b7fd6422ef1f3dd674761fa99d6ac27c8a9a197b272822f6cd57a55aa4f50ae317b13545f
     static final BigInteger sect409r1b = new BigInteger("21a5c2c8ee9feb5c4b9a753b7b476b7fd6422ef1f3dd674761fa99d6ac27c8a9a197b272822f6cd57a55aa4f50ae317b13545f", 16); 
@@ -314,7 +315,7 @@ public class SECNamedCurves
     static final int sect571r1k3 = 10;
 
     // a = 1
-    static final BigInteger sect571r1a = BigInteger.ONE; 
+    static final BigInteger sect571r1a = ECConstants.ONE; 
 
     // b = 2f40e7e2221f295de297117b7f3d62f5c6a97ffcb8ceff1cd6ba8ce4a9a18ad84ffabbd8efa59332be7ad6756a66e294afd185a78ff12aa520e4de739baca0c7ffeff7f2955727a
     static final BigInteger sect571r1b = new BigInteger("2f40e7e2221f295de297117b7f3d62f5c6a97ffcb8ceff1cd6ba8ce4a9a18ad84ffabbd8efa59332be7ad6756a66e294afd185a78ff12aa520e4de739baca0c7ffeff7f2955727a", 16); 
