@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
 import java.security.cert.*;
+import org.bouncycastle.jce.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,11 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.X509Principal;
-
 /**
- * Implements the PKIX CertPathBuilding algorithem for BouncyCastle.<br />
+ * Implements the PKIX CertPathBuilding algorithem for BouncyCastle.
  * <br />
  * <b>MAYBE: implement more CertPath validation whil build path to omit invalid pathes</b>
  *
@@ -41,93 +40,113 @@ public class PKIXCertPathBuilderSpi
 
         PKIXBuilderParameters pkixParams = (PKIXBuilderParameters)params;
 
-        Iterator iter;
         Collection targets;
         Iterator targetIter;
         List certPathList = new ArrayList();
-        TrustAnchor trust = null;
         X509Certificate cert;
-        X509CertSelector certSelectX509 = null;
-        Collection certs;
-        CertPath certPath = null;
-        CertPathValidatorException certPathException = null;
+        Collection      certs;
+        CertPath        certPath = null;
+        Exception       certPathException = null;
+
+        // search target certificates
+        CertSelector certSelect = pkixParams.getTargetCertConstraints();
+        if (certSelect == null)
+        {
+            throw new CertPathBuilderException("targetCertConstraints must be non-null for CertPath building");
+        }
 
         try
         {
-            // search target certificates
-            CertSelector certSelect = pkixParams.getTargetCertConstraints();
-            if ( certSelect == null )
-            throw new CertPathBuilderException("targetCertConstraints must be non-null for CertPath building");
-            targets = findCertificates(certSelect, pkixParams.getCertStores() );
-            if ( targets.isEmpty() )
+            targets = findCertificates(certSelect, pkixParams.getCertStores());
+        }
+        catch (CertStoreException e)
+        {
+            throw new CertPathBuilderException(e);
+        }
+
+        if (targets.isEmpty())
+        {
             throw new CertPathBuilderException("no certificate found matching targetCertContraints");
+        }
 
-            // check all potential target certificates
-            targetIter = targets.iterator();
-            while ( targetIter.hasNext() )
+        CertificateFactory  cFact;
+        CertPathValidator   validator;
+
+        try
+        {
+            cFact = CertificateFactory.getInstance("X.509", "BC");
+            validator = CertPathValidator.getInstance("PKIX", "BC");
+        }
+        catch (Exception e)
+        {
+            throw new CertPathBuilderException("exception creating support classes: " + e);
+        }
+
+        //
+        // check all potential target certificates
+        targetIter = targets.iterator();
+        while (targetIter.hasNext())
+        {
+            cert = (X509Certificate)targetIter.next();
+            certPathList.clear();
+            while (cert != null)
             {
-                cert = (X509Certificate)targetIter.next();
-                certPathList.clear();
-                while ( cert != null )
-                {
-                    // add cert to the certpath
-                    certPathList.add( cert );
+                // add cert to the certpath
+                certPathList.add(cert);
 
-                    // check wether the issuer of <cert> is a TrustAnchor 
-                    if (findTrustAnchor(cert, pkixParams.getTrustAnchors()) != null)
+                // check wether the issuer of <cert> is a TrustAnchor 
+                if (findTrustAnchor(cert, pkixParams.getTrustAnchors()) != null)
+                {
+                    try
                     {
-                        try
-                        {
-                            certPath = CertificateFactory.getInstance("X.509", "BC").generateCertPath( certPathList );
-                            CertPathValidator validator = CertPathValidator.getInstance("PKIX", "BC");
-                            PKIXCertPathValidatorResult result =
-                            (PKIXCertPathValidatorResult) validator.validate(certPath, pkixParams);
-                            return new PKIXCertPathBuilderResult(certPath,
-                                         result.getTrustAnchor(),
-                                         result.getPolicyTree(),
-                                         result.getPublicKey() );
-                        }
-                        catch (CertPathValidatorException ex)
-                        {
-                            certPathException = ex;
-                        }
-                        // if validation failed go to next certificate
-                        cert = null;
+                        certPath = cFact.generateCertPath(certPathList);
+
+                        PKIXCertPathValidatorResult result = (PKIXCertPathValidatorResult)validator.validate(certPath, pkixParams);
+
+                        return new PKIXCertPathBuilderResult(certPath,
+                                     result.getTrustAnchor(),
+                                     result.getPolicyTree(),
+                                     result.getPublicKey());
                     }
-                    else
+                    catch (CertificateException ex)
                     {
-                        // try to get the issuer certificate from one
-                        // of the CertStores
-                        try
+                        certPathException = ex;
+                    }
+                    catch (CertPathValidatorException ex)
+                    {
+                        certPathException = ex;
+                    }
+                    // if validation failed go to next certificate
+                    cert = null;
+                }
+                else
+                {
+                    // try to get the issuer certificate from one
+                    // of the CertStores
+                    try
+                    {
+                        X509Certificate issuer = findIssuer(cert, pkixParams.getCertStores());
+                        if (issuer.equals(cert))
                         {
-                            X509Certificate issuer = findIssuer(cert, pkixParams.getCertStores());
-                            if (issuer.equals(cert))
-                            {
-                                cert = null;
-                            }
-                            else
-                            {
-                                cert = issuer;
-                            }
-                        }
-                        catch (CertPathValidatorException ex)
-                        {
-                            certPathException = ex;
                             cert = null;
                         }
+                        else
+                        {
+                            cert = issuer;
+                        }
+                    }
+                    catch (CertPathValidatorException ex)
+                    {
+                        certPathException = ex;
+                        cert = null;
                     }
                 }
             }
         }
-        catch (Exception ex)
-        {
-            throw new CertPathBuilderException( 
-                "Exception thrown while doing CertPath building\n", ex );
-        }
 
         if (certPath != null)
         {
-            throw new CertPathBuilderException("found certifiacte chain, but could not be validated", certPathException);
+            throw new CertPathBuilderException("found certificate chain, but could not be validated", certPathException);
         }
 
         throw new CertPathBuilderException("unable to find certificate chain");
@@ -148,10 +167,10 @@ public class PKIXCertPathBuilderSpi
      * has thrown an exception. This Exception can be obtainted with
      * <code>getCause()</code> method.
      **/
-    static final TrustAnchor findTrustAnchor(
+    final TrustAnchor findTrustAnchor(
         X509Certificate cert,
         Set             trustAnchors) 
-        throws CertPathValidatorException
+        throws CertPathBuilderException
     {
         Iterator iter = trustAnchors.iterator();
         TrustAnchor trust = null;
@@ -162,19 +181,23 @@ public class PKIXCertPathBuilderSpi
 
         try
         {
-            certSelectX509.setSubject(((X509Principal)cert.getIssuerDN()).getEncoded());
+            certSelectX509.setSubject(PrincipalUtil.getIssuerX509Principal(cert).getEncoded());
+        }
+        catch (CertificateEncodingException ex)
+        {
+            throw new CertPathBuilderException("can't get trust anchor principal",null);
         }
         catch (IOException ex)
         {
-             throw new CertPathValidatorException("can't get trust anchor principal",null);
+            throw new CertPathBuilderException("can't get trust anchor principal",null);
         }
 
-        while ( iter.hasNext() && trust == null )
+        while (iter.hasNext() && trust == null)
         {
             trust = (TrustAnchor)iter.next();
-            if ( trust.getTrustedCert() != null )
+            if (trust.getTrustedCert() != null)
             {
-                if ( certSelectX509.match(trust.getTrustedCert()) )
+                if (certSelectX509.match(trust.getTrustedCert()))
                 {
                     trustPublicKey = trust.getTrustedCert().getPublicKey();
                 }
@@ -188,8 +211,8 @@ public class PKIXCertPathBuilderSpi
             {
                 try
                 {
-                    X509Name certIssuer = new X509Name(trimX509Name(cert.getIssuerDN().getName()));
-                    X509Name caName = new X509Name(trimX509Name(trust.getCAName()));
+                    X509Principal certIssuer = PrincipalUtil.getIssuerX509Principal(cert);
+                    X509Principal caName = new X509Principal(trust.getCAName());
                     if (certIssuer.equals(caName))
                     {
                         trustPublicKey = trust.getCAPublicKey();
@@ -198,6 +221,10 @@ public class PKIXCertPathBuilderSpi
                     {
                         trust = null;
                     }
+                }
+                catch (CertificateEncodingException ex)
+                {
+                    trust = null;
                 }
                 catch (IllegalArgumentException ex)
                 {
@@ -225,7 +252,7 @@ public class PKIXCertPathBuilderSpi
     
         if (trust == null && invalidKeyEx != null)
         {
-            throw new CertPathValidatorException("TrustAnchor found put certificate validation failed",invalidKeyEx,null,-1);
+            throw new CertPathBuilderException("TrustAnchor found put certificate validation failed",invalidKeyEx);
         }
 
         return trust;
@@ -242,27 +269,23 @@ public class PKIXCertPathBuilderSpi
      * certificates
      *
      * @return a Collection of all found {@link Certificate Certificate}
-     * objects. May be emtpy but never <code>null</code>.
+     * objects. May be empty but never <code>null</code>.
      **/
-    private static final Collection findCertificates(
-        CertSelector certSelect,
-        List certStores)
+    private final Collection findCertificates(
+        CertSelector    certSelect,
+        List            certStores) 
+        throws CertStoreException
     {
         Set certs = new HashSet();
         Iterator iter = certStores.iterator();
-        CertStore certStore;
+
         while (iter.hasNext())
         {
-            certStore = (CertStore)iter.next();
-            try
-            {
-                certs.addAll(certStore.getCertificates(certSelect));
-            }
-            catch (CertStoreException ex)
-            {
-                ex.printStackTrace();
-            }
+            CertStore   certStore = (CertStore)iter.next();
+
+            certs.addAll(certStore.getCertificates(certSelect));
         }
+
         return certs;
     }
     
@@ -282,7 +305,7 @@ public class PKIXCertPathBuilderSpi
      * has thrown an exception. This Exception can be obtainted with
      * <code>getCause()</code> method.
      **/
-    private static final X509Certificate findIssuer(
+    private final X509Certificate findIssuer(
         X509Certificate cert,
         List certStores)
         throws CertPathValidatorException
@@ -291,16 +314,29 @@ public class PKIXCertPathBuilderSpi
         X509CertSelector certSelect = new X509CertSelector();
         try
         {
-            certSelect.setSubject(((X509Principal)cert.getIssuerDN()).getEncoded());
+            certSelect.setSubject(PrincipalUtil.getIssuerX509Principal(cert).getEncoded());
+        }
+        catch (CertificateEncodingException ex)
+        {
+            throw new CertPathValidatorException("Issuer not found", null, null, -1);
         }
         catch (IOException ex)
         {
             throw new CertPathValidatorException("Issuer not found", null, null, -1);
         }
 
-        Iterator iter = findCertificates(certSelect, certStores).iterator();
+        Iterator iter;
+        try
+        {
+            iter = findCertificates(certSelect, certStores).iterator();
+        }
+        catch (CertStoreException e)
+        {
+            throw new CertPathValidatorException(e);
+        }
+        
         X509Certificate issuer = null;
-        while ( iter.hasNext() && issuer == null )
+        while (iter.hasNext() && issuer == null)
         {
             issuer = (X509Certificate)iter.next();
             try
@@ -314,39 +350,16 @@ public class PKIXCertPathBuilderSpi
             }
         }
 
-        if ( issuer == null && invalidKeyEx == null )
+        if (issuer == null && invalidKeyEx == null)
         {
-            throw new CertPathValidatorException("issuer not found",null,null,-1);
+           throw new CertPathValidatorException("Issuer not found", null, null, -1);
         }
 
-        if ( issuer == null && invalidKeyEx != null )
+        if (issuer == null && invalidKeyEx != null)
         {
             throw new CertPathValidatorException("issuer found but certificate validation failed",invalidKeyEx,null,-1);
         }
 
         return issuer;
-    }
-
-    /**
-     * Returns the given name converted to upper case and all multi spaces squezed
-     * to one space.
-     **/
-    static String trimX509Name(String name)
-    {
-        String data = name.trim().toUpperCase();
-        int pos;
-        while ((pos = data.indexOf("  ")) >= 0)
-        {
-            data = data.substring(0,pos) + data.substring(pos+1);
-        }
-        while ((pos = data.indexOf(" =")) >= 0)
-        {
-            data = data.substring(0,pos) + data.substring(pos+1);
-        }
-        while ((pos = data.indexOf("= ")) >= 0)
-        {
-            data = data.substring(0,pos+1) + data.substring(pos+2);
-        }
-        return data;
     }
 }
