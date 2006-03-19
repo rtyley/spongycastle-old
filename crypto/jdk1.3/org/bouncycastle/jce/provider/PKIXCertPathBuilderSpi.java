@@ -5,7 +5,10 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateEncodingException;
 import org.bouncycastle.jce.cert.*;
+import org.bouncycastle.jce.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,11 +16,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.PrincipalUtil;
-
 /**
- * Implements the PKIX CertPathBuilding algorithem for BouncyCastle.<br />
+ * Implements the PKIX CertPathBuilding algorithem for BouncyCastle.
  * <br />
  * <b>MAYBE: implement more CertPath validation whil build path to omit invalid pathes</b>
  *
@@ -58,7 +58,14 @@ public class PKIXCertPathBuilderSpi
             throw new CertPathBuilderException("targetCertConstraints must be non-null for CertPath building");
         }
 
-        targets = findCertificates(certSelect, pkixParams.getCertStores());
+        try
+        {
+            targets = findCertificates(certSelect, pkixParams.getCertStores());
+        }
+        catch (CertStoreException e)
+        {
+            throw new CertPathBuilderException(e);
+        }
 
         if (targets.isEmpty())
         {
@@ -179,9 +186,13 @@ public class PKIXCertPathBuilderSpi
         {
             certSelectX509.setSubject(PrincipalUtil.getIssuerX509Principal(cert).getEncoded());
         }
-        catch (Exception ex)
+        catch (CertificateEncodingException ex)
         {
-             throw new CertPathBuilderException("can't get trust anchor principal",null);
+            throw new CertPathBuilderException("can't get trust anchor principal",null);
+        }
+        catch (IOException ex)
+        {
+            throw new CertPathBuilderException("can't get trust anchor principal",null);
         }
 
         while (iter.hasNext() && trust == null)
@@ -214,7 +225,11 @@ public class PKIXCertPathBuilderSpi
                         trust = null;
                     }
                 }
-                catch (Exception ex)
+                catch (CertificateEncodingException ex)
+                {
+                    trust = null;
+                }
+                catch (IllegalArgumentException ex)
                 {
                     trust = null;
                 }
@@ -261,7 +276,8 @@ public class PKIXCertPathBuilderSpi
      **/
     private final Collection findCertificates(
         CertSelector    certSelect,
-        List            certStores)
+        List            certStores) 
+        throws CertStoreException
     {
         Set certs = new HashSet();
         Iterator iter = certStores.iterator();
@@ -270,14 +286,7 @@ public class PKIXCertPathBuilderSpi
         {
             CertStore   certStore = (CertStore)iter.next();
 
-            try
-            {
-                certs.addAll(certStore.getCertificates(certSelect));
-            }
-            catch (CertStoreException ex)
-            {
-                ex.printStackTrace();
-            }
+            certs.addAll(certStore.getCertificates(certSelect));
         }
 
         return certs;
@@ -310,12 +319,25 @@ public class PKIXCertPathBuilderSpi
         {
             certSelect.setSubject(PrincipalUtil.getIssuerX509Principal(cert).getEncoded());
         }
-        catch (Exception ex)
+        catch (CertificateEncodingException ex)
+        {
+            throw new CertPathValidatorException("Issuer not found", null, null, -1);
+        }
+        catch (IOException ex)
         {
             throw new CertPathValidatorException("Issuer not found", null, null, -1);
         }
 
-        Iterator iter = findCertificates(certSelect, certStores).iterator();
+        Iterator iter;
+        try
+        {
+            iter = findCertificates(certSelect, certStores).iterator();
+        }
+        catch (CertStoreException e)
+        {
+            throw new CertPathValidatorException(e);
+        }
+        
         X509Certificate issuer = null;
         while (iter.hasNext() && issuer == null)
         {
