@@ -19,12 +19,6 @@ public class BigInteger
     {
     }
 
-    private BigInteger(int nWords)
-    {
-        sign = 1;
-        magnitude = new int[nWords];
-    }
-
     private BigInteger(int signum, int[] mag)
     {
         sign = signum;
@@ -349,7 +343,7 @@ public class BigInteger
         }
         else
         {
-            for (; ;)
+            for (; ; )
             {
                 for (int i = 0; i < BYTES_PER_INT; i++)
                 {
@@ -600,17 +594,6 @@ public class BigInteger
                 : (w < 1 << 29 ? (w < 1 << 28 ? 28 : 29) : (w < 1 << 30 ? 30 : 31)))));
     }
 
-    private final static byte[] bitLengths = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
-        5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-        6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8};
-
     public int compareTo(Object o)
     {
         return compareTo((BigInteger)o);
@@ -717,7 +700,7 @@ public class BigInteger
             int cStart = 0;
             int iCountStart = 0;
 
-            for (; ;)
+            for (; ; )
             {
                 int cmp = compareTo(xStart, x, cStart, c);
 
@@ -852,28 +835,19 @@ public class BigInteger
     public boolean equals(Object val)
     {
         if (val == this)
-        {
             return true;
-        }
 
         if (!(val instanceof BigInteger))
-        {
             return false;
-        }
-
         BigInteger biggie = (BigInteger)val;
 
         if (biggie.sign != sign || biggie.magnitude.length != magnitude.length)
-        {
             return false;
-        }
 
         for (int i = 0; i < magnitude.length; i++)
         {
             if (biggie.magnitude[i] != magnitude[i])
-            {
                 return false;
-            }
         }
 
         return true;
@@ -1099,9 +1073,7 @@ public class BigInteger
 
         while (v3.compareTo(BigInteger.ZERO) > 0)
         {
-            BigInteger q, 
-            tn, 
-            tv;
+            BigInteger q, tn;
 
             q = u3.divide(v3);
 
@@ -1377,7 +1349,7 @@ public class BigInteger
 
         while (v3 > 0)
         {
-            long q, tn, tv;
+            long q, tn;
 
             q = u3 / v3;
 
@@ -1468,7 +1440,7 @@ public class BigInteger
         int nMinus1 = n - 1;
         long y_0 = y[n - 1] & IMASK;
 
-        // 1. a = 0 (Notation: a = (a_{n} a_{n-1} ... a_{0})_{b})
+        // 1. a = 0 (Notation: a = (a_{n} a_{n-1} ... a_{0})_{b} )
         for (int i = 0; i <= n; i++)
         {
             a[i] = 0;
@@ -1526,7 +1498,7 @@ public class BigInteger
 
     public BigInteger negate()
     {
-        return new BigInteger(-sign, magnitude);
+        return new BigInteger( -sign, magnitude);
     }
 
     public BigInteger pow(int exp) throws ArithmeticException
@@ -1585,7 +1557,7 @@ public class BigInteger
             int xStart = 0;
             int cStart = 0;
 
-            for (; ;)
+            for (; ; )
             {
                 int cmp = compareTo(xStart, x, cStart, c);
 
@@ -1726,7 +1698,7 @@ public class BigInteger
 
         if (n < 0)
         {
-            return shiftRight(-n);
+            return shiftRight( -n);
         }
 
         return new BigInteger(sign, shiftLeft(magnitude, n));
@@ -1805,12 +1777,12 @@ public class BigInteger
 
         if (n < 0)
         {
-            return shiftLeft(-n);
+            return shiftLeft( -n);
         }
 
         if (n >= bitLength())
         {
-            return this.sign < 0 ? valueOf(-1) : BigInteger.ZERO;
+            return (this.sign < 0 ? valueOf( -1) : BigInteger.ZERO);
         }
 
         int[] res = new int[this.magnitude.length];
@@ -1961,6 +1933,115 @@ public class BigInteger
         return bytes;
     }
 
+    public BigInteger xor(BigInteger val) 
+    {
+        int[] result;
+        
+        if (magnitude.length > val.magnitude.length)
+        {
+            result = new int[magnitude.length];
+        }
+        else
+        {
+            result = new int[val.magnitude.length];
+        }
+        
+        for (int i = 0; i < result.length; i++)
+        {
+            int index = result.length - i - 1;
+            
+            if (magnitude.length > i)
+            {
+                result[index] = magnitude[magnitude.length - i - 1];
+            }
+            if (val.magnitude.length > i)
+            {
+                result[index] ^= val.magnitude[val.magnitude.length - i - 1];
+            }
+            else
+            {
+                result[index] ^= 0;
+            }
+        }
+ 
+        int resSign = 1;
+        
+        if (sign < 0 || val.sign < 0)
+        {
+            resSign = -1;
+        }
+        
+        return new BigInteger(resSign, result);
+    }
+    
+    public BigInteger setBit(int n) 
+        throws ArithmeticException 
+    {
+        if (n<0)
+        {
+             throw new ArithmeticException("Bit address less than zero");
+        }
+         
+        int wordNum = n/32;
+        int result[];
+        
+        result = createResult(wordNum);
+        
+        result[result.length - wordNum - 1] |= 1 << (n % 32);
+    
+        return new BigInteger(sign, result);
+    }
+    
+    public BigInteger clearBit(int n) 
+        throws ArithmeticException 
+    {
+        if (n<0)
+        {
+             throw new ArithmeticException("Bit address less than zero");
+        }
+         
+        int wordNum = n/32;
+        int result[];
+        
+        result = createResult(wordNum);
+        
+        result[result.length - wordNum - 1] &= ~(1 << (n % 32));
+    
+        return new BigInteger(sign, result);
+    }
+
+    public BigInteger flipBit(int n) 
+        throws ArithmeticException 
+    {
+        if (n<0)
+        {
+             throw new ArithmeticException("Bit address less than zero");
+        }
+         
+        int wordNum = n/32;
+        int[] result = createResult(wordNum);
+        
+        result[result.length - wordNum - 1] ^= (1 << (n % 32));
+    
+        return new BigInteger(sign, result);
+    }
+
+    private int[] createResult(int wordNum)
+    {
+        int[] result;
+        if (magnitude.length < wordNum + 1)
+        {
+            result = new int[wordNum + 1];
+        }
+        else
+        {
+            result = new int[magnitude.length];
+        }
+        
+        System.arraycopy(magnitude, 0, result, result.length - magnitude.length, magnitude.length);
+        return result;
+    }
+        
     public String toString()
     {
         return toString(10);
@@ -2007,13 +2088,9 @@ public class BigInteger
             {
                 b = u.mod(base);
                 if (b.equals(BigInteger.ZERO))
-                {
                     S.push("0");
-                }
                 else
-                {
                     S.push(Integer.toString(b.magnitude[0], rdx));
-                }
                 u = u.divide(base);
             }
             // Then pop the stack
@@ -2022,18 +2099,12 @@ public class BigInteger
         }
         // Strip leading zeros.
         while (s.length() > 1 && s.charAt(0) == '0')
-        {
             s = s.substring(1);
-        }
 
         if (s.length() == 0)
-        {
             s = "0";
-        }
         else if (sign == -1)
-        {
             s = "-" + s;
-        }
 
         return s;
     }
@@ -2058,13 +2129,6 @@ public class BigInteger
         }
 
         return new BigInteger(b);
-    }
-
-    private int max(int a, int b)
-    {
-        if (a < b)
-            return b;
-        return a;
     }
 
     public int getLowestSetBit()
@@ -2101,7 +2165,8 @@ public class BigInteger
         return (((magnitude.length - 1) - w) * 32 + (31 - b));
     }
 
-    public boolean testBit(int n) throws ArithmeticException
+    public boolean testBit(int n) 
+        throws ArithmeticException
     {
         if (n < 0)
         {
