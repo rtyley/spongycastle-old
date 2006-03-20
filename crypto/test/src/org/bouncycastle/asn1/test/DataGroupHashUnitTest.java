@@ -23,7 +23,10 @@ public class DataGroupHashUnitTest
         Random rand = new Random();
         byte[] bytes = new byte[20];
         
-        rand.nextBytes(bytes);
+        for (int i = 0; i != bytes.length; i++)
+        {
+            bytes[i] = (byte)rand.nextInt();
+        }
         
         return bytes;
     }
