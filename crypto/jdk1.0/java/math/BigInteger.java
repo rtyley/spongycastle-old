@@ -1433,7 +1433,7 @@ public class BigInteger
      * <br>
      * NOTE: the indices of x, y, m, a different in HAC and in Java
      */
-    public void multiplyMonty(int[] a, int[] x, int[] y, int[] m, long mQuote)
+    private void multiplyMonty(int[] a, int[] x, int[] y, int[] m, long mQuote)
     // mQuote = -m^(-1) mod b
     {
         int n = m.length;
