@@ -379,7 +379,7 @@ public abstract class ECFieldElement
          * polynomial <code>f(z)</code>.
          * @param x The BigInteger representing the value of the field element.
          */
-        public F2m(final int m, final int k, final BigInteger x)
+        public F2m(int m, int k, BigInteger x)
         {
             // Set k1 to k, and set k2 and k3 to 0
             this(m, k, 0, 0, x);
