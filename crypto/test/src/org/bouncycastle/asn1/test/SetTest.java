@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.test;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERInteger;
@@ -45,6 +46,13 @@ public class SetTest
                 return new SimpleTestResult(false, getName() + ": sorting failed.");
             }
 
+            s = new BERSet(v);
+            
+            if (!(s.getObjectAt(0) instanceof DEROctetString))
+            {
+                return new SimpleTestResult(false, getName() + ": BER set sort order changed.");
+            }
+            
             // create an implicitly tagged "set" without sorting
             ASN1TaggedObject tag = new DERTaggedObject(false, 1, new DERSequence(v));
             s = ASN1Set.getInstance(tag, false);
