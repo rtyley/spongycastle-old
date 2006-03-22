@@ -28,7 +28,7 @@ public class BERSet
     public BERSet(
         DEREncodableVector   v)
     {
-        super(v, true);
+        super(v, false);
     }
 
     /**
