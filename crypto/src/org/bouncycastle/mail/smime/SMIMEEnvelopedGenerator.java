@@ -96,6 +96,15 @@ public class SMIMEEnvelopedGenerator
     }
 
     /**
+     * Use a BER Set to store the recipient information
+     */
+    public void setBerEncodeRecipients(
+        boolean berEncodeRecipientSet)
+    {
+        fact.setBerEncodeRecipients(berEncodeRecipientSet);
+    }
+    
+    /**
      * if we get here we expect the Mime body part to be well defined.
      */
     private MimeBodyPart make(
@@ -298,7 +307,7 @@ public class SMIMEEnvelopedGenerator
             
             return super.open(out, encryptionOID, encKey, params, recepientInfos, provider);
         }
-        
+
         OutputStream regenerate(
             OutputStream out,
             String       provider)

@@ -28,6 +28,7 @@ import javax.crypto.spec.RC2ParameterSpec;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
@@ -85,6 +86,7 @@ public class CMSEnvelopedDataStreamGenerator
     private Object              _originatorInfo = null;
     private Object              _unprotectedAttributes = null;
     private int                 _bufferSize;
+    private boolean             _berEncodeRecipientSet;
     
     private class RecipientInf
     {
@@ -301,6 +303,15 @@ public class CMSEnvelopedDataStreamGenerator
                                                 keyIdentifier, null, null)));
     }
     
+    /**
+     * Use a BER Set to store the recipient information
+     */
+    public void setBerEncodeRecipients(
+        boolean berEncodeRecipientSet)
+    {
+        _berEncodeRecipientSet = berEncodeRecipientSet;
+    }
+
     private Asn1Integer getVersion()
     {
         if (_originatorInfo != null || _unprotectedAttributes != null)
@@ -415,7 +426,14 @@ public class CMSEnvelopedDataStreamGenerator
             
             envGen.addObject(getVersion());
 
-            envGen.getRawOutputStream().write(new DERSet(recipientInfos).getEncoded());
+            if (_berEncodeRecipientSet)
+            {
+                envGen.getRawOutputStream().write(new BERSet(recipientInfos).getEncoded());
+            }
+            else
+            {
+                envGen.getRawOutputStream().write(new DERSet(recipientInfos).getEncoded());
+            }
 
             Cipher cipher = Cipher.getInstance(encryptionOID, provider);
             
