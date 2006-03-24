@@ -178,59 +178,6 @@ public abstract class ECFieldElement
             return w1.multiply(w2).subtract(W(ECConstants.ONE, r, x, p)).mod(p);
         }
         
-        /**
-         * Outputs the Lucas sequence values according X9.62 D.1.3 Let P and Q
-         * be nonzero integers. The Lucas sequences U<sub>k</sub> and V<sub>k</sub>
-         * for P, Q are defined by:
-         * 
-         * <p>
-         * U<sub>0</sub> = 0, U<sub>1</sub> = 1, and U<sub>k</sub> = PU<sub>k-1</sub> -
-         * QU<sub>k-2</sub> for k &ge; 2. </br> V<sub>0</sub> = 2, V<sub>1</sub> =
-         * P, and V<sub>k</sub> = PV<sub>k-1</sub> - QV<sub>k-2</sub> for
-         * k &ge; 2.
-         * </p>
-         * 
-         * @param p
-         *            p.
-         * @param P
-         *            P.
-         * @param Q
-         *            Q.
-         * @param k
-         *            k.
-         * @return the value U<sub>k</sub> in index 0 and V<sub>k</sub> in
-         *         index 1.
-         */
-        /* TODO: does not work ??? */
-        /*
-        private BigInteger[] lucasSequence(BigInteger p, BigInteger P,
-                BigInteger Q, BigInteger k) {
-            BigInteger D = P.multiply(P).subtract(
-                    Q.multiply(BigInteger.valueOf(4)));
-            BigInteger U = ECConstants.ONE;
-            BigInteger V = P;
-            BigInteger temp;
-            for (int i = k.bitLength() - 2; i >= 0; i--) {
-                temp = U;
-                U = U.multiply(V).mod(p);
-                V = V.multiply(V).add(D.multiply(temp.multiply(temp))).divide(
-                        BigInteger.valueOf(2)).mod(p);
-                if (k.testBit(i)) {
-                    temp = U;
-                    U = P.multiply(U).add(V).divide(BigInteger.valueOf(2)).mod(
-                            p);
-                    V = P.multiply(V).subtract(D.multiply(temp)).divide(
-                            BigInteger.valueOf(2)).mod(p);
-                }
-            }
-            BigInteger result[] = new BigInteger[2];
-            result[0] = U;
-            result[1] = V;
-            return result;
-        }
-        */
-        
-
         public boolean equals(Object other)
         {
             if (other == this)
