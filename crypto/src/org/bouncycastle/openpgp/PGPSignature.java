@@ -46,6 +46,8 @@ public class PGPSignature
     private int                signatureType;
     private TrustPacket        trustPck;
     
+    private byte               lastb;
+    
     PGPSignature(
         BCPGInputStream    pIn)
         throws IOException, PGPException
@@ -114,6 +116,8 @@ public class PGPSignature
         {
             throw new PGPException("invalid key.", e);
         }
+        
+        lastb = 0;
     }
         
     public void update(
@@ -122,19 +126,30 @@ public class PGPSignature
     {
         if (signatureType == PGPSignature.CANONICAL_TEXT_DOCUMENT)
         {
-            if (b == '\n')
+            if (b == '\r')
             {
                 sig.update((byte)'\r');
                 sig.update((byte)'\n');
-                return;
             }
-            else if (b == '\r')
+            else if (b == '\n')
             {
-                return;
+                if (lastb != '\r')
+                {
+                    sig.update((byte)'\r');
+                    sig.update((byte)'\n');
+                }
             }
+            else
+            {
+                sig.update(b);
+            }
+
+            lastb = b;
         }
-        
-        sig.update(b);
+        else
+        {
+            sig.update(b);
+        }
     }
         
     public void update(

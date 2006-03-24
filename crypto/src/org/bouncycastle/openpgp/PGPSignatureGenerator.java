@@ -19,6 +19,7 @@ import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
 import org.bouncycastle.bcpg.sig.IssuerKeyID;
 import org.bouncycastle.bcpg.sig.SignatureCreationTime;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  * Generator for PGP Signatures.
@@ -33,6 +34,8 @@ public class PGPSignatureGenerator
     private int             signatureType;
     private boolean         creationTimeFound;
     private boolean         issuerKeyIDFound;
+    
+    private byte            lastb;
     
     SignatureSubpacket[]    unhashed = new SignatureSubpacket[0];
     SignatureSubpacket[]    hashed = new SignatureSubpacket[2];
@@ -85,6 +88,7 @@ public class PGPSignatureGenerator
         }
         
         dig.reset();
+        lastb = 0;
     }
     
     public void update(
@@ -93,22 +97,36 @@ public class PGPSignatureGenerator
     {
         if (signatureType == PGPSignature.CANONICAL_TEXT_DOCUMENT)
         {
-            if (b == '\n')
+            if (b == '\r')
             {
                 sig.update((byte)'\r');
                 sig.update((byte)'\n');
                 dig.update((byte)'\r');
                 dig.update((byte)'\n');
-                return;
             }
-            else if (b == '\r')
+            else if (b == '\n')
             {
-                return;
+                if (lastb != '\r')
+                {
+                    sig.update((byte)'\r');
+                    sig.update((byte)'\n');
+                    dig.update((byte)'\r');
+                    dig.update((byte)'\n');
+                }
             }
+            else
+            {
+                sig.update(b);
+                dig.update(b);
+            }
+            
+            lastb = b;
         }
-    
-        sig.update(b);
-        dig.update(b);
+        else
+        {
+            sig.update(b);
+            dig.update(b);
+        }
     }
     
     public void update(
@@ -262,15 +280,18 @@ public class PGPSignatureGenerator
         
         byte[]    hData = sOut.toByteArray();
         
-        this.update(hData);
+        sOut.write((byte)version);
+        sOut.write((byte)0xff);
+        sOut.write((byte)(hData.length >> 24));
+        sOut.write((byte)(hData.length >> 16));
+        sOut.write((byte)(hData.length >> 8));
+        sOut.write((byte)(hData.length));
         
-        this.update((byte)version);
-        this.update((byte)0xff);
-        this.update((byte)(hData.length >> 24));
-        this.update((byte)(hData.length >> 16));
-        this.update((byte)(hData.length >> 8));
-        this.update((byte)(hData.length));
+        byte[]    trailer = sOut.toByteArray();
         
+        sig.update(trailer);
+        dig.update(trailer);
+
         if (keyAlgorithm == PublicKeyAlgorithmTags.RSA_SIGN
             || keyAlgorithm == PublicKeyAlgorithmTags.RSA_GENERAL)    // an RSA signature
         {
@@ -284,7 +305,7 @@ public class PGPSignatureGenerator
         
         byte[]                        digest = dig.digest();
         byte[]                        fingerPrint = new byte[2];
-        
+
         fingerPrint[0] = digest[0];
         fingerPrint[1] = digest[1];
         
