@@ -27,6 +27,8 @@ public class PGPV3SignatureGenerator
     private MessageDigest dig;
     private int signatureType;
     
+    private byte            lastb;
+    
     /**
      * Create a generator for the passed in keyAlgorithm and hashAlgorithm codes.
      * 
@@ -75,6 +77,7 @@ public class PGPV3SignatureGenerator
         }
         
         dig.reset();
+        lastb = 0;
     }
     
     public void update(
@@ -83,22 +86,36 @@ public class PGPV3SignatureGenerator
     {
         if (signatureType == PGPSignature.CANONICAL_TEXT_DOCUMENT)
         {
-            if (b == '\n')
+            if (b == '\r')
             {
                 sig.update((byte)'\r');
                 sig.update((byte)'\n');
                 dig.update((byte)'\r');
                 dig.update((byte)'\n');
-                return;
             }
-            else if (b == '\r')
+            else if (b == '\n')
             {
-                return;
+                if (lastb != '\r')
+                {
+                    sig.update((byte)'\r');
+                    sig.update((byte)'\n');
+                    dig.update((byte)'\r');
+                    dig.update((byte)'\n');
+                }
             }
+            else
+            {
+                sig.update(b);
+                dig.update(b);
+            }
+            
+            lastb = b;
         }
-        
-        sig.update(b);
-        dig.update(b);
+        else
+        {
+            sig.update(b);
+            dig.update(b);
+        }
     }
     
     public void update(
@@ -154,39 +171,40 @@ public class PGPV3SignatureGenerator
     public PGPSignature generate()
             throws PGPException, SignatureException
     {
-            long creationTime = new Date().getTime() / 1000;
+        long creationTime = new Date().getTime() / 1000;
 
-            ByteArrayOutputStream sOut = new ByteArrayOutputStream();
+        ByteArrayOutputStream sOut = new ByteArrayOutputStream();
 
-            sOut.write(signatureType);
-            sOut.write((byte)(creationTime >> 24));
-            sOut.write((byte)(creationTime >> 16));
-            sOut.write((byte)(creationTime >> 8));
-            sOut.write((byte)creationTime);
+        sOut.write(signatureType);
+        sOut.write((byte)(creationTime >> 24));
+        sOut.write((byte)(creationTime >> 16));
+        sOut.write((byte)(creationTime >> 8));
+        sOut.write((byte)creationTime);
 
-            byte[] hData = sOut.toByteArray();
+        byte[] hData = sOut.toByteArray();
 
-            this.update(hData);
+        sig.update(hData);
+        dig.update(hData);
 
-            MPInteger[] sigValues;
-            if (keyAlgorithm == PublicKeyAlgorithmTags.RSA_SIGN
-                || keyAlgorithm == PublicKeyAlgorithmTags.RSA_GENERAL)
-                // an RSA signature
-            {
-                sigValues = new MPInteger[1];
-                sigValues[0] = new MPInteger(new BigInteger(1, sig.sign()));
-            }
-            else
-            {
-                sigValues = PGPUtil.dsaSigToMpi(sig.sign());
-            }
+        MPInteger[] sigValues;
+        if (keyAlgorithm == PublicKeyAlgorithmTags.RSA_SIGN
+            || keyAlgorithm == PublicKeyAlgorithmTags.RSA_GENERAL)
+            // an RSA signature
+        {
+            sigValues = new MPInteger[1];
+            sigValues[0] = new MPInteger(new BigInteger(1, sig.sign()));
+        }
+        else
+        {
+            sigValues = PGPUtil.dsaSigToMpi(sig.sign());
+        }
 
-            byte[] digest = dig.digest();
-            byte[] fingerPrint = new byte[2];
+        byte[] digest = dig.digest();
+        byte[] fingerPrint = new byte[2];
 
-            fingerPrint[0] = digest[0];
-            fingerPrint[1] = digest[1];
+        fingerPrint[0] = digest[0];
+        fingerPrint[1] = digest[1];
 
-            return new PGPSignature(new SignaturePacket(3, signatureType, privKey.getKeyID(), keyAlgorithm, hashAlgorithm, creationTime * 1000, fingerPrint, sigValues));
+        return new PGPSignature(new SignaturePacket(3, signatureType, privKey.getKeyID(), keyAlgorithm, hashAlgorithm, creationTime * 1000, fingerPrint, sigValues));
     }
 }
