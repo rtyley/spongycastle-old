@@ -17,6 +17,7 @@ public class RegressionTest
         new PGPPacketTest(),
         new PGPArmoredTest(),
         new PGPSignatureTest(),
+        new PGPClearSignedSignatureTest(),
         new PGPCompressionTest()
     };
 
