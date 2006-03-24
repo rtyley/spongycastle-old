@@ -398,7 +398,7 @@ public class SignerInformation
         {
             if (algorithm.equals("RSA"))
             {
-                Cipher c = Cipher.getInstance(algorithm + "/NONE/PKCS1Padding", sigProvider);
+                Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding", sigProvider);
                 
                 c.init(Cipher.DECRYPT_MODE, key);
                 
