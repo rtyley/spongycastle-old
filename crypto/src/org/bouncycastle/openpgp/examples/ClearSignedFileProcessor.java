@@ -104,24 +104,34 @@ public class ClearSignedFileProcessor
         //
         // read the input, making sure we ingore the last newline.
         //
-        int                   ch;
+        int                   ch, lastCh;
         boolean               newLine = false;
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 
+        lastCh = 0;
+        
         while ((ch = aIn.read()) >= 0 && aIn.isClearText())
         {
+            if (lastCh == '\r' && ch == '\n')
+            {
+                continue;
+            }
+            
             if (newLine)
             {
-                bOut.write((byte)'\n');
+                bOut.write(lastCh);
                 newLine = false;
             }
-            if (ch == '\n')
+            
+            if (ch == '\r' || ch == '\n')
             {
+                lastCh = ch;
                 newLine = true;
                 continue;
             }
 
             bOut.write((byte)ch);
+            lastCh = ch;
         }
         
         PGPPublicKeyRingCollection pgpRings = new PGPPublicKeyRingCollection(keyIn);
@@ -151,12 +161,40 @@ public class ClearSignedFileProcessor
         String          fileName,
         InputStream     keyIn,
         OutputStream    out,
-        char[]          pass)
+        char[]          pass,
+        String          digestName)
         throws IOException, NoSuchAlgorithmException, NoSuchProviderException, PGPException, SignatureException
     {    
+        int digest;
+        
+        if (digestName.equals("SHA256"))
+        {
+            digest = PGPUtil.SHA256;
+        }
+        else if (digestName.equals("SHA384"))
+        {
+            digest = PGPUtil.SHA384;
+        }
+        else if (digestName.equals("SHA512"))
+        {
+            digest = PGPUtil.SHA512;
+        }
+        else if (digestName.equals("MD5"))
+        {
+            digest = PGPUtil.MD5;
+        }
+        else if (digestName.equals("RIPEMD160"))
+        {
+            digest = PGPUtil.RIPEMD160;
+        }
+        else
+        {
+            digest = PGPUtil.SHA1;
+        }
+        
         PGPSecretKey                    pgpSecKey = readSecretKey(keyIn);
         PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey(pass, "BC");        
-        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(pgpSecKey.getPublicKey().getAlgorithm(), PGPUtil.SHA1, "BC");
+        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(pgpSecKey.getPublicKey().getAlgorithm(), digest, "BC");
         PGPSignatureSubpacketGenerator  spGen = new PGPSignatureSubpacketGenerator();
         
         sGen.initSign(PGPSignature.CANONICAL_TEXT_DOCUMENT, pgpPrivKey);
@@ -170,10 +208,11 @@ public class ClearSignedFileProcessor
         
         FileInputStream        fIn = new FileInputStream(fileName);
         int                    ch = 0;
+        int                    lastCh = 0;
         
         ArmoredOutputStream    aOut = new ArmoredOutputStream(out);
         
-        aOut.beginClearText(PGPUtil.SHA1);
+        aOut.beginClearText(digest);
 
         boolean newLine = false;
 
@@ -183,17 +222,27 @@ public class ClearSignedFileProcessor
         while ((ch = fIn.read()) >= 0)
         {
             aOut.write(ch);
+
+            if (lastCh == '\r' && ch == '\n')
+            {
+                continue;
+            }
+            
             if (newLine)
             {
-                sGen.update((byte)'\n');
+                sGen.update((byte)lastCh);
                 newLine = false;
             }
-            if (ch == '\n')
+            
+            if (ch == '\r' || ch == '\n')
             {
+                lastCh = ch;
                 newLine = true;
                 continue;
             }
+
             sGen.update((byte)ch);
+            lastCh = ch;
         }
         
         aOut.endClearText();
@@ -216,7 +265,14 @@ public class ClearSignedFileProcessor
             InputStream        keyIn = PGPUtil.getDecoderStream(new FileInputStream(args[2]));
             FileOutputStream   out = new FileOutputStream(args[1] + ".asc");
             
-            signFile(args[1], keyIn, out, args[3].toCharArray());
+            if (args.length == 4)
+            {
+                signFile(args[1], keyIn, out, args[3].toCharArray(), "SHA1");
+            }
+            else
+            {
+                signFile(args[1], keyIn, out, args[3].toCharArray(), args[4]);
+            }
         }
         else if (args[0].equals("-v"))
         {
