@@ -106,6 +106,7 @@ public class ArmoredInputStream
     boolean        clearText = false;
     boolean        restart = false;
     Vector         headerList= new Vector();
+    int            lastC = 0;
     
     /**
      * Create a stream for reading a PGP armoured message, parsing up to a header 
@@ -179,7 +180,7 @@ public class ArmoredInputStream
         {
             while ((c = in.read()) >= 0)
             {
-                if (c == '-' && (last == 0 || last == '\n'))
+                if (c == '-' && (last == 0 || last == '\n' || last == '\r'))
                 {
                     headerFound = true;
                     break;
@@ -192,6 +193,8 @@ public class ArmoredInputStream
         if (headerFound)
         {
             StringBuffer    buf = new StringBuffer("-");
+            boolean         eolReached = false;
+            boolean         crLf = false;
             
             if (restart)    // we've had to look ahead two '-'
             {
@@ -200,23 +203,43 @@ public class ArmoredInputStream
             
             while ((c = in.read()) >= 0)
             {
-                if (last == '\n' && c == '\n')
+                if (last == '\r' && c == '\n')
+                {
+                    crLf = true;
+                }
+                if (eolReached && (last != '\r' && c == '\n'))
                 {
                     break;
                 }
-                if (c == '\r' || c == '\n')
+                if (eolReached && c == '\r')
+                {
+                    break;
+                }
+                if (c == '\r' || (last != '\r' && c == '\n'))
                 {
                     headerList.addElement(buf.toString());
                     buf.setLength(0);
                 }
-                if (c != '\r')
+
+                if (c != '\n' && c != '\r')
                 {
-                    last = c;
-                    if (c != '\n')
+                    buf.append((char)c);
+                    eolReached = false;
+                }
+                else
+                {
+                    if (c == '\r' || (last != '\r' && c == '\n'))
                     {
-                        buf.append((char)last);
+                        eolReached = true;
                     }
                 }
+                
+                last = c;
+            }
+            
+            if (crLf)
+            {
+                in.read(); // skip last \n
             }
         }
         
@@ -227,7 +250,7 @@ public class ArmoredInputStream
         
         clearText = "-----BEGIN PGP SIGNED MESSAGE-----".equals(header);
         newLineFound = true;
-        
+
         return headerFound;
     }
 
@@ -302,7 +325,7 @@ public class ArmoredInputStream
         {
             c = in.read();
 
-            if (c == '\n')
+            if (c == '\r' || (c == '\n' && lastC != '\r'))
             {
                 newLineFound = true;
             }
@@ -323,18 +346,25 @@ public class ArmoredInputStream
             }
             else
             {
-                newLineFound = false;
+                if (c != '\n' && lastC != '\r')
+                {
+                    newLineFound = false;
+                }
             }
+            
+            lastC = c;
+
             return c;
         }
-        
+
         if (bufPtr > 2 || crcFound)
         {
             c = readIgnoreSpace();
             
-            if (c == '\n' || c == '\r')
+            if (c == '\r' || c == '\n')
             {
                 c = readIgnoreSpace();
+                
                 while (c == '\n' || c == '\r')
                 {
                     c = readIgnoreSpace();
@@ -344,7 +374,7 @@ public class ArmoredInputStream
                 {
                     return -1;
                 }
-    
+
                 if (c == '=')            // crc reached
                 {
                     bufPtr = decode(readIgnoreSpace(), readIgnoreSpace(), readIgnoreSpace(), readIgnoreSpace(), outBuf);
@@ -372,7 +402,7 @@ public class ArmoredInputStream
                 {
                     while ((c = in.read()) >= 0)
                     {
-                        if (c == '\n')
+                        if (c == '\n' || c == '\r')
                         {
                             break;
                         }

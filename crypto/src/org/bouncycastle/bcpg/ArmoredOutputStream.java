@@ -78,6 +78,7 @@ public class ArmoredOutputStream
     int             bufPtr = 0;
     CRC24           crc = new CRC24();
     int             chunkCount = 0;
+    int             lastb;
 
     boolean         start = true;
     boolean         clearText = false;
@@ -198,6 +199,7 @@ public class ArmoredOutputStream
         
         clearText = true;
         newLine = true;
+        lastb = 0;
     }
     
     public void endClearText()
@@ -239,17 +241,21 @@ public class ArmoredOutputStream
 
             if (newLine)
             {
-                newLine = false;
+                if (!(b == '\n' && lastb == '\r'))
+                {
+                    newLine = false;
+                }
                 if (b == '-')
                 {
                     out.write(' ');
                     out.write('-');      // dash escape
                 }
             }
-            if (b == '\n')
+            if (b == '\r' || (b == '\n' && lastb != '\r'))
             {
                 newLine = true;
             }
+            lastb = b;
             return;
         }
         
