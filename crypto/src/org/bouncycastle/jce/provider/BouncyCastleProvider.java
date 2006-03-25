@@ -35,7 +35,7 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
  */
 public final class BouncyCastleProvider extends Provider
 {
-    private static String info = "BouncyCastle Security Provider v1.32b";
+    private static String info = "BouncyCastle Security Provider v1.32";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -46,7 +46,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.315, info);
+        super(PROVIDER_NAME, 1.32, info);
 
         //
         // KeyStore
@@ -181,8 +181,9 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.RC2WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
         put("Cipher.1.2.840.113549.1.9.16.3.7", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
         put("Cipher.ARC4", "org.bouncycastle.jce.provider.JCEStreamCipher$RC4");
-        put("Cipher.RC4", "org.bouncycastle.jce.provider.JCEStreamCipher$RC4");
-        put("Alg.Alias.Cipher.1.2.840.113549.3.4", "RC4");
+        put("Alg.Alias.Cipher.1.2.840.113549.3.4", "ARC4");
+        put("Alg.Alias.Cipher.ARCFOUR", "ARC4");
+        put("Alg.Alias.Cipher.RC4", "ARC4");
         put("Cipher.RC5", "org.bouncycastle.jce.provider.JCEBlockCipher$RC5");
         put("Cipher.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2CBC");
         put("Alg.Alias.Cipher.RC5-32", "RC5");
