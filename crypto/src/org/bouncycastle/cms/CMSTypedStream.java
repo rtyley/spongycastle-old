@@ -1,5 +1,6 @@
 package org.bouncycastle.cms;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -11,19 +12,29 @@ public class CMSTypedStream
     
     private final String      _oid;
     private final InputStream _in;
+    private final int         _bufSize;
     
     public CMSTypedStream(
         InputStream in)
     {
-        this(PKCSObjectIdentifiers.data.getId(), in);
+        this(PKCSObjectIdentifiers.data.getId(), in, BUF_SIZ);
+    }
+    
+    public CMSTypedStream(
+         String oid,
+         InputStream in)
+    {
+        this(oid, in, BUF_SIZ);
     }
     
     public CMSTypedStream(
         String      oid,
-        InputStream in)
+        InputStream in,
+        int         bufSize)
     {
         _oid = oid;
-        _in = new FullReaderStream(in);
+        _bufSize = bufSize;
+        _in = new FullReaderStream(in, bufSize);
     }
 
     public String getContentType()
@@ -39,9 +50,9 @@ public class CMSTypedStream
     public void drain() 
         throws IOException
     {
-        byte[] buf = new byte[BUF_SIZ];
+        byte[] buf = new byte[_bufSize];
         
-        while ((_in.read(buf, 0, buf.length) == buf.length))
+        while ((_in.read(buf, 0, buf.length) > 0))
         {
             // keep going...
         }
@@ -52,18 +63,19 @@ public class CMSTypedStream
     private class FullReaderStream
         extends InputStream
     {
-        InputStream _in;
+        InputStream _stream;
         
         FullReaderStream(
-            InputStream in)
+            InputStream in,
+            int         bufSize)
         {
-            _in = in;
+            _stream = new BufferedInputStream(in, bufSize);
         }
         
         public int read() 
             throws IOException
         {
-            return _in.read();
+            return _stream.read();
         }
         
         public int read(
@@ -75,7 +87,7 @@ public class CMSTypedStream
             int    rd = 0;
             int    total = 0;
             
-            while (len != 0 && (rd = _in.read(buf, off, len)) > 0)
+            while (len != 0 && (rd = _stream.read(buf, off, len)) > 0)
             {
                 off += rd;
                 len -= rd;
@@ -95,7 +107,7 @@ public class CMSTypedStream
         public void close() 
             throws IOException
         {
-            _in.close();
+            _stream.close();
         }
     }
 }
