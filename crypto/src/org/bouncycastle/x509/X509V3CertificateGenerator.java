@@ -69,6 +69,11 @@ public class X509V3CertificateGenerator
     public void setSerialNumber(
         BigInteger      serialNumber)
     {
+        if (serialNumber.compareTo(BigInteger.ZERO) <= 0)
+        {
+            throw new IllegalArgumentException("serial number must be a positive integer");
+        }
+        
         tbsGen.setSerialNumber(new DERInteger(serialNumber));
     }
 
