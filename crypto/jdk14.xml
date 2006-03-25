@@ -7,6 +7,7 @@
     <property name="src.dir" value="${build.dir}/${jdk.name}" />
     <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
     <property name="target.prefix" value="jdk14" />
+    <property name="javadoc.args" value="-breakiterator" />
 
     <target name="init">
         <mkdir dir="${src.dir}" />
