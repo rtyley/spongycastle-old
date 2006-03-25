@@ -82,6 +82,7 @@
                  windowtitle="Bouncy Castle Library ${release.name} API Specification"
                  header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
             <docElements/>
+            <arg value="${javadoc.args}" />
             <classpath>
                 <fileset dir="${artifacts.jars.dir}">
                     <include name="**/*.jar" />
