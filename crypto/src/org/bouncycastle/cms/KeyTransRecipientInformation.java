@@ -17,9 +17,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientIdentifier;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 
@@ -74,6 +76,17 @@ public class KeyTransRecipientInformation
         }
     }
 
+    private String getExchangeEncryptionAlgorithmName(
+        DERObjectIdentifier oid)
+    {
+        if (PKCSObjectIdentifiers.rsaEncryption.equals(oid))
+        {
+            return "RSA/ECB/PKCS1Padding";
+        }
+        
+        return oid.getId();
+    }
+    
     /**
      * decrypt the content and return it as a byte array.
      */
@@ -85,11 +98,12 @@ public class KeyTransRecipientInformation
         try
         {
             byte[]              encryptedKey = _info.getEncryptedKey().getOctets();
-            Cipher              keyCipher = Cipher.getInstance(_keyEncAlg.getObjectId().getId(), prov);
+            String              keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(_keyEncAlg.getObjectId());
+            Cipher              keyCipher = Cipher.getInstance(keyExchangeAlgorithm, prov);
 
             keyCipher.init(Cipher.DECRYPT_MODE, key);
 
-            String              alg = _encAlg.getObjectId().getId();
+            String              alg = getDataEncryptionAlgorithmName(_encAlg.getObjectId());
             SecretKey           sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             
             return getContentFromSessionKey(sKey, prov);
