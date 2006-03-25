@@ -27,7 +27,7 @@ public class CMSProcessableFile
         int  bufSize)
     {
         _file = file;
-        _buf = new byte[DEFAULT_BUF_SIZE];
+        _buf = new byte[bufSize];
     }
 
     public void write(OutputStream zOut)
