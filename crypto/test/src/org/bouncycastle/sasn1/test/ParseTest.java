@@ -294,7 +294,7 @@ public class ParseTest
         
         while (in.read() >= 0)
         {
-            ;
+            // do nothing
         }
     }
 }
