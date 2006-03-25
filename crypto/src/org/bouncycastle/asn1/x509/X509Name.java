@@ -253,7 +253,7 @@ public class X509Name
                    }
                    else
                    {
-                       values.addElement("#" + new String(Hex.encode(value.getDERObject().getDEREncoded())));
+                       values.addElement("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
                    }
                    added.addElement((i != 0) ? new Boolean(true) : new Boolean(false));
             }
@@ -981,6 +981,19 @@ public class X509Name
         return buf.toString();
     }
 
+    private String bytesToString(
+        byte[] data)
+    {
+        char[]  cs = new char[data.length];
+
+        for (int i = 0; i != cs.length; i++)
+        {
+            cs[i] = (char)(data[i] & 0xff);
+        }
+
+        return new String(cs);
+    }
+    
     public String toString()
     {
         return toString(DefaultReverse, DefaultSymbols);
