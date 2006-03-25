@@ -101,6 +101,10 @@ class CMSSignedHelper
         {
             return "DSA";
         }
+        else if (X9ObjectIdentifiers.id_dsa.getId().equals(encryptionAlgOID))
+        {
+            return "DSA";
+        }
         else if (PKCSObjectIdentifiers.rsaEncryption.getId().equals(encryptionAlgOID))
         {
             return "RSA";
