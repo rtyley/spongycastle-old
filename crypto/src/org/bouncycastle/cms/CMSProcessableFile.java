@@ -23,8 +23,8 @@ public class CMSProcessableFile
     }
     
     public CMSProcessableFile(
-            File file,
-            int  bufSize)
+        File file,
+        int  bufSize)
     {
         _file = file;
         _buf = new byte[DEFAULT_BUF_SIZE];
