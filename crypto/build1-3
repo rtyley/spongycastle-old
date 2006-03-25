@@ -6,7 +6,7 @@
 # otherwise it just creates the docs and class files.
 #
 
-JDKPATH=/opt/jdk1.3.1_16   # JDK 1.3 location
+JDKPATH=/opt/jdk1.3.1  # JDK 1.3 location
 JAVA_MAIL_HOME=/opt/javamail-1.3.1
 JAVA_ACTIVATION_HOME=/opt/jaf-1.0.2
 XALAN_HOME=../../apache/xalan-j_2_7_0
