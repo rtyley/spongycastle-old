@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * a holding class for a byte array of data to be compressed.
+ * a holding class for a byte array of data to be processed.
  */
 public class CMSProcessableByteArray
     implements CMSProcessable
