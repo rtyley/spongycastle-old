@@ -20,6 +20,8 @@ import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public abstract class RecipientInformation
@@ -133,24 +135,63 @@ public abstract class RecipientInformation
         }  
     }
     
+    protected String getDataEncryptionAlgorithmName(
+        DERObjectIdentifier oid)
+    {
+        if (NISTObjectIdentifiers.id_aes128_CBC.equals(oid))
+        {
+            return "AES";
+        }
+        else if (NISTObjectIdentifiers.id_aes192_CBC.equals(oid))
+        {
+            return "AES";
+        }
+        else if (NISTObjectIdentifiers.id_aes256_CBC.equals(oid))
+        {
+            return "AES";
+        }
+        
+        return oid.getId();
+    }
+    
+    private String getDataEncryptionCipherName(
+        DERObjectIdentifier oid)
+    {
+        if (NISTObjectIdentifiers.id_aes128_CBC.equals(oid))
+        {
+            return "AES/CBC/PKCS5Padding";
+        }
+        else if (NISTObjectIdentifiers.id_aes192_CBC.equals(oid))
+        {
+            return "AES/CBC/PKCS5Padding";
+        }
+        else if (NISTObjectIdentifiers.id_aes256_CBC.equals(oid))
+        {
+            return "AES/CBC/PKCS5Padding";
+        }
+        
+        return oid.getId();
+    }
+    
     protected CMSTypedStream getContentFromSessionKey(
         Key     sKey,
         String  provider)
         throws CMSException, NoSuchProviderException
     {
-        String              alg = _encAlg.getObjectId().getId();
+        String              alg = getDataEncryptionAlgorithmName(_encAlg.getObjectId());
         
         try
         {
             Cipher              cipher;
+            String              cipherName = getDataEncryptionCipherName(_encAlg.getObjectId());
             
             try
             {
-                cipher = Cipher.getInstance(alg, provider);
+                cipher = Cipher.getInstance(cipherName, provider);
             }
             catch (NoSuchAlgorithmException e)
             {
-                cipher = Cipher.getInstance(alg);
+                cipher = Cipher.getInstance(cipherName);
             }
             
             DEREncodable        sParams = _encAlg.getParameters();
