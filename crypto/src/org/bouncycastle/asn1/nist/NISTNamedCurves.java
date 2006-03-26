@@ -23,7 +23,7 @@ public class NISTNamedCurves
         objIds.put("B-409", SECObjectIdentifiers.sect409r1);  
         objIds.put("B-283", SECObjectIdentifiers.sect283r1);
         objIds.put("B-233", SECObjectIdentifiers.sect233r1);
-        objIds.put("B-163", SECObjectIdentifiers.sect163r1);       
+        objIds.put("B-163", SECObjectIdentifiers.sect163r2);       
         objIds.put("P-521", SECObjectIdentifiers.secp521r1);       
         objIds.put("P-256", SECObjectIdentifiers.secp256r1);   
         objIds.put("P-224", SECObjectIdentifiers.secp224r1); 
@@ -32,7 +32,7 @@ public class NISTNamedCurves
         names.put(SECObjectIdentifiers.sect409r1, "B-409");  
         names.put(SECObjectIdentifiers.sect283r1, "B-283");
         names.put(SECObjectIdentifiers.sect233r1, "B-233");
-        names.put(SECObjectIdentifiers.sect163r1, "B-163");       
+        names.put(SECObjectIdentifiers.sect163r2, "B-163");       
         names.put(SECObjectIdentifiers.secp521r1, "P-521");       
         names.put(SECObjectIdentifiers.secp256r1, "P-256"); 
         names.put(SECObjectIdentifiers.secp224r1, "P-224");
@@ -41,7 +41,7 @@ public class NISTNamedCurves
         curves.put(SECObjectIdentifiers.sect409r1, SECNamedCurves.getByName("sect409r1")); 
         curves.put(SECObjectIdentifiers.sect409r1, SECNamedCurves.getByName("sect283r1")); 
         curves.put(SECObjectIdentifiers.sect409r1, SECNamedCurves.getByName("sect233r1")); 
-        curves.put(SECObjectIdentifiers.sect163r1, SECNamedCurves.getByName("sect163r1"));       
+        curves.put(SECObjectIdentifiers.sect163r2, SECNamedCurves.getByName("sect163r2"));       
         curves.put(SECObjectIdentifiers.secp521r1, SECNamedCurves.getByName("secp521r1")); 
         curves.put(SECObjectIdentifiers.secp256r1, SECNamedCurves.getByName("secp256r1"));
         curves.put(SECObjectIdentifiers.secp224r1, SECNamedCurves.getByName("secp224r1"));             
