@@ -79,17 +79,20 @@ public class MGF1BytesGenerator
 
         digest.reset();
 
-        do
+        if (len > hLen)
         {
-            ItoOSP(counter, C);
-
-            digest.update(seed, 0, seed.length);
-            digest.update(C, 0, C.length);
-            digest.doFinal(hashBuf, 0);
-
-            System.arraycopy(hashBuf, 0, out, outOff + counter * hLen, hLen);
+            do
+            {
+                ItoOSP(counter, C);
+    
+                digest.update(seed, 0, seed.length);
+                digest.update(C, 0, C.length);
+                digest.doFinal(hashBuf, 0);
+    
+                System.arraycopy(hashBuf, 0, out, outOff + counter * hLen, hLen);
+            }
+            while (++counter < (len / hLen));
         }
-        while (++counter < (len / hLen));
 
         if ((counter * hLen) < len)
         {
