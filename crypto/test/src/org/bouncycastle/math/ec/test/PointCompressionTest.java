@@ -16,8 +16,8 @@ public class PointCompressionTest
     extends TestCase
 {
     public static final int NUM_ROUNDS = 1;
-    public static final String CURVE = "sect163r1";
-    public static final String[] CURVES = {"sect163r1", "sect233r1",
+    public static final String CURVE = "sect163r2";
+    public static final String[] CURVES = {"sect163r2", "sect233r1",
         "sect283r1", "sect409r1", "sect571r1"};
     
     public void testCompression()
