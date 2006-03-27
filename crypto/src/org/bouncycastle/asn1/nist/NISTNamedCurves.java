@@ -37,10 +37,10 @@ public class NISTNamedCurves
         names.put(SECObjectIdentifiers.secp256r1, "P-256"); 
         names.put(SECObjectIdentifiers.secp224r1, "P-224");
 
-        curves.put(SECObjectIdentifiers.sect409r1, SECNamedCurves.getByName("sect571r1"));
+        curves.put(SECObjectIdentifiers.sect571r1, SECNamedCurves.getByName("sect571r1"));
         curves.put(SECObjectIdentifiers.sect409r1, SECNamedCurves.getByName("sect409r1")); 
-        curves.put(SECObjectIdentifiers.sect409r1, SECNamedCurves.getByName("sect283r1")); 
-        curves.put(SECObjectIdentifiers.sect409r1, SECNamedCurves.getByName("sect233r1")); 
+        curves.put(SECObjectIdentifiers.sect283r1, SECNamedCurves.getByName("sect283r1")); 
+        curves.put(SECObjectIdentifiers.sect233r1, SECNamedCurves.getByName("sect233r1")); 
         curves.put(SECObjectIdentifiers.sect163r2, SECNamedCurves.getByName("sect163r2"));       
         curves.put(SECObjectIdentifiers.secp521r1, SECNamedCurves.getByName("secp521r1")); 
         curves.put(SECObjectIdentifiers.secp256r1, SECNamedCurves.getByName("secp256r1"));
