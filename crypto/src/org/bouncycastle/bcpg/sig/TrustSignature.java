@@ -38,7 +38,7 @@ public class TrustSignature
     
     public int getDepth()
     {
-        return data[1] & 0xff;
+        return data[0] & 0xff;
     }
     
     public int getTrustAmount()
