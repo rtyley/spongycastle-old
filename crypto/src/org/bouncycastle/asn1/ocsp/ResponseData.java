@@ -14,6 +14,8 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 public class ResponseData
     extends ASN1Encodable
 {
+    private static final DERInteger V1 = new DERInteger(0);
+    
     private DERInteger          version;
     private ResponderID         responderID;
     private DERGeneralizedTime  producedAt;
@@ -33,7 +35,16 @@ public class ResponseData
         this.responses = responses;
         this.responseExtensions = responseExtensions;
     }
-
+    
+    public ResponseData(
+        ResponderID         responderID,
+        DERGeneralizedTime  producedAt,
+        ASN1Sequence        responses,
+        X509Extensions      responseExtensions)
+    {
+        this(V1, responderID, producedAt, responses, responseExtensions);
+    }
+    
     public ResponseData(
         ASN1Sequence    seq)
     {
@@ -51,12 +62,12 @@ public class ResponseData
             }
             else
             {
-                this.version = null;
+                this.version = V1;
             }
         }
         else
         {
-            this.version = null;
+            this.version = V1;
         }
 
         this.responderID = ResponderID.getInstance(seq.getObjectAt(index++));
@@ -132,9 +143,9 @@ public class ResponseData
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        if (version != null)
+        if (!version.equals(V1))
         {
-            v.add(new DERTaggedObject(true, 0, new DERInteger(0)));
+            v.add(new DERTaggedObject(true, 0, version));
         }
 
         v.add(responderID);

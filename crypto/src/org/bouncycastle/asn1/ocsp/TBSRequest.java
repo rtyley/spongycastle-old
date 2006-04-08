@@ -14,6 +14,8 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 public class TBSRequest
     extends ASN1Encodable
 {
+    private static final DERInteger V1 = new DERInteger(0);
+    
     DERInteger      version;
     GeneralName     requestorName;
     ASN1Sequence    requestList;
@@ -24,7 +26,7 @@ public class TBSRequest
         ASN1Sequence    requestList,
         X509Extensions  requestExtensions)
     {
-        this.version = new DERInteger(0);
+        this.version = V1;
         this.requestorName = requestorName;
         this.requestList = requestList;
         this.requestExtensions = requestExtensions;
@@ -46,12 +48,12 @@ public class TBSRequest
             }
             else
             {
-                version = new DERInteger(0);
+                version = V1;
             }
         }
         else
         {
-            version = new DERInteger(0);
+            version = V1;
         }
 
         if (seq.getObjectAt(index) instanceof ASN1TaggedObject)
@@ -126,7 +128,7 @@ public class TBSRequest
         //
         // if default don't include.
         //
-        if (version.getValue().intValue() != 0)
+        if (!version.equals(V1))
         {
             v.add(new DERTaggedObject(true, 0, version));
         }
