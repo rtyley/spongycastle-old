@@ -64,7 +64,6 @@ public class OCSPReq
     implements java.security.cert.X509Extension
 {
     private OCSPRequest       req;
-    private X509Certificate[] chain = null;
 
     public OCSPReq(
         OCSPRequest req)
