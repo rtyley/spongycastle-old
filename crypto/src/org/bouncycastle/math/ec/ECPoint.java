@@ -57,11 +57,11 @@ public abstract class ECPoint
 
         ECPoint o = (ECPoint)other;
 
-        if (this.isInfinity() && o.isInfinity())
-        {
-            return true;
-        }
-        
+		if (this.isInfinity())
+		{
+			return o.isInfinity();
+		}
+
         return x.equals(o.x) && y.equals(o.y);
     }
 
