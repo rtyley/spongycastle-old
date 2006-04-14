@@ -174,7 +174,7 @@ public abstract class ECPoint
 
             if (b.isInfinity())
             {
-                return new ECPoint.F2m(this.curve, this.x, this.y, this.withCompression);
+                return new ECPoint.Fp(this.curve, this.x, this.y, this.withCompression);
             }
 
             // Check if b = this or b = -this
