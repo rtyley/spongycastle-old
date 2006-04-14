@@ -27,6 +27,8 @@ Release 1.33
 <ul>
 <li>OCSPResponseData was including the default version in its encoding. This has been fixed.
 <li>BasicOCSPResp.getVersion() would throw a NullPointer exception if called on a default version response. This has been fixed.
+<li>Addition of an EC point under Fp could result in an ArithmeticException. This has been fixed.
+<li>The n value for prime192v2 was incorrect. This has been fixed.
 </ul>
 
 <h3>2.2.1 Version</h3>
