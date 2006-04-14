@@ -108,7 +108,7 @@ public class PGPSignatureSubpacketVector
             return null;
         }
                     
-        return ((PreferredAlgorithms)p).getPreferrences();
+        return ((PreferredAlgorithms)p).getPreferences();
     }
     
     public int[] getPreferredSymmetricAlgorithms()
@@ -120,7 +120,7 @@ public class PGPSignatureSubpacketVector
             return null;
         }
                     
-        return ((PreferredAlgorithms)p).getPreferrences();
+        return ((PreferredAlgorithms)p).getPreferences();
     }
     
     public int[] getPreferredCompressionAlgorithms()
@@ -132,7 +132,7 @@ public class PGPSignatureSubpacketVector
             return null;
         }
                     
-        return ((PreferredAlgorithms)p).getPreferrences();
+        return ((PreferredAlgorithms)p).getPreferences();
     }
     
     public int getKeyFlags()
