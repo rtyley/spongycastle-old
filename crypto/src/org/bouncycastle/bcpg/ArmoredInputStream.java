@@ -443,4 +443,10 @@ public class ArmoredInputStream
 
         return c;
     }
+    
+    public void close()
+        throws IOException
+    {
+        in.close();
+    }
 }

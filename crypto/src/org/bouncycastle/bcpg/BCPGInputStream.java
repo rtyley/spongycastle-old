@@ -249,6 +249,12 @@ public class BCPGInputStream
         }
     }
     
+    public void close()
+        throws IOException
+    {
+        in.close();
+    }
+    
     /**
      * a stream that overlays our input stream, allowing the user to only read a segment of it.
      */
