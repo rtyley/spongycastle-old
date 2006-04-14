@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider.test.nist;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.security.Security;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
@@ -60,6 +61,14 @@ public class NistCertPathTest
     private static Set   nistTestPolicy2 = Collections.singleton(NIST_TEST_POLICY_2);
     private static Set   nistTestPolicy3 = Collections.singleton(NIST_TEST_POLICY_3);
     private static Set   nistTestPolicy1And2 = new HashSet(Arrays.asList(new String[] { NIST_TEST_POLICY_1, NIST_TEST_POLICY_2 }));
+    
+    public void setUp()
+    {
+        if (Security.getProvider("BC") == null)
+        {
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        }
+    }
     
     public void testValidSignaturesTest1()
         throws Exception
