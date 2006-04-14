@@ -16,6 +16,8 @@ public class ResponseData
 {
     private static final DERInteger V1 = new DERInteger(0);
     
+    private boolean             versionPresent;
+    
     private DERInteger          version;
     private ResponderID         responderID;
     private DERGeneralizedTime  producedAt;
@@ -56,6 +58,7 @@ public class ResponseData
 
             if (o.getTagNo() == 0)
             {
+                this.versionPresent = true;
                 this.version = DERInteger.getInstance(
                                 (ASN1TaggedObject)seq.getObjectAt(0), true);
                 index++;
@@ -143,7 +146,7 @@ public class ResponseData
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        if (!version.equals(V1))
+        if (versionPresent || !version.equals(V1))
         {
             v.add(new DERTaggedObject(true, 0, version));
         }
