@@ -467,7 +467,7 @@ public class JDKKeyStore
         }
         catch (Exception e)
         {
-            throw new IOException("Error initialising store of key store.");
+            throw new IOException("Error initialising store of key store: " + e);
         }
     }
 
