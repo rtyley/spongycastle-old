@@ -37,7 +37,15 @@ public class PreferredAlgorithms
         super(type, critical, intToByteArray(preferrences));
     }
     
+    /**
+     * @deprecated mispelt!
+     */
     public int[] getPreferrences()
+    {
+        return getPreferences();
+    }
+
+    public int[] getPreferences()
     {
         int[]    v = new int[data.length];
         
