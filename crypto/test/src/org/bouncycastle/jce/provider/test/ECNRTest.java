@@ -18,33 +18,19 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
 
 public class ECNRTest
     extends SimpleTest
 {
-    SecureRandom    random = new SecureRandom()
-    {
-        boolean first = true;
+    byte[] k1 = Hex.decode("d5014e4b60ef2ba8b6211b4062ba3224e0427dd3");
+    byte[] k2 = Hex.decode("345e8d05c075c3a508df729a1685690e68fcfb8c8117847e89063bca1f85d968fd281540b6e13bd1af989a1fbf17e06462bf511f9d0b140fb48ac1b1baa5bded");
 
-        public void nextBytes(byte[] bytes)
-        {
-            byte[] k1 = Hex.decode("d5014e4b60ef2ba8b6211b4062ba3224e0427dd3");
-            byte[] k2 = Hex.decode("345e8d05c075c3a508df729a1685690e68fcfb8c8117847e89063bca1f85d968fd281540b6e13bd1af989a1fbf17e06462bf511f9d0b140fb48ac1b1baa5bded");
-
-            if (first)
-            {
-                System.arraycopy(k1, 0, bytes, 0, k1.length);
-                first = false;
-            }
-            else
-            {
-                System.arraycopy(k2, 0, bytes, 0, k2.length);
-            }
-        }
-    };
-
+    SecureRandom    random = new FixedSecureRandom(new byte[][] { k1, k2 });
+    
     /**
      * X9.62 - 1998,<br>
      * J.3.2, Page 155, ECDSA over the field Fp<br>
@@ -56,15 +42,9 @@ public class ECNRTest
         BigInteger r = new BigInteger("308636143175167811492623515537541734843573549327605293463169625072911693");
         BigInteger s = new BigInteger("852401710738814635664888632022555967400445256405412579597015412971797143");
 
-        SecureRandom    k = new SecureRandom()
-        {
-            public void nextBytes(byte[] bytes)
-            {
-                byte[] vals = new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655").toByteArray();
-
-                System.arraycopy(vals, vals.length-bytes.length, bytes, 0, bytes.length);
-            }
-        };
+        byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655"));
+        
+        SecureRandom    k = new FixedSecureRandom(kData);
 
         ECCurve curve = new ECCurve.Fp(
             new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
@@ -106,15 +86,9 @@ public class ECNRTest
         BigInteger r  = new BigInteger("2474388605162950674935076940284692598330235697454145648371");
         BigInteger s  = new BigInteger("2997192822503471356158280167065034437828486078932532073836");
 
-        SecureRandom    k = new SecureRandom()
-        {
-            public void nextBytes(byte[] bytes)
-            {
-                byte[] vals = new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655").toByteArray();
-
-                System.arraycopy(vals, vals.length-bytes.length, bytes, 0, bytes.length);
-            }
-        };
+        byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("dcc5d1f1020906df2782360d36b2de7a17ece37d503784af", 16));
+        
+        SecureRandom    k = new FixedSecureRandom(kData);
 
         ECCurve.Fp curve = new ECCurve.Fp(
             new BigInteger("6277101735386680763835789423207666416083908700390324961279"), // q (or p)
@@ -156,15 +130,9 @@ public class ECNRTest
         BigInteger r  = new BigInteger("1820641608112320695747745915744708800944302281118541146383656165330049339564439316345159057453301092391897040509935100825960342573871340486684575368150970954");
         BigInteger s  = new BigInteger("6358277176448326821136601602749690343031826490505780896013143436153111780706227024847359990383467115737705919410755190867632280059161174165591324242446800763");
 
-        SecureRandom    k = new SecureRandom()
-        {
-            public void nextBytes(byte[] bytes)
-            {
-                byte[] vals = new BigInteger("1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef", 16).toByteArray();
-
-                System.arraycopy(vals, vals.length-bytes.length, bytes, 0, bytes.length);
-            }
-        };
+        byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("cdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef", 16));
+        
+        SecureRandom    k = new FixedSecureRandom(kData);
 
         ECCurve.Fp curve = new ECCurve.Fp(
             new BigInteger("6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151"), // q (or p)

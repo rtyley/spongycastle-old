@@ -1,6 +1,7 @@
 package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
@@ -28,15 +29,9 @@ public class ECGOST3410Test
     BigInteger r = new BigInteger("29700980915817952874371204983938256990422752107994319651632687982059210933395");
     BigInteger s = new BigInteger("574973400270084654178925310019147038455227042649098563933718999175515839552");
 
-    SecureRandom    k = new SecureRandom()
-    {
-        public void nextBytes(byte[] bytes)
-        {
-            byte[] k = new BigInteger("53854137677348463731403841147996619241504003434302020712960838528893196233395").toByteArray();
+    byte[] kData = new BigInteger("53854137677348463731403841147996619241504003434302020712960838528893196233395").toByteArray();
 
-            System.arraycopy(k, k.length-bytes.length, bytes, 0, bytes.length);
-        }
-    };
+    SecureRandom    k = new FixedSecureRandom(kData);
 
     private void ecGOST3410_TEST()
     {

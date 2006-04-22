@@ -24,7 +24,9 @@ import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
@@ -32,50 +34,15 @@ import org.bouncycastle.util.test.TestResult;
 public class GOST3410Test
     implements Test
 {
-    SecureRandom    random = new SecureRandom()
-    {
-        boolean firstLong = true;
-
-        public long nextLong()
-        {
-            String x0 = "0x13DA8B9D";
-            String c =  "0xA0E9DE4B";
-
-            if (firstLong)
-            {
-                firstLong = false;
-                return Long.decode(x0).longValue();
-            }
-            else
-            {
-                return Long.decode(c).longValue();
-            }
-        }
-
-        public void nextBytes(byte[] bytes)
-        {
-
-            byte[] d = Hex.decode("41ab97857f42614355d32db0b1069f109a4da283676c7c53a68185b4");
-
-            System.arraycopy(d, 0, bytes, bytes.length-d.length, d.length);
-        }
-    };
-
     private class ECGOST3410Test
         implements Test
     {
         BigInteger r = new BigInteger("29700980915817952874371204983938256990422752107994319651632687982059210933395");
         BigInteger s = new BigInteger("46959264877825372965922731380059061821746083849389763294914877353246631700866");
 
-        SecureRandom    k = new SecureRandom()
-        {
-            public void nextBytes(byte[] bytes)
-            {
-                byte[] k = new BigInteger("53854137677348463731403841147996619241504003434302020712960838528893196233395").toByteArray();
+        byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("53854137677348463731403841147996619241504003434302020712960838528893196233395"));
 
-                System.arraycopy(k, k.length-bytes.length, bytes, 0, bytes.length);
-            }
-        };
+        SecureRandom    k = new FixedSecureRandom(kData);
 
         public String getName()
         {
