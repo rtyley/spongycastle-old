@@ -392,7 +392,7 @@ public class X509CertificateObject
             }
             catch (Exception e)
             {
-                throw new RuntimeException("error processing key usage extension");
+                throw new RuntimeException("error processing basic constraints extension");
             }
         }
 
