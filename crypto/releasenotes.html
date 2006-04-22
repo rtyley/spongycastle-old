@@ -30,6 +30,7 @@ Release 1.33
 <li>Addition of an EC point under Fp could result in an ArithmeticException. This has been fixed.
 <li>The n value for prime192v2 was incorrect. This has been fixed.
 <li>ArmoredInputStream was not closing the underlying stream on close. This has been fixed.
+<li>Small base64 encoded strings with embedded white space could decode incorrectly using the Base64 class. This has been fixed.
 </ul>
 
 <h3>2.2.1 Version</h3>
