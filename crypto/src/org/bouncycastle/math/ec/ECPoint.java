@@ -112,7 +112,12 @@ public abstract class ECPoint
         public Fp(ECCurve curve, ECFieldElement x, ECFieldElement y, boolean withCompression)
         {
             super(curve, x, y);
-            
+
+            if ((x != null && y == null) || (x == null && y != null))
+            {
+                throw new IllegalArgumentException("Exactly one of the field elements is null");
+            }
+
             this.withCompression = withCompression;
         }
          
@@ -180,7 +185,7 @@ public abstract class ECPoint
             // Check if b = this or b = -this
             if (this.x.equals(b.x))
             {
-                if (this.y.equals(b.x))
+                if (this.y.equals(b.y))
                 {
                     // this = b, i.e. this must be doubled
                     return this.twice();
@@ -223,9 +228,16 @@ public abstract class ECPoint
         }
 
         // D.3.2 pg 102 (see Note:)
-        public ECPoint subtract(ECPoint p2)
+        public ECPoint subtract(ECPoint b)
         {
-            return add(new ECPoint.Fp(curve, p2.x, p2.y.negate(),
+            if (b.isInfinity())
+            {
+                return new ECPoint.Fp(this.curve, this.x, this.y,
+                        this.withCompression);
+            }
+
+            // Add -b
+            return add(new ECPoint.Fp(this.curve, b.x, b.y.negate(),
                     this.withCompression));
         }
 
@@ -429,10 +441,16 @@ public abstract class ECPoint
          */
         public ECPoint subtract(ECPoint b)
         {
+            if (b.isInfinity())
+            {
+                return new ECPoint.F2m(this.curve, this.x, this.y,
+                        this.withCompression);
+            }
+
             // Add -b
             ECPoint.F2m minusB
-                = new ECPoint.F2m(curve, b.getX(), b.getX().add(b.getY()),
-                        withCompression);
+                = new ECPoint.F2m(this.curve, b.x, b.x.add(b.y),
+                        this.withCompression);
             return add(minusB);
         }
 
