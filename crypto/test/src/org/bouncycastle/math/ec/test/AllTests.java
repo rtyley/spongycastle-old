@@ -15,10 +15,9 @@ public class AllTests
         throws Exception
     {   
         TestSuite suite = new TestSuite("EC Math tests");
-        
-        suite.addTest(PointCompressionTest.suite());
-        suite.addTest(ECPointF2mTest.suite());
-        
+
+        suite.addTest(ECPointTest.suite());
+
         return suite;
     }
 }
