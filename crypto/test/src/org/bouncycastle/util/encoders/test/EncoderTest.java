@@ -34,6 +34,7 @@ public class EncoderTest
     {
         testHex();
         testBase64();
+        testBase64WithNL();
     }
     
     
@@ -135,7 +136,21 @@ public class EncoderTest
         }
     }
 
+    public void testBase64WithNL()
+    {
+        byte[] dec = Base64.decode("SVNC" + "\n" + "QUQ=\n");
 
+        if (dec.length != 5)
+        {
+            fail("got length " + dec.length + " when expecting 10");
+        }
+        
+        if (!areEqual(dec, Base64.decode("SVNCQUQ=")))
+        {
+            fail("decodings are not equal");
+        }
+    }
+    
     public void testHex()
     {
         try
