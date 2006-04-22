@@ -9,7 +9,9 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.ECNRSigner;
 import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
 
 /**
@@ -24,15 +26,9 @@ public class ECNRTest
     BigInteger r = new BigInteger("308636143175167811492623515537541734843573549327605293463169625072911693");
     BigInteger s = new BigInteger("852401710738814635664888632022555967400445256405412579597015412971797143");
 
-    SecureRandom    k = new SecureRandom()
-    {
-        public void nextBytes(byte[] bytes)
-        {
-            byte[] k = new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655").toByteArray();
+    byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655"));
 
-            System.arraycopy(k, k.length-bytes.length, bytes, 0, bytes.length);
-        }
-    };
+    SecureRandom    k = new FixedSecureRandom(kData);
 
     private void ecNR239bitPrime()
     {

@@ -12,6 +12,7 @@ import org.bouncycastle.crypto.params.DSAValidationParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.DSASigner;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
 
 /**
@@ -20,51 +21,15 @@ import org.bouncycastle.util.test.SimpleTest;
 public class DSATest
     extends SimpleTest
 {
-    SecureRandom    random = new SecureRandom()
-    {
-        boolean first = true;
+    byte[] k1 = Hex.decode("d5014e4b60ef2ba8b6211b4062ba3224e0427dd3");
+    byte[] k2 = Hex.decode("345e8d05c075c3a508df729a1685690e68fcfb8c8117847e89063bca1f85d968fd281540b6e13bd1af989a1fbf17e06462bf511f9d0b140fb48ac1b1baa5bded");
 
-        public void nextBytes(byte[] bytes)
-        {
-            byte[] k1 = Hex.decode("d5014e4b60ef2ba8b6211b4062ba3224e0427dd3");
-            byte[] k2 = Hex.decode("345e8d05c075c3a508df729a1685690e68fcfb8c8117847e89063bca1f85d968fd281540b6e13bd1af989a1fbf17e06462bf511f9d0b140fb48ac1b1baa5bded");
+    SecureRandom    random = new FixedSecureRandom(new byte[][] { k1, k2});
 
-            if (first)
-            {
-                System.arraycopy(k1, 0, bytes, 0, k1.length);
-                first = false;
-            }
-            else
-            {
-                System.arraycopy(k2, 0, bytes, 0, k2.length);
-            }
-        }
-    };
-
-    SecureRandom    keyRandom = new SecureRandom()
-    {
-        public void nextBytes(byte[] bytes)
-        {
-            byte[] k = Hex.decode("b5014e4b60ef2ba8b6211b4062ba3224e0427dd3");
-
-            int i;
-
-            for (i = 0; i < (bytes.length - k.length); i += k.length)
-            {
-                System.arraycopy(k, 0, bytes, i, k.length);
-            }
-
-            if (i > bytes.length)
-            {
-                System.arraycopy(k, 0, bytes, i - k.length, bytes.length - (i - k.length));
-            }
-            else
-            {
-                System.arraycopy(k, 0, bytes, i, bytes.length - i);
-            }
-        }
-    };
-
+    byte[] keyData = Hex.decode("b5014e4b60ef2ba8b6211b4062ba3224e0427dd3");
+    
+    SecureRandom    keyRandom = new FixedSecureRandom(new byte[][] { keyData, keyData });
+    
     BigInteger  pValue = new BigInteger("8df2a494492276aa3d25759bb06869cbeac0d83afb8d0cf7cbb8324f0d7882e5d0762fc5b7210eafc2e9adac32ab7aac49693dfbf83724c2ec0736ee31c80291", 16);
     BigInteger  qValue = new BigInteger("c773218c737ec8ee993b4f2ded30f48edace915f", 16);
 
