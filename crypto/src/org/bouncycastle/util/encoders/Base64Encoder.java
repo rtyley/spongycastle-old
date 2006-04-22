@@ -145,33 +145,21 @@ public class Base64Encoder
         int  i = off;
         int  finish = end - 4;
         
+        i = nextI(data, i, finish);
+
         while (i < finish)
         {
-            while ((i < finish) && ignore((char)data[i]))
-            {
-                i++;
-            }
-            
             b1 = decodingTable[data[i++]];
             
-            while ((i < finish) && ignore((char)data[i]))
-            {
-                i++;
-            }
+            i = nextI(data, i, finish);
             
             b2 = decodingTable[data[i++]];
             
-            while ((i < finish) && ignore((char)data[i]))
-            {
-                i++;
-            }
+            i = nextI(data, i, finish);
             
             b3 = decodingTable[data[i++]];
             
-            while ((i < finish) && ignore((char)data[i]))
-            {
-                i++;
-            }
+            i = nextI(data, i, finish);
             
             b4 = decodingTable[data[i++]];
 
@@ -180,43 +168,22 @@ public class Base64Encoder
             out.write((b3 << 6) | b4);
             
             outLen += 3;
-        }
-
-        if (data[end - 2] == padding)
-        {
-            b1 = decodingTable[data[end - 4]];
-            b2 = decodingTable[data[end - 3]];
-
-            out.write((b1 << 2) | (b2 >> 4));
             
-            outLen += 1;
-        }
-        else if (data[end - 1] == padding)
-        {
-            b1 = decodingTable[data[end - 4]];
-            b2 = decodingTable[data[end - 3]];
-            b3 = decodingTable[data[end - 2]];
-
-            out.write((b1 << 2) | (b2 >> 4));
-            out.write((b2 << 4) | (b3 >> 2));
-            
-            outLen += 2;
-        }
-        else
-        {
-            b1 = decodingTable[data[end - 4]];
-            b2 = decodingTable[data[end - 3]];
-            b3 = decodingTable[data[end - 2]];
-            b4 = decodingTable[data[end - 1]];
-
-            out.write((b1 << 2) | (b2 >> 4));
-            out.write((b2 << 4) | (b3 >> 2));
-            out.write((b3 << 6) | b4);
-            
-            outLen += 3;
+            i = nextI(data, i, finish);
         }
 
+        outLen += decodeLastBlock(out, (char)data[end - 4], (char)data[end - 3], (char)data[end - 2], (char)data[end - 1]);
+        
         return outLen;
+    }
+
+    private int nextI(byte[] data, int i, int finish)
+    {
+        while ((i < finish) && ignore((char)data[i]))
+        {
+            i++;
+        }
+        return i;
     }
     
     /**
@@ -245,34 +212,25 @@ public class Base64Encoder
             end--;
         }
         
-        int    i = 0;
-        int   finish = end - 4;
+        int  i = 0;
+        int  finish = end - 4;
+        
+        i = nextI(data, i, finish);
         
         while (i < finish)
         {
-            while ((i < finish) && ignore(data.charAt(i)))
-            {
-                i++;
-            }
-            
             b1 = decodingTable[data.charAt(i++)];
             
-            while ((i < finish) && ignore(data.charAt(i)))
-            {
-                i++;
-            }
+            i = nextI(data, i, finish);
+            
             b2 = decodingTable[data.charAt(i++)];
             
-            while ((i < finish) && ignore(data.charAt(i)))
-            {
-                i++;
-            }
+            i = nextI(data, i, finish);
+            
             b3 = decodingTable[data.charAt(i++)];
             
-            while ((i < finish) && ignore(data.charAt(i)))
-            {
-                i++;
-            }
+            i = nextI(data, i, finish);
+            
             b4 = decodingTable[data.charAt(i++)];
 
             out.write((b1 << 2) | (b2 >> 4));
@@ -280,42 +238,61 @@ public class Base64Encoder
             out.write((b3 << 6) | b4);
             
             length += 3;
+            
+            i = nextI(data, i, finish);
         }
 
-        if (data.charAt(end - 2) == padding)
+        length += decodeLastBlock(out, data.charAt(end - 4), data.charAt(end - 3), data.charAt(end - 2), data.charAt(end - 1));
+
+        return length;
+    }
+
+    private int decodeLastBlock(OutputStream out, char c1, char c2, char c3, char c4) 
+        throws IOException
+    {
+        byte    b1, b2, b3, b4;
+        
+        if (c3 == padding)
         {
-            b1 = decodingTable[data.charAt(end - 4)];
-            b2 = decodingTable[data.charAt(end - 3)];
+            b1 = decodingTable[c1];
+            b2 = decodingTable[c2];
 
             out.write((b1 << 2) | (b2 >> 4));
             
-            length += 1;
+            return 1;
         }
-        else if (data.charAt(end - 1) == padding)
+        else if (c4 == padding)
         {
-            b1 = decodingTable[data.charAt(end - 4)];
-            b2 = decodingTable[data.charAt(end - 3)];
-            b3 = decodingTable[data.charAt(end - 2)];
+            b1 = decodingTable[c1];
+            b2 = decodingTable[c2];
+            b3 = decodingTable[c3];
 
             out.write((b1 << 2) | (b2 >> 4));
             out.write((b2 << 4) | (b3 >> 2));
             
-            length += 2;
+            return 2;
         }
         else
         {
-            b1 = decodingTable[data.charAt(end - 4)];
-            b2 = decodingTable[data.charAt(end - 3)];
-            b3 = decodingTable[data.charAt(end - 2)];
-            b4 = decodingTable[data.charAt(end - 1)];
+            b1 = decodingTable[c1];
+            b2 = decodingTable[c2];
+            b3 = decodingTable[c3];
+            b4 = decodingTable[c4];
 
             out.write((b1 << 2) | (b2 >> 4));
             out.write((b2 << 4) | (b3 >> 2));
             out.write((b3 << 6) | b4);
             
-            length += 3;
-        }
+            return 3;
+        } 
+    }
 
-        return length;
+    private int nextI(String data, int i, int finish)
+    {
+        while ((i < finish) && ignore(data.charAt(i)))
+        {
+            i++;
+        }
+        return i;
     }
 }
