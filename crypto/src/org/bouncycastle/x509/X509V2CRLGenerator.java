@@ -126,6 +126,14 @@ public class X509V2CRLGenerator
     {
         tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), reason, new DERGeneralizedTime(invalidityDate));
     }
+   
+    /**
+     * Add a CRL entry with extensions.
+     **/
+    public void addCRLEntry(BigInteger userCertificate, Date revocationDate, X509Extensions extensions)
+    {
+        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), extensions);
+    }
     
     /**
      * Set the signature algorithm. This can be either a name or an OID, names
@@ -153,7 +161,7 @@ public class X509V2CRLGenerator
     }
 
     /**
-     * add a given extension field for the standard extensions tag (tag 3)
+     * add a given extension field for the standard extensions tag (tag 0)
      */
     public void addExtension(
         String          OID,

@@ -110,11 +110,6 @@ public class V2TBSCertListGenerator
 
     public void addCRLEntry(DERInteger userCertificate, Time revocationDate, int reason, DERGeneralizedTime invalidityDate)
     {
-        ASN1EncodableVector v = new ASN1EncodableVector();
-
-        v.add(userCertificate);
-        v.add(revocationDate);
-
         Vector extOids = new Vector();
         Vector extValues = new Vector();
         
@@ -148,18 +143,29 @@ public class V2TBSCertListGenerator
         
         if (extOids.size() != 0)
         {
-            X509Extensions ex = new X509Extensions(extOids, extValues);
-            v.add(ex);
+            addCRLEntry(userCertificate, revocationDate, new X509Extensions(extOids, extValues));
         }
-        
-        if (crlentries == null)
+        else
         {
-            crlentries = new Vector();
+            addCRLEntry(userCertificate, revocationDate, null);
         }
-
-        crlentries.addElement(new DERSequence(v));
     }
 
+    public void addCRLEntry(DERInteger userCertificate, Time revocationDate, X509Extensions extensions)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(userCertificate);
+        v.add(revocationDate);
+        
+        if (extensions != null)
+        {
+            v.add(extensions);
+        }
+        
+        addCRLEntry(new DERSequence(v));
+    }
+    
     public void setExtensions(
         X509Extensions    extensions)
     {

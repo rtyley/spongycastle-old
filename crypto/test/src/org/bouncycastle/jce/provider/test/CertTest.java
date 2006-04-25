@@ -1,6 +1,7 @@
 package org.bouncycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -30,6 +31,7 @@ import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -37,6 +39,7 @@ import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509KeyUsage;
 import org.bouncycastle.jce.X509Principal;
@@ -1094,7 +1097,7 @@ public class CertTest
 
     }
 
-    public void checkCRLCreation()
+    public void checkCRLCreation1()
         throws Exception
     {
         KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "BC");
@@ -1109,6 +1112,91 @@ public class CertTest
         crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
         
         crlGen.addCRLEntry(BigInteger.ONE, now, CRLReason.privilegeWithdrawn);
+        
+        crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
+        
+        X509CRL    crl = crlGen.generateX509CRL(pair.getPrivate(), "BC");
+        
+        if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
+        {
+            fail("failed CRL issuer test");
+        }
+        
+        byte[] authExt = crl.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
+        
+        if (authExt == null)
+        {
+            fail("failed to find CRL extension");
+        }
+        
+        AuthorityKeyIdentifier authId = new AuthorityKeyIdentifierStructure(authExt);
+        
+        X509CRLEntry entry = crl.getRevokedCertificate(BigInteger.ONE);
+        
+        if (entry == null)
+        {
+            fail("failed to find CRL entry");
+        }
+        
+        if (!entry.getSerialNumber().equals(BigInteger.ONE))
+        {
+            fail("CRL cert serial number does not match");
+        }
+        
+        if (!entry.hasExtensions())
+        {
+            fail("CRL entry extension not found");
+        }
+    
+        byte[]  ext = entry.getExtensionValue(X509Extensions.ReasonCode.getId());
+    
+        if (ext != null)
+        {
+            DEREnumerated   reasonCode = (DEREnumerated)X509ExtensionUtil.fromExtensionValue(ext);
+                                                                       
+            if (reasonCode.getValue().intValue() != CRLReason.privilegeWithdrawn)
+            {
+                fail("CRL entry reasonCode wrong");
+            }
+        }
+        else
+        {
+            fail("CRL entry reasonCode not found");
+        }
+    }
+    
+    public void checkCRLCreation2()
+        throws Exception
+    {
+        KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        X509V2CRLGenerator   crlGen = new X509V2CRLGenerator();
+        Date                 now = new Date();
+        KeyPair              pair = kpGen.generateKeyPair();
+        
+        crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
+        
+        crlGen.setThisUpdate(now);
+        crlGen.setNextUpdate(new Date(now.getTime() + 100000));
+        crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
+        
+        Vector extOids = new Vector();
+        Vector extValues = new Vector();
+        
+        CRLReason crlReason = new CRLReason(CRLReason.privilegeWithdrawn);
+        
+        try
+        {
+            extOids.addElement(X509Extensions.ReasonCode);
+            extValues.addElement(new X509Extension(false, new DEROctetString(crlReason.getEncoded())));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("error encoding reason: " + e);
+        }
+        
+        X509Extensions entryExtensions = new X509Extensions(extOids, extValues);
+        
+        crlGen.addCRLEntry(BigInteger.ONE, now, entryExtensions);
         
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
         
@@ -1407,7 +1495,8 @@ public class CertTest
         checkCreation4();
         checkCreation5();
         
-        checkCRLCreation();
+        checkCRLCreation1();
+        checkCRLCreation2();
     }
 
     public static void main(
