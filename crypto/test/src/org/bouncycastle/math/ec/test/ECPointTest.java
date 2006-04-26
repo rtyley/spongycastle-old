@@ -154,7 +154,7 @@ public class ECPointTest extends TestCase
 
         try
         {
-            ECPoint.F2m bad = new ECPoint.F2m(fp.curve, new ECFieldElement.F2m(
+            ECPoint.F2m bad = new ECPoint.F2m(f2m.curve, new ECFieldElement.F2m(
                     f2m.m, f2m.k1, new BigInteger("1011")), null);
             fail();
         }
@@ -164,7 +164,7 @@ public class ECPointTest extends TestCase
 
         try
         {
-            ECPoint.F2m bad = new ECPoint.F2m(fp.curve, null,
+            ECPoint.F2m bad = new ECPoint.F2m(f2m.curve, null,
                     new ECFieldElement.F2m(f2m.m, f2m.k1,
                             new BigInteger("1011")));
             fail();
