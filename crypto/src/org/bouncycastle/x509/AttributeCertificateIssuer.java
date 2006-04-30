@@ -25,7 +25,7 @@ import org.bouncycastle.jce.X509Principal;
 public class AttributeCertificateIssuer
     implements CertSelector
 {
-    ASN1Encodable  form;
+    final ASN1Encodable  form;
     
     /**
      * @param issuer
@@ -68,11 +68,11 @@ public class AttributeCertificateIssuer
         
         for (int i = 0; i != names.length; i++)
         {
-            if (names[i].getName() instanceof X509Name)
+            if (names[i].getTagNo() == GeneralName.directoryName)
             {
                 try
                 {
-                    l.add(new X500Principal(((X509Name)names[i].getName()).getEncoded()));
+                    l.add(new X500Principal(((ASN1Encodable)names[i].getName()).getEncoded()));
                 }
                 catch (IOException e)
                 {
@@ -113,7 +113,7 @@ public class AttributeCertificateIssuer
         {
             GeneralName gn = names[i];
 
-            if (gn.getTagNo() == 4)
+            if (gn.getTagNo() == GeneralName.directoryName)
             {
                 try
                 {

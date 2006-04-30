@@ -1,10 +1,13 @@
 package org.bouncycastle.x509;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -12,6 +15,7 @@ import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.X509Principal;
 
 class X509Util
 {
@@ -84,5 +88,18 @@ class X509Util
         }
         
         return l.iterator();
+    }
+
+    static X509Principal convertPrincipal(
+        X500Principal principal)
+    {
+        try
+        {
+            return new X509Principal(principal.getEncoded());
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("cannot convert principal");
+        }
     }
 }
