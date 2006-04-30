@@ -28,7 +28,7 @@ public class ECNRTest
 
     byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655"));
 
-    SecureRandom    k = new FixedSecureRandom(kData);
+    SecureRandom    k = new FixedSecureRandom(true, kData);
 
     private void ecNR239bitPrime()
     {

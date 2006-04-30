@@ -129,7 +129,7 @@ public class ECTest
 
         byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655"));
 
-        SecureRandom    k = new FixedSecureRandom(kData);
+        SecureRandom    k = new FixedSecureRandom(true, kData);
 
         ECCurve.Fp curve = new ECCurve.Fp(
             new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
