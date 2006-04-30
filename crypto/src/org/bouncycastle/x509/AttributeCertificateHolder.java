@@ -44,7 +44,7 @@ import javax.security.auth.x500.X500Principal;
 public class AttributeCertificateHolder 
     implements CertSelector
 {
-    Holder   holder;
+    final Holder   holder;
 
     AttributeCertificateHolder(
         ASN1Sequence seq)
@@ -52,6 +52,22 @@ public class AttributeCertificateHolder
         holder = Holder.getInstance(seq);
     }
 
+    public AttributeCertificateHolder(
+        X509Principal issuerName,
+        BigInteger    serialNumber)
+    {
+        holder = new org.bouncycastle.asn1.x509.Holder(new IssuerSerial(
+                new GeneralNames(new DERSequence(new GeneralName(issuerName))),
+                new DERInteger(serialNumber)));        
+    }
+
+    public AttributeCertificateHolder(
+        X500Principal issuerName,
+        BigInteger    serialNumber)
+    {
+        this(X509Util.convertPrincipal(issuerName), serialNumber);
+    }
+    
     public AttributeCertificateHolder(
         X509Certificate cert) 
         throws CertificateParsingException
@@ -79,14 +95,7 @@ public class AttributeCertificateHolder
     public AttributeCertificateHolder(
         X500Principal principal) 
     {
-        try
-        {
-            holder = new Holder(generateGeneralNames(new X509Principal(principal.getEncoded())));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("Can't process principal");
-        }
+        this(X509Util.convertPrincipal(principal));
     }
     
     private GeneralNames generateGeneralNames(X509Principal principal)
@@ -102,7 +111,7 @@ public class AttributeCertificateHolder
         {
             GeneralName gn = names[i];
 
-            if (gn.getTagNo() == 4)
+            if (gn.getTagNo() == GeneralName.directoryName)
             {
                 try
                 {
