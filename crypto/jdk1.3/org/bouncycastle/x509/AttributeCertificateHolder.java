@@ -87,7 +87,7 @@ public class AttributeCertificateHolder
         {
             GeneralName gn = names[i];
 
-            if (gn.getTagNo() == 4)
+            if (gn.getTagNo() == GeneralName.directoryName)
             {
                 try
                 {

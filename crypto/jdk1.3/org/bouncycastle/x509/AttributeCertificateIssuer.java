@@ -61,11 +61,11 @@ public class AttributeCertificateIssuer
         
         for (int i = 0; i != names.length; i++)
         {
-            if (names[i].getName() instanceof X509Name)
+            if (names[i].getTagNo() == GeneralName.directoryName)
             {
                 try
                 {
-                    l.add(new X509Principal(((X509Name)names[i].getName()).getEncoded()));
+                    l.add(new X509Principal(((ASN1Encodable)names[i].getName()).getEncoded()));
                 }
                 catch (IOException e)
                 {
