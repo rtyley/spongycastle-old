@@ -10,13 +10,37 @@ public class FixedSecureRandom
     private final byte[] _data;
     
     private int          _index;
+    private int          _intPad;
     
     public FixedSecureRandom(byte[] value)
     {
-        this(new byte[][] { value });
+        this(false, new byte[][] { value });
     }
     
-    public FixedSecureRandom(byte[][] values)
+    public FixedSecureRandom(
+        byte[][] values)
+    {
+        this(false, values);
+    }
+    
+    /**
+     * Pad the data on integer boundaries. This is necessary for the classpath project's BigInteger
+     * implementation.
+     */
+    public FixedSecureRandom(
+        boolean intPad,
+        byte[] value)
+    {
+        this(intPad, new byte[][] { value });
+    }
+    
+    /**
+     * Pad the data on integer boundaries. This is necessary for the classpath project's BigInteger
+     * implementation.
+     */
+    public FixedSecureRandom(
+        boolean intPad,
+        byte[][] values)
     {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         
@@ -33,6 +57,11 @@ public class FixedSecureRandom
         }
         
         _data = bOut.toByteArray();
+        
+        if (intPad)
+        {
+            _intPad = _data.length % 4;
+        }
     }
 
     public void nextBytes(byte[] bytes)
@@ -50,21 +79,25 @@ public class FixedSecureRandom
     {
         int val = 0;
         
-        if (_index <= _data.length - 4)
+        val |= nextValue() << 24;
+        val |= nextValue() << 16;
+        
+        if (_intPad == 2)
         {
-            val |= _data[_index++] << 24;
+            _intPad--;
         }
-        if (_index <= _data.length - 3)
+        else
         {
-            val |= (_data[_index++] & 0xff) << 16;
+            val |= nextValue() << 8;
         }
-        if (_index <= _data.length - 2)
+        
+        if (_intPad == 1)
         {
-            val |= (_data[_index++] & 0xff) << 8;
+            _intPad--;
         }
-        if (_index <= _data.length - 1)
+        else
         {
-            val |= _data[_index++] & 0xff;
+            val |= nextValue();
         }
         
         return val;
@@ -78,39 +111,20 @@ public class FixedSecureRandom
     {
         long val = 0;
         
-        if (_index <= _data.length - 8)
-        {
-            val |= (_data[_index++] & 0xff) << 56;
-        }
-        if (_index <= _data.length - 7)
-        {
-            val |= (_data[_index++] & 0xff) << 48;
-        }
-        if (_index <= _data.length - 6)
-        {
-            val |= (_data[_index++] & 0xff) << 40;
-        }
-        if (_index <= _data.length - 5)
-        {
-            val |= (_data[_index++] & 0xff) << 32;
-        }
-        if (_index <= _data.length - 4)
-        {
-            val |= (_data[_index++] & 0xff) << 24;
-        }
-        if (_index <= _data.length - 3)
-        {
-            val |= (_data[_index++] & 0xff) << 16;
-        }
-        if (_index <= _data.length - 2)
-        {
-            val |= (_data[_index++] & 0xff) << 8;
-        }
-        if (_index <= _data.length - 1)
-        {
-            val |= _data[_index++] & 0xff;
-        }
+        val |= (long)nextValue() << 56;
+        val |= (long)nextValue() << 48;
+        val |= (long)nextValue() << 40;
+        val |= (long)nextValue() << 32;
+        val |= (long)nextValue() << 24;
+        val |= (long)nextValue() << 16;
+        val |= (long)nextValue() << 8;
+        val |= (long)nextValue();
         
         return val;
+    }
+    
+    private int nextValue()
+    {
+        return _data[_index++] & 0xff;
     }
 }
