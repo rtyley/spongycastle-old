@@ -13,6 +13,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
@@ -46,7 +47,6 @@ import org.bouncycastle.crypto.params.ParametersWithSBox;
 import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.crypto.params.RC5Parameters;
 import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
-import org.bouncycastle.util.encoders.Hex;
 
 public class JCEBlockCipher extends WrapCipherSpi
     implements PBE
@@ -308,19 +308,27 @@ public class JCEBlockCipher extends WrapCipherSpi
             throw new NoSuchPaddingException("Padding " + padding + " unknown.");
         }
     }
-private int opmode;
+
     protected void engineInit(
         int                     opmode,
         Key                     key,
         AlgorithmParameterSpec  params,
         SecureRandom            random) 
-    throws InvalidKeyException, InvalidAlgorithmParameterException
+        throws InvalidKeyException, InvalidAlgorithmParameterException
     {
         CipherParameters        param;
-        this.opmode = opmode;
+        
         this.pbeSpec = null;
         this.pbeAlgorithm = null;
         this.engineParams = null;
+        
+        //
+        // basic key check
+        //
+        if (!(key instanceof SecretKey))
+        {
+            throw new InvalidKeyException("Key for algorithm " + key.getAlgorithm() + " not suitable for symmetric enryption.");
+        }
         
         //
         // for RC5-64 we must have some default parameters

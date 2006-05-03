@@ -9,6 +9,7 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
@@ -152,6 +153,14 @@ public class JCEStreamCipher
         this.pbeAlgorithm = null;
         
         this.engineParams = null;
+        
+        //
+        // basic key check
+        //
+        if (!(key instanceof SecretKey))
+        {
+            throw new InvalidKeyException("Key for algorithm " + key.getAlgorithm() + " not suitable for symmetric enryption.");
+        }
         
         if (key instanceof JCEPBEKey)
         {
