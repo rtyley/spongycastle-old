@@ -35,6 +35,7 @@ Release 1.33
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
 <li>The X509V2CRLGenerator now supports adding general extensions to CRL entries.
+<li>A RoleSyntax implementation has been added to the x509 ASN.1 package, and the AttributeCertificateHolder class now support the IssuerSerial option.
 </ul>
 
 <h3>2.2.1 Version</h3>
@@ -540,7 +541,7 @@ precedence over the local alias used to add the key to the PKCS12 key store.
 The local name now takes precedence.
 <li>ReasonFlags now correctly encodes.
 </ul>
-<h3>2.19.2 Additional Functionality and Features</h3>
+<h3>2.19.3 Additional Functionality and Features</h3>
 <ul>
 <li>The PKCS12 key store now handles key bags in encryptedData bags.
 <li>The X509NameTokenizer now handles for '\' and '"' characters.
