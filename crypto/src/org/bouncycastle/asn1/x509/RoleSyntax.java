@@ -63,7 +63,7 @@ public class RoleSyntax
     {
         if(roleName == null || 
                 roleName.getTagNo() != GeneralName.uniformResourceIdentifier ||
-                ((DERString)roleName.getName()).getString() == "")
+                ((DERString)roleName.getName()).getString().equals(""))
         {
             throw new IllegalArgumentException("the role name MUST be non empty and MUST " +
                     "use the URI option of GeneralName");
@@ -150,7 +150,8 @@ public class RoleSyntax
      */
     public String getRoleNameAsString()
     {
-        DERString str = (DERString) this.roleName.getName();
+        DERString str = (DERString)this.roleName.getName();
+        
         return str.getString();
     }
     
@@ -162,7 +163,10 @@ public class RoleSyntax
     public String[] getRoleAuthorityAsString() 
     {
         if(roleAuthority == null) 
+        {
             return new String[0];
+        }
+        
         GeneralName[] names = roleAuthority.getNames();
         String[] namesString = new String[names.length];
         for(int i = 0; i < names.length; i++) 
