@@ -29,7 +29,6 @@ then
         find src -name AllTests.java -exec rm {} \;
 
         mkdir classes; mkdir docs;
-
         (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
             -header "$HEADER" \
             -classpath classes \
@@ -78,6 +77,8 @@ then
 
         PATH=$JDK11PATH/bin:$PATH
         export PATH
+        JAVA_HOME=$JDK11PATH
+        export JAVA_HOME
 
         echo "compiling"
 
@@ -216,6 +217,8 @@ then
 
     PATH=$JDK11PATH/bin:$PATH
     export PATH
+    JAVA_HOME=$JDK11PATH
+    export JAVA_HOME
 
     echo "compiling"
 
@@ -256,6 +259,8 @@ then
 
     PATH=$JDK11PATH/bin:$PATH
     export PATH
+    JAVA_HOME=$JDK11PATH
+    export JAVA_HOME
 
     rm src/org/bouncycastle/openpgp/examples/DSAElGamalKeyRingGenerator.java
     rm src/org/bouncycastle/openpgp/examples/AllTests.java
