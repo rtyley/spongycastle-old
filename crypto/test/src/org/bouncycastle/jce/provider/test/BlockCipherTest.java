@@ -9,6 +9,8 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.Key;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
@@ -757,22 +759,91 @@ public class BlockCipherTest
 
         try
         {
-            AlgorithmParameters algParams = AlgorithmParameters.getInstance("DES", "BC");
+            try
+            {
+                AlgorithmParameters algParams = AlgorithmParameters.getInstance("DES", "BC");
+    
+                byte[] encoding = new byte[10];
+                encoding[0] = 3;
+                encoding[1] = 8;
+    
+                // According specification engineInit(byte[] params, String format)
+                // throws
+                // IOException on decoding errors, but BC throws ClassCastException.
+                algParams.init(encoding, "ASN.1");
+    
+                fail("failed exception test - no IOException thrown");
+            }
+            catch (IOException e)
+            {
+                // okay
+            }
+            
+            try
+            {
+                Cipher c = Cipher.getInstance("DES", "BC");
+    
+                Key k = new PublicKey()
+                {
 
-            byte[] encoding = new byte[10];
-            encoding[0] = 3;
-            encoding[1] = 8;
+                    public String getAlgorithm()
+                    {
+                        return "STUB";
+                    }
 
-            // According specification engineInit(byte[] params, String format)
-            // throws
-            // IOException on decoding errors, but BC throws ClassCastException.
-            algParams.init(encoding, "ASN.1");
+                    public String getFormat()
+                    {
+                        return null;
+                    }
 
-            fail("failed exception test - no IOException thrown");
-        }
-        catch (IOException e)
-        {
-            // okay
+                    public byte[] getEncoded()
+                    {
+                        return null;
+                    }
+                    
+                };
+    
+                c.init(Cipher.ENCRYPT_MODE, k);
+    
+                fail("failed exception test - no InvalidKeyException thrown for public key");
+            }
+            catch (InvalidKeyException e)
+            {
+                // okay
+            }
+            
+            try
+            {
+                Cipher c = Cipher.getInstance("DES", "BC");
+    
+                Key k = new PrivateKey()
+                {
+
+                    public String getAlgorithm()
+                    {
+                        return "STUB";
+                    }
+
+                    public String getFormat()
+                    {
+                        return null;
+                    }
+
+                    public byte[] getEncoded()
+                    {
+                        return null;
+                    }
+                    
+                };
+    
+                c.init(Cipher.DECRYPT_MODE, k);
+    
+                fail("failed exception test - no InvalidKeyException thrown for private key");
+            }
+            catch (InvalidKeyException e)
+            {
+                // okay
+            }
         }
         catch (Exception e)
         {
