@@ -7,7 +7,7 @@ import java.security.SecureRandom;
 public class FixedSecureRandom
     extends SecureRandom
 {
-    private final byte[] _data;
+    private byte[]       _data;
     
     private int          _index;
     private int          _intPad;
