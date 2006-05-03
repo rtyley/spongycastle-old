@@ -83,6 +83,8 @@ then
 
     PATH=$JDKPATH/bin:$PATH
     export PATH
+    JAVA_HOME=$JDKPATH
+    export JAVA_HOME
 
     echo "compiling"
 
