@@ -2,7 +2,10 @@ package org.bouncycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Security;
 
 import javax.crypto.Cipher;
@@ -14,21 +17,19 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * check that cipher input/output streams are working correctly
  */
 public class CipherStreamTest
-    implements Test
+    extends SimpleTest
 {
     public CipherStreamTest()
     {
     }
 
-    private TestResult runTest(
+    private void runTest(
         String  name)
     {
         String lCode = "ABCDEFGHIJKLMNOPQRSTUVWXY0123456789";
@@ -81,18 +82,16 @@ public class CipherStreamTest
 
             if (!res.equals(lCode))
             {
-                return new SimpleTestResult(false, getName() + ": Failed - decrypted data doesn't match.");
+                fail("Failed - decrypted data doesn't match.");
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": Failed - exception " + e.toString());
+            fail("Failed - exception " + e.toString());
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
-    private TestResult testException(
+    private void testException(
         String  name)
     {
         String lCode = "ABCDEFGHIJKLMNOPQRSTUVWXY0123456789";
@@ -117,48 +116,91 @@ public class CipherStreamTest
                 // small to hold the result
                 ecipher.update(new byte[20], 0, 20, cipherText);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no ShortBufferException thrown");
+                fail("failed exception test - no ShortBufferException thrown");
             }
             catch (ShortBufferException e)
             {
                 // ignore
             }
+            
+            try
+            {
+                Cipher c = Cipher.getInstance(name, "BC");
+    
+                Key k = new PublicKey()
+                {
+
+                    public String getAlgorithm()
+                    {
+                        return "STUB";
+                    }
+
+                    public String getFormat()
+                    {
+                        return null;
+                    }
+
+                    public byte[] getEncoded()
+                    {
+                        return null;
+                    }
+                    
+                };
+    
+                c.init(Cipher.ENCRYPT_MODE, k);
+    
+                fail("failed exception test - no InvalidKeyException thrown for public key");
+            }
+            catch (InvalidKeyException e)
+            {
+                // okay
+            }
+            
+            try
+            {
+                Cipher c = Cipher.getInstance(name, "BC");
+    
+                Key k = new PrivateKey()
+                {
+
+                    public String getAlgorithm()
+                    {
+                        return "STUB";
+                    }
+
+                    public String getFormat()
+                    {
+                        return null;
+                    }
+
+                    public byte[] getEncoded()
+                    {
+                        return null;
+                    }
+                    
+                };
+    
+                c.init(Cipher.DECRYPT_MODE, k);
+    
+                fail("failed exception test - no InvalidKeyException thrown for private key");
+            }
+            catch (InvalidKeyException e)
+            {
+                // okay
+            }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult perform()
+    public void performTest()
     {
-        TestResult  res = runTest("RC4");
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = testException("RC4");
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        res = runTest("DES/ECB/PKCS7Padding");
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        res = runTest("DES/CFB8/NoPadding");
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
+        runTest("RC4");
+        testException("RC4");
+        runTest("DES/ECB/PKCS7Padding");
+        runTest("DES/CFB8/NoPadding");
     }
 
     public String getName()
@@ -166,14 +208,12 @@ public class CipherStreamTest
         return "CipherStreamTest";
     }
 
+
     public static void main(
         String[]    args)
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new CipherStreamTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new DESedeTest());
     }
 }
