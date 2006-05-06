@@ -64,7 +64,6 @@ public class MGF1BytesGenerator
      * fill len bytes of the output buffer with bytes generated from
      * the derivation function.
      *
-     * @throws IllegalArgumentException if the size of the request will cause an overflow.
      * @throws DataLengthException if the out buffer is too small.
      */
     public int generateBytes(
@@ -73,6 +72,11 @@ public class MGF1BytesGenerator
         int     len)
         throws DataLengthException, IllegalArgumentException
     {
+        if ((out.length - len) < outOff)
+        {
+            throw new DataLengthException("output buffer too small");
+        }
+        
         byte[]  hashBuf = new byte[hLen];
         byte[]  C = new byte[4];
         int     counter = 0;
