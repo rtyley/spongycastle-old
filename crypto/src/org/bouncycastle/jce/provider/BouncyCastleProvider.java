@@ -35,7 +35,7 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
  */
 public final class BouncyCastleProvider extends Provider
 {
-    private static String info = "BouncyCastle Security Provider v1.33";
+    private static String info = "BouncyCastle Security Provider v1.34b";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -46,7 +46,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.33, info);
+        super(PROVIDER_NAME, 1.335, info);
 
         //
         // KeyStore
@@ -268,7 +268,9 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.RSA/ISO9796-1", "org.bouncycastle.jce.provider.JCERSACipher$ISO9796d1Padding");
 
         put("Cipher.ECIES", "org.bouncycastle.jce.provider.JCEIESCipher$ECIES");
+        put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");
         put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
+        put("Cipher.BrokenIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenIES");
         put("Cipher.ELGAMAL", "org.bouncycastle.jce.provider.JCEElGamalCipher$NoPadding");
         put("Cipher.ELGAMAL/PKCS1", "org.bouncycastle.jce.provider.JCEElGamalCipher$PKCS1v1_5Padding");
 

@@ -13,36 +13,19 @@ import org.bouncycastle.crypto.paddings.X923Padding;
 import org.bouncycastle.crypto.paddings.ZeroBytePadding;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * General Padding tests.
  */
 public class PaddingTest
-    implements Test
+    extends SimpleTest
 {
     public PaddingTest()
     {
     }
 
-    private boolean isEqualTo(
-        byte[]  a,
-        byte[]  b)
-    {
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private TestResult blockCheck(
+    private void blockCheck(
         PaddedBufferedBlockCipher   cipher,
         BlockCipherPadding          padding,
         KeyParameter                key,
@@ -65,20 +48,18 @@ public class PaddingTest
             
             decLen += cipher.doFinal(dec, decLen);
             
-            if (!isEqualTo(data, dec))
+            if (!areEqual(data, dec))
             {
-                return new SimpleTestResult(false, getName() + ": failed to decrypt - i = " + data.length + ", padding = " + padding.getPaddingName());
+                fail("failed to decrypt - i = " + data.length + ", padding = " + padding.getPaddingName());
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": Exception - " + e.toString(), e);
+            fail("Exception - " + e.toString(), e);
         }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult testPadding(
+    public void testPadding(
         BlockCipherPadding  padding,
         SecureRandom        rand,
         byte[]              ffVector,
@@ -96,9 +77,9 @@ public class PaddingTest
         {
             padding.addPadding(data, 3);
             
-            if (!isEqualTo(data, ffVector))
+            if (!areEqual(data, ffVector))
             {
-                return new SimpleTestResult(false, getName() + ": failed ff test for " + padding.getPaddingName());
+                fail("failed ff test for " + padding.getPaddingName());
             }
         }
         
@@ -110,9 +91,9 @@ public class PaddingTest
             data = new byte[8];
             padding.addPadding(data, 4);
             
-            if (!isEqualTo(data, ZeroVector))
+            if (!areEqual(data, ZeroVector))
             {
-                return new SimpleTestResult(false, getName() + ": failed zero test for " + padding.getPaddingName());
+                fail("failed zero test for " + padding.getPaddingName());
             }
         }
         
@@ -122,71 +103,39 @@ public class PaddingTest
             
             rand.nextBytes(data);
 
-            TestResult result = blockCheck(cipher, padding, key, data);
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
+            blockCheck(cipher, padding, key, data);
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
     
-    public TestResult perform()
+    public void performTest()
     {
         SecureRandom    rand = new SecureRandom(new byte[20]);
         
         rand.setSeed(System.currentTimeMillis());
         
-        TestResult    res = testPadding(new PKCS7Padding(), rand,
+        testPadding(new PKCS7Padding(), rand,
                                     Hex.decode("ffffff0505050505"),
                                     Hex.decode("0000000004040404"));
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
 
-        res = testPadding(new ISO10126d2Padding(), rand,
+        testPadding(new ISO10126d2Padding(), rand,
                                     null,
                                     null);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
         
-        res = testPadding(new X923Padding(), rand,
+        testPadding(new X923Padding(), rand,
                                     null,
                                     null);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
 
-        res = testPadding(new TBCPadding(), rand,
+        testPadding(new TBCPadding(), rand,
                                     Hex.decode("ffffff0000000000"),
                                     Hex.decode("00000000ffffffff"));
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        res = testPadding(new ZeroBytePadding(), rand,
+
+        testPadding(new ZeroBytePadding(), rand,
                                     Hex.decode("ffffff0000000000"),
                                     null);
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
         
-        res = testPadding(new ISO7816d4Padding(), rand,
+        testPadding(new ISO7816d4Padding(), rand,
                                     Hex.decode("ffffff8000000000"),
                                     Hex.decode("0000000080000000"));
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
     public String getName()
@@ -197,9 +146,6 @@ public class PaddingTest
     public static void main(
         String[]    args)
     {
-        PaddingTest    test = new PaddingTest();
-        TestResult result = test.perform();
-
-        System.out.println(result);
+        runTest(new PaddingTest());
     }
 }

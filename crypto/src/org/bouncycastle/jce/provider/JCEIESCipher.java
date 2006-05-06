@@ -344,6 +344,30 @@ public class JCEIESCipher extends WrapCipherSpi
     /**
      * classes that inherit from us.
      */
+    static public class BrokenECIES
+        extends JCEIESCipher
+    {
+        public BrokenECIES()
+        {
+            super(new IESEngine(
+                   new ECDHBasicAgreement(),
+                   new BrokenKDF2BytesGenerator(new SHA1Digest()),
+                   new HMac(new SHA1Digest())));
+        }
+    }
+
+    static public class BrokenIES
+        extends JCEIESCipher
+    {
+        public BrokenIES()
+        {
+            super(new IESEngine(
+                   new DHBasicAgreement(),
+                   new BrokenKDF2BytesGenerator(new SHA1Digest()),
+                   new HMac(new SHA1Digest())));
+        }
+    }
+    
     static public class ECIES
         extends JCEIESCipher
     {
@@ -355,7 +379,7 @@ public class JCEIESCipher extends WrapCipherSpi
                    new HMac(new SHA1Digest())));
         }
     }
-
+    
     static public class IES
         extends JCEIESCipher
     {

@@ -72,6 +72,10 @@ public class RegressionTest
         new CTSTest(),
         new PKCS5Test(),
         new PKCS12Test(),
+        new KDF1GeneratorTest(),
+        new KDF2GeneratorTest(),
+        new MGF1GeneratorTest(),
+        new ShortenedDigestTest(),
         new NullTest()
     };
 
