@@ -98,7 +98,7 @@ public class PKCS10CertificationRequest
         oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
         oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
         oids.put(new DERObjectIdentifier("1.2.840.10040.4.3"), "DSAWITHSHA1");
-        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "DSAWITHSHA1");
+        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "ECDSAWITHSHA1");
     }
 
     private static ASN1Sequence toDERSequence(
