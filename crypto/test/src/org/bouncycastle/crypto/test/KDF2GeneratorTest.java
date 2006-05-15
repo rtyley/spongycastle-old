@@ -37,6 +37,12 @@ public class KDF2GeneratorTest
            + "a8aa70185401fbbd99379ec76c663e9a29d0b70f3fe261a59cdc24875a60b4aacb131"
            + "9fa11c3365a8b79a44669f26fba933d012db213d7e3b16349");
 
+    private byte[] sha1Mask = Hex.decode(
+             "0e6a26eb7b956ccb8b3bdc1ca975bc57c3989e8fbad31a224655d800c46954840ff32"
+           + "052cdf0d640562bdfadfa263cfccf3c52b29f2af4a1869959bc77f854cf15bd7a2519"
+           + "2985a842dbff8e13efee5b7e7e55bbe4d389647c686a9a9ab3fb889b2d7767d3837ee"
+           + "a4e0a2f04b53ca8f50fb31225c1be2d0126c8c7a4753b0807");
+    
 
     public KDF2GeneratorTest()
     {
@@ -47,6 +53,7 @@ public class KDF2GeneratorTest
         checkMask(1, new KDF2BytesGenerator(new ShortenedDigest(new SHA256Digest(), 20)), seed1, mask1);
         checkMask(2, new KDF2BytesGenerator(new ShortenedDigest(new SHA256Digest(), 20)), seed2, mask2);
         checkMask(3, new KDF2BytesGenerator(new SHA256Digest()), seed2, adjustedMask2);
+        checkMask(4, new KDF2BytesGenerator(new SHA1Digest()), seed2, sha1Mask);
         
         try
         {
