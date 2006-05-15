@@ -94,7 +94,7 @@ public class BaseKDFBytesGenerator
         //
         if (oBytes > (2L^32 - 1))
         {
-            new IllegalArgumentException("Output length too large");
+            throw new IllegalArgumentException("Output length too large");
         }
 
         int cThreshold = (int)((oBytes + outLen - 1) / outLen);
