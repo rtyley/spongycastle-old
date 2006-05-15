@@ -92,7 +92,7 @@ public class BaseKDFBytesGenerator
         // is the digest output size in bits. We can't have an
         // array with a long index at the moment...
         //
-        if (oBytes > (2L^32 - 1))
+        if (oBytes > ((2L << 32) - 1))
         {
             throw new IllegalArgumentException("Output length too large");
         }
