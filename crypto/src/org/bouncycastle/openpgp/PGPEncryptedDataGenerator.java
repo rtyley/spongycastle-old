@@ -259,15 +259,11 @@ public class PGPEncryptedDataGenerator
     public void addMethod(
         PGPPublicKey    key) 
         throws NoSuchProviderException, PGPException
-    {
-        byte[]        iv = new byte[8];
-        
+    {   
         if (!key.isEncryptionKey())
         {
             throw new IllegalArgumentException("passed in key not an encryption key!");
         }
-        
-        rand.nextBytes(iv);
         
         methods.add(new PubMethod(key));
     }
