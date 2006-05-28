@@ -24,9 +24,9 @@ public interface Mac
     public String getAlgorithmName();
 
     /**
-     * Return the block size for this cipher (in bytes).
+     * Return the block size for this MAC (in bytes).
      *
-     * @return the block size for this cipher in bytes.
+     * @return the block size for this MAC in bytes.
      */
     public int getMacSize();
 
