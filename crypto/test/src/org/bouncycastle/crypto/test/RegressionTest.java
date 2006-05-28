@@ -70,12 +70,14 @@ public class RegressionTest
         new OAEPTest(),
         new PSSTest(),
         new CTSTest(),
+        new CCMTest(),
         new PKCS5Test(),
         new PKCS12Test(),
         new KDF1GeneratorTest(),
         new KDF2GeneratorTest(),
         new MGF1GeneratorTest(),
         new ShortenedDigestTest(),
+        //new NaccacheSternTest(),
         new NullTest()
     };
 
