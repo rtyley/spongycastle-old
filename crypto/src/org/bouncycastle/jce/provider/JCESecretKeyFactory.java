@@ -586,26 +586,26 @@ public class JCESecretKeyFactory
    }
    
    /**
-    * PBEWithMD5And128BitAES-OpenSSL
+    * PBEWithMD5And192BitAES-OpenSSL
     */
    static public class PBEWithMD5And192BitAESCBCOpenSSL
        extends PBEKeyFactory
    {
        public PBEWithMD5And192BitAESCBCOpenSSL()
        {
-           super("PBEWithMD5And128BitAES-CBC-OpenSSL", null, true, OPENSSL, MD5, 192, 128);
+           super("PBEWithMD5And192BitAES-CBC-OpenSSL", null, true, OPENSSL, MD5, 192, 128);
        }
    }
    
    /**
-    * PBEWithMD5And128BitAES-OpenSSL
+    * PBEWithMD5And256BitAES-OpenSSL
     */
    static public class PBEWithMD5And256BitAESCBCOpenSSL
        extends PBEKeyFactory
    {
        public PBEWithMD5And256BitAESCBCOpenSSL()
        {
-           super("PBEWithMD5And128BitAES-CBC-OpenSSL", null, true, OPENSSL, MD5, 256, 128);
+           super("PBEWithMD5And256BitAES-CBC-OpenSSL", null, true, OPENSSL, MD5, 256, 128);
        }
    }
 }
