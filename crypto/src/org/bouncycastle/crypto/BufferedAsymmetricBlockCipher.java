@@ -9,8 +9,7 @@ public class BufferedAsymmetricBlockCipher
     protected byte[]        buf;
     protected int           bufOff;
 
-    private boolean                 forEncryption;
-    private AsymmetricBlockCipher   cipher;
+    private final AsymmetricBlockCipher   cipher;
 
     /**
      * base constructor.
@@ -54,8 +53,6 @@ public class BufferedAsymmetricBlockCipher
         boolean             forEncryption,
         CipherParameters    params)
     {
-        this.forEncryption = forEncryption;
-
         reset();
 
         cipher.init(forEncryption, params);

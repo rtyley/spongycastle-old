@@ -15,9 +15,8 @@ public class OFBBlockCipher
     private byte[]          ofbV;
     private byte[]          ofbOutV;
 
-    private int             blockSize;
-    private BlockCipher     cipher = null;
-    private boolean         encrypting;
+    private final int             blockSize;
+    private final BlockCipher     cipher;
 
     /**
      * Basic constructor.
@@ -60,12 +59,10 @@ public class OFBBlockCipher
      * inappropriate.
      */
     public void init(
-        boolean             encrypting,
+        boolean             encrypting, //ignored by this OFB mode
         CipherParameters    params)
         throws IllegalArgumentException
     {
-        this.encrypting = encrypting;
-        
         if (params instanceof ParametersWithIV)
         {
                 ParametersWithIV ivParam = (ParametersWithIV)params;

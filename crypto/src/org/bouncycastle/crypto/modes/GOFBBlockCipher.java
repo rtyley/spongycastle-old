@@ -15,15 +15,14 @@ public class GOFBBlockCipher
     private byte[]          ofbV;
     private byte[]          ofbOutV;
 
-    private int             blockSize;
-    private BlockCipher     cipher = null;
-    private boolean         encrypting;
+    private final int             blockSize;
+    private final BlockCipher     cipher;
 
     boolean firstStep = true;
-    int C1 = 16843012; //00000001000000010000000100000100
-    int C2 = 16843009; //00000001000000010000000100000001
     int N3;
     int N4;
+    static final int C1 = 16843012; //00000001000000010000000100000100
+    static final int C2 = 16843009; //00000001000000010000000100000001
 
 
     /**
@@ -70,15 +69,13 @@ public class GOFBBlockCipher
      * inappropriate.
      */
     public void init(
-        boolean             encrypting,
+        boolean             encrypting, //ignored by this CTR mode
         CipherParameters    params)
         throws IllegalArgumentException
     {
-        this.encrypting = encrypting;
-
         firstStep = true;
-        int N3 = 0;
-        int N4 = 0;
+        N3 = 0;
+        N4 = 0;
 
         if (params instanceof ParametersWithIV)
         {
