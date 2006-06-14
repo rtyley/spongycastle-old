@@ -19,7 +19,6 @@ import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
 import org.bouncycastle.bcpg.sig.IssuerKeyID;
 import org.bouncycastle.bcpg.sig.SignatureCreationTime;
-import org.bouncycastle.util.encoders.Hex;
 
 /**
  * Generator for PGP Signatures.
