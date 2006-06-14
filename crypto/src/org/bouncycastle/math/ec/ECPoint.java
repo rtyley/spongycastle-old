@@ -244,6 +244,12 @@ public abstract class ECPoint
         // D.3.2 pg 101
         public ECPoint multiply(BigInteger k)
         {
+        	if (k.signum() == 0)
+        	{
+                return new ECPoint.Fp(this.curve, null, null,
+                        this.withCompression);
+        	}
+
             // BigInteger e = k.mod(n); // n == order this
             BigInteger e = k;
 
