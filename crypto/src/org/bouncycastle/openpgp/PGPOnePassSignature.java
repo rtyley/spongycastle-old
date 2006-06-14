@@ -140,8 +140,6 @@ public class PGPOnePassSignature
         PGPSignature    pgpSig)
         throws PGPException, SignatureException
     {
-        byte[]            signature;
-
         sig.update(pgpSig.getSignatureTrailer());
         
         return sig.verify(pgpSig.getSignature());
