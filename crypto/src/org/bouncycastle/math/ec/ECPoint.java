@@ -168,18 +168,12 @@ public abstract class ECPoint
         {
             if (this.isInfinity())
             {
-                if (b.isInfinity())
-                {
-                    return new ECPoint.Fp(this.curve, null, null,
-                            this.withCompression);
-                }
-                return new ECPoint.Fp(b.getCurve(), b.getX(), b.getY(),
-                        this.withCompression);
+            	return b;
             }
 
             if (b.isInfinity())
             {
-                return new ECPoint.Fp(this.curve, this.x, this.y, this.withCompression);
+            	return this;
             }
 
             // Check if b = this or b = -this
@@ -190,12 +184,9 @@ public abstract class ECPoint
                     // this = b, i.e. this must be doubled
                     return this.twice();
                 }
-                else
-                {
-                    // this = -b, i.e. the result is the point at infinity
-                    return new ECPoint.Fp(this.curve, null, null,
-                            this.withCompression);
-                }
+
+                // this = -b, i.e. the result is the point at infinity
+                return new ECPoint.Fp(this.curve, null, null, this.withCompression);
             }
 
             ECFieldElement gamma = b.y.subtract(this.y).divide(b.x.subtract(this.x));
@@ -209,10 +200,15 @@ public abstract class ECPoint
         // B.3 pg 62
         public ECPoint twice()
         {
-            if (this.isInfinity() || (this.y.toBigInteger().equals(ECConstants.ZERO))) 
-            {
+        	if (this.isInfinity())
+        	{
                 // Twice identity element (point at infinity) is identity
-                // element, and if y1 == 0, then (x1, y1) == (x1, -y1)
+        		return this;
+        	}
+
+            if (this.y.toBigInteger().signum() == 0) 
+            {
+            	// if y1 == 0, then (x1, y1) == (x1, -y1)
                 // and hence this = -this and thus 2(x1, y1) == infinity
                 return new ECPoint.Fp(curve, null, null, this.withCompression);
             }
@@ -232,22 +228,24 @@ public abstract class ECPoint
         {
             if (b.isInfinity())
             {
-                return new ECPoint.Fp(this.curve, this.x, this.y,
-                        this.withCompression);
+            	return this;
             }
 
             // Add -b
-            return add(new ECPoint.Fp(this.curve, b.x, b.y.negate(),
-                    this.withCompression));
+            return add(new ECPoint.Fp(this.curve, b.x, b.y.negate(), this.withCompression));
         }
 
         // D.3.2 pg 101
         public ECPoint multiply(BigInteger k)
         {
+        	if (this.isInfinity())
+        	{
+        		return this;
+        	}
+
         	if (k.signum() == 0)
         	{
-                return new ECPoint.Fp(this.curve, null, null,
-                        this.withCompression);
+                return new ECPoint.Fp(this.curve, null, null, this.withCompression);
         	}
 
             // BigInteger e = k.mod(n); // n == order this
@@ -397,17 +395,12 @@ public abstract class ECPoint
 
             if (this.isInfinity())
             {
-                if (b.isInfinity())
-                {
-                    return new ECPoint.F2m(this.curve, null, null,
-                            this.withCompression);
-                }
-                return new ECPoint.F2m(b.getCurve(), b.getX(), b.getY(), withCompression);
+            	return b;
             }
 
             if (b.isInfinity())
             {
-                return new ECPoint.F2m(this.curve, this.x, this.y, withCompression);
+            	return this;
             }
 
             ECFieldElement.F2m.checkFieldElements(this.x, b.getX());
@@ -422,12 +415,9 @@ public abstract class ECPoint
                     // this = b, i.e. this must be doubled
                     return this.twice();
                 }
-                else
-                {
-                    // this = -b, i.e. the result is the point at infinity
-                    return new ECPoint.F2m(this.curve, null, null,
-                            this.withCompression);
-                }
+
+                // this = -b, i.e. the result is the point at infinity
+                return new ECPoint.F2m(this.curve, null, null, this.withCompression);
             }
 
             ECFieldElement.F2m lambda
@@ -449,8 +439,7 @@ public abstract class ECPoint
         {
             if (b.isInfinity())
             {
-                return new ECPoint.F2m(this.curve, this.x, this.y,
-                        this.withCompression);
+            	return this;
             }
 
             // Add -b
@@ -465,10 +454,15 @@ public abstract class ECPoint
          */
         public ECPoint twice()
         {
-            if (this.isInfinity() || (this.x.toBigInteger().equals(ECConstants.ZERO))) 
+            if (this.isInfinity()) 
             {
                 // Twice identity element (point at infinity) is identity
-                // element, and if x1 == 0, then (x1, y1) == (x1, x1 + y1)
+                return this;
+            }
+
+            if (this.x.toBigInteger().signum() == 0) 
+            {
+                // if x1 == 0, then (x1, y1) == (x1, x1 + y1)
                 // and hence this = -this and thus 2(x1, y1) == infinity
                 return new ECPoint.F2m(curve, null, null, this.withCompression);
             }
