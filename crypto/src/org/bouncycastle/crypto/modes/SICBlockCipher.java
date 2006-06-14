@@ -11,12 +11,12 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  */
 public class SICBlockCipher implements BlockCipher
 {
-    private BlockCipher     cipher = null;
-    private int             blockSize;
+    private final BlockCipher     cipher;
+    private final int             blockSize;
+    
     private byte[]          IV;
     private byte[]          counter;
     private byte[]          counterOut;
-    private boolean         encrypting;
 
 
     /**
@@ -45,11 +45,11 @@ public class SICBlockCipher implements BlockCipher
     }
 
 
-    public void init(boolean forEncryption, CipherParameters params)
-          throws IllegalArgumentException
+    public void init(
+    	boolean				forEncryption, //ignored by this CTR mode
+    	CipherParameters	params)
+		throws IllegalArgumentException
     {
-        this.encrypting = forEncryption;
-
         if (params instanceof ParametersWithIV)
         {
           ParametersWithIV ivParam = (ParametersWithIV)params;
