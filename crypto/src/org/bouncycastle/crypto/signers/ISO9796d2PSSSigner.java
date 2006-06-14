@@ -260,9 +260,6 @@ public class ISO9796d2PSSSigner
     {
         int     digSize = digest.getDigestSize();
 
-        int t = 0;
-        int delta = 0;
-
         byte[]    m2Hash = new byte[digSize];
   
         digest.doFinal(m2Hash, 0);
