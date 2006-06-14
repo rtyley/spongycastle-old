@@ -18,7 +18,6 @@ class MacCFBBlockCipher
 
     private int                 blockSize;
     private BlockCipher         cipher = null;
-    private boolean             encrypting;
 
     /**
      * Basic constructor.
@@ -52,8 +51,6 @@ class MacCFBBlockCipher
         CipherParameters    params)
         throws IllegalArgumentException
     {
-        this.encrypting = true;
-        
         if (params instanceof ParametersWithIV)
         {
                 ParametersWithIV ivParam = (ParametersWithIV)params;
