@@ -354,6 +354,12 @@ public class ECPointTest extends TestCase
             implTestAddSubtract(fp.p[i], fp.infinity);
             implTestAddSubtract(f2m.p[i], f2m.infinity);
 
+            implTestMultiply(fp.p[i], 0);
+            implTestMultiply(fp.infinity, 0);
+
+            implTestMultiply(f2m.p[i], 0);
+            implTestMultiply(f2m.infinity, 0);
+            
             // Could be any numBits, 6 is chosen at will
             implTestMultiply(fp.p[i], 6);
             implTestMultiply(fp.infinity, 6);
