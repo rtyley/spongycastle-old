@@ -115,8 +115,7 @@ public abstract class PGPEncryptedData
         //
         // make sure we are at the end.
         //
-        int ch = 0;
-        while ((ch = encStream.read()) >= 0)
+        while (encStream.read() >= 0)
         {
             // do nothing
         }
