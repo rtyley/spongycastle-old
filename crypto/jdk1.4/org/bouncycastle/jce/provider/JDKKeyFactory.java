@@ -587,6 +587,58 @@ public abstract class JDKKeyFactory
         }
     }
 
+    /**
+     * This isn't really correct, however the class path project API seems to think such
+     * a key factory will exist.
+     */
+    public static class X509
+        extends JDKKeyFactory
+    {
+        public X509()
+        {
+        }
+    
+        protected PrivateKey engineGeneratePrivate(
+            KeySpec    keySpec)
+            throws InvalidKeySpecException
+        {
+            if (keySpec instanceof PKCS8EncodedKeySpec)
+            {
+                try
+                {
+                    return JDKKeyFactory.createPrivateKeyFromDERStream(
+                                new ByteArrayInputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidKeySpecException(e.toString());
+                }
+            }
+    
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+        }
+    
+        protected PublicKey engineGeneratePublic(
+            KeySpec    keySpec)
+            throws InvalidKeySpecException
+        {
+            if (keySpec instanceof X509EncodedKeySpec)
+            {
+                try
+                {
+                    return JDKKeyFactory.createPublicKeyFromDERStream(
+                                new ByteArrayInputStream(((X509EncodedKeySpec)keySpec).getEncoded()));
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidKeySpecException(e.toString());
+                }
+            }
+    
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+        }
+    }
+    
     public static class EC
         extends JDKKeyFactory
     {

@@ -464,7 +464,8 @@ public final class BouncyCastleProvider extends Provider
         put("KeyFactory.ECDSA", "org.bouncycastle.jce.provider.JDKKeyFactory$ECDSA");
         put("KeyFactory.ECDH", "org.bouncycastle.jce.provider.JDKKeyFactory$ECDH");
         put("KeyFactory.ECDHC", "org.bouncycastle.jce.provider.JDKKeyFactory$ECDHC");
-
+        put("KeyFactory.X.509", "org.bouncycastle.jce.provider.JDKKeyFactory$X509");
+        
         put("Alg.Alias.KeyFactory.1.2.840.113549.1.1.1", "RSA");
         put("Alg.Alias.KeyFactory.1.2.840.10040.4.1", "DSA");
         put("Alg.Alias.KeyFactory." + X9ObjectIdentifiers.id_ecPublicKey, "EC");
