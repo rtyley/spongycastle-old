@@ -175,7 +175,6 @@ SecureRandom.
 <li>Fix Bernd (KCDP 11) &lt;bernd.fix&#064credit-suisse.com&gt; - fix for 31 byte isssue and exception throwing by Whirlpool.
 <li>David M. Lee &lt;dmlee&#064Crossroads.com&gt; - code for add and remove secret key in the PGPSecretKeyRing class. Additions to S/MIME and CMS unit tests.
 <li>Mike Dillon &lt;md5&#064embody.org&gt; - additional checks for PGP secret and public key construction, patches to copyWithNewPassword.
-<li>Karsten Ohme &lt;widerstand&#064t-online.de&gt; - initial check against for out of range data on non byte aligned RSA keys.
 <li>tu-vi cung &lt;t2cung&#064hotmail.com&gt; - patch for out of bounds problem in getDecoderStream method.
 <li>Chris Schultz &lt;cschultz&#064gmail.com&gt; - fix for InputStream constructor for X509V2AttributeCertificate.
 <li>David M. Lee &lt;dmlee&#064Crossroads.com&gt; - implementation assistance with streaming CMS classes.
@@ -193,7 +192,7 @@ SecureRandom.
 ASN.1 encoding of field elements in X9FieldElement class.
 <li>Olaf Keller, &lt;olaf.keller.bc&#064bluewin.ch&gt; - initial implementation of the elliptic curves over binary fields F2m. Additional tests and modifications to elliptic curve support for both F2m and Fp.
 <li>J&ouml;rg Eichhorn &lt;eichhorn&#064ponton-consulting.de&gt; - patch to fix EOF read on SharedFileInputStream, support for F2m compression.
-<li>Karsten Ohme &lt;widerstand&#064t-online.de&gt; - addition of equals/hashCode on ECCurve.Fp. Additional curve type support for Fp, contributions to F2m compression. F2m decoding for ECPointUtil. Infinity fix and prime192v2 fix for Fp. Extra validation for RSA key creation. Fix to name typos for some OpenSSL key generators.
+<li>Karsten Ohme &lt;widerstand&#064t-online.de&gt; - initial check against for out of range data on non byte aligned RSA keys. Addition of equals/hashCode on ECCurve.Fp. Additional curve type support for Fp, contributions to F2m compression. F2m decoding for ECPointUtil. Infinity fix and prime192v2 fix for Fp. Extra validation for RSA key creation. Fix to name typos for some OpenSSL key generators. RFC-1779 table, improved RFC 2253 compliance for X509Name.
 <li>Carlos Lozano Ruiz &lt;carlos&#064tradise.com&gt; - patch for <ctrl><m> only handling in CRLFOutputStream.
 <li>John Alfred Prufrock &lt;j.a.prufrock&#064gmail.com&gt; - mods to GOST-3411 and MD2 to support ExtendedDigest.
 <li>Stefan Neusatz Guilhen &lt;sneusatz&#064gmail.com&gt; - initial version of RoleSyntax, improvements to AttributeCertificateHolder and AttributeCertificateIssuer.
