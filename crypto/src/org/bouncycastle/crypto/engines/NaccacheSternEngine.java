@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.engines;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
@@ -15,16 +16,24 @@ import org.bouncycastle.crypto.params.NaccacheSternPrivateKeyParameters;
  * NaccacheStern Engine. For details on this cipher, please see
  * http://www.gemplus.com/smart/rd/publications/pdf/NS98pkcs.pdf
  */
-public class NaccacheSternEngine
-    implements AsymmetricBlockCipher
+public class NaccacheSternEngine implements AsymmetricBlockCipher
 {
     private boolean forEncryption;
 
     private NaccacheSternKeyParameters key;
 
-    private Vector[] lookup = null;
+    private Hashtable lookup;
 
     private boolean debug = false;
+
+    private Vector threads;
+
+    private Object waitFor = new Object();
+
+    private Vector plain;
+
+    //private static final int PROCESSOR_CNT = Runtime.getRuntime().availableProcessors();
+    private static final int PROCESSOR_CNT = 1;
 
     /**
      * Initializes this algorithm. Must be called before all other Functions.
@@ -32,44 +41,32 @@ public class NaccacheSternEngine
      * @see org.bouncycastle.crypto.AsymmetricBlockCipher#init(boolean,
      *      org.bouncycastle.crypto.CipherParameters)
      */
-    public void init(boolean forEncryption, CipherParameters param)
+    public void init(final boolean forEncryption, final CipherParameters param)
     {
         this.forEncryption = forEncryption;
-        key = (NaccacheSternKeyParameters)param;
 
         // construct lookup table for faster decryption if necessary
-        if (!this.forEncryption)
+        if (this.forEncryption)
         {
-            if (debug)
-            {
-                System.out.println("Constructing lookup Array");
-            }
-            NaccacheSternPrivateKeyParameters priv = (NaccacheSternPrivateKeyParameters)key;
-            Vector primes = priv.getSmallPrimes();
-            lookup = new Vector[primes.size()];
-            for (int i = 0; i < primes.size(); i++)
-            {
-                BigInteger actualPrime = (BigInteger)primes.elementAt(i);
-                lookup[i] = new Vector();
-                for (int j = 0; j < actualPrime.intValue(); j++)
-                {
-                    BigInteger comp;
-                    comp = (priv.getPhi_n().multiply(BigInteger.valueOf(j))).divide((BigInteger)primes.get(i));
-                    lookup[i].add(priv.getG().modPow(comp, priv.getModulus()));
-                }
-                if (debug)
-                {
-                    System.out.println("Lookup ArrayList for " + primes.get(i) + " constructed");
-                }
-            }
+            key = (NaccacheSternKeyParameters) param;
         }
+        else
+        {
+            final NaccacheSternPrivateKeyParameters privKey = (NaccacheSternPrivateKeyParameters) param;
+            lookup = privKey.getLookupTable();
+            key = privKey;
+        }
+    }
+
+    public void setDebug(final boolean debug)
+    {
+        this.debug = debug;
     }
 
     /**
      * Returns the input block size of this algorithm.
      * 
      * @see org.bouncycastle.crypto.AsymmetricBlockCipher#getInputBlockSize()
-     * @see org.bouncycastle.crypto.engines.RSAEngine#getInputBlockSize()
      */
     public int getInputBlockSize()
     {
@@ -89,7 +86,6 @@ public class NaccacheSternEngine
      * Returns the output block size of this algorithm.
      * 
      * @see org.bouncycastle.crypto.AsymmetricBlockCipher#getOutputBlockSize()
-     * @see org.bouncycastle.crypto.engines.RSAEngine#getOutputBlockSize()
      */
     public int getOutputBlockSize()
     {
@@ -111,122 +107,249 @@ public class NaccacheSternEngine
      * @see org.bouncycastle.crypto.AsymmetricBlockCipher#processBlock(byte[],
      *      int, int)
      */
-    public byte[] processBlock(byte[] in, int inOff, int len) throws InvalidCipherTextException
+    public byte[] processBlock(final byte[] input, final int inOff,
+            final int len) throws InvalidCipherTextException
     {
 
         if (len > (getInputBlockSize() + 1))
         {
-            throw new DataLengthException("input too large for Naccache-Stern cipher.\n");
+            throw new DataLengthException(
+                    "input too large for Naccache-Stern cipher.\n");
         }
 
-        if (!forEncryption)
+        if (!forEncryption && len < getInputBlockSize())
         {
             // At decryption make sure that we receive padded data blocks
-            if (len < getInputBlockSize())
-            {
-                throw new InvalidCipherTextException("BlockLength does not match modulus for Naccache-Stern cipher.\n");
-            }
+            throw new InvalidCipherTextException(
+                    "BlockLength does not match modulus for Naccache-Stern cipher.\n");
         }
 
         byte[] block;
 
-        if (inOff != 0 || len != in.length)
+        if (inOff != 0 || len != input.length)
         {
             block = new byte[len];
-            System.arraycopy(in, inOff, block, 0, len);
+            System.arraycopy(input, inOff, block, 0, len);
         }
         else
         {
-            block = in;
+            block = input;
         }
 
         // transform input into BigInteger
-        BigInteger input = new BigInteger(1, block);
+        final BigInteger input_converted = new BigInteger(1, block);
         if (debug)
         {
-            System.out.println("input as BigInteger: " + input);
+            System.out.println("input as BigInteger: " + input_converted);
         }
         byte[] output;
         if (forEncryption)
         {
-            // Always return modulus size values 0-padded at the beginning
-            // 0-padding at the beginning is correctly parsed by BigInteger :)
-            output = key.getModulus().toByteArray();
-            Arrays.fill(output, Byte.parseByte("0"));
-            byte[] tmp = key.getG().modPow(input, key.getModulus()).toByteArray();
-            System.arraycopy(tmp, 0, output, output.length - tmp.length, tmp.length);
-            if (debug)
-            {
-                System.out.println("Encrypted value is:  " + new BigInteger(output));
-            }
+            output = encrypt(input_converted);
         }
         else
         {
-            Vector plain = new Vector();
-            NaccacheSternPrivateKeyParameters priv = (NaccacheSternPrivateKeyParameters)key;
-            Vector primes = priv.getSmallPrimes();
-            // Get Chinese Remainders of CipherText
-            for (int i = 0; i < primes.size(); i++)
-            {
-                BigInteger exp = input.modPow(priv.getPhi_n().divide((BigInteger)primes.get(i)), priv.getModulus());
-                Vector al = lookup[i];
-                if (lookup[i].size() != ((BigInteger)primes.get(i)).intValue())
-                {
-                    if (debug)
-                    {
-                        System.out.println("Prime is " + primes.get(i) + ", lookup table has size " + al.size());
-                    }
-                    throw new InvalidCipherTextException("Error in lookup Array for "
-                                    + ((BigInteger)primes.get(i)).intValue()
-                                    + ": Size mismatch. Expected ArrayList with length "
-                                    + ((BigInteger)primes.get(i)).intValue() + " but found ArrayList of length "
-                                    + lookup[i].size());
-                }
-                int lookedup = al.indexOf(exp);
-
-                if (lookedup == -1)
-                {
-                    if (debug)
-                    {
-                        System.out.println("Actual prime is " + primes.get(i));
-                        System.out.println("Decrypted value is " + exp);
-
-                        System.out.println("LookupList for " + primes.get(i) + " with size " + lookup[i].size()
-                                        + " is: ");
-                        for (int j = 0; j < lookup[i].size(); j++)
-                        {
-                            System.out.println(lookup[i].get(j));
-                        }
-                    }
-                    throw new InvalidCipherTextException("Lookup failed");
-                }
-                if (debug)
-                {
-                    // System.out.println("looking up " + exp + " leads to "
-                    // + lookedup);
-                }
-                plain.add(BigInteger.valueOf(lookedup));
-            }
-            BigInteger test = chineseRemainder(plain, primes);
-
-            if (debug)
-            {
-                System.out.println("Probable decryption is " + test);
-            }
-
-            // Should not be used as an oracle, so reencrypt output to see
-            // if it corresponds to input
-
-            if ((key.getG().modPow(test, key.getModulus())).equals(input))
-            {
-                output = test.toByteArray();
-            }
-            else
-            {
-                output = null;
-            }
-
+            output = decrypt(input_converted);
         }
+
+        return output;
+    }
+
+    private synchronized byte[] decrypt(final BigInteger input)
+    {
+        final NaccacheSternPrivateKeyParameters priv = (NaccacheSternPrivateKeyParameters) key;
+        final Vector primes = priv.getSmallPrimes();
+        plain = new Vector(primes.size());
+        threads = new Vector();
+        // Get Chinese Remainders of CipherText
+        for (int i = 0; i < primes.size(); i++)
+        {
+            // insert objects into plain, so I can use Vector.setElementAt()
+            plain.add(new Object());
+            final BigInteger smallPrime = (BigInteger) primes.get(i);
+            final Thread t = new DecryptBySmallPrime(smallPrime, input, priv
+                    .getPhi_n(), priv.getModulus(), debug);
+            threads.add(t);
+        }
+
+        final Vector runningThreads = new Vector();
+
+        synchronized (threads)
+        {
+            for (int i = 0; i < threads.size() && i < PROCESSOR_CNT; i++)
+            {
+                final Thread t = (Thread) threads.get(i);
+                runningThreads.add(t);
+                t.start();
+            }
+        }
+        synchronized (waitFor)
+        {
+            while (threads.size() > 0)
+            {
+                try
+                {
+                    waitFor.wait();
+                }
+                catch (InterruptedException e)
+                {
+                }
+                for (int i = 0; i < threads.size(); i++)
+                {
+                    final Thread t = (Thread) threads.get(i);
+                    if (!runningThreads.contains(t))
+                    {
+                        runningThreads.add(t);
+                        t.start();
+                        break;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < runningThreads.size(); i++)
+        {
+            final Thread t = (Thread) runningThreads.get(i);
+            try
+            {
+                t.join();
+            }
+            catch (InterruptedException e)
+            {
+            }
+        }
+
+        final BigInteger test = chineseRemainder(plain, primes);
+
+        // Should not be used as an oracle, so reencrypt output to see
+        // if it corresponds to input
+
+        // this breaks probabilisic encryption, so disable it. Anyway, we do
+        // use the first n primes for key generation, so it is pretty easy
+        // to guess them. But as stated in the paper, this is not a security
+        // breach. So we can just work with the correct sigma.
+
+        // if (debug) {
+        // System.out.println("Decryption is " + test);
+        // }
+        // if ((key.getG().modPow(test, key.getModulus())).equals(input)) {
+        // output = test.toByteArray();
+        // } else {
+        // if(debug){
+        // System.out.println("Engine seems to be used as an oracle,
+        // returning null");
+        // }
+        // output = null;
+        // }
+
+        return test.toByteArray();
+
+    }
+
+    /**
+     * Encrypts a BigInteger aka Plaintext with the public key.
+     * 
+     * @param plain
+     *            The BigInteger to encrypt
+     * @return The byte[] representation of the encrypted BigInteger (i.e.
+     *         crypted.toByteArray())
+     */
+    public byte[] encrypt(final BigInteger plain)
+    {
+        // Always return modulus size values 0-padded at the beginning
+        // 0-padding at the beginning is correctly parsed by BigInteger :)
+        final byte[] output = key.getModulus().toByteArray();
+        Arrays.fill(output, Byte.parseByte("0"));
+        final byte[] tmp = key.getG().modPow(plain, key.getModulus())
+                .toByteArray();
+        System
+                .arraycopy(tmp, 0, output, output.length - tmp.length,
+                        tmp.length);
+        if (debug)
+        {
+            System.out
+                    .println("Encrypted value is:  " + new BigInteger(output));
+        }
+        return output;
+    }
+
+    /**
+     * Adds the contents of two encrypted blocks mod sigma
+     * 
+     * @param block1
+     *            the first encrypted block
+     * @param block2
+     *            the second encrypted block
+     * @return an encrypted block, so that decrypt(retval) = ( decrypt(block1) +
+     *         decrypt(block2) ) % sigma
+     * @throws InvalidCipherTextException
+     */
+    public byte[] addCryptedBlocks(final byte[] block1, final byte[] block2)
+            throws InvalidCipherTextException
+    {
+        // check for correct blocksize
+        if ((block1.length > getOutputBlockSize())
+                || (block2.length > getOutputBlockSize()))
+        {
+            throw new InvalidCipherTextException(
+                    "BlockLength too large for simple addition.\n");
+        }
+
+        // calculate resulting block
+        final BigInteger m1Crypt = new BigInteger(1, block1);
+        final BigInteger m2Crypt = new BigInteger(1, block2);
+        BigInteger m1m2Crypt = m1Crypt.multiply(m2Crypt);
+        m1m2Crypt = m1m2Crypt.mod(key.getModulus());
+        if (debug)
+        {
+            System.out.println("c(m1) as BigInteger:......... " + m1Crypt);
+            System.out.println("c(m2) as BigInteger:......... " + m2Crypt);
+            System.out.println("(c(m1)*c(m2))%n = c(m1+m2)%n: " + m1m2Crypt);
+        }
+
+        final byte[] output = key.getModulus().toByteArray();
+        Arrays.fill(output, Byte.parseByte("0"));
+        System.arraycopy(m1m2Crypt.toByteArray(), 0, output, output.length
+                - m1m2Crypt.toByteArray().length,
+                m1m2Crypt.toByteArray().length);
+
+        return output;
+    }
+
+    /**
+     * Multiplies block1 by value (mod sigma).
+     * 
+     * @param block1
+     *            The encrypted block to be multiplied.
+     * @param value
+     *            The value by which it shall be multiplied
+     * @return an encrypted block, so that decrypt(retval) = ( decrypt(block1) *
+     *         value ) % sigma
+     * @throws InvalidCipherTextException
+     */
+    public byte[] multiplyCryptedBlock(final byte[] block1,
+            final BigInteger value) throws InvalidCipherTextException
+    {
+        if (block1.length > getOutputBlockSize())
+        {
+            throw new InvalidCipherTextException(
+                    "BlockLength too large for simple addition.\n");
+        }
+
+        // calculate resulting block
+        final BigInteger m1Crypt = new BigInteger(1, block1);
+        final BigInteger m1m2Crypt = m1Crypt.modPow(value, key.getModulus());
+        if (debug)
+        {
+            System.out.println("c(m1) as BigInteger:....... " + m1Crypt);
+            System.out.println("m2 as BigInteger:.......... " + value);
+            System.out.println("(c(m1)^m2)%n = c(m1*m2)%n: " + m1m2Crypt);
+        }
+
+        final byte[] output = key.getModulus().toByteArray();
+        Arrays.fill(output, Byte.parseByte("0"));
+        System.arraycopy(m1m2Crypt.toByteArray(), 0, output, output.length
+                - m1m2Crypt.toByteArray().length,
+                m1m2Crypt.toByteArray().length);
 
         return output;
     }
@@ -235,12 +358,14 @@ public class NaccacheSternEngine
      * Convenience Method for data exchange with the cipher.
      * 
      * Determines blocksize and splits data to blocksize.
-     *
-     * @param data the data to be processed
+     * 
+     * @param data
+     *            the data to be processed
      * @return the data after it went through the NaccacheSternEngine.
-     * @throws InvalidCipherTextException 
+     * @throws InvalidCipherTextException
      */
-    public byte[] processData(byte[] data) throws InvalidCipherTextException
+    public byte[] processData(final byte[] data)
+            throws InvalidCipherTextException
     {
         if (debug)
         {
@@ -248,17 +373,21 @@ public class NaccacheSternEngine
         }
         if (data.length > getInputBlockSize())
         {
-            int inBlocksize = getInputBlockSize();
-            int outBlocksize = getOutputBlockSize();
+            final int inBlocksize = getInputBlockSize();
+            final int outBlocksize = getOutputBlockSize();
             if (debug)
             {
-                System.out.println("Input blocksize is:  " + inBlocksize + " bytes");
-                System.out.println("Output blocksize is: " + outBlocksize + " bytes");
-                System.out.println("Data has length:.... " + data.length + " bytes");
+                System.out.println("Input blocksize is:  " + inBlocksize
+                        + " bytes");
+                System.out.println("Output blocksize is: " + outBlocksize
+                        + " bytes");
+                System.out.println("Data has length:.... " + data.length
+                        + " bytes");
             }
             int datapos = 0;
             int retpos = 0;
-            byte[] retval = new byte[(data.length / inBlocksize + 1) * outBlocksize];
+            byte[] retval = new byte[(data.length / inBlocksize + 1)
+                    * outBlocksize];
             while (datapos < data.length)
             {
                 byte[] tmp;
@@ -294,10 +423,7 @@ public class NaccacheSternEngine
                 }
             }
             byte[] ret = new byte[retpos];
-            for (int i = 0; i < retpos; i++)
-            {
-                ret[i] = retval[i];
-            }
+            System.arraycopy(retval, 0, ret, 0, retpos);
             if (debug)
             {
                 System.out.println("returning " + ret.length + " bytes");
@@ -308,7 +434,8 @@ public class NaccacheSternEngine
         {
             if (debug)
             {
-                System.out.println("data size is less then input block size, processing directly");
+                System.out
+                        .println("data size is less then input block size, processing directly");
             }
             return processBlock(data, 0, data.length);
         }
@@ -324,24 +451,103 @@ public class NaccacheSternEngine
      *            the primes p_i
      * @return an integer x for that x % p_i == c_i
      */
-    private static BigInteger chineseRemainder(Vector congruences, Vector primes)
+    private static BigInteger chineseRemainder(final Vector congruences,
+            final Vector primes)
     {
         BigInteger retval = BigInteger.ZERO;
         BigInteger all = BigInteger.ONE;
         for (int i = 0; i < primes.size(); i++)
         {
-            all = all.multiply((BigInteger)primes.elementAt(i));
+            all = all.multiply((BigInteger) primes.elementAt(i));
         }
         for (int i = 0; i < primes.size(); i++)
         {
-            BigInteger a = (BigInteger)primes.elementAt(i);
-            BigInteger b = all.divide(a);
-            BigInteger b_ = b.modInverse(a);
+            final BigInteger a = (BigInteger) primes.elementAt(i);
+            final BigInteger b = all.divide(a);
+            final BigInteger b_ = b.modInverse(a);
             BigInteger tmp = b.multiply(b_);
-            tmp = tmp.multiply((BigInteger)congruences.elementAt(i));
+            tmp = tmp.multiply((BigInteger) congruences.elementAt(i));
             retval = retval.add(tmp);
         }
 
         return retval.mod(all);
     }
+
+    private void submitDecryptionValue(final DecryptBySmallPrime t)
+    {
+        if (t.lookedup == -1)
+        {
+            if (debug)
+            {
+                System.out.println("Actual prime is " + t.smallPrime);
+                System.out.println("Decrypted value is " + t.exp);
+
+                System.out.println("LookupList for " + t.smallPrime
+                        + " with size " + t.al.size() + " is: ");
+                for (int j = 0; j < t.al.size(); j++)
+                {
+                    System.out.println(t.al.get(j));
+                }
+            }
+            return;
+        }
+
+        final NaccacheSternPrivateKeyParameters priv = (NaccacheSternPrivateKeyParameters) key;
+        final Vector smallPrimes = priv.getSmallPrimes();
+        plain.setElementAt(BigInteger.valueOf(t.lookedup), smallPrimes
+                .indexOf(t.smallPrime));
+        synchronized (threads)
+        {
+            threads.remove(t);
+        }
+
+        synchronized (waitFor)
+        {
+            waitFor.notifyAll();
+        }
+    }
+
+    class DecryptBySmallPrime extends Thread
+    {
+        private final BigInteger smallPrime;
+
+        private final BigInteger input;
+
+        private final BigInteger phi_n;
+
+        private final BigInteger modulus;
+
+        private BigInteger exp;
+
+        private int lookedup;
+
+        private Vector al;
+
+        private boolean debug;
+
+        DecryptBySmallPrime(BigInteger smallPrime, BigInteger input,
+                BigInteger phi_n, BigInteger modulus, boolean debug)
+        {
+            super();
+            this.smallPrime = smallPrime;
+            this.input = input;
+            this.phi_n = phi_n;
+            this.modulus = modulus;
+            this.debug = debug;
+        }
+
+        public void run()
+        {
+            exp = input.modPow(phi_n.divide(smallPrime), modulus);
+            al = (Vector) lookup.get(smallPrime);
+            lookedup = al.indexOf(exp);
+            if (debug)
+            {
+                System.out.println("decryption for prime " + smallPrime
+                        + " finished.");
+            }
+            submitDecryptionValue(this);
+        }
+    }
+
 }
