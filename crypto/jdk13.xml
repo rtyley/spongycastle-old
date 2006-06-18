@@ -41,6 +41,9 @@
             <fileset dir="jdk1.3" includes="**/*.java" />
             <fileset dir="test/jdk1.3" includes="**/*.java" />
         </copy>
+        <copy todir="${src.dir}">
+            <fileset dir="jce/src" includes="**/*.java" />
+        </copy>
     </target>
 
     <target name="build" depends="init">
