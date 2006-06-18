@@ -10,15 +10,16 @@ import java.math.BigInteger;
  */
 public class NaccacheSternKeyParameters extends AsymmetricKeyParameter
 {
-
-    private BigInteger g, n;
+    private BigInteger g;
+    private BigInteger n;
 
     int lowerSigmaBound;
 
     /**
      * @param privateKey
      */
-    public NaccacheSternKeyParameters(boolean privateKey, BigInteger g, BigInteger n, int lowerSigmaBound)
+    public NaccacheSternKeyParameters(boolean privateKey, BigInteger g,
+            BigInteger n, int lowerSigmaBound)
     {
         super(privateKey);
         this.g = g;
@@ -48,6 +49,15 @@ public class NaccacheSternKeyParameters extends AsymmetricKeyParameter
     public BigInteger getModulus()
     {
         return n;
+    }
+    
+    public String toString()
+    {
+        String retval = "";
+        retval += "Modulus:.... " + n + "\n";
+        retval += "g:.......... " + g + "\n";
+        retval += "SigmaBits:.. " + lowerSigmaBound + "\n";
+        return retval;
     }
 
 }
