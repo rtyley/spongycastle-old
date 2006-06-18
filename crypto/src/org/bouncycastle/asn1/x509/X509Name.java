@@ -53,6 +53,16 @@ public class X509Name
     public static final DERObjectIdentifier SN = new DERObjectIdentifier("2.5.4.5");
 
     /**
+     * street - StringType(SIZE(1..64))
+     */
+    public static final DERObjectIdentifier STREET = new DERObjectIdentifier("2.5.4.9");
+    
+    /**
+     * device serial number name - StringType(SIZE(1..64))
+     */
+    public static final DERObjectIdentifier SERIALNUMBER = SN;
+
+    /**
      * locality name - StringType(SIZE(1..64))
      */
     public static final DERObjectIdentifier L = new DERObjectIdentifier("2.5.4.7");
@@ -117,9 +127,15 @@ public class X509Name
 
     /**
      * look up table translating OID values into their common symbols following the convention in RFC 2253
-     * with a few extras
+     * 
      */
     public static Hashtable RFC2253Symbols = new Hashtable();
+
+    /**
+     * look up table translating OID values into their common symbols following the convention in RFC 1779
+     * 
+     */
+    public static Hashtable RFC1779Symbols = new Hashtable();
 
     /**
      * look up table translating string values into their OIDS -
@@ -142,9 +158,11 @@ public class X509Name
         DefaultSymbols.put(L, "L");
         DefaultSymbols.put(ST, "ST");
         DefaultSymbols.put(SN, "SN");
+        DefaultSymbols.put(SN, "SERIALNUMBER");
         DefaultSymbols.put(EmailAddress, "E");
         DefaultSymbols.put(DC, "DC");
         DefaultSymbols.put(UID, "UID");
+        DefaultSymbols.put(STREET, "STREET");
         DefaultSymbols.put(SURNAME, "SURNAME");
         DefaultSymbols.put(GIVENNAME, "GIVENNAME");
         DefaultSymbols.put(INITIALS, "INITIALS");
@@ -154,19 +172,21 @@ public class X509Name
 
         RFC2253Symbols.put(C, "C");
         RFC2253Symbols.put(O, "O");
-        RFC2253Symbols.put(T, "T");
         RFC2253Symbols.put(OU, "OU");
         RFC2253Symbols.put(CN, "CN");
         RFC2253Symbols.put(L, "L");
         RFC2253Symbols.put(ST, "ST");
-        RFC2253Symbols.put(SN, "SN");
-        RFC2253Symbols.put(EmailAddress, "EMAILADDRESS");
+        RFC2253Symbols.put(STREET, "STREET");
         RFC2253Symbols.put(DC, "DC");
         RFC2253Symbols.put(UID, "UID");
-        RFC2253Symbols.put(SURNAME, "SURNAME");
-        RFC2253Symbols.put(GIVENNAME, "GIVENNAME");
-        RFC2253Symbols.put(INITIALS, "INITIALS");
-        RFC2253Symbols.put(GENERATION, "GENERATION");
+
+        RFC1779Symbols.put(C, "C");
+        RFC1779Symbols.put(O, "O");
+        RFC1779Symbols.put(OU, "OU");
+        RFC1779Symbols.put(CN, "CN");
+        RFC1779Symbols.put(L, "L");
+        RFC1779Symbols.put(ST, "ST");
+        RFC1779Symbols.put(STREET, "STREET");
 
         DefaultLookUp.put("c", C);
         DefaultLookUp.put("o", O);
@@ -176,6 +196,8 @@ public class X509Name
         DefaultLookUp.put("l", L);
         DefaultLookUp.put("st", ST);
         DefaultLookUp.put("sn", SN);
+        DefaultLookUp.put("serialnumber", SN);
+        DefaultLookUp.put("street", STREET);
         DefaultLookUp.put("emailaddress", E);
         DefaultLookUp.put("dc", DC);
         DefaultLookUp.put("e", E);
