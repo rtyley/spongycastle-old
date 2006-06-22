@@ -19,11 +19,11 @@ import org.bouncycastle.crypto.params.NaccacheSternPrivateKeyParameters;
  * 
  * http://www.gemplus.com/smart/rd/publications/pdf/NS98pkcs.pdf
  */
-public class NaccacheSternKeyPairGenerator 
-     implements AsymmetricCipherKeyPairGenerator
+public class NaccacheSternKeyPairGenerator implements
+        AsymmetricCipherKeyPairGenerator
 {
 
-    private NaccacheSternKeyGenerationParameters param;
+    // private NaccacheSternKeyGenerationParameters param;
 
     private final Vector threads = new Vector();
 
@@ -31,10 +31,8 @@ public class NaccacheSternKeyPairGenerator
 
     private final Hashtable gParts = new Hashtable();
 
-    //private static final int PROCESSOR_CNT = Runtime.getRuntime().availableProcessors();
+    private final int processorCount;
 
-    private static final int PROCESSOR_CNT = 1;
-    
     private boolean gDivisible = false;
 
     private BigInteger a = null;
@@ -71,6 +69,31 @@ public class NaccacheSternKeyPairGenerator
 
     private Vector smallPrimes;
 
+    /**
+     * Constructor for multi-processor systems. You can get the number of
+     * processors in your system via
+     * 
+     * Runtime.getRuntime().availableProcessors();
+     * 
+     * You need java >= 1.4 for this.
+     * 
+     * @param processorCnt
+     *            The number of CPUs to use.
+     */
+    public NaccacheSternKeyPairGenerator(final int processorCnt)
+    {
+        processorCount = processorCnt;
+    }
+
+    /**
+     * Standard constructor, only one CPU is used.
+     * 
+     */
+    public NaccacheSternKeyPairGenerator()
+    {
+        processorCount = 1;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -78,11 +101,20 @@ public class NaccacheSternKeyPairGenerator
      */
     public void init(final KeyGenerationParameters param)
     {
-        this.param = (NaccacheSternKeyGenerationParameters) param;
         strength = param.getStrength();
         rand = param.getRandom();
-        certainty = this.param.getCertainty();
-        debug = this.param.isDebug();
+        certainty = ((NaccacheSternKeyGenerationParameters) param)
+                .getCertainty();
+        debug = ((NaccacheSternKeyGenerationParameters) param).isDebug();
+        if (debug)
+        {
+            System.out.println("Fetching first "
+                    + ((NaccacheSternKeyGenerationParameters) param)
+                            .getCntSmallPrimes() + " primes.");
+        }
+
+        smallPrimes = findFirstPrimes(((NaccacheSternKeyGenerationParameters) param)
+                .getCntSmallPrimes());
     }
 
     /*
@@ -92,13 +124,6 @@ public class NaccacheSternKeyPairGenerator
      */
     public AsymmetricCipherKeyPair generateKeyPair()
     {
-        if (debug)
-        {
-            System.out.println("Fetching first " + param.getCntSmallPrimes()
-                    + " primes.");
-        }
-
-        smallPrimes = findFirstPrimes(param.getCntSmallPrimes());
         smallPrimes = permuteList(smallPrimes, rand);
 
         u = BigInteger.ONE;
@@ -131,9 +156,9 @@ public class NaccacheSternKeyPairGenerator
         {
             System.out.println("generating g");
         }
-        
+
         computeG();
-        
+
         if (debug)
         {
             System.out.println();
@@ -154,9 +179,8 @@ public class NaccacheSternKeyPairGenerator
         }
 
         return new AsymmetricCipherKeyPair(new NaccacheSternKeyParameters(
-                false, g, n, sigma.bitLength()),
-                new NaccacheSternPrivateKeyParameters(g, n, sigma.bitLength(),
-                        smallPrimes, phi_n, debug));
+                false, g, n, sigma), new NaccacheSternPrivateKeyParameters(g,
+                n, sigma, smallPrimes, phi_n, debug, processorCount));
     }
 
     private static BigInteger computeP(final BigInteger a, final BigInteger u,
@@ -191,7 +215,7 @@ public class NaccacheSternKeyPairGenerator
 
         synchronized (waitFor)
         {
-            waitFor.notify();
+            waitFor.notifyAll();
         }
     }
 
@@ -308,22 +332,22 @@ public class NaccacheSternKeyPairGenerator
         // q_.bitLength() - 1 -1
         final int remainingStrength = (strength - sigma.bitLength() - 48) / 2 + 1;
 
-        if (PROCESSOR_CNT == 1)
+        if (processorCount == 1)
         {
-            new GeneratePrimeAThread(remainingStrength).run();
-            new GeneratePrimeBThread(remainingStrength).run();
+            new GeneratePrimeA(remainingStrength).run();
+            new GeneratePrimeB(remainingStrength).run();
         }
         else
         {
             final Vector threads = new Vector();
-            for (int i = 0; i < PROCESSOR_CNT / 2; i++)
+            for (int i = 0; i < processorCount / 2; i++)
             {
-                final Thread t = new GeneratePrimeAThread(remainingStrength);
+                final Thread t = new GeneratePrimeA(remainingStrength);
                 threads.add(t);
             }
-            for (int i = PROCESSOR_CNT / 2; i < PROCESSOR_CNT; i++)
+            for (int i = processorCount / 2; i < processorCount; i++)
             {
-                final Thread t = new GeneratePrimeBThread(remainingStrength);
+                final Thread t = new GeneratePrimeB(remainingStrength);
                 threads.add(t);
             }
             for (int i = 0; i < threads.size(); i++)
@@ -338,21 +362,24 @@ public class NaccacheSternKeyPairGenerator
                     try
                     {
                         waitFor.wait();
-                        // Here Thread.stop() is once useful :)
                         if (a != null)
                         {
-                            for (int i = 0; i < PROCESSOR_CNT / 2; i++)
+                            // stop all threads generating a
+                            for (int i = 0; i < processorCount / 2; i++)
                             {
-                                Thread t = (Thread) threads.get(i);
-                                t.stop();
+                                GeneratePrimeA t = (GeneratePrimeA) threads
+                                        .get(i);
+                                t.endThread();
                             }
                         }
                         if (b != null)
                         {
-                            for (int i = PROCESSOR_CNT / 2; i < PROCESSOR_CNT; i++)
+                            for (int i = processorCount / 2; i < processorCount; i++)
                             {
-                                Thread t = (Thread) threads.get(i);
-                                t.stop();
+                                // stop all threads generating b
+                                GeneratePrimeB t = (GeneratePrimeB) threads
+                                        .get(i);
+                                t.endThread();
                             }
                         }
                     }
@@ -361,6 +388,18 @@ public class NaccacheSternKeyPairGenerator
                     }
                 }
             }
+            for (int i = 0; i < threads.size(); i++)
+            {
+                final Thread t = (Thread) threads.get(i);
+                try
+                {
+                    t.join();
+                }
+                catch (InterruptedException e)
+                {
+                }
+            }
+            threads.removeAllElements();
         }
 
     }
@@ -368,7 +407,7 @@ public class NaccacheSternKeyPairGenerator
     private void generatePQ()
     {
         // parallelize the generation of p and q
-        for (int i = 0; i < PROCESSOR_CNT; i++)
+        for (int i = 0; i < processorCount; i++)
         {
             Thread t = new GeneratePQThread();
             threads.add(t);
@@ -416,7 +455,7 @@ public class NaccacheSternKeyPairGenerator
         }
 
     }
-    
+
     private void computeG()
     {
         for (;;)
@@ -496,7 +535,7 @@ public class NaccacheSternKeyPairGenerator
         // start as many as necessary
         synchronized (threads)
         {
-            for (int i = 0; i < threads.size() && i < PROCESSOR_CNT; i++)
+            for (int i = 0; i < threads.size() && i < processorCount; i++)
             {
                 Thread t = (Thread) threads.get(i);
                 runningThreads.add(t);
@@ -574,7 +613,7 @@ public class NaccacheSternKeyPairGenerator
         }
         Vector runningThreads = new Vector();
         // start as many as needed
-        for (int i = 0; i < threads.size() && i < PROCESSOR_CNT; i++)
+        for (int i = 0; i < threads.size() && i < processorCount; i++)
         {
             Thread t = (Thread) threads.get(i);
             runningThreads.add(t);
@@ -614,9 +653,9 @@ public class NaccacheSternKeyPairGenerator
             }
             catch (InterruptedException e)
             {
-                // TODO Auto-generated catch block
             }
         }
+        runningThreads.removeAllElements();
     }
 
     /**
@@ -712,8 +751,6 @@ public class NaccacheSternKeyPairGenerator
     /**
      * Computes a BigInteger to assemble G from.
      * 
-     * @author lippold Published under the GPLv2 Licence (c) 2006 Georg Lippold
-     * 
      */
     class ComputeGPart extends Thread
     {
@@ -757,8 +794,6 @@ public class NaccacheSternKeyPairGenerator
     /**
      * Tests if g is divisible by a small prime.
      * 
-     * @author lippold Published under the GPLv2 Licence (c) 2006 Georg Lippold
-     * 
      */
     class GDivisionTest extends Thread
     {
@@ -794,13 +829,13 @@ public class NaccacheSternKeyPairGenerator
 
     }
 
-    class GeneratePrimeAThread extends Thread
+    class GeneratePrimeA extends Thread
     {
         private boolean running = true;
 
         private final int bits;
 
-        GeneratePrimeAThread(int bits)
+        GeneratePrimeA(int bits)
         {
             this.bits = bits;
         }
@@ -813,15 +848,28 @@ public class NaccacheSternKeyPairGenerator
                         + " bit and certainty 2^(-" + certainty + ").");
             }
 
-            BigInteger p_ = new BigInteger(bits, certainty, rand);
-            while (p_.bitLength() != bits && running)
+            BigInteger p_;
+            do
             {
-                p_ = new BigInteger(bits, certainty, rand);
+                p_ = new BigInteger(bits, rand);
+                if (p_.bitLength() != bits)
+                {
+                    continue;
+                }
+                if (p_.isProbablePrime(certainty))
+                {
+                    break;
+                }
             }
-            a = p_;
-            synchronized (waitFor)
+            while (running);
+
+            if (running)
             {
-                waitFor.notifyAll();
+                a = p_;
+                synchronized (waitFor)
+                {
+                    waitFor.notifyAll();
+                }
             }
 
         }
@@ -833,13 +881,13 @@ public class NaccacheSternKeyPairGenerator
 
     }
 
-    class GeneratePrimeBThread extends Thread
+    class GeneratePrimeB extends Thread
     {
         private boolean running = true;
 
         private final int bits;
 
-        GeneratePrimeBThread(int bits)
+        GeneratePrimeB(int bits)
         {
             this.bits = bits;
         }
@@ -852,15 +900,28 @@ public class NaccacheSternKeyPairGenerator
                         + " bit and certainty 2^(-" + certainty + ").");
             }
 
-            BigInteger p_ = new BigInteger(bits, certainty, rand);
-            while (p_.bitLength() != bits && running)
+            BigInteger p_;
+            do
             {
-                p_ = new BigInteger(bits, certainty, rand);
+                p_ = new BigInteger(bits, rand);
+                if (p_.bitLength() != bits)
+                {
+                    continue;
+                }
+                if (p_.isProbablePrime(certainty))
+                {
+                    break;
+                }
             }
-            b = p_;
-            synchronized (waitFor)
+            while (running);
+
+            if (running)
             {
-                waitFor.notifyAll();
+                b = p_;
+                synchronized (waitFor)
+                {
+                    waitFor.notifyAll();
+                }
             }
 
         }

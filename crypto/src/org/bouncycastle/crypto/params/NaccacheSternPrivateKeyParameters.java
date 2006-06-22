@@ -13,62 +13,117 @@ import java.util.Vector;
 public class NaccacheSternPrivateKeyParameters extends
         NaccacheSternKeyParameters
 {
-    private BigInteger phi_n;
 
-    private Vector smallPrimes;
+    private final BigInteger phi_n;
 
-    private Hashtable lookupList;
+    private final Vector smallPrimes;
 
-    private Vector threads;
-    
-    //private static final int PROCESSOR_CNT = Runtime.getRuntime().availableProcessors();
-    private static final int PROCESSOR_CNT = 1;
-    
+    private final Hashtable lookupList;
+
+    private final Vector threads;
+
+    private final int processorCount;
+
     private boolean debug = false;
 
-    // need a serializable synchronization object here
-    private final Vector waitFor = new Vector();
-
-    public NaccacheSternPrivateKeyParameters(BigInteger g, BigInteger n,
-            int lowerSigmaBound, Vector smallPrimes, BigInteger phi_n)
-    {
-        this(g, n, lowerSigmaBound, smallPrimes, phi_n, false);
-    }
+    private final Object waitFor = new Object();
 
     /**
-     * Constructs a NaccacheSternPrivateKey
+     * 
+     * Constructs a NaccacheSternPrivateKey using only one CPU without debug
+     * information.
      * 
      * @param g
      *            the public enryption parameter g
      * @param n
      *            the public modulus n = p*q
-     * @param lowerSigmaBound
-     *            the public lower sigma bound up to which data can be encrypted
+     * @param sigma
+     *            the public sigma up to which data can be encrypted
      * @param smallPrimes
      *            the small primes, of which sigma is constructed in the right
      *            order
      * @param phi_n
      *            the private modulus phi(n) = (p-1)(q-1)
+     * 
      */
     public NaccacheSternPrivateKeyParameters(BigInteger g, BigInteger n,
-            int lowerSigmaBound, Vector smallPrimes, BigInteger phi_n,
-            boolean verbose)
+            BigInteger sigma, Vector smallPrimes, BigInteger phi_n)
     {
-        super(true, g, n, lowerSigmaBound);
+        this(g, n, sigma, smallPrimes, phi_n, false, 1);
+    }
+
+    /**
+     * Constructs a NaccacheSternPrivateKeyParameters with a given lookupList.
+     * Used by NaccacheSterKeySerializationFactory. Very fast.
+     * 
+     * @param g
+     *            public encryption parameter g
+     * @param n
+     *            public modulus n
+     * @param sigma
+     *            public sigma up to which data can be encrypted
+     * @param smallPrimes
+     *            the small primes, of which sigma is constructed in the right
+     *            order
+     * @param phi_n
+     *            the private modulus phi(n) = (p-1)(q-1)
+     * @param lookupList
+     *            a hashtable of the form [ smallPrime | Vector<BigInteger> ]
+     *            used for decryption.
+     */
+    public NaccacheSternPrivateKeyParameters(BigInteger g, BigInteger n,
+            BigInteger sigma, Vector smallPrimes, BigInteger phi_n,
+            Hashtable lookupList)
+    {
+        super(true, g, n, sigma);
+        this.smallPrimes = smallPrimes;
+        this.lookupList = lookupList;
+        this.phi_n = phi_n;
+        processorCount = 1;
+        threads = null;
+    }
+
+    /**
+     * Constructs a NaccacheSternPrivateKey using as many CPU's as specified.
+     * 
+     * @param g
+     *            the public enryption parameter g
+     * @param n
+     *            the public modulus n = p*q
+     * @param sigma
+     *            the public sigma up to which data can be encrypted
+     * @param smallPrimes
+     *            the small primes, of which sigma is constructed in the right
+     *            order
+     * @param phi_n
+     *            the private modulus phi(n) = (p-1)(q-1)
+     * @param verbose
+     *            be verbose on lookupTable construction
+     * @param processorCnt
+     *            the number of threads to start. See also
+     *            Runtime.getRuntime().availableProcessors() (since Java 1.4).
+     */
+    public NaccacheSternPrivateKeyParameters(BigInteger g, BigInteger n,
+            BigInteger sigma, Vector smallPrimes, BigInteger phi_n,
+            boolean verbose, int processorCnt)
+    {
+        super(true, g, n, sigma);
         this.smallPrimes = smallPrimes;
         this.phi_n = phi_n;
         this.debug = verbose;
+        processorCount = processorCnt;
         lookupList = new Hashtable();
         if (debug)
         {
-            System.out
-                    .println("current machine has " + PROCESSOR_CNT + " CPU's");
+            System.out.println("current machine has " + processorCount
+                    + " CPU's");
             System.out.println("Constructing lookup Array");
         }
         threads = new Vector();
         for (int i = 0; i < smallPrimes.size(); i++)
         {
-            final BigInteger actualPrime = (BigInteger) smallPrimes.elementAt(i);
+            final BigInteger actualPrime = (BigInteger) smallPrimes
+                    .elementAt(i);
             final Thread t = new ConstructLookupVector(actualPrime);
             threads.add(t);
         }
@@ -76,7 +131,7 @@ public class NaccacheSternPrivateKeyParameters extends
         synchronized (threads)
         {
             // Start as many threads as we have processors
-            for (int i = 0; i < PROCESSOR_CNT && i < threads.size(); i++)
+            for (int i = 0; i < processorCount && i < threads.size(); i++)
             {
                 final Thread t = (Thread) threads.get(i);
                 runningThreads.add(t);
@@ -116,13 +171,11 @@ public class NaccacheSternPrivateKeyParameters extends
             }
             catch (InterruptedException e)
             {
-                // TODO Auto-generated catch block
             }
         }
         if (debug)
         {
-            System.out
-                    .println("NaccacheSternPrivateKey construction finished");
+            System.out.println("NaccacheSternPrivateKey construction finished");
         }
 
     }
@@ -195,7 +248,7 @@ public class NaccacheSternPrivateKeyParameters extends
             submitLookupVector(this);
         }
     }
-    
+
     public String toString()
     {
         String retval = super.toString();
@@ -203,5 +256,5 @@ public class NaccacheSternPrivateKeyParameters extends
         retval += "smallPrimes: " + smallPrimes + "\n";
         return retval;
     }
-    
+
 }

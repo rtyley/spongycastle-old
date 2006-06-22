@@ -10,21 +10,49 @@ import java.math.BigInteger;
  */
 public class NaccacheSternKeyParameters extends AsymmetricKeyParameter
 {
+
     private BigInteger g;
+
     private BigInteger n;
 
-    int lowerSigmaBound;
+    private BigInteger sigma;
 
     /**
+     * Construct a NaccacheStern public key.
+     * 
+     * @param g
+     *            the public enryption parameter g
+     * @param n
+     *            the public modulus n = p*q
+     * @param sigma
+     *            the public sigma up to which data can be encrypted
+     */
+    public NaccacheSternKeyParameters(BigInteger g, BigInteger n,
+            BigInteger sigma)
+    {
+        this(false, g, n, sigma);
+    }
+
+    /**
+     * Construct a NaccacheStern public key.
+     * 
      * @param privateKey
+     *            should be set to false. For private keys, see
+     *            NaccacheSternPrivateKeyParameters.
+     * @param g
+     *            the public enryption parameter g
+     * @param n
+     *            the public modulus n = p*q
+     * @param sigma
+     *            the public sigma up to which data can be encrypted
      */
     public NaccacheSternKeyParameters(boolean privateKey, BigInteger g,
-            BigInteger n, int lowerSigmaBound)
+            BigInteger n, BigInteger sigma)
     {
         super(privateKey);
         this.g = g;
         this.n = n;
-        this.lowerSigmaBound = lowerSigmaBound;
+        this.sigma = sigma;
     }
 
     /**
@@ -38,9 +66,9 @@ public class NaccacheSternKeyParameters extends AsymmetricKeyParameter
     /**
      * @return Returns the lowerSigmaBound.
      */
-    public int getLowerSigmaBound()
+    public BigInteger getSigma()
     {
-        return lowerSigmaBound;
+        return sigma;
     }
 
     /**
@@ -50,13 +78,13 @@ public class NaccacheSternKeyParameters extends AsymmetricKeyParameter
     {
         return n;
     }
-    
+
     public String toString()
     {
         String retval = "";
         retval += "Modulus:.... " + n + "\n";
         retval += "g:.......... " + g + "\n";
-        retval += "SigmaBits:.. " + lowerSigmaBound + "\n";
+        retval += "Sigma:...... " + sigma + "\n";
         return retval;
     }
 
