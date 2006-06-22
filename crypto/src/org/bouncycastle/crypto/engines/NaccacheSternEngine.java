@@ -32,8 +32,19 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
 
     private Vector plain;
 
-    //private static final int PROCESSOR_CNT = Runtime.getRuntime().availableProcessors();
-    private static final int PROCESSOR_CNT = 1;
+    private BigInteger certificate;
+
+    private final int processorCount;
+
+    public NaccacheSternEngine()
+    {
+        processorCount = 1;
+    }
+
+    public NaccacheSternEngine(int processorCnt)
+    {
+        processorCount = processorCnt;
+    }
 
     /**
      * Initializes this algorithm. Must be called before all other Functions.
@@ -73,7 +84,7 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
         if (forEncryption)
         {
             // We can only encrypt values up to lowerSigmaBound
-            return (key.getLowerSigmaBound() + 7) / 8 - 1;
+            return (key.getSigma().bitLength() + 7) / 8 - 1;
         }
         else
         {
@@ -97,7 +108,7 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
         else
         {
             // decrypted Data has upper limit lowerSigmaBound
-            return (key.getLowerSigmaBound() + 7) / 8 - 1;
+            return (key.getSigma().bitLength() + 7 / 8) + 1;
         }
     }
 
@@ -110,12 +121,6 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
     public byte[] processBlock(final byte[] input, final int inOff,
             final int len) throws InvalidCipherTextException
     {
-
-        if (len > (getInputBlockSize() + 1))
-        {
-            throw new DataLengthException(
-                    "input too large for Naccache-Stern cipher.\n");
-        }
 
         if (!forEncryption && len < getInputBlockSize())
         {
@@ -138,6 +143,12 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
 
         // transform input into BigInteger
         final BigInteger input_converted = new BigInteger(1, block);
+
+        if (forEncryption && input_converted.compareTo(key.getSigma()) > 0)
+        {
+            throw new DataLengthException(
+                    "input too large for Naccache-Stern cipher.\n");
+        }
         if (debug)
         {
             System.out.println("input as BigInteger: " + input_converted);
@@ -176,7 +187,7 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
 
         synchronized (threads)
         {
-            for (int i = 0; i < threads.size() && i < PROCESSOR_CNT; i++)
+            for (int i = 0; i < threads.size() && i < processorCount; i++)
             {
                 final Thread t = (Thread) threads.get(i);
                 runningThreads.add(t);
@@ -246,7 +257,8 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
     }
 
     /**
-     * Encrypts a BigInteger aka Plaintext with the public key.
+     * Encrypts a BigInteger aka Plaintext with the public key. Uses
+     * probabilistic encryption if a certificate is set.
      * 
      * @param plain
      *            The BigInteger to encrypt
@@ -259,8 +271,14 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
         // 0-padding at the beginning is correctly parsed by BigInteger :)
         final byte[] output = key.getModulus().toByteArray();
         Arrays.fill(output, Byte.parseByte("0"));
-        final byte[] tmp = key.getG().modPow(plain, key.getModulus())
-                .toByteArray();
+        BigInteger encrypted = key.getG().modPow(plain, key.getModulus());
+        if (certificate != null)
+        {
+            encrypted = certificate.modPow(key.getSigma(), key.getModulus())
+                    .multiply(encrypted).mod(key.getModulus());
+        }
+
+        final byte[] tmp = encrypted.toByteArray();
         System
                 .arraycopy(tmp, 0, output, output.length - tmp.length,
                         tmp.length);
@@ -286,17 +304,18 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
     public byte[] addCryptedBlocks(final byte[] block1, final byte[] block2)
             throws InvalidCipherTextException
     {
+        final BigInteger m1Crypt = new BigInteger(1, block1);
+        final BigInteger m2Crypt = new BigInteger(1, block2);
+
         // check for correct blocksize
-        if ((block1.length > getOutputBlockSize())
-                || (block2.length > getOutputBlockSize()))
+        if (m1Crypt.compareTo(key.getModulus()) >= 0
+                || m2Crypt.compareTo(key.getModulus()) >= 0)
         {
             throw new InvalidCipherTextException(
-                    "BlockLength too large for simple addition.\n");
+                    "BlockLength too large for addition");
         }
 
         // calculate resulting block
-        final BigInteger m1Crypt = new BigInteger(1, block1);
-        final BigInteger m2Crypt = new BigInteger(1, block2);
         BigInteger m1m2Crypt = m1Crypt.multiply(m2Crypt);
         m1m2Crypt = m1m2Crypt.mod(key.getModulus());
         if (debug)
@@ -329,14 +348,15 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
     public byte[] multiplyCryptedBlock(final byte[] block1,
             final BigInteger value) throws InvalidCipherTextException
     {
-        if (block1.length > getOutputBlockSize())
+
+        final BigInteger m1Crypt = new BigInteger(1, block1);
+        if (m1Crypt.compareTo(key.getModulus()) >= 0)
         {
             throw new InvalidCipherTextException(
-                    "BlockLength too large for simple addition.\n");
+                    "BlockLength too large for multiplication.\n");
         }
 
         // calculate resulting block
-        final BigInteger m1Crypt = new BigInteger(1, block1);
         final BigInteger m1m2Crypt = m1Crypt.modPow(value, key.getModulus());
         if (debug)
         {
@@ -371,7 +391,8 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
         {
             System.out.println();
         }
-        if (data.length > getInputBlockSize())
+        final BigInteger dataConverted = new BigInteger(1, data);
+        if (dataConverted.compareTo(key.getSigma()) > 0)
         {
             final int inBlocksize = getInputBlockSize();
             final int outBlocksize = getOutputBlockSize();
@@ -439,6 +460,21 @@ public class NaccacheSternEngine implements AsymmetricBlockCipher
             }
             return processBlock(data, 0, data.length);
         }
+    }
+
+    /**
+     * Set the certificate for this engine. This is a BigInteger that is used by
+     * probabilistic encryption to conceal the actual encrypted value. This also
+     * allows for changing certificates before an encryption process. The
+     * certificate remains valid for this enigne until a new one is set.
+     * 
+     * @param certificate
+     *            The BigInteger used as a certificate to conceal the encrypted
+     *            value.
+     */
+    public void setCertificate(BigInteger certificate)
+    {
+        this.certificate = certificate;
     }
 
     /**
