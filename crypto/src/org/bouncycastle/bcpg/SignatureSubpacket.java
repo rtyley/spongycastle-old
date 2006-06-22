@@ -68,7 +68,7 @@ public class SignatureSubpacket
         
         if (critical)
         {
-            out.write(0x80 & type);
+            out.write(0x80 | type);
         }
         else
         {
