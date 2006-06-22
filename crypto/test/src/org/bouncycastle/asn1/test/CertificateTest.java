@@ -239,7 +239,7 @@ public class CertificateTest
         
         if (!tbsCert.getSubject().toString().equals(subjects[id - 1]))
         {
-            fail("failed subject test for certificate id " + id);
+            fail("failed subject test for certificate id " + id + " got " + tbsCert.getSubject().toString());
         }
         
         if (tbsCert.getVersion() == 3)
