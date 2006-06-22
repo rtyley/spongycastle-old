@@ -82,6 +82,80 @@ public class X509Name
     public static final DERObjectIdentifier UNIQUE_IDENTIFIER = new DERObjectIdentifier("2.5.4.45");
 
     /**
+     * businessCategory - DirectoryString(SIZE(1..128)
+     */
+    public static final DERObjectIdentifier BUSINESSCATEGORY = new DERObjectIdentifier(
+                    "2.5.4.15");
+
+    /**
+     * postalCode - DirectoryString(SIZE(1..40)
+     */
+    public static final DERObjectIdentifier POSTALCODE = new DERObjectIdentifier(
+                    "2.5.4.17");
+    
+    /**
+     * dnQualifier - DirectoryString(SIZE(1..64)
+     */
+    public static final DERObjectIdentifier DN = new DERObjectIdentifier(
+                    "2.5.4.46");
+
+    /**
+     * RFC 3039 Pseudonym - DirectoryString(SIZE(1..64)
+     */
+    public static final DERObjectIdentifier PSEUDONYM = new DERObjectIdentifier(
+                    "2.5.4.65");
+
+    /**
+     * PKIX PKIX personal data pseudonym - DirectoryString(SIZE(1..64)
+     */
+    public static final DERObjectIdentifier PSEUDONYM_PKIX = new DERObjectIdentifier(
+                    "1.3.6.1.5.5.7.9.3");
+
+    /**
+     * RFC 3039 DateOfBirth - GeneralizedTime - YYYYMMDD000000Z
+     */
+    public static final DERObjectIdentifier DATEOFBIRTH = new DERObjectIdentifier(
+                    "1.3.6.1.5.5.7.9.1");
+
+    /**
+     * RFC 3039 PlaceOfBirth - DirectoryString(SIZE(1..128)
+     */
+    public static final DERObjectIdentifier PLACEOFBIRTH = new DERObjectIdentifier(
+                    "1.3.6.1.5.5.7.9.2");
+
+    /**
+     * RFC 3039 CountryOfCitizenship - PrintableString (SIZE (2)) -- ISO 3166
+     * codes only
+     */
+    public static final DERObjectIdentifier COUNTRYOFCITIZENSHIP = new DERObjectIdentifier(
+                    "1.3.6.1.5.5.7.9.4");
+
+    /**
+     * RFC 3039 CountryOfCitizenship - PrintableString (SIZE (2)) -- ISO 3166
+     * codes only
+     */
+    public static final DERObjectIdentifier COUNTRYOFRESIDENCE = new DERObjectIdentifier(
+                    "1.3.6.1.5.5.7.9.5");
+
+    /**
+     * RFC 3039 DateOfBirth - PrintableString (SIZE(1)) -- "M", "F", "m" or "f"
+     */
+    public static final DERObjectIdentifier GENDER = new DERObjectIdentifier(
+                    "1.3.6.1.5.5.7.9.2");
+
+    /**
+     * ISIS-MTT NameAtBirth - DirectoryString(SIZE(1..64)
+     */
+    public static final DERObjectIdentifier NAMEATBIRTH =  new DERObjectIdentifier("1.3.36.8.3.14");
+
+    /**
+     * RFC 3039 PostalAddress - SEQUENCE SIZE (1..6) OF
+     * DirectoryString(SIZE(1..30))
+     */
+    public static final DERObjectIdentifier POSTALADDRESS = new DERObjectIdentifier(
+                    "2.5.4.16");
+
+    /**
      * Email address (RSA PKCS#9 extension) - IA5String.
      * <p>Note: if you're trying to be ultra orthodox, don't use this! It shouldn't be in here.
      */
@@ -158,7 +232,6 @@ public class X509Name
         DefaultSymbols.put(L, "L");
         DefaultSymbols.put(ST, "ST");
         DefaultSymbols.put(SN, "SN");
-        DefaultSymbols.put(SN, "SERIALNUMBER");
         DefaultSymbols.put(EmailAddress, "E");
         DefaultSymbols.put(DC, "DC");
         DefaultSymbols.put(UID, "UID");
@@ -169,6 +242,19 @@ public class X509Name
         DefaultSymbols.put(GENERATION, "GENERATION");
         DefaultSymbols.put(UnstructuredAddress, "unstructuredAddress");
         DefaultSymbols.put(UnstructuredName, "unstructuredName");
+        DefaultSymbols.put(UNIQUE_IDENTIFIER, "UniqueIdentifier");
+        DefaultSymbols.put(DN, "DN");
+        DefaultSymbols.put(PSEUDONYM, "Pseudonym");
+        DefaultSymbols.put(PSEUDONYM_PKIX, "Pseudonym");
+        DefaultSymbols.put(POSTALADDRESS, "PostalAddress");
+        DefaultSymbols.put(NAMEATBIRTH, "NameAtBirth");
+        DefaultSymbols.put(COUNTRYOFCITIZENSHIP, "CountryOfCitizenship");
+        DefaultSymbols.put(COUNTRYOFRESIDENCE, "CountryOfResidence");
+        DefaultSymbols.put(GENDER, "Gender");
+        DefaultSymbols.put(PLACEOFBIRTH, "PlaceOfBirth");
+        DefaultSymbols.put(DATEOFBIRTH, "DateOfBirth");
+        DefaultSymbols.put(POSTALCODE, "PostalCode");
+        DefaultSymbols.put(BUSINESSCATEGORY, "BusinessCategory");
 
         RFC2253Symbols.put(C, "C");
         RFC2253Symbols.put(O, "O");
@@ -208,6 +294,19 @@ public class X509Name
         DefaultLookUp.put("generation", GENERATION);
         DefaultLookUp.put("unstructuredaddress", UnstructuredAddress);
         DefaultLookUp.put("unstructuredname", UnstructuredName);
+        DefaultLookUp.put("uniqueidentifier", UNIQUE_IDENTIFIER);
+        DefaultLookUp.put("dn", DN);
+        DefaultLookUp.put("pseudonym", PSEUDONYM);
+        DefaultLookUp.put("pseudonym_pkix", PSEUDONYM_PKIX);
+        DefaultLookUp.put("postaladdress", POSTALADDRESS);
+        DefaultLookUp.put("nameofbirth", NAMEATBIRTH);
+        DefaultLookUp.put("countryofcitizenship", COUNTRYOFCITIZENSHIP);
+        DefaultLookUp.put("countryofresidence", COUNTRYOFRESIDENCE);
+        DefaultLookUp.put("gender", GENDER);
+        DefaultLookUp.put("placeofbirth", PLACEOFBIRTH);
+        DefaultLookUp.put("dateofbirth", DATEOFBIRTH);
+        DefaultLookUp.put("postalcode", POSTALCODE);
+        DefaultLookUp.put("businesscategory", BUSINESSCATEGORY);
     }
 
     private X509NameEntryConverter  converter = null;
