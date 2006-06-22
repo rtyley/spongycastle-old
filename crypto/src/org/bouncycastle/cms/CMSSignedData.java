@@ -86,6 +86,10 @@ public class CMSSignedData
         {
             throw new CMSException("IOException reading content.", e);
         }
+        catch (ClassCastException e)
+        {
+            throw new CMSException("Malformed content.", e);
+        }
     }
     
     private CMSSignedData(
