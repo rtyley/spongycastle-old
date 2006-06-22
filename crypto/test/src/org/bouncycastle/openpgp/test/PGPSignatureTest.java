@@ -160,6 +160,12 @@ public class PGPSignatureTest
         
         sig = sGen.generateCertification(secretDSAKey.getPublicKey(), secretKey.getPublicKey());
 
+        byte[] sigBytes = sig.getEncoded();
+        
+        PGPObjectFactory f = new PGPObjectFactory(sigBytes);
+        
+        sig = (PGPSignature)f.nextObject();
+        
         sig.initVerify(secretDSAKey.getPublicKey(), "BC");
         
         if (!sig.verifyCertification(secretDSAKey.getPublicKey(), secretKey.getPublicKey()))
