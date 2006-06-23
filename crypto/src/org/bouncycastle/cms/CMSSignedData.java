@@ -90,6 +90,10 @@ public class CMSSignedData
         {
             throw new CMSException("Malformed content.", e);
         }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("Malformed content.", e);
+        }
     }
     
     private CMSSignedData(
