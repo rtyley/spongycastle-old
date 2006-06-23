@@ -296,4 +296,9 @@ abstract public class ASN1Set
 
     abstract void encode(DEROutputStream out)
             throws IOException;
+
+    public String toString() 
+    {
+      return set.toString();
+    }
 }

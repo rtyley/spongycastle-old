@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
+import org.bouncycastle.util.encoders.Hex;
 
 public abstract class ASN1OctetString
     extends DERObject
@@ -138,4 +139,8 @@ public abstract class ASN1OctetString
 
     abstract void encode(DEROutputStream out)
         throws IOException;
+
+    public String toString() {
+      return "#"+new String(Hex.encode(string));
+    }
 }

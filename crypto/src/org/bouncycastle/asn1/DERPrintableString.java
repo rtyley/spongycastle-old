@@ -120,4 +120,9 @@ public class DERPrintableString
 
         return this.getString().equals(s.getString());
     }
+
+    public String toString()
+    {
+      return string;
+    }
 }

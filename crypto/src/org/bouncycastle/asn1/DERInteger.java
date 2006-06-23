@@ -126,4 +126,9 @@ public class DERInteger
 
         return true;
     }
+
+    public String toString()
+    {
+      return getValue().toString();
+    }
 }

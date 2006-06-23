@@ -194,4 +194,9 @@ public abstract class ASN1Sequence
 
     abstract void encode(DEROutputStream out)
         throws IOException;
+
+    public String toString() 
+    {
+      return seq.toString();
+    }
 }
