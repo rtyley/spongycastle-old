@@ -105,4 +105,9 @@ public class DERBoolean
         return value;
     }
 
+
+    public String toString()
+    {
+      return (value != 0) ? "TRUE" : "FALSE";
+    }
 }

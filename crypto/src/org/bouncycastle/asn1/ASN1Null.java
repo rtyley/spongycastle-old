@@ -30,4 +30,9 @@ public abstract class ASN1Null
 
     abstract void encode(DEROutputStream out)
         throws IOException;
+
+    public String toString()
+    {
+      return "NULL";
+    }
 }

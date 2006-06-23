@@ -185,4 +185,9 @@ public class DERUTCTime
     {
         return time.hashCode();
     }
+
+    public String toString() 
+    {
+      return time;
+    }
 }
