@@ -135,16 +135,27 @@ public class TimeStampRequest
         
         try
         {
-            MessageDigest   d = MessageDigest.getInstance(this.getMessageImprintAlgOID(), provider);
-            
-            if (d.getDigestLength() != this.getMessageImprintDigest().length)
-            {
-                throw new TSPValidationException("imprint digest the wrong length.", PKIFailureInfo.BAD_DATA_FORMAT);
-            }
+            checkImprintLength(MessageDigest.getInstance(this.getMessageImprintAlgOID(), provider));
         }
         catch (NoSuchAlgorithmException e)
         {
-            throw new TSPException("digest algorithm cannot be found in provider.", e);
+            try
+            {
+                checkImprintLength(MessageDigest.getInstance(this.getMessageImprintAlgOID()));
+            }
+            catch (NoSuchAlgorithmException ex)
+            {
+                throw new TSPException("digest algorithm cannot be found.", ex);
+            }
+        }
+    }
+
+    private void checkImprintLength(MessageDigest d) 
+        throws TSPValidationException
+    {
+        if (d.getDigestLength() != this.getMessageImprintDigest().length)
+        {
+            throw new TSPValidationException("imprint digest the wrong length.", PKIFailureInfo.BAD_DATA_FORMAT);
         }
     }
     
