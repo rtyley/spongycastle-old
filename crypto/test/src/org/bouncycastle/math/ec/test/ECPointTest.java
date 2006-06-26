@@ -324,6 +324,33 @@ public class ECPointTest extends TestCase
     }
 
     /**
+     * Checks, if the point multiplication algorithm of the given point yields
+     * the same result as point multiplication done by the reference
+     * implementation given in <code>multiply()</code>. This method tests
+     * multiplication of <code>p</code> by every number of bitlength
+     * <code>numBits</code> or less.
+     * 
+     * @param p
+     *            The point to be multiplied.
+     * @param numBits
+     *            Try every multiplier up to this bitlength
+     */
+    private void implTestMultiplyAll(ECPoint p, int numBits)
+    {
+    	BigInteger bound = BigInteger.valueOf(2).pow(numBits);
+    	BigInteger k = BigInteger.ZERO;
+
+    	do
+    	{
+            ECPoint ref = multiply(p, k);
+            ECPoint q = p.multiply(k);
+            assertEquals("ECPoint.multiply is incorrect", ref, q);
+            k = k.add(BigInteger.ONE);
+    	}
+    	while (k.compareTo(bound) < 0);
+    }
+
+    /**
      * Tests <code>ECPoint.add()</code> and <code>ECPoint.subtract()</code>
      * for the given point and the given point at infinity.
      * 
@@ -349,24 +376,23 @@ public class ECPointTest extends TestCase
      */
     public void testAddSubtractMultiplySimple()
     {
-        for (int i = 0; i < 4; i++)
+        for (int iFp = 0; iFp < fp.pointSource.length / 2; iFp++)
         {
-            implTestAddSubtract(fp.p[i], fp.infinity);
-            implTestAddSubtract(f2m.p[i], f2m.infinity);
+            implTestAddSubtract(fp.p[iFp], fp.infinity);
 
-            implTestMultiply(fp.p[i], 0);
-            implTestMultiply(fp.infinity, 0);
+			// Could be any numBits, 6 is chosen at will
+			implTestMultiplyAll(fp.p[iFp], 6);
+			implTestMultiplyAll(fp.infinity, 6);
+		}
 
-            implTestMultiply(f2m.p[i], 0);
-            implTestMultiply(f2m.infinity, 0);
-            
-            // Could be any numBits, 6 is chosen at will
-            implTestMultiply(fp.p[i], 6);
-            implTestMultiply(fp.infinity, 6);
+        for (int iF2m = 0; iF2m < f2m.pointSource.length / 2; iF2m++)
+        {
+            implTestAddSubtract(f2m.p[iF2m], f2m.infinity);
 
-            implTestMultiply(f2m.p[i], 6);
-            implTestMultiply(f2m.infinity, 6);
-        }
+			// Could be any numBits, 6 is chosen at will
+			implTestMultiplyAll(f2m.p[iF2m], 6);
+			implTestMultiplyAll(f2m.infinity, 6);
+		}
     }
 
     /**
