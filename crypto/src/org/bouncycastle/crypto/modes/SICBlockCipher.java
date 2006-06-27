@@ -46,9 +46,9 @@ public class SICBlockCipher implements BlockCipher
 
 
     public void init(
-    	boolean				forEncryption, //ignored by this CTR mode
-    	CipherParameters	params)
-		throws IllegalArgumentException
+        boolean             forEncryption, //ignored by this CTR mode
+        CipherParameters    params)
+        throws IllegalArgumentException
     {
         if (params instanceof ParametersWithIV)
         {

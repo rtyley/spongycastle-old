@@ -165,7 +165,9 @@ public class DERUTF8String
     {
         char[] c = string.toCharArray();
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        for (int i = 0; i != c.length; i++)
+        int i = 0;
+
+        while (i < c.length)
         {
             char ch = c[i];
 
@@ -208,6 +210,8 @@ public class DERUTF8String
                 bOut.write(0x80 | ((ch >> 6) & 0x3F));
                 bOut.write(0x80 | (ch & 0x3F));
             }
+
+            i++;
         }
 
         out.writeEncoded(UTF8_STRING, bOut.toByteArray());

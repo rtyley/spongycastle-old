@@ -168,12 +168,12 @@ public abstract class ECPoint
         {
             if (this.isInfinity())
             {
-            	return b;
+                return b;
             }
 
             if (b.isInfinity())
             {
-            	return this;
+                return this;
             }
 
             // Check if b = this or b = -this
@@ -200,15 +200,15 @@ public abstract class ECPoint
         // B.3 pg 62
         public ECPoint twice()
         {
-        	if (this.isInfinity())
-        	{
+            if (this.isInfinity())
+            {
                 // Twice identity element (point at infinity) is identity
-        		return this;
-        	}
+                return this;
+            }
 
             if (this.y.toBigInteger().signum() == 0) 
             {
-            	// if y1 == 0, then (x1, y1) == (x1, -y1)
+                // if y1 == 0, then (x1, y1) == (x1, -y1)
                 // and hence this = -this and thus 2(x1, y1) == infinity
                 return new ECPoint.Fp(curve, null, null, this.withCompression);
             }
@@ -228,7 +228,7 @@ public abstract class ECPoint
         {
             if (b.isInfinity())
             {
-            	return this;
+                return this;
             }
 
             // Add -b
@@ -238,15 +238,15 @@ public abstract class ECPoint
         // D.3.2 pg 101
         public ECPoint multiply(BigInteger k)
         {
-        	if (this.isInfinity())
-        	{
-        		return this;
-        	}
+            if (this.isInfinity())
+            {
+                return this;
+            }
 
-        	if (k.signum() == 0)
-        	{
+            if (k.signum() == 0)
+            {
                 return new ECPoint.Fp(this.curve, null, null, this.withCompression);
-        	}
+            }
 
             // BigInteger e = k.mod(n); // n == order this
             BigInteger e = k;
@@ -395,12 +395,12 @@ public abstract class ECPoint
 
             if (this.isInfinity())
             {
-            	return b;
+                return b;
             }
 
             if (b.isInfinity())
             {
-            	return this;
+                return this;
             }
 
             ECFieldElement.F2m.checkFieldElements(this.x, b.getX());
@@ -439,7 +439,7 @@ public abstract class ECPoint
         {
             if (b.isInfinity())
             {
-            	return this;
+                return this;
             }
 
             // Add -b
