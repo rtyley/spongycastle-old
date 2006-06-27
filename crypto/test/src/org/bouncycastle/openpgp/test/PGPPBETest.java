@@ -67,10 +67,10 @@ public class PGPPBETest
             bOut.write(ch);
         }
 
-		if (pbe.isIntegrityProtected() && !pbe.verify())
-		{
-			throw new RuntimeException("integrity check failed");
-		}
+        if (pbe.isIntegrityProtected() && !pbe.verify())
+        {
+            throw new RuntimeException("integrity check failed");
+        }
 
         return bOut.toByteArray();
     }
