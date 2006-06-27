@@ -81,5 +81,6 @@ public class OIDTest
         valueCheck(PKCSObjectIdentifiers.pkcs_9_at_contentType.getId());
         valueCheck("1.1.127.32512.8323072.2130706432.545460846592.139637976727552.35747322042253312.9151314442816847872");
         valueCheck("1.2.123.12345678901.1.1.1");
+        valueCheck("2.25.196556539987194312349856245628873852187.1");
     }
 }
