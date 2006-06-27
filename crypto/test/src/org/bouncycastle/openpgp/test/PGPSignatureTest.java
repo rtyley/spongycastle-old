@@ -164,7 +164,7 @@ public class PGPSignatureTest
         
         PGPObjectFactory f = new PGPObjectFactory(sigBytes);
         
-        sig = (PGPSignature)f.nextObject();
+        sig = ((PGPSignatureList) f.nextObject()).get(0);
         
         sig.initVerify(secretDSAKey.getPublicKey(), "BC");
         
