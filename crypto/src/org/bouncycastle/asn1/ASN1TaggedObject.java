@@ -159,7 +159,8 @@ public abstract class ASN1TaggedObject
     abstract void encode(DEROutputStream  out)
         throws IOException;
 
-    public String toString() {
-      return "["+tagNo+"]"+obj;
+    public String toString()
+    {
+        return "[" + tagNo + "]" + obj;
     }
 }

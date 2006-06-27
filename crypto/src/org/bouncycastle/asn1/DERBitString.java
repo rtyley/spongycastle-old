@@ -282,7 +282,8 @@ public class DERBitString
         return buf.toString();
     }
 
-    public String toString() {
-      return getString();
+    public String toString()
+    {
+        return getString();
     }
 }

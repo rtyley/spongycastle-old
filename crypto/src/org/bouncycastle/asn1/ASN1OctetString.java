@@ -140,7 +140,8 @@ public abstract class ASN1OctetString
     abstract void encode(DEROutputStream out)
         throws IOException;
 
-    public String toString() {
+    public String toString()
+    {
       return "#"+new String(Hex.encode(string));
     }
 }
