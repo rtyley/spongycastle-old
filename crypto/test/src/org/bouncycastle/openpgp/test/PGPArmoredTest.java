@@ -35,7 +35,7 @@ public class PGPArmoredTest
           + "4TOAAAoJEJh8Njfhe8KmG7kAn00mTPGJCWqmskmzgdzeky5fWd7rAKCNCp3u"
           + "ZJhfg0htdgAfIy8ppm05vLACAAA=");
     
-    byte[] marker = Hex.decode("2d2d2d2d2d454e4420504750205055424c4943204b455920424c4f434b2d2d2d2d2d0a");
+    byte[] marker = Hex.decode("2d2d2d2d2d454e4420504750205055424c4943204b455920424c4f434b2d2d2d2d2d");
     
     private int markerCount(
         byte[] data)
@@ -103,8 +103,15 @@ public class PGPArmoredTest
             aos.close();
             
             aos.close();
-            
-            if (markerCount(baos.toByteArray()) != 1)
+
+            int mc = markerCount(baos.toByteArray());
+
+            if (mc < 1)
+            {
+                return new SimpleTestResult(false, "No end marker found");
+            }
+
+            if (mc > 1)
             {
                 return new SimpleTestResult(false, "More than one end marker found");
             }
