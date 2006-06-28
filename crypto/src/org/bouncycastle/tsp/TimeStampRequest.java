@@ -31,15 +31,39 @@ public class TimeStampRequest
         this.req = req;
     }
 
-    public TimeStampRequest(byte[] req) throws IOException
+    /**
+     * Create a TimeStampRequest from the past in byte array.
+     * 
+     * @param req byte array containing the request.
+     * @throws IOException if the request is malformed.
+     */
+    public TimeStampRequest(byte[] req) 
+        throws IOException
     {
         this(new ByteArrayInputStream(req));
     }
 
-    public TimeStampRequest(InputStream in) throws IOException
+    /**
+     * Create a TimeStampRequest from the past in input stream.
+     * 
+     * @param in input stream containing the request.
+     * @throws IOException if the request is malformed.
+     */
+    public TimeStampRequest(InputStream in) 
+        throws IOException
     {
-        this.req = TimeStampReq.getInstance(new ASN1InputStream(in)
-                .readObject());
+        try
+        {
+            this.req = TimeStampReq.getInstance(new ASN1InputStream(in).readObject());
+        }
+        catch (ClassCastException e)
+        {
+            throw new IOException("malformed request: " + e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new IOException("malformed request: " + e);
+        }
     }
 
     public int getVersion()
@@ -101,7 +125,7 @@ public class TimeStampRequest
      * @param policies if non-null a set of policies we are willing to sign under.
      * @param extensions if non-null a set of extensions we are willing to accept.
      * @param provider the provider to confirm the digest size against.
-     * @throws TSPException
+     * @throws TSPException if the request is invalid, or processing fails.
      */
     public void validate(
         Set     algorithms,
