@@ -33,18 +33,50 @@ public class TimeStampResponse
         }
     }
 
-    public TimeStampResponse(byte[] req)
+    /**
+     * Create a TimeStampResponse from a byte array containing an ASN.1 encoding.
+     * 
+     * @param resp the byte array containing the encoded response.
+     * @throws TSPException if the response is malformed.
+     * @throws IOException if the byte array doesn't represent an ASN.1 encoding.
+     */
+    public TimeStampResponse(byte[] resp)
         throws TSPException, IOException
     {
-        this(new ByteArrayInputStream(req));
+        this(new ByteArrayInputStream(resp));
     }
 
+    /**
+     * Create a TimeStampResponse from an input stream containing an ASN.1 encoding.
+     * 
+     * @param in the input stream containing the encoded response.
+     * @throws TSPException if the response is malformed.
+     * @throws IOException if the stream doesn't represent an ASN.1 encoding.
+     */
     public TimeStampResponse(InputStream in)
         throws TSPException, IOException
     {
-        this(TimeStampResp.getInstance(new ASN1InputStream(in).readObject()));
+        this(readTimeStampResp(in));
     }
 
+    private static TimeStampResp readTimeStampResp(
+        InputStream in) 
+        throws IOException, TSPException
+    {
+        try
+        {
+            return TimeStampResp.getInstance(new ASN1InputStream(in).readObject());
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new TSPException("malformed timestamp response: " + e, e);
+        }
+        catch (ClassCastException e)
+        {
+            throw new TSPException("malformed timestamp response: " + e, e);
+        }
+    }
+    
     public int getStatus()
     {
         return resp.getStatus().getStatus().intValue();
