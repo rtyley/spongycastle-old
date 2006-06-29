@@ -1,6 +1,5 @@
 package org.bouncycastle.crypto.digests;
 
-
 /**
  * implementation of SHA-1 as outlined in "Handbook of Applied Cryptography", pages 346 - 349.
  *
@@ -57,13 +56,14 @@ public class SHA1Digest
         byte[]  in,
         int     inOff)
     {
-        X[xOff++] = ((in[inOff] & 0xff) << 24) | ((in[inOff + 1] & 0xff) << 16)
-                    | ((in[inOff + 2] & 0xff) << 8) | ((in[inOff + 3] & 0xff)); 
+        X[xOff++] = (in[inOff++] & 0xff) << 24 | (in[inOff++] & 0xff) << 16
+                    | (in[inOff++] & 0xff) << 8 | in[inOff] & 0xff; 
 
         if (xOff == 16)
         {
             processBlock();
-        }
+            xOff = 0;
+        }        
     }
 
     private void unpackWord(
@@ -71,10 +71,10 @@ public class SHA1Digest
         byte[]  out,
         int     outOff)
     {
-        out[outOff]     = (byte)(word >>> 24);
-        out[outOff + 1] = (byte)(word >>> 16);
-        out[outOff + 2] = (byte)(word >>> 8);
-        out[outOff + 3] = (byte)word;
+        out[outOff++] = (byte)(word >>> 24);
+        out[outOff++] = (byte)(word >>> 16);
+        out[outOff++] = (byte)(word >>> 8);
+        out[outOff++] = (byte)word;
     }
 
     protected void processLength(
@@ -133,46 +133,16 @@ public class SHA1Digest
     private static final int    Y2 = 0x6ed9eba1;
     private static final int    Y3 = 0x8f1bbcdc;
     private static final int    Y4 = 0xca62c1d6;
-
-    private int f(
-        int    u,
-        int    v,
-        int    w)
-    {
-        return ((u & v) | ((~u) & w));
-    }
-
-    private int h(
-        int    u,
-        int    v,
-        int    w)
-    {
-        return (u ^ v ^ w);
-    }
-
-    private int g(
-        int    u,
-        int    v,
-        int    w)
-    {
-        return ((u & v) | (u & w) | (v & w));
-    }
-
-    private int rotateLeft(
-        int    x,
-        int    n)
-    {
-        return (x << n) | (x >>> (32 - n));
-    }
-
+   
     protected void processBlock()
     {
         //
         // expand 16 word block into 80 word block.
         //
-        for (int i = 16; i <= 79; i++)
+        for (int i = 16; i < 80; i++)
         {
-            X[i] = rotateLeft((X[i - 3] ^ X[i - 8] ^ X[i - 14] ^ X[i - 16]), 1);
+            int t = X[i - 3] ^ X[i - 8] ^ X[i - 14] ^ X[i - 16];
+            X[i] = t << 1 | t >>> 31;
         }
 
         //
@@ -187,58 +157,89 @@ public class SHA1Digest
         //
         // round 1
         //
-        for (int j = 0; j <= 19; j++)
+        int idx = 0;
+        
+        for(int j = 0; j < 4; j++)
         {
-            int     t = rotateLeft(A, 5) + f(B, C, D) + E + X[j] + Y1;
+            E = (A << 5 | A >>> 27) + ((B & C) | ((~B) & D)) + E + X[idx++] + Y1;
+            B = B << 30 | B >>> 2;
+        
+            D = (E << 5 | E >>> 27) + ((A & B) | ((~A) & C)) + D + X[idx++] + Y1;
+            A = A << 30 | A >>> 2;
+       
+            C = (D << 5 | D >>> 27) + ((E & A) | ((~E) & B)) + C + X[idx++] + Y1;
+            E = E << 30 | E >>> 2;
+       
+            B = (C << 5 | C >>> 27) + ((D & E) | ((~D) & A)) + B + X[idx++] + Y1;
+            D = D << 30 | D >>> 2;
 
-            E = D;
-            D = C;
-            C = rotateLeft(B, 30);
-            B = A;
-            A = t;
+            A = (B << 5 | B >>> 27) + ((C & D) | ((~C) & E)) + A + X[idx++] + Y1;
+            C = C << 30 | C >>> 2;
         }
-
+        
         //
         // round 2
         //
-        for (int j = 20; j <= 39; j++)
+        for(int j = 0; j < 4; j++)
         {
-            int     t = rotateLeft(A, 5) + h(B, C, D) + E + X[j] + Y2;
+            E = (A << 5 | A >>> 27) + (B ^ C ^ D) + E + X[idx++] + Y2;
+            B = B << 30 | B >>> 2;
+            
+            D = (E << 5 | E >>> 27) + (A ^ B ^ C) + D + X[idx++] + Y2;
+            A = A << 30 | A >>> 2;
+            
+            C = (D << 5 | D >>> 27) + (E ^ A ^ B) + C + X[idx++] + Y2;
+            E = E << 30 | E >>> 2;
+            
+            B = (C << 5 | C >>> 27) + (D ^ E ^ A) + B + X[idx++] + Y2;
+            D = D << 30 | D >>> 2;
 
-            E = D;
-            D = C;
-            C = rotateLeft(B, 30);
-            B = A;
-            A = t;
+            A = (B << 5 | B >>> 27) + (C ^ D ^ E) + A + X[idx++] + Y2;
+            C = C << 30 | C >>> 2;
         }
-
+        
         //
         // round 3
         //
-        for (int j = 40; j <= 59; j++)
+        for(int j = 0; j < 4; j++)
         {
-            int     t = rotateLeft(A, 5) + g(B, C, D) + E + X[j] + Y3;
+            E = (A << 5 | A >>> 27) + ((B & C) | (B & D) | (C & D)) + E + X[idx++] + Y3;
+            B = B << 30 | B >>> 2;
+            
+            D = (E << 5 | E >>> 27) + ((A & B) | (A & C) | (B & C)) + D + X[idx++] + Y3;
+            A = A << 30 | A >>> 2;
+            
+            C = (D << 5 | D >>> 27) + ((E & A) | (E & B) | (A & B)) + C + X[idx++] + Y3;
+            E = E << 30 | E >>> 2;
+            
+            B = (C << 5 | C >>> 27) + ((D & E) | (D & A) | (E & A)) + B + X[idx++] + Y3;
+            D = D << 30 | D >>> 2;
 
-            E = D;
-            D = C;
-            C = rotateLeft(B, 30);
-            B = A;
-            A = t;
+            A = (B << 5 | B >>> 27) + ((C & D) | (C & E) | (D & E)) + A + X[idx++] + Y3;
+            C = C << 30 | C >>> 2;
         }
 
         //
         // round 4
         //
-        for (int j = 60; j <= 79; j++)
+        for(int j = 0; j <= 3; j++)
         {
-            int     t = rotateLeft(A, 5) + h(B, C, D) + E + X[j] + Y4;
+            E = (A << 5 | A >>> 27) + (B ^ C ^ D) + E + X[idx++] + Y4;
+            B = B << 30 | B >>> 2;
+            
+            D = (E << 5 | E >>> 27) + (A ^ B ^ C) + D + X[idx++] + Y4;
+            A = A << 30 | A >>> 2;
+            
+            C = (D << 5 | D >>> 27) + (E ^ A ^ B) + C + X[idx++] + Y4;
+            E = E << 30 | E >>> 2;
+            
+            B = (C << 5 | C >>> 27) + (D ^ E ^ A) + B + X[idx++] + Y4;
+            D = D << 30 | D >>> 2;
 
-            E = D;
-            D = C;
-            C = rotateLeft(B, 30);
-            B = A;
-            A = t;
+            A = (B << 5 | B >>> 27) + (C ^ D ^ E) + A + X[idx++] + Y4;
+            C = C << 30 | C >>> 2;
         }
+
 
         H1 += A;
         H2 += B;
@@ -249,10 +250,15 @@ public class SHA1Digest
         //
         // reset the offset and clean out the word buffer.
         //
-        xOff = 0;
-        for (int i = 0; i != X.length; i++)
+        //xOff = 0;
+        for (int i = 0; i < 16; i++)
         {
             X[i] = 0;
         }
+
     }
 }
+
+
+
+
