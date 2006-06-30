@@ -161,6 +161,8 @@ public class SHA1Digest
         
         for(int j = 0; j < 4; j++)
         {
+            // E = rotateLeft(A, 5) + f(B, C, D) + E + X[idx++] + Y1
+            // B = rotateLeft(B, 30)
             E = (A << 5 | A >>> 27) + ((B & C) | ((~B) & D)) + E + X[idx++] + Y1;
             B = B << 30 | B >>> 2;
         
@@ -182,8 +184,10 @@ public class SHA1Digest
         //
         for(int j = 0; j < 4; j++)
         {
+            // E = rotateLeft(A, 5) + h(B, C, D) + E + X[idx++] + Y2
+            // B = rotateLeft(B, 30)
             E = (A << 5 | A >>> 27) + (B ^ C ^ D) + E + X[idx++] + Y2;
-            B = B << 30 | B >>> 2;
+            B = B << 30 | B >>> 2;   
             
             D = (E << 5 | E >>> 27) + (A ^ B ^ C) + D + X[idx++] + Y2;
             A = A << 30 | A >>> 2;
@@ -203,6 +207,8 @@ public class SHA1Digest
         //
         for(int j = 0; j < 4; j++)
         {
+            // E = rotateLeft(A, 5) + g(B, C, D) + E + X[idx++] + Y3
+            // B = rotateLeft(B, 30)
             E = (A << 5 | A >>> 27) + ((B & C) | (B & D) | (C & D)) + E + X[idx++] + Y3;
             B = B << 30 | B >>> 2;
             
@@ -224,6 +230,8 @@ public class SHA1Digest
         //
         for(int j = 0; j <= 3; j++)
         {
+            // E = rotateLeft(A, 5) + h(B, C, D) + E + X[idx++] + Y4
+            // B = rotateLeft(B, 30)
             E = (A << 5 | A >>> 27) + (B ^ C ^ D) + E + X[idx++] + Y4;
             B = B << 30 | B >>> 2;
             
@@ -248,14 +256,12 @@ public class SHA1Digest
         H5 += E;
 
         //
-        // reset the offset and clean out the word buffer.
+        // reset start of the buffer.
         //
-        //xOff = 0;
         for (int i = 0; i < 16; i++)
         {
             X[i] = 0;
         }
-
     }
 }
 
