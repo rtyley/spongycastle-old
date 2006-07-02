@@ -56,13 +56,12 @@ public class SHA1Digest
         byte[]  in,
         int     inOff)
     {
-        X[xOff++] = (in[inOff++] & 0xff) << 24 | (in[inOff++] & 0xff) << 16
-                    | (in[inOff++] & 0xff) << 8 | in[inOff] & 0xff; 
+        X[xOff++] = (in[inOff] & 0xff) << 24 | (in[inOff + 1] & 0xff) << 16
+                    | (in[inOff + 2] & 0xff) << 8 | in[inOff + 3] & 0xff; 
 
         if (xOff == 16)
         {
             processBlock();
-            xOff = 0;
         }        
     }
 
@@ -134,6 +133,30 @@ public class SHA1Digest
     private static final int    Y3 = 0x8f1bbcdc;
     private static final int    Y4 = 0xca62c1d6;
    
+    private int f(
+        int    u,
+        int    v,
+        int    w)
+    {
+        return ((u & v) | ((~u) & w));
+    }
+
+    private int h(
+        int    u,
+        int    v,
+        int    w)
+    {
+        return (u ^ v ^ w);
+    }
+
+    private int g(
+        int    u,
+        int    v,
+        int    w)
+    {
+        return ((u & v) | (u & w) | (v & w));
+    }
+
     protected void processBlock()
     {
         //
@@ -159,92 +182,92 @@ public class SHA1Digest
         //
         int idx = 0;
         
-        for(int j = 0; j < 4; j++)
+        for (int j = 0; j < 4; j++)
         {
             // E = rotateLeft(A, 5) + f(B, C, D) + E + X[idx++] + Y1
             // B = rotateLeft(B, 30)
-            E = (A << 5 | A >>> 27) + ((B & C) | ((~B) & D)) + E + X[idx++] + Y1;
+            E += (A << 5 | A >>> 27) + f(B, C, D) + X[idx++] + Y1;
             B = B << 30 | B >>> 2;
         
-            D = (E << 5 | E >>> 27) + ((A & B) | ((~A) & C)) + D + X[idx++] + Y1;
+            D += (E << 5 | E >>> 27) + f(A, B, C) + X[idx++] + Y1;
             A = A << 30 | A >>> 2;
        
-            C = (D << 5 | D >>> 27) + ((E & A) | ((~E) & B)) + C + X[idx++] + Y1;
+            C += (D << 5 | D >>> 27) + f(E, A, B) + X[idx++] + Y1;
             E = E << 30 | E >>> 2;
        
-            B = (C << 5 | C >>> 27) + ((D & E) | ((~D) & A)) + B + X[idx++] + Y1;
+            B += (C << 5 | C >>> 27) + f(D, E, A) + X[idx++] + Y1;
             D = D << 30 | D >>> 2;
 
-            A = (B << 5 | B >>> 27) + ((C & D) | ((~C) & E)) + A + X[idx++] + Y1;
+            A += (B << 5 | B >>> 27) + f(C, D, E) + X[idx++] + Y1;
             C = C << 30 | C >>> 2;
         }
         
         //
         // round 2
         //
-        for(int j = 0; j < 4; j++)
+        for (int j = 0; j < 4; j++)
         {
             // E = rotateLeft(A, 5) + h(B, C, D) + E + X[idx++] + Y2
             // B = rotateLeft(B, 30)
-            E = (A << 5 | A >>> 27) + (B ^ C ^ D) + E + X[idx++] + Y2;
+            E += (A << 5 | A >>> 27) + h(B, C, D) + X[idx++] + Y2;
             B = B << 30 | B >>> 2;   
             
-            D = (E << 5 | E >>> 27) + (A ^ B ^ C) + D + X[idx++] + Y2;
+            D += (E << 5 | E >>> 27) + h(A, B, C) + X[idx++] + Y2;
             A = A << 30 | A >>> 2;
             
-            C = (D << 5 | D >>> 27) + (E ^ A ^ B) + C + X[idx++] + Y2;
+            C += (D << 5 | D >>> 27) + h(E, A, B) + X[idx++] + Y2;
             E = E << 30 | E >>> 2;
             
-            B = (C << 5 | C >>> 27) + (D ^ E ^ A) + B + X[idx++] + Y2;
+            B += (C << 5 | C >>> 27) + h(D, E, A) + X[idx++] + Y2;
             D = D << 30 | D >>> 2;
 
-            A = (B << 5 | B >>> 27) + (C ^ D ^ E) + A + X[idx++] + Y2;
+            A += (B << 5 | B >>> 27) + h(C, D, E) + X[idx++] + Y2;
             C = C << 30 | C >>> 2;
         }
         
         //
         // round 3
         //
-        for(int j = 0; j < 4; j++)
+        for (int j = 0; j < 4; j++)
         {
             // E = rotateLeft(A, 5) + g(B, C, D) + E + X[idx++] + Y3
             // B = rotateLeft(B, 30)
-            E = (A << 5 | A >>> 27) + ((B & C) | (B & D) | (C & D)) + E + X[idx++] + Y3;
+            E += (A << 5 | A >>> 27) + g(B, C, D) + X[idx++] + Y3;
             B = B << 30 | B >>> 2;
             
-            D = (E << 5 | E >>> 27) + ((A & B) | (A & C) | (B & C)) + D + X[idx++] + Y3;
+            D += (E << 5 | E >>> 27) + g(A, B, C) + X[idx++] + Y3;
             A = A << 30 | A >>> 2;
             
-            C = (D << 5 | D >>> 27) + ((E & A) | (E & B) | (A & B)) + C + X[idx++] + Y3;
+            C += (D << 5 | D >>> 27) + g(E, A, B) + X[idx++] + Y3;
             E = E << 30 | E >>> 2;
             
-            B = (C << 5 | C >>> 27) + ((D & E) | (D & A) | (E & A)) + B + X[idx++] + Y3;
+            B += (C << 5 | C >>> 27) + g(D, E, A) + X[idx++] + Y3;
             D = D << 30 | D >>> 2;
 
-            A = (B << 5 | B >>> 27) + ((C & D) | (C & E) | (D & E)) + A + X[idx++] + Y3;
+            A += (B << 5 | B >>> 27) + g(C, D, E) + X[idx++] + Y3;
             C = C << 30 | C >>> 2;
         }
 
         //
         // round 4
         //
-        for(int j = 0; j <= 3; j++)
+        for (int j = 0; j <= 3; j++)
         {
             // E = rotateLeft(A, 5) + h(B, C, D) + E + X[idx++] + Y4
             // B = rotateLeft(B, 30)
-            E = (A << 5 | A >>> 27) + (B ^ C ^ D) + E + X[idx++] + Y4;
+            E += (A << 5 | A >>> 27) + h(B, C, D) + X[idx++] + Y4;
             B = B << 30 | B >>> 2;
             
-            D = (E << 5 | E >>> 27) + (A ^ B ^ C) + D + X[idx++] + Y4;
+            D += (E << 5 | E >>> 27) + h(A, B, C) + X[idx++] + Y4;
             A = A << 30 | A >>> 2;
             
-            C = (D << 5 | D >>> 27) + (E ^ A ^ B) + C + X[idx++] + Y4;
+            C += (D << 5 | D >>> 27) + h(E, A, B) + X[idx++] + Y4;
             E = E << 30 | E >>> 2;
             
-            B = (C << 5 | C >>> 27) + (D ^ E ^ A) + B + X[idx++] + Y4;
+            B += (C << 5 | C >>> 27) + h(D, E, A) + X[idx++] + Y4;
             D = D << 30 | D >>> 2;
 
-            A = (B << 5 | B >>> 27) + (C ^ D ^ E) + A + X[idx++] + Y4;
+            A += (B << 5 | B >>> 27) + h(C, D, E) + X[idx++] + Y4;
             C = C << 30 | C >>> 2;
         }
 
@@ -258,6 +281,7 @@ public class SHA1Digest
         //
         // reset start of the buffer.
         //
+        xOff = 0;
         for (int i = 0; i < 16; i++)
         {
             X[i] = 0;
