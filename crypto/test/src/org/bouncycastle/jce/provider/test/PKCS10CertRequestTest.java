@@ -15,14 +15,12 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  **/
 public class PKCS10CertRequestTest
-    implements Test
+    extends SimpleTest
 {
     private byte[] gost3410EC_A = Base64.decode(
   "MIIBOzCB6wIBADB/MQ0wCwYDVQQDEwR0ZXN0MRUwEwYDVQQKEwxEZW1vcyBDbyBMdGQxHjAcBgNV"
@@ -69,111 +67,110 @@ public class PKCS10CertRequestTest
         return "PKCS10CertRequest";
     }
 
-    public TestResult perform()
+    private void generationTest(int keySize, String keyName, String sigName)
+        throws Exception
     {
-        try
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyName, "BC");
+
+        kpg.initialize(keySize);
+
+        KeyPair kp = kpg.genKeyPair();
+
+        Hashtable                   attrs = new Hashtable();
+
+        attrs.put(X509Principal.C, "AU");
+        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
+        attrs.put(X509Principal.L, "Melbourne");
+        attrs.put(X509Principal.ST, "Victoria");
+        attrs.put(X509Principal.EmailAddress, "feedback-crypto@bouncycastle.org");
+
+        X509Name    subject = new X509Name(attrs);
+
+        PKCS10CertificationRequest req1 = new PKCS10CertificationRequest(
+                                                    sigName,
+                                                    subject,
+                                                    kp.getPublic(),
+                                                    null,
+                                                    kp.getPrivate());
+                            
+        byte[]  bytes = req1.getEncoded();
+
+        PKCS10CertificationRequest req2 = new PKCS10CertificationRequest(bytes);
+
+        if (!req2.verify())
         {
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "BC");
-
-            kpg.initialize(512);
-
-            KeyPair kp = kpg.genKeyPair();
-
-            Hashtable                   attrs = new Hashtable();
-
-            attrs.put(X509Principal.C, "AU");
-            attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-            attrs.put(X509Principal.L, "Melbourne");
-            attrs.put(X509Principal.ST, "Victoria");
-            attrs.put(X509Principal.EmailAddress, "feedback-crypto@bouncycastle.org");
-
-            X509Name    subject = new X509Name(attrs);
-
-            PKCS10CertificationRequest req1 = new PKCS10CertificationRequest(
-                                                        "SHA1withRSA",
-                                                        subject,
-                                                        kp.getPublic(),
-                                                        null,
-                                                        kp.getPrivate());
-                                
-            byte[]  bytes = req1.getEncoded();
-
-            PKCS10CertificationRequest req2 = new PKCS10CertificationRequest(bytes);
-
-            if (!req2.verify())
-            {
-                return new SimpleTestResult(false, getName() + ": Failed verify check.");
-            }
-
-            if (!req2.getPublicKey().equals(req1.getPublicKey()))
-            {
-                return new SimpleTestResult(false, getName() + ": Failed public key check.");
-            }
-
-            // elliptic curve GOST A parameter set
-            PKCS10CertificationRequest req = new PKCS10CertificationRequest(gost3410EC_A);
-            if (!req.verify())
-            {
-                System.out.println(new SimpleTestResult(false, getName() + ": Failed verify check gost3410EC_A."));
-            }
-
-            // elliptic curve GOST B parameter set
-            req = new PKCS10CertificationRequest(gost3410EC_B);
-            if (!req.verify())
-            {
-                return new SimpleTestResult(false, getName() + ": Failed verify check gost3410EC_B.");
-            }
-
-            // elliptic curve GOST C parameter set
-            req = new PKCS10CertificationRequest(gost3410EC_C);
-            if (!req.verify())
-            {
-                return new SimpleTestResult(false, getName() + ": Failed verify check gost3410EC_C.");
-            }
-            
-            // elliptic curve GOST ExA parameter set
-            req = new PKCS10CertificationRequest(gost3410EC_ExA);
-            if (!req.verify())
-            {
-                return new SimpleTestResult(false, getName() + ": Failed verify check gost3410EC_ExA.");
-            }
-
-            // elliptic curve GOST ExB parameter set
-            req = new PKCS10CertificationRequest(gost3410EC_ExB);
-            if (!req.verify())
-            {
-                return new SimpleTestResult(false, getName() + ": Failed verify check gost3410EC_ExA.");
-            }
-            
-            // elliptic curve openSSL
-            KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
-
-            ECCurve curve = new ECCurve.Fp(
-                new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
-                new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
-                new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
-
-            ECParameterSpec ecSpec = new ECParameterSpec(
-                curve,
-                curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
-                new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
-
-            g.initialize(ecSpec, new SecureRandom());
-
-            kp = g.generateKeyPair();
-
-            req = new PKCS10CertificationRequest(
-                    "ECDSAWITHSHA1", new X509Name("CN=XXX"), kp.getPublic(), null, kp.getPrivate());
-            if (!req.verify())
-            {
-                return new SimpleTestResult(false, getName() + ": Failed verify check EC.");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
+            fail(sigName + ": Failed verify check.");
         }
-        catch (Exception e)
+
+        if (!req2.getPublicKey().equals(req1.getPublicKey()))
         {
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString(), e);
+            fail(keyName + ": Failed public key check.");
+        }
+    }
+    
+    public void performTest()
+        throws Exception
+    {
+        generationTest(512, "RSA", "SHA1withRSA");       
+        generationTest(512, "GOST3410", "GOST3411withGOST3410");
+        
+        // elliptic curve GOST A parameter set
+        PKCS10CertificationRequest req = new PKCS10CertificationRequest(gost3410EC_A);
+        if (!req.verify())
+        {
+            fail("Failed verify check gost3410EC_A.");
+        }
+
+        // elliptic curve GOST B parameter set
+        req = new PKCS10CertificationRequest(gost3410EC_B);
+        if (!req.verify())
+        {
+            fail("Failed verify check gost3410EC_B.");
+        }
+
+        // elliptic curve GOST C parameter set
+        req = new PKCS10CertificationRequest(gost3410EC_C);
+        if (!req.verify())
+        {
+            fail("Failed verify check gost3410EC_C.");
+        }
+        
+        // elliptic curve GOST ExA parameter set
+        req = new PKCS10CertificationRequest(gost3410EC_ExA);
+        if (!req.verify())
+        {
+            fail("Failed verify check gost3410EC_ExA.");
+        }
+
+        // elliptic curve GOST ExB parameter set
+        req = new PKCS10CertificationRequest(gost3410EC_ExB);
+        if (!req.verify())
+        {
+            fail("Failed verify check gost3410EC_ExA.");
+        }
+        
+        // elliptic curve openSSL
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        ECCurve curve = new ECCurve.Fp(
+            new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
+            new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+            new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+
+        ECParameterSpec ecSpec = new ECParameterSpec(
+            curve,
+            curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+            new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
+
+        g.initialize(ecSpec, new SecureRandom());
+
+        KeyPair kp = g.generateKeyPair();
+
+        req = new PKCS10CertificationRequest(
+                "ECDSAWITHSHA1", new X509Name("CN=XXX"), kp.getPublic(), null, kp.getPrivate());
+        if (!req.verify())
+        {
+            fail("Failed verify check EC.");
         }
     }
 
@@ -182,9 +179,6 @@ public class PKCS10CertRequestTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new PKCS10CertRequestTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new PKCS10CertRequestTest());
     }
 }

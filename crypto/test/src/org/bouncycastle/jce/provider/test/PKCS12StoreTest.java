@@ -18,10 +18,10 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 /**
  * Exercise the various key stores, making sure we at least get back what we put in!
@@ -702,11 +702,55 @@ public class PKCS12StoreTest
             fail("cert identified as key entry");
         }
         
+        if (!store.entryInstanceOf("cert", KeyStore.TrustedCertificateEntry.class))
+        {
+            fail("cert not identified as TrustedCertificateEntry");
+        }
+        
+        if (store.entryInstanceOf("cert", KeyStore.PrivateKeyEntry.class))
+        {
+            fail("cert identified as key entry via PrivateKeyEntry");
+        }
+    
         if (!"cert".equals(store.getCertificateAlias(ch[1])))
         {
             fail("Did not return alias for certificate entry");
         }
 
+        //
+        // test restoring of a certificate with private key originally as a ca certificate
+        //
+        store = KeyStore.getInstance("PKCS12", "BC");
+        
+        store.load(null, null);
+        
+        store.setCertificateEntry("cert", ch[0]);
+
+        if (!store.containsAlias("cert"))
+        {
+            fail("restore: couldn't find alias cert");
+        }
+        
+        if (!store.isCertificateEntry("cert"))
+        {
+            fail("restore: cert not identified as certificate entry");
+        }
+        
+        if (store.isKeyEntry("cert"))
+        {
+            fail("restore: cert identified as key entry");
+        }
+        
+        if (store.entryInstanceOf("cert", KeyStore.PrivateKeyEntry.class))
+        {
+            fail("restore: cert identified as key entry via PrivateKeyEntry");
+        }
+        
+        if (!store.entryInstanceOf("cert", KeyStore.TrustedCertificateEntry.class))
+        {
+            fail("restore: cert not identified as TrustedCertificateEntry");
+        }
+        
         //
         // test of reading incorrect zero-length encoding
         //

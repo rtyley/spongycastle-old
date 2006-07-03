@@ -337,17 +337,17 @@ public class ECPointTest extends TestCase
      */
     private void implTestMultiplyAll(ECPoint p, int numBits)
     {
-    	BigInteger bound = BigInteger.valueOf(2).pow(numBits);
-    	BigInteger k = BigInteger.ZERO;
+        BigInteger bound = BigInteger.valueOf(2).pow(numBits);
+        BigInteger k = BigInteger.ZERO;
 
-    	do
-    	{
+        do
+        {
             ECPoint ref = multiply(p, k);
             ECPoint q = p.multiply(k);
             assertEquals("ECPoint.multiply is incorrect", ref, q);
             k = k.add(BigInteger.ONE);
-    	}
-    	while (k.compareTo(bound) < 0);
+        }
+        while (k.compareTo(bound) < 0);
     }
 
     /**
@@ -380,19 +380,19 @@ public class ECPointTest extends TestCase
         {
             implTestAddSubtract(fp.p[iFp], fp.infinity);
 
-			// Could be any numBits, 6 is chosen at will
-			implTestMultiplyAll(fp.p[iFp], 6);
-			implTestMultiplyAll(fp.infinity, 6);
-		}
+            // Could be any numBits, 6 is chosen at will
+            implTestMultiplyAll(fp.p[iFp], 6);
+            implTestMultiplyAll(fp.infinity, 6);
+        }
 
         for (int iF2m = 0; iF2m < f2m.pointSource.length / 2; iF2m++)
         {
             implTestAddSubtract(f2m.p[iF2m], f2m.infinity);
 
-			// Could be any numBits, 6 is chosen at will
-			implTestMultiplyAll(f2m.p[iF2m], 6);
-			implTestMultiplyAll(f2m.infinity, 6);
-		}
+            // Could be any numBits, 6 is chosen at will
+            implTestMultiplyAll(f2m.p[iF2m], 6);
+            implTestMultiplyAll(f2m.infinity, 6);
+        }
     }
 
     /**
