@@ -10,8 +10,7 @@ import org.bouncycastle.crypto.KeyGenerationParameters;
  * 
  * http://www.gemplus.com/smart/rd/publications/pdf/NS98pkcs.pdf
  */
-public class NaccacheSternKeyGenerationParameters extends
-        KeyGenerationParameters
+public class NaccacheSternKeyGenerationParameters extends KeyGenerationParameters
 {
 
     // private BigInteger publicExponent;
@@ -34,8 +33,7 @@ public class NaccacheSternKeyGenerationParameters extends
      * @param cntSmallPrimes
      *            How many small key factors are desired
      */
-    public NaccacheSternKeyGenerationParameters(SecureRandom random,
-            int strength, int certainty, int cntSmallPrimes)
+    public NaccacheSternKeyGenerationParameters(SecureRandom random, int strength, int certainty, int cntSmallPrimes)
     {
         this(random, strength, certainty, cntSmallPrimes, false);
     }
@@ -64,13 +62,11 @@ public class NaccacheSternKeyGenerationParameters extends
         this.certainty = certainty;
         if (cntSmallPrimes % 2 == 1)
         {
-            throw new IllegalArgumentException(
-                    "cntSmallPrimes must be a multiple of 2");
+            throw new IllegalArgumentException("cntSmallPrimes must be a multiple of 2");
         }
         if (cntSmallPrimes < 30)
         {
-            throw new IllegalArgumentException(
-                    "cntSmallPrimes must be >= 30 for security reasons");
+            throw new IllegalArgumentException("cntSmallPrimes must be >= 30 for security reasons");
         }
         this.cntSmallPrimes = cntSmallPrimes;
 
