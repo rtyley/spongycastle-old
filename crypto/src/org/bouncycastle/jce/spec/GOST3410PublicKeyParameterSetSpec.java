@@ -57,4 +57,22 @@ public class GOST3410PublicKeyParameterSetSpec
     {
         return this.a;
     }
+    
+    public boolean equals(
+        Object o)
+    {
+        if (o instanceof GOST3410PublicKeyParameterSetSpec)
+        {
+            GOST3410PublicKeyParameterSetSpec other = (GOST3410PublicKeyParameterSetSpec)o;
+            
+            return this.a.equals(other.a) && this.p.equals(other.p) && this.q.equals(other.q);
+        }
+        
+        return false;
+    }
+    
+    public int hashCode()
+    {
+        return a.hashCode() ^ p.hashCode() ^ q.hashCode();
+    }
 }
