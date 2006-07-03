@@ -161,4 +161,21 @@ public class JDKGOST3410PublicKey
 
         return buf.toString();
     }
+    
+    public boolean equals(Object o)
+    {
+        if (o instanceof JDKGOST3410PublicKey)
+        {
+            JDKGOST3410PublicKey other = (JDKGOST3410PublicKey)o;
+            
+            return this.y.equals(other.y) && this.gost3410Spec.equals(other.gost3410Spec);
+        }
+        
+        return false;
+    }
+    
+    public int hashCode()
+    {
+        return y.hashCode() ^ gost3410Spec.hashCode();
+    }
 }

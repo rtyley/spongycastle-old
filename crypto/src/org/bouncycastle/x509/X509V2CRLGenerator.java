@@ -10,17 +10,22 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
+import java.security.cert.X509CRLEntry;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.SimpleTimeZone;
 import java.util.Vector;
 
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERGeneralizedTime;
@@ -133,6 +138,34 @@ public class X509V2CRLGenerator
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, X509Extensions extensions)
     {
         tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), extensions);
+    }
+    
+    /**
+     * Add the CRLEntry objects contained in a previous CRL.
+     * 
+     * @param other the X509CRL to source the other entries from. 
+     */
+    public void addCRL(X509CRL other)
+        throws CRLException
+    {
+        Set revocations = other.getRevokedCertificates();
+        
+        Iterator it = revocations.iterator();
+        while (it.hasNext())
+        {
+            X509CRLEntry entry = (X509CRLEntry)it.next();
+            
+            ASN1InputStream aIn = new ASN1InputStream(entry.getEncoded());
+            
+            try
+            {
+                tbsGen.addCRLEntry(ASN1Sequence.getInstance(aIn.readObject()));
+            }
+            catch (IOException e)
+            {
+                throw new CRLException("exception processing encoding of CRL: " + e.toString());
+            }
+        }
     }
     
     /**

@@ -95,4 +95,25 @@ public class GOST3410ParameterSpec
     {
         return this.encryptionParamSetOID;
     }
+    
+    public boolean equals(Object o)
+    {
+        if (o instanceof GOST3410ParameterSpec)
+        {
+            GOST3410ParameterSpec other = (GOST3410ParameterSpec)o;
+            
+            return this.keyParameters.equals(other.keyParameters) 
+                && this.digestParamSetOID.equals(other.digestParamSetOID)
+                && (this.encryptionParamSetOID == other.encryptionParamSetOID
+                    || (this.encryptionParamSetOID != null && this.encryptionParamSetOID.equals(other.encryptionParamSetOID)));
+        }
+        
+        return false;
+    }
+    
+    public int hashCode()
+    {
+        return this.keyParameters.hashCode() ^ this.digestParamSetOID.hashCode() 
+                       ^ (this.encryptionParamSetOID != null ? this.encryptionParamSetOID.hashCode() : 0);
+    }
 }
