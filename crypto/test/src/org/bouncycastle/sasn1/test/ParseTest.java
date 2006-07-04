@@ -8,11 +8,13 @@ import junit.framework.TestCase;
 import org.bouncycastle.sasn1.Asn1InputStream;
 import org.bouncycastle.sasn1.Asn1OctetString;
 import org.bouncycastle.sasn1.Asn1Sequence;
+import org.bouncycastle.sasn1.Asn1TaggedObject;
 import org.bouncycastle.sasn1.BerTag;
 import org.bouncycastle.sasn1.cms.ContentInfoParser;
 import org.bouncycastle.sasn1.cms.EncryptedContentInfoParser;
 import org.bouncycastle.sasn1.cms.EnvelopedDataParser;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
 
 public class ParseTest
     extends TestCase
@@ -264,6 +266,8 @@ public class ParseTest
     + "GHJh4AUCLEt0v7Hc3CMy38ovLr3Q8eZsyNGKO5GvGNa7EffGjzOKxgqtMwT2"
     + "yv8TOTFCWnZEUTtVA9+2CpwfmuEjD2UQ4vxoM+o=");
 
+    byte[] longTagged = Hex.decode("9f1f023330");
+    
     public void testClassCast()
         throws IOException
     {
@@ -274,6 +278,16 @@ public class ParseTest
         throws IOException
     {
         parseEnveloped(derExpTest);
+    }
+    
+    public void testLongTag()
+        throws IOException
+    {
+        Asn1InputStream aIn = new Asn1InputStream(longTagged);
+        
+        Asn1TaggedObject tagged = (Asn1TaggedObject)aIn.readObject();
+        
+        assertEquals(31, tagged.getTagNumber());
     }
     
     private void parseEnveloped(byte[] data) throws IOException
