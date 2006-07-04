@@ -127,6 +127,7 @@ public class ASN1InputStream
      */
     protected DERObject buildObject(
         int       tag,
+        int       tagNo,
         byte[]    bytes)
         throws IOException
     {
@@ -210,30 +211,9 @@ public class ASN1InputStream
             //
             // with tagged object tag number is bottom 5 bits
             //
+            
             if ((tag & TAGGED) != 0)  
             {
-                int tagNo = tag & 0x1f;
-
-                if (tagNo == 0x1f)
-                {
-                    int idx = 0;
-
-                    tagNo = 0;
-
-                    while ((bytes[idx] & 0x80) != 0)
-                    {
-                        tagNo |= (bytes[idx++] & 0x7f);
-                        tagNo <<= 7;
-                    }
-
-                    tagNo |= (bytes[idx] & 0x7f);
-
-                    byte[]  tmp = bytes;
-
-                    bytes = new byte[tmp.length - (idx + 1)];
-                    System.arraycopy(tmp, idx + 1, bytes, 0, bytes.length);
-                }
-
                 if (bytes.length == 0)        // empty tag!
                 {
                     if ((tag & CONSTRUCTED) == 0)
@@ -347,6 +327,13 @@ public class ASN1InputStream
             return null;
         }
     
+        int tagNo = 0;
+        
+        if ((tag & TAGGED) != 0)  
+        {
+            tagNo = readTagNumber(tag);
+        }
+        
         int     length = readLength();
 
         if (length < 0)    // indefinite length method
@@ -393,24 +380,6 @@ public class ASN1InputStream
                 //
                 if ((tag & TAGGED) != 0)  
                 {
-                    int tagNo = tag & 0x1f;
-
-                    if (tagNo == 0x1f)
-                    {
-                        int b = read();
-
-                        tagNo = 0;
-
-                        while ((b >= 0) && ((b & 0x80) != 0))
-                        {
-                            tagNo |= (b & 0x7f);
-                            tagNo <<= 7;
-                            b = read();
-                        }
-
-                        tagNo |= (b & 0x7f);
-                    }
-
                     //
                     // simple type - implicit... return an octet string
                     //
@@ -473,7 +442,38 @@ public class ASN1InputStream
     
             readFully(bytes);
     
-            return buildObject(tag, bytes);
+            return buildObject(tag, tagNo, bytes);
         }
     }
+
+    private int readTagNumber(int tag) 
+        throws IOException
+    {
+        int tagNo = tag & 0x1f;
+
+        if (tagNo == 0x1f)
+        {
+            int b = read();
+
+            tagNo = 0;
+
+            while ((b >= 0) && ((b & 0x80) != 0))
+            {
+                tagNo |= (b & 0x7f);
+                tagNo <<= 7;
+                b = read();
+            }
+
+            if (b < 0)
+            {
+                eofFound = true;
+                throw new EOFException("EOF found inside tag value.");
+            }
+            
+            tagNo |= (b & 0x7f);
+        }
+        
+        return tagNo;
+    }
 }
+

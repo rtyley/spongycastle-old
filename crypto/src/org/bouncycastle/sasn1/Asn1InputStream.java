@@ -97,11 +97,6 @@ public class Asn1InputStream
         }
         
         //
-        // calculate length
-        //
-        int length = readLength();
-        
-        //
         // calculate tag number
         //
         int baseTagNo = tag & ~BerTag.CONSTRUCTED;
@@ -127,10 +122,22 @@ public class Asn1InputStream
                     b = _in.read();
                 }
 
+                if (b < 0)
+                {
+                    _eofFound = true;
+
+                    throw new EOFException("EOF encountered inside tag value.");
+                }
+                
                 tagNo |= (b & 0x7f);
             }
         }
  
+        //
+        // calculate length
+        //
+        int length = readLength();
+        
         if (length < 0)  // indefinite length
         {
             IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(_in);

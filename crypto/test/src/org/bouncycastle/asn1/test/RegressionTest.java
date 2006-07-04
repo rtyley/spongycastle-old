@@ -8,6 +8,7 @@ public class RegressionTest
 {
     public static Test[]    tests = {
         new EqualsAndHashCodeTest(),
+        new TagTest(),
         new SetTest(),
         new DERUTF8StringTest(),
         new CertificateTest(),
