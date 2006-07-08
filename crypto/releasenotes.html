@@ -22,7 +22,7 @@ to conform the algorithms to the JCE framework.
 <h2>2.0 Release History</h2>
 
 <h3>2.1.1 Version</h3>
-Release 1.33
+Release 1.34
 <h3>2.1.2 Defects Fixed</h3>
 <ul>
 <li>Endianess of integer conversion in KDF2BytesGenerator was incorrect. This has been fixed.
@@ -33,6 +33,8 @@ Release 1.33
 <li>An ISO18033KDFParameters class had been added to support ISO18033 KDF generators.
 <li>An implemention of the KDF1 bytes generator algorithm has been added.
 <li>An implementation of NaccacheStern encryption has been added to the lightweight API.
+<li>X509V2CRLGenerator can now be loaded from an existing CRL.
+<li>Several flags in PKIFailureInfo were encoding incorrectly. This has been fixed.
 </ul>
 <h3>2.2.1 Version</h3>
 Release 1.33
