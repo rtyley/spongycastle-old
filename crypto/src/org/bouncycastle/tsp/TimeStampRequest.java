@@ -136,12 +136,12 @@ public class TimeStampRequest
     {
         if (!algorithms.contains(this.getMessageImprintAlgOID()))
         {
-            throw new TSPValidationException("request contains unknown algorithm.", PKIFailureInfo.BAD_ALG);
+            throw new TSPValidationException("request contains unknown algorithm.", PKIFailureInfo.badAlg);
         }
         
         if (policies != null && this.getReqPolicy() != null && !policies.contains(this.getReqPolicy()))
         {
-            throw new TSPValidationException("request contains unknown policy.", PKIFailureInfo.UNACCEPTED_POLICY);
+            throw new TSPValidationException("request contains unknown policy.", PKIFailureInfo.unacceptedPolicy);
         }
         
         if (this.getExtensions() != null && extensions != null)
@@ -152,7 +152,7 @@ public class TimeStampRequest
                 String  oid = ((DERObjectIdentifier)en.nextElement()).getId();
                 if (!extensions.contains(oid))
                 {
-                    throw new TSPValidationException("request contains unknown extension.", PKIFailureInfo.UNACCEPTED_EXTENSION);
+                    throw new TSPValidationException("request contains unknown extension.", PKIFailureInfo.unacceptedExtension);
                 }
             }
         }
@@ -179,7 +179,7 @@ public class TimeStampRequest
     {
         if (d.getDigestLength() != this.getMessageImprintDigest().length)
         {
-            throw new TSPValidationException("imprint digest the wrong length.", PKIFailureInfo.BAD_DATA_FORMAT);
+            throw new TSPValidationException("imprint digest the wrong length.", PKIFailureInfo.badDataFormat);
         }
     }
     
