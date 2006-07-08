@@ -36,7 +36,11 @@ public class RegressionTest
         new EncryptedPrivateKeyInfoTest(),
         new DataGroupHashUnitTest(),
         new LDSSecurityObjectUnitTest(),
-        new AttributeTableUnitTest()
+        new AttributeTableUnitTest(),
+        new ReasonFlagsTest(),
+        new NetscapeCertTypeTest(),
+        new PKIFailureInfoTest(),
+        new KeyUsageTest()
     };
 
     public static void main(
