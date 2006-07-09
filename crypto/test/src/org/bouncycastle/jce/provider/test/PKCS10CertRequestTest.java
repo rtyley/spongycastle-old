@@ -67,7 +67,7 @@ public class PKCS10CertRequestTest
         return "PKCS10CertRequest";
     }
 
-    private void generationTest(int keySize, String keyName, String sigName)
+    private void generationTest(int keySize, String keyName, String sigName, String provider)
         throws Exception
     {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyName, "BC");
@@ -91,18 +91,18 @@ public class PKCS10CertRequestTest
                                                     subject,
                                                     kp.getPublic(),
                                                     null,
-                                                    kp.getPrivate());
+                                                    kp.getPrivate(), provider);
                             
         byte[]  bytes = req1.getEncoded();
 
         PKCS10CertificationRequest req2 = new PKCS10CertificationRequest(bytes);
 
-        if (!req2.verify())
+        if (!req2.verify(provider))
         {
             fail(sigName + ": Failed verify check.");
         }
 
-        if (!req2.getPublicKey().equals(req1.getPublicKey()))
+        if (!req2.getPublicKey(provider).equals(req1.getPublicKey(provider)))
         {
             fail(keyName + ": Failed public key check.");
         }
@@ -111,8 +111,13 @@ public class PKCS10CertRequestTest
     public void performTest()
         throws Exception
     {
-        generationTest(512, "RSA", "SHA1withRSA");       
-        generationTest(512, "GOST3410", "GOST3411withGOST3410");
+        generationTest(512, "RSA", "SHA1withRSA", "BC");       
+        generationTest(512, "GOST3410", "GOST3411withGOST3410", "BC");
+        
+        if (Security.getProvider("SunRsaSign") != null)
+        {
+            generationTest(512, "RSA", "SHA1withRSA", "SunRsaSign"); 
+        }
         
         // elliptic curve GOST A parameter set
         PKCS10CertificationRequest req = new PKCS10CertificationRequest(gost3410EC_A);

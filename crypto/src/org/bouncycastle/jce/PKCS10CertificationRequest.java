@@ -60,6 +60,7 @@ public class PKCS10CertificationRequest
     extends CertificationRequest
 {
     private static Hashtable            algorithms = new Hashtable();
+    private static Hashtable            keyAlgorithms = new Hashtable();
     private static Hashtable            oids = new Hashtable();
 
     static
@@ -106,6 +107,12 @@ public class PKCS10CertificationRequest
         oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
         oids.put(new DERObjectIdentifier("1.2.840.10040.4.3"), "DSAWITHSHA1");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "ECDSAWITHSHA1");
+        
+        //
+        // key types
+        //
+        keyAlgorithms.put(PKCSObjectIdentifiers.rsaEncryption, "RSA");
+        keyAlgorithms.put(X9ObjectIdentifiers.id_dsa, "DSA");
     }
 
     private static ASN1Sequence toDERSequence(
@@ -290,13 +297,29 @@ public class PKCS10CertificationRequest
                 InvalidKeyException
     {
         SubjectPublicKeyInfo    subjectPKInfo = reqInfo.getSubjectPublicKeyInfo();
-
+        X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
+        AlgorithmIdentifier     keyAlg = subjectPKInfo.getAlgorithmId();
+        
         try
         {
-            X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
-            AlgorithmIdentifier     keyAlg = subjectPKInfo.getAlgorithmId ();
-
-            return KeyFactory.getInstance(keyAlg.getObjectId().getId (), provider).generatePublic(xspec);
+            try
+            {
+                return KeyFactory.getInstance(keyAlg.getObjectId().getId(), provider).generatePublic(xspec);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                //
+                // try an alternate
+                //
+                if (keyAlgorithms.get(keyAlg.getObjectId()) != null)
+                {
+                    String  keyAlgorithm = (String)keyAlgorithms.get(keyAlg.getObjectId());
+                    
+                    return KeyFactory.getInstance(keyAlgorithm, provider).generatePublic(xspec);
+                }
+                
+                throw e;
+            }
         }
         catch (InvalidKeySpecException e)
         {
