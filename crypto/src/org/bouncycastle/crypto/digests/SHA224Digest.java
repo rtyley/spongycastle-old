@@ -1,6 +1,9 @@
 package org.bouncycastle.crypto.digests;
 
 
+import org.bouncycastle.crypto.digests.GeneralDigest;
+
+
 /**
  * SHA-224 as described in RFC 3874
  * <pre>
@@ -164,20 +167,49 @@ public class SHA224Digest
         int     g = H7;
         int     h = H8;
 
-        for (int t = 0; t <= 63; t++)
-        {
-            int        T1, T2;
 
-            T1 = h + Sum1(e) + Ch(e, f, g) + K[t] + X[t];
-            T2 = Sum0(a) + Maj(a, b, c);
-            h = g;
-            g = f;
-            f = e;
-            e = d + T1;
-            d = c;
-            c = b;
-            b = a;
-            a = T1 + T2;
+        int t = 0;     
+        for(int i = 0; i < 8; i ++)
+        {
+            // t = 8 * i
+            h += Sum1(e) + Ch(e, f, g) + K[t] + X[t++];
+            d += h;
+            h += Sum0(a) + Maj(a, b, c);
+
+            // t = 8 * i + 1
+            g += Sum1(d) + Ch(d, e, f) + K[t] + X[t++];
+            c += g;
+            g += Sum0(h) + Maj(h, a, b);
+
+            // t = 8 * i + 2
+            f += Sum1(c) + Ch(c, d, e) + K[t] + X[t++];
+            b += f;
+            f += Sum0(g) + Maj(g, h, a);
+
+            // t = 8 * i + 3
+            e += Sum1(b) + Ch(b, c, d) + K[t] + X[t++];
+            a += e;
+            e += Sum0(f) + Maj(f, g, h);
+
+            // t = 8 * i + 4
+            d += Sum1(a) + Ch(a, b, c) + K[t] + X[t++];
+            h += d;
+            d += Sum0(e) + Maj(e, f, g);
+
+            // t = 8 * i + 5
+            c += Sum1(h) + Ch(h, a, b) + K[t] + X[t++];
+            g += c;
+            c += Sum0(d) + Maj(d, e, f);
+
+            // t = 8 * i + 6
+            b += Sum1(g) + Ch(g, h, a) + K[t] + X[t++];
+            f += b;
+            b += Sum0(c) + Maj(c, d, e);
+
+            // t = 8 * i + 7
+            a += Sum1(f) + Ch(f, g, h) + K[t] + X[t++];
+            e += a;
+            a += Sum0(b) + Maj(b, c, d);
         }
 
         H1 += a;
@@ -193,17 +225,10 @@ public class SHA224Digest
         // reset the offset and clean out the word buffer.
         //
         xOff = 0;
-        for (int i = 0; i != X.length; i++)
+        for (int i = 0; i < 16; i++)
         {
             X[i] = 0;
         }
-    }
-
-    private int rotateRight(
-        int    x,
-        int    n)
-    {
-        return (x >>> n) | (x << (32 - n));
     }
 
     /* SHA-224 functions */
@@ -226,25 +251,25 @@ public class SHA224Digest
     private int Sum0(
         int    x)
     {
-        return rotateRight(x, 2) ^ rotateRight(x, 13) ^ rotateRight(x, 22);
+        return ((x >>> 2) | (x << 30)) ^ ((x >>> 13) | (x << 19)) ^ ((x >>> 22) | (x << 10));
     }
 
     private int Sum1(
         int    x)
     {
-        return rotateRight(x, 6) ^ rotateRight(x, 11) ^ rotateRight(x, 25);
+        return ((x >>> 6) | (x << 26)) ^ ((x >>> 11) | (x << 21)) ^ ((x >>> 25) | (x << 7));
     }
 
     private int Theta0(
         int    x)
     {
-        return rotateRight(x, 7) ^ rotateRight(x, 18) ^ (x >>> 3);
+        return ((x >>> 7) | (x << 25)) ^ ((x >>> 18) | (x << 14)) ^ (x >>> 3);
     }
 
     private int Theta1(
         int    x)
     {
-        return rotateRight(x, 17) ^ rotateRight(x, 19) ^ (x >>> 10);
+        return ((x >>> 17) | (x << 15)) ^ ((x >>> 19) | (x << 13)) ^ (x >>> 10);
     }
 
     /* SHA-224 Constants
