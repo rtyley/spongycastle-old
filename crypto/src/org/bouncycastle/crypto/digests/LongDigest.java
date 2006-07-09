@@ -242,22 +242,50 @@ public abstract class LongDigest
         long     g = H7;
         long     h = H8;
 
-        for (int t = 0; t <= 79; t++)
+        int t = 0;     
+        for(int i = 0; i < 10; i ++)
         {
-            long    T1, T2;
+          // t = 8 * i
+          h += Sum1(e) + Ch(e, f, g) + K[t] + W[t++];
+          d += h;
+          h += Sum0(a) + Maj(a, b, c);
 
-            T1 = h + Sum1(e) + Ch(e, f, g) + K[t] + W[t];
-            T2 = Sum0(a) + Maj(a, b, c);
-            h = g;
-            g = f;
-            f = e;
-            e = d + T1;
-            d = c;
-            c = b;
-            b = a;
-            a = T1 + T2;
+          // t = 8 * i + 1
+          g += Sum1(d) + Ch(d, e, f) + K[t] + W[t++];
+          c += g;
+          g += Sum0(h) + Maj(h, a, b);
+
+          // t = 8 * i + 2
+          f += Sum1(c) + Ch(c, d, e) + K[t] + W[t++];
+          b += f;
+          f += Sum0(g) + Maj(g, h, a);
+
+          // t = 8 * i + 3
+          e += Sum1(b) + Ch(b, c, d) + K[t] + W[t++];
+          a += e;
+          e += Sum0(f) + Maj(f, g, h);
+
+          // t = 8 * i + 4
+          d += Sum1(a) + Ch(a, b, c) + K[t] + W[t++];
+          h += d;
+          d += Sum0(e) + Maj(e, f, g);
+
+          // t = 8 * i + 5
+          c += Sum1(h) + Ch(h, a, b) + K[t] + W[t++];
+          g += c;
+          c += Sum0(d) + Maj(d, e, f);
+
+          // t = 8 * i + 6
+          b += Sum1(g) + Ch(g, h, a) + K[t] + W[t++];
+          f += b;
+          b += Sum0(c) + Maj(c, d, e);
+
+          // t = 8 * i + 7
+          a += Sum1(f) + Ch(f, g, h) + K[t] + W[t++];
+          e += a;
+          a += Sum0(b) + Maj(b, c, d);
         }
-
+ 
         H1 += a;
         H2 += b;
         H3 += c;
@@ -271,17 +299,10 @@ public abstract class LongDigest
         // reset the offset and clean out the word buffer.
         //
         wOff = 0;
-        for (int i = 0; i != W.length; i++)
+        for (int i = 0; i < 16; i++)
         {
             W[i] = 0;
         }
-    }
-
-    private long rotateRight(
-        long   x,
-        int    n)
-    {
-        return (x >>> n) | (x << (64 - n));
     }
 
     /* SHA-384 and SHA-512 functions (as for SHA-256 but for longs) */
@@ -304,25 +325,25 @@ public abstract class LongDigest
     private long Sum0(
         long    x)
     {
-        return rotateRight(x, 28) ^ rotateRight(x, 34) ^ rotateRight(x, 39);
+        return ((x << 36)|(x >>> 28)) ^ ((x << 30)|(x >>> 34)) ^ ((x << 25)|(x >>> 39));
     }
 
     private long Sum1(
         long    x)
     {
-        return rotateRight(x, 14) ^ rotateRight(x, 18) ^ rotateRight(x, 41);
+        return ((x << 50)|(x >>> 14)) ^ ((x << 46)|(x >>> 18)) ^ ((x << 23)|(x >>> 41));
     }
 
     private long Sigma0(
         long    x)
     {
-        return rotateRight(x, 1) ^ rotateRight(x, 8) ^ (x >>> 7);
+        return ((x << 63)|(x >>> 1)) ^ ((x << 56)|(x >>> 8)) ^ (x >>> 7);
     }
 
     private long Sigma1(
         long    x)
     {
-        return rotateRight(x, 19) ^ rotateRight(x, 61) ^ (x >>> 6);
+        return ((x << 45)|(x >>> 19)) ^ ((x << 3)|(x >>> 61)) ^ (x >>> 6);
     }
 
     /* SHA-384 and SHA-512 Constants
