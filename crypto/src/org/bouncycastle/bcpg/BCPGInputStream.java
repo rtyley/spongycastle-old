@@ -294,6 +294,64 @@ public class BCPGInputStream
             }
         }
 
+        private int loadDataLength()
+            throws IOException
+        {
+            int            l = in.read();
+            
+            if (l < 0)
+            {
+                return -1;
+            }
+            
+            partial = false;
+            if (l < 192)
+            {
+                dataLength = l;
+            }
+            else if (l <= 223)
+            {
+                dataLength = ((l - 192) << 8) + (in.read()) + 192;
+            }
+            else if (l == 255)
+            {
+                dataLength = (in.read() << 24) | (in.read() << 16) |  (in.read() << 8)  | in.read();
+            }
+            else
+            {
+                partial = true;
+                dataLength = 1 << (l & 0x1f);
+            }
+            
+            return dataLength;
+        }
+        
+        public int read(byte[] buf, int offset, int len )
+            throws IOException
+        {
+            if (dataLength > 0)
+            {
+                int readLen = (dataLength > len) ? len : dataLength;
+                
+                readLen = in.read(buf, offset, readLen);
+
+                dataLength -= readLen;
+               
+                return readLen;
+            }
+            else if (partial)
+            {
+                if (loadDataLength() < 0)
+                {
+                    return -1;
+                }
+                
+                return this.read(buf, offset, len);
+            }
+            
+            return -1;
+        }
+        
         public int read()
             throws IOException
         {
@@ -304,30 +362,9 @@ public class BCPGInputStream
             }
             else if (partial)
             {
-                int            l = in.read();
-                
-                if (l < 0)
+                if (loadDataLength() < 0)
                 {
                     return -1;
-                }
-                
-                partial = false;
-                if (l < 192)
-                {
-                    dataLength = l;
-                }
-                else if (l <= 223)
-                {
-                    dataLength = ((l - 192) << 8) + (in.read()) + 192;
-                }
-                else if (l == 255)
-                {
-                    dataLength = (in.read() << 24) | (in.read() << 16) |  (in.read() << 8)  | in.read();
-                }
-                else
-                {
-                    partial = true;
-                    dataLength = 1 << (l & 0x1f);
                 }
             
                 return this.read();
