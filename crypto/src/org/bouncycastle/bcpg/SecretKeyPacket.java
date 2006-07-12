@@ -56,15 +56,9 @@ public class SecretKeyPacket
         
         if (in.available() != 0)
         {
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream(in.available());
+            secKeyData = new byte[in.available()];
             
-            int b;
-            while ((b = in.read()) >= 0) 
-            {
-                 bOut.write(b);
-            }
-            
-            secKeyData = bOut.toByteArray();
+            in.readFully(secKeyData);
         }
     }
     
