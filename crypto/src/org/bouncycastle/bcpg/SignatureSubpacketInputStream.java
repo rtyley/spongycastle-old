@@ -98,48 +98,48 @@ public class SignatureSubpacketInputStream
             bodyLen = (in.read() << 24) | (in.read() << 16) |  (in.read() << 8)  | in.read();
         }
 
-       int        tag = in.read();
+        int        tag = in.read();
 
-       if (tag < 0)
-       {
+        if (tag < 0)
+        {
                throw new EOFException("unexpected EOF reading signature sub packet");
-       }
+        }
        
-       byte[]    data = new byte[bodyLen - 1];
+        byte[]    data = new byte[bodyLen - 1];
        
-       this.readFully(data, 0, data.length);
+        this.readFully(data, 0, data.length);
        
-       boolean   isCritical = ((tag & 0x80) != 0);
-       int       type = tag & 0x7f;
+        boolean   isCritical = ((tag & 0x80) != 0);
+        int       type = tag & 0x7f;
 
-       switch (type)
-       {
-       case CREATION_TIME:
+        switch (type)
+        {
+        case CREATION_TIME:
                return new SignatureCreationTime(isCritical, data);
         case KEY_EXPIRE_TIME:
               return new KeyExpirationTime(isCritical, data);
         case EXPIRE_TIME:
               return new SignatureExpirationTime(isCritical, data);
-       case REVOCABLE:
+        case REVOCABLE:
                return new Revocable(isCritical, data);
-       case EXPORTABLE:
+        case EXPORTABLE:
                return new Exportable(isCritical, data);
-       case ISSUER_KEY_ID:
+        case ISSUER_KEY_ID:
                return new IssuerKeyID(isCritical, data);
-       case TRUST_SIG:
+        case TRUST_SIG:
                return new TrustSignature(isCritical, data);
-       case PREFERRED_COMP_ALGS:
-       case PREFERRED_HASH_ALGS:
-       case PREFERRED_SYM_ALGS:
+        case PREFERRED_COMP_ALGS:
+        case PREFERRED_HASH_ALGS:
+        case PREFERRED_SYM_ALGS:
                return new PreferredAlgorithms(type, isCritical, data);
-       case KEY_FLAGS:
+        case KEY_FLAGS:
                return new KeyFlags(isCritical, data);
-       case PRIMARY_USER_ID:
+        case PRIMARY_USER_ID:
                return new PrimaryUserID(isCritical, data);
-       case SIGNER_USER_ID:
+        case SIGNER_USER_ID:
            return new SignerUserID(isCritical, data);
-       }
+        }
 
-       return new SignatureSubpacket(type, isCritical, data);
+        return new SignatureSubpacket(type, isCritical, data);
     }
 }
