@@ -460,21 +460,22 @@ public class GOST3410ParametersGenerator
      */
     private BigInteger procedure_C(BigInteger p, BigInteger q)
     {
+        BigInteger pSub1 = p.subtract(ONE);
+        BigInteger pSub1DivQ = pSub1.divide(q);
+
         for(;;)
         {
-            byte[]  bytes = new byte[p.toByteArray().length];
-            init_random.nextBytes(bytes);
-            BigInteger d = new BigInteger(bytes);
+            BigInteger d = new BigInteger(p.bitLength(), init_random);
 
-            if ((d.compareTo(TWO)==-1)||      //  1 < d
-                (d.compareTo(p.subtract(TWO))==1)) //  d < p-1
+            // 1 < d < p-1
+            if (d.compareTo(ONE) > 0 && d.compareTo(pSub1) < 0)
             {
-                continue;
-            }
+                BigInteger a = d.modPow(pSub1DivQ, p);
 
-            if (d.modPow(p.subtract(ONE).divide(q),p).compareTo(ONE)!=0)
-            {
-                return d.modPow(p.subtract(ONE).divide(q),p);
+                if (a.compareTo(ONE) != 0)
+                {
+                    return a;
+                }
             }
         }
     }

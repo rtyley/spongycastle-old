@@ -42,7 +42,7 @@ public class GOST3410Test
             return "GOST3410-TEST1-512";
         }
 
-        SecureRandom    init_random = new FixedSecureRandom(new byte[][] { Hex.decode("00005EC900007341"), zeroTwo(65) });
+        SecureRandom    init_random = new FixedSecureRandom(new byte[][] { Hex.decode("00005EC900007341"), zeroTwo(64) });
         SecureRandom    random = new FixedSecureRandom(Hex.decode("90F3A564439242F5186EBB224C8E223811B7105C64E4F5390807E6362DF4C72A"));
         SecureRandom    keyRandom = new FixedSecureRandom(Hex.decode("3036314538303830343630454235324435324234314132373832433138443046"));
 
@@ -116,7 +116,7 @@ public class GOST3410Test
             return "GOST3410-TEST2-512";
         }
 
-        SecureRandom    init_random = new FixedSecureRandom(new byte[][] { Hex.decode("000000003DFC46F1000000000000000D"), zeroTwo(65) });
+        SecureRandom    init_random = new FixedSecureRandom(new byte[][] { Hex.decode("000000003DFC46F1000000000000000D"), zeroTwo(64) });
         SecureRandom    random = new FixedSecureRandom(Hex.decode("90F3A564439242F5186EBB224C8E223811B7105C64E4F5390807E6362DF4C72A"));
         SecureRandom    keyRandom = new FixedSecureRandom(Hex.decode("3036314538303830343630454235324435324234314132373832433138443046"));
 
