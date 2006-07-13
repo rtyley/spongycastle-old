@@ -202,8 +202,8 @@ public class CMSEnvelopedDataStreamGenerator
             String              prov)
             throws IOException, GeneralSecurityException
         {
-            Cipher                  keyCipher = Cipher.getInstance(
-                                         keyEncAlg.getObjectId().getId(), prov);
+            Cipher              keyCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
+                                                    keyEncAlg.getObjectId().getId(), prov);
 
             if (pubKey != null)
             {
@@ -336,12 +336,13 @@ public class CMSEnvelopedDataStreamGenerator
         String       provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
+        String              encProvider = keyGen.getProvider().getName();
         SecretKey           encKey = keyGen.generateKey();
         AlgorithmParameters params;
         
         try
         {
-            AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, provider);
+            AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, encProvider);
 
             if (encryptionOID.equals(RC2_CBC))
             {
@@ -396,7 +397,7 @@ public class CMSEnvelopedDataStreamGenerator
             }
         }
         
-        return open(out, encryptionOID, encKey, params, recipientInfos, provider);
+        return open(out, encryptionOID, encKey, params, recipientInfos, encProvider);
     }
         
     protected OutputStream open(
@@ -503,6 +504,8 @@ public class CMSEnvelopedDataStreamGenerator
         return encAlgId;
     }
     
+
+    
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
@@ -516,8 +519,7 @@ public class CMSEnvelopedDataStreamGenerator
     {
         try
         {
-            KeyGenerator                keyGen = KeyGenerator.getInstance(
-                                                    encryptionOID, provider);
+            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
                                                     
             return open(out, encryptionOID, keyGen, provider);
         }
@@ -541,8 +543,7 @@ public class CMSEnvelopedDataStreamGenerator
     {
         try
         {
-            KeyGenerator                keyGen = KeyGenerator.getInstance(
-                                                    encryptionOID, provider);
+            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
             
             keyGen.init(keySize);
 
@@ -553,7 +554,7 @@ public class CMSEnvelopedDataStreamGenerator
             throw new CMSException("can't find key generation algorithm.", e);
         }
     }
-    
+
     private class CmsEnvelopedDataOutputStream
         extends OutputStream
     {

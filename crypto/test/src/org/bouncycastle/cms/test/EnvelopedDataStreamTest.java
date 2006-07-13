@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
@@ -391,13 +392,59 @@ public class EnvelopedDataStreamTest
         byte[]          data     = "WallaWallaWashington".getBytes();
         
         CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
+    
+        edGen.addKeyTransRecipient(_reciCert);
+    
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        
+        OutputStream out = edGen.open(
+                                bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+    
+        out.write(data);
+        
+        out.close();
+        
+        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(bOut.toByteArray());
+    
+        RecipientInformationStore  recipients = ep.getRecipientInfos();
+    
+        assertEquals(ep.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
+        
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+        
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+    
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+            
+            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), "BC");
+            
+            assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
+        }
+        
+        ep.close();
+    }
+    
+    public void testKeyTransCAST5SunJCE()
+        throws Exception
+    {
+        if (Security.getProvider("SunJCE") == null)
+        {
+            return;
+        }
+        
+        byte[]          data     = "WallaWallaWashington".getBytes();
+        
+        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
 
         edGen.addKeyTransRecipient(_reciCert);
 
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
         
         OutputStream out = edGen.open(
-                                bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+                                bOut, CMSEnvelopedDataGenerator.CAST5_CBC, "SunJCE");
 
         out.write(data);
         
@@ -407,7 +454,7 @@ public class EnvelopedDataStreamTest
 
         RecipientInformationStore  recipients = ep.getRecipientInfos();
 
-        assertEquals(ep.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
+        assertEquals(ep.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.CAST5_CBC);
         
         Collection  c = recipients.getRecipients();
         Iterator    it = c.iterator();
@@ -418,7 +465,7 @@ public class EnvelopedDataStreamTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
             
-            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), "BC");
+            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), "SunJCE");
             
             assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }

@@ -1,6 +1,7 @@
 package org.bouncycastle.cms.test;
 
 import java.security.KeyPair;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -140,6 +141,42 @@ public class EnvelopedDataTest
         }
     }
 
+    public void testKeyTransCAST5SunJCE()
+        throws Exception
+    {
+        if (Security.getProvider("SunJCE") == null)
+        {
+            return;
+        }
+        
+        byte[]          data     = "WallaWallaWashington".getBytes();
+    
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+    
+        edGen.addKeyTransRecipient(_reciCert);
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                CMSEnvelopedDataGenerator.CAST5_CBC, "SunJCE");
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+        
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.CAST5_CBC);
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+        
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+    
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+            
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "SunJCE");
+    
+            assertEquals(true, Arrays.equals(data, recData));
+        }
+    }
+    
     public void testKeyTransAES192()
         throws Exception
     {
