@@ -29,14 +29,9 @@ if [ "$1" == "provider" ]
 then
     ant -f jdk13.xml build-provider
 else
-    if [ "`echo $CLASSPATH | grep checkstyle`" != "" ]
-    then
-        ant -Dcheckstyle.on=true -f jdk13.xml build-jce 
-        ant -f jdk13.xml build
-    else
-        ant -f jdk13.xml build-jce
-        ant -f jdk13.xml build
-    fi
+    ant -f jdk13.xml build-jce
+    ant -f jdk13.xml build
 fi
+ant -f jdk13.xml jar-src
 fi
 

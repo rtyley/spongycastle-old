@@ -36,6 +36,7 @@
             <fileset dir="jdk1.4" includes="**/*.java" />
             <fileset dir="test/jdk1.4" includes="**/*.java" />
         </copy>
+    	<available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
     </target>
 
     <target name="checkstyle-on" if="checkstyle.on">
@@ -78,4 +79,7 @@
         <ant antfile="bc-build.xml" dir="." target="test-lw" />
     </target>
 
+    <target name="jar-src">
+        <ant antfile="bc-build.xml" dir="." target="jar-src" />
+    </target>
 </project>
