@@ -4,6 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -56,6 +61,79 @@ public class TSPUtil
         catch (IOException e)
         {
             throw new TSPValidationException("cannot process ExtendedKeyUsage extension");
+        }
+    }
+    
+    /**
+     * Return the digest algorithm using one of the standard JCA string
+     * representations rather the the algorithm identifier (if possible).
+     */
+    static String getDigestAlgName(
+        String digestAlgOID)
+    {
+        if (PKCSObjectIdentifiers.md5.getId().equals(digestAlgOID))
+        {
+            return "MD5";
+        }
+        else if (OIWObjectIdentifiers.idSHA1.getId().equals(digestAlgOID))
+        {
+            return "SHA1";
+        }
+        else if (NISTObjectIdentifiers.id_sha224.getId().equals(digestAlgOID))
+        {
+            return "SHA224";
+        }
+        else if (NISTObjectIdentifiers.id_sha256.getId().equals(digestAlgOID))
+        {
+            return "SHA256";
+        }
+        else if (NISTObjectIdentifiers.id_sha384.getId().equals(digestAlgOID))
+        {
+            return "SHA384";
+        }
+        else if (NISTObjectIdentifiers.id_sha512.getId().equals(digestAlgOID))
+        {
+            return "SHA512";
+        }
+        else if (PKCSObjectIdentifiers.sha1WithRSAEncryption.getId().equals(digestAlgOID))
+        {
+            return "SHA1";
+        }
+        else if (PKCSObjectIdentifiers.sha224WithRSAEncryption.getId().equals(digestAlgOID))
+        {
+            return "SHA224";
+        }
+        else if (PKCSObjectIdentifiers.sha256WithRSAEncryption.getId().equals(digestAlgOID))
+        {
+            return "SHA256";
+        }
+        else if (PKCSObjectIdentifiers.sha384WithRSAEncryption.getId().equals(digestAlgOID))
+        {
+            return "SHA384";
+        }
+        else if (PKCSObjectIdentifiers.sha512WithRSAEncryption.getId().equals(digestAlgOID))
+        {
+            return "SHA512";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd128.getId().equals(digestAlgOID))
+        {
+            return "RIPEMD128";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd160.getId().equals(digestAlgOID))
+        {
+            return "RIPEMD160";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd256.getId().equals(digestAlgOID))
+        {
+            return "RIPEMD256";
+        }
+        else if (CryptoProObjectIdentifiers.gostR3411.getId().equals(digestAlgOID))
+        {
+            return "GOST3411";
+        }
+        else
+        {
+            return digestAlgOID;            
         }
     }
 }

@@ -157,15 +157,17 @@ public class TimeStampRequest
             }
         }
         
+        String digestName = TSPUtil.getDigestAlgName(this.getMessageImprintAlgOID());
+        
         try
         {
-            checkImprintLength(MessageDigest.getInstance(this.getMessageImprintAlgOID(), provider));
+            checkImprintLength(MessageDigest.getInstance(digestName, provider));
         }
         catch (NoSuchAlgorithmException e)
         {
             try
             {
-                checkImprintLength(MessageDigest.getInstance(this.getMessageImprintAlgOID()));
+                checkImprintLength(MessageDigest.getInstance(digestName));
             }
             catch (NoSuchAlgorithmException ex)
             {

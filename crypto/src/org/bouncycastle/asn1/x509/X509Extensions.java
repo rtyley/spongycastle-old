@@ -185,15 +185,15 @@ public class X509Extensions
 
         while (e.hasMoreElements())
         {
-            ASN1Sequence            s = (ASN1Sequence)e.nextElement();
+            ASN1Sequence            s = ASN1Sequence.getInstance(e.nextElement());
 
             if (s.size() == 3)
             {
-                extensions.put(s.getObjectAt(0), new X509Extension((DERBoolean)s.getObjectAt(1), (ASN1OctetString)s.getObjectAt(2)));
+                extensions.put(s.getObjectAt(0), new X509Extension(DERBoolean.getInstance(s.getObjectAt(1)), ASN1OctetString.getInstance(s.getObjectAt(2))));
             }
             else
             {
-                extensions.put(s.getObjectAt(0), new X509Extension(false, (ASN1OctetString)s.getObjectAt(1)));
+                extensions.put(s.getObjectAt(0), new X509Extension(false, ASN1OctetString.getInstance(s.getObjectAt(1))));
             }
 
             ordering.addElement(s.getObjectAt(0));

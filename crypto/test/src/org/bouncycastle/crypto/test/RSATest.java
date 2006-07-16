@@ -2,10 +2,10 @@ package org.bouncycastle.crypto.test;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.security.Security;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSAEngine;
@@ -34,12 +34,157 @@ public class RSATest
     // to check that we handling byte extension by big number correctly.
     //
     static String edgeInput = "ff6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e";
+    
+    static byte[] oversizedSig = Hex.decode("01ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff004e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e");
+    static byte[] dudBlock = Hex.decode("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff004e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e");
+    static byte[] truncatedDataBlock = Hex.decode("0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff004e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e");
+    static byte[] missingDataBlock = Hex.decode("0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff4e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e");
 
     public String getName()
     {
         return "RSA";
     }
 
+    private void testStrictPKCS1Length(RSAKeyParameters pubParameters, RSAKeyParameters privParameters)
+    {
+        AsymmetricBlockCipher   eng = new RSAEngine();
+
+        eng.init(true, privParameters);
+        
+        byte[] data = null;
+        
+        try
+        {
+            data = eng.processBlock(oversizedSig, 0, oversizedSig.length);
+        }
+        catch (Exception e)
+        {
+            fail("RSA: failed - exception " + e.toString());
+        }
+        
+        eng = new PKCS1Encoding(eng);
+        
+        eng.init(false, pubParameters);
+        
+        try
+        {
+            data = eng.processBlock(data, 0, data.length);
+            
+            fail("oversized signature block not recognised");
+        }
+        catch (InvalidCipherTextException e)
+        {
+            if (!e.getMessage().equals("block incorrect size"))
+            {
+                fail("RSA: failed - exception " + e.toString());
+            }
+        }
+        
+        System.setProperty(PKCS1Encoding.STRICT_LENGTH_ENABLED_PROPERTY, "false");
+        
+        eng = new PKCS1Encoding(new RSAEngine());
+        
+        eng.init(false, pubParameters);
+        
+        try
+        {
+            data = eng.processBlock(data, 0, data.length);
+        }
+        catch (InvalidCipherTextException e)
+        {
+            fail("RSA: failed - exception " + e.toString());
+        }
+        
+        System.getProperties().remove(PKCS1Encoding.STRICT_LENGTH_ENABLED_PROPERTY);
+    }
+        
+    private void testTruncatedPKCS1Block(RSAKeyParameters pubParameters, RSAKeyParameters privParameters)
+    {
+        checkForPKCS1Exception(pubParameters, privParameters, truncatedDataBlock, "block truncated");
+    }
+    
+    private void testDudPKCS1Block(RSAKeyParameters pubParameters, RSAKeyParameters privParameters)
+    {
+        checkForPKCS1Exception(pubParameters, privParameters, dudBlock, "unknown block type");
+    }
+    
+    private void testMissingDataPKCS1Block(RSAKeyParameters pubParameters, RSAKeyParameters privParameters)
+    {
+        checkForPKCS1Exception(pubParameters, privParameters, missingDataBlock, "no data in block");
+    }
+
+    private void checkForPKCS1Exception(RSAKeyParameters pubParameters, RSAKeyParameters privParameters, byte[] inputData, String expectedMessage)
+    {
+        AsymmetricBlockCipher   eng = new RSAEngine();
+
+        eng.init(true, privParameters);
+        
+        byte[] data = null;
+        
+        try
+        {
+            data = eng.processBlock(inputData, 0, inputData.length);
+        }
+        catch (Exception e)
+        {
+            fail("RSA: failed - exception " + e.toString());
+        }
+        
+        eng = new PKCS1Encoding(eng);
+        
+        eng.init(false, pubParameters);
+        
+        try
+        {
+            data = eng.processBlock(data, 0, data.length);
+            
+            fail("missing data block not recognised");
+        }
+        catch (InvalidCipherTextException e)
+        {
+            if (!e.getMessage().equals(expectedMessage))
+            {
+                fail("RSA: failed - exception " + e.toString());
+            }
+        }
+    }
+    
+    private void testOAEP(RSAKeyParameters pubParameters, RSAKeyParameters privParameters)
+    {
+        //
+        // OAEP - public encrypt, private decrypt
+        //
+        AsymmetricBlockCipher eng = new OAEPEncoding(new RSAEngine());
+        byte[] data = Hex.decode(input);
+
+        eng.init(true, pubParameters);
+
+        try
+        {
+            data = eng.processBlock(data, 0, data.length);
+        }
+        catch (Exception e)
+        {
+            fail("failed - exception " + e.toString());
+        }
+
+        eng.init(false, privParameters);
+
+        try
+        {
+            data = eng.processBlock(data, 0, data.length);
+        }
+        catch (Exception e)
+        {
+            fail("failed - exception " + e.toString());
+        }
+
+        if (!input.equals(new String(Hex.encode(data))))
+        {
+            fail("failed OAEP Test");
+        }
+    }
+    
     public void performTest()
     {
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod, pubExp);
@@ -113,6 +258,11 @@ public class RSATest
         eng = new PKCS1Encoding(eng);
 
         eng.init(true, pubParameters);
+        
+        if (eng.getOutputBlockSize() != ((PKCS1Encoding)eng).getUnderlyingCipher().getOutputBlockSize())
+        {
+            fail("PKCS1 output block size incorrect");
+        }
 
         try
         {
@@ -169,38 +319,6 @@ public class RSATest
         if (!input.equals(new String(Hex.encode(data))))
         {
             fail("failed PKCS1 private/public Test");
-        }
-
-        //
-        // OAEP - public encrypt, private decrypt
-        //
-        eng = new OAEPEncoding(((PKCS1Encoding)eng).getUnderlyingCipher());
-
-        eng.init(true, pubParameters);
-
-        try
-        {
-            data = eng.processBlock(data, 0, data.length);
-        }
-        catch (Exception e)
-        {
-            fail("failed - exception " + e.toString());
-        }
-
-        eng.init(false, privParameters);
-
-        try
-        {
-            data = eng.processBlock(data, 0, data.length);
-        }
-        catch (Exception e)
-        {
-            fail("failed - exception " + e.toString());
-        }
-
-        if (!input.equals(new String(Hex.encode(data))))
-        {
-            fail("failed OAEP Test");
         }
 
         //
@@ -284,6 +402,12 @@ public class RSATest
         {
             fail("failed key generation (1024) test");
         }
+        
+        testOAEP(pubParameters, privParameters);
+        testStrictPKCS1Length(pubParameters, privParameters);
+        testDudPKCS1Block(pubParameters, privParameters);
+        testMissingDataPKCS1Block(pubParameters, privParameters);
+        testTruncatedPKCS1Block(pubParameters, privParameters);
     }
 
 
