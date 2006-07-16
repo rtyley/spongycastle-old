@@ -355,7 +355,7 @@ public class BCPGInputStream
             return dataLength;
         }
         
-        public int read(byte[] buf, int offset, int len )
+        public int read(byte[] buf, int offset, int len)
             throws IOException
         {
             if (dataLength > 0)
