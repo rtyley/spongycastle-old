@@ -68,7 +68,7 @@ public class Hex
         OutputStream   out)
         throws IOException
     {
-        return encoder.encode(data, 0, data.length, out);
+        return encoder.encode(data, off, length, out);
     }
     
     /**
