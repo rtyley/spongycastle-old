@@ -17,26 +17,31 @@
     <property name="jce.target.dir" value="${artifacts.dir}/${jce.target}" />
     <property name="jce.target.src.dir" value="${jce.target.dir}/src" />
     <property name="jce.target.docs.dir" value="${jce.target.dir}/docs" />
+    <property name="jce.target.src.jar" value="${jce.target.dir}/src.jar" />
 
     <property name="provider.target" value="bcprov-${target.name}" />
     <property name="provider.target.dir" value="${artifacts.dir}/${provider.target}" />
     <property name="provider.target.src.dir" value="${provider.target.dir}/src" />
     <property name="provider.target.docs.dir" value="${provider.target.dir}/docs" />
+    <property name="provider.target.src.jar" value="${provider.target.dir}/src.jar" />
 
     <property name="mail.target" value="bcmail-${target.name}" />
     <property name="mail.target.dir" value="${artifacts.dir}/${mail.target}" />
     <property name="mail.target.src.dir" value="${mail.target.dir}/src" />
     <property name="mail.target.docs.dir" value="${mail.target.dir}/docs" />
+    <property name="mail.target.src.jar" value="${mail.target.dir}/src.jar" />
 
     <property name="tsp.target" value="bctsp-${target.name}" />
     <property name="tsp.target.dir" value="${artifacts.dir}/${tsp.target}" />
     <property name="tsp.target.src.dir" value="${tsp.target.dir}/src" />
     <property name="tsp.target.docs.dir" value="${tsp.target.dir}/docs" />
+    <property name="tsp.target.src.jar" value="${tsp.target.dir}/src.jar" />
 
     <property name="pg.target" value="bcpg-${target.name}" />
     <property name="pg.target.dir" value="${artifacts.dir}/${pg.target}" />
     <property name="pg.target.src.dir" value="${pg.target.dir}/src" />
     <property name="pg.target.docs.dir" value="${pg.target.dir}/docs" />
+    <property name="pg.target.src.jar" value="${pg.target.dir}/src.jar" />
 
     <property name="lcrypto.target" value="lcrypto-${target.name}" />
     <property name="lcrypto.target.dir" value="${artifacts.dir}/${lcrypto.target}" />
@@ -170,6 +175,7 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
+        
     </target>
 
     <!--
@@ -210,6 +216,7 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
+        
     </target>
 
     <target name="build-libraries" depends="build-mail, build-tsp, build-pg" />
@@ -244,6 +251,7 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
+        
     </target>
 
     <!--
@@ -274,6 +282,7 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
+        
     </target>
 
     <!--
@@ -310,6 +319,7 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
+        
     </target>
 
     <!--
@@ -580,5 +590,32 @@
         <copy todir="${lcrypto.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/lcrypto" />
        </copy>
+    </target>
+    
+    <!-- 
+        jar up the source directories
+    -->
+    <target name="jar-src" depends="jar-src-check, jar-src-jce, jar-src-provider">
+        <jar basedir="${mail.target.src.dir}" jarfile="${mail.target.src.jar}" />
+        <delete dir="${mail.target.src.dir}" />
+        <jar basedir="${tsp.target.src.dir}" jarfile="${tsp.target.src.jar}" />
+        <delete dir="${tsp.target.src.dir}" />
+        <jar basedir="${pg.target.src.dir}" jarfile="${pg.target.src.jar}" />
+        <delete dir="${pg.target.src.dir}" />
+    </target>
+    
+    <target name="jar-src-jce" if="jce.present">
+        <jar basedir="${jce.target.src.dir}" jarfile="${jce.target.src.jar}" />
+        <delete dir="${jce.target.src.dir}" />
+    </target>
+	
+    <target name="jar-src-provider" if="provider.present">
+        <jar basedir="${provider.target.src.dir}" jarfile="${provider.target.src.jar}" />
+        <delete dir="${provider.target.src.dir}" />
+    </target>
+	
+    <target name="jar-src-check">
+    	<available property="jce.present" file="${jce.target.src.dir}" />
+    	<available property="provider.present" file="${provider.target.src.dir}" />
     </target>
 </project>
