@@ -63,11 +63,6 @@ public class TimeStampResponseGenerator
 
         statusStrings = new ASN1EncodableVector();
     }
-    
-    private void setStatus(int status)
-    {
-        this.status = status;
-    }
 
     private void addStatusString(String statusString)
     {
@@ -81,7 +76,6 @@ public class TimeStampResponseGenerator
 
     private PKIStatusInfo getPKIStatusInfo()
     {
-        PKIStatusInfo   pkiStatusInfo;
         ASN1EncodableVector v = new ASN1EncodableVector();
         
         v.add(new DERInteger(status));

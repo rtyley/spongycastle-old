@@ -15,17 +15,33 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 public class PKCS1Encoding
     implements AsymmetricBlockCipher
 {
+    /**
+     * some providers fail to include the leading zero in PKCS1 encoded blocks. If you need to
+     * work with one of these set the system property org.bouncycastle.pkcs1.strict to false.
+     * <p>
+     * The system property is checked during construction of the encoding object, it is set to 
+     * true by default.
+     * </p>
+     */
+    public static String STRICT_LENGTH_ENABLED_PROPERTY = "org.bouncycastle.pkcs1.strict";
+    
     private static int      HEADER_LENGTH = 10;
 
     private SecureRandom            random;
     private AsymmetricBlockCipher   engine;
     private boolean                 forEncryption;
     private boolean                 forPrivateKey;
+    private boolean                 useStrictLength;
 
+    /**
+     * Basic constructor.
+     * @param cipher
+     */
     public PKCS1Encoding(
         AsymmetricBlockCipher   cipher)
     {
         this.engine = cipher;
+        this.useStrictLength = System.getProperty(STRICT_LENGTH_ENABLED_PROPERTY, "true").toLowerCase().equals("true");
     }   
 
     public AsymmetricBlockCipher getUnderlyingCipher()
@@ -165,6 +181,11 @@ public class PKCS1Encoding
             throw new InvalidCipherTextException("unknown block type");
         }
 
+        if (useStrictLength && block.length != engine.getOutputBlockSize())
+        {
+            throw new InvalidCipherTextException("block incorrect size");
+        }
+        
         //
         // find and extract the message block.
         //
