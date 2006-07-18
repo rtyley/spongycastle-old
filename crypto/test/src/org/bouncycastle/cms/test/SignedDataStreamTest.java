@@ -19,7 +19,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSProcessableByteArray;
@@ -292,6 +291,39 @@ public class SignedDataStreamTest
         sigOut.close();
     
         verifyEncodedData(bOut);
+    }
+    
+    public void testSHA1AndMD5WithRSA()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        
+        certList.add(_origCert);
+        certList.add(_signCert);
+    
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+    
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+    
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_MD5, "BC");
+        
+        gen.addCertificatesAndCRLs(certs);
+    
+        OutputStream sigOut = gen.open(bOut);
+    
+        sigOut.write(TEST_MESSAGE.getBytes());
+        
+        sigOut.close();
+        
+        CMSSignedDataParser     sp = new CMSSignedDataParser(
+                new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), bOut.toByteArray());
+    
+        sp.getSignedContent().drain();
+        
+        verifySignatures(sp);
     }
     
     public void testSHA1WithRSAEncapsulatedBufferedStream()
