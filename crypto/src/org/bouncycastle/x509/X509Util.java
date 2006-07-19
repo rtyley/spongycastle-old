@@ -16,6 +16,7 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Strings;
 
 class X509Util
 {
@@ -50,7 +51,7 @@ class X509Util
     static DERObjectIdentifier getAlgorithmOID(
         String algorithmName)
     {
-        algorithmName = algorithmName.toUpperCase();
+        algorithmName = Strings.toUpperCase(algorithmName);
         
         if (algorithms.containsKey(algorithmName))
         {

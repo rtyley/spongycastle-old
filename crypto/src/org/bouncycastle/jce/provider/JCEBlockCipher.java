@@ -47,6 +47,7 @@ import org.bouncycastle.crypto.params.ParametersWithSBox;
 import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.crypto.params.RC5Parameters;
 import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
+import org.bouncycastle.util.Strings;
 
 public class JCEBlockCipher extends WrapCipherSpi
     implements PBE
@@ -160,7 +161,7 @@ public class JCEBlockCipher extends WrapCipherSpi
         String  mode)
         throws NoSuchAlgorithmException
     {
-        modeName = mode.toUpperCase();
+        modeName = Strings.toUpperCase(mode);
 
         if (modeName.equals("ECB"))
         {
@@ -263,7 +264,7 @@ public class JCEBlockCipher extends WrapCipherSpi
         String  padding) 
     throws NoSuchPaddingException
     {
-        String  paddingName = padding.toUpperCase();
+        String  paddingName = Strings.toUpperCase(padding);
 
         if (paddingName.equals("NOPADDING"))
         {

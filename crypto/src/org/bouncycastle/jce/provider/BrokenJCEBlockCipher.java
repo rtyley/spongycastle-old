@@ -40,6 +40,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.crypto.params.RC5Parameters;
+import org.bouncycastle.util.Strings;
 
 public class BrokenJCEBlockCipher
     implements BrokenPBE
@@ -141,7 +142,7 @@ public class BrokenJCEBlockCipher
     protected void engineSetMode(
         String  mode) 
     {
-        String  modeName = mode.toUpperCase();
+        String  modeName = Strings.toUpperCase(mode);
 
         if (modeName.equals("ECB"))
         {
@@ -196,7 +197,7 @@ public class BrokenJCEBlockCipher
         String  padding) 
     throws NoSuchPaddingException
     {
-        String  paddingName = padding.toUpperCase();
+        String  paddingName = Strings.toUpperCase(padding);
 
         if (paddingName.equals("NOPADDING"))
         {

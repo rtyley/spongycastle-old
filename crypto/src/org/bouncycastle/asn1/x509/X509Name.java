@@ -7,6 +7,7 @@ import java.util.Vector;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.Strings;
 
 /**
  * <pre>
@@ -569,7 +570,7 @@ public class X509Name
         String      name,
         Hashtable   lookUp)
     {
-        if (name.toUpperCase().startsWith("OID."))
+        if (Strings.toUpperCase(name).startsWith("OID."))
         {
             return new DERObjectIdentifier(name.substring(4));
         }
@@ -578,7 +579,7 @@ public class X509Name
             return new DERObjectIdentifier(name);
         }
 
-        DERObjectIdentifier oid = (DERObjectIdentifier)lookUp.get(name.toLowerCase());
+        DERObjectIdentifier oid = (DERObjectIdentifier)lookUp.get(Strings.toLowerCase(name));
         if (oid == null)
         {
             throw new IllegalArgumentException("Unknown object id - " + name + " - passed to distinguished name");
@@ -783,8 +784,8 @@ public class X509Name
 
             if (_oid.equals(_oOID))
             {
-                _val = _val.trim().toLowerCase();
-                _oVal = _oVal.trim().toLowerCase();
+                _val = Strings.toLowerCase(_val.trim());
+                _oVal = Strings.toLowerCase(_oVal.trim());
                 if (_val.equals(_oVal))
                 {
                     continue;
@@ -899,8 +900,8 @@ public class X509Name
 
                 if (_oid.equals(_oOID))
                 {
-                    _val = _val.trim().toLowerCase();
-                    _oVal = _oVal.trim().toLowerCase();
+                    _val = Strings.toLowerCase(_val.trim());
+                    _oVal = Strings.toLowerCase(_oVal.trim());
                     if (_val.equals(_oVal))
                     {
                         _indexes[j] = true;

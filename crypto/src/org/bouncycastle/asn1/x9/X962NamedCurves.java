@@ -6,6 +6,7 @@ import java.util.Hashtable;
 
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 
 
@@ -156,7 +157,7 @@ public class X962NamedCurves
     public static X9ECParameters getByName(
         String  name)
     {
-        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(name.toLowerCase());
+        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(Strings.toLowerCase(name));
 
         if (oid != null)
         {

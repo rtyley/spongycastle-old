@@ -3,6 +3,7 @@ package org.bouncycastle.ocsp;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 
@@ -37,7 +38,7 @@ class OCSPUtil
     static DERObjectIdentifier getAlgorithmOID(
         String algorithmName)
     {
-        algorithmName = algorithmName.toUpperCase();
+        algorithmName = Strings.toUpperCase(algorithmName);
         
         if (algorithms.containsKey(algorithmName))
         {

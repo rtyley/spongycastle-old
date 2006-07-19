@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.util.Strings;
 
 /**
  * Utility class for fetching curves using their NIST names as published in FIPS-PUB 186-2
@@ -50,7 +51,7 @@ public class NISTNamedCurves
     public static X9ECParameters getByName(
         String  name)
     {
-        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(name.toUpperCase());
+        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(Strings.toUpperCase(name));
 
         if (oid != null)
         {

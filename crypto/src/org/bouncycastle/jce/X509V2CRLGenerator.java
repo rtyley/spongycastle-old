@@ -34,6 +34,7 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.provider.X509CRLObject;
+import org.bouncycastle.util.Strings;
 
 /**
  * class to produce an X.509 Version 2 CRL.
@@ -121,7 +122,7 @@ public class X509V2CRLGenerator
     {
         this.signatureAlgorithm = signatureAlgorithm;
 
-        sigOID = (DERObjectIdentifier)algorithms.get(signatureAlgorithm.toUpperCase());
+        sigOID = (DERObjectIdentifier)algorithms.get(Strings.toUpperCase(signatureAlgorithm));
 
         if (sigOID == null)
         {
