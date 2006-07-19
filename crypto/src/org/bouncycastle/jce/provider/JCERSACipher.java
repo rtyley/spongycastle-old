@@ -31,6 +31,7 @@ import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.util.Strings;
 
 public class JCERSACipher extends WrapCipherSpi
 {
@@ -160,7 +161,7 @@ public class JCERSACipher extends WrapCipherSpi
         String  mode)
         throws NoSuchAlgorithmException
     {
-        String md = mode.toUpperCase();
+        String md = Strings.toUpperCase(mode);
         
         if (md.equals("NONE") || md.equals("ECB"))
         {
@@ -187,7 +188,7 @@ public class JCERSACipher extends WrapCipherSpi
         String  padding) 
         throws NoSuchPaddingException
     {
-        String pad = padding.toUpperCase();
+        String pad = Strings.toUpperCase(padding);
 
         if (pad.equals("NOPADDING"))
         {

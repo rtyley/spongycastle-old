@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.util.Strings;
 
 /**
  * It turns out that the number of standard ways the fields in a DN should be 
@@ -63,7 +64,7 @@ public abstract class X509NameEntryConverter
         int     off)
         throws IOException
     {
-        str = str.toLowerCase();
+        str = Strings.toLowerCase(str);
         byte[]    data = new byte[str.length() / 2];
         for (int index = 0; index != data.length; index++)
         {

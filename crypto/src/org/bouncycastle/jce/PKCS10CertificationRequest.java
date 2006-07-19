@@ -31,6 +31,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.util.Strings;
 
 /**
  * A class for verifying and creating PKCS10 Certification requests. 
@@ -219,7 +220,7 @@ public class PKCS10CertificationRequest
         throws NoSuchAlgorithmException, NoSuchProviderException,
                 InvalidKeyException, SignatureException
     {
-        DERObjectIdentifier sigOID = (DERObjectIdentifier)algorithms.get(signatureAlgorithm.toUpperCase());
+        DERObjectIdentifier sigOID = (DERObjectIdentifier)algorithms.get(Strings.toUpperCase(signatureAlgorithm));
 
         if (sigOID == null)
         {

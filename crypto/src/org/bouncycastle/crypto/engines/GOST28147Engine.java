@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithSBox;
+import org.bouncycastle.util.Strings;
 
 /**
  * implementation of GOST 28147-89
@@ -343,7 +344,7 @@ public class GOST28147Engine
     public static byte[] getSBox(
         String  sBoxName)
     {
-        byte[] namedSBox = (byte[])sBoxes.get(sBoxName.toUpperCase());
+        byte[] namedSBox = (byte[])sBoxes.get(Strings.toUpperCase(sBoxName));
         
         if (namedSBox != null)
         {

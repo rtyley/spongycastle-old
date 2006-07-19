@@ -10,6 +10,7 @@ import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.Strings;
 
 public class SECNamedCurves
 {
@@ -386,7 +387,7 @@ public class SECNamedCurves
     public static X9ECParameters getByName(
         String  name)
     {
-        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(name.toLowerCase());
+        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(Strings.toLowerCase(name));
 
         if (oid != null)
         {

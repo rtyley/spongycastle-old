@@ -32,6 +32,7 @@ import org.bouncycastle.asn1.x509.V1TBSCertificateGenerator;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.provider.X509CertificateObject;
+import org.bouncycastle.util.Strings;
 
 /**
  * class to produce an X.509 Version 1 certificate.
@@ -135,7 +136,7 @@ public class X509V1CertificateGenerator
     {
         this.signatureAlgorithm = signatureAlgorithm;
 
-        sigOID = (DERObjectIdentifier)algorithms.get(signatureAlgorithm.toUpperCase());
+        sigOID = (DERObjectIdentifier)algorithms.get(Strings.toUpperCase(signatureAlgorithm));
 
         if (sigOID == null)
         {

@@ -9,6 +9,8 @@ import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
+import org.bouncycastle.util.Strings;
+
 /**
  * super class of the various generators.
  */
@@ -31,7 +33,7 @@ public class SMIMEGenerator
         String  encoding)
     {
         this.encoding = encoding;
-        this.useBase64 = encoding.toLowerCase().equals("base64");
+        this.useBase64 = Strings.toLowerCase(encoding).equals("base64");
     }
 
     /**
@@ -74,7 +76,7 @@ public class SMIMEGenerator
             {
                 Header  hdr =(Header)e.nextElement();
 
-                if (hdr.getName().toLowerCase().startsWith("content-"))
+                if (Strings.toLowerCase(hdr.getName()).startsWith("content-"))
                 {
                     content.setHeader(hdr.getName(), hdr.getValue());
                 }

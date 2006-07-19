@@ -16,6 +16,7 @@ import org.bouncycastle.crypto.digests.SHA224Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
+import org.bouncycastle.util.Strings;
 
 class JCEDigestUtil
 {
@@ -80,7 +81,7 @@ class JCEDigestUtil
     static Digest getDigest(
         String digestName) 
     {
-        digestName = digestName.toUpperCase();
+        digestName = Strings.toUpperCase(digestName);
         
         if (sha1.contains(digestName))
         {

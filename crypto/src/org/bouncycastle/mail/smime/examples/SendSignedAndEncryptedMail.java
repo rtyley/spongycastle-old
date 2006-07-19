@@ -29,6 +29,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMEEncryptionKeyPreferenceAttribute;
@@ -172,7 +173,7 @@ public class SendSignedAndEncryptedMail
                  * Make sure not to override any content-* headers from the
                  * original message
                  */
-                if (!headerLine.toLowerCase().startsWith("content-"))
+                if (!Strings.toLowerCase(headerLine).startsWith("content-"))
                 {
                     encryptedMessage.addHeaderLine(headerLine);
                 }
