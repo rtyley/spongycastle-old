@@ -41,7 +41,7 @@ public class PKCS1Encoding
         AsymmetricBlockCipher   cipher)
     {
         this.engine = cipher;
-        this.useStrictLength = System.getProperty(STRICT_LENGTH_ENABLED_PROPERTY, "true").toLowerCase().equals("true");
+        this.useStrictLength = System.getProperty(STRICT_LENGTH_ENABLED_PROPERTY, "true").equals("true");
     }   
 
     public AsymmetricBlockCipher getUnderlyingCipher()
