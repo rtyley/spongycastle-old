@@ -127,21 +127,23 @@ public class PGPPBEEncryptedData
                 {
                     throw new EOFException("unexpected end of stream.");
                 }
-                
-                //
-                // some versions of PGP appear to produce 0 for the extra
+
+
+                // Note: the oracle attack on "quick check" bytes is not deemed
+                // a security risk for PBE (see PGPPublicKeyEncryptedData)
+
+                boolean repeatCheckPassed = iv[iv.length - 2] == (byte) v1
+                        && iv[iv.length - 1] == (byte) v2;
+
+                // Note: some versions of PGP appear to produce 0 for the extra
                 // bytes rather than repeating the two previous bytes
-                //
-                if (iv[iv.length - 2] != (byte)v1 && v1 != 0)
+                boolean zeroesCheckPassed = v1 == 0 && v2 == 0;
+
+                if (!repeatCheckPassed && !zeroesCheckPassed)
                 {
                     throw new PGPDataValidationException("data check failed.");
                 }
-                
-                if (iv[iv.length - 1] != (byte)v2 && v2 != 0)
-                {
-                    throw new PGPDataValidationException("data check failed.");
-                }
-                
+
                 return encStream;
             }
             catch (PGPException e)
