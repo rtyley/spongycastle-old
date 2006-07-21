@@ -462,10 +462,11 @@ public class GOST3410ParametersGenerator
     {
         BigInteger pSub1 = p.subtract(ONE);
         BigInteger pSub1DivQ = pSub1.divide(q);
+        int length = (p.bitLength() + 7) / 8;
 
         for(;;)
         {
-            BigInteger d = new BigInteger(p.bitLength(), init_random);
+            BigInteger d = new BigInteger(length, init_random);
 
             // 1 < d < p-1
             if (d.compareTo(ONE) > 0 && d.compareTo(pSub1) < 0)
