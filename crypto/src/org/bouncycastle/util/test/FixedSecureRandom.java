@@ -122,7 +122,12 @@ public class FixedSecureRandom
         
         return val;
     }
-    
+
+    public boolean isExhausted()
+    {
+        return _index == _data.length;
+    }
+
     private int nextValue()
     {
         return _data[_index++] & 0xff;
