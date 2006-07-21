@@ -19,6 +19,9 @@ import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 public class ElGamalKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator
 {
+    private static BigInteger ZERO = BigInteger.valueOf(0);
+    private static BigInteger TWO = BigInteger.valueOf(2);
+    
     private ElGamalKeyGenerationParameters param;
 
     public void init(
@@ -30,7 +33,7 @@ public class ElGamalKeyPairGenerator
     public AsymmetricCipherKeyPair generateKeyPair()
     {
         BigInteger           p, g, x, y;
-        int                  qLength = param.getStrength() - 1;
+        int                  pLength = param.getStrength();
         ElGamalParameters    elParams = param.getParameters();
 
         p = elParams.getP();
@@ -39,7 +42,13 @@ public class ElGamalKeyPairGenerator
         //
         // calculate the private key
         //
-        x = new BigInteger(qLength, param.getRandom());
+        BigInteger pSub2 = p.subtract(TWO);
+        
+        do
+        {
+            x = new BigInteger(pLength, param.getRandom());
+        }
+        while (x.equals(ZERO) || x.compareTo(pSub2) > 0);
 
         //
         // calculate the public key.
