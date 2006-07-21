@@ -34,7 +34,11 @@ class DHKeyGeneratorHelper
         }
         else
         {
-            x = new BigInteger(limit, random);
+            do
+            {
+                x = new BigInteger(limit, random);
+            }
+            while (x.equals(ZERO));
         }
         
         return x;
