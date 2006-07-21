@@ -25,12 +25,7 @@ public class GOST3410Test
     private byte[] zeroTwo(int length)
     {
         byte[] data = new byte[length];
-        
-        for (int i = 0; i != data.length; i++)
-        {
-            data[data.length - 1] = 0x02;
-        }
-        
+        data[data.length - 1] = 0x02;
         return data;
     }
     
