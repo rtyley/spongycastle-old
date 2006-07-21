@@ -13,7 +13,7 @@ public class DHKeyGenerationParameters
         SecureRandom    random,
         DHParameters    params)
     {
-        super(random, (params.getJ() != 0) ? params.getJ() : params.getP().bitLength() - 1);
+        super(random, params.getP().bitLength());
 
         this.params = params;
     }
