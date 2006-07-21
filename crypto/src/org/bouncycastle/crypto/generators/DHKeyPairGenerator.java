@@ -19,6 +19,8 @@ import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 public class DHKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator
 {
+    private DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
+    
     private DHKeyGenerationParameters param;
 
     public void init(
@@ -29,22 +31,12 @@ public class DHKeyPairGenerator
 
     public AsymmetricCipherKeyPair generateKeyPair()
     {
-        BigInteger      p, g, x, y;
-        int             qLength = param.getStrength() - 1;
+        BigInteger      p, x, y;
         DHParameters    dhParams = param.getParameters();
-
+        
         p = dhParams.getP();
-        g = dhParams.getG();
-    
-        //
-        // calculate the private key
-        //
-        x = new BigInteger(qLength, param.getRandom());
-
-        //
-        // calculate the public key.
-        //
-        y = g.modPow(x, p);
+        x = helper.calculatePrivate(p, param.getRandom(), dhParams.getJ()); 
+        y = helper.calculatePublic(p, dhParams.getG(), x);
 
         return new AsymmetricCipherKeyPair(
                 new DHPublicKeyParameters(y, dhParams),
