@@ -462,7 +462,7 @@ public class GOST3410ParametersGenerator
     {
         BigInteger pSub1 = p.subtract(ONE);
         BigInteger pSub1DivQ = pSub1.divide(q);
-        int length = (p.bitLength() + 7) / 8;
+        int length = p.bitLength();
 
         for(;;)
         {
