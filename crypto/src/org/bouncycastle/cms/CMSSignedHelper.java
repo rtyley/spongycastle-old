@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
 class CMSSignedHelper
@@ -118,6 +119,10 @@ class CMSSignedHelper
             return "RSA";
         }
         else if (TeleTrusTObjectIdentifiers.teleTrusTRSAsignatureAlgorithm.equals(encryptionAlgOID))
+        {
+            return "RSA";
+        }
+        else if (X509ObjectIdentifiers.id_ea_rsa.equals(encryptionAlgOID))
         {
             return "RSA";
         }
