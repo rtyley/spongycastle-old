@@ -27,6 +27,17 @@ public abstract class ASN1TaggedObject
         throw new IllegalArgumentException("implicitly tagged tagged object");
     }
 
+    static public ASN1TaggedObject getInstance(
+        Object obj) 
+    {
+        if (obj == null || obj instanceof ASN1TaggedObject) 
+        {
+                return (ASN1TaggedObject)obj;
+        }
+
+        throw new IllegalArgumentException("unknown object in getInstance");
+    }
+
     /**
      * Create a tagged object in the explicit style.
      * 
@@ -73,7 +84,7 @@ public abstract class ASN1TaggedObject
     public boolean equals(
         Object o)
     {
-        if (o == null || !(o instanceof ASN1TaggedObject))
+        if (!(o instanceof ASN1TaggedObject))
         {
             return false;
         }
