@@ -28,6 +28,7 @@ Release 1.34
 <li>Endianess of integer conversion in KDF2BytesGenerator was incorrect. This has been fixed.
 <li>Generating critical signature subpackets in OpenPGP would result in a zero packet tag. This has been fixed.
 <li>Some flags in PKIFailure info were incorrect, and the range of values was incomplete. The range of values has been increased and the flags corrected.
+<li>The helper class for AuthorityKeyExtension generation was including the subject rather than the issuer DN of the CA certificate. This has been fixed.
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
@@ -40,6 +41,7 @@ Release 1.34
 <li>The PKCS1Encoder would accept PKCS1 packets which were one byte oversize. By default this will now cause an error. However, as there are still implementations which still produce such packets the older behaviour can be turned on by setting the VM system property org.bouncycastle.pkcs1.strict to false before creating an RSA cipher using PKCS1 encoding.
 <li>A a target has been added to the bc-build.xml to jar up the source code rather than leaving it in a directory tree.
 The build scripts now run this target by default.
+<li>Use of toUpperCase and toLowerCase has been replaced with a locale independent converter where appropriate.
 </ul>
 <h3>2.2.1 Version</h3>
 Release 1.33
