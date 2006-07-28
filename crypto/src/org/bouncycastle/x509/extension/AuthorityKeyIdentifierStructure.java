@@ -22,8 +22,6 @@ import org.bouncycastle.jce.PrincipalUtil;
 public class AuthorityKeyIdentifierStructure
     extends AuthorityKeyIdentifier
 {
-    private AuthorityKeyIdentifier authKeyID;
-    
     /**
      * Constructor which will take the byte[] returned from getExtensionValue()
      * 
@@ -45,7 +43,7 @@ public class AuthorityKeyIdentifierStructure
         {
             if (certificate.getVersion() != 3)
             {
-                GeneralName          genName = new GeneralName(PrincipalUtil.getSubjectX509Principal(certificate));
+                GeneralName          genName = new GeneralName(PrincipalUtil.getIssuerX509Principal(certificate));
                 SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
                         (ASN1Sequence)new ASN1InputStream(certificate.getPublicKey().getEncoded()).readObject());
                 
@@ -54,7 +52,7 @@ public class AuthorityKeyIdentifierStructure
             }
             else
             {
-                GeneralName             genName = new GeneralName(PrincipalUtil.getSubjectX509Principal(certificate));
+                GeneralName             genName = new GeneralName(PrincipalUtil.getIssuerX509Principal(certificate));
                 
                 byte[]                  ext = certificate.getExtensionValue(X509Extensions.SubjectKeyIdentifier.getId());
                 
