@@ -57,7 +57,7 @@ public class IssuingDistributionPoint
 
         for (int i = 0; i != seq.size(); i++)
         {
-            ASN1TaggedObject  o = (ASN1TaggedObject)seq.getObjectAt(i);
+            ASN1TaggedObject  o = ASN1TaggedObject.getInstance(seq.getObjectAt(i));
 
             switch (o.getTagNo())
             {

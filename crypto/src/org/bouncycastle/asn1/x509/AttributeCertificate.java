@@ -45,6 +45,12 @@ public class AttributeCertificate
     public AttributeCertificate(
         ASN1Sequence    seq)
     {
+        if (seq.size() != 3)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
         this.acinfo = AttributeCertificateInfo.getInstance(seq.getObjectAt(0));
         this.signatureAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
         this.signatureValue = DERBitString.getInstance(seq.getObjectAt(2));

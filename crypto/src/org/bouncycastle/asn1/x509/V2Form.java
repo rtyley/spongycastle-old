@@ -46,7 +46,12 @@ public class V2Form
     public V2Form(
         ASN1Sequence seq)
     {
-        int    index = 0;
+		if (seq.size() > 3)
+        {
+			throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+        }
+        
+    	int    index = 0;
 
         if (!(seq.getObjectAt(0) instanceof ASN1TaggedObject))
         {
@@ -56,7 +61,7 @@ public class V2Form
 
         for (int i = index; i != seq.size(); i++)
         {
-            ASN1TaggedObject o = (ASN1TaggedObject)seq.getObjectAt(i);
+            ASN1TaggedObject o = ASN1TaggedObject.getInstance(seq.getObjectAt(i));
             if (o.getTagNo() == 0)
             {
                 baseCertificateID = IssuerSerial.getInstance(o, false);
@@ -64,6 +69,11 @@ public class V2Form
             else if (o.getTagNo() == 1)
             {
                 objectDigestInfo = ObjectDigestInfo.getInstance(o, false);
+            }
+            else 
+            {
+				throw new IllegalArgumentException("Bad tag number: "
+						+ o.getTagNo());
             }
         }
     }

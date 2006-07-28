@@ -67,10 +67,16 @@ public class SubjectPublicKeyInfo
     public SubjectPublicKeyInfo(
         ASN1Sequence  seq)
     {
+        if (seq.size() != 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
         Enumeration         e = seq.getObjects();
 
         this.algId = AlgorithmIdentifier.getInstance(e.nextElement());
-        this.keyData = (DERBitString)e.nextElement();
+        this.keyData = DERBitString.getInstance(e.nextElement());
     }
 
     public AlgorithmIdentifier getAlgorithmId()

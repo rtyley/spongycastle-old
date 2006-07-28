@@ -73,7 +73,13 @@ public class AlgorithmIdentifier
     public AlgorithmIdentifier(
         ASN1Sequence   seq)
     {
-        objectId = (DERObjectIdentifier)seq.getObjectAt(0);
+        if (seq.size() < 1 || seq.size() > 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+        
+        objectId = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
 
         if (seq.size() == 2)
         {

@@ -62,7 +62,13 @@ public class PolicyQualifierInfo
    public PolicyQualifierInfo(
        ASN1Sequence as)
    {
-        policyQualifierId = (DERObjectIdentifier) as.getObjectAt(0);
+        if (as.size() != 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + as.size());
+        }
+
+        policyQualifierId = DERObjectIdentifier.getInstance(as.getObjectAt(0));
         qualifier = as.getObjectAt(1);
    }
 

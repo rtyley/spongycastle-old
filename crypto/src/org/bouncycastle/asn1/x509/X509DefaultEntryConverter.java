@@ -2,7 +2,7 @@ package org.bouncycastle.asn1.x509;
 
 import java.io.IOException;
 
-import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -39,19 +39,19 @@ public class X509DefaultEntryConverter
                 throw new RuntimeException("can't recode value for oid " + oid.getId());
             }
         }
-        else if (oid.equals(X509Name.EmailAddress))
+        else if (oid.equals(X509Name.EmailAddress) || oid.equals(X509Name.DC))
         {
             return new DERIA5String(value);
+        }
+        else if (oid.equals(X509Name.DATE_OF_BIRTH))
+        {
+            return new DERGeneralizedTime(value);
         }
         else if (canBePrintable(value))  
         {
             return new DERPrintableString(value);
         }
-        else if (canBeUTF8(value))
-        {
-            return new DERUTF8String(value);
-        }
-
-        return new DERBMPString(value);
+        
+        return new DERUTF8String(value);
     }
 }

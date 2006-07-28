@@ -54,19 +54,19 @@ public class UserNotice
         this.explicitText = new DisplayText(str);
     }
 
-   /**
-    * Creates a new <code>UserNotice</code> instance.
-    * <p>Useful from reconstructing a <code>UserNotice</code> instance
-    * from its encodable/encoded form. 
-    *
-    * @param as an <code>ASN1Sequence</code> value obtained from either
-    * calling @{link toASN1Object()} for a <code>UserNotice</code>
-    * instance or from parsing it from a DER-encoded stream. 
-    */
-   public UserNotice(
+    /**
+     * Creates a new <code>UserNotice</code> instance.
+     * <p>Useful from reconstructing a <code>UserNotice</code> instance
+     * from its encodable/encoded form. 
+     *
+     * @param as an <code>ASN1Sequence</code> value obtained from either
+     * calling @{link toASN1Object()} for a <code>UserNotice</code>
+     * instance or from parsing it from a DER-encoded stream. 
+     */
+    public UserNotice(
        ASN1Sequence as) 
-   {
-       if (as.size() == 2)
+    {
+	   if (as.size() == 2)
        {
            noticeRef = NoticeReference.getInstance(as.getObjectAt(0));
            explicitText = DisplayText.getInstance(as.getObjectAt(1));
@@ -81,6 +81,10 @@ public class UserNotice
            {
                explicitText = DisplayText.getInstance(as.getObjectAt(0));
            }
+       }
+       else
+       {
+           throw new IllegalArgumentException("Bad sequence size: " + as.size());
        }
     }
    

@@ -45,9 +45,14 @@ public class TBSCertList
         public CRLEntry(
             ASN1Sequence  seq)
         {
+            if (seq.size() < 2 || seq.size() > 3)
+            {
+                throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+            }
+            
             this.seq = seq;
 
-            userCertificate = (DERInteger)seq.getObjectAt(0);
+            userCertificate = DERInteger.getInstance(seq.getObjectAt(0));
             revocationDate = Time.getInstance(seq.getObjectAt(1));
             if (seq.size() == 3)
             {
@@ -111,13 +116,18 @@ public class TBSCertList
     public TBSCertList(
         ASN1Sequence  seq)
     {
+        if (seq.size() < 3 || seq.size() > 7)
+        {
+            throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+        }
+
         int seqPos = 0;
 
         this.seq = seq;
 
         if (seq.getObjectAt(seqPos) instanceof DERInteger)
         {
-            version = (DERInteger)seq.getObjectAt(seqPos++);
+            version = DERInteger.getInstance(seq.getObjectAt(seqPos++));
         }
         else
         {
@@ -139,12 +149,12 @@ public class TBSCertList
         if (seqPos < seq.size()
             && !(seq.getObjectAt(seqPos) instanceof DERTaggedObject))
         {
-            ASN1Sequence certs = (ASN1Sequence)seq.getObjectAt(seqPos++);
+            ASN1Sequence certs = ASN1Sequence.getInstance(seq.getObjectAt(seqPos++));
             revokedCertificates = new CRLEntry[certs.size()];
 
             for (int i = 0; i < revokedCertificates.length; i++)
             {
-                revokedCertificates[i] = new CRLEntry((ASN1Sequence)certs.getObjectAt(i));
+                revokedCertificates[i] = new CRLEntry(ASN1Sequence.getInstance(certs.getObjectAt(i)));
             }
         }
 

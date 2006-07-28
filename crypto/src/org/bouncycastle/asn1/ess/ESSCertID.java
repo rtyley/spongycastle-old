@@ -20,11 +20,11 @@ public class ESSCertID
     {
         if (o == null || o instanceof ESSCertID)
         {
-            return (ESSCertID) o;
+            return (ESSCertID)o;
         }
         else if (o instanceof ASN1Sequence)
         {
-            return new ESSCertID((ASN1Sequence) o);
+            return new ESSCertID((ASN1Sequence)o);
         }
 
         throw new IllegalArgumentException(
@@ -37,11 +37,16 @@ public class ESSCertID
      */
     public ESSCertID(ASN1Sequence seq)
     {
+        if (seq.size() < 1 || seq.size() > 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+        }
+
         certHash = ASN1OctetString.getInstance(seq.getObjectAt(0));
  
         if (seq.size() > 1)
         {
-            issuerSerial = new IssuerSerial((ASN1Sequence)seq.getObjectAt(1));
+            issuerSerial = IssuerSerial.getInstance(seq.getObjectAt(1));
         }
     }
 

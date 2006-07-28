@@ -48,6 +48,12 @@ public class ObjectDigestInfo
     
     public ObjectDigestInfo(ASN1Sequence seq)
     {
+        if (seq.size() > 4 || seq.size() < 3)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
         digestedObjectType = DEREnumerated.getInstance(seq.getObjectAt(0));
 
         int offset = 0;
@@ -60,7 +66,7 @@ public class ObjectDigestInfo
 
         digestAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(1 + offset));
 
-        objectDigest = new DERBitString(seq.getObjectAt(2 + offset));
+        objectDigest = DERBitString.getInstance(seq.getObjectAt(2 + offset));
     }
 
     public DEREnumerated getDigestedObjectType()

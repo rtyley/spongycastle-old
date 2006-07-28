@@ -34,11 +34,17 @@ public class OtherSigningCertificate
      */
     public OtherSigningCertificate(ASN1Sequence seq)
     {
-        this.certs = (ASN1Sequence)seq.getObjectAt(0);
+        if (seq.size() < 1 || seq.size() > 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
+        this.certs = ASN1Sequence.getInstance(seq.getObjectAt(0));
 
         if (seq.size() > 1)
         {
-            this.policies = (ASN1Sequence)seq.getObjectAt(1);
+            this.policies = ASN1Sequence.getInstance(seq.getObjectAt(1));
         }
     }
 

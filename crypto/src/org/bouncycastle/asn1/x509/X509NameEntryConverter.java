@@ -146,24 +146,6 @@ public abstract class X509NameEntryConverter
 
         return true;
     }
-
-    /**
-     * return true if the passed in String can be represented without
-     * loss as a UTF8String, false otherwise.
-     */
-    protected boolean canBeUTF8(
-        String  str)
-    {
-        for (int i = str.length() - 1; i >= 0; i--)
-        {
-            if (str.charAt(i) > 0x00ff)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
     
     /**
      * Convert the passed in String value into the appropriate ASN.1

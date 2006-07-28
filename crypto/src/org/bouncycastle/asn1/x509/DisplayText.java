@@ -96,24 +96,6 @@ public class DisplayText
             break;
       }
    }
-
-   /**
-    * return true if the passed in String can be represented without
-    * loss as a UTF8String, false otherwise.
-    */
-   private boolean canBeUTF8(
-       String  str)
-   {
-       for (int i = str.length() - 1; i >= 0; i--)
-       {
-           if (str.charAt(i) > 0x00ff)
-           {
-               return false;
-           }
-       }
-
-       return true;
-   }
    
    /**
     * Creates a new <code>DisplayText</code> instance.
@@ -129,16 +111,8 @@ public class DisplayText
          text = text.substring(0, DISPLAY_TEXT_MAXIMUM_SIZE);
       }
       
-      if (canBeUTF8(text))
-      {
-          contentType = CONTENT_TYPE_UTF8STRING;
-          contents = new DERUTF8String(text);
-      }
-      else
-      {
-          contentType = CONTENT_TYPE_BMPSTRING;
-          contents = new DERBMPString(text);
-      }
+      contentType = CONTENT_TYPE_UTF8STRING;
+      contents = new DERUTF8String(text);
    }
 
    /**

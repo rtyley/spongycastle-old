@@ -39,8 +39,13 @@ public class Attribute
     public Attribute(
         ASN1Sequence seq)
     {
-        attrType = (DERObjectIdentifier)seq.getObjectAt(0);
-        attrValues = (ASN1Set)seq.getObjectAt(1);
+        if (seq.size() != 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+        }
+
+        attrType = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
+        attrValues = ASN1Set.getInstance(seq.getObjectAt(1));
     }
 
     public Attribute(
