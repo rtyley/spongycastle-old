@@ -31,7 +31,7 @@ public class Holder
     ObjectDigestInfo    objectDigestInfo;
 
     public static Holder getInstance(
-            Object  obj)
+        Object  obj)
     {
         if (obj instanceof Holder)
         {
@@ -48,9 +48,15 @@ public class Holder
     public Holder(
         ASN1Sequence    seq)
     {
+        if (seq.size() > 3)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
         for (int i = 0; i != seq.size(); i++)
         {
-            ASN1TaggedObject    tObj = (ASN1TaggedObject)seq.getObjectAt(i);
+            ASN1TaggedObject    tObj = ASN1TaggedObject.getInstance(seq.getObjectAt(i));
             
             switch (tObj.getTagNo())
             {

@@ -18,6 +18,10 @@ import org.bouncycastle.asn1.DERSequence;
 public class AccessDescription
     extends ASN1Encodable
 {
+    public final static DERObjectIdentifier id_ad_caIssuers = new DERObjectIdentifier("1.3.6.1.5.5.7.48.2");
+    
+    public final static DERObjectIdentifier id_ad_ocsp = new DERObjectIdentifier("1.3.6.1.5.5.7.48.1");
+        
     DERObjectIdentifier accessMethod = null;
     GeneralName accessLocation = null;
 
@@ -44,7 +48,7 @@ public class AccessDescription
             throw new IllegalArgumentException("wrong number of elements in inner sequence");
         }
         
-        accessMethod = (DERObjectIdentifier)seq.getObjectAt(0);
+        accessMethod = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
         accessLocation = GeneralName.getInstance(seq.getObjectAt(1));
     }
 

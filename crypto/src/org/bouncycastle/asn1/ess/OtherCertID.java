@@ -37,19 +37,25 @@ public class OtherCertID
      */
     public OtherCertID(ASN1Sequence seq)
     {
+        if (seq.size() < 1 || seq.size() > 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
         if (seq.getObjectAt(0).getDERObject() instanceof ASN1OctetString)
         {
             otherCertHash = ASN1OctetString.getInstance(seq.getObjectAt(0));
         }
         else
         {
-            otherCertHash = DigestInfo.getInstance((ASN1Encodable) seq.getObjectAt(0));
+            otherCertHash = DigestInfo.getInstance(seq.getObjectAt(0));
 
         }
 
         if (seq.size() > 1)
         {
-            issuerSerial = new IssuerSerial((ASN1Sequence)seq.getObjectAt(1));
+            issuerSerial = new IssuerSerial(ASN1Sequence.getInstance(seq.getObjectAt(1)));
         }
     }
 

@@ -31,8 +31,14 @@ public class AttCertValidityPeriod
     public AttCertValidityPeriod(
         ASN1Sequence    seq)
     {
-        notBeforeTime = (DERGeneralizedTime)seq.getObjectAt(0);
-        notAfterTime = (DERGeneralizedTime)seq.getObjectAt(1);
+        if (seq.size() != 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
+        notBeforeTime = DERGeneralizedTime.getInstance(seq.getObjectAt(0));
+        notAfterTime = DERGeneralizedTime.getInstance(seq.getObjectAt(1));
     }
 
     /**

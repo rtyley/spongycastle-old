@@ -62,7 +62,7 @@ public class X509CertificateStructure
             tbsCert = TBSCertificateStructure.getInstance(seq.getObjectAt(0));
             sigAlgId = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
 
-            sig = (DERBitString)seq.getObjectAt(2);
+            sig = DERBitString.getInstance(seq.getObjectAt(2));
         }
         else
         {

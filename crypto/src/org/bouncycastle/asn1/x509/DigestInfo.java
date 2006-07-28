@@ -61,7 +61,7 @@ public class DigestInfo
         Enumeration             e = obj.getObjects();
 
         algId = AlgorithmIdentifier.getInstance(e.nextElement());
-        digest = ((ASN1OctetString)e.nextElement()).getOctets();
+        digest = ASN1OctetString.getInstance(e.nextElement()).getOctets();
     }
 
     public AlgorithmIdentifier getAlgorithmId()

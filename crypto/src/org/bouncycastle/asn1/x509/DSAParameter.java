@@ -52,11 +52,16 @@ public class DSAParameter
     public DSAParameter(
         ASN1Sequence  seq)
     {
+    	if (seq.size() != 3)
+        {
+    	    throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+        }
+        
         Enumeration     e = seq.getObjects();
 
-        p = (DERInteger)e.nextElement();
-        q = (DERInteger)e.nextElement();
-        g = (DERInteger)e.nextElement();
+        p = DERInteger.getInstance(e.nextElement());
+        q = DERInteger.getInstance(e.nextElement());
+        g = DERInteger.getInstance(e.nextElement());
     }
 
     public BigInteger getP()

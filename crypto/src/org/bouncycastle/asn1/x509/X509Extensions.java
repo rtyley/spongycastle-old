@@ -135,13 +135,23 @@ public class X509Extensions
     /**
      * Authority Info Access
      */
-    public static final DERObjectIdentifier AuthorityInfoAccess= new DERObjectIdentifier("1.3.6.1.5.5.7.1.1");
+    public static final DERObjectIdentifier AuthorityInfoAccess = new DERObjectIdentifier("1.3.6.1.5.5.7.1.1");
 
     /**
      * Subject Info Access
      */
-    public static final DERObjectIdentifier SubjectInfoAccess= new DERObjectIdentifier("1.3.6.1.5.5.7.1.11");
+    public static final DERObjectIdentifier SubjectInfoAccess = new DERObjectIdentifier("1.3.6.1.5.5.7.1.11");
     
+    /**
+     * BiometricInfo
+     */
+    public static final DERObjectIdentifier BiometricInfo = new DERObjectIdentifier("1.3.6.1.5.5.7.1.2");
+    
+    /**
+     * QCStatements
+     */
+    public static final DERObjectIdentifier QCStatements = new DERObjectIdentifier("1.3.6.1.5.5.7.1.3");
+
     private Hashtable               extensions = new Hashtable();
     private Vector                  ordering = new Vector();
 
@@ -191,9 +201,13 @@ public class X509Extensions
             {
                 extensions.put(s.getObjectAt(0), new X509Extension(DERBoolean.getInstance(s.getObjectAt(1)), ASN1OctetString.getInstance(s.getObjectAt(2))));
             }
-            else
+            else if (s.size() == 2)
             {
                 extensions.put(s.getObjectAt(0), new X509Extension(false, ASN1OctetString.getInstance(s.getObjectAt(1))));
+            }
+            else
+            {
+                throw new IllegalArgumentException("Bad sequence size: " + s.size());
             }
 
             ordering.addElement(s.getObjectAt(0));
@@ -303,7 +317,7 @@ public class X509Extensions
      *     Extensions        ::=   SEQUENCE SIZE (1..MAX) OF Extension
      *
      *     Extension         ::=   SEQUENCE {
-     *        extnId            EXTENSION.&id ({ExtensionSet}),
+     *        extnId            EXTENSION.&amp;id ({ExtensionSet}),
      *        critical          BOOLEAN DEFAULT FALSE,
      *        extnValue         OCTET STRING }
      * </pre>

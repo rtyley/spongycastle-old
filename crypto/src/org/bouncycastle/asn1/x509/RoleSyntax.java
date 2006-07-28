@@ -106,9 +106,15 @@ public class RoleSyntax
     public RoleSyntax(
         ASN1Sequence seq)
     {
+        if (seq.size() < 1 || seq.size() > 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
         for (int i = 0; i != seq.size(); i++)
         {
-            ASN1TaggedObject taggedObject = (ASN1TaggedObject)seq.getObjectAt(i);
+            ASN1TaggedObject taggedObject = ASN1TaggedObject.getInstance(seq.getObjectAt(i));
             switch (taggedObject.getTagNo())
             {
             case 0:

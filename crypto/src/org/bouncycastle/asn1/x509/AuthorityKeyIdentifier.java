@@ -57,7 +57,7 @@ public class AuthorityKeyIdentifier
 
         while (e.hasMoreElements())
         {
-            DERTaggedObject o = (DERTaggedObject)e.nextElement();
+            ASN1TaggedObject o = DERTaggedObject.getInstance(e.nextElement());
 
             switch (o.getTagNo())
             {

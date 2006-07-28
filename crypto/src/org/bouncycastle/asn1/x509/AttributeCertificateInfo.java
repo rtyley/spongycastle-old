@@ -47,6 +47,11 @@ public class AttributeCertificateInfo
     public AttributeCertificateInfo(
         ASN1Sequence   seq)
     {
+        if (seq.size() != 7)
+        {
+            throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+        }
+
         this.version = DERInteger.getInstance(seq.getObjectAt(0));
         this.holder = Holder.getInstance(seq.getObjectAt(1));
         this.issuer = AttCertIssuer.getInstance(seq.getObjectAt(2));

@@ -51,10 +51,16 @@ public class RSAPublicKeyStructure
     public RSAPublicKeyStructure(
         ASN1Sequence  seq)
     {
+        if (seq.size() != 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
         Enumeration e = seq.getObjects();
 
-        modulus = ((DERInteger)e.nextElement()).getPositiveValue();
-        publicExponent = ((DERInteger)e.nextElement()).getPositiveValue();
+        modulus = DERInteger.getInstance(e.nextElement()).getPositiveValue();
+        publicExponent = DERInteger.getInstance(e.nextElement()).getPositiveValue();
     }
 
     public BigInteger getModulus()

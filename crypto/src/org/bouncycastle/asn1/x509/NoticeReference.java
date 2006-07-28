@@ -105,8 +105,14 @@ public class NoticeReference
    public NoticeReference(
        ASN1Sequence as) 
    {
+       if (as.size() != 2)
+       {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + as.size());
+       }
+
        organization = DisplayText.getInstance(as.getObjectAt(0));
-       noticeNumbers = (ASN1Sequence) as.getObjectAt(1);
+       noticeNumbers = ASN1Sequence.getInstance(as.getObjectAt(1));
    }
 
    public static NoticeReference getInstance(

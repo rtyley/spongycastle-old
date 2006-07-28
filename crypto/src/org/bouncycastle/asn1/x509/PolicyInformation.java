@@ -16,11 +16,17 @@ public class PolicyInformation
     public PolicyInformation(
         ASN1Sequence seq)
     {
-        policyIdentifier = (DERObjectIdentifier)seq.getObjectAt(0);
+        if (seq.size() < 1 || seq.size() > 2)
+        {
+            throw new IllegalArgumentException("Bad sequence size: "
+                    + seq.size());
+        }
+
+        policyIdentifier = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
 
         if (seq.size() > 1)
         {
-            policyQualifiers = (ASN1Sequence)seq.getObjectAt(1);
+            policyQualifiers = ASN1Sequence.getInstance(seq.getObjectAt(1));
         }
     }
 

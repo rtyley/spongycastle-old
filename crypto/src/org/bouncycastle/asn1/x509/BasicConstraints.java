@@ -49,10 +49,10 @@ public class BasicConstraints
         }
         else
         {
-            this.cA = (DERBoolean)seq.getObjectAt(0);
+            this.cA = DERBoolean.getInstance(seq.getObjectAt(0));
             if (seq.size() > 1)
             {
-                this.pathLenConstraint = (DERInteger)seq.getObjectAt(1);
+                this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(1));
             }
         }
     }

@@ -55,7 +55,7 @@ public class CertificatePolicies
         Enumeration e = seq.getObjects();
         while (e.hasMoreElements())
         {
-            ASN1Sequence s = (ASN1Sequence)e.nextElement();
+            ASN1Sequence s = ASN1Sequence.getInstance(e.nextElement());
             policies.addElement(s.getObjectAt(0));
         }
         // For now we just don't handle PolicyQualifiers

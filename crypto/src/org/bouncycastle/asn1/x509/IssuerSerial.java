@@ -19,7 +19,7 @@ public class IssuerSerial
     public static IssuerSerial getInstance(
             Object  obj)
     {
-        if (obj == null || obj instanceof GeneralNames)
+        if (obj == null || obj instanceof IssuerSerial)
         {
             return (IssuerSerial)obj;
         }
@@ -42,12 +42,17 @@ public class IssuerSerial
     public IssuerSerial(
         ASN1Sequence    seq)
     {
+        if (seq.size() != 2 && seq.size() != 3)
+        {
+            throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+        }
+        
         issuer = GeneralNames.getInstance(seq.getObjectAt(0));
-        serial = (DERInteger)seq.getObjectAt(1);
+        serial = DERInteger.getInstance(seq.getObjectAt(1));
 
         if (seq.size() == 3)
         {
-            issuerUID = (DERBitString)seq.getObjectAt(2);
+            issuerUID = DERBitString.getInstance(seq.getObjectAt(2));
         }
     }
     
