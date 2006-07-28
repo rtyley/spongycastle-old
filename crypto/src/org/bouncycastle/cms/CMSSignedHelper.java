@@ -122,7 +122,7 @@ class CMSSignedHelper
         {
             return "RSA";
         }
-        else if (X509ObjectIdentifiers.id_ea_rsa.equals(encryptionAlgOID))
+        else if (X509ObjectIdentifiers.id_ea_rsa.getId().equals(encryptionAlgOID))
         {
             return "RSA";
         }
