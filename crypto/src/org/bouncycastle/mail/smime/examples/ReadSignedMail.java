@@ -137,7 +137,8 @@ public class ReadSignedMail
 
             verify(s);
         }
-        else if (msg.isMimeType("application/pkcs7-mime"))
+        else if (msg.isMimeType("application/pkcs7-mime")
+                || msg.isMimeType("application/x-pkcs7-mime"))
         {
             //
             // in this case the content is wrapped in the signature block.
