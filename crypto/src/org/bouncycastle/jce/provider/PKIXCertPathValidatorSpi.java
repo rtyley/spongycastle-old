@@ -1,35 +1,27 @@
 package org.bouncycastle.jce.provider;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
-import java.security.cert.CRL;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathParameters;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertPathValidatorResult;
 import java.security.cert.CertPathValidatorSpi;
-import java.security.cert.CertSelector;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
-import java.security.cert.PolicyQualifierInfo;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509CRLSelector;
-import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -43,7 +35,6 @@ import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
@@ -59,7 +50,6 @@ import org.bouncycastle.asn1.x509.GeneralSubtree;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.NameConstraints;
 import org.bouncycastle.asn1.x509.PolicyInformation;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
 /**
@@ -102,530 +92,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                         "privilegeWithdrawn",
                                         "aACompromise" };
     
-    /**
-     * extract the value of the given extension, if it exists.
-     */
-    private DERObject getExtensionValue(
-        java.security.cert.X509Extension    ext,
-        String                              oid)
-        throws AnnotatedException
-    {
-        byte[]  bytes = ext.getExtensionValue(oid);
-        if (bytes == null)
-        {
-            return null;
-        }
-
-        return getObject(oid, bytes);
-    }
-
-    private DERObject getObject(
-        String oid,
-        byte[] ext)
-        throws AnnotatedException
-    {
-        try
-        {
-            ASN1InputStream aIn = new ASN1InputStream(ext);
-            ASN1OctetString octs = (ASN1OctetString)aIn.readObject();
-
-            aIn = new ASN1InputStream(octs.getOctets());
-            return aIn.readObject();
-        }
-        catch (IOException e)
-        {
-            throw new AnnotatedException("exception processing extension " + oid, e);
-        }
-    }
     
-    private boolean withinDNSubtree(
-        ASN1Sequence    dns,
-        ASN1Sequence    subtree)
-    {
-        if (subtree.size() < 1)
-        {
-            return false;
-        }
-
-        if (subtree.size() > dns.size())
-        {
-            return false;
-        }
-
-        for (int j = subtree.size() - 1; j >= 0; j--)
-        {
-            if (!subtree.getObjectAt(j).equals(dns.getObjectAt(j)))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private void checkPermittedDN(
-        Set             permitted,
-        ASN1Sequence    dns)
-    throws CertPathValidatorException
-    {
-        if (permitted.isEmpty())
-        {
-            return;
-        }
-        
-        Iterator        it = permitted.iterator();
-
-        while (it.hasNext())
-        {
-            ASN1Sequence subtree = (ASN1Sequence)it.next();
-            
-            if (withinDNSubtree(dns, subtree))
-            {
-                return;
-            }
-        }
-
-        throw new CertPathValidatorException("Subject distinguished name is not from a permitted subtree");
-    }
-    
-    private void checkExcludedDN(
-        Set             excluded,
-        ASN1Sequence    dns)
-        throws CertPathValidatorException
-    {
-        if (excluded.isEmpty())
-        {
-            return;
-        }
-
-        Iterator        it = excluded.iterator();
-
-        while (it.hasNext())
-        {
-            ASN1Sequence subtree = (ASN1Sequence)it.next();
-            
-            if (withinDNSubtree(dns, subtree))
-            {
-                throw new CertPathValidatorException("Subject distinguished name is from an excluded subtree");
-            }
-        }
-    }
-
-    private Set intersectDN(
-        Set             permitted,
-        ASN1Sequence    dn)
-    {
-        if (permitted.isEmpty())
-        {
-            permitted.add(dn);
-
-            return permitted;
-        }
-        else
-        {
-            Set     intersect = new HashSet();
-            
-            Iterator _iter = permitted.iterator();
-            while (_iter.hasNext())
-            {
-                ASN1Sequence subtree = (ASN1Sequence)_iter.next();
-
-                if (withinDNSubtree(dn, subtree))
-                {
-                    intersect.add(dn);
-                }
-                else if (withinDNSubtree(subtree, dn))
-                {
-                    intersect.add(subtree);
-                }
-            }
-            
-            return intersect;
-        }
-    }
-    
-    private Set unionDN(
-        Set             excluded,
-        ASN1Sequence    dn)
-    {
-        if (excluded.isEmpty())
-        {
-            excluded.add(dn);
-
-            return excluded;
-        }
-        else
-        {
-            Set         intersect = new HashSet();
-
-            Iterator _iter = excluded.iterator();
-            while (_iter.hasNext())
-            {
-                ASN1Sequence subtree = (ASN1Sequence)_iter.next();
-
-                if (withinDNSubtree(dn, subtree))
-                {
-                    intersect.add(subtree);
-                }
-                else if (withinDNSubtree(subtree, dn))
-                {
-                    intersect.add(dn);
-                }
-                else
-                {
-                    intersect.add(subtree);
-                    intersect.add(dn);
-                }
-            }
-            
-            return intersect;
-        }
-    }
-    
-    private Set intersectEmail(
-        Set     permitted,
-        String  email)
-    {
-        String _sub = email.substring(email.indexOf('@') + 1);
-        
-        if (permitted.isEmpty())
-        {
-            permitted.add(_sub);
-
-            return permitted;
-        }
-        else
-        {
-            Set      intersect = new HashSet();
-
-            Iterator _iter = permitted.iterator();
-            while (_iter.hasNext())
-            {
-                String _permitted = (String)_iter.next();
-
-                if (_sub.endsWith(_permitted))
-                {
-                    intersect.add(_sub);
-                }
-                else if (_permitted.endsWith(_sub))
-                {
-                    intersect.add(_permitted);
-                }
-            }
-            
-            return intersect;
-        }
-    }
-
-    private Set unionEmail(
-        Set     excluded,
-        String  email)
-    {
-        String _sub = email.substring(email.indexOf('@') + 1);
-        
-        if (excluded.isEmpty())
-        {
-            excluded.add(_sub);
-            return excluded;
-        }
-        else
-        {
-            Set     intersect = new HashSet();
-
-            Iterator _iter = excluded.iterator();
-            while (_iter.hasNext())
-            {
-                String _excluded = (String)_iter.next();
-
-                if (_sub.endsWith(_excluded))
-                {
-                    intersect.add(_excluded);
-                }
-                else if (_excluded.endsWith(_sub))
-                {
-                    intersect.add(_sub);
-                }
-                else
-                {
-                    intersect.add(_excluded);
-                    intersect.add(_sub);
-                }
-            }
-            
-            return intersect;
-        }
-    }
-    
-    private Set intersectIP(
-        Set     permitted,
-        byte[]  ip)
-    {
-        // TBD
-        return permitted;
-    }
-    
-    private Set unionIP(
-        Set     excluded,
-        byte[]  ip)
-    {
-        // TBD
-        return excluded;
-    }
-
-    private void checkPermittedEmail(
-        Set     permitted,
-        String email) 
-        throws CertPathValidatorException
-    {
-        if (permitted.isEmpty())
-        {
-            return;
-        }
-        
-        String      sub = email.substring(email.indexOf('@') + 1);
-        Iterator    it = permitted.iterator();
-
-        while (it.hasNext())
-        {
-            String str = (String)it.next();
-
-            if (sub.endsWith(str))
-            {
-                return;
-            }
-        }
-
-        throw new CertPathValidatorException("Subject email address is not from a permitted subtree");
-    }
-    
-    private void checkExcludedEmail(
-        Set     excluded,
-        String  email) 
-        throws CertPathValidatorException
-    {
-        if (excluded.isEmpty())
-        {
-            return;
-        }
-        
-        String      sub = email.substring(email.indexOf('@') + 1);
-        Iterator    it = excluded.iterator();
-
-        while (it.hasNext())
-        {
-            String str = (String)it.next();
-            if (sub.endsWith(str))
-            {
-                throw new CertPathValidatorException("Subject email address is from an excluded subtree");
-            }
-        }
-    }
-    
-    private void checkPermittedIP(
-        Set     permitted,
-        byte[]  ip) 
-        throws CertPathValidatorException
-    {
-        if (permitted.isEmpty())
-        {
-            return;
-        }
-
-        // TODO: ??? Something here
-    }
-    
-    private void checkExcludedIP(
-        Set     excluded,
-        byte[]  ip) 
-        throws CertPathValidatorException
-    {
-        if (excluded.isEmpty())
-        {
-            return;
-        }
-        
-        // TODO, check RFC791 and RFC1883 for IP bytes definition.
-    }
-
-    private PKIXPolicyNode removePolicyNode(
-        PKIXPolicyNode  validPolicyTree,
-        List     []        policyNodes,
-        PKIXPolicyNode _node)
-    {
-        PKIXPolicyNode _parent = (PKIXPolicyNode)_node.getParent();
-        
-        if (validPolicyTree == null)
-        {
-            return null;
-        }
-
-        if (_parent == null)
-        {
-            for (int j = 0; j < policyNodes.length; j++)
-            {
-                policyNodes[j] = new ArrayList();
-            }
-
-            return null;
-        }
-        else
-        {
-            _parent.removeChild(_node);
-            removePolicyNodeRecurse(policyNodes, _node);
-
-            return validPolicyTree;
-        }
-    }
-    
-    private void removePolicyNodeRecurse(
-        List     []        policyNodes,
-        PKIXPolicyNode  _node)
-    {
-        policyNodes[_node.getDepth()].remove(_node);
-
-        if (_node.hasChildren())
-        {
-            Iterator _iter = _node.getChildren();
-            while (_iter.hasNext())
-            {
-                PKIXPolicyNode _child = (PKIXPolicyNode)_iter.next();
-                removePolicyNodeRecurse(policyNodes, _child);
-            }
-        }
-    }
-
-    private boolean isSelfIssued(
-        X509Certificate cert)
-    {
-        return cert.getSubjectDN().equals(cert.getIssuerDN());
-    }
-
-    private boolean isAnyPolicy(
-        Set policySet)
-    {
-        return policySet == null || policySet.contains(ANY_POLICY) || policySet.isEmpty();
-    }
-
-    private AlgorithmIdentifier getAlgorithmIdentifier(
-        PublicKey key)
-        throws CertPathValidatorException
-    {
-        try
-        {
-            ASN1InputStream      aIn = new ASN1InputStream(
-                                    new ByteArrayInputStream(key.getEncoded()));
-
-            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(aIn.readObject());
-
-            return info.getAlgorithmId();
-        }
-        catch (IOException e)
-        {
-            throw new CertPathValidatorException("exception processing public key");
-        }
-    }
-
-    private final Set getQualifierSet(ASN1Sequence qualifiers) 
-        throws CertPathValidatorException
-    {
-        Set             pq   = new HashSet();
-        
-        if (qualifiers == null)
-        {
-            return pq;
-        }
-        
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-        Enumeration e = qualifiers.getObjects();
-
-        while (e.hasMoreElements())
-        {
-            try
-            {
-                aOut.writeObject(e.nextElement());
-
-                pq.add(new PolicyQualifierInfo(bOut.toByteArray()));
-            }
-            catch (IOException ex)
-            {
-                throw new CertPathValidatorException("exception building qualifier set: " + ex);
-            }
-
-            bOut.reset();
-        }
-        
-        return pq;
-    }
-
-    private boolean processCertD1i(
-        int                 index,
-        List     []            policyNodes,
-        DERObjectIdentifier pOid,
-        Set                 pq)
-    {
-        List       policyNodeVec = policyNodes[index - 1];
-
-        for (int j = 0; j < policyNodeVec.size(); j++)
-        {
-            PKIXPolicyNode node = (PKIXPolicyNode)policyNodeVec.get(j);
-            Set            expectedPolicies = node.getExpectedPolicies();
-            
-            if (expectedPolicies.contains(pOid.getId()))
-            {
-                Set childExpectedPolicies = new HashSet();
-                childExpectedPolicies.add(pOid.getId());
-                
-                PKIXPolicyNode child = new PKIXPolicyNode(new ArrayList(),
-                                                           index,
-                                                           childExpectedPolicies,
-                                                           node,
-                                                           pq,
-                                                           pOid.getId(),
-                                                           false);
-                node.addChild(child);
-                policyNodes[index].add(child);
-                
-                return true;
-            }
-        }
-        
-        return false;
-    }
-
-    private void processCertD1ii(
-        int                 index,
-        List     []            policyNodes,
-        DERObjectIdentifier _poid,
-        Set _pq)
-    {
-        List       policyNodeVec = policyNodes[index - 1];
-
-        for (int j = 0; j < policyNodeVec.size(); j++)
-        {
-            PKIXPolicyNode _node = (PKIXPolicyNode)policyNodeVec.get(j);
-            Set            _expectedPolicies = _node.getExpectedPolicies();
-            
-            if (ANY_POLICY.equals(_node.getValidPolicy()))
-            {
-                Set _childExpectedPolicies = new HashSet();
-                _childExpectedPolicies.add(_poid.getId());
-                
-                PKIXPolicyNode _child = new PKIXPolicyNode(new ArrayList(),
-                                                           index,
-                                                           _childExpectedPolicies,
-                                                           _node,
-                                                           _pq,
-                                                           _poid.getId(),
-                                                           false);
-                _node.addChild(_child);
-                policyNodes[index].add(_child);
-                return;
-            }
-        }
-    }
-
     public CertPathValidatorResult engineValidate(
         CertPath certPath,
         CertPathParameters params)
@@ -660,7 +127,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         //
         // (b)
         //
-        Date validDate = getValidDate(paramsPKIX);
+        Date validDate = CertPathValidatorUtilities.getValidDate(paramsPKIX);
 
         //
         // (c)
@@ -670,7 +137,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         //
         // (d)
         // 
-        TrustAnchor trust = findTrustAnchor((X509Certificate)certs.get(certs.size() - 1), certPath, certs.size() - 1, paramsPKIX.getTrustAnchors());
+        TrustAnchor trust = CertPathValidatorUtilities.findTrustAnchor((X509Certificate)certs.get(certs.size() - 1), certPath, certs.size() - 1, paramsPKIX.getTrustAnchors());
 
         if (trust == null)
         {
@@ -778,7 +245,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         {
             if (sign != null)
             {
-                workingIssuerName = getSubjectPrincipal(sign);
+                workingIssuerName = CertPathValidatorUtilities.getSubjectPrincipal(sign);
                 workingPublicKey = sign.getPublicKey();
             }
             else
@@ -792,7 +259,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             throw new CertPathValidatorException("TrustAnchor subjectDN: " + ex.toString());
         }
 
-        AlgorithmIdentifier workingAlgId = getAlgorithmIdentifier(workingPublicKey);
+        AlgorithmIdentifier workingAlgId = CertPathValidatorUtilities.getAlgorithmIdentifier(workingPublicKey);
         DERObjectIdentifier workingPublicKeyAlgorithm = workingAlgId.getObjectId();
         DEREncodable        workingPublicKeyParameters = workingAlgId.getParameters();
     
@@ -887,10 +354,10 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 //
                 // (a) (4) name chaining
                 //
-                if (!getEncodedIssuerPrincipal(cert).equals(workingIssuerName))
+                if (!CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert).equals(workingIssuerName))
                 {
                     throw new CertPathValidatorException(
-                                "IssuerName(" + getEncodedIssuerPrincipal(cert) +
+                                "IssuerName(" + CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert) +
                                 ") does not match SubjectName(" + workingIssuerName +
                                 ") of signing certificate", null, certPath, index);
                 }
@@ -898,9 +365,9 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 //
                 // (b), (c) permitted and excluded subtree checking.
                 //
-                if (!(isSelfIssued(cert) && (i < n)))
+                if (!(CertPathValidatorUtilities.isSelfIssued(cert) && (i < n)))
                 {
-                    X500Principal principal = getSubjectPrincipal(cert);
+                    X500Principal principal = CertPathValidatorUtilities.getSubjectPrincipal(cert);
                     ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(principal.getEncoded()));
                     ASN1Sequence    dns;
     
@@ -913,11 +380,11 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         throw new CertPathValidatorException("exception extracting subject name when checking subtrees");
                     }
     
-                    checkPermittedDN(permittedSubtreesDN, dns);
+                    CertPathValidatorUtilities.checkPermittedDN(permittedSubtreesDN, dns);
     
-                    checkExcludedDN(excludedSubtreesDN, dns);
+                    CertPathValidatorUtilities.checkExcludedDN(excludedSubtreesDN, dns);
             
-                    ASN1Sequence   altName = (ASN1Sequence)getExtensionValue(cert, SUBJECT_ALTERNATIVE_NAME);
+                    ASN1Sequence   altName = (ASN1Sequence)CertPathValidatorUtilities.getExtensionValue(cert, SUBJECT_ALTERNATIVE_NAME);
                     if (altName != null)
                     {
                         for (int j = 0; j < altName.size(); j++)
@@ -929,20 +396,20 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             case 1:
                                 String email = DERIA5String.getInstance(o, true).getString();
     
-                                checkPermittedEmail(permittedSubtreesEmail, email);
-                                checkExcludedEmail(excludedSubtreesEmail, email);
+                                CertPathValidatorUtilities.checkPermittedEmail(permittedSubtreesEmail, email);
+                                CertPathValidatorUtilities.checkExcludedEmail(excludedSubtreesEmail, email);
                                 break;
                             case 4:
                                 ASN1Sequence altDN = ASN1Sequence.getInstance(o, true);
     
-                                checkPermittedDN(permittedSubtreesDN, altDN);
-                                checkExcludedDN(excludedSubtreesDN, altDN);
+                                CertPathValidatorUtilities.checkPermittedDN(permittedSubtreesDN, altDN);
+                                CertPathValidatorUtilities.checkExcludedDN(excludedSubtreesDN, altDN);
                                 break;
                             case 7:
                                 byte[] ip = ASN1OctetString.getInstance(o, true).getOctets();
     
-                                checkPermittedIP(permittedSubtreesIP, ip);
-                                checkExcludedIP(excludedSubtreesIP, ip);
+                                CertPathValidatorUtilities.checkPermittedIP(permittedSubtreesIP, ip);
+                                CertPathValidatorUtilities.checkExcludedIP(excludedSubtreesIP, ip);
                             }
                         }
                     }
@@ -952,7 +419,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 // (d) policy Information checking against initial policy and
                 // policy mapping
                 //
-                ASN1Sequence   certPolicies = (ASN1Sequence)getExtensionValue(cert, CERTIFICATE_POLICIES);
+                ASN1Sequence   certPolicies = (ASN1Sequence)CertPathValidatorUtilities.getExtensionValue(cert, CERTIFICATE_POLICIES);
                 if (certPolicies != null && validPolicyTree != null)
                 {
                     //
@@ -970,13 +437,13 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     
                         if (!ANY_POLICY.equals(pOid.getId()))
                         {
-                            Set pq = getQualifierSet(pInfo.getPolicyQualifiers());
+                            Set pq = CertPathValidatorUtilities.getQualifierSet(pInfo.getPolicyQualifiers());
                             
-                            boolean match = processCertD1i(i, policyNodes, pOid, pq);
+                            boolean match = CertPathValidatorUtilities.processCertD1i(i, policyNodes, pOid, pq);
                             
                             if (!match)
                             {
-                                processCertD1ii(i, policyNodes, pOid, pq);
+                                CertPathValidatorUtilities.processCertD1ii(i, policyNodes, pOid, pq);
                             }
                         }
                     }
@@ -1006,7 +473,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     //
                     // (d) (2)
                     //
-                    if ((inhibitAnyPolicy > 0) || ((i < n) && isSelfIssued(cert)))
+                    if ((inhibitAnyPolicy > 0) || ((i < n) && CertPathValidatorUtilities.isSelfIssued(cert)))
                     {
                         e = certPolicies.getObjects();
     
@@ -1016,7 +483,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     
                             if (ANY_POLICY.equals(pInfo.getPolicyIdentifier().getId()))
                             {
-                                Set    _apq   = getQualifierSet(pInfo.getPolicyQualifiers());
+                                Set    _apq   = CertPathValidatorUtilities.getQualifierSet(pInfo.getPolicyQualifiers());
                                 List      _nodes = policyNodes[i - 1];
                                 
                                 for (int k = 0; k < _nodes.size(); k++)
@@ -1089,7 +556,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             PKIXPolicyNode node = (PKIXPolicyNode)nodes.get(k);
                             if (!node.hasChildren())
                             {
-                                validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, node);
+                                validPolicyTree = CertPathValidatorUtilities.removePolicyNode(validPolicyTree, policyNodes, node);
                                 if (validPolicyTree == null)
                                 {
                                     break;
@@ -1148,7 +615,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     //
                     // (a) check the policy mappings
                     //
-                    DERObject   pm = getExtensionValue(cert, POLICY_MAPPINGS);
+                    DERObject   pm = CertPathValidatorUtilities.getExtensionValue(cert, POLICY_MAPPINGS);
                     if (pm != null)
                     {
                         ASN1Sequence mappings = (ASN1Sequence)pm;
@@ -1235,7 +702,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                         if (ANY_POLICY.equals(node.getValidPolicy()))
                                         {
                                             Set pq = null;
-                                            ASN1Sequence policies = (ASN1Sequence)getExtensionValue(
+                                            ASN1Sequence policies = (ASN1Sequence)CertPathValidatorUtilities.getExtensionValue(
                                                     cert, CERTIFICATE_POLICIES);
                                             Enumeration e = policies.getObjects();
                                             while (e.hasMoreElements())
@@ -1243,7 +710,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                                 PolicyInformation pinfo = PolicyInformation.getInstance(e.nextElement());
                                                 if (ANY_POLICY.equals(pinfo.getPolicyIdentifier().getId()))
                                                 {
-                                                    pq = getQualifierSet(pinfo.getPolicyQualifiers());
+                                                    pq = CertPathValidatorUtilities.getQualifierSet(pinfo.getPolicyQualifiers());
                                                     break;
                                                 }
                                             }
@@ -1291,7 +758,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                                 PKIXPolicyNode node2 = (PKIXPolicyNode)nodes.get(l);
                                                 if (!node2.hasChildren())
                                                 {
-                                                    validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, node2);
+                                                    validPolicyTree = CertPathValidatorUtilities.removePolicyNode(validPolicyTree, policyNodes, node2);
                                                     if (validPolicyTree == null)
                                                     {
                                                         break;
@@ -1308,7 +775,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     //
                     // (g) handle the name constraints extension
                     //
-                    ASN1Sequence ncSeq = (ASN1Sequence)getExtensionValue(cert, NAME_CONSTRAINTS);
+                    ASN1Sequence ncSeq = (ASN1Sequence)CertPathValidatorUtilities.getExtensionValue(cert, NAME_CONSTRAINTS);
                     if (ncSeq != null)
                     {
                         NameConstraints nc = new NameConstraints(ncSeq);
@@ -1328,13 +795,13 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                 switch(base.getTagNo())
                                 {
                                     case 1:
-                                        permittedSubtreesEmail = intersectEmail(permittedSubtreesEmail, DERIA5String.getInstance(base.getName()).getString());
+                                        permittedSubtreesEmail = CertPathValidatorUtilities.intersectEmail(permittedSubtreesEmail, DERIA5String.getInstance(base.getName()).getString());
                                         break;
                                     case 4:
-                                        permittedSubtreesDN = intersectDN(permittedSubtreesDN, (ASN1Sequence)base.getName());
+                                        permittedSubtreesDN = CertPathValidatorUtilities.intersectDN(permittedSubtreesDN, (ASN1Sequence)base.getName());
                                         break;
                                     case 7:
-                                        permittedSubtreesIP = intersectIP(permittedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
+                                        permittedSubtreesIP = CertPathValidatorUtilities.intersectIP(permittedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
                                         break;
                                 }
                             }
@@ -1355,13 +822,13 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                 switch(base.getTagNo())
                                 {
                                 case 1:
-                                    excludedSubtreesEmail = unionEmail(excludedSubtreesEmail, DERIA5String.getInstance(base.getName()).getString());
+                                    excludedSubtreesEmail = CertPathValidatorUtilities.unionEmail(excludedSubtreesEmail, DERIA5String.getInstance(base.getName()).getString());
                                     break;
                                 case 4:
-                                    excludedSubtreesDN = unionDN(excludedSubtreesDN, (ASN1Sequence)base.getName());
+                                    excludedSubtreesDN = CertPathValidatorUtilities.unionDN(excludedSubtreesDN, (ASN1Sequence)base.getName());
                                     break;
                                 case 7:
-                                    excludedSubtreesIP = unionIP(excludedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
+                                    excludedSubtreesIP = CertPathValidatorUtilities.unionIP(excludedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
                                     break;
                                 }
                             }
@@ -1371,7 +838,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     //
                     // (h)
                     //
-                    if (!isSelfIssued(cert))
+                    if (!CertPathValidatorUtilities.isSelfIssued(cert))
                     {
                         //
                         // (1)
@@ -1401,7 +868,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     //
                     // (i)
                     //
-                    ASN1Sequence pc = (ASN1Sequence)getExtensionValue(cert, POLICY_CONSTRAINTS);
+                    ASN1Sequence pc = (ASN1Sequence)CertPathValidatorUtilities.getExtensionValue(cert, POLICY_CONSTRAINTS);
                 
                     if (pc != null)
                     {
@@ -1433,7 +900,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     //
                     // (j)
                     //
-                    DERInteger iap = (DERInteger)getExtensionValue(cert, INHIBIT_ANY_POLICY);
+                    DERInteger iap = (DERInteger)CertPathValidatorUtilities.getExtensionValue(cert, INHIBIT_ANY_POLICY);
                 
                     if (iap != null)
                     {
@@ -1449,7 +916,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     // (k)
                     //
                     BasicConstraints    bc = BasicConstraints.getInstance(
-                                                getExtensionValue(cert, BASIC_CONSTRAINTS));
+                            CertPathValidatorUtilities.getExtensionValue(cert, BASIC_CONSTRAINTS));
                     if (bc != null)
                     {
                         if (!(bc.isCA()))
@@ -1465,7 +932,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     //
                     // (l)
                     //
-                    if (!isSelfIssued(cert))
+                    if (!CertPathValidatorUtilities.isSelfIssued(cert))
                     {
                         if (maxPathLength <= 0)
                         {
@@ -1545,13 +1012,13 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 workingPublicKey = sign.getPublicKey();
                 try
                 {
-                    workingIssuerName = getSubjectPrincipal(sign);
+                    workingIssuerName = CertPathValidatorUtilities.getSubjectPrincipal(sign);
                 }
                 catch (IllegalArgumentException ex)
                 {
                     throw new CertPathValidatorException(sign.getSubjectDN().getName() + " :" + ex.toString());
                 }
-                workingAlgId = getAlgorithmIdentifier(workingPublicKey);
+                workingAlgId = CertPathValidatorUtilities.getAlgorithmIdentifier(workingPublicKey);
                 workingPublicKeyAlgorithm = workingAlgId.getObjectId();
                 workingPublicKeyParameters = workingAlgId.getParameters();
             }
@@ -1568,7 +1035,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         //
         // (a)
         //
-        if (!isSelfIssued(cert) && (explicitPolicy != 0))
+        if (!CertPathValidatorUtilities.isSelfIssued(cert) && (explicitPolicy != 0))
         {
             explicitPolicy--;
         }
@@ -1578,7 +1045,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         //
         try
         {
-            ASN1Sequence pc = (ASN1Sequence)getExtensionValue(cert, POLICY_CONSTRAINTS);
+            ASN1Sequence pc = (ASN1Sequence)CertPathValidatorUtilities.getExtensionValue(cert, POLICY_CONSTRAINTS);
             if (pc != null)
             {
                 Enumeration policyConstraints = pc.getObjects();
@@ -1669,7 +1136,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
             }
             intersection = null;
         }
-        else if (isAnyPolicy(userInitialPolicySet)) // (g) (ii)
+        else if (CertPathValidatorUtilities.isAnyPolicy(userInitialPolicySet)) // (g) (ii)
         {
             if (paramsPKIX.isExplicitPolicyRequired())
             {
@@ -1722,7 +1189,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                 PKIXPolicyNode node = (PKIXPolicyNode)nodes.get(k);
                                 if (!node.hasChildren())
                                 {
-                                    validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, node);
+                                    validPolicyTree = CertPathValidatorUtilities.removePolicyNode(validPolicyTree, policyNodes, node);
                                 }
                             }
                         }
@@ -1780,7 +1247,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
                 if (!userInitialPolicySet.contains(_validPolicy))
                 {
-                    validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, _node);
+                    validPolicyTree = CertPathValidatorUtilities.removePolicyNode(validPolicyTree, policyNodes, _node);
                 }
             }
             
@@ -1798,7 +1265,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         PKIXPolicyNode node = (PKIXPolicyNode)nodes.get(k);
                         if (!node.hasChildren())
                         {
-                            validPolicyTree = removePolicyNode(validPolicyTree, policyNodes, node);
+                            validPolicyTree = CertPathValidatorUtilities.removePolicyNode(validPolicyTree, policyNodes, node);
                         }
                     }
                 }
@@ -1814,44 +1281,31 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
         throw new CertPathValidatorException("Path processing failed on policy.", null, certPath, index);
     }
-
-    private Date getValidDate(
-        PKIXParameters paramsPKIX)
-    {
-        Date validDate = paramsPKIX.getDate();
-
-        if (validDate == null)
-        {
-            validDate = new Date();
-        }
-        
-        return validDate;
-    }
-
+    
     private void checkCRLs(PKIXParameters paramsPKIX, X509Certificate cert, Date validDate, X509Certificate sign, PublicKey workingPublicKey) 
-        throws AnnotatedException 
+        throws AnnotatedException
     {
         X509CRLSelector crlselect;
         crlselect = new X509CRLSelector();
-
+    
         try
         {
-            crlselect.addIssuerName(getEncodedIssuerPrincipal(cert).getEncoded());
+            crlselect.addIssuerName(CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert).getEncoded());
         }
         catch (IOException e)
         {
             throw new AnnotatedException("Cannot extract issuer from certificate: " + e, e);
         }
-
+    
         crlselect.setCertificateChecking(cert);
-
-        Iterator crl_iter = findCRLs(crlselect, paramsPKIX.getCertStores()).iterator();
+    
+        Iterator crl_iter = CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getCertStores()).iterator();
         boolean validCrlFound = false;
         X509CRLEntry crl_entry;
         while (crl_iter.hasNext())
         {
             X509CRL crl = (X509CRL)crl_iter.next();
-
+    
             if (cert.getNotAfter().after(crl.getThisUpdate()))
             {
                 if (crl.getNextUpdate() == null
@@ -1859,11 +1313,11 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 {
                     validCrlFound = true;
                 }
-
+    
                 if (sign != null)
                 {
                     boolean[] keyusage = sign.getKeyUsage();
-
+    
                     if (keyusage != null
                         && (keyusage.length < 7 || !keyusage[CRL_SIGN]))
                     {
@@ -1871,7 +1325,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             "Issuer certificate keyusage extension does not permit crl signing.\n" + sign);
                     }
                 }
-
+    
                 try
                 {
                     crl.verify(workingPublicKey, "BC");
@@ -1880,7 +1334,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 {
                     throw new AnnotatedException("can't verify CRL: " + e, e);
                 }
-
+    
                 crl_entry = crl.getRevokedCertificate(cert.getSerialNumber());
                 if (crl_entry != null
                     && !validDate.before(crl_entry.getRevocationDate()))
@@ -1889,7 +1343,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     
                     if (crl_entry.hasExtensions())
                     {
-                        DEREnumerated reasonCode = DEREnumerated.getInstance(getExtensionValue(crl_entry, X509Extensions.ReasonCode.getId()));
+                        DEREnumerated reasonCode = DEREnumerated.getInstance(CertPathValidatorUtilities.getExtensionValue(crl_entry, X509Extensions.ReasonCode.getId()));
                         if (reasonCode != null)
                         {
                             reason = crlReasons[reasonCode.getValue().intValue()];
@@ -1905,36 +1359,36 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     
                     throw new AnnotatedException(message);
                 }
-
+    
                 //
                 // check the DeltaCRL indicator, base point and the issuing distribution point
                 //
-                DERObject idp = getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
-                DERObject dci = getExtensionValue(crl, DELTA_CRL_INDICATOR);
-
+                DERObject idp = CertPathValidatorUtilities.getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
+                DERObject dci = CertPathValidatorUtilities.getExtensionValue(crl, DELTA_CRL_INDICATOR);
+    
                 if (dci != null)
                 {
                     X509CRLSelector baseSelect = new X509CRLSelector();
-
+    
                     try
                     {
-                        baseSelect.addIssuerName(getIssuerPrincipal(crl).getEncoded());
+                        baseSelect.addIssuerName(CertPathValidatorUtilities.getIssuerPrincipal(crl).getEncoded());
                     }
                     catch (IOException e)
                     {
                         throw new AnnotatedException("can't extract issuer from certificate: " + e, e);
                     }
-
+    
                     baseSelect.setMinCRLNumber(((DERInteger)dci).getPositiveValue());
-                    baseSelect.setMaxCRLNumber(((DERInteger)getExtensionValue(crl, CRL_NUMBER)).getPositiveValue().subtract(BigInteger.valueOf(1)));
+                    baseSelect.setMaxCRLNumber(((DERInteger)CertPathValidatorUtilities.getExtensionValue(crl, CRL_NUMBER)).getPositiveValue().subtract(BigInteger.valueOf(1)));
                     
                     boolean  foundBase = false;
-                    Iterator it  = findCRLs(baseSelect, paramsPKIX.getCertStores()).iterator();
+                    Iterator it  = CertPathValidatorUtilities.findCRLs(baseSelect, paramsPKIX.getCertStores()).iterator();
                     while (it.hasNext())
                     {
                         X509CRL base = (X509CRL)it.next();
-
-                        DERObject baseIdp = getExtensionValue(base, ISSUING_DISTRIBUTION_POINT);
+    
+                        DERObject baseIdp = CertPathValidatorUtilities.getExtensionValue(base, ISSUING_DISTRIBUTION_POINT);
                         
                         if (idp == null)
                         {
@@ -1959,11 +1413,11 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         throw new AnnotatedException("No base CRL for delta CRL");
                     }
                 }
-
+    
                 if (idp != null)
                 {
                     IssuingDistributionPoint    p = IssuingDistributionPoint.getInstance(idp);
-                    BasicConstraints    bc = BasicConstraints.getInstance(getExtensionValue(cert, BASIC_CONSTRAINTS));
+                    BasicConstraints    bc = BasicConstraints.getInstance(CertPathValidatorUtilities.getExtensionValue(cert, BASIC_CONSTRAINTS));
                     
                     if (p.onlyContainsUserCerts() && (bc != null && bc.isCA()))
                     {
@@ -1982,163 +1436,12 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 }
             }
         }
-
+    
         if (!validCrlFound)
         {
             throw new AnnotatedException("no valid CRL found");
         }
+        
     }
 
-    /**
-     * Return a Collection of all CRLs found in the
-     * CertStore's that are matching the crlSelect criteriums.
-     *
-     * @param certSelector a {@link CertSelector CertSelector}
-     * object that will be used to select the certificates
-     * @param certStores a List containing only {@link CertStore
-     * CertStore} objects. These are used to search for
-     * CRLs
-     *
-     * @return a Collection of all found {@link CRL CRL}
-     * objects. May be empty but never <code>null</code>.
-     */
-    private final Collection findCRLs(
-        X509CRLSelector crlSelect,
-        List            crlStores)
-        throws AnnotatedException
-    {
-        Set crls = new HashSet();
-        Iterator iter = crlStores.iterator();
-
-        while (iter.hasNext())
-        {
-            CertStore   certStore = (CertStore)iter.next();
-
-            try
-            {
-                crls.addAll(certStore.getCRLs(crlSelect));
-            }
-            catch (CertStoreException e)
-            {
-                throw new AnnotatedException("cannot extract crl: " + e, e);
-            }
-        }
-
-        return crls;
-    }
-
-    /**
-     * Search the given Set of TrustAnchor's for one that is the
-     * issuer of the fiven X509 certificate.
-     *
-     * @param cert the X509 certificate
-     * @param trustAnchors a Set of TrustAnchor's
-     *
-     * @return the <code>TrustAnchor</code> object if found or
-     * <code>null</code> if not.
-     *
-     * @exception CertPathValidatorException if a TrustAnchor  was
-     * found but the signature verification on the given certificate
-     * has thrown an exception. This Exception can be obtainted with
-     * <code>getCause()</code> method.
-     **/
-    final TrustAnchor findTrustAnchor(
-        X509Certificate cert,
-        CertPath        certPath,
-        int             index,
-        Set             trustAnchors) 
-        throws CertPathValidatorException
-    {
-        Iterator iter = trustAnchors.iterator();
-        TrustAnchor trust = null;
-        PublicKey trustPublicKey = null;
-        Exception invalidKeyEx = null;
-
-        X509CertSelector certSelectX509 = new X509CertSelector();
-
-        try
-        {
-            certSelectX509.setSubject(getEncodedIssuerPrincipal(cert).getEncoded());
-        }
-        catch (IOException ex)
-        {
-            throw new CertPathValidatorException(ex);
-        }
-
-        while (iter.hasNext() && trust == null)
-        {
-            trust = (TrustAnchor)iter.next();
-            if (trust.getTrustedCert() != null)
-            {
-                if (certSelectX509.match(trust.getTrustedCert()))
-                {
-                    trustPublicKey = trust.getTrustedCert().getPublicKey();
-                }
-                else
-                {
-                    trust = null;
-                }
-            }
-            else if (trust.getCAName() != null
-                        && trust.getCAPublicKey() != null)
-            {
-                try
-                {
-                    X500Principal certIssuer = getEncodedIssuerPrincipal(cert);
-                    X500Principal caName = new X500Principal(trust.getCAName());
-                    if (certIssuer.equals(caName))
-                    {
-                        trustPublicKey = trust.getCAPublicKey();
-                    }
-                    else
-                    {
-                        trust = null;
-                    }
-                }
-                catch (IllegalArgumentException ex)
-                {
-                    trust = null;
-                }
-            }
-            else
-            {
-                trust = null;
-            }
-            
-            if (trustPublicKey != null)
-            {
-                try
-                {
-                    cert.verify(trustPublicKey);
-                }
-                catch (Exception ex)
-                {
-                    invalidKeyEx = ex;
-                    trust = null;
-                }
-            }
-        }
-    
-        if (trust == null && invalidKeyEx != null)
-        {
-            throw new CertPathValidatorException("TrustAnchor found but certificate validation failed.", invalidKeyEx, certPath, index);
-        }
-
-        return trust;
-    }
-    
-    private X500Principal getIssuerPrincipal(X509CRL crl)
-    {
-        return crl.getIssuerX500Principal();
-    }
-
-    private X500Principal getEncodedIssuerPrincipal(X509Certificate cert)
-    {
-        return cert.getIssuerX500Principal();
-    }
-
-    private X500Principal getSubjectPrincipal(X509Certificate cert)
-    {
-        return cert.getSubjectX500Principal();
-    }
 }

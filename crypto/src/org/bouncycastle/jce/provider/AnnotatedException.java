@@ -1,7 +1,6 @@
 package org.bouncycastle.jce.provider;
 
-
-class AnnotatedException 
+public class AnnotatedException 
     extends Exception
 {
     private Exception _underlyingException;
@@ -15,13 +14,18 @@ class AnnotatedException
         _underlyingException = e;
     }
     
-    public AnnotatedException(
+    AnnotatedException(
         String string)
     {
         this(string, null);
     }
 
     Exception getUnderlyingException()
+    {
+        return _underlyingException;
+    }
+    
+    public Throwable getCause()
     {
         return _underlyingException;
     }
