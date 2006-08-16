@@ -16,8 +16,10 @@ import java.util.List;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
+import javax.mail.Session;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import junit.framework.Test;
@@ -456,6 +458,26 @@ public class SMIMESignedTest
         assertEquals(2, certs.getCertificates(null).size());
     }
     
+    public void testQuotable()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("quotable.message");
+        
+        SMIMESigned s = new SMIMESigned((MimeMultipart)message.getContent());
+        
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+    
+    public void testQuotableParser()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("quotable.message");
+        
+        SMIMESignedParser s = new SMIMESignedParser((MimeMultipart)message.getContent());
+        
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+    
     private String getDigestOid(SignerInformationStore s)
     {
         return ((SignerInformation)s.getSigners().iterator().next()).getDigestAlgOID();
@@ -495,7 +517,6 @@ public class SMIMESignedTest
         assertEquals(true, Arrays.equals(bOut1.toByteArray(), bOut2.toByteArray()));
     }
     
-
     private ASN1EncodableVector generateSignedAttributes()
     {
         ASN1EncodableVector         signedAttrs = new ASN1EncodableVector();
@@ -508,5 +529,13 @@ public class SMIMESignedTest
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         
         return signedAttrs;
+    }
+    
+    private MimeMessage loadMessage(String name) 
+        throws MessagingException
+    {
+        Session session = Session.getDefaultInstance(System.getProperties(), null);
+
+        return new MimeMessage(session, this.getClass().getResourceAsStream("data/" + name));
     }
 }
