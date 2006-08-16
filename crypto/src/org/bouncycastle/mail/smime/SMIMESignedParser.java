@@ -12,6 +12,7 @@ import java.io.OutputStream;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
+import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.Session;
@@ -22,7 +23,6 @@ import javax.mail.internet.MimeMultipart;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSTypedStream;
-import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -84,21 +84,16 @@ public class SMIMESignedParser
     }
 
     private static CMSTypedStream getSignedInputStream(
-        Part    bodyPart,
-        String  defaultContentTransferEncoding)
+        BodyPart    bodyPart,
+        String      defaultContentTransferEncoding)
         throws MessagingException
     {
         try
         {
-            File         tmp = File.createTempFile("bcMail", ".mime");   
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(tmp));
-            
-            if (SMIMEUtil.isCanonicalisationRequired(bodyPart, defaultContentTransferEncoding))
-            {
-                out = new CRLFOutputStream(out);
-            }
-            
-            bodyPart.writeTo(out);
+            File           tmp = File.createTempFile("bcMail", ".mime");   
+            OutputStream   out = new BufferedOutputStream(new FileOutputStream(tmp));
+
+            SMIMEUtil.outputBodyPart(out, bodyPart, defaultContentTransferEncoding);
             
             out.close();
             
