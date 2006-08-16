@@ -4,11 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateParsingException;
+import java.util.Enumeration;
 
 import javax.mail.MessagingException;
 import javax.mail.Part;
@@ -17,10 +19,13 @@ import javax.mail.internet.MimeBodyPart;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 public class SMIMEUtil
 {
+    private static final int BUF_SIZE = 4096;
+    
     static boolean isCanonicalisationRequired(
         Part   bodyPart,
         String defaultContentTransferEncoding) 
@@ -49,6 +54,145 @@ public class SMIMEUtil
         }
     }
     
+    private static class LineOutputStream extends FilterOutputStream
+    {
+        private static byte newline[];
+
+        public LineOutputStream(OutputStream outputstream)
+        {
+            super(outputstream);
+        }
+
+        public void writeln(String s)
+            throws MessagingException
+        {
+            try
+            {
+                byte abyte0[] = getBytes(s);
+                super.out.write(abyte0);
+                super.out.write(newline);
+                return;
+            }
+            catch(Exception exception)
+            {
+                throw new MessagingException("IOException", exception);
+            }
+        }
+
+        public void writeln()
+            throws MessagingException
+        {
+            try
+            {
+                super.out.write(newline);
+                return;
+            }
+            catch(Exception exception)
+            {
+                throw new MessagingException("IOException", exception);
+            }
+        }
+
+        static 
+        {
+            newline = new byte[2];
+            newline[0] = 13;
+            newline[1] = 10;
+        }
+        
+        private static byte[] getBytes(String s)
+        {
+            char ac[] = s.toCharArray();
+            int i = ac.length;
+            byte abyte0[] = new byte[i];
+            int j = 0;
+
+            while (j < i)
+            {
+                abyte0[j] = (byte)ac[j++];
+            }
+
+            return abyte0;
+        }
+    }
+    
+    static void outputBodyPart(   
+        OutputStream out,
+        Part         bodyPart,
+        String       defaultContentTransferEncoding) 
+        throws MessagingException, IOException
+    {
+        if (bodyPart instanceof MimeBodyPart)
+        {
+            MimeBodyPart    mimePart = (MimeBodyPart)bodyPart;
+            String[]        cte = mimePart.getHeader("Content-Transfer-Encoding");
+            String          contentTransferEncoding;
+
+            if (cte == null)
+            {
+                contentTransferEncoding = defaultContentTransferEncoding;
+            }
+            else
+            {
+                contentTransferEncoding = cte[0];
+            }
+
+            if (!contentTransferEncoding.equalsIgnoreCase("base64")
+                   && !contentTransferEncoding.equalsIgnoreCase("quoted-printable"))
+            {
+                if (!contentTransferEncoding.equalsIgnoreCase("binary"))
+                {
+                    out = new CRLFOutputStream(out);
+                }
+                bodyPart.writeTo(out);
+                out.flush();
+                return;
+            }
+        
+            // 
+            // Special handling for Base64 or quoted-printable encoded
+            // body part - this is to get around JavaMail's habit of
+            // decoding and then re-encoding base64 data...
+            //
+
+            //
+            // Write headers
+            //
+            LineOutputStream outLine = new LineOutputStream(out);
+            for (Enumeration e = mimePart.getAllHeaderLines(); e.hasMoreElements();) 
+            {
+                outLine.writeln((String)e.nextElement());
+            }
+
+            outLine.writeln();
+            outLine.flush();
+
+            //
+            // Write raw content, performing canonicalization
+            //
+            InputStream in = mimePart.getRawInputStream();
+            CRLFOutputStream outCRLF = new CRLFOutputStream(out);
+
+            byte[]      buf = new byte[BUF_SIZE];
+
+            int len = 0;
+            while ((len = in.read(buf, 0, buf.length)) > 0)
+            {
+                outCRLF.write(buf, 0, len);
+            }
+
+            outCRLF.flush();
+        }
+        else
+        {
+            if (!defaultContentTransferEncoding.equalsIgnoreCase("binary"))
+            {
+                out = new CRLFOutputStream(out);
+            }
+            
+            bodyPart.writeTo(new CRLFOutputStream(out));
+        }
+    }
     /**
      * return the MimeBodyPart described in the raw bytes provided in content
      */
