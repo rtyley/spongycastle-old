@@ -29,6 +29,7 @@ Release 1.34
 <li>Generating critical signature subpackets in OpenPGP would result in a zero packet tag. This has been fixed.
 <li>Some flags in PKIFailure info were incorrect, and the range of values was incomplete. The range of values has been increased and the flags corrected.
 <li>The helper class for AuthorityKeyExtension generation was including the subject rather than the issuer DN of the CA certificate. This has been fixed.
+<li>SMIMESignedParser now avoids JavaMail quoted-printable recoding issue.
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
