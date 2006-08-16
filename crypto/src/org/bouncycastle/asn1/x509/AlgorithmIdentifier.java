@@ -26,7 +26,7 @@ public class AlgorithmIdentifier
     public static AlgorithmIdentifier getInstance(
         Object  obj)
     {
-        if (obj instanceof AlgorithmIdentifier)
+        if (obj== null || obj instanceof AlgorithmIdentifier)
         {
             return (AlgorithmIdentifier)obj;
         }
