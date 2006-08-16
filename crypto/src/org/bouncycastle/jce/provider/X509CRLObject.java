@@ -22,6 +22,7 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -44,11 +45,32 @@ public class X509CRLObject
     extends X509CRL
 {
     private CertificateList c;
+    private String sigAlgName;
+    private byte[] sigAlgParams;
 
     public X509CRLObject(
         CertificateList c)
+        throws CRLException
     {
         this.c = c;
+        
+        try
+        {
+            this.sigAlgName = X509SignatureUtil.getSignatureName(c.getSignatureAlgorithm());
+            
+            if (c.getSignatureAlgorithm().getParameters() != null)
+            {
+                this.sigAlgParams = ((ASN1Encodable)c.getSignatureAlgorithm().getParameters()).getDEREncoded();
+            }
+            else
+            {
+                this.sigAlgParams = null;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new CRLException("CRL contents invalid: " + e);
+        }
     }
 
     /**
@@ -280,7 +302,7 @@ public class X509CRLObject
 
     public String getSigAlgName()
     {
-        return X509SignatureUtil.getSignatureName(c.getSignatureAlgorithm());
+        return sigAlgName;
     }
 
     public String getSigAlgOID()
@@ -290,24 +312,15 @@ public class X509CRLObject
 
     public byte[] getSigAlgParams()
     {
-        ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-
-        if (c.getSignatureAlgorithm().getParameters() != null)
+        if (sigAlgParams != null)
         {
-            try
-            {
-                DEROutputStream    dOut = new DEROutputStream(bOut);
-
-                dOut.writeObject(c.getSignatureAlgorithm().getParameters());
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("exception getting sig parameters " + e);
-            }
-
-            return bOut.toByteArray();
+            byte[] tmp = new byte[sigAlgParams.length];
+            
+            System.arraycopy(sigAlgParams, 0, tmp, 0, tmp.length);
+            
+            return tmp;
         }
-
+        
         return null;
     }
 

@@ -10,6 +10,7 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -318,6 +319,13 @@ public class X509V2CRLGenerator
         v.add(sigAlgId);
         v.add(new DERBitString(sig.sign()));
 
-        return new X509CRLObject(new CertificateList(new DERSequence(v)));
+        try
+        {
+            return new X509CRLObject(new CertificateList(new DERSequence(v)));
+        }
+        catch (CRLException e)
+        {
+            throw new IllegalStateException("attempt to create malformed CRL: " + e.getMessage());
+        }
     }
 }
