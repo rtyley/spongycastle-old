@@ -377,7 +377,14 @@ public class X509V2CRLGenerator
         v.add(sigAlgId);
         v.add(new DERBitString(sig.sign()));
 
-        return new X509CRLObject(new CertificateList(new DERSequence(v)));
+        try
+        {
+            return new X509CRLObject(new CertificateList(new DERSequence(v)));
+        }
+        catch (CRLException e)
+        {
+            throw new SecurityException("exception creating CRL: " + e.getMessage());
+        }
     }
     
     

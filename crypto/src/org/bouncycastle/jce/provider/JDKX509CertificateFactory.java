@@ -40,6 +40,10 @@ public class JDKX509CertificateFactory
     private int                sDataObjectCount = 0;
     private InputStream        currentStream = null;
     
+    private SignedData         sCrlData = null;
+    private int                sCrlDataObjectCount = 0;
+    private InputStream        currentCrlStream = null;
+
     private String readLine(
         InputStream in)
         throws IOException
@@ -156,7 +160,7 @@ public class JDKX509CertificateFactory
 
     private CRL readDERCRL(
         InputStream in)
-        throws IOException
+        throws IOException, CRLException
     {
         ASN1InputStream  dIn = new ASN1InputStream(in);
 
@@ -165,7 +169,7 @@ public class JDKX509CertificateFactory
 
     private CRL readPEMCRL(
         InputStream  in)
-        throws IOException
+        throws IOException, CRLException
     {
         String          line;
         StringBuffer    pemBuf = new StringBuffer();
@@ -197,6 +201,31 @@ public class JDKX509CertificateFactory
         }
 
         return null;
+    }
+
+    private CRL readPKCS7CRL(
+        InputStream  in)
+        throws IOException, CRLException
+    {
+        ASN1InputStream  dIn = new ASN1InputStream(in);
+        ASN1Sequence     seq = (ASN1Sequence)dIn.readObject();
+
+        if (seq.size() > 1
+                && seq.getObjectAt(0) instanceof DERObjectIdentifier)
+        {
+            if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData))
+            {
+                sCrlData = new SignedData(ASN1Sequence.getInstance(
+                                (ASN1TaggedObject)seq.getObjectAt(1), true));
+    
+                return new X509CRLObject(
+                            CertificateList.getInstance(
+                                    sCrlData.getCRLs().getObjectAt(sCrlDataObjectCount++)));
+            }
+        }
+
+        return new X509CRLObject(
+                     CertificateList.getInstance(seq));
     }
 
     /**
@@ -300,24 +329,62 @@ public class JDKX509CertificateFactory
         InputStream inStream) 
         throws CRLException
     {
-        if (!inStream.markSupported())
+        if (currentCrlStream == null)
         {
-            inStream = new BufferedInputStream(inStream);
+            currentCrlStream = inStream;
+            sCrlData = null;
+            sCrlDataObjectCount = 0;
+        }
+        else if (currentCrlStream != inStream) // reset if input stream has changed
+        {
+            currentCrlStream = inStream;
+            sCrlData = null;
+            sCrlDataObjectCount = 0;
         }
 
         try
         {
+            if (sCrlData != null)
+            {
+                if (sCrlDataObjectCount != sCrlData.getCertificates().size())
+                {
+                    return new X509CRLObject(
+                                CertificateList.getInstance(
+                                        sCrlData.getCRLs().getObjectAt(sCrlDataObjectCount++)));
+                }
+                else
+                {
+                    sCrlData = null;
+                    sCrlDataObjectCount = 0;
+                    return null;
+                }
+            }
+            
+            if (!inStream.markSupported())
+            {
+                inStream = new BufferedInputStream(inStream);
+            }
+            
             inStream.mark(10);
             if (inStream.read() != 0x30)  // assume ascii PEM encoded.
             {
                 inStream.reset();
                 return readPEMCRL(inStream);
             }
+            else if (inStream.read() == 0x80)    // assume BER encoded.
+            {
+                inStream.reset();
+                return readPKCS7CRL(inStream);
+            }
             else
             {
                 inStream.reset();
                 return readDERCRL(inStream);
             }
+        }
+        catch (CRLException e)
+        {
+            throw e;
         }
         catch (Exception e)
         {
@@ -338,17 +405,25 @@ public class JDKX509CertificateFactory
         InputStream inStream) 
         throws CRLException
     {
-        return null;
+        CRL     crl;
+        List    crls = new ArrayList();
+
+        while ((crl = engineGenerateCRL(inStream)) != null)
+        {
+            crls.add(crl);
+        }
+
+        return crls;
     }
 
     public Iterator engineGetCertPathEncodings()
     {
-    return PKIXCertPath.certPathEncodings.iterator();
+        return PKIXCertPath.certPathEncodings.iterator();
     }
 
     public CertPath engineGenerateCertPath(
         InputStream inStream)
-    throws CertificateException
+        throws CertificateException
     {
         return engineGenerateCertPath(inStream, "PkiPath");
     }
@@ -356,14 +431,14 @@ public class JDKX509CertificateFactory
     public CertPath engineGenerateCertPath(
         InputStream inStream,
         String encoding)
-    throws CertificateException
+        throws CertificateException
     {
         return new PKIXCertPath(inStream, encoding);
     }
 
     public CertPath engineGenerateCertPath(
         List certificates)
-    throws CertificateException
+        throws CertificateException
     {
         Iterator iter = certificates.iterator();
         Object obj;
