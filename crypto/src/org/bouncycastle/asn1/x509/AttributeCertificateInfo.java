@@ -47,7 +47,7 @@ public class AttributeCertificateInfo
     public AttributeCertificateInfo(
         ASN1Sequence   seq)
     {
-        if (seq.size() != 7)
+        if (seq.size() < 7 || seq.size() > 9)
         {
             throw new IllegalArgumentException("Bad sequence size: " + seq.size());
         }
