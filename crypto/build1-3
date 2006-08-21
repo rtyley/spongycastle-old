@@ -32,6 +32,6 @@ else
     ant -f jdk13.xml build-jce
     ant -f jdk13.xml build
 fi
-ant -f jdk13.xml jar-src
+ant -f jdk13.xml zip-src
 fi
 

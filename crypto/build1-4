@@ -25,5 +25,5 @@ then
 else
     ant -f jdk14.xml build-provider
     ant -f jdk14.xml build
-    ant -f jdk14.xml jar-src
+    ant -f jdk14.xml zip-src
 fi
