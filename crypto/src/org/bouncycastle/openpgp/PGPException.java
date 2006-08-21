@@ -26,4 +26,10 @@ public class PGPException
     {
         return underlying;
     }
+    
+    
+    public Throwable getCause()
+    {
+        return underlying;
+    }
 }

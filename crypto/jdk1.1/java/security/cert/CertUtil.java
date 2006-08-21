@@ -13,6 +13,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.OIDTokenizer;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.util.Strings;
 
 class CertUtil
 {
@@ -489,7 +490,7 @@ class CertUtil
      **/
     static String trimX509Name(String name)
     {
-    String data = name.trim().toUpperCase();
+    String data = Strings.toUpperCase(name.trim());
     int pos;
     while ( (pos = data.indexOf("  ")) >= 0  )
     {

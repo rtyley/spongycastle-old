@@ -142,7 +142,7 @@ public class X509V1CertificateGenerator
     {
         this.signatureAlgorithm = signatureAlgorithm;
 
-        sigOID = (DERObjectIdentifier)algorithms.get(signatureAlgorithm.toUpperCase());
+        sigOID = (DERObjectIdentifier)algorithms.get(Strings.toUpperCase(signatureAlgorithm));
 
         if (sigOID == null)
         {

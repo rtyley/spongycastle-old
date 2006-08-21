@@ -27,10 +27,12 @@ import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
  * The following extensions are listed in RFC 2459 as relevant to CRLs
@@ -172,16 +174,14 @@ public class X509CRLObject
 
     public void verify(PublicKey key)
         throws CRLException,  NoSuchAlgorithmException,
-        InvalidKeyException, NoSuchProviderException,
-        SignatureException
+            InvalidKeyException, NoSuchProviderException, SignatureException
     {
         verify(key, "BC");
     }
 
     public void verify(PublicKey key, String sigProvider)
         throws CRLException, NoSuchAlgorithmException,
-        InvalidKeyException, NoSuchProviderException,
-        SignatureException
+            InvalidKeyException, NoSuchProviderException, SignatureException
     {
         if (!c.getSignatureAlgorithm().equals(c.getTBSCertList().getSignature()))
         {
@@ -243,32 +243,61 @@ public class X509CRLObject
     public X509CRLEntry getRevokedCertificate(BigInteger serialNumber)
     {
         TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
-
+        boolean isIndirect = isIndirectCRL();
         if (certs != null)
         {
+            X500Principal previousCertificateIssuer = getIssuerX500Principal();
             for (int i = 0; i < certs.length; i++)
             {
-                if (certs[i].getUserCertificate().getValue().equals(serialNumber))
+                X509CRLEntryObject crlentry = new X509CRLEntryObject(certs[i],
+                        isIndirect, previousCertificateIssuer);
+                previousCertificateIssuer = crlentry.getCertificateIssuer();
+                if (crlentry.getSerialNumber().equals(serialNumber))
                 {
-                    return new X509CRLEntryObject(certs[i]);
+                    return crlentry;
                 }
             }
         }
 
         return null;
     }
+
+    private boolean isIndirectCRL()
+    {
+        byte[] idp = getExtensionValue(X509Extensions.IssuingDistributionPoint.getId());
+        boolean isIndirect = false;
+        try
+        {
+            if (idp != null)
+            {
+                isIndirect = IssuingDistributionPoint.getInstance(
+                        X509ExtensionUtil.fromExtensionValue(idp))
+                        .isIndirectCRL();
+            }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(
+                    "Exception reading IssuingDistributionPoint" + e);
+        }
+
+        return isIndirect;
+    }
   
     public Set getRevokedCertificates()
     {
         TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
-
+        boolean isIndirect = isIndirectCRL();
         if (certs != null)
         {
-            Set     set = new HashSet();
+            Set set = new HashSet();
+            X500Principal previousCertificateIssuer = getIssuerX500Principal();
             for (int i = 0; i < certs.length; i++)
             {
-                set.add(new X509CRLEntryObject(certs[i]));
-
+                X509CRLEntryObject crlentry = new X509CRLEntryObject(certs[i],
+                        isIndirect, previousCertificateIssuer);
+                set.add(crlentry);
+                previousCertificateIssuer = crlentry.getCertificateIssuer();
             }
 
             return set;

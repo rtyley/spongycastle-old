@@ -46,6 +46,7 @@ public class X509CRLObject
 
     public X509CRLObject(
         CertificateList c)
+        throws CRLException
     {
         this.c = c;
     }
