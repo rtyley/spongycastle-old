@@ -98,6 +98,24 @@ public class PGPSignature
         return sigPck.getVersion();
     }
     
+    /**
+     * Return the key algorithm associated with this signature.
+     * @return signature key algorithm.
+     */
+    public int getKeyAlgorithm()
+    {
+        return sigPck.getKeyAlgorithm();
+    }
+    
+    /**
+     * Return the hash algorithm associated with this signature.
+     * @return signature hash algorithm.
+     */
+    public int getHashAlgorithm()
+    {
+        return sigPck.getHashAlgorithm();
+    }
+    
     public void initVerify(
         PGPPublicKey    pubKey,
         String          provider)
