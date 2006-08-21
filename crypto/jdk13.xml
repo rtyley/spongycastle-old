@@ -24,11 +24,18 @@
                 <exclude name="**/BCEC*.java" />
                 <exclude name="**/JCEEC5*.java" />
                 <exclude name="**/EC5*.java" />
+                <exclude name="**/CertPathReviewer*.java" />
+                <exclude name="**/PKIXCertPathReviewer.java" />
+                <exclude name="**/CertPathValidatorUtilities.java" />
+                <exclude name="**/validator/*.java" />
+                <exclude name="**/ValidateSignedMail.java" />
             </fileset>
             <fileset dir="test/src">
                 <exclude name="**/ECDSA5Test.java" />
                 <exclude name="**/NamedCurveTest.java" />
                 <exclude name="**/nist/NistCertPathTest.java" />
+                <exclude name="**/nist/NistCertPathReviewerTest.java" />
+                <exclude name="**/CRL5Test.java" />
             </fileset>
             <fileset dir="test/src" includes="**/*.html" />
             <fileset dir="test/src" includes="**/*.pem" />
@@ -75,8 +82,8 @@
         <ant antfile="bc-build.xml" dir="." target="test" />
     </target>
 
-    <target name="jar-src">
-        <ant antfile="bc-build.xml" dir="." target="jar-src" />
+    <target name="zip-src">
+        <ant antfile="bc-build.xml" dir="." target="zip-src" />
     </target>
 
 </project>

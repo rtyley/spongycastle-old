@@ -67,7 +67,7 @@
         <ant antfile="bc-build.xml" dir="." target="test-lw" />
     </target>
 
-    <target name="jar-src">
-        <ant antfile="bc-build.xml" dir="." target="jar-src" />
+    <target name="zip-src">
+        <ant antfile="bc-build.xml" dir="." target="zip-src" />
     </target>
 </project>

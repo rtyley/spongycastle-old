@@ -27,6 +27,7 @@
             </fileset>
             <fileset dir="test/src">
                 <exclude name="**/ECDSA5Test.java" />
+                <exclude name="**/CRL5Test.java" />
                 <exclude name="**/NamedCurveTest.java" />
             </fileset>
             <fileset dir="test/src" includes="**/*.html" />
@@ -79,7 +80,7 @@
         <ant antfile="bc-build.xml" dir="." target="test-lw" />
     </target>
 
-    <target name="jar-src">
-        <ant antfile="bc-build.xml" dir="." target="jar-src" />
+    <target name="zip-src">
+        <ant antfile="bc-build.xml" dir="." target="zip-src" />
     </target>
 </project>
