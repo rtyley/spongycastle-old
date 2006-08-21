@@ -32,6 +32,7 @@ import org.bouncycastle.asn1.x509.V2AttributeCertificateInfoGenerator;
 import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.util.Strings;
 
 /**
  * class to produce an X.509 Version 2 AttributeCertificate.
@@ -130,7 +131,7 @@ public class X509V2AttributeCertificateGenerator
     {
         this.signatureAlgorithm = signatureAlgorithm;
 
-        sigOID = (DERObjectIdentifier)algorithms.get(signatureAlgorithm.toUpperCase());
+        sigOID = (DERObjectIdentifier)algorithms.get(Strings.toUpperCase(signatureAlgorithm));
 
         if (sigOID == null)
         {

@@ -37,6 +37,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.util.Strings;
 
 /**
  * Example that sends a signed and encrypted mail message.
@@ -172,7 +173,7 @@ public class SendSignedAndEncryptedMail
                  * Make sure not to override any content-* headers from the
                  * original message
                  */
-                if (!headerLine.toLowerCase().startsWith("content-"))
+                if (!Strings.toLowerCase(headerLine).startsWith("content-"))
                 {
                     encryptedMessage.addHeaderLine(headerLine);
                 }

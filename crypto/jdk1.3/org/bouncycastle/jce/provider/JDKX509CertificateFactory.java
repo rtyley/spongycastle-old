@@ -20,6 +20,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERInputStream;
 import org.bouncycastle.asn1.DERInputStream;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
@@ -157,16 +158,16 @@ public class JDKX509CertificateFactory
 
     private CRL readDERCRL(
         InputStream in)
-        throws IOException
+        throws IOException, CRLException
     {
-        DERInputStream  dIn = new DERInputStream(in);
+        ASN1InputStream  dIn = new ASN1InputStream(in);
 
         return new X509CRLObject(new CertificateList((ASN1Sequence)dIn.readObject()));
     }
 
     private CRL readPEMCRL(
         InputStream  in)
-        throws IOException
+        throws IOException, CRLException
     {
         String          line;
         StringBuffer    pemBuf = new StringBuffer();

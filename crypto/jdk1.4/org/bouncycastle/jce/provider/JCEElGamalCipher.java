@@ -37,6 +37,7 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.jce.interfaces.ElGamalKey;
 import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
 import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
+import org.bouncycastle.util.Strings;
 
 public class JCEElGamalCipher extends WrapCipherSpi
 {
@@ -110,7 +111,7 @@ public class JCEElGamalCipher extends WrapCipherSpi
         String  mode)
         throws NoSuchAlgorithmException
     {
-        String md = mode.toUpperCase();
+        String md = Strings.toUpperCase(mode);
         
         if (md.equals("NONE") || md.equals("ECB"))
         {
@@ -124,7 +125,7 @@ public class JCEElGamalCipher extends WrapCipherSpi
         String  padding) 
         throws NoSuchPaddingException
     {
-        String pad = padding.toUpperCase();
+        String pad = Strings.toUpperCase(padding);
 
         if (pad.equals("NOPADDING"))
         {

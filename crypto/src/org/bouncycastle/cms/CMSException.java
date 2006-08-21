@@ -24,4 +24,9 @@ public class CMSException
     {
         return e;
     }
+    
+    public Throwable getCause()
+    {
+        return e;
+    }
 }
