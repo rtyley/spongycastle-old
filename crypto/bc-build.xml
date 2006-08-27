@@ -157,7 +157,9 @@
                  <exclude name="org/bouncycastle/**/test/*.java" />
                  <exclude name="org/bouncycastle/**/test/nist/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
+                 <exclude name="org/bouncycastle/**/test/*.properties" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
+                 <exclude name="org/bouncycastle/mail/**/*.properties" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
                  <exclude name="org/bouncycastle/tsp/**/*.java" />
