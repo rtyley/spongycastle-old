@@ -24,6 +24,7 @@ import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
@@ -106,8 +107,10 @@ public class PKCS10CertificationRequest
         
         oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
         oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
-        oids.put(new DERObjectIdentifier("1.2.840.10040.4.3"), "DSAWITHSHA1");
+        oids.put(new DERObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "ECDSAWITHSHA1");
+        oids.put(OIWObjectIdentifiers.sha1WithRSA, "SHA1WITHRSA");
+        oids.put(OIWObjectIdentifiers.dsaWithSHA1, "SHA1WITHDSA");
         
         //
         // key types
@@ -354,11 +357,15 @@ public class PKCS10CertificationRequest
             //
             // try an alternate
             //
-            if (oids.get(sigAlgId.getObjectId().getId()) != null)
+            if (oids.get(sigAlgId.getObjectId()) != null)
             {
-                String  signatureAlgorithm = (String)oids.get(sigAlgId.getObjectId().getId());
+                String  signatureAlgorithm = (String)oids.get(sigAlgId.getObjectId());
 
                 sig = Signature.getInstance(signatureAlgorithm, provider);
+            }
+            else
+            {
+                throw e;
             }
         }
 
