@@ -1,5 +1,5 @@
 
-package org.bouncycastle.i18n.test.filter;
+package org.bouncycastle.i18n.filter.test;
 
 import org.bouncycastle.i18n.filter.Filter;
 import org.bouncycastle.i18n.filter.SQLFilter;
