@@ -20,9 +20,11 @@
         <copy todir="${src.dir}">
             <fileset dir="src" includes="**/*.java" />
             <fileset dir="src" includes="**/*.html" />
+            <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.java" />
             <fileset dir="test/src" includes="**/*.html" />
             <fileset dir="test/src" includes="**/*.pem" />
+            <fileset dir="test/src" includes="**/*.properties" />
         </copy>
     	<available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
     </target>
