@@ -84,7 +84,7 @@ public class AuthorityKeyIdentifier
      * Example of making a AuthorityKeyIdentifier:
      * <pre>
      *   SubjectPublicKeyInfo apki = new SubjectPublicKeyInfo((ASN1Sequence)new ASN1InputStream(
-     *       new ByteArrayInputStream(publicKey.getEncoded())).readObject());
+     *       publicKey.getEncoded()).readObject());
      *   AuthorityKeyIdentifier aki = new AuthorityKeyIdentifier(apki);
      * </pre>
      *
