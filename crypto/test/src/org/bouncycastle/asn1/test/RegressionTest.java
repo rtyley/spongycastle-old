@@ -7,6 +7,7 @@ import org.bouncycastle.util.test.TestResult;
 public class RegressionTest
 {
     public static Test[]    tests = {
+        new InputStreamTest(),
         new EqualsAndHashCodeTest(),
         new TagTest(),
         new SetTest(),

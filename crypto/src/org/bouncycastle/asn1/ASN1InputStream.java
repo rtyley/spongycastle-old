@@ -20,23 +20,25 @@ public class ASN1InputStream
 {
     private DERObject END_OF_STREAM = new DERObject()
     {
-                                        void encode(
-                                            DEROutputStream out)
-                                        throws IOException
-                                        {
-                                            throw new IOException("Eeek!");
-                                        }
-                                        public int hashCode()
-                                        {
-                                            return 0;
-                                        }
-                                        public boolean equals(
-                                            Object o) 
-                                        {
-                                            return o == this;
-                                        }
-                                    };
+        void encode(
+            DEROutputStream out)
+        throws IOException
+        {
+            throw new IOException("Eeek!");
+        }
+        public int hashCode()
+        {
+            return 0;
+        }
+        public boolean equals(
+            Object o) 
+        {
+            return o == this;
+        }
+    };
+    
     boolean eofFound = false;
+    int     limit = Integer.MAX_VALUE;
 
     public ASN1InputStream(
         InputStream is)
@@ -44,10 +46,30 @@ public class ASN1InputStream
         super(is);
     }
 
+    /**
+     * Create an ASN1InputStream based on the input byte array. The length of DER objects in
+     * the stream is automatically limited to the length of the input array.
+     * 
+     * @param input array containing ASN.1 encoded data.
+     */
     public ASN1InputStream(
         byte[] input)
     {
-        super(new ByteArrayInputStream(input));
+        this(new ByteArrayInputStream(input), input.length);
+    }
+    
+    /**
+     * Create an ASN1InputStream where no DER object will be longer than limit.
+     * 
+     * @param input stream containing ASN.1 encoded data.
+     * @param limit maximum size of a DER encoded object.
+     */
+    public ASN1InputStream(
+        InputStream input,
+        int         limit)
+    {
+        super(input);
+        this.limit = limit;
     }
     
     protected int readLength()
@@ -89,6 +111,11 @@ public class ASN1InputStream
             if (length < 0)
             {
                 throw new IOException("corrupted steam - negative length found");
+            }
+            
+            if (length >= limit)   // after all we must have read at least 1 byte
+            {
+                throw new IOException("corrupted steam - out of bounds length found");
             }
         }
 
