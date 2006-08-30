@@ -45,6 +45,7 @@ The build scripts now run this target by default.
 <li>Use of toUpperCase and toLowerCase has been replaced with a locale independent converter where appropriate.
 <li>Support for retrieving the issuers of indirect CRLs has been added.
 <li>Classes for doing incremental path validation of PKIX cert paths have been added to the X.509 package and S/MIME.
+<li>Optional limiting has been added to ASN1InputStream to avoid possible OutOfMemoryErrors on corrupted streams.
 </ul>
 <h3>2.2.1 Version</h3>
 Release 1.33
