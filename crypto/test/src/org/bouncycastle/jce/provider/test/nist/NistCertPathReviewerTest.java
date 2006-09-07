@@ -128,7 +128,7 @@ public class NistCertPathReviewerTest
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "BadnotBeforeDateCACRL" },
                 1,
                 "CertPathReviewer.certificateNotYetValid",
-                "Could not validate the certificate. Certificate is not valid till Jan 1, 2047 12:01:00 PM GMT.");
+                "Could not validate the certificate. Certificate is not valid untill Jan 1, 2047 12:01:00 PM GMT.");
     }
     
     public void testInvalidEENotBeforeDateTest2()
@@ -139,7 +139,7 @@ public class NistCertPathReviewerTest
                 new String[] { TRUST_ANCHOR_ROOT_CRL, GOOD_CA_CRL },
                 0,
                 "CertPathReviewer.certificateNotYetValid",
-                "Could not validate the certificate. Certificate is not valid till Jan 1, 2047 12:01:00 PM GMT.");
+                "Could not validate the certificate. Certificate is not valid untill Jan 1, 2047 12:01:00 PM GMT.");
     }
     
     public void testValidPre2000UTCNotBeforeDateTest3()

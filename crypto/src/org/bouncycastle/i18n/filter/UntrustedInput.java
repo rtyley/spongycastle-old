@@ -35,5 +35,10 @@ public class UntrustedInput
     {
         return input.toString();
     }
+    
+    public String toString()
+    {
+        return input.toString();
+    }
 
 }

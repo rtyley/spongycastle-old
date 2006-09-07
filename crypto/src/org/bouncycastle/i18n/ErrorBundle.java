@@ -14,7 +14,7 @@ public class ErrorBundle extends MessageBundle
     /**
      * detail entry key
      */
-    public static final String DETAIL_ENTRY = "detail";
+    public static final String DETAIL_ENTRY = "details";
     
     /**
      * Constructs a new ErrorBundle using <code>resource</code> as the base name for the 
