@@ -187,12 +187,9 @@ public class CMSEnvelopedDataGenerator
 
             if (pubKey != null)
             {
-                byte[]              rawKey = key.getEncoded();
+                keyCipher.init(Cipher.WRAP_MODE, pubKey);
 
-                keyCipher.init(Cipher.ENCRYPT_MODE, pubKey);
-
-                ASN1OctetString         encKey = new DEROctetString(
-                                            keyCipher.doFinal(rawKey));
+                ASN1OctetString         encKey = new DEROctetString(keyCipher.wrap(key));
 
                 if (cert != null)
                 {
