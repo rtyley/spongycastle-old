@@ -67,6 +67,7 @@
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.pem" />
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.message" />
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
+                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.eml" />
             </copy>
             <jar jarfile="${artifacts.jars.dir}/@{target}.jar">
                 <manifest>
