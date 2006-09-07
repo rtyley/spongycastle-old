@@ -97,24 +97,20 @@ public class KeyTransRecipientInformation
     {
         try
         {
-            byte[]              encryptedKey = _info.getEncryptedKey().getOctets();
-            String              keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(_keyEncAlg.getObjectId());
-            Cipher              keyCipher = Cipher.getInstance(keyExchangeAlgorithm, prov);
+            byte[]  encryptedKey = _info.getEncryptedKey().getOctets();
+            String  keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(_keyEncAlg.getObjectId());
+            Cipher  keyCipher = Cipher.getInstance(keyExchangeAlgorithm, prov);
 
-            keyCipher.init(Cipher.DECRYPT_MODE, key);
+            keyCipher.init(Cipher.UNWRAP_MODE, key);
 
-            String              alg = getDataEncryptionAlgorithmName(_encAlg.getObjectId());
-            SecretKey           sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
+            String  alg = getDataEncryptionAlgorithmName(_encAlg.getObjectId());
+            Key     sKey = keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
             
             return getContentFromSessionKey(sKey, prov);
         }
         catch (NoSuchAlgorithmException e)
         {
             throw new CMSException("can't find algorithm.", e);
-        }
-        catch (IllegalBlockSizeException e)
-        {
-            throw new CMSException("illegal blocksize in message.", e);
         }
         catch (InvalidKeyException e)
         {
@@ -123,10 +119,6 @@ public class KeyTransRecipientInformation
         catch (NoSuchPaddingException e)
         {
             throw new CMSException("required padding not supported.", e);
-        }
-        catch (BadPaddingException e)
-        {
-            throw new CMSException("bad padding in message.", e);
         }
     }
 }
