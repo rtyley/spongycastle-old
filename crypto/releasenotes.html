@@ -47,6 +47,10 @@ The build scripts now run this target by default.
 <li>Classes for doing incremental path validation of PKIX cert paths have been added to the X.509 package and S/MIME.
 <li>Optional limiting has been added to ASN1InputStream to avoid possible OutOfMemoryErrors on corrupted streams.
 </ul>
+<h3>2.1.4 Possible comaptibilty issue</h3>
+<ul>
+<li>CMS library now uses Cipher.WRAP and Cipher.UNWRAP for processing secret keys used in CMS enveloped data structures encrypted using asymmetric keys.
+</ul>
 <h3>2.2.1 Version</h3>
 Release 1.33
 <h3>2.2.2 Defects Fixed</h3>
