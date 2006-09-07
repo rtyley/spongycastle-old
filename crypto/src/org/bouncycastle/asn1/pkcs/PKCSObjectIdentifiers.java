@@ -134,6 +134,7 @@ public interface PKCSObjectIdentifiers
     //
     // other SMIME attributes
     //
+    static final DERObjectIdentifier    id_aa_receiptRequest    = new DERObjectIdentifier(pkcs_9 + ".16.2.1");
 
     //
     // id-ct OBJECT IDENTIFIER ::= {iso(1) member-body(2) usa(840)
