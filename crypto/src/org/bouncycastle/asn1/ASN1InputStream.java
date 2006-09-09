@@ -230,6 +230,8 @@ public class ASN1InputStream
             return new DERBMPString(bytes);
         case OCTET_STRING:
             return new DEROctetString(bytes);
+        case OCTET_STRING | CONSTRUCTED:
+            return buildDerConstructedOctetString(bytes);
         case UTC_TIME:
             return new DERUTCTime(bytes);
         case GENERALIZED_TIME:
@@ -335,6 +337,24 @@ public class ASN1InputStream
             octs.addElement(o);
         }
 
+        return new BERConstructedOctetString(octs);
+    }
+    
+    //
+    // yes, people actually do this...
+    //
+    private BERConstructedOctetString buildDerConstructedOctetString(byte[] input)
+        throws IOException
+    {
+        Vector               octs = new Vector();
+        ASN1InputStream      aIn = new ASN1InputStream(input);
+        DERObject            o;
+        
+        while ((o = aIn.readObject()) != null)
+        {
+            octs.addElement(o);
+        }
+    
         return new BERConstructedOctetString(octs);
     }
 
