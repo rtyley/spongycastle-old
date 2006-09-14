@@ -1441,7 +1441,5 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         {
             throw new AnnotatedException("no valid CRL found");
         }
-        
     }
-
 }
