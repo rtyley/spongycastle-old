@@ -30,6 +30,8 @@ Release 1.34
 <li>Some flags in PKIFailure info were incorrect, and the range of values was incomplete. The range of values has been increased and the flags corrected.
 <li>The helper class for AuthorityKeyExtension generation was including the subject rather than the issuer DN of the CA certificate. This has been fixed.
 <li>SMIMESignedParser now avoids JavaMail quoted-printable recoding issue.
+<li>Verification of RSA signatures done with keys with public exponents of 3 was vunerable to
+Bleichenbacher's RSA signature forgery attack. This has been fixed.
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
@@ -45,12 +47,17 @@ The build scripts now run this target by default.
 <li>Use of toUpperCase and toLowerCase has been replaced with a locale independent converter where appropriate.
 <li>Support for retrieving the issuers of indirect CRLs has been added.
 <li>Classes for doing incremental path validation of PKIX cert paths have been added to the X.509 package and S/MIME.
+<li>Locale issues with String.toUpperCase() have now been worked around.
 <li>Optional limiting has been added to ASN1InputStream to avoid possible OutOfMemoryErrors on corrupted streams.
 </ul>
 <h3>2.1.4 Possible comaptibilty issue</h3>
 <ul>
 <li>CMS library now uses Cipher.WRAP and Cipher.UNWRAP for processing secret keys used in CMS enveloped data structures encrypted using asymmetric keys.
 </ul>
+<h3>2.1.5 Security Advisory</h3>
+<ul>
+<li>If you are using public exponents with the value three you *must* upgrade to this release, otherwise it
+will be possible for attackers to exploit Bleichenbacher's RSA signature forgery attack on your applications.
 <h3>2.2.1 Version</h3>
 Release 1.33
 <h3>2.2.2 Defects Fixed</h3>
