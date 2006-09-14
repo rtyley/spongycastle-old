@@ -1,7 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
@@ -18,10 +16,9 @@ import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERTags;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
@@ -49,7 +46,7 @@ public class JDKDigestSignature
     private Digest                  digest;
     private AsymmetricBlockCipher   cipher;
     private AlgorithmIdentifier     algId;
-
+    
     protected JDKDigestSignature(
         String                  name,
         DERObjectIdentifier     objId,
@@ -164,6 +161,7 @@ public class JDKDigestSignature
         try
         {
             sig = cipher.processBlock(sigBytes, 0, sigBytes.length);
+
             digInfo = derDecode(sig);
         }
         catch (Exception e)
@@ -242,10 +240,15 @@ public class JDKDigestSignature
             throw new IOException("not a digest info object");
         }
         
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(encoding);
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
+        ASN1InputStream aIn = new ASN1InputStream(encoding);
+        DigestInfo      dInfo = new DigestInfo((ASN1Sequence)aIn.readObject());
 
-        return new DigestInfo((ASN1Sequence)aIn.readObject());
+        if (aIn.available() != 0)
+        {
+            throw new IOException("malformed stream for DigestInfo");
+        }
+        
+        return dInfo;
     }
 
     static public class SHA1WithRSAEncryption
