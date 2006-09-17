@@ -99,6 +99,11 @@ public class PKCS7ContentHandler
         }
         else
         {
+            // TODO it would be even nicer if we could attach the object to the exception
+            //     as well since in deeply nested messages, it is not always clear which
+            //     part caused the problem. Thus I guess we would have to subclass the
+            //     IOException
+
             throw new IOException("unknown object in writeTo " + obj);
         }
     }
