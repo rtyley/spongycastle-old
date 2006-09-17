@@ -204,12 +204,20 @@ public class CMSEnvelopedDataStreamGenerator
 
             if (pubKey != null)
             {
-                byte[]              rawKey = key.getEncoded();
+                ASN1OctetString         encKey;
 
-                keyCipher.init(Cipher.ENCRYPT_MODE, pubKey);
-
-                ASN1OctetString         encKey = new DEROctetString(
-                                            keyCipher.doFinal(rawKey));
+                try
+                {
+                    keyCipher.init(Cipher.WRAP_MODE, pubKey);
+    
+                    encKey = new DEROctetString(keyCipher.wrap(key));
+                }
+                catch (GeneralSecurityException e)   // some providers do not support wrap
+                {
+                    keyCipher.init(Cipher.ENCRYPT_MODE, pubKey);
+    
+                    encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
+                }
 
                 if (cert != null)
                 {

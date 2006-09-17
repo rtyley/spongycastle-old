@@ -184,10 +184,21 @@ public class CMSEnvelopedDataGenerator
 
             if (pubKey != null)
             {
-                keyCipher.init(Cipher.WRAP_MODE, pubKey);
+                ASN1OctetString         encKey;
 
-                ASN1OctetString         encKey = new DEROctetString(keyCipher.wrap(key));
-
+                try
+                {
+                    keyCipher.init(Cipher.WRAP_MODE, pubKey);
+    
+                    encKey = new DEROctetString(keyCipher.wrap(key));
+                }
+                catch (GeneralSecurityException e)   // some providers do not support wrap
+                {
+                    keyCipher.init(Cipher.ENCRYPT_MODE, pubKey);
+    
+                    encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
+                }
+                
                 if (cert != null)
                 {
                     ASN1InputStream         aIn = new ASN1InputStream(cert.getTBSCertificate());
