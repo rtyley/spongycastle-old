@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
@@ -180,7 +179,7 @@ public abstract class JDKKeyFactory
      * create a public key from the given DER encoded input stream. 
      */ 
     static PublicKey createPublicKeyFromDERStream(
-        InputStream         in)
+        byte[]         in)
         throws IOException
     {
         return createPublicKeyFromPublicKeyInfo(
@@ -241,7 +240,7 @@ public abstract class JDKKeyFactory
      * create a private key from the given DER encoded input stream. 
      */ 
     static PrivateKey createPrivateKeyFromDERStream(
-        InputStream         in)
+        byte[]         in)
         throws IOException
     {
         return createPrivateKeyFromPrivateKeyInfo(
@@ -306,7 +305,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                new ByteArrayInputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
+                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -317,7 +316,7 @@ public abstract class JDKKeyFactory
                     {
                         return new JCERSAPrivateCrtKey(
                             new RSAPrivateKeyStructure(
-                                (ASN1Sequence)new ASN1InputStream(new ByteArrayInputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded())).readObject()));
+                                (ASN1Sequence)new ASN1InputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()).readObject()));
                     }
                     catch (Exception ex)
                     {
@@ -346,7 +345,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPublicKeyFromDERStream(
-                                new ByteArrayInputStream(((X509EncodedKeySpec)keySpec).getEncoded()));
+                                ((X509EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -378,7 +377,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                new ByteArrayInputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
+                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -402,7 +401,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPublicKeyFromDERStream(
-                                new ByteArrayInputStream(((X509EncodedKeySpec)keySpec).getEncoded()));
+                                ((X509EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -434,7 +433,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                new ByteArrayInputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
+                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -458,7 +457,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPublicKeyFromDERStream(
-                                new ByteArrayInputStream(((X509EncodedKeySpec)keySpec).getEncoded()));
+                                ((X509EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -490,7 +489,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPrivateKeyFromDERStream(
-                            new ByteArrayInputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
+                            ((PKCS8EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -514,7 +513,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPublicKeyFromDERStream(
-                            new ByteArrayInputStream(((X509EncodedKeySpec)keySpec).getEncoded()));
+                            ((X509EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -547,7 +546,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                new ByteArrayInputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
+                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -571,7 +570,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPublicKeyFromDERStream(
-                                new ByteArrayInputStream(((X509EncodedKeySpec)keySpec).getEncoded()));
+                                ((X509EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -607,7 +606,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                new ByteArrayInputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
+                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -627,7 +626,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPublicKeyFromDERStream(
-                                new ByteArrayInputStream(((X509EncodedKeySpec)keySpec).getEncoded()));
+                                ((X509EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -664,7 +663,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                new ByteArrayInputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
+                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
@@ -688,7 +687,7 @@ public abstract class JDKKeyFactory
                 try
                 {
                     return JDKKeyFactory.createPublicKeyFromDERStream(
-                                new ByteArrayInputStream(((X509EncodedKeySpec)keySpec).getEncoded()));
+                                ((X509EncodedKeySpec)keySpec).getEncoded());
                 }
                 catch (Exception e)
                 {
