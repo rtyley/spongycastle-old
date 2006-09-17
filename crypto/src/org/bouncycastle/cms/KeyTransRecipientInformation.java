@@ -3,6 +3,7 @@ package org.bouncycastle.cms;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -12,7 +13,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -95,16 +95,27 @@ public class KeyTransRecipientInformation
         String   prov)
         throws CMSException, NoSuchProviderException
     {
+        byte[]  encryptedKey = _info.getEncryptedKey().getOctets();
+        String  keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(_keyEncAlg.getObjectId());
+        String  alg = getDataEncryptionAlgorithmName(_encAlg.getObjectId());
+
         try
         {
-            byte[]  encryptedKey = _info.getEncryptedKey().getOctets();
-            String  keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(_keyEncAlg.getObjectId());
             Cipher  keyCipher = Cipher.getInstance(keyExchangeAlgorithm, prov);
+            Key     sKey;
+            
+            try
+            {
+                keyCipher.init(Cipher.UNWRAP_MODE, key);
 
-            keyCipher.init(Cipher.UNWRAP_MODE, key);
+                sKey = keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
+            }
+            catch (GeneralSecurityException e)   // some providers do not support UNWRAP
+            {
+                keyCipher.init(Cipher.DECRYPT_MODE, key);
 
-            String  alg = getDataEncryptionAlgorithmName(_encAlg.getObjectId());
-            Key     sKey = keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
+                sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
+            }
             
             return getContentFromSessionKey(sKey, prov);
         }
@@ -119,6 +130,14 @@ public class KeyTransRecipientInformation
         catch (NoSuchPaddingException e)
         {
             throw new CMSException("required padding not supported.", e);
+        }
+        catch (IllegalBlockSizeException e)
+        {
+            throw new CMSException("illegal blocksize in message.", e);
+        }
+        catch (BadPaddingException e)
+        {
+            throw new CMSException("bad padding in message.", e);
         }
     }
 }
