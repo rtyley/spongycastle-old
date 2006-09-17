@@ -28,10 +28,10 @@ else
 if [ "$1" == "provider" ]
 then
     ant -f jdk13.xml build-provider
+    ant -f jdk13.xml zip-src-provider
 else
     ant -f jdk13.xml build-jce
     ant -f jdk13.xml build
+    ant -f jdk13.xml zip-src
 fi
-ant -f jdk13.xml zip-src
 fi
-
