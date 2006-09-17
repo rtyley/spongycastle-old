@@ -2,6 +2,8 @@ package org.bouncycastle.bcpg;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Strings;
+
 /**
  * Basic type for a user ID packet.
  */
@@ -21,24 +23,12 @@ public class UserIDPacket
     public UserIDPacket(
         String    id)
     {
-        this.idData = new byte[id.length()];
-        
-        for (int i = 0; i != id.length(); i++)
-        {
-            idData[i] = (byte)id.charAt(i);
-        }
-        
+        this.idData = Strings.toUTF8ByteArray(id);
     }
+    
     public String getID()
     {
-        char[]    chars = new char[idData.length];
-        
-        for (int i = 0; i != chars.length; i++)
-        {
-            chars[i] = (char)(idData[i] & 0xff);
-        }
-        
-        return new String(chars);
+        return Strings.fromUTF8ByteArray(idData);
     }
     
     public void encode(
