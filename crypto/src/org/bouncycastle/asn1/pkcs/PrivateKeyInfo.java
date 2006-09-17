@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1.pkcs;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Enumeration;
@@ -71,8 +70,7 @@ public class PrivateKeyInfo
 
         try
         {
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(((ASN1OctetString)e.nextElement()).getOctets());
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
+            ASN1InputStream         aIn = new ASN1InputStream(((ASN1OctetString)e.nextElement()).getOctets());
 
             privKey = aIn.readObject();
         }

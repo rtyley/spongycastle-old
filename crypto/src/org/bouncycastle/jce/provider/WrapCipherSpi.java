@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -328,7 +327,7 @@ public abstract class WrapCipherSpi extends CipherSpi
              * The caller doesnt know the algorithm as it is part of
              * the encrypted data.
              */
-            ASN1InputStream bIn = new ASN1InputStream(new ByteArrayInputStream(encoded));
+            ASN1InputStream bIn = new ASN1InputStream(encoded);
             PrivateKey      privKey = null;
 
             try

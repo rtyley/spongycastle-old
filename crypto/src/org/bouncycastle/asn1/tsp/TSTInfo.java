@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1.tsp;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -55,11 +54,9 @@ public class TSTInfo
         }
         else if (o instanceof ASN1OctetString)
         {
-            ByteArrayInputStream bIn = new ByteArrayInputStream(
-                    ((ASN1OctetString) o).getOctets());
             try
             {
-                return getInstance(new ASN1InputStream(bIn).readObject());
+                return getInstance(new ASN1InputStream(((ASN1OctetString)o).getOctets()).readObject());
             }
             catch (IOException ioEx)
             {

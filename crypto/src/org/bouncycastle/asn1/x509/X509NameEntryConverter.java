@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1.x509;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -89,8 +88,7 @@ public abstract class X509NameEntryConverter
             }
         }
 
-        ASN1InputStream aIn = new ASN1InputStream(
-                                            new ByteArrayInputStream(data));
+        ASN1InputStream aIn = new ASN1InputStream(data);
                                             
         return aIn.readObject();
     }

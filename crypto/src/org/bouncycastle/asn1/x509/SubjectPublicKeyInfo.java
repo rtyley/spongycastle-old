@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1.x509;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -94,8 +93,7 @@ public class SubjectPublicKeyInfo
     public DERObject getPublicKey()
         throws IOException
     {
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(keyData.getBytes());
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
+        ASN1InputStream         aIn = new ASN1InputStream(keyData.getBytes());
 
         return aIn.readObject();
     }

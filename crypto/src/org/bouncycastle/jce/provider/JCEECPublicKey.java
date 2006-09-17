@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.interfaces.ECPublicKey;
@@ -274,8 +273,7 @@ public class JCEECPublicKey
             {
                 try
                 {
-                    ByteArrayInputStream    bIn = new ByteArrayInputStream(data);
-                    ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                    ASN1InputStream         aIn = new ASN1InputStream(data);
     
                     key = (ASN1OctetString)aIn.readObject();
                 }

@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.PublicKey;
@@ -253,8 +252,7 @@ public class CertPathValidatorUtilities
     {
         try
         {
-            ASN1InputStream      aIn = new ASN1InputStream(
-                                    new ByteArrayInputStream(key.getEncoded()));
+            ASN1InputStream      aIn = new ASN1InputStream(key.getEncoded());
 
             SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(aIn.readObject());
 

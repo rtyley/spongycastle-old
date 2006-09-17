@@ -36,6 +36,8 @@ import org.bouncycastle.util.encoders.Base64;
 public class JDKX509CertificateFactory
     extends CertificateFactorySpi
 {
+    private static final long  MAX_MEMORY = Runtime.getRuntime().maxMemory();
+    
     private SignedData         sData = null;
     private int                sDataObjectCount = 0;
     private InputStream        currentStream = null;
@@ -44,6 +46,22 @@ public class JDKX509CertificateFactory
     private int                sCrlDataObjectCount = 0;
     private InputStream        currentCrlStream = null;
 
+    private int getLimit(InputStream in)
+        throws IOException
+    {
+        if (in instanceof ByteArrayInputStream)
+        {
+            return in.available();
+        }
+        
+        if (MAX_MEMORY > Integer.MAX_VALUE)
+        {
+            return Integer.MAX_VALUE;
+        }
+        
+        return (int)MAX_MEMORY;
+    }
+    
     private String readLine(
         InputStream in)
         throws IOException
@@ -70,10 +88,9 @@ public class JDKX509CertificateFactory
     }
 
     private Certificate readDERCertificate(
-        InputStream in)
+        ASN1InputStream dIn)
         throws IOException
     {
-        ASN1InputStream dIn = new ASN1InputStream(in);
         ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
 
         if (seq.size() > 1
@@ -101,7 +118,7 @@ public class JDKX509CertificateFactory
         InputStream  in)
         throws IOException
     {
-        ASN1InputStream  dIn = new ASN1InputStream(in);
+        ASN1InputStream  dIn = new ASN1InputStream(in, getLimit(in));
         ASN1Sequence     seq = (ASN1Sequence)dIn.readObject();
 
         if (seq.size() > 1
@@ -151,19 +168,16 @@ public class JDKX509CertificateFactory
 
         if (pemBuf.length() != 0)
         {
-            ByteArrayInputStream bIn = new ByteArrayInputStream(Base64.decode(pemBuf.toString()));
-            return readDERCertificate(bIn);
+            return readDERCertificate(new ASN1InputStream(Base64.decode(pemBuf.toString())));
         }
 
         return null;
     }
 
     private CRL readDERCRL(
-        InputStream in)
+        ASN1InputStream dIn)
         throws IOException, CRLException
     {
-        ASN1InputStream  dIn = new ASN1InputStream(in);
-
         return new X509CRLObject(new CertificateList((ASN1Sequence)dIn.readObject()));
     }
 
@@ -196,8 +210,7 @@ public class JDKX509CertificateFactory
 
         if (pemBuf.length() != 0)
         {
-            ByteArrayInputStream bIn = new ByteArrayInputStream(Base64.decode(pemBuf.toString()));
-            return readDERCRL(bIn);
+            return readDERCRL(new ASN1InputStream(Base64.decode(pemBuf.toString())));
         }
 
         return null;
@@ -207,7 +220,7 @@ public class JDKX509CertificateFactory
         InputStream  in)
         throws IOException, CRLException
     {
-        ASN1InputStream  dIn = new ASN1InputStream(in);
+        ASN1InputStream  dIn = new ASN1InputStream(in, getLimit(in));
         ASN1Sequence     seq = (ASN1Sequence)dIn.readObject();
 
         if (seq.size() > 1
@@ -288,12 +301,12 @@ public class JDKX509CertificateFactory
             else if (in.read() == 0x80)    // assume BER encoded.
             {
                 in.reset();
-                return readPKCS7Certificate(in);
+                return readPKCS7Certificate(new ASN1InputStream(in, getLimit(in)));
             }
             else
             {
                 in.reset();
-                return readDERCertificate(in);
+                return readDERCertificate(new ASN1InputStream(in, getLimit(in)));
             }
         }
         catch (Exception e)
@@ -379,7 +392,7 @@ public class JDKX509CertificateFactory
             else
             {
                 inStream.reset();
-                return readDERCRL(inStream);
+                return readDERCRL(new ASN1InputStream(inStream, getLimit(inStream)));
             }
         }
         catch (CRLException e)

@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
@@ -61,8 +60,7 @@ public class JDKGOST3410Signer
             {
                 byte[]  bytes = publicKey.getEncoded();
 
-                publicKey = JDKKeyFactory.createPublicKeyFromDERStream(
-                                        new ByteArrayInputStream(bytes));
+                publicKey = JDKKeyFactory.createPublicKeyFromDERStream(bytes);
 
                 if (publicKey instanceof ECPublicKey)
                 {
