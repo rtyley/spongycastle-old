@@ -218,6 +218,12 @@ public class CMSEnvelopedDataStreamGenerator
     
                     encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
                 }
+                catch (IllegalStateException e)   // some providers do not support wrap
+                {
+                    keyCipher.init(Cipher.ENCRYPT_MODE, pubKey);
+    
+                    encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
+                }
 
                 if (cert != null)
                 {

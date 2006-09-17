@@ -116,6 +116,12 @@ public class KeyTransRecipientInformation
 
                 sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
+            catch (IllegalStateException e)   // some providers do not support UNWRAP
+            {
+                keyCipher.init(Cipher.DECRYPT_MODE, key);
+
+                sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
+            }
             
             return getContentFromSessionKey(sKey, prov);
         }
