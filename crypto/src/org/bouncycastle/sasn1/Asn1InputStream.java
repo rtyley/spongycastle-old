@@ -8,18 +8,29 @@ import java.io.InputStream;
 public class Asn1InputStream
 {
     InputStream     _in;
+    private int     _limit;
     private boolean _eofFound;
     
     public Asn1InputStream(
         InputStream in)
     {
         this._in = in;
+        this._limit = Integer.MAX_VALUE;
     }
     
+    public Asn1InputStream(
+        InputStream in,
+        int         limit)
+    {
+        this._in = in;
+        this._limit = limit;
+    }
+                
     public Asn1InputStream(
         byte[] encoding)
     {
         this._in = new ByteArrayInputStream(encoding);
+        this._limit = encoding.length;
     }
     
     InputStream getParentStream()
@@ -66,6 +77,11 @@ public class Asn1InputStream
             if (length < 0)
             {
                 throw new IOException("corrupted steam - negative length found");
+            }
+
+            if (length >= _limit)   // after all we must have read at least 1 byte
+            {
+                throw new IOException("corrupted steam - out of bounds length found");
             }
         }
     
