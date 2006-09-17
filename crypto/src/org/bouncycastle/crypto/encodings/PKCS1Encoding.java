@@ -176,7 +176,9 @@ public class PKCS1Encoding
             throw new InvalidCipherTextException("block truncated");
         }
 
-        if (block[0] != 1 && block[0] != 2)
+        byte type = block[0];
+        
+        if (type != 1 && type != 2)
         {
             throw new InvalidCipherTextException("unknown block type");
         }
@@ -190,12 +192,18 @@ public class PKCS1Encoding
         // find and extract the message block.
         //
         int start;
-
+        
         for (start = 1; start != block.length; start++)
         {
-            if (block[start] == 0)
+            byte pad = block[start];
+            
+            if (pad == 0)
             {
                 break;
+            }
+            if (type == 1 && pad != (byte)0xff)
+            {
+                throw new InvalidCipherTextException("block padding incorrect");
             }
         }
 
