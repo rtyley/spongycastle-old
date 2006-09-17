@@ -36,6 +36,7 @@
                 <exclude name="**/nist/NistCertPathTest.java" />
                 <exclude name="**/nist/NistCertPathReviewerTest.java" />
                 <exclude name="**/CRL5Test.java" />
+                <exclude name="**/SignedMailValidatorTest.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />
@@ -86,6 +87,10 @@
 
     <target name="zip-src">
         <ant antfile="bc-build.xml" dir="." target="zip-src" />
+    </target>
+
+    <target name="zip-src-provider">
+        <ant antfile="bc-build.xml" dir="." target="zip-src-provider" />
     </target>
 
 </project>

@@ -25,7 +25,11 @@
             <fileset dir="test/src" includes="**/*.html" />
             <fileset dir="test/src" includes="**/*.pem" />
             <fileset dir="test/src" includes="**/*.properties" />
-            <fileset dir="test/src" includes="**/*.eml" />
+            <fileset dir="test/data" includes="**/*.message" />
+            <fileset dir="test/data" includes="**/*.eml" />
+            <fileset dir="test/data" includes="**/*.pem" />
+            <fileset dir="test/data" includes="**/*.crt" />
+            <fileset dir="test/data" includes="**/*.crl" />
         </copy>
     	<available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
     </target>

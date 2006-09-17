@@ -68,6 +68,8 @@
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.message" />
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.eml" />
+                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crt" />
+                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crl" />
             </copy>
             <jar jarfile="${artifacts.jars.dir}/@{target}.jar">
                 <manifest>
@@ -75,6 +77,10 @@
                 </manifest>
                 <fileset dir="${build.dir}/@{target}/classes" includes="**/*.class" />
                 <fileset dir="${build.dir}/@{target}/classes" includes="**/*.pem" />
+                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.crl" />
+                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.crt" />
+                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.eml" />
+                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.message" />
                 <fileset dir="${build.dir}/@{target}/classes" includes="**/*.properties" />
             </jar>
         </sequential>
@@ -159,6 +165,8 @@
                  <exclude name="org/bouncycastle/**/test/nist/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
                  <exclude name="org/bouncycastle/**/test/*.properties" />
+                 <exclude name="org/bouncycastle/**/test/*.crl" />
+                 <exclude name="org/bouncycastle/**/test/*.crt" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/mail/**/*.properties" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
@@ -201,6 +209,9 @@
                  <exclude name="org/bouncycastle/**/test/*.java" />
                  <exclude name="org/bouncycastle/**/test/nist/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
+                 <exclude name="org/bouncycastle/**/test/*.crl" />
+                 <exclude name="org/bouncycastle/**/test/*.crt" />
+                 <exclude name="org/bouncycastle/**/test/*.eml" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
@@ -338,7 +349,7 @@
         <mkdir dir="${artifacts.jars.dir}" />
 
         <property name="test.target.dir" value="${artifacts.dir}/${test.target}" />
-        <property name="test.target.src.dir" value="${test.target.dir}/src" />
+<property name="test.target.src.dir" value="${test.target.dir}/src" />
 
         <mkdir dir="${test.target.dir}" />
 
@@ -348,6 +359,9 @@
              <fileset dir="${src.dir}" includes="**/test/*.java" />
              <fileset dir="${src.dir}" includes="**/test/nist/*.java" />
              <fileset dir="${src.dir}" includes="**/*.pem" />
+             <fileset dir="${src.dir}" includes="**/*.eml" />
+             <fileset dir="${src.dir}" includes="**/*.crt" />
+             <fileset dir="${src.dir}" includes="**/*.crl" />
              <fileset dir="${src.dir}" includes="**/*.properties" />
              <fileset dir="${src.dir}" includes="**/*.message" />
         </copy>
@@ -619,7 +633,7 @@
     </target>
 	
     <target name="zip-src-provider" if="provider.present">
-        <jar basedir="${provider.target.src.dir}" jarfile="${provider.target.src.zip}" />
+        <zip basedir="${provider.target.src.dir}" destfile="${provider.target.src.zip}" />
         <delete dir="${provider.target.src.dir}" />
     </target>
 	

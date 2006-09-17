@@ -40,6 +40,12 @@
             <fileset dir="test/src" includes="**/*.pem" />
             <fileset dir="test/src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.eml" />
+            <fileset dir="test/data" includes="**/*.pem" />
+            <fileset dir="test/data" includes="**/*.properties" />
+            <fileset dir="test/data" includes="**/*.eml" />
+            <fileset dir="test/data" includes="**/*.crt" />
+            <fileset dir="test/data" includes="**/*.crl" />
+            <fileset dir="test/data" includes="**/*.message" />
         </copy>
         <copy todir="${src.dir}" overwrite="true">
             <fileset dir="jdk1.4" includes="**/*.java" />
