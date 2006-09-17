@@ -1,6 +1,5 @@
 package org.bouncycastle.jce;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Principal;
@@ -16,6 +15,20 @@ public class X509Principal
     extends X509Name
     implements Principal
 {
+    private static ASN1Sequence readSequence(
+        ASN1InputStream aIn)
+        throws IOException
+    {
+        try
+        {
+            return ASN1Sequence.getInstance(aIn.readObject());
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new IOException("not an ASN.1 Sequence: " + e);
+        }
+    }
+
     /**
      * Constructor from an encoded byte array.
      */
@@ -23,7 +36,7 @@ public class X509Principal
         byte[]  bytes)
         throws IOException
     {
-        super((ASN1Sequence)(new ASN1InputStream(new ByteArrayInputStream(bytes)).readObject()));
+        super(readSequence(new ASN1InputStream(bytes)));
     }
 
     /**
