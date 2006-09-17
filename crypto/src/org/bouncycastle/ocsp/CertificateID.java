@@ -1,6 +1,5 @@
 package org.bouncycastle.ocsp;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -58,8 +57,7 @@ public class CertificateID
             PublicKey issuerKey = issuerCert.getPublicKey();
 
 
-            ASN1InputStream aIn = new ASN1InputStream(
-                                    new ByteArrayInputStream(issuerKey.getEncoded()));
+            ASN1InputStream aIn = new ASN1InputStream(issuerKey.getEncoded());
             SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(
                                                             aIn.readObject());
 

@@ -44,8 +44,7 @@ public class RespID
         {
             MessageDigest       digest = MessageDigest.getInstance("SHA1");
 
-            ASN1InputStream aIn = new ASN1InputStream(
-                                    new ByteArrayInputStream(key.getEncoded()));
+            ASN1InputStream aIn = new ASN1InputStream(key.getEncoded());
             SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(
                                                             aIn.readObject());
 

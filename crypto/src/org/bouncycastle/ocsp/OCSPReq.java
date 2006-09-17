@@ -75,15 +75,21 @@ public class OCSPReq
         byte[]          req)
         throws IOException
     {
-        this(new ByteArrayInputStream(req));
+        this(new ASN1InputStream(req));
     }
 
     public OCSPReq(
         InputStream     in)
         throws IOException
     {
-        this.req = OCSPRequest.getInstance(
-                        new ASN1InputStream(in).readObject());
+        this(new ASN1InputStream(in));
+    }
+
+    private OCSPReq(
+        ASN1InputStream aIn) 
+        throws IOException
+    {
+        this.req = OCSPRequest.getInstance(aIn.readObject());
     }
 
     /**

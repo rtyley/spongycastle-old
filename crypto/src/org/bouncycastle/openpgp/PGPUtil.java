@@ -1,7 +1,6 @@
 package org.bouncycastle.openpgp;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -62,8 +61,7 @@ public class PGPUtil
         byte[] encoding) 
         throws PGPException
     {
-        ASN1InputStream aIn =
-            new ASN1InputStream(new ByteArrayInputStream(encoding));
+        ASN1InputStream aIn = new ASN1InputStream(encoding);
 
         DERInteger i1;
         DERInteger i2;

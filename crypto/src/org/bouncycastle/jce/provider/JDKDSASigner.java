@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -79,8 +78,7 @@ public class JDKDSASigner
             {
                 byte[]  bytes = publicKey.getEncoded();
 
-                publicKey = JDKKeyFactory.createPublicKeyFromDERStream(
-                                        new ByteArrayInputStream(bytes));
+                publicKey = JDKKeyFactory.createPublicKeyFromDERStream(bytes);
 
                 if (publicKey instanceof ECPublicKey)
                 {
@@ -248,8 +246,7 @@ public class JDKDSASigner
         byte[]  encoding)
         throws IOException
     {
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(encoding);
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
+        ASN1InputStream         aIn = new ASN1InputStream(encoding);
         ASN1Sequence            s = (ASN1Sequence)aIn.readObject();
 
         BigInteger[]            sig = new BigInteger[2];

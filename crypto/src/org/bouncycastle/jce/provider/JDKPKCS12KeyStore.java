@@ -191,10 +191,8 @@ public class JDKPKCS12KeyStore
     {
         try
         {
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(
-                                                    pubKey.getEncoded());
             SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-                (ASN1Sequence)new ASN1InputStream(bIn).readObject());
+                (ASN1Sequence)new ASN1InputStream(pubKey.getEncoded()).readObject());
 
             return new SubjectKeyIdentifier(info);
         }
@@ -370,12 +368,10 @@ public class JDKPKCS12KeyStore
                 {
                     try
                     {
-                        ByteArrayInputStream    bIn = new ByteArrayInputStream(bytes);
-                        ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                        ASN1InputStream         aIn = new ASN1InputStream(bytes);
 
-
-                        bIn = new ByteArrayInputStream(((ASN1OctetString)aIn.readObject()).getOctets());
-                        aIn = new ASN1InputStream(bIn);
+                        byte[] authBytes = ((ASN1OctetString)aIn.readObject()).getOctets();
+                        aIn = new ASN1InputStream(authBytes);
 
                         AuthorityKeyIdentifier id = new AuthorityKeyIdentifier((ASN1Sequence)aIn.readObject());
                         if (id.getKeyIdentifier() != null)
@@ -656,7 +652,7 @@ public class JDKPKCS12KeyStore
             throw new IOException("exception decrypting data - " + e.toString());
         }
 
-        ASN1InputStream  aIn = new ASN1InputStream(new ByteArrayInputStream(out));
+        ASN1InputStream  aIn = new ASN1InputStream(out);
 
         return (ASN1Sequence)aIn.readObject();
     }
@@ -822,7 +818,7 @@ public class JDKPKCS12KeyStore
 
         if (info.getContentType().equals(data))
         {
-            bIn = new ASN1InputStream(new ByteArrayInputStream(((ASN1OctetString)info.getContent()).getOctets()));
+            bIn = new ASN1InputStream(((ASN1OctetString)info.getContent()).getOctets());
 
             AuthenticatedSafe   authSafe = new AuthenticatedSafe((ASN1Sequence)bIn.readObject());
             ContentInfo[]       c = authSafe.getContentInfo();
@@ -831,7 +827,7 @@ public class JDKPKCS12KeyStore
             {
                 if (c[i].getContentType().equals(data))
                 {
-                    ASN1InputStream dIn = new ASN1InputStream(new ByteArrayInputStream(((ASN1OctetString)c[i].getContent()).getOctets()));
+                    ASN1InputStream dIn = new ASN1InputStream(((ASN1OctetString)c[i].getContent()).getOctets());
                     ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
 
                     for (int j = 0; j != seq.size(); j++)

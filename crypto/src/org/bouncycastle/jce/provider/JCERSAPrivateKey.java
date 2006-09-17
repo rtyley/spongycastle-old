@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -138,8 +137,7 @@ public class JCERSAPrivateKey
             this.pkcs12Attributes = new Hashtable();
             this.pkcs12Ordering = new Vector();
 
-            ByteArrayInputStream    bIn = new ByteArrayInputStream((byte[])obj);
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
+            ASN1InputStream         aIn = new ASN1InputStream((byte[])obj);
 
             DERObjectIdentifier    oid;
 

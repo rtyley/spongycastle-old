@@ -1,6 +1,5 @@
 package org.bouncycastle.ocsp;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,15 +25,21 @@ public class OCSPResp
         byte[]          resp)
         throws IOException
     {
-        this(new ByteArrayInputStream(resp));
+        this(new ASN1InputStream(resp));
     }
 
     public OCSPResp(
         InputStream     in)
         throws IOException
     {
-        this.resp = OCSPResponse.getInstance(
-                        new ASN1InputStream(in).readObject());
+        this(new ASN1InputStream(in));
+    }
+
+    private OCSPResp(
+        ASN1InputStream aIn)
+        throws IOException
+    {
+        this(OCSPResponse.getInstance(aIn.readObject()));
     }
 
     public int getStatus()
@@ -56,8 +61,7 @@ public class OCSPResp
         {
             try
             {
-                ASN1InputStream aIn = new ASN1InputStream(
-                        new ByteArrayInputStream(rb.getResponse().getOctets()));
+                ASN1InputStream aIn = new ASN1InputStream(rb.getResponse().getOctets());
                 return new BasicOCSPResp(
                             BasicOCSPResponse.getInstance(aIn.readObject()));
             }

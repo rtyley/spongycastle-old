@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -368,7 +367,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 if (!(CertPathValidatorUtilities.isSelfIssued(cert) && (i < n)))
                 {
                     X500Principal principal = CertPathValidatorUtilities.getSubjectPrincipal(cert);
-                    ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(principal.getEncoded()));
+                    ASN1InputStream aIn = new ASN1InputStream(principal.getEncoded());
                     ASN1Sequence    dns;
     
                     try

@@ -168,8 +168,7 @@ public class ASN1InputStream
         case NULL:
             return new DERNull();   
         case SEQUENCE | CONSTRUCTED:
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(bytes);
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
+            ASN1InputStream         aIn = new ASN1InputStream(bytes);
             ASN1EncodableVector     v = new ASN1EncodableVector();
 
             DERObject   obj = aIn.readObject();
@@ -182,8 +181,7 @@ public class ASN1InputStream
 
             return new DERSequence(v);
         case SET | CONSTRUCTED:
-            bIn = new ByteArrayInputStream(bytes);
-            aIn = new ASN1InputStream(bIn);
+            aIn = new ASN1InputStream(bytes);
             v = new ASN1EncodableVector();
 
             obj = aIn.readObject();
@@ -263,8 +261,7 @@ public class ASN1InputStream
                     return new DERTaggedObject(false, tagNo, new DEROctetString(bytes));
                 }
 
-                bIn = new ByteArrayInputStream(bytes);
-                aIn = new ASN1InputStream(bIn);
+                aIn = new ASN1InputStream(bytes);
 
                 DEREncodable dObj = aIn.readObject();
 

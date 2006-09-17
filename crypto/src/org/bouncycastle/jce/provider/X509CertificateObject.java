@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -295,7 +294,7 @@ public class X509CertificateObject
         {
             try
             {
-                ASN1InputStream dIn = new ASN1InputStream(new ByteArrayInputStream(bytes));
+                ASN1InputStream dIn = new ASN1InputStream(bytes);
                 DERBitString    bits = (DERBitString)dIn.readObject();
 
                 bytes = bits.getBytes();
@@ -329,7 +328,7 @@ public class X509CertificateObject
         {
             try
             {
-                ASN1InputStream dIn = new ASN1InputStream(new ByteArrayInputStream(bytes));
+                ASN1InputStream dIn = new ASN1InputStream(bytes);
                 ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
                 List            list = new ArrayList();
 
@@ -357,7 +356,7 @@ public class X509CertificateObject
         {
             try
             {
-                ASN1InputStream dIn = new ASN1InputStream(new ByteArrayInputStream(bytes));
+                ASN1InputStream dIn = new ASN1InputStream(bytes);
                 ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
 
                 if (seq.size() == 2)
@@ -657,8 +656,7 @@ public class X509CertificateObject
                 if (ext.getValue() != null)
                 {
                     byte[]                  octs = ext.getValue().getOctets();
-                    ByteArrayInputStream    bIn = new ByteArrayInputStream(octs);
-                    ASN1InputStream         dIn = new ASN1InputStream(bIn);
+                    ASN1InputStream         dIn = new ASN1InputStream(octs);
                     buf.append("                       critical(" + ext.isCritical() + ") ");
                     try
                     {

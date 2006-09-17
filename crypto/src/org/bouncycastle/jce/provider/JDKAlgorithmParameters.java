@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.AlgorithmParametersSpi;
@@ -116,8 +115,7 @@ public abstract class JDKAlgorithmParameters
             if ((params.length % 8) != 0
                     && params[0] == 0x04 && params[1] == params.length - 2)
             {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(params);
                 ASN1OctetString         oct = (ASN1OctetString)aIn.readObject();
 
                 params = oct.getOctets();
@@ -140,8 +138,7 @@ public abstract class JDKAlgorithmParameters
             }
             else if (format.equals("ASN.1"))
             {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(params);
                 
                 try
                 {
@@ -246,8 +243,7 @@ public abstract class JDKAlgorithmParameters
             }
             else if (format.equals("ASN.1"))
             {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(params);
                 IDEACBCPar              oct = new IDEACBCPar((ASN1Sequence)aIn.readObject());
 
                 engineInit(oct.getIV());
@@ -417,8 +413,7 @@ public abstract class JDKAlgorithmParameters
             }
             else if (format.equals("ASN.1"))
             {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(params);
                 RC2CBCParameter         p = RC2CBCParameter.getInstance(aIn.readObject());
 
                 if (p.getRC2ParameterVersion() != null)
@@ -517,8 +512,7 @@ public abstract class JDKAlgorithmParameters
             }
             else if (format.equals("ASN.1"))
             {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(params);
                 CAST5CBCParameters      p = CAST5CBCParameters.getInstance(aIn.readObject());
 
                 keyLength = p.getKeyLength();
@@ -602,8 +596,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             this.params = PKCS12PBEParams.getInstance(aIn.readObject());
         }
@@ -702,8 +695,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             try
             {
@@ -824,8 +816,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             try
             {
@@ -939,8 +930,7 @@ public abstract class JDKAlgorithmParameters
                 byte[] params)
         throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        dIn = new ASN1InputStream(bIn);
+            ASN1InputStream        dIn = new ASN1InputStream(params);
             
             try
             {
@@ -1066,8 +1056,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             try
             {
@@ -1180,8 +1169,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             try
             {
@@ -1301,8 +1289,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
     
             try
             {
@@ -1357,8 +1344,6 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded() 
             throws IOException
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
             PSSParameterSpec    pssSpec = (PSSParameterSpec)currentSpec;
             AlgorithmIdentifier hashAlgorithm = new AlgorithmIdentifier(
                                                 JCEDigestUtil.getOID(pssSpec.getDigestAlgorithm()),
@@ -1413,8 +1398,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
     
             try
             {

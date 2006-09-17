@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -54,7 +53,7 @@ public class DERApplicationSpecific
     public DERObject getObject() 
         throws IOException 
     {
-        return new ASN1InputStream(new ByteArrayInputStream(getContents())).readObject();
+        return new ASN1InputStream(getContents()).readObject();
     }
     
     /* (non-Javadoc)
