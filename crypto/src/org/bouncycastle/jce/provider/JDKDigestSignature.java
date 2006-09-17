@@ -11,12 +11,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
@@ -141,12 +136,6 @@ public class JDKDigestSignature
         }
     }
 
-    private boolean isNull(
-        DEREncodable    o)
-    {
-        return (o instanceof ASN1Null) || (o == null);
-    }
-    
     protected boolean engineVerify(
         byte[]  sigBytes) 
         throws SignatureException
@@ -155,43 +144,57 @@ public class JDKDigestSignature
 
         digest.doFinal(hash, 0);
 
-        DigestInfo  digInfo;
         byte[]      sig;
+        byte[]      expected;
 
         try
         {
             sig = cipher.processBlock(sigBytes, 0, sigBytes.length);
 
-            digInfo = derDecode(sig);
+            expected = derEncode(hash);
         }
         catch (Exception e)
         {
             return false;
         }
 
-        if (!digInfo.getAlgorithmId().getObjectId().equals(algId.getObjectId()))
+        if (sig.length == expected.length)
         {
-            return false;
-        }
-        
-        if (!isNull(digInfo.getAlgorithmId().getParameters()))
-        {
-            return false;
-        }
-
-        byte[]  sigHash = digInfo.getDigest();
-
-        if (hash.length != sigHash.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < hash.length; i++)
-        {
-            if (sigHash[i] != hash[i])
+            for (int i = 0; i < sig.length; i++)
             {
-                return false;
+                if (sig[i] != expected[i])
+                {
+                    return false;
+                }
             }
+        }
+        else if (sig.length == expected.length - 2)  // NULL left out
+        {
+            int sigOffset = sig.length - hash.length - 2;
+            int expectedOffset = expected.length - hash.length - 2;
+
+            expected[1] -= 2;      // adjust lengths
+            expected[3] -= 2;
+
+            for (int i = 0; i < hash.length; i++)
+            {
+                if (sig[sigOffset + i] != expected[expectedOffset + i])  // check hash
+                {
+                    return false;
+                }
+            }
+
+            for (int i = 0; i < sigOffset; i++)
+            {
+                if (sig[i] != expected[i])  // check header less NULL
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            return false;
         }
 
         return true;
@@ -229,26 +232,6 @@ public class JDKDigestSignature
         DigestInfo              dInfo = new DigestInfo(algId, hash);
 
         return dInfo.getEncoded(ASN1Encodable.DER);
-    }
-
-    private DigestInfo derDecode(
-        byte[]  encoding)
-        throws IOException
-    {
-        if (encoding[0] != (DERTags.CONSTRUCTED | DERTags.SEQUENCE))
-        {
-            throw new IOException("not a digest info object");
-        }
-        
-        ASN1InputStream aIn = new ASN1InputStream(encoding);
-        DigestInfo      dInfo = new DigestInfo((ASN1Sequence)aIn.readObject());
-
-        if (aIn.available() != 0)
-        {
-            throw new IOException("malformed stream for DigestInfo");
-        }
-        
-        return dInfo;
     }
 
     static public class SHA1WithRSAEncryption
