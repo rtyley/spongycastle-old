@@ -10,7 +10,6 @@ import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
@@ -35,42 +34,18 @@ public class CMSEnvelopedData
     private ASN1Set                unprotectedAttributes;
     private AlgorithmIdentifier _encAlg;
 
-    private static ContentInfo readContentInfo(
-        InputStream envelopedData)
-        throws CMSException
-    {
-        try
-        {
-            ASN1InputStream in = new ASN1InputStream(envelopedData);
-
-            return ContentInfo.getInstance(in.readObject());
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("IOException reading content.", e);
-        }
-        catch (ClassCastException e)
-        {
-            throw new CMSException("Malformed content.", e);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new CMSException("Malformed content.", e);
-        }
-    }
-
     public CMSEnvelopedData(
         byte[]    envelopedData) 
         throws CMSException
     {
-        this(readContentInfo(new ByteArrayInputStream(envelopedData)));
+        this(CMSUtils.readContentInfo(envelopedData));
     }
 
     public CMSEnvelopedData(
         InputStream    envelopedData) 
         throws CMSException
     {
-        this(readContentInfo(envelopedData));
+        this(CMSUtils.readContentInfo(envelopedData));
     }
 
     public CMSEnvelopedData(

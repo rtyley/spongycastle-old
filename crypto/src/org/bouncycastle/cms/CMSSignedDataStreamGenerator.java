@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -259,8 +258,7 @@ public class CMSSignedDataStreamGenerator
 
             ASN1OctetString         encDigest = new DEROctetString(_signature.sign());
             X509Certificate         cert = this.getCertificate();
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getTBSCertificate());
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
+            ASN1InputStream         aIn = new ASN1InputStream(cert.getTBSCertificate());
             TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
             IssuerAndSerialNumber   encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
 
@@ -414,8 +412,7 @@ public class CMSSignedDataStreamGenerator
             return null;
         }
 
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(encoding);
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
+        ASN1InputStream         aIn = new ASN1InputStream(encoding);
 
         return aIn.readObject();
     }

@@ -72,30 +72,6 @@ public class CMSSignedData
     CertStore               certStore;
     SignerInformationStore  signerInfoStore;
 
-    private static ContentInfo readContentInfo(
-        InputStream envelopedData)
-        throws CMSException
-    {
-        try
-        {
-            ASN1InputStream in = new ASN1InputStream(envelopedData);
-
-            return ContentInfo.getInstance(in.readObject());
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("IOException reading content.", e);
-        }
-        catch (ClassCastException e)
-        {
-            throw new CMSException("Malformed content.", e);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new CMSException("Malformed content.", e);
-        }
-    }
-    
     private CMSSignedData(
         CMSSignedData   c)
     {
@@ -110,7 +86,7 @@ public class CMSSignedData
         byte[]      sigBlock)
         throws CMSException
     {
-        this(readContentInfo(new ByteArrayInputStream(sigBlock)));
+        this(CMSUtils.readContentInfo(sigBlock));
     }
 
     public CMSSignedData(
@@ -118,7 +94,7 @@ public class CMSSignedData
         byte[]          sigBlock)
         throws CMSException
     {
-        this(signedContent, readContentInfo(new ByteArrayInputStream(sigBlock)));
+        this(signedContent, CMSUtils.readContentInfo(sigBlock));
     }
 
     /**
@@ -132,7 +108,7 @@ public class CMSSignedData
         InputStream     sigData)
         throws CMSException
     {
-        this(signedContent, readContentInfo(sigData));
+        this(signedContent, CMSUtils.readContentInfo(new ASN1InputStream(sigData)));
     }
 
     /**
@@ -142,7 +118,7 @@ public class CMSSignedData
         InputStream sigData)
         throws CMSException
     {
-        this(readContentInfo(sigData));
+        this(CMSUtils.readContentInfo(sigData));
     }
 
     public CMSSignedData(
@@ -395,8 +371,7 @@ public class CMSSignedData
         byte[]  encoding)
         throws IOException
     {
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(encoding);
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
+        ASN1InputStream         aIn = new ASN1InputStream(encoding);
 
         return aIn.readObject();
     }

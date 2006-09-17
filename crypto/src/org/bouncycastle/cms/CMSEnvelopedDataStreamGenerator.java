@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.AlgorithmParameterGenerator;
@@ -107,8 +106,7 @@ public class CMSEnvelopedDataStreamGenerator
             try
             {
                 byte[]                  bytes = cert.getTBSCertificate();
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(bytes);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(bytes);
 
                 TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
                 SubjectPublicKeyInfo    info = tbs.getSubjectPublicKeyInfo();
@@ -135,8 +133,7 @@ public class CMSEnvelopedDataStreamGenerator
             try
             {
                 byte[]                  bytes = pubKey.getEncoded();
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(bytes);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(bytes);
 
                 SubjectPublicKeyInfo    info = SubjectPublicKeyInfo.getInstance(aIn.readObject());
 
@@ -216,8 +213,7 @@ public class CMSEnvelopedDataStreamGenerator
 
                 if (cert != null)
                 {
-                    ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getTBSCertificate());
-                    ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                    ASN1InputStream         aIn = new ASN1InputStream(cert.getTBSCertificate());
                     TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
                     IssuerAndSerialNumber   encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
 
@@ -488,8 +484,7 @@ public class CMSEnvelopedDataStreamGenerator
         DEREncodable asn1Params;
         if (params != null)
         {
-            ByteArrayInputStream        bIn = new ByteArrayInputStream(params.getEncoded("ASN.1"));
-            ASN1InputStream             aIn = new ASN1InputStream(bIn);
+            ASN1InputStream             aIn = new ASN1InputStream(params.getEncoded("ASN.1"));
       
             asn1Params = aIn.readObject();
         }
