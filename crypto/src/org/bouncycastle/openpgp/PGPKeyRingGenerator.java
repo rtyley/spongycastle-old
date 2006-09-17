@@ -68,13 +68,32 @@ public class PGPKeyRingGenerator
     }
     
     /**
-     * Add a sub key to the key ring to be generated with default certification.
+     * Add a sub key to the key ring to be generated with default certification and inheriting
+     * the hashed/unhashed packets of the master key.
      * 
      * @param keyPair
      * @throws PGPException
      */
     public void addSubKey(
         PGPKeyPair    keyPair) 
+        throws PGPException
+    {
+        addSubKey(keyPair, hashedPcks, unhashedPcks);
+    }
+    
+    /**
+     * Add a subkey with specific hashed and unhashed packets associated with it and default
+     * certification.
+     * 
+     * @param keyPair public/private key pair.
+     * @param hashedPcks hashed packet values to be included in certification.
+     * @param unhashedPcks unhashed packets values to be included in certification.
+     * @throws PGPException
+     */
+    public void addSubKey(
+        PGPKeyPair                  keyPair,
+        PGPSignatureSubpacketVector hashedPcks,
+        PGPSignatureSubpacketVector unhashedPcks) 
         throws PGPException
     {
         try
