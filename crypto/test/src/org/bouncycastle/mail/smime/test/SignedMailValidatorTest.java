@@ -35,10 +35,7 @@ import junit.framework.TestSuite;
 
 public class SignedMailValidatorTest extends TestCase
 {
-
     static String TEST_TRUST_ACHOR = "validator.root.crt";
-
-    static String TEST_FILES_DIR = "data/validator";
 
     public void testShortKey() throws Exception
     {
@@ -208,8 +205,7 @@ public class SignedMailValidatorTest extends TestCase
         Session session = Session.getDefaultInstance(props, null);
 
         // read message
-        MimeMessage msg = new MimeMessage(session, getClass()
-                .getResourceAsStream(TEST_FILES_DIR + "/" + message));
+        MimeMessage msg = new MimeMessage(session, getClass().getResourceAsStream(message));
 
         SignedMailValidator validator = new SignedMailValidator(msg, params);
         SignerInformation signer = (SignerInformation) validator
@@ -268,8 +264,7 @@ public class SignedMailValidatorTest extends TestCase
     private X509Certificate loadCert(String certfile) throws Exception
     {
         X509Certificate cert = null;
-        InputStream in = getClass().getResourceAsStream(
-                TEST_FILES_DIR + "/" + certfile);
+        InputStream in = getClass().getResourceAsStream(certfile);
 
         CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
         cert = (X509Certificate) cf.generateCertificate(in);
@@ -279,8 +274,7 @@ public class SignedMailValidatorTest extends TestCase
     private X509CRL loadCRL(String crlfile) throws Exception
     {
         X509CRL crl = null;
-        InputStream in = getClass().getResourceAsStream(
-                TEST_FILES_DIR + "/" + crlfile);
+        InputStream in = this.getClass().getResourceAsStream(crlfile);
         
         CertificateFactory cf = CertificateFactory.getInstance("x.509", "BC");
         crl = (X509CRL) cf.generateCRL(in);
@@ -295,7 +289,7 @@ public class SignedMailValidatorTest extends TestCase
                     .addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         }
     }
-
+    
     public static void main(String[] args) throws Exception
     {
         junit.textui.TestRunner.run(suite());

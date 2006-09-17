@@ -847,7 +847,6 @@ public class CertTest
         //
         // set up the keys
         //
-        SecureRandom        rand = new SecureRandom();
         PrivateKey          privKey;
         PublicKey           pubKey;
 
@@ -1796,6 +1795,35 @@ public class CertTest
         }
     }
     
+    private void testForgedSignature() 
+        throws Exception
+    {
+        String cert = "MIIBsDCCAVoCAQYwDQYJKoZIhvcNAQEFBQAwYzELMAkGA1UEBhMCQVUxEzARBgNV"
+                    + "BAgTClF1ZWVuc2xhbmQxGjAYBgNVBAoTEUNyeXB0U29mdCBQdHkgTHRkMSMwIQYD"
+                    + "VQQDExpTZXJ2ZXIgdGVzdCBjZXJ0ICg1MTIgYml0KTAeFw0wNjA5MTEyMzU4NTVa"
+                    + "Fw0wNjEwMTEyMzU4NTVaMGMxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpRdWVlbnNs"
+                    + "YW5kMRowGAYDVQQKExFDcnlwdFNvZnQgUHR5IEx0ZDEjMCEGA1UEAxMaU2VydmVy"
+                    + "IHRlc3QgY2VydCAoNTEyIGJpdCkwXDANBgkqhkiG9w0BAQEFAANLADBIAkEAn7PD"
+                    + "hCeV/xIxUg8V70YRxK2A5jZbD92A12GN4PxyRQk0/lVmRUNMaJdq/qigpd9feP/u"
+                    + "12S4PwTLb/8q/v657QIDAQABMA0GCSqGSIb3DQEBBQUAA0EAbynCRIlUQgaqyNgU"
+                    + "DF6P14yRKUtX8akOP2TwStaSiVf/akYqfLFm3UGka5XbPj4rifrZ0/sOoZEEBvHQ"
+                    + "e20sRA==";
+        
+        CertificateFactory certFact = CertificateFactory.getInstance("X.509", "BC");
+        
+        X509Certificate x509 = (X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(Base64.decode(cert)));
+        try
+        {
+            x509.verify(x509.getPublicKey());
+            
+            fail("forged RSA signature passed");
+        }
+        catch (Exception e)
+        {
+            // expected
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -1830,6 +1858,8 @@ public class CertTest
         checkCRLCreation1();
         checkCRLCreation2();
         checkCRLCreation3();
+        
+        testForgedSignature();
     }
 
     public static void main(

@@ -435,6 +435,12 @@ public class EnvelopedDataStreamTest
             return;
         }
         
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.4") || version.startsWith("1.3"))
+        {
+            return;
+        }
+        
         byte[]          data     = "WallaWallaWashington".getBytes();
         
         CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();

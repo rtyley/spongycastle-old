@@ -38,7 +38,8 @@ public class RSATest
     static byte[] oversizedSig = Hex.decode("01ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff004e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e");
     static byte[] dudBlock = Hex.decode("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff004e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e");
     static byte[] truncatedDataBlock = Hex.decode("0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff004e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e");
-    static byte[] missingDataBlock = Hex.decode("0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff4e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e");
+    static byte[] incorrectPadding = Hex.decode("0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff4e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e");
+    static byte[] missingDataBlock = Hex.decode("0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
     public String getName()
     {
@@ -59,7 +60,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("RSA: failed - exception " + e.toString());
+            fail("RSA: failed - exception " + e.toString(), e);
         }
         
         eng = new PKCS1Encoding(eng);
@@ -76,7 +77,7 @@ public class RSATest
         {
             if (!e.getMessage().equals("block incorrect size"))
             {
-                fail("RSA: failed - exception " + e.toString());
+                fail("RSA: failed - exception " + e.toString(), e);
             }
         }
         
@@ -92,7 +93,7 @@ public class RSATest
         }
         catch (InvalidCipherTextException e)
         {
-            fail("RSA: failed - exception " + e.toString());
+            fail("RSA: failed - exception " + e.toString(), e);
         }
         
         System.getProperties().remove(PKCS1Encoding.STRICT_LENGTH_ENABLED_PROPERTY);
@@ -106,6 +107,11 @@ public class RSATest
     private void testDudPKCS1Block(RSAKeyParameters pubParameters, RSAKeyParameters privParameters)
     {
         checkForPKCS1Exception(pubParameters, privParameters, dudBlock, "unknown block type");
+    }
+
+    private void testWrongPaddingPKCS1Block(RSAKeyParameters pubParameters, RSAKeyParameters privParameters)
+    {
+        checkForPKCS1Exception(pubParameters, privParameters, incorrectPadding, "block padding incorrect");
     }
     
     private void testMissingDataPKCS1Block(RSAKeyParameters pubParameters, RSAKeyParameters privParameters)
@@ -127,7 +133,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("RSA: failed - exception " + e.toString());
+            fail("RSA: failed - exception " + e.toString(), e);
         }
         
         eng = new PKCS1Encoding(eng);
@@ -144,7 +150,7 @@ public class RSATest
         {
             if (!e.getMessage().equals(expectedMessage))
             {
-                fail("RSA: failed - exception " + e.toString());
+                fail("RSA: failed - exception " + e.toString(), e);
             }
         }
     }
@@ -165,7 +171,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         eng.init(false, privParameters);
@@ -176,7 +182,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         if (!input.equals(new String(Hex.encode(data))))
@@ -204,7 +210,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("RSA: failed - exception " + e.toString());
+            fail("RSA: failed - exception " + e.toString(), e);
         }
 
         eng.init(false, privParameters);
@@ -215,7 +221,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         if (!edgeInput.equals(new String(Hex.encode(data))))
@@ -233,7 +239,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         eng.init(false, privParameters);
@@ -244,7 +250,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         if (!input.equals(new String(Hex.encode(data))))
@@ -270,7 +276,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         eng.init(false, privParameters);
@@ -281,7 +287,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         if (!input.equals(new String(Hex.encode(data))))
@@ -302,7 +308,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         eng.init(false, pubParameters);
@@ -313,7 +319,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         if (!input.equals(new String(Hex.encode(data))))
@@ -347,7 +353,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         eng.init(false, pair.getPrivate());
@@ -358,7 +364,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         if (!input.equals(new String(Hex.encode(data))))
@@ -384,7 +390,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         eng.init(false, pair.getPrivate());
@@ -395,7 +401,7 @@ public class RSATest
         }
         catch (Exception e)
         {
-            fail("failed - exception " + e.toString());
+            fail("failed - exception " + e.toString(), e);
         }
 
         if (!input.equals(new String(Hex.encode(data))))
@@ -408,6 +414,7 @@ public class RSATest
         testDudPKCS1Block(pubParameters, privParameters);
         testMissingDataPKCS1Block(pubParameters, privParameters);
         testTruncatedPKCS1Block(pubParameters, privParameters);
+        testWrongPaddingPKCS1Block(pubParameters, privParameters);
     }
 
 

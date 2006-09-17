@@ -1,7 +1,6 @@
 package org.bouncycastle.mail.smime.test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
