@@ -20,7 +20,7 @@ public class CMSContentInfoParser
         
         try
         {
-            Asn1InputStream in = new Asn1InputStream(data);
+            Asn1InputStream in = new Asn1InputStream(data, CMSUtils.getMaximumMemory());
     
             _contentInfo = new ContentInfoParser((Asn1Sequence)in.readObject());
         }

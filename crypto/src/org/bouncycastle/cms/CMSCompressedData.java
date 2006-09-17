@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
 
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.cms.CompressedData;
@@ -19,34 +18,18 @@ public class CMSCompressedData
 {
     ContentInfo                 contentInfo;
 
-    private static ContentInfo readContentInfo(
-        InputStream compressedData)
-        throws CMSException
-    {
-        try
-        {
-            ASN1InputStream in = new ASN1InputStream(compressedData);
-
-            return ContentInfo.getInstance(in.readObject());
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("IOException reading content.", e);
-        }
-    }
-
     public CMSCompressedData(
         byte[]    compressedData) 
         throws CMSException
     {
-        this(readContentInfo(new ByteArrayInputStream(compressedData)));
+        this(CMSUtils.readContentInfo(compressedData));
     }
 
     public CMSCompressedData(
         InputStream    compressedData) 
         throws CMSException
     {
-        this(readContentInfo(compressedData));
+        this(CMSUtils.readContentInfo(compressedData));
     }
 
     public CMSCompressedData(
