@@ -32,7 +32,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class SMIMETestUtil
-{    
+{
     public static SecureRandom     rand;
     public static KeyPairGenerator kpg;
     public static KeyPairGenerator dsaKpg;
@@ -74,7 +74,7 @@ public class SMIMETestUtil
             throw new RuntimeException(ex.toString());
         }
     }
-
+    
     /*  
      *  
      *  CRYPT

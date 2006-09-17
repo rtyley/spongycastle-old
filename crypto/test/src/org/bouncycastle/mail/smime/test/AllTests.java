@@ -16,10 +16,11 @@ public class AllTests
     {
         TestSuite suite= new TestSuite("SMIME tests");
 
-        suite.addTest(org.bouncycastle.mail.smime.test.SMIMESignedTest.suite());
-        suite.addTest(org.bouncycastle.mail.smime.test.SMIMEEnvelopedTest.suite());
-        suite.addTest(org.bouncycastle.mail.smime.test.SMIMECompressedTest.suite());
-        suite.addTest(org.bouncycastle.mail.smime.test.SMIMEMiscTest.suite());
+        suite.addTest(SMIMESignedTest.suite());
+        suite.addTest(SignedMailValidatorTest.suite());
+        suite.addTest(SMIMEEnvelopedTest.suite());
+        suite.addTest(SMIMECompressedTest.suite());
+        suite.addTest(SMIMEMiscTest.suite());
         return suite;
     }
 }

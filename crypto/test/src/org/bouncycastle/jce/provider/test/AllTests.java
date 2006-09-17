@@ -3,6 +3,7 @@ package org.bouncycastle.jce.provider.test;
 import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.test.rsa3.RSA3CertTest;
 import org.bouncycastle.util.test.SimpleTestResult;
 
 import junit.framework.*;
@@ -12,8 +13,6 @@ public class AllTests
 {
     public void testJCE()
     {   
-        Security.addProvider(new BouncyCastleProvider());
-        
         org.bouncycastle.util.test.Test[] tests = RegressionTest.tests;
         
         for (int i = 0; i != tests.length; i++)
@@ -36,6 +35,12 @@ public class AllTests
     {
         TestSuite suite = new TestSuite("JCE Tests");
         
+        if (Security.getProvider("BC") == null)
+        {
+            Security.addProvider(new BouncyCastleProvider());  
+        }
+        
+        suite.addTestSuite(RSA3CertTest.class);
         suite.addTestSuite(AllTests.class);
         
         return suite;

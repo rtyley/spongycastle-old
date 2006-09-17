@@ -2,6 +2,8 @@ package org.bouncycastle.mail.smime.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.cert.CertStore;
@@ -532,10 +534,10 @@ public class SMIMESignedTest
     }
     
     private MimeMessage loadMessage(String name) 
-        throws MessagingException
+        throws MessagingException, FileNotFoundException
     {
         Session session = Session.getDefaultInstance(System.getProperties(), null);
 
-        return new MimeMessage(session, this.getClass().getResourceAsStream("data/" + name));
+        return new MimeMessage(session, getClass().getResourceAsStream(name));
     }
 }

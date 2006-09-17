@@ -149,6 +149,12 @@ public class EnvelopedDataTest
             return;
         }
         
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.4") || version.startsWith("1.3"))
+        {
+            return;
+        }
+        
         byte[]          data     = "WallaWallaWashington".getBytes();
     
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
