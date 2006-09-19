@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -128,32 +129,20 @@ public class PGPSecretKey
         this.pub = new PGPPublicKey(secret.getPublicKeyPacket(), trust, subSigs);
     }
     
-    /**
-     * Create a sub key.
-     * 
-     * @param keyPair
-     * @param trust
-     * @param subSigs
-     * @param encAlgorithm
-     * @param passPhrase
-     * @param rand
-     * @param provider
-     * @throws PGPException
-     * @throws NoSuchProviderException
-     */
     PGPSecretKey(
         PGPKeyPair      keyPair,
         TrustPacket     trust,
         List            subSigs,
         int             encAlgorithm,
         char[]          passPhrase,
+        boolean         useSHA1,
         SecureRandom    rand,
         String          provider) 
         throws PGPException, NoSuchProviderException
     {
-        this(keyPair, encAlgorithm, passPhrase, rand, provider);
+        this(keyPair, encAlgorithm, passPhrase, useSHA1, rand, provider);
 
-        this.secret = new SecretSubkeyPacket(secret.getPublicKeyPacket(), secret.getEncAlgorithm(), secret.getS2K(), secret.getIV(), secret.getSecretKeyData());
+        this.secret = new SecretSubkeyPacket(secret.getPublicKeyPacket(), secret.getEncAlgorithm(), secret.getS2KUsage(), secret.getS2K(), secret.getIV(), secret.getSecretKeyData());
         this.trust = trust;
         this.subSigs = subSigs;
         this.pub = new PGPPublicKey(keyPair.getPublicKey(), trust, subSigs);
@@ -163,6 +152,7 @@ public class PGPSecretKey
         PGPKeyPair      keyPair,
         int             encAlgorithm,
         char[]          passPhrase,
+        boolean         useSHA1,
         SecureRandom    rand,
         String          provider) 
         throws PGPException, NoSuchProviderException
@@ -223,15 +213,8 @@ public class PGPSecretKey
             pOut.writeObject(secKey);
             
             byte[]    keyData = bOut.toByteArray();
-            int       checkSum = 0;
-            
-            for (int i = 0; i != keyData.length; i++)
-            {
-                checkSum += keyData[i] & 0xff;
-            }
-            
-            pOut.write(checkSum >> 8);
-            pOut.write(checkSum);
+
+            pOut.write(checksum(useSHA1, keyData, keyData.length));
             
             if (c != null)
             {
@@ -248,7 +231,15 @@ public class PGPSecretKey
     
                 byte[]    encData = c.doFinal(bOut.toByteArray());
     
-                this.secret = new SecretKeyPacket(pubPk, encAlgorithm, s2k, iv, encData);
+                if (useSHA1)
+                {
+                    this.secret = new SecretKeyPacket(pubPk, encAlgorithm, SecretKeyPacket.USAGE_SHA1, s2k, iv, encData);
+                }
+                else
+                {
+                    this.secret = new SecretKeyPacket(pubPk, encAlgorithm, SecretKeyPacket.USAGE_CHECKSUM, s2k, iv, encData);
+                }
+
                 this.trust = null;
             }
             else
@@ -281,7 +272,23 @@ public class PGPSecretKey
         String                      provider)
         throws PGPException, NoSuchProviderException
     {
-        this(keyPair, encAlgorithm, passPhrase, rand, provider);
+        this(certificationLevel, keyPair, id, encAlgorithm, passPhrase, false, hashedPcks, unhashedPcks, rand, provider);
+    }
+
+    public PGPSecretKey(
+        int                         certificationLevel,
+        PGPKeyPair                  keyPair,
+        String                      id,
+        int                         encAlgorithm,
+        char[]                      passPhrase,
+        boolean                     useSHA1,
+        PGPSignatureSubpacketVector hashedPcks,
+        PGPSignatureSubpacketVector unhashedPcks,
+        SecureRandom                rand,
+        String                      provider)
+        throws PGPException, NoSuchProviderException
+    {
+        this(keyPair, encAlgorithm, passPhrase, useSHA1, rand, provider);
 
         try
         {
@@ -341,6 +348,25 @@ public class PGPSecretKey
         throws PGPException, NoSuchProviderException
     {
         this(certificationLevel, new PGPKeyPair(algorithm,pubKey, privKey, time, provider), id, encAlgorithm, passPhrase, hashedPcks, unhashedPcks, rand, provider);
+    }
+
+    public PGPSecretKey(
+        int                         certificationLevel,
+        int                         algorithm,
+        PublicKey                   pubKey,
+        PrivateKey                  privKey,
+        Date                        time,
+        String                      id,
+        int                         encAlgorithm,
+        char[]                      passPhrase,
+        boolean                     useSHA1,
+        PGPSignatureSubpacketVector hashedPcks,
+        PGPSignatureSubpacketVector unhashedPcks,
+        SecureRandom                rand,
+        String                      provider)
+        throws PGPException, NoSuchProviderException
+    {
+        this(certificationLevel, new PGPKeyPair(algorithm,pubKey, privKey, time, provider), id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider);
     }
 
     /**
@@ -455,6 +481,17 @@ public class PGPSecretKey
                         c.init(Cipher.DECRYPT_MODE, key, ivSpec);
                     
                         data = c.doFinal(encData, 0, encData.length);
+                        
+                        boolean useSHA1 = secret.getS2KUsage() == SecretKeyPacket.USAGE_SHA1;
+                        byte[] check = checksum(useSHA1, data, (useSHA1) ? data.length - 20 : data.length - 2);
+                        
+                        for (int i = 0; i != check.length; i++)
+                        {
+                            if (check[i] != data[data.length - check.length + i])
+                            {
+                                throw new PGPException("checksum mismatch at " + i + " of " + check.length);
+                            }
+                        }
                     }
                     else // version 2 or 3, RSA only.
                     {
@@ -614,6 +651,42 @@ public class PGPSecretKey
         }
     }
     
+    private static byte[] checksum(boolean useSHA1, byte[] bytes, int length) 
+        throws PGPException
+    {
+        if (useSHA1)
+        {
+            try
+            {
+            MessageDigest dig = MessageDigest.getInstance("SHA1");
+
+            dig.update(bytes, 0, length);
+
+            return dig.digest();
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                throw new PGPException("Can't find SHA-1", e);
+            }
+        }
+        else
+        {
+            int       checksum = 0;
+        
+            for (int i = 0; i != length; i++)
+            {
+                checksum += bytes[i] & 0xff;
+            }
+        
+            byte[] check = new byte[2];
+
+            check[0] = (byte)(checksum >> 8);
+            check[1] = (byte)checksum;
+
+            return check;
+        }
+    }
+    
     public byte[] getEncoded() 
         throws IOException
     {
@@ -710,13 +783,29 @@ public class PGPSecretKey
         throws PGPException, NoSuchProviderException
     {
         byte[]   rawKeyData = key.extractKeyData(oldPassPhrase, provider);
+        int        s2kUsage = key.secret.getS2KUsage();
         byte[]           iv = null;
         S2K             s2k = null;
         byte[]      keyData = null;
-        
+
         if (newEncAlgorithm == SymmetricKeyAlgorithmTags.NULL)
         {
-            keyData = rawKeyData;
+            s2kUsage = SecretKeyPacket.USAGE_NONE;
+            if (key.secret.getS2KUsage() == SecretKeyPacket.USAGE_SHA1)   // SHA-1 hash, need to rewrite checksum
+            {
+                keyData = new byte[rawKeyData.length - 18];
+
+                System.arraycopy(rawKeyData, 0, keyData, 0, keyData.length - 2);
+
+       	        byte[] check = checksum(false, keyData, keyData.length - 2);
+                
+                keyData[keyData.length - 2] = check[0];
+                keyData[keyData.length - 1] = check[1];
+            }
+            else
+            {
+                keyData = rawKeyData;
+            }
         }
         else
         {
@@ -766,12 +855,12 @@ public class PGPSecretKey
         if (key.secret instanceof SecretSubkeyPacket)
         {
             secret = new SecretSubkeyPacket(key.secret.getPublicKeyPacket(),
-                newEncAlgorithm, s2k, iv, keyData);
+                newEncAlgorithm, s2kUsage, s2k, iv, keyData);
         }
         else
         {
             secret = new SecretKeyPacket(key.secret.getPublicKeyPacket(),
-                newEncAlgorithm, s2k, iv, keyData);
+                newEncAlgorithm, s2kUsage, s2k, iv, keyData);
         }
 
         if (key.subSigs == null)

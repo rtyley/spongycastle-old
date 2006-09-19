@@ -57,7 +57,7 @@ public class DSAElGamalKeyRingGenerator
         PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date(), "BC");
         
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
-                 identity, PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+                 identity, PGPEncryptedData.AES_256, passPhrase, true, null, null, new SecureRandom(), "BC");
         
         keyRingGen.addSubKey(elgKeyPair);
         

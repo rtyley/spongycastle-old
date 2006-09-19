@@ -20,6 +20,7 @@ public class PGPKeyRingGenerator
     private int                         encAlgorithm;
     private int                         certificationLevel;
     private char[]                      passPhrase;
+    private boolean                     useSHA1;
     private PGPKeyPair                  masterKey;
     private PGPSignatureSubpacketVector hashedPcks;
     private PGPSignatureSubpacketVector unhashedPcks;
@@ -27,7 +28,8 @@ public class PGPKeyRingGenerator
     private String                      provider;
     
     /**
-     * Create a new key ring generator.
+     * Create a new key ring generator using old style checksumming. It is recommended to use
+     * SHA1 checksumming where possible.
      * 
      * @param certificationLevel the certification level for keys on this ring.
      * @param masterKey the master key pair.
@@ -54,17 +56,51 @@ public class PGPKeyRingGenerator
         String                         provider)
         throws PGPException, NoSuchProviderException
     {
+        this(certificationLevel, masterKey, id, encAlgorithm, passPhrase, false, hashedPcks, unhashedPcks, rand, provider);
+    }
+
+    /**
+     * Create a new key ring generator.
+     * 
+     * @param certificationLevel the certification level for keys on this ring.
+     * @param masterKey the master key pair.
+     * @param id the id to be associated with the ring.
+     * @param encAlgorithm the algorithm to be used to protect secret keys.
+     * @param passPhrase the passPhrase to be used to protect secret keys.
+     * @param useSHA1 checksum the secret keys with SHA1 rather than the older 16 bit checksum.
+     * @param hashedPcks packets to be include in the certification hash.
+     * @param unhashedPcks packets to be attached unhashed to the certification.
+     * @param rand input secured random
+     * @param provider the provider to use for encryption.
+     * 
+     * @throws PGPException
+     * @throws NoSuchProviderException
+     */
+    public PGPKeyRingGenerator(
+        int                            certificationLevel,
+        PGPKeyPair                     masterKey,
+        String                         id,
+        int                            encAlgorithm,
+        char[]                         passPhrase,
+        boolean                        useSHA1,
+        PGPSignatureSubpacketVector    hashedPcks,
+        PGPSignatureSubpacketVector    unhashedPcks,
+        SecureRandom                   rand,
+        String                         provider)
+        throws PGPException, NoSuchProviderException
+    {
         this.certificationLevel = certificationLevel;
         this.masterKey = masterKey;
         this.id = id;
         this.encAlgorithm = encAlgorithm;
         this.passPhrase = passPhrase;
+        this.useSHA1 = useSHA1;
         this.hashedPcks = hashedPcks;
         this.unhashedPcks = unhashedPcks;
         this.rand = rand;
         this.provider = provider;
         
-        keys.add(new PGPSecretKey(certificationLevel, masterKey, id, encAlgorithm, passPhrase, hashedPcks, unhashedPcks, rand, provider));
+        keys.add(new PGPSecretKey(certificationLevel, masterKey, id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider));
     }
     
     /**
@@ -83,7 +119,7 @@ public class PGPKeyRingGenerator
     
     /**
      * Add a subkey with specific hashed and unhashed packets associated with it and default
-     * certification.
+     * certification. 
      * 
      * @param keyPair public/private key pair.
      * @param hashedPcks hashed packet values to be included in certification.
@@ -112,7 +148,7 @@ public class PGPKeyRingGenerator
             
             subSigs.add(sGen.generateCertification(masterKey.getPublicKey(), keyPair.getPublicKey()));
             
-            keys.add(new PGPSecretKey(keyPair, null, subSigs, encAlgorithm, passPhrase, rand, provider));
+            keys.add(new PGPSecretKey(keyPair, null, subSigs, encAlgorithm, passPhrase, useSHA1, rand, provider));
         }
         catch (PGPException e)
         {
