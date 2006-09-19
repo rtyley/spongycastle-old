@@ -38,6 +38,21 @@ public interface X9ObjectIdentifiers
     static final DERObjectIdentifier    id_ecPublicKey
                     = new DERObjectIdentifier(id_publicKeyType + ".1");
 
+    static final DERObjectIdentifier    ecdsa_with_SHA2
+                    = new DERObjectIdentifier(id_ecSigType + ".3");
+
+    static final DERObjectIdentifier    ecdsa_with_SHA224
+                    = new DERObjectIdentifier(ecdsa_with_SHA2 + ".1");
+
+    static final DERObjectIdentifier    ecdsa_with_SHA256
+                    = new DERObjectIdentifier(ecdsa_with_SHA2 + ".2");
+
+    static final DERObjectIdentifier    ecdsa_with_SHA384
+                    = new DERObjectIdentifier(ecdsa_with_SHA2 + ".3");
+
+    static final DERObjectIdentifier    ecdsa_with_SHA512
+                    = new DERObjectIdentifier(ecdsa_with_SHA2 + ".4");
+
     //
     // named curves
     //
