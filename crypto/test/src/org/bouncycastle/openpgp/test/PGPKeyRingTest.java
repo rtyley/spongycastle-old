@@ -1707,7 +1707,9 @@ public class PGPKeyRingTest
     
         keyRingGen.addSubKey(elgKeyPair);
     
-        PGPSecretKeyRing    keyRing = keyRingGen.generateSecretKeyRing();
+        PGPSecretKeyRing       keyRing = keyRingGen.generateSecretKeyRing();
+        
+        keyRing.getSecretKey().extractPrivateKey(passPhrase, "BC");
         
         PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
         
@@ -1746,6 +1748,81 @@ public class PGPKeyRingTest
         }
     }
     
+    public void generateSha1Test()
+        throws Exception
+    {
+        char[]              passPhrase = "hello".toCharArray();
+        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
+    
+        dsaKpg.initialize(512);
+    
+        //
+        // this takes a while as the key generator has to generate some DSA params
+        // before it generates the key.
+        //
+        KeyPair                    dsaKp = dsaKpg.generateKeyPair();
+    
+        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", "BC");
+        BigInteger             g = new BigInteger("153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b410b7a0f12ca1cb9a428cc", 16);
+        BigInteger             p = new BigInteger("9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd38744d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94bf0573bf047a3aca98cdf3b", 16);
+        
+        ElGamalParameterSpec         elParams = new ElGamalParameterSpec(p, g);
+        
+        elgKpg.initialize(elParams);
+    
+        //
+        // this is quicker because we are using pregenerated parameters.
+        //
+        KeyPair                    elgKp = elgKpg.generateKeyPair();
+        PGPKeyPair        dsaKeyPair = new PGPKeyPair(PGPPublicKey.DSA, dsaKp, new Date(), "BC");
+        PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date(), "BC");
+    
+        PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
+                "test", PGPEncryptedData.AES_256, passPhrase, true, null, null, new SecureRandom(), "BC");
+    
+        keyRingGen.addSubKey(elgKeyPair);
+    
+        PGPSecretKeyRing       keyRing = keyRingGen.generateSecretKeyRing();
+        
+        keyRing.getSecretKey().extractPrivateKey(passPhrase, "BC");
+        
+        PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
+        
+        PGPPublicKey            vKey = null;
+        PGPPublicKey            sKey = null;
+        
+        Iterator                    it = pubRing.getPublicKeys();
+        while (it.hasNext())
+        {
+            PGPPublicKey    pk = (PGPPublicKey)it.next();
+            if (pk.isMasterKey())
+            {
+                vKey = pk;
+            }
+            else
+            {
+                sKey = pk;
+            }
+        }
+        
+        Iterator    sIt = sKey.getSignatures();
+        while (sIt.hasNext())
+        {
+            PGPSignature    sig = (PGPSignature)sIt.next();
+            
+            if (sig.getKeyID() == vKey.getKeyID()
+                && sig.getSignatureType() == PGPSignature.SUBKEY_BINDING)
+            {
+                sig.initVerify(vKey, "BC");
+    
+                if (!sig.verifyCertification(vKey, sKey))
+                {
+                    fail("failed to verify sub-key signature.");
+                }
+            }
+        }
+    }
+    
     private void test11()
         throws Exception
     {
@@ -1768,18 +1845,19 @@ public class PGPKeyRingTest
     {
         try
         {
-            test1();
-            test2();
-            test3();
-            test4();
-            test5();
-            test6();
+//            test1();
+//            test2();
+//            test3();
+//            test4();
+//            test5();
+//            test6();
     //      test7();
-            test8();
-            test9();
-            test10();
-            test11();
-            generateTest();
+//            test8();
+//            test9();
+//            test10();
+//            test11();
+//            generateTest();
+            generateSha1Test();
         }
         catch (PGPException e)
         {

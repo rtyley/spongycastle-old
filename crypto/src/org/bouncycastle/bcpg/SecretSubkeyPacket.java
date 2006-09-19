@@ -38,6 +38,17 @@ public class SecretSubkeyPacket
         super(pubKeyPacket, encAlgorithm, s2k, iv, secKeyData);
     }
  
+    public SecretSubkeyPacket(
+        PublicKeyPacket  pubKeyPacket,
+        int              encAlgorithm,
+        int              s2kUsage,
+        S2K              s2k,
+        byte[]           iv,
+        byte[]           secKeyData)
+    {
+        super(pubKeyPacket, encAlgorithm, s2kUsage, s2k, iv, secKeyData);
+    }
+    
     public void encode(
         BCPGOutputStream    out)
         throws IOException

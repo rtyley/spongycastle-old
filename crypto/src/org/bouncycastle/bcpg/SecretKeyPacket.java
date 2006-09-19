@@ -8,9 +8,13 @@ import java.io.*;
 public class SecretKeyPacket 
     extends ContainedPacket implements PublicKeyAlgorithmTags
 {
+    public static final int USAGE_NONE = 0x00;
+    public static final int USAGE_CHECKSUM = 0xff;
+    public static final int USAGE_SHA1 = 0xfe;
+
     private PublicKeyPacket    pubKeyPacket;
     private byte[]             secKeyData;
-    private int                stringToKey;
+    private int                s2kUsage;
     private int                encAlgorithm;
     private S2K                s2k;
     private byte[]             iv;
@@ -26,21 +30,21 @@ public class SecretKeyPacket
     {      
         pubKeyPacket = new PublicKeyPacket(in);
 
-        stringToKey = in.read();
-        
-        if (stringToKey == 0xff || stringToKey == 0xfe)
+        s2kUsage = in.read();
+
+        if (s2kUsage == USAGE_CHECKSUM || s2kUsage == USAGE_SHA1)
         {
             encAlgorithm = in.read();
             s2k = new S2K(in);
         }
         else
         {
-            encAlgorithm = stringToKey;
+            encAlgorithm = s2kUsage;
         }
 
         if (!(s2k != null && s2k.getType() == S2K.GNU_DUMMY_S2K && s2k.getProtectionMode() == 0x01))
         {
-            if (stringToKey != 0) 
+            if (s2kUsage != 0) 
             {
                 if (encAlgorithm < 7)
                 {
@@ -82,11 +86,11 @@ public class SecretKeyPacket
         
         if (encAlgorithm != SymmetricKeyAlgorithmTags.NULL)
         {
-            this.stringToKey = 0xff;
+            this.s2kUsage = USAGE_CHECKSUM;
         }
         else
         {
-            this.stringToKey = 0x00;
+            this.s2kUsage = USAGE_NONE;
         }
         
         this.s2k = s2k;
@@ -94,11 +98,32 @@ public class SecretKeyPacket
         this.secKeyData = secKeyData;
     }
     
+    public SecretKeyPacket(
+        PublicKeyPacket pubKeyPacket,
+        int             encAlgorithm,
+        int             s2kUsage,
+        S2K             s2k,
+        byte[]          iv,
+        byte[]          secKeyData)
+    {
+        this.pubKeyPacket = pubKeyPacket;
+        this.encAlgorithm = encAlgorithm;
+        this.s2kUsage = s2kUsage;
+        this.s2k = s2k;
+        this.iv = iv;
+        this.secKeyData = secKeyData;
+    }
+
     public int getEncAlgorithm()
     {
         return encAlgorithm;
     }
     
+    public int getS2KUsage()
+    {
+        return s2kUsage;
+    }
+
     public byte[] getIV()
     {
         return iv;
@@ -127,9 +152,9 @@ public class SecretKeyPacket
         
         pOut.write(pubKeyPacket.getEncodedContents());
         
-        pOut.write(stringToKey);
+        pOut.write(s2kUsage);
 
-        if (stringToKey == 0xff || stringToKey == 0xfe)
+        if (s2kUsage == USAGE_CHECKSUM || s2kUsage == USAGE_SHA1)
         {
             pOut.write(encAlgorithm);
             pOut.writeObject(s2k);
