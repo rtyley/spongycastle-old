@@ -37,4 +37,12 @@ public interface NISTObjectIdentifiers
     static final DERObjectIdentifier    id_aes256_OFB           = new DERObjectIdentifier(aes + ".43"); 
     static final DERObjectIdentifier    id_aes256_CFB           = new DERObjectIdentifier(aes + ".44"); 
     static final DERObjectIdentifier    id_aes256_wrap          = new DERObjectIdentifier(aes + ".45"); 
+
+    //
+    // signatures
+    //
+    static final DERObjectIdentifier    id_dsa_with_sha2        = new DERObjectIdentifier(nistAlgorithm + ".3"); 
+
+    static final DERObjectIdentifier    dsa_with_sha224         = new DERObjectIdentifier(id_dsa_with_sha2 + ".1"); 
+    static final DERObjectIdentifier    dsa_with_sha256         = new DERObjectIdentifier(id_dsa_with_sha2 + ".2"); 
 }
