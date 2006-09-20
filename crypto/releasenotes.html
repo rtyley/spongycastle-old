@@ -43,22 +43,19 @@ Bleichenbacher's RSA signature forgery attack. This has been fixed.
 <li>The CMS enveloped data generators will now attempt to use the default provider for encryption if the passed in provider can only handle key exchange.
 <li>OpenPGP file processing has been substantially speeded up.
 <li>The PKCS1Encoder would accept PKCS1 packets which were one byte oversize. By default this will now cause an error. However, as there are still implementations which still produce such packets the older behaviour can be turned on by setting the VM system property org.bouncycastle.pkcs1.strict to false before creating an RSA cipher using PKCS1 encoding.
-<li>A a target has been added to the bc-build.xml to jar up the source code rather than leaving it in a directory tree.
+<li>A target has been added to the bc-build.xml to zip up the source code rather than leaving it in a directory tree.
 The build scripts now run this target by default.
 <li>Use of toUpperCase and toLowerCase has been replaced with a locale independent converter where appropriate.
 <li>Support for retrieving the issuers of indirect CRLs has been added.
 <li>Classes for doing incremental path validation of PKIX cert paths have been added to the X.509 package and S/MIME.
 <li>Locale issues with String.toUpperCase() have now been worked around.
 <li>Optional limiting has been added to ASN1InputStream to avoid possible OutOfMemoryErrors on corrupted streams.
-</ul>
-<h3>2.1.4 Possible comaptibilty issue</h3>
-<ul>
-<li>CMS library now uses Cipher.WRAP and Cipher.UNWRAP for processing secret keys used in CMS enveloped data structures encrypted using asymmetric keys.
+<li>Support has been added for SHA224withECDSA, SHA256withECDSA, SHA384withECDSA, and SHA512withECDSA for the generation of signatures, certificates, CRLs, and certification requests.
 </ul>
 <h3>2.1.5 Security Advisory</h3>
 <ul>
 <li>If you are using public exponents with the value three you *must* upgrade to this release, otherwise it
-will be possible for attackers to exploit Bleichenbacher's RSA signature forgery attack on your applications.
+will be possible for attackers to exploit some of Bleichenbacher's RSA signature forgery attacks on your applications.
 <h3>2.2.1 Version</h3>
 Release 1.33
 <h3>2.2.2 Defects Fixed</h3>
