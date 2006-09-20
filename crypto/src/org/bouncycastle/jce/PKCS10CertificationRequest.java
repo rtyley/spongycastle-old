@@ -13,6 +13,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.HashSet;
 import java.util.Hashtable;
 
 import javax.security.auth.x500.X500Principal;
@@ -32,6 +33,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.util.Strings;
 
 /**
@@ -64,6 +66,7 @@ public class PKCS10CertificationRequest
     private static Hashtable            algorithms = new Hashtable();
     private static Hashtable            keyAlgorithms = new Hashtable();
     private static Hashtable            oids = new Hashtable();
+    private static HashSet              noParams = new HashSet();
 
     static
     {
@@ -87,7 +90,13 @@ public class PKCS10CertificationRequest
         algorithms.put("RIPEMD160WITHRSA", new DERObjectIdentifier("1.3.36.3.3.1.2"));
         algorithms.put("SHA1WITHDSA", new DERObjectIdentifier("1.2.840.10040.4.3"));
         algorithms.put("DSAWITHSHA1", new DERObjectIdentifier("1.2.840.10040.4.3"));
+        algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
+        algorithms.put("SHA256WITHDSA", NISTObjectIdentifiers.dsa_with_sha256);
         algorithms.put("SHA1WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1);
+        algorithms.put("SHA224WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
+        algorithms.put("SHA256WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
+        algorithms.put("SHA384WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
+        algorithms.put("SHA512WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
         algorithms.put("ECDSAWITHSHA1", X9ObjectIdentifiers.ecdsa_with_SHA1);
         algorithms.put("GOST3411WITHGOST3410", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
         algorithms.put("GOST3410WITHGOST3411", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
@@ -108,15 +117,34 @@ public class PKCS10CertificationRequest
         oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
         oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
         oids.put(new DERObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
-        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "ECDSAWITHSHA1");
+        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "SHA1WITHECDSA");
+        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224WITHECDSA");
+        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA256, "SHA256WITHECDSA");
+        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA384, "SHA384WITHECDSA");
+        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA512, "SHA512WITHECDSA");
         oids.put(OIWObjectIdentifiers.sha1WithRSA, "SHA1WITHRSA");
         oids.put(OIWObjectIdentifiers.dsaWithSHA1, "SHA1WITHDSA");
+        oids.put(NISTObjectIdentifiers.dsa_with_sha224, "SHA224WITHDSA");
+        oids.put(NISTObjectIdentifiers.dsa_with_sha256, "SHA256WITHDSA");
         
         //
         // key types
         //
         keyAlgorithms.put(PKCSObjectIdentifiers.rsaEncryption, "RSA");
         keyAlgorithms.put(X9ObjectIdentifiers.id_dsa, "DSA");
+        
+        //
+        // According to RFC 3279, the ASN.1 encoding SHALL (id-dsa-with-sha1) or MUST (ecdsa-with-SHA*) omit the parameters field. 
+        // The parameters field SHALL be NULL for RSA based signature algorithms.
+        //
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA1);
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA224);
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA256);
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA384);
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA512);
+        noParams.add(X9ObjectIdentifiers.id_dsa_with_sha1);
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha256);
     }
 
     private static ASN1Sequence toDERSequence(
@@ -240,7 +268,14 @@ public class PKCS10CertificationRequest
             throw new IllegalArgumentException("public key must not be null");
         }
 
-        this.sigAlgId = new AlgorithmIdentifier(sigOID, null);
+        if (noParams.contains(sigOID))
+        {
+            this.sigAlgId = new AlgorithmIdentifier(sigOID);
+        }
+        else
+        {
+            this.sigAlgId = new AlgorithmIdentifier(sigOID, null);
+        }
 
         byte[]                  bytes = key.getEncoded();
         ByteArrayInputStream    bIn = new ByteArrayInputStream(bytes);

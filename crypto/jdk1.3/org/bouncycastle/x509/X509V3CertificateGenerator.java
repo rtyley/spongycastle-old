@@ -12,13 +12,14 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
@@ -28,7 +29,9 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CertificateObject;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
  * class to produce an X.509 Version 3 certificate.
@@ -63,6 +66,11 @@ public class X509V3CertificateGenerator
     public void setSerialNumber(
         BigInteger      serialNumber)
     {
+        if (serialNumber.compareTo(BigInteger.ZERO) <= 0)
+        {
+            throw new IllegalArgumentException("serial number must be a positive integer");
+        }
+        
         tbsGen.setSerialNumber(new DERInteger(serialNumber));
     }
 
@@ -111,6 +119,12 @@ public class X509V3CertificateGenerator
         }
     }
 
+    /**
+     * Set the signature algorithm. This can be either a name or an OID, names
+     * are treated as case insensitive.
+     * 
+     * @param signatureAlgorithm string representation of the algorithm name.
+     */
     public void setSignatureAlgorithm(
         String  signatureAlgorithm)
     {
@@ -122,10 +136,10 @@ public class X509V3CertificateGenerator
         }
         catch (Exception e)
         {
-            throw new IllegalArgumentException("Unknown signature type requested");
+            throw new IllegalArgumentException("Unknown signature type requested: " + signatureAlgorithm);
         }
 
-        sigAlgId = new AlgorithmIdentifier(this.sigOID, new DERNull());
+        sigAlgId = X509Util.getSigAlgID(sigOID);
 
         tbsGen.setSignature(sigAlgId);
     }
@@ -134,18 +148,18 @@ public class X509V3CertificateGenerator
      * add a given extension field for the standard extensions tag (tag 3)
      */
     public void addExtension(
-        String          OID,
+        String          oid,
         boolean         critical,
         DEREncodable    value)
     {
-        this.addExtension(new DERObjectIdentifier(OID), critical, value);
+        this.addExtension(new DERObjectIdentifier(oid), critical, value);
     }
 
     /**
      * add a given extension field for the standard extensions tag (tag 3)
      */
     public void addExtension(
-        DERObjectIdentifier OID,
+        DERObjectIdentifier oid,
         boolean             critical,
         DEREncodable        value)
     {
@@ -167,7 +181,7 @@ public class X509V3CertificateGenerator
             throw new IllegalArgumentException("error encoding value: " + e);
         }
 
-        this.addExtension(OID, critical, bOut.toByteArray());
+        this.addExtension(oid, critical, bOut.toByteArray());
     }
 
     /**
@@ -176,18 +190,18 @@ public class X509V3CertificateGenerator
      * with the extension.
      */
     public void addExtension(
-        String          OID,
+        String          oid,
         boolean         critical,
         byte[]          value)
     {
-        this.addExtension(new DERObjectIdentifier(OID), critical, value);
+        this.addExtension(new DERObjectIdentifier(oid), critical, value);
     }
 
     /**
      * add a given extension field for the standard extensions tag (tag 3)
      */
     public void addExtension(
-        DERObjectIdentifier OID,
+        DERObjectIdentifier oid,
         boolean             critical,
         byte[]              value)
     {
@@ -197,8 +211,52 @@ public class X509V3CertificateGenerator
             extOrdering = new Vector();
         }
 
-        extensions.put(OID, new X509Extension(critical, new DEROctetString(value)));
-        extOrdering.addElement(OID);
+        extensions.put(oid, new X509Extension(critical, new DEROctetString(value)));
+        extOrdering.addElement(oid);
+    }
+
+    /**
+     * add a given extension field for the standard extensions tag (tag 3)
+     * copying the extension value from another certificate.
+     * @throws CertificateParsingException if the extension cannot be extracted.
+     */
+    public void copyAndAddExtension(
+        String          oid,
+        boolean         critical,
+        X509Certificate cert) 
+        throws CertificateParsingException
+    {
+        byte[] extValue = cert.getExtensionValue(oid);
+        
+        if (extValue == null)
+        {
+            throw new CertificateParsingException("extension " + oid + " not present");
+        }
+        
+        try
+        {
+            ASN1Encodable value = X509ExtensionUtil.fromExtensionValue(extValue);
+    
+            this.addExtension(oid, critical, value);
+        }
+        catch (IOException e)
+        {
+            throw new CertificateParsingException(e.toString());
+        }
+    }
+
+    /**
+     * add a given extension field for the standard extensions tag (tag 3)
+     * copying the extension value from another certificate.
+     * @throws CertificateParsingException if the extension cannot be extracted.
+     */
+    public void copyAndAddExtension(
+        DERObjectIdentifier oid,
+        boolean             critical,
+        X509Certificate     cert)
+        throws CertificateParsingException
+    {
+        this.copyAndAddExtension(oid.getId(), critical, cert);
     }
 
     /**
@@ -322,5 +380,15 @@ public class X509V3CertificateGenerator
         v.add(new DERBitString(sig.sign()));
 
         return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
+    }
+    
+    /**
+     * Return an iterator of the signature names supported by the generator.
+     * 
+     * @return an iterator containing recognised names.
+     */
+    public Iterator getSignatureAlgNames()
+    {
+        return X509Util.getAlgNames();
     }
 }

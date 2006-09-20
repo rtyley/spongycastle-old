@@ -12,35 +12,39 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
+import java.security.cert.X509CRLEntry;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.SimpleTimeZone;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERUTCTime;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertList;
+import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V2TBSCertListGenerator;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CRLObject;
 
 /**
  * class to produce an X.509 Version 2 CRL.
- * <p>
- * <b>Note:</b> This class may be subject to change.
  */
 public class X509V2CRLGenerator
 {
@@ -68,7 +72,6 @@ public class X509V2CRLGenerator
         tbsGen = new V2TBSCertListGenerator();
     }
 
-
     /**
      * Set the issuer distinguished name - the issuer is the entity whose private key is used to sign the
      * certificate.
@@ -82,24 +85,76 @@ public class X509V2CRLGenerator
     public void setThisUpdate(
         Date    date)
     {
-        tbsGen.setThisUpdate(new DERUTCTime(dateF.format(date) + "Z"));
+        tbsGen.setThisUpdate(new Time(date));
     }
 
     public void setNextUpdate(
         Date    date)
     {
-        tbsGen.setNextUpdate(new DERUTCTime(dateF.format(date) + "Z"));
+        tbsGen.setNextUpdate(new Time(date));
     }
 
     /**
-     * Reason being as indicated by ReasonFlags, i.e. ReasonFlags.KEY_COMPROMISE
+     * Reason being as indicated by ReasonFlags, i.e. ReasonFlags.keyCompromise
      * or 0 if ReasonFlags are not to be used
      **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificate), new DERUTCTime(dateF.format(revocationDate) + "Z"), reason);
+        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), reason);
     }
 
+    /**
+     * Add a CRL entry with an Invalidity Date extension as well as a CRLReason extension.
+     * Reason being as indicated by ReasonFlags, i.e. ReasonFlags.keyCompromise
+     * or 0 if ReasonFlags are not to be used
+     **/
+    public void addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason, Date invalidityDate)
+    {
+        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), reason, new DERGeneralizedTime(invalidityDate));
+    }
+   
+    /**
+     * Add a CRL entry with extensions.
+     **/
+    public void addCRLEntry(BigInteger userCertificate, Date revocationDate, X509Extensions extensions)
+    {
+        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), extensions);
+    }
+    
+    /**
+     * Add the CRLEntry objects contained in a previous CRL.
+     * 
+     * @param other the X509CRL to source the other entries from. 
+     */
+    public void addCRL(X509CRL other)
+        throws CRLException
+    {
+        Set revocations = other.getRevokedCertificates();
+        
+        Iterator it = revocations.iterator();
+        while (it.hasNext())
+        {
+            X509CRLEntry entry = (X509CRLEntry)it.next();
+            
+            ASN1InputStream aIn = new ASN1InputStream(entry.getEncoded());
+            
+            try
+            {
+                tbsGen.addCRLEntry(ASN1Sequence.getInstance(aIn.readObject()));
+            }
+            catch (IOException e)
+            {
+                throw new CRLException("exception processing encoding of CRL: " + e.toString());
+            }
+        }
+    }
+    
+    /**
+     * Set the signature algorithm. This can be either a name or an OID, names
+     * are treated as case insensitive.
+     * 
+     * @param signatureAlgorithm string representation of the algorithm name.
+     */
     public void setSignatureAlgorithm(
         String  signatureAlgorithm)
     {
@@ -114,13 +169,13 @@ public class X509V2CRLGenerator
             throw new IllegalArgumentException("Unknown signature type requested");
         }
 
-        sigAlgId = new AlgorithmIdentifier(this.sigOID, null);
+        sigAlgId = X509Util.getSigAlgID(sigOID);
 
         tbsGen.setSignature(sigAlgId);
     }
 
     /**
-     * add a given extension field for the standard extensions tag (tag 3)
+     * add a given extension field for the standard extensions tag (tag 0)
      */
     public void addExtension(
         String          OID,
@@ -311,5 +366,16 @@ public class X509V2CRLGenerator
         {
             throw new SecurityException("exception creating CRL: " + e.getMessage());
         }
+    }
+    
+    
+    /**
+     * Return an iterator of the signature names supported by the generator.
+     * 
+     * @return an iterator containing recognised names.
+     */
+    public Iterator getSignatureAlgNames()
+    {
+        return X509Util.getAlgNames();
     }
 }
