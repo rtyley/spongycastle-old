@@ -1,5 +1,6 @@
 package org.bouncycastle.openpgp.test;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -889,6 +890,40 @@ public class PGPKeyRingTest
     
     public byte[] subKeyBindingCheckSum = Base64.decode("=3HU+");
     
+    //
+    // PGP8 with SHA1 checksum.
+    //
+    public byte[] rewrapKey = Base64.decode(
+            "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"
+          + "8esfw+iLchfEwXtBIRwS");
+
+    char[] rewrapPass = "voltage123".toCharArray();
+
     public void test1()
         throws Exception
     {
@@ -1840,6 +1875,43 @@ public class PGPKeyRingTest
         }
     }
     
+    private void rewrapTest()
+        throws Exception
+    {
+        SecureRandom rand = new SecureRandom();
+
+        // Read the secret key rings
+        PGPSecretKeyRingCollection privRings = new PGPSecretKeyRingCollection(
+                                                         new ByteArrayInputStream(rewrapKey)); 
+
+        Iterator rIt = privRings.getKeyRings();
+
+        if (rIt.hasNext())
+        {
+            PGPSecretKeyRing pgpPriv = (PGPSecretKeyRing)rIt.next();
+
+            Iterator it = pgpPriv.getSecretKeys();
+
+            while (it.hasNext())
+            {
+                PGPSecretKey pgpKey = (PGPSecretKey)it.next();
+
+                // re-encrypt the key with an empty password
+                pgpPriv = PGPSecretKeyRing.removeSecretKey(pgpPriv, pgpKey);
+                pgpKey = PGPSecretKey.copyWithNewPassword(pgpKey,
+                                    rewrapPass,
+                                    null,
+                                    PGPEncryptedData.NULL,
+                                    rand,
+                                    "BC");
+                pgpPriv = PGPSecretKeyRing.insertSecretKey(pgpPriv, pgpKey);
+            
+                // this should succeed
+                PGPPrivateKey privTmp = pgpKey.extractPrivateKey(null, "BC");
+            }
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -1858,6 +1930,7 @@ public class PGPKeyRingTest
             test11();
             generateTest();
             generateSha1Test();
+            rewrapTest();
         }
         catch (PGPException e)
         {
