@@ -6,12 +6,11 @@ import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERUTF8String;
 
 /**
  * The default converter for X509 DN entries when going from their
- * string value to 
+ * string value to ASN.1 strings.
  */
 public class X509DefaultEntryConverter
     extends X509NameEntryConverter
@@ -46,10 +45,6 @@ public class X509DefaultEntryConverter
         else if (oid.equals(X509Name.DATE_OF_BIRTH))
         {
             return new DERGeneralizedTime(value);
-        }
-        else if (canBePrintable(value))  
-        {
-            return new DERPrintableString(value);
         }
         
         return new DERUTF8String(value);

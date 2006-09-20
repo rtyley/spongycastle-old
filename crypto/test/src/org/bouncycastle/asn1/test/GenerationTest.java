@@ -7,10 +7,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
@@ -41,53 +37,38 @@ import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTestResult;
+import org.bouncycastle.util.test.Test;
+import org.bouncycastle.util.test.TestResult;
 
 public class GenerationTest
     implements Test
 {
     private byte[] v1Cert = Base64.decode(
-          "MIGtAgEBMA0GCSqGSIb3DQEBBAUAMCUxCzAJBgNVBAMTAkFVMRYwFAYDVQQKEw1Cb"
+          "MIGtAgEBMA0GCSqGSIb3DQEBBAUAMCUxCzAJBgNVBAMMAkFVMRYwFAYDVQQKDA1Cb"
         + "3VuY3kgQ2FzdGxlMB4XDTcwMDEwMTAwMDAwMVoXDTcwMDEwMTAwMDAxMlowNjELMA"
-        + "kGA1UEAxMCQVUxFjAUBgNVBAoTDUJvdW5jeSBDYXN0bGUxDzANBgNVBAsTBlRlc3Q"
+        + "kGA1UEAwwCQVUxFjAUBgNVBAoMDUJvdW5jeSBDYXN0bGUxDzANBgNVBAsMBlRlc3Q"
         + "gMTAaMA0GCSqGSIb3DQEBAQUAAwkAMAYCAQECAQI=");
 
     private byte[] v3Cert = Base64.decode(
-          "MIIBSKADAgECAgECMA0GCSqGSIb3DQEBBAUAMCUxCzAJBgNVBAMTAkFVMRYwFAYD"
-        + "VQQKEw1Cb3VuY3kgQ2FzdGxlMB4XDTcwMDEwMTAwMDAwMVoXDTcwMDEwMTAwMDAw"
-        + "MlowNjELMAkGA1UEAxMCQVUxFjAUBgNVBAoTDUJvdW5jeSBDYXN0bGUxDzANBgNV"
-        + "BAsTBlRlc3QgMjAYMBAGBisOBwIBATAGAgEBAgECAwQAAgEDo4GVMIGSMGEGA1Ud"
-        + "IwEB/wRXMFWAFDZPdpHPzKi7o8EJokkQU2uqCHRRoTqkODA2MQswCQYDVQQDEwJB"
-        + "VTEWMBQGA1UEChMNQm91bmN5IENhc3RsZTEPMA0GA1UECxMGVGVzdCAyggECMCAG"
+          "MIIBSKADAgECAgECMA0GCSqGSIb3DQEBBAUAMCUxCzAJBgNVBAMMAkFVMRYwFAYD"
+        + "VQQKDA1Cb3VuY3kgQ2FzdGxlMB4XDTcwMDEwMTAwMDAwMVoXDTcwMDEwMTAwMDAw"
+        + "MlowNjELMAkGA1UEAwwCQVUxFjAUBgNVBAoMDUJvdW5jeSBDYXN0bGUxDzANBgNV"
+        + "BAsMBlRlc3QgMjAYMBAGBisOBwIBATAGAgEBAgECAwQAAgEDo4GVMIGSMGEGA1Ud"
+        + "IwEB/wRXMFWAFDZPdpHPzKi7o8EJokkQU2uqCHRRoTqkODA2MQswCQYDVQQDDAJB"
+        + "VTEWMBQGA1UECgwNQm91bmN5IENhc3RsZTEPMA0GA1UECwwGVGVzdCAyggECMCAG"
         + "A1UdDgEB/wQWBBQ2T3aRz8you6PBCaJJEFNrqgh0UTALBgNVHQ8EBAMCBBA=");
 
     private byte[] v2CertList = Base64.decode(
-          "MIIBRQIBATANBgkqhkiG9w0BAQUFADAlMQswCQYDVQQDEwJBVTEWMBQGA1UEChMN"
+          "MIIBRQIBATANBgkqhkiG9w0BAQUFADAlMQswCQYDVQQDDAJBVTEWMBQGA1UECgwN"
         + "Qm91bmN5IENhc3RsZRcNNzAwMTAxMDAwMDAwWhcNNzAwMTAxMDAwMDAyWjAkMCIC"
         + "AQEXDTcwMDEwMTAwMDAwMVowDjAMBgNVHRUEBQoDAIAAoIHFMIHCMGEGA1UdIwEB"
-        + "/wRXMFWAFDZPdpHPzKi7o8EJokkQU2uqCHRRoTqkODA2MQswCQYDVQQDEwJBVTEW"
-        + "MBQGA1UEChMNQm91bmN5IENhc3RsZTEPMA0GA1UECxMGVGVzdCAyggECMEMGA1Ud"
-        + "EgQ8MDqkODA2MQswCQYDVQQDEwJBVTEWMBQGA1UEChMNQm91bmN5IENhc3RsZTEP"
-        + "MA0GA1UECxMGVGVzdCAzMAoGA1UdFAQDAgEBMAwGA1UdHAEB/wQCMAA=");
-    
-    private boolean isSameAs(
-            byte[]  a,
-            byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-        
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-        
-        return true;
-    }
+        + "/wRXMFWAFDZPdpHPzKi7o8EJokkQU2uqCHRRoTqkODA2MQswCQYDVQQDDAJBVTEW"
+        + "MBQGA1UECgwNQm91bmN5IENhc3RsZTEPMA0GA1UECwwGVGVzdCAyggECMEMGA1Ud"
+        + "EgQ8MDqkODA2MQswCQYDVQQDDAJBVTEWMBQGA1UECgwNQm91bmN5IENhc3RsZTEP"
+        + "MA0GA1UECwwGVGVzdCAzMAoGA1UdFAQDAgEBMAwGA1UdHAEB/wQCMAA=");
     
     private TestResult tbsV1CertGen()
     {
@@ -118,7 +99,7 @@ public class GenerationTest
             
             aOut.writeObject(tbs);
             
-            if (!isSameAs(bOut.toByteArray(), v1Cert))
+            if (!Arrays.areEqual(bOut.toByteArray(), v1Cert))
             {
                 return new SimpleTestResult(false, getName() + ": failed v1 cert generation");
             }
@@ -134,7 +115,7 @@ public class GenerationTest
             
             aOut.writeObject(o);
             
-            if (!isSameAs(bOut.toByteArray(), v2CertList))
+            if (!Arrays.areEqual(bOut.toByteArray(), v2CertList))
             {
                 return new SimpleTestResult(false, getName() + ": failed v1 cert read back test");
             }
@@ -207,7 +188,7 @@ public class GenerationTest
             
             aOut.writeObject(tbs);
             
-            if (!isSameAs(bOut.toByteArray(), v3Cert))
+            if (!Arrays.areEqual(bOut.toByteArray(), v3Cert))
             {
                 return new SimpleTestResult(false, getName() + ": failed v3 cert generation");
             }
@@ -223,7 +204,7 @@ public class GenerationTest
             
             aOut.writeObject(o);
             
-            if (!isSameAs(bOut.toByteArray(), v2CertList))
+            if (!Arrays.areEqual(bOut.toByteArray(), v2CertList))
             {
                 return new SimpleTestResult(false, getName() + ": failed v3 cert read back test");
             }
@@ -279,7 +260,7 @@ public class GenerationTest
             
             aOut.writeObject(tbs);
             
-            if (!isSameAs(bOut.toByteArray(), v2CertList))
+            if (!Arrays.areEqual(bOut.toByteArray(), v2CertList))
             {
                 return new SimpleTestResult(false, getName() + ": failed v2 cert list generation");
             }
@@ -295,7 +276,7 @@ public class GenerationTest
             
             aOut.writeObject(o);
             
-            if (!isSameAs(bOut.toByteArray(), v2CertList))
+            if (!Arrays.areEqual(bOut.toByteArray(), v2CertList))
             {
                 return new SimpleTestResult(false, getName() + ": failed v2 cert list read back test");
             }
