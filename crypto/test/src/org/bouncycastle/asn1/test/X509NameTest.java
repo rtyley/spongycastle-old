@@ -124,7 +124,7 @@ public class X509NameTest
         //
         try
         {
-            byte[]  enc = Hex.decode("305e310b300906035504061302415531283026060355040a131f546865204c6567696f6e206f662074686520426f756e637920436173746c6531253010060355040713094d656c626f75726e653011060355040b130a4173636f742056616c65");
+            byte[]  enc = Hex.decode("305e310b300906035504060c02415531283026060355040a0c1f546865204c6567696f6e206f662074686520426f756e637920436173746c653125301006035504070c094d656c626f75726e653011060355040b0c0a4173636f742056616c65");
             
             ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(enc));
             
@@ -143,7 +143,7 @@ public class X509NameTest
             aOut.writeObject(n);
             
             byte[]  enc2 = bOut.toByteArray();
-            
+
             if (enc.length != enc2.length)
             {
                 return new SimpleTestResult(false, getName() + ": Failed composite string to encoding test");

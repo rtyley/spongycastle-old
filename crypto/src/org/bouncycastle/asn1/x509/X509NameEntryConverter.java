@@ -11,14 +11,11 @@ import org.bouncycastle.util.Strings;
  * It turns out that the number of standard ways the fields in a DN should be 
  * encoded into their ASN.1 counterparts is rapidly approaching the
  * number of machines on the internet. By default the X509Name class 
- * will produce PrintableStrings if the field value will decode to that, 
- * next UTF8Strings if the field value will decode to that, and finally BMPStrings
- * if 16 bit characters are required.
+ * will produce UTF8Strings in line with the current recommendations (RFC 3280).
  * <p>
- * The way this is done is with a default encoder which is 
- * implemented as follows:
+ * An example of an encoder look like below:
  * <pre>
- * public class X509DefaultEntryConverter
+ * public class X509DirEntryConverter
  *     extends X509NameEntryConverter
  * {
  *     public DERObject getConvertedValue(
