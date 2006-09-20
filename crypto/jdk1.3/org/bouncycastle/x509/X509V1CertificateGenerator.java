@@ -2,6 +2,7 @@ package org.bouncycastle.x509;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -13,18 +14,16 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.Iterator;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
@@ -32,6 +31,7 @@ import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V1TBSCertificateGenerator;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 
 /**
@@ -63,6 +63,11 @@ public class X509V1CertificateGenerator
     public void setSerialNumber(
         BigInteger      serialNumber)
     {
+        if (serialNumber.compareTo(BigInteger.ZERO) <= 0)
+        {
+            throw new IllegalArgumentException("serial number must be a positive integer");
+        }
+        
         tbsGen.setSerialNumber(new DERInteger(serialNumber));
     }
 
@@ -111,6 +116,12 @@ public class X509V1CertificateGenerator
         }
     }
 
+    /**
+     * Set the signature algorithm. This can be either a name or an OID, names
+     * are treated as case insensitive.
+     * 
+     * @param signatureAlgorithm string representation of the algorithm name.
+     */
     public void setSignatureAlgorithm(
         String  signatureAlgorithm)
     {
@@ -125,7 +136,7 @@ public class X509V1CertificateGenerator
             throw new IllegalArgumentException("Unknown signature type requested");
         }
 
-        sigAlgId = new AlgorithmIdentifier(this.sigOID, new DERNull());
+        sigAlgId = X509Util.getSigAlgID(sigOID);
 
         tbsGen.setSignature(sigAlgId);
     }
@@ -241,5 +252,15 @@ public class X509V1CertificateGenerator
         v.add(new DERBitString(sig.sign()));
 
         return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
+    }
+    
+    /**
+     * Return an iterator of the signature names supported by the generator.
+     * 
+     * @return an iterator containing recognised names.
+     */
+    public Iterator getSignatureAlgNames()
+    {
+        return X509Util.getAlgNames();
     }
 }

@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider;
 
 import java.security.Provider;
 
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -747,10 +748,6 @@ public final class BouncyCastleProvider extends Provider
         put("Signature.DSA", "org.bouncycastle.jce.provider.JDKDSASigner$stdDSA");
         put("Signature.NONEWITHDSA", "org.bouncycastle.jce.provider.JDKDSASigner$noneDSA");
         put("Signature.ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA");
-        put("Signature.SHA224WITHECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA224");
-        put("Signature.SHA256WITHECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA256");
-        put("Signature.SHA384WITHECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA384");
-        put("Signature.SHA512WITHECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA512");
         put("Signature.SHA1WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR");
         put("Signature.SHA224WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR224");
         put("Signature.SHA256WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR256");
@@ -860,6 +857,12 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.SHA1WithECDSA", "ECDSA");
         put("Alg.Alias.Signature.ECDSAWithSHA1", "ECDSA");
         put("Alg.Alias.Signature.1.2.840.10045.4.1", "ECDSA");
+
+        addSignatureAlgorithm("SHA224", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA224", X9ObjectIdentifiers.ecdsa_with_SHA224);
+        addSignatureAlgorithm("SHA256", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA256", X9ObjectIdentifiers.ecdsa_with_SHA256);
+        addSignatureAlgorithm("SHA384", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA384", X9ObjectIdentifiers.ecdsa_with_SHA384);
+        addSignatureAlgorithm("SHA512", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA512", X9ObjectIdentifiers.ecdsa_with_SHA512);
+
         put("Alg.Alias.Signature.SHA/DSA", "DSA");
         put("Alg.Alias.Signature.SHA1withDSA", "DSA");
         put("Alg.Alias.Signature.SHA1WITHDSA", "DSA");
@@ -889,5 +892,24 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.GOST3411WITHGOST3410", "GOST3410");
         put("Alg.Alias.Signature.GOST3411WithGOST3410", "GOST3410");
         put("Alg.Alias.Signature." + CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, "GOST3410");
+    }
+
+    private void addSignatureAlgorithm(
+        String digest,
+        String algorithm,
+        String className,
+        DERObjectIdentifier oid)
+    {
+        String mainName = digest + "WITH" + algorithm;
+        String jdk11Variation1 = digest + "with" + algorithm;
+        String jdk11Variation2 = digest + "With" + algorithm;
+        String alias = digest + "/" + algorithm;
+
+        put("Signature." + mainName, className);
+        put("Alg.Alias.Signature." + jdk11Variation1, mainName);
+        put("Alg.Alias.Signature." + jdk11Variation2, mainName);
+        put("Alg.Alias.Signature." + alias, mainName);
+        put("Alg.Alias.Signature." + oid, mainName);
+        put("Alg.Alias.Signature.OID." + oid, mainName);
     }
 }

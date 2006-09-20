@@ -3,9 +3,11 @@ package org.bouncycastle.x509;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -15,12 +17,14 @@ import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.util.Strings;
 
 class X509Util
 {
     private static Hashtable algorithms = new Hashtable();
+    private static Set       noParams = new HashSet();
     
     static
     {   
@@ -40,14 +44,33 @@ class X509Util
         algorithms.put("SHA512WITHRSA", PKCSObjectIdentifiers.sha512WithRSAEncryption);
         algorithms.put("RIPEMD160WITHRSAENCRYPTION", new DERObjectIdentifier("1.3.36.3.3.1.2"));
         algorithms.put("RIPEMD160WITHRSA", new DERObjectIdentifier("1.3.36.3.3.1.2"));
-        algorithms.put("SHA1WITHDSA", new DERObjectIdentifier("1.2.840.10040.4.3"));
-        algorithms.put("DSAWITHSHA1", new DERObjectIdentifier("1.2.840.10040.4.3"));
+        algorithms.put("SHA1WITHDSA", X9ObjectIdentifiers.id_dsa_with_sha1);
+        algorithms.put("DSAWITHSHA1", X9ObjectIdentifiers.id_dsa_with_sha1);
+        algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
+        algorithms.put("SHA256WITHDSA", NISTObjectIdentifiers.dsa_with_sha256);
         algorithms.put("SHA1WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1);
         algorithms.put("ECDSAWITHSHA1", X9ObjectIdentifiers.ecdsa_with_SHA1);
+        algorithms.put("SHA224WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
+        algorithms.put("SHA256WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
+        algorithms.put("SHA384WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
+        algorithms.put("SHA512WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
         algorithms.put("GOST3411WITHGOST3410", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
         algorithms.put("GOST3411WITHGOST3410-94", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
+        
+        //
+        // According to RFC 3279, the ASN.1 encoding SHALL (id-dsa-with-sha1) or MUST (ecdsa-with-SHA*) omit the parameters field. 
+        // The parameters field SHALL be NULL for RSA based signature algorithms.
+        //
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA1);
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA224);
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA256);
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA384);
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA512);
+        noParams.add(X9ObjectIdentifiers.id_dsa_with_sha1);
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha256);
     }
-    
+     
     static DERObjectIdentifier getAlgorithmOID(
         String algorithmName)
     {
@@ -64,11 +87,7 @@ class X509Util
     static AlgorithmIdentifier getSigAlgID(
         DERObjectIdentifier sigOid)
     {
-        //
-        // According to RFC 3279, the ASN.1 encoding SHALL (id-dsa-with-sha1) or MUST (ecdsa-with-SHA1) omit the parameters field. 
-        // The parameters field SHALL be NULL for RSA based signature algorithms.
-        //
-        if (sigOid.equals(X9ObjectIdentifiers.ecdsa_with_SHA1) || sigOid.equals(X9ObjectIdentifiers.id_dsa_with_sha1))
+        if (noParams.contains(sigOid))
         {
             return new AlgorithmIdentifier(sigOid);
         }

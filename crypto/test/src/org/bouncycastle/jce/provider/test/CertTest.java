@@ -10,6 +10,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.Signature;
 import java.security.cert.CRL;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -41,6 +42,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.X509KeyUsage;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
@@ -1213,7 +1215,7 @@ public class CertTest
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
         certGen.setSubjectDN(new X509Principal(order, attrs));
         certGen.setPublicKey(pubKey);
-        certGen.setSignatureAlgorithm("ECDSAwithSHA1");
+        certGen.setSignatureAlgorithm("SHA1withECDSA");
 
         try
         {
@@ -1268,6 +1270,126 @@ public class CertTest
 
     }
 
+    /**
+     * we generate a self signed certificate for the sake of testing - SHA224withECDSA
+     */
+    private void createECCert(String algorithm, DERObjectIdentifier algOid)
+        throws Exception
+    {
+        ECCurve.Fp curve = new ECCurve.Fp(
+            new BigInteger("6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151"), // q (or p)
+            new BigInteger("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC", 16),   // a
+            new BigInteger("0051953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00", 16));  // b
+
+        ECParameterSpec spec = new ECParameterSpec(
+            curve,
+            curve.decodePoint(Hex.decode("02C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66")), // G
+            new BigInteger("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA51868783BF2F966B7FCC0148F709A5D03BB5C9B8899C47AEBB6FB71E91386409", 16)); // n
+
+        ECPrivateKeySpec privKeySpec = new ECPrivateKeySpec(
+            new BigInteger("5769183828869504557786041598510887460263120754767955773309066354712783118202294874205844512909370791582896372147797293913785865682804434049019366394746072023"), // d
+            spec);
+
+        ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(
+            curve.decodePoint(Hex.decode("026BFDD2C9278B63C92D6624F151C9D7A822CC75BD983B17D25D74C26740380022D3D8FAF304781E416175EADF4ED6E2B47142D2454A7AC7801DD803CF44A4D1F0AC")), // Q
+            spec);
+
+        //
+        // set up the keys
+        //
+        PrivateKey          privKey;
+        PublicKey           pubKey;
+
+        KeyFactory     fact = KeyFactory.getInstance("ECDSA", "BC");
+
+        privKey = fact.generatePrivate(privKeySpec);
+        pubKey = fact.generatePublic(pubKeySpec);
+
+
+        //
+        // distinguished name table.
+        //
+        Hashtable                   attrs = new Hashtable();
+        Vector                      order = new Vector();
+
+        attrs.put(X509Principal.C, "AU");
+        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
+        attrs.put(X509Principal.L, "Melbourne");
+        attrs.put(X509Principal.ST, "Victoria");
+        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+
+        order.addElement(X509Principal.C);
+        order.addElement(X509Principal.O);
+        order.addElement(X509Principal.L);
+        order.addElement(X509Principal.ST);
+        order.addElement(X509Principal.E);
+
+        //
+        // create the certificate - version 3
+        //
+        X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
+
+        certGen.setSerialNumber(BigInteger.valueOf(1));
+        certGen.setIssuerDN(new X509Principal(order, attrs));
+        certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
+        certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
+        certGen.setSubjectDN(new X509Principal(order, attrs));
+        certGen.setPublicKey(pubKey);
+        certGen.setSignatureAlgorithm(algorithm);
+
+
+        X509Certificate cert = certGen.generateX509Certificate(privKey);
+
+        cert.checkValidity(new Date());
+
+        cert.verify(pubKey);
+
+        ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
+        CertificateFactory      certFact = CertificateFactory.getInstance("X.509", "BC");
+
+        cert = (X509Certificate)certFact.generateCertificate(bIn);
+
+        //
+        // try with point compression turned off
+        //
+        ((ECPointEncoder)pubKey).setPointFormat("UNCOMPRESSED");
+        
+        certGen.setPublicKey(pubKey);
+        
+        cert = certGen.generateX509Certificate(privKey);
+
+        cert.checkValidity(new Date());
+
+        cert.verify(pubKey);
+
+        bIn = new ByteArrayInputStream(cert.getEncoded());
+        certFact = CertificateFactory.getInstance("X.509", "BC");
+
+        cert = (X509Certificate)certFact.generateCertificate(bIn);
+        
+        if (!cert.getSigAlgOID().equals(algOid.toString()))
+        {
+            fail("ECDSA oid incorrect.");
+        }
+        
+        if (cert.getSigAlgParams() != null)
+        {
+            fail("sig parameters present");
+        }
+        
+        Signature sig = Signature.getInstance(algorithm, "BC");
+        
+        sig.initVerify(pubKey);
+        
+        sig.update(cert.getTBSCertificate());
+        
+        if (!sig.verify(cert.getSignature()))
+        {
+            fail("EC certificate signature not mapped correctly.");
+        }
+        // System.out.println(cert);
+    }
+    
     private void checkCRL(
         int     id,
         byte[]  bytes)
@@ -1854,6 +1976,12 @@ public class CertTest
         checkCreation3();
         checkCreation4();
         checkCreation5();
+        
+        createECCert("SHA1withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1);
+        createECCert("SHA224withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
+        createECCert("SHA256withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
+        createECCert("SHA384withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
+        createECCert("SHA512withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
         
         checkCRLCreation1();
         checkCRLCreation2();
