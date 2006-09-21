@@ -51,7 +51,7 @@ public class X509Extension
     public boolean equals(
         Object  o)
     {
-        if (o == null || !(o instanceof X509Extension))
+        if (!(o instanceof X509Extension))
         {
             return false;
         }

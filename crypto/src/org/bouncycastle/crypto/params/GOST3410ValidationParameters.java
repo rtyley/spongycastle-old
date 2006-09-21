@@ -47,7 +47,7 @@ public class GOST3410ValidationParameters
     public boolean equals(
         Object o)
     {
-        if (o == null || !(o instanceof GOST3410ValidationParameters))
+        if (!(o instanceof GOST3410ValidationParameters))
         {
             return false;
         }

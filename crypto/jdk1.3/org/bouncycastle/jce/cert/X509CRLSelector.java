@@ -256,7 +256,7 @@ public class X509CRLSelector implements CRLSelector
         ByteArrayInputStream inStream = new ByteArrayInputStream(name);
         DERInputStream derInStream = new DERInputStream(inStream);
         DERObject obj = derInStream.readObject();
-        if (obj != null && obj instanceof ASN1Sequence)
+        if (obj instanceof ASN1Sequence)
         {
             issuerNamesX509.add(new X509Name((ASN1Sequence)obj));
         }

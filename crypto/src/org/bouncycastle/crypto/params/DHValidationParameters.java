@@ -16,7 +16,7 @@ public class DHValidationParameters
     public boolean equals(
         Object o)
     {
-        if (o == null || !(o instanceof DHValidationParameters))
+        if (!(o instanceof DHValidationParameters))
         {
             return false;
         }

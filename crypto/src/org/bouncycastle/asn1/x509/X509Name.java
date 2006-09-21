@@ -761,7 +761,7 @@ public class X509Name
             return this.equals(_obj);
         }
 
-        if (_obj == null || !(_obj instanceof X509Name))
+        if (!(_obj instanceof X509Name))
         {
             return false;
         }

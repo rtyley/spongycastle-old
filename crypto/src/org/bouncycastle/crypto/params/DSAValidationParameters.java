@@ -26,7 +26,7 @@ public class DSAValidationParameters
     public boolean equals(
         Object o)
     {
-        if (o == null || !(o instanceof DSAValidationParameters))
+        if (!(o instanceof DSAValidationParameters))
         {
             return false;
         }

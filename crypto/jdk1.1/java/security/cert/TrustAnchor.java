@@ -253,7 +253,7 @@ public class TrustAnchor
         ByteArrayInputStream inStream = new ByteArrayInputStream(data);
         DERInputStream derInStream = new DERInputStream( inStream );
         DERObject derObject = derInStream.readObject();
-        if ( derObject == null || ! ( derObject instanceof ASN1Sequence ) )
+        if (!( derObject instanceof ASN1Sequence ) )
             throw new IllegalArgumentException("nameConstraints parameter decoding error");
         } catch ( IOException ex ) {
         throw new IllegalArgumentException("nameConstraints parameter decoding error: " + ex);

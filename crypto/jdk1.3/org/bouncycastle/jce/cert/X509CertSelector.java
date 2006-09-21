@@ -296,7 +296,7 @@ public class X509CertSelector implements CertSelector
             ByteArrayInputStream inStream = new ByteArrayInputStream(issuerDN);
             DERInputStream derInStream = new DERInputStream(inStream);
             DERObject obj = derInStream.readObject();
-            if (obj != null && obj instanceof ASN1Sequence)
+            if (obj instanceof ASN1Sequence)
             {
                 this.issuerDNX509 = new X509Name((ASN1Sequence)obj);
             }
@@ -384,7 +384,7 @@ public class X509CertSelector implements CertSelector
             DERInputStream derInStream = new DERInputStream(inStream);
             DERObject obj = derInStream.readObject();
 
-            if (obj != null && obj instanceof ASN1Sequence)
+            if (obj instanceof ASN1Sequence)
             {
                 this.subjectDNX509 = new X509Name((ASN1Sequence)obj);
             }
@@ -727,7 +727,7 @@ public class X509CertSelector implements CertSelector
             while (iter.hasNext())
             {
                 obj = iter.next();
-                if (obj != null && obj instanceof String)
+                if (obj instanceof String)
                 {
                     purposeID = (KeyPurposeId)keyPurposeIdMap.get((String)obj);
                     if (purposeID == null)
@@ -1081,7 +1081,7 @@ public class X509CertSelector implements CertSelector
             while (iter.hasNext())
             {
                 item = iter.next();
-                if (item != null && item instanceof String)
+                if (item instanceof String)
                 {
                     CertUtil.parseOID((String)item);
                     policyOID.add(new DERObjectIdentifier((String)item));
@@ -2370,11 +2370,11 @@ public class X509CertSelector implements CertSelector
         try
         {
             X509CertSelector copy = (X509CertSelector)super.clone();
-            if (issuerDN != null && issuerDN instanceof byte[])
+            if (issuerDN instanceof byte[])
             {
                 copy.issuerDN = ((byte[])issuerDN).clone();
             }
-            if (subjectDN != null && subjectDN instanceof byte[])
+            if (subjectDN instanceof byte[])
             {
                 copy.subjectDN = ((byte[])subjectDN).clone();
             }
