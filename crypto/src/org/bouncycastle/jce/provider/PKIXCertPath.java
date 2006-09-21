@@ -184,7 +184,7 @@ public  class PKIXCertPath
             {
                 ASN1InputStream derInStream = new ASN1InputStream(inStream);
                 DERObject derObject = derInStream.readObject();
-                if (derObject == null || ! (derObject instanceof ASN1Sequence))
+                if (!(derObject instanceof ASN1Sequence))
                 {
                     throw new CertificateException("input stream does not contain a ASN1 SEQUENCE while reading PkiPath encoded data to load CertPath");
                 }

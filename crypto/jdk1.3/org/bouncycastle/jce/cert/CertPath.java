@@ -175,7 +175,7 @@ public abstract class CertPath extends Object implements Serializable
      */
     public boolean equals(Object other)
     {
-        if (other == null || !(other instanceof CertPath))
+        if (!(other instanceof CertPath))
         {
             return false;
         }
