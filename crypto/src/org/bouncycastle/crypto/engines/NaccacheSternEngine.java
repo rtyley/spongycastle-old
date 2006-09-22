@@ -354,10 +354,8 @@ public class NaccacheSternEngine
                 }
                 if (tmp != null)
                 {
-                    for (int i = 0; i < tmp.length; i++)
-                    {
-                        retval[i + retpos] = tmp[i];
-                    }
+                    System.arraycopy(tmp, 0, retval, retpos, tmp.length);
+                    
                     retpos += tmp.length;
                 }
                 else
@@ -370,10 +368,7 @@ public class NaccacheSternEngine
                 }
             }
             byte[] ret = new byte[retpos];
-            for (int i = 0; i < retpos; i++)
-            {
-                ret[i] = retval[i];
-            }
+            System.arraycopy(retval, 0, ret, 0, retpos);
             if (debug)
             {
                 System.out.println("returning " + ret.length + " bytes");
