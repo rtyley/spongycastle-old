@@ -44,7 +44,7 @@ public class JDKGOST3410Signer
         PublicKey   publicKey)
         throws InvalidKeyException
     {
-        CipherParameters    param = null;
+        CipherParameters    param;
 
         if (publicKey instanceof ECPublicKey)
         {
@@ -94,7 +94,7 @@ public class JDKGOST3410Signer
         PrivateKey  privateKey)
         throws InvalidKeyException
     {
-        CipherParameters    param = null;
+        CipherParameters    param;
 
         if (privateKey instanceof ECKey)
         {
@@ -188,15 +188,9 @@ public class JDKGOST3410Signer
             byte[] r = new byte[32]; 
             byte[] s = new byte[32];
 
-            for (int i = 0; i != 32; i ++)
-            {
-                s[i] = sigBytes[i];
-            }
-            
-            for (int i = 0; i != 32; i ++)
-            {
-                r[i] = (byte)sigBytes[32 + i];
-            }
+            System.arraycopy(sigBytes, 0, s, 0, 32);
+
+            System.arraycopy(sigBytes, 32, r, 0, 32);
             
             sig = new BigInteger[2];
             sig[0] = new BigInteger(1, r);

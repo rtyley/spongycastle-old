@@ -809,7 +809,7 @@ public class X509CertSelector implements CertSelector
     {
         try
         {
-            if (names == null && !names.isEmpty())
+            if (names == null || names.isEmpty())
             {
                 subjectAltNames = null;
                 subjectAltNamesByte = null;
@@ -1149,7 +1149,7 @@ public class X509CertSelector implements CertSelector
     {
         try
         {
-            if (names == null && !names.isEmpty())
+            if (names == null || names.isEmpty())
             {
                 pathToNames = null;
                 pathToNamesByte = null;

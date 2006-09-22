@@ -13,7 +13,6 @@ import java.security.SignatureException;
 import java.security.cert.CRL;
 import java.security.cert.CRLException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -85,7 +84,7 @@ public class PKCS7SignedData
     public PKCS7SignedData(
         byte[]  in)
         throws SecurityException, CRLException, InvalidKeyException,
-        CertificateException, NoSuchProviderException, NoSuchAlgorithmException
+        NoSuchProviderException, NoSuchAlgorithmException
     {
         this(in, "BC");
     }
@@ -97,7 +96,7 @@ public class PKCS7SignedData
         byte[]  in,
         String  provider)
         throws SecurityException, CRLException, InvalidKeyException,
-        CertificateException, NoSuchProviderException, NoSuchAlgorithmException
+        NoSuchProviderException, NoSuchAlgorithmException
     {
         ASN1InputStream din = new ASN1InputStream(new ByteArrayInputStream(in));
 
@@ -398,7 +397,7 @@ public class PKCS7SignedData
      */
     public Certificate[] getCertificates()
     {
-        return (X509Certificate[])certs.toArray(new X509Certificate[0]);
+        return (X509Certificate[])certs.toArray(new X509Certificate[certs.size()]);
     }
 
     /**

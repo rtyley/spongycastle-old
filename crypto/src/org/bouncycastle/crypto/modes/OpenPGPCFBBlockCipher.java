@@ -106,10 +106,7 @@ public class OpenPGPCFBBlockCipher
     {
         count = 0;
 
-        for (int i = 0; i != FR.length; i++)
-        {
-            FR[i] = IV[i];
-        }
+        System.arraycopy(IV, 0, FR, 0, FR.length);
 
         cipher.reset();
     }
@@ -140,8 +137,8 @@ public class OpenPGPCFBBlockCipher
     /**
      * Encrypt one byte of data according to CFB mode.
      * @param data the byte to encrypt
-     * @param where am i in the current block, determines when to resync the block
-     * @returns the encrypted byte
+     * @param blockOff offset in the current block
+     * @return the encrypted byte
      */
     private byte encryptByte(byte data, int blockOff)
     {
@@ -266,7 +263,7 @@ public class OpenPGPCFBBlockCipher
             // copy in buffer so that this mode works if in and out are the same 
             System.arraycopy(in, inOff, tmp, 0, blockSize);
 
-            out[outOff + 0] = encryptByte(tmp[0], blockSize - 2);
+            out[outOff    ] = encryptByte(tmp[0], blockSize - 2);
             out[outOff + 1] = encryptByte(tmp[1], blockSize - 1);
 
             System.arraycopy(tmp, 0, FR, blockSize - 2, 2);
@@ -298,7 +295,7 @@ public class OpenPGPCFBBlockCipher
             
             cipher.processBlock(FR, 0, FRE, 0);
 
-            out[outOff + 0] = encryptByte(tmp[0], 0);
+            out[outOff    ] = encryptByte(tmp[0], 0);
             out[outOff + 1] = encryptByte(tmp[1], 1);
             
             System.arraycopy(FR, 2, FR, 0, blockSize - 2);

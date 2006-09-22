@@ -253,7 +253,7 @@ public class X509CertSelector implements CertSelector
             ByteArrayInputStream inStream = new ByteArrayInputStream(issuerDN);
             DERInputStream derInStream = new DERInputStream(inStream);
             DERObject obj = derInStream.readObject();
-            if ( obj != null && obj instanceof ASN1Sequence )
+            if ( obj instanceof ASN1Sequence )
             {
             this.issuerDNX509 = new X509Name((ASN1Sequence)obj);
             }
@@ -760,7 +760,7 @@ public class X509CertSelector implements CertSelector
     {
         try
         {
-            if ( names == null && ! names.isEmpty() )
+            if (names == null || names.isEmpty())
             {
                 subjectAltNames = null;
                 subjectAltNamesByte = null;
@@ -1091,7 +1091,7 @@ public class X509CertSelector implements CertSelector
     {
         try
         {
-            if ( names == null && ! names.isEmpty() )
+            if (names == null || names.isEmpty())
             {
                 pathToNames = null;
                 pathToNamesByte = null;

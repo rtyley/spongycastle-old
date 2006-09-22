@@ -83,7 +83,7 @@ public final class CAST6Engine extends CAST5Engine
             for (int j=0; j< 8; j++)
             {
                 _Tm[i*8 + j] = Cm;
-                Cm = (Cm + Mm) & 0xffffffff;    // mod 2^32;
+                Cm = (Cm + Mm);    // mod 2^32;
 
                 _Tr[i*8 + j] = Cr;
                 Cr = (Cr + Mr) & 0x1f;            // mod 32
@@ -92,10 +92,7 @@ public final class CAST6Engine extends CAST5Engine
 
         byte[] tmpKey = new byte[64];
         int length = key.length;
-        for (int i=0; i < length ; i++)
-        {
-            tmpKey[i] = key[i];
-        }
+        System.arraycopy(key, 0, tmpKey, 0, length);
 
         // now create ABCDEFGH
         for (int i=0; i< 8; i++)
@@ -104,12 +101,11 @@ public final class CAST6Engine extends CAST5Engine
         }
 
         // Generate the key schedule
-        int i2 = 0;
         for (int i=0; i< 12; i++)
         {
             // KAPPA <- W2i(KAPPA)
-            i2 = i*2 *8;
-            _workingKey[6] ^= F1(_workingKey[7], _Tm[i2+0], _Tr[i2+0]);
+            int i2 = i*2 *8;
+            _workingKey[6] ^= F1(_workingKey[7], _Tm[i2  ], _Tr[i2  ]);
             _workingKey[5] ^= F2(_workingKey[6], _Tm[i2+1], _Tr[i2+1]);
             _workingKey[4] ^= F3(_workingKey[5], _Tm[i2+2], _Tr[i2+2]);
             _workingKey[3] ^= F1(_workingKey[4], _Tm[i2+3], _Tr[i2+3]);
@@ -120,7 +116,7 @@ public final class CAST6Engine extends CAST5Engine
 
             // KAPPA <- W2i+1(KAPPA)
             i2 = (i*2 + 1)*8;
-            _workingKey[6] ^= F1(_workingKey[7], _Tm[i2+0], _Tr[i2+0]);
+            _workingKey[6] ^= F1(_workingKey[7], _Tm[i2  ], _Tr[i2  ]);
             _workingKey[5] ^= F2(_workingKey[6], _Tm[i2+1], _Tr[i2+1]);
             _workingKey[4] ^= F3(_workingKey[5], _Tm[i2+2], _Tr[i2+2]);
             _workingKey[3] ^= F1(_workingKey[4], _Tm[i2+3], _Tr[i2+3]);
@@ -130,14 +126,14 @@ public final class CAST6Engine extends CAST5Engine
             _workingKey[7] ^= F2(_workingKey[0], _Tm[i2+7], _Tr[i2+7]);
 
             // Kr_(i) <- KAPPA
-            _Kr[i*4 + 0] = _workingKey[0] & 0x1f;
+            _Kr[i*4    ] = _workingKey[0] & 0x1f;
             _Kr[i*4 + 1] = _workingKey[2] & 0x1f;
             _Kr[i*4 + 2] = _workingKey[4] & 0x1f;
             _Kr[i*4 + 3] = _workingKey[6] & 0x1f;
 
 
             // Km_(i) <- KAPPA
-            _Km[i*4 + 0] = _workingKey[7];
+            _Km[i*4    ] = _workingKey[7];
             _Km[i*4 + 1] = _workingKey[5];
             _Km[i*4 + 2] = _workingKey[3];
             _Km[i*4 + 3] = _workingKey[1];
@@ -233,7 +229,7 @@ public final class CAST6Engine extends CAST5Engine
         {
             x = i*4;
             // BETA <- Qi(BETA)
-            C ^= F1(D, _Km[x + 0], _Kr[x + 0]);
+            C ^= F1(D, _Km[x], _Kr[x]);
             B ^= F2(C, _Km[x + 1], _Kr[x + 1]);
             A ^= F3(B, _Km[x + 2], _Kr[x + 2]);
             D ^= F1(A, _Km[x + 3], _Kr[x + 3]);
@@ -247,7 +243,7 @@ public final class CAST6Engine extends CAST5Engine
             D ^= F1(A, _Km[x + 3], _Kr[x + 3]);
             A ^= F3(B, _Km[x + 2], _Kr[x + 2]);
             B ^= F2(C, _Km[x + 1], _Kr[x + 1]);
-            C ^= F1(D, _Km[x + 0], _Kr[x + 0]);
+            C ^= F1(D, _Km[x], _Kr[x]);
 
         }
 
@@ -255,8 +251,6 @@ public final class CAST6Engine extends CAST5Engine
         result[1] = B;
         result[2] = C;
         result[3] = D;
-
-        return;
     }
 
     /**
@@ -275,7 +269,7 @@ public final class CAST6Engine extends CAST5Engine
         {
             x = (11-i)*4;
             // BETA <- Qi(BETA)
-            C ^= F1(D, _Km[x + 0], _Kr[x + 0]);
+            C ^= F1(D, _Km[x], _Kr[x]);
             B ^= F2(C, _Km[x + 1], _Kr[x + 1]);
             A ^= F3(B, _Km[x + 2], _Kr[x + 2]);
             D ^= F1(A, _Km[x + 3], _Kr[x + 3]);
@@ -289,7 +283,7 @@ public final class CAST6Engine extends CAST5Engine
             D ^= F1(A, _Km[x + 3], _Kr[x + 3]);
             A ^= F3(B, _Km[x + 2], _Kr[x + 2]);
             B ^= F2(C, _Km[x + 1], _Kr[x + 1]);
-            C ^= F1(D, _Km[x + 0], _Kr[x + 0]);
+            C ^= F1(D, _Km[x], _Kr[x]);
 
         }
 
@@ -297,8 +291,6 @@ public final class CAST6Engine extends CAST5Engine
         result[1] = B;
         result[2] = C;
         result[3] = D;
-
-        return;
     }
 
 }

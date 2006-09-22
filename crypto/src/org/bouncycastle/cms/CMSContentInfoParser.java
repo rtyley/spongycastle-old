@@ -28,6 +28,10 @@ public class CMSContentInfoParser
         {
             throw new CMSException("IOException reading content.", e);
         }
+        catch (ClassCastException e)
+        {
+            throw new CMSException("Unexpected object reading content.", e);
+        }
     }
     
     /**

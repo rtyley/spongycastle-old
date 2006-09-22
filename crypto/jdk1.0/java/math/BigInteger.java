@@ -1480,10 +1480,7 @@ public class BigInteger
         }
 
         // put the result in x
-        for (int i = 0; i < n; i++)
-        {
-            x[i] = a[i + 1];
-        }
+        System.arraycopy(a, 1, x, 0, n);
     }
 
     public BigInteger multiply(BigInteger val)
@@ -1649,10 +1646,7 @@ public class BigInteger
         if (nBits == 0)
         {
             newMag = new int[magLen + nInts];
-            for (int i = 0; i < magLen; i++)
-            {
-                newMag[i] = mag[i];
-            }
+            System.arraycopy(mag, 0, newMag, 0, magLen);
         }
         else
         {

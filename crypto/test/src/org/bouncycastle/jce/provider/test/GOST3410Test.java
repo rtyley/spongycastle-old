@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider.test;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -25,7 +24,6 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.BigIntegers;
-import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
@@ -345,20 +343,13 @@ public class GOST3410Test
 
     private BigInteger[] decode(
         byte[]  encoding)
-        throws IOException
     {
         byte[] r = new byte[32];
         byte[] s = new byte[32];
 
-        for (int i = 0; i != 32; i ++)
-        {
-            s[i] = encoding[i];
-        }
+        System.arraycopy(encoding, 0, s, 0, 32);
 
-        for (int i = 0; i != 32; i ++)
-        {
-            r[i] = encoding[32 + i];
-        }
+        System.arraycopy(encoding, 32, r, 0, 32);
 
         BigInteger[]            sig = new BigInteger[2];
 
@@ -366,26 +357,6 @@ public class GOST3410Test
         sig[1] = new BigInteger(1, s);
 
         return sig;
-    }
-
-    private boolean arrayEquals(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public String getName()

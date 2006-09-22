@@ -114,7 +114,7 @@ public class GOST3411Digest
     {
         for(int k = 0; k < 8; k++)
         {
-            K[0 + 4*k] = in[ 0 + k];
+            K[4*k] = in[k];
             K[1 + 4*k] = in[ 8 + k];
             K[2 + 4*k] = in[16 + k];
             K[3 + 4*k] = in[24 + k];
@@ -153,10 +153,7 @@ public class GOST3411Digest
     {
         cpyBytesToShort(in, wS);
         w_S[15] = (short)(wS[0] ^ wS[1] ^ wS[2] ^ wS[3] ^ wS[12] ^ wS[15]);
-        for (int i = 14; i >= 0; i--)
-        {
-            w_S[i] = wS[i+1];
-        }
+        System.arraycopy(wS, 1, w_S, 0, 15);
         cpyShortToBytes(w_S, in);
     }
 
@@ -169,7 +166,7 @@ public class GOST3411Digest
         System.arraycopy(in, inOff, M, 0, 32);
 
         //key step 1
-        int i=0;
+ 
         // H = h3 || h2 || h1 || h0
         // S = s3 || s2 || s1 || s0
         System.arraycopy(H, 0, U, 0, 32);
@@ -182,7 +179,7 @@ public class GOST3411Digest
         E(P(W), S, 0, H, 0); // s0 = EK0 [h0]
 
         //keys step 2,3,4
-        for (i=1; i<4; i++)
+        for (int i=1; i<4; i++)
         {
             byte[] tmpA = A(U);
             for (int j=0; j<32; j++)
@@ -218,10 +215,7 @@ public class GOST3411Digest
         {
             fw(S);
         }
-        for(int j=0; j < H.length; j++)
-        {
-            H[j] = S[j];
-        }
+        System.arraycopy(S, 0, H, 0, H.length);
     }
 
     private void finish()
@@ -243,10 +237,7 @@ public class GOST3411Digest
     {
         finish();
 
-        for(int i=0; i<H.length; i++)
-        {
-            out[i+outOff] = H[i];
-        }
+        System.arraycopy(H, 0, out, outOff, H.length);
 
         reset();
 

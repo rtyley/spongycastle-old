@@ -2,28 +2,30 @@ package org.bouncycastle.x509;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.Iterator;
+
+import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
@@ -31,6 +33,7 @@ import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V1TBSCertificateGenerator;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 
 /**
@@ -38,37 +41,10 @@ import org.bouncycastle.jce.provider.X509CertificateObject;
  */
 public class X509V1CertificateGenerator
 {
-    private SimpleDateFormat            dateF = new SimpleDateFormat("yyMMddHHmmss");
     private V1TBSCertificateGenerator   tbsGen;
     private DERObjectIdentifier         sigOID;
     private AlgorithmIdentifier         sigAlgId;
     private String                      signatureAlgorithm;
-
-    private static Hashtable            algorithms = new Hashtable();
-
-    static
-    {
-        algorithms.put("MD2WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.2"));
-        algorithms.put("MD2WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.2"));
-        algorithms.put("MD5WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.4"));
-        algorithms.put("MD5WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.4"));
-        algorithms.put("SHA1WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
-        algorithms.put("SHA1WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
-        algorithms.put("SHA224WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha224WithRSAEncryption);
-        algorithms.put("SHA224WITHRSA", PKCSObjectIdentifiers.sha224WithRSAEncryption);
-        algorithms.put("SHA256WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha256WithRSAEncryption);
-        algorithms.put("SHA256WITHRSA", PKCSObjectIdentifiers.sha256WithRSAEncryption);
-        algorithms.put("SHA384WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha384WithRSAEncryption);
-        algorithms.put("SHA384WITHRSA", PKCSObjectIdentifiers.sha384WithRSAEncryption);
-        algorithms.put("SHA512WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha512WithRSAEncryption);
-        algorithms.put("SHA512WITHRSA", PKCSObjectIdentifiers.sha512WithRSAEncryption);
-        algorithms.put("RIPEMD160WITHRSAENCRYPTION", new DERObjectIdentifier("1.3.36.3.3.1.2"));
-        algorithms.put("RIPEMD160WITHRSA", new DERObjectIdentifier("1.3.36.3.3.1.2"));
-        algorithms.put("SHA1WITHDSA", new DERObjectIdentifier("1.2.840.10040.4.3"));
-        algorithms.put("DSAWITHSHA1", new DERObjectIdentifier("1.2.840.10040.4.3"));
-        algorithms.put("SHA1WITHECDSA", new DERObjectIdentifier("1.2.840.10045.4.1"));
-        algorithms.put("ECDSAWITHSHA1", new DERObjectIdentifier("1.2.840.10045.4.1"));
-    }
 
     public X509V1CertificateGenerator()
     {
@@ -89,9 +65,31 @@ public class X509V1CertificateGenerator
     public void setSerialNumber(
         BigInteger      serialNumber)
     {
+        if (serialNumber.compareTo(BigInteger.ZERO) <= 0)
+        {
+            throw new IllegalArgumentException("serial number must be a positive integer");
+        }
+        
         tbsGen.setSerialNumber(new DERInteger(serialNumber));
     }
 
+    /**
+     * Set the issuer distinguished name - the issuer is the entity whose private key is used to sign the
+     * certificate.
+     */
+    public void setIssuerDN(
+        X500Principal   issuer)
+    {
+        try
+        {
+            tbsGen.setIssuer(new X509Principal(issuer.getEncoded()));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("can't process principal: " + e);
+        }
+    }
+    
     /**
      * Set the issuer distinguished name - the issuer is the entity whose private key is used to sign the
      * certificate.
@@ -118,6 +116,22 @@ public class X509V1CertificateGenerator
      * Set the subject distinguished name. The subject describes the entity associated with the public key.
      */
     public void setSubjectDN(
+        X500Principal   subject)
+    {
+        try
+        {
+            tbsGen.setSubject(new X509Principal(subject.getEncoded()));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("can't process principal: " + e);
+        }
+    }
+    
+    /**
+     * Set the subject distinguished name. The subject describes the entity associated with the public key.
+     */
+    public void setSubjectDN(
         X509Name   subject)
     {
         tbsGen.setSubject(subject);
@@ -128,7 +142,7 @@ public class X509V1CertificateGenerator
     {
         try
         {
-            tbsGen.setSubjectPublicKeyInfo(new SubjectPublicKeyInfo((ASN1Sequence)new DERInputStream(
+            tbsGen.setSubjectPublicKeyInfo(new SubjectPublicKeyInfo((ASN1Sequence)new ASN1InputStream(
                                 new ByteArrayInputStream(key.getEncoded())).readObject()));
         }
         catch (Exception e)
@@ -137,19 +151,27 @@ public class X509V1CertificateGenerator
         }
     }
 
+    /**
+     * Set the signature algorithm. This can be either a name or an OID, names
+     * are treated as case insensitive.
+     * 
+     * @param signatureAlgorithm string representation of the algorithm name.
+     */
     public void setSignatureAlgorithm(
         String  signatureAlgorithm)
     {
         this.signatureAlgorithm = signatureAlgorithm;
 
-        sigOID = (DERObjectIdentifier)algorithms.get(Strings.toUpperCase(signatureAlgorithm));
-
-        if (sigOID == null)
+        try
+        {
+            sigOID = X509Util.getAlgorithmOID(signatureAlgorithm);
+        }
+        catch (Exception e)
         {
             throw new IllegalArgumentException("Unknown signature type requested");
         }
 
-        sigAlgId = new AlgorithmIdentifier(this.sigOID, null);
+        sigAlgId = X509Util.getSigAlgID(sigOID);
 
         tbsGen.setSignature(sigAlgId);
     }
@@ -164,7 +186,26 @@ public class X509V1CertificateGenerator
     {
         try
         {
-            return generateX509Certificate(key, "BC");
+            return generateX509Certificate(key, "BC", null);
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new SecurityException("BC provider not installed!");
+        }
+    }
+
+    /**
+     * generate an X509 certificate, based on the current issuer and subject
+     * using the default provider "BC" and the passed in source of randomness
+     */
+    public X509Certificate generateX509Certificate(
+        PrivateKey      key,
+        SecureRandom    random)
+        throws SecurityException, SignatureException, InvalidKeyException
+    {
+        try
+        {
+            return generateX509Certificate(key, "BC", random);
         }
         catch (NoSuchProviderException e)
         {
@@ -174,11 +215,26 @@ public class X509V1CertificateGenerator
 
     /**
      * generate an X509 certificate, based on the current issuer and subject,
-     * using the passed in provider for the signing
+     * using the passed in provider for the signing, and the passed in source
+     * of randomness (if required).
      */
     public X509Certificate generateX509Certificate(
         PrivateKey      key,
         String          provider)
+        throws NoSuchProviderException, SecurityException, SignatureException, InvalidKeyException
+    {
+        return generateX509Certificate(key, provider, null);
+    }
+
+    /**
+     * generate an X509 certificate, based on the current issuer and subject,
+     * using the passed in provider for the signing, and the passed in source
+     * of randomness (if required).
+     */
+    public X509Certificate generateX509Certificate(
+        PrivateKey      key,
+        String          provider,
+        SecureRandom    random)
         throws NoSuchProviderException, SecurityException, SignatureException, InvalidKeyException
     {
         Signature sig = null;
@@ -199,7 +255,14 @@ public class X509V1CertificateGenerator
             }
         }
 
-        sig.initSign(key);
+        if (random != null)
+        {
+            sig.initSign(key, random);
+        }
+        else
+        {
+            sig.initSign(key);
+        }
 
         TBSCertificateStructure tbsCert = tbsGen.generateTBSCertificate();
 
@@ -223,7 +286,16 @@ public class X509V1CertificateGenerator
         v.add(sigAlgId);
         v.add(new DERBitString(sig.sign()));
 
-        return new X509CertificateObject(new X509CertificateStructure(
-                                                new DERSequence(v)));
+        return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
+    }
+    
+    /**
+     * Return an iterator of the signature names supported by the generator.
+     * 
+     * @return an iterator containing recognised names.
+     */
+    public Iterator getSignatureAlgNames()
+    {
+        return X509Util.getAlgNames();
     }
 }
