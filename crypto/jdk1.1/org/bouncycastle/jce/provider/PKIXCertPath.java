@@ -62,7 +62,7 @@ public  class PKIXCertPath
     private List sortCerts(
         List certs)
     {
-        if (certs.size() == 1)
+        if (certs.size() < 2)
         {
             return certs;
         }
