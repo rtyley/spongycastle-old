@@ -256,7 +256,7 @@ public class CMSSignedDataStreamGenerator
                 if (attr.get(CMSAttributes.contentType) == null)
                 {
                     v.add(new Attribute(CMSAttributes.contentType,
-                                                   new DERSet(new DERObjectIdentifier(contentType.toString()))));
+                                                   new DERSet(new DERObjectIdentifier(contentType))));
                 }
                 else
                 {
@@ -299,7 +299,7 @@ public class CMSSignedDataStreamGenerator
 
                     v.add(new Attribute(
                         CMSAttributes.contentType,
-                            new DERSet(new DERObjectIdentifier(contentType.toString()))));
+                            new DERSet(new DERObjectIdentifier(contentType))));
 
                     v.add(new Attribute(
                         CMSAttributes.signingTime,

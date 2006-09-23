@@ -156,8 +156,8 @@ public class JDKGOST3410PublicKey
         StringBuffer    buf = new StringBuffer();
         String          nl = System.getProperty("line.separator");
 
-        buf.append("GOST3410 Public Key" + nl);
-        buf.append("            y: " + this.getY().toString(16) + nl);
+        buf.append("GOST3410 Public Key").append(nl);
+        buf.append("            y: ").append(this.getY().toString(16)).append(nl);
 
         return buf.toString();
     }

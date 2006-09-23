@@ -206,9 +206,9 @@ public class PGPDumpEngine implements ProcessingEngine
 
         StringBuffer sb = new StringBuffer("Found Signature: ");
         sb.append(asHex(sig.getKeyID()));
-        sb.append("\n");
+        sb.append('\n');
 
-        sb.append("Creation: ").append(sig.getCreationTime()).append("\n");
+        sb.append("Creation: ").append(sig.getCreationTime()).append('\n');
 
         PGPPublicKey pubKey = findPublicKey(sig.getKeyID());
 
@@ -268,7 +268,7 @@ public class PGPDumpEngine implements ProcessingEngine
 
         StringBuffer sb = new StringBuffer("Found One-Pass Signature: ");
         sb.append(asHex(sig.getKeyID()));
-        sb.append("\n");
+        sb.append('\n');
 
         // sb.append("Creation: ").append(sig.getCreationTime()).append("\n");
 
@@ -335,7 +335,7 @@ public class PGPDumpEngine implements ProcessingEngine
 
         StringBuffer sb = new StringBuffer("SecretKey: ");
         sb.append(asHex(pgpSecKey.getKeyID()));
-        sb.append("\n");
+        sb.append('\n');
 
         PGPPublicKey pubKey = findPublicKey(pgpSecKey.getKeyID());
         // need to grab the public key information or something
@@ -359,7 +359,7 @@ public class PGPDumpEngine implements ProcessingEngine
 
         StringBuffer sb = new StringBuffer("PublicKey: ");
         sb.append(asHex(pubKey.getKeyID()));
-        sb.append("\n");
+        sb.append('\n');
 
         userDataDump(sb, pubKey);
 
@@ -375,14 +375,14 @@ public class PGPDumpEngine implements ProcessingEngine
             while (i.hasNext())
             {
                 String id = (String) i.next();
-                sb.append("\"" + id + "\" ");
+                sb.append('\"').append(id).append("\" ");
             }
         }
         else
         {
             sb.append("<none>");
         }
-        sb.append("\n");
+        sb.append('\n');
 
         /*
         i = pubKey.getUserAttributes();
@@ -392,7 +392,7 @@ public class PGPDumpEngine implements ProcessingEngine
             while (i.hasNext())
             {
                 String id = (String) i.next();
-                sb.append("\"" + id + "\" ");
+                sb.append("\"").append(id).append("\" ");
             }
         }
         else

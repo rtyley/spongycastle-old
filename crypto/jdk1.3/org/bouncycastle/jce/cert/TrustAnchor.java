@@ -242,17 +242,16 @@ public class TrustAnchor
         sb.append("[\n");
         if (getCAPublicKey() != null)
         {
-            sb.append("  Trusted CA Public Key: " + getCAPublicKey() + "\n");
-            sb.append("  Trusted CA Issuer Name: " + getCAName() + "\n");
+            sb.append("  Trusted CA Public Key: ").append(getCAPublicKey()).append('\n');
+            sb.append("  Trusted CA Issuer Name: ").append(getCAName()).append('\n');
         }
         else
         {
-            sb.append("  Trusted CA cert: " + getTrustedCert() + "\n");
+            sb.append("  Trusted CA cert: ").append(getTrustedCert()).append('\n');
         }
         if (nameConstraints != null)
         {
-            sb.append("  Name Constraints: " + nameConstraints.toString()
-                    + "\n");
+            sb.append("  Name Constraints: ").append(nameConstraints).append('\n');
         }
         return sb.toString();
     }

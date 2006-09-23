@@ -997,7 +997,7 @@ public class X509Name
             buf.append(oid.getId());
         }
 
-        buf.append("=");
+        buf.append('=');
 
         int     index = buf.length();
 
@@ -1055,11 +1055,11 @@ public class X509Name
                 {
                     if (((Boolean)added.elementAt(i + 1)).booleanValue())
                     {
-                        buf.append("+");
+                        buf.append('+');
                     }
                     else
                     {
-                        buf.append(",");
+                        buf.append(',');
                     }
                 }
 
@@ -1080,11 +1080,11 @@ public class X509Name
                 {
                     if (((Boolean)added.elementAt(i)).booleanValue())
                     {
-                        buf.append("+");
+                        buf.append('+');
                     }
                     else
                     {
-                        buf.append(",");
+                        buf.append(',');
                     }
                 }
 

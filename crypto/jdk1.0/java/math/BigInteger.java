@@ -2052,7 +2052,7 @@ public class BigInteger
             return "0";
         }
 
-        String s = new String();
+        String s = "";
         String h;
 
         if (rdx == 16)

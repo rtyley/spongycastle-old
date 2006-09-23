@@ -125,9 +125,9 @@ public class DERInputStream
             int             head = bytes[0] & 0xff;
             StringBuffer    objId = new StringBuffer();
     
-            objId.append(Integer.toString(head / 40));
+            objId.append(head / 40);
             objId.append('.');
-            objId.append(Integer.toString(head % 40));
+            objId.append(head % 40);
             
             int value = 0;
     
@@ -139,7 +139,7 @@ public class DERInputStream
                 if ((b & 128) == 0)             // end of number reached
                 {
                     objId.append('.');
-                    objId.append(Integer.toString(value));
+                    objId.append(value);
                     value = 0;
                 }
             }

@@ -134,10 +134,10 @@ public class SignedMailValidator
             for (int i = 0; i < froms.length; i++)
             {
                 String addr = froms[i].toString();
-                int begin = addr.indexOf("<");
+                int begin = addr.indexOf('<');
                 if (begin != -1)
                 {
-                    int end = addr.indexOf(">", begin);
+                    int end = addr.indexOf('>', begin);
                     if (end != -1)
                     {
                         addr = addr.substring(begin + 1, end);
@@ -487,7 +487,7 @@ public class SignedMailValidator
             {
                 for (int j = 0; j < certEmails.size(); j++)
                 {
-                    if (fromAddresses[i].toString().equals(certEmails.get(j)))
+                    if (fromAddresses[i].equals(certEmails.get(j)))
                     {
                         equalsFrom = true;
                         break;

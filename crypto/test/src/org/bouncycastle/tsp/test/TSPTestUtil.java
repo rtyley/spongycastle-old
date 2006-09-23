@@ -104,7 +104,7 @@ public class TSPTestUtil
             {
                 buf.append(new String(data, i, data.length - i));
             }
-            buf.append("\n");
+            buf.append('\n');
         }
 
         return buf.toString();

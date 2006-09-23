@@ -394,7 +394,7 @@ class CertUtil
         int pos = 0;
         int start = 0;
         while (start < data.length()
-                && (pos = data.indexOf(".", start)) > start && pos - start > 3)
+                && (pos = data.indexOf('.', start)) > start && pos - start > 3)
         {
             try
             {
@@ -473,7 +473,7 @@ class CertUtil
      */
     private static byte[] parseRfc822(String data) throws IOException
     {
-        int tmpInt = data.indexOf("@");
+        int tmpInt = data.indexOf('@');
         if (tmpInt < 0 || tmpInt >= data.length() - 1)
         {
             throw new IOException("wrong format of rfc822Name:" + data);

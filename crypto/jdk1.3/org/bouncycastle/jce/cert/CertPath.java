@@ -222,14 +222,14 @@ public abstract class CertPath extends Object implements Serializable
         StringBuffer s = new StringBuffer();
         List certs = getCertificates();
         ListIterator iter = certs.listIterator();
-        s.append("\n" + getType() + " Cert Path: length = " + certs.size()
-                + "\n[\n");
+        s.append('\n').append(getType()).append(" Cert Path: length = ").append(certs.size())
+                .append("\n[\n");
         while (iter.hasNext())
         {
             s
-                    .append("=========================================================Certificate "
-                            + iter.nextIndex() + "\n");
-            s.append(iter.next().toString() + "\n");
+                    .append("=========================================================Certificate ")
+                    .append(iter.nextIndex()).append('\n');
+            s.append(iter.next()).append('\n');
             s
                     .append("========================================================Certificate end\n\n\n");
         }

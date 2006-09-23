@@ -94,10 +94,10 @@ public class PKIXCertPathBuilderResult extends PKIXCertPathValidatorResult
     {
         StringBuffer s = new StringBuffer();
         s.append("PKIXCertPathBuilderResult: [\n");
-        s.append("  Certification Path: " + getCertPath() + "\n");
-        s.append("  Trust Anchor: " + getTrustAnchor() + "\n");
-        s.append("  Policy Tree: " + getPolicyTree() + "\n");
-        s.append("  Subject Public Key: " + getPublicKey() + "\n]");
+        s.append("  Certification Path: ").append(getCertPath()).append('\n');
+        s.append("  Trust Anchor: ").append(getTrustAnchor()).append('\n');
+        s.append("  Policy Tree: ").append(getPolicyTree()).append('\n');
+        s.append("  Subject Public Key: ").append(getPublicKey()).append("\n]");
         return s.toString();
     }
 }

@@ -769,7 +769,7 @@ public class PKIXParameters implements CertPathParameters
         s.append("[\n");
         if (trustAnchors != null)
         {
-            s.append("  Trust Anchors: " + trustAnchors.toString() + "\n");
+            s.append("  Trust Anchors: ").append(trustAnchors).append('\n');
         }
         if (initialPolicies != null)
         {
@@ -779,8 +779,8 @@ public class PKIXParameters implements CertPathParameters
             }
             else
             {
-                s.append("  Initial Policy OIDs: ["
-                        + initialPolicies.toString() + "]\n");
+                s.append("  Initial Policy OIDs: [")
+                       .append(initialPolicies).append("]\n");
             }
         }
         s.append("  Validity Date: ");
@@ -792,7 +792,7 @@ public class PKIXParameters implements CertPathParameters
         {
             s.append("null");
         }
-        s.append("\n");
+        s.append('\n');
 
         s.append("  Signature Provider: ");
         if (sigProvider != null)
@@ -803,31 +803,31 @@ public class PKIXParameters implements CertPathParameters
         {
             s.append("null");
         }
-        s.append("\n");
+        s.append('\n');
 
         s.append("  Default Revocation Enabled: ");
         s.append(revocationEnabled);
-        s.append("\n");
+        s.append('\n');
 
         s.append("  Explicit Policy Required: ");
         s.append(explicitPolicyRequired);
-        s.append("\n");
+        s.append('\n');
 
         s.append("  Policy Mapping Inhibited: ");
         s.append(policyMappingInhibited);
-        s.append("\n");
+        s.append('\n');
 
         s.append("  Any Policy Inhibited: ");
         s.append(anyPolicyInhibited);
-        s.append("\n");
+        s.append('\n');
 
         s.append("  Policy Qualifiers Rejected: ");
         s.append(policyQualifiersRejected);
-        s.append("\n");
+        s.append('\n');
 
         s.append("  Target Cert Constraints: ");
         s.append(certSelector);
-        s.append("\n");
+        s.append('\n');
 
         s.append("  Certification Path Checkers: [");
         s.append(certPathCheckers);

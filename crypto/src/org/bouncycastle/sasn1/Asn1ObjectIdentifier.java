@@ -66,7 +66,7 @@ public class Asn1ObjectIdentifier
                 if ((b & 0x80) == 0) 
                 {
                     objId.append('.');
-                    objId.append(bigValue.toString());
+                    objId.append(bigValue);
                     bigValue = null;
                     value = 0;
                 }

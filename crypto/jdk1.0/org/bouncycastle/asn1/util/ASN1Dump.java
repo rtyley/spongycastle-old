@@ -73,8 +73,8 @@ public class ASN1Dump
 
             DERTaggedObject o = (DERTaggedObject)obj;
 
-            buf.append(Integer.toString(o.getTagNo()));
-            buf.append("]");
+            buf.append(o.getTagNo());
+            buf.append(']');
 
             if (!o.isExplicit())
             {
