@@ -130,9 +130,9 @@ public class LDAPCertStoreParameters implements CertStoreParameters
     {
         StringBuffer sb = new StringBuffer();
         sb.append("LDAPCertStoreParameters: [\n");
-        sb.append("  serverName: " + serverName + "\n");
-        sb.append("  port: " + port + "\n");
-        sb.append("]");
+        sb.append("  serverName: ").append(serverName).append('\n');
+        sb.append("  port: ").append(port).append('\n');
+        sb.append(']');
         return sb.toString();
     }
 }

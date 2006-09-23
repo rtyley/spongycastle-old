@@ -208,7 +208,7 @@ public class SMIMESignedGenerator
             }
             else
             {
-                header.append(",");
+                header.append(',');
             }
 
             header.append(alg);
@@ -220,7 +220,7 @@ public class SMIMESignedGenerator
         {
             if (micAlgs.size() != 1)
             {
-                header.append("\"");
+                header.append('\"');
             }
         }
     }

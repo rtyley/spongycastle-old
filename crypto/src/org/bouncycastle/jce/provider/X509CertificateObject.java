@@ -613,27 +613,27 @@ public class X509CertificateObject
         StringBuffer    buf = new StringBuffer();
         String          nl = System.getProperty("line.separator");
 
-        buf.append("  [0]         Version: " + this.getVersion() + nl);
-        buf.append("         SerialNumber: " + this.getSerialNumber() + nl);
-        buf.append("             IssuerDN: " + this.getIssuerDN() + nl);
-        buf.append("           Start Date: " + this.getNotBefore() + nl);
-        buf.append("           Final Date: " + this.getNotAfter() + nl);
-        buf.append("            SubjectDN: " + this.getSubjectDN() + nl);
-        buf.append("           Public Key: " + this.getPublicKey() + nl);
-        buf.append("  Signature Algorithm: " + this.getSigAlgName() + nl);
+        buf.append("  [0]         Version: ").append(this.getVersion()).append(nl);
+        buf.append("         SerialNumber: ").append(this.getSerialNumber()).append(nl);
+        buf.append("             IssuerDN: ").append(this.getIssuerDN()).append(nl);
+        buf.append("           Start Date: ").append(this.getNotBefore()).append(nl);
+        buf.append("           Final Date: ").append(this.getNotAfter()).append(nl);
+        buf.append("            SubjectDN: ").append(this.getSubjectDN()).append(nl);
+        buf.append("           Public Key: ").append(this.getPublicKey()).append(nl);
+        buf.append("  Signature Algorithm: ").append(this.getSigAlgName()).append(nl);
 
         byte[]  sig = this.getSignature();
 
-        buf.append("            Signature: " + new String(Hex.encode(sig, 0, 20)) + nl);
+        buf.append("            Signature: ").append(new String(Hex.encode(sig, 0, 20))).append(nl);
         for (int i = 20; i < sig.length; i += 20)
         {
             if (i < sig.length - 20)
             {
-                buf.append("                       " + new String(Hex.encode(sig, i, 20)) + nl);
+                buf.append("                       ").append(new String(Hex.encode(sig, i, 20))).append(nl);
             }
             else
             {
-                buf.append("                       " + new String(Hex.encode(sig, i, sig.length - i)) + nl);
+                buf.append("                       ").append(new String(Hex.encode(sig, i, sig.length - i))).append(nl);
             }
         }
 
@@ -657,41 +657,41 @@ public class X509CertificateObject
                 {
                     byte[]                  octs = ext.getValue().getOctets();
                     ASN1InputStream         dIn = new ASN1InputStream(octs);
-                    buf.append("                       critical(" + ext.isCritical() + ") ");
+                    buf.append("                       critical(").append(ext.isCritical()).append(") ");
                     try
                     {
                         if (oid.equals(X509Extensions.BasicConstraints))
                         {
-                            buf.append(new BasicConstraints((ASN1Sequence)dIn.readObject()) + nl);
+                            buf.append(new BasicConstraints((ASN1Sequence)dIn.readObject())).append(nl);
                         }
                         else if (oid.equals(X509Extensions.KeyUsage))
                         {
-                            buf.append(new KeyUsage((DERBitString)dIn.readObject()) + nl);
+                            buf.append(new KeyUsage((DERBitString)dIn.readObject())).append(nl);
                         }
                         else if (oid.equals(MiscObjectIdentifiers.netscapeCertType))
                         {
-                            buf.append(new NetscapeCertType((DERBitString)dIn.readObject()) + nl);
+                            buf.append(new NetscapeCertType((DERBitString)dIn.readObject())).append(nl);
                         }
                         else if (oid.equals(MiscObjectIdentifiers.netscapeRevocationURL))
                         {
-                            buf.append(new NetscapeRevocationURL((DERIA5String)dIn.readObject()) + nl);
+                            buf.append(new NetscapeRevocationURL((DERIA5String)dIn.readObject())).append(nl);
                         }
                         else if (oid.equals(MiscObjectIdentifiers.verisignCzagExtension))
                         {
-                            buf.append(new VerisignCzagExtension((DERIA5String)dIn.readObject()) + nl);
+                            buf.append(new VerisignCzagExtension((DERIA5String)dIn.readObject())).append(nl);
                         }
                         else 
                         {
                             buf.append(oid.getId());
-                            buf.append(" value = " + ASN1Dump.dumpAsString(dIn.readObject()) + nl);
-                            //buf.append(" value = " + "*****" + nl);
+                            buf.append(" value = ").append(ASN1Dump.dumpAsString(dIn.readObject())).append(nl);
+                            //buf.append(" value = ").append("*****").append(nl);
                         }
                     }
                     catch (Exception ex)
                     {
                         buf.append(oid.getId());
-                   //     buf.append(" value = " + new String(Hex.encode(ext.getValue().getOctets())) + nl);
-                        buf.append(" value = " + "*****" + nl);
+                   //     buf.append(" value = ").append(new String(Hex.encode(ext.getValue().getOctets()))).append(nl);
+                        buf.append(" value = ").append("*****").append(nl);
                     }
                 }
                 else

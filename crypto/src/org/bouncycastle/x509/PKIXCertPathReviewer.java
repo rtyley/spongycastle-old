@@ -1923,7 +1923,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             for (int i = 0; i != ip.length; i++)
             {
                 b.append(Integer.toHexString(ip[i] & 0xff));
-                b.append(" ");
+                b.append(' ');
             }
             
             result = b.toString();

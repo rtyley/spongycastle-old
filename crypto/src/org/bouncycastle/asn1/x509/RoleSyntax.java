@@ -224,12 +224,12 @@ public class RoleSyntax
         else 
         {
             String[] names = this.getRoleAuthorityAsString();
-            buff.append("[" + names[0]);
+            buff.append('[').append(names[0]);
             for(int i = 1; i < names.length; i++) 
             {
-                    buff.append(", " + names[i]);
+                    buff.append(", ").append(names[i]);
             }
-            buff.append("]");
+            buff.append(']');
         }
         return buff.toString();
     }

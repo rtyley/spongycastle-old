@@ -164,17 +164,17 @@ public final class PolicyQualifierInfo
     {
     StringBuffer s = new StringBuffer();
     s.append("PolicyQualifierInfo: [\n");
-    s.append("qualifierID: " + id + "\n");
+    s.append("qualifierID: ").append(id).append('\n');
     try {
         ByteArrayInputStream inStream = new ByteArrayInputStream( qualifier );
         DERInputStream derInStream = new DERInputStream( inStream );
         DERObject derObject = derInStream.readObject();
-        s.append("  qualifier:\n" + ASN1Dump.dumpAsString(derObject) + "\n");
+        s.append("  qualifier:\n").append(ASN1Dump.dumpAsString(derObject)).append('\n');
     } catch ( IOException ex ) {
         s.append(ex.getMessage());
     }
-    s.append("qualifier: " + id + "\n");
-    s.append("]");
+    s.append("qualifier: ").append(id).append('\n');
+    s.append(']');
     return s.toString();
     }
 }

@@ -66,7 +66,7 @@ public class UserNotice
     public UserNotice(
        ASN1Sequence as) 
     {
-	   if (as.size() == 2)
+       if (as.size() == 2)
        {
            noticeRef = NoticeReference.getInstance(as.getObjectAt(0));
            explicitText = DisplayText.getInstance(as.getObjectAt(1));

@@ -211,7 +211,7 @@ public class X509CRLSelector implements CRLSelector
             throw new IOException(ex.getMessage());
         }
         issuerNamesX509.add(nameX509);
-        issuerNames.add(new String(name));
+        issuerNames.add(name);
     }
 
     /**
@@ -474,26 +474,26 @@ public class X509CRLSelector implements CRLSelector
             Iterator iter = issuerNamesX509.iterator();
             while (iter.hasNext())
             {
-                s.append("    " + iter.next().toString() + "\n");
+                s.append("    ").append(iter.next()).append('\n');
             }
         }
         if (minCRL != null)
         {
-            s.append("  minCRLNumber: " + minCRL + "\n");
+            s.append("  minCRLNumber: ").append(minCRL).append('\n');
         }
         if (maxCRL != null)
         {
-            s.append("  maxCRLNumber: " + maxCRL + "\n");
+            s.append("  maxCRLNumber: ").append(maxCRL).append('\n');
         }
         if (dateAndTime != null)
         {
-            s.append("  dateAndTime: " + dateAndTime + "\n");
+            s.append("  dateAndTime: ").append(dateAndTime).append('\n');
         }
         if (certChecking != null)
         {
-            s.append("  Certificate being checked: " + certChecking + "\n");
+            s.append("  Certificate being checked: ").append(certChecking).append('\n');
         }
-        s.append("]");
+        s.append(']');
         return s.toString();
     }
 

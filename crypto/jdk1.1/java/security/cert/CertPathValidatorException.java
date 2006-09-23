@@ -137,11 +137,11 @@ public class CertPathValidatorException extends GeneralSecurityException
     StringBuffer s = new StringBuffer();
     if ( message != null )
     {
-        s.append( message + "\n" );
+        s.append(message).append('\n');
     }
     if ( cause != null )
     {
-        s.append( "Cause:\n" + cause.getMessage() + "\n" );
+        s.append("Cause:\n").append(cause.getMessage()).append('\n');
     }
     return s.toString();
     }
@@ -200,7 +200,7 @@ public class CertPathValidatorException extends GeneralSecurityException
     }
     if ( getIndex() >= 0 )
     {
-        sb.append("index in certpath: " + getIndex() + "\n");
+        sb.append("index in certpath: ").append(getIndex()).append('\n');
         sb.append(getCertPath());
     }
     return sb.toString();

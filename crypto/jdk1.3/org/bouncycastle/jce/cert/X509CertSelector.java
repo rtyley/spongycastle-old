@@ -887,7 +887,7 @@ public class X509CertSelector implements CertSelector
         byte[] encoded = CertUtil.parseGeneralName(type, name);
         List tmpList = new ArrayList();
         tmpList.add(new Integer(type));
-        tmpList.add(new String(name));
+        tmpList.add(name);
         subjectAltNames.add(tmpList);
         tmpList.set(1, encoded);
         subjectAltNamesByte.add(tmpList);
@@ -1227,7 +1227,7 @@ public class X509CertSelector implements CertSelector
         byte[] encoded = CertUtil.parseGeneralName(type, name);
         List tmpList = new ArrayList();
         tmpList.add(new Integer(type));
-        tmpList.add(new String(name));
+        tmpList.add(name);
         pathToNames.add(tmpList);
         tmpList.set(1, encoded);
         pathToNamesByte.add(tmpList);
@@ -1863,19 +1863,19 @@ public class X509CertSelector implements CertSelector
         sb.append("X509CertSelector: [\n");
         if (x509Cert != null)
         {
-            sb.append("  Certificate: " + x509Cert.toString() + "\n");
+            sb.append("  Certificate: ").append(x509Cert).append('\n');
         }
         if (serialNumber != null)
         {
-            sb.append("  Serial Number: " + serialNumber.toString() + "\n");
+            sb.append("  Serial Number: ").append(serialNumber).append('\n');
         }
         if (issuerDN != null)
         {
-            sb.append("  Issuer: " + getIssuerAsString() + "\n");
+            sb.append("  Issuer: ").append(getIssuerAsString()).append('\n');
         }
         if (subjectDN != null)
         {
-            sb.append("  Subject: " + getSubjectAsString() + "\n");
+            sb.append("  Subject: ").append(getSubjectAsString()).append('\n');
         }
         try
         {
@@ -1885,8 +1885,8 @@ public class X509CertSelector implements CertSelector
                         subjectKeyID);
                 DERInputStream derInStream = new DERInputStream(inStream);
                 DERObject derObject = derInStream.readObject();
-                sb.append("  Subject Key Identifier: "
-                        + ASN1Dump.dumpAsString(derObject) + "\n");
+                sb.append("  Subject Key Identifier: ")
+                       .append(ASN1Dump.dumpAsString(derObject)).append('\n');
             }
             if (authorityKeyID != null)
             {
@@ -1894,48 +1894,48 @@ public class X509CertSelector implements CertSelector
                         authorityKeyID);
                 DERInputStream derInStream = new DERInputStream(inStream);
                 DERObject derObject = derInStream.readObject();
-                sb.append("  Authority Key Identifier: "
-                        + ASN1Dump.dumpAsString(derObject) + "\n");
+                sb.append("  Authority Key Identifier: ")
+                       .append(ASN1Dump.dumpAsString(derObject)).append('\n');
             }
         }
         catch (IOException ex)
         {
-            sb.append(ex.getMessage() + "\n");
+            sb.append(ex.getMessage()).append('\n');
         }
         if (certValid != null)
         {
-            sb.append("  Certificate Valid: " + certValid.toString() + "\n");
+            sb.append("  Certificate Valid: ").append(certValid).append('\n');
         }
         if (privateKeyValid != null)
         {
-            sb.append("  Private Key Valid: " + privateKeyValid.toString()
-                    + "\n");
+            sb.append("  Private Key Valid: ").append(privateKeyValid)
+                   .append('\n');
         }
         if (subjectKeyAlgID != null)
         {
-            sb.append("  Subject Public Key AlgID: "
-                    + subjectKeyAlgID.toString() + "\n");
+            sb.append("  Subject Public Key AlgID: ")
+                   .append(subjectKeyAlgID).append('\n');
         }
         if (subjectPublicKey != null)
         {
-            sb.append("  Subject Public Key: " + subjectPublicKey.toString()
-                    + "\n");
+            sb.append("  Subject Public Key: ").append(subjectPublicKey)
+                   .append('\n');
         }
         if (keyUsage != null)
         {
-            sb.append("  Key Usage: " + keyUsage + "\n");
+            sb.append("  Key Usage: ").append(keyUsage).append('\n');
         }
         if (keyPurposeSet != null)
         {
-            sb.append("  Extended Key Usage: " + keyPurposeSet.toString()
-                    + "\n");
+            sb.append("  Extended Key Usage: ").append(keyPurposeSet)
+                   .append('\n');
         }
         if (policy != null)
         {
-            sb.append("  Policy: " + policy.toString() + "\n");
+            sb.append("  Policy: ").append(policy).append('\n');
         }
-        sb.append("  matchAllSubjectAltNames flag: "
-                + String.valueOf(matchAllSubjectAltNames) + "\n");
+        sb.append("  matchAllSubjectAltNames flag: ")
+               .append(matchAllSubjectAltNames).append('\n');
         if (subjectAltNamesByte != null)
         {
             sb.append("   SubjectAlternativNames: \n[");
@@ -1950,13 +1950,13 @@ public class X509CertSelector implements CertSelector
                             (byte[])obj.get(1));
                     DERInputStream derInStream = new DERInputStream(inStream);
                     DERObject derObject = derInStream.readObject();
-                    sb.append("  Type: " + obj.get(0) + " Data: "
-                            + ASN1Dump.dumpAsString(derObject) + "\n");
+                    sb.append("  Type: ").append(obj.get(0)).append(" Data: ")
+                           .append(ASN1Dump.dumpAsString(derObject)).append('\n');
                 }
             }
             catch (IOException ex)
             {
-                sb.append(ex.getMessage() + "\n");
+                sb.append(ex.getMessage()).append('\n');
             }
             sb.append("]\n");
         }
@@ -1974,17 +1974,17 @@ public class X509CertSelector implements CertSelector
                             (byte[])obj.get(1));
                     DERInputStream derInStream = new DERInputStream(inStream);
                     DERObject derObject = derInStream.readObject();
-                    sb.append("  Type: " + obj.get(0) + " Data: "
-                            + ASN1Dump.dumpAsString(derObject) + "\n");
+                    sb.append("  Type: ").append(obj.get(0)).append(" Data: ")
+                           .append(ASN1Dump.dumpAsString(derObject)).append('\n');
                 }
             }
             catch (IOException ex)
             {
-                sb.append(ex.getMessage() + "\n");
+                sb.append(ex.getMessage()).append('\n');
             }
             sb.append("]\n");
         }
-        sb.append("]");
+        sb.append(']');
         return sb.toString();
     }
 

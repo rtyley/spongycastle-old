@@ -101,8 +101,8 @@ public class JDKDSAPublicKey
         StringBuffer    buf = new StringBuffer();
         String          nl = System.getProperty("line.separator");
 
-        buf.append("DSA Public Key" + nl);
-        buf.append("            y: " + this.getY().toString(16) + nl);
+        buf.append("DSA Public Key").append(nl);
+        buf.append("            y: ").append(this.getY().toString(16)).append(nl);
 
         return buf.toString();
     }

@@ -102,11 +102,11 @@ public class CertStoreException extends GeneralSecurityException
         StringBuffer s = new StringBuffer();
         if (message != null)
         {
-            s.append(message + "\n");
+            s.append(message).append('\n');
         }
         if (cause != null)
         {
-            s.append("Cause:\n" + cause.getMessage());
+            s.append("Cause:\n").append(cause.getMessage());
         }
         return s.toString();
     }

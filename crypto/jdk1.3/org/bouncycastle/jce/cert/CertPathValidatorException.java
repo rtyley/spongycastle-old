@@ -222,7 +222,7 @@ public class CertPathValidatorException extends GeneralSecurityException
         }
         if (getIndex() >= 0)
         {
-            sb.append("index in certpath: " + getIndex() + "\n");
+            sb.append("index in certpath: ").append(getIndex()).append('\n');
             sb.append(getCertPath());
         }
         return sb.toString();

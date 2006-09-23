@@ -254,7 +254,7 @@ public class NISTCertPathTest
         test("75", TEST_75_DATA, false, false);
         test("76", TEST_76_DATA, false, false);
         
-        resultBuf.append("NISTCertPathTest -- Failed: " + testFail.size() + "/" + testCount + "\n");
+        resultBuf.append("NISTCertPathTest -- Failed: ").append(testFail.size()).append('/').append(testCount).append('\n');
         if (!testFail.isEmpty())
         {
             fail(resultBuf.toString());
@@ -407,8 +407,8 @@ public class NISTCertPathTest
             }
         }
 
-        resultBuf.append("NISTCertPathTest -- " + _name + ": "
-                + (_pass ? "\n" : "Failed.\n"));
+        resultBuf.append("NISTCertPathTest -- ").append(_name).append(": ")
+                .append(_pass ? "\n" : "Failed.\n");
     }
     
 
