@@ -47,8 +47,8 @@ public class CertPathTest
         byte[] enc = { (byte)0, (byte)2, (byte)3, (byte)4, (byte)5 };
         MyCertPath mc = new MyCertPath(enc);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        ByteArrayInputStream is = null;
-        byte[] arr = null;
+        ByteArrayInputStream is;
+        byte[] arr;
 
         try
         {
@@ -139,6 +139,24 @@ public class CertPathTest
             if (!res.isSuccessful())
             {
                 return res;
+            }
+
+            //
+            // empty list test
+            //
+            list = new ArrayList();
+
+            try
+            {
+                CertPath certPath = CertificateFactory.getInstance("X.509","BC").generateCertPath(list);
+                if (certPath.getCertificates().size() != 0)
+                {
+                    return new SimpleTestResult(false, this.getName() + ": list wrong size.");
+                }
+            }
+            catch (Exception e)
+            {
+                return new SimpleTestResult(false, this.getName() + ": " + e);
             }
         }
         catch (Exception e)
