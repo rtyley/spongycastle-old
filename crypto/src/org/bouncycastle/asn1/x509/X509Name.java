@@ -371,7 +371,7 @@ public class X509Name
                    {
                        values.addElement("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
                    }
-                   added.addElement((i != 0) ? new Boolean(true) : new Boolean(false));
+                   added.addElement(Boolean.valueOf(i != 0));
             }
         }
     }
@@ -431,7 +431,7 @@ public class X509Name
             for (int i = 0; i != ordering.size(); i++)
             {
                 this.ordering.addElement(ordering.elementAt(i));
-                this.added.addElement(new Boolean(false));
+                this.added.addElement(Boolean.FALSE);
             }
         }
         else
@@ -441,7 +441,7 @@ public class X509Name
             while (e.hasMoreElements())
             {
                 this.ordering.addElement(e.nextElement());
-                this.added.addElement(new Boolean(false));
+                this.added.addElement(Boolean.FALSE);
             }
         }
 
@@ -490,7 +490,7 @@ public class X509Name
         {
             this.ordering.addElement(oids.elementAt(i));
             this.values.addElement(values.elementAt(i));
-            this.added.addElement(new Boolean(false));
+            this.added.addElement(Boolean.FALSE);
         }
     }
 
@@ -630,7 +630,7 @@ public class X509Name
                 
                 this.ordering.addElement(oid);
                 this.values.addElement(vTok.nextToken());
-                this.added.addElement(new Boolean(false));
+                this.added.addElement(Boolean.FALSE);
                 
                 while (vTok.hasMoreTokens())
                 {
@@ -641,14 +641,14 @@ public class X509Name
                     String  vl = sv.substring(ndx + 1);
                     this.ordering.addElement(decodeOID(nm, lookUp));
                     this.values.addElement(vl);
-                    this.added.addElement(new Boolean(true));
+                    this.added.addElement(Boolean.TRUE);
                 }
             }
             else
             {
                 this.ordering.addElement(oid);
                 this.values.addElement(value);
-                this.added.addElement(new Boolean(false));
+                this.added.addElement(Boolean.FALSE);
             }
         }
 
