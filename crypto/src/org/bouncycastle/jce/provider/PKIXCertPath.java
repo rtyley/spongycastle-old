@@ -62,7 +62,7 @@ public  class PKIXCertPath
     private List sortCerts(
         List certs)
     {
-        if (certs.size() == 1)
+        if (certs.size() < 2)
         {
             return certs;
         }
@@ -152,13 +152,7 @@ public  class PKIXCertPath
         
         return retList;
     }
-    
-    /**
-     * Creates a CertPath of the specified type.
-     * This constructor is protected because most users should use
-     * a CertificateFactory to create CertPaths.
-     * @param type the standard name of the type of Certificatesin this path
-     **/
+
     PKIXCertPath(List certificates)
     {
         super("X.509");
@@ -169,8 +163,6 @@ public  class PKIXCertPath
      * Creates a CertPath of the specified type.
      * This constructor is protected because most users should use
      * a CertificateFactory to create CertPaths.
-     *
-     * @param type the standard name of the type of Certificatesin this path
      **/
     PKIXCertPath(
         InputStream inStream,
@@ -211,7 +203,7 @@ public  class PKIXCertPath
                 inStream = new BufferedInputStream(inStream);
                 certificates = new ArrayList();
                 CertificateFactory certFactory= CertificateFactory.getInstance("X.509", "BC");
-                Certificate cert = null;
+                Certificate cert;
                 while ((cert = certFactory.generateCertificate(inStream)) != null)
                 {
                     certificates.add(cert);
