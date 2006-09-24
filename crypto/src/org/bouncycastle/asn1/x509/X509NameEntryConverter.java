@@ -61,7 +61,7 @@ public abstract class X509NameEntryConverter
         throws IOException
     {
         str = Strings.toLowerCase(str);
-        byte[]    data = new byte[str.length() / 2];
+        byte[] data = new byte[(str.length() - off) / 2];
         for (int index = 0; index != data.length; index++)
         {
             char left = str.charAt((index * 2) + off);
