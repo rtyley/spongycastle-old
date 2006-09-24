@@ -76,4 +76,9 @@ public class GOST3410ValidationParameters
 
         return true;
     }
+
+    public int hashCode()
+    {
+        return x0 ^ c ^ (int) x0L ^ (int)(x0L >> 32) ^ (int) cL ^ (int)(cL >> 32);
+    }
 }
