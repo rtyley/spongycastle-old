@@ -24,6 +24,8 @@ import org.bouncycastle.util.test.SimpleTest;
 public class PGPPBETest
     extends SimpleTest
 {
+    private static final Date TEST_DATE	= new Date(2003, 8, 29, 23, 35, 11);
+
     byte[] enc1 = Base64.decode(
             "jA0EAwMC5M5wWBP2HBZgySvUwWFAmMRLn7dWiZN6AkQMvpE3b6qwN3SSun7zInw2"
           + "hxxdgFzVGfbjuB8w");
@@ -57,6 +59,10 @@ public class PGPPBETest
             && !ld.getFileName().equals("_CONSOLE"))
         {
             throw new RuntimeException("wrong filename in packet");
+        }
+        if (!ld.getModificationTime().equals(TEST_DATE))
+        {
+            throw new RuntimeException("wrong modification time in packet");
         }
 
         InputStream              unc = ld.getInputStream();
@@ -151,7 +157,7 @@ public class PGPPBETest
         ldOut = lData.open(comData.open(bOut),
                                  PGPLiteralData.BINARY, 
                                  PGPLiteralData.CONSOLE, 
-                                 new Date(),
+                                 TEST_DATE,
                                  new byte[16]);
 
         

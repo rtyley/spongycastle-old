@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -128,9 +127,7 @@ public class PGPDSAElGamalTest
     {
         try
         {
-            String file = null;
             PGPPublicKey pubKey = null;
-            PrivateKey privKey = null;
             
             PGPUtil.setDefaultProvider("BC");
 
@@ -172,7 +169,9 @@ public class PGPDSAElGamalTest
             sGen.generateOnePassVersion(false).encode(bcOut);
 
             PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator();
-            OutputStream                    lOut = lGen.open(bcOut, PGPLiteralData.BINARY, "_CONSOLE", data.getBytes().length, new Date());
+            
+            Date testDate = new Date(1973, 7, 27);
+            OutputStream lOut = lGen.open(bcOut, PGPLiteralData.BINARY, "_CONSOLE", data.getBytes().length, testDate);
             int                                    ch;
             
             while ((ch = testIn.read()) >= 0)
@@ -201,6 +200,10 @@ public class PGPDSAElGamalTest
             PGPOnePassSignature ops = p1.get(0);
             
             PGPLiteralData p2 = (PGPLiteralData)pgpFact.nextObject();
+            if (!p2.getModificationTime().equals(testDate))
+            {
+                fail("Modification time not preserved");
+            }
 
             InputStream    dIn = p2.getInputStream();
 
