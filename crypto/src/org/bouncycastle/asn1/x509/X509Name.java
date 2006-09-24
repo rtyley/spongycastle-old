@@ -371,7 +371,7 @@ public class X509Name
                    {
                        values.addElement("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
                    }
-                   added.addElement(Boolean.valueOf(i != 0));
+                   added.addElement((i != 0) ? Boolean.TRUE : Boolean.FALSE);  // to allow earlier JDK compatibility
             }
         }
     }
@@ -380,7 +380,7 @@ public class X509Name
      * constructor from a table of attributes.
      * <p>
      * it's is assumed the table contains OID/String pairs, and the contents
-     * of the table are copied into an internal table as part of the 
+     * of the table are copied into an internal table as part of the
      * construction process.
      * <p>
      * <b>Note:</b> if the name you are trying to generate should be
@@ -397,7 +397,7 @@ public class X509Name
      * Constructor from a table of attributes with ordering.
      * <p>
      * it's is assumed the table contains OID/String pairs, and the contents
-     * of the table are copied into an internal table as part of the 
+     * of the table are copied into an internal table as part of the
      * construction process. The ordering vector should contain the OIDs
      * in the order they are meant to be encoded or printed in toString.
      */
@@ -407,12 +407,12 @@ public class X509Name
     {
         this(ordering, attributes, new X509DefaultEntryConverter());
     }
-    
+
     /**
      * Constructor from a table of attributes with ordering.
      * <p>
      * it's is assumed the table contains OID/String pairs, and the contents
-     * of the table are copied into an internal table as part of the 
+     * of the table are copied into an internal table as part of the
      * construction process. The ordering vector should contain the OIDs
      * in the order they are meant to be encoded or printed in toString.
      * <p>
@@ -425,7 +425,7 @@ public class X509Name
         X509DefaultEntryConverter   converter)
     {
         this.converter = converter;
-        
+
         if (ordering != null)
         {
             for (int i = 0; i != ordering.size(); i++)
@@ -467,7 +467,7 @@ public class X509Name
     {
         this(oids, values, new X509DefaultEntryConverter());
     }
-    
+
     /**
      * Takes two vectors one of the oids and the other of the values.
      * <p>
@@ -480,7 +480,7 @@ public class X509Name
         X509NameEntryConverter  converter)
     {
         this.converter = converter;
-        
+
         if (oids.size() != values.size())
         {
             throw new IllegalArgumentException("oids vector must be same length as values.");
@@ -516,7 +516,7 @@ public class X509Name
     {
         this(DefaultReverse, DefaultLookUp, dirName, converter);
     }
-    
+
     /**
      * Takes an X509 dir name as a string of the format "C=AU, ST=Victoria", or
      * some such, converting it into an ordered set of name attributes. If reverse
@@ -544,10 +544,10 @@ public class X509Name
     {
         this(reverse, DefaultLookUp, dirName, converter);
     }
-    
+
     /**
      * Takes an X509 dir name as a string of the format "C=AU, ST=Victoria", or
-     * some such, converting it into an ordered set of name attributes. lookUp 
+     * some such, converting it into an ordered set of name attributes. lookUp
      * should provide a table of lookups, indexed by lowercase only strings and
      * yielding a DERObjectIdentifier, other than that OID. and numeric oids
      * will be processed automatically.
@@ -565,7 +565,7 @@ public class X509Name
     {
         this(reverse, lookUp, dirName, new X509DefaultEntryConverter());
     }
-    
+
     private DERObjectIdentifier decodeOID(
         String      name,
         Hashtable   lookUp)
@@ -584,13 +584,13 @@ public class X509Name
         {
             throw new IllegalArgumentException("Unknown object id - " + name + " - passed to distinguished name");
         }
-        
+
         return oid;
     }
-    
+
     /**
      * Takes an X509 dir name as a string of the format "C=AU, ST=Victoria", or
-     * some such, converting it into an ordered set of name attributes. lookUp 
+     * some such, converting it into an ordered set of name attributes. lookUp
      * should provide a table of lookups, indexed by lowercase only strings and
      * yielding a DERObjectIdentifier, other than that OID. and numeric oids
      * will be processed automatically. The passed in converter is used to convert the
@@ -627,11 +627,11 @@ public class X509Name
             if (value.indexOf('+') > 0)
             {
                 X509NameTokenizer   vTok = new X509NameTokenizer(value, '+');
-                
+
                 this.ordering.addElement(oid);
                 this.values.addElement(vTok.nextToken());
                 this.added.addElement(Boolean.FALSE);
-                
+
                 while (vTok.hasMoreTokens())
                 {
                     String  sv = vTok.nextToken();
