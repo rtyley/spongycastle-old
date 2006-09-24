@@ -8,7 +8,10 @@ import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.x509.X509DefaultEntryConverter;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x509.X509NameEntryConverter;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTestResult;
@@ -226,6 +229,22 @@ public class X509NameTest
                 return new SimpleTestResult(false, getName() + ": failed to recover tagged name");
             }
             */
+
+        
+        
+            DERUTF8String testString = new DERUTF8String("The Legion of the Bouncy Castle");
+            byte[] encodedBytes = testString.getEncoded();
+            byte[] hexEncodedBytes = Hex.encode(encodedBytes);
+            String hexEncodedString = "#" + new String(hexEncodedBytes);
+
+            DERUTF8String converted = (DERUTF8String)
+                new X509DefaultEntryConverter().getConvertedValue(
+                    X509Name.L , hexEncodedString);
+
+            if (!converted.equals(testString))
+            {
+                return new SimpleTestResult(false, getName() + ": failed X509DefaultEntryConverter test");
+            }
         }
         catch (Exception e)
         {
