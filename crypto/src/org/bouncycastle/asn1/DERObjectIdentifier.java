@@ -89,7 +89,7 @@ public class DERObjectIdentifier
                     }
 
                     objId.append('.');
-                    objId.append(Long.toString(value));
+                    objId.append(value);
                     value = 0;
                 }
             } 
@@ -117,23 +117,11 @@ public class DERObjectIdentifier
     public DERObjectIdentifier(
         String  identifier)
     {
-        for (int i = identifier.length() - 1; i >= 0; i--)
+        if (!isValidIdentifier(identifier))
         {
-            char ch = identifier.charAt(i);
-            
-            if ('0' <= ch && ch <= '9')
-            {
-                continue;
-            }
-            
-            if (ch == '.')
-            {
-                continue;
-            }
-            
             throw new IllegalArgumentException("string " + identifier + " not an OID");
         }
-        
+
         this.identifier = identifier;
     }
 
@@ -258,5 +246,36 @@ public class DERObjectIdentifier
     public String toString()
     {
         return getId();
+    }
+
+    private static boolean isValidIdentifier(
+        String identifier)
+    {
+        boolean periodAllowed = false;
+        for (int i = identifier.length() - 1; i >= 0; i--)
+        {
+            char ch = identifier.charAt(i);
+
+            if ('0' <= ch && ch <= '9')
+            {
+                periodAllowed = true;
+                continue;
+            }
+
+            if (ch == '.')
+            {
+                if (!periodAllowed)
+                {
+                    return false;
+                }
+
+                periodAllowed = false;
+                continue;
+            }
+
+            return false;
+        }
+
+        return periodAllowed;
     }
 }
