@@ -9,6 +9,7 @@ import java.util.Vector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
@@ -33,7 +34,7 @@ public class X509NameTest
         return "X509Name";
     }
     
-    private X509Name fromBytes(
+    private static X509Name fromBytes(
         byte[]  bytes) 
         throws IOException
     {
@@ -144,17 +145,9 @@ public class X509NameTest
             
             byte[]  enc2 = bOut.toByteArray();
 
-            if (enc.length != enc2.length)
+            if (!Arrays.areEqual(enc, enc2))
             {
                 return new SimpleTestResult(false, getName() + ": Failed composite string to encoding test");
-            }
-            
-            for (int i = 0; i != enc.length; i++)
-            {
-                if (enc[i] != enc2[i])
-                {
-                    return new SimpleTestResult(false, getName() + ": Failed composite string to encoding test");
-                }
             }
 
             //
