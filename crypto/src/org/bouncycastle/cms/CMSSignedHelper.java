@@ -1,5 +1,7 @@
 package org.bouncycastle.cms;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -16,6 +18,28 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 class CMSSignedHelper
 {
     static final CMSSignedHelper INSTANCE = new CMSSignedHelper();
+
+    private static final Map     encryptionAlgs = new HashMap();
+
+    static 
+    {
+        encryptionAlgs.put(X9ObjectIdentifiers.id_dsa_with_sha1.getId(), "DSA");
+        encryptionAlgs.put(X9ObjectIdentifiers.id_dsa.getId(), "DSA");
+        encryptionAlgs.put(OIWObjectIdentifiers.dsaWithSHA1.getId(), "DSA");
+        encryptionAlgs.put(PKCSObjectIdentifiers.rsaEncryption.getId(), "RSA");
+        encryptionAlgs.put(PKCSObjectIdentifiers.sha1WithRSAEncryption.getId(), "RSA");
+        encryptionAlgs.put(TeleTrusTObjectIdentifiers.teleTrusTRSAsignatureAlgorithm, "RSA");
+        encryptionAlgs.put(X509ObjectIdentifiers.id_ea_rsa.getId(), "RSA");
+        encryptionAlgs.put(CMSSignedDataGenerator.ENCRYPTION_ECDSA, "ECDSA");
+        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA2.getId(), "ECDSA");
+        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA224.getId(), "ECDSA");
+        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA256.getId(), "ECDSA");
+        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA384.getId(), "ECDSA");
+        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA512.getId(), "ECDSA");
+        encryptionAlgs.put(CMSSignedDataGenerator.ENCRYPTION_RSA_PSS, "RSAandMGF1");
+        encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_94.getId(), "GOST3410");
+        encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_2001.getId(), "ECGOST3410");
+    }
     
     /**
      * Return the digest algorithm using one of the standard JCA string
@@ -98,54 +122,14 @@ class CMSSignedHelper
     String getEncryptionAlgName(
         String encryptionAlgOID)
     {
-        if (X9ObjectIdentifiers.id_dsa_with_sha1.getId().equals(encryptionAlgOID))
+        String algName = (String)encryptionAlgs.get(encryptionAlgOID);
+
+        if (algName != null)
         {
-            return "DSA";
+            return algName;
         }
-        else if (X9ObjectIdentifiers.id_dsa.getId().equals(encryptionAlgOID))
-        {
-            return "DSA";
-        }
-        else if (OIWObjectIdentifiers.dsaWithSHA1.getId().equals(encryptionAlgOID))
-        {
-            return "DSA";
-        }
-        else if (PKCSObjectIdentifiers.rsaEncryption.getId().equals(encryptionAlgOID))
-        {
-            return "RSA";
-        }
-        else if (PKCSObjectIdentifiers.sha1WithRSAEncryption.getId().equals(encryptionAlgOID))
-        {
-            return "RSA";
-        }
-        else if (TeleTrusTObjectIdentifiers.teleTrusTRSAsignatureAlgorithm.equals(encryptionAlgOID))
-        {
-            return "RSA";
-        }
-        else if (X509ObjectIdentifiers.id_ea_rsa.getId().equals(encryptionAlgOID))
-        {
-            return "RSA";
-        }
-        else if (CMSSignedDataGenerator.ENCRYPTION_ECDSA.equals(encryptionAlgOID))
-        {            
-            return "ECDSA";
-        }
-        else if (CMSSignedDataGenerator.ENCRYPTION_RSA_PSS.equals(encryptionAlgOID))
-        {            
-            return "RSAandMGF1";
-        } 
-        else if (CryptoProObjectIdentifiers.gostR3410_94.getId().equals(encryptionAlgOID))
-        {
-            return "GOST3410";
-        }
-        else if (CryptoProObjectIdentifiers.gostR3410_2001.getId().equals(encryptionAlgOID))
-        {
-            return "ECGOST3410";
-        }
-        else
-        {
-            return encryptionAlgOID;            
-        }
+
+        return encryptionAlgOID;
     }
     
     MessageDigest getDigestInstance(

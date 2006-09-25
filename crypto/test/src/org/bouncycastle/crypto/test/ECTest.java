@@ -310,6 +310,68 @@ public class ECTest
     }
 
     /**
+     * General test for long digest.
+     */
+    private void testECDSA239bitBinaryAndLargeDigest()
+    {
+        BigInteger r = new BigInteger("21596333210419611985018340039034612628818151486841789642455876922391552");
+        BigInteger s = new BigInteger("87626799441093658509023277770579403014298417038607966989658087651831660");
+    
+        byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("171278725565216523967285789236956265265265235675811949404040041670216363"));
+        
+        SecureRandom    k = new FixedSecureRandom(kData);
+
+        ECCurve.F2m curve = new ECCurve.F2m(
+            239, // m
+            36, //k
+            new BigInteger("32010857077C5431123A46B808906756F543423E8D27877578125778AC76", 16), // a
+            new BigInteger("790408F2EEDAF392B012EDEFB3392F30F4327C0CA3F31FC383C422AA8C16", 16)); // b
+    
+        ECDomainParameters params = new ECDomainParameters(
+            curve,
+            curve.decodePoint(Hex.decode("0457927098FA932E7C0A96D3FD5B706EF7E5F5C156E16B7E7C86038552E91D61D8EE5077C33FECF6F1A16B268DE469C3C7744EA9A971649FC7A9616305")), // G
+            new BigInteger("220855883097298041197912187592864814557886993776713230936715041207411783"), // n
+            BigInteger.valueOf(4)); // h
+    
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("145642755521911534651321230007534120304391871461646461466464667494947990"), // d
+            params);
+    
+        ECDSASigner ecdsa = new ECDSASigner();
+        ParametersWithRandom param = new ParametersWithRandom(priKey, k);
+    
+        ecdsa.init(true, param);
+    
+        byte[] message = new BigInteger("968236873715988614170569073515315707566766479517968236873715988614170569073515315707566766479517968236873715988614170569073515315707566766479517").toByteArray();
+        BigInteger[] sig = ecdsa.generateSignature(message);
+    
+        if (!r.equals(sig[0]))
+        {
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
+    
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+    
+        // Verify the signature
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            curve.decodePoint(Hex.decode("045894609CCECF9A92533F630DE713A958E96C97CCB8F5ABB5A688A238DEED6DC2D9D0C94EBFB7D526BA6A61764175B99CB6011E2047F9F067293F57F5")), // Q
+            params);
+
+        ecdsa.init(false, pubKey);
+        if (!ecdsa.verifySignature(message, sig[0], sig[1]))
+        {
+            fail("signature fails");
+        }
+    }
+
+    /**
      * key generation test
      */
     private void testECDSAKeyGenTest()
@@ -430,6 +492,7 @@ public class ECTest
         testECDSA239bitBinary();
         testECDSAKeyGenTest();
         testECBasicAgreementTest();
+        testECDSA239bitBinaryAndLargeDigest();
     }
 
 
