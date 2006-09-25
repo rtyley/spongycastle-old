@@ -58,9 +58,8 @@ public class ECDSASigner
     public BigInteger[] generateSignature(
         byte[] message)
     {
-        BigInteger e = new BigInteger(1, message);
         BigInteger n = key.getParameters().getN();
-
+        BigInteger e = calculateE(n, message);
         BigInteger r = null;
         BigInteger s = null;
 
@@ -68,7 +67,7 @@ public class ECDSASigner
         do // generate s
         {
             BigInteger k = null;
-            int            nBitLength = n.bitLength();
+            int        nBitLength = n.bitLength();
 
             do // generate r
             {
@@ -112,8 +111,8 @@ public class ECDSASigner
         BigInteger  r,
         BigInteger  s)
     {
-        BigInteger e = new BigInteger(1, message);
         BigInteger n = key.getParameters().getN();
+        BigInteger e = calculateE(n, message);
 
         // r in the range [1,n-1]
         if (r.compareTo(ONE) < 0 || r.compareTo(n) >= 0)
@@ -140,5 +139,21 @@ public class ECDSASigner
         BigInteger v = point.getX().toBigInteger().mod(n);
 
         return v.equals(r);
+    }
+
+    private BigInteger calculateE(BigInteger n, byte[] message)
+    {
+        if (n.bitLength() > message.length * 8)
+        {
+            return new BigInteger(1, message);
+        }
+        else
+        {
+            byte[] trunc = new byte[n.bitLength() / 8];
+
+            System.arraycopy(message, 0, trunc, 0, trunc.length);
+
+            return new BigInteger(1, trunc);
+        }
     }
 }
