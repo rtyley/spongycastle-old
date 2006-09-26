@@ -1701,6 +1701,25 @@ public class CertTest
         {
             fail("wrong CRLs found in copied list");
         }
+
+        //
+        // check factory read back
+        //
+        CertificateFactory cFact = CertificateFactory.getInstance("X.509", "BC");
+
+        X509CRL readCrl = (X509CRL)cFact.generateCRL(new ByteArrayInputStream(newCrl.getEncoded()));
+
+        if (readCrl == null)
+        {
+            fail("crl not returned!");
+        }
+
+        Collection col = cFact.generateCRLs(new ByteArrayInputStream(newCrl.getEncoded()));
+
+        if (col.size() != 1)
+        {
+            fail("wrong number of CRLs found in collection");
+        }
     }
     
     /**
