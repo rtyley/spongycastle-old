@@ -51,7 +51,7 @@ public class Asn1ObjectIdentifier
                     }
 
                     objId.append('.');
-                    objId.append(Long.toString(value));
+                    objId.append(value);
                     value = 0;
                 }
             } 
