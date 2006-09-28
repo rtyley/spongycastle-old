@@ -208,7 +208,7 @@ public class PGPRSATest
         + "EQIAGQUCP0cHNQQLBwMCAxUCAwMWAgECHgECF4AACgkQzSP16cTKNEMCXACfauui"
         + "bSwyG59Yrm8hHCDuCPmqwsQAni+dPl08FVuWh+wb6kOgJV4lcYae");
          
-    byte[]    subPubCrc = Base64.decode("rikt");
+    byte[]    subPubCrc = Base64.decode("=rikt");
 
     byte[]    pgp8Key = Base64.decode(
           "lQIEBEBXUNMBBADScQczBibewnbCzCswc/9ut8R0fwlltBRxMW0NMdKJY2LF"
@@ -247,8 +247,8 @@ public class PGPRSATest
           + "Xgq+A6i7aI1LG80YxWa9ooQgaCrb9dwY/kPQ+yC22zQ3FExtv+Fv3VtAKTilO3vn"
           + "BA4Y9uTHuObHfI+1yxUS2PrlRUX0m48ZjpIX+cEN3QblGBJudI/A1QSd6P0LZeBr"
           + "7F1Z1aF7ZDo0KzgiAIBvgXkeTpw=");
-    
-    byte[] fingerprintCheck = Base64.decode("CTv2");
+
+    byte[] fingerprintCheck = Base64.decode("=CTv2");
     
     byte[]  expiry60and30daysSig13Key = Base64.decode(
               "mQGiBENZt/URBAC5JccXiwe4g6MuviEC8NI/x0NaVkGFAOY04d5E4jeIycBP"
@@ -732,7 +732,7 @@ public class PGPRSATest
 
         PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator();
 
-        Date testDate = new Date(1973, 7, 27);
+        Date testDate = new Date((System.currentTimeMillis() / 1000) * 1000);
         OutputStream lOut = lGen.open(bcOut, PGPLiteralData.BINARY, "_CONSOLE", data.getBytes().length, testDate);
         
         while ((ch = testIn.read()) >= 0)
@@ -763,7 +763,7 @@ public class PGPRSATest
         p2 = (PGPLiteralData)pgpFact.nextObject();
         if (!p2.getModificationTime().equals(testDate))
         {
-            fail("Modification time not preserved");
+            fail("Modification time not preserved: " + p2.getModificationTime() + " " + testDate);
         }
 
         dIn = p2.getInputStream();
