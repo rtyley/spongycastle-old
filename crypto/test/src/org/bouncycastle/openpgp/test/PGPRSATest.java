@@ -208,7 +208,7 @@ public class PGPRSATest
         + "EQIAGQUCP0cHNQQLBwMCAxUCAwMWAgECHgECF4AACgkQzSP16cTKNEMCXACfauui"
         + "bSwyG59Yrm8hHCDuCPmqwsQAni+dPl08FVuWh+wb6kOgJV4lcYae");
          
-    byte[]    subPubCrc = Base64.decode("=rikt");
+    byte[]    subPubCrc = Base64.decode("rikt");
 
     byte[]    pgp8Key = Base64.decode(
           "lQIEBEBXUNMBBADScQczBibewnbCzCswc/9ut8R0fwlltBRxMW0NMdKJY2LF"
@@ -248,7 +248,7 @@ public class PGPRSATest
           + "BA4Y9uTHuObHfI+1yxUS2PrlRUX0m48ZjpIX+cEN3QblGBJudI/A1QSd6P0LZeBr"
           + "7F1Z1aF7ZDo0KzgiAIBvgXkeTpw=");
     
-    byte[] fingerprintCheck = Base64.decode("=CTv2");
+    byte[] fingerprintCheck = Base64.decode("CTv2");
     
     byte[]  expiry60and30daysSig13Key = Base64.decode(
               "mQGiBENZt/URBAC5JccXiwe4g6MuviEC8NI/x0NaVkGFAOY04d5E4jeIycBP"

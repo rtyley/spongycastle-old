@@ -657,7 +657,7 @@ public class PGPKeyRingTest
       + "EQIABgUCOCpiHgAKCRDj8lhUEo8OeQ+QAKCbOTscyUnWHSrDo4fIy0MThEjhOgCe"
       + "L4Kb7TWkd/OHQScVBO8sTUz0+2g=");
 
-    byte[] pub6check = Base64.decode("=62O9");
+    byte[] pub6check = Base64.decode("62O9");
 
     //
     // revoked sub key
@@ -689,7 +689,7 @@ public class PGPKeyRingTest
       + "AKCrJAUO+lYAyPYwEwgK+bKmUGeKrIkARgQoEQIABgUCQU6wpQAKCRC+CWRwUD9z"
       + "rQK4AJ98kKFxGU6yhHPr6jYBJPWemTNOXgCfeGB3ox4PXeS4DJDuLy9yllytOjo=");
 
-    byte[] pub7check = Base64.decode("=f/YQ");
+    byte[] pub7check = Base64.decode("f/YQ");
     
     byte[] pub8 = Base64.decode(
               "mQGiBEEcraYRBADFYj+uFOhHz5SdECvJ3Z03P47gzmWLQ5HH8fPYC9rrv7AgqFFX"
@@ -888,7 +888,7 @@ public class PGPKeyRingTest
           + "gXxbBCVSTxYMJheXt2xMXsuJAD8DBRg1moGU8gBo4j+O/10RAgWdAKCPhaFIXuC8"
           + "/cdiNMxTDw9ug3De5QCfYXmDzRSFUu/nrCi8yz/l09wsnxo=");
     
-    public byte[] subKeyBindingCheckSum = Base64.decode("=3HU+");
+    public byte[] subKeyBindingCheckSum = Base64.decode("3HU+");
     
     //
     // PGP8 with SHA1 checksum.
