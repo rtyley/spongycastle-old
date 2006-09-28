@@ -105,7 +105,7 @@ public class PGPDSATest
                 + "sGdmZQCJwpQLMq3ayTA/0Fj3xf4jbwPfK/H3zj55Z9L1n2k/GOapKJrvMZ4tLiCW"
                 + "GtP/XeDqX4fORDUA");
 
-    byte[] sig1crc = Base64.decode("OZa/");
+    byte[] sig1crc = Base64.decode("=OZa/");
 
     byte[] testPubWithUserAttr =
         Base64.decode(
@@ -330,7 +330,7 @@ public class PGPDSATest
 
         PGPLiteralDataGenerator     lGen = new PGPLiteralDataGenerator();
         
-        Date testDate = new Date(1973, 7, 27);
+        Date testDate = new Date((System.currentTimeMillis() / 1000) * 1000);
         OutputStream lOut = lGen.open(bcOut, PGPLiteralData.BINARY, "_CONSOLE", data.getBytes().length, testDate);
         
         int ch;
@@ -457,7 +457,7 @@ public class PGPDSATest
         sGen.generateOnePassVersion(false).encode(bcOut);
 
         PGPLiteralDataGenerator     lGen = new PGPLiteralDataGenerator();
-        Date testDate = new Date(1973, 7, 27);
+        Date testDate = new Date((System.currentTimeMillis() / 1000) * 1000);
         OutputStream lOut = lGen.open(bcOut, PGPLiteralData.TEXT, "_CONSOLE", data.getBytes().length, testDate);
     
         while ((ch = testIn.read()) >= 0)
