@@ -124,6 +124,7 @@ public class PGPDSAElGamalTest
     char[] pass = { 'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd' };
     
     public void performTest()
+        throws Exception
     {
         try
         {
@@ -170,7 +171,7 @@ public class PGPDSAElGamalTest
 
             PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator();
             
-            Date testDate = new Date(1973, 7, 27);
+            Date testDate = new Date((System.currentTimeMillis() / 1000) * 1000);
             OutputStream lOut = lGen.open(bcOut, PGPLiteralData.BINARY, "_CONSOLE", data.getBytes().length, testDate);
             int                                    ch;
             
@@ -426,13 +427,12 @@ public class PGPDSAElGamalTest
             
             PGPPrivateKey k2 = pgpKp.getPrivateKey();
         }
-        catch (Exception e)
+        catch (PGPException e)
         {
             if (e instanceof PGPException)
             {
                 fail("exception: " + e.getMessage(), ((PGPException)e).getUnderlyingException());
             }
-            fail("exception - " + e.toString());
         }
     }
 
