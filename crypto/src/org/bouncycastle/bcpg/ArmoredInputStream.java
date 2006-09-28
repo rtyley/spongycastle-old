@@ -318,6 +318,7 @@ public class ArmoredInputStream
                 parseHeaders();
             }
 
+            crc.reset();
             start = false;
         }
         
@@ -371,7 +372,7 @@ public class ArmoredInputStream
                 }
 
                 if (c < 0)                // EOF
-                {
+                { System.out.println("EOF");
                     return -1;
                 }
 
@@ -390,8 +391,7 @@ public class ArmoredInputStream
                         {
                             throw new IOException("crc check failed in armored message.");
                         }
-
-                        return -1;
+                        return read();
                     }
                     else
                     {
