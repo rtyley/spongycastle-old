@@ -24,7 +24,7 @@ import org.bouncycastle.util.test.SimpleTest;
 public class PGPPBETest
     extends SimpleTest
 {
-    private static final Date TEST_DATE	= new Date(2003, 8, 29, 23, 35, 11);
+    private static final Date TEST_DATE	= new Date(1062200111000L);
 
     byte[] enc1 = Base64.decode(
             "jA0EAwMC5M5wWBP2HBZgySvUwWFAmMRLn7dWiZN6AkQMvpE3b6qwN3SSun7zInw2"
@@ -38,7 +38,8 @@ public class PGPPBETest
      * decrypt the passed in message stream
      */
     private byte[] decryptMessage(
-        byte[]    message)
+        byte[]    message,
+        Date      date)
         throws Exception
     {
         PGPObjectFactory         pgpF = new PGPObjectFactory(message);
@@ -58,11 +59,11 @@ public class PGPPBETest
         if (!ld.getFileName().equals("test.txt")
             && !ld.getFileName().equals("_CONSOLE"))
         {
-            throw new RuntimeException("wrong filename in packet");
+            fail("wrong filename in packet");
         }
-        if (!ld.getModificationTime().equals(TEST_DATE))
+        if (!ld.getModificationTime().equals(date))
         {
-            throw new RuntimeException("wrong modification time in packet");
+            fail("wrong modification time in packet: " + ld.getModificationTime().getTime() + " " + date.getTime());
         }
 
         InputStream              unc = ld.getInputStream();
@@ -84,7 +85,7 @@ public class PGPPBETest
     public void performTest()
         throws Exception
     {
-        byte[] out = decryptMessage(enc1);
+        byte[] out = decryptMessage(enc1, TEST_DATE);
 
         if (out[0] != 'h' || out[1] != 'e' || out[2] != 'l')
         {
@@ -104,13 +105,14 @@ public class PGPPBETest
         PGPCompressedDataGenerator comData = new PGPCompressedDataGenerator(
                                                                 PGPCompressedData.ZIP);
                                                                 
+        Date                       cDate = new Date((System.currentTimeMillis() / 1000) * 1000);
         PGPLiteralDataGenerator    lData = new PGPLiteralDataGenerator();
 
         OutputStream    ldOut = lData.open(comData.open(bOut),
                                               PGPLiteralData.BINARY, 
                                               PGPLiteralData.CONSOLE, 
                                               text.length,
-                                              new Date());
+                                              cDate);
         
         ldOut.write(text);
 
@@ -132,7 +134,7 @@ public class PGPPBETest
 
         cOut.close();
 
-        out = decryptMessage(cbOut.toByteArray());
+        out = decryptMessage(cbOut.toByteArray(), cDate);
 
         if (!areEqual(out, text))
         {
@@ -178,7 +180,7 @@ public class PGPPBETest
 
         cPk.close();
 
-        out = decryptMessage(cbOut.toByteArray());
+        out = decryptMessage(cbOut.toByteArray(), TEST_DATE);
         if (!areEqual(out, test))
         {
             fail("wrong plain text in generated packet");
@@ -198,7 +200,7 @@ public class PGPPBETest
 
         cPk.close();
 
-        out = decryptMessage(cbOut.toByteArray());
+        out = decryptMessage(cbOut.toByteArray(), TEST_DATE);
         if (!areEqual(out, test))
         {
             fail("wrong plain text in generated packet");
