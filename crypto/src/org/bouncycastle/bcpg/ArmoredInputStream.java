@@ -372,7 +372,7 @@ public class ArmoredInputStream
                 }
 
                 if (c < 0)                // EOF
-                { System.out.println("EOF");
+                {
                     return -1;
                 }
 
