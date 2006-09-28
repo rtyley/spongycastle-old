@@ -373,7 +373,9 @@ public class BigInteger
             {
                 nextRndBytes(rnd, b);
                 // strip off any excess bits in the MSB
-                b[0] &= rndMask[8 * nBytes - bitLength];
+                int xBits = 8 * nBytes - bitLength;
+                b[0] &= rndMask[xBits];
+                b[0] |= (byte)(1 << (7 - xBits));
             }
 
             this.magnitude = makeMagnitude(b, 1);
