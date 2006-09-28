@@ -429,10 +429,7 @@ public class PGPDSAElGamalTest
         }
         catch (PGPException e)
         {
-            if (e instanceof PGPException)
-            {
-                fail("exception: " + e.getMessage(), ((PGPException)e).getUnderlyingException());
-            }
+            fail("exception: " + e.getMessage(), e.getUnderlyingException());
         }
     }
 
