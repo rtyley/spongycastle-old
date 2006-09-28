@@ -10,6 +10,7 @@ import java.security.SignatureException;
 import java.security.spec.PSSParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -17,6 +18,7 @@ import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -43,13 +45,16 @@ class X509SignatureUtil
                 throw new SignatureException("IOException decoding parameters: " + e.getMessage());
             }
             
-            try
+            if (signature.getAlgorithm().endsWith("MGF1"))
             {
-                signature.setParameter(sigParams.getParameterSpec(PSSParameterSpec.class));
-            }
-            catch (GeneralSecurityException e)
-            {
-                throw new SignatureException("Exception extracting parameters: " + e.getMessage());
+                try
+                {
+                    signature.setParameter(sigParams.getParameterSpec(PSSParameterSpec.class));
+                }
+                catch (GeneralSecurityException e)
+                {
+                    throw new SignatureException("Exception extracting parameters: " + e.getMessage());
+                }
             }
         }
     }
@@ -66,6 +71,12 @@ class X509SignatureUtil
                 RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
                 
                 return getDigestAlgName(rsaParams.getHashAlgorithm().getObjectId()) + "withRSAandMGF1";
+            }
+            if (sigAlgId.getObjectId().equals(X9ObjectIdentifiers.ecdsa_with_SHA2))
+            {
+                ASN1Sequence ecDsaParams = ASN1Sequence.getInstance(params);
+                
+                return getDigestAlgName((DERObjectIdentifier)ecDsaParams.getObjectAt(0)) + "withECDSA";
             }
         }
 

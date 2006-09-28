@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
 
 /**
  * To add the provider at runtime use:
@@ -158,6 +159,12 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND128BITAES-CBC-BC","PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND192BITAES-CBC-BC","PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND256BITAES-CBC-BC","PKCS12PBE");
+
+        put("AlgorithmParameters.SHA1WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
+        put("AlgorithmParameters.SHA224WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
+        put("AlgorithmParameters.SHA256WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
+        put("AlgorithmParameters.SHA384WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
+        put("AlgorithmParameters.SHA512WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
         
         //
         // key agreement
@@ -396,39 +403,6 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.KeyGenerator.GOST", "GOST28147");
         put("Alg.Alias.KeyGenerator.GOST-28147", "GOST28147");
         put("Alg.Alias.KeyGenerator." + CryptoProObjectIdentifiers.gostR28147_cbc, "GOST28147");
-        
-        put("KeyGenerator.HMACMD2", "org.bouncycastle.jce.provider.JCEKeyGenerator$MD2HMAC");
-        put("Alg.Alias.KeyGenerator.HMAC-MD2", "HMACMD2");
-        put("KeyGenerator.HMACMD4", "org.bouncycastle.jce.provider.JCEKeyGenerator$MD4HMAC");
-        put("Alg.Alias.KeyGenerator.HMAC-MD4", "HMACMD4");
-        put("KeyGenerator.HMACMD5", "org.bouncycastle.jce.provider.JCEKeyGenerator$MD5HMAC");
-        put("Alg.Alias.KeyGenerator.HMAC-MD5", "HMACMD5");
-        put("KeyGenerator.HMACRIPEMD128", "org.bouncycastle.jce.provider.JCEKeyGenerator$RIPEMD128HMAC");
-        put("Alg.Alias.KeyGenerator.HMAC-RIPEMD128", "HMACRIPEMD128");
-        put("KeyGenerator.HMACRIPEMD160", "org.bouncycastle.jce.provider.JCEKeyGenerator$RIPEMD160HMAC");
-        put("Alg.Alias.KeyGenerator.HMAC-RIPEMD160", "HMACRIPEMD160");
-        
-        put("KeyGenerator.HMACSHA1", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA1");
-        put("Alg.Alias.KeyGenerator.HMAC-SHA1", "HMACSHA1");
-        put("Alg.Alias.KeyGenerator." + PKCSObjectIdentifiers.id_hmacWithSHA1, "HMACSHA1");
-        
-        put("KeyGenerator.HMACSHA224", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA224");
-        put("Alg.Alias.KeyGenerator.HMAC-SHA224", "HMACSHA224");
-        put("Alg.Alias.KeyGenerator." + PKCSObjectIdentifiers.id_hmacWithSHA224, "HMACSHA224");
-        
-        put("KeyGenerator.HMACSHA256", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA256");
-        put("Alg.Alias.KeyGenerator.HMAC-SHA256", "HMACSHA256");
-        put("Alg.Alias.KeyGenerator." + PKCSObjectIdentifiers.id_hmacWithSHA256, "HMACSHA256");
-        
-        put("KeyGenerator.HMACSHA384", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA384");
-        put("Alg.Alias.KeyGenerator.HMAC-SHA384", "HMACSHA384");
-        put("Alg.Alias.KeyGenerator." + PKCSObjectIdentifiers.id_hmacWithSHA384, "HMACSHA384");
-        
-        put("KeyGenerator.HMACSHA512", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA512");
-        put("Alg.Alias.KeyGenerator.HMAC-SHA512", "HMACSHA512");
-        put("Alg.Alias.KeyGenerator." + PKCSObjectIdentifiers.id_hmacWithSHA512, "HMACSHA512");
-        
-        put("KeyGenerator.HMACTIGER", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACTIGER");
 
         //
         // key pair generators.
@@ -624,66 +598,66 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Mac.RC5/CFB8", "RC5MAC/CFB8");
 
         put("Mac.GOST28147MAC", "org.bouncycastle.jce.provider.JCEMac$GOST28147");
-        
-        put("Mac.HMACMD2", "org.bouncycastle.jce.provider.JCEMac$MD2");
-        put("Alg.Alias.Mac.HMAC-MD2", "HMACMD2");
-        put("Alg.Alias.Mac.HMAC/MD2", "HMACMD2");
-
-        put("Mac.HMACMD4", "org.bouncycastle.jce.provider.JCEMac$MD4");
-        put("Alg.Alias.Mac.HMAC-MD4", "HMACMD4");
-        put("Alg.Alias.Mac.HMAC/MD4", "HMACMD4");
-
-        put("Mac.HMACMD5", "org.bouncycastle.jce.provider.JCEMac$MD5");
-        put("Alg.Alias.Mac.HMAC-MD5", "HMACMD5");
-        put("Alg.Alias.Mac.HMAC/MD5", "HMACMD5");
-
-        put("Mac.HMACRIPEMD128", "org.bouncycastle.jce.provider.JCEMac$RIPEMD128");
-        put("Alg.Alias.Mac.HMAC-RIPEMD128", "HMACRIPEMD128");
-        put("Alg.Alias.Mac.HMAC/RIPEMD128", "HMACRIPEMD128");
-
-        put("Mac.HMACRIPEMD160", "org.bouncycastle.jce.provider.JCEMac$RIPEMD160");
-        put("Alg.Alias.Mac.HMAC-RIPEMD160", "HMACRIPEMD160");
-        put("Alg.Alias.Mac.HMAC/RIPEMD160", "HMACRIPEMD160");
-
-        put("Mac.HMACSHA1", "org.bouncycastle.jce.provider.JCEMac$SHA1");
-        put("Alg.Alias.Mac.HMAC-SHA1", "HMACSHA1");
-        put("Alg.Alias.Mac.HMAC/SHA1", "HMACSHA1");
-        put("Alg.Alias.Mac." + PKCSObjectIdentifiers.id_hmacWithSHA1, "HMACSHA1");
-
-        put("Mac.HMACSHA224", "org.bouncycastle.jce.provider.JCEMac$SHA224");
-        put("Alg.Alias.Mac.HMAC-SHA224", "HMACSHA224");
-        put("Alg.Alias.Mac.HMAC/SHA224", "HMACSHA224");
-        put("Alg.Alias.Mac." + PKCSObjectIdentifiers.id_hmacWithSHA224, "HMACSHA224");
-        
-        put("Mac.HMACSHA256", "org.bouncycastle.jce.provider.JCEMac$SHA256");
-        put("Alg.Alias.Mac.HMAC-SHA256", "HMACSHA256");
-        put("Alg.Alias.Mac.HMAC/SHA256", "HMACSHA256");
-        put("Alg.Alias.Mac." + PKCSObjectIdentifiers.id_hmacWithSHA256, "HMACSHA256");
 
         put("Mac.OLDHMACSHA384", "org.bouncycastle.jce.provider.JCEMac$OldSHA384");
 
         put("Mac.OLDHMACSHA512", "org.bouncycastle.jce.provider.JCEMac$OldSHA512");
-        
-        put("Mac.HMACSHA384", "org.bouncycastle.jce.provider.JCEMac$SHA384");
-        put("Alg.Alias.Mac.HMAC-SHA384", "HMACSHA384");
-        put("Alg.Alias.Mac.HMAC/SHA384", "HMACSHA384");
-        put("Alg.Alias.Mac." + PKCSObjectIdentifiers.id_hmacWithSHA384, "HMACSHA384");
 
-        put("Mac.HMACSHA512", "org.bouncycastle.jce.provider.JCEMac$SHA512");
-        put("Alg.Alias.Mac.HMAC-SHA512", "HMACSHA512");
-        put("Alg.Alias.Mac.HMAC/SHA512", "HMACSHA512");
-        put("Alg.Alias.Mac." + PKCSObjectIdentifiers.id_hmacWithSHA512, "HMACSHA512");
+        addHMACAlgorithm("MD2", "org.bouncycastle.jce.provider.JCEMac$MD2", "org.bouncycastle.jce.provider.JCEKeyGenerator$MD2HMAC");
+        addHMACAlgorithm("MD4", "org.bouncycastle.jce.provider.JCEMac$MD4", "org.bouncycastle.jce.provider.JCEKeyGenerator$MD4HMAC");
+        addHMACAlgorithm("MD5", "org.bouncycastle.jce.provider.JCEMac$MD5", "org.bouncycastle.jce.provider.JCEKeyGenerator$MD5HMAC");
+        addHMACAlias("MD5", IANAObjectIdentifiers.hmacMD5);
 
-        put("Mac.HMACTiger", "org.bouncycastle.jce.provider.JCEMac$Tiger");
-        put("Alg.Alias.Mac.HMAC-Tiger", "HMACTiger");
-        put("Alg.Alias.Mac.HMAC/Tiger", "HMACTiger");
+        addHMACAlgorithm("SHA1", "org.bouncycastle.jce.provider.JCEMac$SHA1", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA1");
+        addHMACAlias("SHA1", PKCSObjectIdentifiers.id_hmacWithSHA1);
+        addHMACAlias("SHA1", IANAObjectIdentifiers.hmacSHA1);
+        addHMACAlgorithm("SHA224", "org.bouncycastle.jce.provider.JCEMac$SHA224", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA224");
+        addHMACAlias("SHA224", PKCSObjectIdentifiers.id_hmacWithSHA224);
+        addHMACAlgorithm("SHA256", "org.bouncycastle.jce.provider.JCEMac$SHA256", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA256");
+        addHMACAlias("SHA256", PKCSObjectIdentifiers.id_hmacWithSHA256);
+        addHMACAlgorithm("SHA384", "org.bouncycastle.jce.provider.JCEMac$SHA384", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA384");
+        addHMACAlias("SHA384", PKCSObjectIdentifiers.id_hmacWithSHA384);
+        addHMACAlgorithm("SHA512", "org.bouncycastle.jce.provider.JCEMac$SHA512", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA512");
+        addHMACAlias("SHA512", PKCSObjectIdentifiers.id_hmacWithSHA512);
+
+        addHMACAlgorithm("RIPEMD128", "org.bouncycastle.jce.provider.JCEMac$RIPEMD128", "org.bouncycastle.jce.provider.JCEKeyGenerator$RIPEMD128HMAC");
+        addHMACAlgorithm("RIPEMD160", "org.bouncycastle.jce.provider.JCEMac$RIPEMD160", "org.bouncycastle.jce.provider.JCEKeyGenerator$RIPEMD160HMAC");
+        addHMACAlias("RIPEMD160", IANAObjectIdentifiers.hmacRIPEMD160);
+
+        addHMACAlgorithm("TIGER", "org.bouncycastle.jce.provider.JCEMac$Tiger", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACTIGER");
+        addHMACAlias("TIGER", IANAObjectIdentifiers.hmacTIGER);
 
         put("Mac.PBEWITHHMACSHA", "org.bouncycastle.jce.provider.JCEMac$PBEWithSHA");
         put("Mac.PBEWITHHMACSHA1", "org.bouncycastle.jce.provider.JCEMac$PBEWithSHA");
         put("Mac.PBEWITHHMACRIPEMD160", "org.bouncycastle.jce.provider.JCEMac$PBEWithRIPEMD160");
         put("Alg.Alias.Mac.1.3.14.3.2.26", "PBEWITHHMACSHA");
     }
-    
+
+    private void addHMACAlgorithm(
+        String algorithm,
+        String algorithmClassName,
+        String keyGeneratorClassName)
+    {
+        String mainName = "HMAC" + algorithm;
+
+        put("Mac." + mainName, algorithmClassName);
+        put("Alg.Alias.Mac.HMAC-" + algorithm, mainName);
+        put("Alg.Alias.Mac.HMAC/" + algorithm, mainName);
+        put("KeyGenerator." + mainName, keyGeneratorClassName);
+        put("Alg.Alias.KeyGenerator.HMAC-" + algorithm, mainName);
+        put("Alg.Alias.KeyGenerator.HMAC/" + algorithm, mainName);
+    }
+
+    private void addHMACAlias(
+        String              algorithm,
+        DERObjectIdentifier oid)
+    {
+        String mainName = "HMAC" + algorithm;
+
+        put("Alg.Alias.Mac." + oid, mainName);
+        put("Alg.Alias.KeyGenerator." + oid, mainName);
+    }
+
     //
     // message digests
     //

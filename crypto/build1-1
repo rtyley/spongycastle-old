@@ -100,6 +100,7 @@ then
 
     mkdir jce-jdk11-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src | (cd jce-jdk11-$base; tar xf -)
+    (cd jce && tar cf - src | (cd ../jce-jdk11-$base; tar xf -))
     (cd test/src; tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
     (cd jdk1.4; tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
     (cd test/jdk1.4; tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))

@@ -1,16 +1,17 @@
 package org.bouncycastle.openpgp.test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 
 import org.bouncycastle.bcpg.ArmoredOutputStream;
+import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.openpgp.PGPObjectFactory;
 
 public class PGPArmoredTest
-    implements Test
+    extends SimpleTest
 {
     byte[] sample = Base64.decode(
             "mQGiBEA83v0RBADzKVLVCnpWQxX0LCsevw/3OLs0H7MOcLBQ4wMO9sYmzGYn"
@@ -34,15 +35,15 @@ public class PGPArmoredTest
           + "k8NGG7Swea7EHKeQI40G3jgO/+xANtMyTIhPBBgRAgAPBQJAPN8BAhsMBQkB"
           + "4TOAAAoJEJh8Njfhe8KmG7kAn00mTPGJCWqmskmzgdzeky5fWd7rAKCNCp3u"
           + "ZJhfg0htdgAfIy8ppm05vLACAAA=");
-    
+
     byte[] marker = Hex.decode("2d2d2d2d2d454e4420504750205055424c4943204b455920424c4f434b2d2d2d2d2d");
-    
+
     private int markerCount(
         byte[] data)
     {
         int ind = 0;
         int matches = 0;
-        
+
         while (ind < data.length)
         {
             if (data[ind] == 0x2d)
@@ -56,12 +57,12 @@ public class PGPArmoredTest
                     }
                     count++;
                 }
-                
+
                 if (count == marker.length)
                 {
                     matches++;
                 }
-                
+
                 ind += count;
             }
             else
@@ -69,58 +70,139 @@ public class PGPArmoredTest
                 ind++;
             }
         }
-        
+
         return matches;
     }
-    
-    public TestResult perform()
+
+    public void performTest()
+        throws Exception
     {
-        try
+        //
+        // test immediate close
+        //
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ArmoredOutputStream aOut = new ArmoredOutputStream(bOut);
+
+        aOut.close();
+
+        byte[] data = bOut.toByteArray();
+
+        if (data.length != 0)
         {
-            //
-            // test immediate close
-            //
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ArmoredOutputStream aos = new ArmoredOutputStream(baos);
-            
-            aos.close();
-
-            byte[] data = baos.toByteArray();
-
-            if (data.length != 0)
-            {
-                return new SimpleTestResult(false, "No data should have been written");
-            }
-            
-            //
-            // multiple close
-            //
-            baos = new ByteArrayOutputStream();
-            aos = new ArmoredOutputStream(baos);
-            
-            aos.write(sample);
-            
-            aos.close();
-            
-            aos.close();
-
-            int mc = markerCount(baos.toByteArray());
-
-            if (mc < 1)
-            {
-                return new SimpleTestResult(false, "No end marker found");
-            }
-
-            if (mc > 1)
-            {
-                return new SimpleTestResult(false, "More than one end marker found");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
+            fail("No data should have been written");
         }
-        catch (Exception e)
+
+        //
+        // multiple close
+        //
+        bOut = new ByteArrayOutputStream();
+        aOut = new ArmoredOutputStream(bOut);
+
+        aOut.write(sample);
+
+        aOut.close();
+
+        aOut.close();
+
+        int mc = markerCount(bOut.toByteArray());
+
+        if (mc < 1)
         {
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString(), e);
+            fail("No end marker found");
+        }
+
+        if (mc > 1)
+        {
+            fail("More than one end marker found");
+        }
+
+        //
+        // writing and reading single objects
+        //
+        bOut = new ByteArrayOutputStream();
+        aOut = new ArmoredOutputStream(bOut);
+
+        aOut.write(sample);
+
+        aOut.close();
+
+        ArmoredInputStream aIn = new ArmoredInputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+        PGPObjectFactory fact = new PGPObjectFactory(aIn);
+        int count = 0;
+
+        while (fact.nextObject() != null)
+        {
+            count++;
+        }
+
+        if (count != 1)
+        {
+            fail("wrong number of objects found: " + count);
+        }
+
+        //
+        // writing and reading multiple objects  - in single block
+        //
+        bOut = new ByteArrayOutputStream();
+        aOut = new ArmoredOutputStream(bOut);
+
+        aOut.write(sample);
+        aOut.write(sample);
+
+        aOut.close();
+
+        aIn = new ArmoredInputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+        fact = new PGPObjectFactory(aIn);
+        count = 0;
+
+        while (fact.nextObject() != null)
+        {
+            count++;
+        }
+
+        if (count != 2)
+        {
+            fail("wrong number of objects found: " + count);
+        }
+
+        //
+        // writing and reading multiple objects  - in single block
+        //
+        bOut = new ByteArrayOutputStream();
+        aOut = new ArmoredOutputStream(bOut);
+
+        aOut.write(sample);
+
+        aOut.close();     // does not close underlying stream
+
+        aOut = new ArmoredOutputStream(bOut);
+
+        aOut.write(sample);
+
+        aOut.close();
+
+        aIn = new ArmoredInputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+        count = 0;
+        boolean atLeastOne;
+        do
+        {
+            atLeastOne = false;
+            fact = new PGPObjectFactory(aIn);
+
+            while (fact.nextObject() != null)
+            {
+                atLeastOne = true;
+                count++;
+            }
+        }
+        while (atLeastOne);
+
+        if (count != 2)
+        {
+            fail("wrong number of objects found: " + count);
         }
     }
 
@@ -132,9 +214,6 @@ public class PGPArmoredTest
     public static void main(
         String[]    args)
     {
-        Test            test = new PGPArmoredTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new PGPArmoredTest());
     }
 }
