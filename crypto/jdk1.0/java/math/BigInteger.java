@@ -878,7 +878,19 @@ public class BigInteger
 
     public int hashCode()
     {
-        return 0;
+        int hc = magnitude.length;
+
+        if (magnitude.length > 0)
+        {
+            hc ^= magnitude[0];
+
+            if (magnitude.length > 1)
+            {
+                hc ^= magnitude[magnitude.length - 1];
+            }
+        }
+
+        return sign < 0 ? ~hc : hc;
     }
 
     public int intValue()
