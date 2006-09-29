@@ -3,8 +3,6 @@ package java.math;
 import java.util.Random;
 import java.util.Stack;
 
-import java.security.SecureRandom;
-
 public class BigInteger
 {
 
@@ -652,8 +650,10 @@ public class BigInteger
             return -1;
         if (sign > val.sign)
             return 1;
+        if (sign == 0)
+            return 0;
 
-        return compareTo(0, magnitude, 0, val.magnitude);
+        return sign * compareTo(0, magnitude, 0, val.magnitude);
     }
 
     /**
@@ -906,66 +906,65 @@ public class BigInteger
      */
     public boolean isProbablePrime(int certainty)
     {
-        if (certainty == 0)
-        {
+        if (certainty <= 0)
             return true;
-        }
+
+        if (sign == 0)
+            return false;
 
         BigInteger n = this.abs();
 
-        if (n.equals(TWO))
-        {
-            return true;
-        }
+        if (!n.testBit(0))
+            return n.equals(TWO);
 
-        if (n.equals(ONE) || !n.testBit(0))
-        {
+        if (n.equals(ONE))
             return false;
-        }
 
-        if ((certainty & 0x1) == 1)
-        {
-            certainty = certainty / 2 + 1;
-        }
-        else
-        {
-            certainty /= 2;
-        }
+        if (n.bitLength() < 4)
+            return true;
+
+        if (n.remainder(THREE).sign == 0 || n.remainder(FIVE).sign == 0)
+            return false;
 
         //
         // let n = 1 + 2^kq
         //
-        BigInteger q = n.subtract(ONE);
+        BigInteger nMinusOne = n.subtract(ONE);
+        BigInteger q = nMinusOne;
         int k = q.getLowestSetBit();
-
         q = q.shiftRight(k);
 
         Random rnd = new Random();
-        for (int i = 0; i <= certainty; i++)
+        do
         {
             BigInteger x;
 
             do
             {
                 x = new BigInteger(n.bitLength(), rnd);
-            } while (x.compareTo(ONE) <= 0 || x.compareTo(n) >= 0);
+            }
+            // NB: Spec says 0 < x < n, but 1 is trivial
+            while (x.compareTo(ONE) <= 0 || x.compareTo(n) >= 0);
 
-            int j = 0;
             BigInteger y = x.modPow(q, n);
 
-            while (!((j == 0 && y.equals(ONE)) || y.equals(n.subtract(ONE))))
+            if (!y.equals(ONE))
             {
-                if (j > 0 && y.equals(ONE))
+                // check already = x.ModPow(q << 0, n)
+                int r = 0;
+                while (!y.equals(nMinusOne))
                 {
-                    return false;
+                    if (++r == k)
+                        return false;
+
+                    // check becomes a.ModPow(q << r, n)
+                    y = y.modPow(TWO, n);
                 }
-                if (++j == k)
-                {
-                    return false;
-                }
-                y = y.modPow(TWO, n);
             }
+
+            certainty -= 2; // composites pass for only 1/4 possible 'x'
         }
+        while (certainty > 0);
 
         return true;
     }
@@ -1111,6 +1110,25 @@ public class BigInteger
 
     public BigInteger modPow(BigInteger exponent, BigInteger m) throws ArithmeticException
     {
+        if (m.sign < 1)
+        {
+            throw new ArithmeticException("Modulus must be positive");
+        }
+
+        if (m.equals(ONE))
+        {
+            return ZERO;
+        }
+
+        // Zero exponent check
+        if (exponent.sign == 0)
+        {
+            return ONE;
+        }
+
+        if (sign == 0)
+            return ZERO;
+
         int[] zVal = null;
         int[] yAccum = null;
         int[] yVal;
@@ -1380,7 +1398,7 @@ public class BigInteger
             throw new ArithmeticException("Modulus must be positive");
         }
 
-        long[]	x = new long[2];
+        long[]  x = new long[2];
 
         long gcd = _extEuclid(v, m, x);
 
@@ -1417,7 +1435,7 @@ public class BigInteger
         mQuote = this.negate().mod(b).modInverse(b).longValue();
 */
         long v = (((~this.magnitude[this.magnitude.length - 1]) | 1) & 0xffffffffL);
-	mQuote = _modInverse(v, 0x100000000L);
+        mQuote = _modInverse(v, 0x100000000L);
 
         return mQuote;
     }
@@ -1498,6 +1516,11 @@ public class BigInteger
     public BigInteger negate()
     {
         return new BigInteger( -sign, magnitude);
+    }
+
+    public BigInteger not()
+    {
+        return add(ONE).negate();
     }
 
     public BigInteger pow(int exp) throws ArithmeticException
@@ -1847,25 +1870,18 @@ public class BigInteger
         {
             return val.negate();
         }
-        if (val.sign < 0)
+        if (this.sign != val.sign)
         {
-            if (this.sign > 0)
-                return this.add(val.negate());
-        }
-        else
-        {
-            if (this.sign < 0)
-                return this.add(val.negate());
+            return this.add(val.negate());
         }
 
-        BigInteger bigun, 
-        littlun;
-        int compare = compareTo(val);
+        int compare = compareTo(0, magnitude, 0, val.magnitude);
         if (compare == 0)
         {
             return ZERO;
         }
 
+        BigInteger bigun, littlun;
         if (compare < 0)
         {
             bigun = val;
@@ -1931,43 +1947,62 @@ public class BigInteger
 
     public BigInteger xor(BigInteger val) 
     {
-        int[] result;
-        
-        if (magnitude.length > val.magnitude.length)
+        if (this.sign == 0)
         {
-            result = new int[magnitude.length];
+            return val;
         }
-        else
+
+        if (val.sign == 0)
         {
-            result = new int[val.magnitude.length];
+            return this;
         }
-        
-        for (int i = 0; i < result.length; i++)
+
+        int[] aMag = this.sign > 0
+            ? this.magnitude
+            : this.add(ONE).magnitude;
+
+        int[] bMag = val.sign > 0
+            ? val.magnitude
+            : val.add(ONE).magnitude;
+
+        boolean resultNeg = (sign < 0 && val.sign >= 0) || (sign >= 0 && val.sign < 0);
+        int resultLength = Math.max(aMag.length, bMag.length);
+        int[] resultMag = new int[resultLength];
+
+        int aStart = resultMag.length - aMag.length;
+        int bStart = resultMag.length - bMag.length;
+
+        for (int i = 0; i < resultMag.length; ++i)
         {
-            int index = result.length - i - 1;
-            
-            if (magnitude.length > i)
+            int aWord = i >= aStart ? aMag[i - aStart] : 0;
+            int bWord = i >= bStart ? bMag[i - bStart] : 0;
+
+            if (this.sign < 0)
             {
-                result[index] = magnitude[magnitude.length - i - 1];
+                aWord = ~aWord;
             }
-            if (val.magnitude.length > i)
+
+            if (val.sign < 0)
             {
-                result[index] ^= val.magnitude[val.magnitude.length - i - 1];
+                bWord = ~bWord;
             }
-            else
+
+            resultMag[i] = aWord ^ bWord;
+
+            if (resultNeg)
             {
-                result[index] ^= 0;
+                resultMag[i] = ~resultMag[i];
             }
         }
- 
-        int resSign = 1;
-        
-        if (sign < 0 || val.sign < 0)
+
+        BigInteger result = new BigInteger(1, resultMag);
+
+        if (resultNeg)
         {
-            resSign = -1;
+            result = result.not();
         }
-        
-        return new BigInteger(resSign, result);
+
+        return result;
     }
     
     public BigInteger setBit(int n) 
@@ -2108,12 +2143,24 @@ public class BigInteger
     public static final BigInteger ZERO = new BigInteger(0, new byte[0]);
     public static final BigInteger ONE = valueOf(1);
     private static final BigInteger TWO = valueOf(2);
+    private static final BigInteger THREE = valueOf(3);
+    private static final BigInteger FIVE = valueOf(5);
 
     public static BigInteger valueOf(long val)
     {
         if (val == 0)
         {
             return BigInteger.ZERO;
+        }
+
+        if (val < 0)
+        {
+            if (val == Long.MIN_VALUE)
+            {
+                return valueOf(~val).not();
+            }
+
+            return valueOf(-val).negate();
         }
 
         // store val into a byte array
