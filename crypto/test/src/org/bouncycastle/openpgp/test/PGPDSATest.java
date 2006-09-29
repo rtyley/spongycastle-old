@@ -105,7 +105,7 @@ public class PGPDSATest
                 + "sGdmZQCJwpQLMq3ayTA/0Fj3xf4jbwPfK/H3zj55Z9L1n2k/GOapKJrvMZ4tLiCW"
                 + "GtP/XeDqX4fORDUA");
 
-    byte[] sig1crc = Base64.decode("=OZa/");
+    byte[] sig1crc = Base64.decode("OZa/");
 
     byte[] testPubWithUserAttr =
         Base64.decode(
