@@ -223,7 +223,7 @@ private static final int[] Tinv0 =
         int     r,
         int     shift)
     {
-        return (((r >>> shift) | (r << (32 - shift))));
+        return (r >>> shift) | (r << -shift);
     }
 
     /* multiply four bytes in GF(2^8) by 'x' {02} in parallel */

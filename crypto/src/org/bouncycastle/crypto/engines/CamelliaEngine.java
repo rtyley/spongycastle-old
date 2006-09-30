@@ -313,7 +313,7 @@ public class CamelliaEngine implements BlockCipher
         int value,
         int rotation)
     {
-        return (value << rotation) | (value >>> (32 - rotation));
+        return (value << rotation) | (value >>> -rotation);
     }
     
     private long lRot128high(
@@ -323,7 +323,7 @@ public class CamelliaEngine implements BlockCipher
     {
         if (rotation < 64)
         {
-            a = (a << rotation) | (b >>> (64 - rotation));
+            a = (a << rotation) | (b >>> -rotation);
         }
         else if (rotation == 64)
         {
@@ -331,7 +331,7 @@ public class CamelliaEngine implements BlockCipher
         }
         else
         {
-            a = (b << (rotation - 64)) | (a >>> (64 - (rotation - 64)));
+            a = (b << (rotation - 64)) | (a >>> -(rotation - 64));
         }
         
         return a;
@@ -344,7 +344,7 @@ public class CamelliaEngine implements BlockCipher
     {
         if (rotation < 64)
         {
-            b = (b << rotation) | (a >>> (64 - rotation));
+            b = (b << rotation) | (a >>> -rotation);
         }
         else if (rotation == 64)
         {
@@ -352,7 +352,7 @@ public class CamelliaEngine implements BlockCipher
         }
         else
         {
-            b = (a << (rotation - 64)) | (b >>> (64 - (rotation - 64)));
+            b = (a << (rotation - 64)) | (b >>> -(rotation - 64));
         }
         
         return b;

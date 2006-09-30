@@ -293,14 +293,14 @@ public class RC6Engine
      * word <em>x</em> is rotated left by <em>y</em> bits.
      * Only the <em>lg(wordSize)</em> low-order bits of <em>y</em>
      * are used to determine the rotation amount. Here it is 
-     * assumed that the wordsize used is a power of 2.
+     * assumed that the wordsize used is 32.
      * <p>
      * @param  x  word to rotate
      * @param  y    number of bits to rotate % wordSize
      */
     private int rotateLeft(int x, int y)
     {
-        return ((x << (y & (wordSize-1))) | (x >>> (wordSize - (y & (wordSize-1)))));
+        return (x << y) | (x >>> -y);
     }
 
     /**
@@ -315,7 +315,7 @@ public class RC6Engine
      */
     private int rotateRight(int x, int y)
     {
-        return ((x >>> (y & (wordSize-1))) | (x << (wordSize - (y & (wordSize-1)))));
+        return (x >>> y) | (x << -y);
     }
 
     private int bytesToWord(
