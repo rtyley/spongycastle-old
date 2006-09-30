@@ -246,14 +246,14 @@ public class SerpentEngine
         int     x,
         int     bits)
     {
-        return ((x << bits) | (x >>> (32 - bits)));
+        return (x << bits) | (x >>> -bits);
     }
 
     private int rotateRight(
         int     x,
         int     bits)
     {
-        return ((x >>> bits) | (x << (32 - bits)));
+        return (x >>> bits) | (x << -bits);
     }
 
     private int bytesToWord(
