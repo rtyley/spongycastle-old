@@ -932,11 +932,13 @@ public class BigInteger
         if (n.equals(ONE))
             return false;
 
-        if (n.bitLength() < 4)
-            return true;
-
-        if (n.remainder(THREE).sign == 0 || n.remainder(FIVE).sign == 0)
-            return false;
+        int test = n.remainder(smallPrimesProduct);
+        for (int index = 0; index < smallPrimes.length; ++index)
+        {
+            int smallPrime = smallPrimes[index];
+            if (test % smallPrime == 0)
+                return n.bitLength() <= 5 && n.intValue() == smallPrime;
+        }
 
         //
         // let n = 1 + 2^kq
@@ -1563,6 +1565,17 @@ public class BigInteger
         return y;
     }
 
+    private int remainder(int m)
+    {
+        long acc = 0;
+        for (int pos = 0; pos < magnitude.length; ++pos)
+        {
+            acc = (acc << 32 | ((long)magnitude[pos] & 0xffffffffL)) % m;
+        }
+
+        return (int) acc;
+    }
+    
     /**
      * return x = x % y - done in place (y value preserved)
      */
@@ -2155,8 +2168,9 @@ public class BigInteger
     public static final BigInteger ZERO = new BigInteger(0, new byte[0]);
     public static final BigInteger ONE = valueOf(1);
     private static final BigInteger TWO = valueOf(2);
-    private static final BigInteger THREE = valueOf(3);
-    private static final BigInteger FIVE = valueOf(5);
+
+    private static final int[] smallPrimes = new int[]{ 3, 5, 7, 11, 13, 17, 19, 23 };
+    private static final int smallPrimesProduct = 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23;
 
     public static BigInteger valueOf(long val)
     {
