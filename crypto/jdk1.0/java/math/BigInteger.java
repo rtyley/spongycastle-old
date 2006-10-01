@@ -1449,7 +1449,7 @@ public class BigInteger
         mQuote = this.negate().mod(b).modInverse(b).longValue();
 */
         long v = (((~this.magnitude[this.magnitude.length - 1]) | 1) & 0xffffffffL);
-        mQuote = _modInverse(v, 0x100000000L);
+    	mQuote = _modInverse(v, 0x100000000L);
 
         return mQuote;
     }
@@ -2013,6 +2013,67 @@ public class BigInteger
             }
 
             resultMag[i] = aWord ^ bWord;
+
+            if (resultNeg)
+            {
+                resultMag[i] = ~resultMag[i];
+            }
+        }
+
+        BigInteger result = new BigInteger(1, resultMag);
+
+        if (resultNeg)
+        {
+            result = result.not();
+        }
+
+        return result;
+    }
+
+    public BigInteger or(
+        BigInteger value)
+    {
+        if (this.sign == 0)
+        {
+            return value;
+        }
+
+        if (value.sign == 0)
+        {
+            return this;
+        }
+
+        int[] aMag = this.sign > 0
+                        ? this.magnitude
+                        : this.add(ONE).magnitude;
+
+        int[] bMag = value.sign > 0
+                        ? value.magnitude
+                        : value.add(ONE).magnitude;
+
+        boolean resultNeg = sign < 0 || value.sign < 0;
+        int resultLength = Math.max(aMag.length, bMag.length);
+        int[] resultMag = new int[resultLength];
+
+        int aStart = resultMag.length - aMag.length;
+        int bStart = resultMag.length - bMag.length;
+
+        for (int i = 0; i < resultMag.length; ++i)
+        {
+            int aWord = i >= aStart ? aMag[i - aStart] : 0;
+            int bWord = i >= bStart ? bMag[i - bStart] : 0;
+
+            if (this.sign < 0)
+            {
+                aWord = ~aWord;
+            }
+
+            if (value.sign < 0)
+            {
+                bWord = ~bWord;
+            }
+
+            resultMag[i] = aWord | bWord;
 
             if (resultNeg)
             {
