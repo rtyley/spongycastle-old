@@ -54,12 +54,12 @@ public class NaccacheSternEngine
                 if (debug)
                 {
                     System.out.println("Constructing lookup ArrayList for "
-                            + primes.get(i));
+                            + primes.elementAt(i));
                 }
                 for (int j = 0; j < actualPrime.intValue(); j++)
                 {
                     BigInteger comp;
-                    comp = (priv.getPhi_n().multiply(BigInteger.valueOf(j))).divide((BigInteger)primes.get(i));
+                    comp = (priv.getPhi_n().multiply(BigInteger.valueOf(j))).divide((BigInteger)primes.elementAt(i));
                     lookup[i].add(priv.getG().modPow(comp, priv.getModulus()));
                 }
             }
@@ -163,18 +163,18 @@ public class NaccacheSternEngine
             // Get Chinese Remainders of CipherText
             for (int i = 0; i < primes.size(); i++)
             {
-                BigInteger exp = input.modPow(priv.getPhi_n().divide((BigInteger)primes.get(i)), priv.getModulus());
+                BigInteger exp = input.modPow(priv.getPhi_n().divide((BigInteger)primes.elementAt(i)), priv.getModulus());
                 Vector al = lookup[i];
-                if (lookup[i].size() != ((BigInteger)primes.get(i)).intValue())
+                if (lookup[i].size() != ((BigInteger)primes.elementAt(i)).intValue())
                 {
                     if (debug)
                     {
-                        System.out.println("Prime is " + primes.get(i) + ", lookup table has size " + al.size());
+                        System.out.println("Prime is " + primes.elementAt(i) + ", lookup table has size " + al.size());
                     }
                     throw new InvalidCipherTextException("Error in lookup Array for "
-                                    + ((BigInteger)primes.get(i)).intValue()
+                                    + ((BigInteger)primes.elementAt(i)).intValue()
                                     + ": Size mismatch. Expected ArrayList with length "
-                                    + ((BigInteger)primes.get(i)).intValue() + " but found ArrayList of length "
+                                    + ((BigInteger)primes.elementAt(i)).intValue() + " but found ArrayList of length "
                                     + lookup[i].size());
                 }
                 int lookedup = al.indexOf(exp);
@@ -183,14 +183,14 @@ public class NaccacheSternEngine
                 {
                     if (debug)
                     {
-                        System.out.println("Actual prime is " + primes.get(i));
+                        System.out.println("Actual prime is " + primes.elementAt(i));
                         System.out.println("Decrypted value is " + exp);
 
-                        System.out.println("LookupList for " + primes.get(i) + " with size " + lookup[i].size()
+                        System.out.println("LookupList for " + primes.elementAt(i) + " with size " + lookup[i].size()
                                         + " is: ");
                         for (int j = 0; j < lookup[i].size(); j++)
                         {
-                            System.out.println(lookup[i].get(j));
+                            System.out.println(lookup[i].elementAt(j));
                         }
                     }
                     throw new InvalidCipherTextException("Lookup failed");

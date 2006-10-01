@@ -219,6 +219,9 @@ public class X509Name
      */
     public static Hashtable DefaultLookUp = SymbolLookUp;
 
+    private static final Boolean TRUE = Boolean.valueOf(true); // for J2ME compatibility
+    private static final Boolean FALSE = Boolean.valueOf(false);
+
     static
     {
         DefaultSymbols.put(C, "C");
@@ -371,7 +374,7 @@ public class X509Name
                    {
                        values.addElement("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
                    }
-                   added.addElement((i != 0) ? Boolean.TRUE : Boolean.FALSE);  // to allow earlier JDK compatibility
+                   added.addElement((i != 0) ? TRUE : FALSE);  // to allow earlier JDK compatibility
             }
         }
     }
@@ -431,7 +434,7 @@ public class X509Name
             for (int i = 0; i != ordering.size(); i++)
             {
                 this.ordering.addElement(ordering.elementAt(i));
-                this.added.addElement(Boolean.FALSE);
+                this.added.addElement(FALSE);
             }
         }
         else
@@ -441,7 +444,7 @@ public class X509Name
             while (e.hasMoreElements())
             {
                 this.ordering.addElement(e.nextElement());
-                this.added.addElement(Boolean.FALSE);
+                this.added.addElement(FALSE);
             }
         }
 
@@ -490,7 +493,7 @@ public class X509Name
         {
             this.ordering.addElement(oids.elementAt(i));
             this.values.addElement(values.elementAt(i));
-            this.added.addElement(Boolean.FALSE);
+            this.added.addElement(FALSE);
         }
     }
 
@@ -630,7 +633,7 @@ public class X509Name
 
                 this.ordering.addElement(oid);
                 this.values.addElement(vTok.nextToken());
-                this.added.addElement(Boolean.FALSE);
+                this.added.addElement(FALSE);
 
                 while (vTok.hasMoreTokens())
                 {
@@ -641,14 +644,14 @@ public class X509Name
                     String  vl = sv.substring(ndx + 1);
                     this.ordering.addElement(decodeOID(nm, lookUp));
                     this.values.addElement(vl);
-                    this.added.addElement(Boolean.TRUE);
+                    this.added.addElement(TRUE);
                 }
             }
             else
             {
                 this.ordering.addElement(oid);
                 this.values.addElement(value);
-                this.added.addElement(Boolean.FALSE);
+                this.added.addElement(FALSE);
             }
         }
 
