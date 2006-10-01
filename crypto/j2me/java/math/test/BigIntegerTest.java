@@ -12,6 +12,12 @@ public class BigIntegerTest
     private static BigInteger VALUE1 = new BigInteger("1234");
     private static BigInteger VALUE2 = new BigInteger("1234567890");
     private static BigInteger VALUE3 = new BigInteger("12345678901234567890123");
+
+    private static BigInteger zero = BigInteger.ZERO;
+    private static BigInteger one = BigInteger.ONE;
+    private static BigInteger two = BigInteger.valueOf(2);
+
+
     
     public String getName()
     {
@@ -146,7 +152,90 @@ public class BigIntegerTest
             fail("setBit - expected: " + result + " got: " + value);
         }
     }
-    
+
+    private void testNegate()
+    {
+        if (!zero.equals(zero.negate()))
+        {
+            fail("zero - negate falied");
+        }
+        if (!one.equals(one.negate().negate()))
+        {
+            fail("one - negate falied");
+        }
+        if (!two.equals(two.negate().negate()))
+        {
+            fail("two - negate falied");
+        }
+    }
+
+    private void testNot()
+    {
+        for (int i = -10; i <= 10; ++i)
+        {
+            if(!BigInteger.valueOf(~i).equals(
+                     BigInteger.valueOf(i).not()))
+            {
+                fail("Problem: ~" + i + " should be " + ~i);
+            }
+        }
+    }
+
+    private void testOr()
+    {
+        for (int i = -10; i <= 10; ++i)
+        {
+            for (int j = -10; j <= 10; ++j)
+            {
+                if (!BigInteger.valueOf(i | j).equals(
+                    BigInteger.valueOf(i).or(BigInteger.valueOf(j))))
+                {
+                    fail("Problem: " + i + " OR " + j + " should be " + (i | j));
+                }
+            }
+        }
+    }
+
+    public void testPow()
+    {
+        if (!one.equals(zero.pow(0)))
+        {
+            fail("one pow equals failed");
+        }
+        if (!zero.equals(zero.pow(123)))
+        {
+            fail("zero pow equals failed");
+        }
+        if (!one.equals(one.pow(0)))
+        {
+            fail("one one equals failed");
+        }
+        if (!one.equals(one.pow(123)))
+        {
+            fail("1 123 equals failed");
+        }
+
+        BigInteger n = new BigInteger("1234567890987654321");
+        BigInteger result = one;
+
+        for (int i = 0; i < 10; ++i)
+        {
+            try
+            {
+                BigInteger.valueOf(i).pow(-1);
+                fail("expected ArithmeticException");
+            }
+            catch (ArithmeticException e) {}
+
+            if (!result.equals(n.pow(i)))
+            {
+                fail("mod pow equals failed");
+            }
+
+            result = result.multiply(n);
+        }
+    }
+
     private void xorTest()
     {
         BigInteger value = VALUE1.xor(VALUE2);
