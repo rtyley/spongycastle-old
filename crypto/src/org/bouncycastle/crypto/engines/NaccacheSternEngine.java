@@ -50,16 +50,22 @@ public class NaccacheSternEngine
             for (int i = 0; i < primes.size(); i++)
             {
                 BigInteger actualPrime = (BigInteger)primes.elementAt(i);
+                int actualPrimeValue = actualPrime.intValue();
+
                 lookup[i] = new Vector();
+                lookup[i].add(BigInteger.ONE);
+
                 if (debug)
                 {
-                    System.out.println("Constructing lookup ArrayList for "
-                            + primes.elementAt(i));
+                    System.out.println("Constructing lookup ArrayList for " + actualPrimeValue);
                 }
-                for (int j = 0; j < actualPrime.intValue(); j++)
+
+                BigInteger accJ = BigInteger.ZERO;
+
+                for (int j = 1; j < actualPrimeValue; j++)
                 {
-                    BigInteger comp;
-                    comp = (priv.getPhi_n().multiply(BigInteger.valueOf(j))).divide((BigInteger)primes.elementAt(i));
+                    accJ = accJ.add(priv.getPhi_n());
+                    BigInteger comp = accJ.divide(actualPrime);
                     lookup[i].add(priv.getG().modPow(comp, priv.getModulus()));
                 }
             }
