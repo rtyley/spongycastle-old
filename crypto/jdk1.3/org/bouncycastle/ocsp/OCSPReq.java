@@ -83,8 +83,18 @@ public class OCSPReq
         InputStream     in)
         throws IOException
     {
-        this.req = OCSPRequest.getInstance(
-                        new ASN1InputStream(in).readObject());
+        try
+        {
+            this.req = OCSPRequest.getInstance(new ASN1InputStream(in).readObject());
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new IOException("malformed request: " + e.getMessage());
+        }
+        catch (ClassCastException e)
+        {
+            throw new IOException("malformed request: " + e.getMessage());
+        }
     }
 
     /**
