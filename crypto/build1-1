@@ -43,6 +43,9 @@ then
             org.bouncycastle.asn1.cryptopro \
             org.bouncycastle.asn1.esf \
             org.bouncycastle.asn1.ess \
+            org.bouncycastle.asn1.gnu \
+            org.bouncycastle.asn1.iana \
+            org.bouncycastle.asn1.icao \
             org.bouncycastle.asn1.misc \
             org.bouncycastle.asn1.mozilla \
             org.bouncycastle.asn1.nist \
@@ -101,13 +104,13 @@ then
     mkdir jce-jdk11-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src | (cd jce-jdk11-$base; tar xf -)
     (cd jce && tar cf - src | (cd ../jce-jdk11-$base; tar xf -))
-    (cd test/src; tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
-    (cd jdk1.4; tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
-    (cd test/jdk1.4; tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
-    (cd jdk1.3; tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
-    (cd test/jdk1.3; tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
-    (cd jdk1.2; tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
-    (cd jdk1.1; tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
+    (cd test/src && tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
+    (cd jdk1.4 && tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
+    (cd test/jdk1.4 && tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
+    (cd jdk1.3 && tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
+    (cd test/jdk1.3 && tar cf - * | (cd ../../jce-jdk11-$base/src; tar xf -))
+    (cd jdk1.2 && tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
+    (cd jdk1.1 && tar cf - * | (cd ../jce-jdk11-$base/src; tar xf -))
 
     (
     cd jce-jdk11-$base; mkdir classes; mkdir docs;
@@ -121,9 +124,13 @@ then
     rm src/org/bouncycastle/jce/provider/test/PSSTest.java
     rm src/org/bouncycastle/jce/provider/test/NIST*.java
     rm src/org/bouncycastle/jce/provider/test/GOST3410Test.java
+    rm -rf src/org/bouncycastle/i18n/test
+    rm -rf src/org/bouncycastle/i18n/filter/test
     rm -rf src/org/bouncycastle/voms
     rm -rf src/org/bouncycastle/jce/ECPointUtil.java
     rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
+    rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
+    rm -rf src/org/bouncycastle/jce/provider/test/CRL5Test.java
     rm -rf src/org/bouncycastle/jce/provider/EC5*.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECEncodingTest.java
@@ -141,6 +148,8 @@ then
     rm -rf src/org/bouncycastle/sasn1/test
     rm -rf src/org/bouncycastle/tsp
     rm -rf src/org/bouncycastle/util/encoders/test
+    rm -rf src/org/bouncycastle/x509/PKIXCertPathReviewer.java
+    rm -rf src/org/bouncycastle/x509/CertPathReviewerException.java
     find src -name AllTests.java -exec rm {} \;
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
@@ -170,6 +179,9 @@ then
         org.bouncycastle.asn1.cryptopro \
         org.bouncycastle.asn1.esf \
         org.bouncycastle.asn1.ess \
+        org.bouncycastle.asn1.gnu \
+        org.bouncycastle.asn1.iana \
+        org.bouncycastle.asn1.icao \
         org.bouncycastle.asn1.misc \
         org.bouncycastle.asn1.mozilla \
         org.bouncycastle.asn1.nist \
