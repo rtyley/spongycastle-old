@@ -39,7 +39,18 @@ public class OCSPResp
         ASN1InputStream aIn)
         throws IOException
     {
-        this(OCSPResponse.getInstance(aIn.readObject()));
+        try
+        {
+            this.resp = OCSPResponse.getInstance(aIn.readObject());
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new IOException("malformed response: " + e.getMessage());
+        }
+        catch (ClassCastException e)
+        {
+            throw new IOException("malformed response: " + e.getMessage());
+        }
     }
 
     public int getStatus()
