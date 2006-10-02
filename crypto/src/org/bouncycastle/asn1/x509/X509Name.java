@@ -219,8 +219,8 @@ public class X509Name
      */
     public static Hashtable DefaultLookUp = SymbolLookUp;
 
-    private static final Boolean TRUE = Boolean.valueOf(true); // for J2ME compatibility
-    private static final Boolean FALSE = Boolean.valueOf(false);
+    private static final Boolean TRUE = new Boolean(true); // for J2ME compatibility
+    private static final Boolean FALSE = new Boolean(false);
 
     static
     {

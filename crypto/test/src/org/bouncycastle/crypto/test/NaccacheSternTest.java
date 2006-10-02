@@ -53,21 +53,22 @@ public class NaccacheSternTest
 
     static final BigInteger v3 = BigInteger.valueOf(17);
 
+    static final BigInteger ONE = BigInteger.valueOf(1);
+
     static final BigInteger TWO = BigInteger.valueOf(2);
 
     static final BigInteger sigma = u1.multiply(u2).multiply(u3).multiply(v1)
             .multiply(v2).multiply(v3);
 
     static final BigInteger p = TWO.multiply(a).multiply(u1).multiply(u2)
-            .multiply(u3).add(BigInteger.ONE);
+            .multiply(u3).add(ONE);
 
     static final BigInteger q = TWO.multiply(b).multiply(v1).multiply(v2)
-            .multiply(v3).add(BigInteger.ONE);
+            .multiply(v3).add(ONE);
 
     static final BigInteger n = p.multiply(q);
 
-    static final BigInteger phi_n = p.subtract(BigInteger.ONE).multiply(
-            q.subtract(BigInteger.ONE));
+    static final BigInteger phi_n = p.subtract(ONE).multiply(q.subtract(ONE));
 
     static final BigInteger g = BigInteger.valueOf(131);
 
@@ -96,17 +97,16 @@ public class NaccacheSternTest
         // First the Parameters from the NaccacheStern Paper
         // (see http://www.gemplus.com/smart/rd/publications/pdf/NS98pkcs.pdf )
 
-        smallPrimes.add(u1);
-        smallPrimes.add(u2);
-        smallPrimes.add(u3);
-        smallPrimes.add(v1);
-        smallPrimes.add(v2);
-        smallPrimes.add(v3);
+        smallPrimes.addElement(u1);
+        smallPrimes.addElement(u2);
+        smallPrimes.addElement(u3);
+        smallPrimes.addElement(v1);
+        smallPrimes.addElement(v2);
+        smallPrimes.addElement(v3);
 
         NaccacheSternKeyParameters pubParameters = new NaccacheSternKeyParameters(false, g, n, sigma.bitLength());
 
-        NaccacheSternPrivateKeyParameters privParameters = new NaccacheSternPrivateKeyParameters(g, n, sigma
-                        .bitLength(), smallPrimes, phi_n);
+        NaccacheSternPrivateKeyParameters privParameters = new NaccacheSternPrivateKeyParameters(g, n, sigma.bitLength(), smallPrimes, phi_n);
 
         AsymmetricCipherKeyPair pair = new AsymmetricCipherKeyPair(pubParameters, privParameters);
 
