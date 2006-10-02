@@ -85,10 +85,16 @@ public class X509CRLEntryObject extends X509CRLEntry
     public X500Principal getCertificateIssuer()
     {
         if (!isIndirect)
+        {
             return null;
+        }
+
         byte[] ext = getExtensionValue(X509Extensions.CertificateIssuer.getId());
         if (ext == null)
+        {
             return previousCertificateIssuer;
+        }
+
         try
         {
             GeneralName[] names = GeneralNames.getInstance(

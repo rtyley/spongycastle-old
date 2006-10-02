@@ -21,8 +21,6 @@ import java.util.Set;
 import java.util.SimpleTimeZone;
 import java.util.Vector;
 
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -72,23 +70,6 @@ public class X509V2CRLGenerator
     public void reset()
     {
         tbsGen = new V2TBSCertListGenerator();
-    }
-
-    /**
-     * Set the issuer distinguished name - the issuer is the entity whose private key is used to sign the
-     * certificate.
-     */
-    public void setIssuerDN(
-        X500Principal   issuer)
-    {
-        try
-        {
-            tbsGen.setIssuer(new X509Principal(issuer.getEncoded()));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("can't process principal: " + e);
-        }
     }
 
     /**
@@ -340,14 +321,7 @@ public class X509V2CRLGenerator
             }
         }
 
-        if (random != null)
-        {
-            sig.initSign(key, random);
-        }
-        else
-        {
-            sig.initSign(key);
-        }
+        sig.initSign(key);
 
         if (extensions != null)
         {
@@ -377,14 +351,7 @@ public class X509V2CRLGenerator
         v.add(sigAlgId);
         v.add(new DERBitString(sig.sign()));
 
-        try
-        {
-            return new X509CRLObject(new CertificateList(new DERSequence(v)));
-        }
-        catch (CRLException e)
-        {
-            throw new SecurityException("exception creating CRL: " + e.getMessage());
-        }
+        return new X509CRLObject(new CertificateList(new DERSequence(v)));
     }
     
     

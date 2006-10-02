@@ -24,7 +24,7 @@ import org.bouncycastle.util.test.SimpleTest;
 public class PGPPBETest
     extends SimpleTest
 {
-    private static final Date TEST_DATE	= new Date(1062200111000L);
+    private static final Date TEST_DATE = new Date(1062200111000L);
 
     byte[] enc1 = Base64.decode(
             "jA0EAwMC5M5wWBP2HBZgySvUwWFAmMRLn7dWiZN6AkQMvpE3b6qwN3SSun7zInw2"

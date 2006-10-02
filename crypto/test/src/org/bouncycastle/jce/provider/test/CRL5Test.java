@@ -242,7 +242,8 @@ public class CRL5Test
         X509CRL crl = (X509CRL) cf.generateCRL(in);
         Set set = crl.getRevokedCertificates();
         Iterator it = set.iterator();
-        while (it.hasNext()) {
+        while (it.hasNext())
+        {
             if (((X509CRLEntry)it.next()).getCertificateIssuer() != null)
             {
                 fail("certificate issuer CRL entry extension is not null");

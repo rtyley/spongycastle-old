@@ -46,12 +46,12 @@ public class V2Form
     public V2Form(
         ASN1Sequence seq)
     {
-		if (seq.size() > 3)
+        if (seq.size() > 3)
         {
-			throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+            throw new IllegalArgumentException("Bad sequence size: " + seq.size());
         }
         
-    	int    index = 0;
+        int    index = 0;
 
         if (!(seq.getObjectAt(0) instanceof ASN1TaggedObject))
         {
@@ -72,8 +72,8 @@ public class V2Form
             }
             else 
             {
-				throw new IllegalArgumentException("Bad tag number: "
-						+ o.getTagNo());
+                throw new IllegalArgumentException("Bad tag number: "
+                        + o.getTagNo());
             }
         }
     }

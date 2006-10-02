@@ -797,7 +797,7 @@ public class PGPSecretKey
 
                 System.arraycopy(rawKeyData, 0, keyData, 0, keyData.length - 2);
 
-       	        byte[] check = checksum(false, keyData, keyData.length - 2);
+                byte[] check = checksum(false, keyData, keyData.length - 2);
                 
                 keyData[keyData.length - 2] = check[0];
                 keyData[keyData.length - 1] = check[1];

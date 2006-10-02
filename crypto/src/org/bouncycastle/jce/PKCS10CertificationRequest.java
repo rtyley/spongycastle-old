@@ -13,6 +13,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 
@@ -66,7 +67,7 @@ public class PKCS10CertificationRequest
     private static Hashtable            algorithms = new Hashtable();
     private static Hashtable            keyAlgorithms = new Hashtable();
     private static Hashtable            oids = new Hashtable();
-    private static HashSet              noParams = new HashSet();
+    private static Set                  noParams = new HashSet();
 
     static
     {
