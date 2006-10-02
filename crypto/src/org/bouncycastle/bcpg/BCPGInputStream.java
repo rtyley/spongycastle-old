@@ -61,8 +61,13 @@ public class BCPGInputStream
             off++;
             len--;
         }
+
+        if (len != 0)
+        {
+            return in.read(buf, off, len) + 1;
+        }
         
-        return in.read(buf, off, len) + 1;
+        return 1;
     }
   
     public void readFully(
