@@ -116,7 +116,7 @@ public class SMIMEUtil
         }
     }
     
-    static void outputBodyPart(   
+    static void outputBodyPart(
         OutputStream out,
         Part         bodyPart,
         String       defaultContentTransferEncoding) 
