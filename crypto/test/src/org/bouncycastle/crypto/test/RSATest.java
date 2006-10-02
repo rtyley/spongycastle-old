@@ -81,8 +81,9 @@ public class RSATest
             }
         }
         
-        System.setProperty(PKCS1Encoding.STRICT_LENGTH_ENABLED_PROPERTY, "false");
+        //System.setProperty(PKCS1Encoding.STRICT_LENGTH_ENABLED_PROPERTY, "false");
         
+        System.getProperties().put(PKCS1Encoding.STRICT_LENGTH_ENABLED_PROPERTY, "false");
         eng = new PKCS1Encoding(new RSAEngine());
         
         eng.init(false, pubParameters);

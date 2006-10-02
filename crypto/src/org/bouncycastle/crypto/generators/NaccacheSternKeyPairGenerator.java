@@ -33,6 +33,8 @@ public class NaccacheSternKeyPairGenerator
     
     private NaccacheSternKeyGenerationParameters param;
 
+    private static final BigInteger ONE = BigInteger.valueOf(1); // JDK 1.1 compatibility
+
     /*
      * (non-Javadoc)
      * 
@@ -63,16 +65,16 @@ public class NaccacheSternKeyPairGenerator
         Vector smallPrimes = findFirstPrimes(param.getCntSmallPrimes());
         smallPrimes = permuteList(smallPrimes, rand);
 
-        BigInteger u = BigInteger.ONE;
-        BigInteger v = BigInteger.ONE;
+        BigInteger u = ONE;
+        BigInteger v = ONE;
 
         for (int i = 0; i < smallPrimes.size() / 2; i++)
         {
-            u = u.multiply((BigInteger)smallPrimes.get(i));
+            u = u.multiply((BigInteger)smallPrimes.elementAt(i));
         }
         for (int i = smallPrimes.size() / 2; i < smallPrimes.size(); i++)
         {
-            v = v.multiply((BigInteger)smallPrimes.get(i));
+            v = v.multiply((BigInteger)smallPrimes.elementAt(i));
         }
 
         BigInteger sigma = u.multiply(v);
@@ -108,7 +110,7 @@ public class NaccacheSternKeyPairGenerator
                 // System.out.println("p_ == q_ : " + p_ + q_);
                 continue;
             }
-            if (!sigma.gcd(p_.multiply(q_)).equals(BigInteger.ONE))
+            if (!sigma.gcd(p_.multiply(q_)).equals(ONE))
             {
                 // System.out.println("sigma.gcd(p_.mult(q_)) != 1!\n p_: " + p_
                 // +"\n q_: "+ q_ );
@@ -142,7 +144,7 @@ public class NaccacheSternKeyPairGenerator
         }
 
         BigInteger n = p.multiply(q);
-        BigInteger phi_n = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+        BigInteger phi_n = p.subtract(ONE).multiply(q.subtract(ONE));
         BigInteger g;
         tries = 0;
         if (debug)
@@ -160,29 +162,29 @@ public class NaccacheSternKeyPairGenerator
                 {
                     tries++;
                     g = new BigInteger(strength, certainty, rand);
-                    if (g.modPow(phi_n.divide(i), n).equals(BigInteger.ONE))
+                    if (g.modPow(phi_n.divide(i), n).equals(ONE))
                     {
                         continue;
                     }
-                    gParts.add(g);
+                    gParts.addElement(g);
                     break;
                 }
             }
-            g = BigInteger.ONE;
+            g = ONE;
             for (int i = 0; i < smallPrimes.size(); i++)
             {
-                g = g.multiply(((BigInteger)gParts.get(i)).modPow(sigma.divide((BigInteger)smallPrimes.get(i)), n)).mod(n);
+                g = g.multiply(((BigInteger)gParts.elementAt(i)).modPow(sigma.divide((BigInteger)smallPrimes.elementAt(i)), n)).mod(n);
             }
 
             // make sure that g is not divisible by p_i or q_i
             boolean divisible = false;
             for (int i = 0; i < smallPrimes.size(); i++)
             {
-                if (g.modPow(phi_n.divide((BigInteger)smallPrimes.get(i)), n).equals(BigInteger.ONE))
+                if (g.modPow(phi_n.divide((BigInteger)smallPrimes.elementAt(i)), n).equals(ONE))
                 {
                     if (debug)
                     {
-                        System.out.println("g has order phi(n)/" + smallPrimes.get(i) + "\n g: " + g);
+                        System.out.println("g has order phi(n)/" + smallPrimes.elementAt(i) + "\n g: " + g);
                     }
                     divisible = true;
                     break;
@@ -196,7 +198,7 @@ public class NaccacheSternKeyPairGenerator
 
             // make sure that g has order > phi_n/4
 
-            if (g.modPow(phi_n.divide(BigInteger.valueOf(4)), n).equals(BigInteger.ONE))
+            if (g.modPow(phi_n.divide(BigInteger.valueOf(4)), n).equals(ONE))
             {
                 if (debug)
                 {
@@ -205,7 +207,7 @@ public class NaccacheSternKeyPairGenerator
                 continue;
             }
 
-            if (g.modPow(phi_n.divide(p_), n).equals(BigInteger.ONE))
+            if (g.modPow(phi_n.divide(p_), n).equals(ONE))
             {
                 if (debug)
                 {
@@ -213,7 +215,7 @@ public class NaccacheSternKeyPairGenerator
                 }
                 continue;
             }
-            if (g.modPow(phi_n.divide(q_), n).equals(BigInteger.ONE))
+            if (g.modPow(phi_n.divide(q_), n).equals(ONE))
             {
                 if (debug)
                 {
@@ -221,7 +223,7 @@ public class NaccacheSternKeyPairGenerator
                 }
                 continue;
             }
-            if (g.modPow(phi_n.divide(a), n).equals(BigInteger.ONE))
+            if (g.modPow(phi_n.divide(a), n).equals(ONE))
             {
                 if (debug)
                 {
@@ -229,7 +231,7 @@ public class NaccacheSternKeyPairGenerator
                 }
                 continue;
             }
-            if (g.modPow(phi_n.divide(b), n).equals(BigInteger.ONE))
+            if (g.modPow(phi_n.divide(b), n).equals(ONE))
             {
                 if (debug)
                 {
@@ -266,7 +268,7 @@ public class NaccacheSternKeyPairGenerator
             BigInteger p_)
     {
         return (((p_.multiply(BigInteger.valueOf(2))).multiply(a)).multiply(u))
-                .add(BigInteger.ONE);
+                .add(ONE);
     }
 
     private static BigInteger generatePrime(
@@ -300,14 +302,36 @@ public class NaccacheSternKeyPairGenerator
         Vector tmp = new Vector();
         for (int i = 0; i < arr.size(); i++) 
         {
-            tmp.add(arr.get(i));
+            tmp.addElement(arr.elementAt(i));
         }
-        retval.add(tmp.remove(0));
+        retval.addElement(tmp.elementAt(0));
+        tmp.removeElementAt(0);
         while (tmp.size() != 0) 
         {
-            retval.add(rand.nextInt(retval.size() + 1), tmp.remove(0));
+            retval.insertElementAt(tmp.elementAt(0), getInt(rand, retval.size() + 1));
+            tmp.removeElementAt(0);
         }
         return retval;
+    }
+
+    private static int getInt(
+        SecureRandom rand,
+        int n)
+    {
+        if ((n & -n) == n) 
+        {
+            return (int)((n * (long)(rand.nextInt() & 0x7fffffff)) >> 31);
+        }
+
+        int bits, val;
+        do
+        {
+            bits = rand.nextInt() & 0x7fffffff;
+            val = bits % n;
+        }
+        while (bits - val + (n-1) < 0);
+
+        return val;
     }
 
     /**

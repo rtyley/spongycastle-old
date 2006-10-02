@@ -37,7 +37,7 @@ import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
  */
 public final class BouncyCastleProvider extends Provider
 {
-    private static String info = "BouncyCastle Security Provider v1.34b";
+    private static String info = "BouncyCastle Security Provider v1.34";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -48,7 +48,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.335, info);
+        super(PROVIDER_NAME, 1.34, info);
 
         //
         // KeyStore

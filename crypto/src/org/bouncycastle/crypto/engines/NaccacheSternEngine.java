@@ -1,8 +1,8 @@
 package org.bouncycastle.crypto.engines;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Vector;
+import org.bouncycastle.util.Arrays;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
@@ -25,6 +25,9 @@ public class NaccacheSternEngine
     private Vector[] lookup = null;
 
     private boolean debug = false;
+
+    private static BigInteger ZERO = BigInteger.valueOf(0);
+    private static BigInteger ONE = BigInteger.valueOf(1);
 
     /**
      * Initializes this algorithm. Must be called before all other Functions.
@@ -53,20 +56,20 @@ public class NaccacheSternEngine
                 int actualPrimeValue = actualPrime.intValue();
 
                 lookup[i] = new Vector();
-                lookup[i].add(BigInteger.ONE);
+                lookup[i].addElement(ONE);
 
                 if (debug)
                 {
                     System.out.println("Constructing lookup ArrayList for " + actualPrimeValue);
                 }
 
-                BigInteger accJ = BigInteger.ZERO;
+                BigInteger accJ = ZERO;
 
                 for (int j = 1; j < actualPrimeValue; j++)
                 {
                     accJ = accJ.add(priv.getPhi_n());
                     BigInteger comp = accJ.divide(actualPrime);
-                    lookup[i].add(priv.getG().modPow(comp, priv.getModulus()));
+                    lookup[i].addElement(priv.getG().modPow(comp, priv.getModulus()));
                 }
             }
         }
@@ -201,7 +204,7 @@ public class NaccacheSternEngine
                     }
                     throw new InvalidCipherTextException("Lookup failed");
                 }
-                plain.add(BigInteger.valueOf(lookedup));
+                plain.addElement(BigInteger.valueOf(lookedup));
             }
             BigInteger test = chineseRemainder(plain, primes);
 
@@ -246,7 +249,7 @@ public class NaccacheSternEngine
         // Always return modulus size values 0-padded at the beginning
         // 0-padding at the beginning is correctly parsed by BigInteger :)
         byte[] output = key.getModulus().toByteArray();
-        Arrays.fill(output, Byte.parseByte("0"));
+        Arrays.fill(output, (byte)0);
         byte[] tmp = key.getG().modPow(plain, key.getModulus()).toByteArray();
         System
                 .arraycopy(tmp, 0, output, output.length - tmp.length,
@@ -305,7 +308,7 @@ public class NaccacheSternEngine
         }
 
         byte[] output = key.getModulus().toByteArray();
-        Arrays.fill(output, Byte.parseByte("0"));
+        Arrays.fill(output, (byte)0);
         System.arraycopy(m1m2Crypt.toByteArray(), 0, output, output.length
                 - m1m2Crypt.toByteArray().length,
                 m1m2Crypt.toByteArray().length);
@@ -403,8 +406,8 @@ public class NaccacheSternEngine
      */
     private static BigInteger chineseRemainder(Vector congruences, Vector primes)
     {
-        BigInteger retval = BigInteger.ZERO;
-        BigInteger all = BigInteger.ONE;
+        BigInteger retval = ZERO;
+        BigInteger all = ONE;
         for (int i = 0; i < primes.size(); i++)
         {
             all = all.multiply((BigInteger)primes.elementAt(i));
