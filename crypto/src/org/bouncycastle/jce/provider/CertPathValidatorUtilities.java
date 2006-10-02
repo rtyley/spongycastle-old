@@ -562,9 +562,9 @@ public class CertPathValidatorUtilities
      * Return a Collection of all CRLs found in the
      * CertStore's that are matching the crlSelect criteriums.
      *
-     * @param certSelector a {@link CertSelector CertSelector}
-     * object that will be used to select the certificates
-     * @param certStores a List containing only {@link CertStore
+     * @param crlSelect a {@link CertSelector CertSelector}
+     * object that will be used to select the CRLs
+     * @param crlStores a List containing only {@link CertStore
      * CertStore} objects. These are used to search for
      * CRLs
      *

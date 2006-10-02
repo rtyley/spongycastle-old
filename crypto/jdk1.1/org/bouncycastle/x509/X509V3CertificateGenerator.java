@@ -19,8 +19,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -40,6 +38,8 @@ import org.bouncycastle.x509.extension.X509ExtensionUtil;
  */
 public class X509V3CertificateGenerator
 {
+    private static final BigInteger     ZERO = BigInteger.valueOf(0);
+
     private V3TBSCertificateGenerator   tbsGen;
     private DERObjectIdentifier         sigOID;
     private AlgorithmIdentifier         sigAlgId;
@@ -68,7 +68,7 @@ public class X509V3CertificateGenerator
     public void setSerialNumber(
         BigInteger      serialNumber)
     {
-        if (serialNumber.compareTo(BigInteger.ZERO) <= 0)
+        if (serialNumber.compareTo(ZERO) <= 0)
         {
             throw new IllegalArgumentException("serial number must be a positive integer");
         }
@@ -76,23 +76,6 @@ public class X509V3CertificateGenerator
         tbsGen.setSerialNumber(new DERInteger(serialNumber));
     }
 
-    /**
-     * Set the issuer distinguished name - the issuer is the entity whose private key is used to sign the
-     * certificate.
-     */
-    public void setIssuerDN(
-        X500Principal   issuer)
-    {
-        try
-        {
-            tbsGen.setIssuer(new X509Principal(issuer.getEncoded()));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("can't process principal: " + e);
-        }
-    }
-    
     /**
      * Set the issuer distinguished name - the issuer is the entity whose private key is used to sign the
      * certificate.
@@ -115,22 +98,6 @@ public class X509V3CertificateGenerator
         tbsGen.setEndDate(new Time(date));
     }
 
-    /**
-     * Set the subject distinguished name. The subject describes the entity associated with the public key.
-     */
-    public void setSubjectDN(
-        X500Principal   subject)
-    {
-        try
-        {
-            tbsGen.setSubject(new X509Principal(subject.getEncoded()));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("can't process principal: " + e);
-        }
-    }
-    
     /**
      * Set the subject distinguished name. The subject describes the entity associated with the public key.
      */
@@ -378,14 +345,7 @@ public class X509V3CertificateGenerator
             }
         }
 
-        if (random != null)
-        {
-            sig.initSign(key, random);
-        }
-        else
-        {
-            sig.initSign(key);
-        }
+        sig.initSign(key);
 
         if (extensions != null)
         {

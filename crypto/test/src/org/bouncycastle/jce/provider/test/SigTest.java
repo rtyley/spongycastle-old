@@ -40,10 +40,12 @@ public class SigTest
         byte[] sigHeader = Hex.decode("3021300906052b0e03021a05000414");
         System.arraycopy(sigHeader, 0, block, 0, sigHeader.length);
         
-        sha1.digest(block, sigHeader.length, sha1.getDigestLength());
+        byte[] dig = sha1.digest();
+
+        System.arraycopy(dig, 0, block, sigHeader.length, dig.length);
 
         System.arraycopy(sigHeader, 0, block, 
-                        sigHeader.length + sha1.getDigestLength(), sigHeader.length);
+                        sigHeader.length + dig.length, sigHeader.length);
         
         byte[] sig = signer.doFinal(block);
         

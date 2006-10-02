@@ -52,9 +52,9 @@ public class DSAParameter
     public DSAParameter(
         ASN1Sequence  seq)
     {
-    	if (seq.size() != 3)
+        if (seq.size() != 3)
         {
-    	    throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+            throw new IllegalArgumentException("Bad sequence size: " + seq.size());
         }
         
         Enumeration     e = seq.getObjects();

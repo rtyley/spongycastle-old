@@ -178,7 +178,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
      * Returns an Array of Lists which contains a List of global error messages 
      * and a List of error messages for each certificate in the path.
      * The global error List is at index 0. The error lists for each certificate at index 1 to n. 
-     * The error messages are of type {@link ErrorBundles}.
+     * The error messages are of type.
      * @return the Array of Lists which contain the error messages
      */
     public List[] getErrors()
@@ -203,7 +203,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
      * Returns an Array of Lists which contains a List of global notification messages 
      * and a List of botification messages for each certificate in the path.
      * The global notificatio List is at index 0. The notification lists for each certificate at index 1 to n. 
-     * The error messages are of type {@link ErrorBundles}.
+     * The error messages are of type.
      * @return the Array of Lists which contain the notification messages
      */
     public List[] getNotifications()
