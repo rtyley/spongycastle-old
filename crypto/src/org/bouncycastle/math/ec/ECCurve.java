@@ -384,8 +384,9 @@ public abstract class ECCurve
                 ECFieldElement w = beta;
                 for (int i = 1; i <= m - 1; i++)
                 {
-                    z = z.square().add(w.square().multiply(t));
-                    w = w.square().add(beta);
+                    ECFieldElement w2 = w.square();
+                    z = z.square().add(w2.multiply(t));
+                    w = w2.add(beta);
                 }
                 if (!w.x.equals(ECConstants.ZERO))
                 {
