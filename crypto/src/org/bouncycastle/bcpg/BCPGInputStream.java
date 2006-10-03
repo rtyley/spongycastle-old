@@ -44,7 +44,7 @@ public class BCPGInputStream
         int off, 
         int len) 
         throws IOException
-    {    
+    {
         //
         // make sure we pick up nextB if set.
         //
@@ -60,6 +60,10 @@ public class BCPGInputStream
             buf[off] = (byte)b;
             off++;
             len--;
+        }
+        else
+        {
+            return 0;
         }
 
         if (len != 0)
