@@ -460,27 +460,38 @@ public class BigInteger
                 return val.subtract(this.negate());
         }
 
-        // both BigIntegers are either +ve or -ve; set the sign later
+        return addToMagnitude(val.magnitude);
+    }
 
-        int[] mag, 
-        op;
-
-        if (this.magnitude.length < val.magnitude.length)
+    private BigInteger addToMagnitude(
+        int[] magToAdd)
+    {
+        int[] big, small;
+        if (this.magnitude.length < magToAdd.length)
         {
-            mag = new int[val.magnitude.length + 1];
-
-            System.arraycopy(val.magnitude, 0, mag, 1, val.magnitude.length);
-            op = this.magnitude;
+            big = magToAdd;
+            small = this.magnitude;
         }
         else
         {
-            mag = new int[this.magnitude.length + 1];
-
-            System.arraycopy(this.magnitude, 0, mag, 1, this.magnitude.length);
-            op = val.magnitude;
+            big = this.magnitude;
+            small = magToAdd;
         }
 
-        return new BigInteger(this.sign, add(mag, op));
+        // Conservatively avoid over-allocation when no overflow possible
+        int limit = Integer.MAX_VALUE;
+        if (big.length == small.length)
+            limit -= small[0];
+
+        boolean possibleOverflow = (big[0] ^ (1 << 31)) >= limit;
+        int extra = possibleOverflow ? 1 : 0;
+
+        int[] bigCopy = new int[big.length + extra];
+        System.arraycopy(big, 0, bigCopy, extra, big.length);
+
+        bigCopy = add(bigCopy, small);
+
+        return new BigInteger(this.sign, bigCopy);
     }
 
     public int bitCount()
