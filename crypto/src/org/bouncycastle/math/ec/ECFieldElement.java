@@ -155,29 +155,35 @@ public abstract class ECFieldElement
                 
                 BigInteger n1 = q.subtract(ECConstants.ONE).divide(BigInteger.valueOf(4));
                 BigInteger n2 = q.add(BigInteger.valueOf(3)).divide(BigInteger.valueOf(4));
-                BigInteger root = x.multiply(BigInteger.valueOf(2).multiply(r).modPow(q.subtract(BigInteger.valueOf(2)), q)).multiply(W(n1, r, x, q).add(W(n2, r, x, q))).mod(q);
+                BigInteger wOne = WOne(r, x, q);
+                BigInteger root = x.multiply(BigInteger.valueOf(2).multiply(r).modPow(q.subtract(BigInteger.valueOf(2)), q)).multiply(W(n1, wOne, q).add(W(n2, wOne, q))).mod(q);
                 return new Fp(q, root);
             }
 
             throw new RuntimeException("not done yet");
         }
 
-        private BigInteger W(BigInteger n, BigInteger r, BigInteger x, BigInteger p)
+        private BigInteger W(BigInteger n, BigInteger wOne, BigInteger p)
         {
             if (n.equals(ECConstants.ONE))
             {
-                return r.multiply(r).multiply(x.modPow(q.subtract(BigInteger.valueOf(2)), q)).subtract(BigInteger.valueOf(2)).mod(p);
+                return wOne;
             }
             if (!n.testBit(0))
             {
-                BigInteger w = W(n.divide(BigInteger.valueOf(2)), r, x, p);
+                BigInteger w = W(n.divide(BigInteger.valueOf(2)), wOne, p);
                 return w.multiply(w).subtract(BigInteger.valueOf(2)).mod(p);
             }
-            BigInteger w1 = W(n.add(ECConstants.ONE).divide(BigInteger.valueOf(2)), r, x, p);
-            BigInteger w2 = W(n.subtract(ECConstants.ONE).divide(BigInteger.valueOf(2)), r, x, p);
-            return w1.multiply(w2).subtract(W(ECConstants.ONE, r, x, p)).mod(p);
+            BigInteger w1 = W(n.add(ECConstants.ONE).divide(BigInteger.valueOf(2)), wOne, p);
+            BigInteger w2 = W(n.subtract(ECConstants.ONE).divide(BigInteger.valueOf(2)), wOne, p);
+            return w1.multiply(w2).subtract(W(ECConstants.ONE, wOne, p)).mod(p);
         }
-        
+
+        private BigInteger WOne(BigInteger r, BigInteger x, BigInteger p)
+        {
+            return r.multiply(r).multiply(x.modPow(q.subtract(BigInteger.valueOf(2)), q)).subtract(BigInteger.valueOf(2)).mod(p);
+        }
+
         public boolean equals(Object other)
         {
             if (other == this)
