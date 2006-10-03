@@ -101,103 +101,166 @@ public abstract class ECFieldElement
          */
         public ECFieldElement sqrt()
         {
+            if (!q.testBit(0))
+                throw new RuntimeException("not done yet");
+
             // p mod 4 == 3
-            if (q.testBit(1)) // TODO Shouldn't this include q.testBit(0)?
+            if (q.testBit(1))
             {
                 // z = g^(u+1) + p, p = 4u + 3
                 ECFieldElement z = new Fp(q, x.modPow(q.shiftRight(2).add(ONE), q));
 
                 return z.square().equals(this) ? z : null;
             }
+
             // p mod 4 == 1
-            if (q.testBit(0))
+            BigInteger qMinusOne = q.subtract(ECConstants.ONE);
+            BigInteger u = qMinusOne.shiftRight(2);
+            BigInteger k = u.shiftLeft(1).add(ECConstants.ONE);
+
+            BigInteger Q = this.x;
+            BigInteger fourQ = Q.shiftLeft(2).mod(q);
+
+            BigInteger U, V;
+            do
             {
-                /*
-                 * TODO: Use Lucas sequence to be faster
-                BigInteger Q = this.x;
-                BigInteger P = this.x;
-                BigInteger U, V;
-                while (true)
-                {
-                    while (!(P.multiply(P).subtract(Q.multiply(ECConstants.FOUR)).compareTo(ECConstants.ZERO) == 1))
-                    {
-                        P = new BigInteger(this.x.bitLength(), new Random());
-                    }
-                    BigInteger u = q.subtract(ECConstants.ONE).divide(
-                            ECConstants.FOUR);
-                    BigInteger result[] = lucasSequence(q, P, Q, u.multiply(
-                            ECConstants.TWO).add(ECConstants.ONE));
-                    U = result[0];
-                    V = result[1];
-                    if (V.multiply(V).equals(Q.multiply(ECConstants.FOUR)))
-                    {
-                        return new Fp(q, V.divide(ECConstants.TWO));
-                    }
-                    if (!U.equals(ECConstants.ONE))
-                    {
-                        return null;
-                    }
-                }
- */
-
-                BigInteger qMinusOne = q.subtract(ECConstants.ONE);
-                BigInteger legendreExponent = qMinusOne.shiftRight(1); //divide(ECConstants.TWO);
-                if (!(x.modPow(legendreExponent, q).equals(ECConstants.ONE)))
-                {
-                    return null;
-                }
-
                 Random rand = new Random();
-                BigInteger fourX = x.shiftLeft(2);
-
-                BigInteger r;
+                BigInteger P;
                 do
                 {
-                    r = new BigInteger(q.bitLength(), rand);
+                    P = new BigInteger(q.bitLength(), rand);
                 }
-                while (r.compareTo(q) >= 0
-                    || !(r.multiply(r).subtract(fourX).modPow(legendreExponent, q).equals(qMinusOne)));
+                while (P.compareTo(q) >= 0);
 
-                BigInteger n1 = qMinusOne.shiftRight(2); //.divide(ECConstants.FOUR);
-                BigInteger n2 = n1.add(ECConstants.ONE); //q.add(ECConstants.THREE).divide(ECConstants.FOUR);
+                BigInteger[] result = lucasSequence(q, P, Q, k);
+                U = result[0];
+                V = result[1];
 
-                BigInteger wOne = WOne(r, x, q);
-                BigInteger wSum = W(n1, wOne, q).add(W(n2, wOne, q)).mod(q);
-                BigInteger twoR = r.shiftLeft(1); //ECConstants.TWO.multiply(r);
+                if (V.multiply(V).mod(q).equals(fourQ))
+                {
+                    // Integer division by 2, mod q
+                    if (V.testBit(0))
+                    {
+                        V = V.add(q);
+                    }
 
-                BigInteger root = twoR.modPow(q.subtract(ECConstants.TWO), q)
-                    .multiply(x).mod(q)
-                    .multiply(wSum).mod(q);
+                    V = V.shiftRight(1);
 
-                return new Fp(q, root);
+                    //assert V.multiply(V).mod(q).equals(x);
+
+                    return new ECFieldElement.Fp(q, V);
+                }
             }
+            while (U.equals(ECConstants.ONE) || U.equals(qMinusOne));
 
-            throw new RuntimeException("not done yet");
+            return null;
+
+//            BigInteger qMinusOne = q.subtract(ECConstants.ONE);
+//            BigInteger legendreExponent = qMinusOne.shiftRight(1); //divide(ECConstants.TWO);
+//            if (!(x.modPow(legendreExponent, q).equals(ECConstants.ONE)))
+//            {
+//                return null;
+//            }
+//
+//            Random rand = new Random();
+//            BigInteger fourX = x.shiftLeft(2);
+//
+//            BigInteger r;
+//            do
+//            {
+//                r = new BigInteger(q.bitLength(), rand);
+//            }
+//            while (r.compareTo(q) >= 0
+//                || !(r.multiply(r).subtract(fourX).modPow(legendreExponent, q).equals(qMinusOne)));
+//
+//            BigInteger n1 = qMinusOne.shiftRight(2); //.divide(ECConstants.FOUR);
+//            BigInteger n2 = n1.add(ECConstants.ONE); //q.add(ECConstants.THREE).divide(ECConstants.FOUR);
+//
+//            BigInteger wOne = WOne(r, x, q);
+//            BigInteger wSum = W(n1, wOne, q).add(W(n2, wOne, q)).mod(q);
+//            BigInteger twoR = r.shiftLeft(1); //ECConstants.TWO.multiply(r);
+//
+//            BigInteger root = twoR.modPow(q.subtract(ECConstants.TWO), q)
+//                .multiply(x).mod(q)
+//                .multiply(wSum).mod(q);
+//
+//            return new Fp(q, root);
         }
 
-        private static BigInteger W(BigInteger n, BigInteger wOne, BigInteger p)
+//        private static BigInteger W(BigInteger n, BigInteger wOne, BigInteger p)
+//        {
+//            if (n.equals(ECConstants.ONE))
+//            {
+//                return wOne;
+//            }
+//            boolean isEven = !n.testBit(0);
+//            n = n.shiftRight(1);//divide(ECConstants.TWO);
+//            if (isEven)
+//            {
+//                BigInteger w = W(n, wOne, p);
+//                return w.multiply(w).subtract(ECConstants.TWO).mod(p);
+//            }
+//            BigInteger w1 = W(n.add(ECConstants.ONE), wOne, p);
+//            BigInteger w2 = W(n, wOne, p);
+//            return w1.multiply(w2).subtract(wOne).mod(p);
+//        }
+//
+//        private BigInteger WOne(BigInteger r, BigInteger x, BigInteger p)
+//        {
+//            return r.multiply(r).multiply(x.modPow(q.subtract(ECConstants.TWO), q)).subtract(ECConstants.TWO).mod(p);
+//        }
+
+        private static BigInteger[] lucasSequence(
+            BigInteger  p,
+            BigInteger  P,
+            BigInteger  Q,
+            BigInteger  k)
         {
-            if (n.equals(ECConstants.ONE))
-            {
-                return wOne;
-            }
-            boolean isEven = !n.testBit(0);
-            n = n.shiftRight(1);//divide(ECConstants.TWO);
-            if (isEven)
-            {
-                BigInteger w = W(n, wOne, p);
-                return w.multiply(w).subtract(ECConstants.TWO).mod(p);
-            }
-            BigInteger w1 = W(n.add(ECConstants.ONE), wOne, p);
-            BigInteger w2 = W(n, wOne, p);
-            return w1.multiply(w2).subtract(wOne).mod(p);
-        }
+            int n = k.bitLength();
+            int s = k.getLowestSetBit();
 
-        private BigInteger WOne(BigInteger r, BigInteger x, BigInteger p)
-        {
-            return r.multiply(r).multiply(x.modPow(q.subtract(ECConstants.TWO), q)).subtract(ECConstants.TWO).mod(p);
-        }
+            BigInteger Uh = ECConstants.ONE;
+            BigInteger Vl = ECConstants.TWO;
+            BigInteger Vh = P;
+            BigInteger Ql = ECConstants.ONE;
+            BigInteger Qh = ECConstants.ONE;
 
+            for (int j = n - 1; j >= s + 1; --j)
+            {
+                Ql = Ql.multiply(Qh).mod(p);
+
+                if (k.testBit(j))
+                {
+                    Qh = Ql.multiply(Q).mod(p);
+                    Uh = Uh.multiply(Vh).mod(p);
+                    Vl = Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
+                    Vh = Vh.multiply(Vh).subtract(Qh.shiftLeft(1)).mod(p);
+                }
+                else
+                {
+                    Qh = Ql;
+                    Uh = Uh.multiply(Vl).subtract(Ql).mod(p);
+                    Vh = Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
+                    Vl = Vl.multiply(Vl).subtract(Ql.shiftLeft(1)).mod(p);
+                }
+            }
+
+            Ql = Ql.multiply(Qh).mod(p);
+            Qh = Ql.multiply(Q).mod(p);
+            Uh = Uh.multiply(Vl).subtract(Ql).mod(p);
+            Vl = Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
+            Ql = Ql.multiply(Qh).mod(p);
+
+            for (int j = 1; j <= s; ++j)
+            {
+                Uh = Uh.multiply(Vl).mod(p);
+                Vl = Vl.multiply(Vl).subtract(Ql.shiftLeft(1)).mod(p);
+                Ql = Ql.multiply(Ql).mod(p);
+            }
+
+            return new BigInteger[]{ Uh, Vl };
+        }
+        
         public boolean equals(Object other)
         {
             if (other == this)
