@@ -1,6 +1,9 @@
 package org.bouncycastle.mail.smime.test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.KeyPair;
 import java.security.Security;
 import org.bouncycastle.jce.cert.CertStore;
@@ -11,8 +14,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
+import javax.mail.Address;
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import junit.framework.Test;
@@ -29,6 +38,7 @@ import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
+import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
 
@@ -122,10 +132,52 @@ public class SMIMEMiscTest
         gen.addCertificatesAndCRLs(certs);
 
         MimeMultipart     smm = gen.generate(mp, "BC");
-        SMIMESignedParser s = new SMIMESignedParser(smm);
+        File              tmpFile = File.createTempFile("bcTest", ".mime");
+
+        MimeMessage       msg = createMimeMessage(tmpFile, smm);
+        
+        SMIMESignedParser s = new SMIMESignedParser((MimeMultipart)msg.getContent());
 
         certs = s.getCertificatesAndCRLs("Collection", "BC");
 
+        verifyMessageBytes(mp, s.getContent());
+    
+        verifySigners(certs, s.getSignerInfos());
+        
+        tmpFile.delete();
+    }
+    
+    public void testSHA256WithRSACompressed()
+        throws Exception
+    {
+        List certList = new ArrayList();
+        
+        certList.add(origCert);
+        certList.add(signCert);
+    
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+    
+        SMIMECompressedGenerator  cGen = new SMIMECompressedGenerator();
+        
+        MimeBodyPart   mp = cGen.generate(msg, SMIMECompressedGenerator.ZLIB);
+        
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+    
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+    
+        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);   
+        gen.addCertificatesAndCRLs(certs);
+    
+        MimeMultipart     smm = gen.generate(mp, "BC");
+        File              tmpFile = File.createTempFile("bcTest", ".mime");
+
+        MimeMessage       msg = createMimeMessage(tmpFile, smm);
+        
+        SMIMESigned       s = new SMIMESigned((MimeMultipart)msg.getContent());
+    
+        certs = s.getCertificatesAndCRLs("Collection", "BC");
+    
         verifyMessageBytes(mp, s.getContent());
     
         verifySigners(certs, s.getSignerInfos());
@@ -154,8 +206,12 @@ public class SMIMEMiscTest
         gen.addCertificatesAndCRLs(certs);
     
         MimeMultipart     smm = gen.generate(mp, "BC");
-        SMIMESignedParser s = new SMIMESignedParser(smm);
+        File              tmpFile = File.createTempFile("bcTest", ".mime");
+
+        MimeMessage       msg = createMimeMessage(tmpFile, smm);
         
+        SMIMESignedParser s = new SMIMESignedParser((MimeMultipart)msg.getContent());
+
         certs = s.getCertificatesAndCRLs("Collection", "BC");
     
         verifyMessageBytes(mp, s.getContent());
@@ -197,7 +253,34 @@ public class SMIMEMiscTest
         assertEquals(true, Arrays.equals(bOut1.toByteArray(), bOut2.toByteArray()));
     }
     
+    /**
+     * Create a mime message representing the multipart. We need to do
+     * this as otherwise no raw content stream for the message will exist.
+     */
+    private MimeMessage createMimeMessage(File tmpFile, MimeMultipart smm) 
+        throws Exception
+    {
+        FileOutputStream  fOut = new FileOutputStream(tmpFile);
+        Properties props = System.getProperties();
+        Session session = Session.getDefaultInstance(props, null);
 
+        Address fromUser = new InternetAddress("\"Eric H. Echidna\"<eric@bouncycastle.org>");
+        Address toUser = new InternetAddress("example@bouncycastle.org");
+
+        MimeMessage body = new MimeMessage(session);
+        body.setFrom(fromUser);
+        body.setRecipient(Message.RecipientType.TO, toUser);
+        body.setSubject("example signed message");
+        body.setContent(smm, smm.getContentType());
+        body.saveChanges();
+
+        body.writeTo(fOut);
+        
+        fOut.close();
+
+        return new MimeMessage(session, new FileInputStream(tmpFile));
+    }
+    
     private ASN1EncodableVector generateSignedAttributes()
     {
         ASN1EncodableVector         signedAttrs = new ASN1EncodableVector();
