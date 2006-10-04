@@ -40,9 +40,9 @@ public class BCPGInputStream
     }
 
     public int read(
-        byte[] buf, 
-        int off, 
-        int len) 
+        byte[] buf,
+        int off,
+        int len)
         throws IOException
     {
         if (len == 0)
@@ -62,8 +62,8 @@ public class BCPGInputStream
             return -1; // EOF
         }
 
-        buf[off] = (byte) nextB;  // May throw NullPointerException...
-        next = false;             // ...so only set this afterwards
+        buf[off] = (byte)nextB;  // May throw NullPointerException...
+        next = false;            // ...so only set this afterwards
 
         return 1;
     }
