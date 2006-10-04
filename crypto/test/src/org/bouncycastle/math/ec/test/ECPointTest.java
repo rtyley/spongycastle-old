@@ -25,9 +25,17 @@ public class ECPointTest extends TestCase
     /**
      * The standard curves on which the tests are done
      */
-    public static final String[] CURVES = { "sect163r2", "sect233r1",
-            "sect283r1", "sect409r1", "sect571r1", "secp224r1", "secp256r1",
-            "secp521r1" };
+    public static final String[] CURVES =
+    {
+        "sect163r2",
+        "sect233r1",
+        "sect283r1",
+        "sect409r1",
+        "sect571r1",
+        "secp224r1",
+        "secp256r1",
+        "secp521r1",
+    };
 
     /**
      * Random source used to generate random points
