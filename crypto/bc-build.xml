@@ -64,6 +64,33 @@
                 </classpath>
             </javac>
             <copy todir="${build.dir}/@{target}/classes">
+                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
+            </copy>
+            <jar jarfile="${artifacts.jars.dir}/@{target}.jar">
+                <manifest>
+                    <manifestElements/>
+                </manifest>
+                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.class" />
+                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.properties" />
+            </jar>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="compile-test">
+        <attribute name="target" />
+        <element name="manifestElements" />
+        <sequential>
+            <mkdir dir="${build.dir}/@{target}/classes" />
+            <mkdir dir="${artifacts.dir}/@{target}" />
+
+            <javac srcdir="${artifacts.dir}/@{target}/src" destdir="${build.dir}/@{target}/classes" debug="${release.debug}">
+                <classpath>
+                    <fileset dir="${artifacts.jars.dir}">
+                        <include name="**/*.jar" />
+                    </fileset>
+                </classpath>
+            </javac>
+            <copy todir="${build.dir}/@{target}/classes">
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.pem" />
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.message" />
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
@@ -86,7 +113,7 @@
         </sequential>
     </macrodef>
 
-    <macrodef name="compileDoc">
+    <macrodef name="compile-doc">
         <attribute name="srcDir" />
         <attribute name="docsDir" />
         <element name="docElements" />
@@ -162,7 +189,7 @@
         <copy todir="${provider.target.src.dir}">
              <fileset dir="${src.dir}">
                  <exclude name="org/bouncycastle/**/test/*.java" />
-                 <exclude name="org/bouncycastle/**/test/nist/*.java" />
+                 <exclude name="org/bouncycastle/**/test/*/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
                  <exclude name="org/bouncycastle/**/test/*.properties" />
                  <exclude name="org/bouncycastle/**/test/*.crl" />
@@ -207,11 +234,12 @@
         <copy todir="${jce.target.src.dir}">
              <fileset dir="${src.dir}">
                  <exclude name="org/bouncycastle/**/test/*.java" />
-                 <exclude name="org/bouncycastle/**/test/nist/*.java" />
+                 <exclude name="org/bouncycastle/**/test/*/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
                  <exclude name="org/bouncycastle/**/test/*.crl" />
                  <exclude name="org/bouncycastle/**/test/*.crt" />
                  <exclude name="org/bouncycastle/**/test/*.eml" />
+                 <exclude name="org/bouncycastle/**/test/*.properties" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
@@ -357,7 +385,7 @@
 
         <copy todir="${test.target.src.dir}">
              <fileset dir="${src.dir}" includes="**/test/*.java" />
-             <fileset dir="${src.dir}" includes="**/test/nist/*.java" />
+             <fileset dir="${src.dir}" includes="**/test/*/*.java" />
              <fileset dir="${src.dir}" includes="**/*.pem" />
              <fileset dir="${src.dir}" includes="**/*.eml" />
              <fileset dir="${src.dir}" includes="**/*.crt" />
@@ -366,7 +394,7 @@
              <fileset dir="${src.dir}" includes="**/*.message" />
         </copy>
 
-        <compile target="${test.target}">
+        <compile-test target="${test.target}">
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
                 <attribute name="Extension-Name" value="org.bouncycastle.bctest" />
@@ -376,7 +404,7 @@
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
-        </compile>
+        </compile-test>
     </target>
 
     <target name="test">
@@ -442,13 +470,14 @@
         <copy todir="${provider.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/jce/**/test/*.java" />
+                 <include name="org/bouncycastle/jce/**/test/*/*.java" />
                  <include name="org/bouncycastle/x509/**/test/*.java" />
                  <include name="org/bouncycastle/openssl/**/test/*.java" />
                  <include name="org/bouncycastle/ocsp/**/test/*.java" />
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${provider.target.src.dir}" docsDir="${artifacts.docs.dir}/bcprov">
+        <compile-doc srcDir="${provider.target.src.dir}" docsDir="${artifacts.docs.dir}/bcprov">
             <docElements>
                 <package name="org.bouncycastle.asn1.*" />
                 <package name="org.bouncycastle.crypto.*" />
@@ -464,7 +493,7 @@
                 <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
                 <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
             </docElements>
-        </compileDoc>
+        </compile-doc>
 
         <copy todir="${provider.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/bcprov" />
@@ -475,13 +504,14 @@
         <copy todir="${jce.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/jce/**/test/*.java" />
+                 <include name="org/bouncycastle/jce/**/test/*/*.java" />
                  <include name="org/bouncycastle/x509/**/test/*.java" />
                  <include name="org/bouncycastle/openssl/**/test/*.java" />
                  <include name="org/bouncycastle/ocsp/**/test/*.java" />
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${jce.target.src.dir}" docsDir="${artifacts.docs.dir}/jce">
+        <compile-doc srcDir="${jce.target.src.dir}" docsDir="${artifacts.docs.dir}/jce">
             <docElements>
                 <package name="org.bouncycastle.asn1.*" />
                 <package name="org.bouncycastle.crypto.*" />
@@ -499,7 +529,7 @@
                 <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
                 <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
             </docElements>
-        </compileDoc>
+        </compile-doc>
 
         <copy todir="${jce.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/jce" />
@@ -521,7 +551,7 @@
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${mail.target.src.dir}" docsDir="${artifacts.docs.dir}/bcmail">
+        <compile-doc srcDir="${mail.target.src.dir}" docsDir="${artifacts.docs.dir}/bcmail">
             <docElements>
                 <package name="org.bouncycastle.cms.*" />
                 <package name="org.bouncycastle.mail.*" />
@@ -530,7 +560,7 @@
                 <group title="S/MIME Packages" packages="org.bouncycastle.mail.smime*" />
                 <group title="Streaming ASN.1 Packages" packages="org.bouncycastle.sasn1*" />
             </docElements>
-        </compileDoc>
+        </compile-doc>
 
         <copy todir="${mail.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/bcmail" />
@@ -548,12 +578,12 @@
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${tsp.target.src.dir}" docsDir="${artifacts.docs.dir}/bctsp">
+        <compile-doc srcDir="${tsp.target.src.dir}" docsDir="${artifacts.docs.dir}/bctsp">
             <docElements>
                 <package name="org.bouncycastle.tsp.*" />
                 <group title="TSP Packages" packages="org.bouncycastle.tsp*" />
             </docElements>
-        </compileDoc>
+        </compile-doc>
 
         <copy todir="${tsp.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/bctsp" />
@@ -573,14 +603,14 @@
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${pg.target.src.dir}" docsDir="${artifacts.docs.dir}/bcpg">
+        <compile-doc srcDir="${pg.target.src.dir}" docsDir="${artifacts.docs.dir}/bcpg">
             <docElements>
                 <package name="org.bouncycastle.openpgp.*" />
                 <package name="org.bouncycastle.bcpg.*" />
                 <group title="BCPG Support Packages" packages="org.bouncycastle.bcpg*" />
                 <group title="OpenPGP Packages" packages="org.bouncycastle.openpgp*" />
             </docElements>
-        </compileDoc>
+        </compile-doc>
 
         <copy todir="${pg.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/bcpg" />
@@ -598,7 +628,7 @@
              </fileset>
         </copy>
 
-        <compileDoc srcDir="${lcrypto.target.src.dir}" docsDir="${artifacts.docs.dir}/lcrypto">
+        <compile-doc srcDir="${lcrypto.target.src.dir}" docsDir="${artifacts.docs.dir}/lcrypto">
             <docElements>
                 <package name="org.bouncycastle.asn1.*" />
                 <package name="org.bouncycastle.crypto.*" />
@@ -608,7 +638,7 @@
                 <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
                 <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
             </docElements>
-        </compileDoc>
+        </compile-doc>
 
         <copy todir="${lcrypto.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/lcrypto" />
