@@ -128,10 +128,13 @@ then
     rm -rf src/org/bouncycastle/i18n/filter/test
     rm -rf src/org/bouncycastle/voms
     rm -rf src/org/bouncycastle/jce/ECPointUtil.java
+    rm -rf src/org/bouncycastle/jce/X509LDAP*.java
     rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
     rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
     rm -rf src/org/bouncycastle/jce/provider/test/CRL5Test.java
     rm -rf src/org/bouncycastle/jce/provider/EC5*.java
+    rm -rf src/org/bouncycastle/jce/provider/X509LDAP*.java
+    rm -rf src/org/bouncycastle/jce/provider/test/X509LDAP*.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECEncodingTest.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECNRTest.java
