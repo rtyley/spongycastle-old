@@ -38,42 +38,36 @@ public class BCPGInputStream
             return in.read();
         }
     }
-    
+
     public int read(
         byte[] buf, 
         int off, 
         int len) 
         throws IOException
     {
-        //
-        // make sure we pick up nextB if set.
-        //
-        if (len > 0)
-        {
-            int    b = this.read();
-            
-            if (b < 0)
-            {
-                return -1;
-            }
-            
-            buf[off] = (byte)b;
-            off++;
-            len--;
-        }
-        else
+        if (len == 0)
         {
             return 0;
         }
 
-        if (len != 0)
+        if (!next)
         {
-            return in.read(buf, off, len) + 1;
+            return in.read(buf, off, len);
         }
-        
+
+        // We have next byte waiting, so return it
+
+        if (nextB < 0)
+        {
+            return -1; // EOF
+        }
+
+        buf[off] = (byte) nextB;  // May throw NullPointerException...
+        next = false;             // ...so only set this afterwards
+
         return 1;
     }
-  
+
     public void readFully(
         byte[]    buf,
         int       off,
