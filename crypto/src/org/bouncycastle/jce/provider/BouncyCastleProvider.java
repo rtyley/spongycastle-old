@@ -37,7 +37,7 @@ import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
  */
 public final class BouncyCastleProvider extends Provider
 {
-    private static String info = "BouncyCastle Security Provider v1.34";
+    private static String info = "BouncyCastle Security Provider v1.35b";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -48,7 +48,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.34, info);
+        super(PROVIDER_NAME, 1.345, info);
 
         //
         // KeyStore
@@ -551,6 +551,8 @@ public final class BouncyCastleProvider extends Provider
         put("CertPathBuilder.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi");
         put("CertPathBuilder.PKIX ValidationAlgorithm", "RFC2459");
         put("CertStore.Collection", "org.bouncycastle.jce.provider.CertStoreCollectionSpi");
+        put("CertStore.LDAP", "org.bouncycastle.jce.provider.X509LDAPCertStoreSpi");
+        put("Alg.Alias.CertStore.X509LDAP", "LDAP");
     }
     
     //
