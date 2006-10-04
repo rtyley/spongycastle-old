@@ -27,4 +27,20 @@ public interface MiscObjectIdentifiers
     // CZAG - country, zip, age, and gender
     //
     static final DERObjectIdentifier    verisignCzagExtension   = new DERObjectIdentifier(verisign + ".6.3");
+    // D&B D-U-N-S number
+    static final DERObjectIdentifier    verisignDnbDunsNumber   = new DERObjectIdentifier(verisign + ".6.15");
+
+    //
+    // Novell
+    //       iso/itu(2) country(16) us(840) organization(1) novell(113719)
+    //
+    static final String                 novell                  = "2.16.840.1.113719";
+    static final DERObjectIdentifier    novellSecurityAttribs   = new DERObjectIdentifier(novell + ".1.9.4.1");
+
+    //
+    // Entrust
+    //       iso(1) member-body(16) us(840) nortelnetworks(113533) entrust(7)
+    //
+    static final String                 entrust                 = "1.2.840.113533.7";
+    static final DERObjectIdentifier    entrustVersionExtension = new DERObjectIdentifier(entrust + ".65.0");
 }

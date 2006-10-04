@@ -143,6 +143,11 @@ public class X509Extensions
     public static final DERObjectIdentifier SubjectInfoAccess = new DERObjectIdentifier("1.3.6.1.5.5.7.1.11");
     
     /**
+     * Logo Type
+     */
+    public static final DERObjectIdentifier LogoType = new DERObjectIdentifier("1.3.6.1.5.5.7.1.12");
+
+    /**
      * BiometricInfo
      */
     public static final DERObjectIdentifier BiometricInfo = new DERObjectIdentifier("1.3.6.1.5.5.7.1.2");
