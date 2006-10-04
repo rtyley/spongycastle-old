@@ -102,7 +102,9 @@ public abstract class ECFieldElement
         public ECFieldElement sqrt()
         {
             if (!q.testBit(0))
+            {
                 throw new RuntimeException("not done yet");
+            }
 
             // p mod 4 == 3
             if (q.testBit(1))
@@ -115,11 +117,6 @@ public abstract class ECFieldElement
 
             // p mod 4 == 1
             BigInteger qMinusOne = q.subtract(ECConstants.ONE);
-
-            BigInteger legendreExponent = qMinusOne.shiftRight(1);
-            if (!(x.modPow(legendreExponent, q).equals(ECConstants.ONE)))
-                return null;
-
             BigInteger u = qMinusOne.shiftRight(2);
             BigInteger k = u.shiftLeft(1).add(ECConstants.ONE);
 
@@ -135,8 +132,7 @@ public abstract class ECFieldElement
                 {
                     P = new BigInteger(q.bitLength(), rand);
                 }
-                while (P.compareTo(q) >= 0
-                    || !(P.multiply(P).subtract(fourQ).modPow(legendreExponent, q).equals(qMinusOne)));
+                while (P.compareTo(q) >= 0);
 
                 BigInteger[] result = lucasSequence(q, P, Q, k);
                 U = result[0];
