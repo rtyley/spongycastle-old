@@ -28,6 +28,11 @@ public abstract class ECFieldElement
     public abstract ECFieldElement invert();
     public abstract ECFieldElement sqrt();
 
+    public String toString()
+    {
+        return this.x.toString(2);
+    }
+
     public static class Fp extends ECFieldElement
     {
         BigInteger q;
@@ -706,11 +711,6 @@ public abstract class ECFieldElement
         public int getK3()
         {
             return this.k3;
-        }
-
-        public String toString()
-        {
-            return this.x.toString(2);
         }
 
         public boolean equals(Object anObject)
