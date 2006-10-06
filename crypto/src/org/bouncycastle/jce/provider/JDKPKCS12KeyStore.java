@@ -72,7 +72,7 @@ public class JDKPKCS12KeyStore
     implements PKCSObjectIdentifiers, X509ObjectIdentifiers, BCKeyStore
 {
     private static final int    SALT_SIZE = 20;
-    private static final int    MIN_ITERATIONS = 100;
+    private static final int    MIN_ITERATIONS = 1024;
     
     //
     // SHA-1 and 3-key-triple DES.
