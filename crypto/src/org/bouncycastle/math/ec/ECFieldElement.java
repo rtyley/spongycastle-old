@@ -516,6 +516,11 @@ public abstract class ECFieldElement
             // No check performed here for performance reasons. Instead the
             // elements involved are checked in ECPoint.F2m
             // checkFieldElements(this, b);
+            if (b.x.signum() == 0)
+            {
+                return this;
+            }
+
             return new F2m(this.m, this.k1, this.k2, this.k3, this.x.xor(b.x));
         }
 
@@ -574,8 +579,8 @@ public abstract class ECFieldElement
 
         public ECFieldElement negate()
         {
-            // -x == x holds for all x in F2m, hence a copy of this is returned
-            return new F2m(this.m, this.k1, this.k2, this.k3, this.x);
+            // -x == x holds for all x in F2m
+            return this;
         }
 
         public ECFieldElement square()
