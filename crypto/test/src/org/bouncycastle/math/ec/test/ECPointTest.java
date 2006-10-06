@@ -59,7 +59,7 @@ public class ECPointTest extends TestCase
 
         private final ECCurve.Fp curve = new ECCurve.Fp(q, a, b);
 
-        private final ECPoint.Fp infinity = new ECPoint.Fp(curve, null, null);
+        private final ECPoint.Fp infinity = (ECPoint.Fp) curve.getInfinity();
 
         private final int[] pointSource = { 5, 22, 16, 27, 13, 6, 14, 6 };
 
@@ -102,7 +102,7 @@ public class ECPointTest extends TestCase
         private final ECCurve.F2m curve = new ECCurve.F2m(m, k1, aTpb
                 .toBigInteger(), bTpb.toBigInteger());
 
-        private final ECPoint.F2m infinity = new ECPoint.F2m(curve);
+        private final ECPoint.F2m infinity = (ECPoint.F2m) curve.getInfinity();
 
         private final String[] pointSource = { "0010", "1111", "1100", "1100",
                 "0001", "0001", "1011", "0010" };
@@ -290,15 +290,7 @@ public class ECPointTest extends TestCase
      */
     private ECPoint multiply(ECPoint p, BigInteger k)
     {
-        ECPoint q;
-        if (p instanceof ECPoint.Fp)
-        {
-            q = new ECPoint.Fp(p.getCurve(), null, null);
-        }
-        else
-        {
-            q = new ECPoint.F2m(p.getCurve(), null, null);
-        }
+        ECPoint q = p.getCurve().getInfinity();
         int t = k.bitLength();
         for (int i = 0; i < t; i++)
         {
@@ -456,16 +448,7 @@ public class ECPointTest extends TestCase
             ECPoint q = g.multiply(b);
 
             // Get point at infinity on the curve
-            ECPoint infinity;
-            if (g instanceof ECPoint.Fp)
-            {
-                infinity = new ECPoint.Fp(x9ECParameters.getCurve(), null, null);
-            }
-            else
-            {
-                infinity = new ECPoint.F2m(x9ECParameters.getCurve(), null,
-                        null);
-            }
+            ECPoint infinity = x9ECParameters.getCurve().getInfinity();
 
             implTestAddSubtract(q, infinity);
             implTestMultiply(q, n.bitLength());

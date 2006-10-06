@@ -186,7 +186,7 @@ public abstract class ECPoint
                 }
 
                 // this = -b, i.e. the result is the point at infinity
-                return new ECPoint.Fp(this.curve, null, null, this.withCompression);
+                return this.curve.getInfinity();
             }
 
             ECFieldElement gamma = b.y.subtract(this.y).divide(b.x.subtract(this.x));
@@ -210,7 +210,7 @@ public abstract class ECPoint
             {
                 // if y1 == 0, then (x1, y1) == (x1, -y1)
                 // and hence this = -this and thus 2(x1, y1) == infinity
-                return new ECPoint.Fp(curve, null, null, this.withCompression);
+                return this.curve.getInfinity();
             }
 
             ECFieldElement TWO = this.curve.fromBigInteger(BigInteger.valueOf(2));
@@ -245,7 +245,7 @@ public abstract class ECPoint
 
             if (k.signum() == 0)
             {
-                return new ECPoint.Fp(this.curve, null, null, this.withCompression);
+                return this.curve.getInfinity();
             }
 
             // BigInteger e = k.mod(n); // n == order this
@@ -323,6 +323,7 @@ public abstract class ECPoint
         }
 
         /**
+         * @deprecated use ECCurve.getInfinity()
          * Constructor for point at infinity
          */
         public F2m(ECCurve curve)
@@ -417,7 +418,7 @@ public abstract class ECPoint
                 }
 
                 // this = -b, i.e. the result is the point at infinity
-                return new ECPoint.F2m(this.curve, null, null, this.withCompression);
+                return this.curve.getInfinity();
             }
 
             ECFieldElement.F2m lambda
@@ -464,7 +465,7 @@ public abstract class ECPoint
             {
                 // if x1 == 0, then (x1, y1) == (x1, x1 + y1)
                 // and hence this = -this and thus 2(x1, y1) == infinity
-                return new ECPoint.F2m(curve, null, null, this.withCompression);
+                return this.curve.getInfinity();
             }
 
             ECFieldElement.F2m lambda
@@ -484,17 +485,17 @@ public abstract class ECPoint
         public ECPoint multiply(
             BigInteger k)
         {
-            ECPoint.F2m p = this;
-            ECPoint.F2m q = new ECPoint.F2m(this.curve, null, null,
-                    this.withCompression);
+            ECPoint p = this;
+            ECPoint q = this.curve.getInfinity();
+
             int t = k.bitLength();
             for (int i = 0; i < t; i++) 
             {
                 if (k.testBit(i)) 
                 {
-                    q = (ECPoint.F2m)q.add(p);
+                    q = q.add(p);
                 }
-                p = (ECPoint.F2m)p.twice();
+                p = p.twice();
             }
             return q;
         }

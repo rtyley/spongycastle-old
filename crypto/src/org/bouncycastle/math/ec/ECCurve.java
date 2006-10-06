@@ -14,6 +14,8 @@ public abstract class ECCurve
 
     public abstract ECPoint decodePoint(byte[] encoded);
 
+    public abstract ECPoint getInfinity();
+
     public ECFieldElement getA()
     {
         return a;
@@ -30,12 +32,14 @@ public abstract class ECCurve
     public static class Fp extends ECCurve
     {
         BigInteger q;
+        final ECPoint.Fp infinity;
 
         public Fp(BigInteger q, BigInteger a, BigInteger b)
         {
             this.q = q;
             this.a = fromBigInteger(a);
             this.b = fromBigInteger(b);
+            this.infinity = new ECPoint.Fp(this, null, null);
         }
 
         public BigInteger getQ()
@@ -110,7 +114,12 @@ public abstract class ECCurve
 
             return p;
         }
-        
+
+        public ECPoint getInfinity()
+        {
+            return infinity;
+        }
+
         public boolean equals(
             Object anObject) 
         {
@@ -172,6 +181,8 @@ public abstract class ECCurve
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
         private int k3;
+
+        private final ECPoint.F2m infinity;
 
         /**
          * Constructor for Trinomial Polynomial Basis (TPB).
@@ -256,6 +267,7 @@ public abstract class ECCurve
 
             this.a = fromBigInteger(a);
             this.b = fromBigInteger(b);
+            this.infinity = new ECPoint.F2m(this, null, null);
         }
         
         public ECFieldElement fromBigInteger(BigInteger x)
@@ -305,6 +317,11 @@ public abstract class ECCurve
             }
 
             return p;
+        }
+
+        public ECPoint getInfinity()
+        {
+            return infinity;
         }
 
         /**
