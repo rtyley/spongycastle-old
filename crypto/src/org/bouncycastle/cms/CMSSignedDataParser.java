@@ -20,17 +20,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.sasn1.Asn1Object;
-import org.bouncycastle.sasn1.Asn1OctetString;
-import org.bouncycastle.sasn1.Asn1Sequence;
-import org.bouncycastle.sasn1.Asn1Set;
-import org.bouncycastle.sasn1.BerTag;
-import org.bouncycastle.sasn1.DerSequence;
+import org.bouncycastle.sasn1.*;
 import org.bouncycastle.sasn1.cms.SignedDataParser;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  * Parsing class for an CMS Signed Data object from an input stream.
@@ -193,7 +189,7 @@ public class CMSSignedDataParser
     /**
      * return the collection of signers that are associated with the
      * signatures for the message.
-     * @throws CmsException 
+     * @throws CMSException 
      */
     public SignerInformationStore getSignerInfos() 
         throws CMSException
@@ -218,9 +214,8 @@ public class CMSSignedDataParser
                 
                 while ((o = s.readObject()) != null)
                 {
-                    DerSequence seq = (DerSequence)o;
-                    SignerInfo  info = SignerInfo.getInstance(new ASN1InputStream(seq.getEncoded()).readObject());
-                    String      digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
+                    SignerInfo info = SignerInfo.getInstance(convertObject(o));
+                    String     digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
                     
                     byte[] hash = (byte[])hashes.get(digestName);
                     
@@ -238,11 +233,57 @@ public class CMSSignedDataParser
         return _signerInfoStore;
     }
 
+    private DERObject convertObject(Asn1Object obj)
+        throws IOException
+    {
+        if (obj instanceof DerObject)
+        {
+            return new ASN1InputStream(((DerObject)obj).getEncoded()).readObject();
+        }
+        else
+        {
+            if (obj instanceof Asn1Sequence)
+            {
+                Asn1Sequence seq = (Asn1Sequence)obj;
+                ASN1EncodableVector v = new ASN1EncodableVector();
+
+                while ((obj = seq.readObject()) != null)
+                {
+                    v.add(convertObject(obj));
+                }
+
+                return new DERSequence(v);
+            }
+            else if (obj instanceof Asn1Set)
+            {
+                Asn1Set set = (Asn1Set)obj;
+                ASN1EncodableVector v = new ASN1EncodableVector();
+
+                while ((obj = set.readObject()) != null)
+                {
+                    v.add(convertObject(obj));
+                }
+
+                return new DERSet(v);
+            }
+            else if (obj instanceof Asn1TaggedObject)
+            {
+                Asn1TaggedObject tagged = (Asn1TaggedObject)obj;
+                                                 // TODO find a more general way of handling this
+                return new DERTaggedObject(false, tagged.getTagNumber(), convertObject(tagged.getObject(BerTag.SET, false)));
+            }
+            else
+            {
+                throw new IOException("unrecognised object: " + obj);
+            }
+        }
+    }
+
     /**
      * return a CertStore containing the certificates and CRLs associated with
      * this message.
      *
-     * @exception NoProviderException if the provider requested isn't available.
+     * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchAlgorithmException if the cert store isn't available.
      */
     public CertStore getCertificatesAndCRLs(
