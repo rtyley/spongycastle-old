@@ -34,6 +34,9 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -43,10 +46,6 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.sasn1.Asn1Integer;
-import org.bouncycastle.sasn1.Asn1ObjectIdentifier;
-import org.bouncycastle.sasn1.BerOctetStringGenerator;
-import org.bouncycastle.sasn1.BerSequenceGenerator;
 
 /**
  * General class for generating a pkcs7-signature message stream.
@@ -221,18 +220,7 @@ public class CMSSignedDataStreamGenerator
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
                   new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
-            AlgorithmIdentifier encAlgId;
-            
-            if (this.getEncryptionAlgOID().equals(ENCRYPTION_DSA))
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()));
-            }
-            else
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()), new DERNull());
-            }
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
 
             byte[]          hash = _digest.digest();
 
@@ -474,14 +462,14 @@ public class CMSSignedDataStreamGenerator
         //
         // ContentInfo
         //
-        BerSequenceGenerator sGen = new BerSequenceGenerator(out);
+        BERSequenceGenerator sGen = new BERSequenceGenerator(out);
         
-        sGen.addObject(new Asn1ObjectIdentifier(CMSObjectIdentifiers.signedData.getId()));
+        sGen.addObject(new DERObjectIdentifier(CMSObjectIdentifiers.signedData.getId()));
         
         //
         // Signed Data
         //
-        BerSequenceGenerator sigGen = new BerSequenceGenerator(sGen.getRawOutputStream(), 0, true);
+        BERSequenceGenerator sigGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
         
         sigGen.addObject(getVersion(signedContentType));
         
@@ -519,15 +507,15 @@ public class CMSSignedDataStreamGenerator
         
         sigGen.getRawOutputStream().write(new DERSet(digestAlgs).getEncoded());
         
-        BerSequenceGenerator eiGen = new BerSequenceGenerator(sigGen.getRawOutputStream());
+        BERSequenceGenerator eiGen = new BERSequenceGenerator(sigGen.getRawOutputStream());
         
-        eiGen.addObject(new Asn1ObjectIdentifier(signedContentType));
+        eiGen.addObject(new DERObjectIdentifier(signedContentType));
         
         OutputStream digStream;
         
         if (encapsulate)
         {
-            BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
+            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
             
             if (_bufferSize != 0)
             {
@@ -553,7 +541,7 @@ public class CMSSignedDataStreamGenerator
         return new CmsSignedDataOutputStream(digStream, signedContentType, sGen, sigGen, eiGen);
     }
     
-    private Asn1Integer getVersion(
+    private DERInteger getVersion(
         String signedContentType)
     {
         int v = 0;
@@ -591,7 +579,7 @@ public class CMSSignedDataStreamGenerator
         {
             v = 1;
         }
-        return new Asn1Integer(v);
+        return new DERInteger(v);
     }
 
     private boolean anyCertHasTypeOther()
@@ -632,16 +620,16 @@ public class CMSSignedDataStreamGenerator
     {
         private OutputStream         _out;
         private DERObjectIdentifier  _contentOID;
-        private BerSequenceGenerator _sGen;
-        private BerSequenceGenerator _sigGen;
-        private BerSequenceGenerator _eiGen;
+        private BERSequenceGenerator _sGen;
+        private BERSequenceGenerator _sigGen;
+        private BERSequenceGenerator _eiGen;
 
         public CmsSignedDataOutputStream(
             OutputStream         out,
             String               contentOID,
-            BerSequenceGenerator sGen, 
-            BerSequenceGenerator sigGen,
-            BerSequenceGenerator eiGen)
+            BERSequenceGenerator sGen,
+            BERSequenceGenerator sigGen,
+            BERSequenceGenerator eiGen)
         {
             _out = out;
             _contentOID = new DERObjectIdentifier(contentOID);

@@ -9,27 +9,25 @@ import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERTags;
+import org.bouncycastle.asn1.ASN1SetParser;
+import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
+import org.bouncycastle.asn1.cms.EnvelopedDataParser;
+import org.bouncycastle.asn1.cms.EncryptedContentInfoParser;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.sasn1.Asn1Object;
-import org.bouncycastle.sasn1.Asn1OctetString;
-import org.bouncycastle.sasn1.Asn1Sequence;
-import org.bouncycastle.sasn1.Asn1Set;
-import org.bouncycastle.sasn1.Asn1TaggedObject;
-import org.bouncycastle.sasn1.BerTag;
-import org.bouncycastle.sasn1.DerObject;
-import org.bouncycastle.sasn1.DerSequence;
-import org.bouncycastle.sasn1.cms.EncryptedContentInfoParser;
-import org.bouncycastle.sasn1.cms.EnvelopedDataParser;
 
 /**
  * Parsing class for an CMS Enveloped Data object from an input stream.
@@ -67,7 +65,7 @@ public class CMSEnvelopedDataParser
     extends CMSContentInfoParser
 {
     RecipientInformationStore   _recipientInfoStore;
-    EnvelopedDataParser         _envelopedData;
+    EnvelopedDataParser _envelopedData;
     
     private AlgorithmIdentifier _encAlg;
     private AttributeTable      _unprotectedAttributes;
@@ -87,30 +85,18 @@ public class CMSEnvelopedDataParser
         super(envelopedData);
 
         this._attrNotRead = true;
-        this._envelopedData = new EnvelopedDataParser((Asn1Sequence)_contentInfo.getContent(BerTag.SEQUENCE));
+        this._envelopedData = new EnvelopedDataParser((ASN1SequenceParser)_contentInfo.getContent(DERTags.SEQUENCE));
 
         //
         // load the RecepientInfoStore
         //
-        Asn1Set     s = _envelopedData.getRecipientInfos();
-        List        baseInfos = new ArrayList();
-        Asn1Object  o = null;
-        
-        while ((o = s.readObject()) != null)
+        ASN1SetParser s = _envelopedData.getRecipientInfos();
+        List          baseInfos = new ArrayList();
+        ASN1Set       set = ASN1Set.getInstance(s.getDERObject());
+
+        for (Enumeration en = set.getObjects(); en.hasMoreElements();)
         {
-            if (o instanceof DerSequence)
-            {
-                DerSequence     seq = (DerSequence)o;
-    
-                baseInfos.add(RecipientInfo.getInstance(new ASN1InputStream(seq.getEncoded()).readObject()));
-            }
-            else 
-            {
-                Asn1TaggedObject t = (Asn1TaggedObject)o;
-                DerSequence      seq = (DerSequence)t.getObject(BerTag.SEQUENCE, true);
-                
-                baseInfos.add(RecipientInfo.getInstance(new DERTaggedObject(true, t.getTagNumber(), new ASN1InputStream(seq.getEncoded()).readObject())));
-            }
+            baseInfos.add(RecipientInfo.getInstance(en.nextElement()));
         }
 
         //
@@ -125,7 +111,7 @@ public class CMSEnvelopedDataParser
         //
         List        infos = new ArrayList();
         Iterator    it = baseInfos.iterator();
-        InputStream dataStream = ((Asn1OctetString)encInfo.getEncryptedContent(BerTag.OCTET_STRING)).getOctetStream();
+        InputStream dataStream = ((ASN1OctetStringParser)encInfo.getEncryptedContent(DERTags.OCTET_STRING)).getOctetStream();
         
         while (it.hasNext())
         {
@@ -162,7 +148,7 @@ public class CMSEnvelopedDataParser
     {
         try
         {
-            return ((DerObject)_encAlg.getParameters()).getEncoded();
+            return ((DEREncodable)_encAlg.getParameters()).getDERObject().getEncoded();
         }
         catch (Exception e)
         {
@@ -180,8 +166,8 @@ public class CMSEnvelopedDataParser
      * @throws NoSuchProviderException if the provider cannot be found.
      */
     public AlgorithmParameters getEncryptionAlgorithmParameters(
-            String  provider) 
-    throws CMSException, NoSuchProviderException    
+        String  provider) 
+        throws CMSException, NoSuchProviderException
     {        
         try
         {
@@ -218,27 +204,27 @@ public class CMSEnvelopedDataParser
     /**
      * return a table of the unprotected attributes indexed by
      * the OID of the attribute.
-     * @throws IOException 
+     * @exception IOException 
      */
     public AttributeTable getUnprotectedAttributes() 
         throws IOException
     {
         if (_unprotectedAttributes == null && _attrNotRead)
         {
-            Asn1Set             set = _envelopedData.getUnprotectedAttrs();
+            ASN1SetParser             set = _envelopedData.getUnprotectedAttrs();
             
             _attrNotRead = false;
             
             if (set != null)
             {
                 ASN1EncodableVector v = new ASN1EncodableVector();
-                Asn1Object          o;
+                DEREncodable        o;
                 
                 while ((o = set.readObject()) != null)
                 {
-                    DerSequence     seq = (DerSequence)o;
+                    ASN1SequenceParser    seq = (ASN1SequenceParser)o;
                     
-                    v.add(DERSequence.getInstance(new ASN1InputStream(seq.getEncoded()).readObject()));
+                    v.add(seq.getDERObject());
                 }
                 
                 _unprotectedAttributes = new AttributeTable(new DERSet(v));

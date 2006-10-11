@@ -5,11 +5,11 @@ import java.io.OutputStream;
 import java.util.zip.DeflaterOutputStream;
 
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.sasn1.Asn1Integer;
-import org.bouncycastle.sasn1.Asn1ObjectIdentifier;
-import org.bouncycastle.sasn1.BerOctetStringGenerator;
-import org.bouncycastle.sasn1.BerSequenceGenerator;
-import org.bouncycastle.sasn1.DerSequenceGenerator;
+import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSequenceGenerator;
+import org.bouncycastle.asn1.BEROctetStringGenerator;
 
 /**
  * General class for generating a compressed CMS message stream.
@@ -51,34 +51,34 @@ public class CMSCompressedDataStreamGenerator
         String        compressionOID) 
         throws IOException
     {
-        BerSequenceGenerator sGen = new BerSequenceGenerator(out);
+        BERSequenceGenerator sGen = new BERSequenceGenerator(out);
         
-        sGen.addObject(new Asn1ObjectIdentifier(CMSObjectIdentifiers.compressedData.getId()));
+        sGen.addObject(CMSObjectIdentifiers.compressedData);
         
         //
         // Compressed Data
         //
-        BerSequenceGenerator cGen = new BerSequenceGenerator(sGen.getRawOutputStream(), 0, true);
+        BERSequenceGenerator cGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
         
-        cGen.addObject(new Asn1Integer(0));
+        cGen.addObject(new DERInteger(0));
         
         //
         // AlgorithmIdentifier
         //
-        DerSequenceGenerator algGen = new DerSequenceGenerator(cGen.getRawOutputStream());
+        DERSequenceGenerator algGen = new DERSequenceGenerator(cGen.getRawOutputStream());
         
-        algGen.addObject(new Asn1ObjectIdentifier(ZLIB));
+        algGen.addObject(new DERObjectIdentifier(ZLIB));
 
         algGen.close();
         
         //
         // Encapsulated ContentInfo
         //
-        BerSequenceGenerator eiGen = new BerSequenceGenerator(cGen.getRawOutputStream());
+        BERSequenceGenerator eiGen = new BERSequenceGenerator(cGen.getRawOutputStream());
         
-        eiGen.addObject(new Asn1ObjectIdentifier(contentOID));
+        eiGen.addObject(new DERObjectIdentifier(contentOID));
         
-        BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
+        BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
         
         return new CmsCompressedOutputStream(new DeflaterOutputStream(octGen.getOctetOutputStream()), sGen, cGen, eiGen);
     }
@@ -87,15 +87,15 @@ public class CMSCompressedDataStreamGenerator
         extends OutputStream
     {
         private DeflaterOutputStream _out;
-        private BerSequenceGenerator _sGen;
-        private BerSequenceGenerator _cGen;
-        private BerSequenceGenerator _eiGen;
+        private BERSequenceGenerator _sGen;
+        private BERSequenceGenerator _cGen;
+        private BERSequenceGenerator _eiGen;
         
         CmsCompressedOutputStream(
             DeflaterOutputStream out,
-            BerSequenceGenerator sGen,
-            BerSequenceGenerator cGen,
-            BerSequenceGenerator eiGen)
+            BERSequenceGenerator sGen,
+            BERSequenceGenerator cGen,
+            BERSequenceGenerator eiGen)
         {
             _out = out;
             _sGen = sGen;
