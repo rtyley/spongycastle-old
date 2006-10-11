@@ -5,6 +5,9 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * @deprecated use org.bouncycastle.asn1.ASN1StreamParser
+ */
 public class Asn1InputStream
 {
     InputStream     _in;
