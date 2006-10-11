@@ -91,6 +91,43 @@ public abstract class ASN1Sequence
         return seq.elements();
     }
 
+    public ASN1SequenceParser parser()
+    {
+        final ASN1Sequence outer = this;
+
+        return new ASN1SequenceParser()
+        {
+            private final int max = size();
+
+            private int index;
+
+            public DEREncodable readObject() throws IOException
+            {
+                if (index == max)
+                {
+                    return null;
+                }
+                
+                DEREncodable obj = getObjectAt(index++);
+                if (obj instanceof ASN1Sequence)
+                {
+                    return ((ASN1Sequence)obj).parser();
+                }
+                if (obj instanceof ASN1Set)
+                {
+                    return ((ASN1Set)obj).parser();
+                }
+
+                return obj;
+            }
+
+            public DERObject getDERObject()
+            {
+                return outer;
+            }
+        };
+    }
+
     /**
      * return the object at the sequence postion indicated by index.
      *

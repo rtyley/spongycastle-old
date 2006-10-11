@@ -101,7 +101,7 @@ public class SMIMEEnvelopedGenerator
     public void setBerEncodeRecipients(
         boolean berEncodeRecipientSet)
     {
-        fact.setBerEncodeRecipients(berEncodeRecipientSet);
+        fact.setBEREncodeRecipients(berEncodeRecipientSet);
     }
     
     /**

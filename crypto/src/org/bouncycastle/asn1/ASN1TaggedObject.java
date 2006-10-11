@@ -9,6 +9,7 @@ import java.io.IOException;
  */
 public abstract class ASN1TaggedObject
     extends DERObject
+    implements ASN1TaggedObjectParser
 {
     int             tagNo;
     boolean         empty = false;
@@ -165,6 +166,40 @@ public abstract class ASN1TaggedObject
         }
 
         return null;
+    }
+
+    public DEREncodable getObject(
+        int     tag,
+        boolean isExplicit)
+    {
+        if (isExplicit)
+        {
+            switch (tag)
+            {
+            case DERTags.SET:
+                return ASN1Set.getInstance(this, isExplicit).parser();
+            case DERTags.SEQUENCE:
+                return ASN1Sequence.getInstance(this, isExplicit).parser();
+            case DERTags.OCTET_STRING:
+                return ASN1OctetString.getInstance(this, isExplicit).parser();
+            }
+            
+            return getObject();
+        }
+        else
+        {
+            switch (tag)
+            {
+            case DERTags.SET:
+                return ASN1Set.getInstance(this, isExplicit).parser();
+            case DERTags.SEQUENCE:
+                return ASN1Sequence.getInstance(this, isExplicit).parser();
+            case DERTags.OCTET_STRING:
+                return ASN1OctetString.getInstance(this, isExplicit).parser();
+            }
+        }
+
+        throw new RuntimeException("implicit tagging not implemented for tag: " + tag);
     }
 
     abstract void encode(DEROutputStream  out)

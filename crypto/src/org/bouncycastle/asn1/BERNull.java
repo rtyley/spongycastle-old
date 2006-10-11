@@ -8,6 +8,8 @@ import java.io.IOException;
 public class BERNull
     extends DERNull
 {
+    public static final BERNull INSTANCE = new BERNull();
+
     public BERNull()
     {
     }

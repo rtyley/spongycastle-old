@@ -132,6 +132,43 @@ abstract public class ASN1Set
         return set.size();
     }
 
+    public ASN1SetParser parser()
+    {
+        final ASN1Set outer = this;
+
+        return new ASN1SetParser()
+        {
+            private final int max = size();
+
+            private int index;
+
+            public DEREncodable readObject() throws IOException
+            {
+                if (index == max)
+                {
+                    return null;
+                }
+
+                DEREncodable obj = getObjectAt(index++);
+                if (obj instanceof ASN1Sequence)
+                {
+                    return ((ASN1Sequence)obj).parser();
+                }
+                if (obj instanceof ASN1Set)
+                {
+                    return ((ASN1Set)obj).parser();
+                }
+
+                return obj;
+            }
+
+            public DERObject getDERObject()
+            {
+                return outer;
+            }
+        };
+    }
+
     public int hashCode()
     {
         Enumeration             e = this.getObjects();
