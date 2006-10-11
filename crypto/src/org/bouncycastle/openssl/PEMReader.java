@@ -13,6 +13,7 @@ import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.cert.X509CRL;
 import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
@@ -128,6 +129,10 @@ public class PEMReader extends BufferedReader
             if (line.indexOf("-----BEGIN X509 CERTIFICATE") != -1)
             {
                 return readCertificate("-----END X509 CERTIFICATE");
+            }
+            if (line.indexOf("-----BEGIN X509 CRL") != -1)
+            {
+                return readCRL("-----END X509 CRL");
             }
             if (line.indexOf("-----BEGIN ATTRIBUTE CERTIFICATE") != -1)
             {
@@ -288,6 +293,49 @@ public class PEMReader extends BufferedReader
                     = CertificateFactory.getInstance("X.509", provider);
 
             return (X509Certificate)certFact.generateCertificate(bIn);
+        }
+        catch (Exception e)
+        {
+            throw new IOException("problem parsing cert: " + e.toString());
+        }
+    }
+
+    /**
+     * Reads in a X509CRL.
+     *
+     * @return the X509Certificate
+     * @throws IOException if an I/O error occured
+     */
+    private X509CRL readCRL(
+        String  endMarker)
+        throws IOException
+    {
+        String          line;
+        StringBuffer    buf = new StringBuffer();
+
+        while ((line = readLine()) != null)
+        {
+            if (line.indexOf(endMarker) != -1)
+            {
+                break;
+            }
+            buf.append(line.trim());
+        }
+
+        if (line == null)
+        {
+            throw new IOException(endMarker + " not found");
+        }
+
+        ByteArrayInputStream    bIn = new ByteArrayInputStream(
+                                                Base64.decode(buf.toString()));
+
+        try
+        {
+            CertificateFactory certFact
+                    = CertificateFactory.getInstance("X.509", provider);
+
+            return (X509CRL)certFact.generateCRL(bIn);
         }
         catch (Exception e)
         {
