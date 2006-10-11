@@ -425,13 +425,55 @@ public class SignedDataTest
     {
         encapsulatedTest(_signKP, _signCert, CMSSignedDataGenerator.DIGEST_SHA256);
     }
-    
+
+    public void testRIPEMD128WithRSAEncapsulated()
+        throws Exception
+    {
+        encapsulatedTest(_signKP, _signCert, CMSSignedDataGenerator.DIGEST_RIPEMD128);
+    }
+
+    public void testRIPEMD160WithRSAEncapsulated()
+        throws Exception
+    {
+        encapsulatedTest(_signKP, _signCert, CMSSignedDataGenerator.DIGEST_RIPEMD160);
+    }
+
+    public void testRIPEMD256WithRSAEncapsulated()
+        throws Exception
+    {
+        encapsulatedTest(_signKP, _signCert, CMSSignedDataGenerator.DIGEST_RIPEMD256);
+    }
+
     public void testECDSAEncapsulated()
         throws Exception
     {
         encapsulatedTest(_signEcDsaKP, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA1);
     }
-    
+
+    public void testECDSASHA224Encapsulated()
+        throws Exception
+    {
+        encapsulatedTest(_signEcDsaKP, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA224);
+    }
+
+    public void testECDSASHA256Encapsulated()
+        throws Exception
+    {
+        encapsulatedTest(_signEcDsaKP, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA256);
+    }
+
+    public void testECDSASHA384Encapsulated()
+        throws Exception
+    {
+        encapsulatedTest(_signEcDsaKP, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA384);
+    }
+
+    public void testECDSASHA512Encapsulated()
+        throws Exception
+    {
+        encapsulatedTest(_signEcDsaKP, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA512);
+    }
+
     public void testDSAEncapsulated()
         throws Exception
     {

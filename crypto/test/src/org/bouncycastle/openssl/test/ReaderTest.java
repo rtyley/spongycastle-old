@@ -12,8 +12,6 @@ import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
@@ -88,7 +86,7 @@ public class ReaderTest
         }
         
         //
-        // writer/reader test
+        // writer/parser test
         //
         KeyPairGenerator      kpGen = KeyPairGenerator.getInstance("RSA", "BC");
         KeyPair               pair = kpGen.generateKeyPair();

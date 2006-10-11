@@ -14,14 +14,18 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
+import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
 
 class CMSSignedHelper
 {
     static final CMSSignedHelper INSTANCE = new CMSSignedHelper();
 
     private static final Map     encryptionAlgs = new HashMap();
+    private static final Map     digestAlgs = new HashMap();
 
-    static 
+
+    static
     {
         encryptionAlgs.put(X9ObjectIdentifiers.id_dsa_with_sha1.getId(), "DSA");
         encryptionAlgs.put(X9ObjectIdentifiers.id_dsa.getId(), "DSA");
@@ -39,6 +43,22 @@ class CMSSignedHelper
         encryptionAlgs.put(CMSSignedDataGenerator.ENCRYPTION_RSA_PSS, "RSAandMGF1");
         encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_94.getId(), "GOST3410");
         encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_2001.getId(), "ECGOST3410");
+
+        digestAlgs.put(PKCSObjectIdentifiers.md5.getId(), "MD5");
+        digestAlgs.put(OIWObjectIdentifiers.idSHA1.getId(), "SHA1");
+        digestAlgs.put(NISTObjectIdentifiers.id_sha224.getId(), "SHA224");
+        digestAlgs.put(NISTObjectIdentifiers.id_sha256.getId(), "SHA256");
+        digestAlgs.put(NISTObjectIdentifiers.id_sha384.getId(), "SHA384");
+        digestAlgs.put(NISTObjectIdentifiers.id_sha512.getId(), "SHA512");
+        digestAlgs.put(PKCSObjectIdentifiers.sha1WithRSAEncryption.getId(), "SHA1");
+        digestAlgs.put(PKCSObjectIdentifiers.sha224WithRSAEncryption.getId(), "SHA224");
+        digestAlgs.put(PKCSObjectIdentifiers.sha256WithRSAEncryption.getId(), "SHA256");
+        digestAlgs.put(PKCSObjectIdentifiers.sha384WithRSAEncryption.getId(), "SHA384");
+        digestAlgs.put(PKCSObjectIdentifiers.sha512WithRSAEncryption.getId(), "SHA512");
+        digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd128.getId(), "RIPEMD128");
+        digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd160.getId(), "RIPEMD160");
+        digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd256.getId(), "RIPEMD256");
+        digestAlgs.put(CryptoProObjectIdentifiers.gostR3411.getId(),  "GOST3411");
     }
     
     /**
@@ -48,70 +68,14 @@ class CMSSignedHelper
     String getDigestAlgName(
         String digestAlgOID)
     {
-        if (PKCSObjectIdentifiers.md5.getId().equals(digestAlgOID))
+        String algName = (String)digestAlgs.get(digestAlgOID);
+
+        if (algName != null)
         {
-            return "MD5";
+            return algName;
         }
-        else if (OIWObjectIdentifiers.idSHA1.getId().equals(digestAlgOID))
-        {
-            return "SHA1";
-        }
-        else if (NISTObjectIdentifiers.id_sha224.getId().equals(digestAlgOID))
-        {
-            return "SHA224";
-        }
-        else if (NISTObjectIdentifiers.id_sha256.getId().equals(digestAlgOID))
-        {
-            return "SHA256";
-        }
-        else if (NISTObjectIdentifiers.id_sha384.getId().equals(digestAlgOID))
-        {
-            return "SHA384";
-        }
-        else if (NISTObjectIdentifiers.id_sha512.getId().equals(digestAlgOID))
-        {
-            return "SHA512";
-        }
-        else if (PKCSObjectIdentifiers.sha1WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA1";
-        }
-        else if (PKCSObjectIdentifiers.sha224WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA224";
-        }
-        else if (PKCSObjectIdentifiers.sha256WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA256";
-        }
-        else if (PKCSObjectIdentifiers.sha384WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA384";
-        }
-        else if (PKCSObjectIdentifiers.sha512WithRSAEncryption.getId().equals(digestAlgOID))
-        {
-            return "SHA512";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd128.getId().equals(digestAlgOID))
-        {
-            return "RIPEMD128";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd160.getId().equals(digestAlgOID))
-        {
-            return "RIPEMD160";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd256.getId().equals(digestAlgOID))
-        {
-            return "RIPEMD256";
-        }
-        else if (CryptoProObjectIdentifiers.gostR3411.getId().equals(digestAlgOID))
-        {
-            return "GOST3411";
-        }
-        else
-        {
-            return digestAlgOID;            
-        }
+
+        return digestAlgOID;
     }
     
     /**

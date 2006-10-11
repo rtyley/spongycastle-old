@@ -2,12 +2,15 @@ package org.bouncycastle.asn1;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 import org.bouncycastle.util.encoders.Hex;
 
 public abstract class ASN1OctetString
     extends DERObject
+    implements ASN1OctetStringParser
 {
     byte[]  string;
 
@@ -88,6 +91,16 @@ public abstract class ASN1OctetString
         {
             throw new IllegalArgumentException("Error processing object : " + e.toString());
         }
+    }
+
+    public InputStream getOctetStream()
+    {
+        return new ByteArrayInputStream(string);
+    }
+
+    public ASN1OctetStringParser parser()
+    {
+        return this;
     }
 
     public byte[] getOctets()

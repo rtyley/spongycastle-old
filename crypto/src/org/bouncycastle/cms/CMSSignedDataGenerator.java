@@ -221,23 +221,11 @@ public class CMSSignedDataGenerator
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
                   new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
-            AlgorithmIdentifier encAlgId;
-            
-            if (this.getEncryptionAlgOID().equals(ENCRYPTION_DSA))
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()));
-            }
-            else
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()), new DERNull());
-            }
-
-            String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
-            String          signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
-            Signature       sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
-            MessageDigest   dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
+            String              digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
+            String              signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
+            Signature           sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+            MessageDigest       dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
 
             byte[]      hash = null;
 

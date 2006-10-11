@@ -34,6 +34,9 @@ then
         rm -rf src/org/bouncycastle/ocsp
         rm -rf src/org/bouncycastle/openpgp
         find src -name AllTests.java -exec rm {} \;
+        rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
+        rm src/org/bouncycastle/asn1/test/OctetStringTest.java
+        rm src/org/bouncycastle/asn1/test/ParseTest.java
 
         (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
             -header "$HEADER" \
@@ -138,6 +141,9 @@ then
     rm -rf src/org/bouncycastle/x509/PKIXCertPathReviewer.java
     rm -rf src/org/bouncycastle/x509/CertPathReviewerException.java
     find src -name AllTests.java -exec rm {} \;
+    rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
+    rm src/org/bouncycastle/asn1/test/OctetStringTest.java
+    rm src/org/bouncycastle/asn1/test/ParseTest.java
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \

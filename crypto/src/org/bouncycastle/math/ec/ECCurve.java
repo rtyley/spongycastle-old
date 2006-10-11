@@ -32,7 +32,7 @@ public abstract class ECCurve
     public static class Fp extends ECCurve
     {
         BigInteger q;
-        final ECPoint.Fp infinity;
+        ECPoint.Fp infinity;
 
         public Fp(BigInteger q, BigInteger a, BigInteger b)
         {
@@ -182,7 +182,7 @@ public abstract class ECCurve
          */
         private int k3;
 
-        private final ECPoint.F2m infinity;
+        private ECPoint.F2m infinity;
 
         /**
          * Constructor for Trinomial Polynomial Basis (TPB).
