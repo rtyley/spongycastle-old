@@ -34,6 +34,8 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
@@ -46,10 +48,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.sasn1.Asn1Integer;
-import org.bouncycastle.sasn1.Asn1ObjectIdentifier;
-import org.bouncycastle.sasn1.BerOctetStringGenerator;
-import org.bouncycastle.sasn1.BerSequenceGenerator;
 
 /**
  * General class for generating a CMS enveloped-data message stream.
@@ -316,21 +314,21 @@ public class CMSEnvelopedDataStreamGenerator
     /**
      * Use a BER Set to store the recipient information
      */
-    public void setBerEncodeRecipients(
+    public void setBEREncodeRecipients(
         boolean berEncodeRecipientSet)
     {
         _berEncodeRecipientSet = berEncodeRecipientSet;
     }
 
-    private Asn1Integer getVersion()
+    private DERInteger getVersion()
     {
         if (_originatorInfo != null || _unprotectedAttributes != null)
         {
-            return new Asn1Integer(2);
+            return new DERInteger(2);
         }
         else
         {
-            return new Asn1Integer(0);
+            return new DERInteger(0);
         }
     }
     
@@ -426,14 +424,14 @@ public class CMSEnvelopedDataStreamGenerator
             //
             // ContentInfo
             //
-            BerSequenceGenerator cGen = new BerSequenceGenerator(out);
+            BERSequenceGenerator cGen = new BERSequenceGenerator(out);
             
-            cGen.addObject(new Asn1ObjectIdentifier(CMSObjectIdentifiers.envelopedData.getId()));
+            cGen.addObject(CMSObjectIdentifiers.envelopedData);
             
             //
             // Encrypted Data
             //
-            BerSequenceGenerator envGen = new BerSequenceGenerator(cGen.getRawOutputStream(), 0, true);
+            BERSequenceGenerator envGen = new BERSequenceGenerator(cGen.getRawOutputStream(), 0, true);
             
             envGen.addObject(getVersion());
 
@@ -450,13 +448,13 @@ public class CMSEnvelopedDataStreamGenerator
             
             cipher.init(Cipher.ENCRYPT_MODE, encKey, params);
 
-            BerSequenceGenerator eiGen = new BerSequenceGenerator(envGen.getRawOutputStream());
+            BERSequenceGenerator eiGen = new BERSequenceGenerator(envGen.getRawOutputStream());
             
-            eiGen.addObject(new Asn1ObjectIdentifier(PKCSObjectIdentifiers.data.getId()));
+            eiGen.addObject(PKCSObjectIdentifiers.data);
             
             eiGen.getRawOutputStream().write(encAlgId.getEncoded());
             
-            BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, false);
+            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, false);
             
             CipherOutputStream      cOut;
             
@@ -568,15 +566,15 @@ public class CMSEnvelopedDataStreamGenerator
         extends OutputStream
     {
         private CipherOutputStream   _out;
-        private BerSequenceGenerator _cGen;
-        private BerSequenceGenerator _envGen;
-        private BerSequenceGenerator _eiGen;
+        private BERSequenceGenerator _cGen;
+        private BERSequenceGenerator _envGen;
+        private BERSequenceGenerator _eiGen;
     
         public CmsEnvelopedDataOutputStream(
             CipherOutputStream   out,
-            BerSequenceGenerator cGen, 
-            BerSequenceGenerator envGen,
-            BerSequenceGenerator eiGen)
+            BERSequenceGenerator cGen,
+            BERSequenceGenerator envGen,
+            BERSequenceGenerator eiGen)
         {
             _out = out;
             _cGen = cGen;

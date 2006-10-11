@@ -1,11 +1,11 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.cms.ContentInfoParser;
+import org.bouncycastle.asn1.ASN1StreamParser;
+import org.bouncycastle.asn1.ASN1SequenceParser;
+
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.bouncycastle.sasn1.Asn1InputStream;
-import org.bouncycastle.sasn1.Asn1Sequence;
-import org.bouncycastle.sasn1.cms.ContentInfoParser;
 
 public class CMSContentInfoParser
 {
@@ -20,9 +20,9 @@ public class CMSContentInfoParser
         
         try
         {
-            Asn1InputStream in = new Asn1InputStream(data, CMSUtils.getMaximumMemory());
+            ASN1StreamParser in = new ASN1StreamParser(data, CMSUtils.getMaximumMemory());
     
-            _contentInfo = new ContentInfoParser((Asn1Sequence)in.readObject());
+            _contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
         }
         catch (IOException e)
         {

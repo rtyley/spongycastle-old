@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
 
-import org.bouncycastle.sasn1.Asn1OctetString;
-import org.bouncycastle.sasn1.Asn1Sequence;
-import org.bouncycastle.sasn1.BerTag;
-import org.bouncycastle.sasn1.cms.CompressedDataParser;
-import org.bouncycastle.sasn1.cms.ContentInfoParser;
+import org.bouncycastle.asn1.cms.CompressedDataParser;
+import org.bouncycastle.asn1.cms.ContentInfoParser;
+import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.DERTags;
 
 /**
  * Class for reading a CMS Compressed Data stream.
@@ -47,10 +47,10 @@ public class CMSCompressedDataParser
     {
         try
         {
-            CompressedDataParser  comData = new CompressedDataParser((Asn1Sequence)_contentInfo.getContent(BerTag.SEQUENCE));
+            CompressedDataParser  comData = new CompressedDataParser((ASN1SequenceParser)_contentInfo.getContent(DERTags.SEQUENCE));
             ContentInfoParser     content = comData.getEncapContentInfo();
     
-            Asn1OctetString bytes = (Asn1OctetString)content.getContent(BerTag.OCTET_STRING);
+            ASN1OctetStringParser bytes = (ASN1OctetStringParser)content.getContent(DERTags.OCTET_STRING);
     
             return new CMSTypedStream(content.getContentType().toString(), new InflaterInputStream(bytes.getOctetStream()));
         }
