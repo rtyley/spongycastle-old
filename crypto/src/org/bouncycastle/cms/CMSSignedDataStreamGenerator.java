@@ -464,7 +464,7 @@ public class CMSSignedDataStreamGenerator
         //
         BERSequenceGenerator sGen = new BERSequenceGenerator(out);
         
-        sGen.addObject(new DERObjectIdentifier(CMSObjectIdentifiers.signedData.getId()));
+        sGen.addObject(CMSObjectIdentifiers.signedData);
         
         //
         // Signed Data
