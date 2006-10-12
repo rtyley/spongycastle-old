@@ -50,11 +50,12 @@ public class DHTest
 
     private void testGP(
         int         size,
+        int         privateValueSize,
         BigInteger  g,
         BigInteger  p)
         throws Exception
     {
-        DHParameterSpec             dhParams = new DHParameterSpec(p, g);
+        DHParameterSpec             dhParams = new DHParameterSpec(p, g, privateValueSize);
 
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH", "BC");
 
@@ -67,6 +68,8 @@ public class DHTest
 
         KeyAgreement aKeyAgree = KeyAgreement.getInstance("DH", "BC");
 
+        checkKeySize(privateValueSize, aKeyPair);
+
         aKeyAgree.init(aKeyPair.getPrivate());
 
         //
@@ -75,6 +78,8 @@ public class DHTest
         KeyPair bKeyPair = keyGen.generateKeyPair();
 
         KeyAgreement bKeyAgree = KeyAgreement.getInstance("DH", "BC");
+
+        checkKeySize(privateValueSize, bKeyPair);
 
         bKeyAgree.init(bKeyPair.getPrivate());
 
@@ -227,6 +232,19 @@ public class DHTest
         }
     }
 
+    private void checkKeySize(int privateValueSize, KeyPair aKeyPair)
+    {
+        if (privateValueSize != 0)
+        {
+            DHPrivateKey key = (DHPrivateKey)aKeyPair.getPrivate();
+
+            if (key.getX().bitLength() != privateValueSize)
+            {
+                fail("limited key check failed for key size " + privateValueSize);
+            }
+        }
+    }
+
     private void testRandom(
         int         size)
         throws Exception
@@ -250,7 +268,7 @@ public class DHTest
 
         DHParameterSpec dhP = (DHParameterSpec)params.getParameterSpec(DHParameterSpec.class);
 
-        testGP(size, dhP.getG(), dhP.getP());
+        testGP(size, 0, dhP.getG(), dhP.getP());
     }
 
     private void testECDH()
@@ -462,9 +480,12 @@ public class DHTest
     public void performTest()
         throws Exception
     {
-        testGP(512, g512, p512);
-        testGP(768, g768, p768);  
-        testGP(1024, g1024, p1024);
+        testGP(512, 0, g512, p512);
+        testGP(768, 0, g768, p768);
+        testGP(1024, 0, g1024, p1024);
+        testGP(512, 64, g512, p512);
+        testGP(768, 128, g768, p768);
+        testGP(1024, 256, g1024, p1024);
         testRandom(256);
         testECDH();
         testECDHC();

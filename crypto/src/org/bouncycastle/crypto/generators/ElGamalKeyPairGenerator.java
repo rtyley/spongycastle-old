@@ -36,7 +36,7 @@ public class ElGamalKeyPairGenerator
 
         p = elParams.getP();
  
-        x = helper.calculatePrivate(p, param.getRandom(), 0); 
+        x = helper.calculatePrivate(p, param.getRandom(), elParams.getL()); 
         y = helper.calculatePublic(p, elParams.getG(), x);
 
         return new AsymmetricCipherKeyPair(

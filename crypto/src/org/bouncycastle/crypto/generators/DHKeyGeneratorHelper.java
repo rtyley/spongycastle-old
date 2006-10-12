@@ -32,7 +32,7 @@ class DHKeyGeneratorHelper
         {
             do
             {
-                x = new BigInteger(limit, random);
+                x = new BigInteger(limit, 0, random);
             }
             while (x.equals(ZERO));
         }
