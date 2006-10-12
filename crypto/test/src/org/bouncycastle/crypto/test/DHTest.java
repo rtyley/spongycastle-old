@@ -78,10 +78,11 @@ public class DHTest
 
     private void testDHBasic(
         int         size,
+        int         privateValueSize,
         BigInteger  g,
         BigInteger  p)
     {
-        DHBasicKeyPairGenerator kpGen = getDHBasicKeyPairGenerator(g, p);
+        DHBasicKeyPairGenerator kpGen = getDHBasicKeyPairGenerator(g, p, privateValueSize);
 
         //
         // generate first pair
@@ -90,6 +91,8 @@ public class DHTest
 
         DHPublicKeyParameters       pu1 = (DHPublicKeyParameters)pair.getPublic();
         DHPrivateKeyParameters      pv1 = (DHPrivateKeyParameters)pair.getPrivate();
+
+        checkKeySize(privateValueSize, pv1);
         //
         // generate second pair
         //
@@ -98,6 +101,7 @@ public class DHTest
         DHPublicKeyParameters       pu2 = (DHPublicKeyParameters)pair.getPublic();
         DHPrivateKeyParameters      pv2 = (DHPrivateKeyParameters)pair.getPrivate();
 
+        checkKeySize(privateValueSize, pv2);
         //
         // two way
         //
@@ -113,6 +117,19 @@ public class DHTest
         if (!k1.equals(k2))
         {
             fail("basic " + size + " bit 2-way test failed");
+        }
+    }
+
+    private void checkKeySize(
+        int privateValueSize,
+        DHPrivateKeyParameters priv)
+    {
+        if (privateValueSize != 0)
+        {
+            if (priv.getX().bitLength() != privateValueSize)
+            {
+                fail("limited key check failed for key size " + privateValueSize);
+            }
         }
     }
 
@@ -193,9 +210,10 @@ public class DHTest
 
     private DHBasicKeyPairGenerator getDHBasicKeyPairGenerator(
         BigInteger g,
-        BigInteger p)
+        BigInteger p,
+        int        privateValueSize)
     {
-        DHParameters                dhParams = new DHParameters(p, g);
+        DHParameters                dhParams = new DHParameters(p, g, null, privateValueSize);
         DHKeyGenerationParameters   params = new DHKeyGenerationParameters(new SecureRandom(), dhParams);
         DHBasicKeyPairGenerator     kpGen = new DHBasicKeyPairGenerator();
 
@@ -275,9 +293,13 @@ public class DHTest
 
     public void performTest()
     {
-        testDHBasic(512, g512, p512);
-        testDHBasic(768, g768, p768);
-        testDHBasic(1024, g1024, p1024);
+        testDHBasic(512, 0, g512, p512);
+        testDHBasic(768, 0, g768, p768);
+        testDHBasic(1024, 0, g1024, p1024);
+
+        testDHBasic(512, 64, g512, p512);
+        testDHBasic(768, 128, g768, p768);
+        testDHBasic(1024, 256, g1024, p1024);
 
         testDH(512, g512, p512);
         testDH(768, g768, p768);
@@ -291,7 +313,7 @@ public class DHTest
         //
         // with random test
         //
-        DHBasicKeyPairGenerator     kpBasicGen = getDHBasicKeyPairGenerator(g512, p512);
+        DHBasicKeyPairGenerator     kpBasicGen = getDHBasicKeyPairGenerator(g512, p512, 0);
         
         testSimpleWithRandom(kpBasicGen);
         
@@ -343,7 +365,7 @@ public class DHTest
             // expected
         }
         
-        DHBasicKeyPairGenerator      kpBasicGen768 = getDHBasicKeyPairGenerator(g768, p768);
+        DHBasicKeyPairGenerator      kpBasicGen768 = getDHBasicKeyPairGenerator(g768, p768, 0);
         
         try
         {

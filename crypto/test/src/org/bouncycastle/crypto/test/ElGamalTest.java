@@ -34,10 +34,11 @@ public class ElGamalTest
 
     private void testEnc(
         int         size,
+        int         privateValueSize,
         BigInteger  g,
         BigInteger  p)
     {
-        ElGamalParameters                dhParams = new ElGamalParameters(p, g);
+        ElGamalParameters                dhParams = new ElGamalParameters(p, g, privateValueSize);
         ElGamalKeyGenerationParameters   params = new ElGamalKeyGenerationParameters(new SecureRandom(), dhParams);
         ElGamalKeyPairGenerator          kpGen = new ElGamalKeyPairGenerator();
 
@@ -50,6 +51,8 @@ public class ElGamalTest
 
         ElGamalPublicKeyParameters      pu = (ElGamalPublicKeyParameters)pair.getPublic();
         ElGamalPrivateKeyParameters     pv = (ElGamalPrivateKeyParameters)pair.getPrivate();
+
+        checkKeySize(privateValueSize, pv);
 
         ElGamalEngine    e = new ElGamalEngine();
 
@@ -115,6 +118,19 @@ public class ElGamalTest
         }
     }
 
+    private void checkKeySize(
+        int privateValueSize,
+        ElGamalPrivateKeyParameters priv)
+    {
+        if (privateValueSize != 0)
+        {
+            if (priv.getX().bitLength() != privateValueSize)
+            {
+                fail("limited key check failed for key size " + privateValueSize);
+            }
+        }
+    }
+
     /**
      * this test is can take quiet a while
      */
@@ -162,9 +178,12 @@ public class ElGamalTest
 
     public void performTest()
     {
-        testEnc(512, g512, p512);
-        testEnc(768, g768, p768);
-        testEnc(1024, g1024, p1024);
+        testEnc(512, 0, g512, p512);
+        testEnc(768, 0, g768, p768);
+        testEnc(1024, 0, g1024, p1024);
+
+        testEnc(512, 64, g512, p512);
+        testEnc(768, 128, g768, p768);
 
         //
         // generation test.

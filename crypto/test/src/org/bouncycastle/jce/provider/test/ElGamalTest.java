@@ -42,11 +42,12 @@ public class ElGamalTest
 
     private void testGP(
         int         size,
+        int         privateValueSize,
         BigInteger  g,
         BigInteger  p)
         throws Exception
     {
-        DHParameterSpec  elParams = new DHParameterSpec(p, g);
+        DHParameterSpec  elParams = new DHParameterSpec(p, g, privateValueSize);
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ElGamal", "BC");
         byte[]           in = "This is a test".getBytes();
 
@@ -54,6 +55,8 @@ public class ElGamalTest
         
         KeyPair         keyPair = keyGen.generateKeyPair();
         SecureRandom    rand = new SecureRandom();
+
+        checkKeySize(privateValueSize, keyPair);
 
         Cipher  cipher = Cipher.getInstance("ElGamal", "BC");
         
@@ -196,6 +199,19 @@ public class ElGamalTest
         }
     }
 
+    private void checkKeySize(int privateValueSize, KeyPair aKeyPair)
+    {
+        if (privateValueSize != 0)
+        {
+            DHPrivateKey key = (DHPrivateKey)aKeyPair.getPrivate();
+
+            if (key.getX().bitLength() != privateValueSize)
+            {
+                fail("limited key check failed for key size " + privateValueSize);
+            }
+        }
+    }
+
     private void testRandom(
         int         size)
         throws Exception
@@ -219,15 +235,19 @@ public class ElGamalTest
 
         DHParameterSpec elP = (DHParameterSpec)params.getParameterSpec(DHParameterSpec.class);
 
-        testGP(size, elP.getG(), elP.getP());
+        testGP(size, 0, elP.getG(), elP.getP());
     }
 
     public void performTest()
         throws Exception
     {
-        testGP(512, g512, p512);
-        testGP(768, g768, p768);
-        testGP(1024, g1024, p1024);
+        testGP(512, 0, g512, p512);
+        testGP(768, 0, g768, p768);
+        testGP(1024, 0, g1024, p1024);
+
+        testGP(512, 64, g512, p512);
+        testGP(768, 128, g768, p768);
+        testGP(1024, 256, g1024, p1024);
         
         testRandom(256);
     }
