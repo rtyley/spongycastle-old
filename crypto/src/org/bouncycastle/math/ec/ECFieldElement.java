@@ -134,9 +134,9 @@ public abstract class ECFieldElement
             BigInteger fourQ = Q.shiftLeft(2).mod(q);
 
             BigInteger U, V;
+            Random rand = new Random();
             do
             {
-                Random rand = new Random();
                 BigInteger P;
                 do
                 {
