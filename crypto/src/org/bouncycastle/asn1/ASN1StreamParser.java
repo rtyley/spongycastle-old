@@ -15,8 +15,7 @@ public class ASN1StreamParser
     public ASN1StreamParser(
         InputStream in)
     {
-        this._in = in;
-        this._limit = Integer.MAX_VALUE;
+        this(in, Integer.MAX_VALUE);
     }
 
     public ASN1StreamParser(
@@ -30,8 +29,7 @@ public class ASN1StreamParser
     public ASN1StreamParser(
         byte[] encoding)
     {
-        this._in = new ByteArrayInputStream(encoding);
-        this._limit = encoding.length;
+        this(new ByteArrayInputStream(encoding), encoding.length);
     }
 
     InputStream getParentStream()
@@ -44,7 +42,7 @@ public class ASN1StreamParser
         int length = _in.read();
         if (length < 0)
         {
-            throw new IOException("EOF found when length expected");
+            throw new EOFException("EOF found when length expected");
         }
 
         if (length == 0x80)
@@ -68,7 +66,7 @@ public class ASN1StreamParser
 
                 if (next < 0)
                 {
-                    throw new IOException("EOF found reading length");
+                    throw new EOFException("EOF found reading length");
                 }
 
                 length = (length << 8) + next;
