@@ -384,20 +384,23 @@ public abstract class ECCurve
          */
         private ECFieldElement solveQuadradicEquation(ECFieldElement beta)
         {
+            ECFieldElement zeroElement = new ECFieldElement.F2m(
+                    this.m, this.k1, this.k2, this.k3, ECConstants.ZERO);
+
             if (beta.x.equals(ECConstants.ZERO))
             {
-                return new ECFieldElement.F2m(
-                        this.m, this.k1, this.k2, this.k3, ECConstants.ZERO);
+                return zeroElement;
             }
+
             ECFieldElement z = null;
-            ECFieldElement gamma = new ECFieldElement.F2m(this.m, this.k1,
-                    this.k2, this.k3, ECConstants.ZERO);
-            while (gamma.toBigInteger().equals(ECConstants.ZERO))
+            ECFieldElement gamma = zeroElement;
+
+            Random rand = new Random();
+            do
             {
                 ECFieldElement t = new ECFieldElement.F2m(this.m, this.k1,
-                        this.k2, this.k3, new BigInteger(m, new Random()));
-                z = new ECFieldElement.F2m(this.m, this.k1, this.k2, this.k3,
-                        ECConstants.ZERO);
+                        this.k2, this.k3, new BigInteger(m, rand));
+                z = zeroElement;
                 ECFieldElement w = beta;
                 for (int i = 1; i <= m - 1; i++)
                 {
@@ -411,6 +414,8 @@ public abstract class ECCurve
                 }
                 gamma = z.square().add(z);
             }
+            while (gamma.toBigInteger().equals(ECConstants.ZERO));
+
             return z;
         }
         
