@@ -57,8 +57,8 @@ public class CMSEnvelopedDataGenerator
 {
     List                        recipientInfs = new ArrayList();
 
-    public static final String  DES_EDE3_CBC    = "1.2.840.113549.3.7";
-    public static final String  RC2_CBC         = "1.2.840.113549.3.2";
+    public static final String  DES_EDE3_CBC    = PKCSObjectIdentifiers.des_EDE3_CBC.getId();
+    public static final String  RC2_CBC         = PKCSObjectIdentifiers.RC2_CBC.getId();
     public static final String  IDEA_CBC        = "1.3.6.1.4.1.188.7.1.1.2";
     public static final String  CAST5_CBC       = "1.2.840.113533.7.66.10";
     public static final String  AES128_CBC      = NISTObjectIdentifiers.id_aes128_CBC.getId(); 
