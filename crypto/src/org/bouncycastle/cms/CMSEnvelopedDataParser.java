@@ -148,7 +148,7 @@ public class CMSEnvelopedDataParser
     {
         try
         {
-            return ((DEREncodable)_encAlg.getParameters()).getDERObject().getEncoded();
+            return _encAlg.getParameters().getDERObject().getEncoded();
         }
         catch (Exception e)
         {
