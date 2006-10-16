@@ -106,6 +106,8 @@ public class PGPUtil
             return "SHA384";
         case HashAlgorithmTags.SHA512:
             return "SHA512";
+        case HashAlgorithmTags.SHA224:
+            return "SHA224";
         default:
             throw new PGPException("unknown hash algorithm tag in getDigestName: " + hashAlgorithm);
         }
