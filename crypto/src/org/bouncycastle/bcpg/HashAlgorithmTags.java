@@ -16,4 +16,5 @@ public interface HashAlgorithmTags
     public static final int SHA256 = 8;       // SHA-256
     public static final int SHA384 = 9;       // SHA-384
     public static final int SHA512 = 10;      // SHA-512
+    public static final int SHA224 = 11;      // SHA-224
 }
