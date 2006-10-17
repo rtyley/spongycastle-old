@@ -5,7 +5,7 @@ import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERTaggedObjectParser;
+import org.bouncycastle.asn1.ASN1TaggedObjectParser;
 import org.bouncycastle.asn1.DERTags;
 
 import java.io.IOException;
@@ -84,9 +84,9 @@ public class SignedDataParser
         _certsCalled = true;
         _nextObject = _seq.readObject();
 
-        if (_nextObject instanceof BERTaggedObjectParser && ((BERTaggedObjectParser)_nextObject).getTagNo() == 0)
+        if (_nextObject instanceof ASN1TaggedObjectParser && ((ASN1TaggedObjectParser)_nextObject).getTagNo() == 0)
         {
-            ASN1SetParser certs = (ASN1SetParser)((BERTaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
+            ASN1SetParser certs = (ASN1SetParser)((ASN1TaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
             _nextObject = null;
 
             return certs;
@@ -110,9 +110,9 @@ public class SignedDataParser
             _nextObject = _seq.readObject();
         }
 
-        if (_nextObject instanceof BERTaggedObjectParser && ((BERTaggedObjectParser)_nextObject).getTagNo() == 1)
+        if (_nextObject instanceof ASN1TaggedObjectParser && ((ASN1TaggedObjectParser)_nextObject).getTagNo() == 1)
         {
-            ASN1SetParser crls = (ASN1SetParser)((BERTaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
+            ASN1SetParser crls = (ASN1SetParser)((ASN1TaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
             _nextObject = null;
 
             return crls;
