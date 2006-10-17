@@ -9,6 +9,7 @@ import java.util.zip.InflaterInputStream;
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.CompressedDataPacket;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
+import org.apache.tools.bzip2.CBZip2InputStream;
 
 /**
  * Compressed data objects.
@@ -55,6 +56,10 @@ public class PGPCompressedData
     public InputStream getDataStream()
         throws PGPException
     {
+      if (this.getAlgorithm() == UNCOMPRESSED)
+      {
+          return this.getInputStream();
+      }
       if (this.getAlgorithm() == ZIP)
       {
           return new InflaterInputStream(this.getInputStream(), new Inflater(true)) 
@@ -88,7 +93,7 @@ public class PGPCompressedData
               private boolean eof = false;
           };
       }
-      else if (this.getAlgorithm() == ZLIB)
+      if (this.getAlgorithm() == ZLIB)
       {
           return new InflaterInputStream(this.getInputStream())
           {
@@ -114,14 +119,18 @@ public class PGPCompressedData
                       len = 1;
                       eof = true;
                   }
-                  
+
                   inf.setInput(buf, 0, len);
               }
 
               private boolean eof = false;
           };
       }
-
+      if (this.getAlgorithm() == BZIP2)
+      {
+          return new CBZip2InputStream(this.getInputStream());
+      }
+        
       throw new PGPException("can't recognise compression algorithm: " + this.getAlgorithm());
     }
 }

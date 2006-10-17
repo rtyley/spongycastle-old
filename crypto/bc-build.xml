@@ -8,6 +8,7 @@
 
     <property name="target.name" value="${target.prefix}-${release.suffix}" />
     <property name="build.dir" value="${src.dir}/.." />
+    <property name="bzip2.src.dir" value="${basedir}/bzip2/src" />
     <property name="artifacts.reports.xml.dir" value="${artifacts.dir}/reports/xml" />
     <property name="artifacts.reports.html.dir" value="${artifacts.dir}/reports/html" />
     <property name="artifacts.jars.dir" value="${artifacts.dir}/jars" />
@@ -246,6 +247,7 @@
                  <exclude name="org/bouncycastle/tsp/**/*.java" />
                  <exclude name="org/bouncycastle/openpgp/**/*.java" />
                  <exclude name="org/bouncycastle/bcpg/**/*.java" />
+                 <exclude name="org/apache/**/*.java" />
              </fileset>
              <fileset dir="${src.dir}" includes="org/bouncycastle/util/test/*.java" />
         </copy>
@@ -351,6 +353,9 @@
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
                  <exclude name="**/test/*.java" />
+             </fileset>
+             <fileset dir="${bzip2.src.dir}">
+                 <include name="org/apache/**/*.java" />
              </fileset>
         </copy>
 
