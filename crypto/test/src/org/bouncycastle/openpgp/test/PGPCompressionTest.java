@@ -81,7 +81,7 @@ public class PGPCompressionTest
         }
 
         if (!areEqual(bOut.toByteArray(), "hello world!".getBytes()))
-        {          System.out.println(new String(bOut.toByteArray()));
+        {
             fail("compression test failed");
         }
     }
