@@ -1,26 +1,36 @@
 package org.bouncycastle.jce;
 
 import java.security.cert.CertStoreParameters;
-import java.util.List;
 
 /**
  * An expanded set of parameters for an LDAPCertStore
  */
-public class X509LDAPCertStoreParameters
-    implements CertStoreParameters
+public class X509LDAPCertStoreParameters implements CertStoreParameters
 {
 
     private String ldapURL;
 
-    private String baseDN = "";
+    private String baseDN;
 
-    private List certificateAttributes;
+    private String certificateAttribute;
 
-    private List crlAttributes;
+    private String cACertificateAttribute;
+
+    private String crossCertificateAttribute;
+
+    private String crlAttribute;
 
     private String ldapCertificateAttributeName;
 
     private String certificateSubjectAttributeName;
+
+    private String ldapCACertificateAttributeName;
+
+    private String cACertificateSubjectAttributeName;
+
+    private String ldapCrossCertificateAttributeName;
+
+    private String crossCertificateSubjectAttributeName;
 
     private String ldapCRLAttributeName;
 
@@ -29,82 +39,168 @@ public class X509LDAPCertStoreParameters
     private String searchForSerialNumberIn;
 
     /**
-     * 
-     * @param ldapURL
-     *            The LDAP URL. If <code>null</code> "ldap://localhost:389" is
-     *            used.
-     * @param baseDN
-     *            The base DN in the LDAP tree to start searching. Maybe
-     *            <code>null</code> and teh whole tree is searched.
-     * @param certificateAttributes
-     *            Attribute names in the LDAP directory where certificates are
-     *            stored.
-     * @param crlAttributes
-     *            Attribute names in the LDAP directory where CRLs are stored.
-     * @param ldapCertificateAttributeName
-     *            The attribute name in the LDAP directory where to search for
-     *            the attribute value of the specified
-     *            <code>certificateSubjectAttributeName</code>.
+     * @param ldapURL                        The LDAP URL. If <code>null</code> "ldap://localhost:389" is
+     *                                       used.
+     * @param baseDN                         The base DN in the LDAP tree to start searching. May be
+     *                                       <code>null</code> and the whole tree is searched.
+     * @param certificateAttribute           Attribute name in the LDAP directory where end certificates
+     *                                       are stored. Defaults to userCertificate if <code>null</code>.
+     * @param cACertificateAttribute         Attribute name in the LDAP directory where CA certificates are
+     *                                       stored. Defaults to cACertificate if <code>null</code>.
+     * @param crossCertificateAttribute      Attribute name, where the cross certificates are stored.
+     *                                       Defaults to crossCertificatePair if <code>null</code>
+     * @param crlAttribute                   Attribute names in the LDAP directory where CRLs are stored.
+     *                                       Defaults to certificateRevocationList if <code>null</code>.
+     * @param ldapCertificateAttributeName   The attribute name in the LDAP directory where to search for
+     *                                       the attribute value of the specified
+     *                                       <code>certificateSubjectAttributeName</code>. E.g. if "cn"
+     *                                       is used to put information about the subject for end
+     *                                       certificates, then specify "cn".
      * @param certificateSubjectAttributeName
-     *            An attribute in the subject of the certificate which is used
-     *            to be searched in the
-     *            <code>ldapCertificateAttributeName</code>.
-     * @param ldapCRLAttributeName
-     *            The attribute name in the LDAP directory where to search for
-     *            the attribute value of the specified
-     *            <code>cRLIssuerAttributeName</code>.
-     * @param cRLIssuerAttributeName
-     *            An attribute in the issuer of the CRL which is used to be
-     *            searched in the <code>ldapCRLAttributeName</code>.
-     * @param searchForSerialNumberIn
-     *            If not <code>null</code> the serial number of the
-     *            certificate is seached in the LDAP attribute.
-     * @throws IllegalArgumentException
-     *             if a parameter except <code>ldapURL</code> or
-     *             <code>searchForSerialNumberIn</code> is <code>null</code>.
+     *                                       An attribute in the subject of the certificate which is used
+     *                                       to be searched in the
+     *                                       <code>ldapCertificateAttributeName</code>. E.g. the "cn"
+     *                                       attribute of the DN could be used.
+     * @param ldapCACertificateAttributeName The attribute name in the LDAP directory where to search for
+     *                                       the attribute value of the specified
+     *                                       <code>cACertificateSubjectAttributeName</code>. E.g. if
+     *                                       "ou" is used to put information about the subject for CA
+     *                                       certificates, then specify "ou".
+     * @param cACertificateSubjectAttributeName
+     *                                       An attribute in the subject of the certificate which is used
+     *                                       to be searched in the
+     *                                       <code>ldapCACertificateAttributeName</code>. E.g. the "ou"
+     *                                       attribute of the DN may be appropriate.
+     * @param ldapCrossCertificateAttributeName
+     *                                       The attribute name in the LDAP directory where to search for
+     *                                       the attribute value of the specified
+     *                                       <code>crossCertificateSubjectAttributeName</code>. E.g. if
+     *                                       "o" is used to put information about the subject for cross
+     *                                       certificates, then specify "o".
+     * @param crossCertificateSubjectAttributeName
+     *                                       An attribute in the subject of the cross certificate which is
+     *                                       used to be searched in the
+     *                                       <code>ldapCrossCertificateAttributeName</code>. E.g. the
+     *                                       "o" attribute of the DN may be appropriate.
+     * @param ldapCRLAttributeName           The attribute name in the LDAP directory where to search for
+     *                                       the attribute value of the specified
+     *                                       <code>cRLIssuerAttributeName</code>. E.g. if "ou" is used
+     *                                       to put information about the issuer of CRLs, specify "ou" .
+     * @param cRLIssuerAttributeName         An attribute in the issuer of the CRL which is used to be
+     *                                       searched in the <code>ldapCRLAttributeName</code>. E.g. the
+     *                                       "o" or "ou" attribute may be used.
+     * @param searchForSerialNumberIn        If not <code>null</code> the serial number of the
+     *                                       certificate is searched in this LDAP attribute.
+     * @throws IllegalArgumentException if a necessary parameter is <code>null</code>.
      */
     public X509LDAPCertStoreParameters(String ldapURL, String baseDN,
-            List certificateAttributes, List crlAttributes,
-            String ldapCertificateAttributeName,
-            String certificateSubjectAttributeName,
-            String ldapCRLAttributeName, String cRLIssuerAttributeName,
-            String searchForSerialNumberIn)
+                                       String certificateAttribute, String cACertificateAttribute,
+                                       String crossCertificateAttribute, String crlAttribute,
+                                       String ldapCertificateAttributeName,
+                                       String certificateSubjectAttributeName,
+                                       String ldapCACertificateAttributeName,
+                                       String cACertificateSubjectAttributeName,
+                                       String ldapCrossCertificateAttributeName,
+                                       String crossCertificateSubjectAttributeName,
+                                       String ldapCRLAttributeName, String cRLIssuerAttributeName,
+                                       String searchForSerialNumberIn)
     {
-        this.ldapURL = ldapURL;
-        if (ldapURL == null)
-        {
-            ldapURL = "ldap://localhost:389";
-        }
-        if (baseDN != null)
-        {
-            this.baseDN = baseDN;
-        }
-        this.certificateAttributes = certificateAttributes;
-        this.crlAttributes = crlAttributes;
-        this.ldapCertificateAttributeName = ldapCertificateAttributeName;
-        this.certificateSubjectAttributeName = certificateSubjectAttributeName;
-        this.cRLIssuerAttributeName = cRLIssuerAttributeName;
-        this.ldapCRLAttributeName = ldapCRLAttributeName;
-        this.searchForSerialNumberIn = searchForSerialNumberIn;
-        if (certificateAttributes == null || crlAttributes == null
-                || ldapCertificateAttributeName == null
-                || certificateSubjectAttributeName == null
-                || ldapCRLAttributeName == null
-                || cRLIssuerAttributeName == null)
-        {
-            throw new IllegalArgumentException(
-                    "All parameters must be specified.");
-        }
+        this(ldapURL, baseDN, ldapCertificateAttributeName,
+            certificateSubjectAttributeName,
+            ldapCACertificateAttributeName,
+            cACertificateSubjectAttributeName,
+            ldapCrossCertificateAttributeName,
+            crossCertificateSubjectAttributeName, ldapCRLAttributeName,
+
+            cRLIssuerAttributeName, searchForSerialNumberIn);
+        this.certificateAttribute = certificateAttribute;
+        this.crossCertificateAttribute = crossCertificateAttribute;
+        this.cACertificateAttribute = cACertificateAttribute;
+        this.crlAttribute = crlAttribute;
     }
 
     /**
-     * Returns the LDAP URL.
-     * 
-     * @return The LDAP URL.
+     * @param ldapURL                        The LDAP URL. If <code>null</code> "ldap://localhost:389" is
+     *                                       used.
+     * @param baseDN                         The base DN in the LDAP tree to start searching. May be
+     *                                       <code>null</code> and the whole tree is searched.
+     * @param ldapCertificateAttributeName   The attribute name in the LDAP directory where to search for
+     *                                       the attribute value of the specified
+     *                                       <code>certificateSubjectAttributeName</code>. E.g. if "cn"
+     *                                       is used to put information about the subject for end
+     *                                       certificates, then specify "cn".
+     * @param certificateSubjectAttributeName
+     *                                       An attribute in the subject of the certificate which is used
+     *                                       to be searched in the
+     *                                       <code>ldapCertificateAttributeName</code>. E.g. the "cn"
+     *                                       attribute of the DN could be used.
+     * @param ldapCACertificateAttributeName The attribute name in the LDAP directory where to search for
+     *                                       the attribute value of the specified
+     *                                       <code>cACertificateSubjectAttributeName</code>. E.g. if
+     *                                       "ou" is used to put information about the subject for CA
+     *                                       certificates, then specify "ou".
+     * @param cACertificateSubjectAttributeName
+     *                                       An attribute in the subject of the certificate which is used
+     *                                       to be searched in the
+     *                                       <code>ldapCACertificateAttributeName</code>. E.g. the "ou"
+     *                                       attribute of the DN may be appropriate.
+     * @param ldapCrossCertificateAttributeName
+     *                                       The attribute name in the LDAP directory where to search for
+     *                                       the attribute value of the specified
+     *                                       <code>crossCertificateSubjectAttributeName</code>. E.g. if
+     *                                       "o" is used to put information about the subject for cross
+     *                                       certificates, then specify "o".
+     * @param crossCertificateSubjectAttributeName
+     *                                       An attribute in the subject of the cross certificate which is
+     *                                       used to be searched in the
+     *                                       <code>ldapCrossCertificateAttributeName</code>. E.g. the
+     *                                       "o" attribute of the DN may be appropriate.
+     * @param ldapCRLAttributeName           The attribute name in the LDAP directory where to search for
+     *                                       the attribute value of the specified
+     *                                       <code>cRLIssuerAttributeName</code>. E.g. if "ou" is used
+     *                                       to put information about the issuer of CRLs, specify "ou" .
+     * @param cRLIssuerAttributeName         An attribute in the issuer of the CRL which is used to be
+     *                                       searched in the <code>ldapCRLAttributeName</code>. E.g. the
+     *                                       "o" or "ou" attribute may be used.
+     * @param searchForSerialNumberIn        If not <code>null</code> the serial number of the
+     *                                       certificate is searched in this LDAP attribute.
+     * @throws IllegalArgumentException if a necessary parameter is <code>null</code>.
      */
-    public String getLDAPURL()
+    public X509LDAPCertStoreParameters(String ldapURL, String baseDN,
+
+                                       String ldapCertificateAttributeName,
+                                       String certificateSubjectAttributeName,
+                                       String ldapCACertificateAttributeName,
+                                       String cACertificateSubjectAttributeName,
+                                       String ldapCrossCertificateAttributeName,
+                                       String crossCertificateSubjectAttributeName,
+                                       String ldapCRLAttributeName, String cRLIssuerAttributeName,
+                                       String searchForSerialNumberIn)
     {
-        return ldapURL;
+        this.ldapURL = ldapURL;
+        this.baseDN = baseDN;
+        this.ldapCertificateAttributeName = ldapCertificateAttributeName;
+        this.certificateSubjectAttributeName = certificateSubjectAttributeName;
+        this.ldapCACertificateAttributeName = ldapCACertificateAttributeName;
+        this.cACertificateSubjectAttributeName = cACertificateSubjectAttributeName;
+        this.ldapCrossCertificateAttributeName = ldapCrossCertificateAttributeName;
+        this.crossCertificateSubjectAttributeName = crossCertificateSubjectAttributeName;
+        this.cRLIssuerAttributeName = cRLIssuerAttributeName;
+        this.ldapCRLAttributeName = ldapCRLAttributeName;
+        this.searchForSerialNumberIn = searchForSerialNumberIn;
+        if (ldapCertificateAttributeName == null
+            || certificateSubjectAttributeName == null
+            || ldapCRLAttributeName == null
+            || cRLIssuerAttributeName == null
+            || ldapCACertificateAttributeName == null
+            || cACertificateSubjectAttributeName == null
+            || ldapCrossCertificateAttributeName == null
+            || crossCertificateSubjectAttributeName == null)
+        {
+            throw new IllegalArgumentException(
+                "Necessary parameters not specified.");
+        }
+
     }
 
     /**
@@ -113,26 +209,39 @@ public class X509LDAPCertStoreParameters
     public Object clone()
     {
         return new X509LDAPCertStoreParameters(ldapURL, baseDN,
-                certificateAttributes, crlAttributes,
-                ldapCertificateAttributeName, certificateSubjectAttributeName,
-                ldapCRLAttributeName, cRLIssuerAttributeName,
-                searchForSerialNumberIn);
+            certificateAttribute, cACertificateAttribute,
+            crossCertificateAttribute, crlAttribute,
+            ldapCertificateAttributeName, certificateSubjectAttributeName,
+            ldapCACertificateAttributeName,
+            cACertificateSubjectAttributeName,
+            ldapCrossCertificateAttributeName,
+            crossCertificateSubjectAttributeName, ldapCRLAttributeName,
+            cRLIssuerAttributeName, searchForSerialNumberIn);
     }
 
     /**
-     * @return Returns the certificateAttributes.
+     * @return Returns the certificateAttribute.
      */
-    public List getCertificateAttributes()
+    public String getCertificateAttribute()
     {
-        return certificateAttributes;
+        if (certificateAttribute == null)
+        {
+            certificateAttribute = "userCertificate";
+        }
+        return certificateAttribute;
     }
 
     /**
-     * @return Returns the crlAttributes.
+     * @return Returns the crlAttribute.
      */
-    public List getCrlAttributes()
+    public String getCrlAttribute()
     {
-        return crlAttributes;
+        if (crlAttribute == null)
+        {
+            crlAttribute = "certificateRevocationList";
+        }
+
+        return crlAttribute;
     }
 
     /**
@@ -160,7 +269,7 @@ public class X509LDAPCertStoreParameters
     }
 
     /**
-     * @return Returns the ldapCRLAttributeName.
+     * @return Returns the ldapCRLAttributeNames.
      */
     public String getLdapCRLAttributeName()
     {
@@ -180,6 +289,78 @@ public class X509LDAPCertStoreParameters
      */
     public String getBaseDN()
     {
+        if (baseDN == null)
+        {
+            baseDN = "";
+        }
         return baseDN;
     }
+
+    /**
+     * @return Returns the crossCertificateAttribute.
+     */
+    public String getCrossCertificateAttribute()
+    {
+        if (crossCertificateAttribute == null)
+        {
+            crossCertificateAttribute = "crossCertificatePair";
+        }
+        return crossCertificateAttribute;
+    }
+
+    /**
+     * @return Returns the cACertificateAttribute.
+     */
+    public String getCACertificateAttribute()
+    {
+        if (cACertificateAttribute == null)
+        {
+            cACertificateAttribute = "cACertificate";
+        }
+        return cACertificateAttribute;
+    }
+
+    /**
+     * @return Returns the cACertificateSubjectAttributeName.
+     */
+    public String getCACertificateSubjectAttributeName()
+    {
+        return cACertificateSubjectAttributeName;
+    }
+
+    /**
+     * @return Returns the crossCertificateSubjectAttributeName.
+     */
+    public String getCrossCertificateSubjectAttributeName()
+    {
+        return crossCertificateSubjectAttributeName;
+    }
+
+    /**
+     * @return Returns the ldapCACertificateAttributeName.
+     */
+    public String getLdapCACertificateAttributeName()
+    {
+        return ldapCACertificateAttributeName;
+    }
+
+    /**
+     * @return Returns the ldapCrossCertificateAttributeName.
+     */
+    public String getLdapCrossCertificateAttributeName()
+    {
+        return ldapCrossCertificateAttributeName;
+    }
+
+    /**
+     * @return Returns the ldapURL.
+     */
+    public String getLdapURL()
+    {
+        if (ldapURL == null)
+        {
+            ldapURL = "ldap://localhost:389";
+        }
+        return ldapURL;
+	}
 }
