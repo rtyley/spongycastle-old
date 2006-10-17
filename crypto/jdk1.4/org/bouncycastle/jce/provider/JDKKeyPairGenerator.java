@@ -138,7 +138,7 @@ public abstract class JDKKeyPairGenerator
             }
             DHParameterSpec     dhParams = (DHParameterSpec)params;
 
-            param = new DHKeyGenerationParameters(random, new DHParameters(dhParams.getP(), dhParams.getG()));
+            param = new DHKeyGenerationParameters(random, new DHParameters(dhParams.getP(), dhParams.getG(), null, dhParams.getL()));
 
             engine.init(param);
             initialised = true;
@@ -334,7 +334,7 @@ public abstract class JDKKeyPairGenerator
             {
                 DHParameterSpec     dhParams = (DHParameterSpec)params;
 
-                param = new ElGamalKeyGenerationParameters(random, new ElGamalParameters(dhParams.getP(), dhParams.getG()));
+                param = new ElGamalKeyGenerationParameters(random, new ElGamalParameters(dhParams.getP(), dhParams.getG(), dhParams.getL()));
             }
 
             engine.init(param);

@@ -168,7 +168,12 @@ public abstract class ASN1TaggedObject
         return null;
     }
 
-    public DEREncodable getObject(
+    /**
+     * Return the object held in this tagged object as a parser assuming it has
+     * the type of the passed in tag. If the object doesn't have a parser
+     * associated with it, the base object is returned.
+     */
+    public DEREncodable getObjectParser(
         int     tag,
         boolean isExplicit)
     {

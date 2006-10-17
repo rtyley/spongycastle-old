@@ -46,6 +46,6 @@ public class EncryptedContentInfoParser
         int  tag) 
         throws IOException
     {
-        return _encryptedContent.getObject(tag, false);
+        return _encryptedContent.getObjectParser(tag, false);
     }
 }
