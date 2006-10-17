@@ -228,7 +228,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(caCert3));
         sl = new X509CertSelector();
-        sl.setSubject(xcert.getSubjectX500Principal());
+        sl.setSubject(xcert.getSubjectX500Principal().getEncoded());
         coll = cs.getCertificates(sl);
         boolean found = false;
         if (coll.isEmpty())
@@ -255,7 +255,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(crossCert3));
         sl = new X509CertSelector();
-        sl.setSubject(xcert.getSubjectX500Principal());
+        sl.setSubject(xcert.getSubjectX500Principal().getEncoded());
         coll = cs.getCertificates(sl);
         if (coll.isEmpty())
         {
