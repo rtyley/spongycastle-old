@@ -86,7 +86,7 @@ public class SignedDataParser
 
         if (_nextObject instanceof BERTaggedObjectParser && ((BERTaggedObjectParser)_nextObject).getTagNo() == 0)
         {
-            ASN1SetParser certs = (ASN1SetParser)((BERTaggedObjectParser)_nextObject).getObject(DERTags.SET, false);
+            ASN1SetParser certs = (ASN1SetParser)((BERTaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
             _nextObject = null;
 
             return certs;
@@ -112,7 +112,7 @@ public class SignedDataParser
 
         if (_nextObject instanceof BERTaggedObjectParser && ((BERTaggedObjectParser)_nextObject).getTagNo() == 1)
         {
-            ASN1SetParser crls = (ASN1SetParser)((BERTaggedObjectParser)_nextObject).getObject(DERTags.SET, false);
+            ASN1SetParser crls = (ASN1SetParser)((BERTaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
             _nextObject = null;
 
             return crls;

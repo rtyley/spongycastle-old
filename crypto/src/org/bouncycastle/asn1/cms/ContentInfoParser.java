@@ -40,7 +40,7 @@ public class ContentInfoParser
     {
         if (content != null)
         {
-            return content.getObject(tag, true);
+            return content.getObjectParser(tag, true);
         }
 
         return null;

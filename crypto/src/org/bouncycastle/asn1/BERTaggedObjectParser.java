@@ -33,7 +33,7 @@ public class BERTaggedObjectParser
         return _tagNumber;
     }
     
-    public DEREncodable getObject(
+    public DEREncodable getObjectParser(
         int     tag,
         boolean isExplicit)
         throws IOException

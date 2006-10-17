@@ -7,6 +7,6 @@ public interface ASN1TaggedObjectParser
 {
     public int getTagNo();
     
-    public DEREncodable getObject(int tag, boolean isExplicit)
+    public DEREncodable getObjectParser(int tag, boolean isExplicit)
         throws IOException;
 }
