@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
+import org.apache.tools.bzip2.CBZip2OutputStream;
+
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.PacketTags;
@@ -19,7 +21,7 @@ public class PGPCompressedDataGenerator
     private int                     compression;
     
     private OutputStream            out;
-    private DeflaterOutputStream    dOut;
+    private OutputStream            dOut;
     private BCPGOutputStream        pkOut;
     
     public PGPCompressedDataGenerator(
@@ -32,7 +34,10 @@ public class PGPCompressedDataGenerator
         int                    algorithm,
         int                    compression)
     {
-        if (algorithm != PGPCompressedData.ZIP && algorithm != PGPCompressedData.ZLIB)
+        if (algorithm != PGPCompressedData.UNCOMPRESSED
+            && algorithm != PGPCompressedData.ZIP
+            && algorithm != PGPCompressedData.ZLIB
+            && algorithm != PGPCompressedData.BZIP2)
         {
             throw new IllegalArgumentException("unknown compression algorithm");
         }
@@ -69,18 +74,37 @@ public class PGPCompressedDataGenerator
             
             pkOut.write(PGPCompressedData.ZIP);
 
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression, true));
+            return dOut = new DeflaterOutputStream(pkOut, new Deflater(compression, true));
         }
-        else
+
+        if (algorithm == PGPCompressedData.ZLIB)
         {
             pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA);
             
             pkOut.write(PGPCompressedData.ZLIB);
             
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression));
+            return dOut = new DeflaterOutputStream(pkOut, new Deflater(compression));
         }
-        
-        return dOut;
+
+        if (algorithm == BZIP2)
+        {
+            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA);
+
+            pkOut.write(PGPCompressedData.BZIP2);
+
+            return dOut = new CBZip2OutputStream(pkOut);
+        }
+
+        if (algorithm == PGPCompressedData.UNCOMPRESSED)
+        {
+            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA);
+
+            pkOut.write(PGPCompressedData.UNCOMPRESSED);
+
+            return dOut = pkOut;
+        }
+
+        throw new IllegalStateException("generator not initialised");
     }
     
     /**
@@ -115,18 +139,38 @@ public class PGPCompressedDataGenerator
             
             pkOut.write(PGPCompressedData.ZIP);
 
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression, true));
+            return dOut = new DeflaterOutputStream(pkOut, new Deflater(compression, true));
         }
-        else
+
+        if (algorithm == PGPCompressedData.ZLIB)
         {
             pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
             
             pkOut.write(PGPCompressedData.ZLIB);
             
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression));
+            return dOut = new DeflaterOutputStream(pkOut, new Deflater(compression));
         }
-        
-        return dOut;
+
+        if (algorithm == PGPCompressedData.BZIP2)
+        {
+            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
+
+            pkOut.write(PGPCompressedData.BZIP2);
+
+            return dOut = new CBZip2OutputStream(pkOut);
+        }
+
+        if (algorithm == PGPCompressedData.UNCOMPRESSED)
+        {
+            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
+
+            pkOut.write(PGPCompressedData.UNCOMPRESSED);
+
+            return dOut = pkOut;
+        }
+
+
+        throw new IllegalStateException("generator not initialised");
     }
     
     /**
@@ -141,9 +185,22 @@ public class PGPCompressedDataGenerator
         {
             throw new IOException("generator not opened.");
         }
-        
-        dOut.finish();
+
+        if (dOut instanceof DeflaterOutputStream)
+        {
+            DeflaterOutputStream dfOut = (DeflaterOutputStream)dOut;
+
+            dfOut.finish();
+        }
+        else if (dOut instanceof CBZip2OutputStream)
+        {
+            CBZip2OutputStream cbOut = (CBZip2OutputStream)dOut;
+
+            cbOut.finish();
+        }
+
         dOut.flush();
+
         pkOut.finish();
         pkOut.flush();
         out.flush();
