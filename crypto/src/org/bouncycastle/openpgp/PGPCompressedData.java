@@ -128,7 +128,14 @@ public class PGPCompressedData
       }
       if (this.getAlgorithm() == BZIP2)
       {
-          return new CBZip2InputStream(this.getInputStream());
+          try
+          {
+              return new CBZip2InputStream(this.getInputStream());
+          }
+          catch (IOException e)
+          {
+              throw new PGPException("I/O problem with stream: " + e, e);
+          }
       }
         
       throw new PGPException("can't recognise compression algorithm: " + this.getAlgorithm());
