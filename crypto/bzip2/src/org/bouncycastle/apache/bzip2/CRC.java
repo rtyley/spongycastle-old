@@ -58,7 +58,7 @@
  * great code.
  */
 
-package org.apache.tools.bzip2;
+package org.bouncycastle.apache.bzip2;
 
 /**
  * A simple class the hold and calculate the CRC for sanity checking
