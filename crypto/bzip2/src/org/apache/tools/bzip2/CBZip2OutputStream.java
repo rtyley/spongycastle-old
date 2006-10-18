@@ -322,6 +322,9 @@ public class CBZip2OutputStream extends OutputStream implements BZip2Constants {
         zptr = null;
         ftab = null;
 
+        inStream.write('B');
+        inStream.write('Z');
+
         bsSetStream(inStream);
 
         workFactor = 50;

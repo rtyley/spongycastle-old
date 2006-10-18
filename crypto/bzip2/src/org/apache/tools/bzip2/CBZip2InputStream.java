@@ -170,7 +170,9 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
     int j2;
     char z;
 
-    public CBZip2InputStream(InputStream zStream) {
+    public CBZip2InputStream(InputStream zStream)
+        throws IOException
+    {
         ll8 = null;
         tt = null;
         bsSetStream(zStream);
@@ -210,8 +212,14 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
         }
     }
 
-    private void initialize() {
+    private void initialize() throws IOException {
         char magic3, magic4;
+        magic3 = bsGetUChar();
+        magic4 = bsGetUChar();
+        if (magic3 != 'B' && magic4 != 'Z')
+        {
+            throw new IOException("Not a BZIP2 marked stream");
+        }
         magic3 = bsGetUChar();
         magic4 = bsGetUChar();
         if (magic3 != 'h' || magic4 < '1' || magic4 > '9') {
