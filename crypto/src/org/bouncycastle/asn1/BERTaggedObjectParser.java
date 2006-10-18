@@ -123,15 +123,15 @@ public class BERTaggedObjectParser
 
             if (v.size() > 1)
             {
-                return new BERTaggedObject(this.isConstructed(), _tagNumber, new BERSequence(v));
+                return new BERTaggedObject(false, _tagNumber, new BERSequence(v));
             }
             else if (v.size() == 1)
             {
-                return new BERTaggedObject(this.isConstructed(), _tagNumber, v.get(0));
+                return new BERTaggedObject(true, _tagNumber, v.get(0));
             }
             else
             {
-                return new BERTaggedObject(this.isConstructed(), _tagNumber, null);
+                return new BERTaggedObject(true, _tagNumber, null);
             }
         }
         else
@@ -142,15 +142,15 @@ public class BERTaggedObjectParser
 
                 if (v.size() > 1)
                 {
-                    return new DERTaggedObject(this.isConstructed(), _tagNumber, new DERSequence(v));
+                    return new DERTaggedObject(false, _tagNumber, new DERSequence(v));
                 }
                 else if (v.size() == 1)
                 {
-                    return new DERTaggedObject(this.isConstructed(), _tagNumber, v.get(0));
+                    return new DERTaggedObject(true, _tagNumber, v.get(0));
                 }
                 else
                 {
-                    return new DERTaggedObject(this.isConstructed(), _tagNumber, null);
+                    return new DERTaggedObject(true, _tagNumber, null);
                 }
             }
 
