@@ -58,7 +58,7 @@
  * great code.
  */
 
-package org.apache.tools.bzip2;
+package org.bouncycastle.apache.bzip2;
 
 import java.io.OutputStream;
 import java.io.IOException;

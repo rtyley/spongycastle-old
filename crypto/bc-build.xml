@@ -355,7 +355,7 @@
                  <exclude name="**/test/*.java" />
              </fileset>
              <fileset dir="${bzip2.src.dir}">
-                 <include name="org/apache/**/*.java" />
+                 <include name="org/bouncycastle/apache/**/*.java" />
              </fileset>
         </copy>
 
