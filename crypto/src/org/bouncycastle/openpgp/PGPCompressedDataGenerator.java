@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
-import org.apache.tools.bzip2.CBZip2OutputStream;
+import org.bouncycastle.apache.bzip2.CBZip2OutputStream;
 
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;

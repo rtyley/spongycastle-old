@@ -9,7 +9,7 @@ import java.util.zip.InflaterInputStream;
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.CompressedDataPacket;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
-import org.apache.tools.bzip2.CBZip2InputStream;
+import org.bouncycastle.apache.bzip2.CBZip2InputStream;
 
 /**
  * Compressed data objects.
