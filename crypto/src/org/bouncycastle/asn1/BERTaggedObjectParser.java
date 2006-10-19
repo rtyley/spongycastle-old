@@ -89,14 +89,13 @@ public class BERTaggedObjectParser
     private ASN1EncodableVector loadVector(InputStream in)
         throws IOException
     {
-        ASN1InputStream         aIn = new ASN1InputStream(in);
+        ASN1StreamParser        aIn = new ASN1StreamParser(in);
         ASN1EncodableVector     v = new ASN1EncodableVector();
-
-        DERObject   obj = aIn.readObject();
+        DEREncodable            obj = aIn.readObject();
 
         while (obj != null)
         {
-            v.add(obj);
+            v.add(obj.getDERObject());
             obj = aIn.readObject();
         }
 
@@ -131,7 +130,7 @@ public class BERTaggedObjectParser
             }
             else
             {
-                return new BERTaggedObject(true, _tagNumber, null);
+                return new BERTaggedObject(false, _tagNumber, new BERSequence());
             }
         }
         else
@@ -150,7 +149,7 @@ public class BERTaggedObjectParser
                 }
                 else
                 {
-                    return new DERTaggedObject(true, _tagNumber, null);
+                    return new DERTaggedObject(false, _tagNumber, new DERSequence());
                 }
             }
 
