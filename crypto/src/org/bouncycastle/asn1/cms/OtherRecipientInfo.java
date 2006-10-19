@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1.cms;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -26,8 +26,8 @@ public class OtherRecipientInfo
     public OtherRecipientInfo(
         ASN1Sequence seq)
     {
-        oriType = DERObjectIdentifier.getInstance(seq.getObjectAt(1));
-        oriValue = seq.getObjectAt(2);
+        oriType = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
+        oriValue = seq.getObjectAt(1);
     }
 
     /**
