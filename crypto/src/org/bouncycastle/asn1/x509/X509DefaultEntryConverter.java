@@ -1,12 +1,13 @@
 package org.bouncycastle.asn1.x509;
 
-import java.io.IOException;
-
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERUTF8String;
+
+import java.io.IOException;
 
 /**
  * The default converter for X509 DN entries when going from their
@@ -46,6 +47,10 @@ public class X509DefaultEntryConverter
         {
             return new DERGeneralizedTime(value);
         }
+        else if (oid.equals(X509Name.C) || oid.equals(X509Name.SN))
+        {
+             return new DERPrintableString(value);
+        }        
         
         return new DERUTF8String(value);
     }
