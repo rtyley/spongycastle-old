@@ -2,14 +2,19 @@ package org.bouncycastle.asn1.test;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x509.X509DefaultEntryConverter;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,7 +23,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 public class X509NameTest
-    implements Test
+    extends SimpleTest
 {
     // TODO add rfc compliance test for default encoder.
    String[] subjects =
@@ -43,9 +48,63 @@ public class X509NameTest
     {
         return X509Name.getInstance(new ASN1InputStream(new ByteArrayInputStream(bytes)).readObject());
     }
-    
-    public TestResult perform()
+
+    private DEREncodable createEntryValue(DERObjectIdentifier oid, String value)
     {
+        Hashtable attrs = new Hashtable();
+
+        attrs.put(oid, value);
+
+        X509Name name = new X509Name(attrs);
+
+        ASN1Sequence seq = (ASN1Sequence)name.getDERObject();
+        ASN1Set set = (ASN1Set)seq.getObjectAt(0);
+        seq = (ASN1Sequence)set.getObjectAt(0);
+
+        return seq.getObjectAt(1);
+    }
+
+
+    private void testEncodingPrintableString(DERObjectIdentifier oid, String value)
+    {
+        DEREncodable converted = createEntryValue(oid, value);
+        if (!(converted instanceof DERPrintableString))
+        {
+            fail("encoding for " + oid + " not printable string");
+        }
+    }
+
+    private void testEncodingIA5String(DERObjectIdentifier oid, String value)
+    {
+        DEREncodable converted = createEntryValue(oid, value);
+        if (!(converted instanceof DERIA5String))
+        {
+            fail("encoding for " + oid + " not IA5String");
+        }
+    }
+
+
+    private void testEncodingGeneralizedTime(DERObjectIdentifier oid, String value)
+    {
+        DEREncodable converted = createEntryValue(oid, value);
+        if (!(converted instanceof DERGeneralizedTime))
+        {
+            fail("encoding for " + oid + " not GeneralizedTime");
+        }
+    }
+
+    public void performTest()
+        throws Exception
+    {
+        testEncodingPrintableString(X509Name.C, "AU");
+        testEncodingPrintableString(X509Name.SERIALNUMBER, "123456");
+        testEncodingIA5String(X509Name.EmailAddress, "test@test.com");
+        testEncodingIA5String(X509Name.DC, "test");
+        testEncodingGeneralizedTime(X509Name.DATE_OF_BIRTH, "20020122122220Z");
+
+        //
+        // composite
+        //
         Hashtable                   attrs = new Hashtable();
 
         attrs.put(X509Name.C, "AU");
@@ -58,14 +117,14 @@ public class X509NameTest
 
         if (!name1.equals(name1))
         {
-            return new SimpleTestResult(false, getName() + ": Failed same object test");
+            fail("Failed same object test");
         }
 
         X509Name    name2 = new X509Name(attrs);
 
         if (!name1.equals(name2))
         {
-            return new SimpleTestResult(false, getName() + ": Failed same name test");
+            fail("Failed same name test");
         }
 
         Vector  ord1 = new Vector();
@@ -89,7 +148,7 @@ public class X509NameTest
 
         if (!name1.equals(name2))
         {
-            return new SimpleTestResult(false, getName() + ": Failed reverse name test");
+            fail("Failed reverse name test");
         }
 
         ord2 = new Vector();
@@ -105,7 +164,7 @@ public class X509NameTest
 
         if (name1.equals(name2))
         {
-            return new SimpleTestResult(false, getName() + ": Failed different name test");
+            fail("Failed different name test");
         }
 
         ord2 = new Vector();
@@ -120,146 +179,133 @@ public class X509NameTest
 
         if (name1.equals(name2))
         {
-            return new SimpleTestResult(false, getName() + ": Failed subset name test");
+            fail("Failed subset name test");
         }
         
         //
         // composite test
         //
-        try
+        byte[]  enc = Hex.decode("305e310b300906035504061302415531283026060355040a0c1f546865204c6567696f6e206f662074686520426f756e637920436173746c653125301006035504070c094d656c626f75726e653011060355040b0c0a4173636f742056616c65");
+        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(enc));
+
+        X509Name    n = X509Name.getInstance(aIn.readObject());
+
+        if (!n.toString().equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne+OU=Ascot Vale"))
         {
-            byte[]  enc = Hex.decode("305e310b300906035504061302415531283026060355040a0c1f546865204c6567696f6e206f662074686520426f756e637920436173746c653125301006035504070c094d656c626f75726e653011060355040b0c0a4173636f742056616c65");
-            ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(enc));
-            
-            X509Name    n = X509Name.getInstance(aIn.readObject());
-            
-            if (!n.toString().equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne+OU=Ascot Vale"))
-            {
-                return new SimpleTestResult(false, getName() + ": Failed composite to string test");
-            }
-            
-            n = new X509Name("C=AU, O=The Legion of the Bouncy Castle, L=Melbourne + OU=Ascot Vale");
-            
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-            
-            aOut.writeObject(n);
-            
-            byte[]  enc2 = bOut.toByteArray();
-
-            if (!Arrays.areEqual(enc, enc2))
-            {
-                return new SimpleTestResult(false, getName() + ": Failed composite string to encoding test");
-            }
-
-            //
-            // general subjects test
-            //
-            for (int i = 0; i != subjects.length; i++)
-            {
-                X509Name    name = new X509Name(subjects[i]);
-
-                bOut = new ByteArrayOutputStream();
-                aOut = new ASN1OutputStream(bOut);
-            
-                aOut.writeObject(name);
-
-                aIn = new ASN1InputStream(new ByteArrayInputStream(bOut.toByteArray()));
-
-                name = X509Name.getInstance(aIn.readObject());
-
-                if (!name.toString().equals(subjects[i]))
-                {
-                    return new SimpleTestResult(false, getName() + ": failed regeneration test " + i);
-                }
-            }
-
-            //
-            // sort test
-            //
-            X509Name unsorted = new X509Name("SN=BBB + CN=AA");
-
-            if (!fromBytes(unsorted.getEncoded()).toString().equals("CN=AA+SN=BBB"))
-            {
-                return new SimpleTestResult(false, getName() + ": failed sort test 1");
-            }
-
-            unsorted = new X509Name("CN=AA + SN=BBB");
-
-            if (!fromBytes(unsorted.getEncoded()).toString().equals("CN=AA+SN=BBB"))
-            {
-                return new SimpleTestResult(false, getName() + ": failed sort test 2");
-            }
-
-            unsorted = new X509Name("SN=B + CN=AA");
-
-            if (!fromBytes(unsorted.getEncoded()).toString().equals("SN=B+CN=AA"))
-            {
-                return new SimpleTestResult(false, getName() + ": failed sort test 3");
-            }
-            
-            unsorted = new X509Name("CN=AA + SN=B");
-
-            if (!fromBytes(unsorted.getEncoded()).toString().equals("SN=B+CN=AA"))
-            {
-                return new SimpleTestResult(false, getName() + ": failed sort test 4");
-            }
-            
-            //
-            // this is contrived but it checks sorting of sets with equal elements
-            //
-            unsorted = new X509Name("CN=AA + CN=AA + CN=AA");
-            
-            // 
-            // tagging test - only works if CHOICE implemented
-            //
-            /*
-            ASN1TaggedObject tag = new DERTaggedObject(false, 1, new X509Name("CN=AA"));
-            
-            if (!tag.isExplicit())
-            {
-                return new SimpleTestResult(false, getName() + ": failed to explicitly tag CHOICE object");
-            }
-            
-            X509Name name = X509Name.getInstance(tag, false);
-            
-            if (!name.equals(new X509Name("CN=AA")))
-            {
-                return new SimpleTestResult(false, getName() + ": failed to recover tagged name");
-            }
-            */
-
-        
-        
-            DERUTF8String testString = new DERUTF8String("The Legion of the Bouncy Castle");
-            byte[] encodedBytes = testString.getEncoded();
-            byte[] hexEncodedBytes = Hex.encode(encodedBytes);
-            String hexEncodedString = "#" + new String(hexEncodedBytes);
-
-            DERUTF8String converted = (DERUTF8String)
-                new X509DefaultEntryConverter().getConvertedValue(
-                    X509Name.L , hexEncodedString);
-
-            if (!converted.equals(testString))
-            {
-                return new SimpleTestResult(false, getName() + ": failed X509DefaultEntryConverter test");
-            }
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": exception " + e.getMessage(), e);
+            fail("Failed composite to string test");
         }
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+        n = new X509Name("C=AU, O=The Legion of the Bouncy Castle, L=Melbourne + OU=Ascot Vale");
+
+        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
+
+        aOut.writeObject(n);
+
+        byte[]  enc2 = bOut.toByteArray();
+
+        if (!Arrays.areEqual(enc, enc2))
+        {
+            fail("Failed composite string to encoding test");
+        }
+
+        //
+        // general subjects test
+        //
+        for (int i = 0; i != subjects.length; i++)
+        {
+            X509Name    name = new X509Name(subjects[i]);
+
+            bOut = new ByteArrayOutputStream();
+            aOut = new ASN1OutputStream(bOut);
+
+            aOut.writeObject(name);
+
+            aIn = new ASN1InputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+            name = X509Name.getInstance(aIn.readObject());
+
+            if (!name.toString().equals(subjects[i]))
+            {
+                fail("failed regeneration test " + i);
+            }
+        }
+
+        //
+        // sort test
+        //
+        X509Name unsorted = new X509Name("SN=BBB + CN=AA");
+
+        if (!fromBytes(unsorted.getEncoded()).toString().equals("CN=AA+SN=BBB"))
+        {
+            fail("failed sort test 1");
+        }
+
+        unsorted = new X509Name("CN=AA + SN=BBB");
+
+        if (!fromBytes(unsorted.getEncoded()).toString().equals("CN=AA+SN=BBB"))
+        {
+            fail("failed sort test 2");
+        }
+
+        unsorted = new X509Name("SN=B + CN=AA");
+
+        if (!fromBytes(unsorted.getEncoded()).toString().equals("SN=B+CN=AA"))
+        {
+            fail("failed sort test 3");
+        }
+
+        unsorted = new X509Name("CN=AA + SN=B");
+
+        if (!fromBytes(unsorted.getEncoded()).toString().equals("SN=B+CN=AA"))
+        {
+            fail("failed sort test 4");
+        }
+
+        //
+        // this is contrived but it checks sorting of sets with equal elements
+        //
+        unsorted = new X509Name("CN=AA + CN=AA + CN=AA");
+
+        //
+        // tagging test - only works if CHOICE implemented
+        //
+        /*
+        ASN1TaggedObject tag = new DERTaggedObject(false, 1, new X509Name("CN=AA"));
+
+        if (!tag.isExplicit())
+        {
+            fail("failed to explicitly tag CHOICE object");
+        }
+
+        X509Name name = X509Name.getInstance(tag, false);
+
+        if (!name.equals(new X509Name("CN=AA")))
+        {
+            fail("failed to recover tagged name");
+        }
+        */
+
+
+
+        DERUTF8String testString = new DERUTF8String("The Legion of the Bouncy Castle");
+        byte[] encodedBytes = testString.getEncoded();
+        byte[] hexEncodedBytes = Hex.encode(encodedBytes);
+        String hexEncodedString = "#" + new String(hexEncodedBytes);
+
+        DERUTF8String converted = (DERUTF8String)
+            new X509DefaultEntryConverter().getConvertedValue(
+                X509Name.L , hexEncodedString);
+
+        if (!converted.equals(testString))
+        {
+            fail("failed X509DefaultEntryConverter test");
+        }
     }
 
     public static void main(
         String[]    args)
     {
-        Test    test = new X509NameTest();
-
-        TestResult  result = test.perform();
-
-        System.out.println(result);
+        runTest(new X509NameTest());
     }
 }
