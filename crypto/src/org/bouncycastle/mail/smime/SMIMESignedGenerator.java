@@ -1,5 +1,19 @@
 package org.bouncycastle.mail.smime;
 
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
+
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.InvalidKeyException;
@@ -10,23 +24,11 @@ import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
-import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -479,7 +481,48 @@ public class SMIMESignedGenerator
 
             return gen;
         }
-        
+
+        private void writeBodyPart(
+            OutputStream out,
+            MimeBodyPart bodyPart)
+            throws IOException, MessagingException
+        {
+            if (bodyPart.getContent() instanceof Multipart)
+            {
+                Multipart mp = (Multipart)bodyPart.getContent();
+                ContentType contentType = new ContentType(mp.getContentType());
+                String boundary = "--" + contentType.getParameter("boundary");
+
+                SMIMEUtil.LineOutputStream lOut = new SMIMEUtil.LineOutputStream(out);
+
+                Enumeration headers = bodyPart.getAllHeaderLines();
+                while (headers.hasMoreElements())
+                {
+                    lOut.writeln((String)headers.nextElement());
+                }
+
+                lOut.writeln();      // CRLF separator
+
+                for (int i = 0; i < mp.getCount(); i++)
+                {
+                    lOut.writeln(boundary);
+                    writeBodyPart(out, (MimeBodyPart)mp.getBodyPart(i));
+                    lOut.writeln();       // CRLF terminator
+                }
+                
+                lOut.writeln(boundary + "--");
+            }
+            else
+            {
+                if (SMIMEUtil.isCanonicalisationRequired(bodyPart, _defaultContentTransferEncoding))
+                {
+                    out = new CRLFOutputStream(out);
+                }
+
+                bodyPart.writeTo(out);
+            }
+        }
+
         public void write(OutputStream out)
             throws IOException
         {
@@ -493,13 +536,12 @@ public class SMIMESignedGenerator
                 {
                     if (!_encapsulate)
                     {
-                        if (SMIMEUtil.isCanonicalisationRequired(_content, _defaultContentTransferEncoding))
-                        {
-                            signingStream = new CRLFOutputStream(signingStream);
-                        }
+                        writeBodyPart(signingStream, _content);
                     }
-    
-                    _content.writeTo(signingStream);
+                    else
+                    {
+                        _content.writeTo(signingStream);
+                    }
                 }
                 
                 signingStream.close();

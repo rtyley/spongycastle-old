@@ -19,18 +19,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.SignerInfo;
+import org.bouncycastle.asn1.cms.SignedDataParser;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.sasn1.Asn1Object;
-import org.bouncycastle.sasn1.Asn1OctetString;
-import org.bouncycastle.sasn1.Asn1Sequence;
-import org.bouncycastle.sasn1.Asn1Set;
-import org.bouncycastle.sasn1.BerTag;
-import org.bouncycastle.sasn1.DerSequence;
-import org.bouncycastle.sasn1.cms.SignedDataParser;
 
 /**
  * Parsing class for an CMS Signed Data object from an input stream.
@@ -126,16 +120,16 @@ public class CMSSignedDataParser
         
         try
         {
-            this._signedContent = signedContent;
-            this._signedData = new SignedDataParser((Asn1Sequence)_contentInfo.getContent(BerTag.SEQUENCE));
-            this._digests = new HashMap();
+            _signedContent = signedContent;
+            _signedData = SignedDataParser.getInstance(_contentInfo.getContent(DERTags.SEQUENCE));
+            _digests = new HashMap();
             
-            Asn1Set    digAlgs = _signedData.getDigestAlgorithms();
-            Asn1Object o;
+            ASN1SetParser digAlgs = _signedData.getDigestAlgorithms();
+            DEREncodable  o;
             
             while ((o = digAlgs.readObject()) != null)
             {
-                AlgorithmIdentifier id = AlgorithmIdentifier.getInstance(new ASN1InputStream(((DerSequence)o).getEncoded()).readObject());
+                AlgorithmIdentifier id = AlgorithmIdentifier.getInstance(o.getDERObject());
                 try
                 {
                     String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(id.getObjectId().toString());
@@ -154,11 +148,11 @@ public class CMSSignedDataParser
                 //
                 // If the message is simply a certificate chain message getContent() may return null.
                 //
-                Asn1OctetString octs = (Asn1OctetString)_signedData.getEncapContentInfo().getContent(BerTag.OCTET_STRING);
+                ASN1OctetStringParser octs = (ASN1OctetStringParser)_signedData.getEncapContentInfo().getContent(DERTags.OCTET_STRING);
                 
                 if (octs != null)
                 {
-                    this._signedContent = new CMSTypedStream(octs.getOctetStream());
+                    _signedContent = new CMSTypedStream(octs.getOctetStream());
                 }
             }
             else
@@ -166,7 +160,7 @@ public class CMSSignedDataParser
                 //
                 // content passed in, need to read past empty encapsulated content info object if present
                 //
-                Asn1OctetString octs = (Asn1OctetString)_signedData.getEncapContentInfo().getContent(BerTag.OCTET_STRING);
+                ASN1OctetStringParser octs = (ASN1OctetStringParser)_signedData.getEncapContentInfo().getContent(DERTags.OCTET_STRING);
                 
                 if (octs != null)
                 {
@@ -193,7 +187,7 @@ public class CMSSignedDataParser
     /**
      * return the collection of signers that are associated with the
      * signatures for the message.
-     * @throws CmsException 
+     * @throws CMSException 
      */
     public SignerInformationStore getSignerInfos() 
         throws CMSException
@@ -213,14 +207,13 @@ public class CMSSignedDataParser
             
             try
             {
-                Asn1Set         s = _signedData.getSignerInfos();
-                Asn1Object      o = null;
+                ASN1SetParser     s = _signedData.getSignerInfos();
+                DEREncodable      o;
                 
                 while ((o = s.readObject()) != null)
                 {
-                    DerSequence seq = (DerSequence)o;
-                    SignerInfo  info = SignerInfo.getInstance(new ASN1InputStream(seq.getEncoded()).readObject());
-                    String      digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
+                    SignerInfo info = SignerInfo.getInstance(o.getDERObject());
+                    String     digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
                     
                     byte[] hash = (byte[])hashes.get(digestName);
                     
@@ -242,7 +235,7 @@ public class CMSSignedDataParser
      * return a CertStore containing the certificates and CRLs associated with
      * this message.
      *
-     * @exception NoProviderException if the provider requested isn't available.
+     * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchAlgorithmException if the cert store isn't available.
      */
     public CertStore getCertificatesAndCRLs(
@@ -270,14 +263,16 @@ public class CMSSignedDataParser
             //
             try
             {
-                Asn1Set s = _signedData.getCertificates();
+                ASN1SetParser s = _signedData.getCertificates();
     
                 if (s != null)
                 {
-                    DerSequence seq;
-    
-                    while ((seq = (DerSequence)s.readObject()) != null)
+                    ASN1Set set = ASN1Set.getInstance(s.getDERObject());
+
+                    for (Enumeration en = set.getObjects(); en.hasMoreElements();)
                     {
+                        ASN1Sequence seq = (ASN1Sequence)en.nextElement();
+
                         try
                         {
                             certsAndcrls.add(cf.generateCertificate(
@@ -302,10 +297,11 @@ public class CMSSignedDataParser
     
                 if (s != null)
                 {
-                    DerSequence seq;
-    
-                    while ((seq = (DerSequence)s.readObject()) != null)
+                    ASN1Set set = ASN1Set.getInstance(s.getDERObject());
+
+                    for (Enumeration en = set.getObjects(); en.hasMoreElements();)
                     {
+                        ASN1Sequence seq = (ASN1Sequence)en.nextElement();
                         try
                         {
                             certsAndcrls.add(cf.generateCRL(

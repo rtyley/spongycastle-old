@@ -9,6 +9,7 @@ import java.security.PrivateKey;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,6 +19,8 @@ import java.util.Set;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -480,28 +483,68 @@ public class SMIMESignedGenerator
             return gen;
         }
         
+        private void writeBodyPart(
+            OutputStream out,
+            MimeBodyPart bodyPart)
+            throws IOException, MessagingException
+        {
+            if (bodyPart.getContent() instanceof Multipart)
+            {
+                Multipart mp = (Multipart)bodyPart.getContent();
+                ContentType contentType = new ContentType(mp.getContentType());
+                String boundary = "--" + contentType.getParameter("boundary");
+
+                SMIMEUtil.LineOutputStream lOut = new SMIMEUtil.LineOutputStream(out);
+
+                Enumeration headers = bodyPart.getAllHeaderLines();
+                while (headers.hasMoreElements())
+                {
+                    lOut.writeln((String)headers.nextElement());
+                }
+
+                lOut.writeln();      // CRLF separator
+
+                for (int i = 0; i < mp.getCount(); i++)
+                {
+                    lOut.writeln(boundary);
+                    writeBodyPart(out, (MimeBodyPart)mp.getBodyPart(i));
+                    lOut.writeln();       // CRLF terminator
+                }
+
+                lOut.writeln(boundary + "--");
+            }
+            else
+            {
+                if (SMIMEUtil.isCanonicalisationRequired(bodyPart, _defaultContentTransferEncoding))
+                {
+                    out = new CRLFOutputStream(out);
+                }
+
+                bodyPart.writeTo(out);
+            }
+        }
+
         public void write(OutputStream out)
             throws IOException
         {
             try
             {
                 CMSSignedDataStreamGenerator gen = getGenerator();
-                
+
                 OutputStream signingStream = gen.open(out, _encapsulate);
-                
+
                 if (_content != null)
                 {
                     if (!_encapsulate)
                     {
-                        if (SMIMEUtil.isCanonicalisationRequired(_content, _defaultContentTransferEncoding))
-                        {
-                            signingStream = new CRLFOutputStream(signingStream);
-                        }
+                        writeBodyPart(signingStream, _content);
                     }
-    
-                    _content.writeTo(signingStream);
+                    else
+                    {
+                        _content.writeTo(signingStream);
+                    }
                 }
-                
+
                 signingStream.close();
             }
             catch (MessagingException e)
