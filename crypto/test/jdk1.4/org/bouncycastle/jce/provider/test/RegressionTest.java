@@ -23,6 +23,7 @@ public class RegressionTest
         new RSATest(),
         new DHTest(),
         new DSATest(),
+        new ImplicitlyCaTest(),
         new GOST3410Test(),
         new ElGamalTest(),
         new ECIESTest(),

@@ -1,22 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidParameterException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.ECField;
-import java.security.spec.ECFieldF2m;
-import java.security.spec.ECFieldFp;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Hashtable;
-
-import javax.crypto.spec.DHParameterSpec;
-
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
@@ -33,7 +16,29 @@ import org.bouncycastle.crypto.generators.ElGamalKeyPairGenerator;
 import org.bouncycastle.crypto.generators.ElGamalParametersGenerator;
 import org.bouncycastle.crypto.generators.GOST3410KeyPairGenerator;
 import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
-import org.bouncycastle.crypto.params.*;
+import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
+import org.bouncycastle.crypto.params.DHParameters;
+import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
+import org.bouncycastle.crypto.params.DHPublicKeyParameters;
+import org.bouncycastle.crypto.params.DSAKeyGenerationParameters;
+import org.bouncycastle.crypto.params.DSAParameters;
+import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
+import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.params.ElGamalKeyGenerationParameters;
+import org.bouncycastle.crypto.params.ElGamalParameters;
+import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
+import org.bouncycastle.crypto.params.GOST3410KeyGenerationParameters;
+import org.bouncycastle.crypto.params.GOST3410Parameters;
+import org.bouncycastle.crypto.params.GOST3410PrivateKeyParameters;
+import org.bouncycastle.crypto.params.GOST3410PublicKeyParameters;
+import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
+import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
@@ -43,6 +48,22 @@ import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
+
+import javax.crypto.spec.DHParameterSpec;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.ECField;
+import java.security.spec.ECFieldF2m;
+import java.security.spec.ECFieldFp;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Hashtable;
 
 public abstract class JDKKeyPairGenerator
     extends KeyPairGenerator
@@ -414,7 +435,7 @@ public abstract class JDKKeyPairGenerator
         {
             this.strength = strength;
             this.random = random;
-            this.ecParams = (ECGenParameterSpec)ecParameters.get(new Integer(strength));
+            this.ecParams = ecParameters.get(new Integer(strength));
 
             if (ecParams != null)
             {
@@ -542,6 +563,20 @@ public abstract class JDKKeyPairGenerator
                 engine.init(param);
                 initialised = true;
             }
+            else if (params == null && BouncyCastleProvider.getImplicitCaEC() != null)
+            {
+                ECParameterSpec p = BouncyCastleProvider.getImplicitCaEC();
+                this.ecParams = params;
+
+                param = new ECKeyGenerationParameters(new ECDomainParameters(p.getCurve(), p.getG(), p.getN()), random);
+
+                engine.init(param);
+                initialised = true;
+            }
+            else if (params == null && BouncyCastleProvider.getImplicitCaEC() == null)
+            {
+                throw new InvalidAlgorithmParameterException("null parameter passed by no implicitCA set");
+            }
             else
             {
                 throw new InvalidAlgorithmParameterException("parameter object not a ECParameterSpec");
@@ -565,6 +600,11 @@ public abstract class JDKKeyPairGenerator
                 
                 return new KeyPair(new JCEECPublicKey(algorithm, pub, p),
                                    new JCEECPrivateKey(algorithm, priv, p));
+            }
+            else if (ecParams == null)
+            {
+               return new KeyPair(new JCEECPublicKey(algorithm, pub),
+                                   new JCEECPrivateKey(algorithm, priv)); 
             }
             else
             {

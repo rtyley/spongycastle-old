@@ -1,11 +1,11 @@
 package org.bouncycastle.jce.provider.test;
 
-import java.security.Security;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
+
+import java.security.Security;
 
 public class RegressionTest
 {
@@ -23,6 +23,7 @@ public class RegressionTest
         new RSATest(),
         new DHTest(),
         new DSATest(),
+        new ImplicitlyCaTest(),
         new ECNRTest(),
         new ECDSA5Test(),
         new GOST3410Test(),

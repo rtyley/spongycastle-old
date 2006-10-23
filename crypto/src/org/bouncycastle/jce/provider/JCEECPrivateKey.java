@@ -1,21 +1,9 @@
 package org.bouncycastle.jce.provider;
 
-import java.math.BigInteger;
-import java.security.interfaces.ECPrivateKey;
-import java.security.spec.ECField;
-import java.security.spec.ECFieldF2m;
-import java.security.spec.ECFieldFp;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPrivateKeySpec;
-import java.security.spec.EllipticCurve;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -32,6 +20,19 @@ import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
+
+import java.math.BigInteger;
+import java.security.interfaces.ECPrivateKey;
+import java.security.spec.ECField;
+import java.security.spec.ECFieldF2m;
+import java.security.spec.ECFieldFp;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPrivateKeySpec;
+import java.security.spec.EllipticCurve;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 public class JCEECPrivateKey
     implements ECPrivateKey, org.bouncycastle.jce.interfaces.ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder
@@ -150,6 +151,15 @@ public class JCEECPrivateKey
     }
 
     JCEECPrivateKey(
+        String                  algorithm,
+        ECPrivateKeyParameters  params)
+    {
+        this.algorithm = algorithm;
+        this.d = params.getD();
+        this.ecSpec = null;
+    }
+
+    JCEECPrivateKey(
         PrivateKeyInfo      info)
     {
         X962Parameters      params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
@@ -168,6 +178,10 @@ public class JCEECPrivateKey
                             ecP.getG().getY().toBigInteger()),
                     ecP.getN(),
                     ecP.getH());
+        }
+        else if (params.isImplicitlyCA())
+        {
+            ecSpec = null;
         }
         else
         {
@@ -228,6 +242,10 @@ public class JCEECPrivateKey
             
             params = new X962Parameters(curveOid);
         }
+        else if (ecSpec == null)
+        {
+            params = new X962Parameters(DERNull.INSTANCE);
+        }
         else
         {
             ECField field = ecSpec.getCurve().getField();
@@ -279,6 +297,11 @@ public class JCEECPrivateKey
 
     public org.bouncycastle.jce.spec.ECParameterSpec getParameters()
     {
+        if (ecSpec == null)
+        {
+            return null;
+        }
+        
         ECCurve curve;
         org.bouncycastle.math.ec.ECPoint ecPoint;
         ECField field = ecSpec.getCurve().getField();

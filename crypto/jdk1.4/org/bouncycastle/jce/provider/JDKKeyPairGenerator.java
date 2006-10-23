@@ -422,16 +422,34 @@ public abstract class JDKKeyPairGenerator
             SecureRandom            random)
             throws InvalidAlgorithmParameterException
         {
-            if (!(params instanceof ECParameterSpec))
+            if (params == null && BouncyCastleProvider.getImplicitCaEC() != null)
             {
-                throw new InvalidAlgorithmParameterException("parameter object not a ECParameterSpec");
+                ECParameterSpec p = BouncyCastleProvider.getImplicitCaEC();
+                this.ecParams = null;
+
+                param = new ECKeyGenerationParameters(new ECDomainParameters(p.getCurve(), p.getG(), p.getN()), random);
+
+                engine.init(param);
+                initialised = true;
+            }
+            else if (params == null && BouncyCastleProvider.getImplicitCaEC() == null)
+            {
+                throw new InvalidAlgorithmParameterException("null parameter passed by no implicitCA set");
+            }
+            else
+            {
+                if (!(params instanceof ECParameterSpec))
+                {
+                    throw new InvalidAlgorithmParameterException("parameter object not a ECParameterSpec");
+                }
+
+                this.ecParams = (ECParameterSpec)params;
+
+                param = new ECKeyGenerationParameters(new ECDomainParameters(ecParams.getCurve(), ecParams.getG(), ecParams.getN()), random);
+
+                engine.init(param);
             }
 
-            this.ecParams = (ECParameterSpec)params;
-
-            param = new ECKeyGenerationParameters(new ECDomainParameters(ecParams.getCurve(), ecParams.getG(), ecParams.getN()), random);
-
-            engine.init(param);
             initialised = true;
         }
 
@@ -446,8 +464,18 @@ public abstract class JDKKeyPairGenerator
             ECPublicKeyParameters       pub = (ECPublicKeyParameters)pair.getPublic();
             ECPrivateKeyParameters      priv = (ECPrivateKeyParameters)pair.getPrivate();
 
-            return new KeyPair(new JCEECPublicKey(algorithm, pub, ecParams),
-                               new JCEECPrivateKey(algorithm, priv, ecParams));
+            if (ecParams == null)
+            {
+                return new KeyPair(new JCEECPublicKey(algorithm, pub),
+                                   new JCEECPrivateKey(algorithm, priv));
+            }
+            else
+            {
+                ECParameterSpec p = (ECParameterSpec)ecParams;
+
+                return new KeyPair(new JCEECPublicKey(algorithm, pub, p),
+                                   new JCEECPrivateKey(algorithm, priv, p));
+            }
         }
     }
 
