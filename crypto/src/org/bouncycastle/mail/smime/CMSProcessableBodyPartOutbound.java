@@ -1,14 +1,14 @@
 package org.bouncycastle.mail.smime;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.mail.smime.util.CRLFOutputStream;
+
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * a holding class for a BodyPart to be processed which does CRLF canocicalisation if 
@@ -52,7 +52,7 @@ public class CMSProcessableBodyPartOutbound
     {
         try
         {
-            if (SMIMEUtil.isCanonicalisationRequired(bodyPart, defaultContentTransferEncoding))
+            if (SMIMEUtil.isCanonicalisationRequired((MimeBodyPart)bodyPart, defaultContentTransferEncoding))
             {
                 out = new CRLFOutputStream(out);
             }

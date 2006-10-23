@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,8 +18,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,26 +34,18 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERUTCTime;
-import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.cms.Time;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.sasn1.Asn1Integer;
-import org.bouncycastle.sasn1.Asn1ObjectIdentifier;
-import org.bouncycastle.sasn1.BerOctetStringGenerator;
-import org.bouncycastle.sasn1.BerSequenceGenerator;
 
 /**
  * General class for generating a pkcs7-signature message stream.
@@ -225,109 +214,18 @@ public class CMSSignedDataStreamGenerator
         }
         
         SignerInfo toSignerInfo(
-            String  contentType,
-            boolean addDefaultAttributes)
+            DERObjectIdentifier  contentType,
+            boolean              addDefaultAttributes)
             throws IOException, SignatureException, CertificateEncodingException
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
                   new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
-            AlgorithmIdentifier encAlgId;
-            
-            if (this.getEncryptionAlgOID().equals(ENCRYPTION_DSA))
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()));
-            }
-            else
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()), new DERNull());
-            }
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
 
-            ASN1Set         signedAttr = null;
-            ASN1Set         unsignedAttr = null;
-            AttributeTable  attr = this.getSignedAttributes();
             byte[]          hash = _digest.digest();
 
-            if (attr != null)
-            {
-                ASN1EncodableVector  v = new ASN1EncodableVector();
-
-                if (attr.get(CMSAttributes.contentType) == null)
-                {
-                    v.add(new Attribute(CMSAttributes.contentType,
-                                                   new DERSet(new DERObjectIdentifier(contentType))));
-                }
-                else
-                {
-                    v.add(attr.get(CMSAttributes.contentType));
-                }
-
-                if (attr.get(CMSAttributes.signingTime) == null)
-                {
-                    v.add(new Attribute(CMSAttributes.signingTime,
-                                           new DERSet(new Time(new Date()))));
-                }
-                else
-                {
-                    v.add(attr.get(CMSAttributes.signingTime));
-                }
-
-                v.add(new Attribute(CMSAttributes.messageDigest,
-                        new DERSet(new DEROctetString(hash))));
-                
-                Hashtable           ats = attr.toHashtable();
-                
-                ats.remove(CMSAttributes.contentType);
-                ats.remove(CMSAttributes.signingTime);
-                ats.remove(CMSAttributes.messageDigest);
-                
-                Iterator            it = ats.values().iterator();
-                
-                while (it.hasNext())
-                {
-                    v.add(Attribute.getInstance(it.next()));
-                }
-                
-                signedAttr = new DERSet(v);
-            }
-            else
-            {
-                if (addDefaultAttributes) 
-                {
-                    ASN1EncodableVector  v = new ASN1EncodableVector();
-
-                    v.add(new Attribute(
-                        CMSAttributes.contentType,
-                            new DERSet(new DERObjectIdentifier(contentType))));
-
-                    v.add(new Attribute(
-                        CMSAttributes.signingTime,
-                            new DERSet(new DERUTCTime(new Date()))));
-
-                    v.add(new Attribute(
-                        CMSAttributes.messageDigest,
-                            new DERSet(new DEROctetString(hash))));
-
-                    signedAttr = new DERSet(v);
-                }
-            }
-
-            attr = this.getUnsignedAttributes();
-
-            if (attr != null)
-            {
-                Hashtable           ats = attr.toHashtable();
-                Iterator            it = ats.values().iterator();
-                ASN1EncodableVector  v = new ASN1EncodableVector();
-
-                while (it.hasNext())
-                {
-                    v.add(Attribute.getInstance(it.next()));
-                }
-
-                unsignedAttr = new DERSet(v);
-            }
+            ASN1Set signedAttr = getSignedAttributeSet(contentType, hash, this.getSignedAttributes(), addDefaultAttributes);
+            ASN1Set unsignedAttr = getUnsignedAttributeSet(this.getUnsignedAttributes());
 
             //
             // sig must be composed from the DER encoding.
@@ -348,8 +246,7 @@ public class CMSSignedDataStreamGenerator
 
             ASN1OctetString         encDigest = new DEROctetString(_signature.sign());
             X509Certificate         cert = this.getCertificate();
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getTBSCertificate());
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
+            ASN1InputStream         aIn = new ASN1InputStream(cert.getTBSCertificate());
             TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
             IssuerAndSerialNumber   encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
 
@@ -503,8 +400,7 @@ public class CMSSignedDataStreamGenerator
             return null;
         }
 
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(encoding);
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
+        ASN1InputStream         aIn = new ASN1InputStream(encoding);
 
         return aIn.readObject();
     }
@@ -566,14 +462,14 @@ public class CMSSignedDataStreamGenerator
         //
         // ContentInfo
         //
-        BerSequenceGenerator sGen = new BerSequenceGenerator(out);
+        BERSequenceGenerator sGen = new BERSequenceGenerator(out);
         
-        sGen.addObject(new Asn1ObjectIdentifier(CMSObjectIdentifiers.signedData.getId()));
+        sGen.addObject(CMSObjectIdentifiers.signedData);
         
         //
         // Signed Data
         //
-        BerSequenceGenerator sigGen = new BerSequenceGenerator(sGen.getRawOutputStream(), 0, true);
+        BERSequenceGenerator sigGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
         
         sigGen.addObject(getVersion(signedContentType));
         
@@ -611,16 +507,16 @@ public class CMSSignedDataStreamGenerator
         
         sigGen.getRawOutputStream().write(new DERSet(digestAlgs).getEncoded());
         
-        BerSequenceGenerator eiGen = new BerSequenceGenerator(sigGen.getRawOutputStream());
+        BERSequenceGenerator eiGen = new BERSequenceGenerator(sigGen.getRawOutputStream());
         
-        eiGen.addObject(new Asn1ObjectIdentifier(signedContentType));
+        eiGen.addObject(new DERObjectIdentifier(signedContentType));
         
         OutputStream digStream;
         
         if (encapsulate)
         {
-            BerOctetStringGenerator octGen = new BerOctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
-        
+            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
+            
             if (_bufferSize != 0)
             {
                 digStream = octGen.getOctetOutputStream(new byte[_bufferSize]);
@@ -631,7 +527,7 @@ public class CMSSignedDataStreamGenerator
             }
         }
         else
-        {
+        {   
             digStream = new NullOutputStream();
         }
         
@@ -645,7 +541,7 @@ public class CMSSignedDataStreamGenerator
         return new CmsSignedDataOutputStream(digStream, signedContentType, sGen, sigGen, eiGen);
     }
     
-    private Asn1Integer getVersion(
+    private DERInteger getVersion(
         String signedContentType)
     {
         int v = 0;
@@ -683,7 +579,7 @@ public class CMSSignedDataStreamGenerator
         {
             v = 1;
         }
-        return new Asn1Integer(v);
+        return new DERInteger(v);
     }
 
     private boolean anyCertHasTypeOther()
@@ -723,20 +619,20 @@ public class CMSSignedDataStreamGenerator
         extends OutputStream
     {
         private OutputStream         _out;
-        private String               _contentOID;
-        private BerSequenceGenerator _sGen;
-        private BerSequenceGenerator _sigGen;
-        private BerSequenceGenerator _eiGen;
+        private DERObjectIdentifier  _contentOID;
+        private BERSequenceGenerator _sGen;
+        private BERSequenceGenerator _sigGen;
+        private BERSequenceGenerator _eiGen;
 
         public CmsSignedDataOutputStream(
             OutputStream         out,
             String               contentOID,
-            BerSequenceGenerator sGen, 
-            BerSequenceGenerator sigGen,
-            BerSequenceGenerator eiGen)
+            BERSequenceGenerator sGen,
+            BERSequenceGenerator sigGen,
+            BERSequenceGenerator eiGen)
         {
             _out = out;
-            _contentOID = contentOID;
+            _contentOID = new DERObjectIdentifier(contentOID);
             _sGen = sGen;
             _sigGen = sigGen;
             _eiGen = eiGen;

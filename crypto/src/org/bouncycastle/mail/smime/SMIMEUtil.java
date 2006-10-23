@@ -1,5 +1,16 @@
 package org.bouncycastle.mail.smime;
 
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
+import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
+
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,53 +19,35 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.cert.X509Certificate;
 import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
 import java.util.Enumeration;
-
-import javax.mail.MessagingException;
-import javax.mail.Part;
-import javax.mail.internet.MimeBodyPart;
-
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.cms.CMSTypedStream;
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.mail.smime.util.CRLFOutputStream;
-import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 public class SMIMEUtil
 {
     private static final int BUF_SIZE = 4096;
     
     static boolean isCanonicalisationRequired(
-        Part   bodyPart,
+        MimeBodyPart   bodyPart,
         String defaultContentTransferEncoding) 
         throws MessagingException
     {
-        if (bodyPart instanceof MimeBodyPart)
-        {
-            MimeBodyPart    mimePart = (MimeBodyPart)bodyPart;
-            String[]        cte = mimePart.getHeader("Content-Transfer-Encoding");
-            String          contentTransferEncoding;
+        String[]        cte = bodyPart.getHeader("Content-Transfer-Encoding");
+        String          contentTransferEncoding;
 
-            if (cte == null)
-            {
-                contentTransferEncoding = defaultContentTransferEncoding;
-            }
-            else
-            {
-                contentTransferEncoding = cte[0];
-            }
-            
-            return !contentTransferEncoding.equalsIgnoreCase("binary");
+        if (cte == null)
+        {
+            contentTransferEncoding = defaultContentTransferEncoding;
         }
         else
         {
-            return !defaultContentTransferEncoding.equalsIgnoreCase("binary");
+            contentTransferEncoding = cte[0];
         }
+
+        return !contentTransferEncoding.equalsIgnoreCase("binary");
     }
     
-    private static class LineOutputStream extends FilterOutputStream
+    static class LineOutputStream extends FilterOutputStream
     {
         private static byte newline[];
 
@@ -115,10 +108,10 @@ public class SMIMEUtil
             return abyte0;
         }
     }
-    
+
     static void outputBodyPart(
         OutputStream out,
-        Part         bodyPart,
+        BodyPart     bodyPart,
         String       defaultContentTransferEncoding) 
         throws MessagingException, IOException
     {
@@ -127,6 +120,33 @@ public class SMIMEUtil
             MimeBodyPart    mimePart = (MimeBodyPart)bodyPart;
             String[]        cte = mimePart.getHeader("Content-Transfer-Encoding");
             String          contentTransferEncoding;
+
+            if (mimePart.getContent() instanceof Multipart)
+            {
+                Multipart mp = (Multipart)bodyPart.getContent();
+                ContentType contentType = new ContentType(mp.getContentType());
+                String boundary = "--" + contentType.getParameter("boundary");
+
+                SMIMEUtil.LineOutputStream lOut = new SMIMEUtil.LineOutputStream(out);
+
+                Enumeration headers = mimePart.getAllHeaderLines();
+                while (headers.hasMoreElements())
+                {
+                    lOut.writeln((String)headers.nextElement());
+                }
+
+                lOut.writeln();      // CRLF separator
+
+                for (int i = 0; i < mp.getCount(); i++)
+                {
+                    lOut.writeln(boundary);
+                    outputBodyPart(out, (MimeBodyPart)mp.getBodyPart(i), defaultContentTransferEncoding);
+                    lOut.writeln();       // CRLF terminator
+                }
+
+                lOut.writeln(boundary + "--");
+                return;
+            }
 
             if (cte == null)
             {
@@ -189,7 +209,7 @@ public class SMIMEUtil
             {
                 out = new CRLFOutputStream(out);
             }
-            
+
             bodyPart.writeTo(new CRLFOutputStream(out));
         }
     }
