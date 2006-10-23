@@ -10,6 +10,7 @@ import java.util.Vector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -91,6 +92,16 @@ public class JCEECPrivateKey
     }
 
     JCEECPrivateKey(
+        String                  algorithm,
+        ECPrivateKeyParameters  params)
+    {
+        this.algorithm = algorithm;
+        this.d = params.getD();
+        this.ecSpec = null;
+    }
+
+
+    JCEECPrivateKey(
         PrivateKeyInfo      info)
     {
         X962Parameters      params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
@@ -107,6 +118,10 @@ public class JCEECPrivateKey
                                         ecP.getN(),
                                         ecP.getH(),
                                         ecP.getSeed());
+        }
+        else if (params.isImplicitlyCA())
+        {
+            ecSpec = null;
         }
         else
         {
@@ -164,6 +179,10 @@ public class JCEECPrivateKey
             DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveParameterSpec)ecSpec).getName());
             
             params = new X962Parameters(curveOid);
+        }
+        else if (ecSpec == null)
+        {
+            params = new X962Parameters(DERNull.INSTANCE);
         }
         else
         {

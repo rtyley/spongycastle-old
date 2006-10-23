@@ -1,16 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECField;
-import java.security.spec.ECFieldF2m;
-import java.security.spec.ECFieldFp;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
-import java.security.spec.EllipticCurve;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -37,6 +26,17 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECField;
+import java.security.spec.ECFieldF2m;
+import java.security.spec.ECFieldFp;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.EllipticCurve;
 
 public class JCEECPublicKey
     implements ECPublicKey, org.bouncycastle.jce.interfaces.ECPublicKey, ECPointEncoder
@@ -117,7 +117,7 @@ public class JCEECPublicKey
 
         if (spec == null)
         {
-            EllipticCurve ellipticCurve = EC5Util.convertCurve(dp.getCurve(), spec.getSeed());
+            EllipticCurve ellipticCurve = EC5Util.convertCurve(dp.getCurve(), dp.getSeed());
 
             this.ecSpec = createSpec(ellipticCurve, dp);
         }
@@ -127,6 +127,20 @@ public class JCEECPublicKey
 
             ecSpec = EC5Util.convertSpec(ellipticCurve, spec);
         }
+    }
+
+    /*
+     * called for implicitCA
+     */
+    JCEECPublicKey(
+        String                  algorithm,
+        ECPublicKeyParameters   params)
+    {
+        ECDomainParameters      dp = params.getParameters();
+
+        this.algorithm = algorithm;
+        this.q = params.getQ();
+        this.ecSpec = null;
     }
 
     private ECParameterSpec createSpec(EllipticCurve ellipticCurve, ECDomainParameters dp)
@@ -245,11 +259,16 @@ public class JCEECPublicKey
                         ecP.getN(),
                         ecP.getH());
             }
+            else if (params.isImplicitlyCA())
+            {
+                ecSpec = null;
+                curve = BouncyCastleProvider.getImplicitCaEC().getCurve();
+            }
             else
             {
                 X9ECParameters          ecP = new X9ECParameters((ASN1Sequence)params.getParameters());
                 
-                curve = (ECCurve)ecP.getCurve();
+                curve = ecP.getCurve();
                 ellipticCurve = EC5Util.convertCurve(curve, ecP.getSeed());
 
                 this.ecSpec = new ECParameterSpec(
@@ -315,6 +334,10 @@ public class JCEECPublicKey
                 
                 params = new X962Parameters(curveOid);
             }
+            else if (ecSpec == null)
+            {
+                params = new X962Parameters(DERNull.INSTANCE);
+            }
             else
             {
                 ECField field = ecSpec.getCurve().getField();
@@ -372,7 +395,7 @@ public class JCEECPublicKey
         }
         else
         {
-            ECCurve curve = this.getQ().getCurve();
+            ECCurve curve = this.engineGetQ().getCurve();
 
             if (curve instanceof ECCurve.Fp)
             {
@@ -396,6 +419,11 @@ public class JCEECPublicKey
 
     public org.bouncycastle.jce.spec.ECParameterSpec getParameters()
     {
+        if (ecSpec == null)     // implictlyCA
+        {
+            return null;
+        }
+
         ECField field = ecSpec.getCurve().getField();
         ECCurve curve;
         org.bouncycastle.math.ec.ECPoint ecPoint;
@@ -428,9 +456,26 @@ public class JCEECPublicKey
 
     public org.bouncycastle.math.ec.ECPoint getQ()
     {
+        if (ecSpec == null)
+        {
+            if (q instanceof org.bouncycastle.math.ec.ECPoint.Fp)
+            {
+                return new org.bouncycastle.math.ec.ECPoint.Fp(null, q.getX(), q.getY());
+            }
+            else
+            {
+                return new org.bouncycastle.math.ec.ECPoint.F2m(null, q.getX(), q.getY());
+            }
+        }
+
         return q;
     }
-    
+
+    org.bouncycastle.math.ec.ECPoint engineGetQ()
+    {
+        return q;
+    }
+
     public String toString()
     {
         StringBuffer    buf = new StringBuffer();

@@ -1,15 +1,17 @@
 package org.bouncycastle.jce.provider;
 
-import java.security.Provider;
-
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
+import org.bouncycastle.jce.ConfigurableProvider;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+
+import java.security.Provider;
 
 /**
  * To add the provider at runtime use:
@@ -36,10 +38,13 @@ import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
  * test for getInstance works.
  */
 public final class BouncyCastleProvider extends Provider
+    implements ConfigurableProvider
 {
     private static String info = "BouncyCastle Security Provider v1.35b";
 
     public static String PROVIDER_NAME = "BC";
+
+    private static volatile ECParameterSpec implicitCaCurve;
 
     /**
      * Construct a new provider.  This should only be required when
@@ -887,5 +892,15 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature." + alias, mainName);
         put("Alg.Alias.Signature." + oid, mainName);
         put("Alg.Alias.Signature.OID." + oid, mainName);
+    }
+
+    public void setImplicitCaEC(ECParameterSpec curve)
+    {
+        implicitCaCurve = curve;
+    }
+
+    static ECParameterSpec getImplicitCaEC()
+    {
+        return implicitCaCurve;
     }
 }

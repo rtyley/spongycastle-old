@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.x9;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -56,6 +57,11 @@ public class X962Parameters
     public boolean isNamedCurve()
     {
         return (params instanceof DERObjectIdentifier);
+    }
+
+    public boolean isImplicitlyCA()
+    {
+        return (params instanceof ASN1Null);
     }
 
     public DERObject getParameters()

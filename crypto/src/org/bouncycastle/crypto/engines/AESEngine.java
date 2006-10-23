@@ -535,7 +535,7 @@ private static final int[] Tinv0 =
         r0 = Tinv0[C0&255] ^ shift(Tinv0[(C3>>8)&255], 24) ^ shift(Tinv0[(C2>>16)&255], 16) ^ shift(Tinv0[(C1>>24)&255], 8) ^ KW[r][0];
         r1 = Tinv0[C1&255] ^ shift(Tinv0[(C0>>8)&255], 24) ^ shift(Tinv0[(C3>>16)&255], 16) ^ shift(Tinv0[(C2>>24)&255], 8) ^ KW[r][1];
         r2 = Tinv0[C2&255] ^ shift(Tinv0[(C1>>8)&255], 24) ^ shift(Tinv0[(C0>>16)&255], 16) ^ shift(Tinv0[(C3>>24)&255], 8) ^ KW[r][2];
-        r3 = Tinv0[C3&255] ^ shift(Tinv0[(C2>>8)&255], 24) ^ shift(Tinv0[(C1>>16)&255], 16) ^ shift(Tinv0[(C0>>24)&255], 8) ^ KW[r--][3];
+        r3 = Tinv0[C3&255] ^ shift(Tinv0[(C2>>8)&255], 24) ^ shift(Tinv0[(C1>>16)&255], 16) ^ shift(Tinv0[(C0>>24)&255], 8) ^ KW[r][3];
         
         // the final round's table is a simple function of Si so we don't use a whole other four tables for it
 

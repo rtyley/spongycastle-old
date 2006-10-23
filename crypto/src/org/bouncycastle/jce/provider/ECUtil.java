@@ -1,9 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
@@ -16,6 +12,10 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.spec.ECParameterSpec;
+
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * utility class for converting jce/jca ECDSA, ECDH, and ECDHC
@@ -102,9 +102,20 @@ public class ECUtil
             ECPublicKey    k = (ECPublicKey)key;
             ECParameterSpec s = k.getParameters();
 
-            return new ECPublicKeyParameters(
+            if (s == null)
+            {
+                s = BouncyCastleProvider.getImplicitCaEC();
+
+                return new ECPublicKeyParameters(
+                            ((JCEECPublicKey)k).engineGetQ(),
+                            new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
+            }
+            else
+            {
+                return new ECPublicKeyParameters(
                             k.getQ(),
                             new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
+            }
         }
 
         throw new InvalidKeyException("can't identify EC public key.");
@@ -118,6 +129,11 @@ public class ECUtil
         {
             ECPrivateKey  k = (ECPrivateKey)key;
             ECParameterSpec s = k.getParameters();
+
+            if (s == null)
+            {
+                s = BouncyCastleProvider.getImplicitCaEC();
+            }
 
             return new ECPrivateKeyParameters(
                             k.getD(),

@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -79,6 +80,15 @@ public class JCEECPublicKey
         {
             this.ecSpec = spec;
         }
+    }
+
+    JCEECPublicKey(
+        String                  algorithm,
+        ECPublicKeyParameters   params)
+    {
+        this.algorithm = algorithm;
+        this.q = params.getQ();
+        this.ecSpec = null;
     }
 
     JCEECPublicKey(
@@ -179,6 +189,11 @@ public class JCEECPublicKey
                                             ecP.getSeed());
                 curve = ((ECParameterSpec)ecSpec).getCurve();
             }
+            else if (params.isImplicitlyCA())
+            {
+                ecSpec = null;
+                curve = BouncyCastleProvider.getImplicitCaEC().getCurve();
+            }
             else
             {
                 X9ECParameters ecP = new X9ECParameters(
@@ -243,6 +258,10 @@ public class JCEECPublicKey
             
             params = new X962Parameters(curveOid);
         }
+        else if (ecSpec == null)
+        {
+            params = new X962Parameters(DERNull.INSTANCE);
+        }
         else
         {
             ECParameterSpec         p = (ECParameterSpec)ecSpec;
@@ -296,7 +315,7 @@ public class JCEECPublicKey
         }
         else
         {
-            ECCurve curve = this.getQ().getCurve();
+            ECCurve curve = this.engineGetQ().getCurve();
             ASN1OctetString p;
             if (curve instanceof ECCurve.Fp) 
             {
@@ -337,7 +356,24 @@ public class JCEECPublicKey
         return (ECParameterSpec)ecSpec;
     }
     
-    public ECPoint getQ()
+    public org.bouncycastle.math.ec.ECPoint getQ()
+    {
+        if (ecSpec == null)
+        {
+            if (q instanceof org.bouncycastle.math.ec.ECPoint.Fp)
+            {
+                return new org.bouncycastle.math.ec.ECPoint.Fp(null, q.getX(), q.getY());
+            }
+            else
+            {
+                return new org.bouncycastle.math.ec.ECPoint.F2m(null, q.getX(), q.getY());
+            }
+        }
+
+        return q;
+    }
+
+    org.bouncycastle.math.ec.ECPoint engineGetQ()
     {
         return q;
     }

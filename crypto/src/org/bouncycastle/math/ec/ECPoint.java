@@ -1,8 +1,8 @@
 package org.bouncycastle.math.ec;
 
-import java.math.BigInteger;
-
 import org.bouncycastle.asn1.x9.X9IntegerConverter;
+
+import java.math.BigInteger;
 
 /**
  * base class for points on elliptic curves.
@@ -316,7 +316,10 @@ public abstract class ECPoint
                 ECFieldElement.F2m.checkFieldElements(this.x, this.y);
     
                 // Check if x and a are elements of the same field
-                ECFieldElement.F2m.checkFieldElements(this.x, this.curve.getA());
+                if (curve != null)
+                {
+                    ECFieldElement.F2m.checkFieldElements(this.x, this.curve.getA());
+                }
             }
             
             this.withCompression = withCompression;

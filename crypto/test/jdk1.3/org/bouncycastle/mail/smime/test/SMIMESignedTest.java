@@ -293,6 +293,110 @@ public class SMIMESignedTest
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
     }
 
+    public void testMimeMultipart()
+        throws Exception
+    {
+        MimeBodyPart m = createMultipartMessage();
+
+        List certList = new ArrayList();
+
+        certList.add(origCert);
+        certList.add(signCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator("binary");
+
+        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addCertificatesAndCRLs(certs);
+
+        MimeMultipart mm = gen.generate(m, "BC");
+
+        SMIMESigned s = new SMIMESigned(mm);
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testMimeMultipartBinaryReader()
+        throws Exception
+    {
+        MimeBodyPart m = createMultipartMessage();
+
+        List certList = new ArrayList();
+
+        certList.add(origCert);
+        certList.add(signCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator("binary");
+
+        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addCertificatesAndCRLs(certs);
+
+        MimeMultipart mm = gen.generate(m, "BC");
+
+        SMIMESigned s = new SMIMESigned(mm, "binary");
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testMimeMultipartBinaryParser()
+        throws Exception
+    {
+        MimeBodyPart m = createMultipartMessage();
+
+        List certList = new ArrayList();
+
+        certList.add(origCert);
+        certList.add(signCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator("binary");
+
+        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addCertificatesAndCRLs(certs);
+
+        MimeMultipart mm = gen.generate(m, "BC");
+
+        SMIMESignedParser s = new SMIMESignedParser(mm, "binary");
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    private MimeBodyPart createMultipartMessage()
+        throws MessagingException
+    {
+        MimeBodyPart    msg1 = new MimeBodyPart();
+
+        msg1.setText("Hello part 1!\n");
+
+        MimeBodyPart    msg2 = new MimeBodyPart();
+
+        msg2.setText("Hello part 2!\n");
+
+        MimeMultipart mp = new MimeMultipart();
+
+        mp.addBodyPart(msg1);
+        mp.addBodyPart(msg2);
+
+        MimeBodyPart m = new MimeBodyPart();
+
+        m.setContent(mp);
+
+        return m;
+    }
+    
     private MimeBodyPart generateBinaryPart() throws MessagingException
     {
         byte[] content = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 10, 11, 12, 13, 14, 10, 10, 15, 16 };   
