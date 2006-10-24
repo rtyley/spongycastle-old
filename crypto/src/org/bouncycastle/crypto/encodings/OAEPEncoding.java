@@ -1,7 +1,5 @@
 package org.bouncycastle.crypto.encodings;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
@@ -9,6 +7,8 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+
+import java.security.SecureRandom;
 
 /**
  * Optimal Asymmetric Encryption Padding (OAEP) - see PKCS 1 V 2.
@@ -77,7 +77,7 @@ public class OAEPEncoding
             kParam = (AsymmetricKeyParameter)param;
         }
 
-        engine.init(forEncryption, kParam);
+        engine.init(forEncryption, param);
 
         this.forEncryption = forEncryption;
     }

@@ -1,8 +1,8 @@
 package org.bouncycastle.crypto.test;
 
+import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.util.test.SimpleTestResult;
 
 public class RegressionTest
 {
@@ -42,6 +42,7 @@ public class RegressionTest
         new GOST28147Test(),
         new IDEATest(),
         new RSATest(),
+        new RSABlindedTest(),
         new ISO9796Test(),
         new ISO9797Alg3MacTest(),
         new MD2DigestTest(),
