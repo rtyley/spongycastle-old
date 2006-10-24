@@ -256,7 +256,7 @@ public class JDKPSSSigner
     {
         public SHA224withRSA()
         {
-            super("SHA2224withRSAandMGF1", new RSABlindedEngine(), new PSSParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), 28, 1));
+            super("SHA224withRSAandMGF1", new RSABlindedEngine(), new PSSParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), 28, 1));
         }
     }
     
