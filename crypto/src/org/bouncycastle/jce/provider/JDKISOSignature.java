@@ -1,5 +1,14 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.engines.RSABlindedEngine;
+import org.bouncycastle.crypto.signers.ISO9796d2Signer;
+
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -8,15 +17,6 @@ import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
-
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.signers.ISO9796d2Signer;
 
 public class JDKISOSignature
     extends Signature
@@ -121,7 +121,7 @@ public class JDKISOSignature
     {
         public SHA1WithRSAEncryption()
         {
-            super("SHA1withRSA/ISO9796-2", new SHA1Digest(), new RSAEngine());
+            super("SHA1withRSA/ISO9796-2", new SHA1Digest(), new RSABlindedEngine());
         }
     }
 
@@ -130,7 +130,7 @@ public class JDKISOSignature
     {
         public MD5WithRSAEncryption()
         {
-            super("MD5withRSA/ISO9796-2", new MD5Digest(), new RSAEngine());
+            super("MD5withRSA/ISO9796-2", new MD5Digest(), new RSABlindedEngine());
         }
     }
 
@@ -139,7 +139,7 @@ public class JDKISOSignature
     {
         public RIPEMD160WithRSAEncryption()
         {
-            super("RIPEMD160withRSA/ISO9796-2", new RIPEMD160Digest(), new RSAEngine());
+            super("RIPEMD160withRSA/ISO9796-2", new RIPEMD160Digest(), new RSABlindedEngine());
         }
     }
 }

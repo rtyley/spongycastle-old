@@ -54,7 +54,7 @@ public class ISO9796d1Encoding
             kParam = (RSAKeyParameters)param;
         }
 
-        engine.init(forEncryption, kParam);
+        engine.init(forEncryption, param);
 
         bitSize = kParam.getModulus().bitLength();
 

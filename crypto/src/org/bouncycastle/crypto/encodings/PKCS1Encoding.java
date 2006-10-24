@@ -1,12 +1,12 @@
 package org.bouncycastle.crypto.encodings;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+
+import java.security.SecureRandom;
 
 /**
  * this does your basic PKCS 1 v1.5 padding - whether or not you should be using this
@@ -68,7 +68,7 @@ public class PKCS1Encoding
             kParam = (AsymmetricKeyParameter)param;
         }
 
-        engine.init(forEncryption, kParam);
+        engine.init(forEncryption, param);
 
         this.forPrivateKey = kParam.isPrivate();
         this.forEncryption = forEncryption;
