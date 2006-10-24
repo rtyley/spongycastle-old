@@ -106,7 +106,7 @@ public abstract class ASN1TaggedObject
         }
         else
         {
-            if(!(obj.equals(other.obj)))
+            if(!(obj.getDERObject().equals(other.obj.getDERObject())))
             {
                 return false;
             }
