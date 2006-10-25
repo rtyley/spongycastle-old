@@ -24,4 +24,9 @@ public class SMIMEException
     {
         return e;
     }
+     
+    public Throwable getCause()
+    {
+        return e;
+    }
 }
