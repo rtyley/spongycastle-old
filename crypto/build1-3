@@ -30,8 +30,10 @@ then
     ant -f jdk13.xml build-provider
     ant -f jdk13.xml zip-src-provider
 else
-    ant -f jdk13.xml build-jce
-    ant -f jdk13.xml build
-    ant -f jdk13.xml zip-src
+    if ant -f jdk13.xml build-jce
+    then
+        ant -f jdk13.xml build
+        ant -f jdk13.xml zip-src
+    fi
 fi
 fi

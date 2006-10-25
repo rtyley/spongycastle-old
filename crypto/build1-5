@@ -24,8 +24,10 @@ if [ "$1" == "test" ]
 then
     ant -f jdk15.xml test
 else
-    ant -f jdk15.xml build-provider
-    ant -f jdk15.xml build
-    ant -f jdk15.xml zip-src
+    if ant -f jdk15.xml build-provider
+    then
+        ant -f jdk15.xml build
+        ant -f jdk15.xml zip-src
+    fi
 fi
 

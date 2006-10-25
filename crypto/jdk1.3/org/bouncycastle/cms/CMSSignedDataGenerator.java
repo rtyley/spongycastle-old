@@ -18,8 +18,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,16 +34,12 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERUTCTime;
-import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
@@ -227,25 +221,11 @@ public class CMSSignedDataGenerator
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
                   new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
-            AlgorithmIdentifier encAlgId;
-            
-            if (this.getEncryptionAlgOID().equals(ENCRYPTION_DSA))
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()));
-            }
-            else
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()), new DERNull());
-            }
-
-            ASN1Set         signedAttr = null;
-            ASN1Set         unsignedAttr = null;
-            String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
-            String          signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
-            Signature       sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
-            MessageDigest   dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
+            String              digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
+            String              signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
+            Signature           sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+            MessageDigest       dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
 
             byte[]      hash = null;
 
@@ -256,102 +236,8 @@ public class CMSSignedDataGenerator
                 hash = dig.digest();
             }
 
-            AttributeTable   attr = this.getSignedAttributes();
-
-            if (attr != null)
-            {
-                ASN1EncodableVector  v = new ASN1EncodableVector();
-
-                if (attr.get(CMSAttributes.contentType) == null)
-                {
-                    v.add(new Attribute(CMSAttributes.contentType,
-                                                   new DERSet(contentType)));
-                }
-                else
-                {
-                    v.add(attr.get(CMSAttributes.contentType));
-                }
-
-                if (attr.get(CMSAttributes.signingTime) == null)
-                {
-                    v.add(new Attribute(CMSAttributes.signingTime,
-                                           new DERSet(new Time(new Date()))));
-                }
-                else
-                {
-                    v.add(attr.get(CMSAttributes.signingTime));
-                }
-
-                if (hash != null)
-                {
-                    v.add(new Attribute(CMSAttributes.messageDigest,
-                        new DERSet(new DEROctetString(hash))));
-                }
-                else
-                {
-                    v.add(new Attribute(CMSAttributes.messageDigest,
-                        new DERSet(new DERNull())));
-                }
-                
-                Hashtable           ats = attr.toHashtable();
-                
-                ats.remove(CMSAttributes.contentType);
-                ats.remove(CMSAttributes.signingTime);
-                ats.remove(CMSAttributes.messageDigest);
-                
-                Iterator            it = ats.values().iterator();
-                
-                while (it.hasNext())
-                {
-                    v.add(Attribute.getInstance(it.next()));
-                }
-                
-                signedAttr = new DERSet(v);
-            }
-            else
-            {
-                if (addDefaultAttributes) 
-                {
-                    ASN1EncodableVector  v = new ASN1EncodableVector();
-
-                    v.add(new Attribute(
-                        CMSAttributes.contentType,
-                            new DERSet(contentType)));
-
-                    v.add(new Attribute(
-                        CMSAttributes.signingTime,
-                            new DERSet(new DERUTCTime(new Date()))));
-
-                    if (hash != null)
-                    {
-                        v.add(new Attribute(CMSAttributes.messageDigest,
-                            new DERSet(new DEROctetString(hash))));
-                    }
-                    else
-                    {
-                        v.add(new Attribute(CMSAttributes.messageDigest,
-                            new DERSet(new DERNull())));
-                    }
-
-                    signedAttr = new DERSet(v);
-                }
-            }
-
-            attr = this.getUnsignedAttributes();
-
-            if (attr != null)
-            {
-                Hashtable           ats = attr.toHashtable();
-                Iterator            it = ats.values().iterator();
-                ASN1EncodableVector  v = new ASN1EncodableVector();
-
-                while (it.hasNext())
-                {
-                    v.add(Attribute.getInstance(it.next()));
-                }
-
-                unsignedAttr = new DERSet(v);
-            }
+            ASN1Set signedAttr = getSignedAttributeSet(contentType, hash, this.getSignedAttributes(), addDefaultAttributes);
+            ASN1Set unsignedAttr = getUnsignedAttributeSet(this.getUnsignedAttributes());
 
             //
             // sig must be composed from the DER encoding.
@@ -381,9 +267,8 @@ public class CMSSignedDataGenerator
             return new SignerInfo(new SignerIdentifier(encSid), digAlgId,
                         signedAttr, encAlgId, encDigest, unsignedAttr);
         }
-
     }
-
+    
     /**
      * base constructor
      */

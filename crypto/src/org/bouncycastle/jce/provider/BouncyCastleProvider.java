@@ -8,8 +8,7 @@ import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.ConfigurableProvider;
-import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 import java.security.Provider;
 
@@ -43,8 +42,6 @@ public final class BouncyCastleProvider extends Provider
     private static String info = "BouncyCastle Security Provider v1.35b";
 
     public static String PROVIDER_NAME = "BC";
-
-    private static volatile ECParameterSpec implicitCaCurve;
 
     /**
      * Construct a new provider.  This should only be required when
@@ -894,13 +891,8 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.OID." + oid, mainName);
     }
 
-    public void setImplicitCaEC(ECParameterSpec curve)
+    public void setParameter(String parameterName, Object parameter)
     {
-        implicitCaCurve = curve;
-    }
-
-    static ECParameterSpec getImplicitCaEC()
-    {
-        return implicitCaCurve;
+        ProviderUtil.setParameter(parameterName, parameter);
     }
 }

@@ -4,7 +4,8 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.jce.ConfigurableProvider;
+import org.bouncycastle.jce.ECPointUtil;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -22,6 +23,8 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
 import java.security.interfaces.ECKey;
+import java.security.spec.ECFieldFp;
+import java.security.spec.EllipticCurve;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -36,7 +39,14 @@ public class ImplicitlyCaTest
     public void performTest()
         throws Exception
     {
+        testBCAPI();
 
+        testJDKAPI();
+    }
+
+    private void testBCAPI()
+        throws Exception
+    {
         KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
 
         ECCurve curve = new ECCurve.Fp(
@@ -51,7 +61,43 @@ public class ImplicitlyCaTest
 
         ConfigurableProvider config = (ConfigurableProvider)Security.getProvider("BC");
 
-        config.setImplicitCaEC(ecSpec);
+        config.setParameter(ConfigurableProvider.EC_IMPLICITLY_CA, ecSpec);
+
+        g.initialize(null, new SecureRandom());
+
+        KeyPair p = g.generateKeyPair();
+
+        ECPrivateKey sKey = (ECPrivateKey)p.getPrivate();
+        ECPublicKey vKey = (ECPublicKey)p.getPublic();
+
+        testECDSA(sKey, vKey);
+
+        testBCParamsAndQ(sKey, vKey);
+        testEC5Params(sKey, vKey);
+
+        testEncoding(sKey, vKey);
+    }
+
+    private void testJDKAPI()
+        throws Exception
+    {
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        EllipticCurve curve = new EllipticCurve(
+            new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
+            new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+            new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+
+        java.security.spec.ECParameterSpec ecSpec = new java.security.spec.ECParameterSpec(
+            curve,
+            ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+            new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
+            1); // h
+
+
+        ConfigurableProvider config = (ConfigurableProvider)Security.getProvider("BC");
+
+        config.setParameter(ConfigurableProvider.EC_IMPLICITLY_CA, ecSpec);
 
         g.initialize(null, new SecureRandom());
 

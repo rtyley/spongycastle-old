@@ -192,7 +192,7 @@ public class JCEECPublicKey
             else if (params.isImplicitlyCA())
             {
                 ecSpec = null;
-                curve = BouncyCastleProvider.getImplicitCaEC().getCurve();
+                curve = ProviderUtil.getEcImplicitlyCa().getCurve();
             }
             else
             {

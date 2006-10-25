@@ -563,9 +563,9 @@ public abstract class JDKKeyPairGenerator
                 engine.init(param);
                 initialised = true;
             }
-            else if (params == null && BouncyCastleProvider.getImplicitCaEC() != null)
+            else if (params == null && ProviderUtil.getEcImplicitlyCa() != null)
             {
-                ECParameterSpec p = BouncyCastleProvider.getImplicitCaEC();
+                ECParameterSpec p = ProviderUtil.getEcImplicitlyCa();
                 this.ecParams = params;
 
                 param = new ECKeyGenerationParameters(new ECDomainParameters(p.getCurve(), p.getG(), p.getN()), random);
@@ -573,7 +573,7 @@ public abstract class JDKKeyPairGenerator
                 engine.init(param);
                 initialised = true;
             }
-            else if (params == null && BouncyCastleProvider.getImplicitCaEC() == null)
+            else if (params == null && ProviderUtil.getEcImplicitlyCa() == null)
             {
                 throw new InvalidAlgorithmParameterException("null parameter passed by no implicitCA set");
             }

@@ -5,7 +5,7 @@ import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.ConfigurableProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -54,7 +54,7 @@ public class ImplicitlyCaTest
 
         ConfigurableProvider config = (ConfigurableProvider)Security.getProvider("BC");
 
-        config.setImplicitCaEC(ecSpec);
+        config.setParameter(ConfigurableProvider.EC_IMPLICITLY_CA, ecSpec);
 
         g.initialize(null, new SecureRandom());
 
