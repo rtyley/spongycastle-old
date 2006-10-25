@@ -104,7 +104,7 @@ public class ECUtil
 
             if (s == null)
             {
-                s = BouncyCastleProvider.getImplicitCaEC();
+                s = ProviderUtil.getEcImplicitlyCa();
 
                 return new ECPublicKeyParameters(
                             ((JCEECPublicKey)k).engineGetQ(),
@@ -132,7 +132,7 @@ public class ECUtil
 
             if (s == null)
             {
-                s = BouncyCastleProvider.getImplicitCaEC();
+                s = ProviderUtil.getEcImplicitlyCa();
             }
 
             return new ECPrivateKeyParameters(

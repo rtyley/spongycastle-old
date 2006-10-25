@@ -1,6 +1,4 @@
-package org.bouncycastle.jce;
-
-import org.bouncycastle.jce.spec.ECParameterSpec;
+package org.bouncycastle.jce.interfaces;
 
 /**
  * Implemented by the BC provider. This allows setting of hidden parameters,
@@ -8,5 +6,7 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
  */
 public interface ConfigurableProvider
 {
-    void setImplicitCaEC(ECParameterSpec curve);
+    static final String      EC_IMPLICITLY_CA = "ecImplicitlyCa";
+
+    void setParameter(String parameterName, Object parameter);
 }

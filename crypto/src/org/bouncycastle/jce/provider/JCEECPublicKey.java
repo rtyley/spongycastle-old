@@ -262,7 +262,7 @@ public class JCEECPublicKey
             else if (params.isImplicitlyCA())
             {
                 ecSpec = null;
-                curve = BouncyCastleProvider.getImplicitCaEC().getCurve();
+                curve = ProviderUtil.getEcImplicitlyCa().getCurve();
             }
             else
             {
@@ -424,29 +424,7 @@ public class JCEECPublicKey
             return null;
         }
 
-        ECField field = ecSpec.getCurve().getField();
-        ECCurve curve;
-        org.bouncycastle.math.ec.ECPoint ecPoint;
-
-        if (field instanceof ECFieldFp)
-        {
-            curve = new ECCurve.Fp(((ECFieldFp)field).getP(), ecSpec.getCurve().getA(), ecSpec.getCurve().getB());
-            ecPoint = new org.bouncycastle.math.ec.ECPoint.Fp(curve, curve.fromBigInteger(ecSpec.getGenerator().getAffineX()), curve.fromBigInteger(ecSpec.getGenerator().getAffineY()), withCompression);
-        }
-        else
-        {
-            ECFieldF2m fieldF2m = (ECFieldF2m)field;
-            int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
-            curve = new ECCurve.F2m(fieldF2m.getM(), ks[0], ks[1], ks[2], ecSpec.getCurve().getA(), ecSpec.getCurve().getB());
-            ecPoint = new org.bouncycastle.math.ec.ECPoint.F2m(curve, curve.fromBigInteger(ecSpec.getGenerator().getAffineX()), curve.fromBigInteger(ecSpec.getGenerator().getAffineY()), withCompression);
-        }
-
-        return new org.bouncycastle.jce.spec.ECParameterSpec(
-                curve,
-                ecPoint,
-                ecSpec.getOrder(),
-                BigInteger.valueOf(ecSpec.getCofactor()),
-                ecSpec.getCurve().getSeed());
+        return EC5Util.convertSpec(ecSpec, withCompression);
     }
 
     public ECPoint getW()

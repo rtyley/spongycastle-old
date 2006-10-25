@@ -1,5 +1,23 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.SignedData;
+import org.bouncycastle.asn1.cms.SignerInfo;
+import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,21 +38,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.SignedData;
-import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -72,22 +75,6 @@ public class CMSSignedData
     CertStore               certStore;
     SignerInformationStore  signerInfoStore;
 
-    private static ContentInfo readContentInfo(
-        InputStream envelopedData)
-        throws CMSException
-    {
-        try
-        {
-            ASN1InputStream in = new ASN1InputStream(envelopedData);
-
-            return ContentInfo.getInstance(in.readObject());
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("IOException reading content.", e);
-        }
-    }
-    
     private CMSSignedData(
         CMSSignedData   c)
     {
@@ -102,7 +89,7 @@ public class CMSSignedData
         byte[]      sigBlock)
         throws CMSException
     {
-        this(readContentInfo(new ByteArrayInputStream(sigBlock)));
+        this(CMSUtils.readContentInfo(sigBlock));
     }
 
     public CMSSignedData(
@@ -110,7 +97,7 @@ public class CMSSignedData
         byte[]          sigBlock)
         throws CMSException
     {
-        this(signedContent, readContentInfo(new ByteArrayInputStream(sigBlock)));
+        this(signedContent, CMSUtils.readContentInfo(sigBlock));
     }
 
     /**
@@ -124,7 +111,7 @@ public class CMSSignedData
         InputStream     sigData)
         throws CMSException
     {
-        this(signedContent, readContentInfo(sigData));
+        this(signedContent, CMSUtils.readContentInfo(new ASN1InputStream(sigData)));
     }
 
     /**
@@ -134,7 +121,7 @@ public class CMSSignedData
         InputStream sigData)
         throws CMSException
     {
-        this(readContentInfo(sigData));
+        this(CMSUtils.readContentInfo(sigData));
     }
 
     public CMSSignedData(
@@ -194,7 +181,7 @@ public class CMSSignedData
      * return a CertStore containing the certificates and CRLs associated with
      * this message.
      *
-     * @exception NoProviderException if the provider requested isn't available.
+     * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchAlgorithmException if the cert store isn't available.
      */
     public CertStore getCertificatesAndCRLs(
@@ -346,18 +333,34 @@ public class CMSSignedData
         // replace the store
         //
         cms.signerInfoStore = signerInformationStore;
-        
+
         //
         // replace the signers in the SignedData object
         //
+        ASN1EncodableVector digestAlgs = new ASN1EncodableVector();
         ASN1EncodableVector vec = new ASN1EncodableVector();
         
         Iterator    it = signerInformationStore.getSigners().iterator();
         while (it.hasNext())
         {
-            vec.add(((SignerInformation)it.next()).toSignerInfo());
+            SignerInformation   signer = (SignerInformation)it.next();
+            AlgorithmIdentifier digAlgId;
+
+            try
+            {
+                digAlgId = makeAlgId(signer.getDigestAlgOID(),
+                                                       signer.getDigestAlgParams());
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException("encoding error: " + e);
+            }
+
+            digestAlgs.add(digAlgId);
+            vec.add(signer.toSignerInfo());
         }
 
+        ASN1Set             digests = new DERSet(digestAlgs);
         ASN1Set             signers = new DERSet(vec);
         ASN1Sequence        sD = (ASN1Sequence)signedData.signedData.getDERObject();
 
@@ -366,7 +369,10 @@ public class CMSSignedData
         //
         // signers are the last item in the sequence.
         //
-        for (int i = 0; i != sD.size() - 1; i++)
+        vec.add(sD.getObjectAt(0)); // version
+        vec.add(digests);
+
+        for (int i = 2; i != sD.size() - 1; i++)
         {
             vec.add(sD.getObjectAt(i));
         }
@@ -382,17 +388,7 @@ public class CMSSignedData
         
         return cms;
     }
-    
-    private static DERObject makeObj(
-        byte[]  encoding)
-        throws IOException
-    {
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(encoding);
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
 
-        return aIn.readObject();
-    }
-    
     /**
      * Replace the certificate and CRL information associated with this
      * CMSSignedData object with the new one passed in.
@@ -503,5 +499,36 @@ public class CMSSignedData
         cms.contentInfo = new ContentInfo(cms.contentInfo.getContentType(), cms.signedData);
         
         return cms;
+    }
+
+    private static DERObject makeObj(
+        byte[]  encoding)
+        throws IOException
+    {
+        if (encoding == null)
+        {
+            return null;
+        }
+
+        ASN1InputStream         aIn = new ASN1InputStream(encoding);
+
+        return aIn.readObject();
+    }
+
+    private static AlgorithmIdentifier makeAlgId(
+        String  oid,
+        byte[]  params)
+        throws IOException
+    {
+        if (params != null)
+        {
+            return new AlgorithmIdentifier(
+                            new DERObjectIdentifier(oid), makeObj(params));
+        }
+        else
+        {
+            return new AlgorithmIdentifier(
+                            new DERObjectIdentifier(oid), new DERNull());
+        }
     }
 }

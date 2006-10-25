@@ -1,9 +1,35 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1SetParser;
+import org.bouncycastle.asn1.ASN1StreamParser;
+import org.bouncycastle.asn1.BEROctetStringGenerator;
+import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.BERSetParser;
+import org.bouncycastle.asn1.BERTaggedObject;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERTags;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.cms.ContentInfoParser;
+import org.bouncycastle.asn1.cms.SignedDataParser;
+import org.bouncycastle.asn1.cms.SignerInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.DigestInputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.MessageDigest;
@@ -11,20 +37,19 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CRLException;
 import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Enumeration;
-
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.cms.SignedDataParser;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * Parsing class for an CMS Signed Data object from an input stream.
@@ -357,6 +382,307 @@ public class CMSSignedDataParser
         else
         {
             return null;
+        }
+    }
+
+
+    /**
+     * Replace the signerinformation store associated with the passed
+     * in message contained in the stream original with the new one passed in.
+     * You would probably only want to do this if you wanted to change the unsigned
+     * attributes associated with a signer, or perhaps delete one.
+     * <p>
+     * The output stream is returned unclosed.
+     * </p>
+     * @param original the signed data stream to be used as a base.
+     * @param signerInformationStore the new signer information store to use.
+     * @param out the stream to write the new signed data object to.
+     * @return out.
+     */
+    public static OutputStream replaceSigners(
+        InputStream             original,
+        SignerInformationStore  signerInformationStore,
+        OutputStream            out)
+        throws CMSException, IOException
+    {
+        ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
+        ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
+        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(DERTags.SEQUENCE));
+
+        BERSequenceGenerator sGen = new BERSequenceGenerator(out);
+
+        sGen.addObject(CMSObjectIdentifiers.signedData);
+
+        BERSequenceGenerator sigGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
+
+        // version number
+        sigGen.addObject(signedData.getVersion());
+
+        // digests
+        signedData.getDigestAlgorithms().getDERObject();  // skip old ones
+
+        ASN1EncodableVector digestAlgs = new ASN1EncodableVector();
+
+        for (Iterator it = signerInformationStore.getSigners().iterator(); it.hasNext();)
+        {
+            SignerInformation        signer = (SignerInformation)it.next();
+            AlgorithmIdentifier     digAlgId;
+
+            digAlgId = makeAlgId(signer.getDigestAlgOID(), signer.getDigestAlgParams());
+
+            digestAlgs.add(digAlgId);
+        }
+
+        sigGen.getRawOutputStream().write(new DERSet(digestAlgs).getEncoded());
+
+        // encap content info
+        ContentInfoParser encapContentInfo = signedData.getEncapContentInfo();
+
+        BERSequenceGenerator eiGen = new BERSequenceGenerator(sigGen.getRawOutputStream());
+
+        eiGen.addObject(encapContentInfo.getContentType());
+
+        ASN1OctetStringParser octs = (ASN1OctetStringParser)encapContentInfo.getContent(DERTags.OCTET_STRING);
+
+        if (octs != null)
+        {
+            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
+            byte[]                  inBuffer = new byte[4096];
+            byte[]                  outBuffer = new byte[4096];
+            InputStream             inOctets = octs.getOctetStream();
+            OutputStream            outOctets = octGen.getOctetOutputStream(outBuffer);
+
+            int len;
+            while ((len = inOctets.read(inBuffer, 0, outBuffer.length)) >= 0)
+            {
+                outOctets.write(inBuffer, 0, len);
+            }
+
+            outOctets.close();
+        }
+
+        eiGen.close();
+
+        ASN1SetParser set = signedData.getCertificates();
+
+        if (set instanceof BERSetParser)
+        {
+            sigGen.getRawOutputStream().write(new BERTaggedObject(false, 0, set.getDERObject()).getEncoded());
+        }
+        else if (set != null)
+        {
+            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 0, set.getDERObject()).getEncoded());
+        }
+
+        set = signedData.getCrls();
+
+        if (set instanceof BERSetParser)
+        {
+            sigGen.getRawOutputStream().write(new BERTaggedObject(false, 1, set.getDERObject()).getEncoded());
+        }
+        else if (set != null)
+        {
+            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, set.getDERObject()).getEncoded());
+        }
+
+        ASN1EncodableVector signerInfos = new ASN1EncodableVector();
+        for (Iterator it = signerInformationStore.getSigners().iterator(); it.hasNext();)
+        {
+            SignerInformation        signer = (SignerInformation)it.next();
+
+            signerInfos.add(signer.toSignerInfo());
+        }
+
+        sigGen.getRawOutputStream().write(new DERSet(signerInfos).getEncoded());
+
+        sigGen.close();
+
+        sGen.close();
+
+        return out;
+    }
+
+    /**
+     * Replace the certificate and CRL information associated with this
+     * CMSSignedData object with the new one passed in.
+     * <p>
+     * The output stream is returned unclosed.
+     * </p>
+     * @param original the signed data stream to be used as a base.
+     * @param certsAndCrls the new certificates and CRLs to be used.
+     * @param out the stream to write the new signed data object to.
+     * @return out.
+     * @exception CMSException if there is an error processing the CertStore
+     */
+    public static OutputStream replaceCertificatesAndCRLs(
+        InputStream   original,
+        CertStore     certsAndCrls,
+        OutputStream  out)
+        throws CMSException, IOException
+    {
+        ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
+        ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
+        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(DERTags.SEQUENCE));
+
+        BERSequenceGenerator sGen = new BERSequenceGenerator(out);
+
+        sGen.addObject(CMSObjectIdentifiers.signedData);
+
+        BERSequenceGenerator sigGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
+
+        // version number
+        sigGen.addObject(signedData.getVersion());
+
+        // digests
+        sigGen.getRawOutputStream().write(signedData.getDigestAlgorithms().getDERObject().getEncoded());
+
+        // encap content info
+        ContentInfoParser encapContentInfo = signedData.getEncapContentInfo();
+
+        BERSequenceGenerator eiGen = new BERSequenceGenerator(sigGen.getRawOutputStream());
+
+        eiGen.addObject(encapContentInfo.getContentType());
+
+        ASN1OctetStringParser octs = (ASN1OctetStringParser)encapContentInfo.getContent(DERTags.OCTET_STRING);
+
+        if (octs != null)
+        {
+            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
+            byte[]                  inBuffer = new byte[4096];
+            byte[]                  outBuffer = new byte[4096];
+            InputStream             inOctets = octs.getOctetStream();
+            OutputStream            outOctets = octGen.getOctetOutputStream(outBuffer);
+
+            int len;
+            while ((len = inOctets.read(inBuffer, 0, outBuffer.length)) >= 0)
+            {
+                outOctets.write(inBuffer, 0, len);
+            }
+
+            outOctets.close();
+        }
+
+        eiGen.close();
+
+        //
+        // skip existing certs and CRLs
+        //
+        ASN1SetParser set = signedData.getCertificates();
+
+        if (set != null)
+        {
+            set.getDERObject();
+        }
+
+        set = signedData.getCrls();
+
+        if (set != null)
+        {
+            set.getDERObject();
+        }
+
+        //
+        // replace the certs and crls in the SignedData object
+        //
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        try
+        {
+            Iterator  it = certsAndCrls.getCertificates(null).iterator();
+
+            while (it.hasNext())
+            {
+                X509Certificate c = (X509Certificate)it.next();
+
+                v.add(makeObj(c.getEncoded()));
+            }
+        }
+        catch (CertStoreException e)
+        {
+            throw new CMSException("error getting certs from certStore", e);
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("error processing certs", e);
+        }
+        catch (CertificateEncodingException e)
+        {
+            throw new CMSException("error encoding certs", e);
+        }
+
+        if (v.size() > 0)
+        {
+            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 0, new DERSet(v)).getEncoded());
+        }
+
+        v = new ASN1EncodableVector();
+
+        try
+        {
+            Iterator    it = certsAndCrls.getCRLs(null).iterator();
+
+            while (it.hasNext())
+            {
+                X509CRL c = (X509CRL)it.next();
+
+                v.add(makeObj(c.getEncoded()));
+            }
+        }
+        catch (CertStoreException e)
+        {
+            throw new CMSException("error getting crls from certStore", e);
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("error processing crls", e);
+        }
+        catch (CRLException e)
+        {
+            throw new CMSException("error encoding crls", e);
+        }
+
+        if (v.size() > 0)
+        {
+            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, new DERSet(v)).getEncoded());
+        }
+
+        sigGen.getRawOutputStream().write(signedData.getSignerInfos().getDERObject().getEncoded());
+
+        sigGen.close();
+
+        sGen.close();
+
+        return out;
+    }
+
+    private static DERObject makeObj(
+        byte[]  encoding)
+        throws IOException
+    {
+        if (encoding == null)
+        {
+            return null;
+        }
+
+        ASN1InputStream         aIn = new ASN1InputStream(encoding);
+
+        return aIn.readObject();
+    }
+
+    private static AlgorithmIdentifier makeAlgId(
+        String  oid,
+        byte[]  params)
+        throws IOException
+    {
+        if (params != null)
+        {
+            return new AlgorithmIdentifier(
+                            new DERObjectIdentifier(oid), makeObj(params));
+        }
+        else
+        {
+            return new AlgorithmIdentifier(
+                            new DERObjectIdentifier(oid), new DERNull());
         }
     }
 }

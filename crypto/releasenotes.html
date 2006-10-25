@@ -31,6 +31,7 @@ Release 1.35
 <li>The l parameter was being ignored for the DH and ElGamal key generation. This has been fixed.</li>
 <li>The ASN1Sequence constructor for OtherRecipientInfo was broken. It has been fixed</li>
 <li>Regression - DN fields SerialNumber and Country were changed to encode as UTF8String in 1.34 in the X509DefaultEntryConverter, these now encode as PrintableString.</li>
+<li>CMSSignedData.replaceSigners() was not replacing the digest set as well as the signers. This has been fixed.</li>
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
@@ -38,6 +39,8 @@ Release 1.35
 <li>API now incorporates a CertStore which should be suitable for use with LDAP.</li>
 <li>The streaming ASN.1 API is now integrated into the base one, the sasn1 package has been deprecated.</li>
 <li>The OpenPGP implementation now supports SHA-224 and BZIP2.</li>
+<li>The JCE provider now does RSA blinding by default.</li>
+<li>CMSSignedDataParser now provides methods for replacing signers and replacing certificates and CRLs.</li>
 </ul>
 <h3>2.1.1 Version</h3>
 Release 1.34
