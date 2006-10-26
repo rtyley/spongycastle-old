@@ -1,20 +1,5 @@
 package org.bouncycastle.ocsp;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -31,9 +16,25 @@ import org.bouncycastle.asn1.ocsp.ResponseData;
 import org.bouncycastle.asn1.ocsp.RevokedInfo;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.CRLReason;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Generator for basic OCSP response objects.
@@ -215,7 +216,7 @@ public class BasicOCSPRespGenerator
     }
 
     private BasicOCSPResp generateResponse(
-        DERObjectIdentifier signingAlgorithm,
+        String              signatureName,
         PrivateKey          key,
         X509Certificate[]   chain,
         Date                producedAt,
@@ -224,6 +225,16 @@ public class BasicOCSPRespGenerator
         throws OCSPException, NoSuchProviderException
     {
         Iterator    it = list.iterator();
+        DERObjectIdentifier signingAlgorithm;
+
+        try
+        {
+            signingAlgorithm = OCSPUtil.getAlgorithmOID(signatureName);
+        }
+        catch (Exception e)
+        {
+            throw new IllegalArgumentException("unknown signing algorithm specified");
+        }
 
         ASN1EncodableVector responses = new ASN1EncodableVector();
 
@@ -241,11 +252,11 @@ public class BasicOCSPRespGenerator
 
         ResponseData  tbsResp = new ResponseData(responderID.toASN1Object(), new DERGeneralizedTime(producedAt), new DERSequence(responses), responseExtensions);
 
-        java.security.Signature sig = null;
+        Signature sig = null;
 
         try
         {
-            sig = java.security.Signature.getInstance(signingAlgorithm.getId(), provider);
+            sig = Signature.getInstance(signatureName, provider);
             if (random != null)
             {
                 sig.initSign(key, random);
@@ -282,7 +293,7 @@ public class BasicOCSPRespGenerator
             throw new OCSPException("exception processing TBSRequest: " + e, e);
         }
 
-        AlgorithmIdentifier sigAlgId = new AlgorithmIdentifier(signingAlgorithm, new DERNull());
+        AlgorithmIdentifier sigAlgId = OCSPUtil.getSigAlgID(signingAlgorithm);
 
         if (chain != null && chain.length > 0)
         {
@@ -337,16 +348,7 @@ public class BasicOCSPRespGenerator
             throw new IllegalArgumentException("no signing algorithm specified");
         }
 
-        try
-        {
-            DERObjectIdentifier oid = OCSPUtil.getAlgorithmOID(signingAlgorithm);
-    
-            return generateResponse(oid, key, chain, producedAt, provider, random);
-        }
-        catch (Exception e)
-        {
-            throw new IllegalArgumentException("unknown signing algorithm specified");
-        }
+        return generateResponse(signingAlgorithm, key, chain, producedAt, provider, random);
     }
     
     /**
