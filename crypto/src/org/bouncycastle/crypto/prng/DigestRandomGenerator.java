@@ -47,13 +47,18 @@ public class DigestRandomGenerator
 
     public void nextBytes(byte[] bytes)
     {
+        nextBytes(bytes, 0, bytes.length);
+    }
+
+    public void nextBytes(byte[] bytes, int start, int len)
+    {
         synchronized (this)
         {
             int stateOff = 0;
 
             digestDoFinal(state);
 
-            for (int i = 0; i != bytes.length; i++)
+            for (int i = start; i != len; i++)
             {
                 if (stateOff == state.length)
                 {
