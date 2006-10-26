@@ -24,4 +24,9 @@ public class OCSPException
     {
         return e;
     }
+      
+    public Throwable getCause()
+    {
+        return e;
+    }
 }
