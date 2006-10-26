@@ -3,6 +3,9 @@ package java.security;
 import java.util.Random;
 
 import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.prng.RandomGenerator;
+import org.bouncycastle.crypto.prng.DigestRandomGenerator;
 
 /**
  * An implementation of SecureRandom specifically for the light-weight API, JDK
@@ -11,25 +14,30 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
  */
 public class SecureRandom extends java.util.Random
 {
-    private static SecureRandom rand    = new SecureRandom();
+    private static SecureRandom rand    = new SecureRandom(new DigestRandomGenerator(new SHA1Digest()));
 
-    private byte[]              seed;
-
-    private long                counter = 1;
-    private SHA1Digest          digest  = new SHA1Digest();
-    private byte[]              state   = new byte[digest.getDigestSize()];
+    protected RandomGenerator             generator;
 
     // public constructors
     public SecureRandom()
     {
         super(0);
+        this.generator = new DigestRandomGenerator(new SHA1Digest());
         setSeed(System.currentTimeMillis());
     }
 
     public SecureRandom(byte[] inSeed)
     {
         super(0);
+        this.generator = new DigestRandomGenerator(new SHA1Digest());
         setSeed(inSeed);
+    }
+
+    protected SecureRandom(
+        RandomGenerator generator)
+    {
+        super(0);
+        this.generator = generator;
     }
 
     // protected constructors
@@ -38,12 +46,20 @@ public class SecureRandom extends java.util.Random
     // public class methods
     public static SecureRandom getInstance(String algorithm)
     {
-        return new SecureRandom();
+        if (algorithm.equals("SHA1PRNG"))
+        {
+            return new SecureRandom(new DigestRandomGenerator(new SHA1Digest()));
+        }
+        if (algorithm.equals("SHA256PRNG"))
+        {
+            return new SecureRandom(new DigestRandomGenerator(new SHA256Digest()));
+        }
+        return new SecureRandom();    // follow old behaviour
     }
 
     public static SecureRandom getInstance(String algorithm, String provider)
     {
-        return new SecureRandom();
+        return getInstance(algorithm);
     }
 
     public static byte[] getSeed(int numBytes)
@@ -69,48 +85,27 @@ public class SecureRandom extends java.util.Random
     // public final Provider getProvider();
     public void setSeed(byte[] inSeed)
     {
-        digest.update(inSeed, 0, inSeed.length);
+        generator.addSeedMaterial(inSeed);
     }
 
     // public methods overriding random
     public void nextBytes(byte[] bytes)
     {
-        int stateOff = 0;
-
-        digest.doFinal(state, 0);
-
-        for (int i = 0; i != bytes.length; i++)
-        {
-            if (stateOff == state.length)
-            {
-                byte[] b = longToBytes(counter++);
-
-                digest.update(b, 0, b.length);
-                digest.update(state, 0, state.length);
-                digest.doFinal(state, 0);
-                stateOff = 0;
-            }
-            bytes[i] = state[stateOff++];
-        }
-
-        byte[] b = longToBytes(counter++);
-
-        digest.update(b, 0, b.length);
-        digest.update(state, 0, state.length);
+        generator.nextBytes(bytes);
     }
 
     public void setSeed(long rSeed)
     {
-        if (rSeed != 0)
+        if (rSeed != 0)    // to avoid problems with Random calling setSeed in construction
         {
-            setSeed(longToBytes(rSeed));
+            generator.addSeedMaterial(rSeed);
         }
     }
 
-    private byte[] intBytes = new byte[4];
-
     public int nextInt()
     {
+        byte[] intBytes = new byte[4];
+
         nextBytes(intBytes);
 
         int result = 0;
@@ -138,18 +133,5 @@ public class SecureRandom extends java.util.Random
         }
 
         return result & ((1 << numBits) - 1);
-    }
-
-    private byte[] longBytes = new byte[8];
-
-    private byte[] longToBytes(long val)
-    {
-        for (int i = 0; i != 8; i++)
-        {
-            longBytes[i] = (byte)val;
-            val >>>= 8;
-        }
-
-        return longBytes;
     }
 }
