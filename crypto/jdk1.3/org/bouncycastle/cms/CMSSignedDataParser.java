@@ -435,7 +435,7 @@ public class CMSSignedDataParser
             OutputStream            outOctets = octGen.getOctetOutputStream(outBuffer);
 
             int len;
-            while ((len = inOctets.read(inBuffer, 0, outBuffer.length)) >= 0)
+            while ((len = inOctets.read(inBuffer, 0, inBuffer.length)) >= 0)
             {
                 outOctets.write(inBuffer, 0, len);
             }
@@ -536,7 +536,7 @@ public class CMSSignedDataParser
             OutputStream            outOctets = octGen.getOctetOutputStream(outBuffer);
 
             int len;
-            while ((len = inOctets.read(inBuffer, 0, outBuffer.length)) >= 0)
+            while ((len = inOctets.read(inBuffer, 0, inBuffer.length)) >= 0)
             {
                 outOctets.write(inBuffer, 0, len);
             }
