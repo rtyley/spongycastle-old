@@ -3,6 +3,12 @@ package org.bouncycastle.cms.test;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.cms.CMSAttributeTableGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSProcessableByteArray;
@@ -11,6 +17,7 @@ import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.util.encoders.Base64;
@@ -27,8 +34,10 @@ import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class SignedDataStreamTest
     extends TestCase
@@ -503,6 +512,87 @@ public class SignedDataStreamTest
         sigOut.close();
 
         verifyEncodedData(bOut);
+    }
+
+    public void testAttributeGenerators()
+        throws Exception
+    {
+        final DERObjectIdentifier dummyOid1 = new DERObjectIdentifier("1.2.3");
+        final DERObjectIdentifier dummyOid2 = new DERObjectIdentifier("1.2.3.4");
+        List                      certList = new ArrayList();
+        ByteArrayOutputStream     bOut = new ByteArrayOutputStream();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        CMSAttributeTableGenerator signedGen = new DefaultSignedAttributeTableGenerator()
+        {
+            public AttributeTable getAttributes(Map parameters)
+            {
+                Hashtable table = createStandardAttributeTable(parameters);
+
+                DEROctetString val = new DEROctetString((byte[])parameters.get(CMSAttributeTableGenerator.DIGEST));
+                Attribute attr = new Attribute(dummyOid1, new DERSet(val));
+
+                table.put(attr.getAttrType(), attr);
+
+                return new AttributeTable(table);
+            }
+        };
+
+        CMSAttributeTableGenerator unsignedGen = new CMSAttributeTableGenerator()
+        {
+            public AttributeTable getAttributes(Map parameters)
+            {
+                DEROctetString val = new DEROctetString((byte[])parameters.get(CMSAttributeTableGenerator.SIGNATURE));
+                Attribute attr = new Attribute(dummyOid2, new DERSet(val));
+
+                return new AttributeTable(new DERSet(attr));
+            }
+        };
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, signedGen, unsignedGen, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        verifySignatures(sp);
+
+        //
+        // check attributes
+        //
+        SignerInformationStore  signers = sp.getSignerInfos();
+
+        Collection              c = signers.getSigners();
+        Iterator                it = c.iterator();
+
+        while (it.hasNext())
+        {
+            SignerInformation   signer = (SignerInformation)it.next();
+            checkAttribute(signer.getContentDigest(), signer.getSignedAttributes().get(dummyOid1));
+            checkAttribute(signer.getSignature(), signer.getUnsignedAttributes().get(dummyOid2));
+        }
+    }
+
+    private void checkAttribute(byte[] expected, Attribute attr)
+    {
+        DEROctetString      value = (DEROctetString)attr.getAttrValues().getObjectAt(0);
+
+        assertEquals(new DEROctetString(expected), value);
     }
 
     public void testSignerStoreReplacement()

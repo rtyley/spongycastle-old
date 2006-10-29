@@ -1,5 +1,24 @@
 package org.bouncycastle.jce;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.CertificationRequest;
+import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.util.Strings;
+
+import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,29 +32,9 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.CertificationRequest;
-import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.util.Strings;
+import java.util.Set;
 
 /**
  * A class for verifying and creating PKCS10 Certification requests. 
@@ -153,8 +152,7 @@ public class PKCS10CertificationRequest
     {
         try
         {
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(bytes);
-            ASN1InputStream         dIn = new ASN1InputStream(bIn);
+            ASN1InputStream         dIn = new ASN1InputStream(bytes);
 
             return (ASN1Sequence)dIn.readObject();
         }
@@ -315,7 +313,7 @@ public class PKCS10CertificationRequest
         }
         catch (Exception e)
         {
-            throw new SecurityException("exception encoding TBS cert request - " + e);
+            throw new IllegalArgumentException("exception encoding TBS cert request - " + e);
         }
 
         this.sigBits = new DERBitString(sig.sign());
@@ -377,7 +375,22 @@ public class PKCS10CertificationRequest
         return verify("BC");
     }
 
+    /**
+     * verify the request using the passed in provider.
+     */
     public boolean verify(
+        String provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException,
+                InvalidKeyException, SignatureException
+    {
+        return verify(this.getPublicKey(provider), provider);
+    }
+
+    /**
+     * verify the request using the passed in public key and the provider..
+     */
+    public boolean verify(
+        PublicKey pubKey,
         String provider)
         throws NoSuchAlgorithmException, NoSuchProviderException,
                 InvalidKeyException, SignatureException
@@ -405,7 +418,7 @@ public class PKCS10CertificationRequest
             }
         }
 
-        sig.initVerify(this.getPublicKey(provider));
+        sig.initVerify(pubKey);
 
         try
         {
@@ -418,7 +431,7 @@ public class PKCS10CertificationRequest
         }
         catch (Exception e)
         {
-            throw new SecurityException("exception encoding TBS cert request - " + e);
+            throw new SignatureException("exception encoding TBS cert request - " + e);
         }
 
         return sig.verify(sigBits.getBytes());

@@ -20,6 +20,9 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -77,96 +80,26 @@ public class CMSSignedDataStreamGenerator
     private List  _digests = new ArrayList();
     private int   _bufferSize;
     
-    static class DigOutputStream
-        extends OutputStream
-    {
-        MessageDigest   dig;
-
-        public DigOutputStream(
-            MessageDigest   dig)
-        {
-            this.dig = dig;
-        }
-
-        public void write(
-            byte[]  b,
-            int     off,
-            int     len)
-            throws IOException
-        {
-            dig.update(b, off, len);
-        }
-
-        public void write(
-            int b)
-            throws IOException
-        {
-            dig.update((byte)b);
-        }
-    }
-
-    static class SigOutputStream
-        extends OutputStream
-    {
-        Signature   sig;
-
-        public SigOutputStream(
-            Signature   sig)
-        {
-            this.sig = sig;
-        }
-
-        public void write(
-            byte[]  b,
-            int     off,
-            int     len)
-            throws IOException
-        {
-            try
-            {
-                sig.update(b, off, len);
-            }
-            catch (SignatureException e)
-            {
-                throw new IOException("signature problem: " + e);
-            }
-        }
-
-        public void write(
-            int b)
-            throws IOException
-        {
-            try
-            {
-                sig.update((byte)b);
-            }
-            catch (SignatureException e)
-            {
-                throw new IOException("signature problem: " + e);
-            }
-        }
-    }
-
     private class SignerInf
     {
-        PrivateKey      _key;
-        X509Certificate _cert;
-        String          _digestOID;
-        String          _encOID;
-        AttributeTable  _sAttr;
-        AttributeTable  _unsAttr;
-        MessageDigest   _digest;
-        Signature       _signature;
+        PrivateKey                  _key;
+        X509Certificate             _cert;
+        String                      _digestOID;
+        String                      _encOID;
+        CMSAttributeTableGenerator  _sAttr;
+        CMSAttributeTableGenerator  _unsAttr;
+        MessageDigest               _digest;
+        Signature                   _signature;
 
         SignerInf(
-            PrivateKey      key,
-            X509Certificate cert,
-            String          digestOID,
-            String          encOID,
-            AttributeTable  sAttr,
-            AttributeTable  unsAttr,
-            MessageDigest   digest,
-            Signature       signature)
+            PrivateKey                  key,
+            X509Certificate             cert,
+            String                      digestOID,
+            String                      encOID,
+            CMSAttributeTableGenerator  sAttr,
+            CMSAttributeTableGenerator  unsAttr,
+            MessageDigest               digest,
+            Signature                   signature)
         {
             _key = key;
             _cert = cert;
@@ -202,20 +135,9 @@ public class CMSSignedDataStreamGenerator
         {
             return _encOID;
         }
-
-        AttributeTable getSignedAttributes()
-        {
-            return _sAttr;
-        }
-
-        AttributeTable getUnsignedAttributes()
-        {
-            return _unsAttr;
-        }
         
         SignerInfo toSignerInfo(
-            DERObjectIdentifier  contentType,
-            boolean              addDefaultAttributes)
+            DERObjectIdentifier  contentType)
             throws IOException, SignatureException, CertificateEncodingException
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
@@ -224,8 +146,11 @@ public class CMSSignedDataStreamGenerator
 
             byte[]          hash = _digest.digest();
 
-            ASN1Set signedAttr = getSignedAttributeSet(contentType, hash, this.getSignedAttributes(), addDefaultAttributes);
-            ASN1Set unsignedAttr = getUnsignedAttributeSet(this.getUnsignedAttributes());
+            Map  parameters = getBaseParameters(contentType, digAlgId, hash);
+
+            AttributeTable signed = (_sAttr != null) ? _sAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
+
+            ASN1Set signedAttr = getAttributeSet(signed);
 
             //
             // sig must be composed from the DER encoding.
@@ -245,6 +170,14 @@ public class CMSSignedDataStreamGenerator
             _signature.update(bOut.toByteArray());
 
             ASN1OctetString         encDigest = new DEROctetString(_signature.sign());
+
+            parameters = getBaseParameters(contentType, digAlgId, hash);
+            parameters.put(CMSAttributeTableGenerator.SIGNATURE, encDigest.getOctets().clone());
+
+            AttributeTable unsigned = (_unsAttr != null) ? _unsAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
+
+            ASN1Set unsignedAttr = getAttributeSet(unsigned);
+
             X509Certificate         cert = this.getCertificate();
             ASN1InputStream         aIn = new ASN1InputStream(cert.getTBSCertificate());
             TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
@@ -288,7 +221,7 @@ public class CMSSignedDataStreamGenerator
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
-       addSigner(key, cert, digestOID, null, null, sigProvider);
+       addSigner(key, cert, digestOID, new DefaultSignedAttributeTableGenerator(), (CMSAttributeTableGenerator)null, sigProvider);
     }
 
     /**
@@ -306,15 +239,28 @@ public class CMSSignedDataStreamGenerator
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
+        addSigner(key, cert, digestOID,
+            new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), sigProvider);
+    }
+
+    public void addSigner(
+        PrivateKey                  key,
+        X509Certificate             cert,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGenerator,
+        CMSAttributeTableGenerator  unsignedAttrGenerator,
+        String                      sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
         String        encOID = getEncOID(key, digestOID);
         String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
         String        signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
         Signature     sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
         MessageDigest dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);
- 
+
         sig.initSign(key);
 
-        _signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttr, unsignedAttr, dig, sig));
+        _signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _digests.add(dig);
     }
 
@@ -718,7 +664,7 @@ public class CMSSignedDataStreamGenerator
 
                 try
                 {
-                    signerInfos.add(signer.toSignerInfo(_contentOID, true));
+                    signerInfos.add(signer.toSignerInfo(_contentOID));
                 }
                 catch (IOException e)
                 {
