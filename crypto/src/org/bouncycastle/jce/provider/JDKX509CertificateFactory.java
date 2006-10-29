@@ -1,5 +1,15 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.SignedData;
+import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.util.encoders.Base64;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,16 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.SignedData;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.util.encoders.Base64;
 
 /**
  * class for dealing with X509 certificates.
@@ -88,9 +88,10 @@ public class JDKX509CertificateFactory
     }
 
     private Certificate readDERCertificate(
-        ASN1InputStream dIn)
+        InputStream in)
         throws IOException
     {
+        ASN1InputStream dIn = new ASN1InputStream(in, getLimit(in));
         ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
 
         if (seq.size() > 1
@@ -301,12 +302,12 @@ public class JDKX509CertificateFactory
             else if (in.read() == 0x80)    // assume BER encoded.
             {
                 in.reset();
-                return readPKCS7Certificate(new ASN1InputStream(in, getLimit(in)));
+                return readPKCS7Certificate(in);
             }
             else
             {
                 in.reset();
-                return readDERCertificate(new ASN1InputStream(in, getLimit(in)));
+                return readDERCertificate(in);
             }
         }
         catch (Exception e)

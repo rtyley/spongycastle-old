@@ -1,27 +1,16 @@
 package org.bouncycastle.x509;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Vector;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
@@ -35,6 +24,27 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
+import javax.security.auth.x500.X500Principal;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
+
 /**
  * class to produce an X.509 Version 3 certificate.
  */
@@ -44,8 +54,8 @@ public class X509V3CertificateGenerator
     private DERObjectIdentifier         sigOID;
     private AlgorithmIdentifier         sigAlgId;
     private String                      signatureAlgorithm;
-    private Hashtable                   extensions = null;
-    private Vector                      extOrdering = null;
+    private Hashtable                   extensions = new Hashtable();
+    private Vector                      extOrdering = new Vector();
 
     public X509V3CertificateGenerator()
     {
@@ -58,8 +68,8 @@ public class X509V3CertificateGenerator
     public void reset()
     {
         tbsGen = new V3TBSCertificateGenerator();
-        extensions = null;
-        extOrdering = null;
+        extensions.clear();
+        extOrdering.clear();
     }
 
     /**
@@ -198,12 +208,6 @@ public class X509V3CertificateGenerator
         boolean             critical,
         DEREncodable        value)
     {
-        if (extensions == null)
-        {
-            extensions = new Hashtable();
-            extOrdering = new Vector();
-        }
-
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         DEROutputStream         dOut = new DEROutputStream(bOut);
 
@@ -240,12 +244,6 @@ public class X509V3CertificateGenerator
         boolean             critical,
         byte[]              value)
     {
-        if (extensions == null)
-        {
-            extensions = new Hashtable();
-            extOrdering = new Vector();
-        }
-
         extensions.put(oid, new X509Extension(critical, new DEROctetString(value)));
         extOrdering.addElement(oid);
     }
@@ -297,6 +295,7 @@ public class X509V3CertificateGenerator
     /**
      * generate an X509 certificate, based on the current issuer and subject
      * using the default provider "BC".
+     * @deprecated use generate(key, "BC")
      */
     public X509Certificate generateX509Certificate(
         PrivateKey      key)
@@ -316,6 +315,7 @@ public class X509V3CertificateGenerator
      * generate an X509 certificate, based on the current issuer and subject
      * using the default provider "BC", and the passed in source of randomness
      * (if required).
+     * @deprecated use generate(key, random, "BC")
      */
     public X509Certificate generateX509Certificate(
         PrivateKey      key,
@@ -335,6 +335,7 @@ public class X509V3CertificateGenerator
     /**
      * generate an X509 certificate, based on the current issuer and subject,
      * using the passed in provider for the signing.
+     * @deprecated use generate()
      */
     public X509Certificate generateX509Certificate(
         PrivateKey      key,
@@ -348,6 +349,7 @@ public class X509V3CertificateGenerator
      * generate an X509 certificate, based on the current issuer and subject,
      * using the passed in provider for the signing and the supplied source
      * of randomness, if required.
+     * @deprecated use generate()
      */
     public X509Certificate generateX509Certificate(
         PrivateKey      key,
@@ -355,68 +357,131 @@ public class X509V3CertificateGenerator
         SecureRandom    random)
         throws NoSuchProviderException, SecurityException, SignatureException, InvalidKeyException
     {
-        Signature sig = null;
-
-        if (sigOID == null)
+        try
         {
-            throw new IllegalStateException("no signature algorithm specified");
+            return generate(key, provider, random);
         }
+        catch (NoSuchProviderException e)
+        {
+            throw e;
+        }
+        catch (SignatureException e)
+        {
+            throw e;
+        }
+        catch (InvalidKeyException e)
+        {
+            throw e;
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new SecurityException("exception: " + e);
+        }
+    }
+
+    /**
+     * generate an X509 certificate, based on the current issuer and subject
+     * using the default provider.
+     * <p>
+     * <b>Note:</b> this differs from the deprecated method in that the default provider is
+     * used - not "BC".
+     * </p>
+     */
+    public X509Certificate generate(
+        PrivateKey      key)
+        throws CertificateEncodingException, IllegalStateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
+    {
+        return generate(key, (SecureRandom)null);
+    }
+
+    /**
+     * generate an X509 certificate, based on the current issuer and subject
+     * using the default provider, and the passed in source of randomness
+     * (if required).
+     * <p>
+     * <b>Note:</b> this differs from the deprecated method in that the default provider is
+     * used - not "BC".
+     * </p>
+     */
+    public X509Certificate generate(
+        PrivateKey      key,
+        SecureRandom    random)
+        throws CertificateEncodingException, IllegalStateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
+    {
+        TBSCertificateStructure tbsCert = generateTbsCert();
+        byte[] signature;
 
         try
         {
-            sig = Signature.getInstance(sigOID.getId(), provider);
+            signature = X509Util.getSignatureForObject(sigOID, signatureAlgorithm, key, random, tbsCert);
         }
-        catch (NoSuchAlgorithmException ex)
+        catch (IOException e)
         {
-            try
-            {
-                sig = Signature.getInstance(signatureAlgorithm, provider);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                throw new SecurityException("exception creating signature: " + e.toString());
-            }
+            throw new ExtCertificateEncodingException("exception encoding TBS cert", e);
         }
 
-        if (random != null)
+        return generateJcaObject(tbsCert, signature);
+    }
+
+    /**
+     * generate an X509 certificate, based on the current issuer and subject,
+     * using the passed in provider for the signing.
+     */
+    public X509Certificate generate(
+        PrivateKey      key,
+        String          provider)
+        throws CertificateEncodingException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
+    {
+        return generate(key, provider, null);
+    }
+
+    /**
+     * generate an X509 certificate, based on the current issuer and subject,
+     * using the passed in provider for the signing and the supplied source
+     * of randomness, if required.
+     */
+    public X509Certificate generate(
+        PrivateKey      key,
+        String          provider,
+        SecureRandom    random)
+        throws CertificateEncodingException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
+    {
+        TBSCertificateStructure tbsCert = generateTbsCert();
+        byte[] signature;
+
+        try
         {
-            sig.initSign(key, random);
+            signature = X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, tbsCert);
         }
-        else
+        catch (IOException e)
         {
-            sig.initSign(key);
+            throw new ExtCertificateEncodingException("exception encoding TBS cert", e);
         }
 
-        if (extensions != null)
+        return generateJcaObject(tbsCert, signature);
+    }
+
+    private TBSCertificateStructure generateTbsCert()
+    {
+        if (!extensions.isEmpty())
         {
             tbsGen.setExtensions(new X509Extensions(extOrdering, extensions));
         }
 
-        TBSCertificateStructure tbsCert = tbsGen.generateTBSCertificate();
+        return tbsGen.generateTBSCertificate();
+    }
 
-        try
-        {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(tbsCert);
-
-            sig.update(bOut.toByteArray());
-        }
-        catch (Exception e)
-        {
-            throw new SecurityException("exception encoding TBS cert - " + e);
-        }
-
-        ASN1EncodableVector  v = new ASN1EncodableVector();
+    private X509Certificate generateJcaObject(TBSCertificateStructure tbsCert, byte[] signature)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
 
         v.add(tbsCert);
         v.add(sigAlgId);
-        v.add(new DERBitString(sig.sign()));
+        v.add(new DERBitString(signature));
 
         return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
     }
-    
+
     /**
      * Return an iterator of the signature names supported by the generator.
      * 

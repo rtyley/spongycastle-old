@@ -20,6 +20,9 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -142,12 +145,13 @@ public class CMSSignedDataGenerator
 
     private class SignerInf
     {
-        PrivateKey      key;
-        X509Certificate cert;
-        String          digestOID;
-        String          encOID;
-        AttributeTable  sAttr;
-        AttributeTable  unsAttr;
+        PrivateKey                  key;
+        X509Certificate             cert;
+        String                      digestOID;
+        String                      encOID;
+        CMSAttributeTableGenerator  sAttr;
+        CMSAttributeTableGenerator  unsAttr;
+        AttributeTable              baseSignedTable;
 
         SignerInf(
             PrivateKey      key,
@@ -162,12 +166,13 @@ public class CMSSignedDataGenerator
         }
 
         SignerInf(
-            PrivateKey      key,
-            X509Certificate cert,
-            String          digestOID,
-            String          encOID,
-            AttributeTable  sAttr,
-            AttributeTable  unsAttr)
+            PrivateKey                 key,
+            X509Certificate            cert,
+            String                     digestOID,
+            String                     encOID,
+            CMSAttributeTableGenerator sAttr,
+            CMSAttributeTableGenerator unsAttr,
+            AttributeTable             baseSigneTable)
         {
             this.key = key;
             this.cert = cert;
@@ -175,6 +180,7 @@ public class CMSSignedDataGenerator
             this.encOID = encOID;
             this.sAttr = sAttr;
             this.unsAttr = unsAttr;
+            this.baseSignedTable = baseSigneTable;
         }
 
         PrivateKey getKey()
@@ -202,12 +208,12 @@ public class CMSSignedDataGenerator
             return encOID;
         }
 
-        AttributeTable getSignedAttributes()
+        CMSAttributeTableGenerator getSignedAttributes()
         {
             return sAttr;
         }
 
-        AttributeTable getUnsignedAttributes()
+        CMSAttributeTableGenerator getUnsignedAttributes()
         {
             return unsAttr;
         }   
@@ -236,8 +242,19 @@ public class CMSSignedDataGenerator
                 hash = dig.digest();
             }
 
-            ASN1Set signedAttr = getSignedAttributeSet(contentType, hash, this.getSignedAttributes(), addDefaultAttributes);
-            ASN1Set unsignedAttr = getUnsignedAttributeSet(this.getUnsignedAttributes());
+            AttributeTable signed;
+
+            if (addDefaultAttributes)
+            {
+                Map parameters = getBaseParameters(contentType, digAlgId, hash);
+                signed = (sAttr != null) ? sAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
+            }
+            else
+            {
+                signed = baseSignedTable;
+            }
+
+            ASN1Set signedAttr = getAttributeSet(signed);
 
             //
             // sig must be composed from the DER encoding.
@@ -253,11 +270,20 @@ public class CMSSignedDataGenerator
             {
                 content.write(bOut);
             }
+
             sig.initSign(key);
 
             sig.update(bOut.toByteArray());
 
             ASN1OctetString         encDigest = new DEROctetString(sig.sign());
+
+            Map parameters = getBaseParameters(contentType, digAlgId, hash);
+            parameters.put(CMSAttributeTableGenerator.SIGNATURE, encDigest.getOctets().clone());
+
+            AttributeTable unsigned = (unsAttr != null) ? unsAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
+
+            ASN1Set unsignedAttr = getAttributeSet(unsigned);
+
             X509Certificate         cert = this.getCertificate();
             ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getTBSCertificate());
             ASN1InputStream         aIn = new ASN1InputStream(bIn);
@@ -288,7 +314,7 @@ public class CMSSignedDataGenerator
     {
         String  encOID = getEncOID(key, digestOID);
 
-        signerInfs.add(new SignerInf(key, cert, digestOID, encOID));
+        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, new DefaultSignedAttributeTableGenerator(), null, null));
     }
 
     /**
@@ -304,7 +330,23 @@ public class CMSSignedDataGenerator
     {
         String  encOID = getEncOID(key, digestOID);
 
-        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttr, unsignedAttr));
+        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), signedAttr));
+    }
+
+    /**
+     * add a signer with extra signed/unsigned attributes based on generators.
+     */
+    public void addSigner(
+        PrivateKey                  key,
+        X509Certificate             cert,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGen,
+        CMSAttributeTableGenerator  unsignedAttrGen)
+        throws IllegalArgumentException
+    {
+        String  encOID = getEncOID(key, digestOID);
+
+        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGen, unsignedAttrGen, null));
     }
 
     /**
@@ -447,11 +489,11 @@ public class CMSSignedDataGenerator
      * attributes will get added at all. 
      */
     public CMSSignedData generate(
-        String                    signedContentType,
+        String                  signedContentType,
         CMSProcessable          content,
-        boolean                     encapsulate,
+        boolean                 encapsulate,
         String                  sigProvider,
-        boolean                    addDefaultAttributes)
+        boolean                 addDefaultAttributes)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();

@@ -1,20 +1,5 @@
 package org.bouncycastle.x509;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERBitString;
@@ -23,16 +8,30 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttCertIssuer;
 import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.V2AttributeCertificateInfoGenerator;
 import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
+import org.bouncycastle.asn1.x509.V2AttributeCertificateInfoGenerator;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
 
 /**
  * class to produce an X.509 Version 2 AttributeCertificate.
@@ -43,8 +42,8 @@ public class X509V2AttributeCertificateGenerator
     private DERObjectIdentifier         sigOID;
     private AlgorithmIdentifier         sigAlgId;
     private String                      signatureAlgorithm;
-    private Hashtable                   extensions = null;
-    private Vector                      extOrdering = null;
+    private Hashtable                   extensions = new Hashtable();
+    private Vector                      extOrdering = new Vector();
 
     public X509V2AttributeCertificateGenerator()
     {
@@ -57,8 +56,8 @@ public class X509V2AttributeCertificateGenerator
     public void reset()
     {
         acInfoGen = new V2AttributeCertificateInfoGenerator();
-        extensions = null;
-        extOrdering = null;
+        extensions.clear();
+        extOrdering.clear();
     }
 
     /**
@@ -165,12 +164,6 @@ public class X509V2AttributeCertificateGenerator
         boolean         critical,
         byte[]          value)
     {
-        if (extensions == null)
-        {
-            extensions = new Hashtable();
-            extOrdering = new Vector();
-        }
-
         DERObjectIdentifier oid = new DERObjectIdentifier(OID);
         
         extensions.put(oid, new X509Extension(critical, new DEROctetString(value)));
@@ -180,6 +173,7 @@ public class X509V2AttributeCertificateGenerator
     /**
      * generate an X509 certificate, based on the current issuer and subject,
      * using the passed in provider for the signing.
+     * @deprecated use generate()
      */
     public X509AttributeCertificate generateCertificate(
         PrivateKey      key,
@@ -193,6 +187,7 @@ public class X509V2AttributeCertificateGenerator
      * generate an X509 certificate, based on the current issuer and subject,
      * using the passed in provider for the signing and the supplied source
      * of randomness, if required.
+     * @deprecated use generate()
      */
     public X509AttributeCertificate generateCertificate(
         PrivateKey      key,
@@ -200,75 +195,75 @@ public class X509V2AttributeCertificateGenerator
         SecureRandom    random)
         throws NoSuchProviderException, SecurityException, SignatureException, InvalidKeyException
     {
-        Signature sig = null;
-
-        if (sigOID == null)
-        {
-            throw new IllegalStateException("no signature algorithm specified");
-        }
-
         try
         {
-            sig = Signature.getInstance(sigOID.getId(), provider);
+            return generate(key, provider, random);
         }
-        catch (NoSuchAlgorithmException ex)
+        catch (NoSuchProviderException e)
         {
-            try
-            {
-                sig = Signature.getInstance(signatureAlgorithm, provider);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                throw new SecurityException("exception creating signature: " + e.toString());
-            }
+            throw e;
         }
+        catch (SignatureException e)
+        {
+            throw e;
+        }
+        catch (InvalidKeyException e)
+        {
+            throw e;
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new SecurityException("exception creating certificate: " + e);
+        }
+    }
 
-        if (random != null)
-        {
-            sig.initSign(key, random);
-        }
-        else
-        {
-            sig.initSign(key);
-        }
+   /**
+     * generate an X509 certificate, based on the current issuer and subject,
+     * using the passed in provider for the signing.
+     */
+    public X509AttributeCertificate generate(
+        PrivateKey      key,
+        String          provider)
+       throws CertificateEncodingException, IllegalStateException, NoSuchProviderException, SignatureException, InvalidKeyException, NoSuchAlgorithmException
+   {
+        return generate(key, provider, null);
+    }
 
-        if (extensions != null)
+    /**
+     * generate an X509 certificate, based on the current issuer and subject,
+     * using the passed in provider for the signing and the supplied source
+     * of randomness, if required.
+     */
+    public X509AttributeCertificate generate(
+        PrivateKey      key,
+        String          provider,
+        SecureRandom    random)
+        throws CertificateEncodingException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
+    {
+        if (!extensions.isEmpty())
         {
             acInfoGen.setExtensions(new X509Extensions(extOrdering, extensions));
         }
 
         AttributeCertificateInfo acInfo = acInfoGen.generateAttributeCertificateInfo();
 
-        try
-        {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(acInfo);
-
-            sig.update(bOut.toByteArray());
-        }
-        catch (Exception e)
-        {
-            throw new SecurityException("exception encoding Attribute cert - " + e);
-        }
-
         ASN1EncodableVector  v = new ASN1EncodableVector();
 
         v.add(acInfo);
         v.add(sigAlgId);
-        v.add(new DERBitString(sig.sign()));
 
         try
         {
+            v.add(new DERBitString(X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, acInfo)));
+
             return new X509V2AttributeCertificate(new AttributeCertificate(new DERSequence(v)));
         }
         catch (IOException e)
         {
-            throw new RuntimeException("constructed invalid certificate!");
+            throw new ExtCertificateEncodingException("constructed invalid certificate", e);
         }
     }
-    
+
     /**
      * Return an iterator of the signature names supported by the generator.
      * 

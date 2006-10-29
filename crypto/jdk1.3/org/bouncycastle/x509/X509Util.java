@@ -8,14 +8,26 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.security.Signature;
+import java.security.NoSuchProviderException;
+import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.InvalidKeyException;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
 
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.util.Strings;
 
@@ -26,12 +38,12 @@ class X509Util
     
     static
     {   
-        algorithms.put("MD2WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.2"));
-        algorithms.put("MD2WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.2"));
-        algorithms.put("MD5WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.4"));
-        algorithms.put("MD5WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.4"));
-        algorithms.put("SHA1WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
-        algorithms.put("SHA1WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
+        algorithms.put("MD2WITHRSAENCRYPTION", PKCSObjectIdentifiers.md2WithRSAEncryption);
+        algorithms.put("MD2WITHRSA", PKCSObjectIdentifiers.md2WithRSAEncryption);
+        algorithms.put("MD5WITHRSAENCRYPTION", PKCSObjectIdentifiers.md5WithRSAEncryption);
+        algorithms.put("MD5WITHRSA", PKCSObjectIdentifiers.md5WithRSAEncryption);
+        algorithms.put("SHA1WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha1WithRSAEncryption);
+        algorithms.put("SHA1WITHRSA", PKCSObjectIdentifiers.sha1WithRSAEncryption);
         algorithms.put("SHA224WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha224WithRSAEncryption);
         algorithms.put("SHA224WITHRSA", PKCSObjectIdentifiers.sha224WithRSAEncryption);
         algorithms.put("SHA256WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha256WithRSAEncryption);
@@ -40,8 +52,12 @@ class X509Util
         algorithms.put("SHA384WITHRSA", PKCSObjectIdentifiers.sha384WithRSAEncryption);
         algorithms.put("SHA512WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha512WithRSAEncryption);
         algorithms.put("SHA512WITHRSA", PKCSObjectIdentifiers.sha512WithRSAEncryption);
-        algorithms.put("RIPEMD160WITHRSAENCRYPTION", new DERObjectIdentifier("1.3.36.3.3.1.2"));
-        algorithms.put("RIPEMD160WITHRSA", new DERObjectIdentifier("1.3.36.3.3.1.2"));
+        algorithms.put("RIPEMD160WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
+        algorithms.put("RIPEMD160WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
+        algorithms.put("RIPEMD128WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
+        algorithms.put("RIPEMD128WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
+        algorithms.put("RIPEMD256WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
+        algorithms.put("RIPEMD256WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
         algorithms.put("SHA1WITHDSA", X9ObjectIdentifiers.id_dsa_with_sha1);
         algorithms.put("DSAWITHSHA1", X9ObjectIdentifiers.id_dsa_with_sha1);
         algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
@@ -106,5 +122,104 @@ class X509Util
         }
         
         return l.iterator();
+    }
+
+    static Signature getSignatureInstance(
+        String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return Signature.getInstance(algorithm);
+    }
+
+    static Signature getSignatureInstance(
+        String algorithm,
+        String provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException
+    {
+        if (provider != null)
+        {
+            return Signature.getInstance(algorithm, provider);
+        }
+        else
+        {
+            return Signature.getInstance(algorithm);
+        }
+    }
+
+    static byte[] getSignatureForObject(
+        DERObjectIdentifier sigOid,
+        String              sigName,
+        PrivateKey          key,
+        SecureRandom        random,
+        ASN1Encodable       object)
+        throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException
+    {
+        Signature sig;
+
+        if (sigOid == null)
+        {
+            throw new IllegalStateException("no signature algorithm specified");
+        }
+
+        try
+        {
+            sig = X509Util.getSignatureInstance(sigOid.getId());
+        }
+        catch (NoSuchAlgorithmException ex)
+        {
+            sig = X509Util.getSignatureInstance(sigName);
+        }
+
+        if (random != null)
+        {
+            sig.initSign(key, random);
+        }
+        else
+        {
+            sig.initSign(key);
+        }
+
+        sig.update(object.getEncoded(ASN1Encodable.DER));
+
+        return sig.sign();
+    }
+
+    static byte[] calculateSignature(
+        DERObjectIdentifier sigOid,
+        String              sigName,
+        String              provider,
+        PrivateKey          key,
+        SecureRandom        random,
+        ASN1Encodable       object)
+        throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException
+    {
+        Signature sig;
+
+        if (sigOid == null)
+        {
+            throw new IllegalStateException("no signature algorithm specified");
+        }
+
+        try
+        {
+            sig = X509Util.getSignatureInstance(sigOid.getId(), provider);
+        }
+        catch (NoSuchAlgorithmException ex)
+        {
+            sig = X509Util.getSignatureInstance(sigName, provider);
+        }
+
+        if (random != null)
+        {
+            sig.initSign(key, random);
+        }
+        else
+        {
+            sig.initSign(key);
+        }
+
+        sig.update(object.getEncoded(ASN1Encodable.DER));
+
+        return sig.sign();
     }
 }

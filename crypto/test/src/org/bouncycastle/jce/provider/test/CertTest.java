@@ -1,5 +1,37 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DEREnumerated;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.X509KeyUsage;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.interfaces.ECPointEncoder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.x509.X509V1CertificateGenerator;
+import org.bouncycastle.x509.X509V2CRLGenerator;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
+import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -20,46 +52,13 @@ import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
-import java.util.Collection;
-import java.util.Iterator;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.CRLReason;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.X509KeyUsage;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-import org.bouncycastle.x509.X509V2CRLGenerator;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
-import org.bouncycastle.jce.interfaces.ECPointEncoder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class CertTest
     extends SimpleTest
@@ -1237,7 +1236,7 @@ public class CertTest
             
             certGen.setPublicKey(pubKey);
             
-            cert = certGen.generateX509Certificate(privKey);
+            cert = certGen.generate(privKey, "BC");
 
             cert.checkValidity(new Date());
 
@@ -1338,7 +1337,7 @@ public class CertTest
         certGen.setSignatureAlgorithm(algorithm);
 
 
-        X509Certificate cert = certGen.generateX509Certificate(privKey);
+        X509Certificate cert = certGen.generate(privKey, "BC");
 
         cert.checkValidity(new Date());
 
@@ -1356,7 +1355,7 @@ public class CertTest
         
         certGen.setPublicKey(pubKey);
         
-        cert = certGen.generateX509Certificate(privKey);
+        cert = certGen.generate(privKey, "BC");
 
         cert.checkValidity(new Date());
 
@@ -1432,7 +1431,7 @@ public class CertTest
         
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
         
-        X509CRL    crl = crlGen.generateX509CRL(pair.getPrivate(), "BC");
+        X509CRL    crl = crlGen.generate(pair.getPrivate(), "BC");
         
         if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
         {
@@ -1517,7 +1516,7 @@ public class CertTest
         
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
         
-        X509CRL    crl = crlGen.generateX509CRL(pair.getPrivate(), "BC");
+        X509CRL    crl = crlGen.generate(pair.getPrivate(), "BC");
         
         if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
         {
@@ -1602,7 +1601,7 @@ public class CertTest
         
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
         
-        X509CRL    crl = crlGen.generateX509CRL(pair.getPrivate(), "BC");
+        X509CRL    crl = crlGen.generate(pair.getPrivate(), "BC");
         
         if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
         {
@@ -1669,7 +1668,7 @@ public class CertTest
         
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
         
-        X509CRL    newCrl = crlGen.generateX509CRL(pair.getPrivate(), "BC");
+        X509CRL    newCrl = crlGen.generate(pair.getPrivate(), "BC");
         
         int     count = 0;
         boolean oneFound = false;
@@ -1772,7 +1771,7 @@ public class CertTest
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("GOST3411withGOST3410");
 
-        X509Certificate cert = certGen.generateX509Certificate(privKey);
+        X509Certificate cert = certGen.generate(privKey, "BC");
 
         cert.checkValidity(new Date());
 
@@ -1874,7 +1873,7 @@ public class CertTest
         certGen.addExtension("2.5.29.17", true,
             new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
     
-        X509Certificate baseCert = certGen.generateX509Certificate(privKey);
+        X509Certificate baseCert = certGen.generate(privKey, "BC");
         
         //
         // copy certificate
@@ -1892,7 +1891,7 @@ public class CertTest
         certGen.copyAndAddExtension(new DERObjectIdentifier("2.5.29.15"), true, baseCert);
         certGen.copyAndAddExtension("2.5.29.37", false, baseCert);
         
-        X509Certificate cert = certGen.generateX509Certificate(privKey);
+        X509Certificate cert = certGen.generate(privKey, "BC");
         
         cert.checkValidity(new Date());
     
@@ -1926,7 +1925,7 @@ public class CertTest
         {
             certGen.setPublicKey(dudPublicKey);
             
-            certGen.generateX509Certificate(privKey);
+            certGen.generate(privKey, "BC");
             
             fail("key without encoding not detected in v3");
         }

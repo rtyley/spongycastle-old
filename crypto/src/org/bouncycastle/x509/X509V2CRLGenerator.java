@@ -1,28 +1,5 @@
 package org.bouncycastle.x509;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.CRLException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509CRLEntry;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.SimpleTimeZone;
-import java.util.Vector;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -45,6 +22,28 @@ import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CRLObject;
 
+import javax.security.auth.x500.X500Principal;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.cert.CRLException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509CRLEntry;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.SimpleTimeZone;
+import java.util.Vector;
+
 /**
  * class to produce an X.509 Version 2 CRL.
  */
@@ -56,8 +55,8 @@ public class X509V2CRLGenerator
     private DERObjectIdentifier         sigOID;
     private AlgorithmIdentifier         sigAlgId;
     private String                      signatureAlgorithm;
-    private Hashtable                   extensions = null;
-    private Vector                      extOrdering = null;
+    private Hashtable                   extensions = new Hashtable();
+    private Vector                      extOrdering = new Vector();
 
     public X509V2CRLGenerator()
     {
@@ -72,6 +71,8 @@ public class X509V2CRLGenerator
     public void reset()
     {
         tbsGen = new V2TBSCertListGenerator();
+        extensions.clear();
+        extOrdering.clear();
     }
 
     /**
@@ -212,12 +213,6 @@ public class X509V2CRLGenerator
         boolean             critical,
         DEREncodable        value)
     {
-        if (extensions == null)
-        {
-            extensions = new Hashtable();
-            extOrdering = new Vector();
-        }
-
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         DEROutputStream         dOut = new DEROutputStream(bOut);
 
@@ -252,12 +247,6 @@ public class X509V2CRLGenerator
         boolean             critical,
         byte[]              value)
     {
-        if (extensions == null)
-        {
-            extensions = new Hashtable();
-            extOrdering = new Vector();
-        }
-
         extensions.put(OID, new X509Extension(critical, new DEROctetString(value)));
         extOrdering.addElement(OID);
     }
@@ -265,6 +254,7 @@ public class X509V2CRLGenerator
     /**
      * generate an X509 CRL, based on the current issuer and subject
      * using the default provider "BC".
+     * @deprecated use generate(key, "BC")
      */
     public X509CRL generateX509CRL(
         PrivateKey      key)
@@ -284,6 +274,7 @@ public class X509V2CRLGenerator
      * generate an X509 CRL, based on the current issuer and subject
      * using the default provider "BC" and an user defined SecureRandom object as
      * source of randomness.
+     * @deprecated use generate(key, random, "BC")
      */
     public X509CRL generateX509CRL(
         PrivateKey      key,
@@ -303,6 +294,7 @@ public class X509V2CRLGenerator
     /**
      * generate an X509 certificate, based on the current issuer and subject
      * using the passed in provider for the signing.
+     * @deprecated use generate()
      */
     public X509CRL generateX509CRL(
         PrivateKey      key,
@@ -315,6 +307,7 @@ public class X509V2CRLGenerator
     /**
      * generate an X509 CRL, based on the current issuer and subject,
      * using the passed in provider for the signing.
+     * @deprecated use generate()
      */
     public X509CRL generateX509CRL(
         PrivateKey      key,
@@ -322,72 +315,131 @@ public class X509V2CRLGenerator
         SecureRandom    random)
         throws NoSuchProviderException, SecurityException, SignatureException, InvalidKeyException
     {
-        Signature sig = null;
+        try
+        {
+            return generate(key, provider, random);
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw e;
+        }
+        catch (SignatureException e)
+        {
+            throw e;
+        }
+        catch (InvalidKeyException e)
+        {
+            throw e;
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new SecurityException("exception: " + e);
+        }
+    }
+    
+    /**
+     * generate an X509 CRL, based on the current issuer and subject
+     * using the default provider.
+     * <p>
+     * <b>Note:</b> this differs from the deprecated method in that the default provider is
+     * used - not "BC".
+     * </p>
+     */
+    public X509CRL generate(
+        PrivateKey      key)
+        throws CRLException, IllegalStateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
+    {
+        return generate(key, (SecureRandom)null);
+    }
+
+    /**
+     * generate an X509 CRL, based on the current issuer and subject
+     * using the default provider and an user defined SecureRandom object as
+     * source of randomness.
+     * <p>
+     * <b>Note:</b> this differs from the deprecated method in that the default provider is
+     * used - not "BC".
+     * </p>
+     */
+    public X509CRL generate(
+        PrivateKey      key,
+        SecureRandom    random)
+        throws CRLException, IllegalStateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
+    {
+        TBSCertList tbsCrl = generateCertList();
+        byte[] signature;
 
         try
         {
-            sig = Signature.getInstance(sigOID.getId(), provider);
+            signature = X509Util.getSignatureForObject(sigOID, signatureAlgorithm, key, random, tbsCrl);
         }
-        catch (NoSuchAlgorithmException ex)
+        catch (IOException e)
         {
-            try
-            {
-                sig = Signature.getInstance(signatureAlgorithm, provider);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                throw new SecurityException("exception creating signature: " + e.toString());
-            }
+            throw new ExtCRLException("cannot generate CRL encoding", e);
         }
 
-        if (random != null)
+        return generateJcaObject(tbsCrl, signature);
+    }
+
+    /**
+     * generate an X509 certificate, based on the current issuer and subject
+     * using the passed in provider for the signing.
+     */
+    public X509CRL generate(
+        PrivateKey      key,
+        String          provider)
+        throws CRLException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
+    {
+        return generate(key, provider, null);
+    }
+
+    /**
+     * generate an X509 CRL, based on the current issuer and subject,
+     * using the passed in provider for the signing.
+     */
+    public X509CRL generate(
+        PrivateKey      key,
+        String          provider,
+        SecureRandom    random)
+        throws CRLException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
+    {
+        TBSCertList tbsCrl = generateCertList();
+        byte[] signature;
+
+        try
         {
-            sig.initSign(key, random);
+            signature = X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, tbsCrl);
         }
-        else
+        catch (IOException e)
         {
-            sig.initSign(key);
+            throw new ExtCRLException("cannot generate CRL encoding", e);
         }
 
-        if (extensions != null)
+        return generateJcaObject(tbsCrl, signature);
+    }
+
+    private TBSCertList generateCertList()
+    {
+        if (!extensions.isEmpty())
         {
             tbsGen.setExtensions(new X509Extensions(extOrdering, extensions));
         }
 
-        TBSCertList tbsCrl = tbsGen.generateTBSCertList();
+        return tbsGen.generateTBSCertList();
+    }
 
-        try
-        {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(tbsCrl);
-
-            sig.update(bOut.toByteArray());
-        }
-        catch (Exception e)
-        {
-            throw new SecurityException("exception encoding TBS cert - " + e);
-        }
-
-        // Construct the CRL
-        ASN1EncodableVector  v = new ASN1EncodableVector();
+    private X509CRL generateJcaObject(TBSCertList tbsCrl, byte[] signature)
+        throws CRLException
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
 
         v.add(tbsCrl);
         v.add(sigAlgId);
-        v.add(new DERBitString(sig.sign()));
+        v.add(new DERBitString(signature));
 
-        try
-        {
-            return new X509CRLObject(new CertificateList(new DERSequence(v)));
-        }
-        catch (CRLException e)
-        {
-            throw new SecurityException("exception creating CRL: " + e.getMessage());
-        }
+        return new X509CRLObject(new CertificateList(new DERSequence(v)));
     }
-    
-    
+
     /**
      * Return an iterator of the signature names supported by the generator.
      * 
@@ -396,5 +448,21 @@ public class X509V2CRLGenerator
     public Iterator getSignatureAlgNames()
     {
         return X509Util.getAlgNames();
+    }
+
+    private static class ExtCRLException
+        extends CRLException
+    {
+        Throwable cause;
+
+        ExtCRLException(String message, Throwable cause)
+        {
+            super(message);
+        }
+
+        public Throwable getCause()
+        {
+            return cause;
+        }
     }
 }

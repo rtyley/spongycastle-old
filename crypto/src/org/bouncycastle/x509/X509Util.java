@@ -1,6 +1,26 @@
 package org.bouncycastle.x509;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Strings;
+
+import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -8,19 +28,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.util.Strings;
 
 class X509Util
 {
@@ -113,6 +120,105 @@ class X509Util
         }
         
         return l.iterator();
+    }
+
+    static Signature getSignatureInstance(
+        String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return Signature.getInstance(algorithm);
+    }
+
+    static Signature getSignatureInstance(
+        String algorithm,
+        String provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException
+    {
+        if (provider != null)
+        {
+            return Signature.getInstance(algorithm, provider);
+        }
+        else
+        {
+            return Signature.getInstance(algorithm);
+        }
+    }
+
+    static byte[] getSignatureForObject(
+        DERObjectIdentifier sigOid,
+        String              sigName,
+        PrivateKey          key,
+        SecureRandom        random,
+        ASN1Encodable       object)
+        throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException
+    {
+        Signature sig;
+
+        if (sigOid == null)
+        {
+            throw new IllegalStateException("no signature algorithm specified");
+        }
+
+        try
+        {
+            sig = X509Util.getSignatureInstance(sigOid.getId());
+        }
+        catch (NoSuchAlgorithmException ex)
+        {
+            sig = X509Util.getSignatureInstance(sigName);
+        }
+
+        if (random != null)
+        {
+            sig.initSign(key, random);
+        }
+        else
+        {
+            sig.initSign(key);
+        }
+
+        sig.update(object.getEncoded(ASN1Encodable.DER));
+
+        return sig.sign();
+    }
+
+    static byte[] calculateSignature(
+        DERObjectIdentifier sigOid,
+        String              sigName,
+        String              provider,
+        PrivateKey          key,
+        SecureRandom        random,
+        ASN1Encodable       object)
+        throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException
+    {
+        Signature sig;
+
+        if (sigOid == null)
+        {
+            throw new IllegalStateException("no signature algorithm specified");
+        }
+
+        try
+        {
+            sig = X509Util.getSignatureInstance(sigOid.getId(), provider);
+        }
+        catch (NoSuchAlgorithmException ex)
+        {
+            sig = X509Util.getSignatureInstance(sigName, provider);
+        }
+
+        if (random != null)
+        {
+            sig.initSign(key, random);
+        }
+        else
+        {
+            sig.initSign(key);
+        }
+
+        sig.update(object.getEncoded(ASN1Encodable.DER));
+
+        return sig.sign();
     }
 
     static X509Principal convertPrincipal(

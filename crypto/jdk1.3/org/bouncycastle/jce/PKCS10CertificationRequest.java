@@ -13,6 +13,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 
@@ -64,7 +65,7 @@ public class PKCS10CertificationRequest
     private static Hashtable            algorithms = new Hashtable();
     private static Hashtable            keyAlgorithms = new Hashtable();
     private static Hashtable            oids = new Hashtable();
-    private static HashSet              noParams = new HashSet();
+    private static Set                  noParams = new HashSet();
 
     static
     {
@@ -150,8 +151,7 @@ public class PKCS10CertificationRequest
     {
         try
         {
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(bytes);
-            ASN1InputStream         dIn = new ASN1InputStream(bIn);
+            ASN1InputStream         dIn = new ASN1InputStream(bytes);
 
             return (ASN1Sequence)dIn.readObject();
         }
@@ -268,7 +268,7 @@ public class PKCS10CertificationRequest
         }
         catch (Exception e)
         {
-            throw new SecurityException("exception encoding TBS cert request - " + e);
+            throw new IllegalArgumentException("exception encoding TBS cert request - " + e);
         }
 
         this.sigBits = new DERBitString(sig.sign());
@@ -330,7 +330,22 @@ public class PKCS10CertificationRequest
         return verify("BC");
     }
 
+    /**
+     * verify the request using the passed in provider.
+     */
     public boolean verify(
+        String provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException,
+                InvalidKeyException, SignatureException
+    {
+        return verify(this.getPublicKey(provider), provider);
+    }
+
+    /**
+     * verify the request using the passed in public key and the provider..
+     */
+    public boolean verify(
+        PublicKey pubKey,
         String provider)
         throws NoSuchAlgorithmException, NoSuchProviderException,
                 InvalidKeyException, SignatureException
@@ -358,7 +373,7 @@ public class PKCS10CertificationRequest
             }
         }
 
-        sig.initVerify(this.getPublicKey(provider));
+        sig.initVerify(pubKey);
 
         try
         {
@@ -371,7 +386,7 @@ public class PKCS10CertificationRequest
         }
         catch (Exception e)
         {
-            throw new SecurityException("exception encoding TBS cert request - " + e);
+            throw new SignatureException("exception encoding TBS cert request - " + e);
         }
 
         return sig.verify(sigBits.getBytes());
