@@ -256,6 +256,7 @@ then
     mkdir bcpg-jdk12-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/bcpg src/org/bouncycastle/openpgp | (cd bcpg-jdk12-$base; tar xf -)
     (cd test/src; tar cf - org/bouncycastle/openpgp | (cd ../../bcpg-jdk12-$base/src; tar xf -))
+    (cd bzip2 && tar cf - src | (cd ../bcpg-jdk12-$base; tar xf -))
     (cd jdk1.2; tar cf - * | (cd ../bcpg-jdk12-$base/src; tar xf -))
     (
     cd bcpg-jdk12-$base; mkdir classes; mkdir docs;
