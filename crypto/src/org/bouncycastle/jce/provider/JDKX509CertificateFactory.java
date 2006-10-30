@@ -88,10 +88,9 @@ public class JDKX509CertificateFactory
     }
 
     private Certificate readDERCertificate(
-        InputStream in)
+        ASN1InputStream dIn)
         throws IOException
     {
-        ASN1InputStream dIn = new ASN1InputStream(in, getLimit(in));
         ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
 
         if (seq.size() > 1
@@ -307,7 +306,7 @@ public class JDKX509CertificateFactory
             else
             {
                 in.reset();
-                return readDERCertificate(in);
+                return readDERCertificate(new ASN1InputStream(in, getLimit(in)));
             }
         }
         catch (Exception e)
