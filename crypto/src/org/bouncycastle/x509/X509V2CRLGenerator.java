@@ -408,7 +408,7 @@ public class X509V2CRLGenerator
 
         try
         {
-            signature = X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, tbsCrl);
+            signature = X509Util.getSignatureForObject(sigOID, signatureAlgorithm, provider, key, random, tbsCrl);
         }
         catch (IOException e)
         {
