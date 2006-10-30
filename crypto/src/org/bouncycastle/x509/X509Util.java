@@ -182,7 +182,7 @@ class X509Util
         return sig.sign();
     }
 
-    static byte[] calculateSignature(
+    static byte[] getSignatureForObject(
         DERObjectIdentifier sigOid,
         String              sigName,
         String              provider,

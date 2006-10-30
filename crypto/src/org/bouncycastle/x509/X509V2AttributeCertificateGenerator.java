@@ -254,7 +254,7 @@ public class X509V2AttributeCertificateGenerator
 
         try
         {
-            v.add(new DERBitString(X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, acInfo)));
+            v.add(new DERBitString(X509Util.getSignatureForObject(sigOID, signatureAlgorithm, provider, key, random, acInfo)));
 
             return new X509V2AttributeCertificate(new AttributeCertificate(new DERSequence(v)));
         }
