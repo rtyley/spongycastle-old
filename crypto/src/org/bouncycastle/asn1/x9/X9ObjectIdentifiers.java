@@ -79,7 +79,7 @@ public interface X9ObjectIdentifiers
     static final DERObjectIdentifier    c2onb239v4 = new DERObjectIdentifier(cTwoCurve + ".14");
     static final DERObjectIdentifier    c2onb239v5 = new DERObjectIdentifier(cTwoCurve + ".15");
     static final DERObjectIdentifier    c2pnb272w1 = new DERObjectIdentifier(cTwoCurve + ".16");
-    static final DERObjectIdentifier    c2png304v1 = new DERObjectIdentifier(cTwoCurve + ".17");
+    static final DERObjectIdentifier    c2pnb304w1 = new DERObjectIdentifier(cTwoCurve + ".17");
     static final DERObjectIdentifier    c2tnb359v1 = new DERObjectIdentifier(cTwoCurve + ".18");
     static final DERObjectIdentifier    c2pnb368w1 = new DERObjectIdentifier(cTwoCurve + ".19");
     static final DERObjectIdentifier    c2tnb431r1 = new DERObjectIdentifier(cTwoCurve + ".20");
