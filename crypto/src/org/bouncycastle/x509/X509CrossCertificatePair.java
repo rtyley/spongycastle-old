@@ -54,7 +54,7 @@ public class X509CrossCertificatePair
         }
         catch (IOException e)
         {
-            throw new CertificateEncodingException(e);
+            throw new ExtCertificateEncodingException(e.toString(), e);
         }
     }
 
