@@ -164,6 +164,7 @@ public interface PKCSObjectIdentifiers
     //
     static String id_aa = "1.2.840.113549.1.9.16.2";
     
+    static final DERObjectIdentifier id_aa_contentHint = new DERObjectIdentifier(id_aa + ".4"); // See RFC 2634
     /*
      * id-aa-encrypKeyPref OBJECT IDENTIFIER ::= {id-aa 11}
      * 
