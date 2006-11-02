@@ -41,8 +41,18 @@ public class PKCS1Encoding
         AsymmetricBlockCipher   cipher)
     {
         this.engine = cipher;
-        this.useStrictLength = System.getProperty(STRICT_LENGTH_ENABLED_PROPERTY, "true").equals("true");
+        this.useStrictLength = useStrict();
     }   
+
+    //
+    // for J2ME compatibility
+    //
+    private boolean useStrict()
+    {
+        String strict = System.getProperty(STRICT_LENGTH_ENABLED_PROPERTY);
+
+        return strict == null || strict.equals("true");
+    }
 
     public AsymmetricBlockCipher getUnderlyingCipher()
     {
