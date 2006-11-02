@@ -1,12 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Signature;
-
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -14,8 +7,13 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
-import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Signature;
+import java.util.HashMap;
+import java.util.Map;
 
 class CMSSignedHelper
 {
@@ -43,6 +41,7 @@ class CMSSignedHelper
         encryptionAlgs.put(CMSSignedDataGenerator.ENCRYPTION_RSA_PSS, "RSAandMGF1");
         encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_94.getId(), "GOST3410");
         encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_2001.getId(), "ECGOST3410");
+        encryptionAlgs.put("1.3.6.1.4.1.5849.1.6.2", "ECGOST3410");
 
         digestAlgs.put(PKCSObjectIdentifiers.md5.getId(), "MD5");
         digestAlgs.put(OIWObjectIdentifiers.idSHA1.getId(), "SHA1");
@@ -59,6 +58,7 @@ class CMSSignedHelper
         digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd160.getId(), "RIPEMD160");
         digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd256.getId(), "RIPEMD256");
         digestAlgs.put(CryptoProObjectIdentifiers.gostR3411.getId(),  "GOST3411");
+        digestAlgs.put("1.3.6.1.4.1.5849.1.2.1",  "GOST3411");
     }
     
     /**
