@@ -1,22 +1,58 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.ProviderConfigurationPermission;
+
+import java.security.Permission;
 
 class ProviderUtil
 {
-    private static volatile ECParameterSpec implicitlyCaCurve;
+    private static Permission BC_EC_LOCAL_PERMISSION = new ProviderConfigurationPermission(
+                                                   "BC", ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA);
+    private static Permission BC_EC_PERMISSION = new ProviderConfigurationPermission(
+                                                   "BC", ConfigurableProvider.EC_IMPLICITLY_CA);
+
+    private static ThreadLocal threadSpec = new ThreadLocal();
+    private static volatile ECParameterSpec ecImplicitCaParams;
 
     static void setParameter(String parameterName, Object parameter)
     {
-        if (parameterName.equals(ConfigurableProvider.EC_IMPLICITLY_CA))
+        SecurityManager securityManager = System.getSecurityManager();
+
+        if (parameterName.equals(ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA))
         {
-            implicitlyCaCurve = (ECParameterSpec)parameter;
+            ECParameterSpec curveSpec;
+
+            if (securityManager != null)
+            {
+                securityManager.checkPermission(BC_EC_LOCAL_PERMISSION);
+            }
+
+            curveSpec = (ECParameterSpec)parameter;
+
+            threadSpec.set(curveSpec);
+        }
+        else if (parameterName.equals(ConfigurableProvider.EC_IMPLICITLY_CA))
+        {
+            if (securityManager != null)
+            {
+                securityManager.checkPermission(BC_EC_PERMISSION);
+            }
+
+            ecImplicitCaParams = (ECParameterSpec)parameter;
         }
     }
 
     static ECParameterSpec getEcImplicitlyCa()
     {
-        return implicitlyCaCurve;
+        ECParameterSpec spec = (ECParameterSpec)threadSpec.get();
+
+        if (spec != null)
+        {
+            return spec;
+        }
+
+        return ecImplicitCaParams;
     }
 }
