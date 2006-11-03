@@ -36,10 +36,42 @@ src/org/bouncycastle/crypto/macs \
 src/org/bouncycastle/crypto/modes \
 src/org/bouncycastle/crypto/params \
 src/org/bouncycastle/crypto/signers \
-src/org/bouncycastle/util src/org/bouncycastle/bcpg src/org/bouncycastle/asn1 | (cd lcrypto-j2me-$base; tar xf -)
-    (cd test; tar cf - src/org/bouncycastle/crypto/test | (cd ../lcrypto-j2me-$base; tar xf -))
+src/org/bouncycastle/crypto/prng \
+src/org/bouncycastle/util \
+src/org/bouncycastle/bcpg \
+src/org/bouncycastle/asn1 \
+| (cd lcrypto-j2me-$base; tar xf -)
+    (cd test; tar cf - src/org/bouncycastle/crypto/test src/org/bouncycastle/asn1/test | (cd ../lcrypto-j2me-$base; tar xf -))
     (cd j2me; tar cf - * | (cd ../lcrypto-j2me-$base; cd src; tar xf -))
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/util/Dump.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/AllTests.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/AttributeTableUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/BiometricDataUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/BitStringConstantTester.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/CommitmentTypeIndicationUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/CommitmentTypeQualifierUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/DataGroupHashUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/DERUTF8StringTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/EqualsAndHashCodeTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/GenerationTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/InputStreamTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/Iso4217CurrencyCodeUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/KeyUsageTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/LDSSecurityObjectUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/MonetaryValueUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/NetscapeCertTypeTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/OctetStringTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/ParseTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/PKIFailureInfoTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/QCStatementUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/ReasonFlagsTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/SemanticsInformationUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/SetTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/SignerLocationUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/SMIMETest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TagTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TypeOfBiometricDataUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AESVectorFileTest.java
 
    (2>&1 find lcrypto-j2me-$base -name CVS -exec rm -rf \{\} \; ) > /dev/null
@@ -92,6 +124,7 @@ src/org/bouncycastle/util src/org/bouncycastle/bcpg src/org/bouncycastle/asn1 | 
     org.bouncycastle.crypto.params \
     org.bouncycastle.crypto.paddings \
     org.bouncycastle.crypto.signers \
+    org.bouncycastle.crypto.prng \
     org.bouncycastle.crypto.test \
     org.bouncycastle.crypto.examples \
     org.bouncycastle.util.encoders \
