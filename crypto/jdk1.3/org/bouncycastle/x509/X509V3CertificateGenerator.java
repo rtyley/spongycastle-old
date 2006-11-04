@@ -378,7 +378,7 @@ public class X509V3CertificateGenerator
 
         try
         {
-            v.add(new DERBitString(X509Util.getSignatureForObject(sigOID, signatureAlgorithm, key, random, tbsCert)));
+            v.add(new DERBitString(X509Util.calculateSignature(sigOID, signatureAlgorithm, key, random, tbsCert)));
         }
         catch (IOException e)
         {

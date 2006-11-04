@@ -363,7 +363,7 @@ public class X509V2CRLGenerator
 
         try
         {
-            v.add(new DERBitString(X509Util.getSignatureForObject(sigOID, signatureAlgorithm, key, random, tbsCrl)));
+            v.add(new DERBitString(X509Util.calculateSignature(sigOID, signatureAlgorithm, key, random, tbsCrl)));
         }
         catch (IOException e)
         {
