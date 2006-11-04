@@ -42,6 +42,8 @@ public class ImplicitlyCaTest
         testBCAPI();
 
         testJDKAPI();
+
+        testBasicThreadLocal();
     }
 
     private void testBCAPI()
@@ -98,6 +100,42 @@ public class ImplicitlyCaTest
         ConfigurableProvider config = (ConfigurableProvider)Security.getProvider("BC");
 
         config.setParameter(ConfigurableProvider.EC_IMPLICITLY_CA, ecSpec);
+
+        g.initialize(null, new SecureRandom());
+
+        KeyPair p = g.generateKeyPair();
+
+        ECPrivateKey sKey = (ECPrivateKey)p.getPrivate();
+        ECPublicKey vKey = (ECPublicKey)p.getPublic();
+
+        testECDSA(sKey, vKey);
+
+        testBCParamsAndQ(sKey, vKey);
+        testEC5Params(sKey, vKey);
+
+        testEncoding(sKey, vKey);
+    }
+
+    private void testBasicThreadLocal()
+        throws Exception
+    {
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        EllipticCurve curve = new EllipticCurve(
+            new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
+            new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+            new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+
+        java.security.spec.ECParameterSpec ecSpec = new java.security.spec.ECParameterSpec(
+            curve,
+            ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+            new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
+            1); // h
+
+
+        ConfigurableProvider config = (ConfigurableProvider)Security.getProvider("BC");
+
+        config.setParameter(ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA, ecSpec);
 
         g.initialize(null, new SecureRandom());
 

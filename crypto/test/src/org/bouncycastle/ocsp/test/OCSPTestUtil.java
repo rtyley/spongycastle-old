@@ -1,5 +1,16 @@
 package org.bouncycastle.ocsp.test;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
+
+import javax.crypto.KeyGenerator;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -12,26 +23,11 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import javax.crypto.KeyGenerator;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-
 public class OCSPTestUtil
 {
     
     public static SecureRandom     rand;
-    public static KeyPairGenerator kpg;
+    public static KeyPairGenerator kpg, eckpg;
     public static KeyGenerator     desede128kg;
     public static KeyGenerator     desede192kg;
     public static KeyGenerator     rc240kg;
@@ -51,6 +47,9 @@ public class OCSPTestUtil
             kpg.initialize(1024, rand);
 
             serialNumber = new BigInteger("1");
+
+            eckpg = KeyPairGenerator.getInstance("ECDSA", "BC");
+            eckpg.initialize(192, rand);
         }
         catch(Exception ex)
         {
@@ -62,13 +61,26 @@ public class OCSPTestUtil
     {
         return kpg.generateKeyPair();
     }
-    
+
+    public static KeyPair makeECKeyPair()
+    {
+        return eckpg.generateKeyPair();
+    }
+
     public static X509Certificate makeCertificate(KeyPair _subKP,
             String _subDN, KeyPair _issKP, String _issDN)
             throws GeneralSecurityException, IOException
     {
 
         return makeCertificate(_subKP, _subDN, _issKP, _issDN, false);
+    }
+
+    public static X509Certificate makeECDSACertificate(KeyPair _subKP,
+            String _subDN, KeyPair _issKP, String _issDN)
+            throws GeneralSecurityException, IOException
+    {
+
+        return makeECDSACertificate(_subKP, _subDN, _issKP, _issDN, false);
     }
 
     public static X509Certificate makeCACertificate(KeyPair _subKP,
@@ -81,6 +93,20 @@ public class OCSPTestUtil
 
     public static X509Certificate makeCertificate(KeyPair _subKP,
             String _subDN, KeyPair _issKP, String _issDN, boolean _ca)
+            throws GeneralSecurityException, IOException
+    {
+        return makeCertificate(_subKP,_subDN, _issKP, _issDN, "MD5withRSA", _ca);
+    }
+
+    public static X509Certificate makeECDSACertificate(KeyPair _subKP,
+            String _subDN, KeyPair _issKP, String _issDN, boolean _ca)
+            throws GeneralSecurityException, IOException
+    {
+        return makeCertificate(_subKP,_subDN, _issKP, _issDN, "SHA1WithECDSA", _ca);
+    }
+
+    public static X509Certificate makeCertificate(KeyPair _subKP,
+            String _subDN, KeyPair _issKP, String _issDN, String algorithm, boolean _ca)
             throws GeneralSecurityException, IOException
     {
 
@@ -98,7 +124,7 @@ public class OCSPTestUtil
                 + (1000L * 60 * 60 * 24 * 100)));
         _v3CertGen.setSubjectDN(new X509Name(_subDN));
         _v3CertGen.setPublicKey(_subPub);
-        _v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
+        _v3CertGen.setSignatureAlgorithm(algorithm);
 
         _v3CertGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
                 createSubjectKeyId(_subPub));
@@ -133,22 +159,6 @@ public class OCSPTestUtil
                 (ASN1Sequence)new ASN1InputStream(_bais).readObject());
 
         return new AuthorityKeyIdentifier(_info);
-    }
-
-    private static AuthorityKeyIdentifier createAuthorityKeyId(
-            PublicKey _pubKey, X509Name _name, int _sNumber) throws IOException
-    {
-
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
-                .getEncoded());
-        SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
-
-        GeneralName _genName = new GeneralName(_name);
-
-        return new AuthorityKeyIdentifier(_info, new GeneralNames(
-                new DERSequence(_genName)), BigInteger.valueOf(_sNumber));
-
     }
 
     private static SubjectKeyIdentifier createSubjectKeyId(PublicKey _pubKey)
