@@ -42,6 +42,7 @@ class CMSSignedHelper
         encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_94.getId(), "GOST3410");
         encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_2001.getId(), "ECGOST3410");
         encryptionAlgs.put("1.3.6.1.4.1.5849.1.6.2", "ECGOST3410");
+        encryptionAlgs.put("1.3.6.1.4.1.5849.1.1.5", "GOST3410");
 
         digestAlgs.put(PKCSObjectIdentifiers.md5.getId(), "MD5");
         digestAlgs.put(OIWObjectIdentifiers.idSHA1.getId(), "SHA1");
