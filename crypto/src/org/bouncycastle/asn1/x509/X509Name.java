@@ -1,13 +1,23 @@
 package org.bouncycastle.asn1.x509;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERString;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.util.Strings;
+import org.bouncycastle.util.encoders.Hex;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.Strings;
 
 /**
  * <pre>
@@ -700,6 +710,26 @@ public class X509Name
         for (int i = 0; i != values.size(); i++)
         {
             v.addElement(values.elementAt(i));
+        }
+
+        return v;
+    }
+
+    /**
+     * return a vector of the values found in the name, in the order they
+     * were found, with the DN label corresponding to passed in oid.
+     */
+    public Vector getValues(
+        DERObjectIdentifier oid)
+    {
+        Vector  v = new Vector();
+
+        for (int i = 0; i != values.size(); i++)
+        {
+            if (ordering.elementAt(i).equals(oid))
+            {
+                v.addElement(values.elementAt(i));
+            }
         }
 
         return v;

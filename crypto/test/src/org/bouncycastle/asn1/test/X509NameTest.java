@@ -210,6 +210,23 @@ public class X509NameTest
         }
 
         //
+        // getValues test
+        //
+        Vector v1 = n.getValues(X509Name.O);
+
+        if (v1.size() != 1 && v1.elementAt(0).equals("The Legion of the Bouncy Castle"))
+        {
+            fail("O test failed");
+        }
+
+        Vector v2 = n.getValues(X509Name.L);
+
+        if (v2.size() != 1 && v2.elementAt(0).equals("Melbourne"))
+        {
+            fail("L test failed");
+        }
+
+        //
         // general subjects test
         //
         for (int i = 0; i != subjects.length; i++)
