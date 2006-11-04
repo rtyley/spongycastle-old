@@ -413,7 +413,7 @@ public class X509V3CertificateGenerator
 
         try
         {
-            signature = X509Util.getSignatureForObject(sigOID, signatureAlgorithm, key, random, tbsCert);
+            signature = X509Util.calculateSignature(sigOID, signatureAlgorithm, key, random, tbsCert);
         }
         catch (IOException e)
         {
@@ -451,7 +451,7 @@ public class X509V3CertificateGenerator
 
         try
         {
-            signature = X509Util.getSignatureForObject(sigOID, signatureAlgorithm, provider, key, random, tbsCert);
+            signature = X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, tbsCert);
         }
         catch (IOException e)
         {
