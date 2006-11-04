@@ -1,14 +1,7 @@
 package org.bouncycastle.ocsp;
 
-import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -18,6 +11,11 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 
 public class CertificateID
 {
@@ -61,12 +59,7 @@ public class CertificateID
             SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(
                                                             aIn.readObject());
 
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-            aOut.writeObject(info.getPublicKey());
-
-            digest.update(bOut.toByteArray());
+            digest.update(info.getPublicKeyData().getBytes());
 
             ASN1OctetString issuerKeyHash = new DEROctetString(digest.digest());
 
