@@ -18,7 +18,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -144,7 +146,7 @@ class X509Util
         }
     }
 
-    static byte[] getSignatureForObject(
+    static byte[] calculateSignature(
         DERObjectIdentifier sigOid,
         String              sigName,
         PrivateKey          key,
@@ -182,7 +184,7 @@ class X509Util
         return sig.sign();
     }
 
-    static byte[] getSignatureForObject(
+    static byte[] calculateSignature(
         DERObjectIdentifier sigOid,
         String              sigName,
         String              provider,
@@ -232,5 +234,152 @@ class X509Util
         {
             throw new IllegalArgumentException("cannot convert principal");
         }
+    }
+
+        static class Implementation
+    {
+        Object      engine;
+        Provider provider;
+
+        Implementation(
+            Object      engine,
+            Provider    provider)
+        {
+            this.engine = engine;
+            this.provider = provider;
+        }
+
+        Object getEngine()
+        {
+            return engine;
+        }
+
+        Provider getProvider()
+        {
+            return provider;
+        }
+    }
+
+    /**
+     * see if we can find an algorithm (or its alias and what it represents) in
+     * the property table for the given provider.
+     */
+    static private Implementation getImplementation(
+        String      baseName,
+        String      algorithm,
+        Provider    prov)
+        throws NoSuchAlgorithmException
+    {
+        String      alias;
+
+        while ((alias = prov.getProperty("Alg.Alias." + baseName + "." + algorithm)) != null)
+        {
+            algorithm = alias;
+        }
+
+        String      className = prov.getProperty(baseName + "." + algorithm);
+
+        if (className != null)
+        {
+            try
+            {
+                Class       cls;
+                ClassLoader clsLoader = prov.getClass().getClassLoader();
+
+                if (clsLoader != null)
+                {
+                    cls = clsLoader.loadClass(className);
+                }
+                else
+                {
+                    cls = Class.forName(className);
+                }
+
+                return new Implementation(cls.newInstance(), prov);
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new IllegalStateException(
+                    "algorithm " + algorithm + " in provider " + prov.getName() + " but no class \"" + className + "\" found!");
+            }
+            catch (Exception e)
+            {
+                throw new IllegalStateException(
+                    "algorithm " + algorithm + " in provider " + prov.getName() + " but class \"" + className + "\" inaccessible!");
+            }
+        }
+
+        throw new NoSuchAlgorithmException("cannot find implementation " + algorithm + " for provider " + prov.getName());
+    }
+
+    /**
+     * return an implementation for a given algorithm/provider.
+     * If the provider is null, we grab the first avalaible who has the required algorithm.
+     */
+    static Implementation getImplementation(
+        String      baseName,
+        String      algorithm)
+        throws NoSuchAlgorithmException
+    {
+        Provider[] prov = Security.getProviders();
+
+        //
+        // search every provider looking for the algorithm we want.
+        //
+        for (int i = 0; i != prov.length; i++)
+        {
+            //
+            // try case insensitive
+            //
+            Implementation imp = getImplementation(baseName, Strings.toUpperCase(algorithm), prov[i]);
+            if (imp != null)
+            {
+                return imp;
+            }
+
+            try
+            {
+                imp = getImplementation(baseName, algorithm, prov[i]);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                // continue
+            }
+        }
+
+        throw new NoSuchAlgorithmException("cannot find implementation " + algorithm);
+    }
+
+
+    /**
+     * return an implementation for a given algorithm/provider.
+     * If the provider is null, we grab the first avalaible who has the required algorithm.
+     *
+     * @return null if no algorithm found, an Implementation if it is.
+     * @exception NoSuchProviderException if a provider is specified and not found.
+     */
+    static Implementation getImplementation(
+        String      baseName,
+        String      algorithm,
+        String      provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException
+    {
+        Provider prov = Security.getProvider(provider);
+
+        if (prov == null)
+        {
+            throw new NoSuchProviderException("Provider " + provider + " not found");
+        }
+
+        //
+        // try case insensitive
+        //
+        Implementation imp = getImplementation(baseName, Strings.toUpperCase(algorithm), prov);
+        if (imp != null)
+        {
+            return imp;
+        }
+
+        return getImplementation(baseName, algorithm, prov);
     }
 }
