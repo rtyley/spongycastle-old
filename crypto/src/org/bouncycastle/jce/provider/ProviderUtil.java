@@ -4,10 +4,15 @@ import org.bouncycastle.jce.ProviderConfigurationPermission;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.Permission;
 
 class ProviderUtil
 {
+    private static final long  MAX_MEMORY = Runtime.getRuntime().maxMemory();
+
     private static Permission BC_EC_LOCAL_PERMISSION = new ProviderConfigurationPermission(
                                                    "BC", ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA);
     private static Permission BC_EC_PERMISSION = new ProviderConfigurationPermission(
@@ -75,5 +80,21 @@ class ProviderUtil
         }
 
         return ecImplicitCaParams;
+    }
+
+    static int getReadLimit(InputStream in)
+        throws IOException
+    {
+        if (in instanceof ByteArrayInputStream)
+        {
+            return in.available();
+        }
+
+        if (MAX_MEMORY > Integer.MAX_VALUE)
+        {
+            return Integer.MAX_VALUE;
+        }
+
+        return (int)MAX_MEMORY;
     }
 }
