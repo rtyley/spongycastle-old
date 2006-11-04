@@ -1,5 +1,10 @@
 package org.bouncycastle.jce.provider.test;
- 
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.test.SimpleTestResult;
+import org.bouncycastle.util.test.Test;
+import org.bouncycastle.util.test.TestResult;
+
 import java.io.ByteArrayInputStream;
 import java.security.Security;
 import java.security.cert.CertStore;
@@ -12,11 +17,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
 
 public class CertStoreTest
     implements Test
@@ -53,7 +53,7 @@ public class CertStoreTest
             list.add(interCrl);
             CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(
                     list);
-            CertStore store = CertStore.getInstance("Collection", ccsp);
+            CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
 
             // Searching for rootCert by subjectDN
             X509CertSelector targetConstraints = new X509CertSelector();

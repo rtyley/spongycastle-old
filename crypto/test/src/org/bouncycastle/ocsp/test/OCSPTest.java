@@ -1,14 +1,5 @@
 package org.bouncycastle.ocsp.test;
 
-import java.io.ByteArrayInputStream;
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.cert.X509Certificate;
-import java.util.Random;
-import java.util.Set;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
@@ -30,6 +21,15 @@ import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
+import java.io.ByteArrayInputStream;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.util.Random;
+import java.util.Set;
+import java.util.Vector;
 
 public class OCSPTest
     extends SimpleTest
@@ -126,6 +126,187 @@ public class OCSPTest
     public String getName()
     {
         return "OCSP";
+    }
+
+    private void testECDSA()
+        throws Exception
+    {
+        String          signDN = "O=Bouncy Castle, C=AU";
+        KeyPair         signKP = OCSPTestUtil.makeECKeyPair();
+        X509Certificate testCert = OCSPTestUtil.makeECDSACertificate(signKP, signDN, signKP, signDN);
+
+        String          origDN = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+        GeneralName     origName = new GeneralName(new X509Name(origDN));
+
+        //
+        // general id value for our test issuer cert and a serial number.
+        //
+        CertificateID   id = new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1));
+
+        //
+        // basic request generation
+        //
+        OCSPReqGenerator    gen = new OCSPReqGenerator();
+
+        gen.addRequest(
+                new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
+
+        OCSPReq         req = gen.generate();
+
+        if (req.isSigned())
+        {
+            fail("signed but shouldn't be");
+        }
+
+        X509Certificate[] certs = req.getCerts("BC");
+
+        if (certs != null)
+        {
+            fail("null certs expected, but not found");
+        }
+
+        Req[]           requests = req.getRequestList();
+
+        if (!requests[0].getCertID().equals(id))
+        {
+            fail("Failed isFor test");
+        }
+
+        //
+        // request generation with signing
+        //
+        X509Certificate[]   chain = new X509Certificate[1];
+
+        gen = new OCSPReqGenerator();
+
+        gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
+
+        gen.addRequest(
+                new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
+
+        chain[0] = testCert;
+
+        req = gen.generate("SHA1withECDSA", signKP.getPrivate(), chain, "BC");
+
+        if (!req.isSigned())
+        {
+            fail("not signed but should be");
+        }
+
+        if (!req.verify(signKP.getPublic(), "BC"))
+        {
+            fail("signature failed to verify");
+        }
+
+        requests = req.getRequestList();
+
+        if (!requests[0].getCertID().equals(id))
+        {
+            fail("Failed isFor test");
+        }
+
+        certs = req.getCerts("BC");
+
+        if (certs == null)
+        {
+            fail("null certs found");
+        }
+
+        if (certs.length != 1 || !certs[0].equals(testCert))
+        {
+            fail("incorrect certs found in request");
+        }
+
+        //
+        // encoding test
+        //
+        byte[] reqEnc = req.getEncoded();
+
+        OCSPReq newReq = new OCSPReq(reqEnc);
+
+        if (!newReq.verify(signKP.getPublic(), "BC"))
+        {
+            fail("newReq signature failed to verify");
+        }
+
+        //
+        // request generation with signing and nonce
+        //
+        chain = new X509Certificate[1];
+
+        gen = new OCSPReqGenerator();
+
+        Vector oids = new Vector();
+        Vector values = new Vector();
+        byte[] sampleNonce = new byte[16];
+        Random rand = new Random();
+
+        rand.nextBytes(sampleNonce);
+
+        gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
+
+        oids.addElement(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
+        values.addElement(new X509Extension(false, new DEROctetString(new DEROctetString(sampleNonce))));
+
+        gen.setRequestExtensions(new X509Extensions(oids, values));
+
+        gen.addRequest(
+                new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
+
+        chain[0] = testCert;
+
+        req = gen.generate("SHA1withECDSA", signKP.getPrivate(), chain, "BC");
+
+        if (!req.isSigned())
+        {
+            fail("not signed but should be");
+        }
+
+        if (!req.verify(signKP.getPublic(), "BC"))
+        {
+            fail("signature failed to verify");
+        }
+
+        //
+        // extension check.
+        //
+        Set extOids = req.getCriticalExtensionOIDs();
+
+        if (extOids.size() != 0)
+        {
+            fail("wrong number of critical extensions in OCSP request.");
+        }
+
+        extOids = req.getNonCriticalExtensionOIDs();
+
+        if (extOids.size() != 1)
+        {
+            fail("wrong number of non-critical extensions in OCSP request.");
+        }
+
+        byte[] extValue = req.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nonce.getId());
+
+        ASN1Encodable extObj = X509ExtensionUtil.fromExtensionValue(extValue);
+
+        if (!(extObj instanceof ASN1OctetString))
+        {
+            fail("wrong extension type found.");
+        }
+
+        if (!areEqual(((ASN1OctetString)extObj).getOctets(), sampleNonce))
+        {
+            fail("wrong extension value found.");
+        }
+
+        //
+        // request list check
+        //
+        requests = req.getRequestList();
+
+        if (!requests[0].getCertID().equals(id))
+        {
+            fail("Failed isFor test");
+        }
     }
 
     public void performTest()
@@ -358,6 +539,8 @@ public class OCSPTest
         {
             fail("response fails to match");
         }
+
+        testECDSA();
     }
 
     public static void main(
