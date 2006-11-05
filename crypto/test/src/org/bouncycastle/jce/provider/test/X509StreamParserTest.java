@@ -10,6 +10,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CertificatePair;
 import org.bouncycastle.x509.X509StreamParser;
 
 import java.io.ByteArrayInputStream;
@@ -66,19 +67,21 @@ public class X509StreamParserTest
     public void performTest()
         throws Exception
     {
-        X509StreamParser parser = X509StreamParser.getInstance("Certificate",
-            new ByteArrayInputStream(CertPathTest.rootCertBin), "BC");
+        X509StreamParser parser = X509StreamParser.getInstance("Certificate", "BC");
 
+        parser.init(new ByteArrayInputStream(CertPathTest.rootCertBin));
         X509Certificate rootCert = (X509Certificate)parser.read();
 
-        parser = X509StreamParser.getInstance("CRL",
-                    new ByteArrayInputStream(CertPathTest.rootCrlBin), "BC");
+        parser = X509StreamParser.getInstance("CRL", "BC");
+
+        parser.init(new ByteArrayInputStream(CertPathTest.rootCrlBin));
 
 
         X509CRL rootCrl = (X509CRL)parser.read();
 
-        parser = X509StreamParser.getInstance("AttributeCertificate",
-                            new ByteArrayInputStream(attrCert), "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+
+        parser.init(new ByteArrayInputStream(attrCert));
 
         X509AttributeCertificate aCert = (X509AttributeCertificate)parser.read();
 
@@ -88,7 +91,9 @@ public class X509StreamParserTest
         bOut.write(CertPathTest.interCertBin);
         bOut.write(CertPathTest.finalCertBin);
 
-        parser = X509StreamParser.getInstance("Certificate", bOut.toByteArray(), "BC");
+        parser = X509StreamParser.getInstance("Certificate", "BC");
+
+        parser.init(bOut.toByteArray());
 
         Collection res = parser.readAll();
 
@@ -102,7 +107,9 @@ public class X509StreamParserTest
         bOut.write(CertPathTest.rootCrlBin);
         bOut.write(CertPathTest.interCrlBin);
 
-        parser = X509StreamParser.getInstance("CRL", bOut.toByteArray(), "BC");
+        parser = X509StreamParser.getInstance("CRL", "BC");
+
+        parser.init(bOut.toByteArray());
 
         res = parser.readAll();
 
@@ -116,7 +123,9 @@ public class X509StreamParserTest
         bOut.write(attrCert);
         bOut.write(attrCert);
 
-        parser = X509StreamParser.getInstance("AttributeCertificate", bOut.toByteArray(), "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+
+        parser.init(bOut.toByteArray());
 
         res = parser.readAll();
 
@@ -128,8 +137,9 @@ public class X509StreamParserTest
         //
         // PEM tests
         //
-        parser = X509StreamParser.getInstance("Certificate",
-            new ByteArrayInputStream(PEMData.CERTIFICATE_1.getBytes("US-ASCII")), "BC");
+        parser = X509StreamParser.getInstance("Certificate", "BC");
+
+        parser.init(PEMData.CERTIFICATE_1.getBytes("US-ASCII"));
 
         res = parser.readAll();
 
@@ -138,8 +148,9 @@ public class X509StreamParserTest
             fail("wrong number of Certificates found");
         }
 
-        parser = X509StreamParser.getInstance("Certificate",
-            new ByteArrayInputStream(PEMData.CERTIFICATE_2.getBytes("US-ASCII")), "BC");
+        parser = X509StreamParser.getInstance("Certificate", "BC");
+
+        parser.init(PEMData.CERTIFICATE_2.getBytes("US-ASCII"));
 
         res = parser.readAll();
 
@@ -148,8 +159,9 @@ public class X509StreamParserTest
             fail("wrong number of Certificates found");
         }
 
-        parser = X509StreamParser.getInstance("CRL",
-            new ByteArrayInputStream(PEMData.CRL_1.getBytes("US-ASCII")), "BC");
+        parser = X509StreamParser.getInstance("CRL", "BC");
+
+        parser.init(PEMData.CRL_1.getBytes("US-ASCII"));
 
         res = parser.readAll();
 
@@ -158,8 +170,9 @@ public class X509StreamParserTest
             fail("wrong number of CRLs found");
         }
 
-        parser = X509StreamParser.getInstance("CRL",
-            new ByteArrayInputStream(PEMData.CRL_2.getBytes("US-ASCII")), "BC");
+        parser = X509StreamParser.getInstance("CRL", "BC");
+
+        parser.init(PEMData.CRL_2.getBytes("US-ASCII"));
 
         res = parser.readAll();
 
@@ -168,8 +181,9 @@ public class X509StreamParserTest
             fail("wrong number of CRLs found");
         }
 
-        parser = X509StreamParser.getInstance("AttributeCertificate",
-            new ByteArrayInputStream(PEMData.ATTRIBUTE_CERTIFICATE_1.getBytes("US-ASCII")), "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+
+        parser.init(PEMData.ATTRIBUTE_CERTIFICATE_1.getBytes("US-ASCII"));
 
         res = parser.readAll();
 
@@ -178,8 +192,9 @@ public class X509StreamParserTest
             fail("wrong number of Attribute Certificates found");
         }
 
-        parser = X509StreamParser.getInstance("AttributeCertificate",
-            new ByteArrayInputStream(PEMData.ATTRIBUTE_CERTIFICATE_2.getBytes("US-ASCII")), "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+
+        parser.init(PEMData.ATTRIBUTE_CERTIFICATE_2.getBytes("US-ASCII"));
 
         res = parser.readAll();
 
@@ -198,14 +213,29 @@ public class X509StreamParserTest
         crls.add(new ASN1InputStream(CertPathTest.rootCrlBin).readObject());
 
         //
+        // cross certificate pairs
+        //
+        parser = X509StreamParser.getInstance("CertificatePair", "BC");
+
+        parser.init(new X509CertificatePair(rootCert, rootCert).getEncoded());
+
+        res = parser.readAll();
+
+        if (res.size() != 1)
+        {
+            fail("wrong number of CertificatePairs found");
+        }
+
+        //
         // PKCS7
         //
         SignedData sigData = new SignedData(new DERSet(), new ContentInfo(CMSObjectIdentifiers.data, null), new DERSet(certs), new DERSet(crls), new DERSet());
 
         ContentInfo info = new ContentInfo(CMSObjectIdentifiers.signedData, sigData);
 
-        parser = X509StreamParser.getInstance("Certificate",
-            new ByteArrayInputStream(info.getEncoded()), "BC");
+        parser = X509StreamParser.getInstance("Certificate", "BC");
+
+        parser.init(info.getEncoded());
 
         res = parser.readAll();
 
@@ -214,8 +244,9 @@ public class X509StreamParserTest
             fail("wrong number of Certificates found");
         }
 
-        parser = X509StreamParser.getInstance("CRL",
-            new ByteArrayInputStream(info.getEncoded()), "BC");
+        parser = X509StreamParser.getInstance("CRL", "BC");
+
+        parser.init(info.getEncoded());
 
         res = parser.readAll();
 
@@ -224,8 +255,9 @@ public class X509StreamParserTest
             fail("wrong number of CRLs found");
         }
 
-        parser = X509StreamParser.getInstance("AttributeCertificate",
-            new ByteArrayInputStream(info.getEncoded()), "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+
+        parser.init(info.getEncoded());
 
         res = parser.readAll();
 

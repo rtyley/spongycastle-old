@@ -65,6 +65,8 @@ public final class BouncyCastleProvider extends Provider
         put("X509StreamParser.CERTIFICATE", "org.bouncycastle.jce.provider.X509CertParser");
         put("X509StreamParser.ATTRIBUTECERTIFICATE", "org.bouncycastle.jce.provider.X509AttrCertParser");
         put("X509StreamParser.CRL", "org.bouncycastle.jce.provider.X509CRLParser");
+        put("X509StreamParser.CERTIFICATEPAIR", "org.bouncycastle.jce.provider.X509CertPairParser");
+
 
         //
         // KeyStore
