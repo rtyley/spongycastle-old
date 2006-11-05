@@ -6,17 +6,16 @@ import org.bouncycastle.jce.cert.X509CertSelector;
 import java.security.cert.Certificate;
 
 public class X509CertSelectorWrapper
+    extends X509CertSelector
     implements Selector
 {
-    private X509CertSelector _selector;
-
-    public X509CertSelectorWrapper(X509CertSelector selector)
-    {
-        _selector = selector;
-    }
-
     public boolean match(Object obj)
     {
-        return _selector.match((Certificate)obj);
+        if (!(obj instanceof Certificate))
+        {
+            return false;
+        }
+
+        return this.match((Certificate)obj);
     }
 }
