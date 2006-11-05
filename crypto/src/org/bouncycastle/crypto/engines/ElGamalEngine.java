@@ -1,8 +1,5 @@
 package org.bouncycastle.crypto.engines;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
@@ -10,6 +7,9 @@ import org.bouncycastle.crypto.params.ElGamalKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * this does your basic ElGamal algorithm.
@@ -20,6 +20,8 @@ public class ElGamalEngine
     private ElGamalKeyParameters    key;
     private SecureRandom            random;
     private boolean                 forEncryption;
+    private int                     bitSize;
+    private int                     shift;
 
     private static BigInteger       ZERO = BigInteger.valueOf(0);
     private static BigInteger       ONE = BigInteger.valueOf(1);
@@ -49,7 +51,18 @@ public class ElGamalEngine
         }
 
         this.forEncryption = forEncryption;
-        
+
+        bitSize = key.getParameters().getP().bitLength();
+
+        if (bitSize % 8 == 0)    // a multiple of 8
+        {
+            this.shift = 0;
+        }
+        else
+        {
+            this.shift = (8 - (bitSize % 8));
+        }
+
         if (forEncryption)
         {
             if (!(key instanceof ElGamalPublicKeyParameters))
@@ -75,8 +88,6 @@ public class ElGamalEngine
      */
     public int getInputBlockSize()
     {
-        int     bitSize = key.getParameters().getP().bitLength();
-
         if (forEncryption)
         {
             if ((bitSize % 8) == 0)
@@ -101,8 +112,6 @@ public class ElGamalEngine
      */
     public int getOutputBlockSize()
     {
-        int     bitSize = key.getParameters().getP().bitLength();
-
         if (forEncryption)
         {
             return 2 * (((bitSize - 1) + 7) / 8);
@@ -131,7 +140,7 @@ public class ElGamalEngine
         {
             throw new DataLengthException("input too large for ElGamal cipher.\n");
         }
-        else if (inLen == (getInputBlockSize() + 1) && (in[inOff] & 0x80) != 0)
+        else if (inLen == (getInputBlockSize() + 1) && (in[inOff] & (0x80 >> shift)) != 0)
         {
             throw new DataLengthException("input too large for ElGamal cipher.\n");
         }
