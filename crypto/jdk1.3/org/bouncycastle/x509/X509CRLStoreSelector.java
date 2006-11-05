@@ -6,17 +6,16 @@ import org.bouncycastle.jce.cert.X509CRLSelector;
 import java.security.cert.CRL;
 
 public class X509CRLSelectorWrapper
+    extends X509CRLSelector
     implements Selector
 {
-    private X509CRLSelector _selector;
-
-    public X509CRLSelectorWrapper(X509CRLSelector selector)
-    {
-        _selector = selector;
-    }
-
     public boolean match(Object obj)
     {
-        return _selector.match((CRL)obj);
+        if (!(obj instanceof CRL))
+        {
+            return false;
+        }
+
+        return this.match((CRL)obj);
     }
 }
