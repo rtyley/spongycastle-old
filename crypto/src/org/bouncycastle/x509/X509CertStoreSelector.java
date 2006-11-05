@@ -5,22 +5,17 @@ import org.bouncycastle.util.Selector;
 import java.security.cert.Certificate;
 import java.security.cert.X509CertSelector;
 
-public class X509CertSelectorWrapper
+public class X509CertStoreSelector
+    extends X509CertSelector
     implements Selector
 {
-    private X509CertSelector _selector;
-
-    public X509CertSelectorWrapper(X509CertSelector selector)
-    {
-        _selector = selector;
-    }
-
     public boolean match(Object obj)
     {
         if (!(obj instanceof Certificate))
         {
             return false;
         }
-        return _selector.match((Certificate)obj);
+
+        return this.match((Certificate)obj);
     }
 }

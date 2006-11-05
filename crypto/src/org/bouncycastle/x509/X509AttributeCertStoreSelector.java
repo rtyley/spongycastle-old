@@ -14,7 +14,7 @@ import java.util.Date;
  * @see org.bouncycastle.x509.X509AttributeCertificate
  * @see org.bouncycastle.x509.X509Store
  */
-public class X509AttributeCertSelector
+public class X509AttributeCertStoreSelector
     implements Selector
 {
 
@@ -30,7 +30,7 @@ public class X509AttributeCertSelector
 
     private X509AttributeCertificate attributeCert;
 
-    public X509AttributeCertSelector()
+    public X509AttributeCertStoreSelector()
     {
         super();
     }
@@ -106,7 +106,7 @@ public class X509AttributeCertSelector
      */
     public Object clone()
     {
-        X509AttributeCertSelector sel = new X509AttributeCertSelector();
+        X509AttributeCertStoreSelector sel = new X509AttributeCertStoreSelector();
         sel.attributeCert = attributeCert;
         sel.attributeCertificateValid = getAttributeCertificateValid();
         sel.holder = holder;
