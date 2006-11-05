@@ -29,6 +29,12 @@ public class X509Store
     public static X509Store getInstance(String type, X509StoreParameters parameters, String provider)
         throws NoSuchStoreException, NoSuchProviderException
     {
+        return getInstance(type, parameters, X509Util.getProvider(provider));
+    }
+
+    public static X509Store getInstance(String type, X509StoreParameters parameters, Provider provider)
+        throws NoSuchStoreException, NoSuchProviderException
+    {
         try
         {
             X509Util.Implementation impl = X509Util.getImplementation("X509Store", type, provider);

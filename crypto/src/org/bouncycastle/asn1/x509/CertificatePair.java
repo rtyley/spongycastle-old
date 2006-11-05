@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
 
 import java.util.Enumeration;
 
@@ -94,11 +95,11 @@ public class CertificatePair
             ASN1TaggedObject o = ASN1TaggedObject.getInstance(e.nextElement());
             if (o.getTagNo() == 0)
             {
-                forward = X509CertificateStructure.getInstance(o.getObject());
+                forward = X509CertificateStructure.getInstance(o, true);
             }
             else if (o.getTagNo() == 1)
             {
-                reverse = X509CertificateStructure.getInstance(o.getObject());
+                reverse = X509CertificateStructure.getInstance(o, true);
             }
             else
             {
@@ -140,11 +141,11 @@ public class CertificatePair
 
         if (forward != null)
         {
-            vec.add(forward);
+            vec.add(new DERTaggedObject(0, forward));
         }
         if (reverse != null)
         {
-            vec.add(reverse);
+            vec.add(new DERTaggedObject(1, reverse));
         }
 
         return new DERSequence(vec);
@@ -161,7 +162,8 @@ public class CertificatePair
     /**
      * @return Returns the reverse.
 	 */
-	public X509CertificateStructure getReverse() {
+	public X509CertificateStructure getReverse()
+    {
 		return reverse;
 	}
 
