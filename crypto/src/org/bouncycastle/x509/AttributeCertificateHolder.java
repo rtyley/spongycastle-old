@@ -1,7 +1,7 @@
 package org.bouncycastle.x509;
 
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -11,19 +11,17 @@ import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 
+import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.math.BigInteger;
-
 import java.security.Principal;
 import java.security.cert.CertSelector;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.security.auth.x500.X500Principal;
 
 /**
  * The Holder object.
@@ -259,5 +257,27 @@ public class AttributeCertificateHolder
          * objectDigestInfo not supported
          */
         return false;
+    }
+    
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
+            return true;
+        }
+
+        if (!(obj instanceof AttributeCertificateHolder))
+        {
+            return false;
+        }
+
+        AttributeCertificateHolder other = (AttributeCertificateHolder)obj;
+
+        return this.holder.equals(other.holder);
+    }
+
+    public int hashCode()
+    {
+        return this.holder.hashCode();
     }
 }

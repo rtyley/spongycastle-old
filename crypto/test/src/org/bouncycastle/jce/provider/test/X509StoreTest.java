@@ -2,10 +2,12 @@ package org.bouncycastle.jce.provider.test;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.x509.X509AttributeCertSelector;
 import org.bouncycastle.x509.X509CRLSelectorWrapper;
 import org.bouncycastle.x509.X509CertSelectorWrapper;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509Store;
+import org.bouncycastle.x509.X509V2AttributeCertificate;
 
 import java.io.ByteArrayInputStream;
 import java.security.Security;
@@ -16,6 +18,7 @@ import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 public class X509StoreTest
@@ -112,6 +115,57 @@ public class X509StoreTest
         if (crls.size() != 1 || !crls.contains(rootCrl))
         {
             fail("rootCrl not found");
+        }
+
+        // Searching for attribute certificates
+        X509V2AttributeCertificate attrCert = new X509V2AttributeCertificate(AttrCertTest.attrCert);
+
+        List attrList = new ArrayList();
+        attrList.add(attrCert);
+        ccsp = new X509CollectionStoreParameters(attrList);
+        store = X509Store.getInstance("AttributeCertificate/Collection", ccsp, "BC");
+        X509AttributeCertSelector attrSelector = new X509AttributeCertSelector();
+        attrSelector.setHolder(attrCert.getHolder());
+        Collection attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 1 || !attrs.contains(attrCert))
+        {
+            fail("attrCert not found");
+        }
+        attrSelector.setIssuer(attrCert.getIssuer());
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 1 || !attrs.contains(attrCert))
+        {
+            fail("attrCert not found");
+        }
+        attrSelector.setAttributeCert(attrCert);
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 1 || !attrs.contains(attrCert))
+        {
+            fail("attrCert not found");
+        }
+        attrSelector.setSerialNumber(attrCert.getSerialNumber());
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 1 || !attrs.contains(attrCert))
+        {
+            fail("attrCert not found");
+        }
+        attrSelector.setAttributeCertificateValid(attrCert.getNotBefore());
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 1 || !attrs.contains(attrCert))
+        {
+            fail("attrCert not found");
+        }
+        attrSelector.setAttributeCertificateValid(new Date(attrCert.getNotBefore().getTime() - 100));
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 0)
+        {
+            fail("attrCert found on before");
+        }
+        attrSelector.setAttributeCertificateValid(new Date(attrCert.getNotAfter().getTime() + 100));
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 0)
+        {
+            fail("attrCert found on after");
         }
     }
 

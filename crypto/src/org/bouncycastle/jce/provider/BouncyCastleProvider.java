@@ -56,14 +56,14 @@ public final class BouncyCastleProvider extends Provider
         // X509Store
         //
         put("X509Store.CERTIFICATE/COLLECTION", "org.bouncycastle.jce.provider.X509StoreCertCollection");
-        put("X509Store.ATTRIBUTECERTIFICATE/COLLECTION", "org.bouncycastle.jce.provider.X509StoreAttrCollection");
+        put("X509Store.ATTRIBUTECERTIFICATE/COLLECTION", "org.bouncycastle.jce.provider.X509StoreAttrCertCollection");
         put("X509Store.CRL/COLLECTION", "org.bouncycastle.jce.provider.X509StoreCRLCollection");
 
         //
         // X509StreamParser
         //
         put("X509StreamParser.CERTIFICATE", "org.bouncycastle.jce.provider.X509CertParser");
-        put("X509StreamParser.ATTRIBUTECERTIFICATE", "org.bouncycastle.jce.provider.X509AttrParser");
+        put("X509StreamParser.ATTRIBUTECERTIFICATE", "org.bouncycastle.jce.provider.X509AttrCertParser");
         put("X509StreamParser.CRL", "org.bouncycastle.jce.provider.X509CRLParser");
 
         //

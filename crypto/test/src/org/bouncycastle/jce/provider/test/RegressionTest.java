@@ -46,6 +46,7 @@ public class RegressionTest
         new PKIXTest(),
         new NetscapeCertRequestTest(),
         new X509StoreTest(),
+        new X509StreamParserTest(),
         new CertPathTest(),
         new CertStoreTest(),
         new CertPathValidatorTest(),

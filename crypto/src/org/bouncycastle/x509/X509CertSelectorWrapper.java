@@ -17,6 +17,10 @@ public class X509CertSelectorWrapper
 
     public boolean match(Object obj)
     {
+        if (!(obj instanceof Certificate))
+        {
+            return false;
+        }
         return _selector.match((Certificate)obj);
     }
 }

@@ -1,5 +1,14 @@
 package org.bouncycastle.x509;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.AttCertIssuer;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.V2Form;
+import org.bouncycastle.jce.X509Principal;
+
+import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.security.Principal;
 import java.security.cert.CertSelector;
@@ -7,17 +16,6 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.x509.AttCertIssuer;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.V2Form;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.X509Principal;
 
 /**
  * Carrying class for an attribute certificate issuer.
@@ -177,4 +175,27 @@ public class AttributeCertificateIssuer
 
         return false;
     }
+
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
+            return true;
+        }
+
+        if (!(obj instanceof AttributeCertificateIssuer))
+        {
+            return false;
+        }
+
+        AttributeCertificateIssuer other = (AttributeCertificateIssuer)obj;
+
+        return this.form.equals(other.form);
+    }
+
+    public int hashCode()
+    {
+        return this.form.hashCode();
+    }
+
 }

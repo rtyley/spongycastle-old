@@ -17,6 +17,10 @@ public class X509CRLSelectorWrapper
 
     public boolean match(Object obj)
     {
+        if (!(obj instanceof CRL))
+        {
+            return false;
+        }
         return _selector.match((CRL)obj);
     }
 }
