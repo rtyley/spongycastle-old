@@ -5,7 +5,7 @@ import org.bouncycastle.util.Selector;
 import org.bouncycastle.jce.cert.X509CRLSelector;
 import java.security.cert.CRL;
 
-public class X509CRLSelectorWrapper
+public class X509CRLStoreSelector
     extends X509CRLSelector
     implements Selector
 {
@@ -16,6 +16,6 @@ public class X509CRLSelectorWrapper
             return false;
         }
 
-        return this.match((CRL)obj);
+        return super.match((CRL)obj);
     }
 }

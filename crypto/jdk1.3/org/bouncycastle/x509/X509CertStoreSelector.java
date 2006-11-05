@@ -5,7 +5,7 @@ import org.bouncycastle.util.Selector;
 import org.bouncycastle.jce.cert.X509CertSelector;
 import java.security.cert.Certificate;
 
-public class X509CertSelectorWrapper
+public class X509CertStoreSelector
     extends X509CertSelector
     implements Selector
 {
@@ -16,6 +16,6 @@ public class X509CertSelectorWrapper
             return false;
         }
 
-        return this.match((Certificate)obj);
+        return super.match((Certificate)obj);
     }
 }
