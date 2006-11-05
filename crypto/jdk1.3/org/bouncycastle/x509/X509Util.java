@@ -222,7 +222,7 @@ class X509Util
         return sig.sign();
     }
 
-    static class Implementation
+        static class Implementation
     {
         Object      engine;
         Provider provider;
@@ -250,12 +250,14 @@ class X509Util
      * see if we can find an algorithm (or its alias and what it represents) in
      * the property table for the given provider.
      */
-    static private Implementation getImplementation(
+    static Implementation getImplementation(
         String      baseName,
         String      algorithm,
         Provider    prov)
         throws NoSuchAlgorithmException
     {
+        algorithm = Strings.toUpperCase(algorithm);
+
         String      alias;
 
         while ((alias = prov.getProperty("Alg.Alias." + baseName + "." + algorithm)) != null)
@@ -336,19 +338,8 @@ class X509Util
         throw new NoSuchAlgorithmException("cannot find implementation " + algorithm);
     }
 
-
-    /**
-     * return an implementation for a given algorithm/provider.
-     * If the provider is null, we grab the first avalaible who has the required algorithm.
-     *
-     * @return null if no algorithm found, an Implementation if it is.
-     * @exception NoSuchProviderException if a provider is specified and not found.
-     */
-    static Implementation getImplementation(
-        String      baseName,
-        String      algorithm,
-        String      provider)
-        throws NoSuchProviderException, NoSuchAlgorithmException
+    static Provider getProvider(String provider)
+        throws NoSuchProviderException
     {
         Provider prov = Security.getProvider(provider);
 
@@ -357,15 +348,6 @@ class X509Util
             throw new NoSuchProviderException("Provider " + provider + " not found");
         }
 
-        //
-        // try case insensitive
-        //
-        Implementation imp = getImplementation(baseName, Strings.toUpperCase(algorithm), prov);
-        if (imp != null)
-        {
-            return imp;
-        }
-
-        return getImplementation(baseName, algorithm, prov);
+        return prov;
     }
 }
