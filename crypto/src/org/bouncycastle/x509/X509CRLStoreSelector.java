@@ -15,6 +15,6 @@ public class X509CRLStoreSelector
         {
             return false;
         }
-        return this.match((CRL)obj);
+        return super.match((CRL)obj);
     }
 }
