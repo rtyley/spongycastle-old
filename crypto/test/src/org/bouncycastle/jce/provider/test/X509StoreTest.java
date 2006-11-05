@@ -2,9 +2,9 @@ package org.bouncycastle.jce.provider.test;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.x509.X509AttributeCertSelector;
-import org.bouncycastle.x509.X509CRLSelectorWrapper;
-import org.bouncycastle.x509.X509CertSelectorWrapper;
+import org.bouncycastle.x509.X509AttributeCertStoreSelector;
+import org.bouncycastle.x509.X509CRLStoreSelector;
+import org.bouncycastle.x509.X509CertStoreSelector;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509Store;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
@@ -13,8 +13,6 @@ import java.io.ByteArrayInputStream;
 import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
-import java.security.cert.X509CRLSelector;
-import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,40 +53,40 @@ public class X509StoreTest
         X509Store store = X509Store.getInstance("Certificate/Collection", ccsp, "BC");
 
         // Searching for rootCert by subjectDN
-        X509CertSelector targetConstraints = new X509CertSelector();
+        X509CertStoreSelector targetConstraints = new X509CertStoreSelector();
         targetConstraints.setSubject(rootCert.getSubjectX500Principal()
                 .getName());
-        Collection certs = store.getMatches(new X509CertSelectorWrapper(targetConstraints));
+        Collection certs = store.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
             fail("rootCert not found by subjectDN");
         }
 
         // Searching for rootCert by subjectDN encoded as byte
-        targetConstraints = new X509CertSelector();
+        targetConstraints = new X509CertStoreSelector();
         targetConstraints.setSubject(rootCert.getSubjectX500Principal()
                 .getEncoded());
-        certs = store.getMatches(new X509CertSelectorWrapper(targetConstraints));
+        certs = store.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
             fail("rootCert not found by encoded subjectDN");
         }
 
         // Searching for rootCert by public key encoded as byte
-        targetConstraints = new X509CertSelector();
+        targetConstraints = new X509CertStoreSelector();
         targetConstraints.setSubjectPublicKey(rootCert.getPublicKey()
                 .getEncoded());
-        certs = store.getMatches(new X509CertSelectorWrapper(targetConstraints));
+        certs = store.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
             fail("rootCert not found by encoded public key");
         }
 
         // Searching for interCert by issuerDN
-        targetConstraints = new X509CertSelector();
+        targetConstraints = new X509CertStoreSelector();
         targetConstraints.setIssuer(rootCert.getSubjectX500Principal()
                 .getEncoded());
-        certs = store.getMatches(new X509CertSelectorWrapper(targetConstraints));
+        certs = store.getMatches(targetConstraints);
         if (certs.size() != 2)
         {
             fail("did not found 2 certs");
@@ -108,10 +106,10 @@ public class X509StoreTest
         crlList.add(interCrl);
         ccsp = new X509CollectionStoreParameters(crlList);
         store = X509Store.getInstance("CRL/Collection", ccsp, "BC");
-        X509CRLSelector targetConstraintsCRL = new X509CRLSelector();
+        X509CRLStoreSelector targetConstraintsCRL = new X509CRLStoreSelector();
         targetConstraintsCRL.addIssuerName(rootCrl.getIssuerX500Principal()
                 .getEncoded());
-        Collection crls = store.getMatches(new X509CRLSelectorWrapper(targetConstraintsCRL));
+        Collection crls = store.getMatches(targetConstraintsCRL);
         if (crls.size() != 1 || !crls.contains(rootCrl))
         {
             fail("rootCrl not found");
@@ -124,7 +122,7 @@ public class X509StoreTest
         attrList.add(attrCert);
         ccsp = new X509CollectionStoreParameters(attrList);
         store = X509Store.getInstance("AttributeCertificate/Collection", ccsp, "BC");
-        X509AttributeCertSelector attrSelector = new X509AttributeCertSelector();
+        X509AttributeCertStoreSelector attrSelector = new X509AttributeCertStoreSelector();
         attrSelector.setHolder(attrCert.getHolder());
         Collection attrs = store.getMatches(attrSelector);
         if (attrs.size() != 1 || !attrs.contains(attrCert))
