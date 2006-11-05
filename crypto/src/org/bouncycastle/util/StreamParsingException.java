@@ -3,9 +3,9 @@ package org.bouncycastle.util;
 public class StreamParsingException 
     extends Exception
 {
-    Exception _e;
+    Throwable _e;
 
-    public StreamParsingException(String message, Exception e)
+    public StreamParsingException(String message, Throwable e)
     {
         super(message);
         _e = e;
