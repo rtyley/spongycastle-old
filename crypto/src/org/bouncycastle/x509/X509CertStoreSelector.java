@@ -16,6 +16,6 @@ public class X509CertStoreSelector
             return false;
         }
 
-        return this.match((Certificate)obj);
+        return super.match((Certificate)obj);
     }
 }
