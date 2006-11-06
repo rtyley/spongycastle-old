@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1.test;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -9,6 +10,8 @@ import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERPrintableString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x509.X509DefaultEntryConverter;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -127,6 +130,11 @@ public class X509NameTest
             fail("Failed same name test");
         }
 
+        if (!name1.equals(name2, true))
+        {
+            fail("Failed same name test - in Order");
+        }
+
         Vector  ord1 = new Vector();
 
         ord1.addElement(X509Name.C);
@@ -149,6 +157,11 @@ public class X509NameTest
         if (!name1.equals(name2))
         {
             fail("Failed reverse name test");
+        }
+
+        if (name1.equals(name2, true))
+        {
+            fail("Failed reverse name test - in Order");
         }
 
         ord2 = new Vector();
@@ -280,6 +293,48 @@ public class X509NameTest
         }
 
         //
+        // equality tests
+        //
+        equalityTest(new X509Name("CN=The     Legion"), new X509Name("CN=The Legion"));
+        equalityTest(new X509Name("CN=   The Legion"), new X509Name("CN=The Legion"));
+        equalityTest(new X509Name("CN=The Legion   "), new X509Name("CN=The Legion"));
+        equalityTest(new X509Name("CN=  The     Legion "), new X509Name("CN=The Legion"));
+
+        //
+        // inequality to sequences
+        //
+        name1 = new X509Name("CN=The Legion");
+
+        if (name1.equals(new DERSequence()))
+        {
+            fail("inequality test with sequence");
+        }
+
+        if (name1.equals(new DERSequence(new DERSet())))
+        {
+            fail("inequality test with sequence and set");
+        }
+
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(new DERObjectIdentifier("1.1"));
+        v.add(new DERObjectIdentifier("1.1"));
+        if (name1.equals(new DERSequence(new DERSet(new DERSequence(v)))))
+        {
+            fail("inequality test with sequence and bad set");
+        }
+
+        v = new ASN1EncodableVector();
+
+        v.add(new DERObjectIdentifier("1.1"));
+        v.add(new DERSequence());
+
+        if (name1.equals(new DERSequence(new DERSet(new DERSequence(v)))))
+        {
+            fail("inequality test with sequence and bad sequence");
+        }
+
+        //
         // this is contrived but it checks sorting of sets with equal elements
         //
         unsorted = new X509Name("CN=AA + CN=AA + CN=AA");
@@ -319,6 +374,15 @@ public class X509NameTest
             fail("failed X509DefaultEntryConverter test");
         }
     }
+
+    private void equalityTest(X509Name x509Name, X509Name x509Name1)
+    {
+        if (!x509Name.equals(x509Name1))
+        {
+            fail("equality test failed for " + x509Name + " : " + x509Name1);
+        }
+    }
+
 
     public static void main(
         String[]    args)
