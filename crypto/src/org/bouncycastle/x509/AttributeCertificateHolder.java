@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.x509.Holder;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Selector;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
@@ -40,7 +41,7 @@ import java.util.List;
  * This holder currently supports use of the baseCertificateID and the entityName.
  */
 public class AttributeCertificateHolder 
-    implements CertSelector
+    implements CertSelector, Selector
 {
     final Holder   holder;
 
@@ -279,5 +280,15 @@ public class AttributeCertificateHolder
     public int hashCode()
     {
         return this.holder.hashCode();
+    }
+
+    public boolean match(Object obj)
+    {
+        if (!(obj instanceof X509Certificate))
+        {
+            return false;
+        }
+
+        return match((Certificate)obj);
     }
 }

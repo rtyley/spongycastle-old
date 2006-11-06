@@ -1,5 +1,6 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.X509AttributeCertStoreSelector;
@@ -54,7 +55,7 @@ public class X509StoreTest
 
         // Searching for rootCert by subjectDN
         X509CertStoreSelector targetConstraints = new X509CertStoreSelector();
-        targetConstraints.setSubject(rootCert.getSubjectX500Principal()
+        targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert)
                 .getName());
         Collection certs = store.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
@@ -64,7 +65,7 @@ public class X509StoreTest
 
         // Searching for rootCert by subjectDN encoded as byte
         targetConstraints = new X509CertStoreSelector();
-        targetConstraints.setSubject(rootCert.getSubjectX500Principal()
+        targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert)
                 .getEncoded());
         certs = store.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
@@ -84,7 +85,7 @@ public class X509StoreTest
 
         // Searching for interCert by issuerDN
         targetConstraints = new X509CertStoreSelector();
-        targetConstraints.setIssuer(rootCert.getSubjectX500Principal()
+        targetConstraints.setIssuer(PrincipalUtil.getSubjectX509Principal(rootCert)
                 .getEncoded());
         certs = store.getMatches(targetConstraints);
         if (certs.size() != 2)
@@ -107,7 +108,7 @@ public class X509StoreTest
         ccsp = new X509CollectionStoreParameters(crlList);
         store = X509Store.getInstance("CRL/Collection", ccsp, "BC");
         X509CRLStoreSelector targetConstraintsCRL = new X509CRLStoreSelector();
-        targetConstraintsCRL.addIssuerName(rootCrl.getIssuerX500Principal()
+        targetConstraintsCRL.addIssuerName(PrincipalUtil.getIssuerX509Principal(rootCrl)
                 .getEncoded());
         Collection crls = store.getMatches(targetConstraintsCRL);
         if (crls.size() != 1 || !crls.contains(rootCrl))
