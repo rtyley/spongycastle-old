@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.V2Form;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Selector;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
@@ -21,7 +22,7 @@ import java.util.List;
  * Carrying class for an attribute certificate issuer.
  */
 public class AttributeCertificateIssuer
-    implements CertSelector
+    implements CertSelector, Selector
 {
     final ASN1Encodable  form;
     
@@ -198,4 +199,13 @@ public class AttributeCertificateIssuer
         return this.form.hashCode();
     }
 
+    public boolean match(Object obj)
+    {
+        if (!(obj instanceof X509Certificate))
+        {
+            return false;
+        }
+
+        return match((Certificate)obj);
+    }
 }

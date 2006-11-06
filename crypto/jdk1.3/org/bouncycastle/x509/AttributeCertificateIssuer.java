@@ -1,31 +1,31 @@
 package org.bouncycastle.x509;
 
-import java.io.IOException;
-import java.security.Principal;
-import org.bouncycastle.jce.cert.CertSelector;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AttCertIssuer;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.V2Form;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Selector;
+
+import java.io.IOException;
+import java.security.Principal;
+import org.bouncycastle.jce.cert.CertSelector;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Carrying class for an attribute certificate issuer.
  */
 public class AttributeCertificateIssuer
-    implements CertSelector
+    implements CertSelector, Selector
 {
-    ASN1Encodable  form;
+    final ASN1Encodable  form;
     
     /**
      * @param issuer
@@ -106,7 +106,7 @@ public class AttributeCertificateIssuer
         {
             GeneralName gn = names[i];
 
-            if (gn.getTagNo() == 4)
+            if (gn.getTagNo() == GeneralName.directoryName)
             {
                 try
                 {
@@ -169,12 +169,44 @@ public class AttributeCertificateIssuer
                     return true;
                 }
             }
-    
-            return false;
         }
         catch (CertificateEncodingException e)
         {
             return false;
         }
+
+        return false;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
+            return true;
+        }
+
+        if (!(obj instanceof AttributeCertificateIssuer))
+        {
+            return false;
+        }
+
+        AttributeCertificateIssuer other = (AttributeCertificateIssuer)obj;
+
+        return this.form.equals(other.form);
+    }
+
+    public int hashCode()
+    {
+        return this.form.hashCode();
+    }
+
+    public boolean match(Object obj)
+    {
+        if (!(obj instanceof X509Certificate))
+        {
+            return false;
+        }
+
+        return match((Certificate)obj);
     }
 }

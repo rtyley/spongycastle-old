@@ -1,7 +1,7 @@
 package org.bouncycastle.x509;
 
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -10,15 +10,15 @@ import org.bouncycastle.asn1.x509.Holder;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Selector;
 
 import java.io.IOException;
 import java.math.BigInteger;
-
 import java.security.Principal;
 import org.bouncycastle.jce.cert.CertSelector;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +40,23 @@ import java.util.List;
  * This holder currently supports use of the baseCertificateID and the entityName.
  */
 public class AttributeCertificateHolder 
-    implements CertSelector
+    implements CertSelector, Selector
 {
-    Holder   holder;
+    final Holder   holder;
 
     AttributeCertificateHolder(
         ASN1Sequence seq)
     {
         holder = Holder.getInstance(seq);
+    }
+
+    public AttributeCertificateHolder(
+        X509Principal issuerName,
+        BigInteger    serialNumber)
+    {
+        holder = new org.bouncycastle.asn1.x509.Holder(new IssuerSerial(
+                new GeneralNames(new DERSequence(new GeneralName(issuerName))),
+                new DERInteger(serialNumber)));        
     }
 
     public AttributeCertificateHolder(
@@ -73,7 +82,7 @@ public class AttributeCertificateHolder
     {        
         holder = new Holder(generateGeneralNames(principal));
     }
-    
+
     private GeneralNames generateGeneralNames(X509Principal principal)
     {
         return new GeneralNames(new DERSequence(new GeneralName(principal)));
@@ -148,7 +157,7 @@ public class AttributeCertificateHolder
     /**
      * Return any principal objects inside the attribute certificate holder entity names field.
      * 
-     * @return an array of Principal objects (usually X500Principal), null if no entity names field is set.
+     * @return an array of Principal objects (usually X509Principal), null if no entity names field is set.
      */
     public Principal[] getEntityNames()
     {
@@ -235,5 +244,37 @@ public class AttributeCertificateHolder
          * objectDigestInfo not supported
          */
         return false;
+    }
+    
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
+            return true;
+        }
+
+        if (!(obj instanceof AttributeCertificateHolder))
+        {
+            return false;
+        }
+
+        AttributeCertificateHolder other = (AttributeCertificateHolder)obj;
+
+        return this.holder.equals(other.holder);
+    }
+
+    public int hashCode()
+    {
+        return this.holder.hashCode();
+    }
+
+    public boolean match(Object obj)
+    {
+        if (!(obj instanceof X509Certificate))
+        {
+            return false;
+        }
+
+        return match((Certificate)obj);
     }
 }
