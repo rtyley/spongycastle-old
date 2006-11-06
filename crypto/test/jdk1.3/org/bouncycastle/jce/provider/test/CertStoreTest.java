@@ -55,12 +55,11 @@ public class CertStoreTest
             list.add(interCrl);
             CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(
                     list);
-            CertStore store = CertStore.getInstance("Collection", ccsp);
+            CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
 
             // Searching for rootCert by subjectDN
             X509CertSelector targetConstraints = new X509CertSelector();
-            targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert)
-                    .getName());
+            targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert).getName());
             Collection certs = store.getCertificates(targetConstraints);
             if (certs.size() != 1 || !certs.contains(rootCert))
             {
