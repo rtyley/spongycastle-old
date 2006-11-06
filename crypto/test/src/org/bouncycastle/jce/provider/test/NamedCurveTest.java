@@ -1,25 +1,29 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.x9.X962NamedCurves;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveSpec;
+import org.bouncycastle.util.test.SimpleTest;
+
+import javax.crypto.KeyAgreement;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Enumeration;
 import java.util.Hashtable;
-
-import javax.crypto.KeyAgreement;
-
-import org.bouncycastle.asn1.nist.NISTNamedCurves;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECNamedCurveSpec;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class NamedCurveTest
     extends SimpleTest
@@ -118,9 +122,88 @@ public class NamedCurveTest
         }
 
         ECNamedCurveSpec privSpec = (ECNamedCurveSpec)privKey.getParams();
-        if (!privSpec.getName().equals(CURVE_NAMES.get(name)))
+        if (!(privSpec.getName().equals(name) || privSpec.getName().equals(CURVE_NAMES.get(name))))
         {
             fail("private key encoding wrong named curve. Expected: " + CURVE_NAMES.get(name) + " got " + privSpec.getName());
+        }
+    }
+
+    public void testECDSA(
+        String name)
+        throws Exception
+    {
+        ECGenParameterSpec     ecSpec = new ECGenParameterSpec(name);
+ 
+        if (ecSpec == null)
+        {
+            fail("no curve for " + name + " found.");
+        }
+
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        g.initialize(ecSpec, new SecureRandom());
+
+        Signature sgr = Signature.getInstance("ECDSA", "BC");
+        KeyPair   pair = g.generateKeyPair();
+        PrivateKey sKey = pair.getPrivate();
+        PublicKey vKey = pair.getPublic();
+
+        sgr.initSign(sKey);
+
+        byte[] message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
+
+        sgr.update(message);
+
+        byte[]  sigBytes = sgr.sign();
+
+        sgr.initVerify(vKey);
+
+        sgr.update(message);
+
+        if (!sgr.verify(sigBytes))
+        {
+            fail(name + " verification failed");
+        }
+
+        //
+        // public key encoding test
+        //
+        byte[]              pubEnc = vKey.getEncoded();
+        KeyFactory          keyFac = KeyFactory.getInstance("ECDH", "BC");
+        X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
+        ECPublicKey         pubKey = (ECPublicKey)keyFac.generatePublic(pubX509);
+
+        if (!pubKey.getW().equals(((ECPublicKey)vKey).getW()))
+        {
+            fail("public key encoding (Q test) failed");
+        }
+
+        if (!(pubKey.getParams() instanceof ECNamedCurveSpec))
+        {
+            fail("public key encoding not named curve");
+        }
+
+        //
+        // private key encoding test
+        //
+        byte[]              privEnc = sKey.getEncoded();
+        PKCS8EncodedKeySpec privPKCS8 = new PKCS8EncodedKeySpec(privEnc);
+        ECPrivateKey        privKey = (ECPrivateKey)keyFac.generatePrivate(privPKCS8);
+
+        if (!privKey.getS().equals(((ECPrivateKey)sKey).getS()))
+        {
+            fail("private key encoding (S test) failed");
+        }
+
+        if (!(privKey.getParams() instanceof ECNamedCurveSpec))
+        {
+            fail("private key encoding not named curve");
+        }
+
+        ECNamedCurveSpec privSpec = (ECNamedCurveSpec)privKey.getParams();
+        if (!privSpec.getName().equals(name))
+        {
+            fail("private key encoding wrong named curve. Expected: " + name + " got " + privSpec.getName());
         }
     }
 
@@ -137,6 +220,20 @@ public class NamedCurveTest
         testCurve("secp224r1");
         testCurve("B-409");   // nist
         testCurve("P-521");
+
+        for (Enumeration en = X962NamedCurves.getNames(); en.hasMoreElements();)
+        {
+            testECDSA((String)en.nextElement());
+        }
+
+        for (Enumeration en = SECNamedCurves.getNames(); en.hasMoreElements();)
+        {
+            String name = (String)en.nextElement();
+            if (!(name.equals("secp192r1") || name.equals("secp256r1")))
+            {
+                testECDSA(name);
+            }
+        }
     }
     
     public static void main(
