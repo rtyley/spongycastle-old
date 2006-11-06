@@ -57,8 +57,7 @@ public class CertStoreTest
 
             // Searching for rootCert by subjectDN
             X509CertSelector targetConstraints = new X509CertSelector();
-            targetConstraints.setSubject(rootCert.getSubjectX500Principal()
-                    .getName());
+            targetConstraints.setSubject(rootCert.getSubjectX500Principal().getName());
             Collection certs = store.getCertificates(targetConstraints);
             if (certs.size() != 1 || !certs.contains(rootCert))
             {
