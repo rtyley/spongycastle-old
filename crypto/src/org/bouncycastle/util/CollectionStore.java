@@ -8,12 +8,12 @@ import java.util.List;
 public class CollectionStore
     implements Store
 {
-    private List _local = new ArrayList();
+    private Collection _local;
 
     public CollectionStore(
         Collection collection)
     {
-        _local.addAll(collection);
+        _local = collection;
     }
 
     public Collection getMatches(Selector selector)
