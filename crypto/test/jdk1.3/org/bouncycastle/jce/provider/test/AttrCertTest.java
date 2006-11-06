@@ -33,7 +33,7 @@ import org.bouncycastle.util.test.SimpleTest;
 public class AttrCertTest
     extends SimpleTest
 {
-    byte[]  attrCert = Base64.decode(
+    static byte[]  attrCert = Base64.decode(
             "MIIHQDCCBqkCAQEwgZChgY2kgYowgYcxHDAaBgkqhkiG9w0BCQEWDW1sb3JjaEB2"
           + "dC5lZHUxHjAcBgNVBAMTFU1hcmt1cyBMb3JjaCAobWxvcmNoKTEbMBkGA1UECxMS"
           + "VmlyZ2luaWEgVGVjaCBVc2VyMRAwDgYDVQQLEwdDbGFzcyAyMQswCQYDVQQKEwJ2"
