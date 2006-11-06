@@ -1,6 +1,7 @@
 package org.bouncycastle.jce.provider.test;
 
 import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.X509AttributeCertStoreSelector;
@@ -52,11 +53,13 @@ public class X509StoreTest
         certList.add(finalCert);
         X509CollectionStoreParameters ccsp = new X509CollectionStoreParameters(certList);
         X509Store store = X509Store.getInstance("Certificate/Collection", ccsp, "BC");
+        // set default to be the same as for SUN X500 name
+        X509Principal.DefaultReverse = true;
 
         // Searching for rootCert by subjectDN
+    
         X509CertStoreSelector targetConstraints = new X509CertStoreSelector();
-        targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert)
-                .getName());
+        targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert).getName());
         Collection certs = store.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
