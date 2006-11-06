@@ -367,13 +367,18 @@ public class X509Name
 
         while (e.hasMoreElements())
         {
-            ASN1Set         set = (ASN1Set)e.nextElement();
+            ASN1Set         set = ASN1Set.getInstance(e.nextElement());
 
             for (int i = 0; i < set.size(); i++) 
             {
-                   ASN1Sequence s = (ASN1Sequence)set.getObjectAt(i);
-                   
-                   ordering.addElement(s.getObjectAt(0));
+                   ASN1Sequence s = ASN1Sequence.getInstance(set.getObjectAt(i));
+
+                   if (s.size() != 2)
+                   {
+                       throw new IllegalArgumentException("badly sized pair");
+                   }
+
+                   ordering.addElement(DERObjectIdentifier.getInstance(s.getObjectAt(0)));
                    
                    DEREncodable value = s.getObjectAt(1);
                    if (value instanceof DERString)
@@ -782,90 +787,61 @@ public class X509Name
      * @param inOrder if true the order of both X509 names must be the same,
      * as well as the values associated with each element.
      */
-    public boolean equals(Object _obj, boolean inOrder) 
+    public boolean equals(Object obj, boolean inOrder)
     {
-        if (_obj == this)
+        if (!inOrder)
+        {
+            return this.equals(obj);
+        }
+
+        if (obj == this)
         {
             return true;
         }
 
-        if (!inOrder)
-        {
-            return this.equals(_obj);
-        }
-
-        if (!(_obj instanceof X509Name))
+        if (!(obj instanceof X509Name || obj instanceof ASN1Sequence))
         {
             return false;
         }
-        
-        X509Name _oxn          = (X509Name)_obj;
-        int      _orderingSize = ordering.size();
 
-        if (_orderingSize != _oxn.ordering.size()) 
+        DERObject derO = ((DEREncodable)obj).getDERObject();
+
+        if (this.getDERObject().equals(derO))
+        {
+            return true;
+        }
+
+        X509Name other;
+
+        try
+        {
+            other = X509Name.getInstance(obj);
+        }
+        catch (IllegalArgumentException e)
         {
             return false;
         }
-        
-        for(int i = 0; i < _orderingSize; i++) 
-        {
-            String  _oid   = ((DERObjectIdentifier)ordering.elementAt(i)).getId();
-            String  _val   = (String)values.elementAt(i);
-            
-            String _oOID = ((DERObjectIdentifier)_oxn.ordering.elementAt(i)).getId();
-            String _oVal = (String)_oxn.values.elementAt(i);
 
-            if (_oid.equals(_oOID))
+        int      orderingSize = ordering.size();
+
+        if (orderingSize != other.ordering.size())
+        {
+            return false;
+        }
+
+        for (int i = 0; i < orderingSize; i++)
+        {
+            DERObjectIdentifier  oid = (DERObjectIdentifier)ordering.elementAt(i);
+            DERObjectIdentifier  oOid = (DERObjectIdentifier)other.ordering.elementAt(i);
+
+            if (oid.equals(oOid))
             {
-                _val = Strings.toLowerCase(_val.trim());
-                _oVal = Strings.toLowerCase(_oVal.trim());
-                if (_val.equals(_oVal))
+                String value = (String)values.elementAt(i);
+                String oValue = (String)other.values.elementAt(i);
+
+                if (!equivalentStrings(value, oValue))
                 {
-                    continue;
-                }
-                else
-                {
-                    StringBuffer    v1 = new StringBuffer();
-                    StringBuffer    v2 = new StringBuffer();
-
-                    if (_val.length() != 0)
-                    {
-                        char    c1 = _val.charAt(0);
-
-                        v1.append(c1);
-
-                        for (int k = 1; k < _val.length(); k++)
-                        {
-                            char    c2 = _val.charAt(k);
-                            if (!(c1 == ' ' && c2 == ' '))
-                            {
-                                v1.append(c2);
-                            }
-                            c1 = c2;
-                        }
-                    }
-
-                    if (_oVal.length() != 0)
-                    {
-                        char    c1 = _oVal.charAt(0);
-
-                        v2.append(c1);
-
-                        for (int k = 1; k < _oVal.length(); k++)
-                        {
-                            char    c2 = _oVal.charAt(k);
-                            if (!(c1 == ' ' && c2 == ' '))
-                            {
-                                v2.append(c2);
-                            }
-                            c1 = c2;
-                        }
-                    }
-
-                    if (!v1.toString().equals(v2.toString()))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
             else
@@ -880,117 +856,88 @@ public class X509Name
     /**
      * test for equality - note: case is ignored.
      */
-    public boolean equals(Object _obj) 
+    public boolean equals(Object obj)
     {
-        if (_obj == this)
+        if (obj == this)
         {
             return true;
         }
 
-        if (!(_obj instanceof X509Name || _obj instanceof ASN1Sequence))
+        if (!(obj instanceof X509Name || obj instanceof ASN1Sequence))
         {
             return false;
         }
         
-        DERObject derO = ((DEREncodable)_obj).getDERObject();
+        DERObject derO = ((DEREncodable)obj).getDERObject();
         
         if (this.getDERObject().equals(derO))
         {
             return true;
         }
-        
-        if (!(_obj instanceof X509Name))
+
+        X509Name other;
+
+        try
+        {
+            other = X509Name.getInstance(obj);
+        }
+        catch (IllegalArgumentException e)
+        { 
+            return false;
+        }
+
+        int      orderingSize = ordering.size();
+
+        if (orderingSize != other.ordering.size())
         {
             return false;
         }
         
-        X509Name _oxn          = (X509Name)_obj;
-        
-        int      _orderingSize = ordering.size();
+        boolean[] indexes = new boolean[orderingSize];
+        int       start, end, delta;
 
-        if (_orderingSize != _oxn.ordering.size()) 
+        if (ordering.elementAt(0).equals(other.ordering.elementAt(0)))   // guess forward
         {
-            return false;
+            start = 0;
+            end = orderingSize;
+            delta = 1;
         }
-        
-        boolean[] _indexes = new boolean[_orderingSize];
-
-        for(int i = 0; i < _orderingSize; i++) 
+        else  // guess reversed - most common problem
         {
-            boolean _found = false;
-            String  _oid   = ((DERObjectIdentifier)ordering.elementAt(i)).getId();
-            String  _val   = (String)values.elementAt(i);
+            start = orderingSize - 1;
+            end = -1;
+            delta = -1;
+        }
+
+        for (int i = start; i != end; i += delta)
+        {
+            boolean              found = false;
+            DERObjectIdentifier  oid = (DERObjectIdentifier)ordering.elementAt(i);
+            String               value = (String)values.elementAt(i);
             
-            for(int j = 0; j < _orderingSize; j++) 
+            for (int j = 0; j < orderingSize; j++)
             {
-                if (_indexes[j])
+                if (indexes[j])
                 {
                     continue;
                 }
                 
-                String _oOID = ((DERObjectIdentifier)_oxn.ordering.elementAt(j)).getId();
-                String _oVal = (String)_oxn.values.elementAt(j);
+                DERObjectIdentifier oOid = (DERObjectIdentifier)other.ordering.elementAt(j);
 
-                if (_oid.equals(_oOID))
+                if (oid.equals(oOid))
                 {
-                    _val = Strings.toLowerCase(_val.trim());
-                    _oVal = Strings.toLowerCase(_oVal.trim());
-                    if (_val.equals(_oVal))
+                    String oValue = (String)other.values.elementAt(j);
+
+                    if (equivalentStrings(value, oValue))
                     {
-                        _indexes[j] = true;
-                        _found      = true;
+                        indexes[j] = true;
+                        found      = true;
                         break;
-                    }
-                    else
-                    {
-                        StringBuffer    v1 = new StringBuffer();
-                        StringBuffer    v2 = new StringBuffer();
-
-                        if (_val.length() != 0)
-                        {
-                            char    c1 = _val.charAt(0);
-
-                            v1.append(c1);
-
-                            for (int k = 1; k < _val.length(); k++)
-                            {
-                                char    c2 = _val.charAt(k);
-                                if (!(c1 == ' ' && c2 == ' '))
-                                {
-                                    v1.append(c2);
-                                }
-                                c1 = c2;
-                            }
-                        }
-
-                        if (_oVal.length() != 0)
-                        {
-                            char    c1 = _oVal.charAt(0);
-
-                            v2.append(c1);
-
-                            for (int k = 1; k < _oVal.length(); k++)
-                            {
-                                char    c2 = _oVal.charAt(k);
-                                if (!(c1 == ' ' && c2 == ' '))
-                                {
-                                    v2.append(c2);
-                                }
-                                c1 = c2;
-                            }
-                        }
-
-                        if (v1.toString().equals(v2.toString()))
-                        {
-                            _indexes[j] = true;
-                            _found      = true;
-                            break;
-                        }
                     }
                 }
             }
 
-            if(!_found)
+            if (!found)
             {
                 return false;
             }
@@ -998,7 +945,51 @@ public class X509Name
         
         return true;
     }
-    
+
+    private boolean equivalentStrings(String s1, String s2)
+    {
+        String value = Strings.toLowerCase(s1.trim());
+        String oValue = Strings.toLowerCase(s2.trim());
+
+        if (!value.equals(oValue))
+        {
+            value = stripInternalSpaces(value);
+            oValue = stripInternalSpaces(oValue);
+
+            if (!value.equals(oValue))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private String stripInternalSpaces(
+        String str)
+    {
+        StringBuffer res = new StringBuffer();
+
+        if (res.length() != 0)
+        {
+            char    c1 = str.charAt(0);
+
+            res.append(c1);
+
+            for (int k = 1; k < str.length(); k++)
+            {
+                char    c2 = str.charAt(k);
+                if (!(c1 == ' ' && c2 == ' '))
+                {
+                    res.append(c2);
+                }
+                c1 = c2;
+            }
+        }
+
+        return res.toString();
+    }
+
     public int hashCode()
     {
         ASN1Sequence  seq = (ASN1Sequence)this.getDERObject();
