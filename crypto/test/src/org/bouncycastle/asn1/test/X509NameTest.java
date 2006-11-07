@@ -28,7 +28,6 @@ import java.util.Vector;
 public class X509NameTest
     extends SimpleTest
 {
-    // TODO add rfc compliance test for default encoder.
    String[] subjects =
    {
        "C=AU,ST=Victoria,L=South Melbourne,O=Connect 4 Pty Ltd,OU=Webserver Team,CN=www2.connect4.com.au,E=webmaster@connect4.com.au",
@@ -123,6 +122,11 @@ public class X509NameTest
             fail("Failed same object test");
         }
 
+        if (!name1.equals(name1, true))
+        {
+            fail("Failed same object test - in Order");
+        }
+
         X509Name    name2 = new X509Name(attrs);
 
         if (!name1.equals(name2))
@@ -131,6 +135,11 @@ public class X509NameTest
         }
 
         if (!name1.equals(name2, true))
+        {
+            fail("Failed same name test - in Order");
+        }
+
+        if (name1.hashCode() != name2.hashCode())
         {
             fail("Failed same name test - in Order");
         }
@@ -164,6 +173,33 @@ public class X509NameTest
             fail("Failed reverse name test - in Order");
         }
 
+        if (!name1.equals(name2, false))
+        {
+            fail("Failed reverse name test - in Order false");
+        }
+
+        Vector oids = name1.getOIDs();
+        if (!oids.equals(ord1))
+        {
+            fail("oid comparison test");
+        }
+
+        Vector val1 = new Vector();
+
+        val1.addElement("AU");
+        val1.addElement("The Legion of the Bouncy Castle");
+        val1.addElement("Melbourne");
+        val1.addElement("Victoria");
+        val1.addElement("feedback-crypto@bouncycastle.org");
+
+        name1 = new X509Name(ord1, val1);
+        
+        Vector values = name1.getValues();
+        if (!values.equals(val1))
+        {
+            fail("value comparison test");
+        }
+
         ord2 = new Vector();
 
         ord2.addElement(X509Name.ST);
@@ -194,45 +230,25 @@ public class X509NameTest
         {
             fail("Failed subset name test");
         }
-        
-        //
-        // composite test
-        //
-        byte[]  enc = Hex.decode("305e310b300906035504061302415531283026060355040a0c1f546865204c6567696f6e206f662074686520426f756e637920436173746c653125301006035504070c094d656c626f75726e653011060355040b0c0a4173636f742056616c65");
-        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(enc));
 
-        X509Name    n = X509Name.getInstance(aIn.readObject());
+        compositeTest();
 
-        if (!n.toString().equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne+OU=Ascot Vale"))
-        {
-            fail("Failed composite to string test");
-        }
 
-        n = new X509Name("C=AU, O=The Legion of the Bouncy Castle, L=Melbourne + OU=Ascot Vale");
-
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-        aOut.writeObject(n);
-
-        byte[]  enc2 = bOut.toByteArray();
-
-        if (!Arrays.areEqual(enc, enc2))
-        {
-            fail("Failed composite string to encoding test");
-        }
+        ByteArrayOutputStream bOut;
+        ASN1OutputStream aOut;
+        ASN1InputStream aIn;
 
         //
         // getValues test
         //
-        Vector v1 = n.getValues(X509Name.O);
+        Vector v1 = name1.getValues(X509Name.O);
 
         if (v1.size() != 1 || !v1.elementAt(0).equals("The Legion of the Bouncy Castle"))
         {
             fail("O test failed");
         }
 
-        Vector v2 = n.getValues(X509Name.L);
+        Vector v2 = name1.getValues(X509Name.L);
 
         if (v2.size() != 1 || !v2.elementAt(0).equals("Melbourne"))
         {
@@ -299,6 +315,7 @@ public class X509NameTest
         equalityTest(new X509Name("CN=   The Legion"), new X509Name("CN=The Legion"));
         equalityTest(new X509Name("CN=The Legion   "), new X509Name("CN=The Legion"));
         equalityTest(new X509Name("CN=  The     Legion "), new X509Name("CN=The Legion"));
+        equalityTest(new X509Name("CN=  the     legion "), new X509Name("CN=The Legion"));
 
         //
         // inequality to sequences
@@ -319,9 +336,24 @@ public class X509NameTest
 
         v.add(new DERObjectIdentifier("1.1"));
         v.add(new DERObjectIdentifier("1.1"));
-        if (name1.equals(new DERSequence(new DERSet(new DERSequence(v)))))
+        if (name1.equals(new DERSequence(new DERSet(new DERSet(v)))))
         {
             fail("inequality test with sequence and bad set");
+        }
+
+        if (name1.equals(new DERSequence(new DERSet(new DERSet(v))), true))
+        {
+            fail("inequality test with sequence and bad set");
+        }
+
+        if (name1.equals(new DERSequence(new DERSet(new DERSequence()))))
+        {
+            fail("inequality test with sequence and short sequence");
+        }
+
+        if (name1.equals(new DERSequence(new DERSet(new DERSequence())), true))
+        {
+            fail("inequality test with sequence and short sequence");
         }
 
         v = new ASN1EncodableVector();
@@ -332,6 +364,16 @@ public class X509NameTest
         if (name1.equals(new DERSequence(new DERSet(new DERSequence(v)))))
         {
             fail("inequality test with sequence and bad sequence");
+        }
+
+        if (name1.equals(null))
+        {
+            fail("inequality test with null");
+        }
+
+        if (name1.equals(null, true))
+        {
+            fail("inequality test with null");
         }
 
         //
@@ -375,9 +417,56 @@ public class X509NameTest
         }
     }
 
+    private void compositeTest()
+        throws IOException
+    {
+        //
+        // composite test
+        //
+        byte[]  enc = Hex.decode("305e310b300906035504061302415531283026060355040a0c1f546865204c6567696f6e206f662074686520426f756e637920436173746c653125301006035504070c094d656c626f75726e653011060355040b0c0a4173636f742056616c65");
+        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(enc));
+
+        X509Name    n = X509Name.getInstance(aIn.readObject());
+
+        if (!n.toString().equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne+OU=Ascot Vale"))
+        {
+            fail("Failed composite to string test got: " + n.toString());
+        }
+
+        if (!n.toString(true, X509Name.DefaultSymbols).equals("L=Melbourne+OU=Ascot Vale,O=The Legion of the Bouncy Castle,C=AU"))
+        {
+            fail("Failed composite to string test got: " + n.toString(true, X509Name.DefaultSymbols));
+        }
+
+        n = new X509Name(true, "L=Melbourne+OU=Ascot Vale,O=The Legion of the Bouncy Castle,C=AU");
+        if (!n.toString().equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne+OU=Ascot Vale"))
+        {
+            fail("Failed composite to string reversal test got: " + n.toString());
+        }
+
+        n = new X509Name("C=AU, O=The Legion of the Bouncy Castle, L=Melbourne + OU=Ascot Vale");
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ASN1OutputStream aOut = new ASN1OutputStream(bOut);
+
+        aOut.writeObject(n);
+
+        byte[]  enc2 = bOut.toByteArray();
+
+        if (!Arrays.areEqual(enc, enc2))
+        {
+            fail("Failed composite string to encoding test");
+        }
+    }
+
     private void equalityTest(X509Name x509Name, X509Name x509Name1)
     {
         if (!x509Name.equals(x509Name1))
+        {
+            fail("equality test failed for " + x509Name + " : " + x509Name1);
+        }
+
+        if (!x509Name.equals(x509Name1, true))
         {
             fail("equality test failed for " + x509Name + " : " + x509Name1);
         }
