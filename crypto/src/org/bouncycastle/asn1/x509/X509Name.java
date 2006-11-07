@@ -970,7 +970,7 @@ public class X509Name
     {
         StringBuffer res = new StringBuffer();
 
-        if (res.length() != 0)
+        if (str.length() != 0)
         {
             char    c1 = str.charAt(0);
 
