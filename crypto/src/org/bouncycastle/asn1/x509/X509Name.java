@@ -675,12 +675,24 @@ public class X509Name
             Vector  o = new Vector();
             Vector  v = new Vector();
             Vector  a = new Vector();
+            int count = 1;
 
-            for (int i = this.ordering.size() - 1; i >= 0; i--)
+            for (int i = 0; i < this.ordering.size(); i++)
             {
-                o.addElement(this.ordering.elementAt(i));
-                v.addElement(this.values.elementAt(i));
-                a.addElement(this.added.elementAt(i));
+                if (((Boolean)this.added.elementAt(i)).booleanValue())
+                {
+                    o.insertElementAt(this.ordering.elementAt(i), count);
+                    v.insertElementAt(this.values.elementAt(i), count);
+                    a.insertElementAt(this.added.elementAt(i), count);
+                    count++;
+                }
+                else
+                {
+                    o.insertElementAt(this.ordering.elementAt(i), 0);
+                    v.insertElementAt(this.values.elementAt(i), 0);
+                    a.insertElementAt(this.added.elementAt(i), 0);
+                    count = 1;
+                }
             }
 
             this.ordering = o;
@@ -1065,11 +1077,33 @@ public class X509Name
         Hashtable   oidSymbols)
     {
         StringBuffer            buf = new StringBuffer();
+        Vector                  components = new Vector();
         boolean                 first = true;
+
+        StringBuffer ava = null;
+
+        for (int i = 0; i < ordering.size(); i++)
+        {
+            if (((Boolean)added.elementAt(i)).booleanValue())
+            {
+                ava.append('+');
+                appendValue(ava, oidSymbols,
+                    (DERObjectIdentifier)ordering.elementAt(i),
+                    (String)values.elementAt(i));
+            }
+            else
+            {
+                ava = new StringBuffer();
+                appendValue(ava, oidSymbols,
+                    (DERObjectIdentifier)ordering.elementAt(i),
+                    (String)values.elementAt(i));
+                components.addElement(ava);
+            }
+        }
 
         if (reverse)
         {
-            for (int i = ordering.size() - 1; i >= 0; i--)
+            for (int i = components.size() - 1; i >= 0; i--)
             {
                 if (first)
                 {
@@ -1077,24 +1111,15 @@ public class X509Name
                 }
                 else
                 {
-                    if (((Boolean)added.elementAt(i + 1)).booleanValue())
-                    {
-                        buf.append('+');
-                    }
-                    else
-                    {
-                        buf.append(',');
-                    }
+                    buf.append(',');
                 }
 
-                appendValue(buf, oidSymbols, 
-                            (DERObjectIdentifier)ordering.elementAt(i),
-                            (String)values.elementAt(i));
+                buf.append(components.elementAt(i).toString());
             }
         }
         else
         {
-            for (int i = 0; i < ordering.size(); i++)
+            for (int i = 0; i < components.size(); i++)
             {
                 if (first)
                 {
@@ -1102,19 +1127,10 @@ public class X509Name
                 }
                 else
                 {
-                    if (((Boolean)added.elementAt(i)).booleanValue())
-                    {
-                        buf.append('+');
-                    }
-                    else
-                    {
-                        buf.append(',');
-                    }
+                    buf.append(',');
                 }
 
-                appendValue(buf, oidSymbols, 
-                            (DERObjectIdentifier)ordering.elementAt(i),
-                            (String)values.elementAt(i));
+                buf.append(components.elementAt(i).toString());
             }
         }
 
