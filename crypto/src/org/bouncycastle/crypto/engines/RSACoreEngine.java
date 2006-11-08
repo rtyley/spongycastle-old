@@ -103,7 +103,7 @@ class RSACoreEngine
         {
             throw new DataLengthException("input too large for RSA cipher.\n");
         }
-        else if (inLen == (getInputBlockSize() + 1) && (in[inOff] & (0x80 >> shift)) != 0)
+        else if (inLen == (getInputBlockSize() + 1) && (!forEncryption || (in[inOff] & (0x80 >> shift)) != 0))
         {
             throw new DataLengthException("input too large for RSA cipher.\n");
         }
