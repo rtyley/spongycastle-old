@@ -1,15 +1,5 @@
 package org.bouncycastle.jce.provider.test;
 
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -22,6 +12,26 @@ import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
+
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Principal;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.Set;
 
 /**
  * Test Utils
@@ -121,5 +131,156 @@ class TestUtils
         crlGen.addExtension(X509Extensions.CRLNumber, false, new CRLNumber(BigInteger.valueOf(1)));
         
         return crlGen.generateX509CRL(caKey, "BC");
+    }
+
+    public static X509Certificate createExceptionCertificate(boolean exceptionOnEncode)
+    {
+        return new ExceptionCertificate(exceptionOnEncode);
+    }
+
+    private static class ExceptionCertificate
+        extends X509Certificate
+    {
+        private boolean _exceptionOnEncode;
+
+        public ExceptionCertificate(boolean exceptionOnEncode)
+        {
+            _exceptionOnEncode = exceptionOnEncode;
+        }
+
+        public void checkValidity() throws CertificateExpiredException, CertificateNotYetValidException
+        {
+            throw new CertificateNotYetValidException();
+        }
+
+        public void checkValidity(Date date) throws CertificateExpiredException, CertificateNotYetValidException
+        {
+            throw new CertificateExpiredException();
+        }
+
+        public int getVersion()
+        {
+            return 0;
+        }
+
+        public BigInteger getSerialNumber()
+        {
+            return null;
+        }
+
+        public Principal getIssuerDN()
+        {
+            return null;
+        }
+
+        public Principal getSubjectDN()
+        {
+            return null;
+        }
+
+        public Date getNotBefore()
+        {
+            return null;
+        }
+
+        public Date getNotAfter()
+        {
+            return null;
+        }
+
+        public byte[] getTBSCertificate() throws CertificateEncodingException
+        {
+            throw new CertificateEncodingException();
+        }
+
+        public byte[] getSignature()
+        {
+            return new byte[0];
+        }
+
+        public String getSigAlgName()
+        {
+            return null;
+        }
+
+        public String getSigAlgOID()
+        {
+            return null;
+        }
+
+        public byte[] getSigAlgParams()
+        {
+            return new byte[0];
+        }
+
+        public boolean[] getIssuerUniqueID()
+        {
+            return new boolean[0];
+        }
+
+        public boolean[] getSubjectUniqueID()
+        {
+            return new boolean[0];
+        }
+
+        public boolean[] getKeyUsage()
+        {
+            return new boolean[0];
+        }
+
+        public int getBasicConstraints()
+        {
+            return 0;
+        }
+
+        public byte[] getEncoded() throws CertificateEncodingException
+        {
+            if (_exceptionOnEncode)
+            {
+                throw new CertificateEncodingException();
+            }
+            
+            return new byte[0];
+        }
+
+        public void verify(PublicKey key) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
+        {
+            throw new CertificateException();
+        }
+
+        public void verify(PublicKey key, String sigProvider) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
+        {
+            throw new CertificateException();
+        }
+
+        public String toString()
+        {
+            return null;
+        }
+
+        public PublicKey getPublicKey()
+        {
+            return null;
+        }
+
+        public boolean hasUnsupportedCriticalExtension()
+        {
+            return false;
+        }
+
+        public Set getCriticalExtensionOIDs()
+        {
+            return null;
+        }
+
+        public Set getNonCriticalExtensionOIDs()
+        {
+            return null;
+        }
+
+        public byte[] getExtensionValue(String oid)
+        {
+            return new byte[0];
+        }
     }
 }

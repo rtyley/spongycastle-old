@@ -1,5 +1,13 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
+
+import javax.crypto.Cipher;
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHParameterSpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -14,14 +22,6 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.Cipher;
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHParameterSpec;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class ElGamalTest
     extends SimpleTest
@@ -76,6 +76,27 @@ public class ElGamalTest
             fail("getOutputSize wrong on decryption");
         }
         
+        //
+        // No Padding - maximum length
+        //
+        byte[]  modBytes = ((DHPublicKey)keyPair.getPublic()).getParams().getP().toByteArray();
+        byte[]  maxInput = new byte[modBytes.length - 1];
+
+        maxInput[0] |= 0x7f;
+
+        cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic(), rand);
+
+        out = cipher.doFinal(maxInput);
+
+        cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+
+        out = cipher.doFinal(out);
+
+        if (!areEqual(out, maxInput))
+        {
+            fail("NoPadding test failed on decrypt expected " + new String(Hex.encode(maxInput)) + " got " + new String(Hex.encode(out)));
+        }
+
         //
         // encrypt/decrypt
         //

@@ -5,6 +5,7 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.X509AttributeCertStoreSelector;
+import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CRLStoreSelector;
 import org.bouncycastle.x509.X509CertStoreSelector;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
@@ -12,6 +13,7 @@ import org.bouncycastle.x509.X509Store;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigInteger;
 import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
@@ -52,7 +54,7 @@ public class X509StoreTest
         certList.add(interCert);
         certList.add(finalCert);
         X509CollectionStoreParameters ccsp = new X509CollectionStoreParameters(certList);
-        X509Store store = X509Store.getInstance("Certificate/Collection", ccsp, "BC");
+        X509Store certStore = X509Store.getInstance("Certificate/Collection", ccsp, "BC");
         // set default to be the same as for SUN X500 name
         X509Principal.DefaultReverse = true;
 
@@ -60,7 +62,7 @@ public class X509StoreTest
     
         X509CertStoreSelector targetConstraints = new X509CertStoreSelector();
         targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert).getName());
-        Collection certs = store.getMatches(targetConstraints);
+        Collection certs = certStore.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
             fail("rootCert not found by subjectDN");
@@ -70,7 +72,7 @@ public class X509StoreTest
         targetConstraints = new X509CertStoreSelector();
         targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert)
                 .getEncoded());
-        certs = store.getMatches(targetConstraints);
+        certs = certStore.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
             fail("rootCert not found by encoded subjectDN");
@@ -80,7 +82,7 @@ public class X509StoreTest
         targetConstraints = new X509CertStoreSelector();
         targetConstraints.setSubjectPublicKey(rootCert.getPublicKey()
                 .getEncoded());
-        certs = store.getMatches(targetConstraints);
+        certs = certStore.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
             fail("rootCert not found by encoded public key");
@@ -90,7 +92,7 @@ public class X509StoreTest
         targetConstraints = new X509CertStoreSelector();
         targetConstraints.setIssuer(PrincipalUtil.getSubjectX509Principal(rootCert)
                 .getEncoded());
-        certs = store.getMatches(targetConstraints);
+        certs = certStore.getMatches(targetConstraints);
         if (certs.size() != 2)
         {
             fail("did not found 2 certs");
@@ -109,7 +111,7 @@ public class X509StoreTest
         crlList.add(rootCrl);
         crlList.add(interCrl);
         ccsp = new X509CollectionStoreParameters(crlList);
-        store = X509Store.getInstance("CRL/Collection", ccsp, "BC");
+        X509Store store = X509Store.getInstance("CRL/Collection", ccsp, "BC");
         X509CRLStoreSelector targetConstraintsCRL = new X509CRLStoreSelector();
         targetConstraintsCRL.addIssuerName(PrincipalUtil.getIssuerX509Principal(rootCrl)
                 .getEncoded());
@@ -119,44 +121,112 @@ public class X509StoreTest
             fail("rootCrl not found");
         }
 
+        crls = certStore.getMatches(targetConstraintsCRL);
+        if (crls.size() != 0)
+        {
+            fail("error using wrong selector (CRL)");
+        }
+        certs = store.getMatches(targetConstraints);
+        if (certs.size() != 0)
+        {
+            fail("error using wrong selector (certs)");
+        }
         // Searching for attribute certificates
         X509V2AttributeCertificate attrCert = new X509V2AttributeCertificate(AttrCertTest.attrCert);
+        X509AttributeCertificate attrCert2 = new X509V2AttributeCertificate(AttrCertTest.certWithBaseCertificateID);
 
         List attrList = new ArrayList();
         attrList.add(attrCert);
+        attrList.add(attrCert2);
         ccsp = new X509CollectionStoreParameters(attrList);
         store = X509Store.getInstance("AttributeCertificate/Collection", ccsp, "BC");
         X509AttributeCertStoreSelector attrSelector = new X509AttributeCertStoreSelector();
         attrSelector.setHolder(attrCert.getHolder());
+        if (!attrSelector.getHolder().equals(attrCert.getHolder()))
+        {
+            fail("holder get not correct");
+        }
         Collection attrs = store.getMatches(attrSelector);
         if (attrs.size() != 1 || !attrs.contains(attrCert))
         {
-            fail("attrCert not found");
+            fail("attrCert not found on holder");
         }
+        attrSelector.setHolder(attrCert2.getHolder());
+        if (attrSelector.getHolder().equals(attrCert.getHolder()))
+        {
+            fail("holder get not correct");
+        }
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 1 || !attrs.contains(attrCert2))
+        {
+            fail("attrCert2 not found on holder");
+        }
+        attrSelector = new X509AttributeCertStoreSelector();
         attrSelector.setIssuer(attrCert.getIssuer());
+        if (!attrSelector.getIssuer().equals(attrCert.getIssuer()))
+        {
+            fail("issuer get not correct");
+        }
         attrs = store.getMatches(attrSelector);
         if (attrs.size() != 1 || !attrs.contains(attrCert))
         {
-            fail("attrCert not found");
+            fail("attrCert not found on issuer");
         }
+        attrSelector.setIssuer(attrCert2.getIssuer());
+        if (attrSelector.getIssuer().equals(attrCert.getIssuer()))
+        {
+            fail("issuer get not correct");
+        }
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 1 || !attrs.contains(attrCert2))
+        {
+            fail("attrCert2 not found on issuer");
+        }
+        attrSelector = new X509AttributeCertStoreSelector();
         attrSelector.setAttributeCert(attrCert);
+        if (!attrSelector.getAttributeCert().equals(attrCert))
+        {
+            fail("attrCert get not correct");
+        }
         attrs = store.getMatches(attrSelector);
         if (attrs.size() != 1 || !attrs.contains(attrCert))
         {
-            fail("attrCert not found");
+            fail("attrCert not found on attrCert");
         }
+        attrSelector = new X509AttributeCertStoreSelector();
         attrSelector.setSerialNumber(attrCert.getSerialNumber());
+        if (!attrSelector.getSerialNumber().equals(attrCert.getSerialNumber()))
+        {
+            fail("serial number get not correct");
+        }
         attrs = store.getMatches(attrSelector);
         if (attrs.size() != 1 || !attrs.contains(attrCert))
         {
-            fail("attrCert not found");
+            fail("attrCert not found on serial number");
         }
+        attrSelector = (X509AttributeCertStoreSelector)attrSelector.clone();
+        if (!attrSelector.getSerialNumber().equals(attrCert.getSerialNumber()))
+        {
+            fail("serial number get not correct");
+        }
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 1 || !attrs.contains(attrCert))
+        {
+            fail("attrCert not found on serial number");
+        }
+
+        attrSelector = new X509AttributeCertStoreSelector();
         attrSelector.setAttributeCertificateValid(attrCert.getNotBefore());
+        if (!attrSelector.getAttributeCertificateValid().equals(attrCert.getNotBefore()))
+        {
+            fail("valid get not correct");
+        }
         attrs = store.getMatches(attrSelector);
         if (attrs.size() != 1 || !attrs.contains(attrCert))
         {
-            fail("attrCert not found");
+            fail("attrCert not found on valid");
         }
+        attrSelector = new X509AttributeCertStoreSelector();
         attrSelector.setAttributeCertificateValid(new Date(attrCert.getNotBefore().getTime() - 100));
         attrs = store.getMatches(attrSelector);
         if (attrs.size() != 0)
@@ -168,6 +238,44 @@ public class X509StoreTest
         if (attrs.size() != 0)
         {
             fail("attrCert found on after");
+        }
+        attrSelector.setSerialNumber(BigInteger.valueOf(10000));
+        attrs = store.getMatches(attrSelector);
+        if (attrs.size() != 0)
+        {
+            fail("attrCert found on wrong serial number");
+        }
+
+        attrSelector.setAttributeCert(null);
+        attrSelector.setAttributeCertificateValid(null);
+        attrSelector.setHolder(null);
+        attrSelector.setIssuer(null);
+        attrSelector.setSerialNumber(null);
+        if (attrSelector.getAttributeCert() != null)
+        {
+            fail("null attrCert");
+        }
+        if (attrSelector.getAttributeCertificateValid() != null)
+        {
+            fail("null attrCertValid");
+        }
+        if (attrSelector.getHolder() != null)
+        {
+            fail("null attrCert holder");
+        }
+        if (attrSelector.getIssuer() != null)
+        {
+            fail("null attrCert issuer");
+        }
+        if (attrSelector.getSerialNumber() != null)
+        {
+            fail("null attrCert serial");
+        }
+
+        attrs = certStore.getMatches(attrSelector);
+        if (attrs.size() != 0)
+        {
+            fail("error using wrong selector (attrs)");
         }
     }
 
