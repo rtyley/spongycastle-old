@@ -142,7 +142,12 @@ public class X509AttributeCertStoreSelector
      */
     public Date getAttributeCertificateValid()
     {
-        return new Date(attributeCertificateValid.getTime());
+        if (attributeCertificateValid != null)
+        {
+            return new Date(attributeCertificateValid.getTime());
+        }
+
+        return null;
     }
 
     /**
@@ -152,7 +157,14 @@ public class X509AttributeCertStoreSelector
      */
     public void setAttributeCertificateValid(Date attributeCertificateValid)
     {
-        this.attributeCertificateValid = new Date(attributeCertificateValid.getTime());
+        if (attributeCertificateValid != null)
+        {
+            this.attributeCertificateValid = new Date(attributeCertificateValid.getTime());
+        }
+        else
+        {
+            this.attributeCertificateValid = null;
+        }
     }
 
     /**
@@ -200,6 +212,6 @@ public class X509AttributeCertStoreSelector
      */
     public void setSerialNumber(BigInteger serialNumber)
     {
-		this.serialNumber = serialNumber;
-	}
+        this.serialNumber = serialNumber;
+    }
 }

@@ -1,5 +1,19 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
@@ -16,21 +30,6 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
-
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class RSATest
     extends SimpleTest
@@ -198,7 +197,7 @@ public class RSATest
 
         if (!areEqual(out, maxInput))
         {
-            fail("NoPadding test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+            fail("NoPadding test failed on decrypt expected " + new String(Hex.encode(maxInput)) + " got " + new String(Hex.encode(out)));
         }
 
         //

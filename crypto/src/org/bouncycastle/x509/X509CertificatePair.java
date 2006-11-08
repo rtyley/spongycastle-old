@@ -72,6 +72,10 @@ public class X509CertificatePair
             }
             return new CertificatePair(f, r).getDEREncoded();
         }
+        catch (IllegalArgumentException e)
+        {
+            throw new ExtCertificateEncodingException(e.toString(), e);
+        }
         catch (IOException e)
         {
             throw new ExtCertificateEncodingException(e.toString(), e);
