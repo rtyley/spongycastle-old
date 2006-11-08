@@ -1,26 +1,25 @@
 package org.bouncycastle.crypto.test;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.IESEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.IESParameters;
 import org.bouncycastle.crypto.params.IESWithCipherParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.math.BigInteger;
 
 /**
  * test for ECIES - Elliptic Curve Integrated Encryption Scheme
@@ -38,28 +37,28 @@ public class ECIESTest
     }
 
     public void performTest()
+        throws Exception
     {
-        SecureRandom    random = new SecureRandom();
         ECCurve.Fp curve = new ECCurve.Fp(
-            new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
-            new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
-            new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+            new BigInteger("6277101735386680763835789423207666416083908700390324961279"), // q
+            new BigInteger("fffffffffffffffffffffffffffffffefffffffffffffffc", 16), // a
+            new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1", 16)); // b
 
         ECDomainParameters params = new ECDomainParameters(
-            curve,
-            curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
-            new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
+                curve,
+                curve.decodePoint(Hex.decode("03188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012")), // G
+                new BigInteger("6277101735386680763835789423176059013767194773182842284081")); // n
 
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("651056770906015076056810763456358567190100156695615665659"), // d
+            params);
 
-        ECKeyPairGenerator          pGen = new ECKeyPairGenerator();
-        ECKeyGenerationParameters   genParam = new ECKeyGenerationParameters(
-                                        params,
-                                        random);
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            curve.decodePoint(Hex.decode("0262b12d60690cdcf330babab6e69763b471f994dd702d16a5")), // Q
+            params);
 
-        pGen.init(genParam);
-
-        AsymmetricCipherKeyPair  p1 = pGen.generateKeyPair();
-        AsymmetricCipherKeyPair  p2 = pGen.generateKeyPair();
+        AsymmetricCipherKeyPair  p1 = new AsymmetricCipherKeyPair(pubKey, priKey);
+        AsymmetricCipherKeyPair  p2 = new AsymmetricCipherKeyPair(pubKey, priKey);
     
         //
         // stream test
@@ -81,25 +80,22 @@ public class ECIESTest
 
         byte[] message = Hex.decode("1234567890abcdef");
 
-        try
+        byte[]   out1 = i1.processBlock(message, 0, message.length);
+
+        if (!areEqual(out1, Hex.decode("2442ae1fbf90dd9c06b0dcc3b27e69bd11c9aee4ad4cfc9e50eceb44")))
         {
-            byte[]   out1 = i1.processBlock(message, 0, message.length);
-
-            byte[]   out2 = i2.processBlock(out1, 0, out1.length);
-
-            if (!areEqual(out2, message))
-            {
-                fail("stream cipher test failed");
-            }
-      
+            fail("stream cipher test failed on enc");
         }
-        catch (Exception ex)
+
+        byte[]   out2 = i2.processBlock(out1, 0, out1.length);
+
+        if (!areEqual(out2, message))
         {
-            fail("stream cipher test exception " + ex.toString(), ex);
+            fail("stream cipher test failed");
         }
 
         //
-        // twofish with IV0 test
+        // twofish with CBC
         //
         BufferedBlockCipher c1 = new PaddedBufferedBlockCipher(
                                     new CBCBlockCipher(new TwofishEngine()));
@@ -124,20 +120,18 @@ public class ECIESTest
 
         message = Hex.decode("1234567890abcdef");
 
-        try
+        out1 = i1.processBlock(message, 0, message.length);
+
+        if (!areEqual(out1, Hex.decode("2ea288651e21576215f2424bbb3f68816e282e3931b44bd1c429ebdb5f1b290cf1b13309")))
         {
-            byte[]    out1 = i1.processBlock(message, 0, message.length);
-
-            byte[]    out2 = i2.processBlock(out1, 0, out1.length);
-
-            if (!areEqual(out2, message))
-            {
-                fail("twofish cipher test failed");
-            }
+            fail("twofish cipher test failed on enc");
         }
-        catch (Exception ex)
+
+        out2 = i2.processBlock(out1, 0, out1.length);
+
+        if (!areEqual(out2, message))
         {
-            fail("twofish cipher test exception " + ex.toString(), ex);
+            fail("twofish cipher test failed");
         }
     }
 

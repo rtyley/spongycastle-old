@@ -1,7 +1,5 @@
 package org.bouncycastle.crypto.engines;
 
-import java.math.BigInteger;
-
 import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
@@ -12,6 +10,8 @@ import org.bouncycastle.crypto.params.IESParameters;
 import org.bouncycastle.crypto.params.IESWithCipherParameters;
 import org.bouncycastle.crypto.params.KDFParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
+
+import java.math.BigInteger;
 
 /**
  * support class for constructing intergrated encryption ciphers
@@ -109,11 +109,9 @@ public class IESEngine
     
         if (cipher == null)     // stream mode
         {
-            byte[]  buf = new byte[inLen + (macKeySize / 8)];
+            byte[] buf = generateKdfBytes(kParam, inLen + (macKeySize / 8));
 
             M = new byte[inLen];
-
-            kdf.generateBytes(buf, 0, buf.length);
 
             for (int i = 0; i != inLen; i++)
             {
@@ -124,20 +122,20 @@ public class IESEngine
         }
         else
         {
-            int     cipherKeySize = ((IESWithCipherParameters)param).getCipherKeySize();
-            byte[]  buf = new byte[(cipherKeySize / 8) + (macKeySize / 8)];
+            int    cipherKeySize = ((IESWithCipherParameters)param).getCipherKeySize();
+            byte[] buf = generateKdfBytes(kParam, (cipherKeySize / 8) + (macKeySize / 8));
 
             cipher.init(false, new KeyParameter(buf, 0, (cipherKeySize / 8)));
 
             byte[] tmp = new byte[cipher.getOutputSize(inLen)];
 
-            int off = cipher.processBytes(in_enc, inOff, inLen, tmp, 0);
+            int len = cipher.processBytes(in_enc, inOff, inLen, tmp, 0);
 
-            off += cipher.doFinal(tmp, off);
+            len += cipher.doFinal(tmp, len);
 
-            M = new byte[off];
+            M = new byte[len];
 
-            System.arraycopy(tmp, 0, M, 0, off);
+            System.arraycopy(tmp, 0, M, 0, len);
 
             macKey = new KeyParameter(buf, (cipherKeySize / 8), (macKeySize / 8));
         }
@@ -175,16 +173,12 @@ public class IESEngine
         int             c_text_length = 0;
         int             macKeySize = param.getMacKeySize();
 
-        kdf.init(kParam);
-
         if (cipher == null)     // stream mode
         {
-            byte[]  buf = new byte[inLen + (macKeySize / 8)];
+            byte[] buf = generateKdfBytes(kParam, inLen + (macKeySize / 8));
 
             C = new byte[inLen + mac.getMacSize()];
             c_text_length = inLen;
-
-            kdf.generateBytes(buf, 0, buf.length);
 
             for (int i = 0; i != inLen; i++)
             {
@@ -195,18 +189,23 @@ public class IESEngine
         }
         else
         {
-            int     cipherKeySize = ((IESWithCipherParameters)param).getCipherKeySize();
-            byte[]  buf = new byte[(cipherKeySize / 8) + (macKeySize / 8)];
+            int    cipherKeySize = ((IESWithCipherParameters)param).getCipherKeySize();
+            byte[] buf = generateKdfBytes(kParam, (cipherKeySize / 8) + (macKeySize / 8));
 
             cipher.init(true, new KeyParameter(buf, 0, (cipherKeySize / 8)));
 
             c_text_length = cipher.getOutputSize(inLen);
 
-            C = new byte[c_text_length + mac.getMacSize()];
+            byte[] tmp = new byte[c_text_length];
 
-            int off = cipher.processBytes(in, inOff, inLen, C, 0);
+            int len = cipher.processBytes(in, inOff, inLen, C, 0);
 
-            cipher.doFinal(C, off);
+            len += cipher.doFinal(tmp, len);
+
+            C = new byte[len +  + mac.getMacSize()];
+            c_text_length = len;
+
+            System.arraycopy(tmp, 0, C, 0, len);
 
             macKey = new KeyParameter(buf, (cipherKeySize / 8), (macKeySize / 8));
         }
@@ -221,6 +220,19 @@ public class IESEngine
         //
         mac.doFinal(C, c_text_length);
         return C;
+    }
+
+    private byte[] generateKdfBytes(
+        KDFParameters kParam,
+        int length)
+    {
+        byte[]  buf = new byte[length];
+
+        kdf.init(kParam);
+
+        kdf.generateBytes(buf, 0, buf.length);
+
+        return buf;
     }
 
     public byte[] processBlock(
