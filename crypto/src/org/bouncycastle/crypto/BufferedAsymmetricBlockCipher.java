@@ -93,7 +93,7 @@ public class BufferedAsymmetricBlockCipher
     public void processByte(
         byte        in)
     {
-        if (bufOff > buf.length)
+        if (bufOff >= buf.length)
         {
             throw new DataLengthException("attempt to process message to long for cipher");
         }
