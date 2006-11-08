@@ -202,7 +202,7 @@ public class IESEngine
 
             len += cipher.doFinal(tmp, len);
 
-            C = new byte[len +  + mac.getMacSize()];
+            C = new byte[len + mac.getMacSize()];
             c_text_length = len;
 
             System.arraycopy(tmp, 0, C, 0, len);
