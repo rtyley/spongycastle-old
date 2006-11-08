@@ -114,7 +114,7 @@ public class ElGamalTest
         {
             bytes[0] = (byte)0x3f;
 
-            e.processBlock(bytes, 1, bytes.length - 1);
+            e.processBlock(bytes, 0, bytes.length - 1);
         }
         catch (DataLengthException ex)
         {
