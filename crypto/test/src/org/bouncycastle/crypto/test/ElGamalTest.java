@@ -112,7 +112,7 @@ public class ElGamalTest
         
         try
         {
-            bytes[0] = (byte)0x3f;
+            bytes[0] = (byte)0x7f;
 
             e.processBlock(bytes, 0, bytes.length - 1);
         }
