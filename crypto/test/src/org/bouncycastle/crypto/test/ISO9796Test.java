@@ -1,7 +1,5 @@
 package org.bouncycastle.crypto.test;
 
-import java.math.BigInteger;
-
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.RIPEMD128Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
@@ -14,6 +12,8 @@ import org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
 import org.bouncycastle.crypto.signers.ISO9796d2Signer;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.math.BigInteger;
 
 /**
  * test vectors from ISO 9796-1 and ISO 9796-2 edition 1.
@@ -313,7 +313,7 @@ public class ISO9796Test
             fail("failed ISO9796-2 generation Test 6");
         }
 
-        if (!eng.verifySignature(sig6))
+        if (!eng.verifySignature(data))
         {
             fail("failed ISO9796-2 verify Test 6");
         }

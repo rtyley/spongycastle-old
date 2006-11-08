@@ -1,8 +1,5 @@
 package org.bouncycastle.crypto.test;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.engines.ElGamalEngine;
@@ -14,6 +11,9 @@ import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 public class ElGamalTest
     extends SimpleTest
@@ -82,6 +82,8 @@ public class ElGamalTest
             fail(size + " bit test failed");
         }
         
+        e.init(true, pu);
+
         byte[] bytes = new byte[e.getInputBlockSize() + 2];
         
         try
@@ -110,6 +112,8 @@ public class ElGamalTest
         
         try
         {
+            bytes[0] = (byte)0x3f;
+
             e.processBlock(bytes, 1, bytes.length - 1);
         }
         catch (DataLengthException ex)
