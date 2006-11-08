@@ -214,6 +214,6 @@ public class CipherStreamTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        runTest(new DESedeTest());
+        runTest(new CipherStreamTest());
     }
 }
