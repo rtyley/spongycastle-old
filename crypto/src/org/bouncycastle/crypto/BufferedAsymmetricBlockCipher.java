@@ -57,7 +57,11 @@ public class BufferedAsymmetricBlockCipher
 
         cipher.init(forEncryption, params);
 
-        buf = new byte[cipher.getInputBlockSize()];
+        //
+        // we allow for an extra byte where people are using their own padding
+        // mechanisms on a raw cipher.
+        //
+        buf = new byte[cipher.getInputBlockSize() + (forEncryption ? 1 : 0)];
         bufOff = 0;
     }
 
