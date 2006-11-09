@@ -1,7 +1,5 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.asn1.util.ASN1Dump;
-
 import java.io.IOException;
 
 /**
@@ -122,8 +120,6 @@ public abstract class ASN1TaggedObject
         {
             if (!(obj.getDERObject().equals(other.obj.getDERObject())))
             {
-                System.out.println(ASN1Dump.dumpAsString(obj));
-                System.out.println(ASN1Dump.dumpAsString(other.obj));
                 return false;
             }
         }
