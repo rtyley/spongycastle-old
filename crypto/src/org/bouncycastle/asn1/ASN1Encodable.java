@@ -62,7 +62,12 @@ public abstract class ASN1Encodable
     public boolean equals(
         Object  o)
     {
-        if ((o == null) || !(o instanceof DEREncodable))
+        if (this == o)
+        {
+            return true;
+        }
+        
+        if (!(o instanceof DEREncodable))
         {
             return false;
         }
