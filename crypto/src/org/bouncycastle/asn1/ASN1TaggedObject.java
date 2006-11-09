@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.asn1.util.ASN1Dump;
+
 import java.io.IOException;
 
 /**
@@ -85,12 +87,24 @@ public abstract class ASN1TaggedObject
     public boolean equals(
         Object o)
     {
-        if (!(o instanceof ASN1TaggedObject))
+        if (o == this)
+        {
+            return true;
+        }
+
+        if (!(o instanceof DEREncodable))
+        {
+            return false;
+        }
+
+        DERObject ot = ((DEREncodable)o).getDERObject();
+        
+        if (!(ot instanceof ASN1TaggedObject))
         {
             return false;
         }
         
-        ASN1TaggedObject other = (ASN1TaggedObject)o;
+        ASN1TaggedObject other = (ASN1TaggedObject)ot;
         
         if (tagNo != other.tagNo || empty != other.empty || explicit != other.explicit)
         {
@@ -99,15 +113,17 @@ public abstract class ASN1TaggedObject
         
         if(obj == null)
         {
-            if(other.obj != null)
+            if (other.obj != null)
             {
                 return false;
             }
         }
         else
         {
-            if(!(obj.getDERObject().equals(other.obj.getDERObject())))
+            if (!(obj.getDERObject().equals(other.obj.getDERObject())))
             {
+                System.out.println(ASN1Dump.dumpAsString(obj));
+                System.out.println(ASN1Dump.dumpAsString(other.obj));
                 return false;
             }
         }
