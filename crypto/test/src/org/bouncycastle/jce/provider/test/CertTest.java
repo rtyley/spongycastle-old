@@ -899,7 +899,7 @@ public class CertTest
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
-        X509Certificate cert = certGen.generateX509Certificate(privKey);
+        X509Certificate cert = certGen.generate(privKey);
 
         cert.checkValidity(new Date());
 
@@ -927,7 +927,7 @@ public class CertTest
         certGen.addExtension("2.5.29.17", true,
             new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
 
-        cert = certGen.generateX509Certificate(privKey);
+        cert = certGen.generate(privKey);
 
         cert.checkValidity(new Date());
 
@@ -977,7 +977,7 @@ public class CertTest
         certGen1.setPublicKey(pubKey);
         certGen1.setSignatureAlgorithm("MD5WithRSAEncryption");
 
-        cert = certGen1.generateX509Certificate(privKey);
+        cert = certGen1.generate(privKey);
 
         cert.checkValidity(new Date());
 
@@ -1053,7 +1053,7 @@ public class CertTest
 
         try
         {
-            X509Certificate cert = certGen.generateX509Certificate(privKey);
+            X509Certificate cert = certGen.generate(privKey);
 
             cert.checkValidity(new Date());
 
@@ -1086,7 +1086,7 @@ public class CertTest
 
         try
         {
-            X509Certificate cert = certGen1.generateX509Certificate(privKey);
+            X509Certificate cert = certGen1.generate(privKey);
 
             cert.checkValidity(new Date());
 
@@ -1218,7 +1218,7 @@ public class CertTest
 
         try
         {
-            X509Certificate cert = certGen.generateX509Certificate(privKey);
+            X509Certificate cert = certGen.generate(privKey);
 
             cert.checkValidity(new Date());
 

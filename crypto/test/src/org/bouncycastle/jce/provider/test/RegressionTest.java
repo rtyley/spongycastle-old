@@ -1,7 +1,6 @@
 package org.bouncycastle.jce.provider.test;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
 
@@ -47,6 +46,7 @@ public class RegressionTest
         new NetscapeCertRequestTest(),
         new X509StoreTest(),
         new X509StreamParserTest(),
+        new X509CertificatePairTest(),
         new CertPathTest(),
         new CertStoreTest(),
         new CertPathValidatorTest(),
@@ -68,9 +68,9 @@ public class RegressionTest
         {
             TestResult  result = tests[i].perform();
             
-            if (((SimpleTestResult)result).getException() != null)
+            if (result.getException() != null)
             {
-                ((SimpleTestResult)result).getException().printStackTrace();
+                result.getException().printStackTrace();
             }
             
             System.out.println(result);

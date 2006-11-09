@@ -20,6 +20,7 @@ import org.bouncycastle.x509.X509V2AttributeCertificateGenerator;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.Principal;
@@ -130,7 +131,7 @@ public class AttrCertTest
           + "CLQWSIa6Tvg4NIV3RRJ0sbCObesyg08lymalQMdkXwtRn5eGE00SHWwEUjSXP2gR"
           + "3g==");
 
-    byte[] certWithBaseCertificateID = Base64.decode(
+    static byte[] certWithBaseCertificateID = Base64.decode(
             "MIIBqzCCARQCAQEwSKBGMD6kPDA6MQswCQYDVQQGEwJJVDEOMAwGA1UEChMFVU5JVE4xDDAKBgNV"
           + "BAsTA0RJVDENMAsGA1UEAxMEcm9vdAIEAVMVjqB6MHikdjB0MQswCQYDVQQGEwJBVTEoMCYGA1UE"
           + "ChMfVGhlIExlZ2lvbiBvZiB0aGUgQm91bmN5IENhc3RsZTEjMCEGA1UECxMaQm91bmN5IFByaW1h"
@@ -184,8 +185,71 @@ public class AttrCertTest
         {
             fail("holder not matching holder certificate");
         }
+
+        if (!holder.equals(holder.clone()))
+        {
+            fail("holder clone test failed");
+        }
+
+        if (!attrCert.getIssuer().equals(attrCert.getIssuer().clone()))
+        {
+            fail("issuer clone test failed");
+        }
+        
+        //equalityAndHashCodeTest(attrCert, certWithBaseCertificateID);
     }
-    
+
+    private void equalityAndHashCodeTest(X509AttributeCertificate attrCert, byte[] encoding)
+        throws IOException
+    {
+        if (!attrCert.equals(attrCert))
+        {
+            fail("same certificate not equal");
+        }
+
+        if (!attrCert.getHolder().equals(attrCert.getHolder()))
+        {
+            fail("same holder not equal");
+        }
+
+        if (!attrCert.getIssuer().equals(attrCert.getIssuer()))
+        {
+            fail("same issuer not equal");
+        }
+
+        if (attrCert.getHolder().equals(attrCert.getIssuer()))
+        {
+            fail("wrong holder equal");
+        }
+
+        if (attrCert.getIssuer().equals(attrCert.getHolder()))
+        {
+            fail("wrong issuer equal");
+        }
+
+        X509AttributeCertificate attrCert2 = new X509V2AttributeCertificate(encoding);
+
+        if (attrCert2.getHolder().hashCode() != attrCert.getHolder().hashCode())
+        {
+            fail("holder hashCode test failed");
+        }
+
+        if (!attrCert2.getHolder().equals(attrCert.getHolder()))
+        {
+            fail("holder equals test failed");
+        }
+
+        if (attrCert2.getIssuer().hashCode() != attrCert.getIssuer().hashCode())
+        {
+            fail("issuer hashCode test failed");
+        }
+
+        if (!attrCert2.getIssuer().equals(attrCert.getIssuer()))
+        {
+            fail("issuer equals test failed");
+        }
+    }
+
     private void testGenerateWithCert()
         throws Exception
     {
@@ -229,7 +293,7 @@ public class AttrCertTest
         gen.setSerialNumber(BigInteger.ONE);
         gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
         
-        X509AttributeCertificate aCert = gen.generateCertificate(privKey, "BC");
+        X509AttributeCertificate aCert = gen.generate(privKey, "BC");
         
         aCert.checkValidity();
         
@@ -291,6 +355,8 @@ public class AttrCertTest
         {
             fail("generated holder matching wrong certificate");
         }
+
+        equalityAndHashCodeTest(aCert, aCert.getEncoded());
     }
     
     private void testGenerateWithPrincipal()
@@ -336,7 +402,7 @@ public class AttrCertTest
         gen.setSerialNumber(BigInteger.ONE);
         gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
         
-        X509AttributeCertificate aCert = gen.generateCertificate(privKey, "BC");
+        X509AttributeCertificate aCert = gen.generate(privKey, "BC");
         
         aCert.checkValidity();
         
@@ -370,6 +436,8 @@ public class AttrCertTest
         {
             fail("principal generated holder matching wrong certificate");
         }
+
+        equalityAndHashCodeTest(aCert, aCert.getEncoded());
     }
     
     public void performTest()
@@ -450,7 +518,7 @@ public class AttrCertTest
         gen.setSerialNumber(aCert.getSerialNumber());
         gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
         
-        aCert = gen.generateCertificate(privKey, "BC");
+        aCert = gen.generate(privKey, "BC");
         
         aCert.checkValidity();
         
@@ -522,7 +590,7 @@ public class AttrCertTest
         
         gen.addExtension("2.2", false, new DEROctetString(new byte[20]));
         
-        aCert = gen.generateCertificate(privKey, "BC");
+        aCert = gen.generate(privKey, "BC");
         
         Set exts = aCert.getCriticalExtensionOIDs();
         
