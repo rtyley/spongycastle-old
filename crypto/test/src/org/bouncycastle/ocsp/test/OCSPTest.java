@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.ocsp.BasicOCSPResp;
+import org.bouncycastle.ocsp.BasicOCSPRespGenerator;
 import org.bouncycastle.ocsp.CertificateID;
 import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
@@ -307,6 +308,11 @@ public class OCSPTest
         {
             fail("Failed isFor test");
         }
+
+        //
+        // response
+        //
+        BasicOCSPRespGenerator respGen = new BasicOCSPRespGenerator(signKP.getPublic());
     }
 
     public void performTest()
