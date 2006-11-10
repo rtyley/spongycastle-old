@@ -8,7 +8,7 @@ import java.io.IOException;
  * rules (as with sequences).
  */
 public abstract class ASN1TaggedObject
-    extends DERObject
+    extends ASN1Object
     implements ASN1TaggedObjectParser
 {
     int             tagNo;
@@ -82,27 +82,15 @@ public abstract class ASN1TaggedObject
         this.obj = obj;
     }
     
-    public boolean equals(
-        Object o)
+    boolean asn1Equals(
+        DERObject o)
     {
-        if (o == this)
-        {
-            return true;
-        }
-
-        if (!(o instanceof DEREncodable))
-        {
-            return false;
-        }
-
-        DERObject ot = ((DEREncodable)o).getDERObject();
-        
-        if (!(ot instanceof ASN1TaggedObject))
+        if (!(o instanceof ASN1TaggedObject))
         {
             return false;
         }
         
-        ASN1TaggedObject other = (ASN1TaggedObject)ot;
+        ASN1TaggedObject other = (ASN1TaggedObject)o;
         
         if (tagNo != other.tagNo || empty != other.empty || explicit != other.explicit)
         {

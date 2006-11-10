@@ -9,7 +9,7 @@ import java.util.SimpleTimeZone;
  * UTC time object.
  */
 public class DERUTCTime
-    extends DERObject
+    extends ASN1Object
 {
     String      time;
 
@@ -170,10 +170,10 @@ public class DERUTCTime
         out.writeEncoded(UTC_TIME, this.getOctets());
     }
     
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if ((o == null) || !(o instanceof DERUTCTime))
+        if (!(o instanceof DERUTCTime))
         {
             return false;
         }

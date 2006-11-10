@@ -1,15 +1,16 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.util.encoders.Hex;
+
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 import java.util.Vector;
-import org.bouncycastle.util.encoders.Hex;
 
 public abstract class ASN1OctetString
-    extends DERObject
+    extends ASN1Object
     implements ASN1OctetStringParser
 {
     byte[]  string;
@@ -121,18 +122,18 @@ public abstract class ASN1OctetString
         return value;
     }
 
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if (!(o instanceof DEROctetString))
+        if (!(o instanceof ASN1OctetString))
         {
             return false;
         }
 
-        DEROctetString  other = (DEROctetString)o;
+        ASN1OctetString  other = (ASN1OctetString)o;
 
-        byte[] b1 = other.getOctets();
-        byte[] b2 = this.getOctets();
+        byte[] b1 = other.string;
+        byte[] b2 = this.string;
 
         if (b1.length != b2.length)
         {

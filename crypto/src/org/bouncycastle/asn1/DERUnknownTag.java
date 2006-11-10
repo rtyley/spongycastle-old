@@ -43,7 +43,7 @@ public class DERUnknownTag
     public boolean equals(
         Object o)
     {
-        if ((o == null) || !(o instanceof DERUnknownTag))
+        if (!(o instanceof DERUnknownTag))
         {
             return false;
         }

@@ -5,7 +5,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 public abstract class ASN1Sequence
-    extends DERObject
+    extends ASN1Object
 {
     private Vector seq = new Vector();
 
@@ -168,27 +168,15 @@ public abstract class ASN1Sequence
         return hashCode;
     }
 
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if (o == this)
-        {
-            return true;
-        }
-        
-        if (!(o instanceof DEREncodable))
-        {
-            return false;
-        }
-
-        DERObject      dObj = ((DEREncodable)o).getDERObject();
-        
-        if (!(dObj instanceof ASN1Sequence))
+        if (!(o instanceof ASN1Sequence))
         {
             return false;
         }
         
-        ASN1Sequence   other = (ASN1Sequence)dObj;
+        ASN1Sequence   other = (ASN1Sequence)o;
 
         if (this.size() != other.size())
         {

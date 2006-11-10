@@ -7,7 +7,7 @@ import java.io.IOException;
  * Base class for an application specific object
  */
 public class DERApplicationSpecific 
-    extends DERObject
+    extends ASN1Object
 {
     private int       tag;
     private byte[]    octets;
@@ -64,10 +64,10 @@ public class DERApplicationSpecific
         out.writeEncoded(DERTags.APPLICATION | tag, octets);
     }
     
-    public boolean equals(
-            Object o)
+    boolean asn1Equals(
+        DERObject o)
     {
-        if ((o == null) || !(o instanceof DERApplicationSpecific))
+        if (!(o instanceof DERApplicationSpecific))
         {
             return false;
         }

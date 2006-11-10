@@ -3,7 +3,7 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 
 public class DERBoolean
-    extends DERObject
+    extends ASN1Object
 {
     byte         value;
 
@@ -89,8 +89,8 @@ public class DERBoolean
         out.writeEncoded(BOOLEAN, bytes);
     }
     
-    public boolean equals(
-        Object  o)
+    protected boolean asn1Equals(
+        DERObject  o)
     {
         if ((o == null) || !(o instanceof DERBoolean))
         {

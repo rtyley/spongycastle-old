@@ -6,7 +6,7 @@ import java.io.IOException;
  * DER VisibleString object.
  */
 public class DERVisibleString
-    extends DERObject
+    extends ASN1Object
     implements DERString
 {
     String  string;
@@ -103,10 +103,10 @@ public class DERVisibleString
         out.writeEncoded(VISIBLE_STRING, this.getOctets());
     }
     
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if ((o == null) || !(o instanceof DERVisibleString))
+        if (!(o instanceof DERVisibleString))
         {
             return false;
         }

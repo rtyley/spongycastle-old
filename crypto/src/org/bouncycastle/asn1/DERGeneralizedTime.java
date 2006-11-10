@@ -10,7 +10,7 @@ import java.util.SimpleTimeZone;
  * Generalized time object.
  */
 public class DERGeneralizedTime
-    extends DERObject
+    extends ASN1Object
 {
     String      time;
 
@@ -184,10 +184,10 @@ public class DERGeneralizedTime
         out.writeEncoded(GENERALIZED_TIME, this.getOctets());
     }
     
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if ((o == null) || !(o instanceof DERGeneralizedTime))
+        if (!(o instanceof DERGeneralizedTime))
         {
             return false;
         }

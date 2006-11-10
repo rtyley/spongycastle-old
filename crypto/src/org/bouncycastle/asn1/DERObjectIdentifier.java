@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 
 public class DERObjectIdentifier
-    extends DERObject
+    extends ASN1Object
 {
     String      identifier;
 
@@ -232,10 +232,10 @@ public class DERObjectIdentifier
         return identifier.hashCode();
     }
 
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if ((o == null) || !(o instanceof DERObjectIdentifier))
+        if (!(o instanceof DERObjectIdentifier))
         {
             return false;
         }

@@ -6,7 +6,7 @@ import java.io.IOException;
  * DER PrintableString object.
  */
 public class DERPrintableString
-    extends DERObject
+    extends ASN1Object
     implements DERString
 {
     String  string;
@@ -108,8 +108,8 @@ public class DERPrintableString
         return this.getString().hashCode();
     }
 
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
         if (!(o instanceof DERPrintableString))
         {
