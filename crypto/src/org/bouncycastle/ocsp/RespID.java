@@ -1,14 +1,16 @@
 package org.bouncycastle.ocsp;
 
-import java.io.*;
-import java.security.*;
-
-import org.bouncycastle.jce.*;
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.ocsp.*;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.ocsp.ResponderID;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.jce.X509Principal;
 
 import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.PublicKey;
 
 /**
  * Carrier for a ResponderID.
@@ -45,15 +47,9 @@ public class RespID
             MessageDigest       digest = MessageDigest.getInstance("SHA1");
 
             ASN1InputStream aIn = new ASN1InputStream(key.getEncoded());
-            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(
-                                                            aIn.readObject());
+            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(aIn.readObject());
 
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-            aOut.writeObject(info.getPublicKey());
-
-            digest.update(bOut.toByteArray());
+            digest.update(info.getPublicKeyData().getBytes());
 
             ASN1OctetString keyHash = new DEROctetString(digest.digest());
 
