@@ -7,7 +7,7 @@ import java.io.IOException;
  * DER UniversalString object.
  */
 public class DERUniversalString
-    extends DERObject
+    extends ASN1Object
     implements DERString
 {
     private static final char[]  table = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -97,10 +97,10 @@ public class DERUniversalString
         out.writeEncoded(UNIVERSAL_STRING, this.getOctets());
     }
     
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if ((o == null) || !(o instanceof DERUniversalString))
+        if (!(o instanceof DERUniversalString))
         {
             return false;
         }

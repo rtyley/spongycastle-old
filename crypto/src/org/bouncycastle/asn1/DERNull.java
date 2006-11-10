@@ -22,20 +22,4 @@ public class DERNull
     {
         out.writeEncoded(NULL, zeroBytes);
     }
-    
-    public boolean equals(
-        Object o)
-    {
-        if ((o == null) || !(o instanceof DERNull))
-        {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    public int hashCode()
-    {
-        return 0;
-    }
 }

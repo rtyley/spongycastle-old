@@ -6,7 +6,7 @@ import java.io.IOException;
  * DER NumericString object - this is an ascii string of characters {0,1,2,3,4,5,6,7,8,9, }.
  */
 public class DERNumericString
-    extends DERObject
+    extends ASN1Object
     implements DERString
 {
     String  string;
@@ -108,8 +108,8 @@ public class DERNumericString
         return this.getString().hashCode();
     }
 
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
         if (!(o instanceof DERNumericString))
         {

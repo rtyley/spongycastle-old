@@ -6,7 +6,7 @@ import java.io.IOException;
  * DER T61String (also the teletex string)
  */
 public class DERT61String
-    extends DERObject
+    extends ASN1Object
     implements DERString
 {
     String  string;
@@ -103,10 +103,10 @@ public class DERT61String
         return bs; 
     }
 
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if ((o == null) || !(o instanceof DERT61String))
+        if (!(o instanceof DERT61String))
         {
             return false;
         }

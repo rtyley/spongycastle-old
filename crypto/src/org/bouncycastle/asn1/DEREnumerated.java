@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 public class DEREnumerated
-    extends DERObject
+    extends ASN1Object
 {
     byte[]      bytes;
 
@@ -80,8 +80,8 @@ public class DEREnumerated
         out.writeEncoded(ENUMERATED, bytes);
     }
     
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
         if (!(o instanceof DEREnumerated))
         {

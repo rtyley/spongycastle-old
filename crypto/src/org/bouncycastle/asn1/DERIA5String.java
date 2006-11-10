@@ -6,7 +6,7 @@ import java.io.IOException;
  * DER IA5String object - this is an ascii string.
  */
 public class DERIA5String
-    extends DERObject
+    extends ASN1Object
     implements DERString
 {
     String  string;
@@ -108,8 +108,8 @@ public class DERIA5String
         return this.getString().hashCode();
     }
 
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
         if (!(o instanceof DERIA5String))
         {

@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class DERBitString
-    extends DERObject
+    extends ASN1Object
     implements DERString
 {
     private static final char[]  table = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -230,8 +230,8 @@ public class DERBitString
         return value;
     }
     
-    public boolean equals(
-        Object  o)
+    protected boolean asn1Equals(
+        DERObject  o)
     {
         if (!(o instanceof DERBitString))
         {
