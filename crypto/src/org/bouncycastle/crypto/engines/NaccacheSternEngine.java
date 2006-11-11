@@ -126,7 +126,10 @@ public class NaccacheSternEngine
      */
     public byte[] processBlock(byte[] in, int inOff, int len) throws InvalidCipherTextException
     {
-
+        if (key == null)
+        {
+            throw new IllegalStateException("NaccacheStern engine not initialised");
+        }
         if (len > (getInputBlockSize() + 1))
         {
             throw new DataLengthException("input too large for Naccache-Stern cipher.\n");

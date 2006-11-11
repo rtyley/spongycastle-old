@@ -136,6 +136,10 @@ public class ElGamalEngine
         int     inOff,
         int     inLen)
     {
+        if (key == null)
+        {
+            throw new IllegalStateException("ElGamal engine not initialised");
+        }
         if (inLen > (getInputBlockSize() + 1))
         {
             throw new DataLengthException("input too large for ElGamal cipher.\n");
