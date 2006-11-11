@@ -1,7 +1,6 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.jce.X509LDAPCertStoreParameters;
-import org.bouncycastle.util.LDAPStoreHelper;
 import org.bouncycastle.util.Selector;
 import org.bouncycastle.util.StoreException;
 import org.bouncycastle.x509.X509CertPairStoreSelector;
@@ -9,6 +8,7 @@ import org.bouncycastle.x509.X509CertStoreSelector;
 import org.bouncycastle.x509.X509CertificatePair;
 import org.bouncycastle.x509.X509StoreParameters;
 import org.bouncycastle.x509.X509StoreSpi;
+import org.bouncycastle.x509.util.LDAPStoreHelper;
 
 import java.util.Collection;
 import java.util.Collections;
