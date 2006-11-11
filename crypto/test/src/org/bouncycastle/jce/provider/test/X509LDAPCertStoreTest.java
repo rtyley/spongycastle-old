@@ -1,5 +1,10 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.jce.X509LDAPCertStoreParameters;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTest;
+
 import java.io.ByteArrayInputStream;
 import java.security.Security;
 import java.security.cert.CertStore;
@@ -9,11 +14,6 @@ import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Iterator;
-
-import org.bouncycastle.jce.X509LDAPCertStoreParameters;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class X509LDAPCertStoreTest extends SimpleTest
 {
@@ -79,14 +79,33 @@ public class X509LDAPCertStoreTest extends SimpleTest
 
     private static String ldapURL1 = "ldap://pksldap.tttc.de:389";
 
-    private static X509LDAPCertStoreParameters params1 = new X509LDAPCertStoreParameters(
-        ldapURL1, null, "cn", "cn", "cn", "cn", "cn", "cn", "cn", "o", "cn");
+    private static X509LDAPCertStoreParameters params1 =
+                        new X509LDAPCertStoreParameters.Builder(ldapURL1, "")
+                        .setCertificateRevocationListIssuerAttributeName("cn")
+                        .setDeltaRevocationListIssuerAttributeName("cn")
+                        .setAuthorityRevocationListIssuerAttributeName("cn")
+                        .setAttributeCertificateAttributeSubjectAttributeName("cn")
+                        .setAACertificateSubjectAttributeName("cn")
+                        .setAttributeDescriptorCertificateSubjectAttributeName("cn")
+                        .setAttributeCertificateRevocationListIssuerAttributeName("cn")
+                        .setAttributeAuthorityRevocationListIssuerAttributeName("o")
+                        .setSearchForSerialNumberIn("cn")
+                        .build();
 
     private static String ldapURL2 = "ldap://directory.d-trust.de:389";
 
-    private static X509LDAPCertStoreParameters params2 = new X509LDAPCertStoreParameters(
-        ldapURL2, null, "cn", "cn", "cn", "cn", "cn", "cn", "cn", "o",
-        "uid");
+    private static X509LDAPCertStoreParameters params2 =
+                        new X509LDAPCertStoreParameters.Builder(ldapURL2, "")
+                        .setCertificateRevocationListIssuerAttributeName("cn")
+                        .setDeltaRevocationListIssuerAttributeName("cn")
+                        .setAuthorityRevocationListIssuerAttributeName("cn")
+                        .setAttributeCertificateAttributeSubjectAttributeName("cn")
+                        .setAACertificateSubjectAttributeName("cn")
+                        .setAttributeDescriptorCertificateSubjectAttributeName("cn")
+                        .setAttributeCertificateRevocationListIssuerAttributeName("cn")
+                        .setAttributeAuthorityRevocationListIssuerAttributeName("o")
+                        .setSearchForSerialNumberIn("uid")
+                        .build();
 
     private byte[] cert2 = Base64
         .decode("MIIEADCCAuigAwIBAgIDAJ/QMA0GCSqGSIb3DQEBBQUAMD8xCzAJBgNVBAYTAkRF"
@@ -114,9 +133,18 @@ public class X509LDAPCertStoreTest extends SimpleTest
 
     private static String ldapURL3 = "ldap://dir.signtrust.de:389";
 
-    private static X509LDAPCertStoreParameters params3 = new X509LDAPCertStoreParameters(
-        ldapURL3, "c=de", "cn", "cn", "ou", "ou", "o", "cn", "cn", "ou",
-        "serialNumber");
+    private static X509LDAPCertStoreParameters params3 =
+                        new X509LDAPCertStoreParameters.Builder(ldapURL3, "c=de")
+                        .setCertificateRevocationListIssuerAttributeName("cn")
+                        .setDeltaRevocationListIssuerAttributeName("cn")
+                        .setAuthorityRevocationListIssuerAttributeName("ou")
+                        .setAttributeCertificateAttributeSubjectAttributeName("ou")
+                        .setAACertificateSubjectAttributeName("o")
+                        .setAttributeDescriptorCertificateSubjectAttributeName("cn")
+                        .setAttributeCertificateRevocationListIssuerAttributeName("cn")
+                        .setAttributeAuthorityRevocationListIssuerAttributeName("ou")
+                        .setSearchForSerialNumberIn("serialNumber")
+                        .build();
 
     private byte[] cert3 = Base64
         .decode("MIICwDCCAimgAwIBAgIBKzANBgkqhkiG9w0BAQUFADA6MRAwDgYDVQQDEwdQQ0Ex"
