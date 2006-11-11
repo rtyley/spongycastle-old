@@ -60,7 +60,7 @@ public class X509CRLStoreSelector extends X509CRLSelector implements Selector
     public void setDeltaCRLIndicatorEnabled(boolean deltaCRLIndicator)
     {
         this.deltaCRLIndicator = deltaCRLIndicator;
-	}
+    }
 
     /**
      * Returns an instance of this from a <code>X509CRLSelector</code>.
