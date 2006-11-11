@@ -18,7 +18,7 @@ public class NullTest
     
     NullTest()
     {
-        super(tests);
+        super(tests, new NullEngine(), new KeyParameter(new byte[2]));
     }
 
     public String getName()

@@ -41,7 +41,7 @@ public class BlowfishTest
 
     BlowfishTest()
     {
-        super(tests);
+        super(tests, new BlowfishEngine(), new KeyParameter(new byte[16]));
     }
 
     public String getName()

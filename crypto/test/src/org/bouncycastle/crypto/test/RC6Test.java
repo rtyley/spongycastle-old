@@ -48,7 +48,7 @@ public class RC6Test
 
     RC6Test()
     {
-        super(tests);
+        super(tests, new RC6Engine(), new KeyParameter(new byte[32]));
     }
 
     public String getName()

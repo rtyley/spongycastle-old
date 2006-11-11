@@ -12,11 +12,11 @@ public abstract class CipherTest
     private BlockCipher _engine;
     private KeyParameter _validKey;
 
-    protected CipherTest(
-        SimpleTest[]  tests)
-    {
-        _tests = tests;
-    }
+//    protected CipherTest(
+//        SimpleTest[]  tests)
+//    {
+//        _tests = tests;
+//    }
 
     protected CipherTest(
         SimpleTest[]   tests,

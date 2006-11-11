@@ -100,7 +100,7 @@ public class RijndaelTest
 
     RijndaelTest()
     {
-        super(tests);
+        super(tests, new RijndaelEngine(128), new KeyParameter(new byte[16]));
     }
 
     public String getName()

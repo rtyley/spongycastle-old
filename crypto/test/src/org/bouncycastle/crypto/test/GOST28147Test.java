@@ -147,7 +147,7 @@ public class GOST28147Test
     
     GOST28147Test()
     {
-        super(tests);
+        super(tests, new GOST28147Engine(), new KeyParameter(new byte[32]));
     }
     
     public void performTest()

@@ -28,7 +28,7 @@ public class CAST6Test
 
     CAST6Test()
     {
-        super(tests);
+        super(tests, new CAST6Engine(), new KeyParameter(new byte[16]));
     }
 
     public String getName()
