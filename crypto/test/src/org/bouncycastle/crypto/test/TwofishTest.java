@@ -29,7 +29,7 @@ public class TwofishTest
 
     TwofishTest()
     {
-        super(tests);
+        super(tests, new TwofishEngine(), new KeyParameter(new byte[32]));
     }
     
     public String getName()

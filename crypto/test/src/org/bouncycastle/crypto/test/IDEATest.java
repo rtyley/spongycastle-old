@@ -22,7 +22,7 @@ public class IDEATest
 
     IDEATest()
     {
-        super(tests);
+        super(tests, new IDEAEngine(), new KeyParameter(new byte[32]));
     }
 
     public String getName()

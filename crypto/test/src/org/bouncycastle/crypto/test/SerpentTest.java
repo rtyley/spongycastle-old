@@ -87,7 +87,7 @@ public class SerpentTest
 
     SerpentTest()
     {
-        super(tests);
+        super(tests, new SerpentEngine(), new KeyParameter(new byte[32]));
     }
 
     public String getName()

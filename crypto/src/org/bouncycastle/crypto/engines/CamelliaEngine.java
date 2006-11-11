@@ -10,6 +10,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
  */
 public class CamelliaEngine implements BlockCipher
 {
+    private boolean initialised;
     private boolean _keyIs128;
     
     private static final int  BLOCK_SIZE = 16;
@@ -267,6 +268,7 @@ public class CamelliaEngine implements BlockCipher
         }
         
         setKey(forEncryption, ((KeyParameter)params).getKey());
+        initialised = true;
     }
 
     public String getAlgorithmName()
@@ -286,6 +288,21 @@ public class CamelliaEngine implements BlockCipher
         int outOff)
         throws DataLengthException, IllegalStateException
     {
+        if (!initialised)
+        {
+            throw new IllegalStateException("Camellia engine not initialised");
+        }
+
+        if ((inOff + BLOCK_SIZE) > in.length)
+        {
+            throw new DataLengthException("input buffer too short");
+        }
+
+        if ((outOff + BLOCK_SIZE) > out.length)
+        {
+            throw new DataLengthException("output buffer too short");
+        }
+
         if (_keyIs128)
         {
             return processBlock128(in, inOff, out, outOff);

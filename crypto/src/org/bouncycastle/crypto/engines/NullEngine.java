@@ -10,7 +10,7 @@ import org.bouncycastle.crypto.DataLengthException;
  */
 public class NullEngine implements BlockCipher
 {
-
+    private boolean initialised;
     protected static final int BLOCK_SIZE = 1;
     
     /**
@@ -27,6 +27,7 @@ public class NullEngine implements BlockCipher
     public void init(boolean forEncryption, CipherParameters params) throws IllegalArgumentException
     {
         // we don't mind any parameters that may come in
+        this.initialised = true;
     }
 
     /* (non-Javadoc)
@@ -51,6 +52,10 @@ public class NullEngine implements BlockCipher
     public int processBlock(byte[] in, int inOff, byte[] out, int outOff)
         throws DataLengthException, IllegalStateException
     {
+        if (!initialised)
+        {
+            throw new IllegalStateException("Null engine not initialised");
+        }
             if ((inOff + BLOCK_SIZE) > in.length)
             {
                 throw new DataLengthException("input buffer too short");

@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.engines;
 
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.params.KeyParameter;
 
 /**
@@ -86,8 +87,23 @@ public class RC6Engine
         byte[]  out,
         int     outOff)
     {
-        return (forEncryption) ? encryptBlock(in, inOff, out, outOff) 
-                                    : decryptBlock(in, inOff, out, outOff);
+        int blockSize = getBlockSize();
+        if (_S == null)
+        {
+            throw new IllegalStateException("RC6 engine not initialised");
+        }
+        if ((inOff + blockSize) > in.length)
+        {
+            throw new DataLengthException("input buffer too short");
+        }
+        if ((outOff + blockSize) > out.length)
+        {
+            throw new DataLengthException("output buffer too short");
+        }
+
+        return (forEncryption)
+            ?   encryptBlock(in, inOff, out, outOff) 
+            :   decryptBlock(in, inOff, out, outOff);
     }
 
     public void reset()

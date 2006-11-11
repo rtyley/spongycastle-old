@@ -51,7 +51,7 @@ public class CamelliaTest
 
     CamelliaTest()
     {
-        super(tests);
+        super(tests, new CamelliaEngine(), new KeyParameter(new byte[32]));
     }
 
     public String getName()

@@ -357,12 +357,13 @@ public class CAST5Engine
             throw new IllegalStateException(getAlgorithmName()+" not initialised");
         }
 
-        if ((inOff + BLOCK_SIZE) > in.length)
+        int blockSize = getBlockSize();
+        if ((inOff + blockSize) > in.length)
         {
             throw new DataLengthException("Input buffer too short");
         }
 
-        if ((outOff + BLOCK_SIZE) > out.length)
+        if ((outOff + blockSize) > out.length)
         {
             throw new DataLengthException("Output buffer too short");
         }
