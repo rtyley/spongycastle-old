@@ -259,11 +259,25 @@ public class NaccacheSternTest
         }
 */
         // END OF TEST CASE
+
+        try
+        {
+            new NaccacheSternEngine().processBlock(new byte[]{ 1 }, 0, 1);
+            fail("failed initialisation check");
+        }
+        catch (IllegalStateException e)
+        {
+            // expected
+        }
+        catch (InvalidCipherTextException e)
+        {
+            fail("failed initialisation check");
+        }
+
         if (debug)
         {
             System.out.println("All tests successful");
         }
-
     }
 
     private byte[] enDeCrypt(byte[] input)
