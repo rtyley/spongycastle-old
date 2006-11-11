@@ -66,6 +66,5 @@ public class X509CertStoreSelector extends X509CertSelector implements Selector
         cs.setSubjectKeyIdentifier(selector.getSubjectKeyIdentifier());
         cs.setSubjectPublicKey(selector.getSubjectPublicKey());
         return cs;
-	}
-
+    }
 }
