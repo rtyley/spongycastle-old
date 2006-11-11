@@ -78,7 +78,7 @@ public class RegressionTest
         new KDF2GeneratorTest(),
         new MGF1GeneratorTest(),
         new ShortenedDigestTest(),
-//        new NaccacheSternTest(),
+        new NaccacheSternTest(),
         new NullTest()
     };
 
