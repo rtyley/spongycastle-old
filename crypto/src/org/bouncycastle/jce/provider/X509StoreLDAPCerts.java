@@ -70,7 +70,7 @@ public class X509StoreLDAPCerts extends X509StoreSpi
     {
         if (!(selector instanceof X509CertStoreSelector))
         {
-            return Collections.emptySet();
+            return Collections.EMPTY_SET;
         }
         X509CertStoreSelector xselector = (X509CertStoreSelector)selector;
         Set set = new HashSet();
