@@ -1,7 +1,20 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.IOException;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.x509.CertificatePair;
+import org.bouncycastle.jce.X509LDAPCertStoreParameters;
+
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CRL;
 import java.security.cert.CRLSelector;
@@ -20,20 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.x509.CertificatePair;
-import org.bouncycastle.jce.X509LDAPCertStoreParameters;
 
 /**
  * 
@@ -277,10 +276,9 @@ public class X509LDAPCertStoreSpi
     private Set getEndCertificates(X509CertSelector xselector)
         throws CertStoreException
     {
-        String[] attrs = {params.getCertificateAttribute()};
-        String attrName = params.getLdapCertificateAttributeName();
-        String subjectAttributeName = params
-            .getCertificateSubjectAttributeName();
+        String[] attrs = {params.getUserCertificateAttribute()};
+        String attrName = params.getLdapUserCertificateAttributeName();
+        String subjectAttributeName = params.getUserCertificateSubjectAttributeName();
 
         Set set = certSubjectSerialSearch(xselector, attrs, attrName,
             subjectAttributeName);
@@ -326,7 +324,7 @@ public class X509LDAPCertStoreSpi
     public Collection engineGetCRLs(CRLSelector selector)
         throws CertStoreException
     {
-        String[] attrs = {params.getCrlAttribute()};
+        String[] attrs = {params.getCertificateRevocationListAttribute()};
         if (!(selector instanceof X509CRLSelector))
         {
             throw new CertStoreException("selector is not a X509CRLSelector");
@@ -335,7 +333,7 @@ public class X509LDAPCertStoreSpi
 
         Set crlSet = new HashSet();
 
-        String attrName = params.getLdapCRLAttributeName();
+        String attrName = params.getLdapCertificateRevocationListAttributeName();
         Set set = new HashSet();
 
         if (xselector.getIssuerNames() != null)
@@ -348,13 +346,13 @@ public class X509LDAPCertStoreSpi
                 if (o instanceof String)
                 {
                     String issuerAttributeName = params
-                        .getCRLIssuerAttributeName();
+                        .getCertificateRevocationListIssuerAttributeName();
                     attrValue = parseDN((String)o, issuerAttributeName);
                 }
                 else
                 {
                     String issuerAttributeName = params
-                        .getCRLIssuerAttributeName();
+                        .getCertificateRevocationListIssuerAttributeName();
                     attrValue = parseDN(new X500Principal((byte[])o)
                         .getName("RFC1779"), issuerAttributeName);
                 }
