@@ -416,6 +416,16 @@ public class RSATest
         testMissingDataPKCS1Block(pubParameters, privParameters);
         testTruncatedPKCS1Block(pubParameters, privParameters);
         testWrongPaddingPKCS1Block(pubParameters, privParameters);
+
+        try
+        {
+            new RSAEngine().processBlock(new byte[]{ 1 }, 0, 1);
+            fail("failed initialisation check");
+        }
+        catch (IllegalStateException e)
+        {
+            // expected
+        }
     }
 
 

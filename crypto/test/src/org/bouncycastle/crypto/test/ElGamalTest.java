@@ -180,6 +180,19 @@ public class ElGamalTest
         }
     }
 
+    private void testInitCheck()
+    {
+        try
+        {
+            new ElGamalEngine().processBlock(new byte[]{ 1 }, 0, 1);
+            fail("failed initialisation check");
+        }
+        catch (IllegalStateException e)
+        {
+            // expected
+        }
+    }
+
     public void performTest()
     {
         testEnc(512, 0, g512, p512);
@@ -193,6 +206,8 @@ public class ElGamalTest
         // generation test.
         //
         testGeneration(258);
+
+        testInitCheck();
     }
 
     public static void main(
