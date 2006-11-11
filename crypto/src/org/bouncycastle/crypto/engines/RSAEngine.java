@@ -10,7 +10,7 @@ import org.bouncycastle.crypto.DataLengthException;
 public class RSAEngine
     implements AsymmetricBlockCipher
 {
-    private RSACoreEngine core = new RSACoreEngine();
+    private RSACoreEngine core;
 
     /**
      * initialise the RSA engine.
@@ -22,6 +22,11 @@ public class RSAEngine
         boolean             forEncryption,
         CipherParameters    param)
     {
+        if (core == null)
+        {
+            core = new RSACoreEngine();
+        }
+
         core.init(forEncryption, param);
     }
 
@@ -63,6 +68,11 @@ public class RSAEngine
         int     inOff,
         int     inLen)
     {
+        if (core == null)
+        {
+            throw new IllegalStateException("RSA engine not initialised");
+        }
+
         return core.convertOutput(core.processBlock(core.convertInput(in, inOff, inLen)));
     }
 }

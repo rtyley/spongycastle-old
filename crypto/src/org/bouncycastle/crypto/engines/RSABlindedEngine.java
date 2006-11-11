@@ -86,6 +86,11 @@ public class RSABlindedEngine
         int     inOff,
         int     inLen)
     {
+        if (key == null)
+        {
+            throw new IllegalStateException("RSA engine not initialised");
+        }
+
         if (key instanceof RSAPrivateCrtKeyParameters)
         {
             RSAPrivateCrtKeyParameters k = (RSAPrivateCrtKeyParameters)key;
