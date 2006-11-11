@@ -62,7 +62,7 @@ public class X509StoreLDAPCRLs extends X509StoreSpi
     {
         if (!(selector instanceof X509CRLStoreSelector))
         {
-            return Collections.emptySet();
+            return Collections.EMPTY_SET;
         }
         X509CRLStoreSelector xselector = (X509CRLStoreSelector)selector;
         Set set = new HashSet();

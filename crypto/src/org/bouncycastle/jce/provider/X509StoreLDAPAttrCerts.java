@@ -66,7 +66,7 @@ public class X509StoreLDAPAttrCerts extends X509StoreSpi
     {
         if (!(selector instanceof X509AttributeCertStoreSelector))
         {
-            return Collections.emptySet();
+            return Collections.EMPTY_SET;
         }
         X509AttributeCertStoreSelector xselector = (X509AttributeCertStoreSelector)selector;
         Set set = new HashSet();
