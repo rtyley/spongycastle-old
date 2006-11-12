@@ -911,7 +911,7 @@ public class CertTest
         cert.verify(pubKey);
 
         Set dummySet = cert.getNonCriticalExtensionOIDs();
-        dummySet = cert.getNonCriticalExtensionOIDs();
+        dummySet = cert.getCriticalExtensionOIDs();
 
         //
         // create the certificate - version 3 - with extensions
