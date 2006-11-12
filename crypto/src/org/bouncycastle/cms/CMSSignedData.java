@@ -218,10 +218,13 @@ public class CMSSignedData
                 {
                     try
                     {
-                        aOut.writeObject(e.nextElement());
+                        DERObject obj = (DERObject)e.nextElement();
 
-                        certsAndcrls.add(cf.generateCertificate(
-                            new ByteArrayInputStream(bOut.toByteArray())));
+                        if (obj instanceof ASN1Sequence)
+                        {
+                            certsAndcrls.add(cf.generateCertificate(
+                                new ByteArrayInputStream(obj.getEncoded())));
+                        }
                     }
                     catch (IOException ex)
                     {
