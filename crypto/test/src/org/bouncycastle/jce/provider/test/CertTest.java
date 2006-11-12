@@ -1,10 +1,15 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -1964,6 +1969,90 @@ public class CertTest
         }
     }
 
+
+    private void pemTest()
+        throws Exception
+    {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+
+        Certificate cert = cf.generateCertificate(new ByteArrayInputStream(PEMData.CERTIFICATE_1.getBytes("US-ASCII")));
+        if (cert == null)
+        {
+            fail("PEM cert not read");
+        }
+        CRL crl = cf.generateCRL(new ByteArrayInputStream(PEMData.CRL_1.getBytes("US-ASCII")));
+        if (crl == null)
+        {
+            fail("PEM crl not read");
+        }
+        Collection col = cf.generateCertificates(new ByteArrayInputStream(PEMData.CERTIFICATE_2.getBytes("US-ASCII")));
+        if (col.size() != 1 || !col.contains(cert))
+        {
+            fail("PEM cert collection not right");
+        }
+        col = cf.generateCRLs(new ByteArrayInputStream(PEMData.CRL_2.getBytes("US-ASCII")));
+        if (col.size() != 1 || !col.contains(crl))
+        {
+            fail("PEM crl collection not right");
+        }
+    }
+
+    private void pkcs7Test()
+        throws Exception
+    {
+        ASN1EncodableVector certs = new ASN1EncodableVector();
+
+        certs.add(new ASN1InputStream(CertPathTest.rootCertBin).readObject());
+        certs.add(new ASN1InputStream(AttrCertTest.attrCert).readObject());
+
+        ASN1EncodableVector crls = new ASN1EncodableVector();
+
+        crls.add(new ASN1InputStream(CertPathTest.rootCrlBin).readObject());
+        SignedData sigData = new SignedData(new DERSet(), new ContentInfo(CMSObjectIdentifiers.data, null), new DERSet(certs), new DERSet(crls), new DERSet());
+
+        ContentInfo info = new ContentInfo(CMSObjectIdentifiers.signedData, sigData);
+
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+
+        X509Certificate cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(info.getEncoded()));
+        if (cert == null || !areEqual(cert.getEncoded(), certs.get(0).getDERObject().getEncoded()))
+        {
+            fail("PKCS7 cert not read");
+        }
+        X509CRL crl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(info.getEncoded()));
+        if (crl == null || !areEqual(crl.getEncoded(), crls.get(0).getDERObject().getEncoded()))
+        {
+            fail("PKCS7 crl not read");
+        }
+        Collection col = cf.generateCertificates(new ByteArrayInputStream(info.getEncoded()));
+        if (col.size() != 1 || !col.contains(cert))
+        {
+            fail("PKCS7 cert collection not right");
+        }
+        col = cf.generateCRLs(new ByteArrayInputStream(info.getEncoded()));
+        if (col.size() != 1 || !col.contains(crl))
+        {
+            fail("PKCS7 crl collection not right");
+        }
+
+        // data with no certificates or CRLs
+
+        sigData = new SignedData(new DERSet(), new ContentInfo(CMSObjectIdentifiers.data, null), new DERSet(), new DERSet(), new DERSet());
+
+        info = new ContentInfo(CMSObjectIdentifiers.signedData, sigData);
+
+        cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(info.getEncoded()));
+        if (cert != null)
+        {
+            fail("PKCS7 cert present");
+        }
+        crl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(info.getEncoded()));
+        if (crl != null)
+        {
+            fail("PKCS7 crl present");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -1973,11 +2062,11 @@ public class CertTest
         checkCertificate(5, cert5);
         checkCertificate(6, oldEcdsa);
         checkCertificate(7, cert7);
-        
+
         checkKeyUsage(8, keyUsage);
         checkSelfSignedCertificate(9, uncompressedPtEC);
         checkNameCertificate(10, nameCert);
-        
+
         checkSelfSignedCertificate(11, probSelfSignedCert);
         checkSelfSignedCertificate(12, gostCA1);
         checkSelfSignedCertificate(13, gostCA2);
@@ -1986,24 +2075,27 @@ public class CertTest
         checkSelfSignedCertificate(16, gost341094A);
         checkSelfSignedCertificate(17, gost341094B);
         checkSelfSignedCertificate(17, gost34102001A);
-        
+
         checkCRL(1, crl1);
-        
+
         checkCreation1();
         checkCreation2();
         checkCreation3();
         checkCreation4();
         checkCreation5();
-        
+
         createECCert("SHA1withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1);
         createECCert("SHA224withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
         createECCert("SHA256withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
         createECCert("SHA384withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
         createECCert("SHA512withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
-        
+
         checkCRLCreation1();
         checkCRLCreation2();
         checkCRLCreation3();
+
+        pemTest();
+        pkcs7Test();
         
         testForgedSignature();
     }
