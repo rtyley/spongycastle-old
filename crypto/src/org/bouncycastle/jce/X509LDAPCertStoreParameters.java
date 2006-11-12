@@ -246,7 +246,7 @@ public class X509LDAPCertStoreParameters
          * @throws IllegalArgumentException if a necessary parameter is <code>null</code>.
          * @return the builder
          */
-        public Builder setcACertificateAttribute(String cACertificateAttribute)
+        public Builder setCACertificateAttribute(String cACertificateAttribute)
         {
             this.cACertificateAttribute = cACertificateAttribute;
 
@@ -333,7 +333,7 @@ public class X509LDAPCertStoreParameters
          * @throws IllegalArgumentException if a necessary parameter is <code>null</code>.
          * @return the builder
          */
-        public Builder setaACertificateAttribute(String aACertificateAttribute)
+        public Builder setAACertificateAttribute(String aACertificateAttribute)
         {
             this.aACertificateAttribute = aACertificateAttribute;
 
