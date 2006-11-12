@@ -4,11 +4,15 @@ import org.bouncycastle.jce.X509LDAPCertStoreParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.x509.X509CRLStoreSelector;
+import org.bouncycastle.x509.X509CertStoreSelector;
+import org.bouncycastle.x509.X509Store;
 
 import java.io.ByteArrayInputStream;
 import java.security.Security;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509CRL;
 import java.security.cert.X509CRLSelector;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
@@ -17,7 +21,7 @@ import java.util.Iterator;
 
 public class X509LDAPCertStoreTest extends SimpleTest
 {
-    private byte cert1[] = Base64
+    private static final byte cert1[] = Base64
         .decode("MIIDyTCCAzKgAwIBAgIEL64+8zANBgkqhkiG9w0BAQUFADBVMQswCQYDVQQGEwJE"
             + "RTEcMBoGA1UEChQTRGV1dHNjaGUgVGVsZWtvbSBBRzEoMAwGBwKCBgEKBxQTATEw"
             + "GAYDVQQDFBFUVEMgVGVzdCBDQSAxMTpQTjAeFw0wMzAzMjUxNDM1MzFaFw0wNjAz"
@@ -40,7 +44,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
             + "rSaW0VJu/zBihsX7hLKOVMf5gvUYMS5ulq/bp8jOj8a+5SmxVY+WWZVFghWjISse"
             + "T3WABdTS9S3zjnQiyg==");
 
-    byte[] directCRL = Base64
+    private static final byte[] directCRL = Base64
         .decode("MIIGXTCCBckCAQEwCgYGKyQDAwECBQAwdDELMAkGA1UEBhMCREUxHDAaBgNVBAoU"
             + "E0RldXRzY2hlIFRlbGVrb20gQUcxFzAVBgNVBAsUDlQtVGVsZVNlYyBUZXN0MS4w"
             + "DAYHAoIGAQoHFBMBMTAeBgNVBAMUF1QtVGVsZVNlYyBUZXN0IERJUiA4OlBOFw0w"
@@ -77,37 +81,41 @@ public class X509LDAPCertStoreTest extends SimpleTest
             + "z6TXpwWB+P4BdUec1ztz04LypsznrHcLRa91ixg9TZCb1MrOG+InNhleRs1ImXk8"
             + "MQ==");
 
-    private static String ldapURL1 = "ldap://pksldap.tttc.de:389";
+    private static final String ldapURL1 = "ldap://pksldap.tttc.de:389";
 
-    private static X509LDAPCertStoreParameters params1 =
-                        new X509LDAPCertStoreParameters.Builder(ldapURL1, "")
-                        .setCertificateRevocationListIssuerAttributeName("cn")
-                        .setDeltaRevocationListIssuerAttributeName("cn")
-                        .setAuthorityRevocationListIssuerAttributeName("cn")
-                        .setAttributeCertificateAttributeSubjectAttributeName("cn")
-                        .setAACertificateSubjectAttributeName("cn")
-                        .setAttributeDescriptorCertificateSubjectAttributeName("cn")
-                        .setAttributeCertificateRevocationListIssuerAttributeName("cn")
-                        .setAttributeAuthorityRevocationListIssuerAttributeName("o")
-                        .setSearchForSerialNumberIn("cn")
-                        .build();
+    private static final X509LDAPCertStoreParameters params1 = new X509LDAPCertStoreParameters.Builder(
+        ldapURL1, "o=Deutsche Telekom AG, c=DE").
+        setAACertificateSubjectAttributeName("ou cn").
+        setAttributeAuthorityRevocationListIssuerAttributeName("cn").
+        setAttributeCertificateAttributeSubjectAttributeName("cn").
+        setAttributeCertificateRevocationListIssuerAttributeName("cn").
+        setAttributeDescriptorCertificateSubjectAttributeName("ou cn").
+        setAuthorityRevocationListIssuerAttributeName("cn").
+        setCACertificateSubjectAttributeName("ou cn").
+        setCertificateRevocationListIssuerAttributeName("cn").
+        setCrossCertificateSubjectAttributeName("cn").
+        setDeltaRevocationListIssuerAttributeName("cn").
+        setSearchForSerialNumberIn("cn")
+        .build();
 
-    private static String ldapURL2 = "ldap://directory.d-trust.de:389";
+    private static final String ldapURL2 = "ldap://directory.d-trust.de:389";
 
-    private static X509LDAPCertStoreParameters params2 =
-                        new X509LDAPCertStoreParameters.Builder(ldapURL2, "")
-                        .setCertificateRevocationListIssuerAttributeName("cn")
-                        .setDeltaRevocationListIssuerAttributeName("cn")
-                        .setAuthorityRevocationListIssuerAttributeName("cn")
-                        .setAttributeCertificateAttributeSubjectAttributeName("cn")
-                        .setAACertificateSubjectAttributeName("cn")
-                        .setAttributeDescriptorCertificateSubjectAttributeName("cn")
-                        .setAttributeCertificateRevocationListIssuerAttributeName("cn")
-                        .setAttributeAuthorityRevocationListIssuerAttributeName("o")
-                        .setSearchForSerialNumberIn("uid")
-                        .build();
+    private static final X509LDAPCertStoreParameters params2 = new X509LDAPCertStoreParameters.Builder(
+        ldapURL2, "o=D-Trust GmbH, c=DE").
+        setAACertificateSubjectAttributeName("cn o").
+        setAttributeAuthorityRevocationListIssuerAttributeName("cn").
+        setAttributeCertificateAttributeSubjectAttributeName("cn").
+        setAttributeCertificateRevocationListIssuerAttributeName("cn").
+        setAttributeDescriptorCertificateSubjectAttributeName("cn o").
+        setAuthorityRevocationListIssuerAttributeName("cn").
+        setCACertificateSubjectAttributeName("cn o").
+        setCertificateRevocationListIssuerAttributeName("cn").
+        setCrossCertificateSubjectAttributeName("cn o").
+        setDeltaRevocationListIssuerAttributeName("cn").
+        setSearchForSerialNumberIn("uid")
+        .build();
 
-    private byte[] cert2 = Base64
+    private static final byte[] cert2 = Base64
         .decode("MIIEADCCAuigAwIBAgIDAJ/QMA0GCSqGSIb3DQEBBQUAMD8xCzAJBgNVBAYTAkRF"
             + "MRUwEwYDVQQKDAxELVRydXN0IEdtYkgxGTAXBgNVBAMMEEQtVFJVU1QgRGVtbyBD"
             + "QTEwHhcNMDYwMzAyMTYxNTU3WhcNMDgwMzEyMTYxNTU3WjB+MQswCQYDVQQGEwJE"
@@ -131,22 +139,24 @@ public class X509LDAPCertStoreTest extends SimpleTest
             + "jHioCvDXyl5pwSHwrHNWQRb5dLF12Fg41LMapDwR7awAKE9h6qHBonvCMBPMvqrr"
             + "NktqQcoQkluR9MItONJI5XHADtU=");
 
-    private static String ldapURL3 = "ldap://dir.signtrust.de:389";
+    private static final String ldapURL3 = "ldap://dir.signtrust.de:389";
 
-    private static X509LDAPCertStoreParameters params3 =
-                        new X509LDAPCertStoreParameters.Builder(ldapURL3, "c=de")
-                        .setCertificateRevocationListIssuerAttributeName("cn")
-                        .setDeltaRevocationListIssuerAttributeName("cn")
-                        .setAuthorityRevocationListIssuerAttributeName("ou")
-                        .setAttributeCertificateAttributeSubjectAttributeName("ou")
-                        .setAACertificateSubjectAttributeName("o")
-                        .setAttributeDescriptorCertificateSubjectAttributeName("cn")
-                        .setAttributeCertificateRevocationListIssuerAttributeName("cn")
-                        .setAttributeAuthorityRevocationListIssuerAttributeName("ou")
-                        .setSearchForSerialNumberIn("serialNumber")
-                        .build();
+    private static final X509LDAPCertStoreParameters params3 = new X509LDAPCertStoreParameters.Builder(
+        ldapURL3, "o=Deutsche Post AG, c=de").
+        setAACertificateSubjectAttributeName("ou").
+        setAttributeAuthorityRevocationListIssuerAttributeName("cn").
+        setAttributeCertificateAttributeSubjectAttributeName("cn").
+        setAttributeCertificateRevocationListIssuerAttributeName("o").
+        setAttributeDescriptorCertificateSubjectAttributeName("ou").
+        setAuthorityRevocationListIssuerAttributeName("o").
+        setCACertificateSubjectAttributeName("ou").
+        setCertificateRevocationListIssuerAttributeName("o").
+        setCrossCertificateSubjectAttributeName("o").
+        setDeltaRevocationListIssuerAttributeName("o").
+        setSearchForSerialNumberIn("serialNumber")
+        .build();
 
-    private byte[] cert3 = Base64
+    private static final byte[] cert3 = Base64
         .decode("MIICwDCCAimgAwIBAgIBKzANBgkqhkiG9w0BAQUFADA6MRAwDgYDVQQDEwdQQ0Ex"
             + "OlBOMRkwFwYDVQQKExBEZXV0c2NoZSBQb3N0IEFHMQswCQYDVQQGEwJERTAeFw0w"
             + "MDA0MTkyMjAwMDBaFw0wMzA0MTkyMjAwMDBaMIGOMRAwDgYDVQQEFAdN5G5jaGVy"
@@ -163,7 +173,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
             + "TJZaf2X1eUUEPmV+5zZlopGa3HvFfgmIYIXBw9ZO3Qb/HWGsPNgW0yg5eXEGwNEt"
             + "vV85BTMGuMjiuDw841IuAZaMKqOKnVXHmd2pLJz7Wv0MLJhw");
 
-    private byte[] caCert3 = Base64
+    private static final byte[] caCert3 = Base64
         .decode("MIICUjCCAb6gAwIBAgIDD2ptMAoGBiskAwMBAgUAMG8xCzAJBgNVBAYTAkRFMT0w"
             + "OwYDVQQKFDRSZWd1bGllcnVuZ3NiZWjIb3JkZSBmyHVyIFRlbGVrb21tdW5pa2F0"
             + "aW9uIHVuZCBQb3N0MSEwDAYHAoIGAQoHFBMBMTARBgNVBAMUCjRSLUNBIDE6UE4w"
@@ -178,7 +188,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
             + "/Q0h/wo/9LTgQaxw52lLs4Ml0HUyJbSFjoQ+sqgjg2fGNGw7aGkVNY5dQTAy8oSv"
             + "iG8mxTsQ7Fxaush3cIB0qDDwXar/hg==");
 
-    private byte[] crossCert3 = Base64
+    private static final byte[] crossCert3 = Base64
         .decode("MIICVDCCAcCgAwIBAgIDDIOsMAoGBiskAwMBAgUAMG8xCzAJBgNVBAYTAkRFMT0w"
             + "OwYDVQQKFDRSZWd1bGllcnVuZ3NiZWjIb3JkZSBmyHVyIFRlbGVrb21tdW5pa2F0"
             + "aW9uIHVuZCBQb3N0MSEwDAYHAoIGAQoHFBMBMTARBgNVBAMUCjRSLUNBIDE6UE4w"
@@ -194,6 +204,12 @@ public class X509LDAPCertStoreTest extends SimpleTest
             + "IoBhf6u9cX+idnN6Uy1q+j/LOrcy3zgj");
 
     public void performTest() throws Exception
+    {
+        certStoretest();
+        x509StoreTest();
+    }
+
+    private void certStoretest() throws Exception
     {
         CertStore cs = CertStore.getInstance("X509LDAP", params1, "BC");
         X509CertSelector sl = new X509CertSelector();
@@ -217,15 +233,15 @@ public class X509LDAPCertStoreTest extends SimpleTest
             fail("certificate could not be picked from LDAP directory.");
         }
         X509CRLSelector sl2 = new X509CRLSelector();
-        // X509CRL crl = (X509CRL)cf.generateCRL(new
-        // ByteArrayInputStream(directCRL));
-        // sl2.addIssuer(crl.getIssuerX500Principal());
+        X509CRL crl = (X509CRL)cf.generateCRL(new
+            ByteArrayInputStream(directCRL));
+        sl2.addIssuer(crl.getIssuerX500Principal());
         coll = cs.getCRLs(sl2);
         if (!coll.iterator().hasNext())
         {
             fail("CRL could not be picked from LDAP directory.");
         }
-        // //System.out.println(coll.toArray()[0]);
+        // System.out.println(coll.toArray()[0]);
 
         cs = CertStore.getInstance("X509LDAP", params2, "BC");
         sl = new X509CertSelector();
@@ -235,7 +251,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         coll = cs.getCertificates(sl);
         if (coll.isEmpty() || !coll.iterator().next().equals(xcert))
         {
-            fail("certificate could not be picked from LDAP directory.");
+            fail("Certificate could not be picked from LDAP directory.");
         }
 
         // System.out.println(coll.toArray()[0]);
@@ -248,7 +264,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         coll = cs.getCertificates(sl);
         if (coll.isEmpty() || !coll.iterator().next().equals(xcert))
         {
-            fail("certificate could not be picked from LDAP directory.");
+            fail("Certificate could not be picked from LDAP directory.");
         }
 
         // System.out.println(coll.toArray()[0]);
@@ -256,12 +272,12 @@ public class X509LDAPCertStoreTest extends SimpleTest
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(caCert3));
         sl = new X509CertSelector();
-        sl.setSubject(xcert.getSubjectX500Principal().getEncoded());
+        sl.setSubject(xcert.getSubjectX500Principal());
         coll = cs.getCertificates(sl);
         boolean found = false;
         if (coll.isEmpty())
         {
-            fail("certificate could not be picked from LDAP directory.");
+            fail("Certificate could not be picked from LDAP directory.");
         }
 
         for (Iterator it = coll.iterator(); it.hasNext();)
@@ -274,7 +290,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         }
         if (!found)
         {
-            fail("certificate could not be picked from LDAP directory.");
+            fail("Certificate could not be picked from LDAP directory.");
         }
 
         // System.out.println(coll.toArray()[0]);
@@ -283,11 +299,11 @@ public class X509LDAPCertStoreTest extends SimpleTest
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(crossCert3));
         sl = new X509CertSelector();
-        sl.setSubject(xcert.getSubjectX500Principal().getEncoded());
+        sl.setSubject(xcert.getSubjectX500Principal());
         coll = cs.getCertificates(sl);
         if (coll.isEmpty())
         {
-            fail("certificate could not be picked from LDAP directory.");
+            fail("Cross certificate pair could not be picked from LDAP directory.");
         }
         found = false;
         for (Iterator it = coll.iterator(); it.hasNext();)
@@ -300,7 +316,121 @@ public class X509LDAPCertStoreTest extends SimpleTest
         }
         if (!found)
         {
+            fail("Cross certificate pair could not be picked from LDAP directory.");
+        }
+
+        // System.out.println(coll.toArray()[0]);
+    }
+
+    private void x509StoreTest() throws Exception
+    {
+        X509Store cs = X509Store.getInstance("CERTIFICATE/LDAP", params1, "BC");
+
+        X509CertStoreSelector sl = new X509CertStoreSelector();
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        X509Certificate xcert = (X509Certificate)cf
+            .generateCertificate(new ByteArrayInputStream(cert1));
+        sl.setCertificate(xcert);
+        Collection coll = cs.getMatches(sl);
+        if (coll.isEmpty() || !coll.iterator().next().equals(xcert))
+        {
             fail("certificate could not be picked from LDAP directory.");
+        }
+
+        // System.out.println(coll.toArray()[0]);
+
+        sl.setCertificate(null);
+        sl.setSubject(xcert.getSubjectX500Principal().getEncoded());
+        coll = cs.getMatches(sl);
+        if (coll.isEmpty() || !coll.iterator().next().equals(xcert))
+        {
+            fail("certificate could not be picked from LDAP directory.");
+        }
+        X509CRLStoreSelector sl2 = new X509CRLStoreSelector();
+        X509CRL crl = (X509CRL)cf.generateCRL(new
+            ByteArrayInputStream(directCRL));
+        sl2.addIssuer(crl.getIssuerX500Principal());
+        cs = X509Store.getInstance("CRL/LDAP", params1, "BC");
+        coll = cs.getMatches(sl2);
+        if (!coll.iterator().hasNext())
+        {
+            fail("CRL could not be picked from LDAP directory.");
+        }
+        // System.out.println(coll.toArray()[0]);
+
+        cs = X509Store.getInstance("CERTIFICATE/LDAP", params2, "BC");
+        sl = new X509CertStoreSelector();
+        xcert = (X509Certificate)cf
+            .generateCertificate(new ByteArrayInputStream(cert2));
+        sl.setCertificate(xcert);
+        coll = cs.getMatches(sl);
+        if (coll.isEmpty() || !coll.iterator().next().equals(xcert))
+        {
+            fail("Certificate could not be picked from LDAP directory.");
+        }
+
+        // System.out.println(coll.toArray()[0]);
+
+        cs = X509Store.getInstance("CERTIFICATE/LDAP", params3, "BC");
+        sl = new X509CertStoreSelector();
+        xcert = (X509Certificate)cf
+            .generateCertificate(new ByteArrayInputStream(cert3));
+        sl.setCertificate(xcert);
+        coll = cs.getMatches(sl);
+        if (coll.isEmpty() || !coll.iterator().next().equals(xcert))
+        {
+            fail("Certificate could not be picked from LDAP directory.");
+        }
+
+        // System.out.println(coll.toArray()[0]);
+
+        xcert = (X509Certificate)cf
+            .generateCertificate(new ByteArrayInputStream(caCert3));
+        sl = new X509CertStoreSelector();
+        sl.setSubject(xcert.getSubjectX500Principal());
+        coll = cs.getMatches(sl);
+        boolean found = false;
+        if (coll.isEmpty())
+        {
+            fail("Certificate could not be picked from LDAP directory.");
+        }
+
+        for (Iterator it = coll.iterator(); it.hasNext();)
+        {
+            if (it.next().equals(xcert))
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            fail("Certificate could not be picked from LDAP directory.");
+        }
+
+        // System.out.println(coll.toArray()[0]);
+
+        sl = new X509CertStoreSelector();
+        xcert = (X509Certificate)cf
+            .generateCertificate(new ByteArrayInputStream(crossCert3));
+        sl.setSubject(xcert.getSubjectX500Principal());
+        coll = cs.getMatches(sl);
+        if (coll.isEmpty())
+        {
+            fail("Cross certificate pair could not be picked from LDAP directory.");
+        }
+        found = false;
+        for (Iterator it = coll.iterator(); it.hasNext();)
+        {
+            if (it.next().equals(xcert))
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            fail("Cross certificate pair could not be picked from LDAP directory.");
         }
 
         // System.out.println(coll.toArray()[0]);
@@ -315,7 +445,6 @@ public class X509LDAPCertStoreTest extends SimpleTest
     public static void main(String[] args)
     {
         Security.addProvider(new BouncyCastleProvider());
-
         runTest(new X509LDAPCertStoreTest());
     }
 }
