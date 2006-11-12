@@ -52,20 +52,18 @@ public class X509AttrCertParser
     private X509AttributeCertificate getCertificate()
         throws IOException
     {
-        if (sDataObjectCount >= sData.getCertificates().size())
+        while (sDataObjectCount < sData.getCertificates().size())
         {
-            return null;
+            Object obj = sData.getCertificates().getObjectAt(sDataObjectCount++);
+
+            if (obj instanceof ASN1TaggedObject && ((ASN1TaggedObject)obj).getTagNo() == 2)
+            {
+               return new X509V2AttributeCertificate(
+                      ASN1Sequence.getInstance((ASN1TaggedObject)obj, false).getEncoded());
+            }
         }
 
-        try
-        {
-            return new X509V2AttributeCertificate(
-                      ASN1Sequence.getInstance(sData.getCertificates().getObjectAt(sDataObjectCount++)).getEncoded());
-        }
-        catch (IllegalArgumentException e)       // could be an attribute certificate
-        {
-            return getCertificate();
-        }
+        return null;
     }
 
     private X509AttributeCertificate readPEMCertificate(

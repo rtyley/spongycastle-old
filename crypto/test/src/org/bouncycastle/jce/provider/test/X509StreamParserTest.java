@@ -3,6 +3,7 @@ package org.bouncycastle.jce.provider.test;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
@@ -206,7 +207,7 @@ public class X509StreamParserTest
         ASN1EncodableVector certs = new ASN1EncodableVector();
 
         certs.add(new ASN1InputStream(CertPathTest.rootCertBin).readObject());
-        certs.add(new ASN1InputStream(attrCert).readObject());
+        certs.add(new DERTaggedObject(false, 2, new ASN1InputStream(attrCert).readObject()));
 
         ASN1EncodableVector crls = new ASN1EncodableVector();
 

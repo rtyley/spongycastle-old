@@ -69,21 +69,18 @@ public class JDKX509CertificateFactory
 
     private Certificate getCertificate()
     {
-        if (sDataObjectCount >= sData.getCertificates().size())
+        while (sDataObjectCount < sData.getCertificates().size())
         {
-            return null;
+            Object obj = sData.getCertificates().getObjectAt(sDataObjectCount++);
+
+            if (obj instanceof ASN1Sequence)
+            {
+               return new X509CertificateObject(
+                                X509CertificateStructure.getInstance(obj));
+            }
         }
 
-        try
-        {
-            return new X509CertificateObject(
-                            X509CertificateStructure.getInstance(
-                                    sData.getCertificates().getObjectAt(sDataObjectCount++)));
-        }
-        catch (IllegalArgumentException e)       // could be an attribute certificate
-        {
-            return getCertificate();
-        }
+        return null;
     }
 
     private Certificate readPEMCertificate(
