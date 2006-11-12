@@ -123,7 +123,7 @@ public class JDKX509CertificateFactory
         InputStream  in)
         throws IOException, CRLException
     {
-        ASN1Sequence seq = PEM_CERT_PARSER.readPEMObject(in);
+        ASN1Sequence seq = PEM_CRL_PARSER.readPEMObject(in);
 
         if (seq != null)
         {
