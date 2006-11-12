@@ -22,7 +22,8 @@ import java.util.Set;
  *
  * @see org.bouncycastle.x509.X509Store
  */
-public class X509StoreLDAPCerts extends X509StoreSpi
+public class X509StoreLDAPCerts
+    extends X509StoreSpi
 {
 
     private LDAPStoreHelper helper;
@@ -99,8 +100,11 @@ public class X509StoreLDAPCerts extends X509StoreSpi
         X509CertStoreSelector xselector) throws StoreException
     {
         Set set = new HashSet();
-        X509CertPairStoreSelector ps = new X509CertPairStoreSelector(xselector,
-            new X509CertStoreSelector());
+        X509CertPairStoreSelector ps = new X509CertPairStoreSelector();
+
+        ps.setForwardSelector(xselector);
+        ps.setReverseSelector(new X509CertStoreSelector());
+        
         Set crossCerts = new HashSet(helper.getCrossCertificatePairs(ps));
         Set forward = new HashSet();
         Set reverse = new HashSet();
