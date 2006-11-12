@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
@@ -911,7 +912,15 @@ public class CertTest
         cert.verify(pubKey);
 
         Set dummySet = cert.getNonCriticalExtensionOIDs();
+        if (dummySet != null)
+        {
+            fail("non-critical oid set should be null");
+        }
         dummySet = cert.getCriticalExtensionOIDs();
+        if (dummySet != null)
+        {
+            fail("critical oid set should be null");
+        }
 
         //
         // create the certificate - version 3 - with extensions
@@ -2003,7 +2012,7 @@ public class CertTest
         ASN1EncodableVector certs = new ASN1EncodableVector();
 
         certs.add(new ASN1InputStream(CertPathTest.rootCertBin).readObject());
-        certs.add(new ASN1InputStream(AttrCertTest.attrCert).readObject());
+        certs.add(new DERTaggedObject(false, 2, new ASN1InputStream(AttrCertTest.attrCert).readObject()));
 
         ASN1EncodableVector crls = new ASN1EncodableVector();
 
