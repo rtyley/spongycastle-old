@@ -832,8 +832,11 @@ public class LDAPStoreHelper
         Set resultSet = createCrossCertificatePairs(list, selector);
         if (resultSet.size() == 0)
         {
-            X509CertPairStoreSelector emptySelector = new X509CertPairStoreSelector(
-                new X509CertStoreSelector(), new X509CertStoreSelector());
+            X509CertStoreSelector emptyCertselector = new X509CertStoreSelector();
+            X509CertPairStoreSelector emptySelector = new X509CertPairStoreSelector();
+
+            emptySelector.setForwardSelector(emptyCertselector);
+            emptySelector.setReverseSelector(emptyCertselector);
             list = crossCertificatePairSubjectSearch(emptySelector, attrs,
                 attrNames, subjectAttributeNames);
             resultSet.addAll(createCrossCertificatePairs(list, selector));
