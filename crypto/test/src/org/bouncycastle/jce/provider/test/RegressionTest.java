@@ -54,7 +54,8 @@ public class RegressionTest
         new ECEncodingTest(),
         new NISTCertPathTest(),
         new PKIXPolicyMappingTest(),
-        new SlotTwoTest()
+        new SlotTwoTest(),
+        new CRL5Test()
     };
 
     public static void main(
