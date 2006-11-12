@@ -12,7 +12,8 @@ import org.bouncycastle.util.Selector;
  * @see org.bouncycastle.x509.X509AttributeCertificate
  * @see org.bouncycastle.x509.X509Store
  */
-public class X509CertPairStoreSelector implements Selector
+public class X509CertPairStoreSelector
+    implements Selector
 {
 
     private X509CertStoreSelector forwardSelector;
@@ -20,6 +21,11 @@ public class X509CertPairStoreSelector implements Selector
     private X509CertStoreSelector reverseSelector;
 
     private X509CertificatePair certPairChecking;
+
+
+    public X509CertPairStoreSelector()
+    {
+    }
 
     /**
      * Returns the certificate pair which is checked *
@@ -48,19 +54,21 @@ public class X509CertPairStoreSelector implements Selector
     }
 
     /**
-     * Constructor for selecting a certificate pair. If you are only interested
-     * in one part of the certificate pair, give an empty selector with no
-     * criteria set for this part.
-     *
      * @param forwardSelector The certificate selector for the forward part in the pair.
-     * @param reverseSelector The certificate selector for the reverse part in the pair.
      */
-    public X509CertPairStoreSelector(X509CertStoreSelector forwardSelector,
-                                     X509CertStoreSelector reverseSelector)
+    public void setForwardSelector(X509CertStoreSelector forwardSelector)
     {
         this.forwardSelector = forwardSelector;
+    }
+
+    /**
+     * @param reverseSelector The certificate selector for the reverse part in the pair.
+     */
+    public void setReverseSelector(X509CertStoreSelector reverseSelector)
+    {
         this.reverseSelector = reverseSelector;
     }
+
 
     /**
      * Returns a clone of this selector.
@@ -70,11 +78,19 @@ public class X509CertPairStoreSelector implements Selector
      */
     public Object clone()
     {
-        X509CertStoreSelector forward = (X509CertStoreSelector)forwardSelector
-            .clone();
-        X509CertStoreSelector reverse = (X509CertStoreSelector)reverseSelector
-            .clone();
-        return new X509CertPairStoreSelector(forward, reverse);
+        X509CertPairStoreSelector cln = new X509CertPairStoreSelector();
+
+        if (forwardSelector != null)
+        {
+           cln.setForwardSelector((X509CertStoreSelector)forwardSelector.clone());
+        }
+
+        if (reverseSelector != null)
+        {
+           cln.setReverseSelector((X509CertStoreSelector)reverseSelector.clone());
+        }
+
+        return cln;
     }
 
     /**
@@ -92,8 +108,18 @@ public class X509CertPairStoreSelector implements Selector
             return false;
         }
         X509CertificatePair pair = (X509CertificatePair)obj;
-        return forwardSelector.match((Object)pair.getForward())
-            && reverseSelector.match((Object)pair.getReverse());
+
+        if (forwardSelector != null && !forwardSelector.match((Object)pair.getForward()))
+        {
+            return false;
+        }
+
+        if (reverseSelector != null && !reverseSelector.match((Object)pair.getForward()))
+        {
+            return false;
+        }
+
+        return true;
     }
 
     /**
