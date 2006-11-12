@@ -594,7 +594,7 @@ public final class BouncyCastleProvider extends Provider
         put("Mac.DESEDEMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESedeCFB8");
         put("Alg.Alias.Mac.DESEDE/CFB8", "DESEDEMAC/CFB8");
         
-        put("Mac.DESWITHISO9797", "org.bouncycastle.jce.provider.JCEMac$ISO9797_DES");
+        put("Mac.DESWITHISO9797", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
         put("Alg.Alias.Mac.DESISO9797MAC", "DESWITHISO9797");
         
         put("Mac.DESEDEMAC64", "org.bouncycastle.jce.provider.JCEMac$DESede64");
