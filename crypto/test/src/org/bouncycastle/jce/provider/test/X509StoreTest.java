@@ -7,7 +7,9 @@ import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.X509AttributeCertStoreSelector;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CRLStoreSelector;
+import org.bouncycastle.x509.X509CertPairStoreSelector;
 import org.bouncycastle.x509.X509CertStoreSelector;
+import org.bouncycastle.x509.X509CertificatePair;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509Store;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
@@ -26,6 +28,53 @@ import java.util.List;
 public class X509StoreTest
     extends SimpleTest
 {
+    private void certPairTest()
+        throws Exception
+    {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509",
+                "BC");
+
+        X509Certificate rootCert = (X509Certificate)cf
+                .generateCertificate(new ByteArrayInputStream(
+                        CertPathTest.rootCertBin));
+        X509Certificate interCert = (X509Certificate)cf
+                .generateCertificate(new ByteArrayInputStream(
+                        CertPathTest.interCertBin));
+        X509Certificate finalCert = (X509Certificate)cf
+                .generateCertificate(new ByteArrayInputStream(
+                        CertPathTest.finalCertBin));
+
+        // Testing CollectionCertStore generation from List
+        X509CertificatePair pair1 = new X509CertificatePair(rootCert, interCert);
+        List certList = new ArrayList();
+
+        certList.add(pair1);
+        certList.add(new X509CertificatePair(interCert, finalCert));
+
+        X509CollectionStoreParameters ccsp = new X509CollectionStoreParameters(certList);
+
+        X509Store certStore = X509Store.getInstance("CertificatePair/Collection", ccsp, "BC");
+        X509CertPairStoreSelector selector = new X509CertPairStoreSelector();
+        X509CertStoreSelector fwSelector = new X509CertStoreSelector();
+
+        fwSelector.setSerialNumber(rootCert.getSerialNumber());
+
+        selector.setForwardSelector(fwSelector);
+
+        Collection col = certStore.getMatches(selector);
+
+        if (col.size() != 1 || !col.contains(pair1))
+        {
+            fail("failed pair1 test");
+        }
+
+        col = certStore.getMatches(null);
+
+        if (col.size() != 2)
+        {
+            fail("failed null test");
+        }
+    }
 
     public void performTest()
         throws Exception
@@ -77,6 +126,8 @@ public class X509StoreTest
         {
             fail("rootCert not found by encoded subjectDN");
         }
+
+        X509Principal.DefaultReverse = false;
 
         // Searching for rootCert by public key encoded as byte
         targetConstraints = new X509CertStoreSelector();
@@ -277,6 +328,8 @@ public class X509StoreTest
         {
             fail("error using wrong selector (attrs)");
         }
+
+        certPairTest();
     }
 
     public String getName()

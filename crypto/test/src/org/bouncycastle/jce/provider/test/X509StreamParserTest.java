@@ -265,6 +265,45 @@ public class X509StreamParserTest
         {
             fail("wrong number of Attribute Certificates found");
         }
+
+        // data with no certificates or CRLs
+
+        sigData = new SignedData(new DERSet(), new ContentInfo(CMSObjectIdentifiers.data, null), new DERSet(), new DERSet(), new DERSet());
+
+        info = new ContentInfo(CMSObjectIdentifiers.signedData, sigData);
+
+        parser = X509StreamParser.getInstance("Certificate", "BC");
+
+        parser.init(info.getEncoded());
+
+        res = parser.readAll();
+
+        if (res.size() != 0)
+        {
+            fail("wrong number of Certificates found - expected 0");
+        }
+
+        parser = X509StreamParser.getInstance("CRL", "BC");
+
+        parser.init(info.getEncoded());
+
+        res = parser.readAll();
+
+        if (res.size() != 0)
+        {
+            fail("wrong number of CRLs found - expected 0");
+        }
+
+        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+
+        parser.init(info.getEncoded());
+
+        res = parser.readAll();
+
+        if (res.size() != 0)
+        {
+            fail("wrong number of Attribute Certificates found - expected 0");
+        }
     }
 
     public String getName()
