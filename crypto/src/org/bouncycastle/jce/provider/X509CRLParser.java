@@ -43,13 +43,24 @@ public class X509CRLParser
                 sData = new SignedData(ASN1Sequence.getInstance(
                                 (ASN1TaggedObject)seq.getObjectAt(1), true));
 
-                return new X509CRLObject(
-                            CertificateList.getInstance(
-                                    sData.getCRLs().getObjectAt(sDataObjectCount++)));
+                return getCRL();
             }
         }
 
         return new X509CRLObject(CertificateList.getInstance(seq));
+    }
+
+    private CRL getCRL()
+        throws CRLException
+    {
+        if (sDataObjectCount >= sData.getCRLs().size())
+        {
+            return null;
+        }
+
+        return new X509CRLObject(
+                        CertificateList.getInstance(
+                                sData.getCRLs().getObjectAt(sDataObjectCount++)));
     }
 
     private CRL readPEMCRL(
@@ -87,9 +98,7 @@ public class X509CRLParser
             {
                 if (sDataObjectCount != sData.getCRLs().size())
                 {
-                    return new X509CRLObject(
-                                CertificateList.getInstance(
-                                        sData.getCRLs().getObjectAt(sDataObjectCount++)));
+                    return getCRL();
                 }
                 else
                 {

@@ -52,6 +52,11 @@ public class X509AttrCertParser
     private X509AttributeCertificate getCertificate()
         throws IOException
     {
+        if (sDataObjectCount >= sData.getCertificates().size())
+        {
+            return null;
+        }
+
         try
         {
             return new X509V2AttributeCertificate(
@@ -59,13 +64,8 @@ public class X509AttrCertParser
         }
         catch (IllegalArgumentException e)       // could be an attribute certificate
         {
-            if (sDataObjectCount < sData.getCertificates().size())
-            {
-                return getCertificate();
-            }
+            return getCertificate();
         }
-
-        return null;
     }
 
     private X509AttributeCertificate readPEMCertificate(
