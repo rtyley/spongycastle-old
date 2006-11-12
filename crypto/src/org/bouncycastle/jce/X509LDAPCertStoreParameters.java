@@ -180,7 +180,14 @@ public class X509LDAPCertStoreParameters
         public Builder(String ldapURL, String baseDN)
         {
             this.ldapURL = ldapURL;
-            this.baseDN = baseDN;
+            if (baseDN == null)
+            {
+                this.baseDN = "";
+            }
+            else
+            {
+                this.baseDN = baseDN;
+            }
 
             this.userCertificateAttribute = "userCertificate";
             this.cACertificateAttribute = "cACertificate";
