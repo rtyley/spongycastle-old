@@ -296,12 +296,15 @@ public class CMSSignedDataParser
 
                     for (Enumeration en = set.getObjects(); en.hasMoreElements();)
                     {
-                        ASN1Sequence seq = (ASN1Sequence)en.nextElement();
+                        DERObject obj = (DERObject)en.nextElement();
 
                         try
                         {
-                            certsAndcrls.add(cf.generateCertificate(
-                                new ByteArrayInputStream(seq.getEncoded())));
+                            if (obj instanceof ASN1Sequence)
+                            {
+                                certsAndcrls.add(cf.generateCertificate(
+                                    new ByteArrayInputStream(obj.getEncoded())));
+                            }
                         }
                         catch (IOException ex)
                         {
