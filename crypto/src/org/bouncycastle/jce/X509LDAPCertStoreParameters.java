@@ -688,7 +688,7 @@ public class X509LDAPCertStoreParameters
          * @throws IllegalArgumentException if a necessary parameter is <code>null</code>.
          * @return the builder
          */
-        public Builder setaACertificateSubjectAttributeName(String aACertificateSubjectAttributeName)
+        public Builder setAACertificateSubjectAttributeName(String aACertificateSubjectAttributeName)
         {
             this.aACertificateSubjectAttributeName = aACertificateSubjectAttributeName;
 
