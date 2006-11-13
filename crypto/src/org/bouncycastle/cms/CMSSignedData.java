@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -192,8 +193,6 @@ public class CMSSignedData
         if (certStore == null)
         {
             List                    certsAndcrls = new ArrayList();
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
             CertificateFactory      cf;
 
             try
@@ -218,7 +217,7 @@ public class CMSSignedData
                 {
                     try
                     {
-                        DERObject obj = (DERObject)e.nextElement();
+                        DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
 
                         if (obj instanceof ASN1Sequence)
                         {
@@ -236,8 +235,6 @@ public class CMSSignedData
                         throw new CMSException(
                                 "can't re-encode certificate!", ex);
                     }
-
-                    bOut.reset();
                 }
             }
 
@@ -251,10 +248,10 @@ public class CMSSignedData
                 {
                     try
                     {
-                        aOut.writeObject(e.nextElement());
+                        DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
 
                         certsAndcrls.add(cf.generateCRL(
-                            new ByteArrayInputStream(bOut.toByteArray())));
+                            new ByteArrayInputStream(obj.getEncoded())));
                     }
                     catch (IOException ex)
                     {
@@ -264,8 +261,6 @@ public class CMSSignedData
                     {
                         throw new CMSException("can't re-encode CRL!", ex);
                     }
-
-                    bOut.reset();
                 }
             }
 
