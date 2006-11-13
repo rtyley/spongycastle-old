@@ -114,11 +114,10 @@ public class JDKX509CertificateFactory
     }
 
     private CRL readDERCRL(
-        InputStream  in)
+        ASN1InputStream  aIn)
         throws IOException, CRLException
     {
-        ASN1InputStream  dIn = new ASN1InputStream(in, ProviderUtil.getReadLimit(in));
-        ASN1Sequence     seq = (ASN1Sequence)dIn.readObject();
+        ASN1Sequence     seq = (ASN1Sequence)aIn.readObject();
 
         if (seq.size() > 1
                 && seq.getObjectAt(0) instanceof DERObjectIdentifier)
