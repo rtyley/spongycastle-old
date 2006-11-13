@@ -296,7 +296,7 @@ public class CMSSignedDataParser
 
                     for (Enumeration en = set.getObjects(); en.hasMoreElements();)
                     {
-                        DERObject obj = (DERObject)en.nextElement();
+                        DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
 
                         try
                         {
@@ -329,7 +329,7 @@ public class CMSSignedDataParser
 
                     for (Enumeration en = set.getObjects(); en.hasMoreElements();)
                     {
-                        ASN1Sequence seq = (ASN1Sequence)en.nextElement();
+                        ASN1Sequence seq = ASN1Sequence.getInstance(((DEREncodable)en.nextElement()).getDERObject());
                         try
                         {
                             certsAndcrls.add(cf.generateCRL(
