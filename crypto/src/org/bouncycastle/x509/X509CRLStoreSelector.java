@@ -3,7 +3,7 @@ package org.bouncycastle.x509;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.util.Selector;
 
-import java.io.IOException;
+import java.security.cert.CRL;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLSelector;
 
@@ -16,7 +16,9 @@ import java.security.cert.X509CRLSelector;
  * @see org.bouncycastle.x509.X509Store
  * @see org.bouncycastle.jce.provider.X509StoreCRLCollection
  */
-public class X509CRLStoreSelector extends X509CRLSelector implements Selector
+public class X509CRLStoreSelector
+    extends X509CRLSelector
+    implements Selector
 {
     private boolean deltaCRLIndicator = false;
 
@@ -36,6 +38,11 @@ public class X509CRLStoreSelector extends X509CRLSelector implements Selector
             }
         }
         return super.match((X509CRL)obj);
+    }
+
+    public boolean match(CRL crl)
+    {
+        return match((Object)crl);
     }
 
     /**
@@ -62,6 +69,13 @@ public class X509CRLStoreSelector extends X509CRLSelector implements Selector
         this.deltaCRLIndicator = deltaCRLIndicator;
     }
 
+    public Object clone()
+    {
+        X509CRLStoreSelector selector = (X509CRLStoreSelector)super.clone();
+
+        return selector;
+    }
+
     /**
      * Returns an instance of this from a <code>X509CRLSelector</code>.
      *
@@ -78,15 +92,6 @@ public class X509CRLStoreSelector extends X509CRLSelector implements Selector
         X509CRLStoreSelector cs = new X509CRLStoreSelector();
         cs.setCertificateChecking(selector.getCertificateChecking());
         cs.setDateAndTime(selector.getDateAndTime());
-        try
-        {
-            cs.setIssuerNames(selector.getIssuerNames());
-        }
-        catch (IOException e)
-        {
-            // cannot happen
-            throw new IllegalArgumentException(e.getMessage());
-        }
         cs.setIssuers(selector.getIssuers());
         cs.setMaxCRLNumber(selector.getMaxCRL());
         cs.setMinCRLNumber(selector.getMinCRL());

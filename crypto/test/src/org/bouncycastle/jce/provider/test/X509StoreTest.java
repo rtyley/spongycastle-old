@@ -22,6 +22,7 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -110,7 +111,7 @@ public class X509StoreTest
         // Searching for rootCert by subjectDN
     
         X509CertStoreSelector targetConstraints = new X509CertStoreSelector();
-        targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert).getName());
+        targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert).getEncoded());
         Collection certs = certStore.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
@@ -119,8 +120,7 @@ public class X509StoreTest
 
         // Searching for rootCert by subjectDN encoded as byte
         targetConstraints = new X509CertStoreSelector();
-        targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert)
-                .getEncoded());
+        targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(rootCert).getEncoded());
         certs = certStore.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
@@ -131,8 +131,7 @@ public class X509StoreTest
 
         // Searching for rootCert by public key encoded as byte
         targetConstraints = new X509CertStoreSelector();
-        targetConstraints.setSubjectPublicKey(rootCert.getPublicKey()
-                .getEncoded());
+        targetConstraints.setSubjectPublicKey(rootCert.getPublicKey().getEncoded());
         certs = certStore.getMatches(targetConstraints);
         if (certs.size() != 1 || !certs.contains(rootCert))
         {
@@ -141,8 +140,7 @@ public class X509StoreTest
 
         // Searching for interCert by issuerDN
         targetConstraints = new X509CertStoreSelector();
-        targetConstraints.setIssuer(PrincipalUtil.getSubjectX509Principal(rootCert)
-                .getEncoded());
+        targetConstraints.setIssuer(PrincipalUtil.getSubjectX509Principal(rootCert).getEncoded());
         certs = certStore.getMatches(targetConstraints);
         if (certs.size() != 2)
         {
@@ -164,8 +162,7 @@ public class X509StoreTest
         ccsp = new X509CollectionStoreParameters(crlList);
         X509Store store = X509Store.getInstance("CRL/Collection", ccsp, "BC");
         X509CRLStoreSelector targetConstraintsCRL = new X509CRLStoreSelector();
-        targetConstraintsCRL.addIssuerName(PrincipalUtil.getIssuerX509Principal(rootCrl)
-                .getEncoded());
+        targetConstraintsCRL.setIssuers(Collections.singleton(rootCrl.getIssuerX500Principal()));
         Collection crls = store.getMatches(targetConstraintsCRL);
         if (crls.size() != 1 || !crls.contains(rootCrl))
         {

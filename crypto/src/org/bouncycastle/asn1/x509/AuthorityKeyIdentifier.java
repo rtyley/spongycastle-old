@@ -1,11 +1,20 @@
 package org.bouncycastle.asn1.x509;
 
-import java.math.BigInteger;
-import java.util.Enumeration;
-
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
+
+import java.math.BigInteger;
+import java.util.Enumeration;
 
 /**
  * The AuthorityKeyIdentifier object.
@@ -42,9 +51,13 @@ public class AuthorityKeyIdentifier
         {
             return (AuthorityKeyIdentifier)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        if (obj instanceof ASN1Sequence)
         {
             return new AuthorityKeyIdentifier((ASN1Sequence)obj);
+        }
+        if (obj instanceof X509Extension)
+        {
+            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
         }
 
         throw new IllegalArgumentException("unknown object in factory");

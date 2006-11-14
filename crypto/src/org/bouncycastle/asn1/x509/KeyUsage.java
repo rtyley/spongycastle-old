@@ -32,6 +32,21 @@ public class KeyUsage
     public static final int        encipherOnly     = (1 << 0);
     public static final int        decipherOnly     = (1 << 15);
 
+    public static DERBitString getInstance(Object obj)
+    {
+        if (obj instanceof KeyUsage)
+        {
+            return (KeyUsage)obj;
+        }
+
+        if (obj instanceof X509Extension)
+        {
+            return new KeyUsage(DERBitString.getInstance(X509Extension.convertValueToObject((X509Extension)obj)));
+        }
+
+        return new KeyUsage(DERBitString.getInstance(obj));
+    }
+    
     /**
      * Basic constructor.
      * 

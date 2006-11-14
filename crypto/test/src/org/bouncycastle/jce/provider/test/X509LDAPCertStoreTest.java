@@ -1,6 +1,8 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509LDAPCertStoreParameters;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
@@ -10,13 +12,16 @@ import org.bouncycastle.x509.X509Store;
 
 import java.io.ByteArrayInputStream;
 import java.security.Security;
+import java.security.cert.CRLException;
 import java.security.cert.CertStore;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLSelector;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 public class X509LDAPCertStoreTest extends SimpleTest
@@ -226,7 +231,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         // System.out.println(coll.toArray()[0]);
 
         sl.setCertificate(null);
-        sl.setSubject(xcert.getSubjectX500Principal().getEncoded());
+        sl.setSubject(getSubject(xcert).getEncoded());
         coll = cs.getCertificates(sl);
         if (coll.isEmpty() || !coll.iterator().next().equals(xcert))
         {
@@ -235,7 +240,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         X509CRLSelector sl2 = new X509CRLSelector();
         X509CRL crl = (X509CRL)cf.generateCRL(new
             ByteArrayInputStream(directCRL));
-        sl2.addIssuer(crl.getIssuerX500Principal());
+        sl2.addIssuerName(getCRLIssuer(crl).getEncoded());
         coll = cs.getCRLs(sl2);
         if (!coll.iterator().hasNext())
         {
@@ -272,7 +277,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(caCert3));
         sl = new X509CertSelector();
-        sl.setSubject(xcert.getSubjectX500Principal());
+        sl.setSubject(getSubject(xcert).getEncoded());
         coll = cs.getCertificates(sl);
         boolean found = false;
         if (coll.isEmpty())
@@ -299,7 +304,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(crossCert3));
         sl = new X509CertSelector();
-        sl.setSubject(xcert.getSubjectX500Principal());
+        sl.setSubject(getSubject(xcert).getEncoded());
         coll = cs.getCertificates(sl);
         if (coll.isEmpty())
         {
@@ -340,7 +345,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         // System.out.println(coll.toArray()[0]);
 
         sl.setCertificate(null);
-        sl.setSubject(xcert.getSubjectX500Principal().getEncoded());
+        sl.setSubject(getSubject(xcert).getEncoded());
         coll = cs.getMatches(sl);
         if (coll.isEmpty() || !coll.iterator().next().equals(xcert))
         {
@@ -349,7 +354,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         X509CRLStoreSelector sl2 = new X509CRLStoreSelector();
         X509CRL crl = (X509CRL)cf.generateCRL(new
             ByteArrayInputStream(directCRL));
-        sl2.addIssuer(crl.getIssuerX500Principal());
+        sl2.setIssuers(Collections.singleton(crl.getIssuerX500Principal()));
         cs = X509Store.getInstance("CRL/LDAP", params1, "BC");
         coll = cs.getMatches(sl2);
         if (!coll.iterator().hasNext())
@@ -387,7 +392,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(caCert3));
         sl = new X509CertStoreSelector();
-        sl.setSubject(xcert.getSubjectX500Principal());
+        sl.setSubject(getSubject(xcert).getEncoded());
         coll = cs.getMatches(sl);
         boolean found = false;
         if (coll.isEmpty())
@@ -413,7 +418,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         sl = new X509CertStoreSelector();
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(crossCert3));
-        sl.setSubject(xcert.getSubjectX500Principal());
+        sl.setSubject(getSubject(xcert).getEncoded());
         coll = cs.getMatches(sl);
         if (coll.isEmpty())
         {
@@ -435,6 +440,18 @@ public class X509LDAPCertStoreTest extends SimpleTest
 
         // System.out.println(coll.toArray()[0]);
 
+    }
+
+    private X509Principal getSubject(X509Certificate cert)
+        throws CertificateEncodingException
+    {
+        return PrincipalUtil.getSubjectX509Principal(cert);
+    }
+
+    private X509Principal getCRLIssuer(X509CRL crl)
+        throws CRLException
+    {
+        return PrincipalUtil.getIssuerX509Principal(crl);
     }
 
     public String getName()

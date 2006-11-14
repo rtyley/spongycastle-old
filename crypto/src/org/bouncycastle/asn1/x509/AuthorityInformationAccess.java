@@ -35,9 +35,15 @@ public class AuthorityInformationAccess
         {
             return (AuthorityInformationAccess)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+
+        if (obj instanceof ASN1Sequence)
         {
             return new AuthorityInformationAccess((ASN1Sequence)obj);
+        }
+
+        if (obj instanceof X509Extension)
+        {
+            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
         }
 
         throw new IllegalArgumentException("unknown object in factory");
