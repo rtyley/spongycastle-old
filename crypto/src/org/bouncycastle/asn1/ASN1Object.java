@@ -5,6 +5,19 @@ import java.io.IOException;
 public abstract  class ASN1Object
     extends DERObject
 {
+    /**
+     *
+     * @param data
+     * @return
+     */
+    public static ASN1Object fromByteArray(byte[] data)
+        throws IOException
+    {
+        ASN1InputStream aIn = new ASN1InputStream(data);
+
+        return (ASN1Object)aIn.readObject();
+    }
+
     public final boolean equals(Object o)
     {
         if (this == o)

@@ -1,15 +1,15 @@
 package org.bouncycastle.asn1.x509;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * The extendedKeyUsage object.
@@ -33,7 +33,7 @@ public class ExtendedKeyUsage
     public static ExtendedKeyUsage getInstance(
         Object obj)
     {
-        if(obj == null || obj instanceof ExtendedKeyUsage) 
+        if (obj instanceof ExtendedKeyUsage) 
         {
             return (ExtendedKeyUsage)obj;
         }
@@ -42,7 +42,12 @@ public class ExtendedKeyUsage
         {
             return new ExtendedKeyUsage((ASN1Sequence)obj);
         }
-        
+
+        if (obj instanceof X509Extension)
+        {
+            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
+        }
+
         throw new IllegalArgumentException("Invalid ExtendedKeyUsage: " + obj.getClass().getName());
     }
 

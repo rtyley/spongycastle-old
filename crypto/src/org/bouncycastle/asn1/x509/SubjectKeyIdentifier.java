@@ -29,7 +29,7 @@ public class SubjectKeyIdentifier
     public static SubjectKeyIdentifier getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof SubjectKeyIdentifier) 
+        if (obj instanceof SubjectKeyIdentifier)
         {
             return (SubjectKeyIdentifier)obj;
         }
@@ -43,7 +43,12 @@ public class SubjectKeyIdentifier
         {
             return new SubjectKeyIdentifier((ASN1OctetString)obj);
         }
-        
+
+        if (obj instanceof X509Extension)
+        {
+            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
+        }
+
         throw new IllegalArgumentException("Invalid SubjectKeyIdentifier: " + obj.getClass().getName());
     }
     

@@ -1,7 +1,10 @@
 package org.bouncycastle.asn1.x509;
 
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERBoolean;
+
+import java.io.IOException;
 
 /**
  * an object for the elements in the X.509 V3 extension block.
@@ -60,5 +63,25 @@ public class X509Extension
 
         return other.getValue().equals(this.getValue())
             && (other.isCritical() == this.isCritical());
+    }
+
+    /**
+     * Convert the value of the passed in extension to an object
+     * @param ext the extension to parse
+     * @return the object the value string contains
+     * @exception IllegalArgumentException if conversion is not possible
+     */
+    public static ASN1Object convertValueToObject(
+        X509Extension ext)
+        throws IllegalArgumentException
+    {
+        try
+        {
+            return ASN1Object.fromByteArray(ext.getValue().getOctets());
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("can't convert extension: " +  e);
+        }
     }
 }

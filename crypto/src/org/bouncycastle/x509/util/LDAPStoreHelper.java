@@ -165,7 +165,7 @@ public class LDAPStoreHelper
                     .next()));
                 X509Certificate cert = (X509Certificate)parser
                     .engineRead();
-                if (xselector.match(cert))
+                if (xselector.match((Object)cert))
                 {
                     certSet.add(cert);
                 }
@@ -202,63 +202,45 @@ public class LDAPStoreHelper
         // TODO: support also subjectAltNames?
         List list = new ArrayList();
 
-        try
+        String subject = null;
+        String serial = null;
+
+        X500Principal encSubject = xselector.getSubject();
+        if (encSubject != null)
         {
-            String subject = null;
-            String serial = null;
+            subject = encSubject.getName("RFC1779");
+        }
+        if (xselector.getSerialNumber() != null)
+        {
+            serial = xselector.getSerialNumber().toString();
+        }
+        if (xselector.getCertificate() != null)
+        {
+            subject = xselector.getCertificate().getSubjectX500Principal().getName("RFC1779");
+            serial = xselector.getCertificate().getSerialNumber().toString();
+        }
 
-            if (xselector.getSubjectAsBytes() != null
-                || xselector.getSubjectAsString() != null
-                || xselector.getSubject() != null)
+        String attrValue = null;
+        if (subject != null)
+        {
+            for (int i = 0; i < subjectAttributeNames.length; i++)
             {
-                if (xselector.getSubject() != null)
-                {
-                    subject = xselector.getSubject().getName("RFC1779");
-                }
-                else if (xselector.getSubjectAsBytes() != null)
-                {
-                    subject = new X500Principal(xselector.getSubjectAsBytes()).getName();
-                }
-                else
-                {
-                    subject = xselector.getSubjectAsString();
-                }
-            }
-            if (xselector.getSerialNumber() != null)
-            {
-                serial = xselector.getSerialNumber().toString();
-            }
-            if (xselector.getCertificate() != null)
-            {
-                subject = xselector.getCertificate().getSubjectX500Principal().getName("RFC1779");
-                serial = xselector.getCertificate().getSerialNumber().toString();
-            }
-
-            String attrValue = null;
-            if (subject != null)
-            {
-                for (int i = 0; i < subjectAttributeNames.length; i++)
-                {
-                    attrValue = parseDN(subject, subjectAttributeNames[i]);
-                    list
-                        .addAll(search(attrNames, "*" + attrValue + "*",
-                            attrs));
-                }
-            }
-            if (serial != null && params.getSearchForSerialNumberIn() != null)
-            {
-                attrValue = serial;
-                list.addAll(search(params.getSearchForSerialNumberIn().split(
-                    "\\s+"), attrValue, attrs));
-            }
-            if (serial == null && subject == null)
-            {
-                list.addAll(search(attrNames, "*", attrs));
+                attrValue = parseDN(subject, subjectAttributeNames[i]);
+                list
+                    .addAll(search(attrNames, "*" + attrValue + "*",
+                        attrs));
             }
         }
-        catch (IOException e)
+        if (serial != null && params.getSearchForSerialNumberIn() != null)
         {
-            throw new StoreException("exception processing selector", e);
+            attrValue = serial;
+            list.addAll(search(
+                splitString(params.getSearchForSerialNumberIn()),
+                                                  attrValue, attrs));
+        }
+        if (serial == null && subject == null)
+        {
+            list.addAll(search(attrNames, "*", attrs));
         }
 
         return list;
@@ -286,57 +268,40 @@ public class LDAPStoreHelper
         throws StoreException
     {
         List list = new ArrayList();
-        try
+
+        // search for subject
+        String subject = null;
+
+        if (xselector.getForwardSelector() != null)
         {
-            // search for subject
-            String subject = null;
-
-            if (xselector.getForwardSelector() != null)
+            X500Principal encSubject = xselector.getForwardSelector().getSubject();
+            if (encSubject != null)
             {
-                if (xselector.getForwardSelector().getSubject() != null)
-                {
-                    subject = xselector.getForwardSelector().getSubject()
-                        .getName("RFC1779");
-                }
-                else if (xselector.getForwardSelector().getSubjectAsBytes() != null)
-                {
-                    subject = new X500Principal(xselector.getForwardSelector()
-                        .getSubjectAsBytes()).getName();
-                }
-                else if (xselector.getForwardSelector().getSubjectAsString() != null)
-                {
-                    subject = xselector.getForwardSelector()
-                        .getSubjectAsString();
-                }
-
-            }
-            if (xselector.getCertPairChecking() != null)
-            {
-                if (xselector.getCertPairChecking().getForward() != null)
-                {
-                    subject = xselector.getCertPairChecking().getForward()
-                        .getSubjectX500Principal().getName("RFC1779");
-                }
-            }
-            String attrValue = null;
-            if (subject != null)
-            {
-                for (int i = 0; i < subjectAttributeNames.length; i++)
-                {
-                    attrValue = parseDN(subject, subjectAttributeNames[i]);
-                    list
-                        .addAll(search(attrNames, "*" + attrValue + "*",
-                            attrs));
-                }
-            }
-            if (subject == null)
-            {
-                list.addAll(search(attrNames, "*", attrs));
+                subject = encSubject.getName("RFC1779");
             }
         }
-        catch (IOException e)
+        if (xselector.getCertPairChecking() != null)
         {
-            throw new StoreException("Exception processing selector: " + e, e);
+            if (xselector.getCertPairChecking().getForward() != null)
+            {
+                subject = xselector.getCertPairChecking().getForward()
+                    .getSubjectX500Principal().getName("RFC1779");
+            }
+        }
+        String attrValue = null;
+        if (subject != null)
+        {
+            for (int i = 0; i < subjectAttributeNames.length; i++)
+            {
+                attrValue = parseDN(subject, subjectAttributeNames[i]);
+                list
+                    .addAll(search(attrNames, "*" + attrValue + "*",
+                        attrs));
+            }
+        }
+        if (subject == null)
+        {
+            list.addAll(search(attrNames, "*", attrs));
         }
 
         return list;
@@ -436,8 +401,7 @@ public class LDAPStoreHelper
             while (it.hasNext())
             {
                 serial = (String)it.next();
-                list.addAll(search(params.getSearchForSerialNumberIn()
-                    .split("\\s+"), serial, attrs));
+                list.addAll(search(splitString(params.getSearchForSerialNumberIn()), serial, attrs));
             }
         }
         if (serials.size() == 0 && subject == null)
@@ -614,11 +578,10 @@ public class LDAPStoreHelper
                 parser.engineInit(new ByteArrayInputStream((byte[])it
                     .next()));
                 X509CRL crl = (X509CRL)parser.engineRead();
-                if (xselector.match(crl))
+                if (xselector.match((Object)crl))
                 {
                     crlSet.add(crl);
                 }
-
             }
             catch (StreamParsingException e)
             {
@@ -662,7 +625,7 @@ public class LDAPStoreHelper
                             reverse).readObject())));
                     i++;
                 }
-                if (xselector.match(pair))
+                if (xselector.match((Object)pair))
                 {
                     certPairSet.add(pair);
                 }
@@ -691,7 +654,7 @@ public class LDAPStoreHelper
                     .next()));
                 X509AttributeCertificate cert = (X509AttributeCertificate)parser
                     .engineRead();
-                if (xselector.match(cert))
+                if (xselector.match((Object)cert))
                 {
                     certSet.add(cert);
                 }
@@ -718,12 +681,11 @@ public class LDAPStoreHelper
     public Collection getAuthorityRevocationLists(X509CRLStoreSelector selector)
         throws StoreException
     {
-        String[] attrs = params.getAuthorityRevocationListAttribute().split(
-            "\\s+");
-        String attrNames[] = params
-            .getLdapAuthorityRevocationListAttributeName().split("\\s+");
-        String issuerAttributeNames[] = params
-            .getAuthorityRevocationListIssuerAttributeName().split("\\s+");
+        String[] attrs = splitString(params.getAuthorityRevocationListAttribute());
+        String attrNames[] = splitString(params
+            .getLdapAuthorityRevocationListAttributeName());
+        String issuerAttributeNames[] = splitString(params
+            .getAuthorityRevocationListIssuerAttributeName());
 
         List list = cRLIssuerSearch(selector, attrs, attrNames,
             issuerAttributeNames);
@@ -752,14 +714,12 @@ public class LDAPStoreHelper
     public Collection getAttributeCertificateRevocationLists(
         X509CRLStoreSelector selector) throws StoreException
     {
-        String[] attrs = params
-            .getAttributeCertificateRevocationListAttribute().split("\\s+");
-        String attrNames[] = params
-            .getLdapAttributeCertificateRevocationListAttributeName()
-            .split("\\s+");
-        String issuerAttributeNames[] = params
-            .getAttributeCertificateRevocationListIssuerAttributeName()
-            .split("\\s+");
+        String[] attrs = splitString(params
+            .getAttributeCertificateRevocationListAttribute());
+        String attrNames[] = splitString(params
+            .getLdapAttributeCertificateRevocationListAttributeName());
+        String issuerAttributeNames[] = splitString(params
+            .getAttributeCertificateRevocationListIssuerAttributeName());
 
         List list = cRLIssuerSearch(selector, attrs, attrNames,
             issuerAttributeNames);
@@ -789,14 +749,11 @@ public class LDAPStoreHelper
     public Collection getAttributeAuthorityRevocationLists(
         X509CRLStoreSelector selector) throws StoreException
     {
-        String[] attrs = params.getAttributeAuthorityRevocationListAttribute()
-            .split("\\s+");
-        String attrNames[] = params
-            .getLdapAttributeAuthorityRevocationListAttributeName().split(
-            "\\s+");
-        String issuerAttributeNames[] = params
-            .getAttributeAuthorityRevocationListIssuerAttributeName()
-            .split("\\s+");
+        String[] attrs = splitString(params.getAttributeAuthorityRevocationListAttribute());
+        String attrNames[] = splitString(params
+            .getLdapAttributeAuthorityRevocationListAttributeName());
+        String issuerAttributeNames[] = splitString(params
+            .getAttributeAuthorityRevocationListIssuerAttributeName());
 
         List list = cRLIssuerSearch(selector, attrs, attrNames,
             issuerAttributeNames);
@@ -822,11 +779,10 @@ public class LDAPStoreHelper
     public Collection getCrossCertificatePairs(
         X509CertPairStoreSelector selector) throws StoreException
     {
-        String[] attrs = params.getCrossCertificateAttribute().split("\\s+");
-        String attrNames[] = params.getLdapCrossCertificateAttributeName()
-            .split("\\s+");
-        String subjectAttributeNames[] = params
-            .getCrossCertificateSubjectAttributeName().split("\\s+");
+        String[] attrs = splitString(params.getCrossCertificateAttribute());
+        String attrNames[] = splitString(params.getLdapCrossCertificateAttributeName());
+        String subjectAttributeNames[] = splitString(params
+            .getCrossCertificateSubjectAttributeName());
         List list = crossCertificatePairSubjectSearch(selector, attrs,
             attrNames, subjectAttributeNames);
         Set resultSet = createCrossCertificatePairs(list, selector);
@@ -858,11 +814,10 @@ public class LDAPStoreHelper
     public Collection getUserCertificates(X509CertStoreSelector selector)
         throws StoreException
     {
-        String[] attrs = params.getUserCertificateAttribute().split("\\s+");
-        String attrNames[] = params.getLdapUserCertificateAttributeName()
-            .split("\\s+");
-        String subjectAttributeNames[] = params
-            .getUserCertificateSubjectAttributeName().split("\\s+");
+        String[] attrs = splitString(params.getUserCertificateAttribute());
+        String attrNames[] = splitString(params.getLdapUserCertificateAttributeName());
+        String subjectAttributeNames[] = splitString(params
+            .getUserCertificateSubjectAttributeName());
 
         List list = certSubjectSerialSearch(selector, attrs, attrNames,
             subjectAttributeNames);
@@ -889,11 +844,9 @@ public class LDAPStoreHelper
     public Collection getAACertificates(X509AttributeCertStoreSelector selector)
         throws StoreException
     {
-        String[] attrs = params.getAACertificateAttribute().split("\\s+");
-        String attrNames[] = params.getLdapAACertificateAttributeName().split(
-            "\\s+");
-        String subjectAttributeNames[] = params
-            .getAACertificateSubjectAttributeName().split("\\s+");
+        String[] attrs = splitString(params.getAACertificateAttribute());
+        String attrNames[] = splitString(params.getLdapAACertificateAttributeName());
+        String subjectAttributeNames[] = splitString(params.getAACertificateSubjectAttributeName());
 
         List list = attrCertSubjectSerialSearch(selector, attrs, attrNames,
             subjectAttributeNames);
@@ -923,14 +876,11 @@ public class LDAPStoreHelper
     public Collection getAttributeDescriptorCertificates(
         X509AttributeCertStoreSelector selector) throws StoreException
     {
-        String[] attrs = params.getAttributeDescriptorCertificateAttribute()
-            .split("\\s+");
-        String attrNames[] = params
-            .getLdapAttributeDescriptorCertificateAttributeName().split(
-            "\\s+");
-        String subjectAttributeNames[] = params
-            .getAttributeDescriptorCertificateSubjectAttributeName().split(
-            "\\s+");
+        String[] attrs = splitString(params.getAttributeDescriptorCertificateAttribute());
+        String attrNames[] = splitString(params
+            .getLdapAttributeDescriptorCertificateAttributeName());
+        String subjectAttributeNames[] = splitString(params
+            .getAttributeDescriptorCertificateSubjectAttributeName());
 
         List list = attrCertSubjectSerialSearch(selector, attrs, attrNames,
             subjectAttributeNames);
@@ -960,11 +910,10 @@ public class LDAPStoreHelper
     public Collection getCACertificates(X509CertStoreSelector selector)
         throws StoreException
     {
-        String[] attrs = params.getCACertificateAttribute().split("\\s+");
-        String attrNames[] = params.getLdapCACertificateAttributeName().split(
-            "\\s+");
-        String subjectAttributeNames[] = params
-            .getCACertificateSubjectAttributeName().split("\\s+");
+        String[] attrs = splitString(params.getCACertificateAttribute());
+        String attrNames[] = splitString(params.getLdapCACertificateAttributeName());
+        String subjectAttributeNames[] = splitString(params
+            .getCACertificateSubjectAttributeName());
         List list = certSubjectSerialSearch(selector, attrs, attrNames,
             subjectAttributeNames);
         Set resultSet = createCerts(list, selector);
@@ -988,11 +937,10 @@ public class LDAPStoreHelper
     public Collection getDeltaCertificateRevocationLists(
         X509CRLStoreSelector selector) throws StoreException
     {
-        String[] attrs = params.getDeltaRevocationListAttribute().split("\\s+");
-        String attrNames[] = params.getLdapDeltaRevocationListAttributeName()
-            .split("\\s+");
-        String issuerAttributeNames[] = params
-            .getDeltaRevocationListIssuerAttributeName().split("\\s+");
+        String[] attrs = splitString(params.getDeltaRevocationListAttribute());
+        String attrNames[] = splitString(params.getLdapDeltaRevocationListAttributeName());
+        String issuerAttributeNames[] = splitString(params
+            .getDeltaRevocationListIssuerAttributeName());
         List list = cRLIssuerSearch(selector, attrs, attrNames,
             issuerAttributeNames);
         Set resultSet = createCRLs(list, selector);
@@ -1019,14 +967,11 @@ public class LDAPStoreHelper
     public Collection getAttributeCertificateAttributes(
         X509AttributeCertStoreSelector selector) throws StoreException
     {
-        String[] attrs = params.getAttributeCertificateAttributeAttribute()
-            .split("\\s+");
-        String attrNames[] = params
-            .getLdapAttributeCertificateAttributeAttributeName().split(
-            "\\s+");
-        String subjectAttributeNames[] = params
-            .getAttributeCertificateAttributeSubjectAttributeName().split(
-            "\\s+");
+        String[] attrs = splitString(params.getAttributeCertificateAttributeAttribute());
+        String attrNames[] = splitString(params
+            .getLdapAttributeCertificateAttributeAttributeName());
+        String subjectAttributeNames[] = splitString(params
+            .getAttributeCertificateAttributeSubjectAttributeName());
         List list = attrCertSubjectSerialSearch(selector, attrs, attrNames,
             subjectAttributeNames);
         Set resultSet = createAttributeCertificates(list, selector);
@@ -1051,13 +996,11 @@ public class LDAPStoreHelper
     public Collection getCertificateRevocationLists(
         X509CRLStoreSelector selector) throws StoreException
     {
-        String[] attrs = params.getCertificateRevocationListAttribute().split(
-            "\\s+");
-        String attrNames[] = params
-            .getLdapCertificateRevocationListAttributeName().split("\\s+");
-        String issuerAttributeNames[] = params
-            .getCertificateRevocationListIssuerAttributeName()
-            .split("\\s+");
+        String[] attrs = splitString(params.getCertificateRevocationListAttribute());
+        String attrNames[] = splitString(params
+            .getLdapCertificateRevocationListAttributeName());
+        String issuerAttributeNames[] = splitString(params
+            .getCertificateRevocationListIssuerAttributeName());
         List list = cRLIssuerSearch(selector, attrs, attrNames,
             issuerAttributeNames);
         Set resultSet = createCRLs(list, selector);
@@ -1127,5 +1070,13 @@ public class LDAPStoreHelper
             return (List)entry.get(1);
         }
         return null;
+    }
+
+    /*
+     * spilt string based on spaces
+     */
+    private String[] splitString(String str)
+    {
+        return str.split("\\s+");
     }
 }

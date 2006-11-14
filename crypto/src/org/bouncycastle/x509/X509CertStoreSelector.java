@@ -5,6 +5,7 @@ import org.bouncycastle.util.Selector;
 import java.io.IOException;
 import java.security.cert.Certificate;
 import java.security.cert.X509CertSelector;
+import java.security.cert.X509Certificate;
 
 /**
  * This class is a Selector implementation for X.509 certificates.
@@ -13,17 +14,32 @@ import java.security.cert.X509CertSelector;
  * @see org.bouncycastle.x509.X509Store
  * @see org.bouncycastle.jce.provider.X509StoreCertCollection
  */
-public class X509CertStoreSelector extends X509CertSelector implements Selector
+public class X509CertStoreSelector
+    extends X509CertSelector
+    implements Selector
 {
-
     public boolean match(Object obj)
     {
-        if (!(obj instanceof Certificate))
+        if (!(obj instanceof X509Certificate))
         {
             return false;
         }
 
-        return super.match((Certificate)obj);
+        X509Certificate other = (X509Certificate)obj;
+
+        return super.match(other);
+    }
+
+    public boolean match(Certificate cert)
+    {
+        return match((Object)cert);
+    }
+
+    public Object clone()
+    {
+        X509CertStoreSelector selector = (X509CertStoreSelector)super.clone();
+
+        return selector;
     }
 
     /**
@@ -48,18 +64,15 @@ public class X509CertStoreSelector extends X509CertSelector implements Selector
         {
             cs.setExtendedKeyUsage(selector.getExtendedKeyUsage());
             cs.setNameConstraints(selector.getNameConstraints());
-            cs.setPathToNames(selector.getPathToNames());
             cs.setPolicy(selector.getPolicy());
             cs.setSubjectPublicKeyAlgID(selector.getSubjectPublicKeyAlgID());
         }
         catch (IOException e)
         {
-            // cannot happen
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException("error in passed in selector: " + e);
         }
         cs.setIssuer(selector.getIssuer());
         cs.setKeyUsage(selector.getKeyUsage());
-        cs.setMatchAllSubjectAltNames(selector.getMatchAllSubjectAltNames());
         cs.setPrivateKeyValid(selector.getPrivateKeyValid());
         cs.setSerialNumber(selector.getSerialNumber());
         cs.setSubject(selector.getSubject());
@@ -67,4 +80,5 @@ public class X509CertStoreSelector extends X509CertSelector implements Selector
         cs.setSubjectPublicKey(selector.getSubjectPublicKey());
         return cs;
     }
+
 }
