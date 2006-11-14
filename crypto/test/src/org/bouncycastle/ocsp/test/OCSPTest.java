@@ -13,6 +13,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.ocsp.BasicOCSPResp;
 import org.bouncycastle.ocsp.BasicOCSPRespGenerator;
 import org.bouncycastle.ocsp.CertificateID;
+import org.bouncycastle.ocsp.CertificateStatus;
 import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
@@ -28,6 +29,7 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
@@ -310,9 +312,13 @@ public class OCSPTest
         }
 
         //
-        // response
+        // response generation
         //
         BasicOCSPRespGenerator respGen = new BasicOCSPRespGenerator(signKP.getPublic());
+
+        respGen.addResponse(id, CertificateStatus.GOOD);
+
+        respGen.generate("SHA1withECDSA", signKP.getPrivate(), chain, new Date(), "BC");
     }
 
     public void performTest()
