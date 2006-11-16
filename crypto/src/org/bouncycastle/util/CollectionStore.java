@@ -5,17 +5,31 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * A simple collection backed store.
+ */
 public class CollectionStore
     implements Store
 {
     private Collection _local;
 
+    /**
+     * Basic constructor.
+     *
+     * @param collection - initial contents for the store, this is copied.
+     */
     public CollectionStore(
         Collection collection)
     {
-        _local = collection;
+        _local = new ArrayList(collection);
     }
 
+    /**
+     * Return the matches in the collection for the passed in selector.
+     *
+     * @param selector the selector to match against.
+     * @return
+     */
     public Collection getMatches(Selector selector)
     {
         if (selector == null)
