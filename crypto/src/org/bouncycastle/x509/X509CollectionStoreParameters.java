@@ -1,5 +1,6 @@
 package org.bouncycastle.x509;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -16,8 +17,8 @@ public class X509CollectionStoreParameters
 	/**
 	 * Constructor.
 	 * <p>
-	 * The collection is stored as a reference. So adding or removing objects
-	 * will effect this.
+	 * The collection is copied.
+     * </p>
 	 * 
 	 * @param collection
 	 *            The collection containing X.509 object types.
@@ -44,14 +45,13 @@ public class X509CollectionStoreParameters
 	}
 	
 	/**
-	 * Returns the <code>Collection</code> as a reference. So adding or
-	 * removing objects will effect this.
+	 * Returns a copy of the <code>Collection</code>.
 	 * 
 	 * @return The <code>Collection</code>. Is never <code>null</code>.
 	 */
     public Collection getCollection()
     {
-        return collection;
+        return new ArrayList(collection);
     }
     
 	/**
