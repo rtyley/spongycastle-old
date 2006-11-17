@@ -404,6 +404,7 @@ public class X509Name
      * <b>Note:</b> if the name you are trying to generate should be
      * following a specific ordering, you should use the constructor
      * with the ordering specified below.
+     * @deprecated use an ordered constructor! The hashtable ordering is rarely correct
      */
     public X509Name(
         Hashtable  attributes)
