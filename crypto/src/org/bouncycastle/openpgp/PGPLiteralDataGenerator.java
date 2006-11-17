@@ -4,6 +4,7 @@ import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.PacketTags;
 
 import java.io.File;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -88,6 +89,11 @@ public class PGPLiteralDataGenerator
         Date            modificationTime)
         throws IOException
     {
+        if (pkOut != null)
+        {
+            throw new IllegalStateException("generator already in open state");
+        }
+
         pkOut = new BCPGOutputStream(out, PacketTags.LITERAL_DATA, length + 2 + name.length() + 4, oldFormat);
         
         writeHeader(pkOut, format, name, modificationTime.getTime());
@@ -119,6 +125,11 @@ public class PGPLiteralDataGenerator
         byte[]          buffer)
         throws IOException
     {
+        if (pkOut != null)
+        {
+            throw new IllegalStateException("generator already in open state");
+        }
+
         pkOut = new BCPGOutputStream(out, PacketTags.LITERAL_DATA, buffer);
         
         writeHeader(pkOut, format, name, modificationTime.getTime());
@@ -143,6 +154,11 @@ public class PGPLiteralDataGenerator
         File            file)
         throws IOException
     {
+        if (pkOut != null)
+        {
+            throw new IllegalStateException("generator already in open state");
+        }
+
         pkOut = new BCPGOutputStream(out, PacketTags.LITERAL_DATA, file.length() + 2 + file.getName().length() + 4, oldFormat);
         
         writeHeader(pkOut, format, file.getName(), file.lastModified());
@@ -159,56 +175,29 @@ public class PGPLiteralDataGenerator
     public void close()
         throws IOException
     {
-        localClose();
-    }
-
-    public void localClose()
-        throws IOException
-    {
-        pkOut.finish();
-        pkOut.flush();
+        if (pkOut != null)
+        {
+            pkOut.finish();
+            pkOut.flush();
+            pkOut = null;
+        }
     }
 
     private class LiteralDataWrappedStream
-        extends OutputStream
+        extends FilterOutputStream
     {
         private final PGPLiteralDataGenerator _lGen;
-        private final OutputStream _out;
 
         public LiteralDataWrappedStream(PGPLiteralDataGenerator lGen, OutputStream out)
         {
+            super(out);
             _lGen = lGen;
-            _out = out;
-        }
-
-        public void write(byte[] bytes)
-            throws IOException
-        {
-            _out.write(bytes);
-        }
-
-        public void write(byte[] bytes, int offset, int length)
-            throws IOException
-        {
-            _out.write(bytes, offset, length);
-        }
-
-        public void write(int b)
-            throws IOException
-        {
-            _out.write(b);
-        }
-
-        public void flush()
-            throws IOException
-        {
-            _out.flush();
         }
 
         public void close()
             throws IOException
         {
-            _lGen.localClose();
+            _lGen.close();
         }
     }
 }

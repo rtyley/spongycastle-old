@@ -5,6 +5,7 @@ import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.PacketTags;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.Deflater;
@@ -18,7 +19,7 @@ public class PGPCompressedDataGenerator
 {
     private int                     algorithm;
     private int                     compression;
-    
+
     private OutputStream            out;
     private OutputStream            dOut;
     private BCPGOutputStream        pkOut;
@@ -172,79 +173,48 @@ public class PGPCompressedDataGenerator
     public void close()
         throws IOException
     {
-        localClose();
-    }
-
-    public void localClose()
-        throws IOException
-    {
-        if (dOut == null)
+        if (dOut != null)
         {
-            throw new IOException("generator not opened.");
+            if (dOut instanceof DeflaterOutputStream)
+            {
+                DeflaterOutputStream dfOut = (DeflaterOutputStream)dOut;
+    
+                dfOut.finish();
+            }
+            else if (dOut instanceof CBZip2OutputStream)
+            {
+                CBZip2OutputStream cbOut = (CBZip2OutputStream)dOut;
+    
+                cbOut.finish();
+            }
+    
+            dOut.flush();
+    
+            pkOut.finish();
+            pkOut.flush();
+            out.flush();
+    
+            dOut = null;
+            pkOut = null;
+            out = null;
         }
-
-        if (dOut instanceof DeflaterOutputStream)
-        {
-            DeflaterOutputStream dfOut = (DeflaterOutputStream)dOut;
-
-            dfOut.finish();
-        }
-        else if (dOut instanceof CBZip2OutputStream)
-        {
-            CBZip2OutputStream cbOut = (CBZip2OutputStream)dOut;
-
-            cbOut.finish();
-        }
-
-        dOut.flush();
-
-        pkOut.finish();
-        pkOut.flush();
-        out.flush();
-
-        dOut = null;
     }
 
     private class CompressedWrappedStream
-        extends OutputStream
+        extends FilterOutputStream
     {
         private final PGPCompressedDataGenerator _cGen;
-        private final OutputStream _out;
 
         public CompressedWrappedStream(PGPCompressedDataGenerator cGen, OutputStream out)
         {
+            super(out);
             _cGen = cGen;
-            _out = out;
-        }
-
-        public void write(byte[] bytes)
-            throws IOException
-        {
-            _out.write(bytes);
-        }
-
-        public void write(byte[] bytes, int offset, int length)
-            throws IOException
-        {
-            _out.write(bytes, offset, length);
-        }
-
-        public void write(int b)
-            throws IOException
-        {
-            _out.write(b);
-        }
-
-        public void flush()
-            throws IOException
-        {
-            _out.flush();
         }
 
         public void close()
             throws IOException
         {
-            _cGen.localClose();
+            _cGen.close();
         }
     }
 }

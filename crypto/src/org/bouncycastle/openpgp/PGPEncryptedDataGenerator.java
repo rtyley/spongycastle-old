@@ -12,6 +12,8 @@ import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.spec.IvParameterSpec;
+
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
@@ -35,7 +37,6 @@ public class PGPEncryptedDataGenerator
     private boolean              withIntegrityPacket = false;
     private boolean              oldFormat = false;
     private DigestOutputStream   digestOut;
-    private boolean              isOpen;
         
     private abstract class EncMethod
         extends ContainedPacket
@@ -68,7 +69,7 @@ public class PGPEncryptedDataGenerator
         {
             return key;
         }
-        
+
         public void addSessionInfo(
             byte[]    sessionInfo) 
             throws Exception
@@ -80,16 +81,16 @@ public class PGPEncryptedDataGenerator
         
             this.sessionInfo = c.doFinal(sessionInfo, 0, sessionInfo.length - 2);
         }
-        
+
         public void encode(BCPGOutputStream pOut) 
             throws IOException
         {
-            SymmetricKeyEncSessionPacket    pk = new SymmetricKeyEncSessionPacket(encAlgorithm, s2k, sessionInfo);
-            
+            SymmetricKeyEncSessionPacket pk = new SymmetricKeyEncSessionPacket(encAlgorithm, s2k, sessionInfo);
+
             pOut.writePacket(pk);
         }
     }
-    
+
     private class PubMethod
         extends EncMethod
     {
@@ -281,7 +282,19 @@ public class PGPEncryptedDataGenerator
         sessionInfo[sessionInfo.length - 2] = (byte)(check >> 8);
         sessionInfo[sessionInfo.length - 1] = (byte)(check);
     }
-    
+
+    private byte[] createSessionInfo(
+        int algorithm,
+        Key key)
+    {
+        byte[] keyBytes = key.getEncoded();
+        byte[] sessionInfo = new byte[keyBytes.length + 3];
+        sessionInfo[0] = (byte) algorithm;
+        System.arraycopy(keyBytes, 0, sessionInfo, 1, keyBytes.length);
+        addCheckSum(sessionInfo);
+        return sessionInfo;
+    }
+
     /**
      * If buffer is non null stream assumed to be partial, otherwise the length will be used
      * to output a fixed length packet. The stream can be closed off by either calling close()
@@ -301,19 +314,17 @@ public class PGPEncryptedDataGenerator
         byte[]          buffer)
         throws IOException, PGPException, IllegalStateException
     {
+        if (cOut != null)
+        {
+            throw new IllegalStateException("generator already in open state");
+        }
+
         if (methods.size() == 0)
         {
             throw new IllegalStateException("no encryption methods specified");
         }
 
-        if (isOpen)
-        {
-            throw new IllegalStateException("stream already opened");
-        }
-
-        Key             key;
-
-        isOpen = true;
+        Key key = null;
 
         pOut = new BCPGOutputStream(out);
 
@@ -321,23 +332,16 @@ public class PGPEncryptedDataGenerator
         {    
             if (methods.get(0) instanceof PBEMethod)
             {
-                PBEMethod    m = (PBEMethod)methods.get(0);
+                PBEMethod m = (PBEMethod)methods.get(0);
                 
                 key = m.getKey();
             }
             else
             {
                 key = PGPUtil.makeRandomKey(defAlgorithm, rand);
-                
-                byte[]    keyBytes = key.getEncoded();
-                byte[]    sessionInfo = new byte[keyBytes.length + 3];
-                
-                sessionInfo[0] = (byte)defAlgorithm;
-                System.arraycopy(keyBytes, 0, sessionInfo, 1, keyBytes.length);
-                
-                addCheckSum(sessionInfo);
-                
-                PubMethod    m = (PubMethod)methods.get(0);
+                byte[] sessionInfo = createSessionInfo(defAlgorithm, key);
+
+                PubMethod m = (PubMethod)methods.get(0);
 
                 try
                 {
@@ -354,19 +358,12 @@ public class PGPEncryptedDataGenerator
         else // multiple methods
         {
             key = PGPUtil.makeRandomKey(defAlgorithm, rand);
-            
-            byte[]    keyBytes = key.getEncoded();
-            byte[]    sessionInfo = new byte[keyBytes.length + 3];
+            byte[] sessionInfo = createSessionInfo(defAlgorithm, key);
 
-            sessionInfo[0] = (byte)defAlgorithm;
-            System.arraycopy(keyBytes, 0, sessionInfo, 1, keyBytes.length);
-            
-            addCheckSum(sessionInfo);
-            
             for (int i = 0; i != methods.size(); i++)
             {
-                EncMethod    m = (EncMethod)methods.get(i);
-                
+                EncMethod m = (EncMethod)methods.get(i);
+
                 try
                 {
                     m.addSessionInfo(sessionInfo);
@@ -375,90 +372,84 @@ public class PGPEncryptedDataGenerator
                 {
                     throw new PGPException("exception encrypting session key", e);
                 }
-                
+
                 pOut.writePacket(m);
             }
         }
-    
-        String    cName = PGPUtil.getSymmetricCipherName(defAlgorithm);
 
-        if (cName != null)
-        {
-            try
-            {
-                if (withIntegrityPacket)
-                {
-                    c = Cipher.getInstance(cName + "/CFB/NoPadding", defProvider);
-                }
-                else
-                {
-                    c = Cipher.getInstance(cName + "/OpenPGPCFB/NoPadding", defProvider);
-                }
-                
-                c.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(new byte[c.getBlockSize()]));
-                
-                if (buffer == null)
-                {
-                    //
-                    // we have to add block size + 2 for the generated IV and + 1 + 22 if integrity protected
-                    //
-                    if (withIntegrityPacket)
-                    {
-                        pOut = new BCPGOutputStream(out, PacketTags.SYM_ENC_INTEGRITY_PRO, length + c.getBlockSize() + 2 + 1 + 22);
-                        pOut.write(1);        // version number
-                    }
-                    else
-                    {
-                        pOut = new BCPGOutputStream(out, PacketTags.SYMMETRIC_KEY_ENC, length + c.getBlockSize() + 2, oldFormat);
-                    }
-                }
-                else
-                {
-                    if (withIntegrityPacket)
-                    {
-                        pOut = new BCPGOutputStream(out, PacketTags.SYM_ENC_INTEGRITY_PRO, buffer);
-                        pOut.write(1);        // version number
-                    }
-                    else
-                    {
-                        pOut = new BCPGOutputStream(out, PacketTags.SYMMETRIC_KEY_ENC, buffer);
-                    }
-                }
+        String cName = PGPUtil.getSymmetricCipherName(defAlgorithm);
 
-                cOut = new CipherOutputStream(pOut, c);
-
-                byte[]    inLineIv = new byte[c.getBlockSize() + 2];
-            
-                rand.nextBytes(inLineIv);
-                inLineIv[inLineIv.length - 1] = inLineIv[inLineIv.length - 3];
-                inLineIv[inLineIv.length - 2] = inLineIv[inLineIv.length - 4];
-                
-                cOut.write(inLineIv);
-
-                if (withIntegrityPacket)
-                {
-                    digestOut = new DigestOutputStream(cOut, MessageDigest.getInstance(PGPUtil.getDigestName(HashAlgorithmTags.SHA1), defProvider));
-                    
-                    digestOut.getMessageDigest().update(inLineIv);
-                    
-                    return new EncryptedWrappedStream(this, digestOut);
-                }
-                else
-                {
-                    return new EncryptedWrappedStream(this, cOut);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new PGPException("Exception creating cipher", e);
-            }
-        }
-        else
+        if (cName == null)
         {
             throw new PGPException("null cipher specified");
         }
+
+        try
+        {
+            if (withIntegrityPacket)
+            {
+                c = Cipher.getInstance(cName + "/CFB/NoPadding", defProvider);
+            }
+            else
+            {
+                c = Cipher.getInstance(cName + "/OpenPGPCFB/NoPadding", defProvider);
+            }
+            
+            c.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(new byte[c.getBlockSize()]));
+            
+            if (buffer == null)
+            {
+                //
+                // we have to add block size + 2 for the generated IV and + 1 + 22 if integrity protected
+                //
+                if (withIntegrityPacket)
+                {
+                    pOut = new BCPGOutputStream(out, PacketTags.SYM_ENC_INTEGRITY_PRO, length + c.getBlockSize() + 2 + 1 + 22);
+                    pOut.write(1);        // version number
+                }
+                else
+                {
+                    pOut = new BCPGOutputStream(out, PacketTags.SYMMETRIC_KEY_ENC, length + c.getBlockSize() + 2, oldFormat);
+                }
+            }
+            else
+            {
+                if (withIntegrityPacket)
+                {
+                    pOut = new BCPGOutputStream(out, PacketTags.SYM_ENC_INTEGRITY_PRO, buffer);
+                    pOut.write(1);        // version number
+                }
+                else
+                {
+                    pOut = new BCPGOutputStream(out, PacketTags.SYMMETRIC_KEY_ENC, buffer);
+                }
+            }
+
+
+            OutputStream myOut = cOut = new CipherOutputStream(pOut, c);
+
+            if (withIntegrityPacket)
+            {
+                String digestName = PGPUtil.getDigestName(HashAlgorithmTags.SHA1);
+                MessageDigest digest = MessageDigest.getInstance(digestName, defProvider);
+                myOut = digestOut = new DigestOutputStream(cOut, digest);
+            }
+
+            byte[] inLineIv = new byte[c.getBlockSize() + 2];
+            rand.nextBytes(inLineIv);
+            inLineIv[inLineIv.length - 1] = inLineIv[inLineIv.length - 3];
+            inLineIv[inLineIv.length - 2] = inLineIv[inLineIv.length - 4];
+
+            myOut.write(inLineIv);
+
+            return new EncryptedWrappedStream(this, myOut);
+        }
+        catch (Exception e)
+        {
+            throw new PGPException("Exception creating cipher", e);
+        }
     }
-    
+
     /**
      * Return an outputstream which will encrypt the data as it is written
      * to it. The stream can be closed off by either calling close()
@@ -510,28 +501,10 @@ public class PGPEncryptedDataGenerator
     public void close()
         throws IOException
     {
-        localClose();
-    }
-
-    private void localClose()
-        throws IOException
-    {
-        if (!isOpen)
-        {
-            throw new IOException("generator not opened");
-        }
-
-        isOpen = false;
-
         if (cOut != null)
         {    
-            cOut.flush();
-            
             if (digestOut != null)
             {
-                digestOut.flush();
-                cOut.flush();
-                
                 //
                 // hand code a mod detection packet
                 //
@@ -539,12 +512,13 @@ public class PGPEncryptedDataGenerator
 
                 bOut.flush();
                 digestOut.flush();
-                
+
                 byte[] dig = digestOut.getMessageDigest().digest();
 
                 cOut.write(dig);
-                cOut.flush();
             }
+
+            cOut.flush();
 
             try
             {
@@ -555,49 +529,27 @@ public class PGPEncryptedDataGenerator
             {
                 throw new IOException(e.toString());
             }
+
+            cOut = null;
+            pOut = null;
         }
     }
 
     private class EncryptedWrappedStream
-        extends OutputStream
+        extends FilterOutputStream
     {
         private final PGPEncryptedDataGenerator _pGen;
-        private final OutputStream _out;
 
         public EncryptedWrappedStream(PGPEncryptedDataGenerator pGen, OutputStream out)
         {
+            super(out);
             _pGen = pGen;
-            _out = out;
-        }
-
-        public void write(byte[] bytes)
-            throws IOException
-        {
-            _out.write(bytes);
-        }
-
-        public void write(byte[] bytes, int offset, int length)
-            throws IOException
-        {
-            _out.write(bytes, offset, length);
-        }
-
-        public void write(int b)
-            throws IOException
-        {
-            _out.write(b);
-        }
-
-        public void flush()
-            throws IOException
-        {
-            _out.flush();
         }
 
         public void close()
             throws IOException
         {
-            _pGen.localClose();
+            _pGen.close();
         }
     }
 }
