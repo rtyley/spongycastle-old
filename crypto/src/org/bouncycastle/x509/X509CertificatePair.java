@@ -150,8 +150,8 @@ public class X509CertificatePair
         if (reverse != null)
         {
             hash += reverse.hashCode();
-		}
+        }
 
-		return hash;
-	}
+        return hash;
+    }
 }

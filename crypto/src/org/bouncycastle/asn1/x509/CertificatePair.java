@@ -38,8 +38,8 @@ import java.util.Enumeration;
  * 
  * <pre>
  *       CertificatePair ::= SEQUENCE {
- *         forward		[0]	Certificate OPTIONAL,
- *         reverse		[1]	Certificate OPTIONAL,
+ *         forward        [0]    Certificate OPTIONAL,
+ *         reverse        [1]    Certificate OPTIONAL,
  *         -- at least one of the pair shall be present -- } 
  * </pre>
  */
@@ -73,8 +73,8 @@ public class CertificatePair
      * <p/>
      * <pre>
      *       CertificatePair ::= SEQUENCE {
-     *         forward		[0]	Certificate OPTIONAL,
-     *         reverse		[1]	Certificate OPTIONAL,
+     *         forward        [0]    Certificate OPTIONAL,
+     *         reverse        [1]    Certificate OPTIONAL,
      *         -- at least one of the pair shall be present -- }
      * </pre>
      *
@@ -128,8 +128,8 @@ public class CertificatePair
      * <p/>
      * <pre>
      *       CertificatePair ::= SEQUENCE {
-     *         forward		[0]	Certificate OPTIONAL,
-     *         reverse		[1]	Certificate OPTIONAL,
+     *         forward        [0]    Certificate OPTIONAL,
+     *         reverse        [1]    Certificate OPTIONAL,
      *         -- at least one of the pair shall be present -- }
      * </pre>
      *
@@ -161,10 +161,9 @@ public class CertificatePair
 
     /**
      * @return Returns the reverse.
-	 */
-	public X509CertificateStructure getReverse()
+     */
+    public X509CertificateStructure getReverse()
     {
-		return reverse;
-	}
-
+        return reverse;
+    }
 }

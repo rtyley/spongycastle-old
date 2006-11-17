@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1;
 
-import java.io.InputStream;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ASN1StreamParser
 {
@@ -38,7 +38,8 @@ public class ASN1StreamParser
     }
 
     private int readLength()
-        throws IOException {
+        throws IOException
+    {
         int length = _in.read();
         if (length < 0)
         {
