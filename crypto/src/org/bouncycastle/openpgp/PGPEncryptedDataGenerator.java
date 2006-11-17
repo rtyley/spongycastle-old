@@ -1,5 +1,17 @@
 package org.bouncycastle.openpgp;
 
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.ContainedPacket;
+import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
+import org.bouncycastle.bcpg.S2K;
+import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.spec.IvParameterSpec;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
@@ -10,19 +22,6 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.spec.IvParameterSpec;
-
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.ContainedPacket;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.PacketTags;
-import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
-import org.bouncycastle.bcpg.S2K;
-import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
 
 /**
  *  Generator for encrypted objects.
@@ -36,6 +35,7 @@ public class PGPEncryptedDataGenerator
     private boolean              withIntegrityPacket = false;
     private boolean              oldFormat = false;
     private DigestOutputStream   digestOut;
+    private boolean              isOpen;
         
     private abstract class EncMethod
         extends ContainedPacket
@@ -284,7 +284,8 @@ public class PGPEncryptedDataGenerator
     
     /**
      * If buffer is non null stream assumed to be partial, otherwise the length will be used
-     * to output a fixed length packet.
+     * to output a fixed length packet. The stream can be closed off by either calling close()
+     * on the stream or close() on the generator.
      * 
      * @param out
      * @param length
@@ -292,22 +293,31 @@ public class PGPEncryptedDataGenerator
      * @return
      * @throws IOException
      * @throws PGPException
+     * @throws IllegalStateException
      */
     private OutputStream open(
         OutputStream    out,
         long            length,
         byte[]          buffer)
-        throws IOException, PGPException
+        throws IOException, PGPException, IllegalStateException
     {
-        Key             key = null;
-        
-        pOut = new BCPGOutputStream(out);
-        
         if (methods.size() == 0)
         {
             throw new IllegalStateException("no encryption methods specified");
         }
-        else if (methods.size() == 1)
+
+        if (isOpen)
+        {
+            throw new IllegalStateException("stream already opened");
+        }
+
+        Key             key;
+
+        isOpen = true;
+
+        pOut = new BCPGOutputStream(out);
+
+        if (methods.size() == 1)
         {    
             if (methods.get(0) instanceof PBEMethod)
             {
@@ -431,11 +441,11 @@ public class PGPEncryptedDataGenerator
                     
                     digestOut.getMessageDigest().update(inLineIv);
                     
-                    return digestOut;
+                    return new EncryptedWrappedStream(this, digestOut);
                 }
                 else
                 {
-                    return cOut;
+                    return new EncryptedWrappedStream(this, cOut);
                 }
             }
             catch (Exception e)
@@ -451,7 +461,8 @@ public class PGPEncryptedDataGenerator
     
     /**
      * Return an outputstream which will encrypt the data as it is written
-     * to it.
+     * to it. The stream can be closed off by either calling close()
+     * on the stream or close() on the generator.
      * 
      * @param out
      * @param length
@@ -470,7 +481,8 @@ public class PGPEncryptedDataGenerator
     /**
      * Return an outputstream which will encrypt the data as it is written
      * to it. The stream will be written out in chunks according to the size of the
-     * passed in buffer.
+     * passed in buffer. The stream can be closed off by either calling close()
+     * on the stream or close() on the generator.
      * <p>
      * <b>Note</b>: if the buffer is not a power of 2 in length only the largest power of 2
      * bytes worth of the buffer will be used.
@@ -490,13 +502,27 @@ public class PGPEncryptedDataGenerator
     }
     
     /**
-     * Close off the encrypted object.
+     * Close off the encrypted object - this is equivalent to calling close on the stream
+     * returned by the open() method.
      * 
      * @throws IOException
      */
     public void close()
         throws IOException
     {
+        localClose();
+    }
+
+    private void localClose()
+        throws IOException
+    {
+        if (!isOpen)
+        {
+            throw new IOException("generator not opened");
+        }
+
+        isOpen = false;
+
         if (cOut != null)
         {    
             cOut.flush();
@@ -529,6 +555,49 @@ public class PGPEncryptedDataGenerator
             {
                 throw new IOException(e.toString());
             }
+        }
+    }
+
+    private class EncryptedWrappedStream
+        extends OutputStream
+    {
+        private final PGPEncryptedDataGenerator _pGen;
+        private final OutputStream _out;
+
+        public EncryptedWrappedStream(PGPEncryptedDataGenerator pGen, OutputStream out)
+        {
+            _pGen = pGen;
+            _out = out;
+        }
+
+        public void write(byte[] bytes)
+            throws IOException
+        {
+            _out.write(bytes);
+        }
+
+        public void write(byte[] bytes, int offset, int length)
+            throws IOException
+        {
+            _out.write(bytes, offset, length);
+        }
+
+        public void write(int b)
+            throws IOException
+        {
+            _out.write(b);
+        }
+
+        public void flush()
+            throws IOException
+        {
+            _out.flush();
+        }
+
+        public void close()
+            throws IOException
+        {
+            _pGen.localClose();
         }
     }
 }

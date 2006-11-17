@@ -1,25 +1,24 @@
 package org.bouncycastle.openpgp.test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.Security;
-import java.security.SecureRandom;
-import java.util.Date;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.PGPCompressedData;
+import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
 import org.bouncycastle.openpgp.PGPLiteralData;
 import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPBEEncryptedData;
-
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Date;
 
 public class PGPPBETest
     extends SimpleTest
@@ -107,8 +106,8 @@ public class PGPPBETest
                                                                 
         Date                       cDate = new Date((System.currentTimeMillis() / 1000) * 1000);
         PGPLiteralDataGenerator    lData = new PGPLiteralDataGenerator();
-
-        OutputStream    ldOut = lData.open(comData.open(bOut),
+        OutputStream               comOut = comData.open(bOut);
+        OutputStream               ldOut = lData.open(comOut,
                                               PGPLiteralData.BINARY, 
                                               PGPLiteralData.CONSOLE, 
                                               text.length,
@@ -116,12 +115,12 @@ public class PGPPBETest
         
         ldOut.write(text);
 
-        lData.close();
+        ldOut.close();
         
-        comData.close();
+        comOut.close();
 
         //
-        // encrypt
+        // encrypt - with stream close
         //
         ByteArrayOutputStream        cbOut = new ByteArrayOutputStream();
         PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), "BC");
@@ -140,7 +139,28 @@ public class PGPPBETest
         {
             fail("wrong plain text in generated packet");
         }
-        
+
+        //
+        // encrypt - with generator close
+        //
+        cbOut = new ByteArrayOutputStream();
+        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), "BC");
+
+        cPk.addMethod(pass);
+
+        cOut = cPk.open(cbOut, bOut.toByteArray().length);
+
+        cOut.write(bOut.toByteArray());
+
+        cPk.close();
+
+        out = decryptMessage(cbOut.toByteArray(), cDate);
+
+        if (!areEqual(out, text))
+        {
+            fail("wrong plain text in generated packet");
+        }
+
         //
         // encrypt - partial packet style.
         //
@@ -153,10 +173,10 @@ public class PGPPBETest
         
         comData = new PGPCompressedDataGenerator(
                                  PGPCompressedData.ZIP);
-                                                                
+        comOut = comData.open(bOut);
         lData = new PGPLiteralDataGenerator();
 
-        ldOut = lData.open(comData.open(bOut),
+        ldOut = lData.open(comOut,
                                  PGPLiteralData.BINARY, 
                                  PGPLiteralData.CONSOLE, 
                                  TEST_DATE,
@@ -165,9 +185,9 @@ public class PGPPBETest
         
         ldOut.write(test);
 
-        lData.close();
+        ldOut.close();
         
-        comData.close();
+        comOut.close();
 
         cbOut = new ByteArrayOutputStream();
         cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, rand, "BC");
@@ -178,7 +198,7 @@ public class PGPPBETest
 
         cOut.write(bOut.toByteArray());
 
-        cPk.close();
+        cOut.close();
 
         out = decryptMessage(cbOut.toByteArray(), TEST_DATE);
         if (!areEqual(out, test))
@@ -198,7 +218,7 @@ public class PGPPBETest
 
         cOut.write(bOut.toByteArray());
 
-        cPk.close();
+        cOut.close();
 
         out = decryptMessage(cbOut.toByteArray(), TEST_DATE);
         if (!areEqual(out, test))

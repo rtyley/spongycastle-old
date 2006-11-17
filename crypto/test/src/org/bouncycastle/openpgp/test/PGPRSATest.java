@@ -1,19 +1,5 @@
 package org.bouncycastle.openpgp.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.util.Date;
-import java.util.Iterator;
-
-import javax.crypto.Cipher;
-
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
@@ -43,6 +29,19 @@ import org.bouncycastle.openpgp.PGPV3SignatureGenerator;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+
+import javax.crypto.Cipher;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Date;
+import java.util.Iterator;
 
 public class PGPRSATest
     extends SimpleTest
@@ -502,7 +501,7 @@ public class PGPRSATest
     
         ByteArrayOutputStream        cbOut = new ByteArrayOutputStream();
         PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.CAST5, new SecureRandom(), "BC");            
-        PGPPublicKey                        puK = pgpPriv.getSecretKey(encP.getKeyID()).getPublicKey();
+        PGPPublicKey                 puK = pgpPriv.getSecretKey(encP.getKeyID()).getPublicKey();
         
         cPk.addMethod(puK);
         
@@ -741,11 +740,11 @@ public class PGPRSATest
             sGen.update((byte)ch);
         }
 
-        lGen.close();
+        lOut.close();
 
         sGen.generate().encode(bcOut);
 
-        cGen.close();
+        bcOut.close();
 
         //
         // verify generated signature
@@ -810,9 +809,9 @@ public class PGPRSATest
 
         sGen.generate().encode(bcOut);
 
-        lGen.close();
+        lOut.close();
 
-        cGen.close();
+        bcOut.close();
 
         //
         // verify generated signature
