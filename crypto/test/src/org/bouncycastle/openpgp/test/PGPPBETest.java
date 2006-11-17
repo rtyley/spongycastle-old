@@ -75,7 +75,7 @@ public class PGPPBETest
 
         if (pbe.isIntegrityProtected() && !pbe.verify())
         {
-            throw new RuntimeException("integrity check failed");
+            fail("integrity check failed");
         }
 
         return bOut.toByteArray();
