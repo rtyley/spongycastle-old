@@ -37,7 +37,17 @@ public class PGPCompressionTest
 
         out.close();
 
-        validateData(bOut);
+        validateData(bOut.toByteArray());
+
+        try
+        {
+            out.close();
+            cPacket.close();
+        }
+        catch (Exception e)
+        {
+            fail("Redundant close() should be ignored");
+        }
 
         //
         // new style - using generator close
@@ -52,17 +62,27 @@ public class PGPCompressionTest
 
         cPacket.close();
 
-        validateData(bOut);
+        validateData(bOut.toByteArray());
+
+        try
+        {
+            out.close();
+            cPacket.close();
+        }
+        catch (Exception e)
+        {
+            fail("Redundant close() should be ignored");
+        }
     }
 
-    private void validateData(ByteArrayOutputStream bOut)
+    private void validateData(byte[] data)
         throws IOException, PGPException
     {
-        PGPObjectFactory pgpFact = new PGPObjectFactory(bOut.toByteArray());
+        PGPObjectFactory pgpFact = new PGPObjectFactory(data);
         PGPCompressedData c1 = (PGPCompressedData)pgpFact.nextObject();
         InputStream pIn = c1.getDataStream();
 
-        bOut.reset();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 
         int ch;
         while ((ch = pIn.read()) >= 0)
