@@ -597,7 +597,8 @@ public class LDAPStoreHelper
     {
         Set certPairSet = new HashSet();
 
-        for (int i = 0; i < list.size(); i++)
+        int i = 0;
+        while (i < list.size())
         {
             X509CertificatePair pair;
             try
@@ -634,6 +635,7 @@ public class LDAPStoreHelper
             {
                 // try next
             }
+            i++;
         }
 
         return certPairSet;

@@ -125,7 +125,9 @@ public abstract class ECFieldElement
 
             BigInteger legendreExponent = qMinusOne.shiftRight(1);
             if (!(x.modPow(legendreExponent, q).equals(ECConstants.ONE)))
+            {
                 return null;
+            }
 
             BigInteger u = qMinusOne.shiftRight(2);
             BigInteger k = u.shiftLeft(1).add(ECConstants.ONE);
