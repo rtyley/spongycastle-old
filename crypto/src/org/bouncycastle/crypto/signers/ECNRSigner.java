@@ -68,7 +68,7 @@ public class ECNRSigner
     {
         if (! this.forSigning) 
         {
-            // not properly initilaized... deal with it
+			throw new IllegalStateException("not initialised for signing");
         }
         
         BigInteger n = ((ECPrivateKeyParameters)this.key).getParameters().getN();
@@ -139,9 +139,9 @@ public class ECNRSigner
     {
         if (this.forSigning) 
         {
-            // not properly initilaized... deal with it
+			throw new IllegalStateException("not initialised for verifying");
         }
-        
+
         ECPublicKeyParameters pubKey = (ECPublicKeyParameters)key;
         BigInteger n = pubKey.getParameters().getN();
         int nBitLength = n.bitLength();
