@@ -1,12 +1,12 @@
 package org.bouncycastle.openpgp;
 
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.PacketTags;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.PacketTags;
 
 /**
  * Class for producing literal data packets.
@@ -71,7 +71,8 @@ public class PGPLiteralDataGenerator
     
     /**
      * Open a literal data packet, returning a stream to store the data inside
-     * the packet.
+     * the packet. The stream can be closed off by either calling close()
+     * on the stream or close() on the generator.
      * 
      * @param out the stream we want the packet in
      * @param format the format we are using
@@ -91,14 +92,15 @@ public class PGPLiteralDataGenerator
         
         writeHeader(pkOut, format, name, modificationTime.getTime());
 
-        return pkOut;
+        return new LiteralDataWrappedStream(this, pkOut);
     }
     
     /**
      * Open a literal data packet, returning a stream to store the data inside
      * the packet as an indefiinite length stream. The stream is written out as a 
      * series of partial packets with a chunk size determined by the size of the
-     * passed in buffer.
+     * passed in buffer.The stream can be closed off by either calling close()
+     * on the stream or close() on the generator.
      * <p>
      * <b>Note</b>: if the buffer is not a power of 2 in length only the largest power of 2
      * bytes worth of the buffer will be used.
@@ -121,12 +123,13 @@ public class PGPLiteralDataGenerator
         
         writeHeader(pkOut, format, name, modificationTime.getTime());
 
-        return pkOut;
+        return new LiteralDataWrappedStream(this, pkOut);
     }
     
     /**
      * Open a literal data packet for the passed in File object, returning
-     * an output stream for saving the file contents.
+     * an output stream for saving the file contents. The stream can be closed off by either calling close()
+     * on the stream or close() on the generator.
      * 
      * @param out
      * @param format
@@ -144,18 +147,68 @@ public class PGPLiteralDataGenerator
         
         writeHeader(pkOut, format, file.getName(), file.lastModified());
 
-        return pkOut;
+        return new LiteralDataWrappedStream(this, pkOut);
     }
     
     /**
-     * Close the literal data packet.
+     * Close the literal data packet - this is equivalent to calling close on the stream
+     * returned by the open() method.
      * 
      * @throws IOException
      */
     public void close()
         throws IOException
     {
+        localClose();
+    }
+
+    public void localClose()
+        throws IOException
+    {
         pkOut.finish();
         pkOut.flush();
+    }
+
+    private class LiteralDataWrappedStream
+        extends OutputStream
+    {
+        private final PGPLiteralDataGenerator _lGen;
+        private final OutputStream _out;
+
+        public LiteralDataWrappedStream(PGPLiteralDataGenerator lGen, OutputStream out)
+        {
+            _lGen = lGen;
+            _out = out;
+        }
+
+        public void write(byte[] bytes)
+            throws IOException
+        {
+            _out.write(bytes);
+        }
+
+        public void write(byte[] bytes, int offset, int length)
+            throws IOException
+        {
+            _out.write(bytes, offset, length);
+        }
+
+        public void write(int b)
+            throws IOException
+        {
+            _out.write(b);
+        }
+
+        public void flush()
+            throws IOException
+        {
+            _out.flush();
+        }
+
+        public void close()
+            throws IOException
+        {
+            _lGen.localClose();
+        }
     }
 }

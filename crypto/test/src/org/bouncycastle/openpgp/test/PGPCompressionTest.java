@@ -1,17 +1,17 @@
 package org.bouncycastle.openpgp.test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.security.Security;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.Security;
 
 public class PGPCompressionTest 
     extends SimpleTest
@@ -25,7 +25,7 @@ public class PGPCompressionTest
         testCompression(PGPCompressedData.BZIP2);
 
         //
-        // new style
+        // new style - using stream close
         //
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         PGPCompressedDataGenerator cPacket = new PGPCompressedDataGenerator(
@@ -35,8 +35,29 @@ public class PGPCompressionTest
 
         out.write("hello world! !dlrow olleh".getBytes());
 
+        out.close();
+
+        validateData(bOut);
+
+        //
+        // new style - using generator close
+        //
+        bOut = new ByteArrayOutputStream();
+        cPacket = new PGPCompressedDataGenerator(
+                PGPCompressedData.ZIP);
+
+        out = cPacket.open(bOut, new byte[4]);
+
+        out.write("hello world! !dlrow olleh".getBytes());
+
         cPacket.close();
 
+        validateData(bOut);
+    }
+
+    private void validateData(ByteArrayOutputStream bOut)
+        throws IOException, PGPException
+    {
         PGPObjectFactory pgpFact = new PGPObjectFactory(bOut.toByteArray());
         PGPCompressedData c1 = (PGPCompressedData)pgpFact.nextObject();
         InputStream pIn = c1.getDataStream();
@@ -66,7 +87,7 @@ public class PGPCompressionTest
 
         out.write("hello world!".getBytes());
 
-        cPacket.close();
+        out.close();
 
         PGPObjectFactory pgpFact = new PGPObjectFactory(bOut.toByteArray());
         PGPCompressedData c1 = (PGPCompressedData)pgpFact.nextObject();
