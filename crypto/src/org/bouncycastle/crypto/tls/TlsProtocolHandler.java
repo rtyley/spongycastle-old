@@ -440,6 +440,11 @@ public class TlsProtocolHandler
                                     {
                                         this.failWithError(AL_fatal, AP_unexpected_message);
                                     }
+
+                                    /*
+                                    * NB: Fall through to next case label to continue RSA key exchange
+                                    */
+
                                 case CS_SERVER_KEY_EXCHANGE_RECEIVED:
 
                                     assertEmpty(is);
