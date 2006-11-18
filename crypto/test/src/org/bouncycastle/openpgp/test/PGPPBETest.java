@@ -1,5 +1,12 @@
 package org.bouncycastle.openpgp.test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Date;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
@@ -12,13 +19,7 @@ import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPBEEncryptedData;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.util.Date;
+import org.bouncycastle.util.test.UncloseableOutputStream;
 
 public class PGPPBETest
     extends SimpleTest
@@ -106,13 +107,14 @@ public class PGPPBETest
                                                                 
         Date                       cDate = new Date((System.currentTimeMillis() / 1000) * 1000);
         PGPLiteralDataGenerator    lData = new PGPLiteralDataGenerator();
-        OutputStream               comOut = comData.open(bOut);
-        OutputStream               ldOut = lData.open(comOut,
-                                              PGPLiteralData.BINARY, 
-                                              PGPLiteralData.CONSOLE, 
-                                              text.length,
-                                              cDate);
-        
+        OutputStream               comOut = comData.open(new UncloseableOutputStream(bOut));
+        OutputStream               ldOut = lData.open(
+            new UncloseableOutputStream(comOut),
+            PGPLiteralData.BINARY, 
+            PGPLiteralData.CONSOLE, 
+            text.length,
+            cDate);
+
         ldOut.write(text);
 
         ldOut.close();
@@ -127,7 +129,7 @@ public class PGPPBETest
         
         cPk.addMethod(pass);
         
-        OutputStream    cOut = cPk.open(cbOut, bOut.toByteArray().length);
+        OutputStream    cOut = cPk.open(new UncloseableOutputStream(cbOut), bOut.toByteArray().length);
 
         cOut.write(bOut.toByteArray());
 
@@ -148,7 +150,7 @@ public class PGPPBETest
 
         cPk.addMethod(pass);
 
-        cOut = cPk.open(cbOut, bOut.toByteArray().length);
+        cOut = cPk.open(new UncloseableOutputStream(cbOut), bOut.toByteArray().length);
 
         cOut.write(bOut.toByteArray());
 
@@ -176,11 +178,9 @@ public class PGPPBETest
         comOut = comData.open(bOut);
         lData = new PGPLiteralDataGenerator();
 
-        ldOut = lData.open(comOut,
-                                 PGPLiteralData.BINARY, 
-                                 PGPLiteralData.CONSOLE, 
-                                 TEST_DATE,
-                                 new byte[16]);
+        ldOut = lData.open(new UncloseableOutputStream(comOut),
+            PGPLiteralData.BINARY, PGPLiteralData.CONSOLE, TEST_DATE,
+            new byte[16]);
 
         
         ldOut.write(test);
@@ -194,7 +194,7 @@ public class PGPPBETest
         
         cPk.addMethod(pass);
         
-        cOut = cPk.open(cbOut, new byte[16]);
+        cOut = cPk.open(new UncloseableOutputStream(cbOut), new byte[16]);
 
         cOut.write(bOut.toByteArray());
 
@@ -214,7 +214,7 @@ public class PGPPBETest
         
         cPk.addMethod(pass);
         
-        cOut = cPk.open(cbOut, new byte[16]);
+        cOut = cPk.open(new UncloseableOutputStream(cbOut), new byte[16]);
 
         cOut.write(bOut.toByteArray());
 

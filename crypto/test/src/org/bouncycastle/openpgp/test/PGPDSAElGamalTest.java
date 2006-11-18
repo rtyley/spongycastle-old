@@ -1,5 +1,33 @@
 package org.bouncycastle.openpgp.test;
 
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ElGamalParameterSpec;
+import org.bouncycastle.openpgp.PGPCompressedData;
+import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
+import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
+import org.bouncycastle.openpgp.PGPEncryptedDataList;
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPKeyPair;
+import org.bouncycastle.openpgp.PGPLiteralData;
+import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
+import org.bouncycastle.openpgp.PGPObjectFactory;
+import org.bouncycastle.openpgp.PGPOnePassSignature;
+import org.bouncycastle.openpgp.PGPOnePassSignatureList;
+import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
+import org.bouncycastle.openpgp.PGPSignature;
+import org.bouncycastle.openpgp.PGPSignatureGenerator;
+import org.bouncycastle.openpgp.PGPSignatureList;
+import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.util.test.UncloseableOutputStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -14,34 +42,6 @@ import java.util.Date;
 import java.util.Iterator;
 
 import javax.crypto.Cipher;
-
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedDataList;
-import org.bouncycastle.openpgp.PGPKeyPair;
-import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPOnePassSignature;
-import org.bouncycastle.openpgp.PGPOnePassSignatureList;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.bouncycastle.openpgp.PGPSignatureGenerator;
-import org.bouncycastle.openpgp.PGPSignatureList;
-import org.bouncycastle.openpgp.PGPUtil;
-
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class PGPDSAElGamalTest
     extends SimpleTest
@@ -163,18 +163,24 @@ public class PGPDSAElGamalTest
             sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 
             PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator(
-                                                                    PGPCompressedData.ZIP);
+                PGPCompressedData.ZIP);
 
-            BCPGOutputStream            bcOut = new BCPGOutputStream(cGen.open(bOut));
+            BCPGOutputStream bcOut = new BCPGOutputStream(
+                cGen.open(new UncloseableOutputStream(bOut)));
 
             sGen.generateOnePassVersion(false).encode(bcOut);
 
-            PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator();
+            PGPLiteralDataGenerator lGen = new PGPLiteralDataGenerator();
             
             Date testDate = new Date((System.currentTimeMillis() / 1000) * 1000);
-            OutputStream lOut = lGen.open(bcOut, PGPLiteralData.BINARY, "_CONSOLE", data.getBytes().length, testDate);
-            int                                    ch;
-            
+            OutputStream lOut = lGen.open(
+                new UncloseableOutputStream(bcOut),
+                PGPLiteralData.BINARY,
+                "_CONSOLE",
+                data.getBytes().length,
+                testDate);
+
+            int ch;
             while ((ch = testIn.read()) >= 0)
             {
                 lOut.write(ch);
@@ -377,7 +383,7 @@ public class PGPDSAElGamalTest
             
             cPk.addMethod(puK);
             
-            OutputStream    cOut = cPk.open(cbOut, bOut.toByteArray().length);
+            OutputStream    cOut = cPk.open(new UncloseableOutputStream(cbOut), bOut.toByteArray().length);
 
             cOut.write(text);
 

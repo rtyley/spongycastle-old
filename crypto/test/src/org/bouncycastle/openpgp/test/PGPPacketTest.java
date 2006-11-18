@@ -1,5 +1,12 @@
 package org.bouncycastle.openpgp.test;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.PGPLiteralData;
+import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
+import org.bouncycastle.openpgp.PGPObjectFactory;
+import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.util.test.UncloseableOutputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,12 +14,6 @@ import java.io.OutputStream;
 import java.security.Security;
 import java.util.Date;
 import java.util.Random;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class PGPPacketTest
     extends SimpleTest
@@ -50,9 +51,14 @@ public class PGPPacketTest
         int i)
         throws IOException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        OutputStream            out = generator.open(bOut, PGPLiteralData.BINARY, PGPLiteralData.CONSOLE, i, new Date());
-        
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        OutputStream out = generator.open(
+            new UncloseableOutputStream(bOut),
+            PGPLiteralData.BINARY,
+            PGPLiteralData.CONSOLE,
+            i,
+            new Date());
+
         out.write(buf, 0, i);
         
         generator.close();

@@ -6,6 +6,7 @@ import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.util.test.UncloseableOutputStream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class PGPCompressionTest
         PGPCompressedDataGenerator cPacket = new PGPCompressedDataGenerator(
                 PGPCompressedData.ZIP);
 
-        OutputStream out = cPacket.open(bOut, new byte[4]);
+        OutputStream out = cPacket.open(new UncloseableOutputStream(bOut), new byte[4]);
 
         out.write("hello world! !dlrow olleh".getBytes());
 
@@ -56,7 +57,7 @@ public class PGPCompressionTest
         cPacket = new PGPCompressedDataGenerator(
                 PGPCompressedData.ZIP);
 
-        out = cPacket.open(bOut, new byte[4]);
+        out = cPacket.open(new UncloseableOutputStream(bOut), new byte[4]);
 
         out.write("hello world! !dlrow olleh".getBytes());
 
@@ -103,7 +104,7 @@ public class PGPCompressionTest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         PGPCompressedDataGenerator cPacket = new PGPCompressedDataGenerator(type);
 
-        OutputStream out = cPacket.open(bOut);
+        OutputStream out = cPacket.open(new UncloseableOutputStream(bOut));
 
         out.write("hello world!".getBytes());
 
