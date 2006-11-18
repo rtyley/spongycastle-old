@@ -29,8 +29,8 @@ import org.bouncycastle.openpgp.PGPV3SignatureGenerator;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.util.test.UncloseableOutputStream;
 
-import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -42,6 +42,8 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
 import java.util.Iterator;
+
+import javax.crypto.Cipher;
 
 public class PGPRSATest
     extends SimpleTest
@@ -505,7 +507,7 @@ public class PGPRSATest
         
         cPk.addMethod(puK);
         
-        OutputStream    cOut = cPk.open(cbOut, shortText.length);
+        OutputStream    cOut = cPk.open(new UncloseableOutputStream(cbOut), shortText.length);
 
         cOut.write(shortText);
 
@@ -543,8 +545,8 @@ public class PGPRSATest
         puK = pgpPriv.getSecretKey(encP.getKeyID()).getPublicKey();
         
         cPk.addMethod(puK);
-        
-        cOut = cPk.open(cbOut, text.length);
+
+        cOut = cPk.open(new UncloseableOutputStream(cbOut), text.length);
 
         cOut.write(text);
 
@@ -723,17 +725,23 @@ public class PGPRSATest
         sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 
         PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator(
-                                                    PGPCompressedData.ZIP);
+            PGPCompressedData.ZIP);
 
-        BCPGOutputStream            bcOut = new BCPGOutputStream(cGen.open(bOut));
+        BCPGOutputStream bcOut = new BCPGOutputStream(
+            cGen.open(new UncloseableOutputStream(bOut)));
 
         sGen.generateOnePassVersion(false).encode(bcOut);
 
         PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator();
 
         Date testDate = new Date((System.currentTimeMillis() / 1000) * 1000);
-        OutputStream lOut = lGen.open(bcOut, PGPLiteralData.BINARY, "_CONSOLE", data.getBytes().length, testDate);
-        
+        OutputStream lOut = lGen.open(
+            new UncloseableOutputStream(bcOut),
+            PGPLiteralData.BINARY,
+            "_CONSOLE",
+            data.getBytes().length,
+            testDate);
+
         while ((ch = testIn.read()) >= 0)
         {
             lOut.write(ch);
@@ -799,8 +807,13 @@ public class PGPRSATest
         sGen.generateOnePassVersion(false).encode(bcOut);
 
         lGen = new PGPLiteralDataGenerator();
-        lOut = lGen.open(bcOut, PGPLiteralData.BINARY, "_CONSOLE", data.getBytes().length, testDate);
-        
+        lOut = lGen.open(
+            new UncloseableOutputStream(bcOut),
+            PGPLiteralData.BINARY,
+            "_CONSOLE",
+            data.getBytes().length,
+            testDate);
+
         while ((ch = testIn.read()) >= 0)
         {
             lOut.write(ch);

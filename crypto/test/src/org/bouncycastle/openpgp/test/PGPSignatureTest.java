@@ -1,15 +1,5 @@
 package org.bouncycastle.openpgp.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.NoSuchProviderException;
-import java.security.Security;
-import java.security.SignatureException;
-import java.util.Date;
-
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
@@ -34,6 +24,17 @@ import org.bouncycastle.openpgp.PGPSignatureSubpacketVector;
 import org.bouncycastle.openpgp.PGPV3SignatureGenerator;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.util.test.UncloseableOutputStream;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.NoSuchProviderException;
+import java.security.Security;
+import java.security.SignatureException;
+import java.util.Date;
 
 public class PGPSignatureTest
     extends SimpleTest
@@ -477,8 +478,13 @@ public class PGPSignatureTest
         sGen.generateOnePassVersion(false).encode(bOut);
     
         PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator();
-        OutputStream               lOut = lGen.open(bOut, PGPLiteralData.BINARY, "_CONSOLE", TEST_DATA.length * 2, new Date());
-        
+        OutputStream               lOut = lGen.open(
+            new UncloseableOutputStream(bOut),
+            PGPLiteralData.BINARY,
+            "_CONSOLE",
+            TEST_DATA.length * 2,
+            new Date());
+
         int ch;
         while ((ch = testIn.read()) >= 0)
         {
@@ -512,10 +518,15 @@ public class PGPSignatureTest
         
         sGen.initSign(PGPSignature.CANONICAL_TEXT_DOCUMENT, privKey);
         sGen.generateOnePassVersion(false).encode(bOut);
-    
+
         PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator();
-        OutputStream               lOut = lGen.open(bOut, PGPLiteralData.TEXT, "_CONSOLE", data.length * 2, creationTime);
-        
+        OutputStream               lOut = lGen.open(
+            new UncloseableOutputStream(bOut),
+            PGPLiteralData.TEXT,
+            "_CONSOLE",
+            data.length * 2,
+            creationTime);
+
         int ch;
         while ((ch = testIn.read()) >= 0)
         {
@@ -556,8 +567,13 @@ public class PGPSignatureTest
         sGen.generateOnePassVersion(false).encode(bOut);
     
         PGPLiteralDataGenerator lGen = new PGPLiteralDataGenerator();
-        OutputStream            lOut = lGen.open(bOut, PGPLiteralData.BINARY, "_CONSOLE", TEST_DATA.length * 2, new Date());
-        
+        OutputStream            lOut = lGen.open(
+            new UncloseableOutputStream(bOut),
+            PGPLiteralData.BINARY,
+            "_CONSOLE",
+            TEST_DATA.length * 2,
+            new Date());
+
         int ch;
         while ((ch = testIn.read()) >= 0)
         {
@@ -590,10 +606,15 @@ public class PGPSignatureTest
         
         sGen.initSign(PGPSignature.CANONICAL_TEXT_DOCUMENT, privKey);
         sGen.generateOnePassVersion(false).encode(bOut);
-    
+
         PGPLiteralDataGenerator lGen = new PGPLiteralDataGenerator();
-        OutputStream            lOut = lGen.open(bOut, PGPLiteralData.TEXT, "_CONSOLE", data.length * 2, new Date());
-        
+        OutputStream            lOut = lGen.open(
+            new UncloseableOutputStream(bOut),
+            PGPLiteralData.TEXT,
+            "_CONSOLE",
+            data.length * 2,
+            new Date());
+
         int ch;
         while ((ch = testIn.read()) >= 0)
         {
