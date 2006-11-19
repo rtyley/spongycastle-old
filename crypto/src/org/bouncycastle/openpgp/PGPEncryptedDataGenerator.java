@@ -12,8 +12,6 @@ import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.spec.IvParameterSpec;
-
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
@@ -29,7 +27,7 @@ import java.util.List;
  *  Generator for encrypted objects.
  */
 public class PGPEncryptedDataGenerator
-    implements SymmetricKeyAlgorithmTags
+    implements SymmetricKeyAlgorithmTags, StreamGenerator
 {
     private BCPGOutputStream     pOut;
     private CipherOutputStream   cOut;
@@ -426,13 +424,13 @@ public class PGPEncryptedDataGenerator
             }
 
 
-            OutputStream myOut = cOut = new CipherOutputStream(pOut, c);
+            OutputStream genOut = cOut = new CipherOutputStream(pOut, c);
 
             if (withIntegrityPacket)
             {
                 String digestName = PGPUtil.getDigestName(HashAlgorithmTags.SHA1);
                 MessageDigest digest = MessageDigest.getInstance(digestName, defProvider);
-                myOut = digestOut = new DigestOutputStream(cOut, digest);
+                genOut = digestOut = new DigestOutputStream(cOut, digest);
             }
 
             byte[] inLineIv = new byte[c.getBlockSize() + 2];
@@ -440,9 +438,9 @@ public class PGPEncryptedDataGenerator
             inLineIv[inLineIv.length - 1] = inLineIv[inLineIv.length - 3];
             inLineIv[inLineIv.length - 2] = inLineIv[inLineIv.length - 4];
 
-            myOut.write(inLineIv);
+            genOut.write(inLineIv);
 
-            return new EncryptedWrappedStream(this, myOut);
+            return new WrappedGeneratorStream(genOut, this);
         }
         catch (Exception e)
         {
@@ -532,24 +530,6 @@ public class PGPEncryptedDataGenerator
 
             cOut = null;
             pOut = null;
-        }
-    }
-
-    private class EncryptedWrappedStream
-        extends FilterOutputStream
-    {
-        private final PGPEncryptedDataGenerator _pGen;
-
-        public EncryptedWrappedStream(PGPEncryptedDataGenerator pGen, OutputStream out)
-        {
-            super(out);
-            _pGen = pGen;
-        }
-
-        public void close()
-            throws IOException
-        {
-            _pGen.close();
         }
     }
 }
