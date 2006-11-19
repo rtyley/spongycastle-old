@@ -426,12 +426,12 @@ public class DHTest
 
             if (!pubKey.getW().equals(((ECPublicKey)aKeyPair.getPublic()).getW()))
             {
-                fail("ECDH public key encoding (W test) failed");
+                fail("ECDHC public key encoding (W test) failed");
             }
 
             if (!pubKey.getParams().getOrder().equals(((ECPublicKey)aKeyPair.getPublic()).getParams().getOrder()))
             {
-                fail("ECDH public key encoding (Order test) failed");
+                fail("ECDHC public key encoding (Order test) failed");
             }
 
             //
@@ -443,12 +443,12 @@ public class DHTest
 
             if (!privKey.getS().equals(((ECPrivateKey)aKeyPair.getPrivate()).getS()))
             {
-                fail("ECDH private key encoding (S test) failed");
+                fail("ECDHC private key encoding (S test) failed");
             }
 
             if (!privKey.getParams().getOrder().equals(((ECPrivateKey)aKeyPair.getPrivate()).getParams().getOrder()))
             {
-                fail("ECDH private key encoding (Order test) failed");
+                fail("ECDHC private key encoding (Order test) failed");
             }
         }
         catch (Exception e)
