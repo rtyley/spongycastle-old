@@ -116,12 +116,10 @@ public class JDKGOST3410PrivateKey
      */
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
         PrivateKeyInfo          info;
         byte[]                  keyEnc = this.getX().toByteArray();
-        byte[]                  keyBytes = new byte[keyEnc.length];
-        
+        byte[]                  keyBytes;
+
         if (keyEnc[0] == 0)
         {
             keyBytes = new byte[keyEnc.length - 1];
