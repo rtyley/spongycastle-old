@@ -5,7 +5,6 @@ import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.PacketTags;
 
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.Deflater;
@@ -15,7 +14,7 @@ import java.util.zip.DeflaterOutputStream;
  *class for producing compressed data packets.
  */
 public class PGPCompressedDataGenerator 
-    implements CompressionAlgorithmTags
+    implements CompressionAlgorithmTags, StreamGenerator
 {
     private int                     algorithm;
     private int                     compression;
@@ -100,7 +99,7 @@ public class PGPCompressedDataGenerator
             throw new IllegalStateException("generator not initialised");
         }
 
-        return new CompressedWrappedStream(this, dOut);
+        return new WrappedGeneratorStream(dOut, this);
     }
     
     /**
@@ -161,7 +160,7 @@ public class PGPCompressedDataGenerator
             throw new IllegalStateException("generator not initialised");
         }
 
-        return new CompressedWrappedStream(this, dOut);
+        return new WrappedGeneratorStream(dOut, this);
     }
     
     /**
@@ -197,24 +196,6 @@ public class PGPCompressedDataGenerator
             dOut = null;
             pkOut = null;
             out = null;
-        }
-    }
-
-    private class CompressedWrappedStream
-        extends FilterOutputStream
-    {
-        private final PGPCompressedDataGenerator _cGen;
-
-        public CompressedWrappedStream(PGPCompressedDataGenerator cGen, OutputStream out)
-        {
-            super(out);
-            _cGen = cGen;
-        }
-
-        public void close()
-            throws IOException
-        {
-            _cGen.close();
         }
     }
 }

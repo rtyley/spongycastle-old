@@ -4,7 +4,6 @@ import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.PacketTags;
 
 import java.io.File;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -12,7 +11,7 @@ import java.util.Date;
 /**
  * Class for producing literal data packets.
  */
-public class PGPLiteralDataGenerator 
+public class PGPLiteralDataGenerator implements StreamGenerator
 {    
     public static final char    BINARY = PGPLiteralData.BINARY;
     public static final char    TEXT = PGPLiteralData.TEXT;
@@ -98,7 +97,7 @@ public class PGPLiteralDataGenerator
         
         writeHeader(pkOut, format, name, modificationTime.getTime());
 
-        return new LiteralDataWrappedStream(this, pkOut);
+        return new WrappedGeneratorStream(pkOut, this);
     }
     
     /**
@@ -134,7 +133,7 @@ public class PGPLiteralDataGenerator
         
         writeHeader(pkOut, format, name, modificationTime.getTime());
 
-        return new LiteralDataWrappedStream(this, pkOut);
+        return new WrappedGeneratorStream(pkOut, this);
     }
     
     /**
@@ -163,7 +162,7 @@ public class PGPLiteralDataGenerator
         
         writeHeader(pkOut, format, file.getName(), file.lastModified());
 
-        return new LiteralDataWrappedStream(this, pkOut);
+        return new WrappedGeneratorStream(pkOut, this);
     }
     
     /**
@@ -180,24 +179,6 @@ public class PGPLiteralDataGenerator
             pkOut.finish();
             pkOut.flush();
             pkOut = null;
-        }
-    }
-
-    private class LiteralDataWrappedStream
-        extends FilterOutputStream
-    {
-        private final PGPLiteralDataGenerator _lGen;
-
-        public LiteralDataWrappedStream(PGPLiteralDataGenerator lGen, OutputStream out)
-        {
-            super(out);
-            _lGen = lGen;
-        }
-
-        public void close()
-            throws IOException
-        {
-            _lGen.close();
         }
     }
 }
