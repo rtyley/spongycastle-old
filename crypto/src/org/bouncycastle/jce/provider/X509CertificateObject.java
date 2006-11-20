@@ -1,13 +1,12 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
@@ -62,11 +61,55 @@ public class X509CertificateObject
     private X509CertificateStructure    c;
     private Hashtable                   pkcs12Attributes = new Hashtable();
     private Vector                      pkcs12Ordering = new Vector();
+    private BasicConstraints            basicConstraints;
+    private boolean[]                   keyUsage;
 
     public X509CertificateObject(
         X509CertificateStructure    c)
+        throws CertificateParsingException
     {
         this.c = c;
+
+        try
+        {
+            byte[]  bytes = this.getExtensionBytes("2.5.29.19");
+
+            if (bytes != null)
+            {
+                basicConstraints = BasicConstraints.getInstance(ASN1Object.fromByteArray(bytes));
+            }
+        }
+        catch (Exception e)
+        {
+            throw new CertificateParsingException("cannot construct BasicConstraints: " + e);
+        }
+
+        try
+        {
+            byte[] bytes = this.getExtensionBytes("2.5.29.15");
+            if (bytes != null)
+            {
+                DERBitString    bits = DERBitString.getInstance(ASN1Object.fromByteArray(bytes));
+
+                bytes = bits.getBytes();
+                int length = (bytes.length * 8) - bits.getPadBits();
+
+                keyUsage = new boolean[(length < 9) ? 9 : length];
+
+                for (int i = 0; i != length; i++)
+                {
+                    keyUsage[i] = (bytes[i / 8] & (0x80 >>> (i % 8))) != 0;
+                }
+            }
+            else
+            {
+                keyUsage = null;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new CertificateParsingException("cannot construct KeyUsage: " + e);
+        }
     }
 
     public void checkValidity()
@@ -221,22 +264,9 @@ public class X509CertificateObject
      */
     public byte[] getSigAlgParams()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-
         if (c.getSignatureAlgorithm().getParameters() != null)
         {
-            try
-            {
-                DEROutputStream         dOut = new DEROutputStream(bOut);
-
-                dOut.writeObject(c.getSignatureAlgorithm().getParameters());
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("exception getting sig parameters " + e);
-            }
-
-            return bOut.toByteArray();
+            return c.getSignatureAlgorithm().getParameters().getDERObject().getDEREncoded();
         }
         else
         {
@@ -286,42 +316,13 @@ public class X509CertificateObject
 
     public boolean[] getKeyUsage()
     {
-        byte[]  bytes = this.getExtensionBytes("2.5.29.15");
-        int     length = 0;
-
-        if (bytes != null)
-        {
-            try
-            {
-                ASN1InputStream dIn = new ASN1InputStream(bytes);
-                DERBitString    bits = (DERBitString)dIn.readObject();
-
-                bytes = bits.getBytes();
-                length = (bytes.length * 8) - bits.getPadBits();
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("error processing key usage extension");
-            }
-
-            boolean[]       keyUsage = new boolean[(length < 9) ? 9 : length];
-
-            for (int i = 0; i != length; i++)
-            {
-                keyUsage[i] = (bytes[i / 8] & (0x80 >>> (i % 8))) != 0;
-            }
-
-            return keyUsage;
-        }
-
-        return null;
+        return keyUsage;
     }
 
     public List getExtendedKeyUsage() 
         throws CertificateParsingException
     {
         byte[]  bytes = this.getExtensionBytes("2.5.29.37");
-        int     length = 0;
 
         if (bytes != null)
         {
@@ -349,48 +350,22 @@ public class X509CertificateObject
     
     public int getBasicConstraints()
     {
-        byte[]  bytes = this.getExtensionBytes("2.5.29.19");
-
-        if (bytes != null)
+        if (basicConstraints != null)
         {
-            try
+            if (basicConstraints.isCA())
             {
-                ASN1InputStream dIn = new ASN1InputStream(bytes);
-                ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
-
-                if (seq.size() == 2)
+                if (basicConstraints.getPathLenConstraint() == null)
                 {
-                    if (((DERBoolean)seq.getObjectAt(0)).isTrue())
-                    {
-                        return ((DERInteger)seq.getObjectAt(1)).getValue().intValue();
-                    }
-                    else
-                    {
-                        return -1;
-                    }
+                    return Integer.MAX_VALUE;
                 }
-                else if (seq.size() == 1)
+                else
                 {
-                    if (seq.getObjectAt(0) instanceof DERBoolean)
-                    {
-                        if (((DERBoolean)seq.getObjectAt(0)).isTrue())
-                        {
-                            return Integer.MAX_VALUE;
-                        }
-                        else
-                        {
-                            return -1;
-                        }
-                    }
-                    else
-                    {
-                        return -1;
-                    }
+                    return basicConstraints.getPathLenConstraint().intValue();
                 }
             }
-            catch (Exception e)
+            else
             {
-                throw new RuntimeException("error processing basic constraints extension");
+                return -1;
             }
         }
 
@@ -452,18 +427,13 @@ public class X509CertificateObject
 
             if (ext != null)
             {
-                ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-                DEROutputStream            dOut = new DEROutputStream(bOut);
-                
                 try
                 {
-                    dOut.writeObject(ext.getValue());
-
-                    return bOut.toByteArray();
+                    return ext.getValue().getEncoded();
                 }
                 catch (Exception e)
                 {
-                    throw new RuntimeException("error encoding " + e.toString());
+                    throw new IllegalStateException("error parsing " + e.toString());
                 }
             }
         }
@@ -723,7 +693,7 @@ public class X509CertificateObject
         throws CertificateException, NoSuchAlgorithmException,
         InvalidKeyException, NoSuchProviderException, SignatureException
     {
-        Signature   signature = null;
+        Signature   signature;
         String      sigName = X509SignatureUtil.getSignatureName(c.getSignatureAlgorithm());
         
         try
@@ -754,7 +724,7 @@ public class X509CertificateObject
         PublicKey key, 
         Signature signature) 
         throws CertificateException, NoSuchAlgorithmException, 
-            SignatureException, InvalidKeyException, CertificateEncodingException
+            SignatureException, InvalidKeyException
     {
         if (!c.getSignatureAlgorithm().equals(c.getTBSCertificate().getSignature()))
         {

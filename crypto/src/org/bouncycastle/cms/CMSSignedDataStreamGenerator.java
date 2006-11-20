@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.DEREncodable;
@@ -72,6 +73,8 @@ import java.util.Map;
 public class CMSSignedDataStreamGenerator
     extends CMSSignedGenerator
 {
+    private static CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
+
     private List  _certs = new ArrayList();
     private List  _crls = new ArrayList();
     private List  _signerInfs = new ArrayList();
@@ -416,16 +419,14 @@ public class CMSSignedDataStreamGenerator
         //
         BERSequenceGenerator sigGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
         
-        sigGen.addObject(getVersion(signedContentType));
+        sigGen.addObject(calculateVersion(signedContentType));
         
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         
         //
         // add the precalculated SignerInfo digest algorithms.
         //
-        Iterator            it = _signers.iterator();
-        
-        while (it.hasNext())
+        for (Iterator it = _signers.iterator(); it.hasNext();)
         {
             SignerInformation        signer = (SignerInformation)it.next();
             AlgorithmIdentifier     digAlgId;
@@ -438,9 +439,7 @@ public class CMSSignedDataStreamGenerator
         //
         // add the new digests
         //
-        it = _signerInfs.iterator();
-
-        while (it.hasNext())
+        for (Iterator it = _signerInfs.iterator(); it.hasNext();)
         {
             SignerInf           signer = (SignerInf)it.next();
             AlgorithmIdentifier digAlgId;
@@ -476,81 +475,129 @@ public class CMSSignedDataStreamGenerator
             digStream = new NullOutputStream();
         }
         
-        it = _digests.iterator();
-        
-        while (it.hasNext())
+        for (Iterator it = _digests.iterator(); it.hasNext();)
         {
             digStream = new DigestOutputStream(digStream, (MessageDigest)it.next());
         }
         
         return new CmsSignedDataOutputStream(digStream, signedContentType, sGen, sigGen, eiGen);
     }
-    
-    private DERInteger getVersion(
-        String signedContentType)
+
+    // RFC3852, section 5.1:
+    // IF ((certificates is present) AND
+    //    (any certificates with a type of other are present)) OR
+    //    ((crls is present) AND
+    //    (any crls with a type of other are present))
+    // THEN version MUST be 5
+    // ELSE
+    //    IF (certificates is present) AND
+    //       (any version 2 attribute certificates are present)
+    //    THEN version MUST be 4
+    //    ELSE
+    //       IF ((certificates is present) AND
+    //          (any version 1 attribute certificates are present)) OR
+    //          (any SignerInfo structures are version 3) OR
+    //          (encapContentInfo eContentType is other than id-data)
+    //       THEN version MUST be 3
+    //       ELSE version MUST be 1
+    //
+    private DERInteger calculateVersion(
+        String contentOid)
     {
-        int v = 0;
-        // RFC3852, section 5.1:
-        // IF ((certificates is present) AND
-        //    (any certificates with a type of other are present)) OR
-        //    ((crls is present) AND
-        //    (any crls with a type of other are present))
-        // THEN version MUST be 5
-        // ELSE
-        //    IF (certificates is present) AND
-        //       (any version 2 attribute certificates are present)
-        //    THEN version MUST be 4
-        //    ELSE
-        //       IF ((certificates is present) AND
-        //          (any version 1 attribute certificates are present)) OR
-        //          (any SignerInfo structures are version 3) OR
-        //          (encapContentInfo eContentType is other than id-data)
-        //       THEN version MUST be 3
-        //       ELSE version MUST be 1
-        //
-        if (anyCertHasTypeOther() || anyCrlHasTypeOther())
+        boolean otherCert = false;
+        boolean otherCrl = false;
+        boolean attrCertV1Found = false;
+        boolean attrCertV2Found = false;
+
+        if (_certs != null)
         {
-            v = 5;
+            for (Iterator it = _certs.iterator(); it.hasNext();)
+            {
+                Object obj = it.next();
+                if (obj instanceof ASN1TaggedObject)
+                {
+                    ASN1TaggedObject tagged = (ASN1TaggedObject)obj;
+
+                    if (tagged.getTagNo() == 1)
+                    {
+                        attrCertV1Found = true;
+                    }
+                    else if (tagged.getTagNo() == 2)
+                    {
+                        attrCertV2Found = true;
+                    }
+                    else if (tagged.getTagNo() == 3)
+                    {
+                        otherCert = true;
+                    }
+                }
+            }
         }
-        else if (anyCertHasV2Attribute())
+
+        if (otherCert)
         {
-            v = 4;
+            return new DERInteger(5);
         }
-        else if (anyCertHasV1Attribute() || /* useV3SignerInfo || */ !signedContentType.equals(DATA))
+
+        if (_crls != null && !otherCert)         // no need to check if otherCert is true
         {
-            v = 3;
+            for (Iterator it = _crls.iterator(); it.hasNext();)
+            {
+                Object obj = it.next();
+                if (obj instanceof ASN1TaggedObject)
+                {
+                    otherCrl = true;
+                }
+            }
+        }
+
+        if (otherCrl)
+        {
+            return new DERInteger(5);
+        }
+
+        if (attrCertV2Found)
+        {
+            return new DERInteger(4);
+        }
+
+        if (attrCertV1Found)
+        {
+            return new DERInteger(3);
+        }
+
+        if (contentOid.equals(DATA))
+        {
+            if (checkForVersion3(_signers))
+            {
+                return new DERInteger(3);
+            }
+            else
+            {
+                return new DERInteger(1);
+            }
         }
         else
         {
-            v = 1;
+            return new DERInteger(3);
         }
-        return new DERInteger(v);
     }
 
-    private boolean anyCertHasTypeOther()
+    private boolean checkForVersion3(List signerInfos)
     {
-        // TODO
+        for (Iterator it = signerInfos.iterator(); it.hasNext();)
+        {
+            SignerInfo s = SignerInfo.getInstance(((SignerInformation)it.next()).toSignerInfo());
+
+            if (s.getVersion().getValue().intValue() == 3)
+            {
+                return true;
+            }
+        }
+
         return false;
     }
-
-    private boolean anyCertHasV1Attribute()
-    {
-        // TODO
-        return false;
-    }
-
-    private boolean anyCertHasV2Attribute()
-    {
-        // TODO
-        return false;
-    }
-
-    private boolean anyCrlHasTypeOther()
-    {
-        // TODO
-        return false;
-    }
-
+    
     private class NullOutputStream
         extends OutputStream
     {

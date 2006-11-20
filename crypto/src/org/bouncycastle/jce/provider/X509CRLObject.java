@@ -48,6 +48,7 @@ public class X509CRLObject
     private CertificateList c;
     private String sigAlgName;
     private byte[] sigAlgParams;
+    private boolean isIndirect;
 
     public X509CRLObject(
         CertificateList c)
@@ -67,6 +68,8 @@ public class X509CRLObject
             {
                 this.sigAlgParams = null;
             }
+
+            this.isIndirect = isIndirectCRL();
         }
         catch (Exception e)
         {
@@ -81,12 +84,7 @@ public class X509CRLObject
     public boolean hasUnsupportedCriticalExtension()
     {
         Set extns = getCriticalExtensionOIDs();
-        if (extns != null && !extns.isEmpty())
-        {
-            return true;
-        }
-
-        return false;
+        return extns != null && !extns.isEmpty();
     }
 
     private Set getExtensionOIDs(boolean critical)
@@ -134,18 +132,13 @@ public class X509CRLObject
 
             if (ext != null)
             {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                DEROutputStream dOut = new DEROutputStream(bOut);
-
                 try
                 {
-                    dOut.writeObject(ext.getValue());
-
-                    return bOut.toByteArray();
+                    return ext.getValue().getEncoded();
                 }
                 catch (Exception e)
                 {
-                    throw new RuntimeException("error encoding " + e.toString());
+                    throw new IllegalStateException("error parsing " + e.toString());
                 }
             }
         }
@@ -242,7 +235,7 @@ public class X509CRLObject
     public X509CRLEntry getRevokedCertificate(BigInteger serialNumber)
     {
         TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
-        boolean isIndirect = isIndirectCRL();
+
         if (certs != null)
         {
             X500Principal previousCertificateIssuer = getIssuerX500Principal();
@@ -261,32 +254,10 @@ public class X509CRLObject
         return null;
     }
 
-    private boolean isIndirectCRL()
-    {
-        byte[] idp = getExtensionValue(X509Extensions.IssuingDistributionPoint.getId());
-        boolean isIndirect = false;
-        try
-        {
-            if (idp != null)
-            {
-                isIndirect = IssuingDistributionPoint.getInstance(
-                        X509ExtensionUtil.fromExtensionValue(idp))
-                        .isIndirectCRL();
-            }
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(
-                    "Exception reading IssuingDistributionPoint" + e);
-        }
-
-        return isIndirect;
-    }
-  
     public Set getRevokedCertificates()
     {
         TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
-        boolean isIndirect = isIndirectCRL();
+
         if (certs != null)
         {
             Set set = new HashSet();
@@ -308,14 +279,9 @@ public class X509CRLObject
     public byte[] getTBSCertList()
         throws CRLException
     {
-        ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-        DEROutputStream            dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(c.getTBSCertList());
-
-            return bOut.toByteArray();
+            return c.getTBSCertList().getEncoded("DER");
         }
         catch (IOException e)
         {
@@ -392,6 +358,29 @@ public class X509CRLObject
         }
 
         return false;
+    }
+
+    private boolean isIndirectCRL()
+        throws CRLException
+    {
+        byte[] idp = getExtensionValue(X509Extensions.IssuingDistributionPoint.getId());
+        boolean isIndirect = false;
+        try
+        {
+            if (idp != null)
+            {
+                isIndirect = IssuingDistributionPoint.getInstance(
+                        X509ExtensionUtil.fromExtensionValue(idp))
+                        .isIndirectCRL();
+            }
+        }
+        catch (IOException e)
+        {
+            throw new CRLException(
+                    "Exception reading IssuingDistributionPoint" + e);
+        }
+
+        return isIndirect;
     }
 }
 

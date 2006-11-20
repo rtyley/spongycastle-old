@@ -1,5 +1,10 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -7,12 +12,27 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.x509.NoSuchStoreException;
+import org.bouncycastle.x509.X509CollectionStoreParameters;
+import org.bouncycastle.x509.X509Store;
+import org.bouncycastle.x509.X509V2AttributeCertificate;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
+import java.security.cert.CRLException;
+import java.security.cert.CertStore;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CollectionCertStoreParameters;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 class CMSSignedHelper
@@ -133,4 +153,163 @@ class CMSSignedHelper
             return Signature.getInstance(algorithm);
         }
     }
+
+    X509Store createAttributeStore(
+        String type,
+        String provider,
+        ASN1Set certSet)
+        throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        List certs = new ArrayList();
+
+        if (certSet != null)
+        {
+            Enumeration e = certSet.getObjects();
+
+            while (e.hasMoreElements())
+            {
+                try
+                {
+                    DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+
+                    if (obj instanceof ASN1TaggedObject)
+                    {
+                        ASN1TaggedObject tagged = (ASN1TaggedObject)obj;
+
+                        if (tagged.getTagNo() == 2)
+                        {
+                            certs.add(new X509V2AttributeCertificate(ASN1Sequence.getInstance(tagged, false).getEncoded()));
+                        }
+                    }
+                }
+                catch (IOException ex)
+                {
+                    throw new CMSException(
+                            "can't re-encode attribute certificate!", ex);
+                }
+            }
+        }
+
+        try
+        {
+            return X509Store.getInstance(
+                         "AttributeCertificate/" +type, new X509CollectionStoreParameters(certs), provider);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("can't setup the X509Store", e);
+        }
+    }
+
+    protected CertStore createCertStore(
+        String type,
+        String provider,
+        ASN1Set certSet,
+        ASN1Set crlSet)
+        throws NoSuchProviderException, CMSException, NoSuchAlgorithmException
+    {
+        List certsAndcrls = new ArrayList();
+        CertificateFactory cf;
+
+        try
+        {
+            cf = CertificateFactory.getInstance("X.509", provider);
+        }
+        catch (CertificateException ex)
+        {
+            throw new CMSException("can't get certificate factory.", ex);
+        }
+
+        //
+        // load the certificates and revocation lists if we have any
+        //
+
+        if (certSet != null)
+        {
+            Enumeration e = certSet.getObjects();
+
+            while (e.hasMoreElements())
+            {
+                try
+                {
+                    DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+
+                    if (obj instanceof ASN1Sequence)
+                    {
+                        certsAndcrls.add(cf.generateCertificate(
+                            new ByteArrayInputStream(obj.getEncoded())));
+                    }
+                }
+                catch (IOException ex)
+                {
+                    throw new CMSException(
+                            "can't re-encode certificate!", ex);
+                }
+                catch (CertificateException ex)
+                {
+                    throw new CMSException(
+                            "can't re-encode certificate!", ex);
+                }
+            }
+        }
+
+
+        if (crlSet != null)
+        {
+            Enumeration e = crlSet.getObjects();
+
+            while (e.hasMoreElements())
+            {
+                try
+                {
+                    DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+
+                    certsAndcrls.add(cf.generateCRL(
+                        new ByteArrayInputStream(obj.getEncoded())));
+                }
+                catch (IOException ex)
+                {
+                    throw new CMSException("can't re-encode CRL!", ex);
+                }
+                catch (CRLException ex)
+                {
+                    throw new CMSException("can't re-encode CRL!", ex);
+                }
+            }
+        }
+
+        try
+        {
+            return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            throw new CMSException("can't setup the CertStore", e);
+        }
+    }
+
+    private boolean anyCertHasTypeOther()
+    {
+        // not supported
+        return false;
+    }
+
+    private boolean anyCertHasV1Attribute()
+    {
+        // obsolete 
+        return false;
+    }
+
+    private boolean anyCertHasV2Attribute()
+    {
+        // TODO
+        return false;
+    }
+
+    private boolean anyCrlHasTypeOther()
+    {
+        // not supported
+        return false;
+    }
+
 }

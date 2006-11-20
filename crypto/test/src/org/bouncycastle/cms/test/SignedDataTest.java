@@ -14,6 +14,10 @@ import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CollectionStoreParameters;
+import org.bouncycastle.x509.X509Store;
+import org.bouncycastle.x509.X509StreamParser;
 
 import java.io.ByteArrayInputStream;
 import java.security.KeyPair;
@@ -23,6 +27,7 @@ import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -642,6 +647,66 @@ public class SignedDataTest
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
 
         verifySignatures(s);
+    }
+
+    public void testWithAttributeCertificate()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        CMSProcessable        msg = new CMSProcessableByteArray("Hello World!".getBytes());
+
+
+        certList.add(_signDsaCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+
+        gen.addCertificatesAndCRLs(certs);
+
+        X509StreamParser parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+
+        parser.init(CMSTestUtil.attrCert);
+
+        X509AttributeCertificate attrCert = (X509AttributeCertificate)parser.read();
+
+        X509Store store = X509Store.getInstance("AttributeCertificate/Collection",
+                                    new X509CollectionStoreParameters(Collections.singleton(attrCert)), "BC");
+
+        gen.addAttributeCertificates(store);
+
+        CMSSignedData sd = gen.generate(msg, "BC");
+
+        assertEquals(4, sd.getVersion());
+
+        store = sd.getAttributeCertificates("Collection", "BC");
+
+        Collection coll = store.getMatches(null);
+
+        assertEquals(1, coll.size());
+
+        assertTrue(coll.contains(attrCert));
+        
+        //
+        // create new certstore
+        //
+        certList = new ArrayList();
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+
+        //
+        // replace certs
+        //
+        sd = CMSSignedData.replaceCertificatesAndCRLs(sd, certs);
+
+        verifySignatures(sd);
     }
 
     public void testCertStoreReplacement()

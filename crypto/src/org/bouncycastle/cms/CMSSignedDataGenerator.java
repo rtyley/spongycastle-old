@@ -2,8 +2,8 @@ package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.DEREncodable;
@@ -13,6 +13,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -21,9 +22,12 @@ import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509Store;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -380,15 +384,17 @@ public class CMSSignedDataGenerator
         //
         try
         {
-            Iterator  it = certStore.getCertificates(null).iterator();
-
-            while (it.hasNext())
+            for (Iterator it = certStore.getCertificates(null).iterator(); it.hasNext();)
             {
                 X509Certificate         c = (X509Certificate)it.next();
 
-                certs.add(new X509CertificateStructure(
-                                        (ASN1Sequence)makeObj(c.getEncoded())));
+                certs.add(X509CertificateStructure.getInstance(
+                                                       ASN1Object.fromByteArray(c.getEncoded())));
             }
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("error processing crls", e);
         }
         catch (IOException e)
         {
@@ -401,15 +407,16 @@ public class CMSSignedDataGenerator
 
         try
         {
-            Iterator    it = certStore.getCRLs(null).iterator();
-
-            while (it.hasNext())
+            for (Iterator it = certStore.getCRLs(null).iterator(); it.hasNext();)
             {
                 X509CRL                 c = (X509CRL)it.next();
 
-                crls.add(new CertificateList(
-                                        (ASN1Sequence)makeObj(c.getEncoded())));
+                crls.add(CertificateList.getInstance(ASN1Object.fromByteArray(c.getEncoded())));
             }
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("error processing crls", e);
         }
         catch (IOException e)
         {
@@ -418,6 +425,36 @@ public class CMSSignedDataGenerator
         catch (CRLException e)
         {
             throw new CMSException("error encoding crls", e);
+        }
+    }
+
+    /**
+     * Add the attribute certificates contained in the passed in store to the
+     * generator.
+     *
+     * @param store a store of Version 2 attribute certificates
+     * @throws CMSException if an error occurse processing the store.
+     */
+    public void addAttributeCertificates(X509Store store)
+        throws CMSException
+    {
+        try
+        {
+            for (Iterator it = store.getMatches(null).iterator(); it.hasNext();)
+            {
+                X509AttributeCertificate attrCert = (X509AttributeCertificate)it.next();
+
+                certs.add(new DERTaggedObject(false, 2,
+                             AttributeCertificate.getInstance(ASN1Object.fromByteArray(attrCert.getEncoded()))));
+            }
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("error processing attribute certs", e);
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("error processing attribute certs", e);
         }
     }
 

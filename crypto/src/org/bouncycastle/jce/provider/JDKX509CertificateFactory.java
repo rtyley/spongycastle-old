@@ -18,6 +18,7 @@ import java.security.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactorySpi;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,7 +48,7 @@ public class JDKX509CertificateFactory
 
     private Certificate readDERCertificate(
         ASN1InputStream dIn)
-        throws IOException
+        throws IOException, CertificateParsingException
     {
         ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
 
@@ -68,6 +69,7 @@ public class JDKX509CertificateFactory
     }
 
     private Certificate getCertificate()
+        throws CertificateParsingException
     {
         while (sDataObjectCount < sData.getCertificates().size())
         {
@@ -85,7 +87,7 @@ public class JDKX509CertificateFactory
 
     private Certificate readPEMCertificate(
         InputStream  in)
-        throws IOException
+        throws IOException, CertificateParsingException
     {
         ASN1Sequence seq = PEM_CERT_PARSER.readPEMObject(in);
 

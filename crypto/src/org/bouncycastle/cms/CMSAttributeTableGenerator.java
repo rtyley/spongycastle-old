@@ -14,5 +14,6 @@ public interface CMSAttributeTableGenerator
     static final String SIGNATURE = "encryptedDigest";
     static final String DIGEST_ALGORITHM_IDENTIFIER = "digestAlgID";
 
-    AttributeTable getAttributes(Map parameters);
+    AttributeTable getAttributes(Map parameters)
+        throws CMSAttributeTableGenerationException;
 }

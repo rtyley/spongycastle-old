@@ -57,6 +57,18 @@ public class DEROutputStream
         write(0x00);
     }
 
+    public void write(byte[] buf)
+        throws IOException
+    {
+        out.write(buf, 0, buf.length);
+    }
+
+    public void write(byte[] buf, int offSet, int len)
+        throws IOException
+    {
+        out.write(buf, offSet, len);
+    }
+
     public void writeObject(
         Object    obj)
         throws IOException
