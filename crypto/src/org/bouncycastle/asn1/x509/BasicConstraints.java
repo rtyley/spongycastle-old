@@ -55,10 +55,25 @@ public class BasicConstraints
         }
         else
         {
-            this.cA = DERBoolean.getInstance(seq.getObjectAt(0));
+            if (seq.getObjectAt(0) instanceof DERBoolean)
+            {
+                this.cA = DERBoolean.getInstance(seq.getObjectAt(0));
+            }
+            else
+            {
+                this.cA = null;
+                this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(0));
+            }
             if (seq.size() > 1)
             {
-                this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(1));
+                if (this.cA != null)
+                {
+                    this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(1));
+                }
+                else
+                {
+                    throw new IllegalArgumentException("wrong sequence in constructor");
+                }
             }
         }
     }

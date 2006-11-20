@@ -1,7 +1,5 @@
 package org.bouncycastle.asn1.cms;
 
-import java.util.Enumeration;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -11,7 +9,10 @@ import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERTaggedObject;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERTaggedObject;
+
+import java.util.Enumeration;
 
 /**
  * a signed data object.
@@ -50,46 +51,133 @@ public class SignedData
         ASN1Set     crls,
         ASN1Set     signerInfos)
     {
-        if (contentInfo.getContentType().equals(CMSObjectIdentifiers.data))
-        {
-            //
-            // we should also be looking for attribute certificates here,
-            // later.
-            //
-            Enumeration e = signerInfos.getObjects();
-            boolean     v3Found = false;
-
-            while (e.hasMoreElements())
-            {
-                SignerInfo  s = SignerInfo.getInstance(e.nextElement());
-
-                if (s.getVersion().getValue().intValue() == 3)
-                {
-                    v3Found = true;
-                }
-            }
-
-            if (v3Found)
-            {
-                this.version = new DERInteger(3);
-            }
-            else
-            {
-                this.version = new DERInteger(1);
-            }
-        }
-        else
-        {
-            this.version = new DERInteger(3);
-        }
-
+        this.version = calculateVersion(contentInfo.getContentType(), certificates, crls, signerInfos);
         this.digestAlgorithms = digestAlgorithms;
         this.contentInfo = contentInfo;
         this.certificates = certificates;
         this.crls = crls;
         this.signerInfos = signerInfos;
     }
-    
+
+
+    // RFC3852, section 5.1:
+    // IF ((certificates is present) AND
+    //    (any certificates with a type of other are present)) OR
+    //    ((crls is present) AND
+    //    (any crls with a type of other are present))
+    // THEN version MUST be 5
+    // ELSE
+    //    IF (certificates is present) AND
+    //       (any version 2 attribute certificates are present)
+    //    THEN version MUST be 4
+    //    ELSE
+    //       IF ((certificates is present) AND
+    //          (any version 1 attribute certificates are present)) OR
+    //          (any SignerInfo structures are version 3) OR
+    //          (encapContentInfo eContentType is other than id-data)
+    //       THEN version MUST be 3
+    //       ELSE version MUST be 1
+    //
+    private DERInteger calculateVersion(
+        DERObjectIdentifier contentOid,
+        ASN1Set certs,
+        ASN1Set crls,
+        ASN1Set signerInfs)
+    {
+        boolean otherCert = false;
+        boolean otherCrl = false;
+        boolean attrCertV1Found = false;
+        boolean attrCertV2Found = false;
+
+        if (certs != null)
+        {
+            for (Enumeration en = certs.getObjects(); en.hasMoreElements();)
+            {
+                Object obj = en.nextElement();
+                if (obj instanceof ASN1TaggedObject)
+                {
+                    ASN1TaggedObject tagged = (ASN1TaggedObject)obj;
+
+                    if (tagged.getTagNo() == 1)
+                    {
+                        attrCertV1Found = true;
+                    }
+                    else if (tagged.getTagNo() == 2)
+                    {
+                        attrCertV2Found = true;
+                    }
+                    else if (tagged.getTagNo() == 3)
+                    {
+                        otherCert = true;
+                    }
+                }
+            }
+        }
+
+        if (otherCert)
+        {
+            return new DERInteger(5);
+        }
+
+        if (crls != null)         // no need to check if otherCert is true
+        {
+            for (Enumeration en = crls.getObjects(); en.hasMoreElements();)
+            {
+                Object obj = en.nextElement();
+                if (obj instanceof ASN1TaggedObject)
+                {
+                    otherCrl = true;
+                }
+            }
+        }
+
+        if (otherCrl)
+        {
+            return new DERInteger(5);
+        }
+
+        if (attrCertV2Found)
+        {
+            return new DERInteger(4);
+        }
+
+        if (attrCertV1Found)
+        {
+            return new DERInteger(3);
+        }
+
+        if (contentOid.equals(CMSObjectIdentifiers.data))
+        {
+            if (checkForVersion3(signerInfs))
+            {
+                return new DERInteger(3);
+            }
+            else
+            {
+                return new DERInteger(1);
+            }
+        }
+        else
+        {
+            return new DERInteger(3);
+        }
+    }
+
+    private boolean checkForVersion3(ASN1Set signerInfs)
+    {
+        for (Enumeration e = signerInfs.getObjects(); e.hasMoreElements();)
+        {
+            SignerInfo s = SignerInfo.getInstance(e.nextElement());
+
+            if (s.getVersion().getValue().intValue() == 3)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public SignedData(
         ASN1Sequence seq)
     {

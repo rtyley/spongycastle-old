@@ -1,5 +1,16 @@
 package org.bouncycastle.x509;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.util.Arrays;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,16 +32,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 
 /*
  * An implementation of a version 2 X.509 Attribute Certificate.
@@ -293,5 +294,53 @@ public class X509V2AttributeCertificate
         }
         
         return (X509Attribute[])list.toArray(new X509Attribute[list.size()]);
+    }
+
+    public boolean equals(
+        Object o)
+    {
+        if (o == this)
+        {
+            return true;
+        }
+
+        if (!(o instanceof X509AttributeCertificate))
+        {
+            return false;
+        }
+
+        X509AttributeCertificate other = (X509AttributeCertificate)o;
+
+        try
+        {
+            byte[] b1 = this.getEncoded();
+            byte[] b2 = other.getEncoded();
+
+            return Arrays.areEqual(b1, b2);
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+    }
+
+    public int hashCode()
+    {
+        try
+        {
+            byte[]  b = this.getEncoded();
+            int     value = 0;
+
+            for (int i = 0; i != b.length; i++)
+            {
+                value ^= (b[i] & 0xff) << (i % 4);
+            }
+
+            return value;
+        }
+        catch (IOException e)
+        {
+            return 0;
+        }
     }
 }
