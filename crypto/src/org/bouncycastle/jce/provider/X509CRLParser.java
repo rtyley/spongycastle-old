@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -24,7 +25,7 @@ public class X509CRLParser
 {
     private static final PEMUtil PEM_PARSER = new PEMUtil("CRL");
 
-    private SignedData sData = null;
+    private ASN1Set     sData = null;
     private int         sDataObjectCount = 0;
     private InputStream currentStream = null;
 
@@ -41,7 +42,7 @@ public class X509CRLParser
             if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData))
             {
                 sData = new SignedData(ASN1Sequence.getInstance(
-                                (ASN1TaggedObject)seq.getObjectAt(1), true));
+                                (ASN1TaggedObject)seq.getObjectAt(1), true)).getCRLs();
 
                 return getCRL();
             }
@@ -53,14 +54,14 @@ public class X509CRLParser
     private CRL getCRL()
         throws CRLException
     {
-        if (sDataObjectCount >= sData.getCRLs().size())
+        if (sData == null || sDataObjectCount >= sData.size())
         {
             return null;
         }
 
         return new X509CRLObject(
                         CertificateList.getInstance(
-                                sData.getCRLs().getObjectAt(sDataObjectCount++)));
+                                sData.getObjectAt(sDataObjectCount++)));
     }
 
     private CRL readPEMCRL(
@@ -96,7 +97,7 @@ public class X509CRLParser
         {
             if (sData != null)
             {
-                if (sDataObjectCount != sData.getCRLs().size())
+                if (sDataObjectCount != sData.size())
                 {
                     return getCRL();
                 }

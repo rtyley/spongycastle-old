@@ -2348,6 +2348,23 @@ public class CertTest
             fail("PKCS7 crl present");
         }
 
+        // data with absent certificates and CRLS
+
+        sigData = new SignedData(new DERSet(), new ContentInfo(CMSObjectIdentifiers.data, null), null, null, new DERSet());
+
+        info = new ContentInfo(CMSObjectIdentifiers.signedData, sigData);
+
+        cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(info.getEncoded()));
+        if (cert != null)
+        {
+            fail("PKCS7 cert present");
+        }
+        crl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(info.getEncoded()));
+        if (crl != null)
+        {
+            fail("PKCS7 crl present");
+        }
+
         //
         // sample message
         //
