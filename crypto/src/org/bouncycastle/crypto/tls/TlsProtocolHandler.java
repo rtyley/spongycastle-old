@@ -849,7 +849,7 @@ public class TlsProtocolHandler
         * First, generate some random data.
         */
         this.clientRandom = new byte[32];
-        int t = (int)System.currentTimeMillis() / 1000;
+        int t = (int)(System.currentTimeMillis() / 1000);
         this.clientRandom[0] = (byte)(t >> 24);
         this.clientRandom[1] = (byte)(t >> 16);
         this.clientRandom[2] = (byte)(t >> 8);
