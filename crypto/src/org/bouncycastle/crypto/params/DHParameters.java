@@ -1,8 +1,8 @@
 package org.bouncycastle.crypto.params;
 
-import java.math.BigInteger;
-
 import org.bouncycastle.crypto.CipherParameters;
+
+import java.math.BigInteger;
 
 public class DHParameters
     implements CipherParameters
@@ -44,7 +44,8 @@ public class DHParameters
         this.p = p;
         this.q = q;
         this.j = j;
-    }   
+        this.validation = validation;
+    }
 
     public BigInteger getP()
     {
@@ -86,21 +87,6 @@ public class DHParameters
 
         DHParameters    pm = (DHParameters)obj;
 
-        if (this.getValidationParameters() != null)
-        {
-            if (!this.getValidationParameters().equals(pm.getValidationParameters()))
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if (pm.getValidationParameters() != null)
-            {
-                return false;
-            }
-        }
-
         if (this.getQ() != null)
         {
             if (!this.getQ().equals(pm.getQ()))
@@ -121,6 +107,6 @@ public class DHParameters
     
     public int hashCode()
     {
-        return getJ() ^ getP().hashCode() ^ getG().hashCode();
+        return getJ() ^ getP().hashCode() ^ getG().hashCode() ^ (getQ() != null ? getQ().hashCode() : 0);
     }
 }
