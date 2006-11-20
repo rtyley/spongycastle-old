@@ -656,7 +656,17 @@ public class PGPSignatureTest
     
         PGPSignatureList p3 = (PGPSignatureList)pgpFact.nextObject();
         PGPSignature sig = p3.get(0);
-        
+
+        Date creationTime = sig.getCreationTime();
+        Date now = new Date();
+
+        // Check creationTime is recent
+        if (creationTime.after(now)
+            || creationTime.before(new Date(now.getTime() - 10 * 60 * 1000)))
+        {
+            fail("bad creation time in signature: " + creationTime);
+        }
+
         if (sig.getKeyID() != pubKey.getKeyID())
         {
             fail("key id mismatch in signature");
