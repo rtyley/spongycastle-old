@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -23,7 +24,7 @@ public class X509AttrCertParser
 {
     private static final PEMUtil PEM_PARSER = new PEMUtil("ATTRIBUTE CERTIFICATE");
 
-    private SignedData sData = null;
+    private ASN1Set     sData = null;
     private int         sDataObjectCount = 0;
     private InputStream currentStream = null;
 
@@ -40,7 +41,7 @@ public class X509AttrCertParser
             if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData))
             {
                 sData = new SignedData(ASN1Sequence.getInstance(
-                                (ASN1TaggedObject)seq.getObjectAt(1), true));
+                                (ASN1TaggedObject)seq.getObjectAt(1), true)).getCertificates();
 
                 return getCertificate();
             }
@@ -52,14 +53,17 @@ public class X509AttrCertParser
     private X509AttributeCertificate getCertificate()
         throws IOException
     {
-        while (sDataObjectCount < sData.getCertificates().size())
+        if (sData != null)
         {
-            Object obj = sData.getCertificates().getObjectAt(sDataObjectCount++);
-
-            if (obj instanceof ASN1TaggedObject && ((ASN1TaggedObject)obj).getTagNo() == 2)
+            while (sDataObjectCount < sData.size())
             {
-               return new X509V2AttributeCertificate(
-                      ASN1Sequence.getInstance((ASN1TaggedObject)obj, false).getEncoded());
+                Object obj = sData.getObjectAt(sDataObjectCount++);
+
+                if (obj instanceof ASN1TaggedObject && ((ASN1TaggedObject)obj).getTagNo() == 2)
+                {
+                   return new X509V2AttributeCertificate(
+                          ASN1Sequence.getInstance((ASN1TaggedObject)obj, false).getEncoded());
+                }
             }
         }
 
@@ -99,7 +103,7 @@ public class X509AttrCertParser
         {
             if (sData != null)
             {
-                if (sDataObjectCount != sData.getCertificates().size())
+                if (sDataObjectCount != sData.size())
                 {
                     return getCertificate();
                 }

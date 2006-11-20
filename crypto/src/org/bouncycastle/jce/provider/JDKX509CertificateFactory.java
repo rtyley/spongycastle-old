@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -38,11 +39,11 @@ public class JDKX509CertificateFactory
     private static final PEMUtil PEM_CERT_PARSER = new PEMUtil("CERTIFICATE");
     private static final PEMUtil PEM_CRL_PARSER = new PEMUtil("CRL");
 
-    private SignedData         sData = null;
+    private ASN1Set            sData = null;
     private int                sDataObjectCount = 0;
     private InputStream        currentStream = null;
     
-    private SignedData         sCrlData = null;
+    private ASN1Set            sCrlData = null;
     private int                sCrlDataObjectCount = 0;
     private InputStream        currentCrlStream = null;
 
@@ -58,7 +59,7 @@ public class JDKX509CertificateFactory
             if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData))
             {
                 sData = new SignedData(ASN1Sequence.getInstance(
-                                (ASN1TaggedObject)seq.getObjectAt(1), true));
+                                (ASN1TaggedObject)seq.getObjectAt(1), true)).getCertificates();
 
                 return getCertificate();
             }
@@ -71,14 +72,17 @@ public class JDKX509CertificateFactory
     private Certificate getCertificate()
         throws CertificateParsingException
     {
-        while (sDataObjectCount < sData.getCertificates().size())
+        if (sData != null)
         {
-            Object obj = sData.getCertificates().getObjectAt(sDataObjectCount++);
-
-            if (obj instanceof ASN1Sequence)
+            while (sDataObjectCount < sData.size())
             {
-               return new X509CertificateObject(
-                                X509CertificateStructure.getInstance(obj));
+                Object obj = sData.getObjectAt(sDataObjectCount++);
+
+                if (obj instanceof ASN1Sequence)
+                {
+                   return new X509CertificateObject(
+                                    X509CertificateStructure.getInstance(obj));
+                }
             }
         }
 
@@ -127,7 +131,7 @@ public class JDKX509CertificateFactory
             if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData))
             {
                 sCrlData = new SignedData(ASN1Sequence.getInstance(
-                                (ASN1TaggedObject)seq.getObjectAt(1), true));
+                                (ASN1TaggedObject)seq.getObjectAt(1), true)).getCRLs();
     
                 return getCRL();
             }
@@ -140,14 +144,14 @@ public class JDKX509CertificateFactory
     private CRL getCRL()
         throws CRLException
     {
-        if (sCrlDataObjectCount >= sCrlData.getCRLs().size())
+        if (sCrlData == null || sCrlDataObjectCount >= sCrlData.size())
         {
             return null;
         }
 
         return new X509CRLObject(
                             CertificateList.getInstance(
-                                    sCrlData.getCRLs().getObjectAt(sCrlDataObjectCount++)));
+                                    sCrlData.getObjectAt(sCrlDataObjectCount++)));
     }
 
     /**
@@ -175,7 +179,7 @@ public class JDKX509CertificateFactory
         {
             if (sData != null)
             {
-                if (sDataObjectCount != sData.getCertificates().size())
+                if (sDataObjectCount != sData.size())
                 {
                     return getCertificate();
                 }
@@ -261,7 +265,7 @@ public class JDKX509CertificateFactory
         {
             if (sCrlData != null)
             {
-                if (sCrlDataObjectCount != sCrlData.getCRLs().size())
+                if (sCrlDataObjectCount != sCrlData.size())
                 {
                     return getCRL();
                 }

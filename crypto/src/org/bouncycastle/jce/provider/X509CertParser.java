@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -14,6 +15,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateParsingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,13 +25,13 @@ public class X509CertParser
 {
     private static final PEMUtil PEM_PARSER = new PEMUtil("CERTIFICATE");
 
-    private SignedData  sData = null;
+    private ASN1Set     sData = null;
     private int         sDataObjectCount = 0;
     private InputStream currentStream = null;
 
     private Certificate readDERCertificate(
         InputStream in)
-        throws IOException
+        throws IOException, CertificateParsingException
     {
         ASN1InputStream dIn = new ASN1InputStream(in, ProviderUtil.getReadLimit(in));
         ASN1Sequence seq = (ASN1Sequence)dIn.readObject();
@@ -40,7 +42,7 @@ public class X509CertParser
             if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData))
             {
                 sData = new SignedData(ASN1Sequence.getInstance(
-                                (ASN1TaggedObject)seq.getObjectAt(1), true));
+                                (ASN1TaggedObject)seq.getObjectAt(1), true)).getCertificates();
 
                 return getCertificate();
             }
@@ -51,15 +53,19 @@ public class X509CertParser
     }
 
     private Certificate getCertificate()
+        throws CertificateParsingException
     {
-        while (sDataObjectCount < sData.getCertificates().size())
+        if (sData != null)
         {
-            Object obj = sData.getCertificates().getObjectAt(sDataObjectCount++);
-
-            if (obj instanceof ASN1Sequence)
+            while (sDataObjectCount < sData.size())
             {
-               return new X509CertificateObject(
-                                X509CertificateStructure.getInstance(obj));
+                Object obj = sData.getObjectAt(sDataObjectCount++);
+
+                if (obj instanceof ASN1Sequence)
+                {
+                   return new X509CertificateObject(
+                                    X509CertificateStructure.getInstance(obj));
+                }
             }
         }
 
@@ -68,7 +74,7 @@ public class X509CertParser
 
     private Certificate readPEMCertificate(
         InputStream  in)
-        throws IOException
+        throws IOException, CertificateParsingException
     {
         ASN1Sequence seq = PEM_PARSER.readPEMObject(in);
 
@@ -100,7 +106,7 @@ public class X509CertParser
         {
             if (sData != null)
             {
-                if (sDataObjectCount != sData.getCertificates().size())
+                if (sDataObjectCount != sData.size())
                 {
                     return getCertificate();
                 }
