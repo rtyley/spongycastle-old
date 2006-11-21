@@ -1,20 +1,5 @@
 package org.bouncycastle.jce;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.Hashtable;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -33,6 +18,21 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.util.Strings;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.Hashtable;
 
 /**
  * class to produce an X.509 Version 1 certificate.
@@ -246,18 +246,18 @@ public class X509V1CertificateGenerator
             dOut.writeObject(tbsCert);
 
             sig.update(bOut.toByteArray());
+
+            ASN1EncodableVector  v = new ASN1EncodableVector();
+
+            v.add(tbsCert);
+            v.add(sigAlgId);
+            v.add(new DERBitString(sig.sign()));
+
+            return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
         }
         catch (Exception e)
         {
             throw new SecurityException("exception encoding TBS cert - " + e);
         }
-
-        ASN1EncodableVector  v = new ASN1EncodableVector();
-
-        v.add(tbsCert);
-        v.add(sigAlgId);
-        v.add(new DERBitString(sig.sign()));
-
-        return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
     }
 }

@@ -37,7 +37,11 @@
     <target name="checkstyle-on" if="checkstyle.on">
         <taskdef resource="checkstyletask.properties" />
         <checkstyle config="checkstyle/bc-checks.xml">
-            <fileset dir="${src.dir}" includes="**/*.java"/>
+            <fileset dir="${src.dir}">
+                <include name="**/*.java"/>
+                <exclude name="**/sasn1/*.java"/>
+                <exclude name="**/sasn1/test/*.java"/>
+            </fileset>
             <formatter type="plain"/>
             <formatter type="xml" toFile="${artifacts.dir}/checkstyle/${jdk.name}-errors.xml"/>
         </checkstyle>

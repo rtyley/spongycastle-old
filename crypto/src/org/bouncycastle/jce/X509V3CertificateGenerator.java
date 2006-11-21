@@ -1,5 +1,28 @@
 package org.bouncycastle.jce;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.asn1.x509.Time;
+import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.provider.X509CertificateObject;
+import org.bouncycastle.util.Strings;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,19 +39,6 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
-
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x509.Time;
-import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.util.Strings;
 
 /**
  * class to produce an X.509 Version 3 certificate.
@@ -326,18 +336,19 @@ public class X509V3CertificateGenerator
             dOut.writeObject(tbsCert);
 
             sig.update(bOut.toByteArray());
+ 
+            ASN1EncodableVector  v = new ASN1EncodableVector();
+
+            v.add(tbsCert);
+            v.add(sigAlgId);
+            v.add(new DERBitString(sig.sign()));
+
+            return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
         }
         catch (Exception e)
         {
             throw new SecurityException("exception encoding TBS cert - " + e);
         }
 
-        ASN1EncodableVector  v = new ASN1EncodableVector();
-
-        v.add(tbsCert);
-        v.add(sigAlgId);
-        v.add(new DERBitString(sig.sign()));
-
-        return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
     }
 }

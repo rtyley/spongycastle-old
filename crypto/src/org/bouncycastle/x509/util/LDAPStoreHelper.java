@@ -29,6 +29,7 @@ import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.sql.Date;
@@ -630,6 +631,10 @@ public class LDAPStoreHelper
                 {
                     certPairSet.add(pair);
                 }
+            }
+            catch (CertificateParsingException e)
+            {
+                // try next
             }
             catch (IOException e)
             {
