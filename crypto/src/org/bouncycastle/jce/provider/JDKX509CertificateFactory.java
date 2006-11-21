@@ -361,7 +361,7 @@ public class JDKX509CertificateFactory
             {
                 if (!(obj instanceof X509Certificate))
                 {
-                    throw new CertificateException("list contains none X509Certificate object while creating CertPath\n" + obj.toString());
+                    throw new CertificateException("list contains non X509Certificate object while creating CertPath\n" + obj.toString());
                 }
             }
         }
