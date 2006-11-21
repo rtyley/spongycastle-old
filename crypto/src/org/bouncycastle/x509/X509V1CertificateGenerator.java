@@ -30,6 +30,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Iterator;
@@ -344,6 +345,7 @@ public class X509V1CertificateGenerator
     }
 
     private X509Certificate generateJcaObject(TBSCertificateStructure tbsCert, byte[] signature)
+        throws CertificateEncodingException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
@@ -351,7 +353,14 @@ public class X509V1CertificateGenerator
         v.add(sigAlgId);
         v.add(new DERBitString(signature));
 
-        return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
+        try
+        {
+            return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
+        }
+        catch (CertificateParsingException e)
+        {
+            throw new ExtCertificateEncodingException("exception producing certificate object", e);
+        }
     }
 
     /**

@@ -10,6 +10,7 @@ import org.bouncycastle.x509.X509StreamParserSpi;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateParsingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +21,8 @@ public class X509CertPairParser
     private InputStream currentStream = null;
 
     private X509CertificatePair readDERCrossCertificatePair(
-        InputStream in) throws IOException
+        InputStream in)
+        throws IOException, CertificateParsingException
     {
         ASN1InputStream dIn = new ASN1InputStream(in, ProviderUtil.getReadLimit(in));
         ASN1Sequence seq = (ASN1Sequence)dIn.readObject();

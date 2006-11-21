@@ -420,7 +420,14 @@ public class X509V3CertificateGenerator
             throw new ExtCertificateEncodingException("exception encoding TBS cert", e);
         }
 
-        return generateJcaObject(tbsCert, signature);
+        try
+        {
+            return generateJcaObject(tbsCert, signature);
+        }
+        catch (CertificateParsingException e)
+        {
+            throw new ExtCertificateEncodingException("exception producing certificate object", e);
+        }
     }
 
     /**
@@ -458,7 +465,14 @@ public class X509V3CertificateGenerator
             throw new ExtCertificateEncodingException("exception encoding TBS cert", e);
         }
 
-        return generateJcaObject(tbsCert, signature);
+        try
+        {
+            return generateJcaObject(tbsCert, signature);
+        }
+        catch (CertificateParsingException e)
+        {
+            throw new ExtCertificateEncodingException("exception producing certificate object", e);
+        }
     }
 
     private TBSCertificateStructure generateTbsCert()
@@ -472,6 +486,7 @@ public class X509V3CertificateGenerator
     }
 
     private X509Certificate generateJcaObject(TBSCertificateStructure tbsCert, byte[] signature)
+        throws CertificateParsingException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

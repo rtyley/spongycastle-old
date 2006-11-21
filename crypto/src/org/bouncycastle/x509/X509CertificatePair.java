@@ -7,6 +7,7 @@ import org.bouncycastle.jce.provider.X509CertificateObject;
 
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 
 /**
@@ -41,6 +42,7 @@ public class X509CertificatePair
      */
     public X509CertificatePair(
         CertificatePair pair)
+        throws CertificateParsingException
     {
         if (pair.getForward() != null)
         {
@@ -50,7 +52,6 @@ public class X509CertificatePair
         {
             this.reverse = new X509CertificateObject(pair.getReverse());
         }
-
     }
     
     public byte[] getEncoded()
