@@ -115,6 +115,8 @@ public class OIDTest
         invalidOidCheck("1");
         invalidOidCheck("2");
         invalidOidCheck("3.1");
+        invalidOidCheck("..1");
+        invalidOidCheck("192.168.1.1");
         invalidOidCheck(".123452");
         invalidOidCheck("1.");
         invalidOidCheck("1.345.23.34..234");
