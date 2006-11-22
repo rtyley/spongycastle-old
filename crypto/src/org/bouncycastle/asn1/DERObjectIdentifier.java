@@ -251,9 +251,20 @@ public class DERObjectIdentifier
     private static boolean isValidIdentifier(
         String identifier)
     {
-        int periodCount = 0;
+        if (identifier.length() < 3
+            || identifier.charAt(1) != '.')
+        {
+            return false;
+        }
+
+        char first = identifier.charAt(0);
+        if (first < '0' || first > '2')
+        {
+            return false;
+        }
+
         boolean periodAllowed = false;
-        for (int i = identifier.length() - 1; i >= 0; i--)
+        for (int i = identifier.length() - 1; i >= 2; i--)
         {
             char ch = identifier.charAt(i);
 
@@ -270,7 +281,6 @@ public class DERObjectIdentifier
                     return false;
                 }
 
-                ++periodCount;
                 periodAllowed = false;
                 continue;
             }
@@ -278,6 +288,6 @@ public class DERObjectIdentifier
             return false;
         }
 
-        return periodAllowed && periodCount > 0;
+        return periodAllowed;
     }
 }
