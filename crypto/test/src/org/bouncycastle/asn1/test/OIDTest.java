@@ -64,7 +64,7 @@ public class OIDTest
         }
     }
     
-    private void valueCheck(
+    private void validOidCheck(
         String  oid)
         throws IOException
     {
@@ -84,17 +84,39 @@ public class OIDTest
             fail("failed oid check for " + oid);
         }
     }
-    
+
+    private void invalidOidCheck(
+        String oid)
+    {
+        try
+        {
+            new DERObjectIdentifier(oid);
+            fail("failed to catch bad oid: " + oid);
+        }
+        catch (IllegalArgumentException e)
+        {
+            // expected
+        }
+    }
+
     public void performTest()
         throws IOException
     {
         recodeCheck("2.100.3", req1);
         recodeCheck("1.2.54.34359733987.17", req2);
         
-        valueCheck(PKCSObjectIdentifiers.pkcs_9_at_contentType.getId());
-        valueCheck("1.1.127.32512.8323072.2130706432.545460846592.139637976727552.35747322042253312.9151314442816847872");
-        valueCheck("1.2.123.12345678901.1.1.1");
-        valueCheck("2.25.196556539987194312349856245628873852187.1");
+        validOidCheck(PKCSObjectIdentifiers.pkcs_9_at_contentType.getId());
+        validOidCheck("1.1.127.32512.8323072.2130706432.545460846592.139637976727552.35747322042253312.9151314442816847872");
+        validOidCheck("1.2.123.12345678901.1.1.1");
+        validOidCheck("2.25.196556539987194312349856245628873852187.1");
+
+        invalidOidCheck("0");
+        invalidOidCheck("123451234");
+        invalidOidCheck(".123452");
+        invalidOidCheck("15245.");
+        invalidOidCheck("12.345.23.34..234");
+        invalidOidCheck("12.345.23.34.234.");
+        invalidOidCheck(".12.345.77.234.");
     }
 
     public static void main(
