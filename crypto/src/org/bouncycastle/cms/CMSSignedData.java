@@ -15,8 +15,6 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.x509.NoSuchStoreException;
 import org.bouncycastle.x509.X509Store;
 
@@ -25,12 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.cert.CRLException;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -368,72 +362,35 @@ public class CMSSignedData
         //
         // replace the certs and crls in the SignedData object
         //
-        ASN1EncodableVector v = new ASN1EncodableVector();
-        
+        ASN1Set             certs = null;
+        ASN1Set             crls = null;
+
         try
         {
-            Iterator  it = certsAndCrls.getCertificates(null).iterator();
+            ASN1Set set = CMSUtils.createDerSetFromList(CMSUtils.getCertificatesFromStore(certsAndCrls));
 
-            while (it.hasNext())
+            if (set.size() != 0)
             {
-                X509Certificate         c = (X509Certificate)it.next();
-
-                v.add(new X509CertificateStructure(
-                                        (ASN1Sequence)makeObj(c.getEncoded())));
+                certs = set;
             }
         }
         catch (CertStoreException e)
         {
             throw new CMSException("error getting certs from certStore", e);
         }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing certs", e);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new CMSException("error encoding certs", e);
-        }
 
-        ASN1Set             certs = null;
-        
-        if (v.size() > 0)
-        {
-            certs = new DERSet(v);
-        }
-        
-        v = new ASN1EncodableVector();
-        
         try
         {
-            Iterator    it = certsAndCrls.getCRLs(null).iterator();
+            ASN1Set set = CMSUtils.createDerSetFromList(CMSUtils.getCRLsFromStore(certsAndCrls));
 
-            while (it.hasNext())
+            if (set.size() != 0)
             {
-                X509CRL                 c = (X509CRL)it.next();
-
-                v.add(new CertificateList(
-                                        (ASN1Sequence)makeObj(c.getEncoded())));
+                crls = set;
             }
         }
         catch (CertStoreException e)
         {
             throw new CMSException("error getting crls from certStore", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing crls", e);
-        }
-        catch (CRLException e)
-        {
-            throw new CMSException("error encoding crls", e);
-        }
-
-        ASN1Set             crls = null;
-        
-        if (v.size() > 0)
-        {
-            crls = new DERSet(v);
         }
         
         //

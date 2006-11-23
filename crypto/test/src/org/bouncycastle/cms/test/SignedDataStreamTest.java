@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.cms.CMSAttributeTableGenerator;
-import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
@@ -21,19 +20,24 @@ import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CollectionStoreParameters;
+import org.bouncycastle.x509.X509Store;
+import org.bouncycastle.x509.X509StreamParser;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -57,8 +61,11 @@ public class SignedDataStreamTest
     
     private static KeyPair         _origDsaKP;
     private static X509Certificate _origDsaCert;
-    
-    private static boolean _initialised = false;
+
+    private static X509CRL         _signCrl;
+    private static X509CRL         _origCrl;
+
+    private static boolean         _initialised = false;
     
     public SignedDataStreamTest(String name) 
     {
@@ -85,7 +92,10 @@ public class SignedDataStreamTest
             
             _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
             _reciKP   = CMSTestUtil.makeKeyPair();
-            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);  
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
+
+            _signCrl  = CMSTestUtil.makeCrl(_signKP);
+            _origCrl  = CMSTestUtil.makeCrl(_origKP);
         }
     }
     
@@ -121,7 +131,8 @@ public class SignedDataStreamTest
         verifySignatures(sp, null);
     }
 
-    private void verifyEncodedData(ByteArrayOutputStream bOut) throws CMSException, IOException, Exception
+    private void verifyEncodedData(ByteArrayOutputStream bOut)
+        throws Exception
     {
         CMSSignedDataParser sp;
         sp = new CMSSignedDataParser(bOut.toByteArray());
@@ -253,15 +264,18 @@ public class SignedDataStreamTest
         
         certList.add(_origCert);
         certList.add(_signCert);
-    
-        CertStore           certs = CertStore.getInstance("Collection",
+
+        certList.add(_signCrl);
+        certList.add(_origCrl);
+
+        CertStore           certsAndCrls = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
     
         CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
     
         gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
     
-        gen.addCertificatesAndCRLs(certs);
+        gen.addCertificatesAndCRLs(certsAndCrls);
     
         OutputStream sigOut = gen.open(bOut);
     
@@ -299,6 +313,15 @@ public class SignedDataStreamTest
         sigOut.close();
     
         verifyEncodedData(bOut);
+
+        //
+        // look for the CRLs
+        //
+        Collection col = certsAndCrls.getCRLs(null);
+
+        assertEquals(2, col.size());
+        assertTrue(col.contains(_signCrl));
+        assertTrue(col.contains(_origCrl));
     }
     
     public void testSHA1AndMD5WithRSA()
@@ -511,6 +534,10 @@ public class SignedDataStreamTest
         
         sigOut.close();
 
+        CMSSignedData sd = new CMSSignedData(new CMSProcessableByteArray(TEST_MESSAGE.getBytes()), bOut.toByteArray());
+
+        assertEquals(1, sd.getSignerInfos().getSigners().size());
+
         verifyEncodedData(bOut);
     }
 
@@ -593,6 +620,56 @@ public class SignedDataStreamTest
         DEROctetString      value = (DEROctetString)attr.getAttrValues().getObjectAt(0);
 
         assertEquals(new DEROctetString(expected), value);
+    }
+
+    public void testWithAttributeCertificate()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        X509StreamParser parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+
+        parser.init(CMSTestUtil.attrCert);
+
+        X509AttributeCertificate attrCert = (X509AttributeCertificate)parser.read();
+
+        X509Store store = X509Store.getInstance("AttributeCertificate/Collection",
+                                    new X509CollectionStoreParameters(Collections.singleton(attrCert)), "BC");
+
+        gen.addAttributeCertificates(store);
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        assertEquals(4, sp.getVersion());
+
+        store = sp.getAttributeCertificates("Collection", "BC");
+
+        Collection coll = store.getMatches(null);
+
+        assertEquals(1, coll.size());
+
+        assertTrue(coll.contains(attrCert));
     }
 
     public void testSignerStoreReplacement()
