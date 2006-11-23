@@ -1,31 +1,35 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERUTCTime;
-import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSAttributes;
-import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509Store;
 
+import java.io.IOException;
 import java.security.PrivateKey;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -79,6 +83,10 @@ public class CMSSignedGenerator
         EC_ALGORITHMS.put(DIGEST_SHA384, ENCRYPTION_ECDSA_WITH_SHA384);
         EC_ALGORITHMS.put(DIGEST_SHA512, ENCRYPTION_ECDSA_WITH_SHA512);
     }
+
+    protected List _certs = new ArrayList();
+    protected List _crls = new ArrayList();
+    protected List _signers = new ArrayList();
 
     protected CMSSignedGenerator()
     {
@@ -137,98 +145,6 @@ public class CMSSignedGenerator
         }
     }
 
-    protected ASN1Set getSignedAttributeSet(
-        DERObjectIdentifier contentType, 
-        byte[]              hash, 
-        AttributeTable      attr, 
-        boolean             addDefaultAttributes)
-    {
-        if (attr != null)
-        {
-            ASN1EncodableVector  v = new ASN1EncodableVector();
-
-            if (attr.get(CMSAttributes.contentType) == null)
-            {
-                v.add(new Attribute(CMSAttributes.contentType,
-                                               new DERSet(contentType)));
-            }
-            else
-            {
-                v.add(attr.get(CMSAttributes.contentType));
-            }
-
-            if (attr.get(CMSAttributes.signingTime) == null)
-            {
-                v.add(new Attribute(CMSAttributes.signingTime,
-                                       new DERSet(new Time(new Date()))));
-            }
-            else
-            {
-                v.add(attr.get(CMSAttributes.signingTime));
-            }
-
-            if (hash != null)
-            {
-                v.add(new Attribute(CMSAttributes.messageDigest,
-                    new DERSet(new DEROctetString(hash))));
-            }
-            else
-            {
-                v.add(new Attribute(CMSAttributes.messageDigest,
-                    new DERSet(new DERNull())));
-            }
-            
-            ASN1EncodableVector attrs = attr.toASN1EncodableVector();
-            
-            for (int i = 0; i != attrs.size(); i++)
-            {
-                Attribute           a = Attribute.getInstance(attrs.get(i));
-                DERObjectIdentifier type = a.getAttrType();
-                
-                if (type.equals(CMSAttributes.contentType)
-                    || type.equals(CMSAttributes.signingTime)
-                    || type.equals(CMSAttributes.messageDigest))
-                {
-                    continue;
-                }
-                
-                v.add(a);
-            }
-
-            return new DERSet(v);
-        }
-        else
-        {
-            if (addDefaultAttributes) 
-            {
-                ASN1EncodableVector  v = new ASN1EncodableVector();
-
-                v.add(new Attribute(
-                    CMSAttributes.contentType,
-                        new DERSet(contentType)));
-
-                v.add(new Attribute(
-                    CMSAttributes.signingTime,
-                        new DERSet(new DERUTCTime(new Date()))));
-
-                if (hash != null)
-                {
-                    v.add(new Attribute(CMSAttributes.messageDigest,
-                        new DERSet(new DEROctetString(hash))));
-                }
-                else
-                {
-                    v.add(new Attribute(CMSAttributes.messageDigest,
-                        new DERSet(new DERNull())));
-                }
-
-                return new DERSet(v);
-            }
-        }
-
-        return null;
-    }
-
     protected Map getBaseParameters(DERObjectIdentifier contentType, AlgorithmIdentifier digAlgId, byte[] hash)
     {
         Map param = new HashMap();
@@ -253,5 +169,71 @@ public class CMSSignedGenerator
         }
         
         return null;
+    }
+
+    /**
+     * add the certificates and CRLs contained in the given CertStore
+     * to the pool that will be included in the encoded signature block.
+     * <p>
+     * Note: this assumes the CertStore will support null in the get
+     * methods.
+     * @param certStore CertStore containing the public key certificates and CRLs
+     * @throws java.security.cert.CertStoreException  if an issue occurs processing the CertStore
+     * @throws CMSException  if an issue occurse transforming data from the CertStore into the message
+     */
+    public void addCertificatesAndCRLs(
+        CertStore certStore)
+        throws CertStoreException, CMSException
+    {
+        _certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
+        _crls.addAll(CMSUtils.getCRLsFromStore(certStore));
+    }
+
+    /**
+     * Add the attribute certificates contained in the passed in store to the
+     * generator.
+     *
+     * @param store a store of Version 2 attribute certificates
+     * @throws CMSException if an error occurse processing the store.
+     */
+    public void addAttributeCertificates(
+        X509Store store)
+        throws CMSException
+    {
+        try
+        {
+            for (Iterator it = store.getMatches(null).iterator(); it.hasNext();)
+            {
+                X509AttributeCertificate attrCert = (X509AttributeCertificate)it.next();
+
+                _certs.add(new DERTaggedObject(false, 2,
+                             AttributeCertificate.getInstance(ASN1Object.fromByteArray(attrCert.getEncoded()))));
+            }
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("error processing attribute certs", e);
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("error processing attribute certs", e);
+        }
+    }
+
+
+    /**
+     * Add a store of precalculated signers to the generator.
+     *
+     * @param signerStore store of signers
+     */
+    public void addSigners(
+        SignerInformationStore    signerStore)
+    {
+        Iterator    it = signerStore.getSigners().iterator();
+
+        while (it.hasNext())
+        {
+            _signers.add(it.next());
+        }
     }
 }

@@ -24,6 +24,7 @@ import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,13 +51,18 @@ public class SignedDataTest
 
     private static KeyPair         _signEcDsaKP;
     private static X509Certificate _signEcDsaCert;
-    
+
+    private static KeyPair         _signEcGostKP;
+    private static X509Certificate _signEcGostCert;
+
     private static KeyPair         _signDsaKP;
     private static X509Certificate _signDsaCert;
     
     private static String          _reciDN;
     private static KeyPair         _reciKP;
     private static X509Certificate _reciCert;
+
+    private static X509CRL         _signCrl;
 
     private static boolean _initialised = false;
 
@@ -253,10 +259,14 @@ public class SignedDataTest
             
             _signEcDsaKP   = CMSTestUtil.makeEcDsaKeyPair();
             _signEcDsaCert = CMSTestUtil.makeCertificate(_signEcDsaKP, _signDN, _origKP, _origDN);
-    
+
+            _signEcGostKP = CMSTestUtil.makeEcGostKeyPair();
+
             _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
             _reciKP   = CMSTestUtil.makeKeyPair();
-            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);      
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
+
+            _signCrl  = CMSTestUtil.makeCrl(_signKP);
         }
     }
 
@@ -369,6 +379,8 @@ public class SignedDataTest
         c = signers.getSigners();
         it = c.iterator();
 
+        assertEquals(2, c.size());
+        
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
@@ -410,7 +422,39 @@ public class SignedDataTest
         
         verifySignatures(s, md.digest("Hello world!".getBytes()));
     }
-    
+
+    public void testECGOST()
+        throws Exception
+    {
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        gen.addSigner(_signEcGostKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_GOST3411);
+
+        gen.addCertificatesAndCRLs(certs);
+
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+
+        SignerInformation info = (SignerInformation)s.getSignerInfos().getSigners().iterator().next();
+
+        info.verify(_signEcGostKP.getPublic(), "BC");
+  
+        //
+        // compute expected content digest
+        //
+//        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+//
+//        verifySignatures(s, md.digest("Hello world!".getBytes()));
+    }
+
     public void testSHA1WithRSAEncapsulated()
         throws Exception
     {
@@ -500,15 +544,17 @@ public class SignedDataTest
     
         certList.add(signatureCert);
         certList.add(_origCert);
-    
-        CertStore           certs = CertStore.getInstance("Collection",
+
+        certList.add(_signCrl);
+
+        CertStore           certsAndCrls = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
     
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
     
         gen.addSigner(signaturePair.getPrivate(), signatureCert, digestAlgorithm);
     
-        gen.addCertificatesAndCRLs(certs);
+        gen.addCertificatesAndCRLs(certsAndCrls);
     
         CMSSignedData s = gen.generate(msg, true, "BC");
     
@@ -517,7 +563,7 @@ public class SignedDataTest
         
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
     
-        certs = s.getCertificatesAndCRLs("Collection", "BC");
+        certsAndCrls = s.getCertificatesAndCRLs("Collection", "BC");
     
         SignerInformationStore  signers = s.getSignerInfos();
         Collection              c = signers.getSigners();
@@ -526,13 +572,22 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
     
             assertEquals(true, signer.verify(cert, "BC"));
         }
+
+        //
+        // check for CRLs
+        //
+        Collection crls = certsAndCrls.getCRLs(null);
+
+        assertEquals(1, crls.size());
+
+        assertTrue(crls.contains(_signCrl));
         
         //
         // try using existing signer
@@ -551,7 +606,7 @@ public class SignedDataTest
     
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
     
-        certs = s.getCertificatesAndCRLs("Collection", "BC");
+        certsAndCrls = s.getCertificatesAndCRLs("Collection", "BC");
     
         signers = s.getSignerInfos();
         c = signers.getSigners();
@@ -560,7 +615,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();

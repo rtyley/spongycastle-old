@@ -34,12 +34,8 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.cert.CRLException;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -207,6 +203,16 @@ public class CMSSignedDataParser
         {
             throw new CMSException("no digests could be created for message.");
         }
+    }
+
+    /**
+     * Return the version number for the SignedData object
+     *
+     * @return the version number
+     */
+    public int getVersion()
+    {
+        return _signedData.getVersion().getValue().intValue();
     }
 
     /**
@@ -559,66 +565,36 @@ public class CMSSignedDataParser
         //
         // replace the certs and crls in the SignedData object
         //
-        ASN1EncodableVector v = new ASN1EncodableVector();
+        ASN1Set certs;
 
         try
         {
-            Iterator  it = certsAndCrls.getCertificates(null).iterator();
-
-            while (it.hasNext())
-            {
-                X509Certificate c = (X509Certificate)it.next();
-
-                v.add(makeObj(c.getEncoded()));
-            }
+            certs = CMSUtils.createDerSetFromList(CMSUtils.getCertificatesFromStore(certsAndCrls));
         }
         catch (CertStoreException e)
         {
             throw new CMSException("error getting certs from certStore", e);
         }
-        catch (IOException e)
+
+        if (certs.size() > 0)
         {
-            throw new CMSException("error processing certs", e);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new CMSException("error encoding certs", e);
+            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 0, certs).getEncoded());
         }
 
-        if (v.size() > 0)
-        {
-            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 0, new DERSet(v)).getEncoded());
-        }
-
-        v = new ASN1EncodableVector();
+        ASN1Set crls;
 
         try
         {
-            Iterator    it = certsAndCrls.getCRLs(null).iterator();
-
-            while (it.hasNext())
-            {
-                X509CRL c = (X509CRL)it.next();
-
-                v.add(makeObj(c.getEncoded()));
-            }
+            crls = CMSUtils.createDerSetFromList(CMSUtils.getCRLsFromStore(certsAndCrls));
         }
         catch (CertStoreException e)
         {
             throw new CMSException("error getting crls from certStore", e);
         }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing crls", e);
-        }
-        catch (CRLException e)
-        {
-            throw new CMSException("error encoding crls", e);
-        }
 
-        if (v.size() > 0)
+        if (crls.size() > 0)
         {
-            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, new DERSet(v)).getEncoded());
+            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, crls).getEncoded());
         }
 
         sigGen.getRawOutputStream().write(signedData.getSignerInfos().getDERObject().getEncoded());

@@ -203,7 +203,7 @@ public class CMSSignedDataGenerator
         CMSAttributeTableGenerator getUnsignedAttributes()
         {
             return unsAttr;
-        }
+        }   
 
         SignerInfo toSignerInfo(
             DERObjectIdentifier contentType,
@@ -218,7 +218,7 @@ public class CMSSignedDataGenerator
             String              digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
             String              signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
             Signature           sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
-            MessageDigest       dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);
+            MessageDigest       dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
 
             byte[]      hash = null;
 
@@ -247,12 +247,12 @@ public class CMSSignedDataGenerator
             // sig must be composed from the DER encoding.
             //
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-
-            if (signedAttr != null)
+ 
+            if (signedAttr != null) 
             {
                 DEROutputStream         dOut = new DEROutputStream(bOut);
                 dOut.writeObject(signedAttr);
-            }
+            } 
             else
             {
                 content.write(bOut);
@@ -281,14 +281,14 @@ public class CMSSignedDataGenerator
                         signedAttr, encAlgId, encDigest, unsignedAttr);
         }
     }
-
+    
     /**
      * base constructor
      */
     public CMSSignedDataGenerator()
     {
     }
-
+    
     /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
@@ -334,112 +334,6 @@ public class CMSSignedDataGenerator
         String  encOID = getEncOID(key, digestOID);
 
         signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGen, unsignedAttrGen, null));
-    }
-
-    /**
-     * Add a store of precalculated signers to the generator.
-     *
-     * @param signerStore
-     */
-    public void addSigners(
-        SignerInformationStore    signerStore)
-    {
-        Iterator    it = signerStore.getSigners().iterator();
-
-        while (it.hasNext())
-        {
-            signers.add(it.next());
-        }
-    }
-
-    /**
-     * add the certificates and CRLs contained in the given CertStore
-     * to the pool that will be included in the encoded signature block.
-     * <p>
-     * Note: this assumes the CertStore will support null in the get
-     * methods.
-     */
-    public void addCertificatesAndCRLs(
-        CertStore               certStore)
-        throws CertStoreException, CMSException
-    {
-        //
-        // divide up the certs and crls.
-        //
-        try
-        {
-            for (Iterator it = certStore.getCertificates(null).iterator(); it.hasNext();)
-            {
-                X509Certificate         c = (X509Certificate)it.next();
-
-                certs.add(X509CertificateStructure.getInstance(
-                                                       ASN1Object.fromByteArray(c.getEncoded())));
-            }
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new CMSException("error processing certs", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing certs", e);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new CMSException("error encoding certs", e);
-        }
-
-        try
-        {
-            for (Iterator it = certStore.getCRLs(null).iterator(); it.hasNext();)
-            {
-                X509CRL                 c = (X509CRL)it.next();
-
-                crls.add(CertificateList.getInstance(ASN1Object.fromByteArray(c.getEncoded())));
-            }
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new CMSException("error processing crls", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing crls", e);
-        }
-        catch (CRLException e)
-        {
-            throw new CMSException("error encoding crls", e);
-        }
-    }
-
-    /**
-     * Add the attribute certificates contained in the passed in store to the
-     * generator.
-     *
-     * @param store a store of Version 2 attribute certificates
-     * @throws CMSException if an error occurse processing the store.
-     */
-    public void addAttributeCertificates(X509Store store)
-        throws CMSException
-    {
-        try
-        {
-            for (Iterator it = store.getMatches(null).iterator(); it.hasNext();)
-            {
-                X509AttributeCertificate attrCert = (X509AttributeCertificate)it.next();
-
-                certs.add(new DERTaggedObject(false, 2,
-                             AttributeCertificate.getInstance(ASN1Object.fromByteArray(attrCert.getEncoded()))));
-            }
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new CMSException("error processing attribute certs", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing attribute certs", e);
-        }
     }
 
     private DERObject makeObj(
@@ -501,12 +395,12 @@ public class CMSSignedDataGenerator
     {
         return generate(signedContentType, content, encapsulate, sigProvider, true);
     }
-
+    
     /**
      * Similar method to the other generate methods. The additional argument
      * addDefaultAttributes indicates whether or not a default set of signed attributes
      * need to be added automatically. If the argument is set to false, no
-     * attributes will get added at all.
+     * attributes will get added at all. 
      */
     public CMSSignedData generate(
         String                  signedContentType,
@@ -520,17 +414,17 @@ public class CMSSignedDataGenerator
         ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
 
         DERObjectIdentifier      contentTypeOID = new DERObjectIdentifier(signedContentType);
-
+        
         //
         // add the precalculated SignerInfo objects.
         //
         Iterator            it = _signers.iterator();
-
+        
         while (it.hasNext())
         {
             SignerInformation        signer = (SignerInformation)it.next();
             AlgorithmIdentifier     digAlgId;
-
+            
             try
             {
                 digAlgId = makeAlgId(signer.getDigestAlgOID(),
@@ -545,7 +439,7 @@ public class CMSSignedDataGenerator
 
            signerInfos.add(signer.toSignerInfo());
         }
-
+        
         //
         // add the SignerInfo objects
         //

@@ -3,12 +3,10 @@ package org.bouncycastle.cms;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSequenceGenerator;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
@@ -23,9 +21,7 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,11 +34,7 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,15 +65,10 @@ import java.util.Map;
 public class CMSSignedDataStreamGenerator
     extends CMSSignedGenerator
 {
-    private static CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
-
-    private List  _certs = new ArrayList();
-    private List  _crls = new ArrayList();
     private List  _signerInfs = new ArrayList();
-    private List  _signers = new ArrayList();
     private List  _digests = new ArrayList();
     private int   _bufferSize;
-    
+
     private class SignerInf
     {
         PrivateKey                  _key;
@@ -264,79 +251,6 @@ public class CMSSignedDataStreamGenerator
 
         _signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _digests.add(dig);
-    }
-
-    /**
-     * Add a store of precalculated signers to the generator.
-     * 
-     * @param signerStore
-     */
-    public void addSigners(
-        SignerInformationStore    signerStore)
-    {
-        Iterator    it = signerStore.getSigners().iterator();
-        
-        while (it.hasNext())
-        {
-            _signers.add(it.next());
-        }
-    }
-    
-    /**
-     * add the certificates and CRLs contained in the given CertStore
-     * to the pool that will be included in the encoded signature block.
-     * <p>
-     * Note: this assumes the CertStore will support null in the get
-     * methods.
-     */
-    public void addCertificatesAndCRLs(
-        CertStore               certStore)
-        throws CertStoreException, CMSException
-    {
-        //
-        // divide up the certs and crls.
-        //
-        try
-        {
-            Iterator  it = certStore.getCertificates(null).iterator();
-
-            while (it.hasNext())
-            {
-                X509Certificate         c = (X509Certificate)it.next();
-
-                _certs.add(new X509CertificateStructure(
-                                        (ASN1Sequence)makeObj(c.getEncoded())));
-            }
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing certs", e);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new CMSException("error encoding certs", e);
-        }
-
-        try
-        {
-            Iterator    it = certStore.getCRLs(null).iterator();
-
-            while (it.hasNext())
-            {
-                X509CRL                 c = (X509CRL)it.next();
-
-                _crls.add(new CertificateList(
-                                        (ASN1Sequence)makeObj(c.getEncoded())));
-            }
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing crls", e);
-        }
-        catch (CRLException e)
-        {
-            throw new CMSException("error encoding crls", e);
-        }
     }
 
     private DERObject makeObj(
@@ -661,29 +575,16 @@ public class CMSSignedDataStreamGenerator
             
             if (_certs.size() != 0)
             {
-                ASN1EncodableVector  v = new ASN1EncodableVector();
+                ASN1Set certs = CMSUtils.createDerSetFromList(_certs);
 
-                Iterator it = _certs.iterator();
-                while (it.hasNext())
-                {
-                    v.add((DEREncodable)it.next());
-                }
-
-                _sigGen.getRawOutputStream().write(new DERTaggedObject(false, 0, new DERSet(v)).getEncoded());
+                _sigGen.getRawOutputStream().write(new DERTaggedObject(false, 0, certs).getEncoded());
             }
-
 
             if (_crls.size() != 0)
             {
-                ASN1EncodableVector  v = new ASN1EncodableVector();
+                ASN1Set crls = CMSUtils.createDerSetFromList(_crls);
 
-                Iterator it = _crls.iterator();
-                while (it.hasNext())
-                {
-                    v.add((DEREncodable)it.next());
-                }
-
-                _sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, new DERSet(v)).getEncoded());
+                _sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, crls).getEncoded());
             }
             
             //

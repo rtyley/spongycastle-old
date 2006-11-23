@@ -5,17 +5,25 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECFieldElement;
+import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,6 +35,7 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.DSAParameterSpec;
@@ -39,6 +48,7 @@ public class CMSTestUtil
     public static KeyPairGenerator kpg;
     public static KeyPairGenerator gostKpg;
     public static KeyPairGenerator dsaKpg;
+    public static KeyPairGenerator ecGostKpg;
     public static KeyPairGenerator ecDsaKpg;
     public static KeyGenerator     aes192kg;
     public static KeyGenerator     desede128kg;
@@ -115,6 +125,23 @@ public class CMSTestUtil
 
             dsaKpg.initialize(dsaSpec, new SecureRandom());
 
+            BigInteger mod_p = new BigInteger("57896044618658097711785492504343953926634992332820282019728792003956564821041"); //p
+
+            ECCurve curve = new ECCurve.Fp(
+                mod_p, // p
+                new BigInteger("7"), // a
+                new BigInteger("43308876546767276905765904595650931995942111794451039583252968842033849580414")); // b
+
+            ECParameterSpec ecSpec = new ECParameterSpec(
+                    curve,
+                        new ECPoint.Fp(curve,
+                                       new ECFieldElement.Fp(mod_p,new BigInteger("2")), // x
+                                       new ECFieldElement.Fp(mod_p,new BigInteger("4018974056539037503335449422937059775635739389905545080690979365213431566280"))), // y
+                        new BigInteger("57896044618658097711785492504343953927082934583725450622380973592137631069619")); // q
+
+            ecGostKpg = KeyPairGenerator.getInstance("ECGOST3410", "BC");
+            ecGostKpg.initialize(ecSpec, new SecureRandom());
+
             ecDsaKpg = KeyPairGenerator.getInstance("ECDSA", "BC");
             ecDsaKpg.initialize(239, new SecureRandom());
 
@@ -186,7 +213,12 @@ public class CMSTestUtil
     {
         return ecDsaKpg.generateKeyPair();
     }
-    
+
+    public static KeyPair makeEcGostKeyPair()
+    {
+        return ecGostKpg.generateKeyPair();
+    }
+
     public static SecretKey makeDesede128Key()
     {
         return desede128kg.generateKey();
@@ -280,7 +312,7 @@ public class CMSTestUtil
             false,
             new BasicConstraints(_ca));
 
-        X509Certificate _cert = _v3CertGen.generateX509Certificate(_issPriv);
+        X509Certificate _cert = _v3CertGen.generate(_issPriv);
 
         _cert.checkValidity(new Date());
         _cert.verify(_issPub);
@@ -288,7 +320,24 @@ public class CMSTestUtil
         return _cert;
     }
     
+    public static X509CRL makeCrl(KeyPair pair)
+        throws Exception
+    {
+        X509V2CRLGenerator crlGen = new X509V2CRLGenerator();
+        Date                 now = new Date();
 
+        crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
+
+        crlGen.setThisUpdate(now);
+        crlGen.setNextUpdate(new Date(now.getTime() + 100000));
+        crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
+
+        crlGen.addCRLEntry(BigInteger.ONE, now, CRLReason.privilegeWithdrawn);
+
+        crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
+
+        return crlGen.generate(pair.getPrivate(), "BC");
+    }
 
     /*  
      *  
