@@ -1,14 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.math.BigInteger;
-import java.security.interfaces.DSAParams;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.DSAPrivateKeySpec;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
@@ -19,6 +10,15 @@ import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+
+import java.math.BigInteger;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.DSAPrivateKeySpec;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 public class JDKDSAPrivateKey
     implements DSAPrivateKey, PKCS12BagAttributeCarrier
@@ -116,6 +116,12 @@ public class JDKDSAPrivateKey
             && this.getParams().getG().equals(other.getParams().getG()) 
             && this.getParams().getP().equals(other.getParams().getP()) 
             && this.getParams().getQ().equals(other.getParams().getQ());
+    }
+
+    public int hashCode()
+    {
+        return this.getX().hashCode() ^ this.getParams().getG().hashCode()
+                ^ this.getParams().getP().hashCode() ^ this.getParams().getQ().hashCode();
     }
     
     public void setBagAttribute(
