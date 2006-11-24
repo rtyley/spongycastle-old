@@ -275,7 +275,7 @@ public class DERBitString
         
         for (int i = 0; i != string.length; i++)
         {
-            buf.append(table[(string[i] >>> 4) % 0xf]);
+            buf.append(table[(string[i] >>> 4) & 0xf]);
             buf.append(table[string[i] & 0xf]);
         }
         
