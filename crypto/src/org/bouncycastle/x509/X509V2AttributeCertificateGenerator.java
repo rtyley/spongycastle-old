@@ -7,7 +7,6 @@ import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttCertIssuer;
@@ -15,8 +14,7 @@ import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
 import org.bouncycastle.asn1.x509.V2AttributeCertificateInfoGenerator;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -29,9 +27,7 @@ import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Vector;
 
 /**
  * class to produce an X.509 Version 2 AttributeCertificate.
@@ -42,12 +38,12 @@ public class X509V2AttributeCertificateGenerator
     private DERObjectIdentifier         sigOID;
     private AlgorithmIdentifier         sigAlgId;
     private String                      signatureAlgorithm;
-    private Hashtable                   extensions = new Hashtable();
-    private Vector                      extOrdering = new Vector();
+    private X509ExtensionsGenerator     extGenerator;
 
     public X509V2AttributeCertificateGenerator()
     {
         acInfoGen = new V2AttributeCertificateInfoGenerator();
+        extGenerator = new X509ExtensionsGenerator();
     }
 
     /**
@@ -56,8 +52,7 @@ public class X509V2AttributeCertificateGenerator
     public void reset()
     {
         acInfoGen = new V2AttributeCertificateInfoGenerator();
-        extensions.clear();
-        extOrdering.clear();
+        extGenerator.reset();
     }
 
     /**
@@ -146,12 +141,12 @@ public class X509V2AttributeCertificateGenerator
      * @throws IOException
      */
     public void addExtension(
-        String          OID,
+        String          oid,
         boolean         critical,
         ASN1Encodable   value)
         throws IOException
     {
-        this.addExtension(OID, critical, value.getEncoded());
+        extGenerator.addExtension(new DERObjectIdentifier(oid), critical, value);
     }
 
     /**
@@ -160,14 +155,11 @@ public class X509V2AttributeCertificateGenerator
      * with the extension.
      */
     public void addExtension(
-        String          OID,
+        String          oid,
         boolean         critical,
         byte[]          value)
     {
-        DERObjectIdentifier oid = new DERObjectIdentifier(OID);
-        
-        extensions.put(oid, new X509Extension(critical, new DEROctetString(value)));
-        extOrdering.addElement(oid);
+        extGenerator.addExtension(new DERObjectIdentifier(oid), critical, value);
     }
 
     /**
@@ -240,9 +232,9 @@ public class X509V2AttributeCertificateGenerator
         SecureRandom    random)
         throws CertificateEncodingException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
-        if (!extensions.isEmpty())
+        if (!extGenerator.isEmpty())
         {
-            acInfoGen.setExtensions(new X509Extensions(extOrdering, extensions));
+            acInfoGen.setExtensions(extGenerator.generate());
         }
 
         AttributeCertificateInfo acInfo = acInfoGen.generateAttributeCertificateInfo();

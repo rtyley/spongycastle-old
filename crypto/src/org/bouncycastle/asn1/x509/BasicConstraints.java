@@ -156,11 +156,11 @@ public class BasicConstraints
         if (cA != null)
         {
             v.add(cA);
-    
-            if (pathLenConstraint != null)
-            {
-                v.add(pathLenConstraint);
-            }
+        }
+
+        if (pathLenConstraint != null)  // yes some people actually do this when cA is false...
+        {
+            v.add(pathLenConstraint);
         }
 
         return new DERSequence(v);

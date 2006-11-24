@@ -21,6 +21,11 @@ public class ElGamalPublicKeyParameters
         return y;
     }
 
+    public int hashCode()
+    {
+        return y.hashCode() ^ super.hashCode();
+    }
+
     public boolean equals(
         Object  obj)
     {
@@ -29,13 +34,8 @@ public class ElGamalPublicKeyParameters
             return false;
         }
 
-        ElGamalPublicKeyParameters   pKey = (ElGamalPublicKeyParameters)obj;
+        ElGamalPublicKeyParameters   other = (ElGamalPublicKeyParameters)obj;
 
-        if (!pKey.getY().equals(y))
-        {
-            return false;
-        }
-
-        return super.equals(obj);
+        return other.getY().equals(y) && super.equals(obj);
     }
 }

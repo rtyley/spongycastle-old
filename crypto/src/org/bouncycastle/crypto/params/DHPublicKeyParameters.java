@@ -21,6 +21,11 @@ public class DHPublicKeyParameters
         return y;
     }
 
+    public int hashCode()
+    {
+        return y.hashCode() ^ super.hashCode();
+    }
+
     public boolean equals(
         Object  obj)
     {
@@ -29,13 +34,8 @@ public class DHPublicKeyParameters
             return false;
         }
 
-        DHPublicKeyParameters   pKey = (DHPublicKeyParameters)obj;
+        DHPublicKeyParameters   other = (DHPublicKeyParameters)obj;
 
-        if (!pKey.getY().equals(y))
-        {
-            return false;
-        }
-
-        return super.equals(obj);
+        return other.getY().equals(y) && super.equals(obj);
     }
 }
