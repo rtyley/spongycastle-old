@@ -41,7 +41,8 @@ public class RegressionTest
         new ReasonFlagsTest(),
         new NetscapeCertTypeTest(),
         new PKIFailureInfoTest(),
-        new KeyUsageTest()
+        new KeyUsageTest(),
+        new StringTest()
     };
 
     public static void main(

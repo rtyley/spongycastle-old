@@ -78,11 +78,16 @@ public class DERUniversalString
         
         for (int i = 0; i != string.length; i++)
         {
-            buf.append(table[(string[i] >>> 4) % 0xf]);
+            buf.append(table[(string[i] >>> 4) & 0xf]);
             buf.append(table[string[i] & 0xf]);
         }
         
         return buf.toString();
+    }
+
+    public String toString()
+    {
+        return getString();
     }
 
     public byte[] getOctets()
