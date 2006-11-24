@@ -95,7 +95,7 @@ public class JCERSAPublicKey
 
     public int hashCode()
     {
-        return key.getModulus().hashCode() ^ key.getPublicExponent().hashCode();
+        return this.getModulus().hashCode() ^ this.getPublicExponent().hashCode();
     }
 
     public boolean equals(Object o)

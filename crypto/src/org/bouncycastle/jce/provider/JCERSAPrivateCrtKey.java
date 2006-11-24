@@ -190,9 +190,9 @@ public class JCERSAPrivateCrtKey
 
     public int hashCode()
     {
-        return this.getModulus()
-               ^ this.getPublicExponent()
-               ^ this.getPrivateExponent();
+        return this.getModulus().hashCode()
+               ^ this.getPublicExponent().hashCode()
+               ^ this.getPrivateExponent().hashCode();
     }
 
     public boolean equals(Object o)
