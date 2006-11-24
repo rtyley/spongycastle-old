@@ -20,6 +20,11 @@ public class ElGamalKeyParameters
         return params;
     }
 
+    public int hashCode()
+    {
+        return (params != null) ? params.hashCode() : 0;
+    }
+
     public boolean equals(
         Object  obj)
     {

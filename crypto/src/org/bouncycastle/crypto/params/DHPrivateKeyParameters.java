@@ -21,6 +21,11 @@ public class DHPrivateKeyParameters
         return x;
     }
 
+    public int hashCode()
+    {
+        return x.hashCode() ^ super.hashCode();
+    }
+    
     public boolean equals(
         Object  obj)
     {
@@ -29,13 +34,8 @@ public class DHPrivateKeyParameters
             return false;
         }
 
-        DHPrivateKeyParameters  pKey = (DHPrivateKeyParameters)obj;
+        DHPrivateKeyParameters  other = (DHPrivateKeyParameters)obj;
 
-        if (!pKey.getX().equals(x))
-        {
-            return false;
-        }
-
-        return super.equals(obj);
+        return other.getX().equals(this.x) && super.equals(obj);
     }
 }

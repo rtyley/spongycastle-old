@@ -1,8 +1,5 @@
 package org.bouncycastle.crypto.signers;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
@@ -15,6 +12,9 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECPoint;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * EC-NR as described in IEEE 1363-2000
@@ -68,7 +68,7 @@ public class ECNRSigner
     {
         if (! this.forSigning) 
         {
-			throw new IllegalStateException("not initialised for signing");
+            throw new IllegalStateException("not initialised for signing");
         }
         
         BigInteger n = ((ECPrivateKeyParameters)this.key).getParameters().getN();
@@ -139,7 +139,7 @@ public class ECNRSigner
     {
         if (this.forSigning) 
         {
-			throw new IllegalStateException("not initialised for verifying");
+            throw new IllegalStateException("not initialised for verifying");
         }
 
         ECPublicKeyParameters pubKey = (ECPublicKeyParameters)key;

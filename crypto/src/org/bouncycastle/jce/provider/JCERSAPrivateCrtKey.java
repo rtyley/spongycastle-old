@@ -1,19 +1,16 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.RSAPrivateCrtKeySpec;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+
+import java.math.BigInteger;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.RSAPrivateCrtKeySpec;
 
 /**
  * A provider representation for a RSA private key, with CRT factors included.
@@ -191,16 +188,23 @@ public class JCERSAPrivateCrtKey
         return crtCoefficient;
     }
 
+    public int hashCode()
+    {
+        return this.getModulus()
+               ^ this.getPublicExponent()
+               ^ this.getPrivateExponent();
+    }
+
     public boolean equals(Object o)
     {
-        if (!(o instanceof RSAPrivateCrtKey))
-        {
-            return false;
-        }
-
         if (o == this)
         {
             return true;
+        }
+
+        if (!(o instanceof RSAPrivateCrtKey))
+        {
+            return false;
         }
 
         RSAPrivateCrtKey key = (RSAPrivateCrtKey)o;
