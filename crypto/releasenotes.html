@@ -27,7 +27,7 @@ Release 1.35
 <ul>
 <li>Test data files are no longer in the provider jars.</li>
 <li>SMIMESignedParser now handles indefinite length data in SignerInfos.</li>
-<li>Under some circumstances the SMIME library was failing to canonicalize multipart data correctly. This has been fixed.</li>
+<li>Under some circumstances the SMIME library was failing to canonicalize mixed-multipart data correctly. This has been fixed.</li>
 <li>The l parameter was being ignored for the DH and ElGamal key generation. This has been fixed.</li>
 <li>The ASN1Sequence constructor for OtherRecipientInfo was broken. It has been fixed</li>
 <li>Regression - DN fields SerialNumber and Country were changed to encode as UTF8String in 1.34 in the X509DefaultEntryConverter, these now encode as PrintableString.</li>
@@ -41,6 +41,8 @@ Release 1.35
 <li>The OpenPGP implementation now supports SHA-224 and BZIP2.</li>
 <li>The JCE provider now does RSA blinding by default.</li>
 <li>CMSSignedDataParser now provides methods for replacing signers and replacing certificates and CRLs.</li>
+<li>A generic store API has been added to support CRLs, Certificates and Attribute certificates.</li>
+<li>The CMS/SMIME API now supports inclusion and retrieval of version 2 attribute certificates.</li>
 </ul>
 <h3>2.1.1 Version</h3>
 Release 1.34
@@ -246,7 +248,7 @@ as some S/MIME 3.1 recommendations have also been introduced for header creation
 Release 1.27
 <h3>2.8.2 Defects Fixed</h3>
 <ul>
-<li>Typos in the provider which pointed Signature algorithms SHA256WihRSA, SHA256WihRSAEncryption, SHA384WithRSA, SHA384WithRSAEncryption, SHA512WithRSA, and SHA512WithRSAEncryption at the PSS versions of the algorithms have been fixed. The correct names for the PSS algorithms are SHA256withRSAandMGF1, SHA384withRSAandMGF1, and SHA512withRSAandMGF1.
+<li>Typos in the provider which pointed Signature algorithms SHA256WithRSA, SHA256WithRSAEncryption, SHA384WithRSA, SHA384WithRSAEncryption, SHA512WithRSA, and SHA512WithRSAEncryption at the PSS versions of the algorithms have been fixed. The correct names for the PSS algorithms are SHA256withRSAandMGF1, SHA384withRSAandMGF1, and SHA512withRSAandMGF1.
 <li>X509CertificateFactory failed under some circumstances to reset properly if the input stream being passed
 to generateCertificate(s)() changed, This has been fixed.
 <li>OpenPGP BitStrength for DSA keys was being calculated from the key's generator rather than prime. This has been fixed.
