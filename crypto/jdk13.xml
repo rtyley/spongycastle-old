@@ -21,6 +21,9 @@
             <fileset dir="src">
                 <exclude name="**/ECPointUtil.java" />
                 <exclude name="**/ECNamedCurveSpec.java" />
+                <exclude name="**/LDAP*.java" />
+                <exclude name="**/X509LDAP*.java" />
+                <exclude name="**/X509StoreLDAP*.java" />
                 <exclude name="**/BCEC*.java" />
                 <exclude name="**/JCEEC5*.java" />
                 <exclude name="**/EC5*.java" />
@@ -37,6 +40,7 @@
                 <exclude name="**/nist/NistCertPathReviewerTest.java" />
                 <exclude name="**/CRL5Test.java" />
                 <exclude name="**/SignedMailValidatorTest.java" />
+                <exclude name="**/X509LDAP*.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />
