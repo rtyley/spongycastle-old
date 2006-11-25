@@ -18,4 +18,9 @@ public class X509CertStoreSelector
 
         return super.match((Certificate)obj);
     }
+
+    public boolean match(Certificate obj)
+    {
+        return this.match((Object)obj);
+    }
 }

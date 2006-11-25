@@ -18,4 +18,9 @@ public class X509CRLStoreSelector
 
         return super.match((CRL)obj);
     }
+
+    public boolean match(CRL obj)
+    {
+        return this.match((Object)obj);
+    }
 }

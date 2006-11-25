@@ -1,6 +1,15 @@
-
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.TBSCertList;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
+import org.bouncycastle.jce.X509Principal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -11,33 +20,55 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.x509.TBSCertList;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-
 /**
  * The following extensions are listed in RFC 2459 as relevant to CRL Entries
- *
- * ReasonCode
- * Hode Instruction Code
- * Invalidity Date
- * Certificate Issuer (critical)
+ * 
+ * ReasonCode Hode Instruction Code Invalidity Date Certificate Issuer
+ * (critical)
  */
 public class X509CRLEntryObject extends X509CRLEntry
 {
     private TBSCertList.CRLEntry c;
 
-    public X509CRLEntryObject(
-        TBSCertList.CRLEntry c)
+    private boolean isIndirect = false;
+
+    private X509Principal previousCertificateIssuer = null;
+
+    public X509CRLEntryObject(TBSCertList.CRLEntry c)
     {
         this.c = c;
     }
 
     /**
-     * Will return true if any extensions are present and marked
-     * as critical as we currently dont handle any extensions!
+     * Constructor for CRLEntries of indirect CRLs. If <code>isIndirect</code>
+     * is <code>false</code> {@link #getCertificateIssuer()} will always
+     * return <code>null</code>, <code>previousCertificateIssuer</code> is
+     * ignored. If this <code>isIndirect</code> is specified and this CRLEntry
+     * has no certificate issuer CRL entry extension
+     * <code>previousCertificateIssuer</code> is returned by
+     * {@link #getCertificateIssuer()}.
+     * 
+     * @param c
+     *            TBSCertList.CRLEntry object.
+     * @param isIndirect
+     *            <code>true</code> if the corresponding CRL is a indirect
+     *            CRL.
+     * @param previousCertificateIssuer
+     *            Certificate issuer of the previous CRLEntry.
+     */
+    public X509CRLEntryObject(
+        TBSCertList.CRLEntry c,
+        boolean isIndirect,
+        X509Principal previousCertificateIssuer)
+    {
+        this.c = c;
+        this.isIndirect = isIndirect;
+        this.previousCertificateIssuer = previousCertificateIssuer;
+    }
+
+    /**
+     * Will return true if any extensions are present and marked as critical as
+     * we currently dont handle any extensions!
      */
     public boolean hasUnsupportedCriticalExtension()
     {
@@ -50,19 +81,51 @@ public class X509CRLEntryObject extends X509CRLEntry
         return false;
     }
 
+    public X509Principal getCertificateIssuer()
+    {
+        if (!isIndirect)
+        {
+            return null;
+        }
+
+        byte[] ext = getExtensionValue(X509Extensions.CertificateIssuer.getId());
+        if (ext == null)
+        {
+            return previousCertificateIssuer;
+        }
+
+        try
+        {
+            GeneralName[] names = GeneralNames.getInstance(
+                    X509ExtensionUtil.fromExtensionValue(ext)).getNames();
+            for (int i = 0; i < names.length; i++)
+            {
+                if (names[i].getTagNo() == GeneralName.directoryName)
+                {
+                    return new X509Principal(names[i].getName().getDERObject().getDEREncoded());
+                }
+            }
+            return null;
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
+    }
+
     private Set getExtensionOIDs(boolean critical)
     {
         X509Extensions extensions = c.getExtensions();
 
         if (extensions != null)
         {
-            Set                set = new HashSet();
-            Enumeration        e = extensions.oids();
+            Set set = new HashSet();
+            Enumeration e = extensions.oids();
 
             while (e.hasMoreElements())
             {
-                DERObjectIdentifier    oid = (DERObjectIdentifier)e.nextElement();
-                X509Extension        ext = extensions.getExtension(oid);
+                DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
+                X509Extension ext = extensions.getExtension(oid);
 
                 if (critical == ext.isCritical())
                 {
@@ -113,8 +176,8 @@ public class X509CRLEntryObject extends X509CRLEntry
     public byte[] getEncoded()
         throws CRLException
     {
-        ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-        DEROutputStream            dOut = new DEROutputStream(bOut);
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        DEROutputStream dOut = new DEROutputStream(bOut);
 
         try
         {
@@ -150,7 +213,6 @@ public class X509CRLEntryObject extends X509CRLEntry
 
         buf.append("      userCertificate: ").append(this.getSerialNumber()).append(nl);
         buf.append("       revocationDate: ").append(this.getRevocationDate()).append(nl);
-
 
         X509Extensions extensions = c.getExtensions();
 

@@ -1,21 +1,5 @@
 package org.bouncycastle.x509;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.GeneralSecurityException;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.util.Date;
-import java.util.Iterator;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -32,6 +16,23 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CertificateObject;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.Iterator;
 
 /**
  * class to produce an X.509 Version 1 certificate.
@@ -256,22 +257,18 @@ public class X509V1CertificateGenerator
         throws CertificateEncodingException, IllegalStateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
         TBSCertificateStructure tbsCert = tbsGen.generateTBSCertificate();
-
-        ASN1EncodableVector  v = new ASN1EncodableVector();
-
-        v.add(tbsCert);
-        v.add(sigAlgId);
+        byte[] signature;
 
         try
         {
-            v.add(new DERBitString(X509Util.calculateSignature(sigOID, signatureAlgorithm, key, random, tbsCert)));
+            signature = X509Util.calculateSignature(sigOID, signatureAlgorithm, key, random, tbsCert);
         }
         catch (IOException e)
         {
             throw new ExtCertificateEncodingException("exception encoding TBS cert", e);
         }
 
-        return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
+        return generateJcaObject(tbsCert, signature);
     }
 
     /**
@@ -299,22 +296,37 @@ public class X509V1CertificateGenerator
         throws CertificateEncodingException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
         TBSCertificateStructure tbsCert = tbsGen.generateTBSCertificate();
-
-        ASN1EncodableVector  v = new ASN1EncodableVector();
-
-        v.add(tbsCert);
-        v.add(sigAlgId);
+        byte[] signature;
 
         try
         {
-            v.add(new DERBitString(X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, tbsCert)));
+            signature = X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, tbsCert);
         }
         catch (IOException e)
         {
             throw new ExtCertificateEncodingException("exception encoding TBS cert", e);
         }
 
-        return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
+        return generateJcaObject(tbsCert, signature);
+    }
+
+    private X509Certificate generateJcaObject(TBSCertificateStructure tbsCert, byte[] signature)
+        throws CertificateEncodingException
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(tbsCert);
+        v.add(sigAlgId);
+        v.add(new DERBitString(signature));
+
+        try
+        {
+            return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
+        }
+        catch (CertificateParsingException e)
+        {
+            throw new ExtCertificateEncodingException("exception producing certificate object", e);
+        }
     }
 
     /**
