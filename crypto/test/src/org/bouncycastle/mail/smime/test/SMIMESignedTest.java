@@ -4,6 +4,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -19,11 +20,13 @@ import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.internet.ContentType;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -31,8 +34,12 @@ import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.KeyPair;
+import java.security.MessageDigest;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
@@ -40,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -89,6 +97,68 @@ public class SMIMESignedTest
         catch (Exception e)
         {
             throw new RuntimeException("problem setting up signed test class: " + e);
+        }
+    }
+
+    private static class LineOutputStream extends FilterOutputStream
+    {
+        private static byte newline[];
+
+        public LineOutputStream(OutputStream outputstream)
+        {
+            super(outputstream);
+        }
+
+        public void writeln(String s)
+            throws MessagingException
+        {
+            try
+            {
+                byte abyte0[] = getBytes(s);
+                super.out.write(abyte0);
+                super.out.write(newline);
+                return;
+            }
+            catch(Exception exception)
+            {
+                throw new MessagingException("IOException", exception);
+            }
+        }
+
+        public void writeln()
+            throws MessagingException
+        {
+            try
+            {
+                super.out.write(newline);
+                return;
+            }
+            catch(Exception exception)
+            {
+                throw new MessagingException("IOException", exception);
+            }
+        }
+
+        static
+        {
+            newline = new byte[2];
+            newline[0] = 13;
+            newline[1] = 10;
+        }
+
+        private static byte[] getBytes(String s)
+        {
+            char ac[] = s.toCharArray();
+            int i = ac.length;
+            byte abyte0[] = new byte[i];
+            int j = 0;
+
+            while (j < i)
+            {
+                abyte0[j] = (byte)ac[j++];
+            }
+
+            return abyte0;
         }
     }
 
@@ -149,7 +219,108 @@ public class SMIMESignedTest
         assertEquals("attachment; filename=\"smime.p7m\"", res.getHeader("Content-Disposition")[0]);
         assertEquals("S/MIME Cryptographic Signed Data", res.getHeader("Content-Description")[0]);
     }
-    
+
+    public void testMultipartTextText()
+        throws Exception
+    {
+        MimeBodyPart part1 = createTemplate("text/html", "7bit");
+        MimeBodyPart part2 = createTemplate("text/xml", "7bit");
+
+        multipartMixedTest(part1, part2);
+    }
+
+    public void testMultipartTextBinary()
+        throws Exception
+    {
+        MimeBodyPart part1 = createTemplate("text/html", "7bit");
+        MimeBodyPart part2 = createTemplate("text/xml", "binary");
+
+        multipartMixedTest(part1, part2);
+    }
+
+    public void testMultipartBinaryText()
+        throws Exception
+    {
+        MimeBodyPart part1 = createTemplate("text/xml", "binary");
+        MimeBodyPart part2 = createTemplate("text/html", "7bit");
+
+        multipartMixedTest(part1, part2);
+    }
+
+    public void testMultipartBinaryBinary()
+        throws Exception
+    {
+        MimeBodyPart part1 = createTemplate("text/xml", "binary");
+        MimeBodyPart part2 = createTemplate("text/html", "binary");
+
+        multipartMixedTest(part1, part2);
+    }
+
+    public void multipartMixedTest(MimeBodyPart part1, MimeBodyPart part2)
+        throws Exception
+    {
+        MimeMultipart mp = new MimeMultipart();
+
+        mp.addBodyPart(part1);
+        mp.addBodyPart(part2);
+
+        MimeBodyPart m = new MimeBodyPart();
+
+        m.setContent(mp);
+
+        MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA1, m);
+        SMIMESigned   s = new SMIMESigned(smm);
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+
+        AttributeTable attr = ((SignerInformation)s.getSignerInfos().getSigners().iterator().next()).getSignedAttributes();
+
+        Attribute a = attr.get(CMSAttributes.messageDigest);
+        byte[] contentDigest = ASN1OctetString.getInstance(a.getAttrValues().getObjectAt(0)).getOctets();
+
+        mp = (MimeMultipart)m.getContent();
+        ContentType contentType = new ContentType(mp.getContentType());
+        String boundary = "--" + contentType.getParameter("boundary");
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        LineOutputStream lOut = new LineOutputStream(bOut);
+
+        Enumeration headers = m.getAllHeaderLines();
+        while (headers.hasMoreElements())
+        {
+            lOut.writeln((String)headers.nextElement());
+        }
+
+        lOut.writeln();      // CRLF separator
+
+        lOut.writeln(boundary);
+        writePart(mp.getBodyPart(0), bOut);
+        lOut.writeln();       // CRLF terminator
+
+        lOut.writeln(boundary);
+        writePart(mp.getBodyPart(1), bOut);
+        lOut.writeln();
+
+        lOut.writeln(boundary + "--");
+
+        MessageDigest dig = MessageDigest.getInstance("SHA1", "BC");
+
+        assertTrue(Arrays.equals(contentDigest, dig.digest(bOut.toByteArray())));
+    }
+
+    private void writePart(BodyPart part, ByteArrayOutputStream bOut)
+        throws MessagingException, IOException
+    {
+        if (part.getHeader("Content-Transfer-Encoding")[0].equals("binary"))
+        {
+            part.writeTo(bOut);
+        }
+        else
+        {
+            part.writeTo(new CRLFOutputStream(bOut));
+        }
+    }
+
     public void testSHA1WithRSA()
         throws Exception
     {
@@ -679,5 +850,17 @@ public class SMIMESignedTest
         Session session = Session.getDefaultInstance(System.getProperties(), null);
 
         return new MimeMessage(session, getClass().getResourceAsStream(name));
+    }
+
+    private MimeBodyPart createTemplate(String contentType, String contentTransferEncoding)
+        throws UnsupportedEncodingException, MessagingException
+    {
+        byte[] content = "<?xml version=\"1.0\"?>\n<INVOICE_CENTER>\n  <CONTENT_FRAME>\n</CONTENT_FRAME>\n</INVOICE_CENTER>\n".getBytes("US-ASCII");
+
+        InternetHeaders ih = new InternetHeaders();
+        ih.setHeader("Content-Type", contentType);
+        ih.setHeader("Content-Transfer-Encoding", contentTransferEncoding);
+
+        return new MimeBodyPart(ih, content);
     }
 }
