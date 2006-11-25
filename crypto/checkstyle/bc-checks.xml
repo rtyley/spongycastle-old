@@ -87,7 +87,7 @@
         <module name="StringLiteralEquality"/>
 
         <!-- Must implement hashCode with equals -->
-        <!-- <module name="EqualsHashCode"/> -->
+        <module name="EqualsHashCode"/>
         <module name="EmptyStatement"/>
 
         <!-- Disallow certain abstract types - must use interface -->

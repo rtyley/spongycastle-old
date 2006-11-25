@@ -1,6 +1,5 @@
 package org.bouncycastle.crypto.test;
 
-import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
 
@@ -78,6 +77,7 @@ public class RegressionTest
         new KDF2GeneratorTest(),
         new MGF1GeneratorTest(),
         new ShortenedDigestTest(),
+        new EqualsHashCodeTest(),
         new NaccacheSternTest(),
         new NullTest()
     };
@@ -89,9 +89,9 @@ public class RegressionTest
         {
             TestResult  result = tests[i].perform();
             
-            if (((SimpleTestResult)result).getException() != null)
+            if (result.getException() != null)
             {
-                ((SimpleTestResult)result).getException().printStackTrace();
+                result.getException().printStackTrace();
             }
             
             System.out.println(result);

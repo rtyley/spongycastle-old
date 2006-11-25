@@ -206,11 +206,8 @@ public class LDAPStoreHelper
         String subject = null;
         String serial = null;
 
-        X500Principal encSubject = xselector.getSubject();
-        if (encSubject != null)
-        {
-            subject = encSubject.getName("RFC1779");
-        }
+        subject = getSubjectAsString(xselector);
+
         if (xselector.getSerialNumber() != null)
         {
             serial = xselector.getSerialNumber().toString();
@@ -247,6 +244,8 @@ public class LDAPStoreHelper
         return list;
     }
 
+
+
     /**
      * Can use the subject of the forward certificate of the set certificate
      * pair or the subject of the forward
@@ -275,11 +274,7 @@ public class LDAPStoreHelper
 
         if (xselector.getForwardSelector() != null)
         {
-            X500Principal encSubject = xselector.getForwardSelector().getSubject();
-            if (encSubject != null)
-            {
-                subject = encSubject.getName("RFC1779");
-            }
+            subject = getSubjectAsString(xselector.getForwardSelector());
         }
         if (xselector.getCertPairChecking() != null)
         {
@@ -440,8 +435,7 @@ public class LDAPStoreHelper
         }
         if (xselector.getCertificateChecking() != null)
         {
-            issuers.add(xselector.getCertificateChecking()
-                .getIssuerX500Principal());
+            issuers.add(getCertificateIssuer(xselector.getCertificateChecking()));
         }
 
         Iterator it = issuers.iterator();
@@ -836,6 +830,7 @@ public class LDAPStoreHelper
                 subjectAttributeNames);
             resultSet.addAll(createCerts(list, selector));
         }
+
         return resultSet;
     }
 
@@ -1085,5 +1080,27 @@ public class LDAPStoreHelper
     private String[] splitString(String str)
     {
         return str.split("\\s+");
+    }
+
+    private String getSubjectAsString(X509CertStoreSelector xselector)
+    {
+        try
+        {
+            byte[] encSubject = xselector.getSubjectAsBytes();
+            if (encSubject != null)
+            {
+                return new X500Principal(encSubject).getName("RFC1779");
+            }
+        }
+        catch (IOException e)
+        {
+            throw new StoreException("exception processing name: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private X500Principal getCertificateIssuer(X509Certificate cert)
+    {
+        return cert.getIssuerX500Principal();
     }
 }

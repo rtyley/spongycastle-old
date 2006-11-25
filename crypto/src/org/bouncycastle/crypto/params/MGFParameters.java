@@ -13,7 +13,7 @@ public class MGFParameters
     public MGFParameters(
         byte[]  seed)
     {
-        this.seed = seed;
+        this(seed, 0, seed.length);
     }
 
     public MGFParameters(

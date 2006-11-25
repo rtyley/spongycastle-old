@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
@@ -23,7 +24,6 @@ import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -326,7 +326,7 @@ public class CMSTestUtil
         X509V2CRLGenerator crlGen = new X509V2CRLGenerator();
         Date                 now = new Date();
 
-        crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
+        crlGen.setIssuerDN(new X509Principal("CN=Test CA"));
 
         crlGen.setThisUpdate(now);
         crlGen.setNextUpdate(new Date(now.getTime() + 100000));
