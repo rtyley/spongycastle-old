@@ -1,5 +1,37 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.EncryptedContentInfo;
+import org.bouncycastle.asn1.cms.EnvelopedData;
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.asn1.cms.KEKIdentifier;
+import org.bouncycastle.asn1.cms.KEKRecipientInfo;
+import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
+import org.bouncycastle.asn1.cms.RecipientIdentifier;
+import org.bouncycastle.asn1.cms.RecipientInfo;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.RC2ParameterSpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.AlgorithmParameterGenerator;
@@ -16,29 +48,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.RC2ParameterSpec;
-
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.EncryptedContentInfo;
-import org.bouncycastle.asn1.cms.EnvelopedData;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.asn1.cms.KEKIdentifier;
-import org.bouncycastle.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.RecipientIdentifier;
-import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 
 /**
  * General class for generating a CMS enveloped-data message.
@@ -85,10 +94,8 @@ public class CMSEnvelopedDataGenerator
 
             try
             {
-                byte[]                  bytes = cert.getTBSCertificate();
-                ASN1InputStream         aIn = new ASN1InputStream(bytes);
-
-                TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
+                TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(
+                                                       ASN1Object.fromByteArray(cert.getTBSCertificate()));
                 SubjectPublicKeyInfo    info = tbs.getSubjectPublicKeyInfo();
 
                 keyEncAlg = info.getAlgorithmId();
@@ -112,10 +119,8 @@ public class CMSEnvelopedDataGenerator
 
             try
             {
-                byte[]                  bytes = pubKey.getEncoded();
-                ASN1InputStream         aIn = new ASN1InputStream(bytes);
-
-                SubjectPublicKeyInfo    info = SubjectPublicKeyInfo.getInstance(aIn.readObject());
+                SubjectPublicKeyInfo    info = SubjectPublicKeyInfo.getInstance(
+                                                        ASN1Object.fromByteArray(pubKey.getEncoded()));
 
                 keyEncAlg = info.getAlgorithmId();
             }
@@ -147,7 +152,7 @@ public class CMSEnvelopedDataGenerator
             else if (secKey.getAlgorithm().startsWith("AES"))
             {
                 int length = secKey.getEncoded().length * 8;
-                DERObjectIdentifier wrapOid = null;
+                DERObjectIdentifier wrapOid;
                 
                 if (length == 128)
                 {
@@ -418,16 +423,9 @@ public class CMSEnvelopedDataGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        try
-        {
-            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
-                                                   
-            return generate(content, encryptionOID, keyGen, provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find key generation algorithm.", e);
-        }
+        KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
+
+        return generate(content, encryptionOID, keyGen, provider);
     }
 
 
@@ -442,17 +440,10 @@ public class CMSEnvelopedDataGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        try
-        {
-            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
-            
-            keyGen.init(keySize);
+        KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
 
-            return generate(content, encryptionOID, keyGen, provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find key generation algorithm.", e);
-        }
+        keyGen.init(keySize);
+
+        return generate(content, encryptionOID, keyGen, provider);
     }
 }
