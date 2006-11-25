@@ -8,8 +8,7 @@ public class TlsNullCipherSuite extends TlsCipherSuite
 
     protected void init(byte[] ms, byte[] cr, byte[] sr)
     {
-        throw new RuntimeException("Sorry, init of TLS_NULL_WITH_NULL_NULL is forbidden");
-
+        throw new TlsRuntimeException("Sorry, init of TLS_NULL_WITH_NULL_NULL is forbidden");
     }
 
     protected byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len)

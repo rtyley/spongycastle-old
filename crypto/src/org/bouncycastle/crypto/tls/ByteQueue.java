@@ -60,11 +60,11 @@ public class ByteQueue
     {
         if ((available - skip) < len)
         {
-            throw new RuntimeException("Not enough data to read");
+            throw new TlsRuntimeException("Not enough data to read");
         }
         if ((buf.length - offset) < len)
         {
-            throw new RuntimeException("Buffer size of " + buf.length + " is too small for a read of " + len + " bytes");
+            throw new TlsRuntimeException("Buffer size of " + buf.length + " is too small for a read of " + len + " bytes");
         }
         System.arraycopy(databuf, skipped + skip, buf, offset, len);
         return;
@@ -100,7 +100,7 @@ public class ByteQueue
     {
         if (i > available)
         {
-            throw new RuntimeException("Cannot remove " + i + " bytes, only got " + available);
+            throw new TlsRuntimeException("Cannot remove " + i + " bytes, only got " + available);
         }
 
         /*

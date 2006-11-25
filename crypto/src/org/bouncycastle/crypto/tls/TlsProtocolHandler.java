@@ -173,7 +173,7 @@ public class TlsProtocolHandler
         }
         catch (NoSuchAlgorithmException e)
         {
-            throw new RuntimeException(e);
+            throw new TlsRuntimeException("cannot create random", e);
         }
         /*
          * Hopefully, 20 bytes in fast mode are good enough.
