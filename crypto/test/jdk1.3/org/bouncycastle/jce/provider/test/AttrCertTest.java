@@ -112,6 +112,16 @@ public class AttrCertTest
           + "CLQWSIa6Tvg4NIV3RRJ0sbCObesyg08lymalQMdkXwtRn5eGE00SHWwEUjSXP2gR"
           + "3g==");
 
+    static byte[] certWithBaseCertificateID = Base64.decode(
+            "MIIBqzCCARQCAQEwSKBGMD6kPDA6MQswCQYDVQQGEwJJVDEOMAwGA1UEChMFVU5JVE4xDDAKBgNV"
+          + "BAsTA0RJVDENMAsGA1UEAxMEcm9vdAIEAVMVjqB6MHikdjB0MQswCQYDVQQGEwJBVTEoMCYGA1UE"
+          + "ChMfVGhlIExlZ2lvbiBvZiB0aGUgQm91bmN5IENhc3RsZTEjMCEGA1UECxMaQm91bmN5IFByaW1h"
+          + "cnkgQ2VydGlmaWNhdGUxFjAUBgNVBAMTDUJvdW5jeSBDYXN0bGUwDQYJKoZIhvcNAQEFBQACBQKW"
+          + "RhnHMCIYDzIwMDUxMjEyMTIwMDQyWhgPMjAwNTEyMTkxMjAxMzJaMA8wDQYDVRhIMQaBBGVWSVAw"
+          + "DQYJKoZIhvcNAQEFBQADgYEAUAVin9StDaA+InxtXq/av6rUQLI9p1X6louBcj4kYJnxRvTrHpsr"
+          + "N3+i9Uq/uk5lRdAqmPFvcmSbuE3TRAsjrXON5uFiBBKZ1AouLqcr8nHbwcdwjJ9TyUNO9I4hfpSH"
+          + "UHHXMtBKgp4MOkhhX8xTGyWg3hp23d3GaUeg/IYlXBI=");
+    
     public String getName()
     {
         return "AttrCertTest";

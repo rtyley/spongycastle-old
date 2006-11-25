@@ -1,37 +1,12 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Principal;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
-import java.util.Vector;
-
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInputStream;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
@@ -46,7 +21,37 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Principal;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
 
 public class X509CertificateObject
     extends X509Certificate
@@ -55,11 +60,55 @@ public class X509CertificateObject
     private X509CertificateStructure    c;
     private Hashtable                   pkcs12Attributes = new Hashtable();
     private Vector                      pkcs12Ordering = new Vector();
+    private BasicConstraints            basicConstraints;
+    private boolean[]                   keyUsage;
 
     public X509CertificateObject(
         X509CertificateStructure    c)
+        throws CertificateParsingException
     {
         this.c = c;
+
+        try
+        {
+            byte[]  bytes = this.getExtensionBytes("2.5.29.19");
+
+            if (bytes != null)
+            {
+                basicConstraints = BasicConstraints.getInstance(ASN1Object.fromByteArray(bytes));
+            }
+        }
+        catch (Exception e)
+        {
+            throw new CertificateParsingException("cannot construct BasicConstraints: " + e);
+        }
+
+        try
+        {
+            byte[] bytes = this.getExtensionBytes("2.5.29.15");
+            if (bytes != null)
+            {
+                DERBitString    bits = DERBitString.getInstance(ASN1Object.fromByteArray(bytes));
+
+                bytes = bits.getBytes();
+                int length = (bytes.length * 8) - bits.getPadBits();
+
+                keyUsage = new boolean[(length < 9) ? 9 : length];
+
+                for (int i = 0; i != length; i++)
+                {
+                    keyUsage[i] = (bytes[i / 8] & (0x80 >>> (i % 8))) != 0;
+                }
+            }
+            else
+            {
+                keyUsage = null;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new CertificateParsingException("cannot construct KeyUsage: " + e);
+        }
     }
 
     public void checkValidity()
@@ -180,22 +229,9 @@ public class X509CertificateObject
      */
     public byte[] getSigAlgParams()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-
         if (c.getSignatureAlgorithm().getParameters() != null)
         {
-            try
-            {
-                DEROutputStream         dOut = new DEROutputStream(bOut);
-
-                dOut.writeObject(c.getSignatureAlgorithm().getParameters());
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("exception getting sig parameters " + e);
-            }
-
-            return bOut.toByteArray();
+            return c.getSignatureAlgorithm().getParameters().getDERObject().getDEREncoded();
         }
         else
         {
@@ -245,81 +281,56 @@ public class X509CertificateObject
 
     public boolean[] getKeyUsage()
     {
-        byte[]  bytes = this.getExtensionBytes("2.5.29.15");
-        int     length = 0;
+        return keyUsage;
+    }
+
+    public List getExtendedKeyUsage() 
+        throws CertificateParsingException
+    {
+        byte[]  bytes = this.getExtensionBytes("2.5.29.37");
 
         if (bytes != null)
         {
             try
             {
-                DERInputStream  dIn = new DERInputStream(new ByteArrayInputStream(bytes));
-                DERBitString    bits = (DERBitString)dIn.readObject();
+                ASN1InputStream dIn = new ASN1InputStream(bytes);
+                ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
+                List            list = new ArrayList();
 
-                bytes = bits.getBytes();
-                length = (bytes.length * 8) - bits.getPadBits();
+                for (int i = 0; i != seq.size(); i++)
+                {
+                    list.add(((DERObjectIdentifier)seq.getObjectAt(i)).getId());
+                }
+                
+                return Collections.unmodifiableList(list);
             }
             catch (Exception e)
             {
-                throw new RuntimeException("error processing key usage extension");
+                throw new CertificateParsingException("error processing extended key usage extension");
             }
-
-            boolean[]       keyUsage = new boolean[(length < 9) ? 9 : length];
-
-            for (int i = 0; i != length; i++)
-            {
-                keyUsage[i] = (bytes[i / 8] & (0x80 >>> (i % 8))) != 0;
-            }
-
-            return keyUsage;
         }
 
         return null;
     }
-
+    
     public int getBasicConstraints()
     {
-        byte[]  bytes = this.getExtensionBytes("2.5.29.19");
-
-        if (bytes != null)
+        if (basicConstraints != null)
         {
-            try
+            if (basicConstraints.isCA())
             {
-                DERInputStream  dIn = new DERInputStream(new ByteArrayInputStream(bytes));
-                ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
-
-                if (seq.size() == 2)
+                if (basicConstraints.getPathLenConstraint() == null)
                 {
-                    if (((DERBoolean)seq.getObjectAt(0)).isTrue())
-                    {
-                        return ((DERInteger)seq.getObjectAt(1)).getValue().intValue();
-                    }
-                    else
-                    {
-                        return -1;
-                    }
+                    return Integer.MAX_VALUE;
                 }
-                else if (seq.size() == 1)
+                else
                 {
-                    if (seq.getObjectAt(0) instanceof DERBoolean)
-                    {
-                        if (((DERBoolean)seq.getObjectAt(0)).isTrue())
-                        {
-                            return Integer.MAX_VALUE;
-                        }
-                        else
-                        {
-                            return -1;
-                        }
-                    }
-                    else
-                    {
-                        return -1;
-                    }
+                    return basicConstraints.getPathLenConstraint().intValue();
                 }
             }
-            catch (Exception e)
+            else
             {
-                throw new RuntimeException("error processing key usage extension");
+                return -1;
             }
         }
 
@@ -381,18 +392,13 @@ public class X509CertificateObject
 
             if (ext != null)
             {
-                ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-                DEROutputStream            dOut = new DEROutputStream(bOut);
-                
                 try
                 {
-                    dOut.writeObject(ext.getValue());
-
-                    return bOut.toByteArray();
+                    return ext.getValue().getEncoded();
                 }
                 catch (Exception e)
                 {
-                    throw new RuntimeException("error encoding " + e.toString());
+                    throw new IllegalStateException("error parsing " + e.toString());
                 }
             }
         }
@@ -484,6 +490,54 @@ public class X509CertificateObject
         }
     }
 
+    public boolean equals(
+        Object o)
+    {
+        if (o == this)
+        {
+            return true;
+        }
+        
+        if (!(o instanceof Certificate))
+        {
+            return false;
+        }
+
+        Certificate other = (Certificate)o;
+        
+        try
+        {
+            byte[] b1 = this.getEncoded();
+            byte[] b2 = other.getEncoded();
+            
+            return Arrays.areEqual(b1, b2);
+        }
+        catch (CertificateEncodingException e)
+        {
+            return false;
+        }
+    }
+    
+    public int hashCode()
+    {
+        try
+        {
+            byte[]  b = this.getEncoded();
+            int     value = 0;
+
+            for (int i = 0; i != b.length; i++)
+            {
+                value ^= (b[i] & 0xff) << (i % 4);
+            }
+
+            return value;
+        }
+        catch (CertificateEncodingException e)
+        {
+            return 0;
+        }
+    }
+    
     public void setBagAttribute(
         DERObjectIdentifier oid,
         DEREncodable        attribute)
@@ -551,8 +605,7 @@ public class X509CertificateObject
                 if (ext.getValue() != null)
                 {
                     byte[]                  octs = ext.getValue().getOctets();
-                    ByteArrayInputStream    bIn = new ByteArrayInputStream(octs);
-                    DERInputStream          dIn = new DERInputStream(bIn);
+                    ASN1InputStream         dIn = new ASN1InputStream(octs);
                     buf.append("                       critical(").append(ext.isCritical()).append(") ");
                     try
                     {
@@ -605,39 +658,47 @@ public class X509CertificateObject
         throws CertificateException, NoSuchAlgorithmException,
         InvalidKeyException, NoSuchProviderException, SignatureException
     {
-        Signature   signature = null;
-
-        if (!c.getSignatureAlgorithm().equals(c.getTBSCertificate().getSignature()))
-        {
-            throw new CertificateException("signature algorithm in TBS cert not same as outer cert");
-        }
-
+        Signature   signature;
+        String      sigName = X509SignatureUtil.getSignatureName(c.getSignatureAlgorithm());
+        
         try
         {
-            signature = Signature.getInstance(c.getSignatureAlgorithm().getObjectId().getId(), "BC");
+            signature = Signature.getInstance(sigName, "BC");
         }
         catch (Exception e)
         {
-            signature = Signature.getInstance(c.getSignatureAlgorithm().getObjectId().getId());
+            signature = Signature.getInstance(sigName);
         }
-
-        signature.initVerify(key);
-
-        signature.update(this.getTBSCertificate());
-
-        if (!signature.verify(this.getSignature()))
-        {
-            throw new InvalidKeyException("Public key presented not for certificate signature");
-        }
+        
+        checkSignature(key, signature);
     }
-
+    
     public final void verify(
         PublicKey   key,
         String      sigProvider)
         throws CertificateException, NoSuchAlgorithmException,
         InvalidKeyException, NoSuchProviderException, SignatureException
     {
-        Signature signature = Signature.getInstance(c.getSignatureAlgorithm().getObjectId().getId(), sigProvider);
+        String    sigName = X509SignatureUtil.getSignatureName(c.getSignatureAlgorithm());
+        Signature signature = Signature.getInstance(sigName, sigProvider);
+        
+        checkSignature(key, signature);
+    }
+
+    private void checkSignature(
+        PublicKey key, 
+        Signature signature) 
+        throws CertificateException, NoSuchAlgorithmException, 
+            SignatureException, InvalidKeyException
+    {
+        if (!c.getSignatureAlgorithm().equals(c.getTBSCertificate().getSignature()))
+        {
+            throw new CertificateException("signature algorithm in TBS cert not same as outer cert");
+        }
+
+        DEREncodable params = c.getSignatureAlgorithm().getParameters();
+        
+        X509SignatureUtil.setSignatureParameters(signature, params);
 
         signature.initVerify(key);
 

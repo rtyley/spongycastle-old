@@ -1,26 +1,5 @@
 package org.bouncycastle.x509;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.GeneralSecurityException;
-import java.security.cert.CRLException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509CRLEntry;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.SimpleTimeZone;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -29,19 +8,35 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V2TBSCertListGenerator;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CRLObject;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.cert.CRLException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509CRLEntry;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.SimpleTimeZone;
 
 /**
  * class to produce an X.509 Version 2 CRL.
@@ -54,14 +49,14 @@ public class X509V2CRLGenerator
     private DERObjectIdentifier         sigOID;
     private AlgorithmIdentifier         sigAlgId;
     private String                      signatureAlgorithm;
-    private Hashtable                   extensions = new Hashtable();
-    private Vector                      extOrdering = new Vector();
+    private X509ExtensionsGenerator     extGenerator;
 
     public X509V2CRLGenerator()
     {
         dateF.setTimeZone(tz);
 
         tbsGen = new V2TBSCertListGenerator();
+        extGenerator = new X509ExtensionsGenerator();
     }
 
     /**
@@ -70,8 +65,7 @@ public class X509V2CRLGenerator
     public void reset()
     {
         tbsGen = new V2TBSCertListGenerator();
-        extensions.clear();
-        extOrdering.clear();
+        extGenerator.reset();
     }
 
     /**
@@ -180,57 +174,44 @@ public class X509V2CRLGenerator
      * add a given extension field for the standard extensions tag (tag 0)
      */
     public void addExtension(
-        String          OID,
+        String          oid,
         boolean         critical,
         DEREncodable    value)
     {
-        this.addExtension(new DERObjectIdentifier(OID), critical, value);
+        this.addExtension(new DERObjectIdentifier(oid), critical, value);
     }
 
     /**
      * add a given extension field for the standard extensions tag (tag 0)
      */
     public void addExtension(
-        DERObjectIdentifier OID,
+        DERObjectIdentifier oid,
         boolean             critical,
         DEREncodable        value)
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
-        try
-        {
-            dOut.writeObject(value);
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("error encoding value: " + e);
-        }
-
-        this.addExtension(OID, critical, bOut.toByteArray());
+        extGenerator.addExtension(oid, critical, value);
     }
 
     /**
      * add a given extension field for the standard extensions tag (tag 0)
      */
     public void addExtension(
-        String          OID,
+        String          oid,
         boolean         critical,
         byte[]          value)
     {
-        this.addExtension(new DERObjectIdentifier(OID), critical, value);
+        this.addExtension(new DERObjectIdentifier(oid), critical, value);
     }
 
     /**
      * add a given extension field for the standard extensions tag (tag 0)
      */
     public void addExtension(
-        DERObjectIdentifier OID,
+        DERObjectIdentifier oid,
         boolean             critical,
         byte[]              value)
     {
-        extensions.put(OID, new X509Extension(critical, new DEROctetString(value)));
-        extOrdering.addElement(OID);
+        extGenerator.addExtension(oid, critical, value);
     }
 
     /**
@@ -348,29 +329,19 @@ public class X509V2CRLGenerator
         SecureRandom    random)
         throws CRLException, IllegalStateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
-        if (extensions != null)
-        {
-            tbsGen.setExtensions(new X509Extensions(extOrdering, extensions));
-        }
-
-        TBSCertList tbsCrl = tbsGen.generateTBSCertList();
-
-        // Construct the CRL
-        ASN1EncodableVector  v = new ASN1EncodableVector();
-
-        v.add(tbsCrl);
-        v.add(sigAlgId);
+        TBSCertList tbsCrl = generateCertList();
+        byte[] signature;
 
         try
         {
-            v.add(new DERBitString(X509Util.calculateSignature(sigOID, signatureAlgorithm, key, random, tbsCrl)));
+            signature = X509Util.calculateSignature(sigOID, signatureAlgorithm, key, random, tbsCrl);
         }
         catch (IOException e)
         {
             throw new ExtCRLException("cannot generate CRL encoding", e);
         }
 
-        return new X509CRLObject(new CertificateList(new DERSequence(v)));
+        return generateJcaObject(tbsCrl, signature);
     }
 
     /**
@@ -395,27 +366,39 @@ public class X509V2CRLGenerator
         SecureRandom    random)
         throws CRLException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
-        if (!extensions.isEmpty())
-        {
-            tbsGen.setExtensions(new X509Extensions(extOrdering, extensions));
-        }
-
-        TBSCertList tbsCrl = tbsGen.generateTBSCertList();
-
-        // Construct the CRL
-        ASN1EncodableVector  v = new ASN1EncodableVector();
-
-        v.add(tbsCrl);
-        v.add(sigAlgId);
+        TBSCertList tbsCrl = generateCertList();
+        byte[] signature;
 
         try
         {
-            v.add(new DERBitString(X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, tbsCrl)));
+            signature = X509Util.calculateSignature(sigOID, signatureAlgorithm, provider, key, random, tbsCrl);
         }
         catch (IOException e)
         {
             throw new ExtCRLException("cannot generate CRL encoding", e);
         }
+
+        return generateJcaObject(tbsCrl, signature);
+    }
+
+    private TBSCertList generateCertList()
+    {
+        if (!extGenerator.isEmpty())
+        {
+            tbsGen.setExtensions(extGenerator.generate());
+        }
+
+        return tbsGen.generateTBSCertList();
+    }
+
+    private X509CRL generateJcaObject(TBSCertList tbsCrl, byte[] signature)
+        throws CRLException
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(tbsCrl);
+        v.add(sigAlgId);
+        v.add(new DERBitString(signature));
 
         return new X509CRLObject(new CertificateList(new DERSequence(v)));
     }
