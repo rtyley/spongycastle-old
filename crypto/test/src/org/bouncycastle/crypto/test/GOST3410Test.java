@@ -1,21 +1,21 @@
 package org.bouncycastle.crypto.test;
 
-import org.bouncycastle.util.test.FixedSecureRandom;
-import org.bouncycastle.util.test.NumberParsing;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.GOST3410KeyPairGenerator;
 import org.bouncycastle.crypto.generators.GOST3410ParametersGenerator;
-import org.bouncycastle.crypto.signers.GOST3410Signer;
-import org.bouncycastle.crypto.params.GOST3410Parameters;
 import org.bouncycastle.crypto.params.GOST3410KeyGenerationParameters;
+import org.bouncycastle.crypto.params.GOST3410Parameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.crypto.signers.GOST3410Signer;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
+import org.bouncycastle.util.test.NumberParsing;
+import org.bouncycastle.util.test.SimpleTestResult;
+import org.bouncycastle.util.test.Test;
+import org.bouncycastle.util.test.TestResult;
 
-import java.security.SecureRandom;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 
 public class GOST3410Test
         implements Test
@@ -54,6 +54,15 @@ public class GOST3410Test
 
             GOST3410Parameters           params = pGen.generateParameters();
 
+            if (params.getValidationParameters() == null)
+            {
+                return new SimpleTestResult(false, getName() + "validation parameters wrong");
+            }
+            if (params.getValidationParameters().getC() != 29505
+                ||  params.getValidationParameters().getX0() != 24265)
+            {
+                return new SimpleTestResult(false, getName() + "validation parameters values wrong");
+            }
             if (!init_random.isExhausted())
             {
                 return new SimpleTestResult(false, getName()
@@ -150,6 +159,17 @@ public class GOST3410Test
             {
                 return new SimpleTestResult(false, getName()
                         + ": unexpected number of bytes used from 'init_random'.");
+            }
+
+            if (params.getValidationParameters() == null)
+            {
+                return new SimpleTestResult(false, getName() + ": validation parameters wrong");
+            }
+
+            if (params.getValidationParameters().getCL() != 13
+                ||  params.getValidationParameters().getX0L() != 1039943409)
+            {
+                return new SimpleTestResult(false, getName() + ": validation parameters values wrong");
             }
 
             if (!pValue.equals(params.getP()) || !qValue.equals(params.getQ()))

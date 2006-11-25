@@ -1,16 +1,17 @@
 package org.bouncycastle.crypto.test;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.Wrapper;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.DESedeWrapEngine;
 import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
+import org.bouncycastle.crypto.params.DESedeParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.security.SecureRandom;
 
 /**
  * DESede tester
@@ -18,22 +19,29 @@ import org.bouncycastle.util.test.SimpleTest;
 public class DESedeTest
     extends CipherTest
 {
+    static private byte[] weakKey =     // first 8 bytes non-weak
+         {
+             (byte)0x06,(byte)0x01,(byte)0x01,(byte)0x01, (byte)0x01,(byte)0x01,(byte)0x01,(byte)0x01,
+             (byte)0x1f,(byte)0x1f,(byte)0x1f,(byte)0x1f, (byte)0x0e,(byte)0x0e,(byte)0x0e,(byte)0x0e,
+             (byte)0xe0,(byte)0xe0,(byte)0xe0,(byte)0xe0, (byte)0xf1,(byte)0xf1,(byte)0xf1,(byte)0xf1,
+         };
+
     static String   input1 = "4e6f77206973207468652074696d6520666f7220616c6c20";
     static String   input2 = "4e6f7720697320746865";
 
     static SimpleTest[]  tests =
             {
                 new BlockCipherVectorTest(0, new DESedeEngine(),
-                        new KeyParameter(Hex.decode("0123456789abcdef0123456789abcdef")),
+                        new DESedeParameters(Hex.decode("0123456789abcdef0123456789abcdef")),
                         input1, "3fa40e8a984d48156a271787ab8883f9893d51ec4b563b53"),
                 new BlockCipherVectorTest(1, new DESedeEngine(),
-                        new KeyParameter(Hex.decode("0123456789abcdeffedcba9876543210")),
+                        new DESedeParameters(Hex.decode("0123456789abcdeffedcba9876543210")),
                         input1, "d80a0d8b2bae5e4e6a0094171abcfc2775d2235a706e232c"),
                 new BlockCipherVectorTest(2, new DESedeEngine(),
-                        new KeyParameter(Hex.decode("0123456789abcdef0123456789abcdef0123456789abcdef")),
+                        new DESedeParameters(Hex.decode("0123456789abcdef0123456789abcdef0123456789abcdef")),
                         input1, "3fa40e8a984d48156a271787ab8883f9893d51ec4b563b53"),
                 new BlockCipherVectorTest(3, new DESedeEngine(),
-                        new KeyParameter(Hex.decode("0123456789abcdeffedcba98765432100123456789abcdef")),
+                        new DESedeParameters(Hex.decode("0123456789abcdeffedcba98765432100123456789abcdef")),
                         input1, "d80a0d8b2bae5e4e6a0094171abcfc2775d2235a706e232c")
             };
 
@@ -127,6 +135,32 @@ public class DESedeTest
         catch (IllegalArgumentException e)
         {
             // expected
+        }
+
+        try
+        {
+            DESedeParameters.isWeakKey(new byte[4], 0);
+            fail("no exception on small key");
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (!e.getMessage().equals("key material too short."))
+            {
+                fail("wrong exception");
+            }
+        }
+
+        try
+        {
+            new DESedeParameters(weakKey);
+            fail("no exception on weak key");
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (!e.getMessage().equals("attempt to create weak DESede key"))
+            {
+                fail("wrong exception");
+            }
         }
     }
 

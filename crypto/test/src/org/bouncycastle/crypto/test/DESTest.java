@@ -1,7 +1,5 @@
 package org.bouncycastle.crypto.test;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.generators.DESKeyGenerator;
@@ -13,6 +11,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.security.SecureRandom;
 
 class DESParityTest
     extends SimpleTest
@@ -83,6 +83,73 @@ class KeyGenTest
     }
 }
 
+class DESParametersTest
+    extends SimpleTest
+{
+    static private byte[] weakKeys =
+     {
+         (byte)0x01,(byte)0x01,(byte)0x01,(byte)0x01, (byte)0x01,(byte)0x01,(byte)0x01,(byte)0x01,
+         (byte)0x1f,(byte)0x1f,(byte)0x1f,(byte)0x1f, (byte)0x0e,(byte)0x0e,(byte)0x0e,(byte)0x0e,
+         (byte)0xe0,(byte)0xe0,(byte)0xe0,(byte)0xe0, (byte)0xf1,(byte)0xf1,(byte)0xf1,(byte)0xf1,
+         (byte)0xfe,(byte)0xfe,(byte)0xfe,(byte)0xfe, (byte)0xfe,(byte)0xfe,(byte)0xfe,(byte)0xfe,
+         /* semi-weak keys */
+         (byte)0x01,(byte)0xfe,(byte)0x01,(byte)0xfe, (byte)0x01,(byte)0xfe,(byte)0x01,(byte)0xfe,
+         (byte)0x1f,(byte)0xe0,(byte)0x1f,(byte)0xe0, (byte)0x0e,(byte)0xf1,(byte)0x0e,(byte)0xf1,
+         (byte)0x01,(byte)0xe0,(byte)0x01,(byte)0xe0, (byte)0x01,(byte)0xf1,(byte)0x01,(byte)0xf1,
+         (byte)0x1f,(byte)0xfe,(byte)0x1f,(byte)0xfe, (byte)0x0e,(byte)0xfe,(byte)0x0e,(byte)0xfe,
+         (byte)0x01,(byte)0x1f,(byte)0x01,(byte)0x1f, (byte)0x01,(byte)0x0e,(byte)0x01,(byte)0x0e,
+         (byte)0xe0,(byte)0xfe,(byte)0xe0,(byte)0xfe, (byte)0xf1,(byte)0xfe,(byte)0xf1,(byte)0xfe,
+         (byte)0xfe,(byte)0x01,(byte)0xfe,(byte)0x01, (byte)0xfe,(byte)0x01,(byte)0xfe,(byte)0x01,
+         (byte)0xe0,(byte)0x1f,(byte)0xe0,(byte)0x1f, (byte)0xf1,(byte)0x0e,(byte)0xf1,(byte)0x0e,
+         (byte)0xe0,(byte)0x01,(byte)0xe0,(byte)0x01, (byte)0xf1,(byte)0x01,(byte)0xf1,(byte)0x01,
+         (byte)0xfe,(byte)0x1f,(byte)0xfe,(byte)0x1f, (byte)0xfe,(byte)0x0e,(byte)0xfe,(byte)0x0e,
+         (byte)0x1f,(byte)0x01,(byte)0x1f,(byte)0x01, (byte)0x0e,(byte)0x01,(byte)0x0e,(byte)0x01,
+         (byte)0xfe,(byte)0xe0,(byte)0xfe,(byte)0xe0, (byte)0xfe,(byte)0xf1,(byte)0xfe,(byte)0xf1
+     };
+
+    public String getName()
+    {
+        return "DESParameters";
+    }
+
+    public void performTest() throws Exception
+    {
+        try
+        {
+            DESParameters.isWeakKey(new byte[4], 0);
+            fail("no exception on small key");
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (!e.getMessage().equals("key material too short."))
+            {
+                fail("wrong exception");
+            }
+        }
+
+        try
+        {
+            new DESParameters(weakKeys);
+            fail("no exception on weak key");
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (!e.getMessage().equals("attempt to create weak DES key"))
+            {
+                fail("wrong exception");
+            }
+        }
+
+        for (int i = 0; i != weakKeys.length; i += 8)
+        {
+            if (!DESParameters.isWeakKey(weakKeys, i))
+            {
+                fail("weakKey test failed");
+            }
+        }
+    }
+}
+
 /**
  * DES tester - vectors from <a href=http://www.itl.nist.gov/fipspubs/fip81.htm>FIPS 81</a>
  */
@@ -117,6 +184,7 @@ public class DESTest
                         new ParametersWithIV(new KeyParameter(Hex.decode("0123456789abcdef")), Hex.decode("1234567890abcdef")),
                         input3, "f3096249c7f46e5135f2c0eb8b"),
                 new DESParityTest(),
+                new DESParametersTest(),
                 new KeyGenTest()
             };
 

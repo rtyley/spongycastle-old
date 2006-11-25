@@ -1,8 +1,5 @@
 package org.bouncycastle.crypto.test;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
@@ -10,15 +7,16 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.crypto.signers.PSSSigner;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /*
  * RSA PSS test vectors for PKCS#1 V2.1
  */
 public class PSSTest
-    implements Test
+    extends SimpleTest
 {
     private final int DATA_LENGTH = 1000;
     private final int NUM_TESTS = 500;
@@ -213,129 +211,52 @@ public class PSSTest
         return "PSSTest";
     }
 
-    private boolean isEqualTo(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private TestResult testSig(
+    private void testSig(
         int                 id,
         RSAKeyParameters    pub,
         RSAKeyParameters    prv,
         byte[]              slt,
         byte[]              msg,
         byte[]              sig)
+        throws Exception
     {
         PSSSigner           eng = new PSSSigner(new RSAEngine(), new SHA1Digest(), 20);
 
         eng.init(true, new ParametersWithRandom(prv, new FixedRandom(slt)));
 
-        try
+        eng.update(msg, 0, msg.length);
+
+        byte[]  s = eng.generateSignature();
+
+        if (!areEqual(s, sig))
         {
-            eng.update(msg, 0, msg.length);
-
-            byte[]  s = eng.generateSignature();
-
-            if (!isEqualTo(s, sig))
-            {
-                return new SimpleTestResult(false, getName() + ": test " + id + " failed generation");
-            }
-
-            eng.init(false, pub);
-
-            eng.update(msg, 0, msg.length);
-
-            if (!eng.verifySignature(s))
-            {
-                return new SimpleTestResult(false, getName() + ": test " + id + " failed verification");
-            }
-        }
-        catch (Exception e)
-        {
-            return new SimpleTestResult(false, getName() + ": test " + id + " failed - exception " + e.toString());
+            fail("test " + id + " failed generation");
         }
 
-        return new SimpleTestResult(true, getName() + ": test " + id + " Okay");
+        eng.init(false, pub);
+
+        eng.update(msg, 0, msg.length);
+
+        if (!eng.verifySignature(s))
+        {
+            fail("test " + id + " failed verification");
+        }
     }
         
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        TestResult  result = testSig(1, pub1, prv1, slt1a, msg1a, sig1a);
+        testSig(1, pub1, prv1, slt1a, msg1a, sig1a);
+        testSig(2, pub1, prv1, slt1b, msg1b, sig1b);
+        testSig(3, pub2, prv2, slt2a, msg2a, sig2a);
+        testSig(4, pub2, prv2, slt2b, msg2b, sig2b);
+        testSig(5, pub4, prv4, slt4a, msg4a, sig4a);
+        testSig(6, pub4, prv4, slt4b, msg4b, sig4b);
+        testSig(7, pub8, prv8, slt8a, msg8a, sig8a);
+        testSig(8, pub8, prv8, slt8b, msg8b, sig8b);
+        testSig(9, pub9, prv9, slt9a, msg9a, sig9a);
+        testSig(10, pub9, prv9, slt9b, msg9b, sig9b);
 
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = testSig(2, pub1, prv1, slt1b, msg1b, sig1b);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = testSig(3, pub2, prv2, slt2a, msg2a, sig2a);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = testSig(4, pub2, prv2, slt2b, msg2b, sig2b);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = testSig(5, pub4, prv4, slt4a, msg4a, sig4a);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = testSig(6, pub4, prv4, slt4b, msg4b, sig4b);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = testSig(7, pub8, prv8, slt8a, msg8a, sig8a);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = testSig(8, pub8, prv8, slt8b, msg8b, sig8b);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = testSig(9, pub9, prv9, slt9a, msg9a, sig9a);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-
-        result = testSig(10, pub9, prv9, slt9b, msg9b, sig9b);
-        if (!result.isSuccessful())
-        {
-            return result;
-        }
-        
         //
         // loop test
         //
@@ -348,47 +269,31 @@ public class PSSTest
         
         for (int j = 0; j < NUM_TESTS; j++)
         {
-            eng.init(true, new ParametersWithRandom(prv8, new SecureRandom()));
-        
-            try
+            eng.init(true, new ParametersWithRandom(prv8));
+
+            eng.update(data, 0, data.length);
+
+            byte[] s = eng.generateSignature();
+
+            eng.init(false, pub8);
+
+            eng.update(data, 0, data.length);
+
+            if (!eng.verifySignature(s))
             {
-                eng.update(data, 0, data.length);
-        
-                byte[] s = eng.generateSignature();
-        
-                eng.init(false, pub8);
-        
-                eng.update(data, 0, data.length);
-        
-                if (!eng.verifySignature(s))
-                {
-                    failed++;
-                }
-            }
-            catch (Exception e)
-            {
-                return new SimpleTestResult(
-                    false,
-                    getName() + ": loop test failed - exception " + e.toString());
+                failed++;
             }
         }
         
         if (failed != 0)
         {
-            return new SimpleTestResult(
-                                false,
-                                getName() + ": loop test failed - failures: " + failed);
+            fail("loop test failed - failures: " + failed);
         }
-
-        return new SimpleTestResult(true, getName() + ": Okay");
     }
 
     public static void main(
         String[]    args)
     {
-        Test        test = new PSSTest();
-        TestResult  result = test.perform();
-
-        System.out.println(result);
+        runTest(new PSSTest());
     }
 }

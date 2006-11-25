@@ -13,7 +13,7 @@ public class DESedeParameters
     {
         super(key);
 
-        if (isWeakKey(key, 0, 0))
+        if (isWeakKey(key, 0, key.length))
         {
             throw new IllegalArgumentException("attempt to create weak DESede key");
         }
