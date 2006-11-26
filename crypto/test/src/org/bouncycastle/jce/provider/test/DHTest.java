@@ -369,7 +369,7 @@ public class DHTest
     {
         try
         {
-            KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDH", "BC");
+            KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDHC", "BC");
 
             EllipticCurve curve = new EllipticCurve(
                     new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
@@ -420,7 +420,7 @@ public class DHTest
             // public key encoding test
             //
             byte[]              pubEnc = aKeyPair.getPublic().getEncoded();
-            KeyFactory          keyFac = KeyFactory.getInstance("ECDH", "BC");
+            KeyFactory          keyFac = KeyFactory.getInstance("ECDHC", "BC");
             X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
             ECPublicKey         pubKey = (ECPublicKey)keyFac.generatePublic(pubX509);
 
