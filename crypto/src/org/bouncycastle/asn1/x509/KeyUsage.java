@@ -32,7 +32,7 @@ public class KeyUsage
     public static final int        encipherOnly     = (1 << 0);
     public static final int        decipherOnly     = (1 << 15);
 
-    public static DERBitString getInstance(Object obj)
+    public static KeyUsage getInstance(Object obj)
     {
         if (obj instanceof KeyUsage)
         {
