@@ -25,7 +25,7 @@ import java.util.List;
 
 class CMSUtils
 {
-    private static Runtime RUNTIME = Runtime.getRuntime();
+    private static final Runtime RUNTIME = Runtime.getRuntime();
     
     static int getMaximumMemory()
     {
