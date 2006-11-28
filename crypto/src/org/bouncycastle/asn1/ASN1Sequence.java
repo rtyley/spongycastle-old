@@ -188,24 +188,15 @@ public abstract class ASN1Sequence
 
         while (s1.hasMoreElements())
         {
-            Object  o1 = s1.nextElement();
-            Object  o2 = s2.nextElement();
+            DERObject  o1 = ((DEREncodable)s1.nextElement()).getDERObject();
+            DERObject  o2 = ((DEREncodable)s2.nextElement()).getDERObject();
 
-            if (o1 != null && o2 != null)
-            {
-                if (!o1.equals(o2))
-                {
-                    return false;
-                }
-            }
-            else if (o1 == null && o2 == null)
+            if (o1 == o2 || (o1 != null && o1.equals(o2)))
             {
                 continue;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         return true;

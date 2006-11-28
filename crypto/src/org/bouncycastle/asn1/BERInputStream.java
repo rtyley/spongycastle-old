@@ -12,7 +12,7 @@ import java.util.Vector;
 public class BERInputStream
     extends DERInputStream
 {
-    private DERObject END_OF_STREAM = new DERObject()
+    private static final DERObject END_OF_STREAM = new DERObject()
     {
                                         void encode(
                                             DEROutputStream out)

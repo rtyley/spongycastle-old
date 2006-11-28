@@ -18,7 +18,7 @@ public class ASN1InputStream
     extends FilterInputStream
     implements DERTags
 {
-    private DERObject END_OF_STREAM = new DERObject()
+    private static final DERObject END_OF_STREAM = new DERObject()
     {
         void encode(
             DEROutputStream out)
