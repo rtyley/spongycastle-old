@@ -2,8 +2,8 @@ package org.bouncycastle.bcpg;
 
 public class CRC24
 {
-    private static int CRC24_INIT = 0x0b704ce;
-    private static int CRC24_POLY = 0x1864cfb;
+    private static final int CRC24_INIT = 0x0b704ce;
+    private static final int CRC24_POLY = 0x1864cfb;
                                                                                 
     private int crc = CRC24_INIT;
                                                                                 
