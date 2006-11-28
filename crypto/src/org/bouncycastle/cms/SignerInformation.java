@@ -361,7 +361,7 @@ public class SignerInformation
         catch (SignatureException e)
         {
             throw new CMSException(
-                    "invalid signature format in message: + " + e.getMessage(), e);
+                    "invalid signature format in message: " + e.getMessage(), e);
         }
     }
 
