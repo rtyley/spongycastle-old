@@ -1,13 +1,42 @@
 package org.bouncycastle.asn1.util;
 
-import java.util.Enumeration;
-
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BERConstructedSequence;
+import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.BERSet;
+import org.bouncycastle.asn1.BERTaggedObject;
+import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERBoolean;
+import org.bouncycastle.asn1.DERConstructedSequence;
+import org.bouncycastle.asn1.DERConstructedSet;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERPrintableString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERT61String;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.DERUnknownTag;
+import org.bouncycastle.asn1.DERVisibleString;
 import org.bouncycastle.util.encoders.Hex;
+
+import java.util.Enumeration;
 
 public class ASN1Dump
 {
-    private static String  TAB = "    ";
+    private static final String  TAB = "    ";
 
     /**
      * dump a DER object as a formatted string with indentation

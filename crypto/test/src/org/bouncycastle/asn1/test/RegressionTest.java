@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1.test;
 
-import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
 
@@ -20,6 +19,7 @@ public class RegressionTest
         new PKCS10Test(),
         new PKCS12Test(),
         new X509NameTest(),
+        new X509ExtensionsTest(),
         new GeneralizedTimeTest(),
         new BitStringTest(),
         new MiscTest(),
@@ -52,9 +52,9 @@ public class RegressionTest
         {
             TestResult  result = tests[i].perform();
             
-            if (((SimpleTestResult)result).getException() != null)
+            if (result.getException() != null)
             {
-                ((SimpleTestResult)result).getException().printStackTrace();
+                result.getException().printStackTrace();
             }
             
             System.out.println(result);

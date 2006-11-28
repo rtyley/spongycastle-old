@@ -1,7 +1,5 @@
 package org.bouncycastle.asn1.x9;
 
-import java.math.BigInteger;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -12,6 +10,8 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 
+import java.math.BigInteger;
+
 /**
  * ASN.1 def for Elliptic-Curve ECParameters structure. See
  * X9.62, for further details.
@@ -20,7 +20,7 @@ public class X9ECParameters
     extends ASN1Encodable
     implements X9ObjectIdentifiers
 {
-    private static BigInteger   ONE = BigInteger.valueOf(1);
+    private static final BigInteger   ONE = BigInteger.valueOf(1);
 
     private X9FieldID           fieldID;
     private ECCurve             curve;

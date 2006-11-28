@@ -1,9 +1,5 @@
 package org.bouncycastle.asn1.x509;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -13,6 +9,10 @@ import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 public class X509Extensions
     extends ASN1Encodable
@@ -353,49 +353,24 @@ public class X509Extensions
         return new DERSequence(vec);
     }
 
-    public int hashCode()
+    public boolean equivalent(
+        X509Extensions other)
     {
-        Enumeration     e = extensions.keys();
-        int             hashCode = 0;
-
-        while (e.hasMoreElements())
-        {
-            Object  o = e.nextElement();
-
-            hashCode ^= o.hashCode();
-            hashCode ^= extensions.get(o).hashCode();
-        }
-
-        return hashCode;
-    }
-
-    public boolean equals(
-        Object o)
-    {
-        if (!(o instanceof X509Extensions))
+        if (extensions.size() != other.extensions.size())
         {
             return false;
         }
 
-        X509Extensions  other = (X509Extensions)o;
-
         Enumeration     e1 = extensions.keys();
-        Enumeration     e2 = other.extensions.keys();
 
-        while (e1.hasMoreElements() && e2.hasMoreElements())
+        while (e1.hasMoreElements())
         {
-            Object  o1 = e1.nextElement();
-            Object  o2 = e2.nextElement();
-            
-            if (!o1.equals(o2))
+            Object  key = e1.nextElement();
+
+            if (!extensions.get(key).equals(other.extensions.get(key)))
             {
                 return false;
             }
-        }
-
-        if (e1.hasMoreElements() || e2.hasMoreElements())
-        {
-            return false;
         }
 
         return true;

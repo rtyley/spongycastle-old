@@ -202,10 +202,15 @@ abstract public class ASN1Set
 
         while (s1.hasMoreElements())
         {
-            if (!s1.nextElement().equals(s2.nextElement()))
+            DERObject  o1 = ((DEREncodable)s1.nextElement()).getDERObject();
+            DERObject  o2 = ((DEREncodable)s2.nextElement()).getDERObject();
+
+            if (o1 == o2 || (o1 != null && o1.equals(o2)))
             {
-                return false;
+                continue;
             }
+
+            return false;
         }
 
         return true;
