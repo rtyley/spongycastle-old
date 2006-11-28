@@ -19,7 +19,7 @@ import java.security.cert.X509Certificate;
 
 public class CertificateID
 {
-    public static String HASH_SHA1 = "1.3.14.3.2.26";
+    public static final String HASH_SHA1 = "1.3.14.3.2.26";
 
     private CertID  id;
 
