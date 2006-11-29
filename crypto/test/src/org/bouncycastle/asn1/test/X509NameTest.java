@@ -100,6 +100,7 @@ public class X509NameTest
     {
         testEncodingPrintableString(X509Name.C, "AU");
         testEncodingPrintableString(X509Name.SERIALNUMBER, "123456");
+        testEncodingPrintableString(X509Name.DN_QUALIFIER, "123456");
         testEncodingIA5String(X509Name.EmailAddress, "test@test.com");
         testEncodingIA5String(X509Name.DC, "test");
         testEncodingGeneralizedTime(X509Name.DATE_OF_BIRTH, "20020122122220Z");

@@ -47,7 +47,7 @@ public class X509DefaultEntryConverter
         {
             return new DERGeneralizedTime(value);
         }
-        else if (oid.equals(X509Name.C) || oid.equals(X509Name.SN))
+        else if (oid.equals(X509Name.C) || oid.equals(X509Name.SN) || oid.equals(X509Name.DN_QUALIFIER))
         {
              return new DERPrintableString(value);
         }        
