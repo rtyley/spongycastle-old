@@ -36,7 +36,7 @@ class EOCObject
 public class ASN1InputStream
     extends DERInputStream
 {
-    private DERObject END_OF_STREAM = new EOCObject();
+    private static final DERObject END_OF_STREAM = new EOCObject();
 
     public ASN1InputStream(
         InputStream is)

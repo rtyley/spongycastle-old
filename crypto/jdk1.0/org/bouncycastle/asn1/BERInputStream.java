@@ -29,7 +29,7 @@ class eos extends DERObject
 public class BERInputStream
     extends DERInputStream
 {
-    private DERObject END_OF_STREAM = new eos();
+    private static final DERObject END_OF_STREAM = new eos();
 
     public BERInputStream(
         InputStream is)

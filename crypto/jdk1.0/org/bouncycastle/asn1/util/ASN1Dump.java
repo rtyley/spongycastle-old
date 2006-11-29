@@ -7,7 +7,7 @@ import org.bouncycastle.util.encoders.Hex;
 
 public class ASN1Dump
 {
-    private static String  TAB = "    ";
+    private static final String  TAB = "    ";
 
     /**
      * dump a DER object as a formatted string with indentation

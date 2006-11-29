@@ -20,7 +20,7 @@ import org.bouncycastle.math.ec.ECPoint;
 public class X9ECParameters
     implements DEREncodable, X9ObjectIdentifiers
 {
-    private static BigInteger   ONE = BigInteger.valueOf(1);
+    private static final BigInteger   ONE = BigInteger.valueOf(1);
 
     private X9FieldID           fieldID;
     private ECCurve             curve;
