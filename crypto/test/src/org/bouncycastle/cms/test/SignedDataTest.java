@@ -508,7 +508,7 @@ public class SignedDataTest
         encapsulatedTest(_signGostKP, _signGostCert, CMSSignedDataGenerator.DIGEST_GOST3411);
     }
 
-    public void testECGOST3411WithGOST3410Encapsulated()
+    public void testGOST3411WithECGOST3410Encapsulated()
         throws Exception
     {
         encapsulatedTest(_signEcGostKP, _signEcGostCert, CMSSignedDataGenerator.DIGEST_GOST3411);
