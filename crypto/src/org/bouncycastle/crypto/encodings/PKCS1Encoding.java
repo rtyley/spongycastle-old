@@ -23,9 +23,9 @@ public class PKCS1Encoding
      * true by default.
      * </p>
      */
-    public static String STRICT_LENGTH_ENABLED_PROPERTY = "org.bouncycastle.pkcs1.strict";
+    public static final String STRICT_LENGTH_ENABLED_PROPERTY = "org.bouncycastle.pkcs1.strict";
     
-    private static int      HEADER_LENGTH = 10;
+    private static final int HEADER_LENGTH = 10;
 
     private SecureRandom            random;
     private AsymmetricBlockCipher   engine;

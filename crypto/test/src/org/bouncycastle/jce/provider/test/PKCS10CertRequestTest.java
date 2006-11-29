@@ -1,19 +1,10 @@
 package org.bouncycastle.jce.provider.test;
 
-import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.Signature;
-import java.util.Hashtable;
-
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
@@ -25,6 +16,17 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
+import java.util.Hashtable;
 
 /**
  **/
@@ -204,7 +206,57 @@ public class PKCS10CertRequestTest
             fail("signature not mapped correctly.");
         }
     }
-    
+
+    private void createECGOSTRequest()
+        throws Exception
+    {
+        String           algorithm = "GOST3411withECGOST3410";
+        KeyPairGenerator ecGostKpg = KeyPairGenerator.getInstance("ECGOST3410", "BC");
+
+        ecGostKpg.initialize(ECGOST3410NamedCurveTable.getParameterSpec("GostR3410-2001-CryptoPro-A"), new SecureRandom());
+
+        //
+        // set up the keys
+        //
+        KeyPair             pair = ecGostKpg.generateKeyPair();
+        PrivateKey          privKey = pair.getPrivate();
+        PublicKey           pubKey = pair.getPublic();
+
+        PKCS10CertificationRequest req = new PKCS10CertificationRequest(
+                        algorithm, new X509Name("CN=XXX"), pubKey, null, privKey);
+        if (!req.verify())
+        {
+            fail("Failed verify check EC.");
+        }
+
+        req = new PKCS10CertificationRequest(req.getEncoded());
+        if (!req.verify())
+        {
+            fail("Failed verify check EC encoded.");
+        }
+
+        if (!req.getSignatureAlgorithm().getObjectId().equals(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001))
+        {
+            fail("ECGOST oid incorrect.");
+        }
+
+        if (req.getSignatureAlgorithm().getParameters() != null)
+        {
+            fail("ECGOST parameters incorrect.");
+        }
+
+        Signature sig = Signature.getInstance(algorithm, "BC");
+
+        sig.initVerify(pubKey);
+
+        sig.update(req.getCertificationRequestInfo().getEncoded());
+
+        if (!sig.verify(req.getSignature().getBytes()))
+        {
+            fail("signature not mapped correctly.");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -280,6 +332,8 @@ public class PKCS10CertRequestTest
         createECRequest("SHA256withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
         createECRequest("SHA384withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
         createECRequest("SHA512withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
+
+        createECGOSTRequest();
     }
 
     public static void main(

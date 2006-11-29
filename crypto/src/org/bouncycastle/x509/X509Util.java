@@ -70,7 +70,10 @@ class X509Util
         algorithms.put("SHA512WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
         algorithms.put("GOST3411WITHGOST3410", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
         algorithms.put("GOST3411WITHGOST3410-94", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
-        
+        algorithms.put("GOST3411WITHECGOST3410", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
+        algorithms.put("GOST3411WITHECGOST3410-2001", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
+        algorithms.put("GOST3411WITHGOST3410-2001", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
+
         //
         // According to RFC 3279, the ASN.1 encoding SHALL (id-dsa-with-sha1) or MUST (ecdsa-with-SHA*) omit the parameters field. 
         // The parameters field SHALL be NULL for RSA based signature algorithms.
@@ -83,6 +86,12 @@ class X509Util
         noParams.add(X9ObjectIdentifiers.id_dsa_with_sha1);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha256);
+
+        //
+        // RFC 4491
+        //
+        noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
+        noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
     }
      
     static DERObjectIdentifier getAlgorithmOID(

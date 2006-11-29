@@ -102,7 +102,7 @@ public class SignedDataStreamTest
     private void verifySignatures(CMSSignedDataParser sp, byte[] contentDigest) 
         throws Exception
     {
-        CertStore               certs = sp.getCertificatesAndCRLs("Collection", "BC");
+        CertStore               certStore = sp.getCertificatesAndCRLs("Collection", "BC");
         SignerInformationStore  signers = sp.getSignerInfos();
         
         Collection              c = signers.getSigners();
@@ -111,7 +111,7 @@ public class SignedDataStreamTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certStore.getCertificates(signer.getSID());
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -123,6 +123,12 @@ public class SignedDataStreamTest
                 assertTrue(MessageDigest.isEqual(contentDigest, signer.getContentDigest()));
             }
         }
+
+        Collection certColl = certStore.getCertificates(null);
+        Collection crlColl = certStore.getCRLs(null);
+
+        assertEquals(certColl.size(), sp.getCertificates("Collection", "BC").getMatches(null).size());
+        assertEquals(crlColl.size(), sp.getCRLs("Collection", "BC").getMatches(null).size());
     }
     
     private void verifySignatures(CMSSignedDataParser sp) 

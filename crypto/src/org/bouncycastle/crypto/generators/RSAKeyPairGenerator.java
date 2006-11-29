@@ -1,7 +1,5 @@
 package org.bouncycastle.crypto.generators;
 
-import java.math.BigInteger;
-
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
 import org.bouncycastle.crypto.KeyGenerationParameters;
@@ -9,13 +7,15 @@ import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 
+import java.math.BigInteger;
+
 /**
  * an RSA key pair generator.
  */
 public class RSAKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator
 {
-    private static BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
 
     private RSAKeyGenerationParameters param;
 

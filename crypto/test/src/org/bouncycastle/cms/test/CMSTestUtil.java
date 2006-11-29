@@ -10,13 +10,10 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECFieldElement;
-import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -125,22 +122,8 @@ public class CMSTestUtil
 
             dsaKpg.initialize(dsaSpec, new SecureRandom());
 
-            BigInteger mod_p = new BigInteger("57896044618658097711785492504343953926634992332820282019728792003956564821041"); //p
-
-            ECCurve curve = new ECCurve.Fp(
-                mod_p, // p
-                new BigInteger("7"), // a
-                new BigInteger("43308876546767276905765904595650931995942111794451039583252968842033849580414")); // b
-
-            ECParameterSpec ecSpec = new ECParameterSpec(
-                    curve,
-                        new ECPoint.Fp(curve,
-                                       new ECFieldElement.Fp(mod_p,new BigInteger("2")), // x
-                                       new ECFieldElement.Fp(mod_p,new BigInteger("4018974056539037503335449422937059775635739389905545080690979365213431566280"))), // y
-                        new BigInteger("57896044618658097711785492504343953927082934583725450622380973592137631069619")); // q
-
             ecGostKpg = KeyPairGenerator.getInstance("ECGOST3410", "BC");
-            ecGostKpg.initialize(ecSpec, new SecureRandom());
+            ecGostKpg.initialize(ECGOST3410NamedCurveTable.getParameterSpec("GostR3410-2001-CryptoPro-A"), new SecureRandom());
 
             ecDsaKpg = KeyPairGenerator.getInstance("ECDSA", "BC");
             ecDsaKpg.initialize(239, new SecureRandom());
@@ -290,7 +273,11 @@ public class CMSTestUtil
         }
         else if (_issPub.getAlgorithm().equals("ECDSA"))
         {
-            _v3CertGen.setSignatureAlgorithm("ECDSAWithSHA1");
+            _v3CertGen.setSignatureAlgorithm("SHA1withECDSA");
+        }
+        else if (_issPub.getAlgorithm().equals("ECGOST3410"))
+        {
+            _v3CertGen.setSignatureAlgorithm("GOST3411withECGOST3410");
         }
         else
         {

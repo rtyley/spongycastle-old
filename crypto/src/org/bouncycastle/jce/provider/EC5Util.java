@@ -1,5 +1,7 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 
@@ -46,13 +48,27 @@ public class EC5Util
         EllipticCurve ellipticCurve,
         org.bouncycastle.jce.spec.ECParameterSpec spec)
     {
-        return new ECParameterSpec(
+        if (spec instanceof ECNamedCurveParameterSpec)
+        {
+            return new ECNamedCurveSpec(
+                ((ECNamedCurveParameterSpec)spec).getName(),
+                ellipticCurve,
+                new ECPoint(
+                        spec.getG().getX().toBigInteger(),
+                        spec.getG().getY().toBigInteger()),
+                        spec.getN(),
+                        spec.getH());
+        }
+        else
+        {
+            return new ECParameterSpec(
                 ellipticCurve,
                 new ECPoint(
                         spec.getG().getX().toBigInteger(),
                         spec.getG().getY().toBigInteger()),
                         spec.getN(),
                         spec.getH().intValue());
+        }
     }
 
     static org.bouncycastle.jce.spec.ECParameterSpec convertSpec(

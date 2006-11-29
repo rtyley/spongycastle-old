@@ -67,6 +67,8 @@ public class CMSSignedData
     CertStore               certStore;
     SignerInformationStore  signerInfoStore;
     X509Store               attributeStore;
+    X509Store               certificateStore;
+    X509Store               crlStore;
 
     private CMSSignedData(
         CMSSignedData   c)
@@ -200,6 +202,54 @@ public class CMSSignedData
         }
 
         return attributeStore;
+    }
+
+    /**
+     * return a X509Store containing the public key certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of public key certificates
+     * @exception NoSuchProviderException if the provider requested isn't available.
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCertificates(
+        String type,
+        String provider)
+        throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        if (certificateStore == null)
+        {
+            certificateStore = HELPER.createCertificateStore(type, provider, signedData.getCertificates());
+        }
+
+        return certificateStore;
+    }
+
+    /**
+     * return a X509Store containing CRLs, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of CRLs
+     * @exception NoSuchProviderException if the provider requested isn't available.
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCRLs(
+        String type,
+        String provider)
+        throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        if (crlStore == null)
+        {
+            crlStore = HELPER.createCRLsStore(type, provider, signedData.getCRLs());
+        }
+
+        return crlStore;
     }
 
     /**

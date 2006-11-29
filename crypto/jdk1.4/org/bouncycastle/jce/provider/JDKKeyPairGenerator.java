@@ -50,7 +50,7 @@ public abstract class JDKKeyPairGenerator
         extends JDKKeyPairGenerator
     {
         final static BigInteger defaultPublicExponent = BigInteger.valueOf(0x10001);
-        final static int defaultTests = 8;
+        final static int defaultTests = 12;
 
         RSAKeyGenerationParameters  param;
         RSAKeyPairGenerator         engine;

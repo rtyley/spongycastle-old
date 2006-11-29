@@ -201,7 +201,55 @@ class CMSSignedHelper
         }
     }
 
-    protected CertStore createCertStore(
+    X509Store createCertificateStore(
+        String type,
+        String provider,
+        ASN1Set certSet)
+        throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        List certs = new ArrayList();
+
+        if (certSet != null)
+        {
+            addCertsFromSet(certs, certSet, provider);
+        }
+
+        try
+        {
+            return X509Store.getInstance(
+                         "Certificate/" +type, new X509CollectionStoreParameters(certs), provider);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("can't setup the X509Store", e);
+        }
+    }
+
+    X509Store createCRLsStore(
+        String type,
+        String provider,
+        ASN1Set crlSet)
+        throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        List crls = new ArrayList();
+
+        if (crlSet != null)
+        {
+            addCRLsFromSet(crls, crlSet, provider);
+        }
+
+        try
+        {
+            return X509Store.getInstance(
+                         "CRL/" +type, new X509CollectionStoreParameters(crls), provider);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("can't setup the X509Store", e);
+        }
+    }
+
+    CertStore createCertStore(
         String type,
         String provider,
         ASN1Set certSet,
@@ -209,6 +257,34 @@ class CMSSignedHelper
         throws NoSuchProviderException, CMSException, NoSuchAlgorithmException
     {
         List certsAndcrls = new ArrayList();
+
+        //
+        // load the certificates and revocation lists if we have any
+        //
+
+        if (certSet != null)
+        {
+            addCertsFromSet(certsAndcrls, certSet, provider);
+        }
+
+        if (crlSet != null)
+        {
+            addCRLsFromSet(certsAndcrls, crlSet, provider);
+        }
+
+        try
+        {
+            return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            throw new CMSException("can't setup the CertStore", e);
+        }
+    }
+
+    private void addCertsFromSet(List certs, ASN1Set certSet, String provider)
+        throws NoSuchProviderException, CMSException
+    {
         CertificateFactory cf;
 
         try
@@ -219,52 +295,57 @@ class CMSSignedHelper
         {
             throw new CMSException("can't get certificate factory.", ex);
         }
+        Enumeration e = certSet.getObjects();
 
-        //
-        // load the certificates and revocation lists if we have any
-        //
-
-        if (certSet != null)
+        while (e.hasMoreElements())
         {
-            Enumeration e = certSet.getObjects();
-
-            while (e.hasMoreElements())
+            try
             {
-                try
-                {
-                    DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
 
-                    if (obj instanceof ASN1Sequence)
-                    {
-                        certsAndcrls.add(cf.generateCertificate(
-                            new ByteArrayInputStream(obj.getEncoded())));
-                    }
-                }
-                catch (IOException ex)
+                if (obj instanceof ASN1Sequence)
                 {
-                    throw new CMSException(
-                            "can't re-encode certificate!", ex);
-                }
-                catch (CertificateException ex)
-                {
-                    throw new CMSException(
-                            "can't re-encode certificate!", ex);
+                    certs.add(cf.generateCertificate(
+                        new ByteArrayInputStream(obj.getEncoded())));
                 }
             }
+            catch (IOException ex)
+            {
+                throw new CMSException(
+                        "can't re-encode certificate!", ex);
+            }
+            catch (CertificateException ex)
+            {
+                throw new CMSException(
+                        "can't re-encode certificate!", ex);
+            }
         }
+    }
 
+    private void addCRLsFromSet(List crls, ASN1Set certSet, String provider)
+        throws NoSuchProviderException, CMSException
+    {
+        CertificateFactory cf;
 
-        if (crlSet != null)
+        try
         {
-            Enumeration e = crlSet.getObjects();
+            cf = CertificateFactory.getInstance("X.509", provider);
+        }
+        catch (CertificateException ex)
+        {
+            throw new CMSException("can't get certificate factory.", ex);
+        }
+        Enumeration e = certSet.getObjects();
 
+        while (e.hasMoreElements())
+        {
             while (e.hasMoreElements())
             {
                 try
                 {
                     DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
 
-                    certsAndcrls.add(cf.generateCRL(
+                    crls.add(cf.generateCRL(
                         new ByteArrayInputStream(obj.getEncoded())));
                 }
                 catch (IOException ex)
@@ -276,15 +357,6 @@ class CMSSignedHelper
                     throw new CMSException("can't re-encode CRL!", ex);
                 }
             }
-        }
-
-        try
-        {
-            return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
-        }
-        catch (InvalidAlgorithmParameterException e)
-        {
-            throw new CMSException("can't setup the CertStore", e);
         }
     }
 

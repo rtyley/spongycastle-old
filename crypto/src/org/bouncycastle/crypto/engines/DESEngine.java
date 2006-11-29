@@ -96,19 +96,19 @@ public class DESEngine
      * Outerbridge's D3DES...
      */
 
-    static short[]    Df_Key =
+    private static final short[]    Df_Key =
         {
             0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef,
             0xfe,0xdc,0xba,0x98,0x76,0x54,0x32,0x10,
             0x89,0xab,0xcd,0xef,0x01,0x23,0x45,0x67
         };
 
-    static short[]    bytebit =
+    private static final short[]    bytebit =
         {
             0200, 0100, 040, 020, 010, 04, 02, 01
         };
 
-    static int[]    bigbyte =
+    private static final int[]    bigbyte =
         {
             0x800000, 0x400000, 0x200000, 0x100000,
             0x80000,  0x40000,  0x20000,  0x10000,
@@ -122,7 +122,7 @@ public class DESEngine
      * Use the key schedule specified in the Standard (ANSI X3.92-1981).
      */
 
-    static byte[]    pc1 =
+    private static final byte[]    pc1 =
         {
             56, 48, 40, 32, 24, 16,  8,   0, 57, 49, 41, 33, 25, 17,
              9,  1, 58, 50, 42, 34, 26,  18, 10,  2, 59, 51, 43, 35,
@@ -130,13 +130,13 @@ public class DESEngine
             13,  5, 60, 52, 44, 36, 28,  20, 12,  4, 27, 19, 11,  3
         };
 
-    static byte[] totrot =
+    private static final byte[] totrot =
         {
             1, 2, 4, 6, 8, 10, 12, 14,
             15, 17, 19, 21, 23, 25, 27, 28
         };
 
-    static byte[] pc2 =
+    private static final byte[] pc2 =
         {
             13, 16, 10, 23,  0,  4,  2, 27, 14,  5, 20,  9,
             22, 18, 11,  3, 25,  7, 15,  6, 26, 19, 12,  1,
@@ -144,7 +144,7 @@ public class DESEngine
             43, 48, 38, 55, 33, 52, 45, 41, 49, 35, 28, 31
         };
 
-    static int[] SP1 = {
+    private static final int[] SP1 = {
         0x01010400, 0x00000000, 0x00010000, 0x01010404,
         0x01010004, 0x00010404, 0x00000004, 0x00010000,
         0x00000400, 0x01010400, 0x01010404, 0x00000400,
@@ -163,7 +163,7 @@ public class DESEngine
         0x00010004, 0x00010400, 0x00000000, 0x01010004
     };
 
-    static int[] SP2 = {
+    private static final int[] SP2 = {
         0x80108020, 0x80008000, 0x00008000, 0x00108020,
         0x00100000, 0x00000020, 0x80100020, 0x80008020,
         0x80000020, 0x80108020, 0x80108000, 0x80000000,
@@ -182,7 +182,7 @@ public class DESEngine
         0x80000000, 0x80100020, 0x80108020, 0x00108000
     };
 
-    static int[] SP3 = {
+    private static final int[] SP3 = {
         0x00000208, 0x08020200, 0x00000000, 0x08020008,
         0x08000200, 0x00000000, 0x00020208, 0x08000200,
         0x00020008, 0x08000008, 0x08000008, 0x00020000,
@@ -201,7 +201,7 @@ public class DESEngine
         0x00020208, 0x00000008, 0x08020008, 0x00020200
     };
 
-    static int[] SP4 = {
+    private static final int[] SP4 = {
         0x00802001, 0x00002081, 0x00002081, 0x00000080,
         0x00802080, 0x00800081, 0x00800001, 0x00002001,
         0x00000000, 0x00802000, 0x00802000, 0x00802081,
@@ -220,7 +220,7 @@ public class DESEngine
         0x00000080, 0x00800000, 0x00002000, 0x00802080
     };
 
-    static int[] SP5 = {
+    private static final int[] SP5 = {
         0x00000100, 0x02080100, 0x02080000, 0x42000100,
         0x00080000, 0x00000100, 0x40000000, 0x02080000,
         0x40080100, 0x00080000, 0x02000100, 0x40080100,
@@ -239,7 +239,7 @@ public class DESEngine
         0x00000000, 0x40080000, 0x02080100, 0x40000100
     };
 
-    static int[] SP6 = {
+    private static final int[] SP6 = {
         0x20000010, 0x20400000, 0x00004000, 0x20404010,
         0x20400000, 0x00000010, 0x20404010, 0x00400000,
         0x20004000, 0x00404010, 0x00400000, 0x20000010,
@@ -258,7 +258,7 @@ public class DESEngine
         0x20404000, 0x20000000, 0x00400010, 0x20004010
     };
 
-    static int[] SP7 = {
+    private static final int[] SP7 = {
         0x00200000, 0x04200002, 0x04000802, 0x00000000,
         0x00000800, 0x04000802, 0x00200802, 0x04200800,
         0x04200802, 0x00200000, 0x00000000, 0x04000002,
@@ -277,7 +277,7 @@ public class DESEngine
         0x04000002, 0x04000800, 0x00000800, 0x00200002
     };
 
-    static int[] SP8 = {
+    private static final int[] SP8 = {
         0x10001040, 0x00001000, 0x00040000, 0x10041040,
         0x10000000, 0x10001040, 0x00000040, 0x10000000,
         0x00040040, 0x10040000, 0x10041040, 0x00041000,

@@ -23,9 +23,9 @@ public class ElGamalEngine
     private int                     bitSize;
     private int                     shift;
 
-    private static BigInteger       ZERO = BigInteger.valueOf(0);
-    private static BigInteger       ONE = BigInteger.valueOf(1);
-    private static BigInteger       TWO = BigInteger.valueOf(2);
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger TWO = BigInteger.valueOf(2);
 
     /**
      * initialise the ElGamal engine.
