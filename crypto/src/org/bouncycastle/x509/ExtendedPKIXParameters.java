@@ -22,8 +22,7 @@ import java.util.Set;
 /**
  * This class extends the PKIXParameters with a validity model parameter.
  */
-public class ExtendedPKIXParameters
-    extends PKIXParameters
+public class ExtendedPKIXParameters extends PKIXParameters
 {
 
     private List stores;
@@ -62,7 +61,7 @@ public class ExtendedPKIXParameters
      * <code>PKIXParameters</code> object.
      *
      * @param pkixParams The given <code>PKIXParameters</code>
-     * @return an extended wrapper for the original object.
+     * @return an extended PKIX params object
      */
     public static ExtendedPKIXParameters getInstance(PKIXParameters pkixParams)
     {
@@ -148,10 +147,10 @@ public class ExtendedPKIXParameters
 
     private int validityModel = PKIX_VALIDITY_MODEL;
 
-    private boolean useDeltas = true;
+    private boolean useDeltas = false;
 
     /**
-     * Defaults to <code>true</code>.
+     * Defaults to <code>false</code>.
      *
      * @return Returns if delta CRLs should be used.
      */
@@ -161,9 +160,9 @@ public class ExtendedPKIXParameters
     }
 
     /**
-     * Sets if delta CRLs shoudl be used for checking the revocation status.
+     * Sets if delta CRLs should be used for checking the revocation status.
      *
-     * @param useDeltas <code>true</code> if delta CRLs shoudl be used.
+     * @param useDeltas <code>true</code> if delta CRLs should be used.
      */
     public void setUseDeltasEnabled(boolean useDeltas)
     {
@@ -190,49 +189,56 @@ public class ExtendedPKIXParameters
     public void addCertStore(CertStore store)
     {
         super.addCertStore(store);
-        if (store.getType().equals("Collection"))
+        if (store.getCertStoreParameters() instanceof CollectionCertStoreParameters)
         {
-
-            if (store.getCertStoreParameters() instanceof CollectionCertStoreParameters)
+            Collection coll = ((CollectionCertStoreParameters)store
+                .getCertStoreParameters()).getCollection();
+            X509CollectionStoreParameters params = new X509CollectionStoreParameters(
+                coll);
+            try
             {
-                Collection coll = ((CollectionCertStoreParameters)store
-                    .getCertStoreParameters()).getCollection();
-                X509CollectionStoreParameters params = new X509CollectionStoreParameters(
-                    coll);
-                try
-                {
-                    stores.add(X509Store.getInstance("CERTIFICATE/COLLECTION",
-                        params, "BC"));
-                    stores.add(X509Store.getInstance("CRL/COLLECTION", params,
-                        "BC"));
-                }
-                catch (Exception e)
-                {
-                    // cannot happen
-                    throw new RuntimeException(e.getMessage());
-                }
+                stores.add(X509Store.getInstance("CERTIFICATE/COLLECTION",
+                    params, "BC"));
+                stores.add(X509Store
+                    .getInstance("CRL/COLLECTION", params, "BC"));
             }
-            if (store.getCertStoreParameters() instanceof LDAPCertStoreParameters)
+            catch (Exception e)
+            {
+                // cannot happen
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+        if (store.getCertStoreParameters() instanceof LDAPCertStoreParameters
+            || store.getCertStoreParameters() instanceof X509LDAPCertStoreParameters)
+        {
+            X509LDAPCertStoreParameters params;
+            if (store.getCertStoreParameters() instanceof X509LDAPCertStoreParameters)
+            {
+                params = (X509LDAPCertStoreParameters)store
+                    .getCertStoreParameters();
+            }
+            else
             {
                 int port = ((LDAPCertStoreParameters)store
                     .getCertStoreParameters()).getPort();
                 String server = ((LDAPCertStoreParameters)store
                     .getCertStoreParameters()).getServerName();
-                X509LDAPCertStoreParameters params = new X509LDAPCertStoreParameters.Builder(
+                params = new X509LDAPCertStoreParameters.Builder(
                     "ldap://" + server + ":" + port, null).build();
-                try
-                {
-                    stores.add(X509Store.getInstance("CERTIFICATE/LDAP",
-                        params, "BC"));
-                    stores.add(X509Store.getInstance("CRL/LDAP", params, "BC"));
-                }
-                catch (Exception e)
-                {
-                    // cannot happen
-                    throw new RuntimeException(e.getMessage());
-                }
+            }
+            try
+            {
+                stores.add(X509Store.getInstance("CERTIFICATE/LDAP", params,
+                    "BC"));
+                stores.add(X509Store.getInstance("CRL/LDAP", params, "BC"));
+            }
+            catch (Exception e)
+            {
+                // cannot happen
+                throw new RuntimeException(e.getMessage());
             }
         }
+
     }
 
     /**
@@ -244,7 +250,6 @@ public class ExtendedPKIXParameters
      */
     public void setCertStores(List stores)
     {
-        super.setCertStores(stores);
         if (stores != null)
         {
             Iterator it = stores.iterator();
@@ -308,8 +313,8 @@ public class ExtendedPKIXParameters
     }
 
     /**
-     * Adds a additional Bouncy Castle {@link Store} to find CRLs, certificates, attribute
-     * certificates or cross certificates.
+     * Adds a additional Bouncy Castle {@link Store} to find CRLs, certificates,
+     * attribute certificates or cross certificates.
      * <p/>
      * You should not use this method. This method is used for adding additional
      * X.509 stores, which are used to add (remote) locations, e.g. LDAP, found
