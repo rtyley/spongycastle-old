@@ -339,23 +339,20 @@ class CMSSignedHelper
 
         while (e.hasMoreElements())
         {
-            while (e.hasMoreElements())
+            try
             {
-                try
-                {
-                    DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
 
-                    crls.add(cf.generateCRL(
-                        new ByteArrayInputStream(obj.getEncoded())));
-                }
-                catch (IOException ex)
-                {
-                    throw new CMSException("can't re-encode CRL!", ex);
-                }
-                catch (CRLException ex)
-                {
-                    throw new CMSException("can't re-encode CRL!", ex);
-                }
+                crls.add(cf.generateCRL(
+                    new ByteArrayInputStream(obj.getEncoded())));
+            }
+            catch (IOException ex)
+            {
+                throw new CMSException("can't re-encode CRL!", ex);
+            }
+            catch (CRLException ex)
+            {
+                throw new CMSException("can't re-encode CRL!", ex);
             }
         }
     }
