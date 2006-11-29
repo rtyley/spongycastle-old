@@ -1,11 +1,11 @@
 package org.bouncycastle.crypto.generators;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAValidationParameters;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * generate suitable parameters for DSA, in line with FIPS 186-2.
@@ -16,8 +16,8 @@ public class DSAParametersGenerator
     private int             certainty;
     private SecureRandom    random;
 
-    private static BigInteger ONE = BigInteger.valueOf(1);
-    private static BigInteger TWO = BigInteger.valueOf(2);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger TWO = BigInteger.valueOf(2);
 
     /**
      * initialise the key generator.

@@ -9,8 +9,8 @@ class DHKeyGeneratorHelper
 
     static final DHKeyGeneratorHelper INSTANCE = new DHKeyGeneratorHelper();
     
-    private static BigInteger ZERO = BigInteger.valueOf(0);
-    private static BigInteger TWO = BigInteger.valueOf(2);
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
+    private static final BigInteger TWO = BigInteger.valueOf(2);
     
     private DHKeyGeneratorHelper()
     {

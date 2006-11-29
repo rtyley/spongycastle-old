@@ -125,7 +125,7 @@ public class JCEECPublicKey
         {
             EllipticCurve ellipticCurve = EC5Util.convertCurve(spec.getCurve(), spec.getSeed());
 
-            ecSpec = EC5Util.convertSpec(ellipticCurve, spec);
+            this.ecSpec = EC5Util.convertSpec(ellipticCurve, spec);
         }
     }
 
@@ -136,8 +136,6 @@ public class JCEECPublicKey
         String                  algorithm,
         ECPublicKeyParameters   params)
     {
-        ECDomainParameters      dp = params.getParameters();
-
         this.algorithm = algorithm;
         this.q = params.getQ();
         this.ecSpec = null;
@@ -320,11 +318,41 @@ public class JCEECPublicKey
 
     public byte[] getEncoded()
     {
-        ASN1Encodable           params = null;
+        ASN1Encodable        params;
+        SubjectPublicKeyInfo info;
 
         if (algorithm.equals("ECGOST3410"))
         {
-            params = new DERNull();  // TODO - parameters not yet correct
+            if (gostParams != null)
+            {
+                params = gostParams;
+            }
+            else
+            {
+                params = new GOST3410PublicKeyAlgParameters(
+                                   ECGOST3410NamedCurves.getOID(((ECNamedCurveSpec)ecSpec).getName()),
+                                   CryptoProObjectIdentifiers.gostR3411_94_CryptoProParamSet);
+            }
+
+            BigInteger      bX = this.q.getX().toBigInteger();
+            BigInteger      bY = this.q.getY().toBigInteger();
+            byte[]          encKey = new byte[64];
+
+            byte[] val = bX.toByteArray();
+
+            for (int i = 0; i != 32; i++)
+            {
+                encKey[i] = val[val.length - 1 - i];
+            }
+
+            val = bY.toByteArray();
+
+            for (int i = 0; i != 32; i++)
+            {
+                encKey[32 + i] = val[val.length - 1 - i];
+            }
+
+            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params.getDERObject()), new DEROctetString(encKey));
         }
         else
         {
@@ -367,34 +395,7 @@ public class JCEECPublicKey
                         ecSpec.getCurve().getSeed());
                 params = new X962Parameters(ecP);
             }
-        }
 
-        SubjectPublicKeyInfo info;
-        
-        if (algorithm.equals("ECGOST3410"))
-        {
-            BigInteger      bX = this.q.getX().toBigInteger();
-            BigInteger      bY = this.q.getY().toBigInteger();
-            byte[]          encKey = new byte[64];
-            
-            byte[] val = bX.toByteArray();
-            
-            for (int i = 0; i != 32; i++)
-            {
-                encKey[i] = val[val.length - 1 - i];
-            }
-            
-            val = bY.toByteArray();
-            
-            for (int i = 0; i != 32; i++)
-            {
-                encKey[32 + i] = val[val.length - 1 - i];
-            }
-            
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, gostParams.getDERObject()), new DEROctetString(encKey));
-        }
-        else
-        {
             ECCurve curve = this.engineGetQ().getCurve();
 
             if (curve instanceof ECCurve.Fp)

@@ -1,10 +1,10 @@
 package org.bouncycastle.crypto.generators;
 
-import org.bouncycastle.crypto.params.GOST3410ValidationParameters;
 import org.bouncycastle.crypto.params.GOST3410Parameters;
+import org.bouncycastle.crypto.params.GOST3410ValidationParameters;
 
-import java.security.SecureRandom;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * generate suitable parameters for GOST3410.
@@ -15,8 +15,8 @@ public class GOST3410ParametersGenerator
     private int             typeproc;
     private SecureRandom    init_random;
 
-    private static BigInteger ONE = BigInteger.valueOf(1);
-    private static BigInteger TWO = BigInteger.valueOf(2);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger TWO = BigInteger.valueOf(2);
 
     /**
      * initialise the key generator.

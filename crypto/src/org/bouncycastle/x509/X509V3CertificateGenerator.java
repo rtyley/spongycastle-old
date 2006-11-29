@@ -145,6 +145,7 @@ public class X509V3CertificateGenerator
 
     public void setPublicKey(
         PublicKey       key)
+        throws IllegalArgumentException
     {
         try
         {

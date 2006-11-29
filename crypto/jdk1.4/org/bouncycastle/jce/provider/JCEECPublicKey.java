@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -248,49 +249,22 @@ public class JCEECPublicKey
 
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-        X962Parameters          params = null;
-
-        if (ecSpec instanceof ECNamedCurveParameterSpec)
-        {
-            DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveParameterSpec)ecSpec).getName());
-            
-            params = new X962Parameters(curveOid);
-        }
-        else if (ecSpec == null)
-        {
-            params = new X962Parameters(DERNull.INSTANCE);
-        }
-        else
-        {
-            ECParameterSpec         p = (ECParameterSpec)ecSpec;
-
-            ECCurve curve = p.getG().getCurve();
-            ECPoint generator;
-            if (curve instanceof ECCurve.Fp) 
-            {
-                generator = new ECPoint.Fp(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression);
-            } 
-            else if (curve instanceof ECCurve.F2m)
-            {
-                generator = new ECPoint.F2m(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression);
-            } 
-            else 
-            {
-                throw new UnsupportedOperationException("Subclass of ECPoint " + curve.getClass().toString() + "not supported");
-            }
-
-            X9ECParameters ecP = new X9ECParameters(
-                p.getCurve(), generator, p.getN(), p.getH(), p.getSeed());
-
-            params = new X962Parameters(ecP);
-        }
-
         SubjectPublicKeyInfo info;
         
         if (algorithm.equals("ECGOST3410"))
         {
+            DEREncodable          params = null;
+            if (gostParams != null)
+            {
+                params = gostParams;
+            }
+            else
+            {
+                params = new GOST3410PublicKeyAlgParameters(
+                                   ECGOST3410NamedCurves.getOID(((ECNamedCurveParameterSpec)ecSpec).getName()),
+                                   CryptoProObjectIdentifiers.gostR3411_94_CryptoProParamSet);
+            }
+
             ASN1OctetString    p = (ASN1OctetString)(new X9ECPoint(new org.bouncycastle.math.ec.ECPoint.Fp(this.getQ().getCurve(), this.getQ().getX(), this.getQ().getY(), false)).getDERObject());
             
             BigInteger      bX = this.q.getX().toBigInteger();
@@ -311,10 +285,46 @@ public class JCEECPublicKey
                 encKey[32 + i] = val[val.length - 1 - i];
             }
             
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, gostParams.getDERObject()), new DEROctetString(encKey));
+            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params.getDERObject()), new DEROctetString(encKey));
         }
         else
         {
+            X962Parameters          params = null;
+            if (ecSpec instanceof ECNamedCurveParameterSpec)
+            {
+                DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveParameterSpec)ecSpec).getName());
+
+                params = new X962Parameters(curveOid);
+            }
+            else if (ecSpec == null)
+            {
+                params = new X962Parameters(DERNull.INSTANCE);
+            }
+            else
+            {
+                ECParameterSpec         p = (ECParameterSpec)ecSpec;
+
+                ECCurve curve = p.getG().getCurve();
+                ECPoint generator;
+                if (curve instanceof ECCurve.Fp)
+                {
+                    generator = new ECPoint.Fp(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression);
+                }
+                else if (curve instanceof ECCurve.F2m)
+                {
+                    generator = new ECPoint.F2m(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression);
+                }
+                else
+                {
+                    throw new UnsupportedOperationException("Subclass of ECPoint " + curve.getClass().toString() + "not supported");
+                }
+
+                X9ECParameters ecP = new X9ECParameters(
+                    p.getCurve(), generator, p.getN(), p.getH(), p.getSeed());
+
+                params = new X962Parameters(ecP);
+            }
+
             ECCurve curve = this.engineGetQ().getCurve();
             ASN1OctetString p;
             if (curve instanceof ECCurve.Fp) 
@@ -333,17 +343,7 @@ public class JCEECPublicKey
             info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), p.getOctets());
         }
         
-        try
-        {
-            dOut.writeObject(info);
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Error encoding EC public key");
-        }
-
-        return bOut.toByteArray();
+        return info.getDEREncoded();
     }
 
     public ECParameterSpec getParams()

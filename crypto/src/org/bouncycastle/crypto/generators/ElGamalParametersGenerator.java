@@ -1,9 +1,9 @@
 package org.bouncycastle.crypto.generators;
 
+import org.bouncycastle.crypto.params.ElGamalParameters;
+
 import java.math.BigInteger;
 import java.security.SecureRandom;
-
-import org.bouncycastle.crypto.params.ElGamalParameters;
 
 public class ElGamalParametersGenerator
 {
@@ -11,8 +11,8 @@ public class ElGamalParametersGenerator
     private int             certainty;
     private SecureRandom    random;
 
-    private static BigInteger ONE = BigInteger.valueOf(1);
-    private static BigInteger TWO = BigInteger.valueOf(2);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger TWO = BigInteger.valueOf(2);
 
     public void init(
         int             size,
