@@ -107,6 +107,10 @@ public class SMIMESignedGenerator
     /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
+     *
+     * @param key key to use to generate the signature
+     * @param cert the public key certificate associated with the signer's key.
+     * @param digestOID object ID of the digest algorithm to use.
      */
     public void addSigner(
         PrivateKey      key,
@@ -118,7 +122,15 @@ public class SMIMESignedGenerator
     }
 
     /**
-     * add a signer with extra signed/unsigned attributes.
+     * Add a signer with extra signed/unsigned attributes or overrides
+     * for the standard attributes. For example this method can be used to
+     * explictly set default attributes such as the signing time.
+     *
+     * @param key key to use to generate the signature
+     * @param cert the public key certificate associated with the signer's key.
+     * @param digestOID object ID of the digest algorithm to use.
+     * @param signedAttr signed attributes to be included in the signature.
+     * @param unsignedAttr unsigned attribitues to be included.
      */
     public void addSigner(
         PrivateKey      key,
@@ -137,6 +149,8 @@ public class SMIMESignedGenerator
      * <p>
      * Note: this assumes the CertStore will support null in the get
      * methods.
+     * </p>
+     * @param certStore CertStore containing the certificates and CRLs to be added.
      */
     public void addCertificatesAndCRLs(
         CertStore               certStore)
