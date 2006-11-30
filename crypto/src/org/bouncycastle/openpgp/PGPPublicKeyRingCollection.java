@@ -1,15 +1,18 @@
 package org.bouncycastle.openpgp;
 
-import java.io.*;
+import org.bouncycastle.bcpg.BCPGOutputStream;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.bouncycastle.bcpg.BCPGOutputStream;
 
 /**
  * Often a PGP key ring file is made up of a succession of master/sub-key key rings.
@@ -34,16 +37,29 @@ public class PGPPublicKeyRingCollection
     {
         this(new ByteArrayInputStream(encoding));
     }
-    
+
+    /**
+     * Build a PGPPublicKeyRingCollection from the passed in input stream.
+     *
+     * @param in  input stream containing data
+     * @throws IOException if a problem parsinh the base stream occurs
+     * @throws PGPException if an object is encountered which isn't a PGPPublicKeyRing
+     */
     public PGPPublicKeyRingCollection(
         InputStream    in)
         throws IOException, PGPException
     {
         PGPObjectFactory    pgpFact = new PGPObjectFactory(in);
-        PGPPublicKeyRing    pgpPub = null;
-        
-        while ((pgpPub = (PGPPublicKeyRing)pgpFact.nextObject()) != null)
+        Object              obj;
+
+        while ((obj = pgpFact.nextObject()) != null)
         {
+            if (!(obj instanceof PGPPublicKeyRing))
+            {
+                throw new PGPException(obj.getClass().getName() + " found where PGPPublicKeyRing expected");
+            }
+            
+            PGPPublicKeyRing    pgpPub = (PGPPublicKeyRing)obj;
             Long    key = new Long(pgpPub.getPublicKey().getKeyID());
             
             pubRings.put(key, pgpPub);
