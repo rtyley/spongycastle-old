@@ -17,6 +17,13 @@ public class FileBackedMimeBodyPart
 
     private final File _file;
 
+    /**
+     * Create a MimeBodyPart backed by the data in file.
+     *
+     * @param file file containing the body part.
+     * @throws MessagingException an exception occurs parsing file.
+     * @throws IOException an exception occurs accessing file.
+     */
     public FileBackedMimeBodyPart(
         File file)
         throws MessagingException, IOException
@@ -26,6 +33,15 @@ public class FileBackedMimeBodyPart
         _file = file;
     }
 
+    /**
+     * Create a MimeBodyPart backed by file based on the headers and
+     * content data in content.
+     *
+     * @param content an inputstream containing the body part.
+     * @param file a handle to the backing file to use for storage.
+     * @throws MessagingException an exception occurs parsing the resulting body part in file.
+     * @throws IOException an exception occurs accessing file or content.
+     */
     public FileBackedMimeBodyPart(
         InputStream content,
         File file)
@@ -35,7 +51,7 @@ public class FileBackedMimeBodyPart
     }
 
     /**
-     * Create a MimeBodyPart backed by file , with the headers
+     * Create a MimeBodyPart backed by file, with the headers
      * given in headers and body content taken from the stream body.
      *
      * @param headers headers for the body part.
