@@ -13,8 +13,6 @@ import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +23,7 @@ import java.util.Enumeration;
 
 public class SMIMEUtil
 {
-    private static final int BUF_SIZE = 4096;
+    private static final int BUF_SIZE = 32760;
     
     static boolean isCanonicalisationRequired(
         MimeBodyPart   bodyPart,
@@ -64,7 +62,6 @@ public class SMIMEUtil
                 byte abyte0[] = getBytes(s);
                 super.out.write(abyte0);
                 super.out.write(newline);
-                return;
             }
             catch(Exception exception)
             {
@@ -78,7 +75,6 @@ public class SMIMEUtil
             try
             {
                 super.out.write(newline);
-                return;
             }
             catch(Exception exception)
             {
@@ -140,7 +136,7 @@ public class SMIMEUtil
                 for (int i = 0; i < mp.getCount(); i++)
                 {
                     lOut.writeln(boundary);
-                    outputBodyPart(out, (MimeBodyPart)mp.getBodyPart(i), defaultContentTransferEncoding);
+                    outputBodyPart(out, mp.getBodyPart(i), defaultContentTransferEncoding);
                     lOut.writeln();       // CRLF terminator
                 }
 
@@ -195,7 +191,7 @@ public class SMIMEUtil
 
             byte[]      buf = new byte[BUF_SIZE];
 
-            int len = 0;
+            int len;
             while ((len = in.read(buf, 0, buf.length)) > 0)
             {
                 outCRLF.write(buf, 0, len);
@@ -274,9 +270,7 @@ public class SMIMEUtil
     {
         try
         {
-            saveContentToFile(content, file);
-            
-            return new FileBackedMimeBodyPart(file);
+            return new FileBackedMimeBodyPart(content.getContentStream(), file);
         }
         catch (IOException e)
         {
@@ -286,26 +280,6 @@ public class SMIMEUtil
         {
             throw new SMIMEException("can't create part: " + e, e);
         }
-    }
-
-    private static void saveContentToFile(
-        CMSTypedStream    content,
-        File tmp) 
-        throws FileNotFoundException, IOException
-    {
-        OutputStream out = new FileOutputStream(tmp);
-        InputStream  in = content.getContentStream();
-        
-        byte[] buf = new byte[10000];
-        int    len;
-        
-        while ((len = in.read(buf, 0, buf.length)) > 0)
-        {
-            out.write(buf, 0, len);
-        }
-        
-        out.close();
-        in.close();
     }
     
     /**
