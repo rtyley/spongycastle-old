@@ -269,7 +269,7 @@ public class PGPPublicKeyRing
      * either added or replacing an existing one.
      * 
      * @param pubRing the public key ring to be modified
-     * @param pubKey the public key to be added.
+     * @param pubKey the public key to be inserted.
      * @return a new keyRing
      */
     public static PGPPublicKeyRing insertPublicKey(
@@ -303,7 +303,7 @@ public class PGPPublicKeyRing
      * removed from the key ring.
      * 
      * @param pubRing the public key ring to be modified
-     * @param pubKey the public key to be added.
+     * @param pubKey the public key to be removed.
      * @return a new keyRing, null if pubKey is not found.
      */
     public static PGPPublicKeyRing removePublicKey(
