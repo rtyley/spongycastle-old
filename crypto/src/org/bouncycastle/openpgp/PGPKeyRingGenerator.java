@@ -36,7 +36,7 @@ public class PGPKeyRingGenerator
      * @param id the id to be associated with the ring.
      * @param encAlgorithm the algorithm to be used to protect secret keys.
      * @param passPhrase the passPhrase to be used to protect secret keys.
-     * @param hashedPcks packets to be include in the certification hash.
+     * @param hashedPcks packets to be included in the certification hash.
      * @param unhashedPcks packets to be attached unhashed to the certification.
      * @param rand input secured random
      * @param provider the provider to use for encryption.
@@ -68,7 +68,7 @@ public class PGPKeyRingGenerator
      * @param encAlgorithm the algorithm to be used to protect secret keys.
      * @param passPhrase the passPhrase to be used to protect secret keys.
      * @param useSHA1 checksum the secret keys with SHA1 rather than the older 16 bit checksum.
-     * @param hashedPcks packets to be include in the certification hash.
+     * @param hashedPcks packets to be included in the certification hash.
      * @param unhashedPcks packets to be attached unhashed to the certification.
      * @param rand input secured random
      * @param provider the provider to use for encryption.
