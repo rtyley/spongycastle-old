@@ -113,7 +113,7 @@ public class BCPGInputStream
     }
 
     /**
-     * returns the nest packet tag in the stream.
+     * returns the next packet tag in the stream.
      * 
      * @return the tag number.
      * 
