@@ -65,7 +65,7 @@ public class PGPSignatureSubpacketVector
     
     /**
      * Return the number of seconds a signature is valid for after its creation date. A value of zero means
-     * the key never expires.
+     * the signature never expires.
      * 
      * @return seconds a signature is valid for.
      */
