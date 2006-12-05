@@ -4,7 +4,7 @@ import java.io.*;
 import java.math.BigInteger;
 
 /**
- * base class for an DSA Public Key.
+ * base class for a DSA Secret Key.
  */
 public class DSASecretBCPGKey 
     extends BCPGObject implements BCPGKey 
