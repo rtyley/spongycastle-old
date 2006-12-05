@@ -3,7 +3,7 @@ package org.bouncycastle.bcpg;
 import java.io.*;
 
 /**
- * basic packet for a mdoification detection code packet.
+ * basic packet for a modification detection code packet.
  */
 public class ModDetectionCodePacket 
     extends ContainedPacket
