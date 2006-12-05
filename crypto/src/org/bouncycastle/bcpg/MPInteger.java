@@ -4,7 +4,7 @@ import java.io.*;
 import java.math.BigInteger;
 
 /**
- * a mulitple precision integer
+ * a multiple precision integer
  */
 public class MPInteger 
     extends BCPGObject
