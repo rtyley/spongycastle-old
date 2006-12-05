@@ -300,7 +300,7 @@ public class PGPSecretKeyRingCollection
         
         if (!ringCollection.secretRings.containsKey(key))
         {
-            throw new IllegalArgumentException("Collection already contains a key with a keyID for the passed in ring.");
+            throw new IllegalArgumentException("Collection does not contain a key with a keyID for the passed in ring.");
         }
         
         Map     newSecretRings = new HashMap(ringCollection.secretRings);
