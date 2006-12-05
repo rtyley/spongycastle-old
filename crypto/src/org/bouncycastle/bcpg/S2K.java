@@ -112,7 +112,7 @@ public class S2K
     }
     
     /**
-     * the protection mode - only if GN_DUMMY_S2K
+     * the protection mode - only if GNU_DUMMY_S2K
      */
     public int getProtectionMode()
     {
