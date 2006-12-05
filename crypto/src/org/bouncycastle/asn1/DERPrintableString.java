@@ -70,11 +70,31 @@ public class DERPrintableString
     }
 
     /**
-     * basic constructor
+     * basic constructor - this does not validate the string
      */
     public DERPrintableString(
         String   string)
     {
+        this(string, false);
+    }
+
+    /**
+     * Constructor with optional validation.
+     *
+     * @param string the base string to wrap.
+     * @param validate whether or not to check the string.
+     * @throws IllegalArgumentException if validate is true and the string
+     * contains characters that should not be in a PrintableString.
+     */
+    public DERPrintableString(
+        String   string,
+        boolean  validate)
+    {
+        if (validate && !isPrintableString(string))
+        {
+            throw new IllegalArgumentException("string contains illegal characters");
+        }
+
         this.string = string;
     }
 
@@ -123,6 +143,62 @@ public class DERPrintableString
 
     public String toString()
     {
-      return string;
+        return string;
+    }
+
+    /**
+     * return true if the passed in String can be represented without
+     * loss as a PrintableString, false otherwise.
+     *
+     * @return true if in printable set, false otherwise.
+     */
+    public static boolean isPrintableString(
+        String  str)
+    {
+        for (int i = str.length() - 1; i >= 0; i--)
+        {
+            char    ch = str.charAt(i);
+
+            if (ch > 0x007f)
+            {
+                return false;
+            }
+
+            if ('a' <= ch && ch <= 'z')
+            {
+                continue;
+            }
+
+            if ('A' <= ch && ch <= 'Z')
+            {
+                continue;
+            }
+
+            if ('0' <= ch && ch <= '9')
+            {
+                continue;
+            }
+
+            switch (ch)
+            {
+            case ' ':
+            case '\'':
+            case '(':
+            case ')':
+            case '+':
+            case '-':
+            case '.':
+            case ':':
+            case '=':
+            case '?':
+            case '/':
+            case ',':
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

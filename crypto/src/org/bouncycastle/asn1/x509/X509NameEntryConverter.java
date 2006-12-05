@@ -1,11 +1,12 @@
 package org.bouncycastle.asn1.x509;
 
-import java.io.IOException;
-
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.util.Strings;
+
+import java.io.IOException;
 
 /**
  * It turns out that the number of standard ways the fields in a DN should be 
@@ -97,49 +98,7 @@ public abstract class X509NameEntryConverter
     protected boolean canBePrintable(
         String  str)
     {
-        for (int i = str.length() - 1; i >= 0; i--)
-        {
-            char    ch = str.charAt(i);
-            
-            if (str.charAt(i) > 0x007f)
-            {
-                return false;
-            }
-            
-            if ('a' <= ch && ch <= 'z')
-            {
-                continue;
-            }
-            
-            if ('A' <= ch && ch <= 'Z')
-            {
-                continue;
-            }
-            
-            if ('0' <= ch && ch <= '9')
-            {
-                continue;
-            }
-            
-            switch (ch)
-            {
-            case ' ':
-            case '\'':
-            case '(':
-            case ')':
-            case '+':
-            case '-':
-            case '.':
-            case ':':
-            case '=':
-            case '?':
-                continue;
-            }
-            
-            return false;
-        }
-
-        return true;
+        return DERPrintableString.isPrintableString(str);
     }
     
     /**
