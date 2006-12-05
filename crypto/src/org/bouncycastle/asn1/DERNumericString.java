@@ -70,11 +70,31 @@ public class DERNumericString
     }
 
     /**
-     * basic constructor - with string.
+     * basic constructor -  without validation..
      */
     public DERNumericString(
         String   string)
     {
+        this(string, false);
+    }
+
+    /**
+     * Constructor with optional validation.
+     *
+     * @param string the base string to wrap.
+     * @param validate whether or not to check the string.
+     * @throws IllegalArgumentException if validate is true and the string
+     * contains characters that should not be in a NumericString.
+     */
+    public DERNumericString(
+        String   string,
+        boolean  validate)
+    {
+        if (validate && !isNumericString(string))
+        {
+            throw new IllegalArgumentException("string contains illegal characters");
+        }
+
         this.string = string;
     }
 
@@ -119,5 +139,34 @@ public class DERNumericString
         DERNumericString  s = (DERNumericString)o;
 
         return this.getString().equals(s.getString());
+    }
+
+    /**
+     * Return true if the string can be represented as a NumericString ('0'..'9', ' ')
+     *
+     * @param str string to validate.
+     * @return true if numeric, fale otherwise.
+     */
+    public static boolean isNumericString(
+        String  str)
+    {
+        for (int i = str.length() - 1; i >= 0; i--)
+        {
+            char    ch = str.charAt(i);
+
+            if (ch > 0x007f)
+            {
+                return false;
+            }
+
+            if (('0' <= ch && ch <= '9') || ch == ' ')
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }
