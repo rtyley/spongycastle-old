@@ -140,37 +140,37 @@ public class PGPPublicKey
         String         provider) 
         throws PGPException, NoSuchProviderException
     {
-        PublicKeyPacket  pubPk;
+        BCPGKey bcpgKey;
 
         if (pubKey instanceof RSAPublicKey)
         {
             RSAPublicKey    rK = (RSAPublicKey)pubKey;
             
-            pubPk = new PublicKeyPacket(algorithm, time, new RSAPublicBCPGKey(rK.getModulus(), rK.getPublicExponent()));
+            bcpgKey = new RSAPublicBCPGKey(rK.getModulus(), rK.getPublicExponent());
         }
         else if (pubKey instanceof DSAPublicKey)
         {
             DSAPublicKey    dK = (DSAPublicKey)pubKey;
             DSAParams       dP = dK.getParams();
             
-            pubPk = new PublicKeyPacket(algorithm, time, new DSAPublicBCPGKey(dP.getP(), dP.getQ(), dP.getG(),  dK.getY()));
+            bcpgKey = new DSAPublicBCPGKey(dP.getP(), dP.getQ(), dP.getG(), dK.getY());
         }
         else if (pubKey instanceof ElGamalPublicKey)
         {
             ElGamalPublicKey        eK = (ElGamalPublicKey)pubKey;
             ElGamalParameterSpec    eS = eK.getParameters();
             
-            pubPk = new PublicKeyPacket(algorithm, time, new ElGamalPublicBCPGKey(eS.getP(), eS.getG(), eK.getY()));
+            bcpgKey = new ElGamalPublicBCPGKey(eS.getP(), eS.getG(), eK.getY());
         }
         else
         {
             throw new PGPException("unknown key class");
         }
-        
-        this.publicPk = pubPk;
+
+        this.publicPk = new PublicKeyPacket(algorithm, time, bcpgKey);
         this.ids = new ArrayList();
         this.idSigs = new ArrayList();
-        
+
         try
         {
             init();
