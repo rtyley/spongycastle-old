@@ -376,8 +376,8 @@ public class X509CRLObject
         }
         catch (IOException e)
         {
-            throw new CRLException(
-                    "Exception reading IssuingDistributionPoint" + e);
+            throw new ExtCRLException(
+                    "Exception reading IssuingDistributionPoint", e);
         }
 
         return isIndirect;
