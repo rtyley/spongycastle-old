@@ -23,8 +23,8 @@ public class X509ExtensionsGenerator
      */
     public void reset()
     {
-        extensions.clear();
-        extOrdering.clear();
+        extensions = new Hashtable();
+        extOrdering = new Vector();
     }
 
     /**
