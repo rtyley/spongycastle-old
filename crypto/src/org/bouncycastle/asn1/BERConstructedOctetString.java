@@ -8,6 +8,8 @@ import java.util.Vector;
 public class BERConstructedOctetString
     extends DEROctetString
 {
+    private static final int MAX_LENGTH = 1000;
+
     /**
      * convert a vector of octet strings into a single byte string
      */
@@ -137,28 +139,25 @@ public class BERConstructedOctetString
             }
             else
             {
-                int     start = 0;
-                int     end = 0;
-
-                while ((end + 1) < string.length)
+                for (int i = 0; i < string.length; i += MAX_LENGTH)
                 {
-                    if (string[end] == 0 && string[end + 1] == 0)
+                    int end;
+
+                    if (i + MAX_LENGTH > string.length)
                     {
-                        byte[]  nStr = new byte[end - start + 1];
-
-                        System.arraycopy(string, start, nStr, 0, nStr.length);
-
-                        out.writeObject(new DEROctetString(nStr));
-                        start = end + 1;
+                        end = string.length;
                     }
-                    end++;
+                    else
+                    {
+                        end = i + MAX_LENGTH;
+                    }
+
+                    byte[]  nStr = new byte[end - i];
+
+                    System.arraycopy(string, i, nStr, 0, nStr.length);
+
+                    out.writeObject(new DEROctetString(nStr));
                 }
-
-                byte[]  nStr = new byte[string.length - start];
-
-                System.arraycopy(string, start, nStr, 0, nStr.length);
-
-                out.writeObject(new DEROctetString(nStr));
             }
 
             out.write(0x00);

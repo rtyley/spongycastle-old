@@ -7,4 +7,8 @@ public class ASN1EncodableVector
     extends DEREncodableVector
 {
     // migrating from DEREncodeableVector
+    public ASN1EncodableVector()
+    {
+        
+    }
 }

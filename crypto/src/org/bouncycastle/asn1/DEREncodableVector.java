@@ -11,6 +11,14 @@ public class DEREncodableVector
 {
     private Vector  v = new Vector();
 
+    /**
+     * @deprecated use ASN1Encodable instead.
+     */
+    public DEREncodableVector()
+    {
+
+    }
+    
     public void add(
         DEREncodable   obj)
     {
