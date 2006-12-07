@@ -1,5 +1,40 @@
 package org.bouncycastle.x509;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DEREnumerated;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.x509.AccessDescription;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.CRLDistPoint;
+import org.bouncycastle.asn1.x509.DistributionPoint;
+import org.bouncycastle.asn1.x509.DistributionPointName;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.GeneralSubtree;
+import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
+import org.bouncycastle.asn1.x509.NameConstraints;
+import org.bouncycastle.asn1.x509.PolicyInformation;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
+import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
+import org.bouncycastle.asn1.x509.qualified.QCStatement;
+import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.i18n.filter.UntrustedInput;
+import org.bouncycastle.jce.provider.AnnotatedException;
+import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
+import org.bouncycastle.jce.provider.PKIXPolicyNode;
+
+import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -33,42 +68,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.x509.AccessDescription;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.CRLDistPoint;
-import org.bouncycastle.asn1.x509.DistributionPoint;
-import org.bouncycastle.asn1.x509.DistributionPointName;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.GeneralSubtree;
-import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
-import org.bouncycastle.asn1.x509.NameConstraints;
-import org.bouncycastle.asn1.x509.PolicyInformation;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
-import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
-import org.bouncycastle.asn1.x509.qualified.QCStatement;
-import org.bouncycastle.i18n.ErrorBundle;
-import org.bouncycastle.i18n.filter.UntrustedInput;
-import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
-import org.bouncycastle.jce.provider.PKIXPolicyNode;
-import org.bouncycastle.jce.provider.AnnotatedException;
 
 /**
  * PKIXCertPathReviewer<br>
@@ -1779,7 +1778,11 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             {
                 cert = (X509Certificate) certs.get(index);
                 
-                Set criticalExtensions = new HashSet(cert.getCriticalExtensionOIDs());
+                Set criticalExtensions = cert.getCriticalExtensionOIDs();
+                if (criticalExtensions == null || criticalExtensions.isEmpty())
+                {
+                	continue;
+                }
                 // remove already processed extensions
                 criticalExtensions.remove(KEY_USAGE);
                 criticalExtensions.remove(CERTIFICATE_POLICIES);
