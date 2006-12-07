@@ -60,8 +60,10 @@ public class X509CertStoreSelector
         cs.setBasicConstraints(selector.getBasicConstraints());
         cs.setCertificate(selector.getCertificate());
         cs.setCertificateValid(selector.getCertificateValid());
+        cs.setMatchAllSubjectAltNames(selector.getMatchAllSubjectAltNames());
         try
         {
+            cs.setPathToNames(selector.getPathToNames());
             cs.setExtendedKeyUsage(selector.getExtendedKeyUsage());
             cs.setNameConstraints(selector.getNameConstraints());
             cs.setPolicy(selector.getPolicy());
