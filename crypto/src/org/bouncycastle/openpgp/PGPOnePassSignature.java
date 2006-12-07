@@ -21,7 +21,9 @@ public class PGPOnePassSignature
     private int                    signatureType;
     
     private Signature              sig;
-    
+
+    private byte lastb;
+
     PGPOnePassSignature(
         BCPGInputStream    pIn)
         throws IOException, PGPException
@@ -58,7 +60,9 @@ public class PGPOnePassSignature
         PGPPublicKey    pubKey,
         String          provider)
         throws NoSuchProviderException, PGPException
-    {    
+    {
+        lastb = 0;
+
         try
         {
             sig.initVerify(pubKey.getKey(provider));
@@ -75,21 +79,32 @@ public class PGPOnePassSignature
     {
         if (signatureType == PGPSignature.CANONICAL_TEXT_DOCUMENT)
         {
-            if (b == '\n')
+            if (b == '\r')
             {
                 sig.update((byte)'\r');
                 sig.update((byte)'\n');
-                return;
             }
-            else if (b == '\r')
+            else if (b == '\n')
             {
-                return;
+                if (lastb != '\r')
+                {
+                    sig.update((byte)'\r');
+                    sig.update((byte)'\n');
+                }
             }
+            else
+            {
+                sig.update(b);
+            }
+
+            lastb = b;
         }
-        
-        sig.update(b);
+        else
+        {
+            sig.update(b);
+        }
     }
-    
+
     public void update(
         byte[]    bytes)
         throws SignatureException
