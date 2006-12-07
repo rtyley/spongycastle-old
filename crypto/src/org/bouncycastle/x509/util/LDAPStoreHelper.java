@@ -276,11 +276,11 @@ public class LDAPStoreHelper
         {
             subject = getSubjectAsString(xselector.getForwardSelector());
         }
-        if (xselector.getCertPairChecking() != null)
+        if (xselector.getCertPair() != null)
         {
-            if (xselector.getCertPairChecking().getForward() != null)
+            if (xselector.getCertPair().getForward() != null)
             {
-                subject = xselector.getCertPairChecking().getForward()
+                subject = xselector.getCertPair().getForward()
                     .getSubjectX500Principal().getName("RFC1779");
             }
         }

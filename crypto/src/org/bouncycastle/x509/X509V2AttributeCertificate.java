@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/*
+/**
  * An implementation of a version 2 X.509 Attribute Certificate.
  */
 public class X509V2AttributeCertificate
