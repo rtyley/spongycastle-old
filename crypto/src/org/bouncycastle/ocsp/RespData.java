@@ -1,13 +1,5 @@
 package org.bouncycastle.ocsp;
 
-import java.io.ByteArrayOutputStream;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -15,6 +7,13 @@ import org.bouncycastle.asn1.ocsp.ResponseData;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+
+import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 public class RespData
     implements java.security.cert.X509Extension
@@ -39,9 +38,14 @@ public class RespData
 
     public Date getProducedAt()
     {
-        SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmssz");
-
-        return dateF.parse(data.getProducedAt().getTime(), new ParsePosition(0));
+        try
+        {
+            return data.getProducedAt().getDate();
+        }
+        catch (ParseException e)
+        {
+            throw new IllegalStateException("ParseException:" + e.getMessage());
+        }
     }
 
     public SingleResp[] getResponses()

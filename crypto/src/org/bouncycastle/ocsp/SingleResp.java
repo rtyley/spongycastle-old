@@ -1,20 +1,19 @@
 package org.bouncycastle.ocsp;
 
-import java.io.ByteArrayOutputStream;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.ocsp.CertStatus;
 import org.bouncycastle.asn1.ocsp.RevokedInfo;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
+
+import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SingleResp
     implements java.security.cert.X509Extension
@@ -55,14 +54,21 @@ public class SingleResp
 
     public Date getThisUpdate()
     {
-        SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmssz");
-
-        return dateF.parse(resp.getThisUpdate().getTime(), new ParsePosition(0));
+        try
+        {
+            return resp.getThisUpdate().getDate();
+        }
+        catch (ParseException e)
+        {
+            throw new IllegalStateException("ParseException: " + e.getMessage());
+        }
     }
 
     /**
      * return the NextUpdate value - note: this is an optional field so may
      * be returned as null.
+     *
+     * @return nextUpdate, or null if not present.
      */
     public Date getNextUpdate()
     {
@@ -71,9 +77,14 @@ public class SingleResp
             return null;
         }
 
-        SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmssz");
-
-        return dateF.parse(resp.getNextUpdate().getTime(), new ParsePosition(0));
+        try
+        {
+            return resp.getNextUpdate().getDate();
+        }
+        catch (ParseException e)
+        {
+            throw new IllegalStateException("ParseException: " + e.getMessage());
+        }
     }
 
     public X509Extensions getSingleExtensions()
@@ -90,12 +101,8 @@ public class SingleResp
     public boolean hasUnsupportedCriticalExtension()
     {
         Set extns = getCriticalExtensionOIDs();
-        if (extns != null && !extns.isEmpty())
-        {
-            return true;
-        }
-
-        return false;
+        
+        return extns != null && !extns.isEmpty();
     }
 
     private Set getExtensionOIDs(boolean critical)
