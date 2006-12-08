@@ -43,7 +43,7 @@ public class X509DefaultEntryConverter
         {
             return new DERIA5String(value);
         }
-        else if (oid.equals(X509Name.DATE_OF_BIRTH))
+        else if (oid.equals(X509Name.DATE_OF_BIRTH))  // accept time string as well as # (for compatibility)
         {
             return new DERGeneralizedTime(value);
         }
