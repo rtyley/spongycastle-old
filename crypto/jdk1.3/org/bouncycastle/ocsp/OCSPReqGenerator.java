@@ -1,6 +1,5 @@
 package org.bouncycastle.ocsp;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -68,8 +67,7 @@ public class OCSPReqGenerator
             return null;
         }
 
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(encoding);
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
+        ASN1InputStream         aIn = new ASN1InputStream(encoding);
 
         return aIn.readObject();
     }

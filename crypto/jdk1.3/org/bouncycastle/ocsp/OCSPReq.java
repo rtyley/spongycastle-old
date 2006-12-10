@@ -64,7 +64,6 @@ public class OCSPReq
     implements java.security.cert.X509Extension
 {
     private OCSPRequest       req;
-    private X509Certificate[] chain = null;
 
     public OCSPReq(
         OCSPRequest req)
@@ -76,16 +75,23 @@ public class OCSPReq
         byte[]          req)
         throws IOException
     {
-        this(new ByteArrayInputStream(req));
+        this(new ASN1InputStream(req));
     }
 
     public OCSPReq(
         InputStream     in)
         throws IOException
     {
+        this(new ASN1InputStream(in));
+    }
+
+    private OCSPReq(
+        ASN1InputStream aIn) 
+        throws IOException
+    {
         try
         {
-            this.req = OCSPRequest.getInstance(new ASN1InputStream(in).readObject());
+            this.req = OCSPRequest.getInstance(aIn.readObject());
         }
         catch (IllegalArgumentException e)
         {

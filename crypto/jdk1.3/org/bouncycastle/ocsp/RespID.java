@@ -1,13 +1,19 @@
 package org.bouncycastle.ocsp;
 
-import java.io.*;
-import java.security.*;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.ocsp.ResponderID;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.jce.X509Principal;
 
-import org.bouncycastle.jce.*;
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.ocsp.*;
-import org.bouncycastle.asn1.x509.*;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.PublicKey;
 
+/**
+ * Carrier for a ResponderID.
+ */
 public class RespID
 {
     ResponderID id;
@@ -21,7 +27,14 @@ public class RespID
     public RespID(
         X509Principal   name)
     {
-        this.id = new ResponderID(name);
+        try
+        {
+            this.id = new ResponderID(new X509Principal(name.getEncoded()));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("can't decode name.");
+        }
     }
 
     public RespID(
@@ -32,17 +45,10 @@ public class RespID
         {
             MessageDigest       digest = MessageDigest.getInstance("SHA1");
 
-            ASN1InputStream aIn = new ASN1InputStream(
-                                    new ByteArrayInputStream(key.getEncoded()));
-            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(
-                                                            aIn.readObject());
+            ASN1InputStream aIn = new ASN1InputStream(key.getEncoded());
+            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(aIn.readObject());
 
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-            aOut.writeObject(info.getPublicKey());
-
-            digest.update(bOut.toByteArray());
+            digest.update(info.getPublicKeyData().getBytes());
 
             ASN1OctetString keyHash = new DEROctetString(digest.digest());
 
@@ -69,11 +75,11 @@ public class RespID
 
         RespID   obj = (RespID)o;
 
-        return id.getDERObject().equals(obj.id.getDERObject());
+        return id.equals(obj.id);
     }
 
     public int hashCode()
     {
-        return id.getDERObject().hashCode();
+        return id.hashCode();
     }
 }
