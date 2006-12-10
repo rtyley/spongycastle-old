@@ -175,18 +175,14 @@ public class DERGeneralizedTime
         }
         else if (time.indexOf('-') > 0 || time.indexOf('+') > 0)
         {
-            char ch = time.charAt(time.length() - 3);
-            if (ch == '+' || ch == '-')
-            {
-                d += "00";
-            }
+            d = this.getTime();
             if (hasFractionalSeconds())
             {
-                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSSZ");
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSSz");
             }
             else
             {
-                dateF = new SimpleDateFormat("yyyyMMddHHmmssZ");
+                dateF = new SimpleDateFormat("yyyyMMddHHmmssz");
             }
 
             dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
