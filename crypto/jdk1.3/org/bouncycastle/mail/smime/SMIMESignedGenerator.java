@@ -1,20 +1,15 @@
 package org.bouncycastle.mail.smime;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
-import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -24,12 +19,21 @@ import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
-import org.bouncycastle.mail.smime.util.CRLFOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -55,18 +59,27 @@ import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 public class SMIMESignedGenerator
     extends SMIMEGenerator
 {
-    static final String CERTIFICATE_MANAGEMENT_CONTENT = "application/pkcs7-mime; name=smime.p7c; smime-type=certs-only";
-    private static final String DETACHED_SIGNATURE_TYPE = "application/pkcs7-signature; name=smime.p7s; smime-type=signed-data";
-    private static final String ENCAPSULATED_SIGNED_CONTENT_TYPE = "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data";
-    public static final String  DIGEST_SHA1 = "1.3.14.3.2.26";
-    public static final String  DIGEST_MD5 = "1.2.840.113549.2.5";
+    public static final String  DIGEST_SHA1 = OIWObjectIdentifiers.idSHA1.getId();
+    public static final String  DIGEST_MD5 = PKCSObjectIdentifiers.md5.getId();
     public static final String  DIGEST_SHA224 = NISTObjectIdentifiers.id_sha224.getId();
     public static final String  DIGEST_SHA256 = NISTObjectIdentifiers.id_sha256.getId();
     public static final String  DIGEST_SHA384 = NISTObjectIdentifiers.id_sha384.getId();
     public static final String  DIGEST_SHA512 = NISTObjectIdentifiers.id_sha512.getId();
+    public static final String  DIGEST_GOST3411 = CryptoProObjectIdentifiers.gostR3411.getId();
+    public static final String  DIGEST_RIPEMD128 = TeleTrusTObjectIdentifiers.ripemd128.getId();
+    public static final String  DIGEST_RIPEMD160 = TeleTrusTObjectIdentifiers.ripemd160.getId();
+    public static final String  DIGEST_RIPEMD256 = TeleTrusTObjectIdentifiers.ripemd256.getId();
 
-    public static final String  ENCRYPTION_RSA = "1.2.840.113549.1.1.1";
-    public static final String  ENCRYPTION_DSA = "1.2.840.10040.4.3";
+    public static final String  ENCRYPTION_RSA = PKCSObjectIdentifiers.rsaEncryption.getId();
+    public static final String  ENCRYPTION_DSA = X9ObjectIdentifiers.id_dsa_with_sha1.getId();
+    public static final String  ENCRYPTION_ECDSA = X9ObjectIdentifiers.ecdsa_with_SHA1.getId();
+    public static final String  ENCRYPTION_RSA_PSS = PKCSObjectIdentifiers.id_RSASSA_PSS.getId();
+    public static final String  ENCRYPTION_GOST3410 = CryptoProObjectIdentifiers.gostR3410_94.getId();
+    public static final String  ENCRYPTION_ECGOST3410 = CryptoProObjectIdentifiers.gostR3410_2001.getId();
+
+    private static final String CERTIFICATE_MANAGEMENT_CONTENT = "application/pkcs7-mime; name=smime.p7c; smime-type=certs-only";
+    private static final String DETACHED_SIGNATURE_TYPE = "application/pkcs7-signature; name=smime.p7s; smime-type=signed-data";
+    private static final String ENCAPSULATED_SIGNED_CONTENT_TYPE = "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data";
 
     private final String        _defaultContentTransferEncoding;
 
@@ -108,6 +121,10 @@ public class SMIMESignedGenerator
     /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
+     *
+     * @param key key to use to generate the signature
+     * @param cert the public key certificate associated with the signer's key.
+     * @param digestOID object ID of the digest algorithm to use.
      */
     public void addSigner(
         PrivateKey      key,
@@ -119,7 +136,15 @@ public class SMIMESignedGenerator
     }
 
     /**
-     * add a signer with extra signed/unsigned attributes.
+     * Add a signer with extra signed/unsigned attributes or overrides
+     * for the standard attributes. For example this method can be used to
+     * explictly set default attributes such as the signing time.
+     *
+     * @param key key to use to generate the signature
+     * @param cert the public key certificate associated with the signer's key.
+     * @param digestOID object ID of the digest algorithm to use.
+     * @param signedAttr signed attributes to be included in the signature.
+     * @param unsignedAttr unsigned attribitues to be included.
      */
     public void addSigner(
         PrivateKey      key,
@@ -138,6 +163,8 @@ public class SMIMESignedGenerator
      * <p>
      * Note: this assumes the CertStore will support null in the get
      * methods.
+     * </p>
+     * @param certStore CertStore containing the certificates and CRLs to be added.
      */
     public void addCertificatesAndCRLs(
         CertStore               certStore)
@@ -185,6 +212,10 @@ public class SMIMESignedGenerator
             else if (signer.getDigestOID().equals(DIGEST_SHA512))
             {
                 micAlgs.add("sha512");
+            }
+            else if (signer.getDigestOID().equals(DIGEST_GOST3411))
+            {
+                micAlgs.add("gostr3411-94");
             }
             else
             {
@@ -482,7 +513,7 @@ public class SMIMESignedGenerator
 
             return gen;
         }
-        
+
         private void writeBodyPart(
             OutputStream out,
             MimeBodyPart bodyPart)
@@ -510,7 +541,7 @@ public class SMIMESignedGenerator
                     writeBodyPart(out, (MimeBodyPart)mp.getBodyPart(i));
                     lOut.writeln();       // CRLF terminator
                 }
-
+                
                 lOut.writeln(boundary + "--");
             }
             else
@@ -530,9 +561,9 @@ public class SMIMESignedGenerator
             try
             {
                 CMSSignedDataStreamGenerator gen = getGenerator();
-
+                
                 OutputStream signingStream = gen.open(out, _encapsulate);
-
+                
                 if (_content != null)
                 {
                     if (!_encapsulate)
@@ -544,7 +575,7 @@ public class SMIMESignedGenerator
                         _content.writeTo(signingStream);
                     }
                 }
-
+                
                 signingStream.close();
             }
             catch (MessagingException e)

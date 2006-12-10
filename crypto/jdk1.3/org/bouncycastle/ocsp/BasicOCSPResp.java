@@ -22,8 +22,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -84,9 +83,14 @@ public class BasicOCSPResp
 
     public Date getProducedAt()
     {
-        SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmssz");
-
-        return dateF.parse(data.getProducedAt().getTime(), new ParsePosition(0));
+        try
+        {
+            return data.getProducedAt().getDate();
+        }
+        catch (ParseException e)
+        {
+            throw new IllegalStateException("ParseException:" + e.getMessage());
+        }
     }
 
     public SingleResp[] getResponses()
