@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 /**
@@ -167,14 +166,7 @@ public class TlsProtocolHandler
          * the constructor with a SecureRandom.
          */
         ThreadedSeedGenerator tsg = new ThreadedSeedGenerator();
-        try
-        {
-            this.random = SecureRandom.getInstance("SHA1PRNG");
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new TlsRuntimeException("cannot create random", e);
-        }
+        this.random = new SecureRandom();
         /*
          * Hopefully, 20 bytes in fast mode are good enough.
          */
@@ -472,7 +464,7 @@ public class TlsProtocolHandler
                                             pms[1] = 1;
                                             for (int i = 2; i < 48; i++)
                                             {
-                                                pms[i] = (byte)random.nextInt(256);
+                                                pms[i] = (byte)random.nextInt();
                                             }
 
                                             /*
@@ -857,7 +849,7 @@ public class TlsProtocolHandler
 
         for (int i = 4; i < clientRandom.length; i++)
         {
-            this.clientRandom[i] = (byte)random.nextInt(256);
+            this.clientRandom[i] = (byte)random.nextInt();
         }
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
