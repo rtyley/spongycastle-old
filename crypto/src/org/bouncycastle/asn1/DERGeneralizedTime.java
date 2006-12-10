@@ -151,10 +151,48 @@ public class DERGeneralizedTime
             }
         }            
 
-        return time;
+        return time + calculateGMTOffset();
     }
 
-    public Date getDate() 
+    private String calculateGMTOffset()
+    {
+        String sign = "+";
+        TimeZone timeZone = TimeZone.getDefault();
+        int offset = timeZone.getRawOffset();
+        if (offset < 0)
+        {
+            sign = "-";
+            offset = -offset;
+        }
+        int hours = offset / (60 * 60 * 1000);
+        int minutes = (offset - (hours * 60 * 60 * 1000)) / (60 * 1000);
+
+        try
+        {
+            if (timeZone.useDaylightTime() && timeZone.inDaylightTime(this.getDate()))
+            {
+                hours += (sign == "+") ? 1 : -1;
+            }
+        }
+        catch (ParseException e)
+        {
+            // we'll do our best and ignore daylight savings
+        }
+
+        return "GMT" + sign + convert(hours) + ":" + convert(minutes);
+    }
+
+    private String convert(int time)
+    {
+        if (time < 10)
+        {
+            return "0" + time;
+        }
+
+        return Integer.toString(time);
+    }
+
+    public Date getDate()
         throws ParseException
     {
         SimpleDateFormat dateF;

@@ -1,18 +1,18 @@
 package org.bouncycastle.asn1.test;
 
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 
 /**
  * X.690 test example
  */
 public class GeneralizedTimeTest
-    implements Test
+    extends SimpleTest
 {
     String[] input =
         {
@@ -91,47 +91,73 @@ public class GeneralizedTimeTest
         return "GeneralizedTime";
     }
     
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
-        try
+        SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+
+        dateF.setTimeZone(new SimpleTimeZone(0,"Z"));
+
+        for (int i = 0; i != input.length; i++)
         {
-            SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+            DERGeneralizedTime    t = new DERGeneralizedTime(input[i]);
 
-            dateF.setTimeZone(new SimpleTimeZone(0,"Z"));
-
-            for (int i = 0; i != input.length; i++)
+            if (output[i].indexOf('G') > 0)   // don't check local time the same way
             {
-                DERGeneralizedTime    t = new DERGeneralizedTime(input[i]);
-
                 if (!t.getTime().equals(output[i]))
                 {
-                    return new SimpleTestResult(false, getName() + ": failed conversion test");
+                    fail("failed conversion test");
                 }
-
-                if (output[i].indexOf('G') > 0)   // don't try checking local time
+                if (!dateF.format(t.getDate()).equals(zOutput[i]))
                 {
-                    if (!dateF.format(t.getDate()).equals(zOutput[i]))
-                    {
-                        return new SimpleTestResult(false, getName() + ": failed date conversion test");
-                    }
+                    fail("failed date conversion test");
+                }
+            }
+            else
+            {
+                String offset = calculateGMTOffset(t.getDate());
+                if (!t.getTime().equals(output[i] + offset))
+                {
+                    fail("failed conversion test");
                 }
             }
         }
-        catch (Exception e)
+    }
+
+    private String calculateGMTOffset(Date date)
+    {
+        String sign = "+";
+        TimeZone timeZone = TimeZone.getDefault();
+        int offset = timeZone.getRawOffset();
+        if (offset < 0)
         {
-            return new SimpleTestResult(false, getName() + ": Exception - " + e.toString());
+            sign = "-";
+            offset = -offset;
+        }
+        int hours = offset / (60 * 60 * 1000);
+        int minutes = (offset - (hours * 60 * 60 * 1000)) / (60 * 1000);
+
+        if (timeZone.useDaylightTime() && timeZone.inDaylightTime(date))
+        {
+            hours += (sign == "+") ? 1 : -1;
         }
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+        return "GMT" + sign + convert(hours) + ":" + convert(minutes);
+    }
+
+    private String convert(int time)
+    {
+        if (time < 10)
+        {
+            return "0" + time;
+        }
+
+        return Integer.toString(time);
     }
 
     public static void main(
         String[]    args)
     {
-        Test    test = new GeneralizedTimeTest();
-
-        TestResult  result = test.perform();
-
-        System.out.println(result);
+        runTest(new GeneralizedTimeTest());
     }
 }
