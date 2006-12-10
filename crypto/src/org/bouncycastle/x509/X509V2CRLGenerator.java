@@ -33,19 +33,15 @@ import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.SimpleTimeZone;
 
 /**
  * class to produce an X.509 Version 2 CRL.
  */
 public class X509V2CRLGenerator
 {
-    private SimpleDateFormat            dateF = new SimpleDateFormat("yyMMddHHmmss");
-    private SimpleTimeZone              tz = new SimpleTimeZone(0, "Z");
     private V2TBSCertListGenerator      tbsGen;
     private DERObjectIdentifier         sigOID;
     private AlgorithmIdentifier         sigAlgId;
@@ -54,8 +50,6 @@ public class X509V2CRLGenerator
 
     public X509V2CRLGenerator()
     {
-        dateF.setTimeZone(tz);
-
         tbsGen = new V2TBSCertListGenerator();
         extGenerator = new X509ExtensionsGenerator();
     }
