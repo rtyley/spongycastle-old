@@ -35,6 +35,7 @@ import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
@@ -72,12 +73,12 @@ public class SMIMEMiscTest
             msg      = SMIMETestUtil.makeMimeBodyPart("Hello world!\n");
             
             signDN   = "O=Bouncy Castle, C=AU";
-            signKP   = SMIMETestUtil.makeKeyPair();  
-            signCert = SMIMETestUtil.makeCertificate(signKP, signDN, signKP, signDN);
+            signKP   = CMSTestUtil.makeKeyPair();
+            signCert = CMSTestUtil.makeCertificate(signKP, signDN, signKP, signDN);
     
             origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
-            origKP   = SMIMETestUtil.makeKeyPair();
-            origCert = SMIMETestUtil.makeCertificate(origKP, origDN, signKP, signDN);
+            origKP   = CMSTestUtil.makeKeyPair();
+            origCert = CMSTestUtil.makeCertificate(origKP, origDN, signKP, signDN);
         }
         catch (Exception e)
         {
