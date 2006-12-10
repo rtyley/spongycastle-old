@@ -1,5 +1,14 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.jce.ECPointUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
+
+import javax.crypto.KeyAgreement;
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHParameterSpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -20,16 +29,6 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.KeyAgreement;
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHParameterSpec;
-
-import org.bouncycastle.jce.ECPointUtil;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class DHTest
     extends SimpleTest
@@ -271,196 +270,96 @@ public class DHTest
         testGP(size, 0, dhP.getG(), dhP.getP());
     }
 
-    private void testECDH()
+    private void testECDH(String algorithm)
+        throws Exception
     {
-        try
+        KeyPairGenerator    g = KeyPairGenerator.getInstance(algorithm, "BC");
+
+        EllipticCurve curve = new EllipticCurve(
+                new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
+                new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+                new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+
+        ECParameterSpec ecSpec = new ECParameterSpec(
+                curve,
+                ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+                new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
+                1); // h
+
+        g.initialize(ecSpec, new SecureRandom());
+
+        //
+        // a side
+        //
+        KeyPair aKeyPair = g.generateKeyPair();
+
+        KeyAgreement aKeyAgree = KeyAgreement.getInstance(algorithm, "BC");
+
+        aKeyAgree.init(aKeyPair.getPrivate());
+
+        //
+        // b side
+        //
+        KeyPair bKeyPair = g.generateKeyPair();
+
+        KeyAgreement bKeyAgree = KeyAgreement.getInstance(algorithm, "BC");
+
+        bKeyAgree.init(bKeyPair.getPrivate());
+
+        //
+        // agreement
+        //
+        aKeyAgree.doPhase(bKeyPair.getPublic(), true);
+        bKeyAgree.doPhase(aKeyPair.getPublic(), true);
+
+        BigInteger  k1 = new BigInteger(aKeyAgree.generateSecret());
+        BigInteger  k2 = new BigInteger(bKeyAgree.generateSecret());
+
+        if (!k1.equals(k2))
         {
-            KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDH", "BC");
-
-            EllipticCurve curve = new EllipticCurve(
-                    new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
-                    new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
-                    new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
-
-            ECParameterSpec ecSpec = new ECParameterSpec(
-                    curve,
-                    ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
-                    new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
-                    1); // h
-            
-            g.initialize(ecSpec, new SecureRandom());
-
-            //
-            // a side
-            //
-            KeyPair aKeyPair = g.generateKeyPair();
-    
-            KeyAgreement aKeyAgree = KeyAgreement.getInstance("ECDH", "BC");
-
-            aKeyAgree.init(aKeyPair.getPrivate());
-
-            //
-            // b side
-            //
-            KeyPair bKeyPair = g.generateKeyPair();
-
-            KeyAgreement bKeyAgree = KeyAgreement.getInstance("ECDH", "BC");
-
-            bKeyAgree.init(bKeyPair.getPrivate());
-
-            //
-            // agreement
-            //
-            aKeyAgree.doPhase(bKeyPair.getPublic(), true);
-            bKeyAgree.doPhase(aKeyPair.getPublic(), true);
-
-            BigInteger  k1 = new BigInteger(aKeyAgree.generateSecret());
-            BigInteger  k2 = new BigInteger(bKeyAgree.generateSecret());
-
-            if (!k1.equals(k2))
-            {
-                fail("ECDH 2-way test failed");
-            }
-
-            //
-            // public key encoding test
-            //
-            byte[]              pubEnc = aKeyPair.getPublic().getEncoded();
-            KeyFactory          keyFac = KeyFactory.getInstance("ECDH", "BC");
-            X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
-            ECPublicKey         pubKey = (ECPublicKey)keyFac.generatePublic(pubX509);
-
-            if (!pubKey.getW().equals(((ECPublicKey)aKeyPair.getPublic()).getW()))
-            {
-                System.out.println(" expected " + pubKey.getW().getAffineX() + " got " + ((ECPublicKey)aKeyPair.getPublic()).getW().getAffineX());
-                System.out.println(" expected " + pubKey.getW().getAffineY() + " got " + ((ECPublicKey)aKeyPair.getPublic()).getW().getAffineY());
-                fail("ECDH public key encoding (W test) failed");
-            }
-
-            if (!pubKey.getParams().getGenerator().equals(((ECPublicKey)aKeyPair.getPublic()).getParams().getGenerator()))
-            {
-                fail("ECDH public key encoding (G test) failed");
-            }
-
-            //
-            // private key encoding test
-            //
-            byte[]              privEnc = aKeyPair.getPrivate().getEncoded();
-            PKCS8EncodedKeySpec privPKCS8 = new PKCS8EncodedKeySpec(privEnc);
-            ECPrivateKey        privKey = (ECPrivateKey)keyFac.generatePrivate(privPKCS8);
-
-            if (!privKey.getS().equals(((ECPrivateKey)aKeyPair.getPrivate()).getS()))
-            {
-                fail("ECDH private key encoding (S test) failed");
-            }
-
-            if (!privKey.getParams().getGenerator().equals(((ECPrivateKey)aKeyPair.getPrivate()).getParams().getGenerator()))
-            {
-                fail("ECDH private key encoding (G test) failed");
-            }
+            fail(algorithm + " 2-way test failed");
         }
-        catch (Exception e)
+
+        //
+        // public key encoding test
+        //
+        byte[]              pubEnc = aKeyPair.getPublic().getEncoded();
+        KeyFactory          keyFac = KeyFactory.getInstance(algorithm, "BC");
+        X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
+        ECPublicKey         pubKey = (ECPublicKey)keyFac.generatePublic(pubX509);
+
+        if (!pubKey.getW().equals(((ECPublicKey)aKeyPair.getPublic()).getW()))
         {
-            fail("ECDH 2-way test failed - exception: " + e);
+            System.out.println(" expected " + pubKey.getW().getAffineX() + " got " + ((ECPublicKey)aKeyPair.getPublic()).getW().getAffineX());
+            System.out.println(" expected " + pubKey.getW().getAffineY() + " got " + ((ECPublicKey)aKeyPair.getPublic()).getW().getAffineY());
+            fail(algorithm + " public key encoding (W test) failed");
         }
-    }
 
-    private void testECDHC()
-    {
-        try
+        if (!pubKey.getParams().getGenerator().equals(((ECPublicKey)aKeyPair.getPublic()).getParams().getGenerator()))
         {
-            KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDHC", "BC");
-
-            EllipticCurve curve = new EllipticCurve(
-                    new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
-                    new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
-                    new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
-
-            ECParameterSpec ecSpec = new ECParameterSpec(
-                    curve,
-                    ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
-                    new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
-                    1); // h
-
-            g.initialize(ecSpec, new SecureRandom());
-
-            //
-            // a side
-            //
-            KeyPair aKeyPair = g.generateKeyPair();
-    
-            KeyAgreement aKeyAgree = KeyAgreement.getInstance("ECDHC", "BC");
-
-            aKeyAgree.init(aKeyPair.getPrivate());
-
-            //
-            // b side
-            //
-            KeyPair bKeyPair = g.generateKeyPair();
-
-            KeyAgreement bKeyAgree = KeyAgreement.getInstance("ECDHC", "BC");
-
-            bKeyAgree.init(bKeyPair.getPrivate());
-
-            //
-            // agreement
-            //
-            aKeyAgree.doPhase(bKeyPair.getPublic(), true);
-            bKeyAgree.doPhase(aKeyPair.getPublic(), true);
-
-            BigInteger  k1 = new BigInteger(aKeyAgree.generateSecret());
-            BigInteger  k2 = new BigInteger(bKeyAgree.generateSecret());
-
-            if (!k1.equals(k2))
-            {
-                fail("ECDHC 2-way test failed");
-            }
-
-            //
-            // public key encoding test
-            //
-            byte[]              pubEnc = aKeyPair.getPublic().getEncoded();
-            KeyFactory          keyFac = KeyFactory.getInstance("ECDHC", "BC");
-            X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
-            ECPublicKey         pubKey = (ECPublicKey)keyFac.generatePublic(pubX509);
-
-            if (!pubKey.getW().equals(((ECPublicKey)aKeyPair.getPublic()).getW()))
-            {
-                fail("ECDHC public key encoding (W test) failed");
-            }
-
-            if (!pubKey.getParams().getOrder().equals(((ECPublicKey)aKeyPair.getPublic()).getParams().getOrder()))
-            {
-                fail("ECDHC public key encoding (Order test) failed");
-            }
-
-            //
-            // private key encoding test
-            //
-            byte[]              privEnc = aKeyPair.getPrivate().getEncoded();
-            PKCS8EncodedKeySpec privPKCS8 = new PKCS8EncodedKeySpec(privEnc);
-            ECPrivateKey        privKey = (ECPrivateKey)keyFac.generatePrivate(privPKCS8);
-
-            if (!privKey.getS().equals(((ECPrivateKey)aKeyPair.getPrivate()).getS()))
-            {
-                fail("ECDHC private key encoding (S test) failed");
-            }
-
-            if (!privKey.getParams().getOrder().equals(((ECPrivateKey)aKeyPair.getPrivate()).getParams().getOrder()))
-            {
-                fail("ECDHC private key encoding (Order test) failed");
-            }
+            fail(algorithm + " public key encoding (G test) failed");
         }
-        catch (Exception e)
+
+        //
+        // private key encoding test
+        //
+        byte[]              privEnc = aKeyPair.getPrivate().getEncoded();
+        PKCS8EncodedKeySpec privPKCS8 = new PKCS8EncodedKeySpec(privEnc);
+        ECPrivateKey        privKey = (ECPrivateKey)keyFac.generatePrivate(privPKCS8);
+
+        if (!privKey.getS().equals(((ECPrivateKey)aKeyPair.getPrivate()).getS()))
         {
-                fail("ECDHC 2-way test failed - exception: " + e);
+            fail(algorithm + " private key encoding (S test) failed");
+        }
+
+        if (!privKey.getParams().getGenerator().equals(((ECPrivateKey)aKeyPair.getPrivate()).getParams().getGenerator()))
+        {
+            fail(algorithm + " private key encoding (G test) failed");
         }
     }
 
     private void testExceptions()
     {
-        DHParameterSpec        dhParams = new DHParameterSpec(p512, g512);
-
         try
         {
             KeyAgreement aKeyAgree = KeyAgreement.getInstance("DH", "BC");
@@ -487,8 +386,8 @@ public class DHTest
         testGP(768, 128, g768, p768);
         testGP(1024, 256, g1024, p1024);
         testRandom(256);
-        testECDH();
-        testECDHC();
+        testECDH("ECDH");
+        testECDH("ECDHC");
         testExceptions();
     }
 

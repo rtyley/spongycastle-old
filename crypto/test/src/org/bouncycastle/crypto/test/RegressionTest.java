@@ -78,7 +78,7 @@ public class RegressionTest
         new MGF1GeneratorTest(),
         new ShortenedDigestTest(),
         new EqualsHashCodeTest(),
-        new NaccacheSternTest(),
+        //new NaccacheSternTest(),
         new NullTest()
     };
 
