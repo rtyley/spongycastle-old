@@ -433,6 +433,7 @@ public class X509V2CRLGenerator
         ExtCRLException(String message, Throwable cause)
         {
             super(message);
+            this.cause = cause;
         }
 
         public Throwable getCause()
