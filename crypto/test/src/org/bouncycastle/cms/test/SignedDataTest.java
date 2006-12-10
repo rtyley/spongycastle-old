@@ -17,7 +17,6 @@ import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509Store;
-import org.bouncycastle.x509.X509StreamParser;
 
 import java.io.ByteArrayInputStream;
 import java.security.KeyPair;
@@ -508,7 +507,7 @@ public class SignedDataTest
         encapsulatedTest(_signGostKP, _signGostCert, CMSSignedDataGenerator.DIGEST_GOST3411);
     }
 
-    public void testGOST3411WithECGOST3410Encapsulated()
+    public void testGOST3411WithEGOST3410Encapsulated()
         throws Exception
     {
         encapsulatedTest(_signEcGostKP, _signEcGostCert, CMSSignedDataGenerator.DIGEST_GOST3411);
@@ -703,11 +702,7 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        X509StreamParser parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
-
-        parser.init(CMSTestUtil.attrCert);
-
-        X509AttributeCertificate attrCert = (X509AttributeCertificate)parser.read();
+        X509AttributeCertificate attrCert = CMSTestUtil.getAttributeCertificate();
 
         X509Store store = X509Store.getInstance("AttributeCertificate/Collection",
                                     new X509CollectionStoreParameters(Collections.singleton(attrCert)), "BC");

@@ -15,6 +15,8 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509StreamParser;
 import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
@@ -57,7 +59,7 @@ public class CMSTestUtil
     
     public static final boolean DEBUG = true;
 
-    static byte[]  attrCert = Base64.decode(
+    private static byte[]  attrCert = Base64.decode(
                 "MIIHQDCCBqkCAQEwgZChgY2kgYowgYcxHDAaBgkqhkiG9w0BCQEWDW1sb3JjaEB2"
               + "dC5lZHUxHjAcBgNVBAMTFU1hcmt1cyBMb3JjaCAobWxvcmNoKTEbMBkGA1UECxMS"
               + "VmlyZ2luaWEgVGVjaCBVc2VyMRAwDgYDVQQLEwdDbGFzcyAyMQswCQYDVQQKEwJ2"
@@ -176,7 +178,17 @@ public class CMSTestUtil
         
         return buf.toString();
     }
-    
+
+    public static X509AttributeCertificate getAttributeCertificate()
+        throws Exception
+    {
+        X509StreamParser parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+
+        parser.init(CMSTestUtil.attrCert);
+
+        return (X509AttributeCertificate)parser.read();
+    }
+
     public static KeyPair makeKeyPair()
     {
         return kpg.generateKeyPair();
@@ -249,60 +261,64 @@ public class CMSTestUtil
     }
     
     
-    public static X509Certificate makeCertificate(KeyPair _subKP, String _subDN, KeyPair _issKP, String _issDN, boolean _ca) 
+    public static X509Certificate makeCertificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN, boolean _ca)
         throws GeneralSecurityException, IOException
     {
 
-        PublicKey  _subPub  = _subKP.getPublic();
-        PrivateKey _issPriv = _issKP.getPrivate();
-        PublicKey  _issPub  = _issKP.getPublic();
+        PublicKey  subPub  = subKP.getPublic();
+        PrivateKey issPriv = issKP.getPrivate();
+        PublicKey  issPub  = issKP.getPublic();
         
-        X509V3CertificateGenerator _v3CertGen = new X509V3CertificateGenerator();
+        X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator();
         
-        _v3CertGen.reset();
-        _v3CertGen.setSerialNumber(allocateSerialNumber());
-        _v3CertGen.setIssuerDN(new X509Name(_issDN));
-        _v3CertGen.setNotBefore(new Date(System.currentTimeMillis()));
-        _v3CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)));
-        _v3CertGen.setSubjectDN(new X509Name(_subDN));
-        _v3CertGen.setPublicKey(_subPub);
+        v3CertGen.reset();
+        v3CertGen.setSerialNumber(allocateSerialNumber());
+        v3CertGen.setIssuerDN(new X509Name(_issDN));
+        v3CertGen.setNotBefore(new Date(System.currentTimeMillis()));
+        v3CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)));
+        v3CertGen.setSubjectDN(new X509Name(_subDN));
+        v3CertGen.setPublicKey(subPub);
         
-        if (_issPub instanceof RSAPublicKey)
+        if (issPub instanceof RSAPublicKey)
         {
-            _v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
+            v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
         }
-        else if (_issPub.getAlgorithm().equals("ECDSA"))
+        else if (issPub.getAlgorithm().equals("DSA"))
         {
-            _v3CertGen.setSignatureAlgorithm("SHA1withECDSA");
+            v3CertGen.setSignatureAlgorithm("SHA1withDSA");
         }
-        else if (_issPub.getAlgorithm().equals("ECGOST3410"))
+        else if (issPub.getAlgorithm().equals("ECDSA"))
         {
-            _v3CertGen.setSignatureAlgorithm("GOST3411withECGOST3410");
+            v3CertGen.setSignatureAlgorithm("SHA1withECDSA");
+        }
+        else if (issPub.getAlgorithm().equals("ECGOST3410"))
+        {
+            v3CertGen.setSignatureAlgorithm("GOST3411withECGOST3410");
         }
         else
         {
-            _v3CertGen.setSignatureAlgorithm("GOST3411WithGOST3410");
+            v3CertGen.setSignatureAlgorithm("GOST3411WithGOST3410");
         }
 
-        _v3CertGen.addExtension(
+        v3CertGen.addExtension(
             X509Extensions.SubjectKeyIdentifier,
             false,
-            createSubjectKeyId(_subPub));
+            createSubjectKeyId(subPub));
 
-        _v3CertGen.addExtension(
+        v3CertGen.addExtension(
             X509Extensions.AuthorityKeyIdentifier,
             false,
-            createAuthorityKeyId(_issPub));
+            createAuthorityKeyId(issPub));
 
-        _v3CertGen.addExtension(
+        v3CertGen.addExtension(
             X509Extensions.BasicConstraints,
             false,
             new BasicConstraints(_ca));
 
-        X509Certificate _cert = _v3CertGen.generate(_issPriv);
+        X509Certificate _cert = v3CertGen.generate(issPriv);
 
         _cert.checkValidity(new Date());
-        _cert.verify(_issPub);
+        _cert.verify(issPub);
 
         return _cert;
     }
