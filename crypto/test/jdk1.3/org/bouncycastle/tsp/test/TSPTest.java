@@ -257,7 +257,7 @@ public class TSPTest
 
         TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
         
-        reqGen.setReqPolicy("4.4");
+        reqGen.setReqPolicy("1.4");
         
         TimeStampRequest            request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20]);
 
