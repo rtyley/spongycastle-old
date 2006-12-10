@@ -1,10 +1,16 @@
 package org.bouncycastle.mail.smime;
 
 import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.mail.smime.util.CRLFOutputStream;
+import org.bouncycastle.x509.X509Store;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -54,23 +60,33 @@ import java.util.Set;
 public class SMIMESignedGenerator
     extends SMIMEGenerator
 {
-    static final String CERTIFICATE_MANAGEMENT_CONTENT = "application/pkcs7-mime; name=smime.p7c; smime-type=certs-only";
-    private static final String DETACHED_SIGNATURE_TYPE = "application/pkcs7-signature; name=smime.p7s; smime-type=signed-data";
-    private static final String ENCAPSULATED_SIGNED_CONTENT_TYPE = "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data";
-    public static final String  DIGEST_SHA1 = "1.3.14.3.2.26";
-    public static final String  DIGEST_MD5 = "1.2.840.113549.2.5";
+    public static final String  DIGEST_SHA1 = OIWObjectIdentifiers.idSHA1.getId();
+    public static final String  DIGEST_MD5 = PKCSObjectIdentifiers.md5.getId();
     public static final String  DIGEST_SHA224 = NISTObjectIdentifiers.id_sha224.getId();
     public static final String  DIGEST_SHA256 = NISTObjectIdentifiers.id_sha256.getId();
     public static final String  DIGEST_SHA384 = NISTObjectIdentifiers.id_sha384.getId();
     public static final String  DIGEST_SHA512 = NISTObjectIdentifiers.id_sha512.getId();
+    public static final String  DIGEST_GOST3411 = CryptoProObjectIdentifiers.gostR3411.getId();
+    public static final String  DIGEST_RIPEMD128 = TeleTrusTObjectIdentifiers.ripemd128.getId();
+    public static final String  DIGEST_RIPEMD160 = TeleTrusTObjectIdentifiers.ripemd160.getId();
+    public static final String  DIGEST_RIPEMD256 = TeleTrusTObjectIdentifiers.ripemd256.getId();
 
-    public static final String  ENCRYPTION_RSA = "1.2.840.113549.1.1.1";
-    public static final String  ENCRYPTION_DSA = "1.2.840.10040.4.3";
+    public static final String  ENCRYPTION_RSA = PKCSObjectIdentifiers.rsaEncryption.getId();
+    public static final String  ENCRYPTION_DSA = X9ObjectIdentifiers.id_dsa_with_sha1.getId();
+    public static final String  ENCRYPTION_ECDSA = X9ObjectIdentifiers.ecdsa_with_SHA1.getId();
+    public static final String  ENCRYPTION_RSA_PSS = PKCSObjectIdentifiers.id_RSASSA_PSS.getId();
+    public static final String  ENCRYPTION_GOST3410 = CryptoProObjectIdentifiers.gostR3410_94.getId();
+    public static final String  ENCRYPTION_ECGOST3410 = CryptoProObjectIdentifiers.gostR3410_2001.getId();
+
+    private static final String CERTIFICATE_MANAGEMENT_CONTENT = "application/pkcs7-mime; name=smime.p7c; smime-type=certs-only";
+    private static final String DETACHED_SIGNATURE_TYPE = "application/pkcs7-signature; name=smime.p7s; smime-type=signed-data";
+    private static final String ENCAPSULATED_SIGNED_CONTENT_TYPE = "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data";
 
     private final String        _defaultContentTransferEncoding;
 
     private List                _certStores = new ArrayList();
     private List                _signers = new ArrayList();
+    private List                _attributeCerts = new ArrayList();
     
     static
     {
@@ -159,6 +175,20 @@ public class SMIMESignedGenerator
         _certStores.add(certStore);
     }
 
+    /**
+     * Add the attribute certificates contained in the passed in store to the
+     * generator.
+     *
+     * @param store a store of Version 2 attribute certificates
+     * @throws CMSException if an error occurse processing the store.
+     */
+    public void addAttributeCertificates(
+        X509Store store)
+        throws CMSException
+    {
+        _attributeCerts.add(store);
+    }
+
     private void addHashHeader(
         StringBuffer header,
         List         signers)
@@ -198,6 +228,10 @@ public class SMIMESignedGenerator
             else if (signer.getDigestOID().equals(DIGEST_SHA512))
             {
                 micAlgs.add("sha512");
+            }
+            else if (signer.getDigestOID().equals(DIGEST_GOST3411))
+            {
+                micAlgs.add("gostr3411-94");
             }
             else
             {
@@ -241,7 +275,7 @@ public class SMIMESignedGenerator
         }
     }
     
-    /**
+    /*
      * at this point we expect our body part to be well defined.
      */
     private MimeMultipart make(
@@ -280,7 +314,7 @@ public class SMIMESignedGenerator
         }
     }
 
-    /**
+    /*
      * at this point we expect our body part to be well defined - generate with data in the signature
      */
     private MimeBodyPart makeEncapsulated(
@@ -309,6 +343,12 @@ public class SMIMESignedGenerator
     /**
      * generate a signed object that contains an SMIME Signed Multipart
      * object using the given provider.
+     * @param content the MimeBodyPart to be signed.
+     * @param sigProvider the provider to be used for the signature.
+     * @return a Multipart containing the content and signature.
+     * @throws NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
+     * @throws NoSuchProviderException if no provider can be found.
+     * @throws SMIMEException if an exception occurs in processing the signature.
      */
     public MimeMultipart generate(
         MimeBodyPart    content,
@@ -477,16 +517,17 @@ public class SMIMESignedGenerator
         {
             CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
             
-            Iterator it = _certStores.iterator();
-            
-            while (it.hasNext())
+            for (Iterator it = _certStores.iterator(); it.hasNext();)
             {
                 gen.addCertificatesAndCRLs((CertStore)it.next());
             }
-            
-            it = _signers.iterator();
-            
-            while (it.hasNext())
+
+            for (Iterator it = _attributeCerts.iterator(); it.hasNext();)
+            {
+                gen.addAttributeCertificates((X509Store)it.next());
+            }
+
+            for (Iterator it = _signers.iterator(); it.hasNext();)
             {
                 Signer signer = (Signer)it.next();
                 
