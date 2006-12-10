@@ -84,6 +84,7 @@ then
             org.bouncycastle.crypto.signers \
             org.bouncycastle.crypto.test \
             org.bouncycastle.crypto.examples \
+            org.bouncycastle.crypto.tls \
             org.bouncycastle.util.encoders \
             org.bouncycastle.util.test) > /dev/null \
 
@@ -140,6 +141,11 @@ then
     rm -rf src/org/bouncycastle/util/encoders/test/*.java
     rm -rf src/org/bouncycastle/x509/PKIXCertPathReviewer.java
     rm -rf src/org/bouncycastle/x509/CertPathReviewerException.java
+    rm -rf src/org/bouncycastle/x509/util/LDAPStoreHelper.java
+    rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPAttrCerts.java
+    rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCertPairs.java
+    rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCerts.java
+    rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCRLs.java
     find src -name AllTests.java -exec rm {} \;
     rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
     rm src/org/bouncycastle/asn1/test/OctetStringTest.java
