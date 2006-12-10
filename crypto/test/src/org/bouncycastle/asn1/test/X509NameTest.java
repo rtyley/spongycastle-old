@@ -66,6 +66,20 @@ public class X509NameTest
         return seq.getObjectAt(1);
     }
 
+    private DEREncodable createEntryValueFromString(DERObjectIdentifier oid, String value)
+    {
+        Hashtable attrs = new Hashtable();
+
+        attrs.put(oid, value);
+
+        X509Name name = new X509Name(new X509Name(attrs).toString());
+
+        ASN1Sequence seq = (ASN1Sequence)name.getDERObject();
+        ASN1Set set = (ASN1Set)seq.getObjectAt(0);
+        seq = (ASN1Sequence)set.getObjectAt(0);
+
+        return seq.getObjectAt(1);
+    }
 
     private void testEncodingPrintableString(DERObjectIdentifier oid, String value)
     {
@@ -93,6 +107,11 @@ public class X509NameTest
         {
             fail("encoding for " + oid + " not GeneralizedTime");
         }
+        converted = createEntryValueFromString(oid, value);
+        if (!(converted instanceof DERGeneralizedTime))
+        {
+            fail("encoding for " + oid + " not GeneralizedTime");
+        }
     }
 
     public void performTest()
@@ -103,6 +122,9 @@ public class X509NameTest
         testEncodingPrintableString(X509Name.DN_QUALIFIER, "123456");
         testEncodingIA5String(X509Name.EmailAddress, "test@test.com");
         testEncodingIA5String(X509Name.DC, "test");
+        // correct encoding
+        testEncodingGeneralizedTime(X509Name.DATE_OF_BIRTH, "#180F32303032303132323132323232305A");
+        // compatability encoding
         testEncodingGeneralizedTime(X509Name.DATE_OF_BIRTH, "20020122122220Z");
 
         //
@@ -416,6 +438,11 @@ public class X509NameTest
         {
             fail("failed X509DefaultEntryConverter test");
         }
+
+        //
+        // try a weird value
+        //
+
     }
 
     private void compositeTest()
