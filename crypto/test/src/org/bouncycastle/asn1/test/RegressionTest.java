@@ -42,7 +42,8 @@ public class RegressionTest
         new NetscapeCertTypeTest(),
         new PKIFailureInfoTest(),
         new KeyUsageTest(),
-        new StringTest()
+        new StringTest(),
+        new UTCTimeTest()
     };
 
     public static void main(
