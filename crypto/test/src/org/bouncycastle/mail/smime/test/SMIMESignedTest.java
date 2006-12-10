@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.Time;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
@@ -17,11 +18,15 @@ import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
 import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CollectionStoreParameters;
+import org.bouncycastle.x509.X509Store;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -46,6 +51,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -59,17 +65,26 @@ public class SMIMESignedTest
     static MimeBodyPart    msgR;
     static MimeBodyPart    msgRN;
 
-    static String          signDN;
-    static KeyPair         signKP;
-    static X509Certificate signCert;
+    static String _origDN;
+    static KeyPair _origKP;
+    static X509Certificate _origCert;
 
-    static String          origDN;
-    static KeyPair         origKP;
-    static X509Certificate origCert;
+    static String _signDN;
+    static KeyPair _signKP;
+    static X509Certificate _signCert;
 
     static String          reciDN;
     static KeyPair         reciKP;
     static X509Certificate reciCert;
+
+    private static KeyPair         _signGostKP;
+    private static X509Certificate _signGostCert;
+
+    private static KeyPair         _signEcDsaKP;
+    private static X509Certificate _signEcDsaCert;
+
+    private static KeyPair         _signEcGostKP;
+    private static X509Certificate _signEcGostCert;
 
     KeyPair         dsaSignKP;
     X509Certificate dsaSignCert;
@@ -86,13 +101,23 @@ public class SMIMESignedTest
             msgR     = SMIMETestUtil.makeMimeBodyPart("Hello world!\r");
             msgRN    = SMIMETestUtil.makeMimeBodyPart("Hello world!\r\n");
             
-            signDN   = "O=Bouncy Castle, C=AU";
-            signKP   = SMIMETestUtil.makeKeyPair();  
-            signCert = SMIMETestUtil.makeCertificate(signKP, signDN, signKP, signDN);
+            _origDN = "O=Bouncy Castle, C=AU";
+            _origKP = CMSTestUtil.makeKeyPair();  
+            _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _origKP, _origDN);
     
-            origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
-            origKP   = SMIMETestUtil.makeKeyPair();
-            origCert = SMIMETestUtil.makeCertificate(origKP, origDN, signKP, signDN);
+            _signDN = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+            _signKP = CMSTestUtil.makeKeyPair();
+            _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _origKP, _origDN);
+
+            _signGostKP   = CMSTestUtil.makeGostKeyPair();
+            _signGostCert = CMSTestUtil.makeCertificate(_signGostKP, _signDN, _origKP, _origDN);
+
+            _signEcDsaKP   = CMSTestUtil.makeEcDsaKeyPair();
+            _signEcDsaCert = CMSTestUtil.makeCertificate(_signEcDsaKP, _signDN, _origKP, _origDN);
+
+            _signEcGostKP = CMSTestUtil.makeEcGostKeyPair();
+            _signEcGostCert = CMSTestUtil.makeCertificate(_signEcGostKP, _signDN, _origKP, _origDN);
+
         }
         catch (Exception e)
         {
@@ -117,7 +142,6 @@ public class SMIMESignedTest
                 byte abyte0[] = getBytes(s);
                 super.out.write(abyte0);
                 super.out.write(newline);
-                return;
             }
             catch(Exception exception)
             {
@@ -131,7 +155,6 @@ public class SMIMESignedTest
             try
             {
                 super.out.write(newline);
-                return;
             }
             catch(Exception exception)
             {
@@ -199,8 +222,8 @@ public class SMIMESignedTest
     {
         List           certList = new ArrayList();
 
-        certList.add(origCert);
-        certList.add(signCert);
+        certList.add(_signCert);
+        certList.add(_origCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
@@ -209,7 +232,7 @@ public class SMIMESignedTest
 
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
 
-        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
 
         gen.addCertificatesAndCRLs(certs);
 
@@ -418,6 +441,7 @@ public class SMIMESignedTest
         MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_MD5, msg);       
         SMIMESigned   s = new  SMIMESigned(smm);
 
+        assertEquals("md5", getMicAlg(smm));
         assertEquals(getDigestOid(s.getSignerInfos()), PKCSObjectIdentifiers.md5.toString());
         
         verifyMessageBytes(msg, s.getContent());
@@ -431,6 +455,7 @@ public class SMIMESignedTest
         MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA224, msg);  
         SMIMESigned   s = new  SMIMESigned(smm);
 
+        assertEquals("sha224", getMicAlg(smm));
         assertEquals(getDigestOid(s.getSignerInfos()), NISTObjectIdentifiers.id_sha224.toString());
         
         verifyMessageBytes(msg, s.getContent());
@@ -444,6 +469,7 @@ public class SMIMESignedTest
         MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA256, msg);
         SMIMESigned   s = new  SMIMESigned(smm);
 
+        assertEquals("sha256", getMicAlg(smm));
         assertEquals(getDigestOid(s.getSignerInfos()), NISTObjectIdentifiers.id_sha256.toString());
 
         verifyMessageBytes(msg, s.getContent());
@@ -457,6 +483,7 @@ public class SMIMESignedTest
         MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA384, msg);
         SMIMESigned   s = new  SMIMESigned(smm);
 
+        assertEquals("sha384", getMicAlg(smm));
         assertEquals(getDigestOid(s.getSignerInfos()), NISTObjectIdentifiers.id_sha384.toString());
 
         verifyMessageBytes(msg, s.getContent());
@@ -470,7 +497,36 @@ public class SMIMESignedTest
         MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA512, msg);
         SMIMESigned   s = new  SMIMESigned(smm);
 
+        assertEquals("sha512", getMicAlg(smm));
         assertEquals(getDigestOid(s.getSignerInfos()), NISTObjectIdentifiers.id_sha512.toString());
+
+        verifyMessageBytes(msg, s.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testGOST3411WithGOST3410()
+        throws Exception
+    {
+        MimeMultipart smm = generateMultiPartGost(msg);
+        SMIMESigned   s = new  SMIMESigned(smm);
+
+        assertEquals("gostr3411-94", getMicAlg(smm));
+        assertEquals(getDigestOid(s.getSignerInfos()), CryptoProObjectIdentifiers.gostR3411.getId());
+
+        verifyMessageBytes(msg, s.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testGOST3411WithECGOST3410()
+        throws Exception
+    {
+        MimeMultipart smm = generateMultiPartECGost(msg);
+        SMIMESigned   s = new  SMIMESigned(smm);
+
+        assertEquals("gostr3411-94", getMicAlg(smm));
+        assertEquals(getDigestOid(s.getSignerInfos()), CryptoProObjectIdentifiers.gostR3411.getId());
 
         verifyMessageBytes(msg, s.getContent());
 
@@ -496,8 +552,8 @@ public class SMIMESignedTest
     {
         List certList = new ArrayList();
         
-        certList.add(origCert);
-        certList.add(signCert);
+        certList.add(_signCert);
+        certList.add(_origCert);
     
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
@@ -506,7 +562,7 @@ public class SMIMESignedTest
     
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
     
-        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA224, new AttributeTable(signedAttrs), null);   
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.DIGEST_SHA224, new AttributeTable(signedAttrs), null);
         gen.addCertificatesAndCRLs(certs);
 
         MimeMultipart     smm = gen.generate(msg, "BC");
@@ -524,11 +580,11 @@ public class SMIMESignedTest
     public void testSHA1withDSA()
         throws Exception
     {
-        dsaSignKP   = SMIMETestUtil.makeDSAKeyPair();  
-        dsaSignCert = SMIMETestUtil.makeCertificate(dsaSignKP, signDN, dsaSignKP, signDN);
+        dsaSignKP   = CMSTestUtil.makeDsaKeyPair();
+        dsaSignCert = CMSTestUtil.makeCertificate(dsaSignKP, _origDN, dsaSignKP, _origDN);
 
-        dsaOrigKP   = SMIMETestUtil.makeDSAKeyPair();
-        dsaOrigCert = SMIMETestUtil.makeCertificate(dsaOrigKP, origDN, dsaSignKP, signDN);
+        dsaOrigKP   = CMSTestUtil.makeDsaKeyPair();
+        dsaOrigCert = CMSTestUtil.makeCertificate(dsaOrigKP, _signDN, dsaSignKP, _origDN);
 
         List           certList = new ArrayList();
 
@@ -576,15 +632,50 @@ public class SMIMESignedTest
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
     }
 
+    public void testWithAttributeCertificate()
+        throws Exception
+    {
+        List certList = new ArrayList();
+
+        certList.add(_signCert);
+        certList.add(_origCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);
+
+        gen.addCertificatesAndCRLs(certs);
+
+        X509AttributeCertificate attrCert = CMSTestUtil.getAttributeCertificate();
+
+        X509Store store = X509Store.getInstance("AttributeCertificate/Collection",
+                                    new X509CollectionStoreParameters(Collections.singleton(attrCert)), "BC");
+
+        gen.addAttributeCertificates(store);
+
+        SMIMESigned s = new SMIMESigned(gen.generateEncapsulated(msg, "BC"));
+
+        verifyMessageBytes(msg, s.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+
+        X509Store attrCerts = s.getAttributeCertificates("Collection", "BC");
+
+        assertTrue(attrCerts.getMatches(null).contains(attrCert));
+    }
+
     private MimeBodyPart generateBinaryPart() throws MessagingException
     {
         byte[] content = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 10, 11, 12, 13, 14, 10, 10, 15, 16 };   
         InternetHeaders ih = new InternetHeaders();
         
         ih.setHeader("Content-Transfer-Encoding", "binary");
-        MimeBodyPart  msg = new MimeBodyPart(ih, content);
-        
-        return msg;
+        return new MimeBodyPart(ih, content);
     }
     
     private MimeMultipart generateMultiPartRsa(
@@ -595,8 +686,8 @@ public class SMIMESignedTest
     {
         List certList = new ArrayList();
     
-        certList.add(origCert);
-        certList.add(signCert);
+        certList.add(_signCert);
+        certList.add(_origCert);
     
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
@@ -610,13 +701,53 @@ public class SMIMESignedTest
     
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
     
-        gen.addSigner(origKP.getPrivate(), origCert, digestOid, new AttributeTable(signedAttrs), null);   
+        gen.addSigner(_signKP.getPrivate(), _signCert, digestOid, new AttributeTable(signedAttrs), null);
         gen.addCertificatesAndCRLs(certs);
 
         return gen.generate(msg, "BC");
     }
-    
-    private MimeMultipart generateMultiPartRsa(String digestOid, MimeBodyPart msg) 
+
+    private MimeMultipart generateMultiPartGost(
+        MimeBodyPart msg)
+        throws Exception
+    {
+        List certList = new ArrayList();
+
+        certList.add(_signCert);
+        certList.add(_signGostCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+
+        gen.addSigner(_signGostKP.getPrivate(), _signGostCert, SMIMESignedGenerator.DIGEST_GOST3411);
+        gen.addCertificatesAndCRLs(certs);
+
+        return gen.generate(msg, "BC");
+    }
+
+    private MimeMultipart generateMultiPartECGost(
+        MimeBodyPart msg)
+        throws Exception
+    {
+        List certList = new ArrayList();
+
+        certList.add(_signCert);
+        certList.add(_signEcGostCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+
+        gen.addSigner(_signEcGostKP.getPrivate(), _signEcGostCert, SMIMESignedGenerator.DIGEST_GOST3411);
+        gen.addCertificatesAndCRLs(certs);
+
+        return gen.generate(msg, "BC");
+    }
+
+    private MimeMultipart generateMultiPartRsa(String digestOid, MimeBodyPart msg)
         throws Exception
     {
         return generateMultiPartRsa(digestOid, msg, null);
@@ -627,8 +758,8 @@ public class SMIMESignedTest
     {
         List certList = new ArrayList();
     
-        certList.add(origCert);
-        certList.add(signCert);
+        certList.add(_signCert);
+        certList.add(_origCert);
     
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
@@ -637,7 +768,7 @@ public class SMIMESignedTest
     
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
     
-        gen.addSigner(origKP.getPrivate(), origCert, digestOid, new AttributeTable(signedAttrs), null);   
+        gen.addSigner(_signKP.getPrivate(), _signCert, digestOid, new AttributeTable(signedAttrs), null);
         gen.addCertificatesAndCRLs(certs);
     
         return gen.generateEncapsulated(msg, "BC");
@@ -648,8 +779,8 @@ public class SMIMESignedTest
     {
         List           certList = new ArrayList();
 
-        certList.add(origCert);
-        certList.add(signCert);
+        certList.add(_signCert);
+        certList.add(_origCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
@@ -674,8 +805,8 @@ public class SMIMESignedTest
 
         List certList = new ArrayList();
 
-        certList.add(origCert);
-        certList.add(signCert);
+        certList.add(_signCert);
+        certList.add(_origCert);
 
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
@@ -684,7 +815,7 @@ public class SMIMESignedTest
 
         SMIMESignedGenerator gen = new SMIMESignedGenerator("binary");
 
-        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
         gen.addCertificatesAndCRLs(certs);
 
         MimeMultipart mm = gen.generate(m, "BC");
@@ -701,8 +832,8 @@ public class SMIMESignedTest
 
         List certList = new ArrayList();
 
-        certList.add(origCert);
-        certList.add(signCert);
+        certList.add(_signCert);
+        certList.add(_origCert);
 
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
@@ -711,7 +842,7 @@ public class SMIMESignedTest
 
         SMIMESignedGenerator gen = new SMIMESignedGenerator("binary");
 
-        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
         gen.addCertificatesAndCRLs(certs);
 
         MimeMultipart mm = gen.generate(m, "BC");
@@ -728,8 +859,8 @@ public class SMIMESignedTest
 
         List certList = new ArrayList();
 
-        certList.add(origCert);
-        certList.add(signCert);
+        certList.add(_signCert);
+        certList.add(_origCert);
 
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
@@ -738,7 +869,7 @@ public class SMIMESignedTest
 
         SMIMESignedGenerator gen = new SMIMESignedGenerator("binary");
 
-        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
         gen.addCertificatesAndCRLs(certs);
 
         MimeMultipart mm = gen.generate(m, "BC");
@@ -862,5 +993,13 @@ public class SMIMESignedTest
         ih.setHeader("Content-Transfer-Encoding", contentTransferEncoding);
 
         return new MimeBodyPart(ih, content);
+    }
+
+    private String getMicAlg(MimeMultipart mm)
+    {
+        String contentType = mm.getContentType();
+        String micAlg = contentType.substring(contentType.indexOf("micalg=") + 7);
+
+        return micAlg.substring(0, micAlg.indexOf(';'));
     }
 }
