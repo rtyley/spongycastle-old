@@ -125,7 +125,7 @@ public class DERUTCTime
                 d += "00";
             }
 
-            if (d.length() == 17)  // no seconds
+            if (d.length() == 17)  // seconds
             {
                 dateF = new SimpleDateFormat("yyMMddHHmmssZ");
             }
