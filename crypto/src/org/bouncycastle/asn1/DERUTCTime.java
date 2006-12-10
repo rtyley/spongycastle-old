@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.SimpleTimeZone;
@@ -64,6 +65,14 @@ public class DERUTCTime
         String  time)
     {
         this.time = time;
+        try
+        {
+            this.getDate();
+        }
+        catch (ParseException e)
+        {
+            throw new IllegalArgumentException("invalid date string: " + e.getMessage());
+        }
     }
 
     /**
@@ -96,6 +105,113 @@ public class DERUTCTime
     }
 
     /**
+     * return the time as a date based on whatever a 2 digit year will return. For
+     * standardised processing use getAdjustedDate().
+     *
+     * @return the resulting date
+     * @exception ParseException if the date string cannot be parsed.
+     */
+    public Date getDate()
+        throws ParseException
+    {
+        SimpleDateFormat dateF;
+        String d = time;
+
+        if (time.indexOf('-') > 0 || time.indexOf('+') > 0)
+        {
+            char ch = time.charAt(time.length() - 3);
+            if (ch == '+' || ch == '-')
+            {
+                d += "00";
+            }
+
+            if (d.length() == 17)  // no seconds
+            {
+                dateF = new SimpleDateFormat("yyMMddHHmmssZ");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyMMddHHmmZ");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
+        }
+        else  // ends with Z
+        {
+            if (d.length() == 13)
+            {
+                dateF = new SimpleDateFormat("yyMMddHHmmss'Z'");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyMMddHHmm'Z'");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
+        }
+
+        return dateF.parse(d);
+    }
+
+    /**
+     * return the time as an adjusted date
+     * in the range of 1950 - 2049.
+     *
+     * @return a date in the range of 1950 to 2049.
+     * @exception ParseException if the date string cannot be parsed.
+     */
+    public Date getAdjustedDate()
+        throws ParseException
+    {
+        SimpleDateFormat dateF;
+        String d = time;
+
+        if (d.charAt(0) < '5')
+        {
+            d = "20" + d;
+        }
+        else
+        {
+            d = "19" + d;
+        }
+
+        if (time.indexOf('-') > 0 || time.indexOf('+') > 0)
+        {
+            char ch = time.charAt(time.length() - 3);
+            if (ch == '+' || ch == '-')
+            {
+                d += "00";
+            }
+
+            if (d.length() == 19)  // seconds
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmssZ");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmZ");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
+        }
+        else  // ends with Z
+        {
+            if (d.length() == 15)
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmm'Z'");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
+        }
+
+        return dateF.parse(d);
+    }
+
+    /**
      * return the time - always in the form of 
      *  YYMMDDhhmmssGMT(+hh:mm|-hh:mm).
      * <p>
@@ -116,24 +232,44 @@ public class DERUTCTime
         //
         // standardise the format.
         //
-        if (time.length() == 11)
+        if (time.indexOf('-') < 0 && time.indexOf('+') < 0)
         {
-            return time.substring(0, 10) + "00GMT+00:00";
+            if (time.length() == 11)
+            {
+                return time.substring(0, 10) + "00GMT+00:00";
+            }
+            else
+            {
+                return time.substring(0, 12) + "GMT+00:00";
+            }
         }
-        else if (time.length() == 13)
+        else
         {
-            return time.substring(0, 12) + "GMT+00:00";
-        }
-        else if (time.length() == 17)
-        {
-            return time.substring(0, 12) + "GMT" + time.substring(12, 15) + ":" + time.substring(15, 17);
-        }
+            int index = time.indexOf('-');
+            if (index < 0)
+            {
+                index = time.indexOf('+');
+            }
+            String d = time;
 
-        return time;
+            if (index == time.length() - 3)
+            {
+                d += "00";
+            }
+
+            if (index == 10)
+            {
+                return d.substring(0, 10) + "00GMT" + d.substring(10, 13) + ":" + d.substring(13, 15);
+            }
+            else
+            {
+                return d.substring(0, 12) + "GMT" + d.substring(12, 15) + ":" +  d.substring(15, 17);
+            }
+        }
     }
 
     /**
-     * return the time as an adjusted date with a 4 digit year. This goes
+     * return a time string as an adjusted date with a 4 digit year. This goes
      * in the range of 1950 - 2049.
      */
     public String getAdjustedTime()

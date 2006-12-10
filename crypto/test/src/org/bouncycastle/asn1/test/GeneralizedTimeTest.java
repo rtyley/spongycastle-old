@@ -5,6 +5,9 @@ import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
 
+import java.text.SimpleDateFormat;
+import java.util.SimpleTimeZone;
+
 /**
  * X.690 test example
  */
@@ -32,7 +35,9 @@ public class GeneralizedTimeTest
             "20020122122220.0001",
             "20020122122220.0001Z",
             "20020122122220.0001-1000",
-            "20020122122220.0001+00" };
+            "20020122122220.0001+00",
+            "20020122122220.0001+1000"
+        };
 
     String[] output = {
             "20020122122220",
@@ -54,7 +59,32 @@ public class GeneralizedTimeTest
             "20020122122220.0001",
             "20020122122220.0001GMT+00:00",
             "20020122122220.0001GMT-10:00",
-            "20020122122220.0001GMT+00:00" };
+            "20020122122220.0001GMT+00:00",
+            "20020122122220.0001GMT+10:00" };
+
+    String[] zOutput = {
+            "20020122122220Z",
+            "20020122122220Z",
+            "20020122222220Z",
+            "20020122122220Z",
+            "20020122122220Z",
+            "20020122122220Z",
+            "20020122222220Z",
+            "20020122122220Z",
+            "20020122122220Z",
+            "20020122122220Z",
+            "20020122222220Z",
+            "20020122122220Z",
+            "20020122122220Z",
+            "20020122122220Z",
+            "20020122222220Z",
+            "20020122122220Z",
+            "20020122122220Z",
+            "20020122122220Z",
+            "20020122222220Z",
+            "20020122122220Z",
+            "20020122022220Z"
+    };
 
     public String getName()
     {
@@ -65,6 +95,10 @@ public class GeneralizedTimeTest
     {
         try
         {
+            SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+
+            dateF.setTimeZone(new SimpleTimeZone(0,"Z"));
+
             for (int i = 0; i != input.length; i++)
             {
                 DERGeneralizedTime    t = new DERGeneralizedTime(input[i]);
@@ -72,6 +106,14 @@ public class GeneralizedTimeTest
                 if (!t.getTime().equals(output[i]))
                 {
                     return new SimpleTestResult(false, getName() + ": failed conversion test");
+                }
+
+                if (output[i].indexOf('G') > 0)   // don't try checking local time
+                {
+                    if (!dateF.format(t.getDate()).equals(zOutput[i]))
+                    {
+                        return new SimpleTestResult(false, getName() + ": failed date conversion test");
+                    }
                 }
             }
         }

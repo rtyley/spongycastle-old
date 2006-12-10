@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 
 /**
  * Generalized time object.
@@ -52,17 +53,26 @@ public class DERGeneralizedTime
     }
     
     /**
-     * The correct format for this is YYYYMMDDHHMMSSZ, or without the Z
+     * The correct format for this is YYYYMMDDHHMMSS[.f]Z, or without the Z
      * for local time, or Z+-HHMM on the end, for difference between local
-     * time and UTC time.
-     * <p>
+     * time and UTC time. The fractional second amount f must consist of at
+     * least one number with trailing zeroes removed.
      *
      * @param time the time string.
+     * @exception IllegalArgumentException if String is an illegal format.
      */
     public DERGeneralizedTime(
         String  time)
     {
         this.time = time;
+        try
+        {
+            this.getDate();
+        }
+        catch (ParseException e)
+        {
+            throw new IllegalArgumentException("invalid date string: " + e.getMessage());
+        }
     }
 
     /**
@@ -148,21 +158,61 @@ public class DERGeneralizedTime
         throws ParseException
     {
         SimpleDateFormat dateF;
+        String d = time;
 
-        if (time.indexOf('.') == 14)
+        if (time.endsWith("Z"))
         {
-            dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
+            if (hasFractionalSeconds())
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSS'Z'");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
+        }
+        else if (time.indexOf('-') > 0 || time.indexOf('+') > 0)
+        {
+            char ch = time.charAt(time.length() - 3);
+            if (ch == '+' || ch == '-')
+            {
+                d += "00";
+            }
+            if (hasFractionalSeconds())
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSSZ");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmssZ");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
         }
         else
         {
-            dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+            if (hasFractionalSeconds())
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSS");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, TimeZone.getDefault().getID()));
         }
-        
-        dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
-        
-        return dateF.parse(time);
+
+        return dateF.parse(d);
     }
-    
+
+    private boolean hasFractionalSeconds()
+    {
+        return time.indexOf('.') == 14;
+    }
+
     private byte[] getOctets()
     {
         char[]  cs = time.toCharArray();
