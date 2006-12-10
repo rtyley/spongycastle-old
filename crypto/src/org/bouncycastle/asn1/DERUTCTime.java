@@ -114,43 +114,9 @@ public class DERUTCTime
     public Date getDate()
         throws ParseException
     {
-        SimpleDateFormat dateF;
-        String d = time;
+        SimpleDateFormat dateF = new SimpleDateFormat("yyMMddHHmmssz");
 
-        if (time.indexOf('-') > 0 || time.indexOf('+') > 0)
-        {
-            char ch = time.charAt(time.length() - 3);
-            if (ch == '+' || ch == '-')
-            {
-                d += "00";
-            }
-
-            if (d.length() == 17)  // seconds
-            {
-                dateF = new SimpleDateFormat("yyMMddHHmmssZ");
-            }
-            else
-            {
-                dateF = new SimpleDateFormat("yyMMddHHmmZ");
-            }
-
-            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
-        }
-        else  // ends with Z
-        {
-            if (d.length() == 13)
-            {
-                dateF = new SimpleDateFormat("yyMMddHHmmss'Z'");
-            }
-            else
-            {
-                dateF = new SimpleDateFormat("yyMMddHHmm'Z'");
-            }
-
-            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
-        }
-
-        return dateF.parse(d);
+        return dateF.parse(getTime());
     }
 
     /**
@@ -163,52 +129,11 @@ public class DERUTCTime
     public Date getAdjustedDate()
         throws ParseException
     {
-        SimpleDateFormat dateF;
-        String d = time;
+        SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmssz");
 
-        if (d.charAt(0) < '5')
-        {
-            d = "20" + d;
-        }
-        else
-        {
-            d = "19" + d;
-        }
+        dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
 
-        if (time.indexOf('-') > 0 || time.indexOf('+') > 0)
-        {
-            char ch = time.charAt(time.length() - 3);
-            if (ch == '+' || ch == '-')
-            {
-                d += "00";
-            }
-
-            if (d.length() == 19)  // seconds
-            {
-                dateF = new SimpleDateFormat("yyyyMMddHHmmssZ");
-            }
-            else
-            {
-                dateF = new SimpleDateFormat("yyyyMMddHHmmZ");
-            }
-
-            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
-        }
-        else  // ends with Z
-        {
-            if (d.length() == 15)
-            {
-                dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
-            }
-            else
-            {
-                dateF = new SimpleDateFormat("yyyyMMddHHmm'Z'");
-            }
-
-            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
-        }
-
-        return dateF.parse(d);
+        return dateF.parse(getAdjustedTime());
     }
 
     /**
