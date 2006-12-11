@@ -43,6 +43,12 @@ src/org/bouncycastle/asn1 \
 | (cd lcrypto-j2me-$base; tar xf -)
     (cd test; tar cf - src/org/bouncycastle/crypto/test src/org/bouncycastle/asn1/test | (cd ../lcrypto-j2me-$base; tar xf -))
     (cd j2me; tar cf - * | (cd ../lcrypto-j2me-$base; cd src; tar xf -))
+    rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AllTests.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/CollectionStore.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/Selector.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/Store.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/StreamParser.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/StreamParsingException.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/util/Dump.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/AllTests.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
@@ -73,6 +79,12 @@ src/org/bouncycastle/asn1 \
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TagTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TypeOfBiometricDataUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AESVectorFileTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/StreamParser.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/StreamParserException.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/Store.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/StoreException.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/CollectionStore.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/Selector.java
 
    (2>&1 find lcrypto-j2me-$base -name CVS -exec rm -rf \{\} \; ) > /dev/null
 
@@ -125,6 +137,7 @@ src/org/bouncycastle/asn1 \
     org.bouncycastle.crypto.paddings \
     org.bouncycastle.crypto.signers \
     org.bouncycastle.crypto.prng \
+    org.bouncycastle.crypto.tls \
     org.bouncycastle.crypto.test \
     org.bouncycastle.crypto.examples \
     org.bouncycastle.util.encoders \
