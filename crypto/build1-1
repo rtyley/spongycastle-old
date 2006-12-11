@@ -30,6 +30,10 @@ then
         rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
         rm src/org/bouncycastle/asn1/test/OctetStringTest.java
         rm src/org/bouncycastle/asn1/test/ParseTest.java
+        rm src/org/bouncycastle/util/CollectionStore.java
+        rm src/org/bouncycastle/util/Store.java
+        rm src/org/bouncycastle/util/Selector.java
+        rm src/org/bouncycastle/util/StreamParser.java
 
         mkdir classes; mkdir docs;
         (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
@@ -76,6 +80,7 @@ then
             org.bouncycastle.crypto.paddings \
             org.bouncycastle.crypto.params \
             org.bouncycastle.crypto.signers \
+            org.bouncycastle.crypto.tls \
             org.bouncycastle.crypto.test \
             org.bouncycastle.crypto.examples \
             org.bouncycastle.util.encoders \
@@ -156,10 +161,19 @@ then
     rm -rf src/org/bouncycastle/util/encoders/test
     rm -rf src/org/bouncycastle/x509/PKIXCertPathReviewer.java
     rm -rf src/org/bouncycastle/x509/CertPathReviewerException.java
+    rm -rf src/org/bouncycastle/x509/ExtendedPKIXParameters.java
+    rm -rf src/org/bouncycastle/x509/util/LDAPStoreHelper.java
+    rm -rf src/org/bouncycastle/jce/ProviderConfigurationPermission.java
+    rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPAttrCerts.java
+    rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCertPairs.java
+    rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCerts.java
+    rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCRLs.java
     find src -name AllTests.java -exec rm {} \;
     rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
     rm src/org/bouncycastle/asn1/test/OctetStringTest.java
     rm src/org/bouncycastle/asn1/test/ParseTest.java
+    rm src/org/bouncycastle/jce/provider/test/ImplicitlyCaTest.java
+    rm src/org/bouncycastle/jce/provider/test/X509StoreTest.java
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -219,6 +233,7 @@ then
         org.bouncycastle.crypto.params \
         org.bouncycastle.crypto.signers \
         org.bouncycastle.crypto.test \
+        org.bouncycastle.crypto.tls \
         org.bouncycastle.crypto.examples \
         org.bouncycastle.jce.interfaces \
         org.bouncycastle.jce.spec \
@@ -275,6 +290,7 @@ then
     mkdir bcpg-jdk11-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/bcpg src/org/bouncycastle/openpgp | (cd bcpg-jdk11-$base; tar xf -)
     (cd test/src; tar cf - org/bouncycastle/openpgp | (cd ../../bcpg-jdk11-$base/src; tar xf -))
+    (cd bzip2 && tar cf - src | (cd ../bcpg-jdk11-$base; tar xf -))
     (cd jdk1.1; tar cf - org/bouncycastle/openpgp | (cd ../bcpg-jdk11-$base/src; tar xf -))
     (
     cd bcpg-jdk11-$base; mkdir classes; mkdir docs;
@@ -310,7 +326,7 @@ q
     echo "compiling"
 
     (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:../../../../jce-jdk11-$base/classes:$JDK11PATH/lib/classes.zip */*.java */*/*.java)
-    java -classpath ../jce-jdk11-$base/classes:classes:$JDK11PATH/lib/classes.zip org.bouncycastle.openpgp.test.RegressionTest
+    java -mx512m -classpath ../jce-jdk11-$base/classes:classes:$JDK11PATH/lib/classes.zip org.bouncycastle.openpgp.test.RegressionTest
      )
 
      (2>&1 find bcpg-jdk11-$base -name CVS -exec rm -rf \{\} \;) > /dev/null

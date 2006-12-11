@@ -202,7 +202,7 @@ public class X509NameTest
         }
 
         Vector oids = name1.getOIDs();
-        if (!oids.equals(ord1))
+        if (!compareVectors(oids, ord1))
         {
             fail("oid comparison test");
         }
@@ -218,7 +218,7 @@ public class X509NameTest
         name1 = new X509Name(ord1, val1);
         
         Vector values = name1.getValues();
-        if (!values.equals(val1))
+        if (!compareVectors(values, val1))
         {
             fail("value comparison test");
         }
@@ -443,6 +443,24 @@ public class X509NameTest
         // try a weird value
         //
 
+    }
+
+    private boolean compareVectors(Vector a, Vector b)    // for compatibility with early JDKs
+    {
+        if (a.size() != b.size())
+        {
+            return false;
+        }
+
+        for (int i = 0; i != a.size(); i++)
+        {
+            if (!a.elementAt(i).equals(b.elementAt(i)))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void compositeTest()
