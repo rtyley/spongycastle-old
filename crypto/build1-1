@@ -32,8 +32,10 @@ then
         rm src/org/bouncycastle/asn1/test/ParseTest.java
         rm src/org/bouncycastle/util/CollectionStore.java
         rm src/org/bouncycastle/util/Store.java
+        rm src/org/bouncycastle/util/StoreException.java
         rm src/org/bouncycastle/util/Selector.java
         rm src/org/bouncycastle/util/StreamParser.java
+        rm src/org/bouncycastle/util/StreamParserException.java
 
         mkdir classes; mkdir docs;
         (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \

@@ -203,6 +203,7 @@ then
         org.bouncycastle.crypto.params \
         org.bouncycastle.crypto.signers \
         org.bouncycastle.crypto.test \
+        org.bouncycastle.crypto.tls \
         org.bouncycastle.crypto.examples \
         org.bouncycastle.jce \
         org.bouncycastle.jce.cert \
