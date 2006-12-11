@@ -1,6 +1,27 @@
 package org.bouncycastle.x509;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Strings;
+
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -8,28 +29,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.security.Signature;
-import java.security.NoSuchProviderException;
-import java.security.NoSuchAlgorithmException;
-import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
-import java.security.cert.CertificateEncodingException;
-
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.util.Strings;
 
 class X509Util
 {
@@ -70,7 +69,10 @@ class X509Util
         algorithms.put("SHA512WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
         algorithms.put("GOST3411WITHGOST3410", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
         algorithms.put("GOST3411WITHGOST3410-94", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
-        
+        algorithms.put("GOST3411WITHECGOST3410", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
+        algorithms.put("GOST3411WITHECGOST3410-2001", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
+        algorithms.put("GOST3411WITHGOST3410-2001", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
+
         //
         // According to RFC 3279, the ASN.1 encoding SHALL (id-dsa-with-sha1) or MUST (ecdsa-with-SHA*) omit the parameters field. 
         // The parameters field SHALL be NULL for RSA based signature algorithms.
@@ -83,6 +85,12 @@ class X509Util
         noParams.add(X9ObjectIdentifiers.id_dsa_with_sha1);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha256);
+
+        //
+        // RFC 4491
+        //
+        noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
+        noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
     }
      
     static DERObjectIdentifier getAlgorithmOID(
@@ -146,7 +154,7 @@ class X509Util
         }
     }
 
-    static byte[] getSignatureForObject(
+    static byte[] calculateSignature(
         DERObjectIdentifier sigOid,
         String              sigName,
         PrivateKey          key,
@@ -170,14 +178,7 @@ class X509Util
             sig = X509Util.getSignatureInstance(sigName);
         }
 
-        if (random != null)
-        {
-            sig.initSign(key); // can't use random in JDK 1.1
-        }
-        else
-        {
-            sig.initSign(key);
-        }
+        sig.initSign(key);
 
         sig.update(object.getEncoded(ASN1Encodable.DER));
 
@@ -209,17 +210,139 @@ class X509Util
             sig = X509Util.getSignatureInstance(sigName, provider);
         }
 
-        if (random != null)
-        {
-            sig.initSign(key); // can't handle random in JDK 1.1
-        }
-        else
-        {
-            sig.initSign(key);
-        }
+        sig.initSign(key);
 
         sig.update(object.getEncoded(ASN1Encodable.DER));
 
         return sig.sign();
+    }
+
+    static class Implementation
+    {
+        Object      engine;
+        Provider provider;
+
+        Implementation(
+            Object      engine,
+            Provider    provider)
+        {
+            this.engine = engine;
+            this.provider = provider;
+        }
+
+        Object getEngine()
+        {
+            return engine;
+        }
+
+        Provider getProvider()
+        {
+            return provider;
+        }
+    }
+
+    /**
+     * see if we can find an algorithm (or its alias and what it represents) in
+     * the property table for the given provider.
+     */
+    static Implementation getImplementation(
+        String      baseName,
+        String      algorithm,
+        Provider    prov)
+        throws NoSuchAlgorithmException
+    {
+        algorithm = Strings.toUpperCase(algorithm);
+
+        String      alias;
+
+        while ((alias = prov.getProperty("Alg.Alias." + baseName + "." + algorithm)) != null)
+        {
+            algorithm = alias;
+        }
+
+        String      className = prov.getProperty(baseName + "." + algorithm);
+
+        if (className != null)
+        {
+            try
+            {
+                Class       cls;
+                ClassLoader clsLoader = prov.getClass().getClassLoader();
+
+                if (clsLoader != null)
+                {
+                    cls = clsLoader.loadClass(className);
+                }
+                else
+                {
+                    cls = Class.forName(className);
+                }
+
+                return new Implementation(cls.newInstance(), prov);
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new IllegalStateException(
+                    "algorithm " + algorithm + " in provider " + prov.getName() + " but no class \"" + className + "\" found!");
+            }
+            catch (Exception e)
+            {
+                throw new IllegalStateException(
+                    "algorithm " + algorithm + " in provider " + prov.getName() + " but class \"" + className + "\" inaccessible!");
+            }
+        }
+
+        throw new NoSuchAlgorithmException("cannot find implementation " + algorithm + " for provider " + prov.getName());
+    }
+
+    /**
+     * return an implementation for a given algorithm/provider.
+     * If the provider is null, we grab the first avalaible who has the required algorithm.
+     */
+    static Implementation getImplementation(
+        String      baseName,
+        String      algorithm)
+        throws NoSuchAlgorithmException
+    {
+        Provider[] prov = Security.getProviders();
+
+        //
+        // search every provider looking for the algorithm we want.
+        //
+        for (int i = 0; i != prov.length; i++)
+        {
+            //
+            // try case insensitive
+            //
+            Implementation imp = getImplementation(baseName, Strings.toUpperCase(algorithm), prov[i]);
+            if (imp != null)
+            {
+                return imp;
+            }
+
+            try
+            {
+                imp = getImplementation(baseName, algorithm, prov[i]);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                // continue
+            }
+        }
+
+        throw new NoSuchAlgorithmException("cannot find implementation " + algorithm);
+    }
+
+    static Provider getProvider(String provider)
+        throws NoSuchProviderException
+    {
+        Provider prov = Security.getProvider(provider);
+
+        if (prov == null)
+        {
+            throw new NoSuchProviderException("Provider " + provider + " not found");
+        }
+
+        return prov;
     }
 }
