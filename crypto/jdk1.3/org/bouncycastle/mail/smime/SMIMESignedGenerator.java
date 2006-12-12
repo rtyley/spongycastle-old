@@ -1,15 +1,16 @@
 package org.bouncycastle.mail.smime;
 
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.mail.smime.util.CRLFOutputStream;
+import org.bouncycastle.x509.X509Store;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -85,6 +86,7 @@ public class SMIMESignedGenerator
 
     private List                _certStores = new ArrayList();
     private List                _signers = new ArrayList();
+    private List                _attributeCerts = new ArrayList();
     
     static
     {
@@ -173,6 +175,20 @@ public class SMIMESignedGenerator
         _certStores.add(certStore);
     }
 
+    /**
+     * Add the attribute certificates contained in the passed in store to the
+     * generator.
+     *
+     * @param store a store of Version 2 attribute certificates
+     * @throws CMSException if an error occurse processing the store.
+     */
+    public void addAttributeCertificates(
+        X509Store store)
+        throws CMSException
+    {
+        _attributeCerts.add(store);
+    }
+
     private void addHashHeader(
         StringBuffer header,
         List         signers)
@@ -259,7 +275,7 @@ public class SMIMESignedGenerator
         }
     }
     
-    /**
+    /*
      * at this point we expect our body part to be well defined.
      */
     private MimeMultipart make(
@@ -298,7 +314,7 @@ public class SMIMESignedGenerator
         }
     }
 
-    /**
+    /*
      * at this point we expect our body part to be well defined - generate with data in the signature
      */
     private MimeBodyPart makeEncapsulated(
@@ -327,6 +343,12 @@ public class SMIMESignedGenerator
     /**
      * generate a signed object that contains an SMIME Signed Multipart
      * object using the given provider.
+     * @param content the MimeBodyPart to be signed.
+     * @param sigProvider the provider to be used for the signature.
+     * @return a Multipart containing the content and signature.
+     * @throws NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
+     * @throws NoSuchProviderException if no provider can be found.
+     * @throws SMIMEException if an exception occurs in processing the signature.
      */
     public MimeMultipart generate(
         MimeBodyPart    content,
@@ -495,16 +517,17 @@ public class SMIMESignedGenerator
         {
             CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
             
-            Iterator it = _certStores.iterator();
-            
-            while (it.hasNext())
+            for (Iterator it = _certStores.iterator(); it.hasNext();)
             {
                 gen.addCertificatesAndCRLs((CertStore)it.next());
             }
-            
-            it = _signers.iterator();
-            
-            while (it.hasNext())
+
+            for (Iterator it = _attributeCerts.iterator(); it.hasNext();)
+            {
+                gen.addAttributeCertificates((X509Store)it.next());
+            }
+
+            for (Iterator it = _signers.iterator(); it.hasNext();)
             {
                 Signer signer = (Signer)it.next();
                 
