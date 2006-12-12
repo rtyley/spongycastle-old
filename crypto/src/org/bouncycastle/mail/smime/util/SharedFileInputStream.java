@@ -1,5 +1,6 @@
 package org.bouncycastle.mail.smime.util;
 
+import javax.mail.internet.SharedInputStream;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,19 +11,18 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.mail.internet.SharedInputStream;
-
 public class SharedFileInputStream 
     extends FilterInputStream
     implements SharedInputStream
 {
-    private final File _file;
-    private final long _start;
-    private final long _length;
+    private final SharedFileInputStream _parent;
+    private final File                  _file;
+    private final long                  _start;
+    private final long                  _length;
     
     private long _position;
     private long _markedPosition;
-    
+
     private List _subStreams = new LinkedList();
     
     public SharedFileInputStream(
@@ -46,11 +46,28 @@ public class SharedFileInputStream
         throws IOException
     {
         super(new BufferedInputStream(new FileInputStream(file)));
-        
+
+        _parent = null;
         _file = file;
         _start = start;
         _length = length;
         
+        in.skip(start);
+    }
+
+    private SharedFileInputStream(
+        SharedFileInputStream parent,
+        long start,
+        long length)
+        throws IOException
+    {
+        super(new BufferedInputStream(new FileInputStream(parent._file)));
+
+        _parent = parent;
+        _file = parent._file;
+        _start = start;
+        _length = length;
+
         in.skip(start);
     }
 
@@ -69,16 +86,16 @@ public class SharedFileInputStream
             {
                 if (_length > 0)
                 {
-                    stream = new SharedFileInputStream(_file, _start + start, _length - start);
+                    stream = new SharedFileInputStream(this, _start + start, _length - start);
                 }
                 else
                 {
-                    stream = new SharedFileInputStream(_file, _start + start, -1);
+                    stream = new SharedFileInputStream(this, _start + start, -1);
                 }
             }
             else
             {
-                stream = new SharedFileInputStream(_file, _start + start, finish - start);
+                stream = new SharedFileInputStream(this, _start + start, finish - start);
             }
             
             _subStreams.add(stream);
@@ -157,7 +174,22 @@ public class SharedFileInputStream
         _position = _markedPosition;
         in.reset();
     }
-    
+
+    /**
+     * Return the shared stream that represents the top most stream that
+     * this stream inherits from.
+     * @return  the base of the shared stream tree.
+     */
+    public SharedFileInputStream getRoot()
+    {
+        if (_parent != null)
+        {
+            return _parent.getRoot();
+        }
+
+        return this;
+    }
+
     /**
      * Close of this stream and any substreams that have been created from it.
      * @throws IOException on problem closing the main stream.
