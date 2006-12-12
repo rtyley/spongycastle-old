@@ -83,14 +83,14 @@ public class FileBackedMimeBodyPart
     }
 
     /**
-     * Close of the underlying shared stream and remove the backing file.
+     * Close off the underlying shared streams and remove the backing file.
      *
-     * @throws IOException if stream cannot be closed of file cannot be deleted.
+     * @throws IOException if streams cannot be closed or the file cannot be deleted.
      */
     public void dispose() 
         throws IOException
     {
-        ((SharedFileInputStream)contentStream).dispose();
+        ((SharedFileInputStream)contentStream).getRoot().dispose();
         
         if (!_file.delete())
         {
