@@ -74,7 +74,7 @@ class CMSUtils
         }
         catch (IllegalArgumentException e)
         {
-            throw new CMSException("error processing crls", e);
+            throw new CMSException("error processing certs", e);
         }
         catch (IOException e)
         {
