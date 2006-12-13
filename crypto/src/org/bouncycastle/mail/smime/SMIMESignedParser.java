@@ -1,14 +1,8 @@
 package org.bouncycastle.mail.smime;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSSignedDataParser;
+import org.bouncycastle.cms.CMSTypedStream;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -19,10 +13,15 @@ import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSSignedDataParser;
-import org.bouncycastle.cms.CMSTypedStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -83,21 +82,34 @@ public class SMIMESignedParser
         }
     }
 
-    private static CMSTypedStream getSignedInputStream(
-        BodyPart    bodyPart,
-        String      defaultContentTransferEncoding)
+    private static File getTmpFile()
         throws MessagingException
     {
         try
         {
-            File           tmp = File.createTempFile("bcMail", ".mime");   
-            OutputStream   out = new BufferedOutputStream(new FileOutputStream(tmp));
+            return File.createTempFile("bcMail", ".mime");
+        }
+        catch (IOException e)
+        {
+            throw new MessagingException("can't extract input stream: " + e);
+        }
+    }
+
+    private static CMSTypedStream getSignedInputStream(
+        BodyPart    bodyPart,
+        String      defaultContentTransferEncoding,
+        File        backingFile)
+        throws MessagingException
+    {
+        try
+        {
+            OutputStream   out = new BufferedOutputStream(new FileOutputStream(backingFile));
 
             SMIMEUtil.outputBodyPart(out, bodyPart, defaultContentTransferEncoding);
-            
+
             out.close();
-            
-            InputStream in = new TemporaryFileInputStream(tmp);
+
+            InputStream in = new TemporaryFileInputStream(backingFile);
 
             return new CMSTypedStream(in);
         }
@@ -121,8 +133,10 @@ public class SMIMESignedParser
     }
     
     /**
-     * base constructor using a defaultContentTransferEncoding of 7bit
+     * base constructor using a defaultContentTransferEncoding of 7bit. A temporary backing file
+     * will be created for the signed data.
      *
+     * @param message signed message with signature.
      * @exception MessagingException on an error extracting the signature or
      * otherwise processing the message.
      * @exception CMSException if some other problem occurs.
@@ -131,19 +145,32 @@ public class SMIMESignedParser
         MimeMultipart message) 
         throws MessagingException, CMSException
     {
-        super(getSignedInputStream(message.getBodyPart(0), "7bit"), getInputStream(message.getBodyPart(1)));
-
-        this.message = message;
-        this.content = (MimeBodyPart)message.getBodyPart(0);
-        
-        drainContent();
+        this(message, getTmpFile());
     }
 
     /**
-     * base constructor with settable contentTransferEncoding
+     * base constructor using a defaultContentTransferEncoding of 7bit and a specified backing file.
      *
-     * @param message the signed message
-     * @param defaultContentTransferEncoding new default to use
+     * @param message signed message with signature.
+     * @param backingFile the temporary file to use to back the signed data.
+     * @exception MessagingException on an error extracting the signature or
+     * otherwise processing the message.
+     * @exception CMSException if some other problem occurs.
+     */
+    public SMIMESignedParser(
+        MimeMultipart message,
+        File          backingFile)
+        throws MessagingException, CMSException
+    {
+        this(message, "7bit", backingFile);
+    }
+
+    /**
+     * base constructor with settable contentTransferEncoding. A temporary backing file will be created
+     * to contain the signed data.
+     *
+     * @param message the signed message with signature.
+     * @param defaultContentTransferEncoding new default to use.
      * @exception MessagingException on an error extracting the signature or
      * otherwise processing the message.
      * @exception CMSException if some other problem occurs.
@@ -153,20 +180,40 @@ public class SMIMESignedParser
         String        defaultContentTransferEncoding) 
         throws MessagingException, CMSException
     {
-        super(getSignedInputStream(message.getBodyPart(0), defaultContentTransferEncoding), getInputStream(message.getBodyPart(1)));
+        this(message, defaultContentTransferEncoding, getTmpFile());
+    }
+
+    /**
+     * base constructor with settable contentTransferEncoding and a specified backing file.
+     *
+     * @param message the signed message with signature.
+     * @param defaultContentTransferEncoding new default to use.
+     * @param backingFile the temporary file to use to back the signed data.
+     * @exception MessagingException on an error extracting the signature or
+     * otherwise processing the message.
+     * @exception CMSException if some other problem occurs.
+     */
+    public SMIMESignedParser(
+        MimeMultipart message,
+        String        defaultContentTransferEncoding,
+        File          backingFile)
+        throws MessagingException, CMSException
+    {
+        super(getSignedInputStream(message.getBodyPart(0), defaultContentTransferEncoding, backingFile), getInputStream(message.getBodyPart(1)));
 
         this.message = message;
         this.content = (MimeBodyPart)message.getBodyPart(0);
-        
+
         drainContent();
     }
-    
+
     /**
      * base constructor for a signed message with encapsulated content.
      * <p>
      * Note: in this case the encapsulated MimeBody part will only be suitable for a single
      * writeTo - once writeTo has been called the file containing the body part will be deleted.
      * </p>
+     * @param message the message containing the encapsulated signed data.
      * @exception MessagingException on an error extracting the signature or
      * otherwise processing the message.
      * @exception SMIMEException if the body part encapsulated in the message cannot be extracted.
@@ -220,6 +267,7 @@ public class SMIMESignedParser
 
     /**
      * return the content that was signed.
+     * @return the signed body part in this message.
      */
     public MimeBodyPart getContent()
     {
@@ -229,9 +277,10 @@ public class SMIMESignedParser
     /**
      * Return the content that was signed as a mime message.
      *
-     * @param session
+     * @param session the session to base the MimeMessage around.
      * @return a MimeMessage holding the content.
-     * @throws MessagingException
+     * @throws MessagingException if there is an issue creating the MimeMessage.
+     * @throws IOException if there is an issue reading the content.
      */
     public MimeMessage getContentAsMimeMessage(Session session)
         throws MessagingException, IOException
@@ -240,8 +289,9 @@ public class SMIMESignedParser
     }
 
     /**
-     * return the content that was signed - depending on whether this was
-     * unencapsulated or not it will return a MimeMultipart or a MimeBodyPart
+     * return the content that was signed with its signature attached.
+     * @return depending on whether this was unencapsulated or not it will return a MimeMultipart
+     * or a MimeBodyPart
      */
     public Object getContentWithSignature()
     {
