@@ -33,6 +33,7 @@ Release 1.35
 <li>Regression - DN fields SerialNumber and Country were changed to encode as UTF8String in 1.34 in the X509DefaultEntryConverter, these now encode as PrintableString.</li>
 <li>CMSSignedData.replaceSigners() was not replacing the digest set as well as the signers. This has been fixed.</li>
 <li>DERGeneralizedTime produced a time string without a GMT offset if they represented local time. This has been fixed.</li>
+<li>Some temp files were still being left on Windows by the SMIME library. All of the known problems have been fixed.</li>
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
