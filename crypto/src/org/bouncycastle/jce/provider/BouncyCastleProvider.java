@@ -39,7 +39,7 @@ import java.security.Provider;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.35b";
+    private static String info = "BouncyCastle Security Provider v1.35";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -50,7 +50,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.345, info);
+        super(PROVIDER_NAME, 1.35, info);
 
         //
         // X509Store
@@ -257,7 +257,8 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher.GOST-28147", "GOST28147");
 
         put("Cipher." + CryptoProObjectIdentifiers.gostR28147_cbc, "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147cbc");
-
+        put("Cipher.TEA", "org.bouncycastle.jce.provider.JCEBlockCipher$TEA");
+        put("Cipher.XTEA", "org.bouncycastle.jce.provider.JCEBlockCipher$XTEA");
 /*
         put("Cipher.DES/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$DES_CFB8");
         put("Cipher.DESEDE/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$DESede_CFB8");
@@ -422,7 +423,9 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.CAST6", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST6");
         put("KeyGenerator.IDEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$IDEA");
         put("KeyGenerator.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$IDEA");
-        
+        put("KeyGenerator.TEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$TEA");
+        put("KeyGenerator.XTEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$XTEA");
+
         put("KeyGenerator.GOST28147", "org.bouncycastle.jce.provider.JCEKeyGenerator$GOST28147");
         put("Alg.Alias.KeyGenerator.GOST", "GOST28147");
         put("Alg.Alias.KeyGenerator.GOST-28147", "GOST28147");

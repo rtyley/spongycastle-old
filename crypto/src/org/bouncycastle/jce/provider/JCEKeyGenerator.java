@@ -1,18 +1,17 @@
 package org.bouncycastle.jce.provider;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidParameterException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.KeyGeneratorSpi;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.generators.DESKeyGenerator;
 import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
+
+import javax.crypto.KeyGeneratorSpi;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEKeyGenerator
     extends KeyGeneratorSpi
@@ -397,6 +396,30 @@ public class JCEKeyGenerator
         public IDEA()
         {
             super("IDEA", 128, new CipherKeyGenerator());
+        }
+    }
+
+    /**
+     * TEA
+     */
+    public static class TEA
+        extends JCEKeyGenerator
+    {
+        public TEA()
+        {
+            super("TEA", 128, new CipherKeyGenerator());
+        }
+    }
+
+    /**
+     * XTEA
+     */
+    public static class XTEA
+        extends JCEKeyGenerator
+    {
+        public XTEA()
+        {
+            super("XTEA", 128, new CipherKeyGenerator());
         }
     }
 

@@ -139,7 +139,7 @@ public class GeneralizedTimeTest
 
         if (timeZone.useDaylightTime() && timeZone.inDaylightTime(date))
         {
-            hours += (sign == "+") ? 1 : -1;
+            hours += sign.equals("+") ? 1 : -1;
         }
 
         return "GMT" + sign + convert(hours) + ":" + convert(minutes);

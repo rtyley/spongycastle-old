@@ -34,7 +34,9 @@ public class HTTPSServerThread
         while ((ch = in.read()) >= 0 && (ch != '\n' && lastCh != '\n'))
         {
             if (ch != '\r')
+            {
                 lastCh = ch;
+            }
         }
     }
 
