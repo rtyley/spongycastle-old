@@ -28,7 +28,7 @@ public class CollectionStore
      * Return the matches in the collection for the passed in selector.
      *
      * @param selector the selector to match against.
-     * @return
+     * @return a possibly empty collection of matching objects.
      */
     public Collection getMatches(Selector selector)
     {
