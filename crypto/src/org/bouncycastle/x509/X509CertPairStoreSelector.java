@@ -38,7 +38,7 @@ public class X509CertPairStoreSelector implements Selector
     /**
      * Set the certificate pair which is used for testing on equality.
      * 
-     * @param certPairChecking The certPairChecking to set.
+     * @param certPair The certPairChecking to set.
      */
     public void setCertPair(X509CertificatePair certPair)
     {
@@ -104,23 +104,23 @@ public class X509CertPairStoreSelector implements Selector
             {
                 return false;
             }
-            X509CertificatePair pair = (X509CertificatePair) obj;
+            X509CertificatePair pair = (X509CertificatePair)obj;
 
             if (forwardSelector != null
-                    && !forwardSelector.match((Object) pair.getForward()))
+                    && !forwardSelector.match((Object)pair.getForward()))
             {
                 return false;
             }
 
             if (reverseSelector != null
-                    && !reverseSelector.match((Object) pair.getForward()))
+                    && !reverseSelector.match((Object)pair.getForward()))
             {
                 return false;
             }
 
             if (certPair != null)
             {
-                return certPair.equals((X509CertificatePair) obj);
+                return certPair.equals(obj);
             }
 
             return true;
