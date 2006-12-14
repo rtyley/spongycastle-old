@@ -1781,7 +1781,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 Set criticalExtensions = cert.getCriticalExtensionOIDs();
                 if (criticalExtensions == null || criticalExtensions.isEmpty())
                 {
-                	continue;
+                    continue;
                 }
                 // remove already processed extensions
                 criticalExtensions.remove(KEY_USAGE);

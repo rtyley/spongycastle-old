@@ -1,5 +1,22 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.DESedeKeySpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+import javax.crypto.spec.RC5ParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -15,24 +32,6 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.DESedeKeySpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * basic test class for a block cipher, basically this just exercises the provider, and makes sure we
@@ -63,6 +62,10 @@ public class BlockCipherTest
         "44c97b67ca8486067f8b6c5b97632f3049e5e52c1d61fdd527dc3da39616540f19a3db39aac1ffd713795cd886cce0c0",
         "IDEA",
         "8c9fd56823ffdc523f6ccf7f614aa6173553e594fc7a21b53f6ccf7f614aa61740c54f7a66e95108",
+        "TEA",
+        "fcf45062104fda7c35712368b56dd4216a6ca998dc297b5435712368b56dd421208027ed2923cd0c",
+        "XTEA",
+        "4b427893d3d6aaded2afafabe25f7b233fb5589faa2b6389d2afafabe25f7b239d12979ac67e1c07",
         "Camellia",
         "3a68b4ad145bc2c76010669d68f2826359887afce763a78d9994143266adfaec8ba7ee562a1688ef9dfd7f897e5c44dc",
         "DES/CBC/NoPadding",
@@ -347,12 +350,21 @@ public class BlockCipherTest
             }
 
             keyGen = KeyGenerator.getInstance(baseAlgorithm, "BC");
+            if (!keyGen.getAlgorithm().equals(baseAlgorithm))
+            {
+                fail("wrong key generator returned!");
+            }
             keyGen.init(rand);
 
             key = keyGen.generateKey();
 
             in = Cipher.getInstance(algorithm, "BC");
             out = Cipher.getInstance(algorithm, "BC");
+
+            if (!in.getAlgorithm().startsWith(baseAlgorithm))
+            {
+                fail("wrong cipher returned!");
+            }
 
             if (algorithm.startsWith("RC2"))
             {
@@ -376,7 +388,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            fail("" + algorithm + " failed initialisation - " + e.toString());
+            fail("" + algorithm + " failed initialisation - " + e.toString(), e);
         }
 
         //

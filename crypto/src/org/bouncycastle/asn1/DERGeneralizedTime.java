@@ -171,7 +171,7 @@ public class DERGeneralizedTime
         {
             if (timeZone.useDaylightTime() && timeZone.inDaylightTime(this.getDate()))
             {
-                hours += (sign == "+") ? 1 : -1;
+                hours += sign.equals("+") ? 1 : -1;
             }
         }
         catch (ParseException e)

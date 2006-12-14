@@ -6,9 +6,11 @@ public abstract  class ASN1Object
     extends DERObject
 {
     /**
+     * Create a base ASN.1 object from a byte stream.
      *
-     * @param data
-     * @return
+     * @param data the byte stream to parse.
+     * @return the base ASN.1 object represented by the byte stream.
+     * @exception IOException if there is a problem parsing the data.
      */
     public static ASN1Object fromByteArray(byte[] data)
         throws IOException

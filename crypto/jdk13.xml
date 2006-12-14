@@ -41,6 +41,7 @@
                 <exclude name="**/CRL5Test.java" />
                 <exclude name="**/SignedMailValidatorTest.java" />
                 <exclude name="**/X509LDAP*.java" />
+                <exclude name="**/tls/test/*.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />

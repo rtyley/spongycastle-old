@@ -124,7 +124,8 @@ public class X509CertPairStoreSelector implements Selector
             }
 
             return true;
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             return false;
         }

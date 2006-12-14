@@ -1,5 +1,31 @@
 package org.bouncycastle.openssl;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.crypto.PBEParametersGenerator;
+import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509V2AttributeCertificate;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,34 +38,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.StringTokenizer;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
-import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509V2AttributeCertificate;
 
 /**
  * Class for reading OpenSSL PEM encoded streams containing 
@@ -138,7 +147,7 @@ public class PEMReader extends BufferedReader
             {
                 return readAttributeCertificate("-----END ATTRIBUTE CERTIFICATE");
             }
-            else if (line.indexOf("-----BEGIN RSA PRIVATE KEY") != -1)
+            if (line.indexOf("-----BEGIN RSA PRIVATE KEY") != -1)
             {
                 try
                 {
@@ -150,7 +159,7 @@ public class PEMReader extends BufferedReader
                         "problem creating RSA private key: " + e.toString());
                 }
             }
-            else if (line.indexOf("-----BEGIN DSA PRIVATE KEY") != -1)
+            if (line.indexOf("-----BEGIN DSA PRIVATE KEY") != -1)
             {
                 try
                 {
@@ -161,6 +170,14 @@ public class PEMReader extends BufferedReader
                     throw new IOException(
                         "problem creating DSA private key: " + e.toString());
                 }
+            }
+            if (line.indexOf("-----BEGIN EC PARAMETERS-----") != -1)
+            {
+                return readECParameters("-----END EC PARAMETERS-----");
+            }
+            if (line.indexOf("-----BEGIN EC PRIVATE KEY-----") != -1)
+            {
+                return readECPrivateKey("-----END EC PRIVATE KEY-----");
             }
         }
 
@@ -204,25 +221,18 @@ public class PEMReader extends BufferedReader
 
         try 
         {
-            KeyFactory keyFact = KeyFactory.getInstance("RSA",provider);      
+            KeyFactory keyFact = KeyFactory.getInstance("RSA", provider);
 
-            PublicKey pubKey = keyFact.generatePublic(keySpec);
-            return pubKey;
-        }
-        catch (NoSuchAlgorithmException e) 
-        { 
-                // ignore
-        }
-        catch (InvalidKeySpecException e) 
-        { 
-                // ignore
+            return keyFact.generatePublic(keySpec);
         }
         catch (NoSuchProviderException e)
         {
-                throw new RuntimeException("can't find provider " + provider);
+            throw new IOException("can't find provider " + provider);
         }
-
-        return  null;
+        catch (Exception e)
+        {
+            throw new IOException("problem extracting key: " + e.toString());
+        }
     }
 
     private PublicKey readPublicKey(String endMarker)
@@ -267,25 +277,7 @@ public class PEMReader extends BufferedReader
         String  endMarker)
         throws IOException
     {
-        String          line;
-        StringBuffer    buf = new StringBuffer();
-  
-        while ((line = readLine()) != null)
-        {
-            if (line.indexOf(endMarker) != -1)
-            {
-                break;
-            }
-            buf.append(line.trim());
-        }
-
-        if (line == null)
-        {
-            throw new IOException(endMarker + " not found");
-        }
-
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(
-                                                Base64.decode(buf.toString()));
+        ByteArrayInputStream    bIn = new ByteArrayInputStream(readBytes(endMarker));
 
         try
         {
@@ -310,25 +302,7 @@ public class PEMReader extends BufferedReader
         String  endMarker)
         throws IOException
     {
-        String          line;
-        StringBuffer    buf = new StringBuffer();
-
-        while ((line = readLine()) != null)
-        {
-            if (line.indexOf(endMarker) != -1)
-            {
-                break;
-            }
-            buf.append(line.trim());
-        }
-
-        if (line == null)
-        {
-            throw new IOException(endMarker + " not found");
-        }
-
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(
-                                                Base64.decode(buf.toString()));
+        ByteArrayInputStream    bIn = new ByteArrayInputStream(readBytes(endMarker));
 
         try
         {
@@ -353,26 +327,9 @@ public class PEMReader extends BufferedReader
         String  endMarker)
         throws IOException
     {
-        String          line;
-        StringBuffer    buf = new StringBuffer();
-  
-        while ((line = readLine()) != null)
-        {
-            if (line.indexOf(endMarker) != -1)
-            {
-                break;
-            }
-            buf.append(line.trim());
-        }
-
-        if (line == null)
-        {
-            throw new IOException(endMarker + " not found");
-        }
-
         try
         {
-            return new PKCS10CertificationRequest(Base64.decode(buf.toString()));
+            return new PKCS10CertificationRequest(readBytes(endMarker));
         }
         catch (Exception e)
         {
@@ -390,24 +347,7 @@ public class PEMReader extends BufferedReader
         String  endMarker)
         throws IOException
     {
-        String          line;
-        StringBuffer    buf = new StringBuffer();
-  
-        while ((line = readLine()) != null)
-        {
-            if (line.indexOf(endMarker) != -1)
-            {
-                break;
-            }
-            buf.append(line.trim());
-        }
-
-        if (line == null)
-        {
-            throw new IOException(endMarker + " not found");
-        }
-
-        return new X509V2AttributeCertificate(Base64.decode(buf.toString()));
+        return new X509V2AttributeCertificate(readBytes(endMarker));
     }
     
     /**
@@ -474,10 +414,6 @@ public class PEMReader extends BufferedReader
         byte[]  salt)
         throws IOException
     {
-        byte[]      key = new byte[keyLength];
-        int         offset = 0;
-        int         bytesNeeded = keyLength;
-
         if (pFinder == null)
         {
             throw new IOException("No password finder specified, but a password is required");
@@ -619,5 +555,38 @@ public class PEMReader extends BufferedReader
         return new KeyPair(
                     fact.generatePublic(pubSpec),
                     fact.generatePrivate(privSpec));
+    }
+
+    private ECNamedCurveParameterSpec readECParameters(String endMarker)
+        throws IOException
+    {
+        DERObjectIdentifier oid = (DERObjectIdentifier)ASN1Object.fromByteArray(readBytes(endMarker));
+
+        return ECNamedCurveTable.getParameterSpec(oid.getId());
+    }
+
+    private KeyPair readECPrivateKey(String endMarker)
+        throws IOException
+    {
+        try
+        {
+            ECPrivateKeyStructure pKey = new ECPrivateKeyStructure((ASN1Sequence)ASN1Object.fromByteArray(readBytes(endMarker)));
+            AlgorithmIdentifier   algId = new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, pKey.getParameters());
+            PrivateKeyInfo        privInfo = new PrivateKeyInfo(algId, pKey.getDERObject());
+            SubjectPublicKeyInfo  pubInfo = new SubjectPublicKeyInfo(algId, pKey.getPublicKey().getBytes());
+            PKCS8EncodedKeySpec   privSpec = new PKCS8EncodedKeySpec(privInfo.getEncoded());
+            X509EncodedKeySpec    pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
+            KeyFactory            fact = KeyFactory.getInstance("EC", provider);
+
+            return new KeyPair(fact.generatePublic(pubSpec), fact.generatePrivate(privSpec));
+        }
+        catch (ClassCastException e)
+        { 
+            throw new IOException("wrong ASN.1 object found in stream");
+        }
+        catch (Exception e)
+        {
+            throw new IOException("problem parsing EC private key: " + e);
+        }
     }
 }
