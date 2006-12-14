@@ -78,6 +78,8 @@ public class RegressionTest
         new MGF1GeneratorTest(),
         new ShortenedDigestTest(),
         new EqualsHashCodeTest(),
+        new TEATest(),
+        new XTEATest(),
         //new NaccacheSternTest(),
         new NullTest()
     };
