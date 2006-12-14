@@ -1,4 +1,14 @@
-package org.bouncycastle.openpgp.examples;
+package org.bouncycastle.openpgp.examples.test;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.openpgp.examples.DSAElGamalKeyRingGenerator;
+import org.bouncycastle.openpgp.examples.KeyBasedFileProcessor;
+import org.bouncycastle.openpgp.examples.KeyBasedLargeFileProcessor;
+import org.bouncycastle.openpgp.examples.PBEFileProcessor;
+import org.bouncycastle.openpgp.examples.RSAKeyPairGenerator;
+import org.bouncycastle.openpgp.examples.SignedFileProcessor;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,10 +18,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 public class AllTests
     extends TestCase
