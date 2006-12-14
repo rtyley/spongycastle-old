@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * @deprecated use corresponsding classes in org.bouncycastle.asn1.
+ */
 public abstract class DerGenerator
     extends Asn1Generator
 {       

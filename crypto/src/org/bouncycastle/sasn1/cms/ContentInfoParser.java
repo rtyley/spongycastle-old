@@ -1,11 +1,11 @@
 package org.bouncycastle.sasn1.cms;
 
-import java.io.IOException;
-
 import org.bouncycastle.sasn1.Asn1Object;
 import org.bouncycastle.sasn1.Asn1ObjectIdentifier;
 import org.bouncycastle.sasn1.Asn1Sequence;
 import org.bouncycastle.sasn1.Asn1TaggedObject;
+
+import java.io.IOException;
 
 /**
  * Produce an object suitable for an ASN1OutputStream.
@@ -15,6 +15,7 @@ import org.bouncycastle.sasn1.Asn1TaggedObject;
  *          content
  *          [0] EXPLICIT ANY DEFINED BY contentType OPTIONAL }
  * </pre>
+ * @deprecated use corresponding class in org.bouncycastle.asn1.cms
  */
 public class ContentInfoParser
 {

@@ -1,15 +1,14 @@
 package org.bouncycastle.sasn1.cms;
 
-import java.io.IOException;
-
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.sasn1.Asn1Object;
 import org.bouncycastle.sasn1.Asn1ObjectIdentifier;
 import org.bouncycastle.sasn1.Asn1Sequence;
 import org.bouncycastle.sasn1.Asn1TaggedObject;
 import org.bouncycastle.sasn1.DerSequence;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import java.io.IOException;
 
 /**
  * <pre>
@@ -19,6 +18,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
  *     encryptedContent [0] IMPLICIT EncryptedContent OPTIONAL 
  * }
  * </pre>
+ * @deprecated use corresponding class in org.bouncycastle.asn1.cms
  */
 public class EncryptedContentInfoParser
 {

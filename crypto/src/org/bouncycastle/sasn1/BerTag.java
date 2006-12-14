@@ -1,5 +1,8 @@
 package org.bouncycastle.sasn1;
 
+/**
+ * @deprecated use corresponsding classes in org.bouncycastle.asn1.
+ */
 public class BerTag
 {
     public static final int BOOLEAN             = 0x01;

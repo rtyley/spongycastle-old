@@ -2,7 +2,10 @@ package org.bouncycastle.sasn1;
 
 import java.io.InputStream;
 
-public class DerOctetString 
+/**
+ * @deprecated use corresponsding classes in org.bouncycastle.asn1.
+ */
+public class DerOctetString
     extends DerObject
     implements Asn1OctetString
 {   

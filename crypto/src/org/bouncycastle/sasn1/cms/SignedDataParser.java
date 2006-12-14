@@ -1,13 +1,13 @@
 package org.bouncycastle.sasn1.cms;
 
-import java.io.IOException;
-
 import org.bouncycastle.sasn1.Asn1Integer;
 import org.bouncycastle.sasn1.Asn1Object;
 import org.bouncycastle.sasn1.Asn1Sequence;
 import org.bouncycastle.sasn1.Asn1Set;
 import org.bouncycastle.sasn1.Asn1TaggedObject;
 import org.bouncycastle.sasn1.BerTag;
+
+import java.io.IOException;
 
 /**
  * <pre>
@@ -20,6 +20,7 @@ import org.bouncycastle.sasn1.BerTag;
  *     signerInfos SignerInfos
  *   }
  * </pre>
+ * @deprecated use corresponding class in org.bouncycastle.asn1.cms
  */
 public class SignedDataParser
 {
