@@ -166,7 +166,7 @@ public class XTEAEngine
         return ((in[inOff++]) << 24) |
                  ((in[inOff++] & 255) << 16) |
                  ((in[inOff++] & 255) <<  8) |
-                 ((in[inOff] & 255)      );
+                 ((in[inOff] & 255));
     }
 
     private void unpackInt(int v, byte[] out, int outOff)
@@ -174,6 +174,6 @@ public class XTEAEngine
         out[outOff++] = (byte)(v >>> 24);
         out[outOff++] = (byte)(v >>> 16);
         out[outOff++] = (byte)(v >>>  8);
-        out[outOff  ] = (byte)(v       );
+        out[outOff  ] = (byte)v;
     }
 }
