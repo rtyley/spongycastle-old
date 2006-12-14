@@ -1,12 +1,12 @@
 package org.bouncycastle.sasn1.cms;
 
-import java.io.IOException;
-
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.sasn1.Asn1Integer;
 import org.bouncycastle.sasn1.Asn1Sequence;
 import org.bouncycastle.sasn1.DerSequence;
+
+import java.io.IOException;
 
 /** 
  * RFC 3274 - CMS Compressed Data.
@@ -17,6 +17,7 @@ import org.bouncycastle.sasn1.DerSequence;
  *  encapContentInfo EncapsulatedContentInfo
  * }
  * </pre>
+ * @deprecated use corresponding class in org.bouncycastle.asn1.cms
  */
 public class CompressedDataParser
 {

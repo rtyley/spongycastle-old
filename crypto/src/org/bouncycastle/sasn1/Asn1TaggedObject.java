@@ -3,6 +3,9 @@ package org.bouncycastle.sasn1;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * @deprecated use corresponsding classes in org.bouncycastle.asn1.
+ */
 public class Asn1TaggedObject
     extends Asn1Object
 {

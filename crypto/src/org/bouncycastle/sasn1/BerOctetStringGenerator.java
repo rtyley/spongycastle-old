@@ -1,10 +1,13 @@
 package org.bouncycastle.sasn1;
 
+import org.bouncycastle.asn1.DEROctetString;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.bouncycastle.asn1.DEROctetString;
-
+/**
+ * @deprecated use corresponsding classes in org.bouncycastle.asn1.
+ */
 public class BerOctetStringGenerator
     extends BerGenerator
 {

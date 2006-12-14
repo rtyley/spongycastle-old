@@ -3,7 +3,10 @@ package org.bouncycastle.sasn1;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class BerSequence 
+/**
+ * @deprecated use corresponsding classes in org.bouncycastle.asn1.
+ */
+public class BerSequence
     extends Asn1Object
     implements Asn1Sequence
 {

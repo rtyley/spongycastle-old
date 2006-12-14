@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 
+/**
+ * @deprecated use corresponsding classes in org.bouncycastle.asn1.
+ */
 public class Asn1ObjectIdentifier
     extends DerObject
 {

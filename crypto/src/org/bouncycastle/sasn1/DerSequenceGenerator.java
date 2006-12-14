@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * @deprecated use corresponsding classes in org.bouncycastle.asn1.
+ */
 public class DerSequenceGenerator
     extends DerGenerator
 {

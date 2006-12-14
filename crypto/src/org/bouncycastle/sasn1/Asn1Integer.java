@@ -3,6 +3,9 @@ package org.bouncycastle.sasn1;
 import java.io.IOException;
 import java.math.BigInteger;
 
+/**
+ * @deprecated use corresponsding classes in org.bouncycastle.asn1.
+ */
 public class Asn1Integer
     extends DerObject
 {
