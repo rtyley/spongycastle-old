@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
@@ -73,14 +74,14 @@ public class ECPrivateKeyStructure
 
         while (e.hasMoreElements())
         {
-            DERObject obj = (DERObject)e.nextElement();
+            DEREncodable obj = (DEREncodable)e.nextElement();
 
             if (obj instanceof ASN1TaggedObject)
             {
                 ASN1TaggedObject tag = (ASN1TaggedObject)obj;
                 if (tag.getTagNo() == tagNo)
                 {
-                    return (ASN1Object)tag.getObject();
+                    return (ASN1Object)((DEREncodable)tag.getObject()).getDERObject();
                 }
             }
         }
