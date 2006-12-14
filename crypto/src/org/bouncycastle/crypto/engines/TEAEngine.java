@@ -125,8 +125,8 @@ public class TEAEngine
         for (int i = 0; i != rounds; i++)
         {
             sum += delta;
-            v0  += ((v1 << 4 ) + _a) ^ (v1 + sum) ^ ((v1 >>> 5) + _b);
-            v1  += ((v0 << 4 ) + _c) ^ (v0 + sum) ^ ((v0 >>> 5) + _d);
+            v0  += ((v1 << 4) + _a) ^ (v1 + sum) ^ ((v1 >>> 5) + _b);
+            v1  += ((v0 << 4) + _c) ^ (v0 + sum) ^ ((v0 >>> 5) + _d);
         }
 
         unpackInt(v0, out, outOff);
@@ -149,8 +149,8 @@ public class TEAEngine
         
         for (int i = 0; i != rounds; i++)
         {
-            v1  -= ((v0 << 4 ) + _c) ^ (v0 + sum) ^ ((v0 >>> 5) + _d);
-            v0  -= ((v1 << 4 ) + _a) ^ (v1 + sum) ^ ((v1 >>> 5) + _b);
+            v1  -= ((v0 << 4) + _c) ^ (v0 + sum) ^ ((v0 >>> 5) + _d);
+            v0  -= ((v1 << 4) + _a) ^ (v1 + sum) ^ ((v1 >>> 5) + _b);
             sum -= delta;
         }
         
@@ -165,7 +165,7 @@ public class TEAEngine
         return ((in[inOff++]) << 24) |
                  ((in[inOff++] & 255) << 16) |
                  ((in[inOff++] & 255) <<  8) |
-                 ((in[inOff] & 255)      );
+                 ((in[inOff] & 255));
     }
 
     private void unpackInt(int v, byte[] out, int outOff)
@@ -173,6 +173,6 @@ public class TEAEngine
         out[outOff++] = (byte)(v >>> 24);
         out[outOff++] = (byte)(v >>> 16);
         out[outOff++] = (byte)(v >>>  8);
-        out[outOff  ] = (byte)(v       );
+        out[outOff  ] = (byte)v;
     }
 }
