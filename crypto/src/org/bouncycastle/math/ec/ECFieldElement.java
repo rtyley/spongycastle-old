@@ -439,8 +439,8 @@ public abstract class ECFieldElement
          * Checks, if the ECFieldElements <code>a</code> and <code>b</code>
          * are elements of the same field <code>F<sub>2<sup>m</sup></sub></code>
          * (having the same representation).
-         * @param a
-         * @param b
+         * @param a field element.
+         * @param b field element to be compared.
          * @throws IllegalArgumentException if <code>a</code> and <code>b</code>
          * are not elements of the same field
          * <code>F<sub>2<sup>m</sup></sub></code> (having the same
