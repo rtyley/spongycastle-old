@@ -35,7 +35,7 @@ then
         rm src/org/bouncycastle/util/StoreException.java
         rm src/org/bouncycastle/util/Selector.java
         rm src/org/bouncycastle/util/StreamParser.java
-        rm src/org/bouncycastle/util/StreamParserException.java
+        rm src/org/bouncycastle/util/StreamParsingException.java
 
         mkdir classes; mkdir docs;
         (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
@@ -176,6 +176,7 @@ then
     rm src/org/bouncycastle/asn1/test/ParseTest.java
     rm src/org/bouncycastle/jce/provider/test/ImplicitlyCaTest.java
     rm src/org/bouncycastle/jce/provider/test/X509StoreTest.java
+    rm -rf src/org/bouncycastle/crypto/tls/test
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -303,7 +304,7 @@ then
     export JAVA_HOME
 
     rm src/org/bouncycastle/openpgp/examples/DSAElGamalKeyRingGenerator.java
-    rm src/org/bouncycastle/openpgp/examples/AllTests.java
+    rm src/org/bouncycastle/openpgp/examples/test/AllTests.java
 
     javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
