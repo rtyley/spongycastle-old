@@ -73,6 +73,8 @@ public class X509CertPairStoreSelector implements Selector
     {
         X509CertPairStoreSelector cln = new X509CertPairStoreSelector();
 
+        cln.certPair = certPair;
+        
         if (forwardSelector != null)
         {
             cln.setForwardSelector((X509CertStoreSelector) forwardSelector

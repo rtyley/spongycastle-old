@@ -14,7 +14,7 @@ import java.security.cert.X509CRLSelector;
 /**
  * This class is a Selector implementation for X.509 certificate revocation
  * lists.
- *
+ * 
  * @see org.bouncycastle.util.Selector
  * @see org.bouncycastle.x509.X509Store
  * @see org.bouncycastle.jce.provider.X509StoreCRLCollection
@@ -33,10 +33,12 @@ public class X509CRLStoreSelector
 
     private boolean issuingDistributionPointEnabled = false;
 
+    private X509AttributeCertificate attrCertChecking;
+
     /**
      * Returns if the issuing distribution point criteria should be applied.
      * Defaults to <code>false</code>.
-     * <p/>
+     * <p>
      * You may also set the issuing distribution point criteria if not a missing
      * issuing distribution point should be assumed.
      *
@@ -58,6 +60,33 @@ public class X509CRLStoreSelector
         boolean issuingDistributionPointEnabled)
     {
         this.issuingDistributionPointEnabled = issuingDistributionPointEnabled;
+    }
+
+    /**
+     * Sets the attribute certificate being checked. This is not a criterion.
+     * Rather, it is optional information that may help a {@link X509Store} find
+     * CRLs that would be relevant when checking revocation for the specified
+     * attribute certificate. If <code>null</code> is specified, then no such
+     * optional information is provided.
+     *
+     * @param attrCert the <code>X509AttributeCertificate</code> being checked (or
+     *             <code>null</code>)
+     * @see #getAttrCertificateChecking()
+     */
+    public void setAttrCertificateChecking(X509AttributeCertificate attrCert)
+    {
+        attrCertChecking = attrCert;
+    }
+
+    /**
+     * Returns the attribute certificate being checked.
+     *
+     * @return Returns the attribute certificate being checked.
+     * @see #setAttrCertificateChecking(X509AttributeCertificate)
+     */
+    public X509AttributeCertificate getAttrCertificateChecking()
+    {
+        return attrCertChecking;
     }
 
     public boolean match(Object obj)
@@ -146,7 +175,7 @@ public class X509CRLStoreSelector
     /**
      * If this is set to <code>true</code> the CRL reported contains the delta
      * CRL indicator CRL extension.
-     * <p/>
+     * <p>
      * {@link #setCompleteCRLEnabled(boolean)} and
      * {@link #setDeltaCRLIndicatorEnabled(boolean)} excluded each other.
      *
@@ -191,6 +220,18 @@ public class X509CRLStoreSelector
         return cs;
     }
 
+    public Object clone()
+    {
+        X509CRLStoreSelector sel = X509CRLStoreSelector.getInstance(this);
+        sel.deltaCRLIndicator = deltaCRLIndicator;
+        sel.completeCRLEnabled = completeCRLEnabled;
+        sel.maxBaseCRLNumber = maxBaseCRLNumber;
+        sel.attrCertChecking = attrCertChecking;
+        sel.issuingDistributionPointEnabled = issuingDistributionPointEnabled;
+        sel.issuingDistributionPoint = Arrays.clone(issuingDistributionPoint);
+        return sel;
+    }
+
     /**
      * If <code>true</code> only complete CRLs are returned. Defaults to
      * <code>false</code>.
@@ -204,7 +245,7 @@ public class X509CRLStoreSelector
 
     /**
      * If set to <code>true</code> only complete CRLs are returned.
-     * <p/>
+     * <p>
      * {@link #setCompleteCRLEnabled(boolean)} and
      * {@link #setDeltaCRLIndicatorEnabled(boolean)} excluded each other.
      *
@@ -230,7 +271,7 @@ public class X509CRLStoreSelector
     /**
      * Sets the maximum base CRL number. Setting to <code>null</code> disables
      * this cheack.
-     * <p/>
+     * <p>
      * This is only meaningful for delta CRLs. Complete CRLs must have a CRL
      * number which is greater or equal than the base number of the
      * corresponding CRL.
@@ -245,9 +286,9 @@ public class X509CRLStoreSelector
     /**
      * Returns the issuing distribution point. Defaults to <code>null</code>,
      * which is a missing issuing distribution point extension.
-     * <p/>
+     * <p>
      * The internal byte array is cloned before it is returned.
-     * <p/>
+     * <p>
      * The criteria must be enable with
      * {@link #setIssuingDistributionPointEnabled(boolean)}.
      *
@@ -261,15 +302,15 @@ public class X509CRLStoreSelector
 
     /**
      * Sets the issuing distribution point.
-     * <p/>
+     * <p>
      * The issuing distribution point extension is a CRL extension which
      * identifies the scope and the distribution point of a CRL. The scope
      * contains among others information about revocation reasons contained in
      * the CRL. Delta CRLs and complete CRLs must have matching issuing
      * distribution points.
-     * <p/>
+     * <p>
      * The byte array is cloned to protect against subsequent modifications.
-     * <p/>
+     * <p>
      * You must also enable or disable this criteria with
      * {@link #setIssuingDistributionPointEnabled(boolean)}.
      *
