@@ -37,6 +37,7 @@ src/org/bouncycastle/crypto/modes \
 src/org/bouncycastle/crypto/params \
 src/org/bouncycastle/crypto/signers \
 src/org/bouncycastle/crypto/prng \
+src/org/bouncycastle/crypto/tls \
 src/org/bouncycastle/util \
 src/org/bouncycastle/bcpg \
 src/org/bouncycastle/asn1 \
@@ -45,6 +46,7 @@ src/org/bouncycastle/asn1 \
     (cd j2me; tar cf - * | (cd ../lcrypto-j2me-$base; cd src; tar xf -))
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AllTests.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/util/CollectionStore.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/util/StoreException.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/util/Selector.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/util/Store.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/util/StreamParser.java
@@ -79,12 +81,6 @@ src/org/bouncycastle/asn1 \
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TagTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TypeOfBiometricDataUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AESVectorFileTest.java
-    rm lcrypto-j2me-$base/src/org/bouncycastle/util/StreamParser.java
-    rm lcrypto-j2me-$base/src/org/bouncycastle/util/StreamParserException.java
-    rm lcrypto-j2me-$base/src/org/bouncycastle/util/Store.java
-    rm lcrypto-j2me-$base/src/org/bouncycastle/util/StoreException.java
-    rm lcrypto-j2me-$base/src/org/bouncycastle/util/CollectionStore.java
-    rm lcrypto-j2me-$base/src/org/bouncycastle/util/Selector.java
 
    (2>&1 find lcrypto-j2me-$base -name CVS -exec rm -rf \{\} \; ) > /dev/null
 
