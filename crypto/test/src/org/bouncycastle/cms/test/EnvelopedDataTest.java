@@ -1,24 +1,25 @@
 package org.bouncycastle.cms.test;
 
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-
-import javax.crypto.SecretKey;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.util.encoders.Base64;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.KeyPair;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
 public class EnvelopedDataTest
     extends TestCase 
@@ -37,7 +38,28 @@ public class EnvelopedDataTest
     
     private static boolean         _initialised = false;
 
-    public EnvelopedDataTest() 
+    private byte[] oldKEK = Base64.decode(
+                          "MIAGCSqGSIb3DQEHA6CAMIACAQIxQaI/MD0CAQQwBwQFAQIDBAUwDQYJYIZIAWUDBAEFBQAEI"
+                        + "Fi2eHTPM4bQSjP4DUeDzJZLpfemW2gF1SPq7ZPHJi1mMIAGCSqGSIb3DQEHATAUBggqhkiG9w"
+                        + "0DBwQImtdGyUdGGt6ggAQYk9X9z01YFBkU7IlS3wmsKpm/zpZClTceAAAAAAAAAAAAAA==");
+
+    private byte[] ecKeyAgreeMsg = Base64.decode(
+                          "MIAGCSqGSIb3DQEHA6CAMIACAQIxgbyhgbkCAQOgKKEmMAsGByqGSM49AgEF"
+                        + "AAMXAAMA1MeMnJtKgJzEaQlORe8fog2gDiMwGgYJK4EFEIZIPwACMA0GCWCG"
+                        + "SAFlAwQBLQUAMG4wbDBAMDQxDDAKBgNVBAMMA2NuMTEKMAgGA1UECgwBbzEL"
+                        + "MAkGA1UECwwCb3UxCzAJBgNVBAYMAmNhAghyzkH+vWY1OwQo3IEM2H+9E64C"
+                        + "33KFP8j1aahAvWkyA4NVkIRAuivjKxE96Szy7ugH1DCABgkqhkiG9w0BBwEw"
+                        + "HQYJYIZIAWUDBAEqBBAJ72q+1QnJ+62gouQaU6mnoIAEIFIdsc9qBCEOi9kk"
+                        + "JcNSQ+2QzdtoEq1ViybBhek+ubdbBBCHqu8xycnrhY6RZ5F7KVdfAAAAAAAA"
+                        + "AAAAAA==");
+
+    private byte[] ecKeyAgreeKey = Base64.decode(
+                          "MIGkAgEBBDCQ7Fw/nnkISP0hSf8Z4FL66Zhv6MBBvhKK9lZFkbXKoxRBBnqQrb7Y"
+                        + "dKaeKf1ywyOgBwYFK4EEACKhZANiAgSwM/xU6jA6/eKVlpceGlngGyVC/mhTzfeM"
+                        + "VB6Sih6P6rzdR2cBtQDIfpU555Q5FJTzfvki+H57PIFtx0o82dnzgG8UGKZci25Y"
+                        + "qswDRAfnTE3q/3pknY9DjZtwBbYCabQ=");
+
+    public EnvelopedDataTest()
     {
     }
 
@@ -399,7 +421,34 @@ public class EnvelopedDataTest
             assertEquals(true, Arrays.equals(data, recData));
         }
     }
-    
+
+    public void testErrorneousKEK()
+        throws Exception
+    {
+        byte[]    data = "WallaWallaWashington".getBytes();
+        SecretKey kek  = new SecretKeySpec(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }, "AES");
+
+        CMSEnvelopedData ed = new CMSEnvelopedData(oldKEK);
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), NISTObjectIdentifiers.id_aes128_wrap.getId());
+
+            byte[] recData = recipient.getContent(kek, "BC");
+
+            assertEquals(true, Arrays.equals(data, recData));
+        }
+    }
+
     public void testAESKEK()
         throws Exception
     {
@@ -468,5 +517,38 @@ public class EnvelopedDataTest
 
             assertEquals(true, Arrays.equals(data, recData));
         }
+    }
+
+   public void testECKeyAgree()
+        throws Exception
+    {
+        CMSEnvelopedData ed = new CMSEnvelopedData(ecKeyAgreeMsg);
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        assertEquals(ed.getEncryptionAlgOID(), "2.16.840.1.101.3.4.1.42");
+
+//        ECPrivateKeyStructure pKey = new ECPrivateKeyStructure((ASN1Sequence)ASN1Object.fromByteArray(ecKeyAgreeKey));
+//        AlgorithmIdentifier algId = new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, pKey.getParameters());
+//        PrivateKeyInfo privInfo = new PrivateKeyInfo(algId, pKey.getDERObject());
+//        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privInfo.getEncoded());
+//        KeyFactory            fact = KeyFactory.getInstance("ECDH", "BC");
+//
+//        while (it.hasNext())
+//        {
+//            RecipientInformation   recipient = (RecipientInformation)it.next();
+//
+//            //assertEquals(recipient.getKeyEncryptionAlgOID(), "1.2.840.113549.3.7");
+//
+//            byte[] recData = recipient.getContent(fact.generatePrivate(privSpec), "BC");
+//            System.out.println(new String(recData));
+////
+////            byte[] recData = recipient.getContent(kek, "BC");
+////
+////            assertEquals(true, Arrays.equals(data, recData));
+//        }
     }
 }

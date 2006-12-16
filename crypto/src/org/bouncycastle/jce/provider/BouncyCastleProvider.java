@@ -196,7 +196,7 @@ public final class BouncyCastleProvider extends Provider
         put("KeyAgreement.DH", "org.bouncycastle.jce.provider.JCEDHKeyAgreement");
         put("KeyAgreement.ECDH", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DH");
         put("KeyAgreement.ECDHC", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DHC");
-
+        put("KeyAgreement.1.3.133.16.840.63.0.2", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DHwithSHA1KDF");
         //
         // cipher engines
         //
@@ -242,7 +242,7 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_wrap, "AESWRAP");
         put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_wrap, "AESWRAP");
         put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_wrap, "AESWRAP");
-        
+
         put("Cipher.SERPENT", "org.bouncycastle.jce.provider.JCEBlockCipher$Serpent");
         put("Cipher.CAMELLIA", "org.bouncycastle.jce.provider.JCEBlockCipher$Camellia");
         put("Cipher.CAST5", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST5");

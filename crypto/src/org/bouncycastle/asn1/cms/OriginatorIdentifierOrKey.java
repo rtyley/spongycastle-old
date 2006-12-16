@@ -84,8 +84,18 @@ public class OriginatorIdentifierOrKey
     {
         return id;
     }
+
+    public OriginatorPublicKey getOriginatorKey()
+    {
+        if (id instanceof ASN1TaggedObject && ((ASN1TaggedObject)id).getTagNo() == 1)
+        {
+            return OriginatorPublicKey.getInstance((ASN1TaggedObject)id, false);
+        }
+
+        return null;
+    }
     
-    /** 
+    /**
      * Produce an object suitable for an ASN1OutputStream.
      * <pre>
      * OriginatorIdentifierOrKey ::= CHOICE {

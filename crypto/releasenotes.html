@@ -36,6 +36,7 @@ Release 1.35
 <li>Some temp files were still being left on Windows by the SMIME library. All of the known problems have been fixed.</li>
 <li>Comparing ASN.1 object for equality would fail in some circumstances. This has been fixed.
 <li>The IESEngine could incorrectly encrypt data when used in block cipher mode. This has been fixed.
+<li>An error in the encoding of the KEKRecipientInfo has been fixed. Compatability warning: this may mean that versions of BC mail prior to 1.35 will have trouble processing KEK messages produced by 1.35 or later.
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>

@@ -3,8 +3,8 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.DerivationFunction;
 import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.ShortenedDigest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.digests.ShortenedDigest;
 import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
 import org.bouncycastle.crypto.params.KDFParameters;
 import org.bouncycastle.util.encoders.Hex;
@@ -42,7 +42,12 @@ public class KDF2GeneratorTest
            + "052cdf0d640562bdfadfa263cfccf3c52b29f2af4a1869959bc77f854cf15bd7a2519"
            + "2985a842dbff8e13efee5b7e7e55bbe4d389647c686a9a9ab3fb889b2d7767d3837ee"
            + "a4e0a2f04b53ca8f50fb31225c1be2d0126c8c7a4753b0807");
-    
+
+    private byte[] seed3 = Hex.decode("CA7C0F8C3FFA87A96E1B74AC8E6AF594347BB40A");
+    private byte[] mask3 = Hex.decode("744AB703F5BC082E59185F6D049D2D367DB245C2");
+
+    private byte[] seed4 = Hex.decode("0499B502FC8B5BAFB0F4047E731D1F9FD8CD0D8881");
+    private byte[] mask4 = Hex.decode("03C62280C894E103C680B13CD4B4AE740A5EF0C72547292F82DC6B1777F47D63BA9D1EA732DBF386");
 
     public KDF2GeneratorTest()
     {
@@ -54,6 +59,8 @@ public class KDF2GeneratorTest
         checkMask(2, new KDF2BytesGenerator(new ShortenedDigest(new SHA256Digest(), 20)), seed2, mask2);
         checkMask(3, new KDF2BytesGenerator(new SHA256Digest()), seed2, adjustedMask2);
         checkMask(4, new KDF2BytesGenerator(new SHA1Digest()), seed2, sha1Mask);
+        checkMask(5, new KDF2BytesGenerator(new SHA1Digest()), seed3, mask3);
+        checkMask(6, new KDF2BytesGenerator(new SHA1Digest()), seed4, mask4);
         
         try
         {
