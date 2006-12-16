@@ -42,7 +42,7 @@ public class JCEECPublicKey
     implements ECPublicKey, org.bouncycastle.jce.interfaces.ECPublicKey, ECPointEncoder
 {
     private String                  algorithm = "EC";
-    private org.bouncycastle.math.ec.ECPoint                 q;
+    private org.bouncycastle.math.ec.ECPoint q;
     private ECParameterSpec         ecSpec;
     private boolean                 withCompression;
     private GOST3410PublicKeyAlgParameters       gostParams;

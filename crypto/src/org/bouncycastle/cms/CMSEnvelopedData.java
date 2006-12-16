@@ -1,5 +1,18 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.EncryptedContentInfo;
+import org.bouncycastle.asn1.cms.EnvelopedData;
+import org.bouncycastle.asn1.cms.KEKRecipientInfo;
+import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
+import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
+import org.bouncycastle.asn1.cms.RecipientInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,18 +22,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.EncryptedContentInfo;
-import org.bouncycastle.asn1.cms.EnvelopedData;
-import org.bouncycastle.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * containing class for an CMS Enveloped Data object
@@ -72,16 +73,22 @@ public class CMSEnvelopedData
         for (int i = 0; i != s.size(); i++)
         {
             RecipientInfo   info = RecipientInfo.getInstance(s.getObjectAt(i));
+            Object          type = info.getInfo();
 
-            if (info.getInfo() instanceof KeyTransRecipientInfo)
+            if (type instanceof KeyTransRecipientInfo)
             {
                 infos.add(new KeyTransRecipientInformation(
-                            (KeyTransRecipientInfo)info.getInfo(), _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
+                            (KeyTransRecipientInfo)type, _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
             }
-            else if (info.getInfo() instanceof KEKRecipientInfo)
+            else if (type instanceof KEKRecipientInfo)
             {
                 infos.add(new KEKRecipientInformation(
-                            (KEKRecipientInfo)info.getInfo(), _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
+                            (KEKRecipientInfo)type, _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
+            }
+            else if (type instanceof KeyAgreeRecipientInfo)
+            {
+                infos.add(new KeyAgreeRecipientInformation(
+                            (KeyAgreeRecipientInfo)type, _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
             }
         }
 
