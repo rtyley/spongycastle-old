@@ -1,12 +1,5 @@
 package org.bouncycastle.asn1.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Set;
@@ -19,6 +12,13 @@ import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.cms.SignedData;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTestResult;
+import org.bouncycastle.util.test.Test;
+import org.bouncycastle.util.test.TestResult;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 public class CMSTest
     implements Test
@@ -52,10 +52,10 @@ public class CMSTest
           + "YSHSqwntGpFqCx4AAAAAAAAAAAAA");
     
     byte[]   envDataKEK = Base64.decode(
-            "MIAGCSqGSIb3DQEHA6CAMIACAQIxVKJSMFACAQQwBwQFAQIDBAUwEAYLKoZIhvcN"
-          + "AQkQAwcCAToEMLsb8fJQ+KUiuKfZh5qOqaPv3lWgtYRNGdkAAVwCJB2hBbLP6gKH"
-          + "pZj8eMceL7TL5zCABgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECJjd4MEFsXqdoIAE"
-          + "GI13Mlv+/r5RkHddcqKnEUNSnP0bKPMH6AAAAAAAAAAAAAA=");
+            "MIAGCSqGSIb3DQEHA6CAMIACAQIxUqJQAgEEMAcEBQECAwQFMBAGCyqGSIb3DQEJE"
+          + "AMHAgE6BDC7G/HyUPilIrin2Yeajqmj795VoLWETRnZAAFcAiQdoQWyz+oCh6WY/H"
+          + "jHHi+0y+cwgAYJKoZIhvcNAQcBMBQGCCqGSIb3DQMHBAiY3eDBBbF6naCABBiNdzJb"
+          + "/v6+UZB3XXKipxFDUpz9GyjzB+gAAAAAAAAAAAAA");
     
     //
     // signed data
@@ -228,7 +228,7 @@ public class CMSTest
             aOut.writeObject(info);
             
             if (!isSameAs(bOut.toByteArray(), envDataKEK))
-            {
+            {                                                         System.out.println(new String(Base64.encode(bOut.toByteArray())));
                 return new SimpleTestResult(false, getName() + ": CMS KEK enveloped failed to re-encode");
             }
             
