@@ -71,7 +71,7 @@ public class TlsMac
         catch (IOException e)
         {
             // This should never happen
-            throw new InternalError("Internal error during mac calculation");
+            throw new IllegalStateException("Internal error during mac calculation");
         }
     }
 

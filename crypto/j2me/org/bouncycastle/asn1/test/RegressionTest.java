@@ -13,7 +13,6 @@ public class RegressionTest
         new PKCS10Test(),
         new PKCS12Test(),
         new X509NameTest(),
-        new GeneralizedTimeTest(),
         new BitStringTest(),
         new MiscTest(),
         new X9Test(),
