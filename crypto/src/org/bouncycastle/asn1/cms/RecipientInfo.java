@@ -22,25 +22,25 @@ public class RecipientInfo
     public RecipientInfo(
         KeyAgreeRecipientInfo info)
     {
-        this.info = new DERTaggedObject(true, 1, info);
+        this.info = new DERTaggedObject(false, 1, info);
     }
 
     public RecipientInfo(
         KEKRecipientInfo info)
     {
-        this.info = new DERTaggedObject(true, 2, info);
+        this.info = new DERTaggedObject(false, 2, info);
     }
 
     public RecipientInfo(
         PasswordRecipientInfo info)
     {
-        this.info = new DERTaggedObject(true, 3, info);
+        this.info = new DERTaggedObject(false, 3, info);
     }
 
     public RecipientInfo(
         OtherRecipientInfo info)
     {
-        this.info = new DERTaggedObject(true, 4, info);
+        this.info = new DERTaggedObject(false, 4, info);
     }
 
     public RecipientInfo(
@@ -78,11 +78,11 @@ public class RecipientInfo
             switch (o.getTagNo())
             {
             case 1:
-                return KeyAgreeRecipientInfo.getInstance(o, true).getVersion();
+                return KeyAgreeRecipientInfo.getInstance(o, false).getVersion();
             case 2:
-                return KEKRecipientInfo.getInstance(o, true).getVersion();
+                return getKEKInfo(o).getVersion();
             case 3:
-                return PasswordRecipientInfo.getInstance(o, true).getVersion();
+                return PasswordRecipientInfo.getInstance(o, false).getVersion();
             case 4:
                 return new DERInteger(0);    // no syntax version for OtherRecipientInfo
             default:
@@ -107,13 +107,13 @@ public class RecipientInfo
             switch (o.getTagNo())
             {
             case 1:
-                return KeyAgreeRecipientInfo.getInstance(o, true);
+                return KeyAgreeRecipientInfo.getInstance(o, false);
             case 2:
-                return KEKRecipientInfo.getInstance(o, true);
+                return getKEKInfo(o);
             case 3:
-                return PasswordRecipientInfo.getInstance(o, true);
+                return PasswordRecipientInfo.getInstance(o, false);
             case 4:
-                return OtherRecipientInfo.getInstance(o, true);
+                return OtherRecipientInfo.getInstance(o, false);
             default:
                 throw new IllegalStateException("unknown tag");
             }
@@ -122,7 +122,19 @@ public class RecipientInfo
         return KeyTransRecipientInfo.getInstance(info);
     }
 
-    /** 
+    private KEKRecipientInfo getKEKInfo(ASN1TaggedObject o)
+    {
+        if (o.isExplicit())
+        {                        // compatibilty with erroneous version
+            return KEKRecipientInfo.getInstance(o, true);
+        }
+        else
+        {
+            return KEKRecipientInfo.getInstance(o, false);
+        }
+    }
+
+    /**
      * Produce an object suitable for an ASN1OutputStream.
      * <pre>
      * RecipientInfo ::= CHOICE {
