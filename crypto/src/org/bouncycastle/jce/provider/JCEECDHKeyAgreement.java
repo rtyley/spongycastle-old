@@ -1,6 +1,14 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DerivationFunction;
@@ -8,6 +16,7 @@ import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.agreement.ECDHCBasicAgreement;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.KDFParameters;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
@@ -20,6 +29,7 @@ import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -33,6 +43,7 @@ import java.util.Hashtable;
 public class JCEECDHKeyAgreement
     extends KeyAgreementSpi
 {
+    private static final X9IntegerConverter converter = new X9IntegerConverter();
     private static final Hashtable algorithms = new Hashtable();
 
     static
@@ -49,25 +60,15 @@ public class JCEECDHKeyAgreement
         algorithms.put(NISTObjectIdentifiers.id_aes256_wrap.getId(), i256);
     }
 
-    private BigInteger          result;
-    private CipherParameters    privKey;
-    private BasicAgreement      agreement;
-    private DerivationFunction  kdf;
+    private BigInteger             result;
+    private ECPrivateKeyParameters privKey;
+    private BasicAgreement         agreement;
+    private DerivationFunction     kdf;
 
     private byte[] bigIntToBytes(
         BigInteger    r)
     {
-        byte[]    tmp = r.toByteArray();
-        
-        if (tmp[0] == 0)
-        {
-            byte[]    ntmp = new byte[tmp.length - 1];
-            
-            System.arraycopy(tmp, 1, ntmp, 0, ntmp.length);
-            return ntmp;
-        }
-        
-        return tmp;
+        return converter.integerToBytes(result, converter.getByteLength(privKey.getParameters().getG().getX()));
     }
     
     protected JCEECDHKeyAgreement(
@@ -129,42 +130,51 @@ public class JCEECDHKeyAgreement
             throw new ShortBufferException("ECKeyAgreement - buffer too short");
         }
 
-        if (kdf != null)
-        {
-            kdf.init(new KDFParameters(secret, null));
-            kdf.generateBytes(sharedSecret, offset, sharedSecret.length - offset);
-        }
-        else
-        {
-            System.arraycopy(secret, 0, sharedSecret, offset, secret.length);
-        }
+        System.arraycopy(secret, 0, sharedSecret, offset, secret.length);
         
         return secret.length;
     }
 
     protected SecretKey engineGenerateSecret(
-        String algorithm) 
+        String algorithm)
+        throws NoSuchAlgorithmException
     {
-        if (algorithms.containsKey(algorithm))
+        if (kdf != null)
         {
+            if (!algorithms.containsKey(algorithm))
+            {
+                throw new NoSuchAlgorithmException("unknown algorithm encountered: " + algorithm);
+            }
+            
             int    keySize = ((Integer)algorithms.get(algorithm)).intValue();
 
             byte[] keyBytes = new byte[keySize / 8];
 
-            if (kdf != null)
-            {
-                kdf.init(new KDFParameters(bigIntToBytes(result), null));
-                kdf.generateBytes(keyBytes, 0, keyBytes.length);
-            }
-            else
-            {
-                System.arraycopy(bigIntToBytes(result), 0, keyBytes, 0, keyBytes.length);
-            }
+            // ECC-CMS-SharedInfo
+            ASN1EncodableVector v = new ASN1EncodableVector();
+
+            v.add(new AlgorithmIdentifier(new DERObjectIdentifier(algorithm), new DERNull()));
+            v.add(new DERTaggedObject(true, 2, new DEROctetString(integerToBytes(keySize))));
+
+            kdf.init(new KDFParameters(bigIntToBytes(result), new DERSequence(v).getDEREncoded()));
+            kdf.generateBytes(keyBytes, 0, keyBytes.length);
 
             return new SecretKeySpec(keyBytes, algorithm);
         }
 
         return new SecretKeySpec(bigIntToBytes(result), algorithm);
+    }
+
+    private byte[] integerToBytes(int keySize)
+    {
+        byte[] val = new byte[4];
+
+        val[0] = (byte)(keySize >> 24);
+        val[1] = (byte)(keySize >> 16);
+        val[2] = (byte)(keySize >> 8);
+        val[3] = (byte)keySize;
+
+        return val;
     }
 
     protected void engineInit(
@@ -178,7 +188,7 @@ public class JCEECDHKeyAgreement
             throw new InvalidKeyException("ECKeyAgreement requires ECPrivateKey for initialisation");
         }
 
-        privKey = ECUtil.generatePrivateKeyParameter((PrivateKey)key);
+        privKey = (ECPrivateKeyParameters)ECUtil.generatePrivateKeyParameter((PrivateKey)key);
 
         agreement.init(privKey);
     }
@@ -193,7 +203,7 @@ public class JCEECDHKeyAgreement
             throw new InvalidKeyException("ECKeyAgreement requires ECPrivateKey");
         }
 
-        privKey = ECUtil.generatePrivateKeyParameter((PrivateKey)key);
+        privKey = (ECPrivateKeyParameters)ECUtil.generatePrivateKeyParameter((PrivateKey)key);
 
         agreement.init(privKey);
     }

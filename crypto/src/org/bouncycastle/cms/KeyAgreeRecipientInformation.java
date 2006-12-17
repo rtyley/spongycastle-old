@@ -35,8 +35,8 @@ public class KeyAgreeRecipientInformation
     extends RecipientInformation
 {
     private KeyAgreeRecipientInfo _info;
-    private AlgorithmIdentifier _encAlg;
-    private ASN1OctetString _encryptedKey;
+    private AlgorithmIdentifier   _encAlg;
+    private ASN1OctetString       _encryptedKey;
 
     public KeyAgreeRecipientInformation(
         KeyAgreeRecipientInfo info,
@@ -87,10 +87,10 @@ public class KeyAgreeRecipientInformation
             PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(key.getEncoded()));
             SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(privInfo.getAlgorithmId(), origK.getPublicKey().getBytes());
             X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
-            KeyFactory fact = KeyFactory.getInstance("EC", prov);
+            KeyFactory fact = KeyFactory.getInstance(_keyEncAlg.getObjectId().getId(), prov);
 
             KeyAgreement agreement = KeyAgreement.getInstance(_keyEncAlg.getObjectId().getId(), prov);
-
+                            
             agreement.init(key);
 
             agreement.doPhase(fact.generatePublic(pubSpec), true);
@@ -98,14 +98,15 @@ public class KeyAgreeRecipientInformation
             String wrapAlg = DERObjectIdentifier.getInstance(
                                    ASN1Sequence.getInstance(_keyEncAlg.getParameters()).getObjectAt(0)).getId();
 
-            Key wkey = agreement.generateSecret(wrapAlg);
+            Key wKey = agreement.generateSecret(wrapAlg);
 
             Cipher keyCipher = Cipher.getInstance(wrapAlg, prov);
 
-            keyCipher.init(Cipher.UNWRAP_MODE, wkey);
+            keyCipher.init(Cipher.UNWRAP_MODE, wKey);
 
             AlgorithmIdentifier aid = _encAlg;
             String              alg = aid.getObjectId().getId();
+
             byte[]              encryptedKey = _encryptedKey.getOctets();
             Key                 sKey = keyCipher.unwrap(
                                         encryptedKey, alg, Cipher.SECRET_KEY);
@@ -128,7 +129,7 @@ public class KeyAgreeRecipientInformation
         {
             throw new CMSException("required padding not supported.", e);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             throw new CMSException("originator key invalid.", e);
         }

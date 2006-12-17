@@ -39,7 +39,7 @@ import java.security.Provider;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.35";
+    private static String info = "BouncyCastle Security Provider v1.36b";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -50,7 +50,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.35, info);
+        super(PROVIDER_NAME, 1.355, info);
 
         //
         // X509Store
@@ -196,7 +196,8 @@ public final class BouncyCastleProvider extends Provider
         put("KeyAgreement.DH", "org.bouncycastle.jce.provider.JCEDHKeyAgreement");
         put("KeyAgreement.ECDH", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DH");
         put("KeyAgreement.ECDHC", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DHC");
-        put("KeyAgreement.1.3.133.16.840.63.0.2", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DHwithSHA1KDF");
+        put("KeyAgreement." + X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DHwithSHA1KDF");
+
         //
         // cipher engines
         //
@@ -332,18 +333,14 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.PBEWITHSHAAND40BITRC2-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAnd40BitRC2");
         put("Cipher.PBEWITHSHAAND128BITRC4", "org.bouncycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd128BitRC4");
         put("Cipher.PBEWITHSHAAND40BITRC4", "org.bouncycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd40BitRC4");
-        
-        put("Cipher.PBEWITHSHAAND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        put("Cipher.PBEWITHSHAAND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        put("Cipher.PBEWITHSHAAND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        
+
         put("Alg.Alias.Cipher.PBEWITHSHA1AND3-KEYTRIPLEDES-CBC", "Cipher.PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND2-KEYTRIPLEDES-CBC", "Cipher.PBEWITHSHAAND2-KEYTRIPLEDES-CBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC2-CBC", "Cipher.PBEWITHSHAAND128BITRC2-CBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC2-CBC", "Cipher.PBEWITHSHAAND40BITRC2-CBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC4", "Cipher.PBEWITHSHAAND128BITRC4");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC4", "Cipher.PBEWITHSHAAND40BITRC4");
-        
+
         put("Cipher.PBEWITHSHAAND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
         put("Cipher.PBEWITHSHAAND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
         put("Cipher.PBEWITHSHAAND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
@@ -471,7 +468,8 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.KeyFactory.1.2.840.113549.1.1.1", "RSA");
         put("Alg.Alias.KeyFactory.1.2.840.10040.4.1", "DSA");
         put("Alg.Alias.KeyFactory." + X9ObjectIdentifiers.id_ecPublicKey, "EC");
-        
+        put("Alg.Alias.KeyFactory." + X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "EC");
+
         put("KeyFactory.GOST3410", "org.bouncycastle.jce.provider.JDKKeyFactory$GOST3410");
         put("Alg.Alias.KeyFactory.GOST-3410", "GOST3410");
         put("Alg.Alias.KeyFactory.GOST-3410-94", "GOST3410");
