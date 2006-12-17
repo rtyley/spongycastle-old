@@ -68,7 +68,7 @@ public class JCEECDHKeyAgreement
     private byte[] bigIntToBytes(
         BigInteger    r)
     {
-        return converter.integerToBytes(result, converter.getByteLength(privKey.getParameters().getG().getX()));
+        return converter.integerToBytes(r, converter.getByteLength(privKey.getParameters().getG().getX()));
     }
     
     protected JCEECDHKeyAgreement(
