@@ -69,7 +69,7 @@ public class KeyAgreeRecipientInformation
         }
         catch (IOException e)
         {
-            throw new IllegalArgumentException("invalid rid in KeyTransRecipientInformation");
+            throw new IllegalArgumentException("invalid rid in KeyAgreeRecipientInformation");
         }
     }
 
