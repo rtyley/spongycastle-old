@@ -186,7 +186,7 @@ public abstract class JDKKeyPairGenerator
         {
             if (strength < 512 || strength > 1024 || strength % 64 != 0)
             {
-                throw new InvalidParameterException("strength must be from 512 - 1024 and a multiple of 64");
+                throw new IllegalArgumentException("strength must be from 512 - 1024 and a multiple of 64");
             }
 
             this.strength = strength;
