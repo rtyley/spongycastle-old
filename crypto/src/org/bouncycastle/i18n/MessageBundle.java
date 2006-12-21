@@ -22,6 +22,19 @@ public class MessageBundle extends TextBundle
     {
         super(resource, id);
     }
+    
+    /**
+     * Constructs a new MessageBundle using <code>resource</code> as the base name for the 
+     * RessourceBundle and <code>id</code> as the message bundle id the resource file. 
+     * @param resource base name of the resource file 
+     * @param id the id of the corresponding bundle in the resource file
+     * @param loader the {@link ClassLoader} used to load the resource file
+     * @throws NullPointerException if <code>resource</code> or <code>id</code> is <code>null</code>
+     */
+    public MessageBundle(String resource, String id, ClassLoader loader) throws NullPointerException
+    {
+        super(resource, id, loader);
+    }
 
     /**
      * Constructs a new MessageBundle using <code>resource</code> as the base name for the 
@@ -34,6 +47,20 @@ public class MessageBundle extends TextBundle
     public MessageBundle(String resource, String id, Object[] arguments) throws NullPointerException
     {
         super(resource, id, arguments);
+    }
+    
+    /**
+     * Constructs a new MessageBundle using <code>resource</code> as the base name for the 
+     * RessourceBundle and <code>id</code> as the message bundle id the resource file. 
+     * @param resource base name of the resource file 
+     * @param id the id of the corresponding bundle in the resource file
+     * @param loader the {@link ClassLoader} used to load the resource file
+     * @param arguments an array containing the arguments for the message
+     * @throws NullPointerException if <code>resource</code> or <code>id</code> is <code>null</code>
+     */
+    public MessageBundle(String resource, String id, ClassLoader loader, Object[] arguments) throws NullPointerException
+    {
+        super(resource, id, loader, arguments);
     }
     
     /**

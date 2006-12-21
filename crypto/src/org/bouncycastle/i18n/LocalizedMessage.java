@@ -1,5 +1,8 @@
 package org.bouncycastle.i18n;
 
+import org.bouncycastle.i18n.filter.Filter;
+import org.bouncycastle.i18n.filter.UntrustedInput;
+
 import java.text.DateFormat;
 import java.text.Format;
 import java.text.MessageFormat;
@@ -7,9 +10,6 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
-
-import org.bouncycastle.i18n.filter.Filter;
-import org.bouncycastle.i18n.filter.UntrustedInput;
 
 public class LocalizedMessage 
 {
@@ -21,6 +21,8 @@ public class LocalizedMessage
     protected Object[] filteredArguments;
     
     protected Filter filter = null;
+    
+    protected ClassLoader loader = null;
     
     /**
      * Constructs a new LocalizedMessage using <code>resource</code> as the base name for the 
@@ -46,6 +48,27 @@ public class LocalizedMessage
      * RessourceBundle and <code>id</code> as the message bundle id the resource file. 
      * @param resource base name of the resource file 
      * @param id the id of the corresponding bundle in the resource file
+     * @param loader the {@link ClassLoader} used to load the resource file
+     * @throws NullPointerException if <code>resource</code> or <code>id</code> is <code>null</code>
+     */
+    public LocalizedMessage(String resource,String id, ClassLoader loader) throws NullPointerException
+    {
+        if (resource == null || id == null)
+        {
+            throw new NullPointerException();
+        }
+        this.id = id;
+        this.resource = resource;
+        this.arguments = new Object[0];
+        this.filteredArguments = arguments;
+        this.loader = loader;
+    }
+    
+    /**
+     * Constructs a new LocalizedMessage using <code>resource</code> as the base name for the 
+     * RessourceBundle and <code>id</code> as the message bundle id the resource file. 
+     * @param resource base name of the resource file 
+     * @param id the id of the corresponding bundle in the resource file
      * @param arguments an array containing the arguments for the message
      * @throws NullPointerException if <code>resource</code> or <code>id</code> is <code>null</code>
      */
@@ -59,6 +82,28 @@ public class LocalizedMessage
         this.resource = resource;
         this.arguments = arguments;
         this.filteredArguments = arguments;
+    }
+    
+    /**
+     * Constructs a new LocalizedMessage using <code>resource</code> as the base name for the 
+     * RessourceBundle and <code>id</code> as the message bundle id the resource file. 
+     * @param resource base name of the resource file 
+     * @param id the id of the corresponding bundle in the resource file
+     * @param loader the {@link ClassLoader} used to load the resource file
+     * @param arguments an array containing the arguments for the message
+     * @throws NullPointerException if <code>resource</code> or <code>id</code> is <code>null</code>
+     */
+    public LocalizedMessage(String resource, String id, ClassLoader loader, Object[] arguments) throws NullPointerException
+    {
+        if (resource == null || id == null || arguments == null)
+        {
+            throw new NullPointerException();
+        }
+        this.id = id;
+        this.resource = resource;
+        this.arguments = arguments;
+        this.filteredArguments = arguments;
+        this.loader = loader;
     }
     
     /**
@@ -76,7 +121,12 @@ public class LocalizedMessage
         
         try
         {
-            ResourceBundle bundle = ResourceBundle.getBundle(resource,loc);
+            ResourceBundle bundle;
+            if (loader != null) {
+                bundle = ResourceBundle.getBundle(resource,loc);
+            } else {
+                bundle = ResourceBundle.getBundle(resource, loc, loader);
+            }
             String template = bundle.getString(entry);
             if (arguments == null || arguments.length == 0)
             {
