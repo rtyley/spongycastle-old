@@ -58,6 +58,7 @@ public class JCEECDHKeyAgreement
         algorithms.put(NISTObjectIdentifiers.id_aes128_wrap.getId(), i128);
         algorithms.put(NISTObjectIdentifiers.id_aes192_wrap.getId(), i192);
         algorithms.put(NISTObjectIdentifiers.id_aes256_wrap.getId(), i256);
+        algorithms.put("1.2.840.113549.1.9.16.3.6", i192);
     }
 
     private BigInteger             result;

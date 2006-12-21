@@ -1,10 +1,24 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.BigIntegers;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
+import org.bouncycastle.util.test.SimpleTest;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
+import java.security.InvalidParameterException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -18,19 +32,6 @@ import java.security.interfaces.DSAPublicKey;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.util.BigIntegers;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.FixedSecureRandom;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class DSATest
     extends SimpleTest
@@ -351,6 +352,42 @@ public class DSATest
         Signature           s = Signature.getInstance("DSA", "BC");
         KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "BC");
         byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+
+
+        // test exception
+        //
+        try
+        {
+            g.initialize(513, new SecureRandom());
+
+            fail("illegal parameter 513 check failed.");
+        }
+        catch (InvalidParameterException e)
+        {
+            // expected
+        }
+
+        try
+        {
+            g.initialize(510, new SecureRandom());
+
+            fail("illegal parameter 510 check failed.");
+        }
+        catch (InvalidParameterException e)
+        {
+            // expected
+        }
+
+        try
+        {
+            g.initialize(1025, new SecureRandom());
+
+            fail("illegal parameter 1025 check failed.");
+        }
+        catch (InvalidParameterException e)
+        {
+            // expected
+        }
 
         g.initialize(512, new SecureRandom());
 

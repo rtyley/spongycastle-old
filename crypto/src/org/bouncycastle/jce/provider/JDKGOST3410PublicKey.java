@@ -1,8 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.IOException;
-import java.math.BigInteger;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -18,6 +15,9 @@ import org.bouncycastle.jce.interfaces.GOST3410PublicKey;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
+
+import java.io.IOException;
+import java.math.BigInteger;
 
 public class JDKGOST3410PublicKey
     implements GOST3410PublicKey
@@ -58,8 +58,8 @@ public class JDKGOST3410PublicKey
     JDKGOST3410PublicKey(
         SubjectPublicKeyInfo    info)
     {
-        GOST3410PublicKeyAlgParameters       params = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
-        DEROctetString                    derY = null;
+        GOST3410PublicKeyAlgParameters    params = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
+        DEROctetString                    derY;
 
         try
         {
@@ -108,7 +108,7 @@ public class JDKGOST3410PublicKey
         byte[]                  keyEnc = this.getY().toByteArray();
         byte[]                  keyBytes;
         
-        if (keyEnc[0] == 0 && (keyEnc.length != 64 || keyEnc.length != 128))
+        if (keyEnc[0] == 0)
         {
             keyBytes = new byte[keyEnc.length - 1];
         }

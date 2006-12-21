@@ -13,7 +13,7 @@ import java.security.SecureRandom;
 
 /**
  * a GOST3410 key pair generator.
- * This generates GOST340 keys in line with the method described
+ * This generates GOST3410 keys in line with the method described
  * in GOST R 34.10-94.
  */
 public class GOST3410KeyPairGenerator

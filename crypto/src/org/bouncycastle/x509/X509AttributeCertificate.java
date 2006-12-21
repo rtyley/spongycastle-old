@@ -12,7 +12,6 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Extension;
 import java.util.Date;
-import java.util.Set;
 
 /**
  * Interface for an X.509 Attribute Certificate.
@@ -78,10 +77,6 @@ public interface X509AttributeCertificate
     public X509Attribute[] getAttributes(String oid);
     
     public boolean[] getIssuerUniqueID();
-    
-    public Set getNonCriticalExtensionOIDs();
-
-    public Set getCriticalExtensionOIDs();
     
     public void checkValidity()
         throws CertificateExpiredException, CertificateNotYetValidException;

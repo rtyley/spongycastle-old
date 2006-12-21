@@ -1,17 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.security.AlgorithmParameterGeneratorSpi;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
-
-import javax.crypto.spec.DHGenParameterSpec;
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-
 import org.bouncycastle.crypto.generators.DHParametersGenerator;
 import org.bouncycastle.crypto.generators.DSAParametersGenerator;
 import org.bouncycastle.crypto.generators.ElGamalParametersGenerator;
@@ -22,6 +10,18 @@ import org.bouncycastle.crypto.params.ElGamalParameters;
 import org.bouncycastle.crypto.params.GOST3410Parameters;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
+
+import javax.crypto.spec.DHGenParameterSpec;
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+import java.security.AlgorithmParameterGeneratorSpi;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.DSAParameterSpec;
 
 public abstract class JDKAlgorithmParameterGenerator
     extends AlgorithmParameterGeneratorSpi
@@ -92,6 +92,19 @@ public abstract class JDKAlgorithmParameterGenerator
     public static class DSA
         extends JDKAlgorithmParameterGenerator
     {
+        protected void engineInit(
+            int             strength,
+            SecureRandom    random)
+        {
+            if (strength < 512 || strength > 1024 || strength % 64 != 0)
+            {
+                throw new InvalidParameterException("strength must be from 512 - 1024 and a multiple of 64");
+            }
+
+            this.strength = strength;
+            this.random = random;
+        }
+
         protected void engineInit(
             AlgorithmParameterSpec  genParamSpec,
             SecureRandom            random)
