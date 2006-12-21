@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
-import java.security.InvalidParameterException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -362,7 +361,7 @@ public class DSATest
 
             fail("illegal parameter 513 check failed.");
         }
-        catch (InvalidParameterException e)
+        catch (IllegalArgumentException e)
         {
             // expected
         }
@@ -373,7 +372,7 @@ public class DSATest
 
             fail("illegal parameter 510 check failed.");
         }
-        catch (InvalidParameterException e)
+        catch (IllegalArgumentException e)
         {
             // expected
         }
@@ -384,7 +383,7 @@ public class DSATest
 
             fail("illegal parameter 1025 check failed.");
         }
-        catch (InvalidParameterException e)
+        catch (IllegalArgumentException e)
         {
             // expected
         }
