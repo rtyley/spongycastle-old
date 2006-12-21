@@ -22,8 +22,20 @@ to conform the algorithms to the JCE framework.
 <h2>2.0 Release History</h2>
 
 <h3>2.1.1 Version</h3>
-Release 1.35
+Release 1.36
 <h3>2.1.2 Defects Fixed</h3>
+<ul>
+<li>DSA key generator now checks range and keysize.</li>
+<li>Class loader issues with SignedMailValidator should now be fixed.</li>
+</ul>
+<h3>2.1.2 Additional Features and Functionality</h3>
+<ul>
+<li>CMS/SMIME now supports basic EC KeyAgreement with X9.63.</li>
+</ul>
+
+<h3>2.2.1 Version</h3>
+Release 1.35
+<h3>2.2.2 Defects Fixed</h3>
 <ul>
 <li>Test data files are no longer in the provider jars.</li>
 <li>SMIMESignedParser now handles indefinite length data in SignerInfos.</li>
@@ -38,7 +50,7 @@ Release 1.35
 <li>The IESEngine could incorrectly encrypt data when used in block cipher mode. This has been fixed.
 <li>An error in the encoding of the KEKRecipientInfo has been fixed. Compatability warning: this may mean that versions of BC mail prior to 1.35 will have trouble processing KEK messages produced by 1.35 or later.
 </ul>
-<h3>2.1.3 Additional Features and Functionality</h3>
+<h3>2.2.3 Additional Features and Functionality</h3>
 <ul>
 <li>Further optimisations to elliptic curve math libraries.</li>
 <li>API now incorporates a CertStore which should be suitable for use with LDAP.</li>
@@ -57,9 +69,9 @@ Release 1.35
 <li>Implementations of the TEA and XTEA ciphers have been added to the light weight API and the provider.</li>
 <li>PEMReader now supports OpenSSL ECDSA key pairs.</li>
 </ul>
-<h3>2.2.1 Version</h3>
+<h3>2.3.1 Version</h3>
 Release 1.34
-<h3>2.2.2 Defects Fixed</h3>
+<h3>2.3.2 Defects Fixed</h3>
 <ul>
 <li>Endianess of integer conversion in KDF2BytesGenerator was incorrect. This has been fixed.
 <li>Generating critical signature subpackets in OpenPGP would result in a zero packet tag. This has been fixed.
@@ -71,7 +83,7 @@ Bleichenbacher's RSA signature forgery attack. This has been fixed.
 <li>PGP Identity strings were only being interpreted as ASCII rather than UTF8. This has been fixed.
 <li>CertificateFactory.generateCRLs now returns a Collection rather than null.
 </ul>
-<h3>2.2.3 Additional Features and Functionality</h3>
+<h3>2.3.3 Additional Features and Functionality</h3>
 <ul>
 <li>An ISO18033KDFParameters class had been added to support ISO18033 KDF generators.
 <li>An implemention of the KDF1 bytes generator algorithm has been added.
@@ -90,7 +102,7 @@ The build scripts now run this target by default.
 <li>Support has been added for SHA224withECDSA, SHA256withECDSA, SHA384withECDSA, and SHA512withECDSA for the generation of signatures, certificates, CRLs, and certification requests.
 <li>Performance of the prime number generation in the BigInteger library has been further improved.
 </ul>
-<h3>2.2.5 Security Advisory</h3>
+<h3>2.3.5 Security Advisory</h3>
 <ul>
 <li>If you are using public exponents with the value three you *must* upgrade to this release, otherwise it
 will be possible for attackers to exploit some of Bleichenbacher's RSA signature forgery attacks on your applications.
