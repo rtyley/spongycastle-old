@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
@@ -15,8 +16,10 @@ import org.bouncycastle.util.encoders.Hex;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -46,8 +49,8 @@ public class EnvelopedDataTest
                         + "Fi2eHTPM4bQSjP4DUeDzJZLpfemW2gF1SPq7ZPHJi1mMIAGCSqGSIb3DQEHATAUBggqhkiG9w"
                         + "0DBwQImtdGyUdGGt6ggAQYk9X9z01YFBkU7IlS3wmsKpm/zpZClTceAAAAAAAAAAAAAA==");
 
-    private byte[] ecKeyAgreeMsg = Base64.decode(
-         "MIAGCSqGSIb3DQEHA6CAMIACAQIxgcShgcECAQOgQ6FBMAsGByqGSM49AgEF"
+    private byte[] ecKeyAgreeMsgAES256 = Base64.decode(
+           "MIAGCSqGSIb3DQEHA6CAMIACAQIxgcShgcECAQOgQ6FBMAsGByqGSM49AgEF"
          + "AAMyAAPdXlSTpub+qqno9hUGkUDl+S3/ABhPziIB5yGU4678tgOgU5CiKG9Z"
          + "kfnabIJ3nZYwGgYJK4EFEIZIPwACMA0GCWCGSAFlAwQBLQUAMFswWTAtMCgx"
          + "EzARBgNVBAMTCkFkbWluLU1EU0UxETAPBgNVBAoTCDRCQ1QtMklEAgEBBCi/"
@@ -55,6 +58,23 @@ public class EnvelopedDataTest
          + "SIb3DQEHATAdBglghkgBZQMEASoEEMtCnKKPwccmyrbgeSIlA3qggAQQDLw8"
          + "pNJR97bPpj6baG99bQQQwhEDsoj5Xg1oOxojHVcYzAAAAAAAAAAAAAA=");
 
+    private byte[] ecKeyAgreeMsgAES128 = Base64.decode(
+           "MIAGCSqGSIb3DQEHA6CAMIACAQIxgbShgbECAQOgQ6FBMAsGByqGSM49AgEF"
+         + "AAMyAAL01JLEgKvKh5rbxI/hOxs/9WEezMIsAbUaZM4l5tn3CzXAN505nr5d"
+         + "LhrcurMK+tAwGgYJK4EFEIZIPwACMA0GCWCGSAFlAwQBBQUAMEswSTAtMCgx"
+         + "EzARBgNVBAMTCkFkbWluLU1EU0UxETAPBgNVBAoTCDRCQ1QtMklEAgEBBBhi"
+         + "FLjc5g6aqDT3f8LomljOwl1WTrplUT8wgAYJKoZIhvcNAQcBMB0GCWCGSAFl"
+         + "AwQBAgQQzXjms16Y69S/rB0EbHqRMaCABBAFmc/QdVW6LTKdEy97kaZzBBBa"
+         + "fQuviUS03NycpojELx0bAAAAAAAAAAAAAA==");
+
+    private byte[] ecKeyAgreeMsgDESEDE = Base64.decode(
+           "MIAGCSqGSIb3DQEHA6CAMIACAQIxgcahgcMCAQOgQ6FBMAsGByqGSM49AgEF"
+         + "AAMyAALIici6Nx1WN5f0ThH2A8ht9ovm0thpC5JK54t73E1RDzCifePaoQo0"
+         + "xd6sUqoyGaYwHAYJK4EFEIZIPwACMA8GCyqGSIb3DQEJEAMGBQAwWzBZMC0w"
+         + "KDETMBEGA1UEAxMKQWRtaW4tTURTRTERMA8GA1UEChMINEJDVC0ySUQCAQEE"
+         + "KJuqZQ1NB1vXrKPOnb4TCpYOsdm6GscWdwAAZlm2EHMp444j0s55J9wwgAYJ"
+         + "KoZIhvcNAQcBMBQGCCqGSIb3DQMHBAjwnsDMsafCrKCABBjyPvqFOVMKxxut"
+         + "VfTx4fQlNGJN8S2ATRgECMcTQ/dsmeViAAAAAAAAAAAAAA==");
 
 
     private byte[] ecKeyAgreeKey = Base64.decode(
@@ -528,22 +548,31 @@ public class EnvelopedDataTest
         }
     }
 
-   public void testECKeyAgree()
+    public void testECKeyAgree()
         throws Exception
+    {
+        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(ecKeyAgreeKey);
+        KeyFactory          fact = KeyFactory.getInstance("ECDH", "BC");
+        PrivateKey          privKey = fact.generatePrivate(privSpec);
+
+        verifyECKeyAgree(privKey, "2.16.840.1.101.3.4.1.42", ecKeyAgreeMsgAES256);
+        verifyECKeyAgree(privKey, "2.16.840.1.101.3.4.1.2", ecKeyAgreeMsgAES128);
+        verifyECKeyAgree(privKey, "1.2.840.113549.3.7", ecKeyAgreeMsgDESEDE);
+    }
+
+    private void verifyECKeyAgree(PrivateKey privKey, String wrapAlg, byte[] message)
+        throws CMSException, GeneralSecurityException
     {
         byte[] data = Hex.decode("504b492d4320434d5320456e76656c6f706564446174612053616d706c65");
 
-        CMSEnvelopedData ed = new CMSEnvelopedData(ecKeyAgreeMsg);
+        CMSEnvelopedData ed = new CMSEnvelopedData(message);
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
         Collection  c = recipients.getRecipients();
         Iterator    it = c.iterator();
 
-        assertEquals("2.16.840.1.101.3.4.1.42", ed.getEncryptionAlgOID());
-
-        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(ecKeyAgreeKey);
-        KeyFactory            fact = KeyFactory.getInstance("ECDH", "BC");
+        assertEquals(wrapAlg, ed.getEncryptionAlgOID());
 
         while (it.hasNext())
         {
@@ -551,7 +580,7 @@ public class EnvelopedDataTest
 
             assertEquals("1.3.133.16.840.63.0.2", recipient.getKeyEncryptionAlgOID());
 
-            byte[] recData = recipient.getContent(fact.generatePrivate(privSpec), "BC");
+            byte[] recData = recipient.getContent(privKey, "BC");
 
             assertTrue(Arrays.equals(data, recData));
         }

@@ -216,6 +216,13 @@ public abstract class JDKKeyPairGenerator
             int             strength,
             SecureRandom    random)
         {
+            if (strength < 512 || strength > 1024 || strength % 64 != 0)
+            {
+                throw new InvalidParameterException("strength must be from 512 - 1024 and a multiple of 64");
+            }
+
+            this.strength = strength;
+            this.random = random;
             this.strength = strength;
             this.random = random;
         }

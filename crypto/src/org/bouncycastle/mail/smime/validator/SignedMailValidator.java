@@ -1,37 +1,5 @@
 package org.bouncycastle.mail.smime.validator;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathBuilder;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.PKIXBuilderParameters;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CertSelector;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.mail.Address;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -55,6 +23,39 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
+
+import javax.mail.Address;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509CertSelector;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 public class SignedMailValidator
 {
@@ -346,54 +347,45 @@ public class SignedMailValidator
         }
     }
 
-    protected Vector getEmailAddresses(X509Certificate cert)
+    public static Set getEmailAddresses(X509Certificate cert) throws IOException, CertificateEncodingException
     {
-        Vector addresses = new Vector();
+        Set addresses = new HashSet();
 
-        try
+        X509Principal name = PrincipalUtil.getSubjectX509Principal(cert);
+        Vector oids = name.getOIDs();
+        Vector names = name.getValues();
+        for (int i = 0; i < oids.size(); i++)
         {
-            X509Principal name = PrincipalUtil.getSubjectX509Principal(cert);
-            Vector oids = name.getOIDs();
-            Vector names = name.getValues();
-            for (int i = 0; i < oids.size(); i++)
+            if (oids.get(i).equals(X509Principal.EmailAddress))
             {
-                if (oids.get(i).equals(X509Principal.EmailAddress))
-                {
-                    String email = (String) names.get(i);
-                    addresses.add(email);
-                    break;
-                }
-            }
-
-            byte[] ext = cert.getExtensionValue(SUBJECT_ALTERNATIVE_NAME);
-            if (ext != null)
-            {
-                DERSequence altNames = (DERSequence) getObject(ext);
-                for (int j = 0; j < altNames.size(); j++)
-                {
-                    ASN1TaggedObject o = (ASN1TaggedObject) altNames
-                            .getObjectAt(j);
-
-                    if (o.getTagNo() == 1)
-                    {
-                        String email = DERIA5String.getInstance(o, true)
-                                .getString();
-                        addresses.add(email);
-                    }
-                }
+                String email = (String) names.get(i);
+                addresses.add(email);
+                break;
             }
         }
-        catch (Exception e)
+
+        byte[] ext = cert.getExtensionValue(SUBJECT_ALTERNATIVE_NAME);
+        if (ext != null)
         {
-            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                    "SignedMailValidator.certGetEmailError", new Object[] {
-                            e.getMessage(), e });
+            DERSequence altNames = (DERSequence) getObject(ext);
+            for (int j = 0; j < altNames.size(); j++)
+            {
+                ASN1TaggedObject o = (ASN1TaggedObject) altNames
+                        .getObjectAt(j);
+
+                if (o.getTagNo() == 1)
+                {
+                    String email = DERIA5String.getInstance(o, true)
+                            .getString();
+                    addresses.add(email);
+                }
+            }
         }
 
         return addresses;
     }
 
-    private DERObject getObject(byte[] ext) throws IOException
+    private static DERObject getObject(byte[] ext) throws IOException
     {
         ASN1InputStream aIn = new ASN1InputStream(ext);
         ASN1OctetString octs = (ASN1OctetString) aIn.readObject();
@@ -467,47 +459,51 @@ public class SignedMailValidator
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                     "SignedMailValidator.extKeyUsageError", new Object[] {
                             e.getMessage(), e });
+            errors.add(msg);
         }
 
         // cert has an email address
-        Vector certEmails = getEmailAddresses(cert);
-        if (certEmails.isEmpty())
+        try
         {
-            // error no email address in signing certificate
-            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                    "SignedMailValidator.noEmailInCert");
-            errors.add(msg);
-        }
-        else
-        {
-            // check if email in cert is equal to the from address in the
-            // message
-            boolean equalsFrom = false;
-            for (int i = 0; i < fromAddresses.length; i++)
+            Set certEmails = getEmailAddresses(cert);
+            if (certEmails.isEmpty())
             {
-                for (int j = 0; j < certEmails.size(); j++)
+                // error no email address in signing certificate
+                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
+                        "SignedMailValidator.noEmailInCert");
+                errors.add(msg);
+            }
+            else
+            {
+                // check if email in cert is equal to the from address in the
+                // message
+                boolean equalsFrom = false;
+                for (int i = 0; i < fromAddresses.length; i++)
                 {
-                    if (fromAddresses[i].equals(certEmails.get(j)))
+                    if (certEmails.contains(fromAddresses[i]))
                     {
                         equalsFrom = true;
                         break;
                     }
                 }
-                if (equalsFrom)
+                if (!equalsFrom)
                 {
-                    break;
+                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
+                            "SignedMailValidator.emailFromCertMismatch",
+                            new Object[] {
+                                    new UntrustedInput(Arrays
+                                            .toString(fromAddresses)),
+                                    new UntrustedInput(certEmails) });
+                    errors.add(msg);
                 }
             }
-            if (!equalsFrom)
-            {
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "SignedMailValidator.emailFromCertMismatch",
-                        new Object[] {
-                                new UntrustedInput(Arrays
-                                        .toString(fromAddresses)),
-                                new UntrustedInput(certEmails) });
-                errors.add(msg);
-            }
+        }
+        catch (Exception e)
+        {
+            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
+                    "SignedMailValidator.certGetEmailError", new Object[] {
+                            e.getMessage(), e });
+            errors.add(msg);
         }
     }
 
@@ -554,6 +550,8 @@ public class SignedMailValidator
         certList.add(cert);
 
         boolean trustAnchorFound = false;
+        
+        X509Certificate taCert = null;
 
         // add other certs to the cert path
         while (cert != null && !trustAnchorFound)
@@ -573,6 +571,7 @@ public class SignedMailValidator
                         {
                             cert.verify(anchorCert.getPublicKey(), "BC");
                             trustAnchorFound = true;
+                            taCert = anchorCert;
                             break;
                         }
                         catch (Exception e)
@@ -635,27 +634,34 @@ public class SignedMailValidator
         // the trustanchor
         if (trustAnchorFound)
         {
-            X509CertSelector select = new X509CertSelector();
-            select.setSubject(cert.getIssuerX500Principal());
-            select.setIssuer(cert.getIssuerX500Principal());
-
-            Iterator certIt = findCerts(certStores, select).iterator();
-            while (certIt.hasNext())
+            if (taCert != null)
             {
-                X509Certificate taCert = (X509Certificate) certIt.next();
-                try
+                certList.add(taCert);
+            }
+            else
+            {
+                X509CertSelector select = new X509CertSelector();
+                select.setSubject(cert.getIssuerX500Principal());
+                select.setIssuer(cert.getIssuerX500Principal());
+    
+                Iterator certIt = findCerts(certStores, select).iterator();
+                while (certIt.hasNext())
                 {
-                    cert.verify(taCert.getPublicKey(), "BC");
-                    certList.add(taCert);
-                    break;
-                }
-                catch (GeneralSecurityException gse)
-                {
-                    // wrong cert
+                    taCert = (X509Certificate) certIt.next();
+                    try
+                    {
+                        cert.verify(taCert.getPublicKey(), "BC");
+                        certList.add(taCert);
+                        break;
+                    }
+                    catch (GeneralSecurityException gse)
+                    {
+                        // wrong cert
+                    }
                 }
             }
         }
-
+        
         CertPath certPath = CertificateFactory.getInstance("X.509", "BC")
                 .generateCertPath(certList);
         return certPath;
