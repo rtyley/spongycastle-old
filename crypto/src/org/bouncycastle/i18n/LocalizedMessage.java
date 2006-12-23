@@ -122,9 +122,12 @@ public class LocalizedMessage
         try
         {
             ResourceBundle bundle;
-            if (loader != null) {
+            if (loader == null)
+            {
                 bundle = ResourceBundle.getBundle(resource,loc);
-            } else {
+            }
+            else
+            {
                 bundle = ResourceBundle.getBundle(resource, loc, loader);
             }
             String template = bundle.getString(entry);
