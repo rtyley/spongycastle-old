@@ -201,5 +201,7 @@ public interface PKCSObjectIdentifiers
     static final DERObjectIdentifier    pbeWithSHAAnd128BitRC2_CBC = new DERObjectIdentifier(pkcs_12PbeIds + ".5");
     static final DERObjectIdentifier    pbewithSHAAnd40BitRC2_CBC = new DERObjectIdentifier(pkcs_12PbeIds + ".6");
 
+    static final DERObjectIdentifier    id_alg_CMS3DESwrap = new DERObjectIdentifier("1.2.840.113549.1.9.16.3.6");
+    static final DERObjectIdentifier    id_alg_CMSRC2wrap = new DERObjectIdentifier("1.2.840.113549.1.9.16.3.7");
 }
 
