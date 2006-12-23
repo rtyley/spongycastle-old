@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DEROctetString;
 
 import java.io.IOException;
@@ -14,8 +13,6 @@ public abstract class JDKECDSAAlgParameters
     public static class SigAlgParameters
         extends JDKAlgorithmParameters
     {
-        private DEREncodable  params;
-
         protected byte[] engineGetEncoded() 
             throws IOException
         {
@@ -39,7 +36,7 @@ public abstract class JDKECDSAAlgParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
