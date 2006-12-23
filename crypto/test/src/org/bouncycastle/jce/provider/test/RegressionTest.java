@@ -52,6 +52,7 @@ public class RegressionTest
         new CertPathValidatorTest(),
         new CertPathBuilderTest(),
         new ECEncodingTest(),
+        new AlgorithmParametersTest(),
         new NISTCertPathTest(),
         new PKIXPolicyMappingTest(),
         new SlotTwoTest(),

@@ -1,21 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.AlgorithmParametersSpi;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
-
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.PSource;
-import javax.crypto.spec.RC2ParameterSpec;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -43,9 +27,44 @@ import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.jce.spec.IESParameterSpec;
 
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.PSource;
+import javax.crypto.spec.RC2ParameterSpec;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.AlgorithmParametersSpi;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
+
 public abstract class JDKAlgorithmParameters
     extends AlgorithmParametersSpi
 {
+    protected boolean isASN1FormatString(String format)
+    {
+        return format == null || format.equals("ASN.1");
+    }
+
+    protected AlgorithmParameterSpec engineGetParameterSpec(
+        Class paramSpec)
+        throws InvalidParameterSpecException
+    {
+        if (paramSpec == null)
+        {
+            throw new NullPointerException("argument to getParameterSpec must not be null");
+        }
+
+        return localEngineGetParameterSpec(paramSpec);
+    }
+
+    protected abstract AlgorithmParameterSpec localEngineGetParameterSpec(Class paramSpec)
+        throws InvalidParameterSpecException;
+
     public static class IVAlgorithmParameters
         extends JDKAlgorithmParameters
     {
@@ -61,9 +80,9 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format == null)
+            if (isASN1FormatString(format))
             {
-                return engineGetEncoded("ASN.1");
+                 return new DEROctetString(engineGetEncoded("RAW")).getEncoded();
             }
             
             if (format.equals("RAW"))
@@ -73,15 +92,11 @@ public abstract class JDKAlgorithmParameters
                 System.arraycopy(iv, 0, tmp, 0, iv.length);
                 return tmp;
             }
-            else if (format.equals("ASN.1"))
-            {
-                return new DEROctetString(engineGetEncoded("RAW")).getEncoded();
-            }
 
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -131,12 +146,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equals("RAW"))
-            {
-                engineInit(params);
-                return;
-            }
-            else if (format.equals("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 ASN1InputStream         aIn = new ASN1InputStream(params);
                 
@@ -151,6 +161,12 @@ public abstract class JDKAlgorithmParameters
                     throw new IOException("Exception decoding: " + e);
                 }
                 
+                return;
+            }
+
+            if (format.equals("RAW"))
+            {
+                engineInit(params);
                 return;
             }
 
@@ -178,9 +194,9 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format == null)
+            if (isASN1FormatString(format))
             {
-                return engineGetEncoded("ASN.1");
+                return new IDEACBCPar(engineGetEncoded("RAW")).getEncoded();
             }
             
             if (format.equals("RAW"))
@@ -190,15 +206,11 @@ public abstract class JDKAlgorithmParameters
                 System.arraycopy(iv, 0, tmp, 0, iv.length);
                 return tmp;
             }
-            else if (format.equals("ASN.1"))
-            {
-                return new IDEACBCPar(engineGetEncoded("RAW")).getEncoded();
-            }
 
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -241,7 +253,7 @@ public abstract class JDKAlgorithmParameters
                 engineInit(params);
                 return;
             }
-            else if (format.equals("ASN.1"))
+            if (format.equals("ASN.1"))
             {
                 ASN1InputStream         aIn = new ASN1InputStream(params);
                 IDEACBCPar              oct = new IDEACBCPar((ASN1Sequence)aIn.readObject());
@@ -315,11 +327,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equals("RAW"))
-            {
-                return engineGetEncoded();
-            }
-            else if (format.equals("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 if (parameterVersion == -1)
                 {
@@ -331,10 +339,15 @@ public abstract class JDKAlgorithmParameters
                 }
             }
 
+            if (format.equals("RAW"))
+            {
+                return engineGetEncoded();
+            }
+
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -406,12 +419,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equals("RAW"))
-            {
-                engineInit(params);
-                return;
-            }
-            else if (format.equals("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 ASN1InputStream         aIn = new ASN1InputStream(params);
                 RC2CBCParameter         p = RC2CBCParameter.getInstance(aIn.readObject());
@@ -423,6 +431,12 @@ public abstract class JDKAlgorithmParameters
 
                 iv = p.getIV();
 
+                return;
+            }
+
+            if (format.equals("RAW"))
+            {
+                engineInit(params);
                 return;
             }
 
@@ -453,19 +467,21 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException 
         {
-            if (format.equals("RAW"))
-            {
-                return engineGetEncoded();
-            }
-            else if (format.equals("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 return new CAST5CBCParameters(engineGetEncoded(), keyLength).getEncoded();
             }
 
+            if (format.equals("RAW"))
+            {
+                return engineGetEncoded();
+            }
+
+
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -505,12 +521,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equals("RAW"))
-            {
-                engineInit(params);
-                return;
-            }
-            else if (format.equals("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 ASN1InputStream         aIn = new ASN1InputStream(params);
                 CAST5CBCParameters      p = CAST5CBCParameters.getInstance(aIn.readObject());
@@ -519,6 +530,12 @@ public abstract class JDKAlgorithmParameters
 
                 iv = p.getIV();
 
+                return;
+            }
+
+            if (format.equals("RAW"))
+            {
+                engineInit(params);
                 return;
             }
 
@@ -556,7 +573,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equals("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 return engineGetEncoded();
             }
@@ -564,7 +581,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -606,7 +623,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equals("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 engineInit(params);
                 return;
@@ -658,8 +675,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 return engineGetEncoded();
             }
@@ -667,7 +683,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -725,8 +741,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 engineInit(params);
             }
@@ -779,8 +794,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 return engineGetEncoded();
             }
@@ -788,7 +802,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -839,8 +853,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 engineInit(params);
             }
@@ -893,8 +906,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
                 String format)
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 return engineGetEncoded();
             }
@@ -902,7 +914,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
         
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
                 Class paramSpec)
         throws InvalidParameterSpecException
         {
@@ -953,8 +965,7 @@ public abstract class JDKAlgorithmParameters
                 String format)
         throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 engineInit(params);
             }
@@ -1006,8 +1017,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 return engineGetEncoded();
             }
@@ -1015,7 +1025,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -1079,8 +1089,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 engineInit(params);
             }
@@ -1132,8 +1141,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 return engineGetEncoded();
             }
@@ -1141,7 +1149,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -1195,8 +1203,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 engineInit(params);
             }
@@ -1252,8 +1259,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 return engineGetEncoded();
             }
@@ -1261,11 +1267,11 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
     
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
-            if (paramSpec == OAEPParameterSpec.class && currentSpec instanceof OAEPParameterSpec)
+            if (paramSpec == OAEPParameterSpec.class && currentSpec != null)
             {
                 return currentSpec;
             }
@@ -1344,7 +1350,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded() 
             throws IOException
         {
-            PSSParameterSpec    pssSpec = (PSSParameterSpec)currentSpec;
+            PSSParameterSpec    pssSpec = currentSpec;
             AlgorithmIdentifier hashAlgorithm = new AlgorithmIdentifier(
                                                 JCEDigestUtil.getOID(pssSpec.getDigestAlgorithm()),
                                                 new DERNull());
@@ -1370,11 +1376,11 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
     
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
-            if (paramSpec == PSSParameterSpec.class && currentSpec instanceof PSSParameterSpec)
+            if (paramSpec == PSSParameterSpec.class && currentSpec != null)
             {
                 return currentSpec;
             }
@@ -1426,8 +1432,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 engineInit(params);
             }
