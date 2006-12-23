@@ -1,23 +1,18 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DerivationFunction;
 import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.agreement.ECDHCBasicAgreement;
+import org.bouncycastle.crypto.agreement.kdf.DHKDFParameters;
+import org.bouncycastle.crypto.agreement.kdf.ECDHKEKGenerator;
 import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle.crypto.params.KDFParameters;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 
@@ -58,7 +53,7 @@ public class JCEECDHKeyAgreement
         algorithms.put(NISTObjectIdentifiers.id_aes128_wrap.getId(), i128);
         algorithms.put(NISTObjectIdentifiers.id_aes192_wrap.getId(), i192);
         algorithms.put(NISTObjectIdentifiers.id_aes256_wrap.getId(), i256);
-        algorithms.put("1.2.840.113549.1.9.16.3.6", i192);
+        algorithms.put(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId(), i192);
     }
 
     private BigInteger             result;
@@ -149,33 +144,18 @@ public class JCEECDHKeyAgreement
             
             int    keySize = ((Integer)algorithms.get(algorithm)).intValue();
 
+            DHKDFParameters params = new DHKDFParameters(new DERObjectIdentifier(algorithm), keySize, bigIntToBytes(result));
+
             byte[] keyBytes = new byte[keySize / 8];
 
-            // ECC-CMS-SharedInfo
-            ASN1EncodableVector v = new ASN1EncodableVector();
-
-            v.add(new AlgorithmIdentifier(new DERObjectIdentifier(algorithm), new DERNull()));
-            v.add(new DERTaggedObject(true, 2, new DEROctetString(integerToBytes(keySize))));
-
-            kdf.init(new KDFParameters(bigIntToBytes(result), new DERSequence(v).getDEREncoded()));
+            kdf.init(params);
+            
             kdf.generateBytes(keyBytes, 0, keyBytes.length);
 
             return new SecretKeySpec(keyBytes, algorithm);
         }
 
         return new SecretKeySpec(bigIntToBytes(result), algorithm);
-    }
-
-    private byte[] integerToBytes(int keySize)
-    {
-        byte[] val = new byte[4];
-
-        val[0] = (byte)(keySize >> 24);
-        val[1] = (byte)(keySize >> 16);
-        val[2] = (byte)(keySize >> 8);
-        val[3] = (byte)keySize;
-
-        return val;
     }
 
     protected void engineInit(
@@ -232,7 +212,7 @@ public class JCEECDHKeyAgreement
     {
         public DHwithSHA1KDF()
         {
-            super(new ECDHBasicAgreement(), new KDF2BytesGenerator(new SHA1Digest()));
+            super(new ECDHBasicAgreement(), new ECDHKEKGenerator(new SHA1Digest()));
         }
     }
 }
