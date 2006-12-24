@@ -87,6 +87,7 @@ public class CMSSignedGenerator
     protected List _certs = new ArrayList();
     protected List _crls = new ArrayList();
     protected List _signers = new ArrayList();
+    protected Map  _digests = new HashMap();
 
     protected CMSSignedGenerator()
     {
@@ -235,5 +236,16 @@ public class CMSSignedGenerator
         {
             _signers.add(it.next());
         }
+    }
+
+    /**
+     * Return a map of oids and byte arrays representing the digests calculated on the content during
+     * the last generate.
+     *
+     * @return a map of oids (as String objects) and byte[] representing digests.
+     */
+    public Map getGeneratedDigests()
+    {
+        return new HashMap(_digests);
     }
 }

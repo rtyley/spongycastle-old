@@ -65,9 +65,9 @@ import java.util.Map;
 public class CMSSignedDataStreamGenerator
     extends CMSSignedGenerator
 {
-    private List  _signerInfs = new ArrayList();
-    private List  _digests = new ArrayList();
-    private int   _bufferSize;
+    private List _signerInfs = new ArrayList();
+    private List _messageDigests = new ArrayList();
+    private int  _bufferSize;
 
     private class SignerInf
     {
@@ -134,6 +134,8 @@ public class CMSSignedDataStreamGenerator
             AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
 
             byte[]          hash = _digest.digest();
+
+            _digests.put(_digestOID, hash.clone());
 
             Map  parameters = getBaseParameters(contentType, digAlgId, hash);
 
@@ -250,7 +252,7 @@ public class CMSSignedDataStreamGenerator
         sig.initSign(key);
 
         _signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
-        _digests.add(dig);
+        _messageDigests.add(dig);
     }
 
     private DERObject makeObj(
@@ -389,7 +391,7 @@ public class CMSSignedDataStreamGenerator
             digStream = new NullOutputStream();
         }
         
-        for (Iterator it = _digests.iterator(); it.hasNext();)
+        for (Iterator it = _messageDigests.iterator(); it.hasNext();)
         {
             digStream = new DigestOutputStream(digStream, (MessageDigest)it.next());
         }
@@ -572,7 +574,9 @@ public class CMSSignedDataStreamGenerator
         {
             _out.close();
             _eiGen.close();
-            
+
+            _digests.clear();    // clear the current preserved digest state
+
             if (_certs.size() != 0)
             {
                 ASN1Set certs = CMSUtils.createDerSetFromList(_certs);
