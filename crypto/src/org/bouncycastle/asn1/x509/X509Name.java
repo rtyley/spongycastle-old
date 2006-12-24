@@ -439,9 +439,9 @@ public class X509Name
      * ASN.1 counterparts.
      */
     public X509Name(
-        Vector                      ordering,
-        Hashtable                   attributes,
-        X509DefaultEntryConverter   converter)
+        Vector                   ordering,
+        Hashtable                attributes,
+        X509NameEntryConverter   converter)
     {
         this.converter = converter;
 

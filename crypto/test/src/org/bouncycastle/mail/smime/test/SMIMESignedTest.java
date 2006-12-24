@@ -823,6 +823,13 @@ public class SMIMESignedTest
         SMIMESigned s = new SMIMESigned(mm);
 
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+
+        byte[] contentDigest = (byte[])gen.getGeneratedDigests().get(SMIMESignedGenerator.DIGEST_SHA1);
+
+        AttributeTable table = ((SignerInformation)s.getSignerInfos().getSigners().iterator().next()).getSignedAttributes();
+        Attribute hash = table.get(CMSAttributes.messageDigest);
+
+        assertTrue(MessageDigest.isEqual(contentDigest, ((ASN1OctetString)hash.getAttrValues().getObjectAt(0)).getOctets()));
     }
 
     public void testMimeMultipartBinaryReader()

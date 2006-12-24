@@ -4,6 +4,10 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSProcessableByteArray;
@@ -356,12 +360,24 @@ public class SignedDataTest
             sid = signer.getSID();
             
             assertEquals(true, signer.verify(cert, "BC"));
+
+            //
+            // check content digest
+            //
+
+            byte[] contentDigest = (byte[])gen.getGeneratedDigests().get(signer.getDigestAlgOID());
+
+            AttributeTable table = signer.getSignedAttributes();
+            Attribute hash = table.get(CMSAttributes.messageDigest);
+
+            assertTrue(MessageDigest.isEqual(contentDigest, ((ASN1OctetString)hash.getAttrValues().getObjectAt(0)).getOctets()));
         }
         
         c = signers.getSigners(sid);
         
         assertEquals(2, c.size());
-        
+
+
         //
         // try using existing signer
         //

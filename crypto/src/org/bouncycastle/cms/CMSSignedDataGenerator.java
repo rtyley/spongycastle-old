@@ -227,6 +227,8 @@ public class CMSSignedDataGenerator
                 content.write(new DigOutputStream(dig));
 
                 hash = dig.digest();
+
+                _digests.put(digestOID, hash.clone());
             }
 
             AttributeTable signed;
@@ -414,7 +416,9 @@ public class CMSSignedDataGenerator
         ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
 
         DERObjectIdentifier      contentTypeOID = new DERObjectIdentifier(signedContentType);
-        
+
+        _digests.clear();  // clear the current preserved digest state
+
         //
         // add the precalculated SignerInfo objects.
         //
