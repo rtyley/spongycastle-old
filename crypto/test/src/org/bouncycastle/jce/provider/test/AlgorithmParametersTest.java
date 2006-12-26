@@ -63,7 +63,7 @@ public class AlgorithmParametersTest
             spec = alg.getParameterSpec(null);
             fail("null spec not detected");
         }
-        catch (InvalidParameterSpecException e)
+        catch (NullPointerException e)
         {
             // expected unknown object
         }
