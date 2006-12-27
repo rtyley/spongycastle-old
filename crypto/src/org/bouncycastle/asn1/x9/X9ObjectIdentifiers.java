@@ -124,5 +124,18 @@ public interface X9ObjectIdentifiers
     public static final DERObjectIdentifier x9_63_scheme = new DERObjectIdentifier("1.3.133.16.840.63.0");
     public static final DERObjectIdentifier dhSinglePass_stdDH_sha1kdf_scheme = new DERObjectIdentifier(x9_63_scheme + ".2");
     public static final DERObjectIdentifier dhSinglePass_cofactorDH_sha1kdf_scheme = new DERObjectIdentifier(x9_63_scheme + ".3");
+
+    /**
+     * X9.42
+     */
+    public static final DERObjectIdentifier x9_42_schemes = new DERObjectIdentifier("1.2.840.10046.3");
+    public static final DERObjectIdentifier dhStatic = new DERObjectIdentifier(x9_42_schemes + ".1");
+    public static final DERObjectIdentifier dhEphem = new DERObjectIdentifier(x9_42_schemes + ".2");
+    public static final DERObjectIdentifier dhOneFlow = new DERObjectIdentifier(x9_42_schemes + ".3");
+    public static final DERObjectIdentifier dhHybrid1 = new DERObjectIdentifier(x9_42_schemes + ".4");
+    public static final DERObjectIdentifier dhHybrid2 = new DERObjectIdentifier(x9_42_schemes + ".5");
+    public static final DERObjectIdentifier dhHybridOneFlow = new DERObjectIdentifier(x9_42_schemes + ".6");
+    public static final DERObjectIdentifier mqv2 = new DERObjectIdentifier(x9_42_schemes + ".7");
+    public static final DERObjectIdentifier mqv1 = new DERObjectIdentifier(x9_42_schemes + ".8");
 }
 

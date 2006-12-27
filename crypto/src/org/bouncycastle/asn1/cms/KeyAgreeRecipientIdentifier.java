@@ -58,6 +58,13 @@ public class KeyAgreeRecipientIdentifier
         throw new IllegalArgumentException("Invalid KeyAgreeRecipientIdentifier: " + obj.getClass().getName());
     } 
 
+    public KeyAgreeRecipientIdentifier(
+        IssuerAndSerialNumber issuerSerial)
+    {
+        this.issuerSerial = issuerSerial;
+        this.rKeyID = null;
+    }
+
     public IssuerAndSerialNumber getIssuerAndSerialNumber()
     {
         return issuerSerial;
@@ -71,7 +78,7 @@ public class KeyAgreeRecipientIdentifier
     /** 
      * Produce an object suitable for an ASN1OutputStream.
      * <pre>
-     * KeyAgreeRecipientIdentifier ::= SEQUENCE {
+     * KeyAgreeRecipientIdentifier ::= CHOICE {
      *     issuerAndSerialNumber IssuerAndSerialNumber,
      *     rKeyId [0] IMPLICIT RecipientKeyIdentifier
      * }

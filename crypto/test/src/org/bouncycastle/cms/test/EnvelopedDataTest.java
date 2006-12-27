@@ -41,7 +41,11 @@ public class EnvelopedDataTest
     private static String          _reciDN;
     private static KeyPair         _reciKP;
     private static X509Certificate _reciCert;
-    
+
+    private static KeyPair         _origEcKP;
+    private static KeyPair         _reciEcKP;
+    private static X509Certificate _reciEcCert;
+
     private static boolean         _initialised = false;
 
     private byte[] oldKEK = Base64.decode(
@@ -83,6 +87,7 @@ public class EnvelopedDataTest
       + "Tt84dUvuSKkFy3RhjxJmjwIscK6zbEUzKhcPQG2GHzXhWK5x1kov0I74XpGhVkya"
       + "ElH5K6SaOXiXAzcyNGggTOk4+ZFnz5Xl0pBje3zKxPhYu0SnCw7Pcqw=");
 
+
 //                          "MIGkAgEBBDC8vp7xVTbKSgYVU5WchGkWbzaj+yUFETIWP1Dt7+WSpq3ikSPdl7Pp" +
 //                              "HPqnPVZfoIWgBwYFK4EEACKhZANiAgSYHTgxf+DdTt84dUvuSKkFy3RhjxJmjwIs" +
 //                              "cK6zbEUzKhcPQG2GHzXhWK5x1kov0I74XpGhVkyaElH5K6SaOXiXAzcyNGggTOk4" +
@@ -109,7 +114,11 @@ public class EnvelopedDataTest
 
             _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
             _reciKP   = CMSTestUtil.makeKeyPair();
-            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);      
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
+
+            _origEcKP = CMSTestUtil.makeEcDsaKeyPair();
+            _reciEcKP = CMSTestUtil.makeEcDsaKeyPair();
+            _reciEcCert = CMSTestUtil.makeCertificate(_reciEcKP, _reciDN, _signKP, _signDN);
         }
     }
     
@@ -551,16 +560,46 @@ public class EnvelopedDataTest
     public void testECKeyAgree()
         throws Exception
     {
+        byte[] data = Hex.decode("504b492d4320434d5320456e76656c6f706564446174612053616d706c65");
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        edGen.addKeyAgreementRecipient(_origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
+
+        CMSEnvelopedData ed = edGen.generate(
+                              new CMSProcessableByteArray(data),
+                              CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(),
+                                   CMSEnvelopedDataGenerator.AES128_CBC);
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            byte[] recData = recipient.getContent(_reciEcKP.getPrivate(), "BC");
+            assertEquals(true, Arrays.equals(data, recData));
+        }
+    }
+
+    public void testECKeyAgreeVectors()
+        throws Exception
+    {
         PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(ecKeyAgreeKey);
         KeyFactory          fact = KeyFactory.getInstance("ECDH", "BC");
         PrivateKey          privKey = fact.generatePrivate(privSpec);
 
-        verifyECKeyAgree(privKey, "2.16.840.1.101.3.4.1.42", ecKeyAgreeMsgAES256);
-        verifyECKeyAgree(privKey, "2.16.840.1.101.3.4.1.2", ecKeyAgreeMsgAES128);
-        verifyECKeyAgree(privKey, "1.2.840.113549.3.7", ecKeyAgreeMsgDESEDE);
+        verifyECKeyAgreeVectors(privKey, "2.16.840.1.101.3.4.1.42", ecKeyAgreeMsgAES256);
+        verifyECKeyAgreeVectors(privKey, "2.16.840.1.101.3.4.1.2", ecKeyAgreeMsgAES128);
+        verifyECKeyAgreeVectors(privKey, "1.2.840.113549.3.7", ecKeyAgreeMsgDESEDE);
     }
 
-    private void verifyECKeyAgree(PrivateKey privKey, String wrapAlg, byte[] message)
+    private void verifyECKeyAgreeVectors(PrivateKey privKey, String wrapAlg, byte[] message)
         throws CMSException, GeneralSecurityException
     {
         byte[] data = Hex.decode("504b492d4320434d5320456e76656c6f706564446174612053616d706c65");
