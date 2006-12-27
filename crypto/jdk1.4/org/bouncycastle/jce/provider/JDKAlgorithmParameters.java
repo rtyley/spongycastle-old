@@ -1,23 +1,8 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.AlgorithmParametersSpi;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
-import java.security.spec.PSSParameterSpec;
-
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
@@ -25,8 +10,6 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.cryptopro.GOST3410NamedParameters;
-import org.bouncycastle.asn1.cryptopro.GOST3410ParamSetParameters;
 import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.asn1.misc.CAST5CBCParameters;
 import org.bouncycastle.asn1.misc.IDEACBCPar;
@@ -44,25 +27,59 @@ import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.jce.spec.IESParameterSpec;
 
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.AlgorithmParametersSpi;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.PSSParameterSpec;
+
 public abstract class JDKAlgorithmParameters
     extends AlgorithmParametersSpi
 {
+    protected boolean isASN1FormatString(String format)
+    {
+        return format == null || format.equals("ASN.1");
+    }
+
+    protected AlgorithmParameterSpec engineGetParameterSpec(
+        Class paramSpec)
+        throws InvalidParameterSpecException
+    {
+        if (paramSpec == null)
+        {
+            throw new NullPointerException("argument to getParameterSpec must not be null");
+        }
+
+        return localEngineGetParameterSpec(paramSpec);
+    }
+
+    protected abstract AlgorithmParameterSpec localEngineGetParameterSpec(Class paramSpec)
+        throws InvalidParameterSpecException;
+
     public static class IVAlgorithmParameters
         extends JDKAlgorithmParameters
     {
         private byte[]  iv;
 
         protected byte[] engineGetEncoded() 
+            throws IOException
         {
             return engineGetEncoded("ASN.1");
         }
 
         protected byte[] engineGetEncoded(
             String format) 
+            throws IOException
         {
-            if (format == null)
+            if (isASN1FormatString(format))
             {
-                return engineGetEncoded("ASN.1");
+                 return new DEROctetString(engineGetEncoded("RAW")).getEncoded();
             }
             
             if (format.equals("RAW"))
@@ -72,27 +89,11 @@ public abstract class JDKAlgorithmParameters
                 System.arraycopy(iv, 0, tmp, 0, iv.length);
                 return tmp;
             }
-            else if (format.equals("ASN.1"))
-            {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        dOut = new ASN1OutputStream(bOut);
-
-                try
-                {
-                    dOut.writeObject(new DEROctetString(engineGetEncoded("RAW")));
-                }
-                catch (IOException e)
-                {
-                    return null;
-                }
-
-                return bOut.toByteArray();
-            }
 
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -126,8 +127,7 @@ public abstract class JDKAlgorithmParameters
             if ((params.length % 8) != 0
                     && params[0] == 0x04 && params[1] == params.length - 2)
             {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(params);
                 ASN1OctetString         oct = (ASN1OctetString)aIn.readObject();
 
                 params = oct.getOctets();
@@ -143,15 +143,10 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equals("RAW"))
+            if (isASN1FormatString(format))
             {
-                engineInit(params);
-                return;
-            }
-            else if (format.equals("ASN.1"))
-            {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(params);
+                
                 try
                 {
                     ASN1OctetString         oct = (ASN1OctetString)aIn.readObject();
@@ -162,6 +157,13 @@ public abstract class JDKAlgorithmParameters
                 {
                     throw new IOException("Exception decoding: " + e);
                 }
+                
+                return;
+            }
+
+            if (format.equals("RAW"))
+            {
+                engineInit(params);
                 return;
             }
 
@@ -180,16 +182,18 @@ public abstract class JDKAlgorithmParameters
         private byte[]  iv;
 
         protected byte[] engineGetEncoded() 
+            throws IOException
         {
             return engineGetEncoded("ASN.1");
         }
 
         protected byte[] engineGetEncoded(
             String format) 
+            throws IOException
         {
-            if (format == null)
+            if (isASN1FormatString(format))
             {
-                return engineGetEncoded("ASN.1");
+                return new IDEACBCPar(engineGetEncoded("RAW")).getEncoded();
             }
             
             if (format.equals("RAW"))
@@ -199,27 +203,11 @@ public abstract class JDKAlgorithmParameters
                 System.arraycopy(iv, 0, tmp, 0, iv.length);
                 return tmp;
             }
-            else if (format.equals("ASN.1"))
-            {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        dOut = new ASN1OutputStream(bOut);
-
-                try
-                {
-                    dOut.writeObject(new IDEACBCPar(engineGetEncoded("RAW")));
-                }
-                catch (IOException e)
-                {
-                    return null;
-                }
-
-                return bOut.toByteArray();
-            }
 
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -262,21 +250,12 @@ public abstract class JDKAlgorithmParameters
                 engineInit(params);
                 return;
             }
-            else if (format.equals("ASN.1"))
+            if (format.equals("ASN.1"))
             {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
-                
-                try
-                {
-                    IDEACBCPar              oct = new IDEACBCPar((ASN1Sequence)aIn.readObject());
-    
-                    engineInit(oct.getIV());                
-                }
-                catch (Exception e)
-                {
-                    throw new IOException("Exception decoding: " + e);
-                }
+                ASN1InputStream         aIn = new ASN1InputStream(params);
+                IDEACBCPar              oct = new IDEACBCPar((ASN1Sequence)aIn.readObject());
+
+                engineInit(oct.getIV());
                 return;
             }
 
@@ -343,39 +322,29 @@ public abstract class JDKAlgorithmParameters
 
         protected byte[] engineGetEncoded(
             String format) 
+            throws IOException
         {
+            if (isASN1FormatString(format))
+            {
+                if (parameterVersion == -1)
+                {
+                    return new RC2CBCParameter(engineGetEncoded()).getEncoded();
+                }
+                else
+                {
+                    return new RC2CBCParameter(parameterVersion, engineGetEncoded()).getEncoded();
+                }
+            }
+
             if (format.equals("RAW"))
             {
                 return engineGetEncoded();
-            }
-            else if (format.equals("ASN.1"))
-            {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        dOut = new ASN1OutputStream(bOut);
-
-                try
-                {
-                    if (parameterVersion == -1)
-                    {
-                        dOut.writeObject(new RC2CBCParameter(engineGetEncoded()));
-                    }
-                    else
-                    {
-                        dOut.writeObject(new RC2CBCParameter(parameterVersion, engineGetEncoded()));
-                    }
-                }
-                catch (IOException e)
-                {
-                    return null;
-                }
-
-                return bOut.toByteArray();
             }
 
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -447,15 +416,9 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equals("RAW"))
+            if (isASN1FormatString(format))
             {
-                engineInit(params);
-                return;
-            }
-            else if (format.equals("ASN.1"))
-            {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(params);
                 RC2CBCParameter         p = RC2CBCParameter.getInstance(aIn.readObject());
 
                 if (p.getRC2ParameterVersion() != null)
@@ -465,6 +428,12 @@ public abstract class JDKAlgorithmParameters
 
                 iv = p.getIV();
 
+                return;
+            }
+
+            if (format.equals("RAW"))
+            {
+                engineInit(params);
                 return;
             }
 
@@ -493,32 +462,23 @@ public abstract class JDKAlgorithmParameters
 
         protected byte[] engineGetEncoded(
             String format) 
+            throws IOException 
         {
+            if (isASN1FormatString(format))
+            {
+                return new CAST5CBCParameters(engineGetEncoded(), keyLength).getEncoded();
+            }
+
             if (format.equals("RAW"))
             {
                 return engineGetEncoded();
             }
-            else if (format.equals("ASN.1"))
-            {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        dOut = new ASN1OutputStream(bOut);
 
-                try
-                {
-                    dOut.writeObject(new CAST5CBCParameters(engineGetEncoded(), keyLength));
-                }
-                catch (IOException e)
-                {
-                    return null;
-                }
-
-                return bOut.toByteArray();
-            }
 
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -558,21 +518,21 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equals("RAW"))
+            if (isASN1FormatString(format))
             {
-                engineInit(params);
-                return;
-            }
-            else if (format.equals("ASN.1"))
-            {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(params);
-                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+                ASN1InputStream         aIn = new ASN1InputStream(params);
                 CAST5CBCParameters      p = CAST5CBCParameters.getInstance(aIn.readObject());
 
                 keyLength = p.getKeyLength();
 
                 iv = p.getIV();
 
+                return;
+            }
+
+            if (format.equals("RAW"))
+            {
+                engineInit(params);
                 return;
             }
 
@@ -610,7 +570,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equals("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 return engineGetEncoded();
             }
@@ -618,7 +578,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -650,8 +610,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             this.params = PKCS12PBEParams.getInstance(aIn.readObject());
         }
@@ -661,7 +620,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equals("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 engineInit(params);
                 return;
@@ -713,8 +672,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 return engineGetEncoded();
             }
@@ -722,7 +680,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -750,8 +708,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             try
             {
@@ -781,8 +738,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 engineInit(params);
             }
@@ -835,8 +791,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format))
             {
                 return engineGetEncoded();
             }
@@ -844,7 +799,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -872,8 +827,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             try
             {
@@ -896,8 +850,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 engineInit(params);
             }
@@ -912,7 +865,7 @@ public abstract class JDKAlgorithmParameters
             return "DSA Parameters";
         }
     }
-
+    
     public static class GOST3410
         extends JDKAlgorithmParameters
     {
@@ -950,8 +903,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
                 String format)
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 return engineGetEncoded();
             }
@@ -959,7 +911,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
         
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
                 Class paramSpec)
         throws InvalidParameterSpecException
         {
@@ -987,13 +939,11 @@ public abstract class JDKAlgorithmParameters
                 byte[] params)
         throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        dIn = new ASN1InputStream(bIn);
+            ASN1InputStream        dIn = new ASN1InputStream(params);
             
             try
             {
                 GOST3410PublicKeyAlgParameters gost3410P = new GOST3410PublicKeyAlgParameters((ASN1Sequence)dIn.readObject());
-                GOST3410ParamSetParameters p = GOST3410NamedParameters.getByOID(gost3410P.getPublicKeyParamSet());
                 
                 currentSpec = new GOST3410ParameterSpec(gost3410P.getPublicKeyParamSet().getId(), gost3410P.getDigestParamSet().getId(), gost3410P.getEncryptionParamSet().getId());
             }
@@ -1012,8 +962,7 @@ public abstract class JDKAlgorithmParameters
                 String format)
         throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 engineInit(params);
             }
@@ -1028,7 +977,7 @@ public abstract class JDKAlgorithmParameters
             return "GOST3410 Parameters";
         }
     }
-    
+
     public static class ElGamal
         extends JDKAlgorithmParameters
     {
@@ -1065,8 +1014,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 return engineGetEncoded();
             }
@@ -1074,7 +1022,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -1115,8 +1063,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             try
             {
@@ -1139,8 +1086,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 engineInit(params);
             }
@@ -1192,8 +1138,7 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 return engineGetEncoded();
             }
@@ -1201,7 +1146,7 @@ public abstract class JDKAlgorithmParameters
             return null;
         }
 
-        protected AlgorithmParameterSpec engineGetParameterSpec(
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
             Class paramSpec) 
             throws InvalidParameterSpecException
         {
@@ -1229,8 +1174,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
+            ASN1InputStream        aIn = new ASN1InputStream(params);
 
             try
             {
@@ -1256,8 +1200,7 @@ public abstract class JDKAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (format.equalsIgnoreCase("X.509")
-                    || format.equalsIgnoreCase("ASN.1"))
+            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
             {
                 engineInit(params);
             }
@@ -1272,16 +1215,16 @@ public abstract class JDKAlgorithmParameters
             return "IES Parameters";
         }
     }
-    
+
     public static class PSS
         extends JDKAlgorithmParameters
-    {  
+    {
         PSSParameterSpec     currentSpec;
-    
+
         /**
          * Return the PKCS#1 ASN.1 structure RSA-ES-OAEP-params.
          */
-        protected byte[] engineGetEncoded() 
+        protected byte[] engineGetEncoded()
         {
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
             DEROutputStream         dOut = new DEROutputStream(bOut);
@@ -1296,57 +1239,56 @@ public abstract class JDKAlgorithmParameters
             {
                 throw new RuntimeException("Error encoding PSSParameters");
             }
-    
+
             return bOut.toByteArray();
         }
-    
+
         protected byte[] engineGetEncoded(
-            String format) 
+            String format)
         {
             if (format.equalsIgnoreCase("X.509")
                     || format.equalsIgnoreCase("ASN.1"))
             {
                 return engineGetEncoded();
             }
-    
+
             return null;
         }
-    
-        protected AlgorithmParameterSpec engineGetParameterSpec(
-            Class paramSpec) 
+
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
+            Class paramSpec)
             throws InvalidParameterSpecException
         {
             if (paramSpec == PSSParameterSpec.class && currentSpec instanceof PSSParameterSpec)
             {
                 return currentSpec;
             }
-    
+
             throw new InvalidParameterSpecException("unknown parameter spec passed to PSS parameters object.");
         }
-    
+
         protected void engineInit(
-            AlgorithmParameterSpec paramSpec) 
+            AlgorithmParameterSpec paramSpec)
             throws InvalidParameterSpecException
         {
             if (!(paramSpec instanceof PSSParameterSpec))
             {
                 throw new InvalidParameterSpecException("PSSParameterSpec required to initialise an PSS algorithm parameters object");
             }
-    
+
             this.currentSpec = (PSSParameterSpec)paramSpec;
         }
-    
+
         protected void engineInit(
-            byte[] params) 
+            byte[] params)
             throws IOException
         {
-            ByteArrayInputStream   bIn = new ByteArrayInputStream(params);
-            ASN1InputStream        aIn = new ASN1InputStream(bIn);
-    
+            ASN1InputStream        aIn = new ASN1InputStream(params);
+
             try
             {
                 RSASSAPSSparams pssP = new RSASSAPSSparams((ASN1Sequence)aIn.readObject());
-    
+
                 currentSpec = new PSSParameterSpec(
                                        pssP.getSaltLength().getValue().intValue());
             }
@@ -1359,10 +1301,10 @@ public abstract class JDKAlgorithmParameters
                 throw new IOException("Not a valid PSS Parameter encoding.");
             }
         }
-    
+
         protected void engineInit(
             byte[] params,
-            String format) 
+            String format)
             throws IOException
         {
             if (format.equalsIgnoreCase("X.509")
@@ -1375,8 +1317,8 @@ public abstract class JDKAlgorithmParameters
                 throw new IOException("Unknown parameter format " + format);
             }
         }
-    
-        protected String engineToString() 
+
+        protected String engineToString()
         {
             return "PSS Parameters";
         }
