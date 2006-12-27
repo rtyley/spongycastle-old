@@ -75,7 +75,7 @@ public class X509CRLStoreSelector
      * attribute certificate. If <code>null</code> is specified, then no such
      * optional information is provided.
      * 
-     * @param cert the <code>X509AttributeCertificate</code> being checked (or
+     * @param attrCert the <code>X509AttributeCertificate</code> being checked (or
      *            <code>null</code>)
      * @see #getAttrCertificateChecking()
      */

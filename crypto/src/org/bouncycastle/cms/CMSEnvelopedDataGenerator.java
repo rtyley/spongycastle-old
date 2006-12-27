@@ -57,7 +57,6 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.ECPrivateKey;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -361,7 +360,7 @@ public class CMSEnvelopedDataGenerator
         {
             algorithm = null;
         }
-        else if (senderPrivateKey instanceof ECPrivateKey)
+        else if (senderPrivateKey.getAlgorithm().startsWith("EC"))
         {
             // TODO - need to check for GOST, ECDHC
             algorithm = X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme.getId();
