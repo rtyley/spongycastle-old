@@ -1,18 +1,22 @@
 package org.bouncycastle.mail.smime.handlers;
 
-import java.awt.datatransfer.DataFlavor;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.bouncycastle.mail.smime.SMIMEStreamingProcessor;
 
 import javax.activation.ActivationDataFlavor;
 import javax.activation.DataContentHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-
-import org.bouncycastle.mail.smime.SMIMEStreamingProcessor;
+import java.awt.datatransfer.DataFlavor;
+import java.io.BufferedInputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
 
 public class multipart_signed 
     implements DataContentHandler 
@@ -59,7 +63,7 @@ public class multipart_signed
         {
             try
             {
-                ((MimeMultipart)obj).writeTo(os);
+                outputBodyPart(os, obj);
             }
             catch (MessagingException ex)
             {
@@ -94,6 +98,116 @@ public class multipart_signed
         else
         {
             throw new IOException("unknown object in writeTo " + obj);
+        }
+    }
+
+    /*
+     * Output the mulitpart as a collection of leaves to make sure preamble text is not included.
+     */
+    private void outputBodyPart(
+        OutputStream out,
+        Object bodyPart)
+        throws MessagingException, IOException
+    {
+        if (bodyPart instanceof Multipart)
+        {
+            Multipart mp = (Multipart)bodyPart;
+            ContentType contentType = new ContentType(mp.getContentType());
+            String boundary = "--" + contentType.getParameter("boundary");
+
+            LineOutputStream lOut = new LineOutputStream(out);
+
+            for (int i = 0; i < mp.getCount(); i++)
+            {
+                lOut.writeln(boundary);
+                outputBodyPart(out, mp.getBodyPart(i));
+                lOut.writeln();       // CRLF terminator
+            }
+
+            lOut.writeln(boundary + "--");
+            return;
+        }
+
+        MimeBodyPart    mimePart = (MimeBodyPart)bodyPart;
+
+        if (mimePart.getContent() instanceof Multipart)
+        {
+            Multipart mp = (Multipart)mimePart.getContent();
+
+            LineOutputStream lOut = new LineOutputStream(out);
+
+            Enumeration headers = mimePart.getAllHeaderLines();
+            while (headers.hasMoreElements())
+            {
+                lOut.writeln((String)headers.nextElement());
+            }
+
+            lOut.writeln();      // CRLF separator
+
+            outputBodyPart(out, mp);
+            return;
+        }
+
+        mimePart.writeTo(out);
+    }
+
+    private static class LineOutputStream extends FilterOutputStream
+    {
+        private static byte newline[];
+
+        public LineOutputStream(OutputStream outputstream)
+        {
+            super(outputstream);
+        }
+
+        public void writeln(String s)
+            throws MessagingException
+        {
+            try
+            {
+                byte abyte0[] = getBytes(s);
+                super.out.write(abyte0);
+                super.out.write(newline);
+            }
+            catch(Exception exception)
+            {
+                throw new MessagingException("IOException", exception);
+            }
+        }
+
+        public void writeln()
+            throws MessagingException
+        {
+            try
+            {
+                super.out.write(newline);
+            }
+            catch(Exception exception)
+            {
+                throw new MessagingException("IOException", exception);
+            }
+        }
+
+        static
+        {
+            newline = new byte[2];
+            newline[0] = 13;
+            newline[1] = 10;
+        }
+
+        private static byte[] getBytes(String s)
+        {
+            char ac[] = s.toCharArray();
+            int i = ac.length;
+            byte abyte0[] = new byte[i];
+            int j = 0;
+
+            while (j < i)
+            {
+                abyte0[j] = (byte)ac[j++];
+            }
+
+            return abyte0;
         }
     }
 }

@@ -1,11 +1,13 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
 import javax.crypto.KeyAgreement;
+import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
@@ -231,6 +233,51 @@ public class DHTest
         }
     }
 
+    private void testExplicitWrapping(
+        int         size,
+        int         privateValueSize,
+        BigInteger  g,
+        BigInteger  p)
+        throws Exception
+    {
+        DHParameterSpec             dhParams = new DHParameterSpec(p, g, privateValueSize);
+
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH", "BC");
+
+        keyGen.initialize(dhParams);
+
+        //
+        // a side
+        //
+        KeyPair aKeyPair = keyGen.generateKeyPair();
+
+        KeyAgreement aKeyAgree = KeyAgreement.getInstance("DH", "BC");
+
+        checkKeySize(privateValueSize, aKeyPair);
+
+        aKeyAgree.init(aKeyPair.getPrivate());
+
+        //
+        // b side
+        //
+        KeyPair bKeyPair = keyGen.generateKeyPair();
+
+        KeyAgreement bKeyAgree = KeyAgreement.getInstance("DH", "BC");
+
+        checkKeySize(privateValueSize, bKeyPair);
+
+        bKeyAgree.init(bKeyPair.getPrivate());
+
+        //
+        // agreement
+        //
+        aKeyAgree.doPhase(bKeyPair.getPublic(), true);
+        bKeyAgree.doPhase(aKeyPair.getPublic(), true);
+
+        SecretKey k1 = aKeyAgree.generateSecret(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId());
+        SecretKey k2 = aKeyAgree.generateSecret(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId());
+    }
+
     private void checkKeySize(int privateValueSize, KeyPair aKeyPair)
     {
         if (privateValueSize != 0)
@@ -385,6 +432,7 @@ public class DHTest
         testGP(512, 64, g512, p512);
         testGP(768, 128, g768, p768);
         testGP(1024, 256, g1024, p1024);
+        testExplicitWrapping(512, 0, g512, p512);
         testRandom(256);
         testECDH("ECDH");
         testECDH("ECDHC");

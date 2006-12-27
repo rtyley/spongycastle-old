@@ -130,6 +130,7 @@ public class SMIMESignedGenerator
      * @param key key to use to generate the signature
      * @param cert the public key certificate associated with the signer's key.
      * @param digestOID object ID of the digest algorithm to use.
+     * @exception IllegalArgumentException any of the arguments are inappropriate
      */
     public void addSigner(
         PrivateKey      key,
@@ -513,7 +514,7 @@ public class SMIMESignedGenerator
             return unsignedAttr;
         }
     }
-    
+
     private class ContentSigner
         implements SMIMEStreamingProcessor
     {

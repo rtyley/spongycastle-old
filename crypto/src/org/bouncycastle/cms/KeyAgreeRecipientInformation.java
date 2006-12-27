@@ -88,7 +88,6 @@ public class KeyAgreeRecipientInformation
             SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(privInfo.getAlgorithmId(), origK.getPublicKey().getBytes());
             X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
             KeyFactory fact = KeyFactory.getInstance(_keyEncAlg.getObjectId().getId(), prov);
-
             KeyAgreement agreement = KeyAgreement.getInstance(_keyEncAlg.getObjectId().getId(), prov);
                             
             agreement.init(key);

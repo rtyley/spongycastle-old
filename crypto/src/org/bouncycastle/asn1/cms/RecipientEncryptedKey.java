@@ -60,6 +60,14 @@ public class RecipientEncryptedKey
         throw new IllegalArgumentException("Invalid RecipientEncryptedKey: " + obj.getClass().getName());
     } 
 
+    public RecipientEncryptedKey(
+        KeyAgreeRecipientIdentifier id,
+        ASN1OctetString             encryptedKey)
+    {
+        this.identifier = id;
+        this.encryptedKey = encryptedKey;
+    }
+
     public KeyAgreeRecipientIdentifier getIdentifier()
     {
         return identifier;
