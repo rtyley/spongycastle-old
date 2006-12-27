@@ -16,6 +16,19 @@ import java.io.OutputStream;
  */
 public class TlsUtils
 {
+    static byte[] toByteArray(String str)
+    {
+        char[] chars = str.toCharArray();
+        byte[] bytes = new byte[chars.length];
+
+        for (int i = 0; i != bytes.length; i++)
+        {
+            bytes[i] = (byte)chars[i];
+        }
+
+        return bytes;
+    }
+
     protected static void writeUint8(short i, OutputStream os) throws IOException
     {
         os.write(i);
