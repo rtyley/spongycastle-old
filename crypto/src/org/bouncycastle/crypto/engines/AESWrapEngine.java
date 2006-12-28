@@ -37,11 +37,11 @@ public class AESWrapEngine
         }
         else if (param instanceof ParametersWithIV)
         {
-            this.iv = ((ParametersWithIV) param).getIV();
-            this.param = (KeyParameter) ((ParametersWithIV) param).getParameters();
+            this.iv = ((ParametersWithIV)param).getIV();
+            this.param = (KeyParameter)((ParametersWithIV) param).getParameters();
             if (this.iv.length != 8)
             {
-               throw new IllegalArgumentException("IV not multiple of 8");
+               throw new IllegalArgumentException("IV not equal to 8");
             }
         }
     }

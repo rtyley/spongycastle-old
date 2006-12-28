@@ -82,6 +82,7 @@ public class RegressionTest
         new EqualsHashCodeTest(),
         new TEATest(),
         new XTEATest(),
+        new RFC3211WrapTest(),
         //new NaccacheSternTest(),
         new NullTest()
     };
