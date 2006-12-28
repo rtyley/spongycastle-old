@@ -1,10 +1,8 @@
 package org.bouncycastle.crypto.test;
 
-import java.io.ByteArrayInputStream;
-
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.EncryptionScheme;
 import org.bouncycastle.asn1.pkcs.PBES2Parameters;
@@ -20,12 +18,13 @@ import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.SimpleTest;
+
+import java.io.ByteArrayInputStream;
 
 /**
  * A test class for PKCS5 PBES2 with PBKDF2 (PKCS5 v2.0) using
@@ -37,7 +36,7 @@ import org.bouncycastle.util.test.TestResult;
  * (without quotes). They should all yield the same PrivateKeyInfo object.
  */
 public class PKCS5Test
-    implements PKCSObjectIdentifiers, Test
+    extends SimpleTest
 {
     /**
      * encrypted using des-cbc.
@@ -95,7 +94,7 @@ public class PKCS5Test
       + "845e82767c1c38e82745daf421f0c8cd09d7652387");
 
     private class PBETest
-        implements Test
+        extends SimpleTest
     {
         int                 id;
         BufferedBlockCipher cipher;
@@ -119,13 +118,13 @@ public class PKCS5Test
             return cipher.getUnderlyingCipher().getAlgorithmName() + " PKCS5S2 Test " + id;
         }
 
-        public TestResult perform()
+        public void performTest()
         {
             char[]                  password = { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
             PBEParametersGenerator  generator = new PKCS5S2ParametersGenerator();
             ByteArrayInputStream    bIn = new ByteArrayInputStream(sample);
             ASN1InputStream         dIn = new ASN1InputStream(bIn);
-            EncryptedPrivateKeyInfo info;
+            EncryptedPrivateKeyInfo info = null;
 
             try
             {
@@ -133,7 +132,7 @@ public class PKCS5Test
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": failed construction - exception " + e.toString());
+                fail("failed construction - exception " + e.toString(), e);
             }
 
             PBES2Parameters         alg = new PBES2Parameters((ASN1Sequence)info.getEncryptionAlgorithm().getParameters());
@@ -155,7 +154,7 @@ public class PKCS5Test
     
             CipherParameters    param;
     
-            if (scheme.getObjectId().equals(RC2_CBC))
+            if (scheme.getObjectId().equals(PKCSObjectIdentifiers.RC2_CBC))
             {
                 RC2CBCParameter rc2Params = new RC2CBCParameter((ASN1Sequence)scheme.getObject());
                 byte[]  iv = rc2Params.getIV();
@@ -181,23 +180,21 @@ public class PKCS5Test
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": failed doFinal - exception " + e.toString());
+                fail("failed doFinal - exception " + e.toString());
             }
 
             if (result.length != len)
             {
-                return new SimpleTestResult(false, getName() + ": failed");
+                fail("failed length");
             }
 
             for (int i = 0; i != len; i++)
             {
                 if (out[i] != result[i])
                 {
-                    return new SimpleTestResult(false, getName() + ": failed");
+                    fail("failed comparison");
                 }
             }
-
-            return new SimpleTestResult(true, getName() + ": Okay");
         }
     }
 
@@ -206,45 +203,57 @@ public class PKCS5Test
         return "PKCS5S2";
     }
 
-    public TestResult perform()
+    public void performTest()
+        throws Exception
     {
         BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new DESEngine()));
-        Test                test = new PBETest(0, cipher, sample1, 64);
-        TestResult          result = test.perform();
+        SimpleTest          test = new PBETest(0, cipher, sample1, 64);
 
-        if (!result.isSuccessful())
-        {
-            return new SimpleTestResult(false, getName() + ": " + result.toString());
-        }
+        test.performTest();
 
         cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new DESedeEngine()));
         test = new PBETest(1, cipher, sample2, 192);
-        result = test.perform();
 
-        if (!result.isSuccessful())
-        {
-            return new SimpleTestResult(false, getName() + ": " + result.toString());
-        }
+        test.performTest();
 
         cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new RC2Engine()));
         test = new PBETest(2, cipher, sample3, 0);
-        result = test.perform();
+        test.performTest();
 
-        if (!result.isSuccessful())
+        //
+        // RFC 3211 tests
+        //
+        char[]                  password = { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
+        PBEParametersGenerator  generator = new PKCS5S2ParametersGenerator();
+
+        byte[]  salt = Hex.decode("1234567878563412");
+
+        generator.init(
+                PBEParametersGenerator.PKCS5PasswordToBytes(password),
+                salt,
+                5);
+
+        if (!areEqual(((KeyParameter)generator.generateDerivedParameters(64)).getKey(), Hex.decode("d1daa78615f287e6")))
         {
-            return new SimpleTestResult(false, getName() + ": " + result.toString());
+            fail("64 test failed");
         }
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+        password = "All n-entities must communicate with other n-entities via n-1 entiteeheehees".toCharArray();
+
+        generator.init(
+                PBEParametersGenerator.PKCS5PasswordToBytes(password),
+                salt,
+                500);
+
+        if (!areEqual(((KeyParameter)generator.generateDerivedParameters(192)).getKey(), Hex.decode("6a8970bf68c92caea84a8df28510858607126380cc47ab2d")))
+        {
+            fail("192 test failed");
+        }
     }
 
     public static void main(
         String[]    args)
     {
-        Test    test = new PKCS5Test();
-
-        TestResult  result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new PKCS5Test());
     }
 }
