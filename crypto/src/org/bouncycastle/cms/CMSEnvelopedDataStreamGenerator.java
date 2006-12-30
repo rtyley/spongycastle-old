@@ -1,5 +1,25 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.BEROctetStringGenerator;
+import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.BERSet;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.RC2ParameterSpec;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.AlgorithmParameterGenerator;
@@ -9,45 +29,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.RC2ParameterSpec;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.BERSet;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.BERSequenceGenerator;
-import org.bouncycastle.asn1.BEROctetStringGenerator;
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.asn1.cms.KEKIdentifier;
-import org.bouncycastle.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.RecipientIdentifier;
-import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 
 /**
  * General class for generating a CMS enveloped-data message stream.
@@ -68,193 +50,12 @@ import org.bouncycastle.asn1.x509.TBSCertificateStructure;
  * </pre>
  */
 public class CMSEnvelopedDataStreamGenerator
+    extends CMSEnvelopedGenerator
 {
-    public static final String  DES_EDE3_CBC    = "1.2.840.113549.3.7";
-    public static final String  RC2_CBC         = "1.2.840.113549.3.2";
-    public static final String  IDEA_CBC        = "1.3.6.1.4.1.188.7.1.1.2";
-    public static final String  CAST5_CBC       = "1.2.840.113533.7.66.10";
-    public static final String  AES128_CBC      = NISTObjectIdentifiers.id_aes128_CBC.getId(); 
-    public static final String  AES192_CBC      = NISTObjectIdentifiers.id_aes192_CBC.getId(); 
-    public static final String  AES256_CBC      = NISTObjectIdentifiers.id_aes256_CBC.getId(); 
-
-    SecureRandom  rand = new SecureRandom();
-
-    List                        recipientInfs = new ArrayList();
     private Object              _originatorInfo = null;
     private Object              _unprotectedAttributes = null;
     private int                 _bufferSize;
     private boolean             _berEncodeRecipientSet;
-    
-    private class RecipientInf
-    {
-        X509Certificate         cert;
-        AlgorithmIdentifier     keyEncAlg;
-        PublicKey               pubKey;
-        ASN1OctetString         subKeyId;
-
-        SecretKey               secKey;
-        KEKIdentifier           secKeyId;
-
-        RecipientInf(
-            X509Certificate cert)
-        {
-            this.cert = cert;
-            this.pubKey = cert.getPublicKey();
-
-            try
-            {
-                byte[]                  bytes = cert.getTBSCertificate();
-                ASN1InputStream         aIn = new ASN1InputStream(bytes);
-
-                TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
-                SubjectPublicKeyInfo    info = tbs.getSubjectPublicKeyInfo();
-
-                keyEncAlg = info.getAlgorithmId();
-            }
-            catch (IOException e)
-            {
-                throw new IllegalArgumentException("can't extract key algorithm from this cert");
-            }
-            catch (CertificateEncodingException e)
-            {
-                throw new IllegalArgumentException("can't extract tbs structure from this cert");
-            }
-        }
-
-        RecipientInf(
-            PublicKey               pubKey,
-            ASN1OctetString         subKeyId)
-        {
-            this.pubKey = pubKey;
-            this.subKeyId = subKeyId; 
-
-            try
-            {
-                byte[]                  bytes = pubKey.getEncoded();
-                ASN1InputStream         aIn = new ASN1InputStream(bytes);
-
-                SubjectPublicKeyInfo    info = SubjectPublicKeyInfo.getInstance(aIn.readObject());
-
-                keyEncAlg = info.getAlgorithmId();
-            }
-            catch (IOException e)
-            {
-                throw new IllegalArgumentException("can't extract key algorithm from this key");
-            }
-        }
-
-        RecipientInf(
-            SecretKey               secKey,
-            KEKIdentifier           secKeyId)
-        {
-            this.secKey = secKey;
-            this.secKeyId = secKeyId;
-
-            if (secKey.getAlgorithm().startsWith("DES"))
-            {
-                keyEncAlg = new AlgorithmIdentifier(
-                        new DERObjectIdentifier("1.2.840.113549.1.9.16.3.6"),
-                            new DERNull());
-            }
-            else if (secKey.getAlgorithm().startsWith("RC2"))
-            {
-                keyEncAlg = new AlgorithmIdentifier(
-                        new DERObjectIdentifier("1.2.840.113549.1.9.16.3.7"),
-                        new DERInteger(58));
-            }
-            else if (secKey.getAlgorithm().startsWith("AES"))
-            {
-                int length = secKey.getEncoded().length * 8;
-                DERObjectIdentifier wrapOid = null;
-                
-                if (length == 128)
-                {
-                    wrapOid = NISTObjectIdentifiers.id_aes128_wrap;
-                }
-                else if (length == 192)
-                {
-                    wrapOid = NISTObjectIdentifiers.id_aes192_wrap;
-                }
-                else if (length == 256)
-                {
-                    wrapOid = NISTObjectIdentifiers.id_aes256_wrap;
-                }
-                else
-                {
-                    throw new IllegalArgumentException("illegal keysize in AES");
-                }
-                
-                keyEncAlg = new AlgorithmIdentifier(wrapOid, new DERNull());
-            }
-            else
-            {
-                throw new IllegalArgumentException("unknown algorithm");
-            }
-        }
-
-        RecipientInfo toRecipientInfo(
-            SecretKey           key,
-            String              prov)
-            throws IOException, GeneralSecurityException
-        {
-            Cipher              keyCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
-                                                    keyEncAlg.getObjectId().getId(), prov);
-
-            if (pubKey != null)
-            {
-                ASN1OctetString         encKey;
-
-                try
-                {
-                    keyCipher.init(Cipher.WRAP_MODE, pubKey);
-    
-                    encKey = new DEROctetString(keyCipher.wrap(key));
-                }
-                catch (GeneralSecurityException e)   // some providers do not support wrap
-                {
-                    keyCipher.init(Cipher.ENCRYPT_MODE, pubKey);
-    
-                    encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
-                }
-                catch (IllegalStateException e)   // some providers do not support wrap
-                {
-                    keyCipher.init(Cipher.ENCRYPT_MODE, pubKey);
-    
-                    encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
-                }
-
-                if (cert != null)
-                {
-                    ASN1InputStream         aIn = new ASN1InputStream(cert.getTBSCertificate());
-                    TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
-                    IssuerAndSerialNumber   encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
-
-
-                    return new RecipientInfo(new KeyTransRecipientInfo(
-                            new RecipientIdentifier(encSid),
-                            keyEncAlg,
-                            encKey));
-                }
-                else
-                {
-                    return new RecipientInfo(new KeyTransRecipientInfo(
-                            new RecipientIdentifier(subKeyId),
-                            keyEncAlg,
-                            encKey));
-                }
-            }
-            else
-            {
-                keyCipher.init(Cipher.WRAP_MODE, secKey);
-
-                ASN1OctetString         encKey = new DEROctetString(
-                                                        keyCipher.wrap(key));
-
-                return new RecipientInfo(new KEKRecipientInfo(
-                                                secKeyId, keyEncAlg, encKey));
-            }
-        }
-    }
 
     /**
      * base constructor
@@ -273,42 +74,6 @@ public class CMSEnvelopedDataStreamGenerator
         int bufferSize)
     {
         _bufferSize = bufferSize;
-    }
-    
-    /**
-     * add a recipient.
-     */
-    public void addKeyTransRecipient(
-        X509Certificate cert)
-        throws IllegalArgumentException
-    {
-        recipientInfs.add(new RecipientInf(cert));
-    }
-
-    /**
-     * add a recipient
-     *
-     * @param key the public key used by the recipient
-     * @param subKeyId the identifier for the recipient's public key
-     */
-    public void addKeyTransRecipient(
-        PublicKey   key,
-        byte[]      subKeyId)
-        throws IllegalArgumentException
-    {
-        recipientInfs.add(new RecipientInf(key, new DEROctetString(subKeyId)));
-    }
-
-    /**
-     * add a KEK recipient.
-     */
-    public void addKEKRecipient(
-        SecretKey   key,
-        byte[]      keyIdentifier)
-        throws IllegalArgumentException
-    {
-        recipientInfs.add(new RecipientInf(key, new KEKIdentifier(
-                                                keyIdentifier, null, null)));
     }
     
     /**

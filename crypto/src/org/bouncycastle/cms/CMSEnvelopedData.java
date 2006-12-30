@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.cms.EnvelopedData;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
+import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -89,6 +90,11 @@ public class CMSEnvelopedData
             {
                 infos.add(new KeyAgreeRecipientInformation(
                             (KeyAgreeRecipientInfo)type, _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
+            }
+            else if (type instanceof PasswordRecipientInfo)
+            {
+                infos.add(new PasswordRecipientInformation(
+                            (PasswordRecipientInfo)type, _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
             }
         }
 

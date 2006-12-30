@@ -1,12 +1,9 @@
 package org.bouncycastle.mail.smime;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.AlgorithmParameters;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
+import org.bouncycastle.cms.CMSException;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -15,11 +12,15 @@ import javax.crypto.SecretKey;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
-import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
-import org.bouncycastle.cms.CMSException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.AlgorithmParameters;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 
 /**
  * General class for generating a pkcs7-mime message.
@@ -48,6 +49,12 @@ public class SMIMEEnvelopedGenerator
     public static final String  AES128_CBC      = CMSEnvelopedDataGenerator.AES128_CBC;
     public static final String  AES192_CBC      = CMSEnvelopedDataGenerator.AES192_CBC;
     public static final String  AES256_CBC      = CMSEnvelopedDataGenerator.AES256_CBC;
+
+    public static final String  DES_EDE3_WRAP   = CMSEnvelopedDataGenerator.DES_EDE3_WRAP;
+    public static final String  AES128_WRAP     = CMSEnvelopedDataGenerator.AES128_WRAP;
+    public static final String  AES256_WRAP     = CMSEnvelopedDataGenerator.AES256_WRAP;
+
+    public static final String  ECDH_SHA1KDF    = CMSEnvelopedDataGenerator.ECDH_SHA1KDF;
 
     private static final String ENCRYPTED_CONTENT_TYPE = "application/pkcs7-mime; name=\"smime.p7m\"; smime-type=enveloped-data";
     
@@ -93,6 +100,38 @@ public class SMIMEEnvelopedGenerator
         throws IllegalArgumentException
     {
         fact.addKeyTransRecipient(key, subKeyId);
+    }
+
+    /**
+     * add a KEK recipient.
+     */
+    public void addKEKRecipient(
+        SecretKey   key,
+        byte[]      keyIdentifier)
+        throws IllegalArgumentException
+    {
+        fact.addKEKRecipient(key, keyIdentifier);
+    }
+
+    /**
+     * Add a key agreement based recipient.
+     *
+     * @param senderPrivateKey private key to initialise sender side of agreement with.
+     * @param senderPublicKey sender public key to include with message.
+     * @param recipientCert recipient's public key certificate.
+     * @param cekWrapAlgorithm OID for key wrapping algorithm to use.
+     * @param provider provider to use for the agreement calculation.
+     */
+    public void addKeyAgreementRecipient(
+        String           agreementAlgorithm,
+        PrivateKey       senderPrivateKey,
+        PublicKey        senderPublicKey,
+        X509Certificate  recipientCert,
+        String           cekWrapAlgorithm,
+        String           provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException
+    {
+        fact.addKeyAgreementRecipient(agreementAlgorithm, senderPrivateKey, senderPublicKey, recipientCert, cekWrapAlgorithm, provider);
     }
 
     /**

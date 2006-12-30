@@ -1,5 +1,23 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1SetParser;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTags;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.EncryptedContentInfoParser;
+import org.bouncycastle.asn1.cms.EnvelopedDataParser;
+import org.bouncycastle.asn1.cms.KEKRecipientInfo;
+import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
+import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
+import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
+import org.bouncycastle.asn1.cms.RecipientInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,27 +25,9 @@ import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Enumeration;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.ASN1SequenceParser;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERTags;
-import org.bouncycastle.asn1.ASN1SetParser;
-import org.bouncycastle.asn1.ASN1OctetStringParser;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.cms.EnvelopedDataParser;
-import org.bouncycastle.asn1.cms.EncryptedContentInfoParser;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * Parsing class for an CMS Enveloped Data object from an input stream.
@@ -126,6 +126,16 @@ public class CMSEnvelopedDataParser
             {
                 infos.add(new KEKRecipientInformation(
                             (KEKRecipientInfo)info.getInfo(), _encAlg, dataStream));
+            }
+            else if (info.getInfo() instanceof KeyAgreeRecipientInfo)
+            {
+                infos.add(new KeyAgreeRecipientInformation(
+                            (KeyAgreeRecipientInfo)info.getInfo(), _encAlg, dataStream));
+            }
+            else if (info.getInfo() instanceof PasswordRecipientInfo)
+            {
+                infos.add(new PasswordRecipientInformation(
+                            (PasswordRecipientInfo)info.getInfo(), _encAlg, dataStream));
             }
         }
         
