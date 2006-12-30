@@ -60,6 +60,7 @@ public class SignerId
                 return false;
             }
         }
+
         
         byte[] subjectId = this.getSubjectKeyIdentifier();
         if (subjectId != null)

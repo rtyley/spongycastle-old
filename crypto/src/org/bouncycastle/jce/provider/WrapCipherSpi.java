@@ -1,5 +1,36 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.Wrapper;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.engines.AESWrapEngine;
+import org.bouncycastle.crypto.engines.CamelliaEngine;
+import org.bouncycastle.crypto.engines.DESedeEngine;
+import org.bouncycastle.crypto.engines.DESedeWrapEngine;
+import org.bouncycastle.crypto.engines.RC2WrapEngine;
+import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.CipherSpi;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+import javax.crypto.spec.RC5ParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -13,34 +44,6 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.CipherSpi;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.Wrapper;
-import org.bouncycastle.crypto.engines.AESWrapEngine;
-import org.bouncycastle.crypto.engines.DESedeWrapEngine;
-import org.bouncycastle.crypto.engines.RC2WrapEngine;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
 
 public abstract class WrapCipherSpi extends CipherSpi
     implements PBE
@@ -63,7 +66,10 @@ public abstract class WrapCipherSpi extends CipherSpi
 
     protected AlgorithmParameters     engineParams = null;
 
-    protected Wrapper                   wrapEngine = null;
+    protected Wrapper                 wrapEngine = null;
+
+    private int                       ivSize;
+    private byte[]                    iv;
 
     protected WrapCipherSpi()
     {
@@ -72,7 +78,15 @@ public abstract class WrapCipherSpi extends CipherSpi
     protected WrapCipherSpi(
         Wrapper wrapEngine)
     {
+        this(wrapEngine, 0);
+    }
+
+    protected WrapCipherSpi(
+        Wrapper wrapEngine,
+        int     ivSize)
+    {
         this.wrapEngine = wrapEngine;
+        this.ivSize = ivSize;
     }
 
     protected int engineGetBlockSize()
@@ -82,7 +96,7 @@ public abstract class WrapCipherSpi extends CipherSpi
 
     protected byte[] engineGetIV()
     {
-        return null;
+        return (byte[])iv.clone();
     }
 
     protected int engineGetKeySize(
@@ -150,8 +164,14 @@ public abstract class WrapCipherSpi extends CipherSpi
         if (params instanceof javax.crypto.spec.IvParameterSpec)
         {
             IvParameterSpec iv = (IvParameterSpec) params;
-            CipherParameters paramPlusIV = new ParametersWithIV(param, iv.getIV());
-            param = paramPlusIV;
+            param = new ParametersWithIV(param, iv.getIV());
+        }
+
+        if (param instanceof KeyParameter && ivSize != 0)
+        {
+            iv = new byte[ivSize];
+            random.nextBytes(iv);
+            param = new ParametersWithIV(param, iv);
         }
 
         switch (opmode)
@@ -428,6 +448,33 @@ public abstract class WrapCipherSpi extends CipherSpi
         public RC2Wrap()
         {
             super(new RC2WrapEngine());
+        }
+    }
+
+    public static class RFC3211DESedeWrap
+        extends WrapCipherSpi
+    {
+        public RFC3211DESedeWrap()
+        {
+            super(new RFC3211WrapEngine(new DESedeEngine()), 8);
+        }
+    }
+
+    public static class RFC3211AESWrap
+        extends WrapCipherSpi
+    {
+        public RFC3211AESWrap()
+        {
+            super(new RFC3211WrapEngine(new AESEngine()), 16);
+        }
+    }
+
+    public static class RFC3211CamelliaWrap
+        extends WrapCipherSpi
+    {
+        public RFC3211CamelliaWrap()
+        {
+            super(new RFC3211WrapEngine(new CamelliaEngine()), 16);
         }
     }
 }

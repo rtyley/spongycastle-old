@@ -1,5 +1,23 @@
 package org.bouncycastle.cms.test;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.CMSEnvelopedDataParser;
+import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
+import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.cms.RecipientId;
+import org.bouncycastle.cms.RecipientInformation;
+import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
+
+import javax.crypto.SecretKey;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -13,25 +31,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-
-import javax.crypto.SecretKey;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
-import org.bouncycastle.cms.CMSEnvelopedDataParser;
-import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
-import org.bouncycastle.cms.CMSTypedStream;
-import org.bouncycastle.cms.RecipientId;
-import org.bouncycastle.cms.RecipientInformation;
-import org.bouncycastle.cms.RecipientInformationStore;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
 
 public class EnvelopedDataStreamTest
     extends TestCase
@@ -48,7 +47,11 @@ public class EnvelopedDataStreamTest
     private static String          _reciDN;
     private static KeyPair         _reciKP;
     private static X509Certificate _reciCert;
-    
+
+    private static KeyPair         _origEcKP;
+    private static KeyPair         _reciEcKP;
+    private static X509Certificate _reciEcCert;
+
     private static boolean         _initialised = false;
     
     public EnvelopedDataStreamTest()
@@ -72,7 +75,11 @@ public class EnvelopedDataStreamTest
     
             _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
             _reciKP   = CMSTestUtil.makeKeyPair();
-            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);       
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
+
+            _origEcKP = CMSTestUtil.makeEcDsaKeyPair();
+            _reciEcKP = CMSTestUtil.makeEcDsaKeyPair();
+            _reciEcCert = CMSTestUtil.makeCertificate(_reciEcKP, _reciDN, _signKP, _signDN);
         }
     }
     
@@ -567,7 +574,45 @@ public class EnvelopedDataStreamTest
 
         ep.close();
     }
-    
+
+    public void testECKeyAgree()
+        throws Exception
+    {
+        byte[] data = Hex.decode("504b492d4320434d5320456e76656c6f706564446174612053616d706c65");
+
+        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
+
+        edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
+
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+
+        OutputStream out = edGen.open(
+                                bOut,
+                                CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+        out.write(data);
+
+        out.close();
+
+        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(bOut.toByteArray());
+
+        RecipientInformationStore  recipients = ep.getRecipientInfos();
+
+        assertEquals(ep.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
+
+        RecipientId                recSel = new RecipientId();
+
+        recSel.setIssuer(PrincipalUtil.getIssuerX509Principal(_reciEcCert).getEncoded());
+        recSel.setSerialNumber(_reciEcCert.getSerialNumber());
+
+        RecipientInformation       recipient = recipients.get(recSel);
+
+        CMSTypedStream recData = recipient.getContentStream(_reciEcKP.getPrivate(), "BC");
+
+        assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
+
+        ep.close();
+    }
+
     public static Test suite()
         throws Exception
     {
