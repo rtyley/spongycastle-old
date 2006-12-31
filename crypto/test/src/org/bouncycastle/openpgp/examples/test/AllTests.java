@@ -43,7 +43,7 @@ public class AllTests
     public void tearDown()
     {
         System.setOut(_oldOut);
-        System.setOut(_oldErr);
+        System.setErr(_oldErr);
     }
     
     public void testRSAKeyGeneration() 
