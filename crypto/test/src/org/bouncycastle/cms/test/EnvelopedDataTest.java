@@ -416,7 +416,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
     
@@ -450,7 +450,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -484,7 +484,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -523,7 +523,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -554,7 +554,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -593,7 +593,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -632,7 +632,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -666,7 +666,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -721,7 +721,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -752,7 +752,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -786,7 +786,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 
@@ -816,7 +816,7 @@ public class EnvelopedDataTest
         }
         else
         {
-            fail("no recpient found");
+            fail("no recipient found");
         }
     }
 }
