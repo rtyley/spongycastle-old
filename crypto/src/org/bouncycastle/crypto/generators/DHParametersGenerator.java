@@ -39,21 +39,16 @@ public class DHParametersGenerator
      */
     public DHParameters generateParameters()
     {
-        BigInteger      g, p, q;
-        int             qLength = size - 1;
-
         //
         // find a safe prime p where p = 2*q + 1, where p and q are prime.
         //
-        for (;;)
-        {
-            q = new BigInteger(qLength, certainty, random);
-            p = q.multiply(TWO).add(ONE);
-            if (p.isProbablePrime(certainty))
-            {
-                break;
-            }
-        }
+        BigInteger[] safePrimes = DHParametersHelper.generateSafePrimes(size, certainty, random);
+
+        BigInteger p = safePrimes[0];
+        BigInteger q = safePrimes[1];
+
+        BigInteger g;
+        int qLength = size - 1;
 
         //
         // calculate the generator g - the advantage of using the 2q+1 
