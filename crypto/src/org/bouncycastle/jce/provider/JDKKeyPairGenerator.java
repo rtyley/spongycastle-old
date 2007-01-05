@@ -223,8 +223,6 @@ public abstract class JDKKeyPairGenerator
 
             this.strength = strength;
             this.random = random;
-            this.strength = strength;
-            this.random = random;
         }
 
         public void initialize(
