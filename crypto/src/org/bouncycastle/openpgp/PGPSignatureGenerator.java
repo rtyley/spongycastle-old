@@ -1,5 +1,14 @@
 package org.bouncycastle.openpgp;
 
+import org.bouncycastle.bcpg.MPInteger;
+import org.bouncycastle.bcpg.OnePassSignaturePacket;
+import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
+import org.bouncycastle.bcpg.SignaturePacket;
+import org.bouncycastle.bcpg.SignatureSubpacket;
+import org.bouncycastle.bcpg.SignatureSubpacketTags;
+import org.bouncycastle.bcpg.sig.IssuerKeyID;
+import org.bouncycastle.bcpg.sig.SignatureCreationTime;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -10,15 +19,6 @@ import java.security.NoSuchProviderException;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Date;
-
-import org.bouncycastle.bcpg.MPInteger;
-import org.bouncycastle.bcpg.OnePassSignaturePacket;
-import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
-import org.bouncycastle.bcpg.SignaturePacket;
-import org.bouncycastle.bcpg.SignatureSubpacket;
-import org.bouncycastle.bcpg.SignatureSubpacketTags;
-import org.bouncycastle.bcpg.sig.IssuerKeyID;
-import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 
 /**
  * Generator for PGP Signatures.
@@ -31,13 +31,11 @@ public class PGPSignatureGenerator
     private Signature       sig;
     private MessageDigest   dig;
     private int             signatureType;
-    private boolean         creationTimeFound;
-    private boolean         issuerKeyIDFound;
     
     private byte            lastb;
     
     SignatureSubpacket[]    unhashed = new SignatureSubpacket[0];
-    SignatureSubpacket[]    hashed = new SignatureSubpacket[2];
+    SignatureSubpacket[]    hashed = new SignatureSubpacket[0];
     
     /**
      * Create a generator for the passed in keyAlgorithm and hashAlgorithm codes.
@@ -160,44 +158,13 @@ public class PGPSignatureGenerator
     public void setHashedSubpackets(
         PGPSignatureSubpacketVector    hashedPcks)
     {
-        creationTimeFound = false;
-        issuerKeyIDFound = false;
-    
         if (hashedPcks == null)
         {
-            hashed = new SignatureSubpacket[2];
+            hashed = new SignatureSubpacket[0];
             return;
         }
         
-        SignatureSubpacket[]    tmp = hashedPcks.toSubpacketArray();
-        
-    
-        for (int i = 0; i != tmp.length; i++)
-        {
-            if (tmp[i].getType() == SignatureSubpacketTags.CREATION_TIME)
-            {
-                creationTimeFound = true;
-            }
-            else if(tmp[i].getType() == SignatureSubpacketTags.ISSUER_KEY_ID)
-            {
-                issuerKeyIDFound = true;
-            }
-        }
-        
-        if (creationTimeFound && issuerKeyIDFound)
-        {
-            hashed = tmp;
-        }
-        else if (creationTimeFound || issuerKeyIDFound)
-        {
-            hashed = new SignatureSubpacket[tmp.length + 1];
-            System.arraycopy(tmp, 0, hashed, 1, tmp.length);
-        }
-        else
-        {
-            hashed = new SignatureSubpacket[tmp.length + 2];
-            System.arraycopy(tmp, 0, hashed, 2, tmp.length);
-        }
+        hashed = hashedPcks.toSubpacketArray();
     }
     
     public void setUnhashedSubpackets(
@@ -208,7 +175,7 @@ public class PGPSignatureGenerator
             unhashed = new SignatureSubpacket[0];
             return;
         }
-        
+
         unhashed = unhashedPcks.toSubpacketArray();
     }
     
@@ -239,17 +206,24 @@ public class PGPSignatureGenerator
         MPInteger[]             sigValues;
         int                     version = 4;
         ByteArrayOutputStream   sOut = new ByteArrayOutputStream();
-        
-        int    index = 0;
-        
-        if (!creationTimeFound)
+        SignatureSubpacket[]    hPkts, unhPkts;
+
+        if (!packetPresent(hashed, SignatureSubpacketTags.CREATION_TIME))
         {
-            hashed[index++] = new SignatureCreationTime(false, new Date());
+            hPkts = insertSubpacket(hashed, new SignatureCreationTime(false, new Date()));
+        }
+        else
+        {
+            hPkts = hashed;
         }
         
-        if (!issuerKeyIDFound)
+        if (!packetPresent(hashed, SignatureSubpacketTags.ISSUER_KEY_ID) && !packetPresent(unhashed, SignatureSubpacketTags.ISSUER_KEY_ID))
         {
-            hashed[index++] = new IssuerKeyID(false, privKey.getKeyID());
+            unhPkts = insertSubpacket(unhashed, new IssuerKeyID(false, privKey.getKeyID()));
+        }
+        else
+        {
+            unhPkts = unhashed;
         }
         
         try
@@ -261,9 +235,9 @@ public class PGPSignatureGenerator
             
             ByteArrayOutputStream    hOut = new ByteArrayOutputStream();
             
-            for (int i = 0; i != hashed.length; i++)
+            for (int i = 0; i != hPkts.length; i++)
             {
-                hashed[i].encode(hOut);
+                hPkts[i].encode(hOut);
             }
                 
             byte[]                            data = hOut.toByteArray();
@@ -308,9 +282,9 @@ public class PGPSignatureGenerator
         fingerPrint[0] = digest[0];
         fingerPrint[1] = digest[1];
         
-        return new PGPSignature(new SignaturePacket(signatureType, privKey.getKeyID(), keyAlgorithm, hashAlgorithm, hashed, unhashed, fingerPrint, sigValues));
+        return new PGPSignature(new SignaturePacket(signatureType, privKey.getKeyID(), keyAlgorithm, hashAlgorithm, hPkts, unhPkts, fingerPrint, sigValues));
     }
-    
+
     /**
      * Generate a certification for the passed in id and key.
      * 
@@ -422,5 +396,32 @@ public class PGPSignatureGenerator
         }
         
         return keyBytes;
+    }
+
+    private boolean packetPresent(
+        SignatureSubpacket[] packets,
+        int type)
+    {
+        for (int i = 0; i != packets.length; i++)
+        {
+            if (packets[i].getType() == type)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private SignatureSubpacket[] insertSubpacket(
+        SignatureSubpacket[] packets,
+        SignatureSubpacket subpacket)
+    {
+        SignatureSubpacket[] tmp = new SignatureSubpacket[packets.length + 1];
+
+        tmp[0] = subpacket;
+        System.arraycopy(packets, 0, tmp, 1, packets.length);
+
+        return tmp;
     }
 }

@@ -175,13 +175,18 @@ public class PGPSignatureTest
         }
         
         PGPSignatureSubpacketVector hashedPcks = sig.getHashedSubPackets();
-        PGPSignatureSubpacketVector unhashedPcks = sig.getHashedSubPackets();
+        PGPSignatureSubpacketVector unhashedPcks = sig.getUnhashedSubPackets();
         
-        if (hashedPcks.size() != 7)
+        if (hashedPcks.size() != 6)
         {
             fail("wrong number of hashed packets found.");
         }
-        
+
+        if (unhashedPcks.size() != 1)
+        {
+            fail("wrong number of unhashed packets found.");
+        }
+
         if (!hashedPcks.getSignerUserID().equals(TEST_USER_ID))
         {
             fail("test userid not matching");
@@ -192,7 +197,7 @@ public class PGPSignatureTest
             fail("test signature expiration time not matching");
         }
         
-        if (hashedPcks.getIssuerKeyID() != secretDSAKey.getKeyID())
+        if (unhashedPcks.getIssuerKeyID() != secretDSAKey.getKeyID())
         {
             fail("wrong issuer key ID found in certification");
         }
@@ -239,16 +244,16 @@ public class PGPSignatureTest
         
         hashedPcks = sig.getHashedSubPackets();
         
-        if (hashedPcks.size() != 2)
+        if (hashedPcks.size() != 1)
         {
             fail("found wrong number of hashed packets");
         }
         
         unhashedPcks = sig.getUnhashedSubPackets();
         
-        if (unhashedPcks.size() != 0)
+        if (unhashedPcks.size() != 1)
         {
-            fail("found non-zero unhashed packets");
+            fail("found wrong number of unhashed packets");
         }
         
         try
@@ -288,7 +293,7 @@ public class PGPSignatureTest
         
         hashedPcks = sig.getHashedSubPackets();
         
-        if (hashedPcks.size() != 2)
+        if (hashedPcks.size() != 1)
         {
             fail("found wrong number of hashed packets in override test");
         }
@@ -331,9 +336,9 @@ public class PGPSignatureTest
         
         unhashedPcks = sig.getUnhashedSubPackets();
         
-        if (unhashedPcks.size() != 0)
+        if (unhashedPcks.size() != 1)
         {
-            fail("found non-zero unhashed packets in override test");
+            fail("found wrong number of unhashed packets in override test");
         }
         
         //
