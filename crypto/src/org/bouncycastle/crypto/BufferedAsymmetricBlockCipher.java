@@ -95,7 +95,7 @@ public class BufferedAsymmetricBlockCipher
     {
         if (bufOff >= buf.length)
         {
-            throw new DataLengthException("attempt to process message to long for cipher");
+            throw new DataLengthException("attempt to process message too long for cipher");
         }
 
         buf[bufOff++] = in;
@@ -125,7 +125,7 @@ public class BufferedAsymmetricBlockCipher
 
         if (bufOff + len > buf.length)
         {
-            throw new DataLengthException("attempt to process message to long for cipher");
+            throw new DataLengthException("attempt to process message too long for cipher");
         }
 
         System.arraycopy(in, inOff, buf, bufOff, len);
