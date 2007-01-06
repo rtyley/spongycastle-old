@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.params.ElGamalKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.util.BigIntegers;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -21,7 +22,6 @@ public class ElGamalEngine
     private SecureRandom            random;
     private boolean                 forEncryption;
     private int                     bitSize;
-    private int                     shift;
 
     private static final BigInteger ZERO = BigInteger.valueOf(0);
     private static final BigInteger ONE = BigInteger.valueOf(1);
@@ -54,15 +54,6 @@ public class ElGamalEngine
 
         bitSize = key.getParameters().getP().bitLength();
 
-        if (bitSize % 8 == 0)    // a multiple of 8
-        {
-            this.shift = 0;
-        }
-        else
-        {
-            this.shift = (8 - (bitSize % 8));
-        }
-
         if (forEncryption)
         {
             if (!(key instanceof ElGamalPublicKeyParameters))
@@ -90,17 +81,10 @@ public class ElGamalEngine
     {
         if (forEncryption)
         {
-            if ((bitSize % 8) == 0)
-            {
-                return bitSize / 8 - 1;
-            }
+            return (bitSize - 1) / 8;
+        }
 
-            return bitSize / 8;
-        }
-        else
-        {
-            return 2 * (((bitSize - 1) + 7) / 8);
-        }
+        return 2 * ((bitSize + 7) / 8);
     }
 
     /**
@@ -114,12 +98,10 @@ public class ElGamalEngine
     {
         if (forEncryption)
         {
-            return 2 * (((bitSize - 1) + 7) / 8);
+            return 2 * ((bitSize + 7) / 8);
         }
-        else
-        {
-            return (bitSize - 7) / 8;
-        }
+
+        return (bitSize - 1) / 8;
     }
 
     /**
@@ -140,38 +122,20 @@ public class ElGamalEngine
         {
             throw new IllegalStateException("ElGamal engine not initialised");
         }
-        if (inLen > (getInputBlockSize() + 1))
-        {
-            throw new DataLengthException("input too large for ElGamal cipher.\n");
-        }
-        else if (inLen == (getInputBlockSize() + 1) && (!forEncryption || (in[inOff] & (0x80 >> shift)) != 0))
+        if (inLen > (getInputBlockSize() + (forEncryption ? 1 : 0)))
         {
             throw new DataLengthException("input too large for ElGamal cipher.\n");
         }
 
-        byte[]  block;
-
-        if (inOff != 0 || inLen != in.length)
-        {
-            block = new byte[inLen];
-
-            System.arraycopy(in, inOff, block, 0, inLen);
-        }
-        else
-        {
-            block = in;
-        }
-
-        BigInteger  g = key.getParameters().getG();
         BigInteger  p = key.getParameters().getP();
 
-        if (key instanceof ElGamalPrivateKeyParameters)
+        if (key instanceof ElGamalPrivateKeyParameters) // decryption
         {
-            byte[]  in1 = new byte[block.length / 2];
-            byte[]  in2 = new byte[block.length / 2];
+            byte[]  in1 = new byte[inLen / 2];
+            byte[]  in2 = new byte[inLen / 2];
 
-            System.arraycopy(block, 0, in1, 0, in1.length);
-            System.arraycopy(block, in1.length, in2, 0, in2.length);
+            System.arraycopy(in, inOff, in1, 0, in1.length);
+            System.arraycopy(in, inOff + in1.length, in2, 0, in2.length);
 
             BigInteger  gamma = new BigInteger(1, in1);
             BigInteger  phi = new BigInteger(1, in2);
@@ -180,24 +144,30 @@ public class ElGamalEngine
 
             BigInteger  m = gamma.modPow(p.subtract(ONE).subtract(priv.getX()), p).multiply(phi).mod(p);
 
-            byte[]      out = m.toByteArray();
-
-            if (out[0] != 0)
+            return BigIntegers.asUnsignedByteArray(m);
+        }
+        else // encryption
+        {
+            byte[] block;
+            if (inOff != 0 || inLen != in.length)
             {
-                return out;
+                block = new byte[inLen];
+
+                System.arraycopy(in, inOff, block, 0, inLen);
             }
             else
             {
-                byte[]  output = new byte[out.length - 1];
-                System.arraycopy(out, 1, output, 0, output.length);
-
-                return output;
+                block = in;
             }
-        }
-        else
-        {
+
+            BigInteger input = new BigInteger(1, block);
+
+            if (input.compareTo(p) >= 0)
+            {
+                throw new DataLengthException("input too large for ElGamal cipher.\n");
+            }
+            
             ElGamalPublicKeyParameters  pub = (ElGamalPublicKeyParameters)key;
-            BigInteger                  input = new BigInteger(1, block);
 
             int                         pBitLength = p.bitLength();
             BigInteger                  k = new BigInteger(pBitLength, random);
@@ -207,6 +177,7 @@ public class ElGamalEngine
                 k = new BigInteger(pBitLength, random);
             }
 
+            BigInteger  g = key.getParameters().getG();
             BigInteger  gamma = g.modPow(k, p);
             BigInteger  phi = input.multiply(pub.getY().modPow(k, p)).mod(p);
 

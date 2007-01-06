@@ -1,6 +1,7 @@
 package org.bouncycastle.openpgp.test;
 
 import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
@@ -28,11 +29,15 @@ import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.util.test.UncloseableOutputStream;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.DHParameterSpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.security.AlgorithmParameterGenerator;
+import java.security.AlgorithmParameters;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
@@ -40,8 +45,6 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
 import java.util.Iterator;
-
-import javax.crypto.Cipher;
 
 public class PGPDSAElGamalTest
     extends SimpleTest
@@ -432,6 +435,71 @@ public class PGPDSAElGamalTest
             PGPPublicKey k1 = pgpKp.getPublicKey();
             
             PGPPrivateKey k2 = pgpKp.getPrivateKey();
+
+
+
+            // Test bug with ElGamal P size != 0 mod 8 (don't use these sizes at home!)
+            SecureRandom random = new SecureRandom();
+            for (int pSize = 257; pSize < 264; ++pSize)
+            {
+                // Generate some parameters of the given size
+                AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("ElGamal", "BC");
+                a.init(pSize, new SecureRandom());
+                AlgorithmParameters params = a.generateParameters();
+
+                DHParameterSpec elP = (DHParameterSpec)params.getParameterSpec(DHParameterSpec.class);
+                KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ElGamal", "BC");
+
+                keyGen.initialize(elP);
+
+
+                // Run a short encrypt/decrypt test with random key for the given parameters
+                kp = keyGen.generateKeyPair();
+
+                PGPKeyPair elGamalKeyPair = new PGPKeyPair(
+                    PublicKeyAlgorithmTags.ELGAMAL_GENERAL, kp, new Date(), "BC");
+
+                cPk = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.CAST5, random, "BC");
+
+                puK = elGamalKeyPair.getPublicKey();
+
+                cPk.addMethod(puK);
+
+                cbOut = new ByteArrayOutputStream();
+
+                cOut = cPk.open(cbOut, text.length);
+
+                cOut.write(text);
+
+                cOut.close();
+
+                pgpF = new PGPObjectFactory(cbOut.toByteArray());
+
+                encList = (PGPEncryptedDataList)pgpF.nextObject();
+
+                encP = (PGPPublicKeyEncryptedData)encList.get(0);
+
+                pgpPrivKey = elGamalKeyPair.getPrivateKey();
+
+                // Note: This is where an exception would be expected if the P size causes problems
+                clear = encP.getDataStream(pgpPrivKey, "BC");
+
+                ByteArrayOutputStream dec = new ByteArrayOutputStream();
+
+                int b;
+                while ((b = clear.read()) >= 0)
+                {
+                    dec.write(b);
+                }
+
+                byte[] decText = dec.toByteArray();
+
+                if (!areEqual(text, decText))
+                {
+                    fail("decrypted message incorrect");
+                }
+            }
+           
         }
         catch (PGPException e)
         {
