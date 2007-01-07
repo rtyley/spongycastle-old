@@ -2032,6 +2032,18 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     onlineCRL = getCRL(location);
                     if (onlineCRL != null)
                     {
+                        // check if crl issuer is correct
+                        if (!cert.getIssuerX500Principal().equals(onlineCRL.getIssuerX500Principal()))
+                        {
+                            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
+                                        "CertPathReviewer.onlineCRLWrongCA",
+                                        new Object[] {new UntrustedInput(onlineCRL.getIssuerX500Principal().getName()),
+                                                      new UntrustedInput(cert.getIssuerX500Principal().getName()),
+                                                      new UntrustedInput(location)});
+                            addNotification(msg,index);
+                            continue;
+                        }
+                        
                         if (onlineCRL.getNextUpdate() == null
                             || new Date().before(onlineCRL.getNextUpdate()))
                         {
