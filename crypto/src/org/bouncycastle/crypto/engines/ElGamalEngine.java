@@ -122,7 +122,12 @@ public class ElGamalEngine
         {
             throw new IllegalStateException("ElGamal engine not initialised");
         }
-        if (inLen > (getInputBlockSize() + (forEncryption ? 1 : 0)))
+
+        int maxLength = forEncryption
+            ?   (bitSize - 1 + 7) / 8
+            :   getInputBlockSize();
+
+        if (inLen > maxLength)
         {
             throw new DataLengthException("input too large for ElGamal cipher.\n");
         }
@@ -162,11 +167,11 @@ public class ElGamalEngine
 
             BigInteger input = new BigInteger(1, block);
 
-            if (input.compareTo(p) >= 0)
+            if (input.bitLength() >= p.bitLength())
             {
                 throw new DataLengthException("input too large for ElGamal cipher.\n");
             }
-            
+
             ElGamalPublicKeyParameters  pub = (ElGamalPublicKeyParameters)key;
 
             int                         pBitLength = p.bitLength();
