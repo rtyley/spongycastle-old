@@ -1,17 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.interfaces.DSAKey;
-import java.security.spec.AlgorithmParameterSpec;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -35,6 +23,18 @@ import org.bouncycastle.crypto.signers.ECNRSigner;
 import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410Key;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.interfaces.DSAKey;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JDKDSASigner
     extends Signature implements PKCSObjectIdentifiers, X509ObjectIdentifiers
@@ -263,6 +263,42 @@ public class JDKDSASigner
         public stdDSA()
         {
             super("SHA1withDSA", new SHA1Digest(), new DSASigner());
+        }
+    }
+
+    static public class dsa224
+        extends JDKDSASigner
+    {
+        public dsa224()
+        {
+            super("SHA224withDSA", new SHA224Digest(), new DSASigner());
+        }
+    }
+    
+    static public class dsa256
+        extends JDKDSASigner
+    {
+        public dsa256()
+        {
+            super("SHA256withDSA", new SHA256Digest(), new DSASigner());
+        }
+    }
+    
+    static public class dsa384
+        extends JDKDSASigner
+    {
+        public dsa384()
+        {
+            super("SHA384withDSA", new SHA384Digest(), new DSASigner());
+        }
+    }
+    
+    static public class dsa512
+        extends JDKDSASigner
+    {
+        public dsa512()
+        {
+            super("SHA512withDSA", new SHA512Digest(), new DSASigner());
         }
     }
 

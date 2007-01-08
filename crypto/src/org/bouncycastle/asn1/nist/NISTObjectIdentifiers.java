@@ -44,5 +44,7 @@ public interface NISTObjectIdentifiers
     static final DERObjectIdentifier    id_dsa_with_sha2        = new DERObjectIdentifier(nistAlgorithm + ".3"); 
 
     static final DERObjectIdentifier    dsa_with_sha224         = new DERObjectIdentifier(id_dsa_with_sha2 + ".1"); 
-    static final DERObjectIdentifier    dsa_with_sha256         = new DERObjectIdentifier(id_dsa_with_sha2 + ".2"); 
+    static final DERObjectIdentifier    dsa_with_sha256         = new DERObjectIdentifier(id_dsa_with_sha2 + ".2");
+    static final DERObjectIdentifier    dsa_with_sha384         = new DERObjectIdentifier(id_dsa_with_sha2 + ".3");
+    static final DERObjectIdentifier    dsa_with_sha512         = new DERObjectIdentifier(id_dsa_with_sha2 + ".4"); 
 }

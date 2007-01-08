@@ -1,11 +1,12 @@
 package org.bouncycastle.openpgp.test;
 
-import java.security.Security;
-
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTestResult;
 
-import junit.framework.*;
+import java.security.Security;
 
 public class AllTests
     extends TestCase
@@ -37,6 +38,7 @@ public class AllTests
         TestSuite suite = new TestSuite("OpenPGP Tests");
         
         suite.addTestSuite(AllTests.class);
+        suite.addTestSuite(DSA2Test.class);
         
         return suite;
     }
