@@ -1,5 +1,9 @@
 package org.bouncycastle.openpgp;
 
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.OnePassSignaturePacket;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -7,10 +11,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
 import java.security.SignatureException;
-
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.OnePassSignaturePacket;
 
 /**
  * A one pass signature object.
@@ -169,8 +169,18 @@ public class PGPOnePassSignature
     {
         return sigPack.getSignatureType();
     }
-    
-    public byte[] getEncoded() 
+
+    public int getHashAlgorithm()
+    {
+        return sigPack.getHashAlgorithm();
+    }
+
+    public int getKeyAlgorithm()
+    {
+        return sigPack.getKeyAlgorithm();
+    }
+
+    public byte[] getEncoded()
         throws IOException
     {
         ByteArrayOutputStream    bOut = new ByteArrayOutputStream();

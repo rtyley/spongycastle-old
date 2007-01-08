@@ -1,13 +1,13 @@
 package org.bouncycastle.openpgp;
 
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.PacketTags;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.PacketTags;
 
 /**
  * General class for reading a PGP object stream.
@@ -37,7 +37,7 @@ public class PGPObjectFactory
      * Return the next object in the stream, or null if the end is reached.
      * 
      * @return Object
-     * @throws IOException
+     * @throws IOException on a parse error
      */
     public Object nextObject()
         throws IOException
@@ -93,7 +93,7 @@ public class PGPObjectFactory
                 }
                 catch (PGPException e)
                 {
-                    throw new IOException("can't create signature object: " + e);
+                    throw new IOException("can't create one pass signature object: " + e);
                 }
             }
             

@@ -1,8 +1,5 @@
 package org.bouncycastle.crypto.signers;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.params.DSAKeyParameters;
@@ -10,6 +7,9 @@ import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * The Digital Signature Algorithm - as described in "Handbook of Applied
@@ -57,8 +57,8 @@ public class DSASigner
     public BigInteger[] generateSignature(
         byte[] message)
     {
-        BigInteger      m = new BigInteger(1, message);
         DSAParameters   params = key.getParameters();
+        BigInteger      m = calculateE(params.getQ(), message);
         BigInteger      k;
         int                  qBitLength = params.getQ().bitLength();
 
@@ -93,8 +93,8 @@ public class DSASigner
         BigInteger  r,
         BigInteger  s)
     {
-        BigInteger      m = new BigInteger(1, message);
         DSAParameters   params = key.getParameters();
+        BigInteger      m = calculateE(params.getQ(), message);
         BigInteger      zero = BigInteger.valueOf(0);
 
         if (zero.compareTo(r) >= 0 || params.getQ().compareTo(r) <= 0)
@@ -118,5 +118,21 @@ public class DSASigner
         BigInteger  v = u1.multiply(u2).mod(params.getP()).mod(params.getQ());
 
         return v.equals(r);
+    }
+
+    private BigInteger calculateE(BigInteger n, byte[] message)
+    {
+        if (n.bitLength() > message.length * 8)
+        {
+            return new BigInteger(1, message);
+        }
+        else
+        {
+            byte[] trunc = new byte[n.bitLength() / 8];
+
+            System.arraycopy(message, 0, trunc, 0, trunc.length);
+
+            return new BigInteger(1, trunc);
+        }
     }
 }

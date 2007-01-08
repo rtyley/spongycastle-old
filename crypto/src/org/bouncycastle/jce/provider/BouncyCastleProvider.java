@@ -493,7 +493,6 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameters.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
         put("AlgorithmParameters.RC5", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.RC6", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("AlgorithmParameters.IDEA", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IDEAAlgorithmParameters");
         put("AlgorithmParameters.BLOWFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.TWOFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.SKIPJACK", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
@@ -866,6 +865,11 @@ public final class BouncyCastleProvider extends Provider
         addSignatureAlgorithm("SHA256", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA256", X9ObjectIdentifiers.ecdsa_with_SHA256);
         addSignatureAlgorithm("SHA384", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA384", X9ObjectIdentifiers.ecdsa_with_SHA384);
         addSignatureAlgorithm("SHA512", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA512", X9ObjectIdentifiers.ecdsa_with_SHA512);
+
+        addSignatureAlgorithm("SHA224", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa224", NISTObjectIdentifiers.dsa_with_sha224);
+        addSignatureAlgorithm("SHA256", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa256", NISTObjectIdentifiers.dsa_with_sha256);
+        addSignatureAlgorithm("SHA384", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa384", NISTObjectIdentifiers.dsa_with_sha384);
+        addSignatureAlgorithm("SHA512", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa512", NISTObjectIdentifiers.dsa_with_sha512);
 
         put("Alg.Alias.Signature.SHA/DSA", "DSA");
         put("Alg.Alias.Signature.SHA1withDSA", "DSA");
