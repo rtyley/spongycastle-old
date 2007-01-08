@@ -1,8 +1,5 @@
 package org.bouncycastle.crypto.test;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.DSAKeyPairGenerator;
 import org.bouncycastle.crypto.generators.DSAParametersGenerator;
@@ -11,9 +8,13 @@ import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAValidationParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.DSASigner;
+import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * Test based on FIPS 186-2, Appendix 5, an example of DSA.
@@ -72,7 +73,7 @@ public class DSATest
 
         dsa.init(true, param);
 
-        byte[] message = new BigInteger("968236873715988614170569073515315707566766479517").toByteArray();
+        byte[] message = BigIntegers.asUnsignedByteArray(new BigInteger("968236873715988614170569073515315707566766479517"));
         BigInteger[] sig = dsa.generateSignature(message);
 
         if (!r.equals(sig[0]))
