@@ -241,7 +241,7 @@ public class X509Name
         DefaultSymbols.put(CN, "CN");
         DefaultSymbols.put(L, "L");
         DefaultSymbols.put(ST, "ST");
-        DefaultSymbols.put(SN, "SN");
+        DefaultSymbols.put(SN, "SERIALNUMBER");
         DefaultSymbols.put(EmailAddress, "E");
         DefaultSymbols.put(DC, "DC");
         DefaultSymbols.put(UID, "UID");
