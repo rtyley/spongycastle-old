@@ -33,7 +33,7 @@ public class X509NameTest
        "C=AU,ST=Victoria,L=South Melbourne,O=Connect 4 Pty Ltd,OU=Webserver Team,CN=www2.connect4.com.au,E=webmaster@connect4.com.au",
        "C=AU,ST=Victoria,L=South Melbourne,O=Connect 4 Pty Ltd,OU=Certificate Authority,CN=Connect 4 CA,E=webmaster@connect4.com.au",
        "C=AU,ST=QLD,CN=SSLeay/rsa test cert",
-       "C=US,O=National Aeronautics and Space Administration,SN=16+CN=Steve Schoch",
+       "C=US,O=National Aeronautics and Space Administration,SERIALNUMBER=16+CN=Steve Schoch",
        "E=cooke@issl.atl.hp.com,C=US,OU=Hewlett Packard Company (ISSL),CN=Paul A. Cooke",
        "O=Sun Microsystems Inc,CN=store.sun.com",
        "unstructuredAddress=192.168.1.33,unstructuredName=pixfirewall.ciscopix.com,CN=pixfirewall.ciscopix.com"
@@ -303,30 +303,30 @@ public class X509NameTest
         //
         // sort test
         //
-        X509Name unsorted = new X509Name("SN=BBB + CN=AA");
+        X509Name unsorted = new X509Name("SERIALNUMBER=BBB + CN=AA");
 
-        if (!fromBytes(unsorted.getEncoded()).toString().equals("CN=AA+SN=BBB"))
+        if (!fromBytes(unsorted.getEncoded()).toString().equals("CN=AA+SERIALNUMBER=BBB"))
         {
             fail("failed sort test 1");
         }
 
-        unsorted = new X509Name("CN=AA + SN=BBB");
+        unsorted = new X509Name("CN=AA + SERIALNUMBER=BBB");
 
-        if (!fromBytes(unsorted.getEncoded()).toString().equals("CN=AA+SN=BBB"))
+        if (!fromBytes(unsorted.getEncoded()).toString().equals("CN=AA+SERIALNUMBER=BBB"))
         {
             fail("failed sort test 2");
         }
 
-        unsorted = new X509Name("SN=B + CN=AA");
+        unsorted = new X509Name("SERIALNUMBER=B + CN=AA");
 
-        if (!fromBytes(unsorted.getEncoded()).toString().equals("SN=B+CN=AA"))
+        if (!fromBytes(unsorted.getEncoded()).toString().equals("SERIALNUMBER=B+CN=AA"))
         {
             fail("failed sort test 3");
         }
 
-        unsorted = new X509Name("CN=AA + SN=B");
+        unsorted = new X509Name("CN=AA + SERIALNUMBER=B");
 
-        if (!fromBytes(unsorted.getEncoded()).toString().equals("SN=B+CN=AA"))
+        if (!fromBytes(unsorted.getEncoded()).toString().equals("SERIALNUMBER=B+CN=AA"))
         {
             fail("failed sort test 4");
         }
