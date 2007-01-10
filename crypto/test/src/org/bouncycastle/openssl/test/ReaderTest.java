@@ -115,6 +115,16 @@ public class ReaderTest
             fail("EC verification failed");
         }
 
+        if (!pair.getPublic().getAlgorithm().equals("ECDSA"))
+        {
+            fail("wrong algorithm name on public");
+        }
+
+        if (!pair.getPrivate().getAlgorithm().equals("ECDSA"))
+        {
+            fail("wrong algorithm name on private");
+        }
+
         //
         // writer/parser test
         //

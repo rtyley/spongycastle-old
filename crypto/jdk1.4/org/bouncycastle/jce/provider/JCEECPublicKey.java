@@ -51,6 +51,17 @@ public class JCEECPublicKey
 
     JCEECPublicKey(
         String              algorithm,
+        JCEECPublicKey      key)
+    {
+        this.algorithm = algorithm;
+        this.q = key.q;
+        this.ecSpec = key.ecSpec;
+        this.withCompression = key.withCompression;
+        this.gostParams = key.gostParams;
+    }
+
+    JCEECPublicKey(
+        String              algorithm,
         ECPublicKeySpec     spec)
     {
         this.algorithm = algorithm;
@@ -93,7 +104,6 @@ public class JCEECPublicKey
     }
 
     JCEECPublicKey(
-        String          algorithm,
         ECPublicKey     key)
     {
         this.q = key.getQ();

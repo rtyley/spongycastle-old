@@ -576,7 +576,7 @@ public class PEMReader extends BufferedReader
             SubjectPublicKeyInfo  pubInfo = new SubjectPublicKeyInfo(algId, pKey.getPublicKey().getBytes());
             PKCS8EncodedKeySpec   privSpec = new PKCS8EncodedKeySpec(privInfo.getEncoded());
             X509EncodedKeySpec    pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
-            KeyFactory            fact = KeyFactory.getInstance("EC", provider);
+            KeyFactory            fact = KeyFactory.getInstance("ECDSA", provider);
 
             return new KeyPair(fact.generatePublic(pubSpec), fact.generatePrivate(privSpec));
         }
