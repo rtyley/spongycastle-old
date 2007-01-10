@@ -1,7 +1,29 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
+import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
+import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
+import org.bouncycastle.jce.spec.GOST3410PrivateKeySpec;
+import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
+
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHPrivateKeySpec;
+import javax.crypto.spec.DHPublicKeySpec;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactorySpi;
@@ -21,30 +43,6 @@ import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHPrivateKeySpec;
-import javax.crypto.spec.DHPublicKeySpec;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
-import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
-import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
-import org.bouncycastle.jce.spec.GOST3410PrivateKeySpec;
-import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
 
 public abstract class JDKKeyFactory
     extends KeyFactorySpi
@@ -661,8 +659,10 @@ public abstract class JDKKeyFactory
             {
                 try
                 {
-                    return JDKKeyFactory.createPrivateKeyFromDERStream(
+                    JCEECPrivateKey key = (JCEECPrivateKey)JDKKeyFactory.createPrivateKeyFromDERStream(
                                 ((PKCS8EncodedKeySpec)keySpec).getEncoded());
+
+                    return new JCEECPrivateKey(algorithm, key);
                 }
                 catch (Exception e)
                 {
@@ -689,8 +689,10 @@ public abstract class JDKKeyFactory
             {
                 try
                 {
-                    return JDKKeyFactory.createPublicKeyFromDERStream(
+                    JCEECPublicKey key = (JCEECPublicKey)JDKKeyFactory.createPublicKeyFromDERStream(
                                 ((X509EncodedKeySpec)keySpec).getEncoded());
+
+                    return new JCEECPublicKey(algorithm, key);
                 }
                 catch (Exception e)
                 {

@@ -87,6 +87,18 @@ public class JCEECPrivateKey
     }
 
     JCEECPrivateKey(
+        String             algorithm,
+        JCEECPrivateKey    key)
+    {
+        this.algorithm = algorithm;
+        this.d = key.d;
+        this.ecSpec = key.ecSpec;
+        this.withCompression = key.withCompression;
+        this.pkcs12Attributes = key.pkcs12Attributes;
+        this.pkcs12Ordering = key.pkcs12Ordering;
+    }
+
+    JCEECPrivateKey(
         String                  algorithm,
         ECPrivateKeyParameters  params,
         ECParameterSpec         spec)

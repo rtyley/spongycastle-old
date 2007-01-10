@@ -662,8 +662,10 @@ public abstract class JDKKeyFactory
             {
                 try
                 {
-                    return JDKKeyFactory.createPrivateKeyFromDERStream(
+                    JCEECPrivateKey key = (JCEECPrivateKey)JDKKeyFactory.createPrivateKeyFromDERStream(
                                 ((PKCS8EncodedKeySpec)keySpec).getEncoded());
+
+                    return new JCEECPrivateKey(algorithm, key);
                 }
                 catch (Exception e)
                 {
@@ -686,8 +688,10 @@ public abstract class JDKKeyFactory
             {
                 try
                 {
-                    return JDKKeyFactory.createPublicKeyFromDERStream(
+                    JCEECPublicKey key = (JCEECPublicKey)JDKKeyFactory.createPublicKeyFromDERStream(
                                 ((X509EncodedKeySpec)keySpec).getEncoded());
+
+                    return new JCEECPublicKey(algorithm, key);
                 }
                 catch (Exception e)
                 {
