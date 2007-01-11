@@ -112,7 +112,7 @@ public class CMSSignedGenerator
                 throw new IllegalArgumentException("can't mix DSA with anything but SHA1");
             }
         }
-        else if ("ECDSA".equalsIgnoreCase(key.getAlgorithm()))
+        else if ("ECDSA".equalsIgnoreCase(key.getAlgorithm()) || "EC".equalsIgnoreCase(key.getAlgorithm()))
         {
             encOID = (String)EC_ALGORITHMS.get(digestOID);
             if (encOID == null)
