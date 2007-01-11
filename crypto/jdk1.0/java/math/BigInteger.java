@@ -5,7 +5,120 @@ import java.util.Stack;
 
 public class BigInteger
 {
+    // The primes b/w 2 and ~2^10
+    /*
+            3   5   7   11  13  17  19  23  29
+        31  37  41  43  47  53  59  61  67  71
+        73  79  83  89  97  101 103 107 109 113
+        127 131 137 139 149 151 157 163 167 173
+        179 181 191 193 197 199 211 223 227 229
+        233 239 241 251 257 263 269 271 277 281
+        283 293 307 311 313 317 331 337 347 349
+        353 359 367 373 379 383 389 397 401 409
+        419 421 431 433 439 443 449 457 461 463
+        467 479 487 491 499 503 509 521 523 541
+        547 557 563 569 571 577 587 593 599 601
+        607 613 617 619 631 641 643 647 653 659
+        661 673 677 683 691 701 709 719 727 733
+        739 743 751 757 761 769 773 787 797 809
+        811 821 823 827 829 839 853 857 859 863
+        877 881 883 887 907 911 919 929 937 941
+        947 953 967 971 977 983 991 997
+        1009 1013 1019 1021 1031
+    */
 
+    // Each list has a product < 2^31
+    private static final int[][] primeLists = new int[][]
+    {
+        new int[]{ 3, 5, 7, 11, 13, 17, 19, 23 },
+        new int[]{ 29, 31, 37, 41, 43 },
+        new int[]{ 47, 53, 59, 61, 67 },
+        new int[]{ 71, 73, 79, 83 },
+        new int[]{ 89, 97, 101, 103 },
+
+        new int[]{ 107, 109, 113, 127 },
+        new int[]{ 131, 137, 139, 149 },
+        new int[]{ 151, 157, 163, 167 },
+        new int[]{ 173, 179, 181, 191 },
+        new int[]{ 193, 197, 199, 211 },
+
+        new int[]{ 223, 227, 229 },
+        new int[]{ 233, 239, 241 },
+        new int[]{ 251, 257, 263 },
+        new int[]{ 269, 271, 277 },
+        new int[]{ 281, 283, 293 },
+
+        new int[]{ 307, 311, 313 },
+        new int[]{ 317, 331, 337 },
+        new int[]{ 347, 349, 353 },
+        new int[]{ 359, 367, 373 },
+        new int[]{ 379, 383, 389 },
+
+        new int[]{ 397, 401, 409 },
+        new int[]{ 419, 421, 431 },
+        new int[]{ 433, 439, 443 },
+        new int[]{ 449, 457, 461 },
+        new int[]{ 463, 467, 479 },
+
+        new int[]{ 487, 491, 499 },
+        new int[]{ 503, 509, 521 },
+        new int[]{ 523, 541, 547 },
+        new int[]{ 557, 563, 569 },
+        new int[]{ 571, 577, 587 },
+
+        new int[]{ 593, 599, 601 },
+        new int[]{ 607, 613, 617 },
+        new int[]{ 619, 631, 641 },
+        new int[]{ 643, 647, 653 },
+        new int[]{ 659, 661, 673 },
+
+        new int[]{ 677, 683, 691 },
+        new int[]{ 701, 709, 719 },
+        new int[]{ 727, 733, 739 },
+        new int[]{ 743, 751, 757 },
+        new int[]{ 761, 769, 773 },
+
+        new int[]{ 787, 797, 809 },
+        new int[]{ 811, 821, 823 },
+        new int[]{ 827, 829, 839 },
+        new int[]{ 853, 857, 859 },
+        new int[]{ 863, 877, 881 },
+
+        new int[]{ 883, 887, 907 },
+        new int[]{ 911, 919, 929 },
+        new int[]{ 937, 941, 947 },
+        new int[]{ 953, 967, 971 },
+        new int[]{ 977, 983, 991 },
+
+        new int[]{ 997, 1009, 1013 },
+        new int[]{ 1019, 1021, 1031 },
+    };
+
+    private static int[] primeProducts;
+//    private static BigInteger[] PrimeProducts;
+
+    static
+    {
+        primeProducts = new int[primeLists.length];
+//        PrimeProducts = new BigInteger[primeLists.length];
+
+        for (int i = 0; i < primeLists.length; ++i)
+        {
+            int[] primeList = primeLists[i];
+            int product = 1;
+            for (int j = 0; j < primeList.length; ++j)
+            {
+                product *= primeList[j];
+            }
+            primeProducts[i] = product;
+//            PrimeProducts[i] = BigInteger.valueOf(product);
+        }
+    }
+    
+
+    
+    
+    
     private int sign; // -1 means -ve; +1 means +ve; 0 means 0;
     private int[] magnitude; // array of ints with [0] being the most significant
     private int nBits = -1; // cache bitCount() value
@@ -361,32 +474,63 @@ public class BigInteger
 
     public BigInteger(int bitLength, int certainty, Random rnd) throws ArithmeticException
     {
-        int nBytes = (bitLength + 7) / 8;
+        if (bitLength < 2)
+        {
+            throw new ArithmeticException("bitLength < 2");
+        }
+
+        this.sign = 1;
+        this.nBitLength = bitLength;
+
+        if (bitLength == 2)
+        {
+            this.magnitude = rnd.nextInt() < 0
+                ?   TWO.magnitude
+                :   THREE.magnitude;
+            return;
+        }
+
+        int nBytes = (bitLength + 7) / BITS_PER_BYTE;
+        int xBits = BITS_PER_BYTE * nBytes - bitLength;
+        byte mask = rndMask[xBits];
 
         byte[] b = new byte[nBytes];
 
-        do
+        for (;;)
         {
-            if (nBytes > 0)
-            {
-                nextRndBytes(rnd, b);
-                // strip off any excess bits in the MSB
-                int xBits = 8 * nBytes - bitLength;
-                b[0] &= rndMask[xBits];
-                b[0] |= (byte)(1 << (7 - xBits));
-            }
+            nextRndBytes(rnd, b);
+
+            // strip off any excess bits in the MSB
+            b[0] &= mask;
+
+            // ensure the leading bit is 1 (to meet the strength requirement)
+            b[0] |= (byte)(1 << (7 - xBits));
+
+            // ensure the trailing bit is 1 (i.e. must be odd)
+            b[nBytes - 1] |= (byte)1;
 
             this.magnitude = makeMagnitude(b, 1);
-            this.sign = 1;
             this.nBits = -1;
-            this.nBitLength = -1;
             this.mQuote = -1L;
-            
-            if (certainty > 0 && bitLength > 2)
+
+            if (certainty < 1)
+                break;
+
+            if (this.isProbablePrime(certainty))
+                break;
+
+            if (bitLength > 32)
             {
-                this.magnitude[this.magnitude.length - 1] |= 1;
+                for (int rep = 0; rep < 10000; ++rep)
+                {
+                    this.magnitude[this.magnitude.length - 1] ^= (rnd.nextInt() << 1);
+                    this.mQuote = -1L;
+
+                    if (this.isProbablePrime(certainty))
+                        return;
+                }
             }
-        } while (this.bitLength() != bitLength || !this.isProbablePrime(certainty));
+        }
     }
 
     public BigInteger abs()
@@ -943,12 +1087,24 @@ public class BigInteger
         if (n.equals(ONE))
             return false;
 
-        int test = n.remainder(smallPrimesProduct);
-        for (int index = 0; index < smallPrimes.length; ++index)
+        // Try to reduce the penalty for really small numbers
+        int numLists = Math.min(n.bitLength() - 2, primeLists.length);
+
+        for (int i = 0; i < numLists; ++i)
         {
-            int smallPrime = smallPrimes[index];
-            if (test % smallPrime == 0)
-                return n.bitLength() <= 5 && n.intValue() == smallPrime;
+            int test = n.remainder(primeProducts[i]);
+
+            int[] primeList = primeLists[i];
+            for (int j = 0; j < primeList.length; ++j)
+            {
+                int prime = primeList[j];
+                int qRem = test % prime;
+                if (qRem == 0)
+                {
+                    // We may find small numbers in the list
+                    return n.bitLength() < 16 && n.intValue() == prime;
+                }
+            }
         }
 
         //
@@ -2240,9 +2396,7 @@ public class BigInteger
     public static final BigInteger ZERO = new BigInteger(0, new byte[0]);
     public static final BigInteger ONE = valueOf(1);
     private static final BigInteger TWO = valueOf(2);
-
-    private static final int[] smallPrimes = new int[]{ 3, 5, 7, 11, 13, 17, 19, 23 };
-    private static final int smallPrimesProduct = 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23;
+    private static final BigInteger THREE = valueOf(3);
 
     public static BigInteger valueOf(long val)
     {
