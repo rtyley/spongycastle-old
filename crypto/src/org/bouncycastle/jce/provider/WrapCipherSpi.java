@@ -210,7 +210,7 @@ public abstract class WrapCipherSpi extends CipherSpi
                 }
                 catch (Exception e)
                 {
-                    continue;
+                    // try next spec
                 }
             }
 
@@ -312,7 +312,7 @@ public abstract class WrapCipherSpi extends CipherSpi
         int     wrappedKeyType)
     throws InvalidKeyException
     {
-        byte[] encoded = null;
+        byte[] encoded;
         try
         {
             if (wrapEngine == null)
@@ -348,7 +348,7 @@ public abstract class WrapCipherSpi extends CipherSpi
              * the encrypted data.
              */
             ASN1InputStream bIn = new ASN1InputStream(encoded);
-            PrivateKey      privKey = null;
+            PrivateKey      privKey;
 
             try
             {
