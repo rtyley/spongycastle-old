@@ -1,11 +1,15 @@
 package org.bouncycastle.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
@@ -34,6 +38,7 @@ import java.util.Set;
 class X509Util
 {
     private static Hashtable algorithms = new Hashtable();
+    private static Hashtable params = new Hashtable();
     private static Set       noParams = new HashSet();
     
     static
@@ -52,6 +57,11 @@ class X509Util
         algorithms.put("SHA384WITHRSA", PKCSObjectIdentifiers.sha384WithRSAEncryption);
         algorithms.put("SHA512WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha512WithRSAEncryption);
         algorithms.put("SHA512WITHRSA", PKCSObjectIdentifiers.sha512WithRSAEncryption);
+        algorithms.put("SHA1WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
+        algorithms.put("SHA224WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
+        algorithms.put("SHA256WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
+        algorithms.put("SHA384WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
+        algorithms.put("SHA512WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("RIPEMD160WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
         algorithms.put("RIPEMD160WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
         algorithms.put("RIPEMD128WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
@@ -92,8 +102,35 @@ class X509Util
         //
         noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
         noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
+
+        //
+        // explicit params
+        //
+        AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull());
+        params.put("SHA1WITHRSAANDMGF1", creatPSSParams(sha1AlgId, 20));
+
+        AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull());
+        params.put("SHA224WITHRSAANDMGF1", creatPSSParams(sha224AlgId, 28));
+
+        AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull());
+        params.put("SHA256WITHRSAANDMGF1", creatPSSParams(sha256AlgId, 32));
+
+        AlgorithmIdentifier sha384AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull());
+        params.put("SHA384WITHRSAANDMGF1", creatPSSParams(sha384AlgId, 48));
+
+        AlgorithmIdentifier sha512AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512, new DERNull());
+        params.put("SHA512WITHRSAANDMGF1", creatPSSParams(sha512AlgId, 64));
     }
-     
+
+    private static RSASSAPSSparams creatPSSParams(AlgorithmIdentifier hashAlgId, int saltSize)
+    {
+        return new RSASSAPSSparams(
+            hashAlgId,
+            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, hashAlgId),
+            new DERInteger(saltSize),
+            new DERInteger(1));
+    }
+
     static DERObjectIdentifier getAlgorithmOID(
         String algorithmName)
     {
@@ -108,11 +145,19 @@ class X509Util
     }
     
     static AlgorithmIdentifier getSigAlgID(
-        DERObjectIdentifier sigOid)
+        DERObjectIdentifier sigOid,
+        String              algorithmName)
     {
         if (noParams.contains(sigOid))
         {
             return new AlgorithmIdentifier(sigOid);
+        }
+
+        algorithmName = Strings.toUpperCase(algorithmName);
+
+        if (params.containsKey(algorithmName))
+        {
+            return new AlgorithmIdentifier(sigOid, (DEREncodable)params.get(algorithmName));
         }
         else
         {
@@ -209,14 +254,7 @@ class X509Util
             throw new IllegalStateException("no signature algorithm specified");
         }
 
-        try
-        {
-            sig = X509Util.getSignatureInstance(sigOid.getId(), provider);
-        }
-        catch (NoSuchAlgorithmException ex)
-        {
-            sig = X509Util.getSignatureInstance(sigName, provider);
-        }
+        sig = X509Util.getSignatureInstance(sigName, provider);
 
         if (random != null)
         {
@@ -245,7 +283,7 @@ class X509Util
         }
     }
 
-        static class Implementation
+    static class Implementation
     {
         Object      engine;
         Provider provider;

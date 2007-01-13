@@ -9,6 +9,7 @@ import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.KeyTransRecipientInformation;
 import org.bouncycastle.cms.PKCS5Scheme2PBEKey;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
@@ -744,11 +745,18 @@ public class EnvelopedDataTest
 
         if (it.hasNext())
         {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
+            while (it.hasNext())
+            {
+                RecipientInformation   recipient = (RecipientInformation)it.next();
+                byte[] recData;
 
-            byte[] recData = recipient.getContent(key, "BC");
+                if (recipient instanceof KeyTransRecipientInformation)
+                {
+                    recData = recipient.getContent(key, "BC");
 
-            assertEquals(true, Arrays.equals(data, recData));
+                    assertEquals(true, Arrays.equals(data, recData));
+                }
+            }
         }
         else
         {
