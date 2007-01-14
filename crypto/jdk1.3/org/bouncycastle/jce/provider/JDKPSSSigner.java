@@ -1,5 +1,6 @@
 package org.bouncycastle.jce.provider;
 
+import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.PrivateKey;
@@ -10,16 +11,16 @@ import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
-import org.bouncycastle.jce.spec.PSSParameterSpec;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA224Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
-import org.bouncycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.PSSSigner;
 
@@ -29,7 +30,7 @@ public class JDKPSSSigner
     private AsymmetricBlockCipher signer;
     private Digest digest;
     private int saltLength;
-
+    private AlgorithmParameters engineParams;
     private PSSSigner pss;
 
     protected JDKPSSSigner(
@@ -41,7 +42,14 @@ public class JDKPSSSigner
 
         this.signer = signer;
         this.digest = digest;
-        this.saltLength = digest.getDigestSize();
+        if (digest != null)
+        {
+            this.saltLength = digest.getDigestSize();
+        }
+        else
+        {
+            this.saltLength = 20;
+        }
     }
 
     protected void engineInitVerify(
@@ -104,7 +112,7 @@ public class JDKPSSSigner
     protected byte[] engineSign()
         throws SignatureException
     {
-        try 
+        try
         {
             return pss.generateSignature();
         }
@@ -125,14 +133,12 @@ public class JDKPSSSigner
         AlgorithmParameterSpec params)
         throws InvalidParameterException
     {
-        if (params instanceof PSSParameterSpec)
-        {
-            saltLength = ((PSSParameterSpec)params).getSaltLength();
-        }
-        else
-        {
-            throw new InvalidParameterException("Only PSSParameterSpec supported");
-        }
+        throw new InvalidParameterException("Only PSSParameterSpec supported");
+    }
+    
+    protected AlgorithmParameters engineGetParameters() 
+    {
+        return engineParams;
     }
 
     /**
@@ -151,12 +157,30 @@ public class JDKPSSSigner
         throw new UnsupportedOperationException("engineGetParameter unsupported");
     }
 
+    static public class PSSwithRSA
+        extends JDKPSSSigner
+    {
+        public PSSwithRSA()
+        {
+            super("SHA1withRSAandMGF1", new RSABlindedEngine(), null);
+        }
+    }
+
     static public class SHA1withRSA
         extends JDKPSSSigner
     {
         public SHA1withRSA()
         {
-            super("SHA1withRSAandMGF1", new RSAEngine(), new SHA1Digest());
+            super("SHA1withRSAandMGF1", new RSABlindedEngine(), new SHA1Digest());
+        }
+    }
+
+    static public class SHA224withRSA
+        extends JDKPSSSigner
+    {
+        public SHA224withRSA()
+        {
+            super("SHA224withRSAandMGF1", new RSABlindedEngine(), new SHA224Digest());
         }
     }
 
@@ -165,7 +189,7 @@ public class JDKPSSSigner
     {
         public SHA256withRSA()
         {
-            super("SHA256withRSAandMGF1", new RSAEngine(), new SHA256Digest());
+            super("SHA256withRSAandMGF1", new RSABlindedEngine(), new SHA256Digest());
         }
     }
 
@@ -174,7 +198,7 @@ public class JDKPSSSigner
     {
         public SHA384withRSA()
         {
-            super("SHA384withRSAandMGF1", new RSAEngine(), new SHA384Digest());
+            super("SHA384withRSAandMGF1", new RSABlindedEngine(), new SHA384Digest());
         }
     }
 
@@ -183,7 +207,7 @@ public class JDKPSSSigner
     {
         public SHA512withRSA()
         {
-            super("SHA512withRSAandMGF1", new RSAEngine(), new SHA512Digest());
+            super("SHA512withRSAandMGF1", new RSABlindedEngine(), new SHA512Digest());
         }
     }
 }

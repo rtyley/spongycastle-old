@@ -4,6 +4,9 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -12,6 +15,8 @@ import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -21,6 +26,8 @@ import org.bouncycastle.util.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -63,6 +70,7 @@ public class PKCS10CertificationRequest
     extends CertificationRequest
 {
     private static Hashtable            algorithms = new Hashtable();
+    private static Hashtable            params = new Hashtable();
     private static Hashtable            keyAlgorithms = new Hashtable();
     private static Hashtable            oids = new Hashtable();
     private static Set                  noParams = new HashSet();
@@ -84,6 +92,11 @@ public class PKCS10CertificationRequest
         algorithms.put("SHA384WITHRSA", PKCSObjectIdentifiers.sha384WithRSAEncryption);
         algorithms.put("SHA512WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha512WithRSAEncryption);
         algorithms.put("SHA512WITHRSA", PKCSObjectIdentifiers.sha512WithRSAEncryption);
+        algorithms.put("SHA1WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
+        algorithms.put("SHA224WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
+        algorithms.put("SHA256WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
+        algorithms.put("SHA384WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
+        algorithms.put("SHA512WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("RSAWITHSHA1", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
         algorithms.put("RIPEMD160WITHRSAENCRYPTION", new DERObjectIdentifier("1.3.36.3.3.1.2"));
         algorithms.put("RIPEMD160WITHRSA", new DERObjectIdentifier("1.3.36.3.3.1.2"));
@@ -151,6 +164,32 @@ public class PKCS10CertificationRequest
         //
         noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
         noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
+        //
+        // explicit params
+        //
+        AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull());
+        params.put("SHA1WITHRSAANDMGF1", creatPSSParams(sha1AlgId, 20));
+
+        AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull());
+        params.put("SHA224WITHRSAANDMGF1", creatPSSParams(sha224AlgId, 28));
+
+        AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull());
+        params.put("SHA256WITHRSAANDMGF1", creatPSSParams(sha256AlgId, 32));
+
+        AlgorithmIdentifier sha384AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull());
+        params.put("SHA384WITHRSAANDMGF1", creatPSSParams(sha384AlgId, 48));
+
+        AlgorithmIdentifier sha512AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512, new DERNull());
+        params.put("SHA512WITHRSAANDMGF1", creatPSSParams(sha512AlgId, 64));
+    }
+
+    private static RSASSAPSSparams creatPSSParams(AlgorithmIdentifier hashAlgId, int saltSize)
+    {
+        return new RSASSAPSSparams(
+            hashAlgId,
+            new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, hashAlgId),
+            new DERInteger(saltSize),
+            new DERInteger(1));
     }
 
     private static ASN1Sequence toDERSequence(
@@ -212,7 +251,8 @@ public class PKCS10CertificationRequest
         throws NoSuchAlgorithmException, NoSuchProviderException,
                 InvalidKeyException, SignatureException
     {
-        DERObjectIdentifier sigOID = (DERObjectIdentifier)algorithms.get(Strings.toUpperCase(signatureAlgorithm));
+        String algorithmName = Strings.toUpperCase(signatureAlgorithm);
+        DERObjectIdentifier sigOID = (DERObjectIdentifier)algorithms.get(algorithmName);
 
         if (sigOID == null)
         {
@@ -233,6 +273,10 @@ public class PKCS10CertificationRequest
         {
             this.sigAlgId = new AlgorithmIdentifier(sigOID);
         }
+        else if (params.containsKey(algorithmName))
+        {
+            this.sigAlgId = new AlgorithmIdentifier(sigOID, (DEREncodable)params.get(algorithmName));
+        }
         else
         {
             this.sigAlgId = new AlgorithmIdentifier(sigOID, null);
@@ -251,16 +295,7 @@ public class PKCS10CertificationRequest
             throw new IllegalArgumentException("can't encode public key");
         }
 
-        Signature sig = null;
-        
-        try
-        {
-            sig = Signature.getInstance(sigAlgId.getObjectId().getId(), provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            sig = Signature.getInstance(signatureAlgorithm, provider);
-        }
+        Signature sig = Signature.getInstance(signatureAlgorithm, provider);
 
         sig.initSign(signingKey);
 
@@ -357,11 +392,11 @@ public class PKCS10CertificationRequest
         throws NoSuchAlgorithmException, NoSuchProviderException,
                 InvalidKeyException, SignatureException
     {
-        Signature   sig = null;
+        Signature   sig;
 
         try
         {
-            sig = Signature.getInstance(sigAlgId.getObjectId().getId(), provider);
+            sig = Signature.getInstance(getSignatureName(sigAlgId), provider);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -380,6 +415,8 @@ public class PKCS10CertificationRequest
             }
         }
 
+        //setSignatureParameters(sig, sigAlgId.getParameters());
+        
         sig.initVerify(pubKey);
 
         try
@@ -417,5 +454,71 @@ public class PKCS10CertificationRequest
         }
 
         return bOut.toByteArray();
+    }
+
+    static String getSignatureName(
+        AlgorithmIdentifier sigAlgId)
+    {
+        DEREncodable params = sigAlgId.getParameters();
+
+        if (params != null && !DERNull.INSTANCE.equals(params))
+        {
+            if (sigAlgId.getObjectId().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
+            {
+                RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
+                return getDigestAlgName(rsaParams.getHashAlgorithm().getObjectId()) + "withRSAandMGF1";
+            }
+        }
+
+        return sigAlgId.getObjectId().getId();
+    }
+
+    private static String getDigestAlgName(
+        DERObjectIdentifier digestAlgOID)
+    {
+        if (PKCSObjectIdentifiers.md5.equals(digestAlgOID))
+        {
+            return "MD5";
+        }
+        else if (OIWObjectIdentifiers.idSHA1.equals(digestAlgOID))
+        {
+            return "SHA1";
+        }
+        else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
+        {
+            return "SHA224";
+        }
+        else if (NISTObjectIdentifiers.id_sha256.equals(digestAlgOID))
+        {
+            return "SHA256";
+        }
+        else if (NISTObjectIdentifiers.id_sha384.equals(digestAlgOID))
+        {
+            return "SHA384";
+        }
+        else if (NISTObjectIdentifiers.id_sha512.equals(digestAlgOID))
+        {
+            return "SHA512";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
+        {
+            return "RIPEMD128";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
+        {
+            return "RIPEMD160";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
+        {
+            return "RIPEMD256";
+        }
+        else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
+        {
+            return "GOST3411";
+        }
+        else
+        {
+            return digestAlgOID.getId();            
+        }
     }
 }
