@@ -215,14 +215,7 @@ class X509Util
             throw new IllegalStateException("no signature algorithm specified");
         }
 
-        try
-        {
-            sig = X509Util.getSignatureInstance(sigOid.getId());
-        }
-        catch (NoSuchAlgorithmException ex)
-        {
-            sig = X509Util.getSignatureInstance(sigName);
-        }
+        sig = X509Util.getSignatureInstance(sigName);
 
         if (random != null)
         {
