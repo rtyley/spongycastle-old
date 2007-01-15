@@ -115,7 +115,7 @@ public class X509CertPairStoreSelector implements Selector
             }
 
             if (reverseSelector != null
-                    && !reverseSelector.match((Object)pair.getForward()))
+                    && !reverseSelector.match((Object)pair.getReverse()))
             {
                 return false;
             }
