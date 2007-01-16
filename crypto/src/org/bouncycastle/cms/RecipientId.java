@@ -1,5 +1,6 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.util.Arrays;
 import java.security.cert.X509CertSelector;
 
 public class RecipientId
@@ -71,41 +72,20 @@ public class RecipientId
 
         if (id.keyIdentifier != null)
         {
-            if (keyIdentifier == null)
+            if (keyIdentifier == null || !Arrays.areEqual(id.keyIdentifier, keyIdentifier))
             {
                 return false;
-            }
-            
-            if (keyIdentifier.length != id.keyIdentifier.length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i != keyIdentifier.length; i++)
-            {
-                if (keyIdentifier[i] != id.keyIdentifier[i])
-                {
-                    return false;
-                }
             }
         }
 
-        if (id.getSubjectKeyIdentifier() != null)
+        byte[] idSubKeyId = id.getSubjectKeyIdentifier();
+        if (idSubKeyId != null)
         {
-            byte[]  idSubKeyId = id.getSubjectKeyIdentifier();
-            byte[]  subKeyId = this.getSubjectKeyIdentifier();
+            byte[] subKeyId = this.getSubjectKeyIdentifier();
 
-            if (subKeyId.length != idSubKeyId.length)
+            if (subKeyId == null || !Arrays.areEqual(idSubKeyId, subKeyId))
             {
                 return false;
-            }
-
-            for (int i = 0; i != subKeyId.length; i++)
-            {
-                if (subKeyId[i] != idSubKeyId[i])
-                {
-                    return false;
-                }
             }
         }
 
