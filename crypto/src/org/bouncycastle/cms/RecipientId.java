@@ -1,7 +1,7 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.util.Arrays;
 import java.security.cert.X509CertSelector;
+import java.util.Arrays;
 
 public class RecipientId
     extends X509CertSelector
@@ -70,41 +70,24 @@ public class RecipientId
 
         RecipientId id = (RecipientId)o;
 
-        if (id.keyIdentifier != null)
+        return equalsByteArray(keyIdentifier, id.keyIdentifier)
+            && equalsByteArray(this.getSubjectKeyIdentifier(), id.getSubjectKeyIdentifier())
+            && equalsObj(this.getSerialNumber(), id.getSerialNumber())
+            && equalsObj(this.getIssuerAsString(), id.getIssuerAsString());
+    }
+
+    private boolean equalsObj(Object a, Object b)
+    {
+        return (a != null) ? a.equals(b) : b == null;
+    }
+
+    private boolean equalsByteArray(byte[] a, byte[] b)
+    {
+        if (a != null)
         {
-            if (keyIdentifier == null || !Arrays.areEqual(id.keyIdentifier, keyIdentifier))
-            {
-                return false;
-            }
+            return (b != null) && Arrays.equals(a, b);
         }
 
-        byte[] idSubKeyId = id.getSubjectKeyIdentifier();
-        if (idSubKeyId != null)
-        {
-            byte[] subKeyId = this.getSubjectKeyIdentifier();
-
-            if (subKeyId == null || !Arrays.areEqual(idSubKeyId, subKeyId))
-            {
-                return false;
-            }
-        }
-
-        if (id.getSerialNumber() != null)
-        {
-            if (!id.getSerialNumber().equals(this.getSerialNumber()))
-            {
-                return false;
-            }
-        }
-
-        if (id.getIssuerAsString() != null)
-        {
-            if (!id.getIssuerAsString().equals(this.getIssuerAsString()))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return (b == null);
     }
 }
