@@ -45,33 +45,23 @@ public class SignerId
 
         SignerId id = (SignerId)o;
 
-        if (id.getSerialNumber() != null)
+        return equalsObj(this.getSerialNumber(), id.getSerialNumber())
+            && equalsObj(this.getIssuerAsString(), id.getIssuerAsString())
+            && equalsByteArray(this.getSubjectKeyIdentifier(), id.getSubjectKeyIdentifier());
+    }
+
+    private boolean equalsObj(Object a, Object b)
+    {
+        return (a != null) ? a.equals(b) : b == null;
+    }
+
+    private boolean equalsByteArray(byte[] a, byte[] b)
+    {
+        if (a != null)
         {
-            if (!id.getSerialNumber().equals(this.getSerialNumber()))
-            {
-                return false;
-            }
+            return (b != null) && Arrays.equals(a, b);
         }
 
-        if (id.getIssuerAsString() != null)
-        {
-            if (!id.getIssuerAsString().equals(this.getIssuerAsString()))
-            {
-                return false;
-            }
-        }
-        
-        byte[] subjectId = this.getSubjectKeyIdentifier();
-        if (subjectId != null)
-        {
-            byte[] otherId = id.getSubjectKeyIdentifier();
-            
-            if (otherId == null || !Arrays.equals(subjectId, otherId))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return (b == null);
     }
 }

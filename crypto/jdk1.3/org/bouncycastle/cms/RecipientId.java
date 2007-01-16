@@ -1,6 +1,7 @@
 package org.bouncycastle.cms;
 
 import org.bouncycastle.jce.cert.X509CertSelector;
+import java.util.Arrays;
 
 public class RecipientId
     extends X509CertSelector
@@ -32,7 +33,17 @@ public class RecipientId
         {
             for (int i = 0; i != keyIdentifier.length; i++)
             {
-                code ^= (keyIdentifier[i] << (i % 4));
+                code ^= ((keyIdentifier[i] & 0xff) << (i % 4));
+            }
+        }
+
+        byte[]  subKeyId = this.getSubjectKeyIdentifier();
+
+        if (subKeyId != null)
+        {
+            for (int i = 0; i != subKeyId.length; i++)
+            {
+                code ^= ((subKeyId[i] & 0xff) << (i % 4));
             }
         }
 
@@ -59,43 +70,24 @@ public class RecipientId
 
         RecipientId id = (RecipientId)o;
 
-        if (id.keyIdentifier != null)
-        {
-            if (keyIdentifier == null)
-            {
-                return false;
-            }
-            
-            if (keyIdentifier.length != id.keyIdentifier.length)
-            {
-                return false;
-            }
+        return equalsByteArray(keyIdentifier, id.keyIdentifier)
+            && equalsByteArray(this.getSubjectKeyIdentifier(), id.getSubjectKeyIdentifier())
+            && equalsObj(this.getSerialNumber(), id.getSerialNumber())
+            && equalsObj(this.getIssuerAsString(), id.getIssuerAsString());
+    }
 
-            for (int i = 0; i != keyIdentifier.length; i++)
-            {
-                if (keyIdentifier[i] != id.keyIdentifier[i])
-                {
-                    return false;
-                }
-            }
+    private boolean equalsObj(Object a, Object b)
+    {
+        return (a != null) ? a.equals(b) : b == null;
+    }
+
+    private boolean equalsByteArray(byte[] a, byte[] b)
+    {
+        if (a != null)
+        {
+            return (b != null) && Arrays.equals(a, b);
         }
 
-        if (id.getSerialNumber() != null)
-        {
-            if (!id.getSerialNumber().equals(this.getSerialNumber()))
-            {
-                return false;
-            }
-        }
-
-        if (id.getIssuerAsString() != null)
-        {
-            if (!id.getIssuerAsString().equals(this.getIssuerAsString()))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return (b == null);
     }
 }
