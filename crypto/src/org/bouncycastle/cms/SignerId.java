@@ -61,13 +61,12 @@ public class SignerId
             }
         }
 
-        
-        byte[] subjectId = this.getSubjectKeyIdentifier();
-        if (subjectId != null)
+        byte[] otherId = id.getSubjectKeyIdentifier();
+        if (otherId != null)
         {
-            byte[] otherId = id.getSubjectKeyIdentifier();
-            
-            if (otherId == null || !Arrays.equals(subjectId, otherId))
+            byte[] subjectId = this.getSubjectKeyIdentifier();
+
+            if (subjectId == null || !Arrays.equals(subjectId, otherId))
             {
                 return false;
             }
