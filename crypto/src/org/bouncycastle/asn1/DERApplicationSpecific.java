@@ -47,7 +47,7 @@ public class DERApplicationSpecific
     
     public int getApplicationTag() 
     {
-        return tag & 0x1F;
+        return tag;
     }
      
     public DERObject getObject() 
