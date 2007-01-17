@@ -35,9 +35,25 @@ public interface X509ObjectIdentifiers
 
     static final DERObjectIdentifier    id_ea_rsa = new DERObjectIdentifier("2.5.8.1.1");
     
+    // id-pkix
+    static final DERObjectIdentifier id_pkix = new DERObjectIdentifier("1.3.6.1.5.5.7");
+
     //
-    //    OID for ocsp uri in AuthorityInformationAccess extension
+    // private internet extensions
     //
-     static final DERObjectIdentifier ocspAccessMethod = new DERObjectIdentifier("1.3.6.1.5.5.7.48.1");
+    static final DERObjectIdentifier  id_pe = new DERObjectIdentifier(id_pkix + ".1");
+
+    //
+    // authority information access
+    //
+    static final DERObjectIdentifier  id_ad = new DERObjectIdentifier(id_pkix + ".48");
+    static final DERObjectIdentifier  id_ad_caIssuers = new DERObjectIdentifier(id_ad + ".2");
+    static final DERObjectIdentifier  id_ad_ocsp = new DERObjectIdentifier(id_ad + ".1");
+
+    //
+    //    OID for ocsp and crl uri in AuthorityInformationAccess extension
+    //
+    static final DERObjectIdentifier ocspAccessMethod = id_ad_ocsp;
+    static final DERObjectIdentifier crlAccessMethod = id_ad_caIssuers;
 }
 
