@@ -58,7 +58,8 @@ public class DigestRandomGenerator
 
             digestDoFinal(state);
 
-            for (int i = start; i != len; i++)
+            int end = start + len;
+            for (int i = start; i != end; i++)
             {
                 if (stateOff == state.length)
                 {
