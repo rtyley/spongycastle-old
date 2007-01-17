@@ -1,12 +1,5 @@
 package org.bouncycastle.asn1.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.Date;
-
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.BERConstructedOctetString;
@@ -38,6 +31,13 @@ import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.asn1.DERUnknownTag;
 import org.bouncycastle.asn1.DERVisibleString;
+import org.bouncycastle.util.test.SimpleTestResult;
+import org.bouncycastle.util.test.Test;
+import org.bouncycastle.util.test.TestResult;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Date;
 
 public class EqualsAndHashCodeTest
     implements Test
@@ -51,7 +51,7 @@ public class EqualsAndHashCodeTest
                 new BERSequence(new DERPrintableString("hello world")),
                 new BERSet(new DERPrintableString("hello world")),
                 new BERTaggedObject(0, new DERPrintableString("hello world")),
-                new DERApplicationSpecific(0 | DERTags.APPLICATION, data),
+                new DERApplicationSpecific(0, data),
                 new DERBitString(data),
                 new DERBMPString("hello world"),
                 new DERBoolean(true),

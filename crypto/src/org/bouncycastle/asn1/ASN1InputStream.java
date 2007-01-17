@@ -160,7 +160,7 @@ public class ASN1InputStream
     {
         if ((tag & APPLICATION) != 0)
         {
-            return new DERApplicationSpecific(tag, bytes);
+            return new DERApplicationSpecific(tagNo, bytes);
         }
         
         switch (tag)
@@ -373,7 +373,7 @@ public class ASN1InputStream
     
         int tagNo = 0;
         
-        if ((tag & TAGGED) != 0)  
+        if ((tag & TAGGED) != 0 || (tag & APPLICATION) != 0)
         {
             tagNo = readTagNumber(tag);
         }
