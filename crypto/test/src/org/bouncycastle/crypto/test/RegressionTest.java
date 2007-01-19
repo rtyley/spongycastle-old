@@ -42,6 +42,7 @@ public class RegressionTest
         new IDEATest(),
         new RSATest(),
         new RSABlindedTest(),
+        new PSSBlindTest(),
         new ISO9796Test(),
         new ISO9797Alg3MacTest(),
         new MD2DigestTest(),
