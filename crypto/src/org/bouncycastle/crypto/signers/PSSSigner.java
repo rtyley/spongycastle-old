@@ -1,7 +1,5 @@
 package org.bouncycastle.crypto.signers;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
@@ -9,7 +7,10 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.crypto.params.RSABlindingParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
+
+import java.security.SecureRandom;
 
 /**
  * RSA-PSS as described in PKCS# 1 v 2.1.
@@ -68,26 +69,37 @@ public class PSSSigner
         boolean                 forSigning,
         CipherParameters        param)
     {
-        RSAKeyParameters  kParam = null;
+        CipherParameters  params;
 
         if (param instanceof ParametersWithRandom)
         {
             ParametersWithRandom    p = (ParametersWithRandom)param;
 
-            kParam = (RSAKeyParameters)p.getParameters();
+            params = p.getParameters();
             random = p.getRandom();
         }
         else
         {
-            kParam = (RSAKeyParameters)param;
+            params = param;
             if (forSigning)
             {
                 random = new SecureRandom();
             }
         }
 
-        cipher.init(forSigning, kParam);
+        cipher.init(forSigning, params);
 
+        RSAKeyParameters kParam;
+
+        if (params instanceof RSABlindingParameters)
+        {
+            kParam = ((RSABlindingParameters)params).getPublicKey();
+        }
+        else
+        {
+            kParam = (RSAKeyParameters)params;
+        }
+        
         emBits = kParam.getModulus().bitLength() - 1;
 
         block = new byte[(emBits + 7) / 8];

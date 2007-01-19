@@ -14,8 +14,7 @@ import java.math.BigInteger;
 class RSACoreEngine
 {
     private RSAKeyParameters key;
-    private boolean                 forEncryption;
-    private int                     shift;
+    private boolean          forEncryption;
 
     /**
      * initialise the RSA engine.
@@ -39,17 +38,6 @@ class RSACoreEngine
         }
 
         this.forEncryption = forEncryption;
-
-        int     bitSize = key.getModulus().bitLength();
-
-        if (bitSize % 8 == 0)    // a multiple of 8
-        {
-            this.shift = 0;
-        }
-        else
-        {
-            this.shift = (8 - (bitSize % 8));
-        }
     }
 
     /**
@@ -101,11 +89,11 @@ class RSACoreEngine
     {
         if (inLen > (getInputBlockSize() + 1))
         {
-            throw new DataLengthException("input too large for RSA cipher.\n");
+            throw new DataLengthException("input too large for RSA cipher.");
         }
-        else if (inLen == (getInputBlockSize() + 1) && (!forEncryption || (in[inOff] & (0x80 >> shift)) != 0))
+        else if (inLen == (getInputBlockSize() + 1) && !forEncryption)
         {
-            throw new DataLengthException("input too large for RSA cipher.\n");
+            throw new DataLengthException("input too large for RSA cipher.");
         }
 
         byte[]  block;
@@ -121,7 +109,13 @@ class RSACoreEngine
             block = in;
         }
 
-        return new BigInteger(1, block);
+        BigInteger res = new BigInteger(1, block);
+        if (res.compareTo(key.getModulus()) >= 0)
+        {
+            throw new DataLengthException("input too large for RSA cipher.");
+        }
+
+        return res;
     }
 
     public byte[] convertOutput(
