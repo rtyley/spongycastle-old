@@ -578,6 +578,8 @@ public class SMIMESignedGenerator
 
                 lOut.writeln();      // CRLF separator
 
+                SMIMEUtil.outputPreamble(lOut, bodyPart, boundary);
+
                 for (int i = 0; i < mp.getCount(); i++)
                 {
                     lOut.writeln(boundary);

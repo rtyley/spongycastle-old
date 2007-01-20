@@ -928,6 +928,26 @@ public class SMIMESignedTest
         
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
     }
+
+    public void testEmbeddedMulti()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("embeddedmulti.message");
+
+        SMIMESigned s = new SMIMESigned((MimeMultipart)message.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testEmbeddedMultiParser()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("embeddedmulti.message");
+
+        SMIMESignedParser s = new SMIMESignedParser((MimeMultipart)message.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
     
     private String getDigestOid(SignerInformationStore s)
     {
@@ -982,7 +1002,7 @@ public class SMIMESignedTest
         return signedAttrs;
     }
     
-    private MimeMessage loadMessage(String name) 
+    private MimeMessage loadMessage(String name)
         throws MessagingException, FileNotFoundException
     {
         Session session = Session.getDefaultInstance(System.getProperties(), null);

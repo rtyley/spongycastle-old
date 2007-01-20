@@ -8,9 +8,9 @@ import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FilterOutputStream;
@@ -105,6 +105,69 @@ public class SMIMEUtil
         }
     }
 
+    /**
+     * internal preamble is generally included in signatures, while this is technically wrong,
+     * if we find internal preamble we include it by default.
+     */
+    static void outputPreamble(LineOutputStream lOut, MimeBodyPart part, String boundary)
+        throws MessagingException, IOException
+    {
+        InputStream in;
+
+        try
+        {
+            in = part.getRawInputStream();
+        }
+        catch (MessagingException e)
+        {
+            return;   // no underlying content rely on default generation
+        }
+
+        String line;
+
+        while ((line = readLine(in)) != null)
+        {
+            if (line.equals(boundary))
+            {
+                break;
+            }
+
+            lOut.writeln(line);
+        }
+
+        in.close();
+
+        if (line == null)
+        {
+            throw new MessagingException("no boundary found");
+        }
+    }
+
+    /*
+     * read a line of input stripping of the tailing \r\n
+     */
+    private static String readLine(InputStream in)
+        throws IOException
+    {
+        StringBuffer b = new StringBuffer();
+
+        int ch;
+        while ((ch = in.read()) >= 0 && ch != '\n')
+        {
+            if (ch != '\r')
+            {
+                b.append((char)ch);
+            }
+        }
+
+        if (ch < 0)
+        {
+            return null;
+        }
+        
+        return b.toString();
+    }
+
     static void outputBodyPart(
         OutputStream out,
         BodyPart     bodyPart,
@@ -117,9 +180,9 @@ public class SMIMEUtil
             String[]        cte = mimePart.getHeader("Content-Transfer-Encoding");
             String          contentTransferEncoding;
 
-            if (mimePart.getContent() instanceof Multipart)
+            if (mimePart.getContent() instanceof MimeMultipart)
             {
-                Multipart mp = (Multipart)bodyPart.getContent();
+                MimeMultipart mp = (MimeMultipart)bodyPart.getContent();
                 ContentType contentType = new ContentType(mp.getContentType());
                 String boundary = "--" + contentType.getParameter("boundary");
 
@@ -132,6 +195,8 @@ public class SMIMEUtil
                 }
 
                 lOut.writeln();      // CRLF separator
+
+                outputPreamble(lOut, mimePart, boundary);
 
                 for (int i = 0; i < mp.getCount(); i++)
                 {
@@ -186,13 +251,13 @@ public class SMIMEUtil
             //
             // Write raw content, performing canonicalization
             //
-            InputStream in = mimePart.getRawInputStream();
+            InputStream inRaw = mimePart.getRawInputStream();
             CRLFOutputStream outCRLF = new CRLFOutputStream(out);
 
             byte[]      buf = new byte[BUF_SIZE];
 
             int len;
-            while ((len = in.read(buf, 0, buf.length)) > 0)
+            while ((len = inRaw.read(buf, 0, buf.length)) > 0)
             {
                 outCRLF.write(buf, 0, len);
             }
@@ -209,6 +274,7 @@ public class SMIMEUtil
             bodyPart.writeTo(new CRLFOutputStream(out));
         }
     }
+
     /**
      * return the MimeBodyPart described in the raw bytes provided in content
      */
