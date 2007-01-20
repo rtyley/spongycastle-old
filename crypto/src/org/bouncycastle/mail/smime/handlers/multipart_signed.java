@@ -133,6 +133,8 @@ public class multipart_signed
         if (mimePart.getContent() instanceof Multipart)
         {
             Multipart mp = (Multipart)mimePart.getContent();
+            ContentType contentType = new ContentType(mp.getContentType());
+            String boundary = "--" + contentType.getParameter("boundary");
 
             LineOutputStream lOut = new LineOutputStream(out);
 
@@ -144,11 +146,76 @@ public class multipart_signed
 
             lOut.writeln();      // CRLF separator
 
+            outputPreamble(lOut, mimePart, boundary);
+
             outputBodyPart(out, mp);
             return;
         }
 
         mimePart.writeTo(out);
+    }
+
+    /**
+     * internal preamble is generally included in signatures, while this is technically wrong,
+     * if we find internal preamble we include it by default.
+     */
+    static void outputPreamble(LineOutputStream lOut, MimeBodyPart part, String boundary)
+        throws MessagingException, IOException
+    {
+        InputStream in;
+
+        try
+        {
+            in = part.getRawInputStream();
+        }
+        catch (MessagingException e)
+        {
+            return;            // no underlying content, rely on default generation
+        }
+
+        String line;
+
+        while ((line = readLine(in)) != null)
+        {
+            if (line.equals(boundary))
+            {
+                break;
+            }
+
+            lOut.writeln(line);
+        }
+
+        in.close();
+
+        if (line == null)
+        {
+            throw new MessagingException("no boundary found");
+        }
+    }
+
+    /*
+     * read a line of input stripping of the tailing \r\n
+     */
+    private static String readLine(InputStream in)
+        throws IOException
+    {
+        StringBuffer b = new StringBuffer();
+
+        int ch;
+        while ((ch = in.read()) >= 0 && ch != '\n')
+        {
+            if (ch != '\r')
+            {
+                b.append((char)ch);
+            }
+        }
+
+        if (ch < 0)
+        {
+            return null;
+        }
+
+        return b.toString();
     }
 
     private static class LineOutputStream extends FilterOutputStream
