@@ -515,11 +515,11 @@ public class PEMReader extends BufferedReader
                 {
                     keyBits = 128;
                 }
-                else if (encoding.equals("AES-128-CBC"))
+                else if (encoding.equals("AES-192-CBC"))
                 {
                     keyBits = 192;
                 }
-                else if (encoding.equals("AES-128-CBC"))
+                else if (encoding.equals("AES-256-CBC"))
                 {
                     keyBits = 256;
                 }
