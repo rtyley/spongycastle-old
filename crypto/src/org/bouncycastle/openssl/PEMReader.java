@@ -498,6 +498,42 @@ public class PEMReader extends BufferedReader
                 c.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(iv));
                 keyBytes = c.doFinal(Base64.decode(buf.toString()));
             }
+            else if (encoding.startsWith("AES-"))
+            {
+                byte[]  iv = Hex.decode(tknz.nextToken());
+
+                // TODO Should this be handled automatically by getKey(AES)/OpenSSL?
+                byte[] salt = iv;
+                if (salt.length > 8)
+                {
+                    salt = new byte[8];
+                    System.arraycopy(iv, 0, salt, 0, 8);
+                }
+
+                int keyBits;
+                if (encoding.equals("AES-128-CBC"))
+                {
+                    keyBits = 128;
+                }
+                else if (encoding.equals("AES-128-CBC"))
+                {
+                    keyBits = 192;
+                }
+                else if (encoding.equals("AES-128-CBC"))
+                {
+                    keyBits = 256;
+                }
+                else
+                {
+                    throw new IOException("unknown AES encryption with private key");
+                }
+
+                Key sKey = getKey("AES", keyBits / 8, salt);
+                Cipher  c = Cipher.getInstance("AES/CBC/PKCS5Padding", provider);
+
+                c.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(iv));
+                keyBytes = c.doFinal(Base64.decode(buf.toString()));
+            }
             else
             {
                 throw new IOException("unknown encryption with private key");

@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -51,12 +52,20 @@ public class ReaderTest
         return "PEMReaderTest";
     }
 
+    private PEMReader openPEMResource(
+        String          fileName,
+        PasswordFinder  pGet)
+    {
+        InputStream res = this.getClass().getResourceAsStream(fileName);
+        Reader fRd = new BufferedReader(new InputStreamReader(res));
+        return new PEMReader(fRd, pGet);
+    }
+
     public void performTest()
         throws Exception
     {
-        Reader          fRd =new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("test.pem")));
         PasswordFinder  pGet = new Password("secret".toCharArray());
-        PEMReader       pemRd = new PEMReader(fRd, pGet);
+        PEMReader       pemRd = openPEMResource("test.pem", pGet);
         Object          o;
         KeyPair         pair;
 
@@ -78,9 +87,7 @@ public class ReaderTest
         //
         // pkcs 7 data
         //
-        fRd = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("pkcs7.pem")));
-        pemRd = new PEMReader(fRd);
-        
+        pemRd = openPEMResource("pkcs7.pem", null);
         ContentInfo d = (ContentInfo)pemRd.readObject();    
             
         if (!d.getContentType().equals(CMSObjectIdentifiers.envelopedData))
@@ -91,8 +98,7 @@ public class ReaderTest
         //
         // ECKey
         //
-        fRd = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("eckey.pem")));
-        pemRd = new PEMReader(fRd);
+        pemRd = openPEMResource("eckey.pem", null);
         ECNamedCurveParameterSpec spec = (ECNamedCurveParameterSpec)pemRd.readObject();
 
         pair = (KeyPair)pemRd.readObject();
@@ -199,8 +205,27 @@ public class ReaderTest
         {
             fail("Failed private key public read: " + name);
         }
+
+        doOpenSSLTest("RSA-DES.pem");
+        doOpenSSLTest("RSA-DES3.pem");
+        doOpenSSLTest("RSA-AES128.pem");
+        doOpenSSLTest("RSA-AES192.pem");
+        doOpenSSLTest("RSA-AES256.pem");
     }
-    
+
+    private void doOpenSSLTest(
+        String fileName)
+        throws IOException
+    {
+        PEMReader pr = openPEMResource(fileName, new Password("bouncy".toCharArray()));
+        Object o = pr.readObject();
+
+        if (o == null || !(o instanceof KeyPair))
+        {
+            fail("Didn't find OpenSSL key");
+        }
+    }
+
     public static void main(
         String[]    args)
     {
