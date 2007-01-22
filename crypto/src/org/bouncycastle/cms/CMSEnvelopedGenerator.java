@@ -237,6 +237,12 @@ public class CMSEnvelopedGenerator
 
                     encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
                 }
+                catch (UnsupportedOperationException e)   // some providers do not support UNWRAP
+                {
+                    keyCipher.init(Cipher.ENCRYPT_MODE, key);
+
+                    encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
+                }
 
                 if (cert != null)
                 {
@@ -315,6 +321,9 @@ public class CMSEnvelopedGenerator
 
     /**
      * add a recipient.
+     *
+     * @param cert recipient's public key certificate
+     * @exception IllegalArgumentException if there is a problem with the certificate
      */
     public void addKeyTransRecipient(
         X509Certificate cert)
@@ -328,6 +337,7 @@ public class CMSEnvelopedGenerator
      *
      * @param key the public key used by the recipient
      * @param subKeyId the identifier for the recipient's public key
+     * @exception IllegalArgumentException if there is a problem with the key
      */
     public void addKeyTransRecipient(
         PublicKey   key,
@@ -339,6 +349,8 @@ public class CMSEnvelopedGenerator
 
     /**
      * add a KEK recipient.
+     * @param key the secret key to use for wrapping
+     * @param keyIdentifier the byte string that identifies the key
      */
     public void addKEKRecipient(
         SecretKey   key,
@@ -366,6 +378,9 @@ public class CMSEnvelopedGenerator
      * @param recipientCert recipient's public key certificate.
      * @param cekWrapAlgorithm OID for key wrapping algorithm to use.
      * @param provider provider to use for the agreement calculation.
+     * @exception NoSuchProviderException if the specified provider cannot be found
+     * @exception NoSuchAlgorithmException if the algorithm requested cannot be found
+     * @exception InvalidKeyException if the keys are inappropriate for the algorithm specified
      */
     public void addKeyAgreementRecipient(
         String           agreementAlgorithm,
