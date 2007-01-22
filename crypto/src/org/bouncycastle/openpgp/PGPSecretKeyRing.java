@@ -1,5 +1,14 @@
 package org.bouncycastle.openpgp;
 
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.bcpg.SecretKeyPacket;
+import org.bouncycastle.bcpg.SecretSubkeyPacket;
+import org.bouncycastle.bcpg.SignaturePacket;
+import org.bouncycastle.bcpg.TrustPacket;
+import org.bouncycastle.bcpg.UserAttributePacket;
+import org.bouncycastle.bcpg.UserIDPacket;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,8 +21,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.bcpg.*;
-
 /**
  * Holder for a collection of PGP secret keys.
  */
@@ -21,9 +28,6 @@ public class PGPSecretKeyRing
 {    
     List            keys = new ArrayList();
     
-    /**
-     * @param keys
-     */
     PGPSecretKeyRing(List keys)
     {
         this.keys = keys;
@@ -96,7 +100,16 @@ public class PGPSecretKeyRing
         {
             try
             {
-                keySigs.add(new PGPSignature(pIn));
+                SignaturePacket    s = (SignaturePacket)pIn.readPacket();
+
+                if (pIn.nextPacketTag() == PacketTags.TRUST)
+                {
+                    keySigs.add(new PGPSignature(s, (TrustPacket)pIn.readPacket()));
+                }
+                else
+                {
+                    keySigs.add(new PGPSignature(s));
+                }
             }
             catch (PGPException e)
             {
