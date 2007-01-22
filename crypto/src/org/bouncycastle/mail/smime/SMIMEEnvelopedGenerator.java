@@ -305,19 +305,19 @@ public class SMIMEEnvelopedGenerator
             }
             catch (MessagingException e)
             {
-                throw new IOException(e.toString());
+                throw new WrappingIOException(e.toString(), e);
             }
             catch (NoSuchAlgorithmException e)
             {
-                throw new IOException(e.toString());
+                throw new WrappingIOException(e.toString(), e);
             }
             catch (NoSuchProviderException e)
             {
-                throw new IOException(e.toString());
+                throw new WrappingIOException(e.toString(), e);
             }
             catch (CMSException e)
             {
-                throw new IOException(e.toString());
+                throw new WrappingIOException(e.toString(), e);
             }
         }
     }
@@ -353,6 +353,24 @@ public class SMIMEEnvelopedGenerator
             throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
         {
             return super.open(out, _encryptionOID, _encKey, _params, _recipientInfos, provider);
+        }
+    }
+
+    private static class WrappingIOException
+        extends IOException
+    {
+        private Throwable cause;
+
+        WrappingIOException(String msg, Throwable cause)
+        {
+            super(msg);
+
+            this.cause = cause;
+        }
+
+        public Throwable getCause()
+        {
+            return cause;
         }
     }
 }
