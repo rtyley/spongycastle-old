@@ -948,7 +948,27 @@ public class SMIMESignedTest
 
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
     }
-    
+
+    public void testBasicAS2()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("basicAS2.message");
+
+        SMIMESigned s = new SMIMESigned((MimeMultipart)message.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testBasicAS2Parser()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("basicAS2.message");
+
+        SMIMESignedParser s = new SMIMESignedParser((MimeMultipart)message.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
     private String getDigestOid(SignerInformationStore s)
     {
         return ((SignerInformation)s.getSigners().iterator().next()).getDigestAlgOID();
