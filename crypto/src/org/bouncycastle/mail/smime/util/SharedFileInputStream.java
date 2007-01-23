@@ -29,14 +29,14 @@ public class SharedFileInputStream
         String fileName) 
         throws IOException
     {
-        this(new File(fileName), 0, -1);
+        this(new File(fileName));
     }
     
     public SharedFileInputStream(
         File file) 
         throws IOException
     {
-        this(file, 0, -1);
+        this(file, 0, file.length());
     }
     
     private SharedFileInputStream(
@@ -87,6 +87,10 @@ public class SharedFileInputStream
                 if (_length > 0)
                 {
                     stream = new SharedFileInputStream(this, _start + start, _length - start);
+                }
+                else if (_length == 0)
+                {
+                    stream = new SharedFileInputStream(this, _start + start, 0);
                 }
                 else
                 {
@@ -161,6 +165,27 @@ public class SharedFileInputStream
         return in.read();
     }
     
+    public boolean markSupported()
+    {
+        return true;
+    }
+
+    public long skip(long n)
+        throws IOException
+    {
+        long count;
+
+        for (count = 0; count != n; count++)
+        {
+            if (this.read() < 0)
+            {
+                break;
+            }
+        }
+
+        return count;
+    }
+
     public void mark(
         int readLimit)
     {
