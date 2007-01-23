@@ -19,10 +19,13 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
 
 /**
  * basic class for reading test.pem - the password is "secret"
@@ -206,15 +209,22 @@ public class ReaderTest
             fail("Failed private key public read: " + name);
         }
 
-        doOpenSSLTest("RSA-DES.pem");
-        doOpenSSLTest("RSA-DES3.pem");
-        doOpenSSLTest("RSA-AES128.pem");
-        doOpenSSLTest("RSA-AES192.pem");
-        doOpenSSLTest("RSA-AES256.pem");
+        doOpenSSLTest("RSA-DES.pem", RSAPrivateKey.class);
+        doOpenSSLTest("RSA-DES3.pem", RSAPrivateKey.class);
+        doOpenSSLTest("RSA-AES128.pem", RSAPrivateKey.class);
+        doOpenSSLTest("RSA-AES192.pem", RSAPrivateKey.class);
+        doOpenSSLTest("RSA-AES256.pem", RSAPrivateKey.class);
+
+        doOpenSSLTest("DSA-DES.pem", DSAPrivateKey.class);
+        doOpenSSLTest("DSA-DES3.pem", DSAPrivateKey.class);
+        doOpenSSLTest("DSA-AES128.pem", DSAPrivateKey.class);
+        doOpenSSLTest("DSA-AES192.pem", DSAPrivateKey.class);
+        doOpenSSLTest("DSA-AES256.pem", DSAPrivateKey.class);
     }
 
     private void doOpenSSLTest(
-        String fileName)
+        String  fileName,
+        Class   expectedPrivKeyClass)
         throws IOException
     {
         PEMReader pr = openPEMResource(fileName, new Password("bouncy".toCharArray()));
@@ -223,6 +233,14 @@ public class ReaderTest
         if (o == null || !(o instanceof KeyPair))
         {
             fail("Didn't find OpenSSL key");
+        }
+
+        KeyPair kp = (KeyPair) o;
+        PrivateKey privKey = kp.getPrivate();
+
+        if (!expectedPrivKeyClass.isInstance(privKey))
+        {
+            fail("Returned key not of correct type");
         }
     }
 
