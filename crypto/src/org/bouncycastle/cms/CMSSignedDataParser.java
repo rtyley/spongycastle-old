@@ -379,22 +379,21 @@ public class CMSSignedDataParser
 
         try
         {
+            // care! Streaming - these must be done in exactly this order.
             sCerts = _signedData.getCertificates();
+            if (sCerts != null)
+            {
+                _certSet = ASN1Set.getInstance(sCerts.getDERObject());
+            }
             sCrls = _signedData.getCrls();
+            if (sCrls != null)
+            {
+                _crlSet = ASN1Set.getInstance(sCrls.getDERObject());
+            }
         }
         catch (IOException e)
         {
             throw new CMSException("problem parsing cert/crl sets", e);
-        }
-
-        if (sCerts != null)
-        {
-            _certSet = ASN1Set.getInstance(sCerts.getDERObject());
-        }
-
-        if (sCrls != null)
-        {
-            _crlSet = ASN1Set.getInstance(sCrls.getDERObject());
         }
     }
 
