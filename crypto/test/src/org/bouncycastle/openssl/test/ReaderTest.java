@@ -166,6 +166,25 @@ public class ReaderTest
         {
             fail("failed envelopedData recode check");
         }
+
+
+        // OpenSSL test cases (as embedded resources)
+        doOpenSslDsaTest("unencrypted");
+        doOpenSslRsaTest("unencrypted");
+
+        doOpenSslTests("aes128");
+        doOpenSslTests("aes192");
+        doOpenSslTests("aes256");
+        doOpenSslTests("blowfish");
+        doOpenSslTests("des1");
+        doOpenSslTests("des2");
+        doOpenSslTests("des3");
+        doOpenSslTests("rc2_128");
+
+        doOpenSslDsaTest("rc2_40_cbc");
+        doOpenSslRsaTest("rc2_40_cbc");
+        doOpenSslDsaTest("rc2_64_cbc");
+        doOpenSslRsaTest("rc2_64_cbc");
     }
 
     private void keyPairTest(
@@ -208,26 +227,60 @@ public class ReaderTest
         {
             fail("Failed private key public read: " + name);
         }
-
-        doOpenSSLTest("RSA-DES.pem", RSAPrivateKey.class);
-        doOpenSSLTest("RSA-DES3.pem", RSAPrivateKey.class);
-        doOpenSSLTest("RSA-AES128.pem", RSAPrivateKey.class);
-        doOpenSSLTest("RSA-AES192.pem", RSAPrivateKey.class);
-        doOpenSSLTest("RSA-AES256.pem", RSAPrivateKey.class);
-
-        doOpenSSLTest("DSA-DES.pem", DSAPrivateKey.class);
-        doOpenSSLTest("DSA-DES3.pem", DSAPrivateKey.class);
-        doOpenSSLTest("DSA-AES128.pem", DSAPrivateKey.class);
-        doOpenSSLTest("DSA-AES192.pem", DSAPrivateKey.class);
-        doOpenSSLTest("DSA-AES256.pem", DSAPrivateKey.class);
     }
 
-    private void doOpenSSLTest(
+    private void doOpenSslTests(
+        String baseName)
+        throws IOException
+    {
+        doOpenSslDsaModesTest(baseName);
+        doOpenSslRsaModesTest(baseName);
+    }
+
+    private void doOpenSslDsaModesTest(
+        String baseName)
+        throws IOException
+    {
+        doOpenSslDsaTest(baseName + "_cbc");
+        doOpenSslDsaTest(baseName + "_cfb");
+        doOpenSslDsaTest(baseName + "_ecb");
+        doOpenSslDsaTest(baseName + "_ofb");
+    }
+
+    private void doOpenSslRsaModesTest(
+        String baseName)
+        throws IOException
+    {
+        doOpenSslRsaTest(baseName + "_cbc");
+        doOpenSslRsaTest(baseName + "_cfb");
+        doOpenSslRsaTest(baseName + "_ecb");
+        doOpenSslRsaTest(baseName + "_ofb");
+    }
+
+    private void doOpenSslDsaTest(
+        String name)
+        throws IOException
+    {
+        String fileName = "dsa/openssl_dsa_" + name + ".pem";
+
+        doOpenSslTestFile(fileName, DSAPrivateKey.class);
+    }
+
+    private void doOpenSslRsaTest(
+        String name)
+        throws IOException
+    {
+        String fileName = "rsa/openssl_rsa_" + name + ".pem";
+
+        doOpenSslTestFile(fileName, RSAPrivateKey.class);
+    }
+
+    private void doOpenSslTestFile(
         String  fileName,
         Class   expectedPrivKeyClass)
         throws IOException
     {
-        PEMReader pr = openPEMResource(fileName, new Password("bouncy".toCharArray()));
+        PEMReader pr = openPEMResource("data/" + fileName, new Password("changeit".toCharArray()));
         Object o = pr.readObject();
 
         if (o == null || !(o instanceof KeyPair))
