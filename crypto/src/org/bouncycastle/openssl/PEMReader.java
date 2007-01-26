@@ -26,6 +26,7 @@ import org.bouncycastle.x509.X509V2AttributeCertificate;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,6 +41,7 @@ import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
@@ -404,14 +406,25 @@ public class PEMReader extends BufferedReader
             throw new IOException("problem parsing PKCS7 object: " + e.toString());
         }
     }
-    
+
+    private SecretKey getKey(
+        String  algorithm,
+        int     keyLength,
+        byte[]  salt)
+        throws IOException
+    {
+        return getKey(algorithm, keyLength, salt, false);
+    }
+
+
     /**
      * create the secret key needed for this object, fetching the password
      */
     private SecretKey getKey(
         String  algorithm,
         int     keyLength,
-        byte[]  salt)
+        byte[]  salt,
+        boolean des2)
         throws IOException
     {
         if (pFinder == null)
@@ -430,7 +443,15 @@ public class PEMReader extends BufferedReader
 
         pGen.init(PBEParametersGenerator.PKCS5PasswordToBytes(password), salt);
 
-        return new javax.crypto.spec.SecretKeySpec(((KeyParameter)pGen.generateDerivedParameters(keyLength * 8)).getKey(), algorithm);
+        KeyParameter keyParam;
+        keyParam = (KeyParameter) pGen.generateDerivedParameters(keyLength * 8);
+        byte[] key = keyParam.getKey();
+        if (des2 && key.length >= 24)
+        {
+            // For DES2, we must copy first 8 bytes into the last 8 bytes.
+            System.arraycopy(key, 0, key, 16, 8);
+        }
+        return new javax.crypto.spec.SecretKeySpec(key, algorithm);
     }
 
     /**
@@ -473,35 +494,82 @@ public class PEMReader extends BufferedReader
 
         if (isEncrypted)
         {
-            StringTokenizer tknz = new StringTokenizer(dekInfo, ",");
-            String          encoding = tknz.nextToken();
+            StringTokenizer        tknz = new StringTokenizer(dekInfo, ",");
+            String                 encoding = tknz.nextToken();
+            byte[]                 iv = Hex.decode(tknz.nextToken());
+            AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
+            String                 alg;
+            String                 blockMode = "CBC";
+            String                 padding = "PKCS5Padding";
+            Key                    sKey;
 
-            if (encoding.equals("DES-EDE3-CBC"))
+
+            // Figure out block mode and padding.
+            if (encoding.endsWith("-CFB"))
             {
-                String  alg = "DESede";
-                byte[]  iv = Hex.decode(tknz.nextToken());
-                Key     sKey = getKey(alg, 24, iv);
-                Cipher  c = Cipher.getInstance(
-                                "DESede/CBC/PKCS5Padding", provider);
-
-                c.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(iv));
-                keyBytes = c.doFinal(Base64.decode(buf.toString()));
+                blockMode = "CFB";
+                padding = "NoPadding";
             }
-            else if (encoding.equals("DES-CBC"))
+            if (encoding.endsWith("-ECB") ||
+                "DES-EDE".equals(encoding) ||
+                "DES-EDE3".equals(encoding))
             {
-                String  alg = "DES";
-                byte[]  iv = Hex.decode(tknz.nextToken());
-                Key     sKey = getKey(alg, 8, iv);
-                Cipher  c = Cipher.getInstance(
-                                "DES/CBC/PKCS5Padding", provider);
+                // ECB is actually the default (though seldom used) when OpenSSL
+                // uses DES-EDE (des2) or DES-EDE3 (des3).
+                blockMode = "ECB";
+                paramSpec = null;
+            }
+            if (encoding.endsWith("-OFB"))
+            {
+                blockMode = "OFB";
+                padding = "NoPadding";
+            }
 
-                c.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(iv));
-                keyBytes = c.doFinal(Base64.decode(buf.toString()));
+
+            // Figure out algorithm and key size.
+            if (encoding.startsWith("DES-EDE"))
+            {
+                alg = "DESede";
+                // "DES-EDE" is actually des2 in OpenSSL-speak!
+                // "DES-EDE3" is des3.
+                boolean des2 = !encoding.startsWith("DES-EDE3");
+                sKey = getKey(alg, 24, iv, des2);
+            }
+            else if (encoding.startsWith("DES-"))
+            {
+                alg = "DES";
+                sKey = getKey(alg, 8, iv);
+            }
+            else if (encoding.startsWith("BF-"))
+            {
+                alg = "Blowfish";
+                sKey = getKey(alg, 16, iv);
+            }
+            else if (encoding.startsWith("RC2-"))
+            {
+                alg = "RC2";
+                int keyBits = 128;
+                if (encoding.startsWith("RC2-40-"))
+                {
+                    keyBits = 40;
+                }
+                else if (encoding.startsWith("RC2-64-"))
+                {
+                    keyBits = 64;
+                }
+                sKey = getKey(alg, keyBits / 8, iv);
+                if (paramSpec == null) // ECB block mode
+                {
+                    paramSpec = new RC2ParameterSpec(keyBits);
+                }
+                else
+                {
+                    paramSpec = new RC2ParameterSpec(keyBits, iv);
+                }
             }
             else if (encoding.startsWith("AES-"))
             {
-                byte[]  iv = Hex.decode(tknz.nextToken());
-
+                alg = "AES";
                 // TODO Should this be handled automatically by getKey(AES)/OpenSSL?
                 byte[] salt = iv;
                 if (salt.length > 8)
@@ -511,15 +579,15 @@ public class PEMReader extends BufferedReader
                 }
 
                 int keyBits;
-                if (encoding.equals("AES-128-CBC"))
+                if (encoding.startsWith("AES-128-"))
                 {
                     keyBits = 128;
                 }
-                else if (encoding.equals("AES-192-CBC"))
+                else if (encoding.startsWith("AES-192-"))
                 {
                     keyBits = 192;
                 }
-                else if (encoding.equals("AES-256-CBC"))
+                else if (encoding.startsWith("AES-256-"))
                 {
                     keyBits = 256;
                 }
@@ -527,17 +595,24 @@ public class PEMReader extends BufferedReader
                 {
                     throw new IOException("unknown AES encryption with private key");
                 }
-
-                Key sKey = getKey("AES", keyBits / 8, salt);
-                Cipher  c = Cipher.getInstance("AES/CBC/PKCS5Padding", provider);
-
-                c.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(iv));
-                keyBytes = c.doFinal(Base64.decode(buf.toString()));
+                sKey = getKey("AES", keyBits / 8, salt);
             }
             else
             {
                 throw new IOException("unknown encryption with private key");
             }
+
+            String transformation = alg + "/" + blockMode + "/" + padding;
+            Cipher c = Cipher.getInstance(transformation, provider);
+            if (paramSpec == null) // ECB block mode
+            {
+                c.init(Cipher.DECRYPT_MODE, sKey);
+            }
+            else
+            {
+                c.init(Cipher.DECRYPT_MODE, sKey, paramSpec);
+            }
+            keyBytes = c.doFinal(Base64.decode(buf.toString()));
         }
         else
         {
