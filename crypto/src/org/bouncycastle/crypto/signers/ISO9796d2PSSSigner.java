@@ -1,7 +1,5 @@
 package org.bouncycastle.crypto.signers;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
@@ -13,6 +11,8 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.ParametersWithSalt;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
+
+import java.security.SecureRandom;
 
 /**
  * ISO9796-2 - mechanism using a hash function with recovery (scheme 2 and 3).
@@ -119,8 +119,8 @@ public class ISO9796d2PSSSigner
         boolean                 forSigning,
         CipherParameters        param)
     {
-        RSAKeyParameters    kParam = null;
-        int                    lengthOfSalt = saltLength;
+        RSAKeyParameters    kParam;
+        int                 lengthOfSalt = saltLength;
 
         if (param instanceof ParametersWithRandom)
         {
@@ -134,19 +134,15 @@ public class ISO9796d2PSSSigner
         }
         else if (param instanceof ParametersWithSalt)
         {
-//            if (!forSigning)
-//            {
-//                throw new IllegalArgumentException("ParametersWithSalt only valid for signing");
-//            }
             ParametersWithSalt    p = (ParametersWithSalt)param;
 
             kParam = (RSAKeyParameters)p.getParameters();
             standardSalt = p.getSalt();
             lengthOfSalt = standardSalt.length;
-//            if (standardSalt.length != saltLength)
-//            {
-//                throw new IllegalArgumentException("Fixed salt is of wrong length");
-//            }
+            if (standardSalt.length != saltLength)
+            {
+                throw new IllegalArgumentException("Fixed salt is of wrong length");
+            }
         }
         else
         {
