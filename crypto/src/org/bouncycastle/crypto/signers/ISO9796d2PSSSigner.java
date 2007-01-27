@@ -127,7 +127,10 @@ public class ISO9796d2PSSSigner
             ParametersWithRandom    p = (ParametersWithRandom)param;
 
             kParam = (RSAKeyParameters)p.getParameters();
-            random = p.getRandom();
+            if (forSigning)
+            {
+                random = p.getRandom();
+            }
         }
         else if (param instanceof ParametersWithSalt)
         {
