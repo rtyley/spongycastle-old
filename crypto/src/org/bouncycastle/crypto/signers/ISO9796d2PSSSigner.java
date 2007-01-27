@@ -40,7 +40,7 @@ public class ISO9796d2PSSSigner
     private byte[]      block;
     private byte[]      mBuf;
     private int         messageLength;
-    private int         saltLength;
+    private final int   saltLength;
     private boolean     fullMessage;
     private byte[]      recoveredMessage;
 
@@ -131,11 +131,19 @@ public class ISO9796d2PSSSigner
         }
         else if (param instanceof ParametersWithSalt)
         {
+//            if (!forSigning)
+//            {
+//                throw new IllegalArgumentException("ParametersWithSalt only valid for signing");
+//            }
             ParametersWithSalt    p = (ParametersWithSalt)param;
 
             kParam = (RSAKeyParameters)p.getParameters();
             standardSalt = p.getSalt();
             lengthOfSalt = standardSalt.length;
+//            if (standardSalt.length != saltLength)
+//            {
+//                throw new IllegalArgumentException("Fixed salt is of wrong length");
+//            }
         }
         else
         {
@@ -243,11 +251,15 @@ public class ISO9796d2PSSSigner
     {
         digest.reset();
         messageLength = 0;
+        if (mBuf != null)
+        {
+            clearBlock(mBuf);
+        }
         if (recoveredMessage != null)
         {
             clearBlock(recoveredMessage);
+            recoveredMessage = null;
         }
-        recoveredMessage = null;
         fullMessage = false;
     }
 
@@ -340,7 +352,7 @@ public class ISO9796d2PSSSigner
     public boolean verifySignature(
         byte[]      signature)
     {
-        byte[]      block = null;
+        byte[] block;
 
         try
         {
@@ -359,10 +371,11 @@ public class ISO9796d2PSSSigner
             byte[] tmp = new byte[(keyBits + 7) / 8];
 
             System.arraycopy(block, 0, tmp, tmp.length - block.length, block.length);
+            clearBlock(block);
             block = tmp;
         }
 
-        int     tLength = 0;
+        int tLength;
 
         if (((block[block.length - 1] & 0xFF) ^ 0xBC) == 0)
         {
@@ -420,8 +433,7 @@ public class ISO9796d2PSSSigner
         // find out how much padding we've got
         //
         int mStart = 0;
-
-        for (mStart = 0; mStart != block.length; mStart++)
+        for (; mStart != block.length; mStart++)
         {
             if (block[mStart] == 0x01)
             {
@@ -436,16 +448,9 @@ public class ISO9796d2PSSSigner
             clearBlock(block);
             return false;
         }
-        
-        if (mStart > 1)
-        {
-            fullMessage = true;
-        }
-        else
-        {
-            fullMessage = false;
-        }
-        
+
+        fullMessage = (mStart > 1);
+
         recoveredMessage = new byte[dbMask.length - mStart - saltLength];
 
         System.arraycopy(block, mStart, recoveredMessage, 0, recoveredMessage.length);
@@ -464,14 +469,15 @@ public class ISO9796d2PSSSigner
         }
 
         digest.update(m2Hash, 0, m2Hash.length);
-        byte[]  hash = new byte[digest.getDigestSize()];
 
-        digest.update(block, mStart + recoveredMessage.length, dbMask.length - mStart - recoveredMessage.length);
-        
+        // Update for the salt
+        digest.update(block, mStart + recoveredMessage.length, saltLength);
+
+        byte[] hash = new byte[digest.getDigestSize()];
         digest.doFinal(hash, 0);
 
         int off = block.length - tLength - hash.length;
-        
+
         for (int i = 0; i != hash.length; i++)
         {
             if (hash[i] != block[off + i])
@@ -480,10 +486,13 @@ public class ISO9796d2PSSSigner
                 clearBlock(hash);
                 clearBlock(recoveredMessage);
                 fullMessage = false;
-                
+
                 return false;
             }
         }
+
+        clearBlock(block);
+        clearBlock(hash);
 
         //
         // if they've input a message check what we've recovered against
@@ -494,16 +503,13 @@ public class ISO9796d2PSSSigner
             if (!isSameAs(mBuf, recoveredMessage))
             {
                 clearBlock(mBuf);
-                clearBlock(block);
-               
                 return false;
             }
-        }
-        
-        clearBlock(mBuf);
-        clearBlock(block);
-        messageLength = 0;
 
+            messageLength = 0;
+        }
+
+        clearBlock(mBuf);
         return true;
     }
 
