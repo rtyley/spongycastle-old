@@ -20,9 +20,13 @@ public class ReversedWindowGenerator
         int             windowSize)
     {
         if (generator == null)
+        {
             throw new IllegalArgumentException("generator cannot be null");
+        }
         if (windowSize < 2)
+        {
             throw new IllegalArgumentException("windowSize must be at least 2");
+        }
 
         this.generator = generator;
         this.window = new byte[windowSize];
