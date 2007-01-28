@@ -1,5 +1,17 @@
 package org.bouncycastle.openpgp;
 
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.InputStreamPacket;
+import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
+import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
+import org.bouncycastle.jce.interfaces.ElGamalKey;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.EOFException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -7,19 +19,6 @@ import java.security.DigestInputStream;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchProviderException;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.InputStreamPacket;
-import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
-import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
-import org.bouncycastle.jce.interfaces.ElGamalKey;
 
 /**
  * A public key encrypted data object.
@@ -94,12 +93,12 @@ public class PGPPublicKeyEncryptedData
     {
         return keyData.getKeyID();
     }
-    
+
     /**
      * Return the decrypted data stream for the packet.
-     * 
-     * @param privKey
-     * @param provider
+     *
+     * @param privKey private key to use
+     * @param provider provider to use for private key and symmetric key decryption.
      * @return InputStream
      * @throws PGPException
      * @throws NoSuchProviderException
@@ -108,8 +107,27 @@ public class PGPPublicKeyEncryptedData
         PGPPrivateKey  privKey,
         String         provider)
         throws PGPException, NoSuchProviderException
+    {
+        return getDataStream(privKey, provider, provider);
+    }
+
+    /**
+     * Return the decrypted data stream for the packet.
+     * 
+     * @param privKey private key to use.
+     * @param asymProvider asymetric provider to use with private key.
+     * @param provider provider to use for symmetric algorithm.
+     * @return InputStream
+     * @throws PGPException
+     * @throws NoSuchProviderException
+     */
+    public InputStream getDataStream(
+        PGPPrivateKey  privKey,
+        String         asymProvider,
+        String         provider)
+        throws PGPException, NoSuchProviderException
     {        
-        Cipher    c1 = getKeyCipher(keyData.getAlgorithm(), provider);
+        Cipher    c1 = getKeyCipher(keyData.getAlgorithm(), asymProvider);
         
         try
         {
