@@ -437,7 +437,17 @@ public class LDAPStoreHelper
         {
             issuers.add(getCertificateIssuer(xselector.getCertificateChecking()));
         }
-
+        if (xselector.getAttrCertificateChecking() != null)
+        {
+            Principal principals[] = xselector.getAttrCertificateChecking().getIssuer().getPrincipals();
+            for (int i=0; i<principals.length; i++)
+            {
+                if (principals[i] instanceof X500Principal)
+                {
+                    issuers.add(principals[i]);        
+                }
+            }
+        }
         Iterator it = issuers.iterator();
         while (it.hasNext())
         {

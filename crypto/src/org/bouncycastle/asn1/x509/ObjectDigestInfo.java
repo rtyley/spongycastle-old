@@ -9,12 +9,45 @@ import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-
+/**
+ * ObjectDigestInfo ASN.1 structure used in v2 attribute certificates.
+ * 
+ * <pre>
+ *  
+ *    ObjectDigestInfo ::= SEQUENCE {
+ *         digestedObjectType  ENUMERATED {
+ *                 publicKey            (0),
+ *                 publicKeyCert        (1),
+ *                 otherObjectTypes     (2) },
+ *                         -- otherObjectTypes MUST NOT
+ *                         -- be used in this profile
+ *         otherObjectTypeID   OBJECT IDENTIFIER OPTIONAL,
+ *         digestAlgorithm     AlgorithmIdentifier,
+ *         objectDigest        BIT STRING
+ *    }
+ *   
+ * </pre>
+ * 
+ */
 public class ObjectDigestInfo
     extends ASN1Encodable
 {
+    /**
+     * The public key is hashed.
+     */
+    public final static int publicKey = 0;
+
+    /**
+     * The public key certificate is hashed.
+     */
+    public final static int publicKeyCert = 1;
+
+    /**
+     * An other object is hashed.
+     */
+    public final static int otherObjectDigest = 2;
+
     DEREnumerated digestedObjectType;
 
     DERObjectIdentifier otherObjectTypeID;
@@ -24,7 +57,7 @@ public class ObjectDigestInfo
     DERBitString objectDigest;
 
     public static ObjectDigestInfo getInstance(
-            Object  obj)
+        Object obj)
     {
         if (obj == null || obj instanceof ObjectDigestInfo)
         {
@@ -36,7 +69,8 @@ public class ObjectDigestInfo
             return new ObjectDigestInfo((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
+        throw new IllegalArgumentException("illegal object in getInstance: "
+            + obj.getClass().getName());
     }
 
     public static ObjectDigestInfo getInstance(
@@ -45,13 +79,44 @@ public class ObjectDigestInfo
     {
         return getInstance(ASN1Sequence.getInstance(obj, explicit));
     }
-    
-    public ObjectDigestInfo(ASN1Sequence seq)
+
+    /**
+     * Constructor from given details.
+     * <p>
+     * If <code>digestedObjectType</code> is not {@link #publicKeyCert} or
+     * {@link #publicKey} <code>otherObjectTypeID</code> must be given,
+     * otherwise it is ignored.
+     * 
+     * @param digestedObjectType The digest object type.
+     * @param otherObjectTypeID The object type ID for
+     *            <code>otherObjectDigest</code>.
+     * @param digestAlgorithm The algorithm identifier for the hash.
+     * @param objectDigest The hash value.
+     */
+    public ObjectDigestInfo(
+        int digestedObjectType,
+        String otherObjectTypeID,
+        AlgorithmIdentifier digestAlgorithm,
+        byte[] objectDigest)
+    {
+        this.digestedObjectType = new DEREnumerated(digestedObjectType);
+        if (digestedObjectType == otherObjectDigest)
+        {
+            this.otherObjectTypeID = new DERObjectIdentifier(otherObjectTypeID);
+        }
+
+        this.digestAlgorithm = digestAlgorithm; 
+
+        this.objectDigest = new DERBitString(objectDigest);
+    }
+
+    public ObjectDigestInfo(
+        ASN1Sequence seq)
     {
         if (seq.size() > 4 || seq.size() < 3)
         {
             throw new IllegalArgumentException("Bad sequence size: "
-                    + seq.size());
+                + seq.size());
         }
 
         digestedObjectType = DEREnumerated.getInstance(seq.getObjectAt(0));
@@ -93,19 +158,19 @@ public class ObjectDigestInfo
      * Produce an object suitable for an ASN1OutputStream.
      * 
      * <pre>
-     * 
-     *   ObjectDigestInfo ::= SEQUENCE {
-     *        digestedObjectType  ENUMERATED {
-     *                publicKey            (0),
-     *                publicKeyCert        (1),
-     *                otherObjectTypes     (2) },
-     *                        -- otherObjectTypes MUST NOT
-     *                        -- be used in this profile
-     *        otherObjectTypeID   OBJECT IDENTIFIER OPTIONAL,
-     *        digestAlgorithm     AlgorithmIdentifier,
-     *        objectDigest        BIT STRING
-     *   }
      *  
+     *    ObjectDigestInfo ::= SEQUENCE {
+     *         digestedObjectType  ENUMERATED {
+     *                 publicKey            (0),
+     *                 publicKeyCert        (1),
+     *                 otherObjectTypes     (2) },
+     *                         -- otherObjectTypes MUST NOT
+     *                         -- be used in this profile
+     *         otherObjectTypeID   OBJECT IDENTIFIER OPTIONAL,
+     *         digestAlgorithm     AlgorithmIdentifier,
+     *         objectDigest        BIT STRING
+     *    }
+     *   
      * </pre>
      */
     public DERObject toASN1Object()

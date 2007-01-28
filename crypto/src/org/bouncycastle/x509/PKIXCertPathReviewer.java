@@ -829,7 +829,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 catch (GeneralSecurityException ex)
                 {
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.signatureNotVerified",
-                            new Object[] {ex.getMessage(),ex}); 
+                            new Object[] {ex.getMessage(),ex,ex.getClass().getName()}); 
                     addError(msg,index);
                 }
             }
@@ -1762,7 +1762,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             catch (CertPathValidatorException cpve)
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.certPathCheckerError",
-                        new Object[] {cpve.getMessage(),cpve});
+                        new Object[] {cpve.getMessage(),cpve,cpve.getClass().getName()});
                 throw new CertPathReviewerException(msg,cpve);
             }
             
@@ -1814,7 +1814,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     catch (CertPathValidatorException e)
                     {
                         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.criticalExtensionError",
-                                new Object[] {e.getMessage(),e});
+                                new Object[] {e.getMessage(),e,e.getClass().getName()});
                         throw new CertPathReviewerException(msg,e.getCause(),certPath,index);
                     }
                 }
@@ -1989,7 +1989,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         catch (AnnotatedException ae)
         {
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlExtractionError",
-                    new Object[] {ae.getCause().getMessage(),ae.getCause()});
+                    new Object[] {ae.getCause().getMessage(),ae.getCause(),ae.getCause().getClass().getName()});
             addError(msg,index);
             crl_iter = new ArrayList().iterator();
         }
@@ -2404,7 +2404,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                     "CertPathReviewer.loadCrlDistPointError",
                     new Object[] {new UntrustedInput(location),
-                                  e.getMessage(),e});
+                                  e.getMessage(),e,e.getClass().getName()});
             throw new CertPathReviewerException(msg);
         }
         return result;

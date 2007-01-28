@@ -1,30 +1,30 @@
 package org.bouncycastle.jce.provider;
 
-public class AnnotatedException 
-    extends Exception
-{
-    private Exception _underlyingException;
+import org.bouncycastle.jce.exception.ExtException;
 
-    AnnotatedException(
-        String string, 
-        Exception e)
+public class AnnotatedException
+    extends Exception
+    implements ExtException
+{
+    private Throwable _underlyingException;
+
+    AnnotatedException(String string, Throwable e)
     {
         super(string);
-        
+
         _underlyingException = e;
     }
-    
-    AnnotatedException(
-        String string)
+
+    AnnotatedException(String string)
     {
         this(string, null);
     }
 
-    Exception getUnderlyingException()
+    Throwable getUnderlyingException()
     {
         return _underlyingException;
     }
-    
+
     public Throwable getCause()
     {
         return _underlyingException;

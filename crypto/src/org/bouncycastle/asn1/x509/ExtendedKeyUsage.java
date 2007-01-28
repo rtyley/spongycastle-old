@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 import java.util.Enumeration;
@@ -69,7 +70,10 @@ public class ExtendedKeyUsage
         while (e.hasMoreElements())
         {
             Object  o = e.nextElement();
-
+            if (!(o instanceof DERObjectIdentifier))
+            {
+                throw new IllegalArgumentException("Only DERObjectIdentifiers allowed in ExtendedKeyUsage.");
+            }
             this.usageTable.put(o, o);
         }
     }
@@ -95,6 +99,21 @@ public class ExtendedKeyUsage
         KeyPurposeId keyPurposeId)
     {
         return (usageTable.get(keyPurposeId) != null);
+    }
+    
+    /**
+     * Returns all extended key usages.
+     * The returned vector contains DERObjectIdentifiers.
+     * @return A vector with all key purposes.
+     */
+    public Vector getUsages()
+    {
+        Vector temp = new Vector();
+        for (Enumeration it = usageTable.elements(); it.hasMoreElements();)
+        {
+            temp.addElement(it.nextElement());
+        }
+        return temp;
     }
 
     public int size()

@@ -159,7 +159,7 @@ public class SignedMailValidator
             // exception reading message
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                     "SignedMailValidator.exceptionReadingMessage",
-                    new Object[] { e.getMessage(), e });
+                    new Object[] { e.getMessage(), e , e.getClass().getName()});
             throw new SignedMailValidatorException(msg, e);
         }
 
@@ -202,7 +202,7 @@ public class SignedMailValidator
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                         "SignedMailValidator.exceptionRetrievingSignerCert",
-                        new Object[] { cse.getMessage(), cse });
+                        new Object[] { cse.getMessage(), cse , cse.getClass().getName()});
                 errors.add(msg);
             }
 
@@ -224,7 +224,7 @@ public class SignedMailValidator
                 {
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                             "SignedMailValidator.exceptionVerifyingSignature",
-                            new Object[] { e.getMessage(), e });
+                            new Object[] { e.getMessage(), e, e.getClass().getName() });
                     errors.add(msg);
                 }
 
@@ -322,7 +322,7 @@ public class SignedMailValidator
                     // cannot create cert path
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                             "SignedMailValidator.exceptionCreateCertPath",
-                            new Object[] { gse.getMessage(), gse });
+                            new Object[] { gse.getMessage(), gse, gse.getClass().getName() });
                     errors.add(msg);
                     results.put(signer, new ValidationResult(null,
                             validSignature, errors, notifications));
@@ -458,7 +458,7 @@ public class SignedMailValidator
         {
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                     "SignedMailValidator.extKeyUsageError", new Object[] {
-                            e.getMessage(), e });
+                            e.getMessage(), e, e.getClass().getName() });
             errors.add(msg);
         }
 
@@ -502,7 +502,7 @@ public class SignedMailValidator
         {
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                     "SignedMailValidator.certGetEmailError", new Object[] {
-                            e.getMessage(), e });
+                            e.getMessage(), e, e.getClass().getName() });
             errors.add(msg);
         }
     }

@@ -24,34 +24,33 @@ import java.util.List;
 public class AttributeCertificateIssuer
     implements CertSelector, Selector
 {
-    final ASN1Encodable  form;
-    
+    final ASN1Encodable form;
+
     /**
-     * @param issuer
+     * Set the issuer directly with the ASN.1 structure.
+     * 
+     * @param issuer The issuer
      */
-    AttributeCertificateIssuer(
-        AttCertIssuer issuer)
+    AttributeCertificateIssuer(AttCertIssuer issuer)
     {
         form = issuer.getIssuer();
     }
 
-    public AttributeCertificateIssuer(
-        X500Principal principal) 
-        throws IOException 
-    {        
+    public AttributeCertificateIssuer(X500Principal principal)
+        throws IOException
+    {
         this(new X509Principal(principal.getEncoded()));
     }
-    
-    public AttributeCertificateIssuer(
-        X509Principal principal) 
-    {        
+
+    public AttributeCertificateIssuer(X509Principal principal)
+    {
         form = new V2Form(new GeneralNames(new DERSequence(new GeneralName(principal))));
     }
-    
+
     private Object[] getNames()
     {
-        GeneralNames    name;
-        
+        GeneralNames name;
+
         if (form instanceof V2Form)
         {
             name = ((V2Form)form).getIssuerName();
@@ -60,18 +59,19 @@ public class AttributeCertificateIssuer
         {
             name = (GeneralNames)form;
         }
-        
-        GeneralName[]   names = name.getNames();
-        
-        List        l = new ArrayList(names.length);
-        
+
+        GeneralName[] names = name.getNames();
+
+        List l = new ArrayList(names.length);
+
         for (int i = 0; i != names.length; i++)
         {
             if (names[i].getTagNo() == GeneralName.directoryName)
             {
                 try
                 {
-                    l.add(new X500Principal(((ASN1Encodable)names[i].getName()).getEncoded()));
+                    l.add(new X500Principal(
+                        ((ASN1Encodable)names[i].getName()).getEncoded()));
                 }
                 catch (IOException e)
                 {
@@ -79,20 +79,21 @@ public class AttributeCertificateIssuer
                 }
             }
         }
-        
+
         return l.toArray(new Object[l.size()]);
     }
-    
+
     /**
-     * Return any principal objects inside the attribute certificate issuer object.
+     * Return any principal objects inside the attribute certificate issuer
+     * object.
      * 
      * @return an array of Principal objects (usually X500Principal)
      */
     public Principal[] getPrincipals()
     {
-        Object[]    p = this.getNames();
-        List        l = new ArrayList();
-        
+        Object[] p = this.getNames();
+        List l = new ArrayList();
+
         for (int i = 0; i != p.length; i++)
         {
             if (p[i] instanceof Principal)
@@ -103,10 +104,10 @@ public class AttributeCertificateIssuer
 
         return (Principal[])l.toArray(new Principal[l.size()]);
     }
-    
+
     private boolean matchesDN(X500Principal subject, GeneralNames targets)
     {
-        GeneralName[]   names = targets.getNames();
+        GeneralName[] names = targets.getNames();
 
         for (int i = 0; i != names.length; i++)
         {
@@ -129,27 +130,21 @@ public class AttributeCertificateIssuer
 
         return false;
     }
-    
-    /* (non-Javadoc)
-     * @see java.security.cert.CertSelector#clone()
-     */
+
     public Object clone()
     {
         return new AttributeCertificateIssuer(AttCertIssuer.getInstance(form));
     }
-    
-    /* (non-Javadoc)
-     * @see java.security.cert.CertSelector#match(java.security.cert.Certificate)
-     */
+
     public boolean match(Certificate cert)
     {
         if (!(cert instanceof X509Certificate))
         {
             return false;
         }
-        
+
         X509Certificate x509Cert = (X509Certificate)cert;
-        
+
         if (form instanceof V2Form)
         {
             V2Form issuer = (V2Form)form;
@@ -158,7 +153,7 @@ public class AttributeCertificateIssuer
                 return issuer.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber())
                     && matchesDN(x509Cert.getIssuerX500Principal(), issuer.getBaseCertificateID().getIssuer());
             }
-            
+
             GeneralNames name = issuer.getIssuerName();
             if (matchesDN(x509Cert.getSubjectX500Principal(), name))
             {

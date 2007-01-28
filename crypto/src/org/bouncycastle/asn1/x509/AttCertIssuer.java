@@ -13,7 +13,7 @@ public class AttCertIssuer
 {
     ASN1Encodable   obj;
     DERObject       choiceObj;
-
+    
     public static AttCertIssuer getInstance(
         Object  obj)
     {
@@ -49,7 +49,8 @@ public class AttCertIssuer
     }
 
     /**
-     * Don't use this one if you are trying to be RFC compliant.
+     * Don't use this one if you are trying to be RFC 3281 compliant.
+     * Use it for v1 attribute certificates only.
      * 
      * @param names our GeneralNames structure
      */
