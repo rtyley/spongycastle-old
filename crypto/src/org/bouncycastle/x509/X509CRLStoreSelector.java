@@ -41,7 +41,7 @@ public class X509CRLStoreSelector
      * <p>
      * You may also set the issuing distribution point criteria if not a missing
      * issuing distribution point should be assumed.
-     *
+     * 
      * @return Returns if the issuing distribution point check is enabled.
      */
     public boolean isIssuingDistributionPointEnabled()
@@ -51,10 +51,9 @@ public class X509CRLStoreSelector
 
     /**
      * Enables or disables the issuing distribution point check.
-     *
-     * @param issuingDistributionPointEnabled
-     *         <code>true</code> to enable the
-     *         issuing distribution point check.
+     * 
+     * @param issuingDistributionPointEnabled <code>true</code> to enable the
+     *            issuing distribution point check.
      */
     public void setIssuingDistributionPointEnabled(
         boolean issuingDistributionPointEnabled)
@@ -68,9 +67,9 @@ public class X509CRLStoreSelector
      * CRLs that would be relevant when checking revocation for the specified
      * attribute certificate. If <code>null</code> is specified, then no such
      * optional information is provided.
-     *
-     * @param attrCert the <code>X509AttributeCertificate</code> being checked (or
-     *             <code>null</code>)
+     * 
+     * @param cert the <code>X509AttributeCertificate</code> being checked (or
+     *            <code>null</code>)
      * @see #getAttrCertificateChecking()
      */
     public void setAttrCertificateChecking(X509AttributeCertificate attrCert)
@@ -80,7 +79,7 @@ public class X509CRLStoreSelector
 
     /**
      * Returns the attribute certificate being checked.
-     *
+     * 
      * @return Returns the attribute certificate being checked.
      * @see #setAttrCertificateChecking(X509AttributeCertificate)
      */
@@ -163,7 +162,7 @@ public class X509CRLStoreSelector
     /**
      * Returns if this selector must match CRLs with the delta CRL indicator
      * extension set. Defaults to <code>false</code>.
-     *
+     * 
      * @return Returns <code>true</code> if only CRLs with the delta CRL
      *         indicator extension are selected.
      */
@@ -178,9 +177,9 @@ public class X509CRLStoreSelector
      * <p>
      * {@link #setCompleteCRLEnabled(boolean)} and
      * {@link #setDeltaCRLIndicatorEnabled(boolean)} excluded each other.
-     *
+     * 
      * @param deltaCRLIndicator <code>true</code> if the delta CRL indicator
-     *                          extension must be in the CRL.
+     *            extension must be in the CRL.
      */
     public void setDeltaCRLIndicatorEnabled(boolean deltaCRLIndicator)
     {
@@ -189,11 +188,11 @@ public class X509CRLStoreSelector
 
     /**
      * Returns an instance of this from a <code>X509CRLSelector</code>.
-     *
+     * 
      * @param selector A <code>X509CRLSelector</code> instance.
      * @return An instance of an <code>X509CRLStoreSelector</code>.
-     * @throws IllegalArgumentException if selector is null or creation
-     *                                  fails.
+     * @exception IllegalArgumentException if selector is null or creation
+     *                fails.
      */
     public static X509CRLStoreSelector getInstance(X509CRLSelector selector)
     {
@@ -219,7 +218,7 @@ public class X509CRLStoreSelector
         cs.setMinCRLNumber(selector.getMinCRL());
         return cs;
     }
-
+    
     public Object clone()
     {
         X509CRLStoreSelector sel = X509CRLStoreSelector.getInstance(this);
@@ -235,7 +234,7 @@ public class X509CRLStoreSelector
     /**
      * If <code>true</code> only complete CRLs are returned. Defaults to
      * <code>false</code>.
-     *
+     * 
      * @return <code>true</code> if only complete CRLs are returned.
      */
     public boolean isCompleteCRLEnabled()
@@ -248,9 +247,9 @@ public class X509CRLStoreSelector
      * <p>
      * {@link #setCompleteCRLEnabled(boolean)} and
      * {@link #setDeltaCRLIndicatorEnabled(boolean)} excluded each other.
-     *
+     * 
      * @param completeCRLEnabled <code>true</code> if only complete CRLs
-     *                           should be returned.
+     *            should be returned.
      */
     public void setCompleteCRLEnabled(boolean completeCRLEnabled)
     {
@@ -259,7 +258,7 @@ public class X509CRLStoreSelector
 
     /**
      * Get the maximum base CRL number. Defaults to <code>null</code>.
-     *
+     * 
      * @return Returns the maximum base CRL number.
      * @see #setMaxBaseCRLNumber(BigInteger)
      */
@@ -275,7 +274,7 @@ public class X509CRLStoreSelector
      * This is only meaningful for delta CRLs. Complete CRLs must have a CRL
      * number which is greater or equal than the base number of the
      * corresponding CRL.
-     *
+     * 
      * @param maxBaseCRLNumber The maximum base CRL number to set.
      */
     public void setMaxBaseCRLNumber(BigInteger maxBaseCRLNumber)
@@ -291,7 +290,7 @@ public class X509CRLStoreSelector
      * <p>
      * The criteria must be enable with
      * {@link #setIssuingDistributionPointEnabled(boolean)}.
-     *
+     * 
      * @return Returns the issuing distribution point.
      * @see #setIssuingDistributionPoint(byte[])
      */
@@ -313,9 +312,9 @@ public class X509CRLStoreSelector
      * <p>
      * You must also enable or disable this criteria with
      * {@link #setIssuingDistributionPointEnabled(boolean)}.
-     *
+     * 
      * @param issuingDistributionPoint The issuing distribution point to set.
-     *                                 This is the DER encoded OCTET STRING extension value.
+     *            This is the DER encoded OCTET STRING extension value.
      * @see #getIssuingDistributionPoint()
      */
     public void setIssuingDistributionPoint(byte[] issuingDistributionPoint)

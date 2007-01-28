@@ -157,6 +157,21 @@ public class X509Extensions
      */
     public static final DERObjectIdentifier QCStatements = new DERObjectIdentifier("1.3.6.1.5.5.7.1.3");
 
+    /**
+     * Audit identity extension in attribute certificates.
+     */
+    public static final DERObjectIdentifier AuditIdentity = new DERObjectIdentifier("1.3.6.1.5.5.7.1.4");
+    
+    /**
+     * NoRevAvail extension in attribute certificates.
+     */
+    public static final DERObjectIdentifier NoRevAvail = new DERObjectIdentifier("2.5.29.56");
+
+    /**
+     * TargetInformation extension in attribute certificates.
+     */
+    public static final DERObjectIdentifier TargetInformation = new DERObjectIdentifier("2.5.29.55");
+    
     private Hashtable               extensions = new Hashtable();
     private Vector                  ordering = new Vector();
 
