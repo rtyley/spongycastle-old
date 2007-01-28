@@ -61,8 +61,8 @@ import java.util.StringTokenizer;
  */
 public class PEMReader extends BufferedReader
 {
-    private PasswordFinder  pFinder;
-    private String          provider;
+    private final PasswordFinder    pFinder;
+    private final String            provider;
 
     /**
      * Create a new PEMReader
@@ -407,53 +407,6 @@ public class PEMReader extends BufferedReader
         }
     }
 
-    private SecretKey getKey(
-        String  algorithm,
-        int     keyLength,
-        byte[]  salt)
-        throws IOException
-    {
-        return getKey(algorithm, keyLength, salt, false);
-    }
-
-
-    /**
-     * create the secret key needed for this object, fetching the password
-     */
-    private SecretKey getKey(
-        String  algorithm,
-        int     keyLength,
-        byte[]  salt,
-        boolean des2)
-        throws IOException
-    {
-        if (pFinder == null)
-        {
-            throw new IOException("No password finder specified, but a password is required");
-        }
-
-        char[]      password = pFinder.getPassword();
-
-        if (password == null)
-        {
-            throw new IOException("Password is null, but a password is required");
-        }
-        
-        OpenSSLPBEParametersGenerator   pGen = new OpenSSLPBEParametersGenerator();
-
-        pGen.init(PBEParametersGenerator.PKCS5PasswordToBytes(password), salt);
-
-        KeyParameter keyParam;
-        keyParam = (KeyParameter) pGen.generateDerivedParameters(keyLength * 8);
-        byte[] key = keyParam.getKey();
-        if (des2 && key.length >= 24)
-        {
-            // For DES2, we must copy first 8 bytes into the last 8 bytes.
-            System.arraycopy(key, 0, key, 16, 8);
-        }
-        return new javax.crypto.spec.SecretKeySpec(key, algorithm);
-    }
-
     /**
      * Read a Key Pair
      */
@@ -490,134 +443,29 @@ public class PEMReader extends BufferedReader
         //
         // extract the key
         //
-        byte[]  keyBytes = null;
+        byte[] keyBytes = Base64.decode(buf.toString());
 
         if (isEncrypted)
         {
-            StringTokenizer        tknz = new StringTokenizer(dekInfo, ",");
-            String                 encoding = tknz.nextToken();
-            byte[]                 iv = Hex.decode(tknz.nextToken());
-            AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
-            String                 alg;
-            String                 blockMode = "CBC";
-            String                 padding = "PKCS5Padding";
-            Key                    sKey;
-
-
-            // Figure out block mode and padding.
-            if (encoding.endsWith("-CFB"))
+            if (pFinder == null)
             {
-                blockMode = "CFB";
-                padding = "NoPadding";
-            }
-            if (encoding.endsWith("-ECB") ||
-                "DES-EDE".equals(encoding) ||
-                "DES-EDE3".equals(encoding))
-            {
-                // ECB is actually the default (though seldom used) when OpenSSL
-                // uses DES-EDE (des2) or DES-EDE3 (des3).
-                blockMode = "ECB";
-                paramSpec = null;
-            }
-            if (encoding.endsWith("-OFB"))
-            {
-                blockMode = "OFB";
-                padding = "NoPadding";
+                throw new IOException("No password finder specified, but a password is required");
             }
 
+            char[] password = pFinder.getPassword();
 
-            // Figure out algorithm and key size.
-            if (encoding.startsWith("DES-EDE"))
+            if (password == null)
             {
-                alg = "DESede";
-                // "DES-EDE" is actually des2 in OpenSSL-speak!
-                // "DES-EDE3" is des3.
-                boolean des2 = !encoding.startsWith("DES-EDE3");
-                sKey = getKey(alg, 24, iv, des2);
-            }
-            else if (encoding.startsWith("DES-"))
-            {
-                alg = "DES";
-                sKey = getKey(alg, 8, iv);
-            }
-            else if (encoding.startsWith("BF-"))
-            {
-                alg = "Blowfish";
-                sKey = getKey(alg, 16, iv);
-            }
-            else if (encoding.startsWith("RC2-"))
-            {
-                alg = "RC2";
-                int keyBits = 128;
-                if (encoding.startsWith("RC2-40-"))
-                {
-                    keyBits = 40;
-                }
-                else if (encoding.startsWith("RC2-64-"))
-                {
-                    keyBits = 64;
-                }
-                sKey = getKey(alg, keyBits / 8, iv);
-                if (paramSpec == null) // ECB block mode
-                {
-                    paramSpec = new RC2ParameterSpec(keyBits);
-                }
-                else
-                {
-                    paramSpec = new RC2ParameterSpec(keyBits, iv);
-                }
-            }
-            else if (encoding.startsWith("AES-"))
-            {
-                alg = "AES";
-                // TODO Should this be handled automatically by getKey(AES)/OpenSSL?
-                byte[] salt = iv;
-                if (salt.length > 8)
-                {
-                    salt = new byte[8];
-                    System.arraycopy(iv, 0, salt, 0, 8);
-                }
-
-                int keyBits;
-                if (encoding.startsWith("AES-128-"))
-                {
-                    keyBits = 128;
-                }
-                else if (encoding.startsWith("AES-192-"))
-                {
-                    keyBits = 192;
-                }
-                else if (encoding.startsWith("AES-256-"))
-                {
-                    keyBits = 256;
-                }
-                else
-                {
-                    throw new IOException("unknown AES encryption with private key");
-                }
-                sKey = getKey("AES", keyBits / 8, salt);
-            }
-            else
-            {
-                throw new IOException("unknown encryption with private key");
+                throw new IOException("Password is null, but a password is required");
             }
 
-            String transformation = alg + "/" + blockMode + "/" + padding;
-            Cipher c = Cipher.getInstance(transformation, provider);
-            if (paramSpec == null) // ECB block mode
-            {
-                c.init(Cipher.DECRYPT_MODE, sKey);
-            }
-            else
-            {
-                c.init(Cipher.DECRYPT_MODE, sKey, paramSpec);
-            }
-            keyBytes = c.doFinal(Base64.decode(buf.toString()));
+            StringTokenizer tknz = new StringTokenizer(dekInfo, ",");
+            String          dekAlgName = tknz.nextToken();
+            byte[]          iv = Hex.decode(tknz.nextToken());
+
+            keyBytes = PEMUtilities.crypt(false, provider, keyBytes, password, dekAlgName, iv);
         }
-        else
-        {
-            keyBytes = Base64.decode(buf.toString());
-        }
+
 
         KeySpec                 pubSpec, privSpec;
         ByteArrayInputStream    bIn = new ByteArrayInputStream(keyBytes);
