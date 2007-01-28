@@ -6,7 +6,7 @@ import org.bouncycastle.crypto.Digest;
  * Random generation based on the digest with counter. Calling addSeedMaterial will
  * always increase the entropy of the hash.
  * <p>
- * Internal access to the digest is syncrhonized so a single one of these can be shared.
+ * Internal access to the digest is synchronized so a single one of these can be shared.
  * </p>
  */
 public class DigestRandomGenerator
