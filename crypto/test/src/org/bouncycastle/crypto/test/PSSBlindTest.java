@@ -267,7 +267,7 @@ public class PSSBlindTest
 
         if (!signer.verifySignature(s))
         {
-        	fail("test " + id + " failed PSSSigner verification");
+            fail("test " + id + " failed PSSSigner verification");
         }
     }
 
@@ -335,7 +335,7 @@ public class PSSBlindTest
         RSABlindingFactorGenerator blindFactorGen = new RSABlindingFactorGenerator();
         RSABlindingEngine blindingEngine = new RSABlindingEngine();
         PSSSigner blindSigner = new PSSSigner(blindingEngine, new SHA1Digest(), 20);
-        PSSSigner				 pssEng = new PSSSigner(new RSAEngine(), new SHA1Digest(), 20);
+        PSSSigner                 pssEng = new PSSSigner(new RSAEngine(), new SHA1Digest(), 20);
         
         int failed = 0;
         byte[] data = new byte[DATA_LENGTH];
@@ -346,16 +346,17 @@ public class PSSBlindTest
         RSAKeyParameters[] kprv ={prv1, prv2, prv4, prv8, prv9};
         RSAKeyParameters[] kpub ={pub1, pub2, pub4, pub8, pub9};
 
-        for (int j = 0, i = 0; j < NUM_TESTS; j++, i++)
+        int i = 0;
+        for (int j = 0; j < NUM_TESTS; j++, i++)
         {
-        	if (i == kprv.length)
+            if (i == kprv.length)
             {
                 i = 0;
             }
 
             if (!isProcessingOkay(kpub[i], kprv[i], data, random))
             {
-            	failed++;
+                failed++;
             }
         }
 
@@ -376,15 +377,15 @@ public class PSSBlindTest
 
         for (int k = 0; k < NUM_TESTS_WITH_KEY_GENERATION; k++)
         {
-        	AsymmetricCipherKeyPair pair = pGen.generateKeyPair();
+            AsymmetricCipherKeyPair pair = pGen.generateKeyPair();
 
-	        for (int j = 0; j < NUM_TESTS; j++)
-	        {
+            for (int j = 0; j < NUM_TESTS; j++)
+            {
                 if (!isProcessingOkay((RSAKeyParameters)pair.getPublic(), (RSAKeyParameters)pair.getPrivate(), data, random))
                 {
                     failed++;
                 }
-	        }
+            }
 
         }
         

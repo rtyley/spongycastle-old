@@ -23,7 +23,9 @@ class DHParametersHelper
 
             if (p.isProbablePrime(certainty)
                 && (certainty <= 2 || q.isProbablePrime(certainty)))
+            {
                     break;
+            }
         }
 
         return new BigInteger[] { p, q };
