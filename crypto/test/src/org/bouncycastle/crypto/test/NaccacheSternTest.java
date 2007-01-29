@@ -146,9 +146,8 @@ public class NaccacheSternTest
         }
 
         // specify key generation parameters
-        NaccacheSternKeyGenerationParameters genParam;
- 
-        genParam = new NaccacheSternKeyGenerationParameters(new SecureRandom(), 768, 8, 30);
+        NaccacheSternKeyGenerationParameters genParam
+            = new NaccacheSternKeyGenerationParameters(new SecureRandom(), 768, 8, 30, debug);
 
         // Initialize Key generator and generate key pair
         NaccacheSternKeyPairGenerator pGen = new NaccacheSternKeyPairGenerator();
