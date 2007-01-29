@@ -108,7 +108,7 @@ public class AttributeCertificateHolder
      * <li>1 - publicKeyCert - A hash of the public key certificate of the
      * holder must be passed.
      * <li>2 - otherObjectDigest - A hash of some other object type must be
-     * passed. <code>otherObjectTypeID</code> muts not be empty.
+     * passed. <code>otherObjectTypeID</code> must not be empty.
      * </ul>
      * <p>
      * This cannot be used if a v1 attribute certificate is used.
