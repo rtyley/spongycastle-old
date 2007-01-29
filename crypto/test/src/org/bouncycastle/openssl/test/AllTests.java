@@ -14,8 +14,12 @@ public class AllTests
     {   
         Security.addProvider(new BouncyCastleProvider());
         
-        org.bouncycastle.util.test.Test[] tests = new org.bouncycastle.util.test.Test[] { new ReaderTest() };
-        
+        org.bouncycastle.util.test.Test[] tests = new org.bouncycastle.util.test.Test[]
+        {
+            new ReaderTest(),
+            new WriterTest()
+        };
+
         for (int i = 0; i != tests.length; i++)
         {
             SimpleTestResult  result = (SimpleTestResult)tests[i].perform();
