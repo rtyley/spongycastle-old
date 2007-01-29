@@ -110,7 +110,7 @@ public class ObjectDigestInfo
         this.objectDigest = new DERBitString(objectDigest);
     }
 
-    public ObjectDigestInfo(
+    private ObjectDigestInfo(
         ASN1Sequence seq)
     {
         if (seq.size() > 4 || seq.size() < 3)
