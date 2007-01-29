@@ -189,7 +189,7 @@ public class Holder
     }
 
     /**
-     * Returns the entityName vor an v2 attribute certificate or the subjectName
+     * Returns the entityName for an v2 attribute certificate or the subjectName
      * for an v1 attribute certificate.
      * 
      * @return The entityname or subjectname.
