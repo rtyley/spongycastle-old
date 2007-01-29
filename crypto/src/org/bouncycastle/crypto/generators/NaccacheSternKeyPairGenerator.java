@@ -98,34 +98,47 @@ public class NaccacheSternKeyPairGenerator
         {
             System.out.println("generating p and q");
         }
+
+        BigInteger _2au = a.multiply(u).shiftLeft(1);
+        BigInteger _2bv = b.multiply(v).shiftLeft(1);
+
         for (;;)
         {
-            p_ = generatePrime(24, certainty, rand);
-            q_ = generatePrime(24, certainty, rand);
-            p = generateP(a, u, p_);
-            q = generateP(b, v, q_);
             tries++;
-            if (p_.equals(q_))
+
+            p_ = generatePrime(24, certainty, rand);
+
+            p = p_.multiply(_2au).add(BigInteger.ONE);
+
+            if (!p.isProbablePrime(certainty))
             {
-                // System.out.println("p_ == q_ : " + p_ + q_);
                 continue;
             }
+
+            for (;;)
+            {
+                q_ = generatePrime(24, certainty, rand);
+
+                if (p_.equals(q_))
+                {
+                    continue;
+                }
+
+                q = q_.multiply(_2bv).add(BigInteger.ONE);
+
+                if (q.isProbablePrime(certainty))
+                {
+                    break;
+                }
+            }
+
             if (!sigma.gcd(p_.multiply(q_)).equals(ONE))
             {
                 // System.out.println("sigma.gcd(p_.mult(q_)) != 1!\n p_: " + p_
                 // +"\n q_: "+ q_ );
                 continue;
             }
-            if (!p.isProbablePrime(certainty))
-            {
-                // System.out.println("p is not prime: " + p);
-                continue;
-            }
-            if (!q.isProbablePrime(certainty))
-            {
-                // System.out.println("q is not prime: " + q);
-                continue;
-            }
+
             if (p.multiply(q).bitLength() < strength)
             {
                 if (debug)
@@ -158,11 +171,13 @@ public class NaccacheSternKeyPairGenerator
             for (int ind = 0; ind != smallPrimes.size(); ind++)
             {
                 BigInteger i = (BigInteger)smallPrimes.elementAt(ind);
+                BigInteger e = phi_n.divide(i);
+
                 for (;;)
                 {
                     tries++;
                     g = new BigInteger(strength, certainty, rand);
-                    if (g.modPow(phi_n.divide(i), n).equals(ONE))
+                    if (g.modPow(e, n).equals(ONE))
                     {
                         continue;
                     }
@@ -262,13 +277,6 @@ public class NaccacheSternKeyPairGenerator
 
         return new AsymmetricCipherKeyPair(new NaccacheSternKeyParameters(false, g, n, sigma.bitLength()),
                         new NaccacheSternPrivateKeyParameters(g, n, sigma.bitLength(), smallPrimes, phi_n));
-    }
-
-    private static BigInteger generateP(BigInteger a, BigInteger u,
-            BigInteger p_)
-    {
-        return (((p_.multiply(BigInteger.valueOf(2))).multiply(a)).multiply(u))
-                .add(ONE);
     }
 
     private static BigInteger generatePrime(
