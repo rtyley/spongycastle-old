@@ -36,6 +36,12 @@ public class NaccacheSternTest
 
     static final NaccacheSternEngine decryptEng = new NaccacheSternEngine();
 
+    static
+    {
+        cryptEng.setDebug(debug);
+        decryptEng.setDebug(debug);
+    }
+
     // Values from NaccacheStern paper
     static final BigInteger a = BigInteger.valueOf(101);
 
