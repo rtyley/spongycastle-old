@@ -122,7 +122,7 @@ public class DSASigner
 
     private BigInteger calculateE(BigInteger n, byte[] message)
     {
-        if (n.bitLength() > message.length * 8)
+        if (n.bitLength() >= message.length * 8)
         {
             return new BigInteger(1, message);
         }
