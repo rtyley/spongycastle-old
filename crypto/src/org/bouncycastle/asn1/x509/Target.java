@@ -26,10 +26,11 @@ public class Target
     extends ASN1Encodable
     implements ASN1Choice
 {
+    public static final int targetName = 0;
+    public static final int targetGroup = 1;
 
-    private GeneralName targetName;
-
-    private GeneralName targetGroup;
+    private GeneralName targName;
+    private GeneralName targGroup;
 
     /**
      * Creates an instance of a Target from the given object.
@@ -49,7 +50,7 @@ public class Target
         }
         else if (obj instanceof ASN1TaggedObject)
         {
-            return new Target((ASN1TaggedObject) obj);
+            return new Target((ASN1TaggedObject)obj);
         }
 
         throw new IllegalArgumentException("unknown object in factory: "
@@ -62,15 +63,15 @@ public class Target
      * @param tagObj The tagged object.
      * @throws IllegalArgumentException if the encoding is wrong.
      */
-    public Target(ASN1TaggedObject tagObj)
+    private Target(ASN1TaggedObject tagObj)
     {
         switch (tagObj.getTagNo())
         {
-        case 0:     // GeneralName is already a choice so explicit
-            targetName = GeneralName.getInstance(tagObj, true);
+        case targetName:     // GeneralName is already a choice so explicit
+            targName = GeneralName.getInstance(tagObj, true);
             break;
-        case 1:
-            targetGroup = GeneralName.getInstance(tagObj, true);
+        case targetGroup:
+            targGroup = GeneralName.getInstance(tagObj, true);
             break;
         default:
             throw new IllegalArgumentException("unknown tag: " + tagObj.getTagNo());
@@ -81,27 +82,14 @@ public class Target
      * Constructor from given details.
      * <p>
      * Exactly one of the parameters must be not <code>null</code>.
-     * 
-     * @param targetName The allowed target name.
-     * 
-     * @param targetGroup The allowed target group.
-     * @throws IllegalArgumentException if both parameters are <code>null</code>.
+     *
+     * @param type the choice type to apply to the name.
+     * @param name the general name.
+     * @throws IllegalArgumentException if type is invalid.
      */
-    public Target(GeneralName targetName, GeneralName targetGroup)
+    public Target(int type, GeneralName name)
     {
-        if (targetGroup == null && targetName == null)
-        {
-            throw new IllegalArgumentException(
-                "All parameters are null for Target.");
-        }
-        if (targetName != null)
-        {
-            this.targetName = targetName;
-        }
-        if (targetGroup != null)
-        {
-            this.targetGroup = targetGroup;
-        }
+        this(new DERTaggedObject(type, name));
     }
 
     /**
@@ -109,7 +97,7 @@ public class Target
      */
     public GeneralName getTargetGroup()
     {
-        return targetGroup;
+        return targGroup;
     }
 
     /**
@@ -117,7 +105,7 @@ public class Target
      */
     public GeneralName getTargetName()
     {
-        return targetName;
+        return targName;
     }
 
     /**
@@ -138,13 +126,13 @@ public class Target
     public DERObject toASN1Object()
     {
         // GeneralName is a choice already so most be explicitly tagged
-        if (targetName != null)
+        if (targName != null)
         {
-            return new DERTaggedObject(true, 0, targetName);
+            return new DERTaggedObject(true, 0, targName);
         }
         else
         {
-            return new DERTaggedObject(true, 1, targetGroup);
+            return new DERTaggedObject(true, 1, targGroup);
         }
     }
 }

@@ -57,7 +57,7 @@ public class TargetInformation
      * @throws IllegalArgumentException if the sequence does not contain
      *             correctly encoded Targets elements.
      */
-    public TargetInformation(ASN1Sequence seq)
+    private TargetInformation(ASN1Sequence seq)
     {
         Enumeration e = seq.getObjects();
         _targets = new Vector(seq.size());
