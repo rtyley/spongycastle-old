@@ -101,16 +101,16 @@ public class PersonalData
             switch (tag)
             {
                 case 0:
-                    nameDistiguisher = DERInteger.getInstance(o, true).getValue();
+                    nameDistiguisher = DERInteger.getInstance(o, false).getValue();
                     break;
                 case 1:
-                    dateOfBirth = DERGeneralizedTime.getInstance(o, true);
+                    dateOfBirth = DERGeneralizedTime.getInstance(o, false);
                     break;
                 case 2:
                     placeOfBirth = DirectoryString.getInstance(o, true);
                     break;
                 case 3:
-                    gender = DERPrintableString.getInstance(o, true);
+                    gender = DERPrintableString.getInstance(o, false);
                     break;
                 case 4:
                     postalAddress = DirectoryString.getInstance(o, true);
@@ -167,11 +167,11 @@ public class PersonalData
         vec.add(nameOrPseudonym);
         if (nameDistiguisher != null)
         {
-            vec.add(new DERTaggedObject(true, 0, new DERInteger(nameDistiguisher)));
+            vec.add(new DERTaggedObject(false, 0, new DERInteger(nameDistiguisher)));
         }
         if (dateOfBirth != null)
         {
-            vec.add(new DERTaggedObject(true, 1, dateOfBirth));
+            vec.add(new DERTaggedObject(false, 1, dateOfBirth));
         }
         if (placeOfBirth != null)
         {
@@ -179,7 +179,7 @@ public class PersonalData
         }
         if (gender != null)
         {
-            vec.add(new DERTaggedObject(true, 3, gender));
+            vec.add(new DERTaggedObject(false, 3, gender));
         }
         if (postalAddress != null)
         {
