@@ -145,7 +145,7 @@ public class Procuration
     public Procuration(String country, DirectoryString typeOfSubstitution,
                        GeneralName thirdPerson, IssuerSerial certRef)
     {
-        this.country = new DERPrintableString(country);
+        this.country = new DERPrintableString(country, true);
         this.typeOfSubstitution = typeOfSubstitution;
         this.thirdPerson = thirdPerson;
         this.certRef = certRef;
