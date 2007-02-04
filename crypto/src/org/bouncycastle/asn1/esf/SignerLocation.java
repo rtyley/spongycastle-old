@@ -1,6 +1,12 @@
 package org.bouncycastle.asn1.esf;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERUTF8String;
 
 import java.util.Enumeration;
 
@@ -41,7 +47,14 @@ public class SignerLocation
                 this.localityName = DERUTF8String.getInstance(o, true);
                 break;
             case 2:
-                this.postalAddress = ASN1Sequence.getInstance(o, true);
+                if (o.isExplicit())
+                {
+                    this.postalAddress = ASN1Sequence.getInstance(o, true);
+                }
+                else    // handle erroneous implicitly tagged sequences
+                {
+                    this.postalAddress = ASN1Sequence.getInstance(o, false);
+                }
                 if (postalAddress != null && postalAddress.size() > 6)
                 {
                     throw new IllegalArgumentException("postal address must contain less than 6 strings");
