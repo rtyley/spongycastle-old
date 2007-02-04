@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.x500;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
@@ -52,6 +53,16 @@ public class DirectoryString
         throw new IllegalArgumentException("illegal object in getInstance");
     }
 
+    public static DirectoryString getInstance(ASN1TaggedObject o, boolean explicit)
+    {
+        if (!explicit)
+        {
+            throw new IllegalArgumentException("choice item must be explicitly tagged");
+        }
+
+        return getInstance(o.getObject());
+    }
+
     private DirectoryString(
         DERT61String string)
     {
@@ -80,6 +91,11 @@ public class DirectoryString
         DERBMPString string)
     {
         this.string = string;
+    }
+
+    public DirectoryString(String string)
+    {
+        this.string = new DERUTF8String(string);
     }
 
     public String getString()
