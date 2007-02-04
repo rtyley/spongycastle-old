@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DEREncodableVector;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
@@ -52,11 +52,11 @@ public class Targets
     {
         if (obj instanceof Targets)
         {
-            return (Targets) obj;
+            return (Targets)obj;
         }
         else if (obj instanceof ASN1Sequence)
         {
-            return new Targets((ASN1Sequence) obj);
+            return new Targets((ASN1Sequence)obj);
         }
 
         throw new IllegalArgumentException("unknown object in factory: "
@@ -70,7 +70,7 @@ public class Targets
      * @throws IllegalArgumentException if the contents of the sequence are
      *             invalid.
      */
-    public Targets(ASN1Sequence targets)
+    private Targets(ASN1Sequence targets)
     {
         _targets = new Vector();
         // check contents
@@ -95,13 +95,7 @@ public class Targets
         _targets = new Vector();
         for (Enumeration e = targets.elements(); e.hasMoreElements();)
         {
-            Object o = e.nextElement();
-            if (!(o instanceof Target))
-            {
-                throw new IllegalArgumentException(
-                    "Content of vector must be a Target instance.");
-            }
-            _targets.addElement(o);
+            _targets.addElement(Target.getInstance(e.nextElement()));
         }
     }
 
@@ -135,7 +129,7 @@ public class Targets
      */
     public DERObject toASN1Object()
     {
-        DEREncodableVector vec = new DEREncodableVector();
+        ASN1EncodableVector vec = new ASN1EncodableVector();
         for (Enumeration e = _targets.elements(); e.hasMoreElements();)
         {
             Object o = e.nextElement();
