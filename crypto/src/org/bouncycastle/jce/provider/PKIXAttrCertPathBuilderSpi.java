@@ -58,7 +58,7 @@ public class PKIXAttrCertPathBuilderSpi
                             + ".");
         }
 
-        ExtendedPKIXBuilderParameters pkixParams = null;
+        ExtendedPKIXBuilderParameters pkixParams;
         if (params instanceof ExtendedPKIXBuilderParameters)
         {
             pkixParams = (ExtendedPKIXBuilderParameters) params;
@@ -114,12 +114,12 @@ public class PKIXAttrCertPathBuilderSpi
             Set issuers = new HashSet();
             for (int i = 0; i < principals.length; i++)
             {
-                if (principals[i] instanceof X500Principal)
-                {
-                    selector.setSubject((X500Principal) principals[i]);
-                }
                 try
                 {
+                    if (principals[i] instanceof X500Principal)
+                    {
+                        selector.setSubject(((X500Principal)principals[i]).getEncoded());
+                    }
                     issuers.addAll(CertPathValidatorUtilities
                         .findCertificates((Selector) selector, pkixParams
                             .getStores()));
@@ -130,6 +130,12 @@ public class PKIXAttrCertPathBuilderSpi
                         "Public key certificate for attribute certificate cannot be searched.",
                         e);
                 }
+                catch (IOException e)
+                {
+                    throw new ExtCertPathBuilderException(
+                        "cannot encode X500Proncipal.",
+                        e);
+                }
             }
             if (issuers.isEmpty())
             {
@@ -137,7 +143,7 @@ public class PKIXAttrCertPathBuilderSpi
                     "Public key certificate for attribute certificate cannot be found.");
             }
             Iterator it = issuers.iterator();
-            while (it.hasNext() && result != null)
+            while (it.hasNext() && result == null)
             {
                 result = build(cert, (X509Certificate)it.next(), pkixParams, certPathList);
             }
@@ -210,8 +216,8 @@ public class PKIXAttrCertPathBuilderSpi
             // check wether the issuer of <tbvCert> is a TrustAnchor
             if (findTrustAnchor(tbvCert, pkixParams.getTrustAnchors()) != null)
             {
-                CertPath certPath = null;
-                PKIXCertPathValidatorResult result = null;
+                CertPath certPath;
+                PKIXCertPathValidatorResult result;
                 try
                 {
                     certPath = cFact.generateCertPath(tbvPath);
@@ -475,7 +481,7 @@ public class PKIXAttrCertPathBuilderSpi
         AnnotatedException lastException = null;
         boolean issuerCertFound = false;
 
-        X509Certificate issuer = null;
+        X509Certificate issuer;
         while (iter.hasNext())
         {
             issuer = (X509Certificate) iter.next();
