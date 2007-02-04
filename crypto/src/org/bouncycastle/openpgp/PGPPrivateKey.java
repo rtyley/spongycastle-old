@@ -10,8 +10,15 @@ public class PGPPrivateKey
 {
     private long          keyID;
     private PrivateKey    privateKey;
-    
-    PGPPrivateKey(
+
+    /**
+     * Create a PGPPrivateKey from a regular private key and the keyID of its associated
+     * public key.
+     *
+     * @param privateKey private key tu use.
+     * @param keyID keyID of the corresponding public key.
+     */
+    public PGPPrivateKey(
         PrivateKey        privateKey,
         long              keyID)
     {
