@@ -19,6 +19,7 @@ import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CertStoreSelector;
 
 import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -415,12 +416,12 @@ class RFC3281CertPathUtilities
             Principal[] principals = attrCert.getHolder().getIssuer();
             for (int i = 0; i < principals.length; i++)
             {
-                if (principals[i] instanceof X500Principal)
-                {
-                    selector.setIssuer((X500Principal) principals[i]);
-                }
                 try
                 {
+                    if (principals[i] instanceof X500Principal)
+                    {
+                        selector.setIssuer(((X500Principal)principals[i]).getEncoded());
+                    }
                     holderPKCs.addAll(CertPathValidatorUtilities
                         .findCertificates((Selector) selector, pkixParams
                             .getStores()));
@@ -429,6 +430,12 @@ class RFC3281CertPathUtilities
                 {
                     throw new ExtCertPathValidatorException(
                         "Public key certificate for attribute certificate cannot be searched.",
+                        e);
+                }
+                catch (IOException e)
+                {
+                    throw new ExtCertPathValidatorException(
+                        "Unable to encode X500 principal.",
                         e);
                 }
             }
@@ -444,12 +451,12 @@ class RFC3281CertPathUtilities
             Principal[] principals = attrCert.getHolder().getEntityNames();
             for (int i = 0; i < principals.length; i++)
             {
-                if (principals[i] instanceof X500Principal)
-                {
-                    selector.setIssuer((X500Principal) principals[i]);
-                }
                 try
                 {
+                    if (principals[i] instanceof X500Principal)
+                    {
+                        selector.setIssuer(((X500Principal)principals[i]).getEncoded());
+                    }
                     holderPKCs.addAll(CertPathValidatorUtilities
                         .findCertificates((Selector) selector, pkixParams
                             .getStores()));
@@ -458,6 +465,12 @@ class RFC3281CertPathUtilities
                 {
                     throw new ExtCertPathValidatorException(
                         "Public key certificate for attribute certificate cannot be searched.",
+                        e);
+                }
+                catch (IOException e)
+                {
+                    throw new ExtCertPathValidatorException(
+                        "Unable to encode X500 principal.",
                         e);
                 }
             }

@@ -1248,7 +1248,15 @@ public class CertPathValidatorUtilities
         Iterator it = issuers.iterator();
         while (it.hasNext())
         {
-            selector.addIssuer((X500Principal) it.next());
+            try
+            {
+                selector.addIssuerName(((X500Principal)it.next()).getEncoded());
+            }
+            catch (IOException ex)
+            {
+                throw new AnnotatedException(
+                    "Cannot decode CRL issuer information.", ex);
+            }
         }
     }
 
