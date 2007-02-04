@@ -1480,11 +1480,11 @@ public class CertPathValidatorUtilities
                     DERGeneralizedTime dateOfCertgen = null;
                     try
                     {
-//                        dateOfCertgen = DERGeneralizedTime
-//                            .getInstance(((X509Certificate) certPath
-//                                .getCertificates().get(index - 1))
-//                                .getExtensionValue(ISISMTTObjectIdentifiers.id_isismtt_at_dateOfCertGen
-//                                    .getId()));
+                        dateOfCertgen = DERGeneralizedTime
+                            .getInstance(((X509Certificate) certPath
+                                .getCertificates().get(index - 1))
+                                .getExtensionValue(ISISMTTObjectIdentifiers.id_isismtt_at_dateOfCertGen
+                                    .getId()));
                     }
                     catch (IllegalArgumentException e)
                     {
