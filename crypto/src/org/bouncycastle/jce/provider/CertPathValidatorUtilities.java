@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLNumber;
@@ -1023,7 +1024,7 @@ public class CertPathValidatorUtilities
      * Return a Collection of all certificates found in the CertStore's that are
      * matching the certSelect criteriums.
      * 
-     * @param certSelector a {@link CertSelector CertSelector} object that will
+     * @param certSelect a {@link CertSelector CertSelector} object that will
      *            be used to select the certificates
      * @param certStores a List containing only {@link CertStore CertStore}
      *            objects. These are used to search for certificates
@@ -1062,7 +1063,7 @@ public class CertPathValidatorUtilities
      * Return a Collection of all certificates or attribute certificates found
      * in the X509Store's that are matching the certSelect criteriums.
      * 
-     * @param certSelector a {@link Selector} object that will be used to select
+     * @param certSelect a {@link Selector} object that will be used to select
      *            the certificates
      * @param certStores a List containing only {@link X509Store} objects. These
      *            are used to search for certificates.
