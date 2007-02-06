@@ -55,7 +55,7 @@ public abstract class ECCurve
         /**
          * Decode a point on this curve from its ASN.1 encoding. The different
          * encodings are taken account of, including point compression for
-         * <code>F<sub>p</sub><code> (X9.62 s 4.2.1 pg 17).
+         * <code>F<sub>p</sub></code> (X9.62 s 4.2.1 pg 17).
          * @return The decoded point.
          */
         public ECPoint decodePoint(byte[] encoded)
