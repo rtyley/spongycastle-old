@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.isismtt.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
@@ -11,10 +12,8 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.x500.DirectoryString;
 
 import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * Professions, specializations, disciplines, fields of activity, etc.
@@ -151,13 +150,13 @@ public class ProfessionInfo extends ASN1Encodable
 
     private NamingAuthority namingAuthority;
 
-    private Vector professionItems;
+    private ASN1Sequence professionItems;
 
-    private Vector professionOIDs;
+    private ASN1Sequence professionOIDs;
 
     private DERPrintableString registrationNumber;
 
-    private DEROctetString addProfessionInfo;
+    private ASN1OctetString addProfessionInfo;
 
     public static ProfessionInfo getInstance(Object obj)
     {
@@ -214,31 +213,23 @@ public class ProfessionInfo extends ASN1Encodable
             namingAuthority = NamingAuthority.getInstance((ASN1TaggedObject)o, true);
             o = (DEREncodable)e.nextElement();
         }
-        Enumeration items = ((DERSequence)o).getObjects();
-        professionItems = new Vector();
-        while (items.hasMoreElements())
-        {
-            professionItems.addElement(DirectoryString.getInstance(items.nextElement()));
-        }
+
+        professionItems = ASN1Sequence.getInstance(o);
+
         if (e.hasMoreElements())
         {
             o = (DEREncodable)e.nextElement();
-            if (o instanceof DERSequence)
+            if (o instanceof ASN1Sequence)
             {
-                professionOIDs = new Vector();
-                Enumeration oids = ((DERSequence)o).getObjects();
-                while (oids.hasMoreElements())
-                {
-                    professionOIDs.addElement(oids.nextElement());
-                }
+                professionOIDs = ASN1Sequence.getInstance(o);
             }
             else if (o instanceof DERPrintableString)
             {
                 registrationNumber = DERPrintableString.getInstance(o);
             }
-            else if (o instanceof DEROctetString)
+            else if (o instanceof ASN1OctetString)
             {
-                addProfessionInfo = (DEROctetString)o;
+                addProfessionInfo = ASN1OctetString.getInstance(o);
             }
             else
             {
@@ -287,30 +278,18 @@ public class ProfessionInfo extends ASN1Encodable
      *
      * @param namingAuthority    The naming authority.
      * @param professionItems    This vector contains text strings of the profession.
-     * @param professionOIDs     The vector contains DERObjectIdentfier objects for the
+     * @param professionOIDs     The sequence contains DERObjectIdentfier objects for the
      *                           profession.
      * @param registrationNumber Registration number.
      * @param addProfessionInfo  Additional infos in encoded form.
      */
     public ProfessionInfo(NamingAuthority namingAuthority,
-                          Vector professionItems, Vector professionOIDs,
-                          String registrationNumber, DEROctetString addProfessionInfo)
+                          ASN1Sequence professionItems, ASN1Sequence professionOIDs,
+                          String registrationNumber, ASN1OctetString addProfessionInfo)
     {
         this.namingAuthority = namingAuthority;
-        this.professionItems = new Vector(professionItems.size());
-
-        for (Enumeration e = professionItems.elements(); e.hasMoreElements();)
-        {
-            this.professionItems.addElement(e.nextElement());
-        }
-        if (professionOIDs != null)
-        {
-            this.professionOIDs = new Vector(professionOIDs.size());
-            for (Enumeration e = professionOIDs.elements(); e.hasMoreElements();)
-            {
-                this.professionOIDs.addElement(e.nextElement());
-            }
-        }
+        this.professionItems = professionItems;
+        this.professionOIDs = professionOIDs;
         this.registrationNumber = new DERPrintableString(registrationNumber, true);
         this.addProfessionInfo = addProfessionInfo;
     }
@@ -340,20 +319,10 @@ public class ProfessionInfo extends ASN1Encodable
         {
             vec.add(new DERTaggedObject(true, 0, namingAuthority));
         }
-        ASN1EncodableVector items = new ASN1EncodableVector();
-        for (Enumeration e = professionItems.elements(); e.hasMoreElements();)
-        {
-            items.add((DEREncodable)e.nextElement());
-        }
-        vec.add(new DERSequence(items));
+        vec.add(professionItems);
         if (professionOIDs != null)
         {
-            ASN1EncodableVector oids = new ASN1EncodableVector();
-            for (Enumeration e = professionOIDs.elements(); e.hasMoreElements();)
-            {
-                oids.add((DERObjectIdentifier)e.nextElement());
-            }
-            vec.add(new DERSequence(oids));
+            vec.add(professionOIDs);
         }
         if (registrationNumber != null)
         {
@@ -369,7 +338,7 @@ public class ProfessionInfo extends ASN1Encodable
     /**
      * @return Returns the addProfessionInfo.
      */
-    public DEROctetString getAddProfessionInfo()
+    public ASN1OctetString getAddProfessionInfo()
     {
         return addProfessionInfo;
     }
@@ -385,7 +354,7 @@ public class ProfessionInfo extends ASN1Encodable
     /**
      * @return Returns the professionItems.
      */
-    public Vector getProfessionItems()
+    public ASN1Sequence getProfessionItems()
     {
         return professionItems;
     }
@@ -393,7 +362,7 @@ public class ProfessionInfo extends ASN1Encodable
     /**
      * @return Returns the professionOIDs.
      */
-    public Vector getProfessionOIDs()
+    public ASN1Sequence getProfessionOIDs()
     {
         return professionOIDs;
     }
@@ -405,5 +374,4 @@ public class ProfessionInfo extends ASN1Encodable
     {
         return registrationNumber.getString();
     }
-
 }

@@ -7,9 +7,6 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 /**
  * Attribute to indicate admissions to certain professions.
  * <p/>
@@ -124,7 +121,7 @@ public class Admission
 
     private GeneralName admissionAuthority;
 
-    private Vector contentsOfAdmissions;
+    private ASN1Sequence contentsOfAdmissions;
 
     public static Admission getInstance(Object obj)
     {
@@ -185,45 +182,27 @@ public class Admission
         switch (seq.size())
         {
         case 1:
-            contentsOfAdmissions = collectContentsOfAdmissions(DERSequence.getInstance(seq.getObjectAt(0)));
+            contentsOfAdmissions = DERSequence.getInstance(seq.getObjectAt(0));
             break;
         case 2:
             admissionAuthority = GeneralName.getInstance(seq.getObjectAt(0));
-            contentsOfAdmissions = collectContentsOfAdmissions(DERSequence.getInstance(seq.getObjectAt(1)));
+            contentsOfAdmissions = DERSequence.getInstance(seq.getObjectAt(1));
             break;
         default:
             throw new IllegalArgumentException("Bad sequence size: " + seq.size());
         }
     }
 
-    private Vector collectContentsOfAdmissions(ASN1Sequence seq)
-    {
-        Enumeration e = seq.getObjects();
-        Vector results = new Vector();
-        while (e.hasMoreElements())
-        {
-            results.addElement(Admissions.getInstance(e.nextElement()));
-        }
-
-        return results;
-    }
-
     /**
      * Constructor from given details.
      *
      * @param admissionAuthority   The admission authority.
-     * @param contentsOfAdmissions The admissions. This is a Vector of Admissions.
+     * @param contentsOfAdmissions The admissions.
      */
-    public Admission(GeneralName admissionAuthority, Vector contentsOfAdmissions)
+    public Admission(GeneralName admissionAuthority, ASN1Sequence contentsOfAdmissions)
     {
         this.admissionAuthority = admissionAuthority;
-
-        this.contentsOfAdmissions = new Vector(contentsOfAdmissions.size());
-        Enumeration e = contentsOfAdmissions.elements();
-        while (e.hasMoreElements())
-        {
-            this.contentsOfAdmissions.addElement(Admissions.getInstance(e.nextElement()));
-        }
+        this.contentsOfAdmissions = contentsOfAdmissions;
     }
 
     /**
@@ -271,17 +250,12 @@ public class Admission
         {
             vec.add(admissionAuthority);
         }
-        ASN1EncodableVector admissions = new ASN1EncodableVector();
-        for (Enumeration e = contentsOfAdmissions.elements(); e.hasMoreElements();)
-        {
-            admissions.add(Admissions.getInstance(e.nextElement()));
-        }
-        vec.add(new DERSequence(admissions));
+        vec.add(contentsOfAdmissions);
         return new DERSequence(vec);
     }
 
     /**
-     * @return Returns the admissionAuthority.
+     * @return Returns the admissionAuthority if present, null otherwise.
      */
     public GeneralName getAdmissionAuthority()
     {
@@ -291,7 +265,7 @@ public class Admission
     /**
      * @return Returns the contentsOfAdmissions.
      */
-    public Vector getContentsOfAdmissions()
+    public ASN1Sequence getContentsOfAdmissions()
     {
         return contentsOfAdmissions;
 	}
