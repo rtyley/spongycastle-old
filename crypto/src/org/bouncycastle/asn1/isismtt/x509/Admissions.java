@@ -11,7 +11,6 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.GeneralName;
 
 import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * An Admissions structure.
@@ -37,7 +36,7 @@ public class Admissions extends ASN1Encodable
 
     private NamingAuthority namingAuthority;
 
-    private Vector professionInfos;
+    private ASN1Sequence professionInfos;
 
     public static Admissions getInstance(Object obj)
     {
@@ -107,13 +106,7 @@ public class Admissions extends ASN1Encodable
             }
             o = (DEREncodable)e.nextElement();
         }
-        professionInfos = new Vector();
-        Enumeration e2 = DERSequence.getInstance(o).getObjects();
-        while (e2.hasMoreElements())
-        {
-            professionInfos.addElement(ProfessionInfo.getInstance(e2
-                .nextElement()));
-        }
+        professionInfos = ASN1Sequence.getInstance(o);
         if (e.hasMoreElements())
         {
             throw new IllegalArgumentException("Bad object encountered: "
@@ -128,20 +121,14 @@ public class Admissions extends ASN1Encodable
      *
      * @param admissionAuthority The admission authority.
      * @param namingAuthority    The naming authority.
-     * @param professionInfos    The profession infos. This is a Vecor of ProfessionInfo objects.
+     * @param professionInfos    The profession infos. This is a sequence of ProfessionInfo objects.
      */
     public Admissions(GeneralName admissionAuthority,
-                      NamingAuthority namingAuthority, Vector professionInfos)
+                      NamingAuthority namingAuthority, ASN1Sequence professionInfos)
     {
         this.admissionAuthority = admissionAuthority;
         this.namingAuthority = namingAuthority;
-
-        this.professionInfos = new Vector();
-        Enumeration e = professionInfos.elements();
-        while (e.hasMoreElements())
-        {
-            this.professionInfos.addElement(e.nextElement());
-        }
+        this.professionInfos = professionInfos;
     }
 
     /**
@@ -164,6 +151,7 @@ public class Admissions extends ASN1Encodable
     public DERObject toASN1Object()
     {
         ASN1EncodableVector vec = new ASN1EncodableVector();
+        
         if (admissionAuthority != null)
         {
             vec.add(new DERTaggedObject(true, 0, admissionAuthority));
@@ -172,13 +160,7 @@ public class Admissions extends ASN1Encodable
         {
             vec.add(new DERTaggedObject(true, 1, namingAuthority));
         }
-
-        ASN1EncodableVector infos = new ASN1EncodableVector();
-        for (Enumeration e = professionInfos.elements(); e.hasMoreElements();)
-        {
-            infos.add((ProfessionInfo)e.nextElement());
-        }
-        vec.add(new DERSequence(infos));
+        vec.add(professionInfos);
 
         return new DERSequence(vec);
     }
