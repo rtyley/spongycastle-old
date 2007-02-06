@@ -131,12 +131,13 @@ public class AttributeCertificateHolder
     /**
      * Returns the digest object type if an object digest info is used.
      * <p>
+     * <ul>
      * <li>0 - publicKey - A hash of the public key of the holder must be
      * passed.
      * <li>1 - publicKeyCert - A hash of the public key certificate of the
      * holder must be passed.
      * <li>2 - otherObjectDigest - A hash of some other object type must be
-     * passed. <code>otherObjectTypeID</code> muts not be empty.
+     * passed. <code>otherObjectTypeID</code> must not be empty.
      * </ul>
      * 
      * @return The digest object type or -1 if no object digest info is set.

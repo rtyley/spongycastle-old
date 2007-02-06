@@ -164,7 +164,7 @@ public class RoleSyntax
     /**
      * Gets the role authority as a <code>String[]</code> object.
      * @return the role authority of this RoleSyntax represented as a
-     * <code>String[]<code> array.
+     * <code>String[]</code> array.
      */
     public String[] getRoleAuthorityAsString() 
     {
