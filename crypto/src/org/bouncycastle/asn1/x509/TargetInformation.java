@@ -64,7 +64,7 @@ public class TargetInformation
      * 
      * @return Returns the targets.
      */
-    public Targets[] getTargets()
+    public Targets[] getTargetsObjects()
     {
         Targets[] copy = new Targets[targets.size()];
         int count = 0;
