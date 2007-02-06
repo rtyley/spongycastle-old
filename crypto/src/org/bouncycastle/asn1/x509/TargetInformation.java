@@ -1,7 +1,6 @@
 package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
@@ -99,14 +98,7 @@ public class TargetInformation
      */
     public TargetInformation(Target[] targets)
     {
-        ASN1EncodableVector v = new ASN1EncodableVector();
-
-        for (int count = 0; count != targets.length; count++)
-        {
-            v.add(targets[count]);
-        }
-
-        this.targets = new DERSequence(new DERSequence(v));
+        this(new Targets(targets));
     }
 
     /**
