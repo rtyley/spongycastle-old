@@ -103,10 +103,10 @@ public class TargetInformation
 
         for (int count = 0; count != targets.length; count++)
         {
-            v.add(targets[count++]);
+            v.add(targets[count]);
         }
 
-        this.targets = new DERSequence(v);
+        this.targets = new DERSequence(new DERSequence(v));
     }
 
     /**
