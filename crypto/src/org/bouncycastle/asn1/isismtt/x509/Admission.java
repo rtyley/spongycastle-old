@@ -7,6 +7,8 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
 
+import java.util.Enumeration;
+
 /**
  * Attribute to indicate admissions to certain professions.
  * <p/>
@@ -265,8 +267,14 @@ public class Admission
     /**
      * @return Returns the contentsOfAdmissions.
      */
-    public ASN1Sequence getContentsOfAdmissions()
+    public Admissions[] getContentsOfAdmissions()
     {
-        return contentsOfAdmissions;
-	}
+        Admissions[] admissions = new Admissions[contentsOfAdmissions.size()];
+        int count = 0;
+        for (Enumeration e = contentsOfAdmissions.getObjects(); e.hasMoreElements();)
+        {
+            admissions[count++] = Admissions.getInstance(e.nextElement());
+        }
+        return admissions;
+    }
 }

@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.x500.DirectoryString;
 
 import java.util.Enumeration;
 
@@ -277,19 +278,29 @@ public class ProfessionInfo extends ASN1Encodable
      * optional.
      *
      * @param namingAuthority    The naming authority.
-     * @param professionItems    This vector contains text strings of the profession.
-     * @param professionOIDs     The sequence contains DERObjectIdentfier objects for the
+     * @param professionItems    Directory strings of the profession.
+     * @param professionOIDs     DERObjectIdentfier objects for the
      *                           profession.
      * @param registrationNumber Registration number.
      * @param addProfessionInfo  Additional infos in encoded form.
      */
     public ProfessionInfo(NamingAuthority namingAuthority,
-                          ASN1Sequence professionItems, ASN1Sequence professionOIDs,
+                          DirectoryString[] professionItems, DERObjectIdentifier[] professionOIDs,
                           String registrationNumber, ASN1OctetString addProfessionInfo)
     {
         this.namingAuthority = namingAuthority;
-        this.professionItems = professionItems;
-        this.professionOIDs = professionOIDs;
+        ASN1EncodableVector v = new ASN1EncodableVector();
+        for (int i = 0; i != professionItems.length; i++)
+        {
+            v.add(professionItems[i]);
+        }
+        this.professionItems = new DERSequence(v);
+        v = new ASN1EncodableVector();
+        for (int i = 0; i != professionOIDs.length; i++)
+        {
+            v.add(professionOIDs[i]);
+        }
+        this.professionOIDs = new DERSequence(v);
         this.registrationNumber = new DERPrintableString(registrationNumber, true);
         this.addProfessionInfo = addProfessionInfo;
     }
