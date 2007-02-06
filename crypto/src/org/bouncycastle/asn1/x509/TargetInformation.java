@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
 import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * Target information extension for attributes certificates according to RFC
@@ -20,10 +20,7 @@ import java.util.Vector;
 public class TargetInformation
     extends ASN1Encodable
 {
-
-    private ASN1Sequence _seq;
-
-    private Vector _targets;
+    private ASN1Sequence targets;
 
     /**
      * Creates an instance of a TargetInformation from the given object.
@@ -59,28 +56,21 @@ public class TargetInformation
      */
     private TargetInformation(ASN1Sequence seq)
     {
-        Enumeration e = seq.getObjects();
-        _targets = new Vector(seq.size());
-        while (e.hasMoreElements())
-        {
-            _targets.addElement(Targets.getInstance(e.nextElement()));
-        }
-        _seq = seq;
+        targets = seq;
     }
 
     /**
      * Returns the targets in this target information extension.
-     * <p>
-     * The vector is cloned before it is returned.
      * 
      * @return Returns the targets.
      */
-    public Vector getTargets()
+    public Targets[] getTargets()
     {
-        Vector copy = new Vector(_targets.capacity());
-        for (Enumeration e = _targets.elements(); e.hasMoreElements();)
+        Targets[] copy = new Targets[targets.size()];
+        int count = 0;
+        for (Enumeration e = targets.getObjects(); e.hasMoreElements();)
         {
-            copy.addElement(e.nextElement());
+            copy[count++] = Targets.getInstance(e.nextElement());
         }
         return copy;
     }
@@ -93,8 +83,7 @@ public class TargetInformation
      */
     public TargetInformation(Targets targets)
     {
-        _targets = new Vector(1);
-        _targets.addElement(targets);
+        this.targets = new DERSequence(targets);
     }
     
     /**
@@ -108,23 +97,16 @@ public class TargetInformation
      * @throws IllegalArgumentException if the vector does not consists of only
      *             Targets objects.
      */
-    public TargetInformation(Vector targets)
+    public TargetInformation(Target[] targets)
     {
-        Enumeration e = targets.elements();
-        while (e.hasMoreElements())
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        for (int count = 0; count != targets.length; count++)
         {
-            Object o = e.nextElement();
-            if (!(o instanceof Targets))
-            {
-                throw new IllegalArgumentException(
-                    "Content of vector must be a Targets instance.");
-            }
+            v.add(targets[count++]);
         }
-        _targets = new Vector(targets.capacity());
-        for (e = targets.elements(); e.hasMoreElements();)
-        {
-            _targets.addElement(e.nextElement());
-        }
+
+        this.targets = new DERSequence(v);
     }
 
     /**
@@ -146,20 +128,6 @@ public class TargetInformation
      */
     public DERObject toASN1Object()
     {
-        if (_seq != null)
-        {
-            return _seq;
-        }
-        Vector targets = new Vector();
-        // collect all target elements and use only one targets element
-        for (Enumeration e = _targets.elements(); e.hasMoreElements();)
-        {
-            Targets t = (Targets)e.nextElement();
-            for (Enumeration e2 = t.getTargets().elements(); e2.hasMoreElements();)
-            {
-                targets.addElement(e2.nextElement());
-            }
-        }
-        return new DERSequence(new Targets(targets).toASN1Object());
+        return targets;
     }
 }
