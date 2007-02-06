@@ -121,14 +121,21 @@ public class Admissions extends ASN1Encodable
      *
      * @param admissionAuthority The admission authority.
      * @param namingAuthority    The naming authority.
-     * @param professionInfos    The profession infos. This is a sequence of ProfessionInfo objects.
+     * @param professionInfos    The profession infos.
      */
     public Admissions(GeneralName admissionAuthority,
-                      NamingAuthority namingAuthority, ASN1Sequence professionInfos)
+                      NamingAuthority namingAuthority, ProfessionInfo[] professionInfos)
     {
         this.admissionAuthority = admissionAuthority;
         this.namingAuthority = namingAuthority;
-        this.professionInfos = professionInfos;
+
+        ASN1EncodableVector v = new ASN1EncodableVector();
+        for (int i = 0; i != professionInfos.length; i++)
+        {
+            v.add(professionInfos[i]);
+        }
+
+        this.professionInfos = new DERSequence(v);
     }
 
     /**
