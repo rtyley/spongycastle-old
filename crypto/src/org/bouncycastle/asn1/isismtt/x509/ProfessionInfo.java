@@ -365,24 +365,40 @@ public class ProfessionInfo extends ASN1Encodable
     /**
      * @return Returns the professionItems.
      */
-    public ASN1Sequence getProfessionItems()
+    public DirectoryString[] getProfessionItems()
     {
-        return professionItems;
+        DirectoryString[] items = new DirectoryString[professionItems.size()];
+        int count = 0;
+        for (Enumeration e = professionItems.getObjects(); e.hasMoreElements();)
+        {
+            items[count++] = DirectoryString.getInstance(e.nextElement());
+        }
+        return items;
     }
 
     /**
      * @return Returns the professionOIDs.
      */
-    public ASN1Sequence getProfessionOIDs()
+    public DERObjectIdentifier[] getProfessionOIDs()
     {
-        return professionOIDs;
+        if (professionOIDs == null)
+        {
+            return new DERObjectIdentifier[0];
+        }
+        DERObjectIdentifier[] oids = new DERObjectIdentifier[professionOIDs.size()];
+        int count = 0;
+        for (Enumeration e = professionOIDs.getObjects(); e.hasMoreElements();)
+        {
+            oids[count++] = DERObjectIdentifier.getInstance(e.nextElement());
+        }
+        return oids;
     }
 
     /**
      * @return Returns the registrationNumber.
      */
-    public String getRegistrationNumber()
+    public DERPrintableString getRegistrationNumber()
     {
-        return registrationNumber.getString();
+        return registrationNumber;
     }
 }
