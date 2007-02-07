@@ -84,12 +84,7 @@ public class Targets
      */
     public Targets(Target[] targets)
     {
-        ASN1EncodableVector v = new ASN1EncodableVector();
-        for (int i = 0; i != targets.length; i++)
-        {
-            v.add(targets[i]);
-        }
-        this.targets = new DERSequence(v);
+        this.targets = new DERSequence(targets);
     }
 
     /**
