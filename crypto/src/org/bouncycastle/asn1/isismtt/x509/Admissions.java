@@ -128,14 +128,7 @@ public class Admissions extends ASN1Encodable
     {
         this.admissionAuthority = admissionAuthority;
         this.namingAuthority = namingAuthority;
-
-        ASN1EncodableVector v = new ASN1EncodableVector();
-        for (int i = 0; i != professionInfos.length; i++)
-        {
-            v.add(professionInfos[i]);
-        }
-
-        this.professionInfos = new DERSequence(v);
+        this.professionInfos = new DERSequence(professionInfos);
     }
 
     /**
