@@ -65,20 +65,13 @@ public class BERTaggedObjectParser
                     return new DERSequence(loadVector(_contentStream)).parser();
                 }
             case DERTags.OCTET_STRING:
-                if (_indefiniteLength)
+                if (_indefiniteLength || this.isConstructed())
                 {
                     return new BEROctetStringParser(new ASN1ObjectParser(_baseTag, _tagNumber, _contentStream));
                 }
                 else
                 {
-                    if (this.isConstructed())
-                    {
-                        return new BEROctetStringParser(new ASN1ObjectParser(_baseTag, _tagNumber, _contentStream));
-                    }
-                    else
-                    {
-                        return new DEROctetString(((DefiniteLengthInputStream)_contentStream).toByteArray()).parser();
-                    }
+                    return new DEROctetString(((DefiniteLengthInputStream)_contentStream).toByteArray()).parser();
                 }
             }
         }
@@ -139,18 +132,12 @@ public class BERTaggedObjectParser
             {
                 ASN1EncodableVector v = rLoadVector(_contentStream);
 
-                if (v.size() > 1)
-                {
-                    return new DERTaggedObject(false, _tagNumber, new DERSequence(v));
-                }
-                else if (v.size() == 1)
+                if (v.size() == 1)
                 {
                     return new DERTaggedObject(true, _tagNumber, v.get(0));
                 }
-                else
-                {
-                    return new DERTaggedObject(false, _tagNumber, new DERSequence());
-                }
+
+                return new DERTaggedObject(false, _tagNumber, new DERSequence(v));                
             }
 
             try
