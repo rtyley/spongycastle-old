@@ -84,6 +84,7 @@ public class RegressionTest
         new TEATest(),
         new XTEATest(),
         new RFC3211WrapTest(),
+        new SEEDTest(),
         //new NaccacheSternTest(),
         new NullTest()
     };
