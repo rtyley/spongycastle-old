@@ -80,12 +80,14 @@ public class PBEFileProcessor
         o = pgpFact.nextObject();
         if (o instanceof PGPCompressedData)
         {
-            PGPCompressedData       cData = (PGPCompressedData)pgpFact.nextObject();
+            PGPCompressedData   cData = (PGPCompressedData)o;
 
             pgpFact = new PGPObjectFactory(cData.getDataStream());
+
+            o = pgpFact.nextObject();
         }
         
-        PGPLiteralData          ld = (PGPLiteralData)pgpFact.nextObject();
+        PGPLiteralData          ld = (PGPLiteralData)o;
         
         FileOutputStream        fOut = new FileOutputStream(ld.getFileName());
         
