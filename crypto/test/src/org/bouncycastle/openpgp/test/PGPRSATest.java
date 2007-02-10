@@ -15,6 +15,7 @@ import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPOnePassSignature;
 import org.bouncycastle.openpgp.PGPOnePassSignatureList;
+import org.bouncycastle.openpgp.PGPPBEEncryptedData;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
@@ -31,8 +32,10 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.util.test.UncloseableOutputStream;
 
+import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyPair;
@@ -42,8 +45,6 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
 import java.util.Iterator;
-
-import javax.crypto.Cipher;
 
 public class PGPRSATest
     extends SimpleTest
@@ -299,7 +300,99 @@ public class PGPRSATest
             fail("version 4 fingerprint test failed");
         }
     }
-    
+
+    private void mixedTest(PGPPrivateKey pgpPrivKey, PGPPublicKey pgpPubKey)
+        throws Exception
+    {
+        byte[]    text = { (byte)'h', (byte)'e', (byte)'l', (byte)'l', (byte)'o', (byte)' ', (byte)'w', (byte)'o', (byte)'r', (byte)'l', (byte)'d', (byte)'!', (byte)'\n' };
+
+        //
+        // literal data
+        //
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        PGPLiteralDataGenerator lGen = new PGPLiteralDataGenerator();
+        OutputStream lOut = lGen.open(bOut, PGPLiteralData.BINARY, PGPLiteralData.CONSOLE, text.length, new Date());
+
+        lOut.write(text);
+
+        lGen.close();
+
+        byte[] bytes = bOut.toByteArray();
+
+        PGPObjectFactory f = new PGPObjectFactory(bytes);
+        checkLiteralData((PGPLiteralData)f.nextObject(), text);
+
+        ByteArrayOutputStream bcOut = new ByteArrayOutputStream();
+
+        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.AES_128, true, new SecureRandom(), "BC");
+
+        encGen.addMethod(pgpPubKey);
+
+        encGen.addMethod("password".toCharArray());
+
+        OutputStream cOut = encGen.open(bcOut, bytes.length);
+
+        cOut.write(bytes);
+
+        cOut.close();
+
+        byte[] encData = bcOut.toByteArray();
+
+        //
+        // asymmetric
+        //
+        PGPObjectFactory pgpF = new PGPObjectFactory(encData);
+
+        PGPEncryptedDataList       encList = (PGPEncryptedDataList)pgpF.nextObject();
+
+        PGPPublicKeyEncryptedData  encP = (PGPPublicKeyEncryptedData)encList.get(0);
+
+        InputStream clear = encP.getDataStream(pgpPrivKey, "BC");
+
+        PGPObjectFactory pgpFact = new PGPObjectFactory(clear);
+
+        checkLiteralData((PGPLiteralData)pgpFact.nextObject(), text);
+
+        //
+        // PBE
+        //
+        pgpF = new PGPObjectFactory(encData);
+
+        encList = (PGPEncryptedDataList)pgpF.nextObject();
+
+        PGPPBEEncryptedData encPbe = (PGPPBEEncryptedData)encList.get(1);
+
+        clear = encPbe.getDataStream("password".toCharArray(), "BC");
+
+        pgpF = new PGPObjectFactory(clear);
+
+        checkLiteralData((PGPLiteralData)pgpF.nextObject(), text);
+    }
+
+    private void checkLiteralData(PGPLiteralData ld, byte[] data)
+        throws IOException
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        if (!ld.getFileName().equals(PGPLiteralData.CONSOLE))
+        {
+            throw new RuntimeException("wrong filename in packet");
+        }
+
+        InputStream    inLd = ld.getDataStream();
+        int ch;
+
+        while ((ch = inLd.read()) >= 0)
+        {
+            bOut.write(ch);
+        }
+
+        if (!areEqual(bOut.toByteArray(), data))
+        {
+            fail("wrong plain text in decrypted packet");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -420,20 +513,20 @@ public class PGPRSATest
         //
         // test signature message
         //
-        PGPObjectFactory                pgpFact = new PGPObjectFactory(sig1);
+        PGPObjectFactory           pgpFact = new PGPObjectFactory(sig1);
 
-        PGPCompressedData             c1 = (PGPCompressedData)pgpFact.nextObject();
+        PGPCompressedData          c1 = (PGPCompressedData)pgpFact.nextObject();
 
         pgpFact = new PGPObjectFactory(c1.getDataStream());
         
-        PGPOnePassSignatureList     p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
+        PGPOnePassSignatureList    p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
         
-        PGPOnePassSignature            ops = p1.get(0);
+        PGPOnePassSignature        ops = p1.get(0);
         
-        PGPLiteralData                    p2 = (PGPLiteralData)pgpFact.nextObject();
+        PGPLiteralData             p2 = (PGPLiteralData)pgpFact.nextObject();
 
-        InputStream                         dIn = p2.getInputStream();
-        int                                     ch;
+        InputStream                dIn = p2.getInputStream();
+        int                        ch;
 
         ops.initVerify(pgpPub.getPublicKey(ops.getKeyID()), "BC");
         
@@ -495,7 +588,7 @@ public class PGPRSATest
         {
             fail("wrong plain text in decrypted packet");
         }
-        
+
         //
         // encrypt - short message
         //
@@ -667,7 +760,9 @@ public class PGPRSATest
         PGPPrivateKey k2 = pgpKp.getPrivateKey();
         
         k1.getEncoded();
-        
+
+        mixedTest(k2, k1);
+
         //
         // key pair generation - AES_256 encryption.
         //
