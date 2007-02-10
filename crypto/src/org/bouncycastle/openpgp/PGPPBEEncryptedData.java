@@ -6,16 +6,19 @@ import org.bouncycastle.bcpg.InputStreamPacket;
 import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
 import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.EOFException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * A password based encryption object.
@@ -60,21 +63,22 @@ public class PGPPBEEncryptedData
     {
         try
         {
-            SecretKey    key = PGPUtil.makeKeyFromPassPhrase(keyData.getEncAlgorithm(), keyData.getS2K(), passPhrase, provider);
             int          keyAlgorithm = keyData.getEncAlgorithm();
+            SecretKey    key = PGPUtil.makeKeyFromPassPhrase(keyAlgorithm, keyData.getS2K(), passPhrase, provider);
 
-            if (keyData.getSecKeyData() != null)
+            byte[] secKeyData = keyData.getSecKeyData();
+            if (secKeyData != null)
             {
                 Cipher keyCipher = Cipher.getInstance(
-                    PGPUtil.getSymmetricCipherName(keyData.getEncAlgorithm()) + "/CFB/NoPadding",
+                    PGPUtil.getSymmetricCipherName(keyAlgorithm) + "/CFB/NoPadding",
                     provider);
 
                 keyCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(new byte[keyCipher.getBlockSize()]));
 
-                byte[] keyBytes = keyCipher.doFinal(keyData.getSecKeyData());
+                byte[] keyBytes = keyCipher.doFinal(secKeyData);
 
                 keyAlgorithm = keyBytes[0];
-                key = new SecretKeySpec(keyBytes, 1, keyBytes.length - 1, PGPUtil.getSymmetricCipherName(keyBytes[0]));
+                key = new SecretKeySpec(keyBytes, 1, keyBytes.length - 1, PGPUtil.getSymmetricCipherName(keyAlgorithm));
             }
 
             Cipher c = createStreamCipher(keyAlgorithm, provider);
@@ -88,7 +92,11 @@ public class PGPPBEEncryptedData
             if (encData instanceof SymmetricEncIntegrityPacket)
             {
                 truncStream = new TruncatedStream(encStream);
-                encStream = new DigestInputStream(truncStream, MessageDigest.getInstance(PGPUtil.getDigestName(HashAlgorithmTags.SHA1), provider));
+
+                String digestName = PGPUtil.getDigestName(HashAlgorithmTags.SHA1);
+                MessageDigest digest = MessageDigest.getInstance(digestName, provider);
+
+                encStream = new DigestInputStream(truncStream, digest);
             }
 
             for (int i = 0; i != iv.length; i++)
@@ -140,37 +148,16 @@ public class PGPPBEEncryptedData
     }
 
     private Cipher createStreamCipher(int keyAlgorithm, String provider)
-        throws NoSuchProviderException, PGPException
+        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException,
+            PGPException
     {
-        Cipher c;
-        try
-        {
-            if (encData instanceof SymmetricEncIntegrityPacket)
-            {
-                c = Cipher.getInstance(
-                        PGPUtil.getSymmetricCipherName(keyAlgorithm) + "/CFB/NoPadding",
-                        provider);
-            }
-            else
-            {
-                c = Cipher.getInstance(
-                        PGPUtil.getSymmetricCipherName(keyAlgorithm) + "/OpenPGPCFB/NoPadding",
-                        provider);
-            }
-        }
-        catch (NoSuchProviderException e)
-        {
-           throw e;
-        }
-        catch (PGPException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new PGPException("exception creating cipher", e);
-        }
+        String mode = (encData instanceof SymmetricEncIntegrityPacket)
+            ?   "CFB"
+            :   "OpenPGPCFB";
 
-        return c;
+        String cName = PGPUtil.getSymmetricCipherName(keyAlgorithm)
+            + "/" + mode + "/NoPadding";
+
+        return Cipher.getInstance(cName, provider);
     }
 }
