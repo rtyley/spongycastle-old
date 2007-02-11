@@ -206,8 +206,8 @@ public class SEEDEngine
             throw new DataLengthException("output buffer too short");
         }
 
-        long l = bytesToLong(in, 0);
-        long r = bytesToLong(in, 8);
+        long l = bytesToLong(in, inOff + 0);
+        long r = bytesToLong(in, inOff + 8);
 
         if (forEncryption)
         {
@@ -230,8 +230,8 @@ public class SEEDEngine
             }
         }
 
-        longToBytes(out, 0, r);
-        longToBytes(out, 8, l);
+        longToBytes(out, outOff + 0, r);
+        longToBytes(out, outOff + 8, l);
 
         return BLOCK_SIZE;
     }

@@ -19,6 +19,7 @@ import org.bouncycastle.crypto.engines.RC532Engine;
 import org.bouncycastle.crypto.engines.RC564Engine;
 import org.bouncycastle.crypto.engines.RC6Engine;
 import org.bouncycastle.crypto.engines.RijndaelEngine;
+import org.bouncycastle.crypto.engines.SEEDEngine;
 import org.bouncycastle.crypto.engines.SerpentEngine;
 import org.bouncycastle.crypto.engines.SkipjackEngine;
 import org.bouncycastle.crypto.engines.TEAEngine;
@@ -1020,6 +1021,18 @@ public class JCEBlockCipher extends WrapCipherSpi
         public XTEA()
         {
             super(new XTEAEngine());
+        }
+    }
+
+    /**
+     * SEED
+     */
+    static public class SEED
+        extends JCEBlockCipher
+    {
+        public SEED()
+        {
+            super(new SEEDEngine());
         }
     }
 

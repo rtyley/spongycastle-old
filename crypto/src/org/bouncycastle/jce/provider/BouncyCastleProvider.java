@@ -263,6 +263,7 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher." + CryptoProObjectIdentifiers.gostR28147_cbc, "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147cbc");
         put("Cipher.TEA", "org.bouncycastle.jce.provider.JCEBlockCipher$TEA");
         put("Cipher.XTEA", "org.bouncycastle.jce.provider.JCEBlockCipher$XTEA");
+        put("Cipher.SEED", "org.bouncycastle.jce.provider.JCEBlockCipher$SEED");
 /*
         put("Cipher.DES/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$DES_CFB8");
         put("Cipher.DESEDE/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$DESede_CFB8");
@@ -425,6 +426,7 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$IDEA");
         put("KeyGenerator.TEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$TEA");
         put("KeyGenerator.XTEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$XTEA");
+        put("KeyGenerator.SEED", "org.bouncycastle.jce.provider.JCEKeyGenerator$SEED");
 
         put("KeyGenerator.GOST28147", "org.bouncycastle.jce.provider.JCEKeyGenerator$GOST28147");
         put("Alg.Alias.KeyGenerator.GOST", "GOST28147");
