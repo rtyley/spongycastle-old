@@ -4,14 +4,13 @@ import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
 
-import java.io.IOException;
-import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
-
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
+import java.io.IOException;
+import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
 
 final class PEMUtilities
 {
@@ -133,13 +132,15 @@ final class PEMUtilities
         try
         {
             Cipher c = Cipher.getInstance(transformation, provider);
+            int    mode = encrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
+
             if (paramSpec == null) // ECB block mode
             {
-                c.init(Cipher.DECRYPT_MODE, sKey);
+                c.init(mode, sKey);
             }
             else
             {
-                c.init(Cipher.DECRYPT_MODE, sKey, paramSpec);
+                c.init(mode, sKey, paramSpec);
             }
             return c.doFinal(bytes);
         }
