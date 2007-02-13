@@ -17,8 +17,7 @@ import java.util.Date;
 import java.util.Set;
 
 /**
- * CertPathValidatorSpi implementation for X.509 Attribute Certificates � la RFC
- * 3281.
+ * CertPathValidatorSpi implementation for X.509 Attribute Certificates la RFC 3281.
  * 
  * @see org.bouncycastle.x509.ExtendedPKIXParameters
  */
