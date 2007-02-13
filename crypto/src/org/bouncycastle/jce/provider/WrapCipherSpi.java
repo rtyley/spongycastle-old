@@ -13,10 +13,12 @@ import org.bouncycastle.crypto.Wrapper;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.AESWrapEngine;
 import org.bouncycastle.crypto.engines.CamelliaEngine;
+import org.bouncycastle.crypto.engines.CamelliaWrapEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.DESedeWrapEngine;
 import org.bouncycastle.crypto.engines.RC2WrapEngine;
 import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
+import org.bouncycastle.crypto.engines.SEEDWrapEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
@@ -430,6 +432,24 @@ public abstract class WrapCipherSpi extends CipherSpi
         public AESWrap()
         {
             super(new AESWrapEngine());
+        }
+    }
+
+    public static class CamelliaWrap
+        extends WrapCipherSpi
+    {
+        public CamelliaWrap()
+        {
+            super(new CamelliaWrapEngine());
+        }
+    }
+
+    public static class SEEDWrap
+        extends WrapCipherSpi
+    {
+        public SEEDWrap()
+        {
+            super(new SEEDWrapEngine());
         }
     }
 

@@ -243,6 +243,8 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_wrap, "AESWRAP");
         put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_wrap, "AESWRAP");
         put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_wrap, "AESWRAP");
+        put("Cipher.CAMELLIAWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$CamelliaWrap");
+        put("Cipher.SEEDWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$SEEDWrap");
         put("Cipher.DESEDERFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211DESedeWrap");
         put("Cipher.AESRFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211AESWrap");
         put("Cipher.CAMELLIARFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211CamelliaWrap");

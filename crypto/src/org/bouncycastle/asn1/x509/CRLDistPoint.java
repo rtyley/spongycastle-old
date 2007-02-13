@@ -22,7 +22,7 @@ public class CRLDistPoint
     public static CRLDistPoint getInstance(
         Object  obj)
     {
-        if (obj instanceof CRLDistPoint)
+        if (obj instanceof CRLDistPoint || obj == null)
         {
             return (CRLDistPoint)obj;
         }
