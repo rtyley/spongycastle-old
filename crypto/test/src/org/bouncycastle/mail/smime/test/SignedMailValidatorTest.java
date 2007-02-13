@@ -1,5 +1,18 @@
 package org.bouncycastle.mail.smime.test;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.mail.smime.validator.SignedMailValidator;
+import org.bouncycastle.x509.PKIXCertPathReviewer;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
 import java.io.InputStream;
 import java.security.Security;
 import java.security.cert.CertStore;
@@ -17,21 +30,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
-
-import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
-
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.i18n.ErrorBundle;
-import org.bouncycastle.mail.smime.validator.SignedMailValidator;
-import org.bouncycastle.x509.PKIXCertPathReviewer;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 public class SignedMailValidatorTest extends TestCase
 {
@@ -114,7 +112,7 @@ public class SignedMailValidatorTest extends TestCase
         assertContainsMessage(
                 review.getErrors(0),
                 "CertPathReviewer.certificateNotYetValid",
-                "Could not validate the certificate. Certificate is not valid untill Dec 28, 2006 2:19:31 PM GMT.");
+                "Could not validate the certificate. Certificate is not valid until Dec 28, 2006 2:19:31 PM GMT.");
     }
     
     public void testExpired() throws Exception
