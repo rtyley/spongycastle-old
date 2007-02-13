@@ -64,7 +64,6 @@ import java.util.Set;
 
 public class CertPathValidatorUtilities
 {
-
     protected static final String CERTIFICATE_POLICIES = X509Extensions.CertificatePolicies.getId();
     protected static final String BASIC_CONSTRAINTS = X509Extensions.BasicConstraints.getId();
     protected static final String POLICY_MAPPINGS = X509Extensions.PolicyMappings.getId();
@@ -75,7 +74,9 @@ public class CertPathValidatorUtilities
     protected static final String ISSUING_DISTRIBUTION_POINT = X509Extensions.IssuingDistributionPoint.getId();
     protected static final String DELTA_CRL_INDICATOR = X509Extensions.DeltaCRLIndicator.getId();
     protected static final String POLICY_CONSTRAINTS = X509Extensions.PolicyConstraints.getId();
-    
+    protected static final String FRESHEST_CRL = X509Extensions.FreshestCRL.getId();
+    protected static final String CRL_DISTRIBUTION_POINTS = X509Extensions.CRLDistributionPoints.getId();
+    protected static final String AUTHORITY_KEY_IDENTIFIER = X509Extensions.AuthorityKeyIdentifier.getId();
 
     protected static final String ANY_POLICY = "2.5.29.32.0";
     
