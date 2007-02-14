@@ -919,7 +919,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 // check CRLs
                 try 
                 {
-                    checkCRLs(pkixParams, cert, validDate, sign, workingPublicKey, crlDistPointUrls, index);
+                    checkRevocation(pkixParams, cert, validDate, sign, workingPublicKey, crlDistPointUrls, ocspUrls, index);
                 }
                 catch (CertPathReviewerException cpre)
                 {
@@ -1935,7 +1935,20 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         return result;
     }
     
-    private void checkCRLs(
+    protected void checkRevocation(PKIXParameters paramsPKIX,
+            X509Certificate cert,
+            Date validDate,
+            X509Certificate sign,
+            PublicKey workingPublicKey,
+            Vector crlDistPointUrls,
+            Vector ocspUrls,
+            int index)
+        throws CertPathReviewerException
+    {
+        checkCRLs(paramsPKIX, cert, validDate, sign, workingPublicKey, crlDistPointUrls, index);
+    }
+    
+    protected void checkCRLs(
             PKIXParameters paramsPKIX,
             X509Certificate cert,
             Date validDate,
@@ -2305,7 +2318,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     
     }
     
-    private Vector getCRLDistUrls(CRLDistPoint crlDistPoints, AuthorityInformationAccess authInfoAcc)
+    protected Vector getCRLDistUrls(CRLDistPoint crlDistPoints, AuthorityInformationAccess authInfoAcc)
     {
         Vector urls = new Vector();
         
@@ -2350,7 +2363,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         return urls;
     }
     
-    private Vector getOCSPUrls(AuthorityInformationAccess authInfoAccess)
+    protected Vector getOCSPUrls(AuthorityInformationAccess authInfoAccess)
     {
         Vector urls = new Vector();
         
