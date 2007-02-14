@@ -1,7 +1,6 @@
 package org.bouncycastle.x509;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
@@ -24,7 +23,6 @@ import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.NameConstraints;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
 import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
@@ -32,6 +30,7 @@ import org.bouncycastle.i18n.ErrorBundle;
 import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
+import org.bouncycastle.jce.provider.PKIXNameConstraints;
 import org.bouncycastle.jce.provider.PKIXPolicyNode;
 
 import javax.security.auth.x500.X500Principal;
@@ -340,15 +339,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         // Setup
         //
         
-        // (b)
-        Set     permittedSubtreesDN = new HashSet();
-        Set     permittedSubtreesEmail = new HashSet();
-        Set     permittedSubtreesIP = new HashSet();
-    
-        // (c)
-        Set     excludedSubtreesDN = new HashSet();
-        Set     excludedSubtreesEmail = new HashSet();
-        Set     excludedSubtreesIP = new HashSet();
+        // (b)  and (c)
+        PKIXNameConstraints nameConstraints = new PKIXNameConstraints();
 
         //
         // process each certificate except the last in the path
@@ -389,7 +381,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     
                     try
                     {
-                        checkPermittedDN(permittedSubtreesDN, dns);
+                        nameConstraints.checkPermittedDN(dns);
                     }
                     catch (CertPathValidatorException cpve)
                     {
@@ -400,7 +392,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     
                     try
                     {
-                        checkExcludedDN(excludedSubtreesDN, dns);
+                        nameConstraints.checkExcludedDN(dns);
                     }
                     catch (CertPathValidatorException cpve)
                     {
@@ -424,89 +416,100 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     {
                         for (int j = 0; j < altName.size(); j++)
                         {
-                            ASN1TaggedObject o = (ASN1TaggedObject)altName.getObjectAt(j);
-    
-                            switch(o.getTagNo())
-                            {
-                            case 1:
-                                String email = DERIA5String.getInstance(o, true).getString();
-    
-                                try
-                                {
-                                    checkPermittedEmail(permittedSubtreesEmail, email);
-                                }
-                                catch (CertPathValidatorException cpve)
-                                {
-                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedEmail", 
-                                            new Object[] {new UntrustedInput(email)});
-                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
-                                }
-                                
-                                try
-                                {
-                                    checkExcludedEmail(excludedSubtreesEmail, email);
-                                }
-                                catch (CertPathValidatorException cpve)
-                                {
-                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.excludedEmail", 
-                                            new Object[] {new UntrustedInput(email)});
-                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
-                                }
+                            GeneralName name = GeneralName.getInstance(altName.getObjectAt(j));
 
-                                break;
-                            case 4:
-                                ASN1Sequence altDN = ASN1Sequence.getInstance(o, true);
-    
-                                try
-                                {
-                                    checkPermittedDN(permittedSubtreesDN, altDN);
-                                }
-                                catch (CertPathValidatorException cpve)
-                                {
-                                    X509Name altDNName = new X509Name(altDN);
-                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedDN", 
-                                            new Object[] {new UntrustedInput(altDNName)});
-                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
-                                }
-                                
-                                try
-                                {
-                                    checkExcludedDN(excludedSubtreesDN, altDN);
-                                }
-                                catch (CertPathValidatorException cpve)
-                                {
-                                    X509Name altDNName = new X509Name(altDN);
-                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.excludedDN", 
-                                            new Object[] {new UntrustedInput(altDNName)});
-                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
-                                }
-                                
-                                break;
-                            case 7:
-                                byte[] ip = ASN1OctetString.getInstance(o, true).getOctets();
-    
-                                try
-                                {
-                                    checkPermittedIP(permittedSubtreesIP, ip);
-                                }
-                                catch (CertPathValidatorException cpve)
-                                {
-                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedIP", 
-                                            new Object[] {IPtoString(ip)});
-                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
-                                }
-                                
-                                try
-                                {
-                                    checkExcludedIP(excludedSubtreesIP, ip);
-                                }
-                                catch (CertPathValidatorException cpve)
-                                {
-                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.excludedIP", 
-                                            new Object[] {IPtoString(ip)});
-                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
-                                }
+                            try
+                            {
+                                nameConstraints.checkPermitted(name);
+                                nameConstraints.checkExcluded(name);
                             }
+                            catch (CertPathValidatorException cpve)
+                            {
+                                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedEmail",
+                                        new Object[] {new UntrustedInput(name)});
+                                throw new CertPathReviewerException(msg,cpve,certPath,index);
+                            }
+//                            switch(o.getTagNo())            TODO - move resources to PKIXNameConstraints
+//                            {
+//                            case 1:
+//                                String email = DERIA5String.getInstance(o, true).getString();
+//
+//                                try
+//                                {
+//                                    checkPermittedEmail(permittedSubtreesEmail, email);
+//                                }
+//                                catch (CertPathValidatorException cpve)
+//                                {
+//                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedEmail",
+//                                            new Object[] {new UntrustedInput(email)});
+//                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
+//                                }
+//
+//                                try
+//                                {
+//                                    checkExcludedEmail(excludedSubtreesEmail, email);
+//                                }
+//                                catch (CertPathValidatorException cpve)
+//                                {
+//                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.excludedEmail",
+//                                            new Object[] {new UntrustedInput(email)});
+//                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
+//                                }
+//
+//                                break;
+//                            case 4:
+//                                ASN1Sequence altDN = ASN1Sequence.getInstance(o, true);
+//
+//                                try
+//                                {
+//                                    checkPermittedDN(permittedSubtreesDN, altDN);
+//                                }
+//                                catch (CertPathValidatorException cpve)
+//                                {
+//                                    X509Name altDNName = new X509Name(altDN);
+//                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedDN",
+//                                            new Object[] {new UntrustedInput(altDNName)});
+//                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
+//                                }
+//
+//                                try
+//                                {
+//                                    checkExcludedDN(excludedSubtreesDN, altDN);
+//                                }
+//                                catch (CertPathValidatorException cpve)
+//                                {
+//                                    X509Name altDNName = new X509Name(altDN);
+//                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.excludedDN",
+//                                            new Object[] {new UntrustedInput(altDNName)});
+//                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
+//                                }
+//
+//                                break;
+//                            case 7:
+//                                byte[] ip = ASN1OctetString.getInstance(o, true).getOctets();
+//
+//                                try
+//                                {
+//                                    checkPermittedIP(permittedSubtreesIP, ip);
+//                                }
+//                                catch (CertPathValidatorException cpve)
+//                                {
+//                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedIP",
+//                                            new Object[] {IPtoString(ip)});
+//                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
+//                                }
+//
+//                                try
+//                                {
+//                                    checkExcludedIP(excludedSubtreesIP, ip);
+//                                }
+//                                catch (CertPathValidatorException cpve)
+//                                {
+//                                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.excludedIP",
+//                                            new Object[] {IPtoString(ip)});
+//                                    throw new CertPathReviewerException(msg,cpve,certPath,index);
+//                                }
+//                            }
                         }
                     }
                 }
@@ -543,20 +546,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                         while (e.hasMoreElements())
                         {
                             GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
-                            GeneralName     base = subtree.getBase();
 
-                            switch(base.getTagNo())
-                            {
-                                case 1:
-                                    permittedSubtreesEmail = intersectEmail(permittedSubtreesEmail, DERIA5String.getInstance(base.getName()).getString());
-                                    break;
-                                case 4:
-                                    permittedSubtreesDN = intersectDN(permittedSubtreesDN, (ASN1Sequence)base.getName());
-                                    break;
-                                case 7:
-                                    permittedSubtreesIP = intersectIP(permittedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
-                                    break;
-                            }
+                            nameConstraints.intersectPermittedSubtree(subtree);
                         }
                     }
                 
@@ -570,20 +561,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                         while (e.hasMoreElements())
                         {
                             GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
-                            GeneralName     base = subtree.getBase();
 
-                            switch(base.getTagNo())
-                            {
-                            case 1:
-                                excludedSubtreesEmail = unionEmail(excludedSubtreesEmail, DERIA5String.getInstance(base.getName()).getString());
-                                break;
-                            case 4:
-                                excludedSubtreesDN = unionDN(excludedSubtreesDN, (ASN1Sequence)base.getName());
-                                break;
-                            case 7:
-                                excludedSubtreesIP = unionIP(excludedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
-                                break;
-                            }
+                            nameConstraints.addExcludedSubtree(subtree);
                         }
                     }
                 }
