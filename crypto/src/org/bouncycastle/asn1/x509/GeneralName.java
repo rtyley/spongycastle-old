@@ -147,23 +147,23 @@ public class GeneralName
             switch (tag)
             {
             case otherName:
-                return new GeneralName(ASN1Sequence.getInstance(tagObj, false), tag);
+                return new GeneralName(tag, ASN1Sequence.getInstance(tagObj, false));
             case rfc822Name:
-                return new GeneralName(DERIA5String.getInstance(tagObj, false), tag);
+                return new GeneralName(tag, DERIA5String.getInstance(tagObj, false));
             case dNSName:
-                return new GeneralName(DERIA5String.getInstance(tagObj, false), tag);
+                return new GeneralName(tag, DERIA5String.getInstance(tagObj, false));
             case x400Address:
                 throw new IllegalArgumentException("unknown tag: " + tag);
             case directoryName:
-                return new GeneralName(ASN1Sequence.getInstance(tagObj, true), tag);
+                return new GeneralName(tag, ASN1Sequence.getInstance(tagObj, true));
             case ediPartyName:
-                return new GeneralName(ASN1Sequence.getInstance(tagObj, false), tag);
+                return new GeneralName(tag, ASN1Sequence.getInstance(tagObj, false));
             case uniformResourceIdentifier:
-                return new GeneralName(DERIA5String.getInstance(tagObj, false), tag);
+                return new GeneralName(tag, DERIA5String.getInstance(tagObj, false));
             case iPAddress:
-                return new GeneralName(ASN1OctetString.getInstance(tagObj, false), tag);
+                return new GeneralName(tag, ASN1OctetString.getInstance(tagObj, false));
             case registeredID:
-                return new GeneralName(DERObjectIdentifier.getInstance(tagObj, false), tag);
+                return new GeneralName(tag, DERObjectIdentifier.getInstance(tagObj, false));
             }
         }
 
