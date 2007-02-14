@@ -1,5 +1,14 @@
 package org.bouncycastle.jce.provider.test.nist;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.x509.PKIXCertPathReviewer;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.Security;
@@ -21,16 +30,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.i18n.ErrorBundle;
-import org.bouncycastle.x509.PKIXCertPathReviewer;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
  * NIST CertPath test data for RFC 3280
@@ -90,7 +89,7 @@ public class NistCertPathReviewerTest
             new String[] { TRUST_ANCHOR_ROOT_CRL, GOOD_CA_CRL },
             0,
             "CertPathReviewer.signatureNotVerified",
-            "The certificate signature is invalid.");
+            "The certificate signature is invalid. A java.security.InvalidKeyException occurred.");
     }
     
     public void testValidDSASignaturesTest4()
@@ -117,7 +116,7 @@ public class NistCertPathReviewerTest
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "DSACACRL" },
                 0,
                 "CertPathReviewer.signatureNotVerified",
-                "The certificate signature is invalid.");
+                "The certificate signature is invalid. A java.security.InvalidKeyException occurred.");
     }
     
     public void testCANotBeforeDateTest1()
@@ -128,7 +127,7 @@ public class NistCertPathReviewerTest
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "BadnotBeforeDateCACRL" },
                 1,
                 "CertPathReviewer.certificateNotYetValid",
-                "Could not validate the certificate. Certificate is not valid untill Jan 1, 2047 12:01:00 PM GMT.");
+                "Could not validate the certificate. Certificate is not valid until Jan 1, 2047 12:01:00 PM GMT.");
     }
     
     public void testInvalidEENotBeforeDateTest2()
@@ -139,7 +138,7 @@ public class NistCertPathReviewerTest
                 new String[] { TRUST_ANCHOR_ROOT_CRL, GOOD_CA_CRL },
                 0,
                 "CertPathReviewer.certificateNotYetValid",
-                "Could not validate the certificate. Certificate is not valid untill Jan 1, 2047 12:01:00 PM GMT.");
+                "Could not validate the certificate. Certificate is not valid until Jan 1, 2047 12:01:00 PM GMT.");
     }
     
     public void testValidPre2000UTCNotBeforeDateTest3()

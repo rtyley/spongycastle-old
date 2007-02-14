@@ -1,12 +1,10 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -149,10 +147,6 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         Iterator certIter;
         int index = 0;
         int i;
-        //Certificate for each interation of the validation loop
-        //Signature information for each iteration of the validation loop
-        Set subTreeContraints = new HashSet();
-        Set subTreeExcludes = new HashSet();
 
         //
         // 6.1.2 - setup
@@ -176,18 +170,9 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         policyNodes[0].add(validPolicyTree);
 
         //
-        // (b)
+        // (b) and (c)
         //
-        Set     permittedSubtreesDN = new HashSet();
-        Set     permittedSubtreesEmail = new HashSet();
-        Set     permittedSubtreesIP = new HashSet();
-    
-        //
-        // (c)
-        //
-        Set     excludedSubtreesDN = new HashSet();
-        Set     excludedSubtreesEmail = new HashSet();
-        Set     excludedSubtreesIP = new HashSet();
+        PKIXNameConstraints nameConstraints = new PKIXNameConstraints();
     
         //
         // (d)
@@ -378,37 +363,18 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         throw new CertPathValidatorException("exception extracting subject name when checking subtrees");
                     }
     
-                    CertPathValidatorUtilities.checkPermittedDN(permittedSubtreesDN, dns);
-    
-                    CertPathValidatorUtilities.checkExcludedDN(excludedSubtreesDN, dns);
+                    nameConstraints.checkPermittedDN(dns);
+                    nameConstraints.checkExcludedDN(dns);
             
                     ASN1Sequence   altName = (ASN1Sequence)CertPathValidatorUtilities.getExtensionValue(cert, SUBJECT_ALTERNATIVE_NAME);
                     if (altName != null)
                     {
                         for (int j = 0; j < altName.size(); j++)
                         {
-                            ASN1TaggedObject o = (ASN1TaggedObject)altName.getObjectAt(j);
-    
-                            switch(o.getTagNo())
-                            {
-                            case 1:
-                                String email = DERIA5String.getInstance(o, true).getString();
-    
-                                CertPathValidatorUtilities.checkPermittedEmail(permittedSubtreesEmail, email);
-                                CertPathValidatorUtilities.checkExcludedEmail(excludedSubtreesEmail, email);
-                                break;
-                            case 4:
-                                ASN1Sequence altDN = ASN1Sequence.getInstance(o, true);
-    
-                                CertPathValidatorUtilities.checkPermittedDN(permittedSubtreesDN, altDN);
-                                CertPathValidatorUtilities.checkExcludedDN(excludedSubtreesDN, altDN);
-                                break;
-                            case 7:
-                                byte[] ip = ASN1OctetString.getInstance(o, true).getOctets();
-    
-                                CertPathValidatorUtilities.checkPermittedIP(permittedSubtreesIP, ip);
-                                CertPathValidatorUtilities.checkExcludedIP(excludedSubtreesIP, ip);
-                            }
+                            GeneralName name = GeneralName.getInstance(altName.getObjectAt(j));
+
+                            nameConstraints.checkPermitted(name);
+                            nameConstraints.checkExcluded(name);
                         }
                     }
                 }
@@ -788,20 +754,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             while (e.hasMoreElements())
                             {
                                 GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
-                                GeneralName     base = subtree.getBase();
-    
-                                switch(base.getTagNo())
-                                {
-                                    case 1:
-                                        permittedSubtreesEmail = CertPathValidatorUtilities.intersectEmail(permittedSubtreesEmail, DERIA5String.getInstance(base.getName()).getString());
-                                        break;
-                                    case 4:
-                                        permittedSubtreesDN = CertPathValidatorUtilities.intersectDN(permittedSubtreesDN, (ASN1Sequence)base.getName());
-                                        break;
-                                    case 7:
-                                        permittedSubtreesIP = CertPathValidatorUtilities.intersectIP(permittedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
-                                        break;
-                                }
+
+                                nameConstraints.intersectPermittedSubtree(subtree);
                             }
                         }
                     
@@ -815,20 +769,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             while (e.hasMoreElements())
                             {
                                 GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
-                                GeneralName     base = subtree.getBase();
-    
-                                switch(base.getTagNo())
-                                {
-                                case 1:
-                                    excludedSubtreesEmail = CertPathValidatorUtilities.unionEmail(excludedSubtreesEmail, DERIA5String.getInstance(base.getName()).getString());
-                                    break;
-                                case 4:
-                                    excludedSubtreesDN = CertPathValidatorUtilities.unionDN(excludedSubtreesDN, (ASN1Sequence)base.getName());
-                                    break;
-                                case 7:
-                                    excludedSubtreesIP = CertPathValidatorUtilities.unionIP(excludedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
-                                    break;
-                                }
+                                nameConstraints.addExcludedSubtree(subtree);
                             }
                         }
                     }
