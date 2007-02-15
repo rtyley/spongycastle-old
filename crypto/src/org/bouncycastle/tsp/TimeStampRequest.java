@@ -1,22 +1,20 @@
 package org.bouncycastle.tsp;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cmp.PKIFailureInfo;
+import org.bouncycastle.asn1.tsp.TimeStampReq;
+import org.bouncycastle.asn1.x509.X509Extensions;
+
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.X509Extension;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.bouncycastle.asn1.cmp.PKIFailureInfo;
-import org.bouncycastle.asn1.tsp.TimeStampReq;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.x509.X509Extensions;
 
 /**
  * Base class for an RFC 3161 Time Stamp Request.
@@ -157,34 +155,14 @@ public class TimeStampRequest
             }
         }
         
-        String digestName = TSPUtil.getDigestAlgName(this.getMessageImprintAlgOID());
+        int digestLength = TSPUtil.getDigestLength(this.getMessageImprintAlgOID(), provider);
         
-        try
-        {
-            checkImprintLength(MessageDigest.getInstance(digestName, provider));
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            try
-            {
-                checkImprintLength(MessageDigest.getInstance(digestName));
-            }
-            catch (NoSuchAlgorithmException ex)
-            {
-                throw new TSPException("digest algorithm cannot be found.", ex);
-            }
-        }
-    }
-
-    private void checkImprintLength(MessageDigest d) 
-        throws TSPValidationException
-    {
-        if (d.getDigestLength() != this.getMessageImprintDigest().length)
+        if (digestLength != this.getMessageImprintDigest().length)
         {
             throw new TSPValidationException("imprint digest the wrong length.", PKIFailureInfo.badDataFormat);
         }
     }
-    
+
    /**
     * return the ASN.1 encoded representation of this object.
     */
