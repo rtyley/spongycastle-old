@@ -1,36 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.Key;
-import java.security.KeyStoreException;
-import java.security.KeyStoreSpi;
-import java.security.NoSuchAlgorithmException;
-import java.security.Principal;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -65,7 +34,38 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
+
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.Key;
+import java.security.KeyStoreException;
+import java.security.KeyStoreSpi;
+import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 public class JDKPKCS12KeyStore
     extends KeyStoreSpi
@@ -84,9 +84,9 @@ public class JDKPKCS12KeyStore
     //
     private static final String CERT_ALGORITHM = "1.2.840.113549.1.12.1.6";
 
-    private Hashtable                       keys = new Hashtable();
+    private IgnoresCaseHashtable            keys = new IgnoresCaseHashtable();
     private Hashtable                       localIds = new Hashtable();
-    private Hashtable                       certs = new Hashtable();
+    private IgnoresCaseHashtable            certs = new IgnoresCaseHashtable();
     private Hashtable                       chainCerts = new Hashtable();
     private Hashtable                       keyCerts = new Hashtable();
 
@@ -556,7 +556,7 @@ public class JDKPKCS12KeyStore
         PKCS12PBEParams     pbeParams = new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
 
         PBEKeySpec          pbeSpec = new PBEKeySpec(password);
-        PrivateKey          out = null;
+        PrivateKey          out;
 
         try
         {
@@ -628,7 +628,7 @@ public class JDKPKCS12KeyStore
         PKCS12PBEParams     pbeParams = new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
 
         PBEKeySpec          pbeSpec = new PBEKeySpec(password);
-        byte[]              out = null;
+        byte[]              out;
 
         try
         {
@@ -813,7 +813,7 @@ public class JDKPKCS12KeyStore
             }
         }
 
-        keys = new Hashtable();
+        keys = new IgnoresCaseHashtable();
         localIds = new Hashtable();
 
         if (info.getContentType().equals(data))
@@ -1030,7 +1030,7 @@ public class JDKPKCS12KeyStore
             }
         }
 
-        certs = new Hashtable();
+        certs = new IgnoresCaseHashtable();
         chainCerts = new Hashtable();
         keyCerts = new Hashtable();
 
@@ -1038,7 +1038,7 @@ public class JDKPKCS12KeyStore
         {
             SafeBag     b = (SafeBag)chain.elementAt(i);
             CertBag     cb = new CertBag((ASN1Sequence)b.getBagValue());
-            Certificate cert = null;
+            Certificate cert;
 
             try
             {
@@ -1456,7 +1456,7 @@ public class JDKPKCS12KeyStore
     
         byte[]  data = ((ASN1OctetString)mainInfo.getContent()).getOctets();
 
-        MacData                 mData = null;
+        MacData                 mData;
 
         try
         {
@@ -1506,6 +1506,50 @@ public class JDKPKCS12KeyStore
         public DefPKCS12KeyStore()
         {
             super(null);
+        }
+    }
+
+    private static class IgnoresCaseHashtable
+    {
+        private Hashtable orig = new Hashtable();
+        private Hashtable keys = new Hashtable();
+
+        public void put(String key, Object value)
+        {
+            keys.put(Strings.toLowerCase(key), key);
+            orig.put(key, value);
+        }
+
+        public Enumeration keys()
+        {
+            return orig.keys();
+        }
+
+        public Object remove(String alias)
+        {
+            String k = (String)keys.remove(Strings.toLowerCase(alias));
+            if (k == null)
+            {
+                return null;
+            }
+
+            return orig.remove(k);
+        }
+
+        public Object get(String alias)
+        {
+            String k = (String)keys.get(Strings.toLowerCase(alias));
+            if (k == null)
+            {
+                return null;
+            }
+            
+            return orig.get(k);
+        }
+
+        public Enumeration elements()
+        {
+            return orig.elements();
         }
     }
 }

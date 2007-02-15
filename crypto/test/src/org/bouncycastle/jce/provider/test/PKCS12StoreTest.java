@@ -1,5 +1,11 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
@@ -16,12 +22,6 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 /**
  * Exercise the various key stores, making sure we at least get back what we put in!
@@ -591,19 +591,19 @@ public class PKCS12StoreTest
 
         store.setKeyEntry("privateKey", privKey, null, chain);
         
-        if (!store.containsAlias("privateKey"))
+        if (!store.containsAlias("privateKey") || !store.containsAlias("PRIVATEKEY"))
         {
             fail("couldn't find alias privateKey");
         }
         
         if (store.isCertificateEntry("privateKey"))
         {
-            fail("cert identified as certificate entry");
+            fail("key identified as certificate entry");
         }
         
-        if (!store.isKeyEntry("privateKey"))
+        if (!store.isKeyEntry("privateKey") || !store.isKeyEntry("PRIVATEKEY"))
         {
-            fail("cert not dentified as key entry");
+            fail("key not identified as key entry");
         }
         
         if (!"privateKey".equals(store.getCertificateAlias(chain[0])))
@@ -650,8 +650,12 @@ public class PKCS12StoreTest
         // failure tests
         //
         ch = store.getCertificateChain("dummy");
+
+        store.getCertificateChain("DUMMY");
         
         store.getCertificate("dummy");
+
+        store.getCertificate("DUMMY");
 
         //
         // storage test
@@ -687,17 +691,17 @@ public class PKCS12StoreTest
         //
         store.setCertificateEntry("cert", ch[1]);
         
-        if (!store.containsAlias("cert"))
+        if (!store.containsAlias("cert") || !store.containsAlias("CERT"))
         {
             fail("couldn't find alias cert");
         }
         
-        if (!store.isCertificateEntry("cert"))
+        if (!store.isCertificateEntry("cert") || !store.isCertificateEntry("CERT"))
         {
             fail("cert not identified as certificate entry");
         }
         
-        if (store.isKeyEntry("cert"))
+        if (store.isKeyEntry("cert") || store.isKeyEntry("CERT"))
         {
             fail("cert identified as key entry");
         }
@@ -707,6 +711,11 @@ public class PKCS12StoreTest
             fail("cert not identified as TrustedCertificateEntry");
         }
         
+        if (!store.entryInstanceOf("CERT", KeyStore.TrustedCertificateEntry.class))
+        {
+            fail("CERT not identified as TrustedCertificateEntry");
+        }
+
         if (store.entryInstanceOf("cert", KeyStore.PrivateKeyEntry.class))
         {
             fail("cert identified as key entry via PrivateKeyEntry");
@@ -726,22 +735,27 @@ public class PKCS12StoreTest
         
         store.setCertificateEntry("cert", ch[0]);
 
-        if (!store.containsAlias("cert"))
+        if (!store.containsAlias("cert") || !store.containsAlias("CERT"))
         {
             fail("restore: couldn't find alias cert");
         }
         
-        if (!store.isCertificateEntry("cert"))
+        if (!store.isCertificateEntry("cert") || !store.isCertificateEntry("CERT"))
         {
             fail("restore: cert not identified as certificate entry");
         }
         
-        if (store.isKeyEntry("cert"))
+        if (store.isKeyEntry("cert") || store.isKeyEntry("CERT"))
         {
             fail("restore: cert identified as key entry");
         }
         
         if (store.entryInstanceOf("cert", KeyStore.PrivateKeyEntry.class))
+        {
+            fail("restore: cert identified as key entry via PrivateKeyEntry");
+        }
+        
+        if (store.entryInstanceOf("CERT", KeyStore.PrivateKeyEntry.class))
         {
             fail("restore: cert identified as key entry via PrivateKeyEntry");
         }
