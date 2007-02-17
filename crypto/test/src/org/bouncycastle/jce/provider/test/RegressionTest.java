@@ -13,6 +13,7 @@ public class RegressionTest
         new DESedeTest(),
         new AESTest(),
         new CamelliaTest(),
+        new SEEDTest(),
         new AESSICTest(),
         new GOST28147Test(),
         new PBETest(),
