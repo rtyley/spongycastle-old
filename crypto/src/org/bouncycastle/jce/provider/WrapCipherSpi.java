@@ -10,15 +10,10 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Wrapper;
-import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.engines.AESWrapEngine;
-import org.bouncycastle.crypto.engines.CamelliaEngine;
-import org.bouncycastle.crypto.engines.CamelliaWrapEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.DESedeWrapEngine;
 import org.bouncycastle.crypto.engines.RC2WrapEngine;
 import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
-import org.bouncycastle.crypto.engines.SEEDWrapEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
@@ -426,32 +421,8 @@ public abstract class WrapCipherSpi extends CipherSpi
     //
     // classes that inherit directly from us
     //
-    public static class AESWrap
-        extends WrapCipherSpi
-    {
-        public AESWrap()
-        {
-            super(new AESWrapEngine());
-        }
-    }
 
-    public static class CamelliaWrap
-        extends WrapCipherSpi
-    {
-        public CamelliaWrap()
-        {
-            super(new CamelliaWrapEngine());
-        }
-    }
 
-    public static class SEEDWrap
-        extends WrapCipherSpi
-    {
-        public SEEDWrap()
-        {
-            super(new SEEDWrapEngine());
-        }
-    }
 
     public static class DESEDEWrap
         extends WrapCipherSpi
@@ -477,24 +448,6 @@ public abstract class WrapCipherSpi extends CipherSpi
         public RFC3211DESedeWrap()
         {
             super(new RFC3211WrapEngine(new DESedeEngine()), 8);
-        }
-    }
-
-    public static class RFC3211AESWrap
-        extends WrapCipherSpi
-    {
-        public RFC3211AESWrap()
-        {
-            super(new RFC3211WrapEngine(new AESEngine()), 16);
-        }
-    }
-
-    public static class RFC3211CamelliaWrap
-        extends WrapCipherSpi
-    {
-        public RFC3211CamelliaWrap()
-        {
-            super(new RFC3211WrapEngine(new CamelliaEngine()), 16);
         }
     }
 }

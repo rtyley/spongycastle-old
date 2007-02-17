@@ -9,8 +9,13 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
+import org.bouncycastle.jce.provider.symmetric.AESMappings;
+import org.bouncycastle.jce.provider.symmetric.CamelliaMappings;
+import org.bouncycastle.jce.provider.symmetric.SEEDMappings;
 
 import java.security.Provider;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * To add the provider at runtime use:
@@ -51,6 +56,10 @@ public final class BouncyCastleProvider extends Provider
     public BouncyCastleProvider()
     {
         super(PROVIDER_NAME, 1.355, info);
+
+        addMappings(new AESMappings());
+        addMappings(new CamelliaMappings());
+        addMappings(new SEEDMappings());
 
         //
         // X509Store
@@ -109,13 +118,7 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameterGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
         put("AlgorithmParameterGenerator.CAST5", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$CAST5");
         put("AlgorithmParameterGenerator.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$CAST5");
-        put("AlgorithmParameterGenerator.AES", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$AES");
-        put("Alg.Alias.AlgorithmParameterGenerator.2.16.840.1.101.3.4.2", "AES");  // these first 3 are wrong, but seem to have got around
-        put("Alg.Alias.AlgorithmParameterGenerator.2.16.840.1.101.3.4.22", "AES");
-        put("Alg.Alias.AlgorithmParameterGenerator.2.16.840.1.101.3.4.42", "AES");
-        put("Alg.Alias.AlgorithmParameterGenerator.2.16.840.1.101.3.4.1.2", "AES");
-        put("Alg.Alias.AlgorithmParameterGenerator.2.16.840.1.101.3.4.1.22", "AES");
-        put("Alg.Alias.AlgorithmParameterGenerator.2.16.840.1.101.3.4.1.42", "AES");
+
         put("Alg.Alias.AlgorithmParameterGenerator.GOST-3410", "GOST3410");
         //
         // algorithm parameters
@@ -223,34 +226,9 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.RC5-64", "org.bouncycastle.jce.provider.JCEBlockCipher$RC564");
         put("Cipher.RC6", "org.bouncycastle.jce.provider.JCEBlockCipher$RC6");
         put("Cipher.RIJNDAEL", "org.bouncycastle.jce.provider.JCEBlockCipher$Rijndael");
-        put("Cipher.AES", "org.bouncycastle.jce.provider.JCEBlockCipher$AES");
-        put("Alg.Alias.Cipher.2.16.840.1.101.3.4.2", "AES");
-        put("Alg.Alias.Cipher.2.16.840.1.101.3.4.22", "AES");
-        put("Alg.Alias.Cipher.2.16.840.1.101.3.4.42", "AES");
-        put("Cipher." + NISTObjectIdentifiers.id_aes128_ECB, "org.bouncycastle.jce.provider.JCEBlockCipher$AES");
-        put("Cipher." + NISTObjectIdentifiers.id_aes192_ECB, "org.bouncycastle.jce.provider.JCEBlockCipher$AES");
-        put("Cipher." + NISTObjectIdentifiers.id_aes256_ECB, "org.bouncycastle.jce.provider.JCEBlockCipher$AES");
-        put("Cipher." + NISTObjectIdentifiers.id_aes128_CBC, "org.bouncycastle.jce.provider.JCEBlockCipher$AESCBC");
-        put("Cipher." + NISTObjectIdentifiers.id_aes192_CBC, "org.bouncycastle.jce.provider.JCEBlockCipher$AESCBC");
-        put("Cipher." + NISTObjectIdentifiers.id_aes256_CBC, "org.bouncycastle.jce.provider.JCEBlockCipher$AESCBC");
-        put("Cipher." + NISTObjectIdentifiers.id_aes128_OFB, "org.bouncycastle.jce.provider.JCEBlockCipher$AESOFB");
-        put("Cipher." + NISTObjectIdentifiers.id_aes192_OFB, "org.bouncycastle.jce.provider.JCEBlockCipher$AESOFB");
-        put("Cipher." + NISTObjectIdentifiers.id_aes256_OFB, "org.bouncycastle.jce.provider.JCEBlockCipher$AESOFB");
-        put("Cipher." + NISTObjectIdentifiers.id_aes128_CFB, "org.bouncycastle.jce.provider.JCEBlockCipher$AESCFB");
-        put("Cipher." + NISTObjectIdentifiers.id_aes192_CFB, "org.bouncycastle.jce.provider.JCEBlockCipher$AESCFB");
-        put("Cipher." + NISTObjectIdentifiers.id_aes256_CFB, "org.bouncycastle.jce.provider.JCEBlockCipher$AESCFB");
-        put("Cipher.AESWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$AESWrap");
-        put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_wrap, "AESWRAP");
-        put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_wrap, "AESWRAP");
-        put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_wrap, "AESWRAP");
-        put("Cipher.CAMELLIAWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$CamelliaWrap");
-        put("Cipher.SEEDWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$SEEDWrap");
         put("Cipher.DESEDERFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211DESedeWrap");
-        put("Cipher.AESRFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211AESWrap");
-        put("Cipher.CAMELLIARFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211CamelliaWrap");
-
         put("Cipher.SERPENT", "org.bouncycastle.jce.provider.JCEBlockCipher$Serpent");
-        put("Cipher.CAMELLIA", "org.bouncycastle.jce.provider.JCEBlockCipher$Camellia");
+
         put("Cipher.CAST5", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST5");
         put("Cipher.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST5CBC");
         put("Cipher.CAST6", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST6");
@@ -261,40 +239,10 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.GOST28147", "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147");
         put("Alg.Alias.Cipher.GOST", "GOST28147");
         put("Alg.Alias.Cipher.GOST-28147", "GOST28147");
-
         put("Cipher." + CryptoProObjectIdentifiers.gostR28147_cbc, "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147cbc");
+
         put("Cipher.TEA", "org.bouncycastle.jce.provider.JCEBlockCipher$TEA");
         put("Cipher.XTEA", "org.bouncycastle.jce.provider.JCEBlockCipher$XTEA");
-        put("Cipher.SEED", "org.bouncycastle.jce.provider.JCEBlockCipher$SEED");
-/*
-        put("Cipher.DES/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$DES_CFB8");
-        put("Cipher.DESEDE/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$DESede_CFB8");
-        put("Cipher.SKIPJACK/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$Skipjack_CFB8");
-        put("Cipher.BLOWFISH/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$Blowfish_CFB8");
-        put("Cipher.TWOFISH/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$Twofish_CFB8");
-        put("Cipher.IDEA/CFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$IDEA_CFB8");
-
-        put("Alg.Alias.Cipher.DES/CFB8/NOPADDING", "DES/CFB8");
-        put("Alg.Alias.Cipher.DESEDE/CFB8/NOPADDING", "DESEDE/CFB8");
-        put("Alg.Alias.Cipher.SKIPJACK/CFB8/NOPADDING", "SKIPJACK/CFB8");
-        put("Alg.Alias.Cipher.BLOWFISH/CFB8/NOPADDING", "Blowfish/CFB8");
-        put("Alg.Alias.Cipher.TWOFISH/CFB8/NOPADDING", "Twofish/CFB8");
-        put("Alg.Alias.Cipher.IDEA/CFB8/NOPADDING", "IDEA/CFB8");
-
-        put("Cipher.DES/OFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$DES_OFB8");
-        put("Cipher.DESEDE/OFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$DESede_OFB8");
-        put("Cipher.SKIPJACK/OFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$Skipjack_OFB8");
-        put("Cipher.BLOWFISH/OFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$Blowfish_OFB8");
-        put("Cipher.TWOFISH/OFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$Twofish_OFB8");
-        put("Cipher.IDEA/OFB8", "org.bouncycastle.jce.provider.JCEStreamCipher$IDEA_OFB8");
-
-        put("Alg.Alias.Cipher.DES/OFB8/NOPADDING", "DES/OFB8");
-        put("Alg.Alias.Cipher.DESEDE/OFB8/NOPADDING", "DESEDE/OFB8");
-        put("Alg.Alias.Cipher.SKIPJACK/OFB8/NOPADDING", "SKIPJACK/OFB8");
-        put("Alg.Alias.Cipher.BLOWFISH/OFB8/NOPADDING", "BLOWFISH/OFB8");
-        put("Alg.Alias.Cipher.TWOFISH/OFB8/NOPADDING", "TWOFISH/OFB8");
-        put("Alg.Alias.Cipher.IDEA/OFB8/NOPADDING", "IDEA/OFB8");
-*/
 
         put("Cipher.RSA", "org.bouncycastle.jce.provider.JCERSACipher$NoPadding");
         put("Cipher.RSA/RAW", "org.bouncycastle.jce.provider.JCERSACipher$NoPadding");
@@ -399,28 +347,9 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.RC5-64", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC564");
         put("KeyGenerator.RC6", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC6");
         put("KeyGenerator.RIJNDAEL", "org.bouncycastle.jce.provider.JCEKeyGenerator$Rijndael");
-        put("KeyGenerator.AES", "org.bouncycastle.jce.provider.JCEKeyGenerator$AES");
-        put("KeyGenerator.2.16.840.1.101.3.4.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$AES128");
-        put("KeyGenerator.2.16.840.1.101.3.4.22", "org.bouncycastle.jce.provider.JCEKeyGenerator$AES192");
-        put("KeyGenerator.2.16.840.1.101.3.4.42", "org.bouncycastle.jce.provider.JCEKeyGenerator$AES256");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_ECB, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES128");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_CBC, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES128");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_OFB, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES128");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_CFB, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES128");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_ECB, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES192");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_CBC, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES192");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_OFB, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES192");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_CFB, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES192");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_ECB, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES256");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_CBC, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES256");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_OFB, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES256");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_CFB, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES256");
-        put("KeyGenerator.AESWRAP", "org.bouncycastle.jce.provider.JCEKeyGenerator$AES");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_wrap, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES128");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_wrap, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES192");
-        put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_wrap, "org.bouncycastle.jce.provider.JCEKeyGenerator$AES256");
+
         put("KeyGenerator.SERPENT", "org.bouncycastle.jce.provider.JCEKeyGenerator$Serpent");
-        put("KeyGenerator.CAMELLIA", "org.bouncycastle.jce.provider.JCEKeyGenerator$Camellia");
+
         put("KeyGenerator.CAST5", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST5");
         put("KeyGenerator.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST5");
         put("KeyGenerator.CAST6", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST6");
@@ -428,7 +357,6 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$IDEA");
         put("KeyGenerator.TEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$TEA");
         put("KeyGenerator.XTEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$XTEA");
-        put("KeyGenerator.SEED", "org.bouncycastle.jce.provider.JCEKeyGenerator$SEED");
 
         put("KeyGenerator.GOST28147", "org.bouncycastle.jce.provider.JCEKeyGenerator$GOST28147");
         put("Alg.Alias.KeyGenerator.GOST", "GOST28147");
@@ -501,13 +429,7 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameters.TWOFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.SKIPJACK", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.RIJNDAEL", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("AlgorithmParameters.AES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("Alg.Alias.AlgorithmParameters.2.16.840.1.101.3.4.2", "AES");
-        put("Alg.Alias.AlgorithmParameters.2.16.840.1.101.3.4.22", "AES");
-        put("Alg.Alias.AlgorithmParameters.2.16.840.1.101.3.4.42", "AES");
-        put("Alg.Alias.AlgorithmParameters.2.16.840.1.101.3.4.1.2", "AES");
-        put("Alg.Alias.AlgorithmParameters.2.16.840.1.101.3.4.1.22", "AES");
-        put("Alg.Alias.AlgorithmParameters.2.16.840.1.101.3.4.1.42", "AES");
+
         
         //
         // secret key factories.
@@ -584,7 +506,18 @@ public final class BouncyCastleProvider extends Provider
         put("CertStore.LDAP", "org.bouncycastle.jce.provider.X509LDAPCertStoreSpi");
         put("Alg.Alias.CertStore.X509LDAP", "LDAP");
     }
-    
+
+    private void addMappings(Map mappings)
+    {
+        // can't use putAll due to JDK 1.1
+        for (Iterator it = mappings.keySet().iterator(); it.hasNext();)
+        {
+            Object key = it.next();
+
+            put(key, mappings.get(key));
+        }
+    }
+
     //
     // macs
     //

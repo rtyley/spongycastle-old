@@ -423,18 +423,6 @@ public class JCEKeyGenerator
         }
     }
 
-    /**
-     * SEED
-     */
-    public static class SEED
-        extends JCEKeyGenerator
-    {
-        public SEED()
-        {
-            super("SEED", 128, new CipherKeyGenerator());
-        }
-    }
-
     // HMAC Related secret keys..
   
     /**

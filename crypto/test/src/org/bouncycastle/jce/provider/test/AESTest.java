@@ -1,5 +1,13 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -7,24 +15,11 @@ import java.io.IOException;
 import java.security.Key;
 import java.security.Security;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
-
 /**
  * basic test class for the AES cipher vectors from FIPS-197
  */
 public class AESTest
-    extends SimpleTest
+    extends BaseBlockCipherTest
 {
     static String[] cipherTests =
     {
@@ -42,9 +37,9 @@ public class AESTest
         "8ea2b7ca516745bfeafc49904b496089",
     };
 
-    public String getName()
+    public AESTest()
     {
-        return "AES";
+        super("AES");
     }
 
     public void test(
@@ -144,115 +139,6 @@ public class AESTest
         }
     }
 
-    private void wrapTest(
-        int     id,
-        byte[]  kek,
-        byte[]  in,
-        byte[]  out)
-        throws Exception
-    {
-        Cipher wrapper = Cipher.getInstance("AESWrap", "BC");
-
-        wrapper.init(Cipher.WRAP_MODE, new SecretKeySpec(kek, "AES"));
-
-        try
-        {
-            byte[]  cText = wrapper.wrap(new SecretKeySpec(in, "AES"));
-            if (!areEqual(cText, out))
-            {
-                fail("failed wrap test " + id  + " expected " + new String(Hex.encode(out)) + " got " + new String(Hex.encode(cText)));
-            }
-        }
-        catch (Exception e)
-        {
-            fail("failed wrap test exception " + e.toString(), e);
-        }
-
-        wrapper.init(Cipher.UNWRAP_MODE, new SecretKeySpec(kek, "AES"));
-
-        try
-        {
-            Key  pText = wrapper.unwrap(out, "AES", Cipher.SECRET_KEY);
-            if (!areEqual(pText.getEncoded(), in))
-            {
-                fail("failed unwrap test " + id  + " expected " + new String(Hex.encode(in)) + " got " + new String(Hex.encode(pText.getEncoded())));
-            }
-        }
-        catch (Exception e)
-        {
-            fail("failed unwrap test exception " + e.toString(), e);
-        }
-    }
-
-    private void oidTest()
-        throws Exception
-    {
-        String[] oids = {
-                NISTObjectIdentifiers.id_aes128_ECB.getId(),
-                NISTObjectIdentifiers.id_aes128_CBC.getId(),
-                NISTObjectIdentifiers.id_aes128_OFB.getId(),
-                NISTObjectIdentifiers.id_aes128_CFB.getId(),
-                NISTObjectIdentifiers.id_aes192_ECB.getId(),
-                NISTObjectIdentifiers.id_aes192_CBC.getId(),
-                NISTObjectIdentifiers.id_aes192_OFB.getId(),
-                NISTObjectIdentifiers.id_aes192_CFB.getId(),
-                NISTObjectIdentifiers.id_aes256_ECB.getId(),
-                NISTObjectIdentifiers.id_aes256_CBC.getId(),
-                NISTObjectIdentifiers.id_aes256_OFB.getId(),
-                NISTObjectIdentifiers.id_aes256_CFB.getId()
-        };
-        
-        String[] names = {
-                "AES/ECB/PKCS7Padding",
-                "AES/CBC/PKCS7Padding",
-                "AES/OFB/PKCS7Padding",
-                "AES/CFB/PKCS7Padding",
-                "AES/ECB/PKCS7Padding",
-                "AES/CBC/PKCS7Padding",
-                "AES/OFB/PKCS7Padding",
-                "AES/CFB/PKCS7Padding",
-                "AES/ECB/PKCS7Padding",
-                "AES/CBC/PKCS7Padding",
-                "AES/OFB/PKCS7Padding",
-                "AES/CFB/PKCS7Padding"
-        };
-        
-        byte[]          data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-        IvParameterSpec ivSpec = new IvParameterSpec(new byte[16]);
-        
-        for (int i = 0; i != oids.length; i++)
-        {
-            Cipher c1 = Cipher.getInstance(oids[i], "BC");
-            Cipher c2 = Cipher.getInstance(names[i], "BC");
-            KeyGenerator kg = KeyGenerator.getInstance(oids[i], "BC");
-            
-            SecretKey k = kg.generateKey();
-            
-            if (names[i].startsWith("AES/ECB"))
-            {
-                c1.init(Cipher.ENCRYPT_MODE, k);
-                c2.init(Cipher.DECRYPT_MODE, k);
-            }
-            else
-            {
-                c1.init(Cipher.ENCRYPT_MODE, k, ivSpec);
-                c2.init(Cipher.DECRYPT_MODE, k, ivSpec);
-            }
-
-            byte[] result = c2.doFinal(c1.doFinal(data));
-            
-            if (!areEqual(data, result))
-            {
-                fail("failed OID test");
-            }
-            
-            if (k.getEncoded().length != (16 + ((i / 4) * 8)))
-            {
-                fail("failed key length test");
-            }
-        }
-    }
-
     public void performTest()
         throws Exception
     {
@@ -268,9 +154,48 @@ public class AESTest
         byte[]  in1 = Hex.decode("00112233445566778899aabbccddeeff");
         byte[]  out1 = Hex.decode("1fa68b0a8112b447aef34bd8fb5a7b829d3e862371d2cfe5");
         
-        wrapTest(1, kek1, in1, out1);
+        wrapTest(1, "AESWrap", kek1, in1, out1);
 
-        oidTest();
+        String[] oids = {
+                NISTObjectIdentifiers.id_aes128_ECB.getId(),
+                NISTObjectIdentifiers.id_aes128_CBC.getId(),
+                NISTObjectIdentifiers.id_aes128_OFB.getId(),
+                NISTObjectIdentifiers.id_aes128_CFB.getId(),
+                NISTObjectIdentifiers.id_aes192_ECB.getId(),
+                NISTObjectIdentifiers.id_aes192_CBC.getId(),
+                NISTObjectIdentifiers.id_aes192_OFB.getId(),
+                NISTObjectIdentifiers.id_aes192_CFB.getId(),
+                NISTObjectIdentifiers.id_aes256_ECB.getId(),
+                NISTObjectIdentifiers.id_aes256_CBC.getId(),
+                NISTObjectIdentifiers.id_aes256_OFB.getId(),
+                NISTObjectIdentifiers.id_aes256_CFB.getId()
+        };
+
+        String[] names = {
+                "AES/ECB/PKCS7Padding",
+                "AES/CBC/PKCS7Padding",
+                "AES/OFB/PKCS7Padding",
+                "AES/CFB/PKCS7Padding",
+                "AES/ECB/PKCS7Padding",
+                "AES/CBC/PKCS7Padding",
+                "AES/OFB/PKCS7Padding",
+                "AES/CFB/PKCS7Padding",
+                "AES/ECB/PKCS7Padding",
+                "AES/CBC/PKCS7Padding",
+                "AES/OFB/PKCS7Padding",
+                "AES/CFB/PKCS7Padding"
+        };
+
+        oidTest(oids, names, 4);
+
+
+        String[] wrapOids = {
+                NISTObjectIdentifiers.id_aes128_wrap.getId(),
+                NISTObjectIdentifiers.id_aes192_wrap.getId(),
+                NISTObjectIdentifiers.id_aes256_wrap.getId()
+        };
+
+        wrapOidTest(wrapOids, "AESWrap");
     }
 
     public static void main(
