@@ -12,6 +12,7 @@ public class RegressionTest
         new FIPSDESTest(),
         new DESedeTest(),
         new AESTest(),
+        new CamelliaTest(),
         new AESSICTest(),
         new GOST28147Test(),
         new PBETest(),

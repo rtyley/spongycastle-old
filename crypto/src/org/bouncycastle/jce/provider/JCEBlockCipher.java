@@ -9,7 +9,6 @@ import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.BlowfishEngine;
 import org.bouncycastle.crypto.engines.CAST5Engine;
 import org.bouncycastle.crypto.engines.CAST6Engine;
-import org.bouncycastle.crypto.engines.CamelliaEngine;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
@@ -903,7 +902,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             super(new CFBBlockCipher(new AESFastEngine(), 128), 128);
         }
     }
-    
+
     /**
      * AESOFB
      */
@@ -915,7 +914,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             super(new OFBBlockCipher(new AESFastEngine(), 128), 128);
         }
     }
-    
+
     /**
      * Rijndael
      */
@@ -940,17 +939,7 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
     }
 
-    /**
-     * Camellia
-     */
-    static public class Camellia
-        extends JCEBlockCipher
-    {
-        public Camellia()
-        {
-            super(new CamelliaEngine());
-        }
-    }
+
     
     /**
      * CAST5
