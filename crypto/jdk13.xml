@@ -29,6 +29,10 @@
                 <exclude name="**/EC5*.java" />
                 <exclude name="**/CertPathReviewer*.java" />
                 <exclude name="**/PKIXCertPathReviewer.java" />
+                <exclude name="**/PKIXAttrCert*.java" />
+                <exclude name="**/PKIXNameConstraints*.java" />
+                <exclude name="**/ExtendedPKIX*.java" />
+                <exclude name="**/RFC3281*.java" />
                 <exclude name="**/CertPathValidatorUtilities.java" />
                 <exclude name="**/validator/*.java" />
                 <exclude name="**/ValidateSignedMail.java" />
