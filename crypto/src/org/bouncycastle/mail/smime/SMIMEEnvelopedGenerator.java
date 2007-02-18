@@ -50,10 +50,20 @@ public class SMIMEEnvelopedGenerator
     public static final String  AES192_CBC      = CMSEnvelopedDataGenerator.AES192_CBC;
     public static final String  AES256_CBC      = CMSEnvelopedDataGenerator.AES256_CBC;
 
+    public static final String  CAMELLIA128_CBC = CMSEnvelopedDataGenerator.CAMELLIA128_CBC;
+    public static final String  CAMELLIA192_CBC = CMSEnvelopedDataGenerator.CAMELLIA192_CBC;
+    public static final String  CAMELLIA256_CBC = CMSEnvelopedDataGenerator.CAMELLIA256_CBC;
+
+    public static final String  SEED_CBC        = CMSEnvelopedDataGenerator.SEED_CBC;
+
     public static final String  DES_EDE3_WRAP   = CMSEnvelopedDataGenerator.DES_EDE3_WRAP;
     public static final String  AES128_WRAP     = CMSEnvelopedDataGenerator.AES128_WRAP;
     public static final String  AES256_WRAP     = CMSEnvelopedDataGenerator.AES256_WRAP;
-
+    public static final String  CAMELLIA128_WRAP = CMSEnvelopedDataGenerator.CAMELLIA128_WRAP;
+    public static final String  CAMELLIA192_WRAP = CMSEnvelopedDataGenerator.CAMELLIA192_WRAP;
+    public static final String  CAMELLIA256_WRAP = CMSEnvelopedDataGenerator.CAMELLIA256_WRAP;
+    public static final String  SEED_WRAP       = CMSEnvelopedDataGenerator.SEED_WRAP;
+    
     public static final String  ECDH_SHA1KDF    = CMSEnvelopedDataGenerator.ECDH_SHA1KDF;
 
     private static final String ENCRYPTED_CONTENT_TYPE = "application/pkcs7-mime; name=\"smime.p7m\"; smime-type=enveloped-data";
