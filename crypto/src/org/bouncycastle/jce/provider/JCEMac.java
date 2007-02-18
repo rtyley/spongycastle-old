@@ -1,17 +1,18 @@
 package org.bouncycastle.jce.provider;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.MacSpi;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Mac;
-import org.bouncycastle.crypto.digests.*;
+import org.bouncycastle.crypto.digests.MD2Digest;
+import org.bouncycastle.crypto.digests.MD4Digest;
+import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.RIPEMD128Digest;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA224Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.digests.SHA384Digest;
+import org.bouncycastle.crypto.digests.SHA512Digest;
+import org.bouncycastle.crypto.digests.TigerDigest;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.IDEAEngine;
@@ -24,8 +25,17 @@ import org.bouncycastle.crypto.macs.GOST28147Mac;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.macs.ISO9797Alg3Mac;
 import org.bouncycastle.crypto.macs.OldHMac;
+import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+
+import javax.crypto.MacSpi;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEMac
     extends MacSpi implements PBE
@@ -304,7 +314,31 @@ public class JCEMac
             super(new CBCBlockCipherMac(new DESedeEngine(), 64));
         }
     }
-    
+
+    /**
+     * DESede64with7816-4Padding
+     */
+    public static class DESede64with7816d4
+        extends JCEMac
+    {
+        public DESede64with7816d4()
+        {
+            super(new CBCBlockCipherMac(new DESedeEngine(), 64, new ISO7816d4Padding()));
+        }
+    }
+
+    /**
+     * DES9797Alg3with7816-4Padding
+     */
+    public static class DES9797Alg3with7816d4
+        extends JCEMac
+    {
+        public DES9797Alg3with7816d4()
+        {
+            super(new ISO9797Alg3Mac(new DESEngine(), new ISO7816d4Padding()));
+        }
+    }
+
     /**
      * DES9797Alg3
      */

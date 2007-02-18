@@ -1,15 +1,14 @@
 package org.bouncycastle.jce.provider.test;
 
-import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
+import java.security.Security;
 
 /**
  * MAC tester - vectors from 
@@ -40,6 +39,36 @@ public class MacTest
     
     public MacTest()
     {
+    }
+
+    private void aliasTest(SecretKey key, String primary, String[] aliases)
+        throws Exception
+    {
+        Mac mac = Mac.getInstance(primary, "BC");
+
+        //
+        // standard DAC - zero IV
+        //
+        mac.init(key);
+
+        mac.update(input, 0, input.length);
+
+        byte[] ref = mac.doFinal();
+
+        for (int i = 0; i != aliases.length; i++)
+        {
+            mac = Mac.getInstance(aliases[i], "BC");
+
+            mac.init(key);
+
+            mac.update(input, 0, input.length);
+
+            byte[] out = mac.doFinal();
+            if (!areEqual(out, ref))
+            {
+                fail("Failed - expected " + new String(Hex.encode(ref)) + " got " + new String(Hex.encode(out)));
+            }
+        }
     }
 
     public void performTest()
@@ -130,6 +159,12 @@ public class MacTest
         {
             fail("Failed - expected " + new String(Hex.encode(outputDesEDE64)) + " got " + new String(Hex.encode(out)));
         }
+
+        aliasTest(new SecretKeySpec(keyBytesISO9797, "DESede"), "DESedeMac64withISO7816-4Padding",
+            new String[] { "DESEDE64WITHISO7816-4PADDING", "DESEDEISO9797ALG1MACWITHISO7816-4PADDING", "DESEDEISO9797ALG1WITHISO7816-4PADDING" });
+
+        aliasTest(new SecretKeySpec(keyBytesISO9797, "DESede"), "ISO9797ALG3WITHISO7816-4PADDING",
+            new String[] { "ISO9797ALG3MACWITHISO7816-4PADDING" });
     }
 
     public String getName()

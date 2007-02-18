@@ -55,6 +55,9 @@ public class CMSTestUtil
     public static KeyGenerator     rc240kg;
     public static KeyGenerator     rc264kg;
     public static KeyGenerator     rc2128kg;
+    public static KeyGenerator     aesKg;
+    public static KeyGenerator     seedKg;
+    public static KeyGenerator     camelliaKg;
     public static BigInteger       serialNumber;
     
     public static final boolean DEBUG = true;
@@ -147,6 +150,12 @@ public class CMSTestUtil
             
             rc2128kg = KeyGenerator.getInstance("RC2", "BC");
             rc2128kg.init(128, rand);
+
+            aesKg = KeyGenerator.getInstance("AES", "BC");
+
+            seedKg = KeyGenerator.getInstance("SEED", "BC");
+
+            camelliaKg = KeyGenerator.getInstance("Camellia", "BC");
             
             serialNumber = new BigInteger("1");
         }
@@ -242,6 +251,23 @@ public class CMSTestUtil
     public static SecretKey makeRC2128Key()
     {
         return rc2128kg.generateKey();
+    }
+
+    public static SecretKey makeSEEDKey()
+    {
+        return seedKg.generateKey();
+    }
+
+    public static SecretKey makeAESKey(int keySize)
+    {
+        aesKg.init(keySize);
+        return aesKg.generateKey();
+    }
+
+    public static SecretKey makeCamelliaKey(int keySize)
+    {
+        camelliaKg.init(keySize);
+        return camelliaKg.generateKey();
     }
 
     public static X509Certificate makeCertificate(KeyPair _subKP,

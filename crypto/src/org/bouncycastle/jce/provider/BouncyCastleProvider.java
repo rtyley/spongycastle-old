@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.symmetric.AESMappings;
+import org.bouncycastle.jce.provider.symmetric.CAST5Mappings;
 import org.bouncycastle.jce.provider.symmetric.CamelliaMappings;
 import org.bouncycastle.jce.provider.symmetric.SEEDMappings;
 
@@ -59,6 +60,7 @@ public final class BouncyCastleProvider extends Provider
 
         addMappings(new AESMappings());
         addMappings(new CamelliaMappings());
+        addMappings(new CAST5Mappings());
         addMappings(new SEEDMappings());
 
         //
@@ -116,8 +118,6 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameterGenerator.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$IDEA");
         put("AlgorithmParameterGenerator.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
         put("AlgorithmParameterGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
-        put("AlgorithmParameterGenerator.CAST5", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$CAST5");
-        put("AlgorithmParameterGenerator.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$CAST5");
 
         put("Alg.Alias.AlgorithmParameterGenerator.GOST-3410", "GOST3410");
         //
@@ -133,8 +133,7 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameters.1.2.840.113549.3.7", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.IDEA", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IDEAAlgorithmParameters");
         put("AlgorithmParameters.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IDEAAlgorithmParameters");
-        put("AlgorithmParameters.CAST5", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$CAST5AlgorithmParameters");
-        put("AlgorithmParameters.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$CAST5AlgorithmParameters");
+
         put("AlgorithmParameters.GOST3410", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$GOST3410");
         put("Alg.Alias.AlgorithmParameters.GOST-3410", "GOST3410");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHA1ANDRC2", "PKCS12PBE");
@@ -229,8 +228,7 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.DESEDERFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211DESedeWrap");
         put("Cipher.SERPENT", "org.bouncycastle.jce.provider.JCEBlockCipher$Serpent");
 
-        put("Cipher.CAST5", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST5");
-        put("Cipher.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST5CBC");
+
         put("Cipher.CAST6", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST6");
         put("Cipher.IDEA", "org.bouncycastle.jce.provider.JCEBlockCipher$IDEA");
         put("Cipher.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JCEBlockCipher$IDEACBC");
@@ -350,8 +348,7 @@ public final class BouncyCastleProvider extends Provider
 
         put("KeyGenerator.SERPENT", "org.bouncycastle.jce.provider.JCEKeyGenerator$Serpent");
 
-        put("KeyGenerator.CAST5", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST5");
-        put("KeyGenerator.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST5");
+
         put("KeyGenerator.CAST6", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST6");
         put("KeyGenerator.IDEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$IDEA");
         put("KeyGenerator.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$IDEA");
@@ -514,6 +511,10 @@ public final class BouncyCastleProvider extends Provider
         {
             Object key = it.next();
 
+            if (containsKey(key))
+            {
+                throw new IllegalStateException("duplicate provider key (" + key + ") found in " + mappings.getClass().getName());
+            }
             put(key, mappings.get(key));
         }
     }
@@ -538,9 +539,16 @@ public final class BouncyCastleProvider extends Provider
         
         put("Mac.DESEDEMAC64", "org.bouncycastle.jce.provider.JCEMac$DESede64");
         put("Alg.Alias.Mac.DESEDE64", "DESEDEMAC64");
-        
+
+        put("Mac.DESEDEMAC64WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.JCEMac$DESede64with7816d4");
+        put("Alg.Alias.Mac.DESEDE64WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
+        put("Alg.Alias.Mac.DESEDEISO9797ALG1MACWITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
+        put("Alg.Alias.Mac.DESEDEISO9797ALG1WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
+
         put("Mac.ISO9797ALG3MAC", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
         put("Alg.Alias.Mac.ISO9797ALG3", "ISO9797ALG3MAC");
+        put("Mac.ISO9797ALG3WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3with7816d4");
+        put("Alg.Alias.Mac.ISO9797ALG3MACWITHISO7816-4PADDING", "ISO9797ALG3WITHISO7816-4PADDING");
 
         put("Mac.SKIPJACKMAC", "org.bouncycastle.jce.provider.JCEMac$Skipjack");
         put("Alg.Alias.Mac.SKIPJACK", "SKIPJACKMAC");
