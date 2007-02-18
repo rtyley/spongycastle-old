@@ -66,7 +66,23 @@ public class JCEECPublicKey
     {
         this.algorithm = algorithm;
         this.q = spec.getQ();
-        this.ecSpec = spec.getParams();
+
+        if (spec.getParams() ! = null)
+        {
+            this.ecSpec = spec.getParams();
+        }
+        else
+        {
+            if (q.getCurve() == null)
+            {
+                org.bouncycastle.jce.spec.ECParameterSpec s = ProviderUtil.getEcImplicitlyCa();
+
+                q = (q instanceof org.bouncycastle.math.ec.ECPoint.Fp)
+                                ? (org.bouncycastle.math.ec.ECPoint)new org.bouncycastle.math.ec.ECPoint.Fp(s.getCurve(), q.getX(), q.getY())
+                                : (org.bouncycastle.math.ec.ECPoint)new org.bouncycastle.math.ec.ECPoint.F2m(s.getCurve(), q.getX(), q.getY());
+            }
+            this.ecSpec = null;
+        }
     }
 
     JCEECPublicKey(

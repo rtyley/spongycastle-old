@@ -277,45 +277,6 @@ public class JCEKeyGenerator
     }
 
     /**
-     * AES
-     */
-    public static class AES
-        extends JCEKeyGenerator
-    {
-        public AES()
-        {
-            super("AES", 192, new CipherKeyGenerator());
-        }
-    }
-
-    public static class AES128
-        extends JCEKeyGenerator
-    {
-        public AES128()
-        {
-            super("AES", 128, new CipherKeyGenerator());
-        }
-    }
-
-    public static class AES192
-        extends JCEKeyGenerator
-    {
-        public AES192()
-        {
-            super("AES", 192, new CipherKeyGenerator());
-        }
-    }
-
-    public static class AES256
-        extends JCEKeyGenerator
-    {
-        public AES256()
-        {
-            super("AES", 256, new CipherKeyGenerator());
-        }
-    }
-
-    /**
      * GOST28147
      */
     public static class GOST28147
@@ -350,30 +311,8 @@ public class JCEKeyGenerator
             super("Serpent", 192, new CipherKeyGenerator());
         }
     }
-
-    /**
-     * Camellia
-     */
-    public static class Camellia
-        extends JCEKeyGenerator
-    {
-        public Camellia()
-        {
-            super("Camellia", 256, new CipherKeyGenerator());
-        }
-    }
     
-    /**
-     * CAST5
-     */
-    public static class CAST5
-        extends JCEKeyGenerator
-    {
-        public CAST5()
-        {
-            super("CAST5", 128, new CipherKeyGenerator());
-        }
-    }
+
 
     /**
      * CAST6

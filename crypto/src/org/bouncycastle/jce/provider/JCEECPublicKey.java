@@ -85,13 +85,28 @@ public class JCEECPublicKey
     {
         this.algorithm = algorithm;
         this.q = spec.getQ();
-        
-        ECCurve curve = spec.getParams().getCurve();
-        EllipticCurve ellipticCurve;
 
-        ellipticCurve = EC5Util.convertCurve(curve, spec.getParams().getSeed());
-        
-        this.ecSpec = EC5Util.convertSpec(ellipticCurve, spec.getParams());
+        if (spec.getParams() != null) // can be null if implictlyCa
+        {
+            ECCurve curve = spec.getParams().getCurve();
+            EllipticCurve ellipticCurve;
+
+            ellipticCurve = EC5Util.convertCurve(curve, spec.getParams().getSeed());
+
+            this.ecSpec = EC5Util.convertSpec(ellipticCurve, spec.getParams());
+        }
+        else
+        {
+            if (q.getCurve() == null)
+            {
+                org.bouncycastle.jce.spec.ECParameterSpec s = ProviderUtil.getEcImplicitlyCa();
+
+                q = (q instanceof org.bouncycastle.math.ec.ECPoint.Fp)
+                                ? (org.bouncycastle.math.ec.ECPoint)new org.bouncycastle.math.ec.ECPoint.Fp(s.getCurve(), q.getX(), q.getY())
+                                : (org.bouncycastle.math.ec.ECPoint)new org.bouncycastle.math.ec.ECPoint.F2m(s.getCurve(), q.getX(), q.getY());
+            }               
+            this.ecSpec = null;
+        }
     }
     
     JCEECPublicKey(

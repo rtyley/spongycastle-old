@@ -10,6 +10,7 @@ import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.FixedSecureRandom;
@@ -43,6 +44,8 @@ public class ImplicitlyCaTest
 
         testJDKAPI();
 
+        testKeyFactory();
+
         testBasicThreadLocal();
     }
 
@@ -71,6 +74,44 @@ public class ImplicitlyCaTest
 
         ECPrivateKey sKey = (ECPrivateKey)p.getPrivate();
         ECPublicKey vKey = (ECPublicKey)p.getPublic();
+
+        testECDSA(sKey, vKey);
+
+        testBCParamsAndQ(sKey, vKey);
+        testEC5Params(sKey, vKey);
+
+        testEncoding(sKey, vKey);
+    }
+
+    private void testKeyFactory()
+        throws Exception
+    {
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        ECCurve curve = new ECCurve.Fp(
+            new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
+            new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+            new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+
+        ECParameterSpec ecSpec = new ECParameterSpec(
+            curve,
+            curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+            new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
+
+        ConfigurableProvider config = (ConfigurableProvider)Security.getProvider("BC");
+
+        config.setParameter(ConfigurableProvider.EC_IMPLICITLY_CA, ecSpec);
+
+        g.initialize(null, new SecureRandom());
+
+        KeyPair p = g.generateKeyPair();
+
+        ECPrivateKey sKey = (ECPrivateKey)p.getPrivate();
+        ECPublicKey vKey = (ECPublicKey)p.getPublic();
+
+        KeyFactory fact = KeyFactory.getInstance("ECDSA", "BC");
+
+        vKey = (ECPublicKey)fact.generatePublic(new ECPublicKeySpec(vKey.getQ(), null));
 
         testECDSA(sKey, vKey);
 

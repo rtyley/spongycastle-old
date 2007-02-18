@@ -22,7 +22,9 @@ import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
 import org.bouncycastle.asn1.cms.RecipientIdentifier;
 import org.bouncycastle.asn1.cms.RecipientInfo;
+import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -70,16 +72,26 @@ public class CMSEnvelopedGenerator
     public static final String  AES128_CBC      = NISTObjectIdentifiers.id_aes128_CBC.getId();
     public static final String  AES192_CBC      = NISTObjectIdentifiers.id_aes192_CBC.getId();
     public static final String  AES256_CBC      = NISTObjectIdentifiers.id_aes256_CBC.getId();
+    public static final String  CAMELLIA128_CBC = NTTObjectIdentifiers.id_camellia128_cbc.getId();
+    public static final String  CAMELLIA192_CBC = NTTObjectIdentifiers.id_camellia192_cbc.getId();
+    public static final String  CAMELLIA256_CBC = NTTObjectIdentifiers.id_camellia256_cbc.getId();
+    public static final String  SEED_CBC        = KISAObjectIdentifiers.id_seedCBC.getId();
 
     public static final String  DES_EDE3_WRAP   = PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId();
     public static final String  AES128_WRAP     = NISTObjectIdentifiers.id_aes128_wrap.getId();
+    public static final String  AES192_WRAP     = NISTObjectIdentifiers.id_aes192_wrap.getId();
     public static final String  AES256_WRAP     = NISTObjectIdentifiers.id_aes256_wrap.getId();
+    public static final String  CAMELLIA128_WRAP = NTTObjectIdentifiers.id_camellia128_wrap.getId();
+    public static final String  CAMELLIA192_WRAP = NTTObjectIdentifiers.id_camellia192_wrap.getId();
+    public static final String  CAMELLIA256_WRAP = NTTObjectIdentifiers.id_camellia256_wrap.getId();
+    public static final String  SEED_WRAP       = KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap.getId();
 
     public static final String  ECDH_SHA1KDF    = X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme.getId();
 
+    private static final CMSEnvelopedHelper HELPER = CMSEnvelopedHelper.INSTANCE;
+
     List recipientInfs = new ArrayList();
     SecureRandom rand = new SecureRandom();
-    private static final CMSEnvelopedHelper HELPER = CMSEnvelopedHelper.INSTANCE;
 
     protected class RecipientInf
     {
@@ -181,7 +193,36 @@ public class CMSEnvelopedGenerator
                     throw new IllegalArgumentException("illegal keysize in AES");
                 }
 
-                keyEncAlg = new AlgorithmIdentifier(wrapOid, new DERNull());
+                keyEncAlg = new AlgorithmIdentifier(wrapOid);  // parameters absent
+            }
+            else if (secKey.getAlgorithm().startsWith("SEED"))
+            {
+                // parameters absent
+                keyEncAlg = new AlgorithmIdentifier(KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap);
+            }
+            else if (secKey.getAlgorithm().startsWith("Camellia"))
+            {
+                int length = secKey.getEncoded().length * 8;
+                DERObjectIdentifier wrapOid;
+
+                if (length == 128)
+                {
+                    wrapOid = NTTObjectIdentifiers.id_camellia128_wrap;
+                }
+                else if (length == 192)
+                {
+                    wrapOid = NTTObjectIdentifiers.id_camellia192_wrap;
+                }
+                else if (length == 256)
+                {
+                    wrapOid = NTTObjectIdentifiers.id_camellia256_wrap;
+                }
+                else
+                {
+                    throw new IllegalArgumentException("illegal keysize in Camellia");
+                }
+
+                keyEncAlg = new AlgorithmIdentifier(wrapOid);  // parameters must be absent
             }
             else
             {
@@ -217,8 +258,7 @@ public class CMSEnvelopedGenerator
             {
                 ASN1OctetString         encKey;
 
-                Cipher keyCipher = HELPER.createAsymmetricCipher(
-                                                                   keyEncAlg.getObjectId().getId(), prov);
+                Cipher keyCipher = HELPER.createAsymmetricCipher(keyEncAlg.getObjectId().getId(), prov);
                 try
                 {
                     keyCipher.init(Cipher.WRAP_MODE, pubKey);
@@ -249,7 +289,6 @@ public class CMSEnvelopedGenerator
                     ASN1InputStream aIn = new ASN1InputStream(cert.getTBSCertificate());
                     TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
                     IssuerAndSerialNumber encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
-
 
                     return new RecipientInfo(new KeyTransRecipientInfo(
                             new RecipientIdentifier(encSid),

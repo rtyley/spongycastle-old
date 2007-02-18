@@ -3,7 +3,13 @@ package org.bouncycastle.cms.test;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
@@ -22,6 +28,8 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
@@ -206,41 +214,6 @@ public class EnvelopedDataTest
         }
     }
 
-    public void testKeyTransAES128()
-        throws Exception
-    {
-        byte[]          data     = "WallaWallaWashington".getBytes();
-
-        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-
-        edGen.addKeyTransRecipient(_reciCert);
-
-        CMSEnvelopedData ed = edGen.generate(
-                                new CMSProcessableByteArray(data),
-                                CMSEnvelopedDataGenerator.AES128_CBC, "BC");
-
-        RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
-        
-        Collection  c = recipients.getRecipients();
-
-        assertEquals(1, c.size());
-
-        Iterator    it = c.iterator();
-        
-        while (it.hasNext())
-        {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
-
-            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
-            
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
-            assertEquals(true, Arrays.equals(data, recData));
-        }
-    }
-
     public void testKeyTransCAST5SunJCE()
         throws Exception
     {
@@ -282,74 +255,6 @@ public class EnvelopedDataTest
             
             byte[] recData = recipient.getContent(_reciKP.getPrivate(), "SunJCE");
     
-            assertEquals(true, Arrays.equals(data, recData));
-        }
-    }
-    
-    public void testKeyTransAES192()
-        throws Exception
-    {
-        byte[]          data     = "WallaWallaWashington".getBytes();
-
-        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-
-        edGen.addKeyTransRecipient(_reciCert);
-
-        CMSEnvelopedData ed = edGen.generate(
-                                new CMSProcessableByteArray(data),
-                                CMSEnvelopedDataGenerator.AES192_CBC, "BC");
-
-        RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES192_CBC);
-        
-        Collection  c = recipients.getRecipients();
-
-        assertEquals(1, c.size());
-
-        Iterator    it = c.iterator();
-
-        while (it.hasNext())
-        {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
-
-            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
-            
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
-            assertEquals(true, Arrays.equals(data, recData));
-        }
-    }
-
-    public void testKeyTransAES256()
-        throws Exception
-    {
-        byte[]          data     = "WallaWallaWashington".getBytes();
-
-        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-
-        edGen.addKeyTransRecipient(_reciCert);
-
-        CMSEnvelopedData ed = edGen.generate(
-                                new CMSProcessableByteArray(data),
-                                CMSEnvelopedDataGenerator.AES256_CBC, "BC");
-
-        RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-        assertEquals(ed.getEncryptionAlgOID(), "2.16.840.1.101.3.4.1.42");
-        
-        Collection  c = recipients.getRecipients();
-
-        assertEquals(1, c.size());
-
-        Iterator    it = c.iterator();
-
-        while (it.hasNext())
-        {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
-
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
-
             assertEquals(true, Arrays.equals(data, recData));
         }
     }
@@ -489,42 +394,98 @@ public class EnvelopedDataTest
         }
     }
 
-    public void testDESKEK()
+    public void testKeyTransCAST5()
         throws Exception
     {
-        byte[]    data = "WallaWallaWashington".getBytes();
-        SecretKey kek  = CMSTestUtil.makeDesede192Key();
-        
+        tryKeyTrans(CMSEnvelopedDataGenerator.CAST5_CBC, new DERObjectIdentifier(CMSEnvelopedDataGenerator.CAST5_CBC), ASN1Sequence.class);
+    }
+
+    public void testKeyTransAES128()
+        throws Exception
+    {
+        tryKeyTrans(CMSEnvelopedDataGenerator.AES128_CBC, NISTObjectIdentifiers.id_aes128_CBC, DEROctetString.class);
+    }
+
+    public void testKeyTransAES192()
+        throws Exception
+    {
+        tryKeyTrans(CMSEnvelopedDataGenerator.AES192_CBC, NISTObjectIdentifiers.id_aes192_CBC, DEROctetString.class);
+    }
+
+    public void testKeyTransAES256()
+        throws Exception
+    {
+        tryKeyTrans(CMSEnvelopedDataGenerator.AES256_CBC, NISTObjectIdentifiers.id_aes256_CBC, DEROctetString.class);
+    }
+
+    public void testKeyTransSEED()
+        throws Exception
+    {
+        tryKeyTrans(CMSEnvelopedDataGenerator.SEED_CBC, KISAObjectIdentifiers.id_seedCBC, DEROctetString.class);
+    }
+
+    public void testKeyTransCamellia128()
+        throws Exception
+    {
+        tryKeyTrans(CMSEnvelopedDataGenerator.CAMELLIA128_CBC, NTTObjectIdentifiers.id_camellia128_cbc, DEROctetString.class);
+    }
+
+    public void testKeyTransCamellia192()
+        throws Exception
+    {
+        tryKeyTrans(CMSEnvelopedDataGenerator.CAMELLIA192_CBC, NTTObjectIdentifiers.id_camellia192_cbc, DEROctetString.class);
+    }
+
+    public void testKeyTransCamellia256()
+        throws Exception
+    {
+        tryKeyTrans(CMSEnvelopedDataGenerator.CAMELLIA256_CBC, NTTObjectIdentifiers.id_camellia256_cbc, DEROctetString.class);
+    }
+
+    public void tryKeyTrans(String generatorOID, DERObjectIdentifier checkOID, Class asn1Params)
+        throws Exception
+    {
+        byte[]          data     = "WallaWallaWashington".getBytes();
+
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
-
-        edGen.addKEKRecipient(kek, kekId);
+        edGen.addKeyTransRecipient(_reciCert);
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
-                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+                                generatorOID, "BC");
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
-        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
-        
+        assertEquals(checkOID.getId(), ed.getEncryptionAlgOID());
+
+        if (asn1Params != null)
+        {
+            ASN1InputStream aIn = new ASN1InputStream(ed.getEncryptionAlgParams());
+
+            assertTrue(asn1Params.isAssignableFrom(aIn.readObject().getClass()));
+        }
+
         Collection  c = recipients.getRecipients();
+
+        assertEquals(1, c.size());
+
         Iterator    it = c.iterator();
 
-        if (it.hasNext())
+        if (!it.hasNext())
+        {
+            fail("no recipients found");
+        }
+
+        while (it.hasNext())
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            assertEquals(recipient.getKeyEncryptionAlgOID(), "1.2.840.113549.1.9.16.3.6");
-            
-            byte[] recData = recipient.getContent(kek, "BC");
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
 
             assertEquals(true, Arrays.equals(data, recData));
-        }
-        else
-        {
-            fail("no recipient found");
         }
     }
 
@@ -559,51 +520,63 @@ public class EnvelopedDataTest
         }
     }
 
-    public void testAESKEK()
+    public void testDESKEK()
         throws Exception
     {
-        byte[]    data = "WallaWallaWashington".getBytes();
-        SecretKey kek  = CMSTestUtil.makeAES192Key();
-        
-        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-
-        byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
-
-        edGen.addKEKRecipient(kek, kekId);
-
-        CMSEnvelopedData ed = edGen.generate(
-                                new CMSProcessableByteArray(data),
-                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
-
-        RecipientInformationStore  recipients = ed.getRecipientInfos();
-
-        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
-        
-        Collection  c = recipients.getRecipients();
-        Iterator    it = c.iterator();
-
-        if (it.hasNext())
-        {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
-
-            assertEquals(recipient.getKeyEncryptionAlgOID(), "2.16.840.1.101.3.4.1.25");
-            
-            byte[] recData = recipient.getContent(kek, "BC");
-
-            assertEquals(true, Arrays.equals(data, recData));
-        }
-        else
-        {
-            fail("no recipient found");
-        }
+        tryKekAlgorithm(CMSTestUtil.makeDesede192Key(), new DERObjectIdentifier("1.2.840.113549.1.9.16.3.6"));
+    }
+    public void testRC2128KEK()
+        throws Exception
+    {
+        tryKekAlgorithm(CMSTestUtil.makeRC2128Key(), new DERObjectIdentifier("1.2.840.113549.1.9.16.3.7"));
     }
 
-    public void testRC2KEK()
+    public void testAES128KEK()
         throws Exception
     {
+        tryKekAlgorithm(CMSTestUtil.makeAESKey(128), NISTObjectIdentifiers.id_aes128_wrap);
+    }
+
+    public void testAES192KEK()
+        throws Exception
+    {
+        tryKekAlgorithm(CMSTestUtil.makeAESKey(192), NISTObjectIdentifiers.id_aes192_wrap);
+    }
+
+    public void testAES256KEK()
+        throws Exception
+    {
+        tryKekAlgorithm(CMSTestUtil.makeAESKey(256), NISTObjectIdentifiers.id_aes256_wrap);
+    }
+
+    public void testSEED128KEK()
+        throws Exception
+    {
+        tryKekAlgorithm(CMSTestUtil.makeSEEDKey(), KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap);
+    }
+
+    public void testCamellia128KEK()
+        throws Exception
+    {
+        tryKekAlgorithm(CMSTestUtil.makeCamelliaKey(128), NTTObjectIdentifiers.id_camellia128_wrap);
+    }
+
+    public void testCamellia192KEK()
+        throws Exception
+    {
+        tryKekAlgorithm(CMSTestUtil.makeCamelliaKey(192), NTTObjectIdentifiers.id_camellia192_wrap);
+    }
+
+    public void testCamellia256KEK()
+        throws Exception
+    {
+        tryKekAlgorithm(CMSTestUtil.makeCamelliaKey(256), NTTObjectIdentifiers.id_camellia256_wrap);
+    }
+
+    private void tryKekAlgorithm(SecretKey kek, DERObjectIdentifier algOid)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
         byte[]    data = "WallaWallaWashington".getBytes();
-        SecretKey kek  = CMSTestUtil.makeRC2128Key();
-        
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
         byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
@@ -614,19 +587,19 @@ public class EnvelopedDataTest
                                 new CMSProcessableByteArray(data),
                                 CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
 
-        RecipientInformationStore  recipients = ed.getRecipientInfos();
+        RecipientInformationStore recipients = ed.getRecipientInfos();
 
-        Collection  c = recipients.getRecipients();
-        Iterator    it = c.iterator();
+        Collection c = recipients.getRecipients();
+        Iterator it = c.iterator();
 
         assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
-        
+
         if (it.hasNext())
         {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
+            RecipientInformation recipient = (RecipientInformation)it.next();
 
-            assertEquals(recipient.getKeyEncryptionAlgOID(), "1.2.840.113549.1.9.16.3.7");
-            
+            assertEquals(algOid.getId(), recipient.getKeyEncryptionAlgOID());
+
             byte[] recData = recipient.getContent(kek, "BC");
 
             assertTrue(Arrays.equals(data, recData));

@@ -18,7 +18,7 @@ public class AESMappings
 
     public AESMappings()
     {
-        put("AlgorithmParameters.AES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
+        put("AlgorithmParameters.AES", "org.bouncycastle.jce.provider.symmetric.AES$AlgParams");
         put("Alg.Alias.AlgorithmParameters." + wrongAES128, "AES");
         put("Alg.Alias.AlgorithmParameters." + wrongAES192, "AES");
         put("Alg.Alias.AlgorithmParameters." + wrongAES256, "AES");
@@ -26,7 +26,7 @@ public class AESMappings
         put("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_CBC, "AES");
         put("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
 
-        put("AlgorithmParameterGenerator.AES", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$AES");
+        put("AlgorithmParameterGenerator.AES", "org.bouncycastle.jce.provider.symmetric.AES$AlgParamGen");
         put("Alg.Alias.AlgorithmParameterGenerator." + wrongAES128, "AES");
         put("Alg.Alias.AlgorithmParameterGenerator." + wrongAES192, "AES");
         put("Alg.Alias.AlgorithmParameterGenerator." + wrongAES256, "AES");
