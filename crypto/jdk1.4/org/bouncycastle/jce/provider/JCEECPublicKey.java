@@ -67,7 +67,7 @@ public class JCEECPublicKey
         this.algorithm = algorithm;
         this.q = spec.getQ();
 
-        if (spec.getParams() ! = null)
+        if (spec.getParams() != null)
         {
             this.ecSpec = spec.getParams();
         }
