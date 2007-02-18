@@ -84,22 +84,6 @@ public class TargetInformation
     {
         this.targets = new DERSequence(targets);
     }
-    
-    /**
-     * According to RFC 3281 only one targets element must be produced. If
-     * multiple targets are given in the constructor they are merged in
-     * {@link #toASN1Object()} into one targets element.
-     * <p>
-     * The vector is copied.
-     * 
-     * @param targets A <code>Vector</code> with {@link Targets}.
-     * @throws IllegalArgumentException if the vector does not consists of only
-     *             Targets objects.
-     */
-    public TargetInformation(Target[] targets)
-    {
-        this(new Targets(targets));
-    }
 
     /**
      * Produce an object suitable for an ASN1OutputStream.
