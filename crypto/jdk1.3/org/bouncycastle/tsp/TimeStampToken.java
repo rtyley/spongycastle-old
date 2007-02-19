@@ -132,7 +132,7 @@ public class TimeStampToken
      * <p>
      * To be valid the token must be signed by the passed in certificate and
      * the certificate must be the one refered to by the SigningCertificate 
-     * attribute included in the the hashed attributes of the token. The
+     * attribute included in the hashed attributes of the token. The
      * certifcate must also have the ExtendedKeyUsageExtension with only
      * KeyPurposeId.id_kp_timeStamping and have been valid at the time the
      * timestamp was created.
