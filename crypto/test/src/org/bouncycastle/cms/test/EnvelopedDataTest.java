@@ -442,7 +442,7 @@ public class EnvelopedDataTest
         tryKeyTrans(CMSEnvelopedDataGenerator.CAMELLIA256_CBC, NTTObjectIdentifiers.id_camellia256_cbc, DEROctetString.class);
     }
 
-    public void tryKeyTrans(String generatorOID, DERObjectIdentifier checkOID, Class asn1Params)
+    private void tryKeyTrans(String generatorOID, DERObjectIdentifier checkOID, Class asn1Params)
         throws Exception
     {
         byte[]          data     = "WallaWallaWashington".getBytes();
