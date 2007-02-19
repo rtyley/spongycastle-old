@@ -100,7 +100,7 @@ public class TSPUtil
     
     /*
      * Return the digest algorithm using one of the standard JCA string
-     * representations rather the the algorithm identifier (if possible).
+     * representations rather than the algorithm identifier (if possible).
      */
     static String getDigestAlgName(
         String digestAlgOID)

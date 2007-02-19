@@ -750,7 +750,7 @@ public class SerpentEngine
     }
 
     /**
-     * Apply the the linear transformation to the register set.
+     * Apply the linear transformation to the register set.
      */
     private void LT()
     {
