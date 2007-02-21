@@ -16,6 +16,8 @@ import java.security.spec.RSAPublicKeySpec;
 public class JCERSAPublicKey
     implements RSAPublicKey
 {
+    static final long serialVersionUID = 2675817738516720772L;
+    
     private BigInteger modulus;
     private BigInteger publicExponent;
 
