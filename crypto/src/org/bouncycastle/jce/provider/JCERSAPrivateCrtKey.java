@@ -19,6 +19,8 @@ public class JCERSAPrivateCrtKey
     extends JCERSAPrivateKey
     implements RSAPrivateCrtKey
 {
+    static final long serialVersionUID = 7834723820638524718L;
+    
     private BigInteger  publicExponent;
     private BigInteger  primeP;
     private BigInteger  primeQ;
