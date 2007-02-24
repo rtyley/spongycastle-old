@@ -177,31 +177,19 @@ public abstract class ASN1TaggedObject
         int     tag,
         boolean isExplicit)
     {
+        switch (tag)
+        {
+        case DERTags.SET:
+            return ASN1Set.getInstance(this, isExplicit).parser();
+        case DERTags.SEQUENCE:
+            return ASN1Sequence.getInstance(this, isExplicit).parser();
+        case DERTags.OCTET_STRING:
+            return ASN1OctetString.getInstance(this, isExplicit).parser();
+        }
+
         if (isExplicit)
         {
-            switch (tag)
-            {
-            case DERTags.SET:
-                return ASN1Set.getInstance(this, isExplicit).parser();
-            case DERTags.SEQUENCE:
-                return ASN1Sequence.getInstance(this, isExplicit).parser();
-            case DERTags.OCTET_STRING:
-                return ASN1OctetString.getInstance(this, isExplicit).parser();
-            }
-            
             return getObject();
-        }
-        else
-        {
-            switch (tag)
-            {
-            case DERTags.SET:
-                return ASN1Set.getInstance(this, isExplicit).parser();
-            case DERTags.SEQUENCE:
-                return ASN1Sequence.getInstance(this, isExplicit).parser();
-            case DERTags.OCTET_STRING:
-                return ASN1OctetString.getInstance(this, isExplicit).parser();
-            }
         }
 
         throw new RuntimeException("implicit tagging not implemented for tag: " + tag);
