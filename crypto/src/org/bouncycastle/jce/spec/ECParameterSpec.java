@@ -1,10 +1,10 @@
 package org.bouncycastle.jce.spec;
 
-import java.math.BigInteger;
-import java.security.spec.AlgorithmParameterSpec;
-
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+
+import java.math.BigInteger;
+import java.security.spec.AlgorithmParameterSpec;
 
 /**
  * basic domain parameters for an Elliptic Curve public or private key.
@@ -59,6 +59,7 @@ public class ECParameterSpec
 
     /**
      * return the curve along which the base point lies.
+     * @return the curve
      */
     public ECCurve getCurve()
     {
@@ -67,6 +68,7 @@ public class ECParameterSpec
 
     /**
      * return the base point we are using for these domain parameters.
+     * @return the base point.
      */
     public ECPoint getG()
     {
@@ -75,6 +77,7 @@ public class ECParameterSpec
 
     /**
      * return the order N of G
+     * @return the order
      */
     public BigInteger getN()
     {
@@ -83,6 +86,7 @@ public class ECParameterSpec
 
     /**
      * return the cofactor H to the order of G.
+     * @return the cofactor
      */
     public BigInteger getH()
     {
@@ -91,9 +95,27 @@ public class ECParameterSpec
 
     /**
      * return the seed used to generate this curve (if available).
+     * @return the random seed
      */
     public byte[] getSeed()
     {
         return seed;
+    }
+
+    public boolean equals(Object o)
+    {
+        if (!(o instanceof ECParameterSpec))
+        {
+            return false;
+        }
+
+        ECParameterSpec other = (ECParameterSpec)o;
+
+        return this.getCurve().equals(other.getCurve()) && this.getG().equals(other.getG());
+    }
+
+    public int hashCode()
+    {
+        return this.getCurve().hashCode() ^ this.getG().hashCode();
     }
 }

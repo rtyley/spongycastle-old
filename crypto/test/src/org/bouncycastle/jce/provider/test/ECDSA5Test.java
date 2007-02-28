@@ -1,5 +1,15 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.jce.ECPointUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.BigIntegers;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
+import org.bouncycastle.util.test.SimpleTest;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -11,6 +21,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECFieldF2m;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
@@ -18,16 +30,6 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.jce.ECPointUtil;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.BigIntegers;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.FixedSecureRandom;
-import org.bouncycastle.util.test.SimpleTest;
 
 public class ECDSA5Test
     extends SimpleTest
@@ -247,6 +249,40 @@ public class ECDSA5Test
         if (!s.verify(sigBytes))
         {
             fail("ECDSA verification failed");
+        }
+
+        testKeyFactory((ECPublicKey)vKey, (ECPrivateKey)sKey);
+    }
+
+    private void testKeyFactory(ECPublicKey pub, ECPrivateKey priv)
+        throws Exception
+    {
+        KeyFactory ecFact = KeyFactory.getInstance("ECDSA");
+
+        ECPublicKeySpec  pubSpec = (ECPublicKeySpec)ecFact.getKeySpec(pub, ECPublicKeySpec.class);
+        ECPrivateKeySpec  privSpec = (ECPrivateKeySpec)ecFact.getKeySpec(priv, ECPrivateKeySpec.class);
+
+        if (!pubSpec.getW().equals(pub.getW()) || !pubSpec.getParams().getCurve().equals(pub.getParams().getCurve()))
+        {
+            fail("pubSpec not correct");
+        }
+
+        if (!privSpec.getS().equals(priv.getS()) || !privSpec.getParams().getCurve().equals(priv.getParams().getCurve()))
+        {
+            fail("privSpec not correct");
+        }
+
+        ECPublicKey  pubKey = (ECPublicKey)ecFact.translateKey(pub);
+        ECPrivateKey  privKey = (ECPrivateKey)ecFact.translateKey(priv);
+
+        if (!pubKey.getW().equals(pub.getW()) || !pubKey.getParams().getCurve().equals(pub.getParams().getCurve()))
+        {
+            fail("pubKey not correct");
+        }
+
+        if (!privKey.getS().equals(priv.getS()) || !privKey.getParams().getCurve().equals(priv.getParams().getCurve()))
+        {
+            fail("privKey not correct");
         }
     }
 
