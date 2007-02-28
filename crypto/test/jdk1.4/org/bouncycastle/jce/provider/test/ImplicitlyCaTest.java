@@ -102,7 +102,8 @@ public class ImplicitlyCaTest
         KeyFactory fact = KeyFactory.getInstance("ECDSA", "BC");
 
         vKey = (ECPublicKey)fact.generatePublic(new ECPublicKeySpec(vKey.getQ(), null));
-
+        sKey = (ECPrivateKey)fact.generatePrivate(new ECPrivateKeySpec(sKey.getD(), null));
+                        
         testECDSA(sKey, vKey);
 
         testBCParamsAndQ(sKey, vKey);
