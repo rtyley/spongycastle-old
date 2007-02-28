@@ -158,7 +158,7 @@ public interface ISISMTTObjectIdentifiers
      *               AdditionalInformationSyntax ::= DirectoryString (SIZE(1..2048))
      * </pre>
      * 
-     * @see org.bouncycastle.asn1.isismtt.x509.AdditionalInformation
+     * @see org.bouncycastle.asn1.isismtt.x509.AdditionalInformationSyntax
      */
     public static final DERObjectIdentifier id_isismtt_at_additionalInformation = new DERObjectIdentifier(id_isismtt_at + ".15");
 

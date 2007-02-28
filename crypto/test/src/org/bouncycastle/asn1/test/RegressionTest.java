@@ -43,7 +43,13 @@ public class RegressionTest
         new PKIFailureInfoTest(),
         new KeyUsageTest(),
         new StringTest(),
-        new UTCTimeTest()
+        new UTCTimeTest(),
+        new RequestedCertificateUnitTest(),
+        new OtherCertIDUnitTest(),
+        new OtherSigningCertificateUnitTest(),
+        new ContentHintsUnitTest(),
+        new CertHashUnitTest(),
+        new AdditionalInformationSyntaxUnitTest()
     };
 
     public static void main(
