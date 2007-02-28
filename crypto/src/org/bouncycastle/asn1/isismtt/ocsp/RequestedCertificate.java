@@ -10,6 +10,8 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 
+import java.io.IOException;
+
 /**
  * ISIS-MTT-Optional: The certificate requested by the client by inserting the
  * RetrieveIfAllowed extension in the request, will be returned in this
@@ -47,10 +49,11 @@ public class RequestedCertificate
     extends ASN1Encodable
     implements ASN1Choice
 {
+    public static final int certificate = -1;
     public static final int publicKeyCertificate = 0;
     public static final int attributeCertificate = 1;
 
-    private X509CertificateStructure certificate;
+    private X509CertificateStructure cert;
     private byte[] publicKeyCert;
     private byte[] attributeCert;
 
@@ -88,11 +91,11 @@ public class RequestedCertificate
     {
         if (tagged.getTagNo() == publicKeyCertificate)
         {
-            publicKeyCert = ASN1OctetString.getInstance(tagged, false).getOctets();
+            publicKeyCert = ASN1OctetString.getInstance(tagged, true).getOctets();
         }
         else if (tagged.getTagNo() == attributeCertificate)
         {
-            attributeCert = ASN1OctetString.getInstance(tagged, false).getOctets();
+            attributeCert = ASN1OctetString.getInstance(tagged, true).getOctets();
         }
         else
         {
@@ -109,7 +112,7 @@ public class RequestedCertificate
      */
     public RequestedCertificate(X509CertificateStructure certificate)
     {
-        this.certificate = certificate;
+        this.cert = certificate;
     }
 
     public RequestedCertificate(int type, byte[] certificateOctets)
@@ -117,6 +120,39 @@ public class RequestedCertificate
         this(new DERTaggedObject(type, new DEROctetString(certificateOctets)));
     }
 
+    public int getType()
+    {
+        if (cert != null)
+        {
+            return certificate;
+        }
+        if (publicKeyCert != null)
+        {
+            return publicKeyCertificate;
+        }
+        return attributeCertificate;
+    }
+
+    public byte[] getCertifcateBytes()
+    {
+        if (cert != null)
+        {
+            try
+            {
+                return cert.getEncoded();
+            }
+            catch (IOException e)
+            {
+                throw new IllegalStateException("can't decode certificate: " + e);
+            }
+        }
+        if (publicKeyCert != null)
+        {
+            return publicKeyCert;
+        }
+        return attributeCert;
+    }
+    
     /**
      * Produce an object suitable for an ASN1OutputStream.
      * <p/>
@@ -142,6 +178,6 @@ public class RequestedCertificate
         {
             return new DERTaggedObject(1, new DEROctetString(attributeCert));
         }
-        return certificate.getDERObject();
+        return cert.getDERObject();
     }
 }

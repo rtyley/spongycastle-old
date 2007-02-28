@@ -13,26 +13,26 @@ import org.bouncycastle.asn1.x500.DirectoryString;
  *    AdditionalInformationSyntax ::= DirectoryString (SIZE(1..2048))
  * </pre>
  */
-public class AdditionalInformation extends ASN1Encodable
+public class AdditionalInformationSyntax extends ASN1Encodable
 {
     private DirectoryString information;
 
-    public static AdditionalInformation getInstance(Object obj)
+    public static AdditionalInformationSyntax getInstance(Object obj)
     {
-        if (obj == null || obj instanceof AdditionalInformation)
+        if (obj == null || obj instanceof AdditionalInformationSyntax)
         {
-            return (AdditionalInformation)obj;
+            return (AdditionalInformationSyntax)obj;
         }
 
         if (obj instanceof DERString)
         {
-            return new AdditionalInformation(DirectoryString.getInstance(obj));
+            return new AdditionalInformationSyntax(DirectoryString.getInstance(obj));
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
-    private AdditionalInformation(DirectoryString information)
+    private AdditionalInformationSyntax(DirectoryString information)
     {
         this.information = information;
     }
@@ -42,9 +42,14 @@ public class AdditionalInformation extends ASN1Encodable
      *
      * @param information The describtion of the information.
      */
-    public AdditionalInformation(String information)
+    public AdditionalInformationSyntax(String information)
     {
-        this.information = new DirectoryString(information);
+        this(new DirectoryString(information));
+    }
+
+    public DirectoryString getInformation()
+    {
+        return information;
     }
 
     /**

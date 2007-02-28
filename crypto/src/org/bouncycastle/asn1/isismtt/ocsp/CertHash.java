@@ -90,6 +90,16 @@ public class CertHash
             certificateHash.length);
     }
 
+    public AlgorithmIdentifier getHashAlgorithm()
+    {
+        return hashAlgorithm;
+    }
+
+    public byte[] getCertificateHash()
+    {
+        return certificateHash;
+    }
+
     /**
      * Produce an object suitable for an ASN1OutputStream.
      * <p/>
