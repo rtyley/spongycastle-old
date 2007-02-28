@@ -63,17 +63,20 @@ public class JCEECPrivateKey
     {
         this.algorithm = algorithm;
         this.d = spec.getD();
-        
-        ECCurve curve = spec.getParams().getCurve();
-        EllipticCurve ellipticCurve = EC5Util.convertCurve(curve, spec.getParams().getSeed());
-        
-        this.ecSpec = new ECParameterSpec(
-                                ellipticCurve,
-                                new ECPoint(
-                                        spec.getParams().getG().getX().toBigInteger(),
-                                        spec.getParams().getG().getY().toBigInteger()),
-                                spec.getParams().getN(),
-                                spec.getParams().getH().intValue());
+
+        if (spec.getParams() != null) // can be null if implictlyCa
+        {
+            ECCurve curve = spec.getParams().getCurve();
+            EllipticCurve ellipticCurve;
+
+            ellipticCurve = EC5Util.convertCurve(curve, spec.getParams().getSeed());
+
+            this.ecSpec = EC5Util.convertSpec(ellipticCurve, spec.getParams());
+        }
+        else
+        {
+            this.ecSpec = null;
+        }
     }
 
 
@@ -246,7 +249,7 @@ public class JCEECPrivateKey
      */
     public byte[] getEncoded()
     {
-        X962Parameters          params = null;
+        X962Parameters          params;
 
         if (ecSpec instanceof ECNamedCurveSpec)
         {
