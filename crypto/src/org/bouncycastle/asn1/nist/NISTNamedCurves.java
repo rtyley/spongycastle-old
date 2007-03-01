@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.nist;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.util.Strings;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * Utility class for fetching curves using their NIST names as published in FIPS-PUB 186-2
@@ -85,7 +85,7 @@ public class NISTNamedCurves
     public static DERObjectIdentifier getOID(
         String  name)
     {
-        return (DERObjectIdentifier)objIds.get(name);
+        return (DERObjectIdentifier)objIds.get(Strings.toUpperCase(name));
     }
 
     /**

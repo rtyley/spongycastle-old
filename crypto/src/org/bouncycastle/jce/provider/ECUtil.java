@@ -3,6 +3,7 @@ package org.bouncycastle.jce.provider;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -155,6 +156,10 @@ public class ECUtil
             {
                 oid = NISTNamedCurves.getOID(name);
             }
+            if (oid == null)
+            {
+                oid = TeleTrusTNamedCurves.getOID(name);
+            }
         }
 
         return oid;
@@ -172,6 +177,10 @@ public class ECUtil
             {
                 params = NISTNamedCurves.getByOID(oid);
             }
+            if (params == null)
+            {
+                params = TeleTrusTNamedCurves.getByOID(oid);
+            }
         }
 
         return params;
@@ -188,6 +197,10 @@ public class ECUtil
             if (name == null)
             {
                 name = NISTNamedCurves.getName(oid);
+            }
+            if (name == null)
+            {
+                name = TeleTrusTNamedCurves.getName(oid);
             }
         }
 
