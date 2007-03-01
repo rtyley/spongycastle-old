@@ -591,7 +591,7 @@ public class X962NamedCurves
     public static DERObjectIdentifier getOID(
         String name)
     {
-        return (DERObjectIdentifier)objIds.get(name);
+        return (DERObjectIdentifier)objIds.get(Strings.toLowerCase(name));
     }
 
     /**

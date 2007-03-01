@@ -523,7 +523,7 @@ public class SECNamedCurves
     public static DERObjectIdentifier getOID(
         String name)
     {
-        return (DERObjectIdentifier)objIds.get(name);
+        return (DERObjectIdentifier)objIds.get(Strings.toLowerCase(name));
     }
 
     /**

@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider.test;
 
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
@@ -37,6 +38,7 @@ public class NamedCurveTest
         CURVE_NAMES.put("secp224r1", "secp224r1");
         CURVE_NAMES.put("B-409", SECNamedCurves.getName(NISTNamedCurves.getOID("B-409")));   // nist
         CURVE_NAMES.put("P-521", SECNamedCurves.getName(NISTNamedCurves.getOID("P-521")));
+        CURVE_NAMES.put("brainpoolP512r1", "brainpoolP512r1");         // TeleTrusT
     }
     
     public void testCurve(
@@ -201,7 +203,7 @@ public class NamedCurveTest
         }
 
         ECNamedCurveSpec privSpec = (ECNamedCurveSpec)privKey.getParams();
-        if (!privSpec.getName().equals(name))
+        if (!privSpec.getName().equalsIgnoreCase(name))
         {
             fail("private key encoding wrong named curve. Expected: " + name + " got " + privSpec.getName());
         }
@@ -220,6 +222,7 @@ public class NamedCurveTest
         testCurve("secp224r1");
         testCurve("B-409");   // nist
         testCurve("P-521");
+        testCurve("brainpoolP160r1");    // TeleTrusT
 
         for (Enumeration en = X962NamedCurves.getNames(); en.hasMoreElements();)
         {
@@ -233,6 +236,11 @@ public class NamedCurveTest
             {
                 testECDSA(name);
             }
+        }
+
+        for (Enumeration en = TeleTrusTNamedCurves.getNames(); en.hasMoreElements();)
+        {
+            testECDSA((String)en.nextElement());
         }
     }
     

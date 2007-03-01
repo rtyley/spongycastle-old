@@ -259,20 +259,20 @@ public class TeleTrusTNamedCurves
 
     static
     {
-        objIds.put("brainpoolP160r1", TeleTrusTObjectIdentifiers.brainpoolP160r1);
-        objIds.put("brainpoolP160t1", TeleTrusTObjectIdentifiers.brainpoolP160t1);
-        objIds.put("brainpoolP192r1", TeleTrusTObjectIdentifiers.brainpoolP192r1);
-        objIds.put("brainpoolP192t1", TeleTrusTObjectIdentifiers.brainpoolP192t1);
-        objIds.put("brainpoolP224r1", TeleTrusTObjectIdentifiers.brainpoolP224r1);
-        objIds.put("brainpoolP224t1", TeleTrusTObjectIdentifiers.brainpoolP224t1);
-        objIds.put("brainpoolP256r1", TeleTrusTObjectIdentifiers.brainpoolP256r1);
-        objIds.put("brainpoolP256t1", TeleTrusTObjectIdentifiers.brainpoolP256t1);
-        objIds.put("brainpoolP320r1", TeleTrusTObjectIdentifiers.brainpoolP320r1);
-        objIds.put("brainpoolP320t1", TeleTrusTObjectIdentifiers.brainpoolP320t1);
-        objIds.put("brainpoolP384r1", TeleTrusTObjectIdentifiers.brainpoolP384r1);
-        objIds.put("brainpoolP384t1", TeleTrusTObjectIdentifiers.brainpoolP384t1);
-        objIds.put("brainpoolP512r1", TeleTrusTObjectIdentifiers.brainpoolP512r1);
-        objIds.put("brainpoolP512t1", TeleTrusTObjectIdentifiers.brainpoolP512t1);
+        objIds.put("brainpoolp160r1", TeleTrusTObjectIdentifiers.brainpoolP160r1);
+        objIds.put("brainpoolp160t1", TeleTrusTObjectIdentifiers.brainpoolP160t1);
+        objIds.put("brainpoolp192r1", TeleTrusTObjectIdentifiers.brainpoolP192r1);
+        objIds.put("brainpoolp192t1", TeleTrusTObjectIdentifiers.brainpoolP192t1);
+        objIds.put("brainpoolp224r1", TeleTrusTObjectIdentifiers.brainpoolP224r1);
+        objIds.put("brainpoolp224t1", TeleTrusTObjectIdentifiers.brainpoolP224t1);
+        objIds.put("brainpoolp256r1", TeleTrusTObjectIdentifiers.brainpoolP256r1);
+        objIds.put("brainpoolp256t1", TeleTrusTObjectIdentifiers.brainpoolP256t1);
+        objIds.put("brainpoolp320r1", TeleTrusTObjectIdentifiers.brainpoolP320r1);
+        objIds.put("brainpoolp320t1", TeleTrusTObjectIdentifiers.brainpoolP320t1);
+        objIds.put("brainpoolp384r1", TeleTrusTObjectIdentifiers.brainpoolP384r1);
+        objIds.put("brainpoolp384t1", TeleTrusTObjectIdentifiers.brainpoolP384t1);
+        objIds.put("brainpoolp512r1", TeleTrusTObjectIdentifiers.brainpoolP512r1);
+        objIds.put("brainpoolp512t1", TeleTrusTObjectIdentifiers.brainpoolP512t1);
 
         names.put(TeleTrusTObjectIdentifiers.brainpoolP160r1, "brainpoolP160r1");
         names.put(TeleTrusTObjectIdentifiers.brainpoolP160t1, "brainpoolP160t1");
@@ -346,7 +346,7 @@ public class TeleTrusTNamedCurves
     public static DERObjectIdentifier getOID(
         String name)
     {
-        return (DERObjectIdentifier)objIds.get(name);
+        return (DERObjectIdentifier)objIds.get(Strings.toLowerCase(name));
     }
 
     /**

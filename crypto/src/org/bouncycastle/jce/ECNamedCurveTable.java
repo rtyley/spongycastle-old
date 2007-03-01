@@ -1,14 +1,15 @@
 package org.bouncycastle.jce;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * a table of locally supported named curves.
@@ -53,7 +54,23 @@ public class ECNamedCurveTable
                 }
             }
         }
-        
+
+        if (ecP == null)
+        {
+            ecP = TeleTrusTNamedCurves.getByName(name);
+            if (ecP == null)
+            {
+                try
+                {
+                    ecP = TeleTrusTNamedCurves.getByOID(new DERObjectIdentifier(name));
+                }
+                catch (IllegalArgumentException e)
+                {
+                    // ignore - not an oid
+                }
+            }
+        }
+
         if (ecP == null)
         {
             ecP = NISTNamedCurves.getByName(name);
@@ -85,7 +102,8 @@ public class ECNamedCurveTable
         addEnumeration(v, X962NamedCurves.getNames());
         addEnumeration(v, SECNamedCurves.getNames());
         addEnumeration(v, NISTNamedCurves.getNames());
-        
+        addEnumeration(v, TeleTrusTNamedCurves.getNames());
+
         return v.elements();
     }
 
