@@ -22,7 +22,11 @@ public class DeclarationOfMajorityUnitTest
         DERGeneralizedTime dateOfBirth = new DERGeneralizedTime(new Date());
         DeclarationOfMajority decl = new DeclarationOfMajority(dateOfBirth);
 
-        checkConstruction(decl, DeclarationOfMajority.dateOfBirth, dateOfBirth);
+        checkConstruction(decl, DeclarationOfMajority.dateOfBirth, dateOfBirth, -1);
+
+        decl = new DeclarationOfMajority(6);
+
+        checkConstruction(decl, DeclarationOfMajority.notYoungerThan, null, 6);
 
         decl = DeclarationOfMajority.getInstance(null);
 
@@ -46,14 +50,15 @@ public class DeclarationOfMajorityUnitTest
     private void checkConstruction(
         DeclarationOfMajority decl,
         int                   type,
-        DERGeneralizedTime    dateOfBirth)
+        DERGeneralizedTime    dateOfBirth,
+        int                   notYoungerThan)
         throws IOException
     {
-        checkValues(decl, type, dateOfBirth);
+        checkValues(decl, type, dateOfBirth, notYoungerThan);
 
         decl = DeclarationOfMajority.getInstance(decl);
 
-        checkValues(decl, type, dateOfBirth);
+        checkValues(decl, type, dateOfBirth, notYoungerThan);
 
         ASN1InputStream aIn = new ASN1InputStream(decl.toASN1Object().getEncoded());
 
@@ -61,16 +66,21 @@ public class DeclarationOfMajorityUnitTest
 
         decl = DeclarationOfMajority.getInstance(info);
 
-        checkValues(decl, type, dateOfBirth);
+        checkValues(decl, type, dateOfBirth, notYoungerThan);
     }
 
     private void checkValues(
         DeclarationOfMajority decl,
         int                   type,
-        DERGeneralizedTime    dateOfBirth)
+        DERGeneralizedTime    dateOfBirth,
+        int                   notYoungerThan)
     {
         checkMandatoryField("type", type, decl.getType());
         checkOptionalField("dateOfBirth", dateOfBirth, decl.getDateOfBirth());
+        if (notYoungerThan != -1 && notYoungerThan != decl.notYoungerThan())
+        {
+            fail("notYoungerThan mismatch");
+        }
     }
 
     public static void main(
