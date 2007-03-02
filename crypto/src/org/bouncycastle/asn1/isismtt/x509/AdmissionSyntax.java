@@ -117,7 +117,7 @@ import java.util.Enumeration;
  * @see org.bouncycastle.asn1.isismtt.x509.ProfessionInfo
  * @see org.bouncycastle.asn1.isismtt.x509.NamingAuthority
  */
-public class Admission
+public class AdmissionSyntax
     extends ASN1Encodable
 {
 
@@ -125,16 +125,16 @@ public class Admission
 
     private ASN1Sequence contentsOfAdmissions;
 
-    public static Admission getInstance(Object obj)
+    public static AdmissionSyntax getInstance(Object obj)
     {
-        if (obj == null || obj instanceof Admission)
+        if (obj == null || obj instanceof AdmissionSyntax)
         {
-            return (Admission)obj;
+            return (AdmissionSyntax)obj;
         }
 
         if (obj instanceof ASN1Sequence)
         {
-            return new Admission((ASN1Sequence)obj);
+            return new AdmissionSyntax((ASN1Sequence)obj);
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: "
@@ -179,7 +179,7 @@ public class Admission
      *
      * @param seq The ASN.1 sequence.
      */
-    private Admission(ASN1Sequence seq)
+    private AdmissionSyntax(ASN1Sequence seq)
     {
         switch (seq.size())
         {
@@ -201,7 +201,7 @@ public class Admission
      * @param admissionAuthority   The admission authority.
      * @param contentsOfAdmissions The admissions.
      */
-    public Admission(GeneralName admissionAuthority, ASN1Sequence contentsOfAdmissions)
+    public AdmissionSyntax(GeneralName admissionAuthority, ASN1Sequence contentsOfAdmissions)
     {
         this.admissionAuthority = admissionAuthority;
         this.contentsOfAdmissions = contentsOfAdmissions;
