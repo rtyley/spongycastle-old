@@ -49,7 +49,10 @@ public class RegressionTest
         new OtherSigningCertificateUnitTest(),
         new ContentHintsUnitTest(),
         new CertHashUnitTest(),
-        new AdditionalInformationSyntaxUnitTest()
+        new AdditionalInformationSyntaxUnitTest(),
+        new AdmissionSyntaxUnitTest(),
+        new AdmissionsUnitTest(),
+        new DeclarationOfMajorityUnitTest()
     };
 
     public static void main(

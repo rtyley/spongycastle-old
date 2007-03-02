@@ -25,7 +25,7 @@ import java.util.Enumeration;
  * <p/>
  * </pre>
  *
- * @see org.bouncycastle.asn1.isismtt.x509.Admission
+ * @see org.bouncycastle.asn1.isismtt.x509.AdmissionSyntax
  * @see org.bouncycastle.asn1.isismtt.x509.ProfessionInfo
  * @see org.bouncycastle.asn1.isismtt.x509.NamingAuthority
  */
@@ -129,6 +129,27 @@ public class Admissions extends ASN1Encodable
         this.admissionAuthority = admissionAuthority;
         this.namingAuthority = namingAuthority;
         this.professionInfos = new DERSequence(professionInfos);
+    }
+
+    public GeneralName getAdmissionAuthority()
+    {
+        return admissionAuthority;
+    }
+
+    public NamingAuthority getNamingAuthority()
+    {
+        return namingAuthority;
+    }
+
+    public ProfessionInfo[] getProfessionInfos()
+    {
+        ProfessionInfo[] infos = new ProfessionInfo[professionInfos.size()];
+        int count = 0;
+        for (Enumeration e = professionInfos.getObjects(); e.hasMoreElements();)
+        {
+            infos[count++] = ProfessionInfo.getInstance(e.nextElement());
+        }
+        return infos;
     }
 
     /**

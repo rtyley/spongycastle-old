@@ -27,7 +27,7 @@ import java.util.Enumeration;
  *               namingAuthorityText DirectoryString(SIZE(1..128)) OPTIONAL
  *             }
  * </pre>
- * @see org.bouncycastle.asn1.isismtt.x509.Admission
+ * @see org.bouncycastle.asn1.isismtt.x509.AdmissionSyntax
  * 
  */
 public class NamingAuthority
