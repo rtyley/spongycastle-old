@@ -45,7 +45,7 @@ public class JCEECPublicKey
 {
     private String          algorithm = "EC";
     private ECPoint         q;
-    private Object          ecSpec;
+    private ECParameterSpec ecSpec;
     private boolean         withCompression;
     private GOST3410PublicKeyAlgParameters       gostParams;
 
@@ -474,5 +474,32 @@ public class JCEECPublicKey
     public void setPointFormat(String style)
     {
        withCompression = !("UNCOMPRESSED".equalsIgnoreCase(style));
+    }
+
+    ECParameterSpec engineGetSpec()
+    {
+        if (ecSpec != null)
+        {
+            return (ECParameterSpec)ecSpec;
+        }
+
+        return ProviderUtil.getEcImplicitlyCa();
+    }
+
+    public boolean equals(Object o)
+    {
+        if (!(o instanceof JCEECPublicKey))
+        {
+            return false;
+        }
+
+        JCEECPublicKey other = (JCEECPublicKey)o;
+
+        return getQ().equals(other.getQ()) && (engineGetSpec().equals(other.engineGetSpec()));
+    }
+
+    public int hashCode()
+    {
+        return getQ().hashCode() ^ engineGetSpec().hashCode();
     }
 }

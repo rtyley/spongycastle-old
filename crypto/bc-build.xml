@@ -492,6 +492,7 @@
                 <package name="org.bouncycastle.mozilla.*" />
                 <package name="org.bouncycastle.x509.*" />
                 <package name="org.bouncycastle.ocsp.*" />
+                <package name="org.bouncycastle.util.*" />
                 <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
                 <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
                 <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />

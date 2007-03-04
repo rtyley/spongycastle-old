@@ -480,6 +480,16 @@ public class JCEECPublicKey
         return q;
     }
 
+    org.bouncycastle.jce.spec.ECParameterSpec engineGetSpec()
+    {
+        if (ecSpec != null)
+        {
+            return EC5Util.convertSpec(ecSpec, withCompression);
+        }
+
+        return ProviderUtil.getEcImplicitlyCa();
+    }
+
     public String toString()
     {
         StringBuffer    buf = new StringBuffer();
@@ -496,5 +506,22 @@ public class JCEECPublicKey
     public void setPointFormat(String style)
     {
        withCompression = !("UNCOMPRESSED".equalsIgnoreCase(style));
+    }
+
+    public boolean equals(Object o)
+    {
+        if (!(o instanceof JCEECPublicKey))
+        {
+            return false;
+        }
+
+        JCEECPublicKey other = (JCEECPublicKey)o;
+
+        return engineGetQ().equals(other.engineGetQ()) && (engineGetSpec().equals(other.engineGetSpec()));
+    }
+
+    public int hashCode()
+    {
+        return engineGetQ().hashCode() ^ engineGetSpec().hashCode();
     }
 }
