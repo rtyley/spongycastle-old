@@ -39,7 +39,7 @@ public class JCEECPrivateKey
 {
     private String          algorithm = "EC";
     private BigInteger      d;
-    private Object          ecSpec;
+    private ECParameterSpec ecSpec;
     private boolean         withCompression;
 
     private Hashtable   pkcs12Attributes = new Hashtable();
@@ -342,4 +342,32 @@ public class JCEECPrivateKey
     {
        withCompression = !("UNCOMPRESSED".equalsIgnoreCase(style));
     }
+
+    ECParameterSpec engineGetSpec()
+    {
+        if (ecSpec != null)
+        {
+            return ecSpec;
+        }
+
+        return ProviderUtil.getEcImplicitlyCa();
+    }
+
+    public boolean equals(Object o)
+    {
+        if (!(o instanceof JCEECPrivateKey))
+        {
+            return false;
+        }
+
+        JCEECPrivateKey other = (JCEECPrivateKey)o;
+
+        return getD().equals(other.getD()) && (engineGetSpec().equals(other.engineGetSpec()));
+    }
+
+    public int hashCode()
+    {
+        return getD().hashCode() ^ engineGetSpec().hashCode();
+    }
+
 }

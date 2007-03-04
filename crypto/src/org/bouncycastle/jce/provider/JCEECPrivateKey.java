@@ -319,7 +319,17 @@ public class JCEECPrivateKey
         
         return EC5Util.convertSpec(ecSpec, withCompression);
     }
-    
+
+    org.bouncycastle.jce.spec.ECParameterSpec engineGetSpec()
+    {
+        if (ecSpec != null)
+        {
+            return EC5Util.convertSpec(ecSpec, withCompression);
+        }
+
+        return ProviderUtil.getEcImplicitlyCa();
+    }
+
     public BigInteger getS()
     {
         return d;
@@ -352,5 +362,22 @@ public class JCEECPrivateKey
     public void setPointFormat(String style)
     {
        withCompression = !("UNCOMPRESSED".equalsIgnoreCase(style));
+    }
+
+    public boolean equals(Object o)
+    {
+        if (!(o instanceof JCEECPrivateKey))
+        {
+            return false;
+        }
+
+        JCEECPrivateKey other = (JCEECPrivateKey)o;
+
+        return getD().equals(other.getD()) && (engineGetSpec().equals(other.engineGetSpec()));
+    }
+
+    public int hashCode()
+    {
+        return getD().hashCode() ^ engineGetSpec().hashCode();
     }
 }

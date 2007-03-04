@@ -6,6 +6,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
@@ -109,6 +110,19 @@ public class ImplicitlyCaTest
         testBCParamsAndQ(sKey, vKey);
 
         testEncoding(sKey, vKey);
+
+        ECPublicKey vKey2 = (ECPublicKey)fact.generatePublic(new ECPublicKeySpec(vKey.getQ(), ecSpec));
+        ECPrivateKey sKey2 = (ECPrivateKey)fact.generatePrivate(new ECPrivateKeySpec(sKey.getD(), ecSpec));
+
+        if (!vKey.equals(vKey2) || vKey.hashCode() != vKey2.hashCode())
+        {
+            fail("private equals/hashCode failed");
+        }
+
+        if (!sKey.equals(sKey2) || sKey.hashCode() != sKey2.hashCode())
+        {
+            fail("private equals/hashCode failed");
+        }
     }
 
     private void testECDSA(
@@ -138,24 +152,34 @@ public class ImplicitlyCaTest
     }
 
     private void testEncoding(
-        ECPrivateKey sKey,
-        ECPublicKey vKey)
+        ECPrivateKey privKey,
+        ECPublicKey pubKey)
         throws Exception
     {
         KeyFactory kFact = KeyFactory.getInstance("ECDSA", "BC");
 
-        byte[] bytes = sKey.getEncoded();
+        byte[] bytes = privKey.getEncoded();
 
         PrivateKeyInfo sInfo = PrivateKeyInfo.getInstance(new ASN1InputStream(bytes).readObject());
-        
+
         if (!sInfo.getAlgorithmId().getParameters().equals(DERNull.INSTANCE))
         {
             fail("private key parameters wrong");
         }
 
-        sKey = (ECPrivateKey)kFact.generatePrivate(new PKCS8EncodedKeySpec(bytes));
+        ECPrivateKey sKey = (ECPrivateKey)kFact.generatePrivate(new PKCS8EncodedKeySpec(bytes));
 
-        bytes = vKey.getEncoded();
+        if (!sKey.equals(privKey))
+        {
+            fail("private equals failed");
+        }
+
+        if (sKey.hashCode() != privKey.hashCode())
+        {
+            fail("private hashCode failed");
+        }
+
+        bytes = pubKey.getEncoded();
 
         SubjectPublicKeyInfo vInfo = SubjectPublicKeyInfo.getInstance(new ASN1InputStream(bytes).readObject());
 
@@ -163,8 +187,13 @@ public class ImplicitlyCaTest
         {
             fail("public key parameters wrong");
         }
-        
-        vKey = (ECPublicKey)kFact.generatePublic(new X509EncodedKeySpec(bytes));
+
+        ECPublicKey vKey = (ECPublicKey)kFact.generatePublic(new X509EncodedKeySpec(bytes));
+
+        if (!vKey.equals(pubKey) || vKey.hashCode() != pubKey.hashCode())
+        {
+            fail("public equals/hashCode failed");
+        }
 
         testBCParamsAndQ(sKey, vKey);
 
