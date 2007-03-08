@@ -18,11 +18,11 @@ import java.util.Vector;
  * 
  * <pre>
  *       NameOrPseudonym ::= CHOICE {
- *     	   surAndGivenName SEQUENCE {
- *     	     surName DirectoryString,
- *     	     givenName SEQUENCE OF DirectoryString 
+ *            surAndGivenName SEQUENCE {
+ *              surName DirectoryString,
+ *              givenName SEQUENCE OF DirectoryString 
  *         },
- *     	   pseudonym DirectoryString 
+ *            pseudonym DirectoryString 
  *       }
  * </pre>
  * 
@@ -67,11 +67,11 @@ public class NameOrPseudonym
      * <p/>
      * <pre>
      *       NameOrPseudonym ::= CHOICE {
-     *     	   surAndGivenName SEQUENCE {
-     *     	     surName DirectoryString,
-     *     	     givenName SEQUENCE OF DirectoryString
+     *            surAndGivenName SEQUENCE {
+     *              surName DirectoryString,
+     *              givenName SEQUENCE OF DirectoryString
      *         },
-     *     	   pseudonym DirectoryString
+     *            pseudonym DirectoryString
      *       }
      * </pre>
      * @param pseudonym pseudonym value to use.
@@ -88,11 +88,11 @@ public class NameOrPseudonym
      * <p/>
      * <pre>
      *       NameOrPseudonym ::= CHOICE {
-     *     	   surAndGivenName SEQUENCE {
-     *     	     surName DirectoryString,
-     *     	     givenName SEQUENCE OF DirectoryString
+     *            surAndGivenName SEQUENCE {
+     *              surName DirectoryString,
+     *              givenName SEQUENCE OF DirectoryString
      *         },
-     *     	   pseudonym DirectoryString
+     *            pseudonym DirectoryString
      *       }
      * </pre>
      *
@@ -163,11 +163,11 @@ public class NameOrPseudonym
      * <p/>
      * <pre>
      *       NameOrPseudonym ::= CHOICE {
-     *     	   surAndGivenName SEQUENCE {
-     *     	     surName DirectoryString,
-     *     	     givenName SEQUENCE OF DirectoryString
+     *            surAndGivenName SEQUENCE {
+     *              surName DirectoryString,
+     *              givenName SEQUENCE OF DirectoryString
      *         },
-     *     	   pseudonym DirectoryString
+     *            pseudonym DirectoryString
      *       }
      * </pre>
      *
@@ -188,8 +188,8 @@ public class NameOrPseudonym
             {
                 vec2.add(new DERUTF8String(e.nextElement().toString()));
             }
-			vec1.add(new DERSequence(vec2));
-			return new DERSequence(vec1);
-		}
-	}
+            vec1.add(new DERSequence(vec2));
+            return new DERSequence(vec1);
+        }
+    }
 }

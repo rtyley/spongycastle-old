@@ -65,6 +65,6 @@ public class AdditionalInformationSyntax extends ASN1Encodable
      */
     public DERObject toASN1Object()
     {
-		return information.toASN1Object();
-	}
+        return information.toASN1Object();
+    }
 }

@@ -166,11 +166,11 @@ public class NamingAuthority
 
     /**
      * @return Returns the namingAuthorityUrl.
-	 */
-	public String getNamingAuthorityUrl()
+     */
+    public String getNamingAuthorityUrl()
     {
-		return namingAuthorityUrl.getString();
-	}
+        return namingAuthorityUrl.getString();
+    }
 
     /**
      * Constructor from given details.
