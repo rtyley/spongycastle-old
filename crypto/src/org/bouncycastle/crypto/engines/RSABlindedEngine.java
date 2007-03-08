@@ -94,12 +94,18 @@ public class RSABlindedEngine
         if (key instanceof RSAPrivateCrtKeyParameters)
         {
             RSAPrivateCrtKeyParameters k = (RSAPrivateCrtKeyParameters)key;
-            BigInteger input = core.convertInput(in, inOff, inLen);
-            BigInteger m = k.getModulus();
-            BigInteger r = calculateR(m);
-            BigInteger result = core.processBlock(r.modPow(k.getPublicExponent(), m).multiply(input).mod(m));
 
-            return core.convertOutput(result.multiply(r.modInverse(m)).mod(m));
+            if (k.getPublicExponent() != null)   // can't do blinding without a public exponent
+            {
+                BigInteger input = core.convertInput(in, inOff, inLen);
+                BigInteger m = k.getModulus();
+                BigInteger r = calculateR(m);
+                BigInteger result = core.processBlock(r.modPow(k.getPublicExponent(), m).multiply(input).mod(m));
+
+                return core.convertOutput(result.multiply(r.modInverse(m)).mod(m));
+            }
+
+            return core.convertOutput(core.processBlock(core.convertInput(in, inOff, inLen)));
         }
         else
         {
