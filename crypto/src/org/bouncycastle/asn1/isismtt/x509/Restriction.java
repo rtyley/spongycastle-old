@@ -38,7 +38,7 @@ public class Restriction extends ASN1Encodable
      * The DERString is of type RestrictionSyntax:
      * <p/>
      * <pre>
-     * 	 RestrictionSyntax ::= DirectoryString (SIZE(1..1024))
+     *      RestrictionSyntax ::= DirectoryString (SIZE(1..1024))
      * </pre>
      *
      * @param restriction A DERString.
@@ -64,7 +64,7 @@ public class Restriction extends ASN1Encodable
      * Returns:
      * <p/>
      * <pre>
-     * 	 RestrictionSyntax ::= DirectoryString (SIZE(1..1024))
+     *      RestrictionSyntax ::= DirectoryString (SIZE(1..1024))
      * <p/>
      * </pre>
      *

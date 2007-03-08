@@ -118,7 +118,7 @@ public class CertHash
     {
         ASN1EncodableVector vec = new ASN1EncodableVector();
         vec.add(hashAlgorithm);
-		vec.add(new DEROctetString(certificateHash));
-		return new DERSequence(vec);
-	}
+        vec.add(new DEROctetString(certificateHash));
+        return new DERSequence(vec);
+    }
 }

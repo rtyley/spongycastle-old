@@ -186,5 +186,5 @@ public class PersonalData
             vec.add(new DERTaggedObject(true, 4, postalAddress));
         }
         return new DERSequence(vec);
-	}
+    }
 }

@@ -123,9 +123,9 @@ public class MonetaryLimit
         ASN1EncodableVector seq = new ASN1EncodableVector();
         seq.add(currency);
         seq.add(amount);
-		seq.add(exponent);
+        seq.add(exponent);
 
-		return new DERSequence(seq);
-	}
+        return new DERSequence(seq);
+    }
 
 }
