@@ -1,7 +1,6 @@
 package org.bouncycastle.util;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 public final class Strings
 {
@@ -44,7 +43,7 @@ public final class Strings
 
             if ((bytes[i] & 0xf0) == 0xf0)
             {
-                int codePoint = ((bytes[i] & 0x0F) << 18) | ((bytes[i+1] & 0x3F) << 12) | ((bytes[i+2] & 0x3F) << 6) | (bytes[i+3] & 0x3F);
+                int codePoint = ((bytes[i] & 0x03) << 18) | ((bytes[i+1] & 0x3F) << 12) | ((bytes[i+2] & 0x3F) << 6) | (bytes[i+3] & 0x3F);
                 int U = codePoint - 0x10000;
                 char W1 = (char)(0xD800 | (U >> 10));
                 char W2 = (char)(0xDC00 | (U & 0x3FF));
@@ -54,13 +53,18 @@ public final class Strings
             }
             else if ((bytes[i] & 0xe0) == 0xe0)
             {
-                ch = (char)(((bytes[i] & 0x1f) << 12)
+                ch = (char)(((bytes[i] & 0x0f) << 12)
                         | ((bytes[i + 1] & 0x3f) << 6) | (bytes[i + 2] & 0x3f));
                 i += 3;
             }
+            else if ((bytes[i] & 0xd0) == 0xd0)
+            {
+                ch = (char)(((bytes[i] & 0x1f) << 6) | (bytes[i + 1] & 0x3f));
+                i += 2;
+            }
             else if ((bytes[i] & 0xc0) == 0xc0)
             {
-                ch = (char)(((bytes[i] & 0x3f) << 6) | (bytes[i + 1] & 0x3f));
+                ch = (char)(((bytes[i] & 0x1f) << 6) | (bytes[i + 1] & 0x3f));
                 i += 2;
             }
             else
