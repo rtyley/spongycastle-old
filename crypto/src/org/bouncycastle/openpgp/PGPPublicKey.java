@@ -1,5 +1,22 @@
 package org.bouncycastle.openpgp;
 
+import org.bouncycastle.bcpg.BCPGKey;
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.ContainedPacket;
+import org.bouncycastle.bcpg.DSAPublicBCPGKey;
+import org.bouncycastle.bcpg.ElGamalPublicBCPGKey;
+import org.bouncycastle.bcpg.MPInteger;
+import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
+import org.bouncycastle.bcpg.PublicKeyPacket;
+import org.bouncycastle.bcpg.RSAPublicBCPGKey;
+import org.bouncycastle.bcpg.TrustPacket;
+import org.bouncycastle.bcpg.UserAttributePacket;
+import org.bouncycastle.bcpg.UserIDPacket;
+import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
+import org.bouncycastle.jce.spec.ElGamalParameterSpec;
+import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
+import org.bouncycastle.util.Arrays;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,12 +35,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import org.bouncycastle.bcpg.*;
-
-import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
 
 /**
  * general class to handle a PGP public key object.
@@ -126,12 +137,12 @@ public class PGPPublicKey
      * Note: the time passed in affects the value of the key's keyID, so you probably only want
      * to do this once for a JCA key, or make sure you keep track of the time you used.
      * 
-     * @param algorithm
-     * @param pubKey
-     * @param time
-     * @param provider
-     * @throws PGPException
-     * @throws NoSuchProviderException
+     * @param algorithm asymmetric algorithm type representing the public key.
+     * @param pubKey actual public key to associate.
+     * @param time date of creation.
+     * @param provider provider to use for underlying digest calculations.
+     * @throws PGPException on key creation problem.
+     * @throws NoSuchProviderException if the specified provider is required and cannot be found.
      */
     public PGPPublicKey(
         int            algorithm,
@@ -181,13 +192,9 @@ public class PGPPublicKey
         }
     }
     
-    /**
-      * Constructor for a sub-key.
-      * 
-      * @param pk
-      * @param sha
-      * @param sig
-      */
+    /*
+     * Constructor for a sub-key.
+     */
     PGPPublicKey(
         PublicKeyPacket publicPk, 
         TrustPacket     trustPk, 
@@ -200,12 +207,7 @@ public class PGPPublicKey
         
         init();
      }
-     
-    /**
-     * @param key
-     * @param trust
-     * @param subSigs
-     */
+
     PGPPublicKey(
         PGPPublicKey key,
         TrustPacket trust, 
@@ -222,7 +224,7 @@ public class PGPPublicKey
     
     /**
      * Copy constructor.
-     * @param pubKey
+     * @param pubKey the public key to copy.
      */
     PGPPublicKey(
         PGPPublicKey    pubKey)
@@ -315,7 +317,21 @@ public class PGPPublicKey
             return publicPk.getValidDays();
         }
     }
-    
+
+    /**
+     * Return the trust data associated with the public key, if present.
+     * @return a byte array with trust data, null otherwise.
+     */
+    public byte[] getTrustData()
+    {
+        if (trustPk == null)
+        {
+            return null;
+        }
+
+        return Arrays.clone(trustPk.getLevelAndTrustAmount());
+    }
+
     /**
      * @return number of valid seconds from creation time - zero means no
      * expiry.
@@ -405,7 +421,8 @@ public class PGPPublicKey
     }
     
     /**
-     * return true if this key is marked as suitable for encryption.
+     * Return true if this key is marked as suitable for using for encryption.
+     * @return true if this key is marked as suitable for using for encryption.
      */
     public boolean isEncryptionKey()
     {
@@ -448,10 +465,9 @@ public class PGPPublicKey
      * Return the public key contained in the object.
      * 
      * @param provider provider to construct the key for.
-     * 
-     * @return PublicKey
-     * @throws PGPException
-     * @throws NoSuchProviderException
+     * @return a JCE/JCA public key.
+     * @throws PGPException if the key algorithm is not recognised.
+     * @throws NoSuchProviderException if the provider cannot be found.
      */
     public PublicKey getKey(
         String                provider)
