@@ -3,6 +3,8 @@ package org.bouncycastle.i18n;
 import org.bouncycastle.i18n.filter.Filter;
 import org.bouncycastle.i18n.filter.UntrustedInput;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.Format;
 import java.text.MessageFormat;
@@ -16,6 +18,10 @@ public class LocalizedMessage
 
     protected final String id;
     protected final String resource;
+    
+    // ISO-8859-1 is the default encoding
+    public static final String DEFAULT_ENCODING = "ISO-8859-1";
+    protected String encoding = DEFAULT_ENCODING;
     
     protected Object[] arguments;
     protected Object[] filteredArguments;
@@ -48,10 +54,11 @@ public class LocalizedMessage
      * RessourceBundle and <code>id</code> as the message bundle id the resource file. 
      * @param resource base name of the resource file 
      * @param id the id of the corresponding bundle in the resource file
-     * @param loader the {@link ClassLoader} used to load the resource file
+     * @param encoding the encoding of the resource file
      * @throws NullPointerException if <code>resource</code> or <code>id</code> is <code>null</code>
+     * @throws UnsupportedEncodingException if the encoding is not supported
      */
-    public LocalizedMessage(String resource,String id, ClassLoader loader) throws NullPointerException
+    public LocalizedMessage(String resource,String id, String encoding) throws NullPointerException, UnsupportedEncodingException
     {
         if (resource == null || id == null)
         {
@@ -61,7 +68,11 @@ public class LocalizedMessage
         this.resource = resource;
         this.arguments = new Object[0];
         this.filteredArguments = arguments;
-        this.loader = loader;
+        if (!Charset.isSupported(encoding))
+        {
+            throw new UnsupportedEncodingException("The encoding \"" + encoding + "\" is not supported.");
+        }
+        this.encoding = encoding;
     }
     
     /**
@@ -89,11 +100,12 @@ public class LocalizedMessage
      * RessourceBundle and <code>id</code> as the message bundle id the resource file. 
      * @param resource base name of the resource file 
      * @param id the id of the corresponding bundle in the resource file
-     * @param loader the {@link ClassLoader} used to load the resource file
+     * @param encoding the encoding of the resource file
      * @param arguments an array containing the arguments for the message
      * @throws NullPointerException if <code>resource</code> or <code>id</code> is <code>null</code>
+     * @throws UnsupportedEncodingException if the encoding is not supported
      */
-    public LocalizedMessage(String resource, String id, ClassLoader loader, Object[] arguments) throws NullPointerException
+    public LocalizedMessage(String resource, String id, String encoding, Object[] arguments) throws NullPointerException, UnsupportedEncodingException
     {
         if (resource == null || id == null || arguments == null)
         {
@@ -103,7 +115,11 @@ public class LocalizedMessage
         this.resource = resource;
         this.arguments = arguments;
         this.filteredArguments = arguments;
-        this.loader = loader;
+        if (!Charset.isSupported(encoding))
+        {
+            throw new UnsupportedEncodingException("The encoding \"" + encoding + "\" is not supported.");
+        }
+        this.encoding = encoding;
     }
     
     /**
@@ -131,6 +147,10 @@ public class LocalizedMessage
                 bundle = ResourceBundle.getBundle(resource, loc, loader);
             }
             String template = bundle.getString(entry);
+            if (!encoding.equals(DEFAULT_ENCODING))
+            {
+                template = new String(template.getBytes(DEFAULT_ENCODING), encoding);
+            }
             if (arguments == null || arguments.length == 0)
             {
                 return template;
@@ -144,7 +164,14 @@ public class LocalizedMessage
         {
             throw new MissingEntryException("Can't find entry " + entry + " in resource file " + resource + ".",
                     resource,
-                    entry); 
+                    entry,
+                    loc,
+                    loader != null ? loader : this.getClassLoader()); 
+        }
+        catch (UnsupportedEncodingException use)
+        {
+            // should never occur - cause we already test this in the constructor
+            throw new RuntimeException(use);
         }
     }
     
@@ -208,6 +235,26 @@ public class LocalizedMessage
     public Filter getFilter()
     {
         return filter;
+    }
+    
+    /**
+     * Set the {@link ClassLoader} which loads the resource files. If it is set to <code>null</code>
+     * then the default {@link ClassLoader} is used. 
+     * @param loader the {@link ClassLoader} which loads the resource files
+     */
+    public void setClassLoader(ClassLoader loader)
+    {
+        this.loader = loader;
+    }
+    
+    /**
+     * Returns the {@link ClassLoader} which loads the resource files or <code>null</code>
+     * if the default ClassLoader is used.
+     * @return the {@link ClassLoader} which loads the resource files
+     */
+    public ClassLoader getClassLoader()
+    {
+        return loader;
     }
     
     /**
