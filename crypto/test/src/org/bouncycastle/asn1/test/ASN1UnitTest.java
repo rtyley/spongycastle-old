@@ -14,6 +14,14 @@ public abstract class ASN1UnitTest
         }
     }
 
+    protected void checkMandatoryField(String name, String expected, String present)
+    {
+        if (!expected.equals(present))
+        {
+            fail(name + " field doesn't match.");
+        }
+    }
+
     protected void checkMandatoryField(String name, byte[] expected, byte[] present)
     {
         if (!areEqual(expected, present))

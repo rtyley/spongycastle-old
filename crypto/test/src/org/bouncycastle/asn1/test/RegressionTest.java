@@ -53,7 +53,11 @@ public class RegressionTest
         new AdmissionSyntaxUnitTest(),
         new AdmissionsUnitTest(),
         new DeclarationOfMajorityUnitTest(),
-        new ProcurationSyntaxUnitTest()
+        new ProcurationSyntaxUnitTest(),
+        new ProfessionInfoUnitTest(),
+        new RestrictionUnitTest(),
+        new NamingAuthorityUnitTest(),
+        new MonetaryLimitUnitTest()
     };
 
     public static void main(
