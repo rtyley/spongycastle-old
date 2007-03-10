@@ -155,7 +155,7 @@ public class ProfessionInfo extends ASN1Encodable
 
     private ASN1Sequence professionOIDs;
 
-    private DERPrintableString registrationNumber;
+    private String registrationNumber;
 
     private ASN1OctetString addProfessionInfo;
 
@@ -226,7 +226,7 @@ public class ProfessionInfo extends ASN1Encodable
             }
             else if (o instanceof DERPrintableString)
             {
-                registrationNumber = DERPrintableString.getInstance(o);
+                registrationNumber = DERPrintableString.getInstance(o).getString();
             }
             else if (o instanceof ASN1OctetString)
             {
@@ -243,7 +243,7 @@ public class ProfessionInfo extends ASN1Encodable
             o = (DEREncodable)e.nextElement();
             if (o instanceof DERPrintableString)
             {
-                registrationNumber = DERPrintableString.getInstance(o);
+                registrationNumber = DERPrintableString.getInstance(o).getString();
             }
             else if (o instanceof DEROctetString)
             {
@@ -295,13 +295,16 @@ public class ProfessionInfo extends ASN1Encodable
             v.add(professionItems[i]);
         }
         this.professionItems = new DERSequence(v);
-        v = new ASN1EncodableVector();
-        for (int i = 0; i != professionOIDs.length; i++)
+        if (professionOIDs != null)
         {
-            v.add(professionOIDs[i]);
+            v = new ASN1EncodableVector();
+            for (int i = 0; i != professionOIDs.length; i++)
+            {
+                v.add(professionOIDs[i]);
+            }
+            this.professionOIDs = new DERSequence(v);
         }
-        this.professionOIDs = new DERSequence(v);
-        this.registrationNumber = new DERPrintableString(registrationNumber, true);
+        this.registrationNumber = registrationNumber;
         this.addProfessionInfo = addProfessionInfo;
     }
 
@@ -337,7 +340,7 @@ public class ProfessionInfo extends ASN1Encodable
         }
         if (registrationNumber != null)
         {
-            vec.add(registrationNumber);
+            vec.add(new DERPrintableString(registrationNumber, true));
         }
         if (addProfessionInfo != null)
         {
@@ -397,7 +400,7 @@ public class ProfessionInfo extends ASN1Encodable
     /**
      * @return Returns the registrationNumber.
      */
-    public DERPrintableString getRegistrationNumber()
+    public String getRegistrationNumber()
     {
         return registrationNumber;
     }

@@ -58,6 +58,11 @@ public class Restriction extends ASN1Encodable
         this.restriction = new DirectoryString(restriction);
     }
 
+    public DirectoryString getRestriction()
+    {
+        return restriction;
+    }
+
     /**
      * Produce an object suitable for an ASN1OutputStream.
      * <p/>

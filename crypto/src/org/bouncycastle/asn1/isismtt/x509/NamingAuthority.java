@@ -44,7 +44,7 @@ public class NamingAuthority
         new DERObjectIdentifier(ISISMTTObjectIdentifiers.id_isismtt_at_namingAuthorities + ".1");
 
     private DERObjectIdentifier namingAuthorityId;
-    private DERIA5String namingAuthorityUrl;
+    private String namingAuthorityUrl;
     private DirectoryString namingAuthorityText;
 
     public static NamingAuthority getInstance(Object obj)
@@ -103,7 +103,7 @@ public class NamingAuthority
             }
             else if (o instanceof DERIA5String)
             {
-                namingAuthorityUrl = DERIA5String.getInstance(o);
+                namingAuthorityUrl = DERIA5String.getInstance(o).getString();
             }
             else if (o instanceof DERString)
             {
@@ -120,7 +120,7 @@ public class NamingAuthority
             DEREncodable o = (DEREncodable)e.nextElement();
             if (o instanceof DERIA5String)
             {
-                namingAuthorityUrl = DERIA5String.getInstance(o);
+                namingAuthorityUrl = DERIA5String.getInstance(o).getString();
             }
             else if (o instanceof DERString)
             {
@@ -169,7 +169,7 @@ public class NamingAuthority
      */
     public String getNamingAuthorityUrl()
     {
-        return namingAuthorityUrl.getString();
+        return namingAuthorityUrl;
     }
 
     /**
@@ -185,7 +185,7 @@ public class NamingAuthority
                            String namingAuthorityUrl, DirectoryString namingAuthorityText)
     {
         this.namingAuthorityId = namingAuthorityId;
-        this.namingAuthorityUrl = new DERIA5String(namingAuthorityUrl, true);
+        this.namingAuthorityUrl = namingAuthorityUrl;
         this.namingAuthorityText = namingAuthorityText;
     }
 
@@ -214,7 +214,7 @@ public class NamingAuthority
         }
         if (namingAuthorityUrl != null)
         {
-            vec.add(namingAuthorityUrl);
+            vec.add(new DERIA5String(namingAuthorityUrl, true));
         }
         if (namingAuthorityText != null)
         {
