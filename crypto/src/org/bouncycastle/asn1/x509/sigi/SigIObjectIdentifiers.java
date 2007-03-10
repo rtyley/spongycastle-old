@@ -6,12 +6,8 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
  * Object Identifiers of SigI specifciation (German Signature Law
  * Interoperability specification).
  */
-public final class SigIObjectIdentifiers
+public interface SigIObjectIdentifiers
 {
-    private SigIObjectIdentifiers()
-    {
-    }
-
     public final static DERObjectIdentifier id_sigi = new DERObjectIdentifier("1.3.36.8");
 
     /**

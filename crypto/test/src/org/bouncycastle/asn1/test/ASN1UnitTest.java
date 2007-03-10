@@ -3,6 +3,8 @@ package org.bouncycastle.asn1.test;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.util.test.SimpleTest;
 
+import java.math.BigInteger;
+
 public abstract class ASN1UnitTest
     extends SimpleTest
 {
@@ -67,5 +69,21 @@ public abstract class ASN1UnitTest
             fail(name + " field found when none expected.");
         }
     }
+
+    protected void checkOptionalField(String name, BigInteger expected, BigInteger present)
+    {
+        if (expected != null)
+        {
+            if (!expected.equals(present))
+            {
+                fail(name + " field doesn't match.");
+            }
+        }
+        else if (present != null)
+        {
+            fail(name + " field found when none expected.");
+        }
+    }
+
 
 }
