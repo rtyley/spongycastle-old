@@ -36,18 +36,12 @@ import java.util.Enumeration;
 public class PersonalData
     extends ASN1Encodable
 {
-
-    private NameOrPseudonym nameOrPseudonym = null;
-
-    private BigInteger nameDistiguisher = null;
-
-    private DERGeneralizedTime dateOfBirth = null;
-
-    private DirectoryString placeOfBirth = null;
-
-    private DERPrintableString gender = null;
-
-    private DirectoryString postalAddress = null;
+    private NameOrPseudonym nameOrPseudonym;
+    private BigInteger nameDistinguisher;
+    private DERGeneralizedTime dateOfBirth;
+    private DirectoryString placeOfBirth;
+    private String gender;
+    private DirectoryString postalAddress;
 
     public static PersonalData getInstance(Object obj)
     {
@@ -101,7 +95,7 @@ public class PersonalData
             switch (tag)
             {
                 case 0:
-                    nameDistiguisher = DERInteger.getInstance(o, false).getValue();
+                    nameDistinguisher = DERInteger.getInstance(o, false).getValue();
                     break;
                 case 1:
                     dateOfBirth = DERGeneralizedTime.getInstance(o, false);
@@ -110,7 +104,7 @@ public class PersonalData
                     placeOfBirth = DirectoryString.getInstance(o, true);
                     break;
                 case 3:
-                    gender = DERPrintableString.getInstance(o, false);
+                    gender = DERPrintableString.getInstance(o, false).getString();
                     break;
                 case 4:
                     postalAddress = DirectoryString.getInstance(o, true);
@@ -133,14 +127,44 @@ public class PersonalData
      */
     public PersonalData(NameOrPseudonym nameOrPseudonym,
                         BigInteger nameDistiguisher, DERGeneralizedTime dateOfBirth,
-                        String placeOfBirth, String gender, String postalAddress)
+                        DirectoryString placeOfBirth, String gender, DirectoryString postalAddress)
     {
         this.nameOrPseudonym = nameOrPseudonym;
         this.dateOfBirth = dateOfBirth;
-        this.gender = new DERPrintableString(gender, true);
-        this.nameDistiguisher = nameDistiguisher;
-        this.postalAddress = new DirectoryString(postalAddress);
-        this.placeOfBirth = new DirectoryString(placeOfBirth);
+        this.gender = gender;
+        this.nameDistinguisher = nameDistiguisher;
+        this.postalAddress = postalAddress;
+        this.placeOfBirth = placeOfBirth;
+    }
+
+    public NameOrPseudonym getNameOrPseudonym()
+    {
+        return nameOrPseudonym;
+    }
+
+    public BigInteger getNameDistinguisher()
+    {
+        return nameDistinguisher;
+    }
+
+    public DERGeneralizedTime getDateOfBirth()
+    {
+        return dateOfBirth;
+    }
+
+    public DirectoryString getPlaceOfBirth()
+    {
+        return placeOfBirth;
+    }
+
+    public String getGender()
+    {
+        return gender;
+    }
+
+    public DirectoryString getPostalAddress()
+    {
+        return postalAddress;
     }
 
     /**
@@ -165,9 +189,9 @@ public class PersonalData
     {
         ASN1EncodableVector vec = new ASN1EncodableVector();
         vec.add(nameOrPseudonym);
-        if (nameDistiguisher != null)
+        if (nameDistinguisher != null)
         {
-            vec.add(new DERTaggedObject(false, 0, new DERInteger(nameDistiguisher)));
+            vec.add(new DERTaggedObject(false, 0, new DERInteger(nameDistinguisher)));
         }
         if (dateOfBirth != null)
         {
@@ -179,7 +203,7 @@ public class PersonalData
         }
         if (gender != null)
         {
-            vec.add(new DERTaggedObject(false, 3, gender));
+            vec.add(new DERTaggedObject(false, 3, new DERPrintableString(gender, true)));
         }
         if (postalAddress != null)
         {

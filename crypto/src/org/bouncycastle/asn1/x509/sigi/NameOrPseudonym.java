@@ -7,11 +7,9 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERString;
-import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.DirectoryString;
 
 import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * Structure for a name or pseudonym.
@@ -35,9 +33,9 @@ public class NameOrPseudonym
 {
     private DirectoryString pseudonym;
 
-    private DirectoryString surname = null;
+    private DirectoryString surname;
 
-    private Vector givenName = null;
+    private ASN1Sequence givenName;
 
     public static NameOrPseudonym getInstance(Object obj)
     {
@@ -113,21 +111,7 @@ public class NameOrPseudonym
         }
 
         surname = DirectoryString.getInstance(seq.getObjectAt(0));
-
-        givenName = new Vector();
-
-        ASN1Sequence s = ASN1Sequence.getInstance(seq.getObjectAt(1));
-        Enumeration e = s.getObjects();
-
-        while (e.hasMoreElements())
-        {
-            Object o = e.nextElement();
-            if (!(o instanceof DERString))
-            {
-                throw new IllegalArgumentException("Bad object encountered: " + o.getClass());
-            }
-            givenName.addElement(DirectoryString.getInstance(o));
-        }
+        givenName = ASN1Sequence.getInstance(seq.getObjectAt(1));
     }
 
     /**
@@ -137,23 +121,40 @@ public class NameOrPseudonym
      */
     public NameOrPseudonym(String pseudonym)
     {
-        this.pseudonym = new DirectoryString(pseudonym);
+        this(new DirectoryString(pseudonym));
     }
 
     /**
      * Constructor from a given details.
      *
      * @param surname   The surname.
-     * @param givenName A vector of strings of the given name
+     * @param givenName A sequence of directory strings making up the givenName
      */
-    public NameOrPseudonym(String surname, Vector givenName)
+    public NameOrPseudonym(DirectoryString surname, ASN1Sequence givenName)
     {
-        this.surname = new DirectoryString(surname);
-        this.givenName = new Vector();
-        for (Enumeration e = givenName.elements(); e.hasMoreElements();)
+        this.surname = surname;
+        this.givenName = givenName;
+    }
+
+    public DirectoryString getPseudonym()
+    {
+        return pseudonym;
+    }
+
+    public DirectoryString getSurname()
+    {
+        return surname;
+    }
+
+    public DirectoryString[] getGivenName()
+    {
+        DirectoryString[] items = new DirectoryString[givenName.size()];
+        int count = 0;
+        for (Enumeration e = givenName.getObjects(); e.hasMoreElements();)
         {
-            this.givenName.addElement(new DirectoryString((String)e.nextElement()));
+            items[count++] = DirectoryString.getInstance(e.nextElement());
         }
+        return items;
     }
 
     /**
@@ -183,12 +184,7 @@ public class NameOrPseudonym
         {
             ASN1EncodableVector vec1 = new ASN1EncodableVector();
             vec1.add(surname);
-            ASN1EncodableVector vec2 = new ASN1EncodableVector();
-            for (Enumeration e = givenName.elements(); e.hasMoreElements();)
-            {
-                vec2.add(new DERUTF8String(e.nextElement().toString()));
-            }
-            vec1.add(new DERSequence(vec2));
+            vec1.add(givenName);
             return new DERSequence(vec1);
         }
     }
