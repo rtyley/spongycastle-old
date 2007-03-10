@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.BERTaggedObject;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
@@ -14,7 +15,6 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -579,16 +579,16 @@ public class CMSSignedDataStreamGenerator
 
             if (_certs.size() != 0)
             {
-                ASN1Set certs = CMSUtils.createDerSetFromList(_certs);
+                ASN1Set certs = CMSUtils.createBerSetFromList(_certs);
 
-                _sigGen.getRawOutputStream().write(new DERTaggedObject(false, 0, certs).getEncoded());
+                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 0, certs).getEncoded());
             }
 
             if (_crls.size() != 0)
             {
-                ASN1Set crls = CMSUtils.createDerSetFromList(_crls);
+                ASN1Set crls = CMSUtils.createBerSetFromList(_crls);
 
-                _sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, crls).getEncoded());
+                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 1, crls).getEncoded());
             }
             
             //

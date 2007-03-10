@@ -417,7 +417,7 @@ public class CMSSignedData
 
         try
         {
-            ASN1Set set = CMSUtils.createDerSetFromList(CMSUtils.getCertificatesFromStore(certsAndCrls));
+            ASN1Set set = CMSUtils.createBerSetFromList(CMSUtils.getCertificatesFromStore(certsAndCrls));
 
             if (set.size() != 0)
             {
@@ -431,7 +431,7 @@ public class CMSSignedData
 
         try
         {
-            ASN1Set set = CMSUtils.createDerSetFromList(CMSUtils.getCRLsFromStore(certsAndCrls));
+            ASN1Set set = CMSUtils.createBerSetFromList(CMSUtils.getCRLsFromStore(certsAndCrls));
 
             if (set.size() != 0)
             {

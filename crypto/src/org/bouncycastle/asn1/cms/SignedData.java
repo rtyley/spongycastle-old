@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.BERTaggedObject;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
@@ -26,7 +27,7 @@ public class SignedData
     private ASN1Set     certificates;
     private ASN1Set     crls;
     private ASN1Set     signerInfos;
-    private boolean        certBer;
+    private boolean certsBer;
     private boolean        crlsBer;
 
     public static SignedData getInstance(
@@ -57,6 +58,8 @@ public class SignedData
         this.certificates = certificates;
         this.crls = crls;
         this.signerInfos = signerInfos;
+        this.crlsBer = crls instanceof BERSet;
+        this.certsBer = certificates instanceof BERSet;
     }
 
 
@@ -203,7 +206,7 @@ public class SignedData
                 switch (tagged.getTagNo())
                 {
                 case 0:
-                    certBer = tagged instanceof BERTaggedObject;
+                    certsBer = tagged instanceof BERTaggedObject;
                     certificates = ASN1Set.getInstance(tagged, false);
                     break;
                 case 1:
@@ -274,7 +277,7 @@ public class SignedData
 
         if (certificates != null)
         {
-            if (certBer)
+            if (certsBer)
             {
                 v.add(new BERTaggedObject(false, 0, certificates));
             }

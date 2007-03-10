@@ -485,14 +485,14 @@ public class CMSSignedDataGenerator
 
         if (_certs.size() != 0)
         {
-            certificates = CMSUtils.createDerSetFromList(_certs);
+            certificates = CMSUtils.createBerSetFromList(_certs);
         }
 
         ASN1Set certrevlist = null;
 
         if (_crls.size() != 0)
         {
-            certrevlist = CMSUtils.createDerSetFromList(_crls);
+            certrevlist = CMSUtils.createBerSetFromList(_crls);
         }
 
         ContentInfo    encInfo;

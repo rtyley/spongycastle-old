@@ -832,6 +832,64 @@ public class SignedDataTest
         verifySignatures(sd);
     }
 
+    public void testCertOrdering1()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        CMSProcessable        msg = new CMSProcessableByteArray("Hello World!".getBytes());
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+        certList.add(_signDsaCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+
+        gen.addCertificatesAndCRLs(certs);
+
+        CMSSignedData sd = gen.generate(msg, true, "BC");
+
+        certs = sd.getCertificatesAndCRLs("Collection", "BC");
+        Iterator it = certs.getCertificates(null).iterator();
+
+        assertEquals(_origCert, it.next());
+        assertEquals(_signCert, it.next());
+        assertEquals(_signDsaCert, it.next());
+    }
+
+    public void testCertOrdering2()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        CMSProcessable        msg = new CMSProcessableByteArray("Hello World!".getBytes());
+
+        certList.add(_signCert);
+        certList.add(_signDsaCert);
+        certList.add(_origCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+
+        gen.addCertificatesAndCRLs(certs);
+
+        CMSSignedData sd = gen.generate(msg, true, "BC");
+
+        certs = sd.getCertificatesAndCRLs("Collection", "BC");
+        Iterator it = certs.getCertificates(null).iterator();
+
+        assertEquals(_signCert, it.next());
+        assertEquals(_signDsaCert, it.next());
+        assertEquals(_origCert, it.next());
+    }
+
     public void testSignerStoreReplacement()
         throws Exception
     {
