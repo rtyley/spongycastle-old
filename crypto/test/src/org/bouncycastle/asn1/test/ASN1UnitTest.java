@@ -45,5 +45,19 @@ public abstract class ASN1UnitTest
         }
     }
 
+    protected void checkOptionalField(String name, String expected, String present)
+    {
+        if (expected != null)
+        {
+            if (!expected.equals(present))
+            {
+                fail(name + " field doesn't match.");
+            }
+        }
+        else if (present != null)
+        {
+            fail(name + " field found when none expected.");
+        }
+    }
 
 }

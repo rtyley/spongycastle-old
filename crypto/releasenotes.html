@@ -34,6 +34,7 @@ regression for processing some messages with embedded multiparts that contained 
 <li>SharedFileInputStream compatability issues with JavaMail 1.4 have been addressed.</li>
 <li>JDK 1.5 and later KeyFactory now accepts ECPublicKey/ECPrivateKey to translateKey.</li>
 <li>JDK 1.5 and later KeyFactory now produces ECPublicKeySpec/ECPrivateKeySpec on getKeySpec.</li>
+<li>Some surrogate pairs were not assembled correctly by the UTF8 decoder. This has been fixed.</li>
 </ul>
 <h3>2.1.2 Additional Features and Functionality</h3>
 <ul>
@@ -44,6 +45,7 @@ regression for processing some messages with embedded multiparts that contained 
 <li>Support for the SEED algorithm has been added to the provider and the lightweight API</li>
 <li>CMS/SMIME now support SEED and Camellia</li>
 <li>A table of TeleTrusT curves has been added.</li>
+<li>CMSSignedData creation and Collection CertStore now preserves the order of certificates/CRls if the backing collection is ordered.</li>
 </ul>
 
 <h3>2.2.1 Version</h3>
