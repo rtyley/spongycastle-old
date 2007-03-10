@@ -1,14 +1,26 @@
 package org.bouncycastle.asn1.test;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.isismtt.ocsp.RequestedCertificate;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
 
 public class RequestedCertificateUnitTest
     extends ASN1UnitTest
 {
+   byte[]  certBytes = Base64.decode(
+           "MIIBWzCCAQYCARgwDQYJKoZIhvcNAQEEBQAwODELMAkGA1UEBhMCQVUxDDAKBgNV"
+         + "BAgTA1FMRDEbMBkGA1UEAxMSU1NMZWF5L3JzYSB0ZXN0IENBMB4XDTk1MDYxOTIz"
+         + "MzMxMloXDTk1MDcxNzIzMzMxMlowOjELMAkGA1UEBhMCQVUxDDAKBgNVBAgTA1FM"
+         + "RDEdMBsGA1UEAxMUU1NMZWF5L3JzYSB0ZXN0IGNlcnQwXDANBgkqhkiG9w0BAQEF"
+         + "AANLADBIAkEAqtt6qS5GTxVxGZYWa0/4u+IwHf7p2LNZbcPBp9/OfIcYAXBQn8hO"
+         + "/Re1uwLKXdCjIoaGs4DLdG88rkzfyK5dPQIDAQABMAwGCCqGSIb3DQIFBQADQQAE"
+         + "Wc7EcF8po2/ZO6kNCwK/ICH6DobgLekA5lSLr5EvuioZniZp5lFzAw4+YzPQ7XKJ"
+         + "zl9HYIMxATFyqSiD9jsx");
+
     public String getName()
     {
         return "RequestedCertificate";
@@ -19,10 +31,16 @@ public class RequestedCertificateUnitTest
     {
         int type = 1;
         byte[] certOctets = new byte[20];
+        X509CertificateStructure cert = new X509CertificateStructure(
+            (ASN1Sequence)new ASN1InputStream(certBytes).readObject());
 
         RequestedCertificate requested = new RequestedCertificate(type, certOctets);
 
-        checkConstruction(requested, type, certOctets);
+        checkConstruction(requested, type, certOctets, null);
+
+        requested = new RequestedCertificate(cert);
+
+        checkConstruction(requested, RequestedCertificate.certificate, null, cert);
 
         requested = RequestedCertificate.getInstance(null);
 
@@ -46,31 +64,42 @@ public class RequestedCertificateUnitTest
     private void checkConstruction(
         RequestedCertificate requested,
         int type,
-        byte[] certOctets)
+        byte[] certOctets,
+        X509CertificateStructure cert)
         throws IOException
     {
-        checkValues(requested, type, certOctets);
+        checkValues(requested, type, certOctets, cert);
 
         requested = RequestedCertificate.getInstance(requested);
 
-        checkValues(requested, type, certOctets);
+        checkValues(requested, type, certOctets, cert);
 
         ASN1InputStream aIn = new ASN1InputStream(requested.toASN1Object().getEncoded());
 
-        ASN1TaggedObject taggedObject = (ASN1TaggedObject)aIn.readObject();
+        Object obj = aIn.readObject();
 
-        requested = RequestedCertificate.getInstance(taggedObject);
+        requested = RequestedCertificate.getInstance(obj);
 
-        checkValues(requested, type, certOctets);
+        checkValues(requested, type, certOctets, cert);
     }
 
     private void checkValues(
         RequestedCertificate requested,
         int type,
-        byte[] certOctets)
+        byte[] certOctets,
+        X509CertificateStructure cert)
+        throws IOException
     {
         checkMandatoryField("certType", type, requested.getType());
-        checkMandatoryField("certificateOctets", certOctets, requested.getCertifcateBytes());
+
+        if (requested.getType() == RequestedCertificate.certificate)
+        {
+            checkMandatoryField("certificate", cert.getEncoded(), requested.getCertifcateBytes());
+        }
+        else
+        {
+            checkMandatoryField("certificateOctets", certOctets, requested.getCertifcateBytes());
+        }
     }
 
     public static void main(
