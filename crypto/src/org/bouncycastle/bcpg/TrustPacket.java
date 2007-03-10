@@ -33,7 +33,12 @@ public class TrustPacket
         
         this.levelAndTrustAmount[0] = (byte)trustCode;
     }
-    
+
+    public byte[] getLevelAndTrustAmount()
+    {
+        return levelAndTrustAmount;
+    }
+
     public void encode(
         BCPGOutputStream    out)
         throws IOException
