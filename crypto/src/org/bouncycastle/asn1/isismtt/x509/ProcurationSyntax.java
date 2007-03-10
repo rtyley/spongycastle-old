@@ -48,25 +48,25 @@ import java.util.Enumeration;
  * </pre>
  * 
  */
-public class Procuration
+public class ProcurationSyntax
     extends ASN1Encodable
 {
-    private DERPrintableString country;
+    private String country;
     private DirectoryString typeOfSubstitution;
 
     private GeneralName thirdPerson;
     private IssuerSerial certRef;
 
-    public static Procuration getInstance(Object obj)
+    public static ProcurationSyntax getInstance(Object obj)
     {
-        if (obj == null || obj instanceof Procuration)
+        if (obj == null || obj instanceof ProcurationSyntax)
         {
-            return (Procuration)obj;
+            return (ProcurationSyntax)obj;
         }
 
         if (obj instanceof ASN1Sequence)
         {
-            return new Procuration((ASN1Sequence)obj);
+            return new ProcurationSyntax((ASN1Sequence)obj);
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: "
@@ -94,7 +94,7 @@ public class Procuration
      *
      * @param seq The ASN.1 sequence.
      */
-    private Procuration(ASN1Sequence seq)
+    private ProcurationSyntax(ASN1Sequence seq)
     {
         if (seq.size() < 1 || seq.size() > 3)
         {
@@ -108,7 +108,7 @@ public class Procuration
             switch (o.getTagNo())
             {
                 case 1:
-                    country = DERPrintableString.getInstance(o, true);
+                    country = DERPrintableString.getInstance(o, true).getString();
                     break;
                 case 2:
                     typeOfSubstitution = DirectoryString.getInstance(o, true);
@@ -139,16 +139,59 @@ public class Procuration
      *
      * @param country            The country code whose laws apply.
      * @param typeOfSubstitution The type of procuration.
-     * @param thirdPerson        The GeneralName of the person who is represented.
      * @param certRef            Reference to certificate of the person who is represented.
      */
-    public Procuration(String country, DirectoryString typeOfSubstitution,
-                       GeneralName thirdPerson, IssuerSerial certRef)
+    public ProcurationSyntax(
+        String country,
+        DirectoryString typeOfSubstitution,
+        IssuerSerial certRef)
     {
-        this.country = new DERPrintableString(country, true);
+        this.country = country;
+        this.typeOfSubstitution = typeOfSubstitution;
+        this.thirdPerson = null;
+        this.certRef = certRef;
+    }
+
+    /**
+     * Constructor from a given details.
+     * <p/>
+     * <p/>
+     * Either <code>generalName</code> or <code>certRef</code> MUST be
+     * <code>null</code>.
+     *
+     * @param country            The country code whose laws apply.
+     * @param typeOfSubstitution The type of procuration.
+     * @param thirdPerson        The GeneralName of the person who is represented.
+     */
+    public ProcurationSyntax(
+        String country,
+        DirectoryString typeOfSubstitution,
+        GeneralName thirdPerson)
+    {
+        this.country = country;
         this.typeOfSubstitution = typeOfSubstitution;
         this.thirdPerson = thirdPerson;
-        this.certRef = certRef;
+        this.certRef = null;
+    }
+
+    public String getCountry()
+    {
+        return country;
+    }
+
+    public DirectoryString getTypeOfSubstitution()
+    {
+        return typeOfSubstitution;
+    }
+
+    public GeneralName getThirdPerson()
+    {
+        return thirdPerson;
+    }
+
+    public IssuerSerial getCertRef()
+    {
+        return certRef;
     }
 
     /**
@@ -177,7 +220,7 @@ public class Procuration
         ASN1EncodableVector vec = new ASN1EncodableVector();
         if (country != null)
         {
-            vec.add(new DERTaggedObject(true, 1, country));
+            vec.add(new DERTaggedObject(true, 1, new DERPrintableString(country, true)));
         }
         if (typeOfSubstitution != null)
         {
@@ -185,11 +228,11 @@ public class Procuration
         }
         if (thirdPerson != null)
         {
-            vec.add(thirdPerson);
+            vec.add(new DERTaggedObject(true, 3, thirdPerson));
         }
         else
         {
-            vec.add(certRef);
+            vec.add(new DERTaggedObject(true, 3, certRef));
         }
 
         return new DERSequence(vec);

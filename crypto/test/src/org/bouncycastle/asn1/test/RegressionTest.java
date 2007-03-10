@@ -52,7 +52,8 @@ public class RegressionTest
         new AdditionalInformationSyntaxUnitTest(),
         new AdmissionSyntaxUnitTest(),
         new AdmissionsUnitTest(),
-        new DeclarationOfMajorityUnitTest()
+        new DeclarationOfMajorityUnitTest(),
+        new ProcurationSyntaxUnitTest()
     };
 
     public static void main(
