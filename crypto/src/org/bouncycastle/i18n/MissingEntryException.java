@@ -2,7 +2,6 @@ package org.bouncycastle.i18n;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
 import java.util.Locale;
 
 public class MissingEntryException extends RuntimeException 
@@ -61,7 +60,11 @@ public class MissingEntryException extends RuntimeException
             if (loader instanceof URLClassLoader)
             {
                 URL[] urls = ((URLClassLoader) loader).getURLs();
-                debugMsg += " The following entries in the classpath were searched: " + Arrays.toString(urls);
+                debugMsg += " The following entries in the classpath were searched: ";
+                for (int i = 0; i != urls.length; i++)
+                {
+                    debugMsg += urls[i] + " ";
+                }
             }
         }
         return debugMsg;
