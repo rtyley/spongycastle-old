@@ -621,7 +621,7 @@ public class CMSSignedDataParser
 
         try
         {
-            certs = CMSUtils.createDerSetFromList(CMSUtils.getCertificatesFromStore(certsAndCrls));
+            certs = CMSUtils.createBerSetFromList(CMSUtils.getCertificatesFromStore(certsAndCrls));
         }
         catch (CertStoreException e)
         {
@@ -637,7 +637,7 @@ public class CMSSignedDataParser
 
         try
         {
-            crls = CMSUtils.createDerSetFromList(CMSUtils.getCRLsFromStore(certsAndCrls));
+            crls = CMSUtils.createBerSetFromList(CMSUtils.getCRLsFromStore(certsAndCrls));
         }
         catch (CertStoreException e)
         {

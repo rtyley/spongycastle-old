@@ -9,10 +9,10 @@ import java.security.cert.CertStoreParameters;
 import java.security.cert.CertStoreSpi;
 import java.security.cert.Certificate;
 import java.security.cert.CollectionCertStoreParameters;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 public class CertStoreCollectionSpi extends CertStoreSpi
 {
@@ -35,7 +35,7 @@ public class CertStoreCollectionSpi extends CertStoreSpi
         CertSelector selector)
         throws CertStoreException 
     {
-        Set         col = new HashSet();
+        List        col = new ArrayList();
         Iterator    iter = params.getCollection().iterator();
 
         if (selector == null)
@@ -71,7 +71,7 @@ public class CertStoreCollectionSpi extends CertStoreSpi
         CRLSelector selector)
         throws CertStoreException 
     {
-        Set         col = new HashSet();
+        List        col = new ArrayList();
         Iterator    iter = params.getCollection().iterator();
 
         if (selector == null)

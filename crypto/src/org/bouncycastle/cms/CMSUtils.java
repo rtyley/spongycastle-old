@@ -4,6 +4,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
@@ -114,6 +115,18 @@ class CMSUtils
         {
             throw new CMSException("error encoding crls", e);
         }
+    }
+
+    static ASN1Set createBerSetFromList(List derObjects)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        for (Iterator it = derObjects.iterator(); it.hasNext();)
+        {
+            v.add((DEREncodable)it.next());
+        }
+
+        return new BERSet(v);
     }
 
     static ASN1Set createDerSetFromList(List derObjects)
