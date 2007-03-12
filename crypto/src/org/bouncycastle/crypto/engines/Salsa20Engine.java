@@ -95,7 +95,9 @@ public class Salsa20Engine
             keyStream = salsa20WordToByte(engineState);
             engineState[8]++;
             if (engineState[8] == 0)
+            {
                 engineState[9]++;
+            }
         }
         byte out = (byte)(keyStream[index]^in);
         index = (index + 1) & 63;
@@ -209,11 +211,11 @@ public class Salsa20Engine
     
     /**
      * Salsa20 function
-	 *
-	 * @param   input   input data
      *
-	 * @return  keystream
-	 */    
+     * @param   input   input data
+     *
+     * @return  keystream
+     */    
     private byte[] salsa20WordToByte(int[] input)
     {
         int[] x = new int[input.length];
@@ -321,7 +323,7 @@ public class Salsa20Engine
      */
     private int byteToIntLittle(byte[] x, int offset)
     {
-        return ((x[offset++] & 255)      ) |
+        return ((x[offset++] & 255)) |
                ((x[offset++] & 255) <<  8) |
                ((x[offset++] & 255) << 16) |
                (x[offset  ] << 24);
