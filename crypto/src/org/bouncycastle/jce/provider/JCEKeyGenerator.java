@@ -362,6 +362,18 @@ public class JCEKeyGenerator
         }
     }
 
+    /**
+     * Salsa20
+     */
+    public static class Salsa20
+        extends JCEKeyGenerator
+    {
+        public Salsa20()
+        {
+            super("Salsa20", 128, new CipherKeyGenerator());
+        }
+    }
+    
     // HMAC Related secret keys..
   
     /**

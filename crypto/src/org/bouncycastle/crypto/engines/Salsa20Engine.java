@@ -6,6 +6,7 @@ import org.bouncycastle.crypto.MaxBytesExceededException;
 import org.bouncycastle.crypto.StreamCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.util.Strings;
 
 import java.math.BigInteger;
 
@@ -20,8 +21,8 @@ public class Salsa20Engine
     private final static int stateSize = 16; // 16, 32 bit ints = 64 bytes
     
     private final static byte[]
-        sigma = "expand 32-byte k".getBytes(),
-        tau   = "expand 16-byte k".getBytes();
+        sigma = Strings.toByteArray("expand 32-byte k"),
+        tau   = Strings.toByteArray("expand 16-byte k");
 
     public final static BigInteger maxBytesPerIV = new BigInteger("1180591620717411303424");
     
