@@ -1,12 +1,7 @@
 package org.bouncycastle.jce.provider.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.test.SimpleTest;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -15,9 +10,13 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTest;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
 
 /**
  * check that cipher input/output streams are working correctly
@@ -36,7 +35,7 @@ public class CipherStreamTest
 
         try
         {
-            KeyGenerator            kGen = null;
+            KeyGenerator            kGen;
 
             if (name.indexOf('/') < 0)
             {
@@ -66,7 +65,7 @@ public class CipherStreamTest
             CipherInputStream       cIn = new CipherInputStream(bIn, in);
             CipherOutputStream      cOut = new CipherOutputStream(bOut, out);
 
-            int c = 0;
+            int c;
 
             while ((c = cIn.read()) >= 0)
             {
@@ -87,6 +86,7 @@ public class CipherStreamTest
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             fail("Failed - exception " + e.toString());
         }
     }
@@ -94,14 +94,15 @@ public class CipherStreamTest
     private void testException(
         String  name)
     {
-        String lCode = "ABCDEFGHIJKLMNOPQRSTUVWXY0123456789";
-        
         try
         {
-            byte[] rc4Key = { (byte)128, (byte)131, (byte)133, (byte)134,
+            byte[] keyBytes = {
+                    (byte)128, (byte)131, (byte)133, (byte)134,
+                    (byte)137, (byte)138, (byte)140, (byte)143,
+                    (byte)128, (byte)131, (byte)133, (byte)134,
                     (byte)137, (byte)138, (byte)140, (byte)143 };
 
-            SecretKeySpec cipherKey = new SecretKeySpec(rc4Key, name);
+            SecretKeySpec cipherKey = new SecretKeySpec(keyBytes, name);
             Cipher ecipher = Cipher.getInstance(name, "BC");
             ecipher.init(Cipher.ENCRYPT_MODE, cipherKey);
 
@@ -199,6 +200,8 @@ public class CipherStreamTest
     {
         runTest("RC4");
         testException("RC4");
+        runTest("Salsa20");
+        testException("Salsa20");
         runTest("DES/ECB/PKCS7Padding");
         runTest("DES/CFB8/NoPadding");
     }

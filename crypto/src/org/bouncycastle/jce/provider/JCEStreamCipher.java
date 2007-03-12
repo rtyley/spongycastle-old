@@ -1,21 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
-
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
@@ -26,12 +10,28 @@ import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.IDEAEngine;
 import org.bouncycastle.crypto.engines.RC4Engine;
+import org.bouncycastle.crypto.engines.Salsa20Engine;
 import org.bouncycastle.crypto.engines.SkipjackEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+import javax.crypto.spec.RC5ParameterSpec;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEStreamCipher
     extends WrapCipherSpi implements PBE
@@ -56,9 +56,11 @@ public class JCEStreamCipher
     private String                  pbeAlgorithm = null;
 
     protected JCEStreamCipher(
-        StreamCipher engine)
+        StreamCipher engine,
+        int          ivLength)
     {
         cipher = engine;
+        this.ivLength = ivLength;
     }
         
     protected JCEStreamCipher(
@@ -521,7 +523,7 @@ public class JCEStreamCipher
     {
         public RC4()
         {
-            super(new RC4Engine());
+            super(new RC4Engine(), 0);
         }
     }
 
@@ -533,7 +535,7 @@ public class JCEStreamCipher
     {
         public PBEWithSHAAnd128BitRC4()
         {
-            super(new RC4Engine());
+            super(new RC4Engine(), 0);
         }
     }
 
@@ -545,7 +547,19 @@ public class JCEStreamCipher
     {
         public PBEWithSHAAnd40BitRC4()
         {
-            super(new RC4Engine());
+            super(new RC4Engine(), 0);
+        }
+    }
+
+    /**
+     * Salsa20
+     */
+    static public class Salsa20
+        extends JCEStreamCipher
+    {
+        public Salsa20()
+        {
+            super(new Salsa20Engine(), 8);
         }
     }
 }
