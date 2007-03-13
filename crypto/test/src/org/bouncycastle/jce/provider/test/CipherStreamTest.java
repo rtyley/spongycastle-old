@@ -86,7 +86,6 @@ public class CipherStreamTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             fail("Failed - exception " + e.toString());
         }
     }
