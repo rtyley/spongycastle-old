@@ -8,8 +8,6 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Strings;
 
-import java.math.BigInteger;
-
 /**
  * Implementation of Daniel J. Bernstein's Salsa20 stream cipher, Snuffle 2005
  */
@@ -24,8 +22,6 @@ public class Salsa20Engine
         sigma = Strings.toByteArray("expand 32-byte k"),
         tau   = Strings.toByteArray("expand 16-byte k");
 
-    public final static BigInteger maxBytesPerIV = new BigInteger("1180591620717411303424");
-    
     /*
      * variables to hold the state of the engine
      * during encryption and decryption
@@ -37,11 +33,10 @@ public class Salsa20Engine
                         workingIV   = null;
     private boolean     initialised = false;
     
-    /* Please, oh _please_ don't let the overhead kill the speed
-     * I also considered using a long+int to count the bytes+rollovers of the long
-     * But decided this was more likely to be error free
+    /*
+     * internal counter
      */
-    private BigInteger counter = BigInteger.ZERO;
+    private int cW0, cW1, cW2;
     
 
     /**
@@ -86,7 +81,7 @@ public class Salsa20Engine
 
     public byte returnByte(byte in)
     {
-        if (counter.compareTo(maxBytesPerIV) == 0)
+        if (limitExceeded())
         {
             throw new MaxBytesExceededException("2^70 byte limit per IV; Change IV");
         }
@@ -102,7 +97,6 @@ public class Salsa20Engine
         }
         byte out = (byte)(keyStream[index]^in);
         index = (index + 1) & 63;
-        counter = counter.add(BigInteger.ONE);
     
         return out;
     }
@@ -131,7 +125,7 @@ public class Salsa20Engine
         
         for (int i = 0; i < len; i++)
         {
-            if (counter.compareTo(maxBytesPerIV) == 0)
+            if (limitExceeded())
             {
                 throw new MaxBytesExceededException("2^70 byte limit per IV; Change IV");
             }
@@ -147,7 +141,6 @@ public class Salsa20Engine
             }
             out[i+outOff] = (byte)(keyStream[index]^in[i+inOff]);
             index = (index + 1) & 63;
-            counter = counter.add(BigInteger.ONE);
         }
     }
 
@@ -164,43 +157,40 @@ public class Salsa20Engine
         workingIV  = ivBytes;
 
         index = 0;
-        counter = BigInteger.ZERO;
+        resetCounter();
 
         if (engineState == null)
         {
             engineState = new int[stateSize];
         }
 
-        int i = 1, j = 0;
+        int offset = 0;
         byte[] constants;
         
         // Key
-        while (i < 5)
-        {
-            engineState[i] = byteToIntLittle(workingKey, j);
-            i++;
-            j+=4;
-        }
+        engineState[1] = byteToIntLittle(workingKey, 0);
+        engineState[2] = byteToIntLittle(workingKey, 4);
+        engineState[3] = byteToIntLittle(workingKey, 8);
+        engineState[4] = byteToIntLittle(workingKey, 12);
         
         if (workingKey.length == 32)
         {
             constants = sigma;
+            offset = 16;
         }
         else
-        { // 16
-            j = 0;
+        {
             constants = tau;
         }
         
-        for (i = 11; i < 15; i++,j+=4)
-        {
-            engineState[i] = byteToIntLittle(workingKey, j);
-        }
-        
-        for (i = j = 0; i <= 15; i+=5,j+=4)
-        {
-            engineState[i] = byteToIntLittle(constants, j);
-        }
+        engineState[11] = byteToIntLittle(workingKey, offset);
+        engineState[12] = byteToIntLittle(workingKey, offset+4);
+        engineState[13] = byteToIntLittle(workingKey, offset+8);
+        engineState[14] = byteToIntLittle(workingKey, offset+12);
+        engineState[0 ] = byteToIntLittle(constants, 0);
+        engineState[5 ] = byteToIntLittle(constants, 4);
+        engineState[10] = byteToIntLittle(constants, 8);
+        engineState[15] = byteToIntLittle(constants, 12);
         
         // IV
         engineState[6] = byteToIntLittle(workingIV, 0);
@@ -328,5 +318,28 @@ public class Salsa20Engine
                ((x[offset++] & 255) <<  8) |
                ((x[offset++] & 255) << 16) |
                (x[offset  ] << 24);
+    }
+
+    private void resetCounter()
+    {
+        cW0 = 0;
+        cW1 = 0;
+        cW2 = 0;
+    }
+
+    private boolean limitExceeded()
+    {
+        cW0++;
+        if (cW0 == 0)
+        {
+            cW1++;
+            if (cW1 == 0)
+            {
+                cW2++;
+                return (cW2 & 0x20) != 0;          // 2^(32 + 32 + 6)
+            }
+        }
+
+        return false;
     }
 }
