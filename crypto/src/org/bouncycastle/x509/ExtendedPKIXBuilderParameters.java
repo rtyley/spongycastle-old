@@ -136,7 +136,7 @@ public class ExtendedPKIXBuilderParameters extends ExtendedPKIXParameters
      * Can alse handle <code>ExtendedPKIXBuilderParameters</code> and
      * <code>PKIXBuilderParameters</code>.
      * 
-     * @param Parameters to set.
+     * @param params Parameters to set.
      * @see org.bouncycastle.x509.ExtendedPKIXParameters#setParams(java.security.cert.PKIXParameters)
      */
     protected void setParams(PKIXParameters params)
@@ -191,7 +191,7 @@ public class ExtendedPKIXBuilderParameters extends ExtendedPKIXParameters
      */
     public static ExtendedPKIXParameters getInstance(PKIXParameters pkixParams)
     {
-        ExtendedPKIXBuilderParameters params = null;
+        ExtendedPKIXBuilderParameters params;
         try
         {
             params = new ExtendedPKIXBuilderParameters(pkixParams
