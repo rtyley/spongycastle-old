@@ -35,6 +35,7 @@ regression for processing some messages with embedded multiparts that contained 
 <li>JDK 1.5 and later KeyFactory now accepts ECPublicKey/ECPrivateKey to translateKey.</li>
 <li>JDK 1.5 and later KeyFactory now produces ECPublicKeySpec/ECPrivateKeySpec on getKeySpec.</li>
 <li>Some surrogate pairs were not assembled correctly by the UTF8 decoder. This has been fixed.</li>
+<li>Alias resolution in PKCS#12 is now case insensitive.</li>
 </ul>
 <h3>2.1.2 Additional Features and Functionality</h3>
 <ul>
@@ -47,6 +48,8 @@ regression for processing some messages with embedded multiparts that contained 
 <li>CMS/SMIME now support SEED and Camellia</li>
 <li>A table of TeleTrusT curves has been added.</li>
 <li>CMSSignedData creation and Collection CertStore now preserves the order of certificates/CRls if the backing collection is ordered.</li>
+<li>CMS Signed objects now use BER encdoing for sets containing certificates and CRLs, allowing specific ordering to be specified for the objects contained.</li>
+<li>CMS enveloped now works around providers which throw UnsupportedOperationException if key wrap is attempted.</li>
 </ul>
 
 <h3>2.2.1 Version</h3>
