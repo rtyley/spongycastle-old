@@ -118,21 +118,21 @@ public class PersonalData
     /**
      * Constructor from a given details.
      *
-     * @param nameOrPseudonym  Name or pseudonym.
-     * @param nameDistiguisher Name distinguisher.
-     * @param dateOfBirth      Date of birth.
-     * @param placeOfBirth     Place of birth.
-     * @param gender           Gender.
-     * @param postalAddress    Postal Address.
+     * @param nameOrPseudonym   Name or pseudonym.
+     * @param nameDistinguisher Name distinguisher.
+     * @param dateOfBirth       Date of birth.
+     * @param placeOfBirth      Place of birth.
+     * @param gender            Gender.
+     * @param postalAddress     Postal Address.
      */
     public PersonalData(NameOrPseudonym nameOrPseudonym,
-                        BigInteger nameDistiguisher, DERGeneralizedTime dateOfBirth,
+                        BigInteger nameDistinguisher, DERGeneralizedTime dateOfBirth,
                         DirectoryString placeOfBirth, String gender, DirectoryString postalAddress)
     {
         this.nameOrPseudonym = nameOrPseudonym;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
-        this.nameDistinguisher = nameDistiguisher;
+        this.nameDistinguisher = nameDistinguisher;
         this.postalAddress = postalAddress;
         this.placeOfBirth = placeOfBirth;
     }
