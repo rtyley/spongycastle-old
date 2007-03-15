@@ -1,13 +1,5 @@
 package org.bouncycastle.asn1.test;
 
-import java.io.ByteArrayInputStream;
-
-import java.util.Date;
-
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERObject;
@@ -17,6 +9,12 @@ import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.asn1.smime.SMIMEEncryptionKeyPreferenceAttribute;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTestResult;
+import org.bouncycastle.util.test.Test;
+import org.bouncycastle.util.test.TestResult;
+
+import java.io.ByteArrayInputStream;
 
 public class SMIMETest
     implements Test
@@ -55,7 +53,7 @@ public class SMIMETest
         SMIMECapabilitiesAttribute attr = new SMIMECapabilitiesAttribute(caps);
         
         SMIMEEncryptionKeyPreferenceAttribute   pref = new SMIMEEncryptionKeyPreferenceAttribute(
-                                                  new RecipientKeyIdentifier(new DEROctetString(new byte[8]), new DERGeneralizedTime(new Date(1000)), null));
+                                                  new RecipientKeyIdentifier(new DEROctetString(new byte[8]), new DERGeneralizedTime("20070315173729Z"), null));
         
         try
         {

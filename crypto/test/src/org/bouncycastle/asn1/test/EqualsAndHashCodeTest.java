@@ -57,7 +57,7 @@ public class EqualsAndHashCodeTest
                 new DERBoolean(true),
                 new DERBoolean(false),
                 new DEREnumerated(100),
-                new DERGeneralizedTime(new Date()),
+                new DERGeneralizedTime("20070315173729Z"),
                 new DERGeneralString("hello world"),
                 new DERIA5String("hello"),
                 new DERInteger(1000),
