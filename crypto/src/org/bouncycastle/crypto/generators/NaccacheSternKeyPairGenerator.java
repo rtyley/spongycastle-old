@@ -1,15 +1,15 @@
 package org.bouncycastle.crypto.generators;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Vector;
-
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.params.NaccacheSternKeyGenerationParameters;
 import org.bouncycastle.crypto.params.NaccacheSternKeyParameters;
 import org.bouncycastle.crypto.params.NaccacheSternPrivateKeyParameters;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Vector;
 
 /**
  * Key generation parameters for NaccacheStern cipher. For details on this cipher, please see
@@ -107,8 +107,8 @@ public class NaccacheSternKeyPairGenerator
             tries++;
 
             p_ = generatePrime(24, certainty, rand);
-
-            p = p_.multiply(_2au).add(BigInteger.ONE);
+   
+            p = p_.multiply(_2au).add(ONE);
 
             if (!p.isProbablePrime(certainty))
             {
@@ -124,7 +124,7 @@ public class NaccacheSternKeyPairGenerator
                     continue;
                 }
 
-                q = q_.multiply(_2bv).add(BigInteger.ONE);
+                q = q_.multiply(_2bv).add(ONE);
 
                 if (q.isProbablePrime(certainty))
                 {

@@ -100,6 +100,8 @@ public class CMSSignedDataParser
     private X509Store               _attributeStore;
     private ASN1Set                 _certSet, _crlSet;
     private boolean                 _isCertCrlParsed;
+    private X509Store               _certificateStore;
+    private X509Store               _crlStore;
 
     public CMSSignedDataParser(
         byte[]      sigBlock)
@@ -288,6 +290,57 @@ public class CMSSignedDataParser
         return _attributeStore;
     }
 
+        /**
+     * return a X509Store containing the public key certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of public key certificates
+     * @exception NoSuchProviderException if the provider requested isn't available.
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCertificates(
+        String type,
+        String provider)
+        throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        if (_certificateStore == null)
+        {
+            populateCertCrlSets();
+
+            _certificateStore = HELPER.createCertificateStore(type, provider, _certSet);
+        }
+
+        return _certificateStore;
+    }
+
+    /**
+     * return a X509Store containing CRLs, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of CRLs
+     * @exception NoSuchProviderException if the provider requested isn't available.
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCRLs(
+        String type,
+        String provider)
+        throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        if (_crlStore == null)
+        {
+            populateCertCrlSets();
+
+            _crlStore = HELPER.createCRLsStore(type, provider, _crlSet);
+        }
+
+        return _crlStore;
+    }
 
     /**
      * return a CertStore containing the certificates and CRLs associated with
@@ -568,7 +621,7 @@ public class CMSSignedDataParser
 
         try
         {
-            certs = CMSUtils.createDerSetFromList(CMSUtils.getCertificatesFromStore(certsAndCrls));
+            certs = CMSUtils.createBerSetFromList(CMSUtils.getCertificatesFromStore(certsAndCrls));
         }
         catch (CertStoreException e)
         {
@@ -584,7 +637,7 @@ public class CMSSignedDataParser
 
         try
         {
-            crls = CMSUtils.createDerSetFromList(CMSUtils.getCRLsFromStore(certsAndCrls));
+            crls = CMSUtils.createBerSetFromList(CMSUtils.getCRLsFromStore(certsAndCrls));
         }
         catch (CertStoreException e)
         {

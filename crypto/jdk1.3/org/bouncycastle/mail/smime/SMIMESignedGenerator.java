@@ -31,9 +31,11 @@ import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -87,6 +89,7 @@ public class SMIMESignedGenerator
     private List                _certStores = new ArrayList();
     private List                _signers = new ArrayList();
     private List                _attributeCerts = new ArrayList();
+    private Map                 _digests = new HashMap();
     
     static
     {
@@ -127,6 +130,7 @@ public class SMIMESignedGenerator
      * @param key key to use to generate the signature
      * @param cert the public key certificate associated with the signer's key.
      * @param digestOID object ID of the digest algorithm to use.
+     * @exception IllegalArgumentException any of the arguments are inappropriate
      */
     public void addSigner(
         PrivateKey      key,
@@ -147,6 +151,7 @@ public class SMIMESignedGenerator
      * @param digestOID object ID of the digest algorithm to use.
      * @param signedAttr signed attributes to be included in the signature.
      * @param unsignedAttr unsigned attribitues to be included.
+     * @exception IllegalArgumentException any of the arguments are inappropriate
      */
     public void addSigner(
         PrivateKey      key,
@@ -341,6 +346,17 @@ public class SMIMESignedGenerator
     }
 
     /**
+     * Return a map of oids and byte arrays representing the digests calculated on the content during
+     * the last generate.
+     *
+     * @return a map of oids (as String objects) and byte[] representing digests.
+     */
+    public Map getGeneratedDigests()
+    {
+        return new HashMap(_digests);
+    }
+
+    /**
      * generate a signed object that contains an SMIME Signed Multipart
      * object using the given provider.
      * @param content the MimeBodyPart to be signed.
@@ -361,6 +377,10 @@ public class SMIMESignedGenerator
     /**
      * generate a signed object that contains an SMIME Signed Multipart
      * object using the given provider from the given MimeMessage
+     *
+     * @throws NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
+     * @throws NoSuchProviderException if no provider can be found.
+     * @throws SMIMEException if an exception occurs in processing the signature.
      */
     public MimeMultipart generate(
         MimeMessage     message,
@@ -494,14 +514,14 @@ public class SMIMESignedGenerator
             return unsignedAttr;
         }
     }
-    
+
     private class ContentSigner
         implements SMIMEStreamingProcessor
     {
         private final MimeBodyPart _content;
         private final boolean      _encapsulate;
         private final String       _provider;
-        
+
         ContentSigner(
             MimeBodyPart content,
             boolean      encapsulate,
@@ -558,6 +578,8 @@ public class SMIMESignedGenerator
 
                 lOut.writeln();      // CRLF separator
 
+                SMIMEUtil.outputPreamble(lOut, bodyPart, boundary);
+
                 for (int i = 0; i < mp.getCount(); i++)
                 {
                     lOut.writeln(boundary);
@@ -600,6 +622,8 @@ public class SMIMESignedGenerator
                 }
                 
                 signingStream.close();
+
+                _digests = gen.getGeneratedDigests();
             }
             catch (MessagingException e)
             {

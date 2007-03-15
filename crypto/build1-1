@@ -163,13 +163,20 @@ then
     rm -rf src/org/bouncycastle/util/encoders/test
     rm -rf src/org/bouncycastle/x509/PKIXCertPathReviewer.java
     rm -rf src/org/bouncycastle/x509/CertPathReviewerException.java
-    rm -rf src/org/bouncycastle/x509/ExtendedPKIXParameters.java
+    rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
     rm -rf src/org/bouncycastle/x509/util/LDAPStoreHelper.java
+    rm -rf src/org/bouncycastle/jce/provider/PKIXAttrCert*.java
+    rm -rf src/org/bouncycastle/jce/provider/PKIXNameConstraints*.java
+    rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
+    rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
+    rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
     rm -rf src/org/bouncycastle/jce/ProviderConfigurationPermission.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPAttrCerts.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCertPairs.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCerts.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCRLs.java
+    rm -rf src/org/bouncycastle/jce/exception
+    rm -rf src/org/bouncycastle/openssl/test/WriterTest.java
     find src -name AllTests.java -exec rm {} \;
     rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
     rm src/org/bouncycastle/asn1/test/OctetStringTest.java
@@ -305,6 +312,7 @@ then
 
     rm src/org/bouncycastle/openpgp/examples/DSAElGamalKeyRingGenerator.java
     rm src/org/bouncycastle/openpgp/examples/test/AllTests.java
+    rm -f src/org/bouncycastle/openpgp/test/DSA2Test.java
 
     javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
