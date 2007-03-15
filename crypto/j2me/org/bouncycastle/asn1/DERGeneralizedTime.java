@@ -11,10 +11,6 @@ public class DERGeneralizedTime extends DERObject
 {
     String time;
 
-    public DERGeneralizedTime(Date date) {
-        time = date.toString();
-    }
-    
     /**
      * return a generalized time from the passed in object
      * 

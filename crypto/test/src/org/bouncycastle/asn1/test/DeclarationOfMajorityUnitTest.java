@@ -6,7 +6,6 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.isismtt.x509.DeclarationOfMajority;
 
 import java.io.IOException;
-import java.util.Date;
 
 public class DeclarationOfMajorityUnitTest
     extends ASN1UnitTest
@@ -19,7 +18,7 @@ public class DeclarationOfMajorityUnitTest
     public void performTest()
         throws Exception
     {
-        DERGeneralizedTime dateOfBirth = new DERGeneralizedTime(new Date());
+        DERGeneralizedTime dateOfBirth = new DERGeneralizedTime("20070315173729Z");
         DeclarationOfMajority decl = new DeclarationOfMajority(dateOfBirth);
 
         checkConstruction(decl, DeclarationOfMajority.dateOfBirth, dateOfBirth, -1);
