@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.x509.sigi.PersonalData;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Date;
 
 public class PersonalDataUnitTest
     extends ASN1UnitTest
@@ -24,7 +23,7 @@ public class PersonalDataUnitTest
     {
         NameOrPseudonym nameOrPseudonym = new NameOrPseudonym("pseudonym");
         BigInteger nameDistinguisher = BigInteger.valueOf(10);
-        DERGeneralizedTime dateOfBirth= new DERGeneralizedTime(new Date());
+        DERGeneralizedTime dateOfBirth= new DERGeneralizedTime("20070315173729Z");
         DirectoryString placeOfBirth = new DirectoryString("placeOfBirth");
         String gender = "M";
         DirectoryString postalAddress = new DirectoryString("address");
