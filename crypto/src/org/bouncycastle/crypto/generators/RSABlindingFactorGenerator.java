@@ -15,6 +15,9 @@ import java.security.SecureRandom;
  */
 public class RSABlindingFactorGenerator
 {
+    private static BigInteger ZERO = BigInteger.valueOf(0);
+    private static BigInteger ONE = BigInteger.valueOf(1);
+
     private RSAKeyParameters key;
     private SecureRandom random;
 
@@ -67,7 +70,7 @@ public class RSABlindingFactorGenerator
             factor = new BigInteger(length, random);
             gcd = factor.gcd(m);
         }
-        while (factor.equals(BigInteger.ZERO) || factor.equals(BigInteger.ONE) || !gcd.equals(BigInteger.ONE));
+        while (factor.equals(ZERO) || factor.equals(ONE) || !gcd.equals(ONE));
 
         return factor;
     }

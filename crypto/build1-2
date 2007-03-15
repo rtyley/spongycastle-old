@@ -147,10 +147,17 @@ then
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCertPairs.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCerts.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCRLs.java
+    rm -rf src/org/bouncycastle/jce/provider/PKIXAttrCert*.java
+    rm -rf src/org/bouncycastle/jce/provider/PKIXNameConstraints*.java
+    rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
+    rm -rf src/org/bouncycastle/x509/PKIXAttrCert*.java
+    rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
+    rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
     find src -name AllTests.java -exec rm {} \;
     rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
     rm src/org/bouncycastle/asn1/test/OctetStringTest.java
     rm src/org/bouncycastle/asn1/test/ParseTest.java
+    rm -rf src/org/bouncycastle/openssl/test
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -216,7 +223,6 @@ then
         org.bouncycastle.ocsp \
         org.bouncycastle.ocsp.test \
         org.bouncycastle.openssl \
-        org.bouncycastle.openssl.test \
         org.bouncycastle.mozilla \
         org.bouncycastle.mozilla.test \
         org.bouncycastle.x509 \
@@ -237,11 +243,8 @@ then
     (cd src/javax/crypto; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java)
 
 
-    cp src/org/bouncycastle/openssl/test/*.pem classes/org/bouncycastle/openssl/test
-
     echo "provider regression test"
     java -classpath classes org.bouncycastle.jce.provider.test.RegressionTest
-    java -classpath classes org.bouncycastle.openssl.test.ReaderTest
 
     (cd classes; jar cf ../../bctest-jdk12-$base.jar org/bouncycastle/asn1/test org/bouncycastle/crypto/test org/bouncycastle/jce/provider/test)
 
@@ -278,6 +281,7 @@ then
     rm -rf src/org/bouncycastle/mail
     rm -rf src/org/bouncycastle/cms
     rm -rf src/org/bouncycastle/sasn1
+    rm -f src/org/bouncycastle/openpgp/test/DSA2Test.java
     find src -name AllTests.java -exec rm {} \;
 
     javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \

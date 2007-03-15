@@ -40,7 +40,7 @@ public class ISO9796d2PSSSigner
     private byte[]      block;
     private byte[]      mBuf;
     private int         messageLength;
-    private final int   saltLength;
+    private int         saltLength;
     private boolean     fullMessage;
     private byte[]      recoveredMessage;
 

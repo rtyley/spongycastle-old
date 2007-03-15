@@ -40,7 +40,7 @@ import java.security.interfaces.RSAPrivateKey;
 public class PEMWriter
     extends BufferedWriter
 {
-    private final String provider;
+    private String provider;
 
     /**
      * Base constructor.
