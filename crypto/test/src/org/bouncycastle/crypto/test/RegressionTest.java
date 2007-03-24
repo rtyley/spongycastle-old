@@ -86,6 +86,7 @@ public class RegressionTest
         new RFC3211WrapTest(),
         new SEEDTest(),
         new Salsa20Test(),
+        new CMacTest(),
         //new NaccacheSternTest(),
         new NullTest()
     };
