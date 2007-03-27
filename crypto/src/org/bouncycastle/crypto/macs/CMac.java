@@ -23,6 +23,7 @@ import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
  * It supports 128- or 64-bits block ciphers, with any key size, and returns
  * a MAC with dimension less or equal to the block size of the underlying 
  * cipher.
+ * </p>
  */
 public class CMac implements Mac
 {
