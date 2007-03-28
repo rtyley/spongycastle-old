@@ -20,19 +20,6 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  * message isn't needed to begin processing it), has good performances, it's
  * simple and provably secure (provided the underlying block cipher is secure).
  * 
- * This class implements EAX. It can be used in three modes: encryption,
- * decryption (implying verification) and verification (without decryption).
- * 
- * To encrypt, use it like a normal stream cipher, then use getMac(...) to
- * obtain the authentication data.
- * 
- * To decrypt, use it like a normal stream cipher, then use verifyMac(...) to 
- * verify that the data are authentic.
- * 
- * To verify data, use it like a normal stream cipher, but pass a null parameter
- * to processBytes(...) as the output byte buffer, so that no actual decryption 
- * will be performed, then use verifyMac(...) as in the previous case.
- * 
  * Of course, this implementations is NOT thread-safe.
  */
 public class EAXBlockCipher
