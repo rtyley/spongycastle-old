@@ -24,14 +24,18 @@ import org.bouncycastle.crypto.engines.SkipjackEngine;
 import org.bouncycastle.crypto.engines.TEAEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.crypto.engines.XTEAEngine;
+import org.bouncycastle.crypto.modes.AEADBlockCipher;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.modes.CCMBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.CTSBlockCipher;
+import org.bouncycastle.crypto.modes.EAXBlockCipher;
 import org.bouncycastle.crypto.modes.GOFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 import org.bouncycastle.crypto.modes.OpenPGPCFBBlockCipher;
 import org.bouncycastle.crypto.modes.PGPCFBBlockCipher;
 import org.bouncycastle.crypto.modes.SICBlockCipher;
+import org.bouncycastle.crypto.paddings.BlockCipherPadding;
 import org.bouncycastle.crypto.paddings.ISO10126d2Padding;
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
@@ -82,7 +86,7 @@ public class JCEBlockCipher extends WrapCipherSpi
                                     };
  
     private BlockCipher             baseEngine;
-    private BufferedBlockCipher     cipher;
+    private GenericBlockCipher      cipher;
     private ParametersWithIV        ivParam;
 
     private int                     ivLength = 0;
@@ -99,7 +103,7 @@ public class JCEBlockCipher extends WrapCipherSpi
     {
         baseEngine = engine;
 
-        cipher = new PaddedBufferedBlockCipher(engine);
+        cipher = new BufferedGenericBlockCipher(engine);
     }
         
     protected JCEBlockCipher(
@@ -108,7 +112,7 @@ public class JCEBlockCipher extends WrapCipherSpi
     {
         baseEngine = engine;
 
-        this.cipher = new PaddedBufferedBlockCipher(engine);
+        this.cipher = new BufferedGenericBlockCipher(engine);
         this.ivLength = ivLength / 8;
     }
 
@@ -183,12 +187,12 @@ public class JCEBlockCipher extends WrapCipherSpi
         if (modeName.equals("ECB"))
         {
             ivLength = 0;
-            cipher = new PaddedBufferedBlockCipher(baseEngine);
+            cipher = new BufferedGenericBlockCipher(baseEngine);
         }
         else if (modeName.equals("CBC"))
         {
             ivLength = baseEngine.getBlockSize();
-            cipher = new PaddedBufferedBlockCipher(
+            cipher = new BufferedGenericBlockCipher(
                             new CBCBlockCipher(baseEngine));
         }
         else if (modeName.startsWith("OFB"))
@@ -198,12 +202,12 @@ public class JCEBlockCipher extends WrapCipherSpi
             {
                 int wordSize = Integer.parseInt(modeName.substring(3));
 
-                cipher = new PaddedBufferedBlockCipher(
+                cipher = new BufferedGenericBlockCipher(
                                 new OFBBlockCipher(baseEngine, wordSize));
             }
             else
             {
-                cipher = new PaddedBufferedBlockCipher(
+                cipher = new BufferedGenericBlockCipher(
                         new OFBBlockCipher(baseEngine, 8 * baseEngine.getBlockSize()));
             }
         }
@@ -214,12 +218,12 @@ public class JCEBlockCipher extends WrapCipherSpi
             {
                 int wordSize = Integer.parseInt(modeName.substring(3));
 
-                cipher = new PaddedBufferedBlockCipher(
+                cipher = new BufferedGenericBlockCipher(
                                 new CFBBlockCipher(baseEngine, wordSize));
             }
             else
             {
-                cipher = new PaddedBufferedBlockCipher(
+                cipher = new BufferedGenericBlockCipher(
                         new CFBBlockCipher(baseEngine, 8 * baseEngine.getBlockSize()));
             }
         }
@@ -228,20 +232,20 @@ public class JCEBlockCipher extends WrapCipherSpi
             if (modeName.equalsIgnoreCase("PGPCFBwithIV"))
             {
                 ivLength = baseEngine.getBlockSize();
-                cipher = new PaddedBufferedBlockCipher(
+                cipher = new BufferedGenericBlockCipher(
                     new PGPCFBBlockCipher(baseEngine, true));
             }
             else
             {
                 ivLength = baseEngine.getBlockSize();
-                cipher = new PaddedBufferedBlockCipher(
+                cipher = new BufferedGenericBlockCipher(
                     new PGPCFBBlockCipher(baseEngine, false));
             }
         }
         else if (modeName.equalsIgnoreCase("OpenPGPCFB"))
         {
             ivLength = 0;
-            cipher = new PaddedBufferedBlockCipher(
+            cipher = new BufferedGenericBlockCipher(
                 new OpenPGPCFBBlockCipher(baseEngine));
         }
         else if (modeName.startsWith("SIC"))
@@ -251,25 +255,35 @@ public class JCEBlockCipher extends WrapCipherSpi
             {
                 throw new IllegalArgumentException("Warning: SIC-Mode can become a twotime-pad if the blocksize of the cipher is too small. Use a cipher with a block size of at least 128 bits (e.g. AES)");
             }
-            cipher = new BufferedBlockCipher(
-                        new SICBlockCipher(baseEngine));
+            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+                        new SICBlockCipher(baseEngine)));
         }
         else if (modeName.startsWith("CTR"))
         {
             ivLength = baseEngine.getBlockSize();
-            cipher = new BufferedBlockCipher(
-                        new SICBlockCipher(baseEngine));
+            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+                        new SICBlockCipher(baseEngine)));
         }
         else if (modeName.startsWith("GOFB"))
         {
             ivLength = baseEngine.getBlockSize();
-            cipher = new BufferedBlockCipher(
-                        new GOFBBlockCipher(baseEngine));
+            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+                        new GOFBBlockCipher(baseEngine)));
         }
         else if (modeName.startsWith("CTS"))
         {
             ivLength = baseEngine.getBlockSize();
-            cipher = new CTSBlockCipher(new CBCBlockCipher(baseEngine));
+            cipher = new BufferedGenericBlockCipher(new CTSBlockCipher(new CBCBlockCipher(baseEngine)));
+        }
+        else if (modeName.startsWith("CCM"))
+        {
+            ivLength = baseEngine.getBlockSize();
+            cipher = new AEADGenericBlockCipher(new CCMBlockCipher(baseEngine));
+        }
+        else if (modeName.startsWith("EAX"))
+        {
+            ivLength = baseEngine.getBlockSize();
+            cipher = new AEADGenericBlockCipher(new EAXBlockCipher(baseEngine));
         }
         else
         {
@@ -287,39 +301,43 @@ public class JCEBlockCipher extends WrapCipherSpi
         {
             padded = false;
             
-            if (!(cipher instanceof CTSBlockCipher))
+            if (cipher.wrapOnNoPadding())
             {
-                cipher = new BufferedBlockCipher(cipher.getUnderlyingCipher());
+                cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(cipher.getUnderlyingCipher()));
             }
+        }
+        else if ("CCM".equals(modeName) || "EAX".equals(modeName))
+        {
+            throw new NoSuchPaddingException("Only NoPadding can be used with AEAD modes.");
         }
         else if (paddingName.equals("PKCS5PADDING") || paddingName.equals("PKCS7PADDING"))
         {
-            cipher = new PaddedBufferedBlockCipher(cipher.getUnderlyingCipher());
+            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher());
         }
         else if (paddingName.equals("ZEROBYTEPADDING"))
         {
-            cipher = new PaddedBufferedBlockCipher(cipher.getUnderlyingCipher(), new ZeroBytePadding());
+            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new ZeroBytePadding());
         }
         else if (paddingName.equals("ISO10126PADDING") || paddingName.equals("ISO10126-2PADDING"))
         {
-            cipher = new PaddedBufferedBlockCipher(cipher.getUnderlyingCipher(), new ISO10126d2Padding());
+            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new ISO10126d2Padding());
         }
         else if (paddingName.equals("X9.23PADDING") || paddingName.equals("X923PADDING"))
         {
-            cipher = new PaddedBufferedBlockCipher(cipher.getUnderlyingCipher(), new X923Padding());
+            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new X923Padding());
         }
         else if (paddingName.equals("ISO7816-4PADDING") || paddingName.equals("ISO9797-1PADDING"))
         {
-            cipher = new PaddedBufferedBlockCipher(cipher.getUnderlyingCipher(), new ISO7816d4Padding());
+            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new ISO7816d4Padding());
         }
         else if (paddingName.equals("TBCPADDING"))
         {
-            cipher = new PaddedBufferedBlockCipher(cipher.getUnderlyingCipher(), new TBCPadding());
+            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new TBCPadding());
         }
         else if (paddingName.equals("WITHCTS"))
         {
             padded = false;
-            cipher = new CTSBlockCipher(cipher.getUnderlyingCipher());
+            cipher = new BufferedGenericBlockCipher(new CTSBlockCipher(cipher.getUnderlyingCipher()));
         }
         else
         {
@@ -402,7 +420,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             {
                 IvParameterSpec p = (IvParameterSpec)params;
 
-                if (p.getIV().length != ivLength)
+                if (p.getIV().length != ivLength && !modeName.equals("CCM") && !modeName.equals("EAX"))
                 {
                     throw new InvalidAlgorithmParameterException("IV must be " + ivLength + " bytes long.");
                 }
@@ -1166,6 +1184,155 @@ public class JCEBlockCipher extends WrapCipherSpi
         public PBEWithAESCBC()
         {
             super(new CBCBlockCipher(new AESFastEngine()));
+        }
+    }
+
+    static private interface GenericBlockCipher
+    {
+        public void init(boolean forEncryption, CipherParameters params)
+            throws IllegalArgumentException;
+
+        public boolean wrapOnNoPadding();
+
+        public String getAlgorithmName();
+
+        public BlockCipher getUnderlyingCipher();
+
+        public int getOutputSize(int len);
+
+        public int getUpdateOutputSize(int len);
+
+        public int processByte(byte in, byte[] out, int outOff)
+            throws DataLengthException;
+
+        public int processBytes(byte[] in, int inOff, int len, byte[] out, int outOff)
+            throws DataLengthException;
+
+        public int doFinal(byte[] out, int outOff)
+            throws IllegalStateException, InvalidCipherTextException;
+    }
+
+    private static class BufferedGenericBlockCipher
+        implements GenericBlockCipher
+    {
+        private BufferedBlockCipher cipher;
+
+        BufferedGenericBlockCipher(BufferedBlockCipher cipher)
+        {
+            this.cipher = cipher;
+        }
+
+        BufferedGenericBlockCipher(BlockCipher cipher)
+        {
+            this.cipher = new PaddedBufferedBlockCipher(cipher);
+        }
+
+        BufferedGenericBlockCipher(BlockCipher cipher, BlockCipherPadding padding)
+        {
+            this.cipher = new PaddedBufferedBlockCipher(cipher, padding);
+        }
+
+        public void init(boolean forEncryption, CipherParameters params)
+            throws IllegalArgumentException
+        {
+            cipher.init(forEncryption, params);
+        }
+
+        public boolean wrapOnNoPadding()
+        {
+            return !(cipher instanceof CTSBlockCipher);
+        }
+
+        public String getAlgorithmName()
+        {
+            return cipher.getUnderlyingCipher().getAlgorithmName();
+        }
+
+        public BlockCipher getUnderlyingCipher()
+        {
+            return cipher.getUnderlyingCipher();
+        }
+
+        public int getOutputSize(int len)
+        {
+            return cipher.getOutputSize(len);
+        }
+
+        public int getUpdateOutputSize(int len)
+        {
+            return cipher.getUpdateOutputSize(len);
+        }
+
+        public int processByte(byte in, byte[] out, int outOff) throws DataLengthException
+        {
+            return cipher.processByte(in, out, outOff);
+        }
+
+        public int processBytes(byte[] in, int inOff, int len, byte[] out, int outOff) throws DataLengthException
+        {
+            return cipher.processBytes(in, inOff, len, out, outOff);
+        }
+
+        public int doFinal(byte[] out, int outOff) throws IllegalStateException, InvalidCipherTextException
+        {
+            return cipher.doFinal(out, outOff);
+        }
+    }
+
+    private static class AEADGenericBlockCipher
+        implements GenericBlockCipher
+    {
+        private AEADBlockCipher cipher;
+
+        AEADGenericBlockCipher(AEADBlockCipher cipher)
+        {
+            this.cipher = cipher;
+        }
+
+        public void init(boolean forEncryption, CipherParameters params)
+            throws IllegalArgumentException
+        {
+            cipher.init(forEncryption, params);
+        }
+
+        public String getAlgorithmName()
+        {
+            return cipher.getUnderlyingCipher().getAlgorithmName();
+        }
+
+        public boolean wrapOnNoPadding()
+        {
+            return false;
+        }
+
+        public BlockCipher getUnderlyingCipher()
+        {
+            return cipher.getUnderlyingCipher();
+        }
+
+        public int getOutputSize(int len)
+        {
+            return cipher.getOutputSize(len);
+        }
+
+        public int getUpdateOutputSize(int len)
+        {
+            return cipher.getUpdateOutputSize(len);
+        }
+
+        public int processByte(byte in, byte[] out, int outOff) throws DataLengthException
+        {
+            return cipher.processByte(in, out, outOff);
+        }
+
+        public int processBytes(byte[] in, int inOff, int len, byte[] out, int outOff) throws DataLengthException
+        {
+            return cipher.processBytes(in, inOff, len, out, outOff);
+        }
+
+        public int doFinal(byte[] out, int outOff) throws IllegalStateException, InvalidCipherTextException
+        {
+            return cipher.doFinal(out, outOff);
         }
     }
 }

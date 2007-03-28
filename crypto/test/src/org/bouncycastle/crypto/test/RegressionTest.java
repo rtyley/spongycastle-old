@@ -87,6 +87,7 @@ public class RegressionTest
         new SEEDTest(),
         new Salsa20Test(),
         new CMacTest(),
+        new EAXTest(),
         //new NaccacheSternTest(),
         new NullTest()
     };
