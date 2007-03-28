@@ -20,7 +20,7 @@ public class SMIMETest
     implements Test
 {
     byte[] attrBytes = Base64.decode("MDQGCSqGSIb3DQEJDzEnMCUwCgYIKoZIhvcNAwcwDgYIKoZIhvcNAwICAgCAMAcGBSsOAwIH");
-    byte[] prefBytes = Base64.decode("MCwGCyqGSIb3DQEJEAILMR2hGwQIAAAAAAAAAAAYDzE5NzAwMTAxMDAwMDAxWg==");
+    byte[] prefBytes = Base64.decode("MCwGCyqGSIb3DQEJEAILMR2hGwQIAAAAAAAAAAAYDzIwMDcwMzE1MTczNzI5Wg==");
 
     private boolean isSameAs(
         byte[]  a,
