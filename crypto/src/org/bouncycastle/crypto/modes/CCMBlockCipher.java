@@ -2,11 +2,15 @@ package org.bouncycastle.crypto.modes;
 
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
-import org.bouncycastle.crypto.params.CCMParameters;
+import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.util.Arrays;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * Implements the Counter with Cipher Block Chaining mode (CCM) detailed in
@@ -15,13 +19,17 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  * <b>Note</b>: this mode is a packet mode - it needs all the data up front.
  */
 public class CCMBlockCipher
+    implements AEADBlockCipher
 {
-    private BlockCipher     cipher = null;
-    private int             blockSize;
-    private boolean         forEncryption;
-    private CCMParameters   params;
-    private byte[]          macBlock;
-
+    private BlockCipher           cipher;
+    private int                   blockSize;
+    private boolean               forEncryption;
+    private byte[]                nonce;
+    private byte[]                associatedText;
+    private int                   macSize;
+    private CipherParameters      keyParam;
+    private byte[]                macBlock;
+    private ByteArrayOutputStream data = new ByteArrayOutputStream();
 
     /**
      * Basic constructor.
@@ -54,20 +62,72 @@ public class CCMBlockCipher
     public void init(boolean forEncryption, CipherParameters params)
           throws IllegalArgumentException
     {
-        if (!(params instanceof CCMParameters))
-        {
-            throw new IllegalArgumentException("parameters need to be CCMParameters");
-        }
-        
         this.forEncryption = forEncryption;
-        this.params = (CCMParameters)params;
+
+        if (params instanceof AEADParameters)
+        {
+            AEADParameters param = (AEADParameters)params;
+
+            nonce = param.getNonce();
+            associatedText = param.getAssociatedText();
+            macSize = param.getMacSize() / 8;
+            keyParam = param.getKey();
+        }
+        else if (params instanceof ParametersWithIV)
+        {
+            ParametersWithIV param = (ParametersWithIV)params;
+
+            nonce = param.getIV();
+            associatedText = null;
+            macSize = macBlock.length / 2;
+            keyParam = param.getParameters();
+        }
+        else
+        {
+            throw new IllegalArgumentException("invalid parameters passed to CCM");
+        }
     }
 
     public String getAlgorithmName()
     {
         return cipher.getAlgorithmName() + "/CCM";
     }
-    
+
+    public int processByte(byte in, byte[] out, int outOff)
+        throws DataLengthException, IllegalStateException
+    {
+        data.write(in);
+
+        return 0;
+    }
+
+    public int processBytes(byte[] in, int inOff, int inLen, byte[] out, int outOff)
+        throws DataLengthException, IllegalStateException
+    {
+        data.write(in, inOff, inLen);
+
+        return 0;
+    }
+
+    public int doFinal(byte[] out, int outOff)
+        throws IllegalStateException, InvalidCipherTextException
+    {
+        byte[] text = data.toByteArray();
+        byte[] enc = processPacket(text, 0, text.length);
+
+        System.arraycopy(enc, 0, out, outOff, enc.length);
+
+        reset();
+
+        return enc.length;
+    }
+
+    public void reset()
+    {
+        cipher.reset();
+        data.reset();
+    }
+
     /**
      * Returns a byte array containing the mac calculated as part of the
      * last encrypt or decrypt operation.
@@ -76,32 +136,47 @@ public class CCMBlockCipher
      */
     public byte[] getMac()
     {
-        byte[] mac = new byte[params.getMacSize() / 8];
+        byte[] mac = new byte[macSize];
         
         System.arraycopy(macBlock, 0, mac, 0, mac.length);
         
         return mac;
     }
 
+    public int getUpdateOutputSize(int len)
+    {
+        return 0;
+    }
+
+    public int getOutputSize(int len)
+    {
+        if (forEncryption)
+        {
+            return data.size() + len + macSize;
+        }
+        else
+        {
+            return data.size() + len - macSize;
+        }
+    }
+
     public byte[] processPacket(byte[] in, int inOff, int inLen)
         throws IllegalStateException, InvalidCipherTextException
     {
-        if (params == null)
+        if (keyParam == null)
         {
             throw new IllegalStateException("CCM cipher unitialized.");
         }
         
         BlockCipher ctrCipher = new SICBlockCipher(cipher);
         byte[] iv = new byte[blockSize];
-        byte[] nonce = params.getNonce();
-        int    macSize = params.getMacSize() / 8;
         byte[] out;
 
         iv[0] = (byte)(((15 - nonce.length) - 1) & 0x7);
         
         System.arraycopy(nonce, 0, iv, 1, nonce.length);
         
-        ctrCipher.init(forEncryption, new ParametersWithIV(params.getKey(), iv));
+        ctrCipher.init(forEncryption, new ParametersWithIV(keyParam, iv));
         
         if (forEncryption)
         {
@@ -168,7 +243,7 @@ public class CCMBlockCipher
             
             calculateMac(out, 0, out.length, calculatedMacBlock);
             
-            if (!areEqual(macBlock, calculatedMacBlock))
+            if (!Arrays.areEqual(macBlock, calculatedMacBlock))
             {
                 throw new InvalidCipherTextException("mac check in CCM failed");
             }
@@ -179,19 +254,16 @@ public class CCMBlockCipher
     
     private int calculateMac(byte[] data, int dataOff, int dataLen, byte[] macBlock)
     {
-        Mac    cMac = new CBCBlockCipherMac(cipher, params.getMacSize());
+        Mac    cMac = new CBCBlockCipherMac(cipher, macSize * 8);
 
-        byte[] nonce = params.getNonce();
-        byte[] associatedText = params.getAssociatedText();
-        
-        cMac.init(params.getKey());
+        cMac.init(keyParam);
 
         //
         // build b0
         //
         byte[] b0 = new byte[16];
     
-        if (associatedText != null && associatedText.length != 0)
+        if (hasAssociatedText())
         {
             b0[0] |= 0x40;
         }
@@ -216,7 +288,7 @@ public class CCMBlockCipher
         //
         // process associated text
         //
-        if (associatedText != null)
+        if (hasAssociatedText())
         {
             int extra;
             
@@ -258,27 +330,9 @@ public class CCMBlockCipher
 
         return cMac.doFinal(macBlock, 0);
     }
-    
-    /**
-     * compare two byte arrays.
-     */
-    private boolean areEqual(
-        byte[]    a,
-        byte[]    b)
+
+    private boolean hasAssociatedText()
     {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-        
-        for (int i = 0; i != b.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-        
-        return true;
+        return associatedText != null && associatedText.length != 0;
     }
 }

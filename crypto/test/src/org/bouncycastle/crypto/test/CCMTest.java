@@ -4,8 +4,11 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.modes.CCMBlockCipher;
+import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.CCMParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -58,7 +61,9 @@ public class CCMTest
         checkVectors(0, ccm, K1, 32, N1, A1, P1, T1, C1);
         checkVectors(1, ccm, K2, 48, N2, A2, P2, T2, C2);
         checkVectors(2, ccm, K3, 64, N3, A3, P3, T3, C3);
-        
+
+        ivParamTest(0, ccm, K1, N1);
+
         //
         // 4 has a reduced associated text which needs to be replicated
         //
@@ -103,6 +108,17 @@ public class CCMTest
         {
             // expected
         }
+
+        try
+        {
+            ccm.init(false, new KeyParameter(K1));
+
+            fail("illegal argument not picked up");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // expected
+        }
     }
 
     private void checkVectors(
@@ -117,31 +133,77 @@ public class CCMTest
         byte[] c)
         throws InvalidCipherTextException
     {
-        ccm.init(true, new CCMParameters(new KeyParameter(k), macSize, n, a));
+        ccm.init(true, new AEADParameters(new KeyParameter(k), macSize, n, a));
 
-        byte[] enc = ccm.processPacket(p, 0, p.length);
-        
+        byte[] enc = new byte[c.length];
+
+        int len = ccm.processBytes(p, 0, p.length, enc, 0);
+
+        len += ccm.doFinal(enc, len);
+
         if (!areEqual(c, enc))
         {
             fail("encrypted stream fails to match in test " + count);
         }
-        
-        ccm.init(false, new CCMParameters(new KeyParameter(k), macSize, n, a));
 
-        byte[] dec = ccm.processPacket(enc, 0, enc.length);
-        
+        ccm.init(false, new AEADParameters(new KeyParameter(k), macSize, n, a));
+
+        byte[] tmp = new byte[enc.length];
+
+        len = ccm.processBytes(enc, 0, enc.length, tmp, 0);
+
+        len += ccm.doFinal(tmp, len);
+
+        byte[] dec = new byte[len];
+
+        System.arraycopy(tmp, 0, dec, 0, len);
+
         if (!areEqual(p, dec))
         {
             fail("decrypted stream fails to match in test " + count);
         }
-        
+
         if (!areEqual(t, ccm.getMac()))
         {
-            System.out.println(new String(Hex.encode(ccm.getMac())));
             fail("MAC fails to match in test " + count);
         }
     }
-    
+
+    private void ivParamTest(
+        int count,
+        CCMBlockCipher ccm,
+        byte[] k,
+        byte[] n)
+        throws InvalidCipherTextException
+    {
+        byte[] p = Strings.toByteArray("hello world!!");
+
+        ccm.init(true, new ParametersWithIV(new KeyParameter(k), n));
+
+        byte[] enc = new byte[p.length + 8];
+
+        int len = ccm.processBytes(p, 0, p.length, enc, 0);
+
+        len += ccm.doFinal(enc, len);
+
+        ccm.init(false, new ParametersWithIV(new KeyParameter(k), n));
+
+        byte[] tmp = new byte[enc.length];
+
+        len = ccm.processBytes(enc, 0, enc.length, tmp, 0);
+
+        len += ccm.doFinal(tmp, len);
+
+        byte[] dec = new byte[len];
+
+        System.arraycopy(tmp, 0, dec, 0, len);
+
+        if (!areEqual(p, dec))
+        {
+            fail("decrypted stream fails to match in test " + count);
+        }
+    }
+
     public String getName()
     {
         return "CCM";

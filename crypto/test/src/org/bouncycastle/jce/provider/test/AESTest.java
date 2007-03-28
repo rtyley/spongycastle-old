@@ -7,6 +7,8 @@ import org.bouncycastle.util.encoders.Hex;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,7 +44,7 @@ public class AESTest
         super("AES");
     }
 
-    public void test(
+    private void test(
         int         strength,
         byte[]      keyBytes,
         byte[]      input,
@@ -139,6 +141,94 @@ public class AESTest
         }
     }
 
+    private void eaxTest()
+        throws Exception
+    {
+        byte[] K = Hex.decode("233952DEE4D5ED5F9B9C6D6FF80FF478");
+        byte[] N = Hex.decode("62EC67F9C3A4A407FCB2A8C49031A8B3");
+        byte[] P = Hex.decode("68656c6c6f20776f726c642121");
+        byte[] C = Hex.decode("2f9f76cb7659c70e4be11670a3e193ae1bc6b5762a");
+
+        Key                     key;
+        Cipher                  in, out;
+
+        key = new SecretKeySpec(K, "AES");
+
+        in = Cipher.getInstance("AES/EAX/NoPadding", "BC");
+        out = Cipher.getInstance("AES/EAX/NoPadding", "BC");
+
+        in.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(N));
+
+        byte[] enc = in.doFinal(P);
+        if (!areEqual(enc, C))
+        {
+            fail("ciphertext doesn't match in EAX");
+        }
+
+        out.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(N));
+
+        byte[] dec = out.doFinal(C);
+        if (!areEqual(dec, P))
+        {
+            fail("plaintext doesn't match in EAX");
+        }
+
+        try
+        {
+            in = Cipher.getInstance("AES/EAX/PKCS5Padding", "BC");
+
+            fail("bad padding missed in EAX");
+        }
+        catch (NoSuchPaddingException e)
+        {
+            // expected
+        }
+    }
+
+    private void ccmTest()
+        throws Exception
+    {
+        byte[] K = Hex.decode("404142434445464748494a4b4c4d4e4f");
+        byte[] N = Hex.decode("10111213141516");
+        byte[] P = Hex.decode("68656c6c6f20776f726c642121");
+        byte[] C = Hex.decode("39264f148b54c456035de0a531c8344f46db12b388");
+
+        Key                     key;
+        Cipher                  in, out;
+
+        key = new SecretKeySpec(K, "AES");
+
+        in = Cipher.getInstance("AES/CCM/NoPadding", "BC");
+        out = Cipher.getInstance("AES/CCM/NoPadding", "BC");
+
+        in.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(N));
+
+        byte[] enc = in.doFinal(P);
+        if (!areEqual(enc, C))
+        {
+            fail("ciphertext doesn't match in CCM");
+        }
+
+        out.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(N));
+
+        byte[] dec = out.doFinal(C);
+        if (!areEqual(dec, P))
+        {
+            fail("plaintext doesn't match in CCM");
+        }
+
+        try
+        {
+            in = Cipher.getInstance("AES/CCM/PKCS5Padding", "BC");
+
+            fail("bad padding missed in CCM");
+        }
+        catch (NoSuchPaddingException e)
+        {
+            // expected
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -196,6 +286,9 @@ public class AESTest
         };
 
         wrapOidTest(wrapOids, "AESWrap");
+
+        eaxTest();
+        ccmTest();
     }
 
     public static void main(
