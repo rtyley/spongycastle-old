@@ -1,17 +1,5 @@
 package org.bouncycastle.openpgp.examples;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
-import java.security.SignatureException;
-import java.util.Iterator;
-
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
@@ -29,6 +17,18 @@ import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
+import java.security.SignatureException;
+import java.util.Iterator;
+
 /**
  * A simple utility class that creates clear signed files and verifies them.
  * <p>
@@ -36,8 +36,6 @@ import org.bouncycastle.openpgp.PGPUtil;
  * If -a is specified the output file will be "ascii-armored".
  * <p>
  * To decrypt: ClearSignedFileProcessor -v fileName signatureFile publicKeyFile.
- * <p>
- * Note: This example does not dash escape the input on signing or look for dash escaping on verification. See section 7 of RFC 2440 for further details.
  */
 public class ClearSignedFileProcessor
 {
