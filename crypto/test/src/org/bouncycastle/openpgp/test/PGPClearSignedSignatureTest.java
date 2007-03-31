@@ -1,11 +1,5 @@
 package org.bouncycastle.openpgp.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
@@ -23,6 +17,14 @@ import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.SignatureException;
+import java.util.Iterator;
 
 public class PGPClearSignedSignatureTest 
     extends SimpleTest
@@ -151,7 +153,27 @@ public class PGPClearSignedSignatureTest
       + "dMgLEGhmqsgaetVq1ZIuBZj5S4j2apBJCDpF6GBfpBOfwIZs0Tpmlw==\r\n"
       + "=84Nd\r"
       + "-----END PGP SIGNATURE-----\r\n";
-    
+
+    String crNlSignedMessageTrailingWhiteSpace =
+        "-----BEGIN PGP SIGNED MESSAGE-----\r\n"
+      + "Hash: SHA256\r\n"
+      + "\r\n"
+      + "\r\n"
+      + " hello world! \t\r\n"
+      + "\r\n"
+      + "- - dash\r\n"
+      + "-----BEGIN PGP SIGNATURE-----\r\n"
+      + "Version: GnuPG v1.4.2.1 (GNU/Linux)\r\n"
+      + "\r\n"
+      + "iQEVAwUBRCNS8+DPyHq93/cWAQi6SwgAj3ItmSLr/sd/ixAQLW7/12jzEjfNmFDt\r\n"
+      + "WOZpJFmXj0fnMzTrOILVnbxHv2Ru+U8Y1K6nhzFSR7d28n31/XGgFtdohDEaFJpx\r\n"
+      + "Fl+KvASKIonnpEDjFJsPIvT1/G/eCPalwO9IuxaIthmKj0z44SO1VQtmNKxdLAfK\r\n"
+      + "+xTnXGawXS1WUE4CQGPM45mIGSqXcYrLtJkAg3jtRa8YRUn2d7b2BtmWH+jVaVuC\r\n"
+      + "hNrXYv7iHFOu25yRWhUQJisvdC13D/gKIPRvARXPgPhAC2kovIy6VS8tDoyG6Hm5\r\n"
+      + "dMgLEGhmqsgaetVq1ZIuBZj5S4j2apBJCDpF6GBfpBOfwIZs0Tpmlw==\r\n"
+      + "=84Nd\r"
+      + "-----END PGP SIGNATURE-----\r\n";
+
     public String getName()
     {
         return "PGPClearSignedSignature";
@@ -179,34 +201,12 @@ public class PGPClearSignedSignatureTest
         //
         // read the input, making sure we ingore the last newline.
         //
-        int                   ch, lastCh;
-        boolean               newLine = false;
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        int                   ch;
 
-        lastCh = 0;
-        
         while ((ch = aIn.read()) >= 0 && aIn.isClearText())
         {
-            if (lastCh == '\r' && ch == '\n')
-            {
-                continue;
-            }
-            
-            if (newLine)
-            {
-                bOut.write(lastCh);
-                newLine = false;
-            }
-            
-            if (ch == '\r' || ch == '\n')
-            {
-                lastCh = ch;
-                newLine = true;
-                continue;
-            }
-
             bOut.write((byte)ch);
-            lastCh = ch;
         }
 
         PGPPublicKeyRingCollection pgpRings = new PGPPublicKeyRingCollection(publicKey);
@@ -217,7 +217,25 @@ public class PGPClearSignedSignatureTest
         
         sig.initVerify(pgpRings.getPublicKey(sig.getKeyID()), "BC");
 
-        sig.update(bOut.toByteArray());
+        ByteArrayOutputStream lineOut = new ByteArrayOutputStream();
+        InputStream           sigIn = new ByteArrayInputStream(bOut.toByteArray());
+        int lookAhead = readInputLine(lineOut, sigIn);
+
+        processLine(sig, lineOut.toByteArray());
+
+        if (lookAhead != -1)
+        {
+            do
+            {
+                lookAhead = readInputLine(lineOut, lookAhead, sigIn);
+
+                sig.update((byte)'\r');
+                sig.update((byte)'\n');
+
+                processLine(sig, lineOut.toByteArray());
+            }
+            while (lookAhead != -1);
+        }
 
         if (!sig.verify())
         {
@@ -280,9 +298,6 @@ public class PGPClearSignedSignatureTest
             spGen.setSignerUserID(false, (String)it.next());
             sGen.setHashedSubpackets(spGen.generate());
         }
-
-        int                    ch = 0;
-        int                    lastCh = 0;
         
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
         ArmoredOutputStream    aOut = new ArmoredOutputStream(bOut);
@@ -290,35 +305,26 @@ public class PGPClearSignedSignatureTest
 
         aOut.beginClearText(PGPUtil.SHA256);
 
-        boolean newLine = false;
-
         //
         // note the last \n in the file is ignored
         //
-        while ((ch = bIn.read()) >= 0)
+        ByteArrayOutputStream lineOut = new ByteArrayOutputStream();
+        int lookAhead = readInputLine(lineOut, bIn);
+
+        processLine(aOut, sGen, lineOut.toByteArray());
+
+        if (lookAhead != -1)
         {
-            aOut.write(ch);
+            do
+            {
+                lookAhead = readInputLine(lineOut, lookAhead, bIn);
 
-            if (lastCh == '\r' && ch == '\n')
-            {
-                continue;
-            }
-            
-            if (newLine)
-            {
-                sGen.update((byte)lastCh);
-                newLine = false;
-            }
-            
-            if (ch == '\r' || ch == '\n')
-            {
-                lastCh = ch;
-                newLine = true;
-                continue;
-            }
+                sGen.update((byte)'\r');
+                sGen.update((byte)'\n');
 
-            sGen.update((byte)ch);
-            lastCh = ch;
+                processLine(aOut, sGen, lineOut.toByteArray());
+            }
+            while (lookAhead != -1);
         }
 
         aOut.endClearText();
@@ -331,14 +337,110 @@ public class PGPClearSignedSignatureTest
         
         messageTest(new String(bOut.toByteArray()), type);
     }
-    
-    public void performTest() 
+
+    private static int readInputLine(ByteArrayOutputStream bOut, InputStream fIn)
+        throws IOException
+    {
+        bOut.reset();
+
+        int lookAhead = -1;
+        int ch;
+
+        while ((ch = fIn.read()) >= 0)
+        {
+            bOut.write(ch);
+            if (ch == '\r' || ch == '\n')
+            {
+                lookAhead = readPassedEOL(bOut, ch, fIn);
+                break;
+            }
+        }
+
+        return lookAhead;
+    }
+
+    private static int readInputLine(ByteArrayOutputStream bOut, int lookAhead, InputStream fIn)
+        throws IOException
+    {
+        bOut.reset();
+
+        int ch = lookAhead;
+
+        do
+        {
+            bOut.write(ch);
+            if (ch == '\r' || ch == '\n')
+            {
+                lookAhead = readPassedEOL(bOut, ch, fIn);
+                break;
+            }
+        }
+        while ((ch = fIn.read()) >= 0);
+
+        return lookAhead;
+    }
+
+    private static int readPassedEOL(ByteArrayOutputStream bOut, int lastCh, InputStream fIn)
+        throws IOException
+    {
+        int lookAhead = fIn.read();
+
+        if (lastCh == '\r' && lookAhead == '\n')
+        {
+            bOut.write(lookAhead);
+            lookAhead = fIn.read();
+        }
+
+        return lookAhead;
+    }
+
+    private static void processLine(PGPSignature sig, byte[] line)
+        throws SignatureException, IOException
+    {
+        int length = getLengthWithoutWhiteSpace(line);
+        if (length > 0)
+        {
+            sig.update(line, 0, length);
+        }
+    }
+
+    private static void processLine(OutputStream aOut, PGPSignatureGenerator sGen, byte[] line)
+        throws SignatureException, IOException
+    {
+        int length = getLengthWithoutWhiteSpace(line);
+        if (length > 0)
+        {
+            sGen.update(line, 0, length);
+        }
+
+        aOut.write(line, 0, line.length);
+    }
+
+    private static int getLengthWithoutWhiteSpace(byte[] line)
+    {
+        int    end = line.length - 1;
+
+        while (end >= 0 && isWhiteSpace(line[end]))
+        {
+            end--;
+        }
+
+        return end + 1;
+    }
+
+    private static boolean isWhiteSpace(byte b)
+    {
+        return b == '\r' || b == '\n' || b == '\t' || b == ' ';
+    }
+
+    public void performTest()
         throws Exception
     {
         messageTest(crOnlySignedMessage, "\\r");
         messageTest(nlOnlySignedMessage, "\\n");
         messageTest(crNlSignedMessage, "\\r\\n");
-        
+        messageTest(crNlSignedMessageTrailingWhiteSpace, "\\r\\n");
+
         generateTest(nlOnlyMessage, "\\r");
         generateTest(crOnlyMessage, "\\n");
         generateTest(crNlMessage, "\\r\\n");
