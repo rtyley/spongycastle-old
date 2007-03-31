@@ -124,6 +124,7 @@ public interface X9ObjectIdentifiers
     public static final DERObjectIdentifier x9_63_scheme = new DERObjectIdentifier("1.3.133.16.840.63.0");
     public static final DERObjectIdentifier dhSinglePass_stdDH_sha1kdf_scheme = new DERObjectIdentifier(x9_63_scheme + ".2");
     public static final DERObjectIdentifier dhSinglePass_cofactorDH_sha1kdf_scheme = new DERObjectIdentifier(x9_63_scheme + ".3");
+    public static final DERObjectIdentifier mqvSinglePass_sha1kdf_scheme = new DERObjectIdentifier(x9_63_scheme + ".16");
 
     /**
      * X9.42

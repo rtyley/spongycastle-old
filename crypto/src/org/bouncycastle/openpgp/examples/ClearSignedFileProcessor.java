@@ -17,6 +17,8 @@ import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -43,10 +45,10 @@ public class ClearSignedFileProcessor
      * A simple routine that opens a key ring file and loads the first available key suitable for
      * signature generation.
      * 
-     * @param in
-     * @return
-     * @throws IOException
-     * @throws PGPException
+     * @param in  stream to read the secret key ring collection from.
+     * @return  a secret key.
+     * @throws IOException on a problem with using the input stream.
+     * @throws PGPException if there is an issue parsing the input stream.
      */
     private static PGPSecretKey readSecretKey(
         InputStream    in)
@@ -88,50 +90,104 @@ public class ClearSignedFileProcessor
         
         return key;
     }
-    
-    /**
-     * verify a SHA1 clear text signed file
+
+    private static int readInputLine(ByteArrayOutputStream bOut, InputStream fIn)
+        throws IOException
+    {
+        bOut.reset();
+
+        int lookAhead = -1;
+        int ch;
+
+        while ((ch = fIn.read()) >= 0)
+        {
+            bOut.write(ch);
+            if (ch == '\r' || ch == '\n')
+            {
+                lookAhead = readPassedEOL(bOut, ch, fIn);
+                break;
+            }
+        }
+
+        return lookAhead;
+    }
+
+    private static int readInputLine(ByteArrayOutputStream bOut, int lookAhead, InputStream fIn)
+        throws IOException
+    {
+        bOut.reset();
+
+        int ch = lookAhead;
+
+        do
+        {
+            bOut.write(ch);
+            if (ch == '\r' || ch == '\n')
+            {
+                lookAhead = readPassedEOL(bOut, ch, fIn);
+                break;
+            }
+        }
+        while ((ch = fIn.read()) >= 0);
+
+        return lookAhead;
+    }
+
+    private static int readPassedEOL(ByteArrayOutputStream bOut, int lastCh, InputStream fIn)
+        throws IOException
+    {
+        int lookAhead = fIn.read();
+
+        if (lastCh == '\r' && lookAhead == '\n')
+        {
+            bOut.write(lookAhead);
+            lookAhead = fIn.read();
+        }
+
+        return lookAhead;
+    }
+
+    /*
+     * verify a clear text signed file
      */
     private static void verifyFile(
         InputStream        in,
-        InputStream        keyIn)
+        InputStream        keyIn,
+        String             resultName)
         throws Exception
     {
         ArmoredInputStream    aIn = new ArmoredInputStream(in);
+        OutputStream          out = new BufferedOutputStream(new FileOutputStream(resultName));
+
+
 
         //
-        // read the input, making sure we ingore the last newline.
+        // write out signed section using the local line separator.
+        // note: although we leave it in trailing white space as it is not verifiable.
+        // Some people prefer to remove it.
         //
-        int                   ch, lastCh;
-        boolean               newLine = false;
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ByteArrayOutputStream lineOut = new ByteArrayOutputStream();
+        int                   lookAhead = readInputLine(lineOut, aIn);
+        byte[]                lineSep = getLineSeparator();
 
-        lastCh = 0;
-        
-        while ((ch = aIn.read()) >= 0 && aIn.isClearText())
+        if (lookAhead != -1 && aIn.isClearText())
         {
-            if (lastCh == '\r' && ch == '\n')
-            {
-                continue;
-            }
-            
-            if (newLine)
-            {
-                bOut.write(lastCh);
-                newLine = false;
-            }
-            
-            if (ch == '\r' || ch == '\n')
-            {
-                lastCh = ch;
-                newLine = true;
-                continue;
-            }
+            byte[] line = lineOut.toByteArray();
+            out.write(line, 0, getLengthWithoutSeperator(line));
+            out.write(lineSep);
 
-            bOut.write((byte)ch);
-            lastCh = ch;
+            while (lookAhead != -1 && aIn.isClearText())
+            {
+                lookAhead = readInputLine(lineOut, lookAhead, aIn);
+                
+                line = lineOut.toByteArray();
+                out.write(line, 0, getLengthWithoutSeperator(line));
+                out.write(lineSep);
+            }
         }
-        
+
+        out.close();
+
         PGPPublicKeyRingCollection pgpRings = new PGPPublicKeyRingCollection(keyIn);
 
         PGPObjectFactory           pgpFact = new PGPObjectFactory(aIn);
@@ -140,7 +196,29 @@ public class ClearSignedFileProcessor
 
         sig.initVerify(pgpRings.getPublicKey(sig.getKeyID()), "BC");
 
-        sig.update(bOut.toByteArray());
+        //
+        // read the input, making sure we ingore the last newline.
+        //
+
+        InputStream sigIn = new BufferedInputStream(new FileInputStream(resultName));
+
+        lookAhead = readInputLine(lineOut, sigIn);
+
+        processLine(sig, lineOut.toByteArray());
+
+        if (lookAhead != -1)
+        {
+            do
+            {
+                lookAhead = readInputLine(lineOut, lookAhead, sigIn);
+
+                sig.update((byte)'\r');
+                sig.update((byte)'\n');
+
+                processLine(sig, lineOut.toByteArray());
+            }
+            while (lookAhead != -1);
+        }
 
         if (sig.verify())
         {
@@ -152,7 +230,20 @@ public class ClearSignedFileProcessor
         }
     }
 
-    /**
+    private static byte[] getLineSeparator()
+    {
+        String nl = System.getProperty("line.separator");
+        byte[] nlBytes = new byte[nl.length()];
+
+        for (int i = 0; i != nlBytes.length; i++)
+        {
+            nlBytes[i] = (byte)nl.charAt(i);
+        }
+
+        return nlBytes;
+    }
+
+    /*
      * create a clear text signed file.
      */
     private static void signFile(
@@ -205,42 +296,30 @@ public class ClearSignedFileProcessor
         }
         
         FileInputStream        fIn = new FileInputStream(fileName);
-        int                    ch = 0;
-        int                    lastCh = 0;
-        
         ArmoredOutputStream    aOut = new ArmoredOutputStream(out);
         
         aOut.beginClearText(digest);
 
-        boolean newLine = false;
+        //
+        // note the last \n/\r/\r\n in the file is ignored
+        //
+        ByteArrayOutputStream lineOut = new ByteArrayOutputStream();
+        int lookAhead = readInputLine(lineOut, fIn);
 
-        //
-        // note the last \n in the file is ignored
-        //
-        while ((ch = fIn.read()) >= 0)
+        processLine(aOut, sGen, lineOut.toByteArray());
+
+        if (lookAhead != -1)
         {
-            aOut.write(ch);
+            do
+            {
+                lookAhead = readInputLine(lineOut, lookAhead, fIn);
 
-            if (lastCh == '\r' && ch == '\n')
-            {
-                continue;
-            }
-            
-            if (newLine)
-            {
-                sGen.update((byte)lastCh);
-                newLine = false;
-            }
-            
-            if (ch == '\r' || ch == '\n')
-            {
-                lastCh = ch;
-                newLine = true;
-                continue;
-            }
+                sGen.update((byte)'\r');
+                sGen.update((byte)'\n');
 
-            sGen.update((byte)ch);
-            lastCh = ch;
+                processLine(aOut, sGen, lineOut.toByteArray());
+            }
+            while (lookAhead != -1);
         }
         
         aOut.endClearText();
@@ -250,6 +329,62 @@ public class ClearSignedFileProcessor
         sGen.generate().encode(bOut);
 
         aOut.close();
+    }
+
+    private static void processLine(PGPSignature sig, byte[] line)
+        throws SignatureException, IOException
+    {
+        int length = getLengthWithoutWhiteSpace(line);
+        if (length > 0)
+        {
+            sig.update(line, 0, length);
+        }
+    }
+
+    private static void processLine(OutputStream aOut, PGPSignatureGenerator sGen, byte[] line)
+        throws SignatureException, IOException
+    {
+        int length = getLengthWithoutWhiteSpace(line);
+        if (length > 0)
+        {
+            sGen.update(line, 0, length);
+        }
+
+        aOut.write(line, 0, line.length);
+    }
+
+    private static int getLengthWithoutSeperator(byte[] line)
+    {
+        int    end = line.length - 1;
+
+        while (end >= 0 && isLineEnding(line[end]))
+        {
+            end--;
+        }
+
+        return end + 1;
+    }
+
+    private static boolean isLineEnding(byte b)
+    {
+        return b == '\r' || b == '\n';
+    }
+
+    private static int getLengthWithoutWhiteSpace(byte[] line)
+    {
+        int    end = line.length - 1;
+
+        while (end >= 0 && isWhiteSpace(line[end]))
+        {
+            end--;
+        }
+
+        return end + 1;
+    }
+
+    private static boolean isWhiteSpace(byte b)
+    {
+        return b == '\r' || b == '\n' || b == '\t' || b == ' ';
     }
 
     public static void main(
@@ -274,10 +409,15 @@ public class ClearSignedFileProcessor
         }
         else if (args[0].equals("-v"))
         {
+            if (args[1].indexOf(".asc") < 0)
+            {
+                System.err.println("file needs to end in \".asc\"");
+                System.exit(1);
+            }
             FileInputStream    in = new FileInputStream(args[1]);
             InputStream        keyIn = PGPUtil.getDecoderStream(new FileInputStream(args[2]));
                 
-            verifyFile(in, keyIn);
+            verifyFile(in, keyIn, args[1].substring(0, args[1].length() - 4));
         }
         else
         {
