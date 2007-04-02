@@ -23,12 +23,15 @@ import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509Store;
 
 import java.io.ByteArrayInputStream;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -509,6 +512,17 @@ public class SignedDataTest
         throws Exception
     {
         encapsulatedTest(_signEcDsaKP, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA512);
+    }
+
+    public void testECDSASHA512EncapsulatedWithKeyFactoryAsEC()
+        throws Exception
+    {
+        X509EncodedKeySpec  pubSpec = new X509EncodedKeySpec(_signEcDsaKP.getPublic().getEncoded());
+        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(_signEcDsaKP.getPrivate().getEncoded());
+        KeyFactory          keyFact = KeyFactory.getInstance("EC", "BC");
+        KeyPair             kp = new KeyPair(keyFact.generatePublic(pubSpec), keyFact.generatePrivate(privSpec));
+        
+        encapsulatedTest(kp, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA512);
     }
 
     public void testDSAEncapsulated()
