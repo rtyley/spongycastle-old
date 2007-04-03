@@ -3,18 +3,34 @@ package org.bouncycastle.jce.provider;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
-import java.security.cert.X509Certificate;
+import org.bouncycastle.jce.cert.CertPath;
+import org.bouncycastle.jce.cert.CertPathBuilderException;
+import org.bouncycastle.jce.cert.CertPathBuilderResult;
+import org.bouncycastle.jce.cert.CertPathBuilderSpi;
+import org.bouncycastle.jce.cert.CertPathParameters;
+import org.bouncycastle.jce.cert.CertPathValidator;
+import org.bouncycastle.jce.cert.CertPathValidatorException;
+import org.bouncycastle.jce.cert.CertSelector;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateEncodingException;
-import org.bouncycastle.jce.cert.*;
-import org.bouncycastle.jce.*;
-
+import org.bouncycastle.jce.cert.CertificateFactory;
+import org.bouncycastle.jce.cert.PKIXBuilderParameters;
+import org.bouncycastle.jce.cert.PKIXCertPathBuilderResult;
+import org.bouncycastle.jce.cert.PKIXCertPathValidatorResult;
+import org.bouncycastle.jce.cert.TrustAnchor;
+import org.bouncycastle.jce.cert.X509CertSelector;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.PrincipalUtil;
 
 /**
  * Implements the PKIX CertPathBuilding algorithem for BouncyCastle.
@@ -46,6 +62,7 @@ public class PKIXCertPathBuilderSpi
         Collection targets;
         Iterator targetIter;
         List certPathList = new ArrayList();
+        Set  certPathSet = new HashSet();
         X509Certificate cert;
         Collection      certs;
         CertPath        certPath = null;
@@ -92,12 +109,14 @@ public class PKIXCertPathBuilderSpi
         {
             cert = (X509Certificate)targetIter.next();
             certPathList.clear();
+            certPathSet.clear();
             while (cert != null)
             {
                 // add cert to the certpath
                 certPathList.add(cert);
+                certPathSet.add(cert);
 
-                // check wether the issuer of <cert> is a TrustAnchor 
+                // check whether the issuer of <cert> is a TrustAnchor
                 if (findTrustAnchor(cert, pkixParams.getTrustAnchors()) != null)
                 {
                     try
@@ -136,6 +155,11 @@ public class PKIXCertPathBuilderSpi
                         else
                         {
                             cert = issuer;
+                            // validation failed - circular path detected, go to next certificate
+                            if (certPathSet.contains(cert))
+                            {
+                                cert = null;
+                            }
                         }
                     }
                     catch (CertPathValidatorException ex)
@@ -186,11 +210,7 @@ public class PKIXCertPathBuilderSpi
         {
             certSelectX509.setSubject(PrincipalUtil.getIssuerX509Principal(cert).getEncoded());
         }
-        catch (CertificateEncodingException ex)
-        {
-            throw new CertPathBuilderException("can't get trust anchor principal",null);
-        }
-        catch (IOException ex)
+        catch (Exception ex)
         {
             throw new CertPathBuilderException("can't get trust anchor principal",null);
         }
@@ -225,11 +245,7 @@ public class PKIXCertPathBuilderSpi
                         trust = null;
                     }
                 }
-                catch (CertificateEncodingException ex)
-                {
-                    trust = null;
-                }
-                catch (IllegalArgumentException ex)
+                catch (Exception ex)
                 {
                     trust = null;
                 }
@@ -265,7 +281,7 @@ public class PKIXCertPathBuilderSpi
      * Return a Collection of all certificates found in the
      * CertStore's that are matching the certSelect criteriums.
      *
-     * @param certSelector a {@link CertSelector CertSelector}
+     * @param certSelect a {@link CertSelector CertSelector}
      * object that will be used to select the certificates
      * @param certStores a List containing only {@link CertStore
      * CertStore} objects. These are used to search for
@@ -319,11 +335,7 @@ public class PKIXCertPathBuilderSpi
         {
             certSelect.setSubject(PrincipalUtil.getIssuerX509Principal(cert).getEncoded());
         }
-        catch (CertificateEncodingException ex)
-        {
-            throw new CertPathValidatorException("Issuer not found", null, null, -1);
-        }
-        catch (IOException ex)
+        catch (Exception ex)
         {
             throw new CertPathValidatorException("Issuer not found", null, null, -1);
         }

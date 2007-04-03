@@ -2,18 +2,17 @@ package org.bouncycastle.jce.provider;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CRL;
-import java.security.cert.Certificate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.bouncycastle.jce.cert.CRLSelector;
 import org.bouncycastle.jce.cert.CertSelector;
 import org.bouncycastle.jce.cert.CertStoreException;
 import org.bouncycastle.jce.cert.CertStoreParameters;
 import org.bouncycastle.jce.cert.CertStoreSpi;
+import java.security.cert.Certificate;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 public class CertStoreCollectionSpi extends CertStoreSpi
 {
@@ -23,10 +22,12 @@ public class CertStoreCollectionSpi extends CertStoreSpi
         throws InvalidAlgorithmParameterException
     {
         super(params);
-        if (! (params instanceof CollectionCertStoreParameters))
+
+        if (!(params instanceof CollectionCertStoreParameters))
         {
             throw new InvalidAlgorithmParameterException("org.bouncycastle.jce.provider.CertStoreCollectionSpi: parameter must be a CollectionCertStoreParameters object\n" +  params.toString());
         }
+
         this.params = (CollectionCertStoreParameters)params;
     }
 
@@ -34,7 +35,7 @@ public class CertStoreCollectionSpi extends CertStoreSpi
         CertSelector selector)
         throws CertStoreException 
     {
-        Set         col = new HashSet();
+        List        col = new ArrayList();
         Iterator    iter = params.getCollection().iterator();
 
         if (selector == null)
@@ -55,7 +56,7 @@ public class CertStoreCollectionSpi extends CertStoreSpi
             {
                 Object obj = iter.next();
 
-                if (obj instanceof Certificate && selector.match((Certificate)obj))
+                if ((obj instanceof Certificate) && selector.match((Certificate)obj))
                 {
                     col.add(obj);
                 }
@@ -70,7 +71,7 @@ public class CertStoreCollectionSpi extends CertStoreSpi
         CRLSelector selector)
         throws CertStoreException 
     {
-        Set         col = new HashSet();
+        List        col = new ArrayList();
         Iterator    iter = params.getCollection().iterator();
 
         if (selector == null)
@@ -91,7 +92,7 @@ public class CertStoreCollectionSpi extends CertStoreSpi
             {
                 Object obj = iter.next();
 
-                if (obj instanceof CRL && selector.match((CRL)obj))
+                if ((obj instanceof CRL) && selector.match((CRL)obj))
                 {
                     col.add(obj);
                 }
