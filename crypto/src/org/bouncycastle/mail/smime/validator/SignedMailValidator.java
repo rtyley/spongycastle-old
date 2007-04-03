@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -541,13 +542,12 @@ public class SignedMailValidator
     protected CertPath createCertPath(X509Certificate signerCert,
             Set trustanchors, List certStores) throws GeneralSecurityException
     {
-        // FIXME add a better check for that the cert path cannot contain loops
-        List certList = new ArrayList();
+        Set  certSet = new LinkedHashSet();
 
         // add signer certificate
 
         X509Certificate cert = signerCert;
-        certList.add(cert);
+        certSet.add(cert);
 
         boolean trustAnchorFound = false;
         
@@ -618,10 +618,10 @@ public class SignedMailValidator
                     }
                 }
 
-                if (certFound)
+                if (certFound && !certSet.contains(cert))
                 {
                     cert = nextCert;
-                    certList.add(cert);
+                    certSet.add(cert);
                 }
                 else
                 {
@@ -636,7 +636,7 @@ public class SignedMailValidator
         {
             if (taCert != null)
             {
-                certList.add(taCert);
+                certSet.add(taCert);
             }
             else
             {
@@ -651,7 +651,7 @@ public class SignedMailValidator
                     try
                     {
                         cert.verify(taCert.getPublicKey(), "BC");
-                        certList.add(taCert);
+                        certSet.add(taCert);
                         break;
                     }
                     catch (GeneralSecurityException gse)
@@ -662,8 +662,7 @@ public class SignedMailValidator
             }
         }
         
-        CertPath certPath = CertificateFactory.getInstance("X.509", "BC")
-                .generateCertPath(certList);
+        CertPath certPath = CertificateFactory.getInstance("X.509", "BC").generateCertPath(new ArrayList(certSet));
         return certPath;
     }
 
