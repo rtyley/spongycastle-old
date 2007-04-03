@@ -1,34 +1,54 @@
 package org.bouncycastle.cms.test;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.KeyPair;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.cms.CMSAttributeTableGenerator;
+import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CollectionStoreParameters;
+import org.bouncycastle.x509.X509Store;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.security.KeyPair;
+import java.security.MessageDigest;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class SignedDataStreamTest
     extends TestCase
 {
+    private static final String TEST_MESSAGE = "Hello World!";
     private static String          _signDN;
     private static KeyPair         _signKP;  
     private static X509Certificate _signCert;
@@ -41,7 +61,13 @@ public class SignedDataStreamTest
     private static KeyPair         _reciKP;
     private static X509Certificate _reciCert;
     
-    private static boolean _initialised = false;
+    private static KeyPair         _origDsaKP;
+    private static X509Certificate _origDsaCert;
+
+    private static X509CRL         _signCrl;
+    private static X509CRL         _origCrl;
+
+    private static boolean         _initialised = false;
     
     public SignedDataStreamTest(String name) 
     {
@@ -63,16 +89,22 @@ public class SignedDataStreamTest
             _origKP   = CMSTestUtil.makeKeyPair();
             _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
     
+            _origDsaKP   = CMSTestUtil.makeDsaKeyPair();
+            _origDsaCert = CMSTestUtil.makeCertificate(_origDsaKP, _origDN, _signKP, _signDN);
+            
             _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
             _reciKP   = CMSTestUtil.makeKeyPair();
-            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);      
+            _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
+
+            _signCrl  = CMSTestUtil.makeCrl(_signKP);
+            _origCrl  = CMSTestUtil.makeCrl(_origKP);
         }
     }
     
-    private void verifySignatures(CMSSignedDataParser sp) 
+    private void verifySignatures(CMSSignedDataParser sp, byte[] contentDigest) 
         throws Exception
     {
-        CertStore               certs = sp.getCertificatesAndCRLs("Collection", "BC");
+        CertStore               certStore = sp.getCertificatesAndCRLs("Collection", "BC");
         SignerInformationStore  signers = sp.getSignerInfos();
         
         Collection              c = signers.getSigners();
@@ -81,16 +113,34 @@ public class SignedDataStreamTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certStore.getCertificates(signer.getSID());
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
     
             assertEquals(true, signer.verify(cert, "BC"));
+            
+            if (contentDigest != null)
+            {
+                assertTrue(MessageDigest.isEqual(contentDigest, signer.getContentDigest()));
+            }
         }
+
+        Collection certColl = certStore.getCertificates(null);
+        Collection crlColl = certStore.getCRLs(null);
+
+        assertEquals(certColl.size(), sp.getCertificates("Collection", "BC").getMatches(null).size());
+        assertEquals(crlColl.size(), sp.getCRLs("Collection", "BC").getMatches(null).size());
+    }
+    
+    private void verifySignatures(CMSSignedDataParser sp) 
+        throws Exception
+    {
+        verifySignatures(sp, null);
     }
 
-    private void verifyEncodedData(ByteArrayOutputStream bOut) throws CMSException, IOException, Exception
+    private void verifyEncodedData(ByteArrayOutputStream bOut)
+        throws Exception
     {
         CMSSignedDataParser sp;
         sp = new CMSSignedDataParser(bOut.toByteArray());
@@ -98,6 +148,8 @@ public class SignedDataStreamTest
         sp.getSignedContent().drain();
         
         verifySignatures(sp);
+        
+        sp.close();
     }
     
     public void testSha1EncapsulatedSignature()
@@ -146,6 +198,72 @@ public class SignedDataStreamTest
         verifySignatures(sp);
     }
     
+    public void testSHA1WithRSANoAttributes()
+        throws Exception
+    {
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray(TEST_MESSAGE.getBytes());
+    
+        certList.add(_origCert);
+        certList.add(_signCert);
+    
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+    
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+    
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+    
+        gen.addCertificatesAndCRLs(certs);
+    
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(
+                new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), s.getEncoded());
+        
+        sp.getSignedContent().drain();
+        
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+        
+        verifySignatures(sp, md.digest(TEST_MESSAGE.getBytes()));
+    }
+    
+    public void testDSANoAttributes()
+        throws Exception
+    {
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray(TEST_MESSAGE.getBytes());
+    
+        certList.add(_origDsaCert);
+        certList.add(_signCert);
+    
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+    
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+    
+        gen.addSigner(_origDsaKP.getPrivate(), _origDsaCert, CMSSignedDataGenerator.DIGEST_SHA1);
+    
+        gen.addCertificatesAndCRLs(certs);
+    
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+    
+        CMSSignedDataParser     sp = new CMSSignedDataParser(
+                new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), s.getEncoded());
+        
+        sp.getSignedContent().drain();
+        
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+        
+        verifySignatures(sp, md.digest(TEST_MESSAGE.getBytes()));
+    }
+    
     public void testSHA1WithRSA()
         throws Exception
     {
@@ -154,28 +272,36 @@ public class SignedDataStreamTest
         
         certList.add(_origCert);
         certList.add(_signCert);
-    
-        CertStore           certs = CertStore.getInstance("Collection",
+
+        certList.add(_signCrl);
+        certList.add(_origCrl);
+
+        CertStore           certsAndCrls = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
     
         CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
     
         gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
     
-        gen.addCertificatesAndCRLs(certs);
+        gen.addCertificatesAndCRLs(certsAndCrls);
     
         OutputStream sigOut = gen.open(bOut);
     
-        sigOut.write("Hello World!".getBytes());
+        sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
         
         CMSSignedDataParser     sp = new CMSSignedDataParser(
-                new CMSTypedStream(new ByteArrayInputStream("Hello World!".getBytes())), bOut.toByteArray());
+                new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), bOut.toByteArray());
     
         sp.getSignedContent().drain();
         
-        verifySignatures(sp);
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+        
+        verifySignatures(sp, md.digest(TEST_MESSAGE.getBytes()));
         
         //
         // try using existing signer
@@ -190,11 +316,96 @@ public class SignedDataStreamTest
         
         sigOut = gen.open(bOut, true);
     
-        sigOut.write("Hello World!".getBytes());
+        sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
     
         verifyEncodedData(bOut);
+
+        //
+        // look for the CRLs
+        //
+        Collection col = certsAndCrls.getCRLs(null);
+
+        assertEquals(2, col.size());
+        assertTrue(col.contains(_signCrl));
+        assertTrue(col.contains(_origCrl));
+    }
+
+    public void testSHA1WithRSANonData()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        certList.add(_signCrl);
+        certList.add(_origCrl);
+
+        CertStore           certsAndCrls = CertStore.getInstance("Collection",
+                                                       new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certsAndCrls);
+
+        OutputStream sigOut = gen.open(bOut, "1.2.3.4", true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        CMSTypedStream stream = sp.getSignedContent();
+
+        assertEquals("1.2.3.4", stream.getContentType());
+
+        stream.drain();
+
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+
+        verifySignatures(sp, md.digest(TEST_MESSAGE.getBytes()));
+    }
+
+    public void testSHA1AndMD5WithRSA()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        
+        certList.add(_origCert);
+        certList.add(_signCert);
+    
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+    
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+    
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_MD5, "BC");
+        
+        gen.addCertificatesAndCRLs(certs);
+    
+        OutputStream sigOut = gen.open(bOut);
+    
+        sigOut.write(TEST_MESSAGE.getBytes());
+        
+        sigOut.close();
+        
+        CMSSignedDataParser     sp = new CMSSignedDataParser(
+                new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), bOut.toByteArray());
+    
+        sp.getSignedContent().drain();
+        
+        verifySignatures(sp);
     }
     
     public void testSHA1WithRSAEncapsulatedBufferedStream()
@@ -347,7 +558,7 @@ public class SignedDataStreamTest
 
         OutputStream sigOut = gen.open(bOut, true);
 
-        sigOut.write("Hello World!".getBytes());
+        sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
         
@@ -357,6 +568,13 @@ public class SignedDataStreamTest
         
         verifySignatures(sp);
         
+        byte[] contentDigest = (byte[])gen.getGeneratedDigests().get(SMIMESignedGenerator.DIGEST_SHA1);
+
+        AttributeTable table = ((SignerInformation)sp.getSignerInfos().getSigners().iterator().next()).getSignedAttributes();
+        Attribute hash = table.get(CMSAttributes.messageDigest);
+
+        assertTrue(MessageDigest.isEqual(contentDigest, ((ASN1OctetString)hash.getAttrValues().getObjectAt(0)).getOctets()));
+
         //
         // try using existing signer
         //
@@ -370,14 +588,439 @@ public class SignedDataStreamTest
         
         sigOut = gen.open(bOut, true);
 
-        sigOut.write("Hello World!".getBytes());
+        sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
 
+        CMSSignedData sd = new CMSSignedData(new CMSProcessableByteArray(TEST_MESSAGE.getBytes()), bOut.toByteArray());
+
+        assertEquals(1, sd.getSignerInfos().getSigners().size());
+
         verifyEncodedData(bOut);
     }
-    
-    public static Test suite() 
+
+    public void testAttributeGenerators()
+        throws Exception
+    {
+        final DERObjectIdentifier dummyOid1 = new DERObjectIdentifier("1.2.3");
+        final DERObjectIdentifier dummyOid2 = new DERObjectIdentifier("1.2.3.4");
+        List                      certList = new ArrayList();
+        ByteArrayOutputStream     bOut = new ByteArrayOutputStream();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        CMSAttributeTableGenerator signedGen = new DefaultSignedAttributeTableGenerator()
+        {
+            public AttributeTable getAttributes(Map parameters)
+            {
+                Hashtable table = createStandardAttributeTable(parameters);
+
+                DEROctetString val = new DEROctetString((byte[])parameters.get(CMSAttributeTableGenerator.DIGEST));
+                Attribute attr = new Attribute(dummyOid1, new DERSet(val));
+
+                table.put(attr.getAttrType(), attr);
+
+                return new AttributeTable(table);
+            }
+        };
+
+        CMSAttributeTableGenerator unsignedGen = new CMSAttributeTableGenerator()
+        {
+            public AttributeTable getAttributes(Map parameters)
+            {
+                DEROctetString val = new DEROctetString((byte[])parameters.get(CMSAttributeTableGenerator.SIGNATURE));
+                Attribute attr = new Attribute(dummyOid2, new DERSet(val));
+
+                return new AttributeTable(new DERSet(attr));
+            }
+        };
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, signedGen, unsignedGen, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        verifySignatures(sp);
+
+        //
+        // check attributes
+        //
+        SignerInformationStore  signers = sp.getSignerInfos();
+
+        Collection              c = signers.getSigners();
+        Iterator                it = c.iterator();
+
+        while (it.hasNext())
+        {
+            SignerInformation   signer = (SignerInformation)it.next();
+            checkAttribute(signer.getContentDigest(), signer.getSignedAttributes().get(dummyOid1));
+            checkAttribute(signer.getSignature(), signer.getUnsignedAttributes().get(dummyOid2));
+        }
+    }
+
+    private void checkAttribute(byte[] expected, Attribute attr)
+    {
+        DEROctetString      value = (DEROctetString)attr.getAttrValues().getObjectAt(0);
+
+        assertEquals(new DEROctetString(expected), value);
+    }
+
+    public void testWithAttributeCertificate()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        X509AttributeCertificate attrCert = CMSTestUtil.getAttributeCertificate();
+
+        X509Store store = X509Store.getInstance("AttributeCertificate/Collection",
+                                    new X509CollectionStoreParameters(Collections.singleton(attrCert)), "BC");
+
+        gen.addAttributeCertificates(store);
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        assertEquals(4, sp.getVersion());
+
+        store = sp.getAttributeCertificates("Collection", "BC");
+
+        Collection coll = store.getMatches(null);
+
+        assertEquals(1, coll.size());
+
+        assertTrue(coll.contains(attrCert));
+    }
+
+    public void testSignerStoreReplacement()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        byte[]                data = TEST_MESSAGE.getBytes();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut, false);
+
+        sigOut.write(data);
+
+        sigOut.close();
+
+        //
+        // create new Signer
+        //
+        ByteArrayInputStream  original = new ByteArrayInputStream(bOut.toByteArray());
+
+        bOut.reset();
+
+        gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA224, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        sigOut = gen.open(bOut);
+
+        sigOut.write(data);
+
+        sigOut.close();
+
+        CMSSignedData sd = new CMSSignedData(bOut.toByteArray());
+
+        //
+        // replace signer
+        //
+        ByteArrayOutputStream newOut = new ByteArrayOutputStream();
+
+        CMSSignedDataParser.replaceSigners(original, sd.getSignerInfos(), newOut);
+
+        sd = new CMSSignedData(new CMSProcessableByteArray(data), newOut.toByteArray());
+        SignerInformation signer = (SignerInformation)sd.getSignerInfos().getSigners().iterator().next();
+
+        assertEquals(signer.getDigestAlgOID(), CMSSignedDataStreamGenerator.DIGEST_SHA224);
+
+        CMSSignedDataParser sp = new CMSSignedDataParser(new CMSTypedStream(new ByteArrayInputStream(data)), newOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        verifySignatures(sp);
+    }
+
+    public void testEncapsulatedSignerStoreReplacement()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        //
+        // create new Signer
+        //
+        ByteArrayInputStream  original = new ByteArrayInputStream(bOut.toByteArray());
+
+        bOut.reset();
+
+        gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA224, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedData sd = new CMSSignedData(bOut.toByteArray());
+
+        //
+        // replace signer
+        //
+        ByteArrayOutputStream newOut = new ByteArrayOutputStream();
+
+        CMSSignedDataParser.replaceSigners(original, sd.getSignerInfos(), newOut);
+
+        sd = new CMSSignedData(newOut.toByteArray());
+        SignerInformation signer = (SignerInformation)sd.getSignerInfos().getSigners().iterator().next();
+
+        assertEquals(signer.getDigestAlgOID(), CMSSignedDataStreamGenerator.DIGEST_SHA224);
+
+        CMSSignedDataParser sp = new CMSSignedDataParser(newOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        verifySignatures(sp);
+    }
+
+    public void testCertStoreReplacement()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        byte[]                data = TEST_MESSAGE.getBytes();
+
+        certList.add(_origDsaCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut);
+
+        sigOut.write(data);
+
+        sigOut.close();
+
+        //
+        // create new certstore with the right certificates
+        //
+        certList = new ArrayList();
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        //
+        // replace certs
+        //
+        ByteArrayInputStream original = new ByteArrayInputStream(bOut.toByteArray());
+        ByteArrayOutputStream newOut = new ByteArrayOutputStream();
+
+        CMSSignedDataParser.replaceCertificatesAndCRLs(original, certs, newOut);
+
+        CMSSignedDataParser sp = new CMSSignedDataParser(new CMSTypedStream(new ByteArrayInputStream(data)), newOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        verifySignatures(sp);
+    }
+
+    public void testEncapsulatedCertStoreReplacement()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        certList.add(_origDsaCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        //
+        // create new certstore with the right certificates
+        //
+        certList = new ArrayList();
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        //
+        // replace certs
+        //
+        ByteArrayInputStream original = new ByteArrayInputStream(bOut.toByteArray());
+        ByteArrayOutputStream newOut = new ByteArrayOutputStream();
+
+        CMSSignedDataParser.replaceCertificatesAndCRLs(original, certs, newOut);
+
+        CMSSignedDataParser sp = new CMSSignedDataParser(newOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        verifySignatures(sp);
+    }
+
+    public void testCertOrdering1()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        sp.getSignedContent().drain();
+        certs = sp.getCertificatesAndCRLs("Collection", "BC");
+        Iterator it = certs.getCertificates(null).iterator();
+
+        assertEquals(_origCert, it.next());
+        assertEquals(_signCert, it.next());
+    }
+
+    public void testCertOrdering2()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        certList.add(_signCert);
+        certList.add(_origCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        sp.getSignedContent().drain();
+        certs = sp.getCertificatesAndCRLs("Collection", "BC");
+        Iterator it = certs.getCertificates(null).iterator();
+
+        assertEquals(_signCert, it.next());
+        assertEquals(_origCert, it.next());
+    }
+
+    public static Test suite()
         throws Exception
     {
         init();

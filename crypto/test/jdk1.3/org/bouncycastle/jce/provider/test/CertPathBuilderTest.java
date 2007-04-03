@@ -1,29 +1,29 @@
 package org.bouncycastle.jce.provider.test;
  
-import java.math.BigInteger;
 import java.io.ByteArrayInputStream;
-import java.security.Security;
+import java.math.BigInteger;
 import java.security.KeyPair;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Date;
-import java.util.Collections;
-
-import org.bouncycastle.jce.PrincipalUtil;
+import java.security.Security;
+import org.bouncycastle.jce.cert.CertPath;
 import org.bouncycastle.jce.cert.CertPathBuilder;
 import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertPath;
 import org.bouncycastle.jce.cert.CertificateFactory;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import org.bouncycastle.jce.cert.PKIXBuilderParameters;
 import org.bouncycastle.jce.cert.PKIXCertPathBuilderResult;
 import org.bouncycastle.jce.cert.TrustAnchor;
+import java.security.cert.X509CRL;
 import org.bouncycastle.jce.cert.X509CertSelector;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
@@ -59,9 +59,10 @@ public class CertPathBuilderTest
                 //Searching for rootCert by subjectDN without CRL
             Set trust = new HashSet();
             trust.add(new TrustAnchor(rootCert, null));
+
             CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","BC");
             X509CertSelector targetConstraints = new X509CertSelector();
-            targetConstraints.setSubject(finalCert.getSubjectDN().getName());
+            targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(finalCert).getEncoded());
             PKIXBuilderParameters params = new PKIXBuilderParameters(trust, targetConstraints);
             params.addCertStore(store);
             params.setDate(validDate.getTime());
@@ -150,7 +151,7 @@ public class CertPathBuilderTest
         
         return v0Test();
     }
-
+    
     public String getName()
     {
         return "CertPathBuilder";
@@ -166,6 +167,5 @@ public class CertPathBuilderTest
 
         System.out.println(result.toString());
     }
-
 }
 
