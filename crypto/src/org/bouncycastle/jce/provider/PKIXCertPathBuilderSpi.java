@@ -60,6 +60,7 @@ public class PKIXCertPathBuilderSpi
         Collection targets;
         Iterator targetIter;
         List certPathList = new ArrayList();
+        Set  certPathSet = new HashSet();
         X509Certificate cert;
         Collection      certs;
         CertPath        certPath = null;
@@ -106,12 +107,14 @@ public class PKIXCertPathBuilderSpi
         {
             cert = (X509Certificate)targetIter.next();
             certPathList.clear();
+            certPathSet.clear();
             while (cert != null)
             {
                 // add cert to the certpath
                 certPathList.add(cert);
+                certPathSet.add(cert);
 
-                // check wether the issuer of <cert> is a TrustAnchor 
+                // check whether the issuer of <cert> is a TrustAnchor
                 if (findTrustAnchor(cert, pkixParams.getTrustAnchors()) != null)
                 {
                     try
@@ -150,6 +153,11 @@ public class PKIXCertPathBuilderSpi
                         else
                         {
                             cert = issuer;
+                            // validation failed - circular path detected, go to next certificate
+                            if (certPathSet.contains(cert))
+                            {
+                                cert = null;
+                            }
                         }
                     }
                     catch (CertPathValidatorException ex)
