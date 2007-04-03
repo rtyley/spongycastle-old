@@ -195,6 +195,17 @@ public class SignedMailValidatorTest extends TestCase
                 "Warning: corrupt trust root store: There are 2 trusted public keys for the CA \"CN=SignedMailValidatorTest Root, C=CH\" - please ensure with CA which is the correct key.");
     }
     
+    public void testCircular() throws Exception
+    {
+        String message = "circular.eml";
+        PKIXParameters params = createDefaultParams();
+        SignedMailValidator.ValidationResult result = doTest(message, params);
+
+        assertTrue(result.isVerifiedSignature());
+        assertFalse(result.isValidSignature());
+        assertFalse(result.getCertPathReview().isValidCertPath());
+    }
+    
     private SignedMailValidator.ValidationResult doTest(String message,
             PKIXParameters params) throws Exception
     {
