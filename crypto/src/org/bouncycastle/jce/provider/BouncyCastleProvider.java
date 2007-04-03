@@ -45,7 +45,7 @@ import java.util.Map;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.36";
+    private static String info = "BouncyCastle Security Provider v1.37b";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -56,7 +56,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.36, info);
+        super(PROVIDER_NAME, 1.365, info);
 
         addMappings(new AESMappings());
         addMappings(new CamelliaMappings());
