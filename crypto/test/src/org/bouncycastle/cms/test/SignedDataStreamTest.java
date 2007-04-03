@@ -331,7 +331,50 @@ public class SignedDataStreamTest
         assertTrue(col.contains(_signCrl));
         assertTrue(col.contains(_origCrl));
     }
-    
+
+    public void testSHA1WithRSANonData()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        certList.add(_signCrl);
+        certList.add(_origCrl);
+
+        CertStore           certsAndCrls = CertStore.getInstance("Collection",
+                                                       new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certsAndCrls);
+
+        OutputStream sigOut = gen.open(bOut, "1.2.3.4", true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        CMSTypedStream stream = sp.getSignedContent();
+
+        assertEquals("1.2.3.4", stream.getContentType());
+
+        stream.drain();
+
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+
+        verifySignatures(sp, md.digest(TEST_MESSAGE.getBytes()));
+    }
+
     public void testSHA1AndMD5WithRSA()
         throws Exception
     {

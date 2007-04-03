@@ -171,11 +171,12 @@ public class CMSSignedDataParser
                 //
                 // If the message is simply a certificate chain message getContent() may return null.
                 //
-                ASN1OctetStringParser octs = (ASN1OctetStringParser)_signedData.getEncapContentInfo().getContent(DERTags.OCTET_STRING);
-                
+                ContentInfoParser     cont = _signedData.getEncapContentInfo();
+                ASN1OctetStringParser octs = (ASN1OctetStringParser)cont.getContent(DERTags.OCTET_STRING);
+
                 if (octs != null)
                 {
-                    _signedContent = new CMSTypedStream(octs.getOctetStream());
+                    _signedContent = new CMSTypedStream(cont.getContentType().getId(), octs.getOctetStream());
                 }
             }
             else
