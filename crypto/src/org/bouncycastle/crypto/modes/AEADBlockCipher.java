@@ -16,6 +16,7 @@ public interface AEADBlockCipher
      *
      * @param forEncryption true if we are setting up for encryption, false otherwise.
      * @param params the necessary parameters for the underlying cipher to be initialised.
+     * @exception IllegalArgumentException if the params argument is inappropriate.
      */
     public void init(boolean forEncryption, CipherParameters params)
         throws IllegalArgumentException;
@@ -41,6 +42,7 @@ public interface AEADBlockCipher
      * @param out the output buffer the processed byte goes into.
      * @param outOff the offset into the output byte array the processed data starts at.
      * @return the number of bytes written to out.
+     * @exception DataLengthException if the output buffer is too small.
      */
     public int processByte(byte in, byte[] out, int outOff)
         throws DataLengthException;
@@ -79,21 +81,21 @@ public interface AEADBlockCipher
     public byte[] getMac();
 
     /**
-     * return the size of the output buffer required for an update
+     * return the size of the output buffer required for a processBytes
      * an input of len bytes.
      *
      * @param len the length of the input.
-     * @return the space required to accommodate a call to update
+     * @return the space required to accommodate a call to processBytes
      * with len bytes of input.
      */
     public int getUpdateOutputSize(int len);
 
     /**
-     * return the size of the output buffer required for an update plus a
+     * return the size of the output buffer required for a processBytes plus a
      * doFinal with an input of len bytes.
      *
      * @param len the length of the input.
-     * @return the space required to accommodate a call to update and doFinal
+     * @return the space required to accommodate a call to processBytes and doFinal
      * with len bytes of input.
      */
     public int getOutputSize(int len);
