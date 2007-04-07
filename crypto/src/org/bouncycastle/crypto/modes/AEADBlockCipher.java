@@ -99,4 +99,10 @@ public interface AEADBlockCipher
      * with len bytes of input.
      */
     public int getOutputSize(int len);
+
+    /**
+     * Reset the cipher. After resetting the cipher is in the same state
+     * as it was after the last init (if there was one).
+     */
+    public void reset();
 }
