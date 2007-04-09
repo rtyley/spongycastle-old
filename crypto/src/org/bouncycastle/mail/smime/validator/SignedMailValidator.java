@@ -61,6 +61,8 @@ import java.util.Vector;
 public class SignedMailValidator
 {
     private static final String RESOURCE_NAME = "org.bouncycastle.mail.smime.validator.SignedMailValidatorMessages";
+    
+    private static final Class DEFAULT_CERT_PATH_REVIEWER = PKIXCertPathReviewer.class;
 
     private static final String EXT_KEY_USAGE = X509Extensions.ExtendedKeyUsage
             .getId();
@@ -80,6 +82,8 @@ public class SignedMailValidator
     private Map results;
 
     private String[] fromAddresses;
+    
+    private Class certPathReviewerClass;
 
     /**
      * Validates the signed {@link MimeMessage} message. The
@@ -96,14 +100,57 @@ public class SignedMailValidator
      * @param message
      *            the signed MimeMessage
      * @param param
-     *            the parameters for the certificate path validation
+     *            the parameters for the certificate path validation 
      * @throws SignedMailValidatorException
      *             if the message is no signed message or if an exception occurs
      *             reading the message
      */
     public SignedMailValidator(MimeMessage message, PKIXParameters param)
+        throws SignedMailValidatorException
+    {
+        this(message, param, DEFAULT_CERT_PATH_REVIEWER);
+    }
+    
+    /**
+     * Validates the signed {@link MimeMessage} message. The
+     * {@link PKIXParameters} from param are used for the certificate path
+     * validation. The actual PKIXParameters used for the certificate path
+     * validation is a copy of param with the followin changes: <br> - The
+     * validation date is changed to the signature time <br> - A CertStore with
+     * certificates and crls from the mail message is added to the CertStores.<br>
+     * <br>
+     * In <code>param</code> it's also possible to add additional CertStores
+     * with intermediate Certificates and/or CRLs which then are also used for
+     * the validation.
+     * 
+     * @param message
+     *            the signed MimeMessage
+     * @param param
+     *            the parameters for the certificate path validation
+     * @param certPathReviewerClass
+     *            a subclass of {@link PKIXCertPathReviewer}. The SignedMailValidator
+     *            uses objects of this type for the cert path vailidation. The class must
+     *            have an empty constructor.
+     * @throws SignedMailValidatorException
+     *             if the message is no signed message or if an exception occurs
+     *             reading the message
+     * @throws IllegalArgumentException if the certPathReviewerClass is not a 
+     *             subclass of {@link PKIXCertPathReviewer} or objects of 
+     *             certPathReviewerClass can not be instantiated
+     */
+    public SignedMailValidator(MimeMessage message, PKIXParameters param, Class certPathReviewerClass)
             throws SignedMailValidatorException
     {
+        this.certPathReviewerClass = certPathReviewerClass;
+        try
+        {
+            certPathReviewerClass.asSubclass(DEFAULT_CERT_PATH_REVIEWER);
+        }
+        catch (ClassCastException e)
+        {
+            throw new IllegalArgumentException("certPathReviewerClass is not a subclass of " + DEFAULT_CERT_PATH_REVIEWER.getName());
+        }
+        
         SMIMESigned s;
 
         try
@@ -307,8 +354,22 @@ public class SignedMailValidator
                     }
 
                     // validate cert chain
-                    PKIXCertPathReviewer review = new PKIXCertPathReviewer(
-                            certPath, usedParameters);
+                    PKIXCertPathReviewer review;
+                    try
+                    {
+                        review = (PKIXCertPathReviewer) certPathReviewerClass.newInstance();
+                    }
+                    catch (IllegalAccessException e)
+                    {
+                        throw new IllegalArgumentException("Cannot instantiate object of type " +
+                                certPathReviewerClass.getName() + ": " + e.getMessage(), e);
+                    }
+                    catch (InstantiationException e)
+                    {
+                        throw new IllegalArgumentException("Cannot instantiate object of type " +
+                                certPathReviewerClass.getName() + ": " + e.getMessage(), e);
+                    }
+                    review.init(certPath, usedParameters);
                     if (!review.isValidCertPath())
                     {
                         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
@@ -377,7 +438,7 @@ public class SignedMailValidator
                 if (o.getTagNo() == 1)
                 {
                     String email = DERIA5String.getInstance(o, true)
-                            .getString();
+                            .getString().toLowerCase();
                     addresses.add(email);
                 }
             }
@@ -481,7 +542,7 @@ public class SignedMailValidator
                 boolean equalsFrom = false;
                 for (int i = 0; i < fromAddresses.length; i++)
                 {
-                    if (certEmails.contains(fromAddresses[i]))
+                    if (certEmails.contains(fromAddresses[i].toLowerCase()))
                     {
                         equalsFrom = true;
                         break;

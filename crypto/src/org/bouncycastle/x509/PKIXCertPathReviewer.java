@@ -103,16 +103,24 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     protected PublicKey subjectPublicKey;
     protected PolicyNode policyTree;
     
+    private boolean initialized;
     
-    /**
-     * Creates a PKIXCertPathReviewer for the given {@link CertPath} and {@link PKIXParameters} params
+    /** 
+     * Initializes the PKIXCertPathReviewer with the given {@link CertPath} and {@link PKIXParameters} params
      * @param certPath the {@link CertPath} to validate
      * @param params the {@link PKIXParameters} to use
      * @throws CertPathReviewerException if the certPath is empty
+     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} is already initialized
      */
-    public PKIXCertPathReviewer(CertPath certPath, PKIXParameters params)
+    public void init(CertPath certPath, PKIXParameters params)
             throws CertPathReviewerException
     {
+        if (initialized)
+        {
+            throw new IllegalStateException("object is already initialized!");
+        }
+        initialized = true;
+        
         // check input parameters
         if (certPath == null)
         {
@@ -151,7 +159,26 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         trustAnchor = null;
         subjectPublicKey = null;
         policyTree = null;
-
+    }
+    
+    /**
+     * Creates a PKIXCertPathReviewer and initializes it with the given {@link CertPath} and {@link PKIXParameters} params
+     * @param certPath the {@link CertPath} to validate
+     * @param params the {@link PKIXParameters} to use
+     * @throws CertPathReviewerException if the certPath is empty
+     */
+    public PKIXCertPathReviewer(CertPath certPath, PKIXParameters params)
+            throws CertPathReviewerException
+    {
+        init(certPath, params);
+    }
+    
+    /**
+     * Creates an empty PKIXCertPathReviewer. Don't forget to call init() to initialize the object.
+     */
+    public PKIXCertPathReviewer()
+    {
+        // do nothing
     }
     
     /**
@@ -178,6 +205,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
      * The global error List is at index 0. The error lists for each certificate at index 1 to n. 
      * The error messages are of type.
      * @return the Array of Lists which contain the error messages
+     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
      */
     public List[] getErrors()
     {
@@ -190,6 +218,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
      * If index == -1 then the list of global errors is returned with errors not specific to a certificate. 
      * @param index the index of the certificate in the CertPath
      * @return List of error messages for the certificate
+     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
      */
     public List getErrors(int index)
     {
@@ -203,6 +232,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
      * The global notificatio List is at index 0. The notification lists for each certificate at index 1 to n. 
      * The error messages are of type.
      * @return the Array of Lists which contain the notification messages
+     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
      */
     public List[] getNotifications()
     {
@@ -215,6 +245,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
      * If index == -1 then the list of global notifications is returned with notifications not specific to a certificate. 
      * @param index the index of the certificate in the CertPath
      * @return List of notification messages for the certificate
+     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
      */
     public List getNotifications(int index)
     {
@@ -225,6 +256,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     /**
      * 
      * @return the valid policy tree, <b>null</b> if no valid policy exists.
+     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
      */
     public PolicyNode getPolicyTree()
     {
@@ -235,6 +267,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     /**
      * 
      * @return the PublicKey if the last certificate in the CertPath
+     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
      */
     public PublicKey getSubjectPublicKey()
     {
@@ -245,6 +278,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     /**
      * 
      * @return the TrustAnchor for the CertPath, <b>null</b> if no valid TrustAnchor was found.
+     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
      */
     public TrustAnchor getTrustAnchor()
     {
@@ -255,6 +289,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     /**
      * 
      * @return if the CertPath is valid
+     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
      */
     public boolean isValidCertPath()
     {
@@ -301,6 +336,10 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     
     protected void doChecks()
     {
+        if (!initialized)
+        {
+            throw new IllegalStateException("Object not initialized. Call init() first.");
+        }
         if (notifications == null)
         {
             // initialize lists
@@ -871,7 +910,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     addError(msg,index);
                 }
                 
-                Vector crlDistPointUrls = getCRLDistUrls(crlDistPoints,authInfoAcc);
+                Vector crlDistPointUrls = getCRLDistUrls(crlDistPoints);
                 Vector ocspUrls = getOCSPUrls(authInfoAcc);
                 
                 // add notifications with the crl distribution points
@@ -2297,7 +2336,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     
     }
     
-    protected Vector getCRLDistUrls(CRLDistPoint crlDistPoints, AuthorityInformationAccess authInfoAcc)
+    protected Vector getCRLDistUrls(CRLDistPoint crlDistPoints)
     {
         Vector urls = new Vector();
         
@@ -2321,24 +2360,6 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 }
             }
         }
-        
-        if (authInfoAcc != null)
-        {
-            AccessDescription[] ads = authInfoAcc.getAccessDescriptions();
-            for (int i = 0; i < ads.length; i++)
-            {
-                if (ads[i].getAccessMethod().equals(AccessDescription.id_ad_caIssuers))
-                {
-                    GeneralName name = ads[i].getAccessLocation();
-                    if (name.getTagNo() ==  GeneralName.uniformResourceIdentifier)
-                    {
-                        String url = ((DERIA5String) name.getName()).getString();
-                        urls.add(url);
-                    }
-                }
-            }
-        }
-        
         return urls;
     }
     

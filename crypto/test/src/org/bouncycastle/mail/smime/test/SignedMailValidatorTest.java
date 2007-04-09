@@ -206,6 +206,49 @@ public class SignedMailValidatorTest extends TestCase
         assertFalse(result.getCertPathReview().isValidCertPath());
     }
     
+    public void testExtendedReviewer() throws Exception
+    {
+        try
+        {
+            // Get a Session object with the default properties.
+            Properties props = System.getProperties();
+            Session session = Session.getDefaultInstance(props, null);
+
+            // read message
+            MimeMessage msg = new MimeMessage(session, getClass().getResourceAsStream("validator.shortKey.eml"));
+
+            SignedMailValidator validator = new SignedMailValidator(msg, createDefaultParams(), String.class);
+            fail();
+        } 
+        catch (IllegalArgumentException e)
+        {
+            assertTrue(e.getMessage().startsWith("certPathReviewerClass is not a subclass of"));
+        }
+        
+        try
+        {
+            // Get a Session object with the default properties.
+            Properties props = System.getProperties();
+            Session session = Session.getDefaultInstance(props, null);
+
+            // read message
+            MimeMessage msg = new MimeMessage(session, getClass().getResourceAsStream("validator.shortKey.eml"));
+
+            SignedMailValidator validator = new SignedMailValidator(msg, createDefaultParams(), DummyCertPathReviewer.class);
+            SignerInformation sInfo = (SignerInformation) validator.getSignerInformationStore().getSigners().iterator().next();
+            SignedMailValidator.ValidationResult result = validator.getValidationResult(sInfo);
+
+            assertTrue(result.isValidSignature());
+            assertContainsMessage(result.getNotifications(),
+                    "SignedMailValidator.shortSigningKey",
+                    "Warning: The signing key is only 512 bits long.");
+        } 
+        catch (IllegalArgumentException e)
+        {
+            fail();
+        }
+    }
+    
     private SignedMailValidator.ValidationResult doTest(String message,
             PKIXParameters params) throws Exception
     {
