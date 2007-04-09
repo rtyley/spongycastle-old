@@ -105,6 +105,7 @@ public class Salsa20Test
                   set6v0_0, set6v0_65472, set6v0_65536);
         salsa20Test2(new ParametersWithIV(new KeyParameter(Hex.decode("0558ABFE51A4F74A9DF04396E93C8FE23588DB2E81D4277ACD2073C6196CBF12")), Hex.decode("167DE44BB21980E7")),
                   set6v1_0, set6v1_65472, set6v1_65536);
+        reinitBug();
     }
 
     private void salsa20Test1(CipherParameters params, String v0, String v192, String v256, String v448)
@@ -192,6 +193,26 @@ public class Salsa20Test
     private void mismatch(String name, String expected, byte[] found)
     {
         fail("mismatch on " + name, expected, new String(Hex.encode(found)));
+    }
+
+
+    private void reinitBug()
+    {
+        KeyParameter key = new KeyParameter(Hex.decode("80000000000000000000000000000000"));
+        ParametersWithIV parameters = new ParametersWithIV(key, Hex.decode("0000000000000000"));
+
+        StreamCipher salsa = new Salsa20Engine();
+
+        salsa.init(true, parameters);
+
+        try
+        {
+            salsa.init(true, key);
+            fail("Salsa20 should throw exception if no IV in Init");
+        }
+        catch (IllegalArgumentException e)
+        {
+        }
     }
 
     public static void main(

@@ -51,27 +51,31 @@ public class Salsa20Engine
         boolean             forEncryption, 
         CipherParameters     params)
     {
-        CipherParameters keyParam = params;
-        if (params instanceof ParametersWithIV)
-        {
-            workingIV = ((ParametersWithIV)params).getIV();
-            keyParam = ((ParametersWithIV)params).getParameters();
-        }
-        
-        if (keyParam instanceof KeyParameter)
-        {
-            /* 
-             * Salsa20 encryption and decryption is completely
-             * symmetrical, so the 'forEncryption' is 
-             * irrelevant. (Like 90% of stream ciphers)
-             */
-            workingKey = ((KeyParameter)keyParam).getKey();
-            setKey(workingKey, workingIV);
+        /* 
+        * Salsa20 encryption and decryption is completely
+        * symmetrical, so the 'forEncryption' is 
+        * irrelevant. (Like 90% of stream ciphers)
+        */
 
-            return;
-        }
+        if (!(params instanceof ParametersWithIV))
+            throw new IllegalArgumentException("Salsa20 Init parameters must include an IV");
 
-        throw new IllegalArgumentException("invalid parameter passed to Salsa20 init - " + params.getClass().getName());
+        ParametersWithIV ivParams = (ParametersWithIV) params;
+
+        byte[] iv = ivParams.getIV();
+
+        if (iv == null || iv.length != 8)
+            throw new IllegalArgumentException("Salsa20 requires exactly 8 bytes of IV");
+
+        if (!(ivParams.getParameters() instanceof KeyParameter))
+            throw new IllegalArgumentException("Salsa20 Init parameters must include a key");
+
+        KeyParameter key = (KeyParameter) ivParams.getParameters();
+
+        workingKey = key.getKey();
+        workingIV = iv;
+
+        setKey(workingKey, workingIV);
     }
 
     public String getAlgorithmName()
