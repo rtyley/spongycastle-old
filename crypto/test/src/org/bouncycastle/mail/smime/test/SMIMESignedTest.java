@@ -16,6 +16,7 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.test.CMSTestUtil;
@@ -499,6 +500,20 @@ public class SMIMESignedTest
 
         assertEquals("sha512", getMicAlg(smm));
         assertEquals(getDigestOid(s.getSignerInfos()), NISTObjectIdentifiers.id_sha512.toString());
+
+        verifyMessageBytes(msg, s.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testRIPEMD160WithRSA()
+        throws Exception
+    {
+        MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_RIPEMD160, msg);
+        SMIMESigned   s = new  SMIMESigned(smm);
+
+        assertEquals("unknown", getMicAlg(smm));
+        assertEquals(getDigestOid(s.getSignerInfos()), TeleTrusTObjectIdentifiers.ripemd160.toString());
 
         verifyMessageBytes(msg, s.getContent());
 
