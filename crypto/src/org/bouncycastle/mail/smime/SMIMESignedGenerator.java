@@ -240,7 +240,7 @@ public class SMIMESignedGenerator
             }
             else
             {
-                header.append("unknown");
+                micAlgs.add("unknown");
             }
         }
         
