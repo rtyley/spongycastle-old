@@ -586,7 +586,7 @@ public class SignedMailValidator
         return result;
     }
 
-    private List findCerts(List certStores, X509CertSelector selector)
+    private static List findCerts(List certStores, X509CertSelector selector)
             throws CertStoreException
     {
         List result = new ArrayList();
@@ -600,7 +600,7 @@ public class SignedMailValidator
         return result;
     }
 
-    protected CertPath createCertPath(X509Certificate signerCert,
+    public static CertPath createCertPath(X509Certificate signerCert,
             Set trustanchors, List certStores) throws GeneralSecurityException
     {
         Set  certSet = new LinkedHashSet();
@@ -672,14 +672,14 @@ public class SignedMailValidator
                 while (certIt.hasNext())
                 {
                     nextCert = (X509Certificate) certIt.next();
-                    if (!nextCert.equals(cert))
+                    if (!certSet.contains(nextCert))
                     {
                         certFound = true;
                         break;
                     }
                 }
 
-                if (certFound && !certSet.contains(cert))
+                if (certFound)
                 {
                     cert = nextCert;
                     certSet.add(cert);
@@ -695,7 +695,7 @@ public class SignedMailValidator
         // the trustanchor
         if (trustAnchorFound)
         {
-            if (taCert != null)
+            if (taCert != null && taCert.getSubjectX500Principal().equals(taCert.getIssuerX500Principal()))
             {
                 certSet.add(taCert);
             }

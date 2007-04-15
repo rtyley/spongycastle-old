@@ -204,6 +204,7 @@ public class SignedMailValidatorTest extends TestCase
         assertTrue(result.isVerifiedSignature());
         assertFalse(result.isValidSignature());
         assertFalse(result.getCertPathReview().isValidCertPath());
+        assertTrue("cert path size", result.getCertPathReview().getCertPathSize() > 2);
     }
     
     public void testExtendedReviewer() throws Exception
