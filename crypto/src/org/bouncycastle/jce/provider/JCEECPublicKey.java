@@ -363,19 +363,8 @@ public class JCEECPublicKey
             BigInteger      bY = this.q.getY().toBigInteger();
             byte[]          encKey = new byte[64];
 
-            byte[] val = bX.toByteArray();
-
-            for (int i = 0; i != 32; i++)
-            {
-                encKey[i] = val[val.length - 1 - i];
-            }
-
-            val = bY.toByteArray();
-
-            for (int i = 0; i != 32; i++)
-            {
-                encKey[32 + i] = val[val.length - 1 - i];
-            }
+            extractBytes(encKey, 0, bX);
+            extractBytes(encKey, 32, bY);
 
             info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params.getDERObject()), new DEROctetString(encKey));
         }
@@ -436,6 +425,21 @@ public class JCEECPublicKey
         }
         
         return info.getDEREncoded();
+    }
+
+    private void extractBytes(byte[] encKey, int offSet, BigInteger bI)
+    {
+        byte[] val = bI.toByteArray();
+        if (val.length < 32)
+        {
+            byte[] tmp = new byte[32];
+            System.arraycopy(val, 0, tmp, tmp.length - val.length, val.length);
+        }
+
+        for (int i = 0; i != 32; i++)
+        {
+            encKey[offSet + i] = val[val.length - 1 - i];
+        }
     }
 
     public ECParameterSpec getParams()
