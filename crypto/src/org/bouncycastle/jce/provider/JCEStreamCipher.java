@@ -8,6 +8,8 @@ import org.bouncycastle.crypto.StreamCipher;
 import org.bouncycastle.crypto.engines.BlowfishEngine;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
+import org.bouncycastle.crypto.engines.HC128Engine;
+import org.bouncycastle.crypto.engines.HC256Engine;
 import org.bouncycastle.crypto.engines.IDEAEngine;
 import org.bouncycastle.crypto.engines.RC4Engine;
 import org.bouncycastle.crypto.engines.Salsa20Engine;
@@ -560,6 +562,30 @@ public class JCEStreamCipher
         public Salsa20()
         {
             super(new Salsa20Engine(), 8);
+        }
+    }
+
+    /**
+     * HC-128
+     */
+    static public class HC128
+        extends JCEStreamCipher
+    {
+        public HC128()
+        {
+            super(new HC128Engine(), 16);
+        }
+    }
+
+    /**
+     * HC-256
+     */
+    static public class HC256
+        extends JCEStreamCipher
+    {
+        public HC256()
+        {
+            super(new HC256Engine(), 32);
         }
     }
 }
