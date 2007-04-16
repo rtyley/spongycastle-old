@@ -76,7 +76,7 @@ public class JCEKeyGenerator
                                     new SecureRandom(), defaultKeySize));
         }
 
-        return (SecretKey)(new SecretKeySpec(engine.generateKey(), algName));
+        return new SecretKeySpec(engine.generateKey(), algName);
     }
 
     /**
@@ -373,7 +373,31 @@ public class JCEKeyGenerator
             super("Salsa20", 128, new CipherKeyGenerator());
         }
     }
-    
+
+    /**
+     * HC128
+     */
+    public static class HC128
+        extends JCEKeyGenerator
+    {
+        public HC128()
+        {
+            super("HC128", 128, new CipherKeyGenerator());
+        }
+    }
+
+    /**
+     * HC256
+     */
+    public static class HC256
+        extends JCEKeyGenerator
+    {
+        public HC256()
+        {
+            super("HC256", 256, new CipherKeyGenerator());
+        }
+    }
+
     // HMAC Related secret keys..
   
     /**

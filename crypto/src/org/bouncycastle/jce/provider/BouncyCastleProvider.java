@@ -220,6 +220,8 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher.ARCFOUR", "ARC4");
         put("Alg.Alias.Cipher.RC4", "ARC4");
         put("Cipher.SALSA20", "org.bouncycastle.jce.provider.JCEStreamCipher$Salsa20");
+        put("Cipher.HC128", "org.bouncycastle.jce.provider.JCEStreamCipher$HC128");
+        put("Cipher.HC256", "org.bouncycastle.jce.provider.JCEStreamCipher$HC256");
         put("Cipher.RC5", "org.bouncycastle.jce.provider.JCEBlockCipher$RC5");
         put("Cipher.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2CBC");
         put("Alg.Alias.Cipher.RC5-32", "RC5");
@@ -349,6 +351,8 @@ public final class BouncyCastleProvider extends Provider
 
         put("KeyGenerator.SERPENT", "org.bouncycastle.jce.provider.JCEKeyGenerator$Serpent");
         put("KeyGenerator.SALSA20", "org.bouncycastle.jce.provider.JCEKeyGenerator$Salsa20");
+        put("KeyGenerator.HC128", "org.bouncycastle.jce.provider.JCEKeyGenerator$HC128");
+        put("KeyGenerator.HC256", "org.bouncycastle.jce.provider.JCEKeyGenerator$HC256");
 
         put("KeyGenerator.CAST6", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST6");
         put("KeyGenerator.IDEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$IDEA");
