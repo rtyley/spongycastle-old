@@ -42,6 +42,7 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateExpiredException;
@@ -742,11 +743,14 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 {
                     cert.verify(trustPublicKey);
                 }
-                catch (Exception e)
+                catch (SignatureException e)
                 {
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.trustButInvalidCert");
                     addError(msg);
-                    trust = null;
+                }
+                catch (Exception e)
+                {
+                    // do nothing, error occurs again later
                 }
             }
         }
@@ -775,6 +779,17 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.trustDNInvalid",
                         new Object[] {new UntrustedInput(trust.getCAName())});
                 addError(msg);
+            }
+            
+            // test key usages of the trust anchor
+            if (sign != null)
+            {
+                boolean[] ku = sign.getKeyUsage(); 
+                if (ku != null && !ku[5])
+                {
+                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "CertPathReviewer.trustKeyUsage");
+                    addNotification(msg);
+                }
             }
         }
         

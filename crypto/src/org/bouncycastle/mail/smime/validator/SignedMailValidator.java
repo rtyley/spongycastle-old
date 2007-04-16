@@ -31,14 +31,12 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.cert.CertPath;
-import java.security.cert.CertPathBuilder;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
@@ -332,26 +330,13 @@ public class SignedMailValidator
                 {
                     // construct cert chain
                     CertPath certPath;
-                    try
-                    {
-                        // try to use the PKIXCertPathBuilder to create a cert
-                        // path
-                        CertPathBuilder builder = CertPathBuilder.getInstance(
-                                "PKIX", "BC");
-                        X509CertSelector select = new X509CertSelector();
-                        select.setCertificate(cert);
-                        PKIXBuilderParameters param = new PKIXBuilderParameters(
-                                usedParameters.getTrustAnchors(), select);
-                        param.setDate(usedParameters.getDate());
-                        certPath = builder.build(param).getCertPath();
-                    }
-                    catch (Exception e)
-                    {
-                        // use the backup procedure to build a cert path
-                        certPath = createCertPath(cert, usedParameters
-                                .getTrustAnchors(), usedParameters
-                                .getCertStores());
-                    }
+                    List userProvidedList;
+                    
+                    List userCertStores = new ArrayList();
+                    userCertStores.add(certs);
+                    Object[] cpres = createCertPath(cert, usedParameters.getTrustAnchors(), pkixParam.getCertStores(), userCertStores);
+                    certPath = (CertPath) cpres[0];
+                    userProvidedList = (List) cpres[1];
 
                     // validate cert chain
                     PKIXCertPathReviewer review;
@@ -377,7 +362,7 @@ public class SignedMailValidator
                         errors.add(msg);
                     }
                     results.put(signer, new ValidationResult(review,
-                            validSignature, errors, notifications));
+                            validSignature, errors, notifications, userProvidedList));
                 }
                 catch (GeneralSecurityException gse)
                 {
@@ -387,14 +372,14 @@ public class SignedMailValidator
                             new Object[] { gse.getMessage(), gse, gse.getClass().getName() });
                     errors.add(msg);
                     results.put(signer, new ValidationResult(null,
-                            validSignature, errors, notifications));
+                            validSignature, errors, notifications, null));
                 }
                 catch (CertPathReviewerException cpre)
                 {
                     // cannot initialize certpathreviewer - wrong parameters
                     errors.add(cpre.getErrorMessage());
                     results.put(signer, new ValidationResult(null,
-                            validSignature, errors, notifications));
+                            validSignature, errors, notifications, null));
                 }
             }
             else
@@ -404,7 +389,7 @@ public class SignedMailValidator
                         "SignedMailValidator.noSignerCert");
                 errors.add(msg);
                 results.put(signer, new ValidationResult(null, false, errors,
-                        notifications));
+                        notifications, null));
             }
         }
     }
@@ -599,16 +584,63 @@ public class SignedMailValidator
         }
         return result;
     }
+    
+    private static X509Certificate findNextCert(List certStores, X509CertSelector selector, Set certSet)
+        throws CertStoreException
+    {
+        Iterator certIt = findCerts(certStores, selector).iterator();
 
+        boolean certFound = false;
+        X509Certificate nextCert = null;
+        while (certIt.hasNext())
+        {
+            nextCert = (X509Certificate) certIt.next();
+            if (!certSet.contains(nextCert))
+            {
+                certFound = true;
+                break;
+            }
+        }
+        
+        return certFound ? nextCert : null;
+    }
+
+    /**
+     * 
+     * @param signerCert the end of the path
+     * @param trustanchors trust anchors for the path
+     * @param certStores
+     * @return
+     * @throws GeneralSecurityException
+     */
     public static CertPath createCertPath(X509Certificate signerCert,
             Set trustanchors, List certStores) throws GeneralSecurityException
     {
+        Object[] results = createCertPath(signerCert, trustanchors, certStores, null);
+        return (CertPath) results[0];
+    }
+    
+    /**
+     * Returns an Object array containing a CertPath and a List of Booleans. The list contains the value <code>true</code>
+     * if the corresponding certificate in the CertPath was taken from the user provided CertStores.
+     * @param signerCert the end of the path
+     * @param trustanchors trust anchors for the path
+     * @param systemCertStores list of {@link CertStore} provided by the system
+     * @param userCertStores list of {@link CertStore} provided by the user
+     * @return
+     * @throws GeneralSecurityException
+     */
+    public static Object[] createCertPath(X509Certificate signerCert,
+            Set trustanchors, List systemCertStores, List userCertStores) throws GeneralSecurityException
+    {
         Set  certSet = new LinkedHashSet();
+        List userProvidedList = new ArrayList();
 
         // add signer certificate
 
         X509Certificate cert = signerCert;
         certSet.add(cert);
+        userProvidedList.add(new Boolean(true));
 
         boolean trustAnchorFound = false;
         
@@ -665,28 +697,20 @@ public class SignedMailValidator
                 // add next cert to path
                 X509CertSelector select = new X509CertSelector();
                 select.setSubject(cert.getIssuerX500Principal());
-                Iterator certIt = findCerts(certStores, select).iterator();
-
-                boolean certFound = false;
-                X509Certificate nextCert = null;
-                while (certIt.hasNext())
+                boolean userProvided = false;
+                
+                cert = findNextCert(systemCertStores, select, certSet);
+                if (cert == null && userCertStores != null)
                 {
-                    nextCert = (X509Certificate) certIt.next();
-                    if (!certSet.contains(nextCert))
-                    {
-                        certFound = true;
-                        break;
-                    }
+                    userProvided = true;
+                    cert = findNextCert(userCertStores, select, certSet);
                 }
-
-                if (certFound)
+                
+                if (cert != null)
                 {
-                    cert = nextCert;
+                    // cert found
                     certSet.add(cert);
-                }
-                else
-                {
-                    cert = null;
+                    userProvidedList.add(new Boolean(userProvided));
                 }
             }
         }
@@ -698,6 +722,7 @@ public class SignedMailValidator
             if (taCert != null && taCert.getSubjectX500Principal().equals(taCert.getIssuerX500Principal()))
             {
                 certSet.add(taCert);
+                userProvidedList.add(new Boolean(false));
             }
             else
             {
@@ -705,15 +730,21 @@ public class SignedMailValidator
                 select.setSubject(cert.getIssuerX500Principal());
                 select.setIssuer(cert.getIssuerX500Principal());
     
-                Iterator certIt = findCerts(certStores, select).iterator();
-                while (certIt.hasNext())
+                boolean userProvided = false;
+                
+                taCert = findNextCert(systemCertStores, select, certSet);
+                if (taCert == null)
                 {
-                    taCert = (X509Certificate) certIt.next();
+                    userProvided = true;
+                    taCert = findNextCert(userCertStores, select, certSet);
+                }
+                if (taCert != null)
+                {
                     try
                     {
                         cert.verify(taCert.getPublicKey(), "BC");
                         certSet.add(taCert);
-                        break;
+                        userProvidedList.add(new Boolean(userProvided));
                     }
                     catch (GeneralSecurityException gse)
                     {
@@ -724,7 +755,7 @@ public class SignedMailValidator
         }
         
         CertPath certPath = CertificateFactory.getInstance("X.509", "BC").generateCertPath(new ArrayList(certSet));
-        return certPath;
+        return new Object[] {certPath, userProvidedList};
     }
 
     public CertStore getCertsAndCRLs()
@@ -762,16 +793,19 @@ public class SignedMailValidator
         private List errors;
 
         private List notifications;
+        
+        private List userProvidedCerts;
 
         private boolean signVerified;
 
         ValidationResult(PKIXCertPathReviewer review, boolean verified,
-                List errors, List notifications)
+                List errors, List notifications, List userProvidedCerts)
         {
             this.review = review;
             this.errors = errors;
             this.notifications = notifications;
             signVerified = verified;
+            this.userProvidedCerts = userProvidedCerts;
         }
 
         /**
@@ -802,6 +836,26 @@ public class SignedMailValidator
         public PKIXCertPathReviewer getCertPathReview()
         {
             return review;
+        }
+        
+        /**
+         * 
+         * @return the CertPath for this signature
+         *         or null if an Exception occured.
+         */
+        public CertPath getCertPath()
+        {
+            return review != null ? review.getCertPath() : null;
+        }
+        
+        /**
+         * 
+         * @return a List of Booleans that are true if the corresponding certificate in the CertPath was taken from
+         * the CertStore of the SMIME message
+         */
+        public List getUserProvidedCerts()
+        {
+            return userProvidedCerts;
         }
 
         /**
