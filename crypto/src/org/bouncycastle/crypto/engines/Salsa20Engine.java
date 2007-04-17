@@ -27,8 +27,9 @@ public class Salsa20Engine
      * during encryption and decryption
      */
     private int         index = 0;
-    private int[]       engineState = null; // state
-    private byte[]      keyStream   = new byte[stateSize>>2], // expanded state, 64 bytes
+    private int[]       engineState = new int[stateSize]; // state
+    private int[]       x = new int[stateSize] ; // internal buffer
+    private byte[]      keyStream   = new byte[stateSize * 4], // expanded state, 64 bytes
                         workingKey  = null,
                         workingIV   = null;
     private boolean     initialised = false;
@@ -92,7 +93,7 @@ public class Salsa20Engine
         
         if (index == 0)
         {
-            keyStream = salsa20WordToByte(engineState);
+            salsa20WordToByte(engineState, keyStream);
             engineState[8]++;
             if (engineState[8] == 0)
             {
@@ -126,17 +127,17 @@ public class Salsa20Engine
         {
             throw new DataLengthException("output buffer too short");
         }
-        
+
+        if (limitExceeded(len))
+        {
+            throw new MaxBytesExceededException("2^70 byte limit per IV would be exceeded; Change IV");
+        }
+
         for (int i = 0; i < len; i++)
         {
-            if (limitExceeded())
-            {
-                throw new MaxBytesExceededException("2^70 byte limit per IV; Change IV");
-            }
-            
             if (index == 0)
             {
-                keyStream = salsa20WordToByte(engineState);
+                salsa20WordToByte(engineState, keyStream);
                 engineState[8]++;
                 if (engineState[8] == 0)
                 {
@@ -162,12 +163,6 @@ public class Salsa20Engine
 
         index = 0;
         resetCounter();
-
-        if (engineState == null)
-        {
-            engineState = new int[stateSize];
-        }
-
         int offset = 0;
         byte[] constants;
         
@@ -211,13 +206,11 @@ public class Salsa20Engine
      *
      * @return  keystream
      */    
-    private byte[] salsa20WordToByte(int[] input)
+    private void salsa20WordToByte(int[] input, byte[] output)
     {
-        int[] x = new int[input.length];
         System.arraycopy(input, 0, x, 0, input.length);
-        
-        int i = 0;
-        while (i++ < 10)
+
+        for (int i = 0; i < 10; i++)
         {
             x[ 4] ^= rotl((x[ 0]+x[12]), 7);
             x[ 8] ^= rotl((x[ 4]+x[ 0]), 9);
@@ -252,13 +245,19 @@ public class Salsa20Engine
             x[14] ^= rotl((x[13]+x[12]),13);
             x[15] ^= rotl((x[14]+x[13]),18);
         }
-        
-        for (i = 0; i < stateSize; i++)
+
+        int offset = 0;
+        for (int i = 0; i < stateSize; i++)
         {
-            x[i] += input[i];
+            intToByteLittle(x[i] + input[i], output, offset);
+            offset += 4;
         }
-        
-        return intToByteLittle(x);
+
+        for (int i = stateSize; i < x.length; i++)
+        {
+            intToByteLittle(x[i], output, offset);
+            offset += 4;
+        }
     }
     
     /**
@@ -268,30 +267,12 @@ public class Salsa20Engine
      *
      * @return  value of x expressed as a byte[] array in little endian order
      */
-    private byte[] intToByteLittle(int x)
+    private byte[] intToByteLittle(int x, byte[] out, int off)
     {
-        byte[] out = new byte[4];
-        out[0] = (byte)x;
-        out[1] = (byte)(x >>> 8);
-        out[2] = (byte)(x >>> 16);
-        out[3] = (byte)(x >>> 24);
-        return out;
-    }
-    
-    /**
-     * Applies intToByteLittle() over an array of ints, returning a single byte array
-     *
-     * @param   x   array of values to 'unpack'
-     *
-     * @return  byte[] array of the values in x
-     */
-    private byte[] intToByteLittle(int[] x)
-    {
-        byte[] out = new byte[4*x.length];
-        for (int i = 0, j = 0; i < x.length; i++,j+=4)
-        {
-            System.arraycopy(intToByteLittle(x[i]), 0, out, j, 4);
-        }
+        out[off] = (byte)x;
+        out[off + 1] = (byte)(x >>> 8);
+        out[off + 2] = (byte)(x >>> 16);
+        out[off + 3] = (byte)(x >>> 24);
         return out;
     }
     
@@ -305,7 +286,7 @@ public class Salsa20Engine
      */
     private int rotl(int x, int y)
     {
-        return (x << y) | (x >>> (32-y));
+        return (x << y) | (x >>> -y);
     }
     
     /**
@@ -318,10 +299,10 @@ public class Salsa20Engine
      */
     private int byteToIntLittle(byte[] x, int offset)
     {
-        return ((x[offset++] & 255)) |
-               ((x[offset++] & 255) <<  8) |
-               ((x[offset++] & 255) << 16) |
-               (x[offset  ] << 24);
+        return ((x[offset] & 255)) |
+               ((x[offset + 1] & 255) <<  8) |
+               ((x[offset + 2] & 255) << 16) |
+                (x[offset + 3] << 24);
     }
 
     private void resetCounter()
@@ -341,6 +322,32 @@ public class Salsa20Engine
             {
                 cW2++;
                 return (cW2 & 0x20) != 0;          // 2^(32 + 32 + 6)
+            }
+        }
+
+        return false;
+    }
+
+    /*
+     * this relies on the fact len will always be positive.
+     */
+    private boolean limitExceeded(int len)
+    {
+        if (cW0 >= 0)
+        {
+            cW0 += len;
+        }
+        else
+        {
+            cW0 += len;
+            if (cW0 >= 0)
+            {
+                cW1++;
+                if (cW1 == 0)
+                {
+                    cW2++;
+                    return (cW2 & 0x20) != 0;          // 2^(32 + 32 + 6)
+                }
             }
         }
 
