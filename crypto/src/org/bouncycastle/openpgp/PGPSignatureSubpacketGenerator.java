@@ -1,14 +1,11 @@
 package org.bouncycastle.openpgp;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
 import org.bouncycastle.bcpg.sig.Exportable;
 import org.bouncycastle.bcpg.sig.KeyExpirationTime;
 import org.bouncycastle.bcpg.sig.KeyFlags;
+import org.bouncycastle.bcpg.sig.NotationData;
 import org.bouncycastle.bcpg.sig.PreferredAlgorithms;
 import org.bouncycastle.bcpg.sig.PrimaryUserID;
 import org.bouncycastle.bcpg.sig.Revocable;
@@ -16,6 +13,10 @@ import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 import org.bouncycastle.bcpg.sig.SignatureExpirationTime;
 import org.bouncycastle.bcpg.sig.SignerUserID;
 import org.bouncycastle.bcpg.sig.TrustSignature;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Generator for signature subpackets.
@@ -137,7 +138,16 @@ public class PGPSignatureSubpacketGenerator
     {
         list.add(new PrimaryUserID(isCritical, isPrimaryUserID));
     }
-    
+
+    public void setNotationData(
+        boolean isCritical,
+        boolean isHumanReadable,
+        String  notationName,
+        String  notationValue)
+    {
+        list.add(new NotationData(isCritical, isHumanReadable, notationName, notationValue));
+    }
+
     public PGPSignatureSubpacketVector generate()
     {
         return new PGPSignatureSubpacketVector((SignatureSubpacket[])list.toArray(new SignatureSubpacket[list.size()]));
