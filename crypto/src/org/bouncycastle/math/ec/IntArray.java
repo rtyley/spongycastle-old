@@ -249,7 +249,7 @@ public class IntArray implements Cloneable
         if (newMinUsedLen > m_ints.length)
         {
             m_ints = resizedInts(newMinUsedLen);
-            System.out.println("Resize required");
+            //System.out.println("Resize required");
         }
 
         for (int i = 0; i < usedLenOther; i++)
