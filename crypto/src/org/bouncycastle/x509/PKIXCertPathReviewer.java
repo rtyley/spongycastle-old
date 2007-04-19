@@ -1854,17 +1854,13 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 if (!criticalExtensions.isEmpty())
                 {
                     ErrorBundle msg;
-                    if (criticalExtensions.size() == 1)
+                    Iterator it = criticalExtensions.iterator();
+                    while (it.hasNext())
                     {
                         msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.unknownCriticalExt",
-                                new Object[] {criticalExtensions.iterator().next()});
+                                new Object[] {new DERObjectIdentifier((String) criticalExtensions.iterator().next())});
+                        addError(msg, index);
                     }
-                    else
-                    {
-                        msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.unknownCriticalExts",
-                                new Object[] {new UntrustedInput(criticalExtensions)});
-                    }
-                    throw new CertPathReviewerException(msg,certPath,index);
                 }
             }
         }

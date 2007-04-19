@@ -733,7 +733,7 @@ public class SignedMailValidator
                 boolean userProvided = false;
                 
                 taCert = findNextCert(systemCertStores, select, certSet);
-                if (taCert == null)
+                if (taCert == null && userCertStores != null)
                 {
                     userProvided = true;
                     taCert = findNextCert(userCertStores, select, certSet);
