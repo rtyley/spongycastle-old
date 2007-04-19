@@ -27,26 +27,39 @@ public class HC128Engine
 
     private static int f1(int x)
     {
-        return Integer.rotateRight(x, 7) ^ Integer.rotateRight(x, 18)
+        return rotateRight(x, 7) ^ rotateRight(x, 18)
             ^ (x >>> 3);
     }
 
     private static int f2(int x)
     {
-        return Integer.rotateRight(x, 17) ^ Integer.rotateRight(x, 19)
+        return rotateRight(x, 17) ^ rotateRight(x, 19)
             ^ (x >>> 10);
     }
 
     private int g1(int x, int y, int z)
     {
-        return (Integer.rotateRight(x, 10) ^ Integer.rotateRight(z, 23))
-            + Integer.rotateRight(y, 8);
+        return (rotateRight(x, 10) ^ rotateRight(z, 23))
+            + rotateRight(y, 8);
     }
 
     private int g2(int x, int y, int z)
     {
-        return (Integer.rotateLeft(x, 10) ^ Integer.rotateLeft(z, 23))
-            + Integer.rotateLeft(y, 8);
+        return (rotateLeft(x, 10) ^ rotateLeft(z, 23)) + rotateLeft(y, 8);
+    }
+
+    private static int rotateLeft(
+        int     x,
+        int     bits)
+    {
+        return (x << bits) | (x >>> -bits);
+    }
+
+    private static int rotateRight(
+        int     x,
+        int     bits)
+    {
+        return (x >>> bits) | (x << -bits);
     }
 
     private int h1(int x)

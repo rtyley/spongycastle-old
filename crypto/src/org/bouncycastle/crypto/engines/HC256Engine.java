@@ -35,7 +35,7 @@ public class HC256Engine
             int x = p[(j - 3 & 0x3FF)];
             int y = p[(j - 1023 & 0x3FF)];
             p[j] += p[(j - 10 & 0x3FF)]
-                + (Integer.rotateRight(x, 10) ^ Integer.rotateRight(y, 23))
+                + (rotateRight(x, 10) ^ rotateRight(y, 23))
                 + q[((x ^ y) & 0x3FF)];
 
             x = p[(j - 12 & 0x3FF)];
@@ -48,7 +48,7 @@ public class HC256Engine
             int x = q[(j - 3 & 0x3FF)];
             int y = q[(j - 1023 & 0x3FF)];
             q[j] += q[(j - 10 & 0x3FF)]
-                + (Integer.rotateRight(x, 10) ^ Integer.rotateRight(y, 23))
+                + (rotateRight(x, 10) ^ rotateRight(y, 23))
                 + p[((x ^ y) & 0x3FF)];
 
             x = q[(j - 12 & 0x3FF)];
@@ -67,7 +67,6 @@ public class HC256Engine
     {
         if (key.length != 32)
         {
-            System.out.println(key.length);
             throw new java.lang.IllegalArgumentException(
                 "The key must be 256 bit long");
         }
@@ -90,9 +89,9 @@ public class HC256Engine
         {
             int x = w[i - 2];
             int y = w[i - 15];
-            w[i] = (Integer.rotateRight(x, 17) ^ Integer.rotateRight(x, 19) ^ (x >>> 10))
+            w[i] = (rotateRight(x, 17) ^ rotateRight(x, 19) ^ (x >>> 10))
                 + w[i - 7]
-                + (Integer.rotateRight(y, 7) ^ Integer.rotateRight(y, 18) ^ (y >>> 3))
+                + (rotateRight(y, 7) ^ rotateRight(y, 18) ^ (y >>> 3))
                 + w[i - 16] + i;
         }
 
@@ -206,5 +205,12 @@ public class HC256Engine
     public byte returnByte(byte in)
     {
         return (byte)(in ^ getByte());
+    }
+
+    private static int rotateRight(
+        int     x,
+        int     bits)
+    {
+        return (x >>> bits) | (x << -bits);
     }
 }
