@@ -340,7 +340,7 @@ public abstract class ECCurve
             ECFieldElement xp = new ECFieldElement.F2m(
                     this.m, this.k1, this.k2, this.k3, new BigInteger(1, xEnc));
             ECFieldElement yp = null;
-            if (xp.x.equals(ECConstants.ZERO))
+            if (xp.toBigInteger().equals(ECConstants.ZERO))
             {
                 yp = (ECFieldElement.F2m)b;
                 for (int i = 0; i < m - 1; i++)
@@ -358,7 +358,7 @@ public abstract class ECCurve
                     throw new RuntimeException("Invalid point compression");
                 }
                 int zBit = 0;
-                if (z.x.testBit(0))
+                if (z.toBigInteger().testBit(0))
                 {
                     zBit = 1;
                 }
@@ -387,7 +387,7 @@ public abstract class ECCurve
             ECFieldElement zeroElement = new ECFieldElement.F2m(
                     this.m, this.k1, this.k2, this.k3, ECConstants.ZERO);
 
-            if (beta.x.equals(ECConstants.ZERO))
+            if (beta.toBigInteger().equals(ECConstants.ZERO))
             {
                 return zeroElement;
             }
@@ -408,7 +408,7 @@ public abstract class ECCurve
                     z = z.square().add(w2.multiply(t));
                     w = w2.add(beta);
                 }
-                if (!w.x.equals(ECConstants.ZERO))
+                if (!w.toBigInteger().equals(ECConstants.ZERO))
                 {
                     return null;
                 }
@@ -475,4 +475,3 @@ public abstract class ECCurve
         }    
     }
 }
-
