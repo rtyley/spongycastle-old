@@ -155,7 +155,7 @@ public class SignedMailValidatorTest extends TestCase
         assertContainsMessage(
                 review.getErrors(0),
                 "CertPathReviewer.certRevoked",
-                "The certificate is invalid, because it was revoked at Sep 1, 2006 9:30:00 AM GMT. Reason: keyCompromise.");
+                "The certificate was revoked at Sep 1, 2006 9:30:00 AM GMT. Reason: keyCompromise.");
     }
     
     public void testLongValidity() throws Exception

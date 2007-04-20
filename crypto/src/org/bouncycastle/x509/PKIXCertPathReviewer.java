@@ -1858,7 +1858,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     while (it.hasNext())
                     {
                         msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.unknownCriticalExt",
-                                new Object[] {new DERObjectIdentifier((String) criticalExtensions.iterator().next())});
+                                new Object[] {new DERObjectIdentifier((String) it.next())});
                         addError(msg, index);
                     }
                 }
