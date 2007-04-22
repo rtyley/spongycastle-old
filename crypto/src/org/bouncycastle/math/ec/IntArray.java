@@ -2,7 +2,7 @@ package org.bouncycastle.math.ec;
 
 import java.math.BigInteger;
 
-public class IntArray implements Cloneable
+class IntArray implements Cloneable
 {
     // TODO make m fixed for the IntArray, and hence compute T once and for all
 
