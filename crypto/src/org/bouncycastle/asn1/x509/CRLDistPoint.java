@@ -80,4 +80,19 @@ public class CRLDistPoint
     {
         return seq;
     }
+
+    public String toString()
+    {
+        String indent = "    ";
+        StringBuffer buf = new StringBuffer();
+        buf.append("CRLDistPoint:");
+        buf.append(System.getProperty("line.separator"));
+        DistributionPoint dp[] = getDistributionPoints();
+        for (int i = 0; i != dp.length; i++)
+        {
+            buf.append(indent + dp[i]);
+            buf.append(System.getProperty("line.separator"));
+        }
+        return buf.toString();
+    }
 }
