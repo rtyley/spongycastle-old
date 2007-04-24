@@ -83,15 +83,17 @@ public class CRLDistPoint
 
     public String toString()
     {
-        String indent = "    ";
         StringBuffer buf = new StringBuffer();
+        String       sep = System.getProperty("line.separator");
+
         buf.append("CRLDistPoint:");
-        buf.append(System.getProperty("line.separator"));
+        buf.append(sep);
         DistributionPoint dp[] = getDistributionPoints();
         for (int i = 0; i != dp.length; i++)
         {
-            buf.append(indent + dp[i]);
-            buf.append(System.getProperty("line.separator"));
+            buf.append("    ");
+            buf.append(dp[i]);
+            buf.append(sep);
         }
         return buf.toString();
     }

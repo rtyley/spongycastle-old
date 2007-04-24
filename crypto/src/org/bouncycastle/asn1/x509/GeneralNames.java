@@ -73,4 +73,22 @@ public class GeneralNames
     {
         return seq;
     }
+
+    public String toString()
+    {
+        StringBuffer  buf = new StringBuffer();
+        String        sep = System.getProperty("line.separator");
+        GeneralName[] names = getNames();
+
+        buf.append("GeneralNames:");
+        buf.append(sep);
+
+        for (int i = 0; i != names.length; i++)
+        {
+            buf.append("    ");
+            buf.append(names[i]);
+            buf.append(sep);
+        }
+        return buf.toString();
+    }
 }
