@@ -105,6 +105,15 @@ public class DERGeneralizedTime
     }
 
     /**
+     * Return the time.
+     * @return The time string as it appeared in the encoded object.
+     */
+    public String getTimeString()
+    {
+        return time;
+    }
+    
+    /**
      * return the time - always in the form of 
      *  YYYYMMDDhhmmssGMT(+hh:mm|-hh:mm).
      * <p>
@@ -150,7 +159,6 @@ public class DERGeneralizedTime
                 }
             }
         }            
-
         return time + calculateGMTOffset();
     }
 
