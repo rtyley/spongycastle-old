@@ -102,6 +102,52 @@ public class PGPPBETest
         return bOut.toByteArray();
     }
 
+    private byte[] decryptMessageBuffered(
+        byte[]    message,
+        Date      date)
+        throws Exception
+    {
+        PGPObjectFactory         pgpF = new PGPObjectFactory(message);
+        PGPEncryptedDataList     enc = (PGPEncryptedDataList)pgpF.nextObject();
+        PGPPBEEncryptedData      pbe = (PGPPBEEncryptedData)enc.get(0);
+
+        InputStream clear = pbe.getDataStream(pass, "BC");
+
+        PGPObjectFactory         pgpFact = new PGPObjectFactory(clear);
+        PGPCompressedData        cData = (PGPCompressedData)pgpFact.nextObject();
+
+        pgpFact = new PGPObjectFactory(cData.getDataStream());
+
+        PGPLiteralData           ld = (PGPLiteralData)pgpFact.nextObject();
+
+        ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
+        if (!ld.getFileName().equals("test.txt")
+            && !ld.getFileName().equals("_CONSOLE"))
+        {
+            fail("wrong filename in packet");
+        }
+        if (!ld.getModificationTime().equals(date))
+        {
+            fail("wrong modification time in packet: " + ld.getModificationTime().getTime() + " " + date.getTime());
+        }
+
+        InputStream              unc = ld.getInputStream();
+        byte[]                   buf = new byte[1024];
+        int                      len;
+
+        while ((len = unc.read(buf)) >= 0)
+        {
+            bOut.write(buf, 0, len);
+        }
+
+        if (pbe.isIntegrityProtected() && !pbe.verify())
+        {
+            fail("integrity check failed");
+        }
+
+        return bOut.toByteArray();
+    }
+
     public void performTest()
         throws Exception
     {
@@ -247,6 +293,15 @@ public class PGPPBETest
         }
 
         //
+        // decrypt with buffering
+        //
+        out = decryptMessageBuffered(cbOut.toByteArray(), TEST_DATE);
+        if (!areEqual(out, test))
+        {
+            fail("wrong plain text in buffer generated packet");
+        }
+
+        //
         // sample message
         //
         PGPObjectFactory pgpFact = new PGPObjectFactory(testPBEAsym);
@@ -273,6 +328,56 @@ public class PGPPBETest
         if (!areEqual(bOut.toByteArray(), Hex.decode("5361742031302e30322e30370d0a")))
         {
             fail("data mismatch on combined PBE");
+        }
+
+        //
+        // with integrity packet - one byte message
+        //
+        byte[] msg = new byte[1];
+        bOut = new ByteArrayOutputStream();
+
+        comData = new PGPCompressedDataGenerator(
+                                                                PGPCompressedData.ZIP);
+
+        lData = new PGPLiteralDataGenerator();
+        comOut = comData.open(new UncloseableOutputStream(bOut));
+        ldOut = lData.open(
+            new UncloseableOutputStream(comOut),
+            PGPLiteralData.BINARY,
+            PGPLiteralData.CONSOLE,
+            msg.length,
+            cDate);
+
+        ldOut.write(msg);
+
+        ldOut.close();
+
+        comOut.close();
+        
+        cbOut = new ByteArrayOutputStream();
+        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, true, rand, "BC");
+
+        cPk.addMethod(pass);
+
+        cOut = cPk.open(new UncloseableOutputStream(cbOut), new byte[16]);
+
+        cOut.write(bOut.toByteArray());
+
+        cOut.close();
+
+        out = decryptMessage(cbOut.toByteArray(), cDate);
+        if (!areEqual(out, msg))
+        {
+            fail("wrong plain text in generated packet");
+        }
+
+        //
+        // decrypt with buffering
+        //
+        out = decryptMessageBuffered(cbOut.toByteArray(), cDate);
+        if (!areEqual(out, msg))
+        {
+            fail("wrong plain text in buffer generated packet");
         }
     }
 
