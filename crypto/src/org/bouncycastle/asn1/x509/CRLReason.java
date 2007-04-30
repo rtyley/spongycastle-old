@@ -73,7 +73,14 @@ public class CRLReason
     public static final int removeFromCRL = 8;
     public static final int privilegeWithdrawn = 9;
     public static final int aACompromise = 10;
-    
+
+    private static final String[] reasonString =
+        {
+            "unspecified", "keyComprimise", "cACompromise", "affiliationChanged",
+            "superseded", "cessationOfOperation", "certificateHold", "unknown",
+            "removeFromCRL", "privilegeWithdrawn", "aACompromise"
+        };
+
     public CRLReason(
         int reason)
     {
@@ -85,4 +92,19 @@ public class CRLReason
     {
         super(reason.getValue().intValue());
     }
+
+    public String toString()
+    {
+        String str;
+        int reason = getValue().intValue();
+        if (reason < 0 || reason > 10)
+        {
+            str = "invalid";
+        }
+        else
+        {
+            str = reasonString[reason];
+        }
+        return "CRLReason: " + str;
+    }    
 }

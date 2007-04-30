@@ -107,4 +107,37 @@ public class DistributionPointName
     {
         return new DERTaggedObject(false, type, name);
     }
+
+    public String toString()
+    {
+        String       sep = System.getProperty("line.separator");
+        StringBuffer buf = new StringBuffer();
+        buf.append("DistributionPointName: [");
+        buf.append(sep);
+        if (type == FULL_NAME)
+        {
+            appendObject(buf, sep, "fullName", name.toString());
+        }
+        else
+        {
+            appendObject(buf, sep, "nameRelativeToCRLIssuer", name.toString());
+        }
+        buf.append("]");
+        buf.append(sep);
+        return buf.toString();
+    }
+
+    private void appendObject(StringBuffer buf, String sep, String name, String value)
+    {
+        String       indent = "    ";
+
+        buf.append(indent);
+        buf.append(name);
+        buf.append(":");
+        buf.append(sep);
+        buf.append(indent);
+        buf.append(indent);
+        buf.append(value);
+        buf.append(sep);
+    }
 }

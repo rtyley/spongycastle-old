@@ -118,4 +118,41 @@ public class DistributionPoint
 
         return new DERSequence(v);
     }
+
+    public String toString()
+    {
+        String       sep = System.getProperty("line.separator");
+        StringBuffer buf = new StringBuffer();
+        buf.append("DistributionPoint: [");
+        buf.append(sep);
+        if (distributionPoint != null)
+        {
+            appendObject(buf, sep, "distributionPoint", distributionPoint.toString());
+        }
+        if (reasons != null)
+        {
+            appendObject(buf, sep, "reasons", reasons.toString());
+        }
+        if (cRLIssuer != null)
+        {
+            appendObject(buf, sep, "cRLIssuer", cRLIssuer.toString());
+        }
+        buf.append("]");
+        buf.append(sep);
+        return buf.toString();
+    }
+
+    private void appendObject(StringBuffer buf, String sep, String name, String value)
+    {
+        String       indent = "    ";
+
+        buf.append(indent);
+        buf.append(name);
+        buf.append(":");
+        buf.append(sep);
+        buf.append(indent);
+        buf.append(indent);
+        buf.append(value);
+        buf.append(sep);
+    }
 }
