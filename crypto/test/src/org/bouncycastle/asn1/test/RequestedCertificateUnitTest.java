@@ -94,11 +94,11 @@ public class RequestedCertificateUnitTest
 
         if (requested.getType() == RequestedCertificate.certificate)
         {
-            checkMandatoryField("certificate", cert.getEncoded(), requested.getCertifcateBytes());
+            checkMandatoryField("certificate", cert.getEncoded(), requested.getCertificateBytes());
         }
         else
         {
-            checkMandatoryField("certificateOctets", certOctets, requested.getCertifcateBytes());
+            checkMandatoryField("certificateOctets", certOctets, requested.getCertificateBytes());
         }
     }
 

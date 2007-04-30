@@ -198,4 +198,55 @@ public class IssuingDistributionPoint
     {
         return seq;
     }
+
+    public String toString()
+    {
+        String       sep = System.getProperty("line.separator");
+        StringBuffer buf = new StringBuffer();
+
+        buf.append("IssuingDistributionPoint: [");
+        buf.append(sep);
+        if (distributionPoint != null)
+        {
+            appendObject(buf, sep, "distributionPoint", distributionPoint.toString());
+        }
+        if (onlyContainsUserCerts)
+        {
+            appendObject(buf, sep, "onlyContainsUserCerts", Boolean.toString(onlyContainsUserCerts));
+        }
+        if (onlyContainsCACerts)
+        {
+            appendObject(buf, sep, "onlyContainsCACerts", Boolean.toString(onlyContainsCACerts));
+        }
+        if (onlySomeReasons != null)
+        {
+            appendObject(buf, sep, "onlySomeReasons", onlySomeReasons.toString());
+        }
+        if (onlyContainsAttributeCerts)
+        {
+            appendObject(buf, sep, "onlyContainsAttributeCerts", Boolean.toString(onlyContainsAttributeCerts));
+        }
+        if (indirectCRL)
+        {
+            appendObject(buf, sep, "indirectCRL", Boolean.toString(indirectCRL));
+        }
+        buf.append("]");
+        buf.append(sep);
+        return buf.toString();
+    }
+
+    private void appendObject(StringBuffer buf, String sep, String name, String value)
+    {
+        String       indent = "    ";
+
+        buf.append(indent);
+        buf.append(name);
+        buf.append(":");
+        buf.append(sep);
+        buf.append(indent);
+        buf.append(indent);
+        buf.append(value);
+        buf.append(sep);
+    }
+
 }

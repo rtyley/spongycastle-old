@@ -133,7 +133,7 @@ public class RequestedCertificate
         return attributeCertificate;
     }
 
-    public byte[] getCertifcateBytes()
+    public byte[] getCertificateBytes()
     {
         if (cert != null)
         {
