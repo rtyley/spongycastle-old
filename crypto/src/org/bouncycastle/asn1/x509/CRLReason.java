@@ -70,16 +70,17 @@ public class CRLReason
     public static final int superseded = 4;
     public static final int cessationOfOperation  = 5;
     public static final int certificateHold = 6;
+    // 7 -> unknown
     public static final int removeFromCRL = 8;
     public static final int privilegeWithdrawn = 9;
     public static final int aACompromise = 10;
 
     private static final String[] reasonString =
-        {
-            "unspecified", "keyComprimise", "cACompromise", "affiliationChanged",
-            "superseded", "cessationOfOperation", "certificateHold", "unknown",
-            "removeFromCRL", "privilegeWithdrawn", "aACompromise"
-        };
+    {
+        "unspecified", "keyCompromise", "cACompromise", "affiliationChanged",
+        "superseded", "cessationOfOperation", "certificateHold", "unknown",
+        "removeFromCRL", "privilegeWithdrawn", "aACompromise"
+    };
 
     public CRLReason(
         int reason)
