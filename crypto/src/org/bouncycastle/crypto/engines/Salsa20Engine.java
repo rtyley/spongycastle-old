@@ -59,17 +59,23 @@ public class Salsa20Engine
         */
 
         if (!(params instanceof ParametersWithIV))
+        {
             throw new IllegalArgumentException("Salsa20 Init parameters must include an IV");
+        }
 
         ParametersWithIV ivParams = (ParametersWithIV) params;
 
         byte[] iv = ivParams.getIV();
 
         if (iv == null || iv.length != 8)
+        {
             throw new IllegalArgumentException("Salsa20 requires exactly 8 bytes of IV");
+        }
 
         if (!(ivParams.getParameters() instanceof KeyParameter))
+        {
             throw new IllegalArgumentException("Salsa20 Init parameters must include a key");
+        }
 
         KeyParameter key = (KeyParameter) ivParams.getParameters();
 

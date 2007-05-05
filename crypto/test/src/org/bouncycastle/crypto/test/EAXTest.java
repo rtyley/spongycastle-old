@@ -15,7 +15,7 @@ import org.bouncycastle.util.test.SimpleTest;
 public class EAXTest
     extends SimpleTest
 {
-	private byte[] K1 = Hex.decode("233952DEE4D5ED5F9B9C6D6FF80FF478");
+    private byte[] K1 = Hex.decode("233952DEE4D5ED5F9B9C6D6FF80FF478");
     private byte[] N1 = Hex.decode("62EC67F9C3A4A407FCB2A8C49031A8B3");
     private byte[] A1 = Hex.decode("6BFB914FD07EAE6B");
     private byte[] P1 = Hex.decode("");
@@ -94,8 +94,8 @@ public class EAXTest
 
     public String getName()
     {
-		return "EAX";
-	}
+        return "EAX";
+    }
 
     public void performTest()
         throws Exception
@@ -233,6 +233,6 @@ public class EAXTest
 
     public static void main(String[] args)
     {
-		runTest(new EAXTest());
-	}
+        runTest(new EAXTest());
+    }
 }

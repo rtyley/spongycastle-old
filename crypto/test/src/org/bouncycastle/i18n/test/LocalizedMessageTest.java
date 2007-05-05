@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import org.bouncycastle.i18n.LocalizedMessage;
 import org.bouncycastle.i18n.MissingEntryException;
 import org.bouncycastle.i18n.filter.HTMLFilter;
-import org.bouncycastle.i18n.filter.UntrustedInput;
+import org.bouncycastle.i18n.filter.TrustedInput;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -56,16 +56,30 @@ public class LocalizedMessageTest extends TestCase
         // test timezones
         // test date 17. Aug. 13:12:00 GMT
         Date testDate = new Date(1155820320000l);
-        args = new Object[] { testDate };
+        args = new Object[] { new TrustedInput(testDate) };
         msg = new LocalizedMessage(TEST_RESOURCE, timeTestId, args);
         assertEquals("It's 1:12:00 PM GMT at Aug 17, 2006.", msg.getEntry(
                 "text", Locale.ENGLISH, TimeZone.getTimeZone("GMT")));
         assertEquals("Es ist 13.12 Uhr GMT am 17.08.2006.", msg.getEntry(
                 "text", Locale.GERMAN, TimeZone.getTimeZone("GMT")));
+        
+        // test time with filter
+        args = new Object[] { new TrustedInput(testDate) };
+        msg = new LocalizedMessage(TEST_RESOURCE, timeTestId, args);
+        msg.setFilter(new HTMLFilter());
+        assertEquals("It's 1:12:00 PM GMT at Aug 17, 2006.", msg.getEntry(
+                "text", Locale.ENGLISH, TimeZone.getTimeZone("GMT")));
+        assertEquals("Es ist 13.12 Uhr GMT am 17.08.2006.", msg.getEntry(
+                "text", Locale.GERMAN, TimeZone.getTimeZone("GMT")));
+        
+        // test number
+        args = new Object[] { new TrustedInput(new Float(0.2))  };
+        msg = new LocalizedMessage(TEST_RESOURCE, "number", args);
+        assertEquals("20%", msg.getEntry("text", Locale.ENGLISH, TimeZone.getDefault()));
 
         // test filters
         String untrusted = "<script>doBadThings()</script>";
-        args = new Object[] { new UntrustedInput(untrusted) };
+        args = new Object[] { untrusted };
         msg = new LocalizedMessage(TEST_RESOURCE,filterTestId,args);
         msg.setFilter(new HTMLFilter());
         assertEquals("The following part should contain no HTML tags: "

@@ -10,5 +10,12 @@ public interface Filter
      * @return filtered String
      */
     public String doFilter(String input);
+    
+    /**
+     * Runs the filter on the input url and returns the filtered String
+     * @param input input url String
+     * @return filtered String
+     */
+    public String doFilterUrl(String input);
 
 }

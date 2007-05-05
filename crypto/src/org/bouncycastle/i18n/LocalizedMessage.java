@@ -1,7 +1,9 @@
 package org.bouncycastle.i18n;
 
 import org.bouncycastle.i18n.filter.Filter;
+import org.bouncycastle.i18n.filter.TrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedInput;
+import org.bouncycastle.i18n.filter.UntrustedUrlInput;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -45,8 +47,7 @@ public class LocalizedMessage
         }
         this.id = id;
         this.resource = resource;
-        this.arguments = new Object[0];
-        this.filteredArguments = arguments;
+        initArguments(new Object[0]);
     }
     
     /**
@@ -66,8 +67,7 @@ public class LocalizedMessage
         }
         this.id = id;
         this.resource = resource;
-        this.arguments = new Object[0];
-        this.filteredArguments = arguments;
+        initArguments(new Object[0]);
         if (!Charset.isSupported(encoding))
         {
             throw new UnsupportedEncodingException("The encoding \"" + encoding + "\" is not supported.");
@@ -91,8 +91,7 @@ public class LocalizedMessage
         }
         this.id = id;
         this.resource = resource;
-        this.arguments = arguments;
-        this.filteredArguments = arguments;
+        initArguments(arguments);
     }
     
     /**
@@ -113,13 +112,33 @@ public class LocalizedMessage
         }
         this.id = id;
         this.resource = resource;
-        this.arguments = arguments;
-        this.filteredArguments = arguments;
+        initArguments(arguments);
         if (!Charset.isSupported(encoding))
         {
             throw new UnsupportedEncodingException("The encoding \"" + encoding + "\" is not supported.");
         }
         this.encoding = encoding;
+    }
+    
+    private final void initArguments(Object[] arguments)
+    {
+        this.arguments = new Object[arguments.length];
+        for (int i = 0; i < arguments.length; i++)
+        {
+            if (arguments[i] instanceof TrustedInput)
+            {
+                this.arguments[i] = ((TrustedInput) arguments[i]).getInput(); 
+            } 
+            else if (arguments[i] instanceof UntrustedInput)
+            {
+                this.arguments[i] = arguments[i];
+            }
+            else
+            {
+                this.arguments[i] = new UntrustedInput(arguments[i]);
+            }
+        }
+        this.filteredArguments = this.arguments;
     }
     
     /**
@@ -217,7 +236,14 @@ public class LocalizedMessage
             {
                 if (arguments[i] instanceof UntrustedInput) 
                 {
-                    filteredArguments[i] = filter.doFilter(((UntrustedInput) arguments[i]).getString());
+                    if (arguments[i] instanceof UntrustedUrlInput)
+                    {
+                        filteredArguments[i] = filter.doFilterUrl(((UntrustedUrlInput) arguments[i]).getString());
+                    }
+                    else
+                    {
+                        filteredArguments[i] = filter.doFilter(((UntrustedInput) arguments[i]).getString());
+                    }
                 }
                 else
                 {

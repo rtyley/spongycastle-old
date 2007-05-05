@@ -17,6 +17,7 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.i18n.filter.TrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
@@ -313,14 +314,14 @@ public class SignedMailValidator
                     {
                         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                                 "SignedMailValidator.certExpired",
-                                new Object[] { signTime, cert.getNotAfter() });
+                                new Object[] { new TrustedInput(signTime), new TrustedInput(cert.getNotAfter()) });
                         errors.add(msg);
                     }
                     catch (CertificateNotYetValidException e)
                     {
                         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                                 "SignedMailValidator.certNotYetValid",
-                                new Object[] { signTime, cert.getNotBefore() });
+                                new Object[] { new TrustedInput(signTime), new TrustedInput(cert.getNotBefore()) });
                         errors.add(msg);
                     }
                 }
@@ -469,7 +470,7 @@ public class SignedMailValidator
         {
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                     "SignedMailValidator.longValidity",
-                    new Object[] {cert.getNotBefore(), cert.getNotAfter()});
+                    new Object[] {new TrustedInput(cert.getNotBefore()), new TrustedInput(cert.getNotAfter())});
             notifications.add(msg);
         }
 
@@ -554,7 +555,7 @@ public class SignedMailValidator
         }
     }
 
-    protected Date getSignatureTime(SignerInformation signer)
+    public static Date getSignatureTime(SignerInformation signer)
     {
         AttributeTable atab = signer.getSignedAttributes();
         Date result = null;

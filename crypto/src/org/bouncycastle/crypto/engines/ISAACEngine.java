@@ -217,10 +217,10 @@ public class ISAACEngine
     
     private int byteToIntLittle(byte[] x, int offset)
     {
-        return (int)((x[offset++] & 0xFF)      ) |
-                    ((x[offset++] & 0xFF) <<  8) |
-                    ((x[offset++] & 0xFF) << 16) |
-                     (x[offset++] << 24);
+        return (int)(x[offset++] & 0xFF)        |
+                   ((x[offset++] & 0xFF) <<  8) |
+                   ((x[offset++] & 0xFF) << 16) |
+                    (x[offset++] << 24);
     }
     
     private byte[] intToByteLittle(int x)
