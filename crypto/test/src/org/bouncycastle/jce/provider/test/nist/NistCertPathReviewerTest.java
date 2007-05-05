@@ -76,9 +76,9 @@ public class NistCertPathReviewerTest
         doErrorTest(TRUST_ANCHOR_ROOT_CERTIFICATE, 
                 new String[] { "ValidCertificatePathTest1EE", "BadSignedCACert" }, 
                 new String[] { "BadSignedCACRL", TRUST_ANCHOR_ROOT_CRL},
-                -1,
-                "CertPathReviewer.trustButInvalidCert",
-                "A TrustAnchor was found but the certificate validation failed.");
+                1,
+                "CertPathReviewer.signatureNotVerified",
+                "The certificate signature is invalid. A java.security.InvalidKeyException occurred.");
     }
     
     public void testInvalidEESignatureTest3()
@@ -198,7 +198,7 @@ public class NistCertPathReviewerTest
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "NegativeSerialNumberCACRL" },
                 0,
                 "CertPathReviewer.certRevoked",
-                "The certificate is invalid, because it was revoked at Apr 19, 2001 2:57:20 PM GMT. Reason: keyCompromise.");
+                "The certificate was revoked at Apr 19, 2001 2:57:20 PM GMT. Reason: keyCompromise.");
     }
     
     //
