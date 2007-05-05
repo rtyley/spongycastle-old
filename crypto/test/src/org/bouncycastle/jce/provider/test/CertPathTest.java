@@ -159,7 +159,7 @@ public class CertPathTest
 
         CertPathBuilder pathBuilder = CertPathBuilder.getInstance("PKIX", "BC");
         X509CertSelector select = new X509CertSelector();
-        select.setSubject(((X509Certificate)certCol.get(0)).getSubjectX500Principal());
+        select.setSubject(((X509Certificate)certCol.get(0)).getSubjectX500Principal().getEncoded());
 
         Set trustanchors = new HashSet();
         trustanchors.add(new TrustAnchor((X509Certificate)cf.generateCertificate(new ByteArrayInputStream(rootCertBin)), null));
