@@ -8,6 +8,7 @@ import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.cert.CRL;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLSelector;
 
@@ -68,7 +69,7 @@ public class X509CRLStoreSelector
      * attribute certificate. If <code>null</code> is specified, then no such
      * optional information is provided.
      * 
-     * @param cert the <code>X509AttributeCertificate</code> being checked (or
+     * @param attrCert the <code>X509AttributeCertificate</code> being checked (or
      *            <code>null</code>)
      * @see #getAttrCertificateChecking()
      */
@@ -157,6 +158,11 @@ public class X509CRLStoreSelector
 
         }
         return super.match((X509CRL)obj);
+    }
+
+    public boolean match(CRL crl)
+    {
+        return match((Object)crl);
     }
 
     /**
