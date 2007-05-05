@@ -59,5 +59,10 @@ public class HTMLFilter implements Filter
         }
         return buf.toString();
     }
+    
+    public String doFilterUrl(String input)
+    {
+        return doFilter(input);
+    }
 
 }

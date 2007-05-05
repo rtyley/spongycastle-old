@@ -142,7 +142,7 @@ public class EAXBlockCipher
     public void reset()
     {
         cipher.reset();
-		mac.reset();
+        mac.reset();
 
         bufOff = 0;
     }

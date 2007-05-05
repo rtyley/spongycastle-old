@@ -35,10 +35,10 @@ public class NotationData
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-//		(4 octets of flags, 2 octets of name length (M),
-//		2 octets of value length (N),
-//		M octets of name data,
-//		N octets of value data)
+//        (4 octets of flags, 2 octets of name length (M),
+//        2 octets of value length (N),
+//        M octets of name data,
+//        N octets of value data)
 
         // flags
         out.write(humanReadable ? 0x80 : 0x00);
