@@ -11,9 +11,8 @@ public class ThreadedSeedGenerator
     private class SeedGenerator
         implements Runnable
     {
-        private int counter = 0;
-
-        private boolean stop = false;
+        private volatile int counter = 0;
+        private volatile boolean stop = false;
 
         public void run()
         {
