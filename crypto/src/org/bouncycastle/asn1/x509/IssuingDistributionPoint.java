@@ -212,11 +212,11 @@ public class IssuingDistributionPoint
         }
         if (onlyContainsUserCerts)
         {
-            appendObject(buf, sep, "onlyContainsUserCerts", Boolean.toString(onlyContainsUserCerts));
+            appendObject(buf, sep, "onlyContainsUserCerts", booleanToString(onlyContainsUserCerts));
         }
         if (onlyContainsCACerts)
         {
-            appendObject(buf, sep, "onlyContainsCACerts", Boolean.toString(onlyContainsCACerts));
+            appendObject(buf, sep, "onlyContainsCACerts", booleanToString(onlyContainsCACerts));
         }
         if (onlySomeReasons != null)
         {
@@ -224,11 +224,11 @@ public class IssuingDistributionPoint
         }
         if (onlyContainsAttributeCerts)
         {
-            appendObject(buf, sep, "onlyContainsAttributeCerts", Boolean.toString(onlyContainsAttributeCerts));
+            appendObject(buf, sep, "onlyContainsAttributeCerts", booleanToString(onlyContainsAttributeCerts));
         }
         if (indirectCRL)
         {
-            appendObject(buf, sep, "indirectCRL", Boolean.toString(indirectCRL));
+            appendObject(buf, sep, "indirectCRL", booleanToString(indirectCRL));
         }
         buf.append("]");
         buf.append(sep);
@@ -249,4 +249,8 @@ public class IssuingDistributionPoint
         buf.append(sep);
     }
 
+    private String booleanToString(boolean value)
+    {
+        return value ? "true" : "false";
+    }
 }
