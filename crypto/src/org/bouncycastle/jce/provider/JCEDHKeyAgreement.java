@@ -1,11 +1,7 @@
 package org.bouncycastle.jce.provider;
 
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
+import org.bouncycastle.crypto.params.DESParameters;
+import org.bouncycastle.util.Strings;
 
 import javax.crypto.KeyAgreementSpi;
 import javax.crypto.SecretKey;
@@ -14,6 +10,13 @@ import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.util.Hashtable;
 
 /**
  * Diffie-Hellman key agreement. There's actually a better way of doing this
@@ -29,7 +32,20 @@ public class JCEDHKeyAgreement
     private BigInteger      result;
 
     private SecureRandom    random;
-    
+
+    private static final Hashtable algorithms = new Hashtable();
+
+    static
+    {
+        Integer i64 = new Integer(64);
+        Integer i192 = new Integer(192);
+        Integer i448 = new Integer(448);
+
+        algorithms.put("DES", i64);
+        algorithms.put("DESEDE", i192);
+        algorithms.put("BLOWFISH", i448);
+    }
+
     private byte[] bigIntToBytes(
         BigInteger    r)
     {
@@ -120,8 +136,26 @@ public class JCEDHKeyAgreement
         {
             throw new IllegalStateException("Diffie-Hellman not initialised.");
         }
-        
-        return new SecretKeySpec(bigIntToBytes(result), algorithm);
+
+        String algKey = Strings.toUpperCase(algorithm);
+        byte[] res = bigIntToBytes(result);
+
+        if (algorithms.containsKey(algKey))
+        {
+            Integer length = (Integer)algorithms.get(algKey);
+
+            byte[] key = new byte[length.intValue() / 8];
+            System.arraycopy(res, 0, key, 0, key.length);
+
+            if (algorithm.startsWith("DES"))
+            {
+                DESParameters.setOddParity(key);
+            }
+            
+            return new SecretKeySpec(key, algorithm);
+        }
+
+        return new SecretKeySpec(res, algorithm);
     }
 
     protected void engineInit(

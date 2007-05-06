@@ -10,6 +10,8 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.DHParameterSpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -423,6 +425,54 @@ public class DHTest
         }
     }
 
+    private void testDESAndDESede(BigInteger g, BigInteger p)
+        throws Exception
+    {
+        DHParameterSpec             dhParams = new DHParameterSpec(p, g, 256);
+
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH", "BC");
+
+        keyGen.initialize(dhParams);
+
+        KeyPair kp = keyGen.generateKeyPair();
+
+        KeyAgreement keyAgreement = KeyAgreement.getInstance("DH", "BC");
+
+        keyAgreement.init(kp.getPrivate());
+        keyAgreement.doPhase(kp.getPublic(), true);
+
+        SecretKey key = keyAgreement.generateSecret("DES");
+
+        if (key.getEncoded().length != 8)
+        {
+            fail("DES length wrong");
+        }
+
+        if (!DESKeySpec.isParityAdjusted(key.getEncoded(), 0))
+        {
+            fail("DES parity wrong");
+        }
+
+        key = keyAgreement.generateSecret("DESEDE");
+
+        if (key.getEncoded().length != 24)
+        {
+            fail("DESEDE length wrong");
+        }
+
+        if (!DESedeKeySpec.isParityAdjusted(key.getEncoded(), 0))
+        {
+            fail("DESEDE parity wrong");
+        }
+
+        key = keyAgreement.generateSecret("Blowfish");
+
+        if (key.getEncoded().length != 56)
+        {
+            fail("Blowfish length wrong");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -437,6 +487,7 @@ public class DHTest
         testECDH("ECDH");
         testECDH("ECDHC");
         testExceptions();
+        testDESAndDESede(g768, p768);
     }
 
     public static void main(

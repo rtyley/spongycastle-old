@@ -28,6 +28,7 @@ Release 1.37
 <li>The ClearSignedFileProcessor example for OpenPGP did not take into account trailing white space in
 the file to be signed. This has been fixed.</li>
 <li>A possible infinite loop in the CertPathBuilder and SignedMailValidator have been removed.</li>
+<li>Requesting DES, DESede, or Blowfish keys using regular Diffie-Hellman now returns the same length keys as the regular JCE provider.</li>
 </ul>
 <h3>2.1.2 Additional Features and Functionality</h3>
 <ul>
