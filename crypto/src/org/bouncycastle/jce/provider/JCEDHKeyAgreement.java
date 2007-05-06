@@ -147,7 +147,7 @@ public class JCEDHKeyAgreement
             byte[] key = new byte[length.intValue() / 8];
             System.arraycopy(res, 0, key, 0, key.length);
 
-            if (algorithm.startsWith("DES"))
+            if (algKey.startsWith("DES"))
             {
                 DESParameters.setOddParity(key);
             }
