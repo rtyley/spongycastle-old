@@ -1,16 +1,19 @@
 package org.bouncycastle.openpgp;
 
-import java.util.Date;
-
 import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
 import org.bouncycastle.bcpg.sig.IssuerKeyID;
 import org.bouncycastle.bcpg.sig.KeyExpirationTime;
 import org.bouncycastle.bcpg.sig.KeyFlags;
+import org.bouncycastle.bcpg.sig.NotationData;
 import org.bouncycastle.bcpg.sig.PreferredAlgorithms;
 import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 import org.bouncycastle.bcpg.sig.SignatureExpirationTime;
 import org.bouncycastle.bcpg.sig.SignerUserID;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Container for a list of signature subpackets.
@@ -38,7 +41,19 @@ public class PGPSignatureSubpacketVector
         
         return null;
     }
-    
+
+    public NotationData[] getNotationDataOccurences()
+    {
+        SignatureSubpacket[] notations = getSubpackets(SignatureSubpacketTags.NOTATION_DATA);
+        NotationData[] vals = new NotationData[notations.length];
+        for (int i = 0; i < notations.length; i++)
+        {
+            vals[i] = (NotationData)notations[i];
+        }
+
+        return vals;
+    }
+
     public long getIssuerKeyID()
     {
         SignatureSubpacket    p = this.getSubpacket(SignatureSubpacketTags.ISSUER_KEY_ID);
@@ -199,5 +214,21 @@ public class PGPSignatureSubpacketVector
     SignatureSubpacket[] toSubpacketArray()
     {
         return packets;
+    }
+
+    private SignatureSubpacket[] getSubpackets(
+        int    type)
+    {
+        List list = new ArrayList();
+
+        for (int i = 0; i != packets.length; i++)
+        {
+            if (packets[i].getType() == type)
+            {
+                list.add(packets[i]);
+            }
+        }
+
+        return (SignatureSubpacket[])list.toArray(new SignatureSubpacket[]{});
     }
 }

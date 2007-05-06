@@ -1,11 +1,10 @@
 package org.bouncycastle.bcpg;
 
-import java.io.*;
-
 import org.bouncycastle.bcpg.sig.Exportable;
 import org.bouncycastle.bcpg.sig.IssuerKeyID;
 import org.bouncycastle.bcpg.sig.KeyExpirationTime;
 import org.bouncycastle.bcpg.sig.KeyFlags;
+import org.bouncycastle.bcpg.sig.NotationData;
 import org.bouncycastle.bcpg.sig.PreferredAlgorithms;
 import org.bouncycastle.bcpg.sig.PrimaryUserID;
 import org.bouncycastle.bcpg.sig.Revocable;
@@ -13,6 +12,10 @@ import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 import org.bouncycastle.bcpg.sig.SignatureExpirationTime;
 import org.bouncycastle.bcpg.sig.SignerUserID;
 import org.bouncycastle.bcpg.sig.TrustSignature;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * reader for signature sub-packets
@@ -115,29 +118,31 @@ public class SignatureSubpacketInputStream
         switch (type)
         {
         case CREATION_TIME:
-               return new SignatureCreationTime(isCritical, data);
+            return new SignatureCreationTime(isCritical, data);
         case KEY_EXPIRE_TIME:
-              return new KeyExpirationTime(isCritical, data);
+            return new KeyExpirationTime(isCritical, data);
         case EXPIRE_TIME:
-              return new SignatureExpirationTime(isCritical, data);
+            return new SignatureExpirationTime(isCritical, data);
         case REVOCABLE:
-               return new Revocable(isCritical, data);
+            return new Revocable(isCritical, data);
         case EXPORTABLE:
-               return new Exportable(isCritical, data);
+            return new Exportable(isCritical, data);
         case ISSUER_KEY_ID:
-               return new IssuerKeyID(isCritical, data);
+            return new IssuerKeyID(isCritical, data);
         case TRUST_SIG:
-               return new TrustSignature(isCritical, data);
+            return new TrustSignature(isCritical, data);
         case PREFERRED_COMP_ALGS:
         case PREFERRED_HASH_ALGS:
         case PREFERRED_SYM_ALGS:
-               return new PreferredAlgorithms(type, isCritical, data);
+            return new PreferredAlgorithms(type, isCritical, data);
         case KEY_FLAGS:
-               return new KeyFlags(isCritical, data);
+            return new KeyFlags(isCritical, data);
         case PRIMARY_USER_ID:
-               return new PrimaryUserID(isCritical, data);
+            return new PrimaryUserID(isCritical, data);
         case SIGNER_USER_ID:
-           return new SignerUserID(isCritical, data);
+            return new SignerUserID(isCritical, data);
+        case NOTATION_DATA:
+            return new NotationData(isCritical, data);
         }
 
         return new SignatureSubpacket(type, isCritical, data);
