@@ -42,6 +42,27 @@ public class PGPSignatureSubpacketVector
         return null;
     }
 
+    /**
+     * Return all signature subpackets of the passed in type.
+     * @param type subpacket type code
+     * @return an array of zero or more matching subpackets.
+     */
+    public SignatureSubpacket[] getSubpackets(
+        int    type)
+    {
+        List list = new ArrayList();
+
+        for (int i = 0; i != packets.length; i++)
+        {
+            if (packets[i].getType() == type)
+            {
+                list.add(packets[i]);
+            }
+        }
+
+        return (SignatureSubpacket[])list.toArray(new SignatureSubpacket[]{});
+    }
+
     public NotationData[] getNotationDataOccurences()
     {
         SignatureSubpacket[] notations = getSubpackets(SignatureSubpacketTags.NOTATION_DATA);
@@ -214,21 +235,5 @@ public class PGPSignatureSubpacketVector
     SignatureSubpacket[] toSubpacketArray()
     {
         return packets;
-    }
-
-    private SignatureSubpacket[] getSubpackets(
-        int    type)
-    {
-        List list = new ArrayList();
-
-        for (int i = 0; i != packets.length; i++)
-        {
-            if (packets[i].getType() == type)
-            {
-                list.add(packets[i]);
-            }
-        }
-
-        return (SignatureSubpacket[])list.toArray(new SignatureSubpacket[]{});
     }
 }
