@@ -12,7 +12,7 @@ public class DEREncodableVector
     private Vector  v = new Vector();
 
     /**
-     * @deprecated use ASN1Encodable instead.
+     * @deprecated use ASN1EncodableVector instead.
      */
     public DEREncodableVector()
     {
