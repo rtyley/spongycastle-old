@@ -1,11 +1,10 @@
 package org.bouncycastle.crypto.util;
 
-import java.io.IOException;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
@@ -13,6 +12,8 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
@@ -29,6 +30,8 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalParameters;
 import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+
+import java.io.IOException;
 
 /**
  * Factory for creating private key objects from PKCS8 PrivateKeyInfo objects.
@@ -92,6 +95,21 @@ public class PrivateKeyFactory
             {
                 DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
                 X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
+
+                if (ecP == null)
+                {
+                    ecP = SECNamedCurves.getByOID(oid);
+
+                    if (ecP == null)
+                    {
+                        ecP = NISTNamedCurves.getByOID(oid);
+
+                        if (ecP == null)
+                        {
+                            ecP = TeleTrusTNamedCurves.getByOID(oid);
+                        }
+                    }
+                }
 
                 dParams = new ECDomainParameters(
                                             ecP.getCurve(),
