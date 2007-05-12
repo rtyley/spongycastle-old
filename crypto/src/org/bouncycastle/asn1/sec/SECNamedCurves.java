@@ -414,252 +414,507 @@ public class SECNamedCurves
         }
     };
     
+    /*
+     * sect113r1
+     */
+    static X9ECParametersHolder sect113r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 113;
+            int k = 9;
+
+            BigInteger a = fromHex("003088250CA6E7C7FE649CE85820F7");
+            BigInteger b = fromHex("00E8BEE4D3E2260744188BE0E9C723");
+            byte[] S = Hex.decode("10E723AB14D696E6768756151756FEBF8FCB49A9");
+            BigInteger n = fromHex("0100000000000000D9CCEC8A39E56F");
+            BigInteger h = BigInteger.valueOf(2);
+
+            ECCurve curve = new ECCurve.F2m(m, k, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "009D73616F35F4AB1407D73562C10F"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "009D73616F35F4AB1407D73562C10F"
+                + "00A52830277958EE84D1315ED31886"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
 
     /*
-     * sect163r2 (NIST B-163)
+     * sect113r2
+     */
+    static X9ECParametersHolder sect113r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 113;
+            int k = 9;
+
+            BigInteger a = fromHex("00689918DBEC7E5A0DD6DFC0AA55C7");
+            BigInteger b = fromHex("0095E9A9EC9B297BD4BF36E059184F");
+            byte[] S = Hex.decode("10C0FB15760860DEF1EEF4D696E676875615175D");
+            BigInteger n = fromHex("010000000000000108789B2496AF93");
+            BigInteger h = BigInteger.valueOf(2);
+
+            ECCurve curve = new ECCurve.F2m(m, k, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "01A57A6A7B26CA5EF52FCDB8164797"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "01A57A6A7B26CA5EF52FCDB8164797"
+                + "00B3ADC94ED1FE674C06E695BABA1D"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * sect131r1
+     */
+    static X9ECParametersHolder sect131r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 131;
+            int k1 = 2;
+            int k2 = 3;
+            int k3 = 8;
+
+            BigInteger a = fromHex("07A11B09A76B562144418FF3FF8C2570B8");
+            BigInteger b = fromHex("0217C05610884B63B9C6C7291678F9D341");
+            byte[] S = Hex.decode("4D696E676875615175985BD3ADBADA21B43A97E2");
+            BigInteger n = fromHex("0400000000000000023123953A9464B54D");
+            BigInteger h = BigInteger.valueOf(2);
+
+            ECCurve curve = new ECCurve.F2m(m, k1, k2, k3, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "0081BAF91FDF9833C40F9C181343638399"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "0081BAF91FDF9833C40F9C181343638399"
+                + "078C6E7EA38C001F73C8134B1B4EF9E150"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * sect131r2
+     */
+    static X9ECParametersHolder sect131r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 131;
+            int k1 = 2;
+            int k2 = 3;
+            int k3 = 8;
+
+            BigInteger a = fromHex("03E5A88919D7CAFCBF415F07C2176573B2");
+            BigInteger b = fromHex("04B8266A46C55657AC734CE38F018F2192");
+            byte[] S = Hex.decode("985BD3ADBAD4D696E676875615175A21B43A97E3");
+            BigInteger n = fromHex("0400000000000000016954A233049BA98F");
+            BigInteger h = BigInteger.valueOf(2);
+
+            ECCurve curve = new ECCurve.F2m(m, k1, k2, k3, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "0356DCD8F2F95031AD652D23951BB366A8"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "0356DCD8F2F95031AD652D23951BB366A8"
+                + "0648F06D867940A5366D9E265DE9EB240F"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * sect163k1
+     */
+    static X9ECParametersHolder sect163k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 163;
+            int k1 = 3;
+            int k2 = 6;
+            int k3 = 7;
+
+            BigInteger a = BigInteger.valueOf(1);
+            BigInteger b = BigInteger.valueOf(1);
+            byte[] S = null;
+            BigInteger n = fromHex("04000000000000000000020108A2E0CC0D99F8A5EF");
+            BigInteger h = BigInteger.valueOf(2);
+
+            ECCurve curve = new ECCurve.F2m(m, k1, k2, k3, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "02FE13C0537BBC11ACAA07D793DE4E6D5E5C94EEE8"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "02FE13C0537BBC11ACAA07D793DE4E6D5E5C94EEE8"
+                + "0289070FB05D38FF58321F2E800536D538CCDAA3D9"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * sect163r1
+     */
+    static X9ECParametersHolder sect163r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 163;
+            int k1 = 3;
+            int k2 = 6;
+            int k3 = 7;
+
+            BigInteger a = fromHex("07B6882CAAEFA84F9554FF8428BD88E246D2782AE2");
+            BigInteger b = fromHex("0713612DCDDCB40AAB946BDA29CA91F73AF958AFD9");
+            byte[] S = Hex.decode("24B7B137C8A14D696E6768756151756FD0DA2E5C");
+            BigInteger n = fromHex("03FFFFFFFFFFFFFFFFFFFF48AAB689C29CA710279B");
+            BigInteger h = BigInteger.valueOf(2);
+
+            ECCurve curve = new ECCurve.F2m(m, k1, k2, k3, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "0369979697AB43897789566789567F787A7876A654"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "0369979697AB43897789566789567F787A7876A654"
+                + "00435EDB42EFAFB2989D51FEFCE3C80988F41FF883"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * sect163r2
      */
     static X9ECParametersHolder sect163r2 = new X9ECParametersHolder()
     {
         protected X9ECParameters createParameters()
         {
-            // m = 163, k1 = 3, k2 = 6, k3 = 7
-            int sect163r2m = 163;
-            int sect163r2k1 = 3;
-            int sect163r2k2 = 6;
-            int sect163r2k3 = 7;
+            int m = 163;
+            int k1 = 3;
+            int k2 = 6;
+            int k3 = 7;
 
-            // a = 1
-            BigInteger sect163r2a = ECConstants.ONE;
+            BigInteger a = BigInteger.valueOf(1);
+            BigInteger b = fromHex("020A601907B8C953CA1481EB10512F78744A3205FD");
+            byte[] S = Hex.decode("85E25BFE5C86226CDB12016F7553F9D0E693A268");
+            BigInteger n = fromHex("040000000000000000000292FE77E70C12A4234C33");
+            BigInteger h = BigInteger.valueOf(2);
 
-            // b = 20a601907b8c953ca1481eb10512f78744a3205fd
-            BigInteger sect163r2b = new BigInteger("20a601907b8c953ca1481eb10512f78744a3205fd", 16);
+            ECCurve curve = new ECCurve.F2m(m, k1, k2, k3, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "03F0EBA16286A2D57EA0991168D4994637E8343E36"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "03F0EBA16286A2D57EA0991168D4994637E8343E36"
+                + "00D51FBC6C71A0094FA2CDD545B11C5C0C797324F1"));
 
-            ECCurve sect163r2Curve = new ECCurve.F2m(sect163r2m, sect163r2k1, sect163r2k2, sect163r2k3, sect163r2a, sect163r2b);
-
-            // x = 3f0eba16286a2d57ea0991168d4994637e8343e36
-            ECFieldElement sect163r2x = new ECFieldElement.F2m(
-                sect163r2m, sect163r2k1, sect163r2k2, sect163r2k3,
-                new BigInteger("3f0eba16286a2d57ea0991168d4994637e8343e36", 16));
-
-            // y = 0d51fbc6c71a0094fa2cdd545b11c5c0c797324f1
-            ECFieldElement sect163r2y = new ECFieldElement.F2m(
-                sect163r2m, sect163r2k1, sect163r2k2, sect163r2k3,
-                new BigInteger("0d51fbc6c71a0094fa2cdd545b11c5c0c797324f1", 16));
-
-            ECPoint sect163r2BasePoint = new ECPoint.F2m(
-                sect163r2Curve, sect163r2x, sect163r2y, false);
-
-            BigInteger sect163r2n = new BigInteger("5846006549323611672814742442876390689256843201587");
-
-            BigInteger sect163r2h = new BigInteger("2");
-
-            byte[] sect163r2Seed = null;
-
-            return new X9ECParameters(
-                sect163r2Curve,
-                sect163r2BasePoint,
-                sect163r2n,
-                sect163r2h,
-                sect163r2Seed);
+            return new X9ECParameters(curve, G, n, h, S);
         }
     };
 
     /*
-     * sect233r1 (NIST B-233)
+     * sect193r1
+     */
+    static X9ECParametersHolder sect193r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 193;
+            int k = 15;
+
+            BigInteger a = fromHex("0017858FEB7A98975169E171F77B4087DE098AC8A911DF7B01");
+            BigInteger b = fromHex("00FDFB49BFE6C3A89FACADAA7A1E5BBC7CC1C2E5D831478814");
+            byte[] S = Hex.decode("103FAEC74D696E676875615175777FC5B191EF30");
+            BigInteger n = fromHex("01000000000000000000000000C7F34A778F443ACC920EBA49");
+            BigInteger h = BigInteger.valueOf(2);
+
+            ECCurve curve = new ECCurve.F2m(m, k, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "01F481BC5F0FF84A74AD6CDF6FDEF4BF6179625372D8C0C5E1"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "01F481BC5F0FF84A74AD6CDF6FDEF4BF6179625372D8C0C5E1"
+                + "0025E399F2903712CCF3EA9E3A1AD17FB0B3201B6AF7CE1B05"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * sect193r2
+     */
+    static X9ECParametersHolder sect193r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 193;
+            int k = 15;
+
+            BigInteger a = fromHex("0163F35A5137C2CE3EA6ED8667190B0BC43ECD69977702709B");
+            BigInteger b = fromHex("00C9BB9E8927D4D64C377E2AB2856A5B16E3EFB7F61D4316AE");
+            byte[] S = Hex.decode("10B7B4D696E676875615175137C8A16FD0DA2211");
+            BigInteger n = fromHex("010000000000000000000000015AAB561B005413CCD4EE99D5");
+            BigInteger h = BigInteger.valueOf(2);
+
+            ECCurve curve = new ECCurve.F2m(m, k, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "00D9B67D192E0367C803F39E1A7E82CA14A651350AAE617E8F"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "00D9B67D192E0367C803F39E1A7E82CA14A651350AAE617E8F"
+                + "01CE94335607C304AC29E7DEFBD9CA01F596F927224CDECF6C"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * sect233k1
+     */
+    static X9ECParametersHolder sect233k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 233;
+            int k = 74;
+
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(1);
+            byte[] S = null;
+            BigInteger n = fromHex("8000000000000000000000000000069D5BB915BCD46EFB1AD5F173ABDF");
+            BigInteger h = BigInteger.valueOf(4);
+
+            ECCurve curve = new ECCurve.F2m(m, k, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+            //+ "017232BA853A7E731AF129F22FF4149563A419C26BF50A4C9D6EEFAD6126"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "017232BA853A7E731AF129F22FF4149563A419C26BF50A4C9D6EEFAD6126"
+                + "01DB537DECE819B7F70F555A67C427A8CD9BF18AEB9B56E0C11056FAE6A3"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * sect233r1
      */
     static X9ECParametersHolder sect233r1 = new X9ECParametersHolder()
     {
         protected X9ECParameters createParameters()
         {
-            // m = 233, k1 = 74, k2 = 0, k3 = 0
-            int sect233r1m = 233;
-            int sect233r1k1 = 74;
-            int sect233r1k2 = 0;
-            int sect233r1k3 = 0;
+            int m = 233;
+            int k = 74;
 
-            // a = 1
-            BigInteger sect233r1a = ECConstants.ONE;
+            BigInteger a = BigInteger.valueOf(1);
+            BigInteger b = fromHex("0066647EDE6C332C7F8C0923BB58213B333B20E9CE4281FE115F7D8F90AD");
+            byte[] S = Hex.decode("74D59FF07F6B413D0EA14B344B20A2DB049B50C3");
+            BigInteger n = fromHex("01000000000000000000000000000013E974E72F8A6922031D2603CFE0D7");
+            BigInteger h = BigInteger.valueOf(2);
 
-            // b = 066647ede6c332c7f8c0923bb58213b333b20e9ce4281fe115f7d8f90ad
-            BigInteger sect233r1b = new BigInteger("066647ede6c332c7f8c0923bb58213b333b20e9ce4281fe115f7d8f90ad", 16);
+            ECCurve curve = new ECCurve.F2m(m, k, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "00FAC9DFCBAC8313BB2139F1BB755FEF65BC391F8B36F8F8EB7371FD558B"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "00FAC9DFCBAC8313BB2139F1BB755FEF65BC391F8B36F8F8EB7371FD558B"
+                + "01006A08A41903350678E58528BEBF8A0BEFF867A7CA36716F7E01F81052"));
 
-            ECCurve sect233r1Curve = new ECCurve.F2m(sect233r1m, sect233r1k1, sect233r1k2, sect233r1k3, sect233r1a, sect233r1b);
-
-            // x = 0fac9dfcbac8313bb2139f1bb755fef65bc391f8b36f8f8eb7371fd558b
-            ECFieldElement sect233r1x = new ECFieldElement.F2m(
-                sect233r1m, sect233r1k1, sect233r1k2, sect233r1k3,
-                new BigInteger("0fac9dfcbac8313bb2139f1bb755fef65bc391f8b36f8f8eb7371fd558b", 16));
-
-            // y = 1006a08a41903350678e58528bebf8a0beff867a7ca36716f7e01f81052
-            ECFieldElement sect233r1y = new ECFieldElement.F2m(
-                sect233r1m, sect233r1k1, sect233r1k2, sect233r1k3,
-                new BigInteger("1006a08a41903350678e58528bebf8a0beff867a7ca36716f7e01f81052", 16));
-
-            ECPoint sect233r1BasePoint = new ECPoint.F2m(
-                sect233r1Curve, sect233r1x, sect233r1y, false);
-
-            BigInteger sect233r1n = new BigInteger("6901746346790563787434755862277025555839812737345013555379383634485463");
-
-            BigInteger sect233r1h = new BigInteger("2");
-
-            byte[] sect233r1Seed = null;
-
-            return new X9ECParameters(
-                sect233r1Curve,
-                sect233r1BasePoint,
-                sect233r1n,
-                sect233r1h,
-                sect233r1Seed);
+            return new X9ECParameters(curve, G, n, h, S);
         }
     };
 
+    /*
+     * sect239k1
+     */
+    static X9ECParametersHolder sect239k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 239;
+            int k = 158;
+
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(1);
+            byte[] S = null;
+            BigInteger n = fromHex("2000000000000000000000000000005A79FEC67CB6E91F1C1DA800E478A5");
+            BigInteger h = BigInteger.valueOf(4);
+
+            ECCurve curve = new ECCurve.F2m(m, k, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "29A0B6A887A983E9730988A68727A8B2D126C44CC2CC7B2A6555193035DC"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "29A0B6A887A983E9730988A68727A8B2D126C44CC2CC7B2A6555193035DC"
+                + "76310804F12E549BDB011C103089E73510ACB275FC312A5DC6B76553F0CA"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
 
     /*
-     * sect283r1 (NIST B-283)
+     * sect283k1
+     */
+    static X9ECParametersHolder sect283k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 283;
+            int k1 = 5;
+            int k2 = 7;
+            int k3 = 12;
+
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(1);
+            byte[] S = null;
+            BigInteger n = fromHex("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE9AE2ED07577265DFF7F94451E061E163C61");
+            BigInteger h = BigInteger.valueOf(4);
+
+            ECCurve curve = new ECCurve.F2m(m, k1, k2, k3, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+            //+ "0503213F78CA44883F1A3B8162F188E553CD265F23C1567A16876913B0C2AC2458492836"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "0503213F78CA44883F1A3B8162F188E553CD265F23C1567A16876913B0C2AC2458492836"
+                + "01CCDA380F1C9E318D90F95D07E5426FE87E45C0E8184698E45962364E34116177DD2259"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * sect283r1
      */
     static X9ECParametersHolder sect283r1 = new X9ECParametersHolder()
     {
         protected X9ECParameters createParameters()
         {
-            // m = 283, k1 = 5, k2 = 7, k3 = 12
-            int sect283r1m = 283;
-            int sect283r1k1 = 5;
-            int sect283r1k2 = 7;
-            int sect283r1k3 = 12;
+            int m = 283;
+            int k1 = 5;
+            int k2 = 7;
+            int k3 = 12;
 
-            // a = 1
-            BigInteger sect283r1a = ECConstants.ONE;
+            BigInteger a = BigInteger.valueOf(1);
+            BigInteger b = fromHex("027B680AC8B8596DA5A4AF8A19A0303FCA97FD7645309FA2A581485AF6263E313B79A2F5");
+            byte[] S = Hex.decode("77E2B07370EB0F832A6DD5B62DFC88CD06BB84BE");
+            BigInteger n = fromHex("03FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEF90399660FC938A90165B042A7CEFADB307");
+            BigInteger h = BigInteger.valueOf(2);
 
-            // b = 27b680ac8b8596da5a4af8a19a0303fca97fd7645309fa2a581485af6263e313b79a2f5
-            BigInteger sect283r1b = new BigInteger("27b680ac8b8596da5a4af8a19a0303fca97fd7645309fa2a581485af6263e313b79a2f5", 16);
+            ECCurve curve = new ECCurve.F2m(m, k1, k2, k3, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "05F939258DB7DD90E1934F8C70B0DFEC2EED25B8557EAC9C80E2E198F8CDBECD86B12053"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "05F939258DB7DD90E1934F8C70B0DFEC2EED25B8557EAC9C80E2E198F8CDBECD86B12053"
+                + "03676854FE24141CB98FE6D4B20D02B4516FF702350EDDB0826779C813F0DF45BE8112F4"));
 
-            ECCurve sect283r1Curve = new ECCurve.F2m(sect283r1m, sect283r1k1, sect283r1k2, sect283r1k3, sect283r1a, sect283r1b);
-
-            // x = 5f939258db7dd90e1934f8c70b0dfec2eed25b8557eac9c80e2e198f8cdbecd86b12053
-            ECFieldElement sect283r1x = new ECFieldElement.F2m(
-                sect283r1m, sect283r1k1, sect283r1k2, sect283r1k3,
-                new BigInteger("5f939258db7dd90e1934f8c70b0dfec2eed25b8557eac9c80e2e198f8cdbecd86b12053", 16));
-
-            // y = 3676854fe24141cb98fe6d4b20d02b4516ff702350eddb0826779c813f0df45be8112f4
-            ECFieldElement sect283r1y = new ECFieldElement.F2m(
-                sect283r1m, sect283r1k1, sect283r1k2, sect283r1k3,
-                new BigInteger("3676854fe24141cb98fe6d4b20d02b4516ff702350eddb0826779c813f0df45be8112f4", 16));
-
-            ECPoint sect283r1BasePoint = new ECPoint.F2m(
-                sect283r1Curve, sect283r1x, sect283r1y, false);
-
-            BigInteger sect283r1n = new BigInteger("7770675568902916283677847627294075626569625924376904889109196526770044277787378692871");
-
-            BigInteger sect283r1h = new BigInteger("2");
-
-            byte[] sect283r1Seed = null;
-
-            return new X9ECParameters(
-                sect283r1Curve,
-                sect283r1BasePoint,
-                sect283r1n,
-                sect283r1h,
-                sect283r1Seed);
+            return new X9ECParameters(curve, G, n, h, S);
         }
     };
 
+    /*
+     * sect409k1
+     */
+    static X9ECParametersHolder sect409k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 409;
+            int k = 87;
+
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(1);
+            byte[] S = null;
+            BigInteger n = fromHex("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE5F83B2D4EA20400EC4557D5ED3E3E7CA5B4B5C83B8E01E5FCF");
+            BigInteger h = BigInteger.valueOf(4);
+
+            ECCurve curve = new ECCurve.F2m(m, k, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "0060F05F658F49C1AD3AB1890F7184210EFD0987E307C84C27ACCFB8F9F67CC2C460189EB5AAAA62EE222EB1B35540CFE9023746"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "0060F05F658F49C1AD3AB1890F7184210EFD0987E307C84C27ACCFB8F9F67CC2C460189EB5AAAA62EE222EB1B35540CFE9023746"
+                + "01E369050B7C4E42ACBA1DACBF04299C3460782F918EA427E6325165E9EA10E3DA5F6C42E9C55215AA9CA27A5863EC48D8E0286B"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
 
     /*
-     * sect409r1 (NIST - B-409)
+     * sect409r1
      */
     static X9ECParametersHolder sect409r1 = new X9ECParametersHolder()
     {
         protected X9ECParameters createParameters()
         {
-            // m = 409, k1 = 87, k2 = 0, k3 = 0
-            int sect409r1m = 409;
-            int sect409r1k1 = 87;
-            int sect409r1k2 = 0;
-            int sect409r1k3 = 0;
+            int m = 409;
+            int k = 87;
 
-            // a = 1
-            BigInteger sect409r1a = ECConstants.ONE;
+            BigInteger a = BigInteger.valueOf(1);
+            BigInteger b = fromHex("0021A5C2C8EE9FEB5C4B9A753B7B476B7FD6422EF1F3DD674761FA99D6AC27C8A9A197B272822F6CD57A55AA4F50AE317B13545F");
+            byte[] S = Hex.decode("4099B5A457F9D69F79213D094C4BCD4D4262210B");
+            BigInteger n = fromHex("010000000000000000000000000000000000000000000000000001E2AAD6A612F33307BE5FA47C3C9E052F838164CD37D9A21173");
+            BigInteger h = BigInteger.valueOf(2);
 
-            // b = 21a5c2c8ee9feb5c4b9a753b7b476b7fd6422ef1f3dd674761fa99d6ac27c8a9a197b272822f6cd57a55aa4f50ae317b13545f
-            BigInteger sect409r1b = new BigInteger("21a5c2c8ee9feb5c4b9a753b7b476b7fd6422ef1f3dd674761fa99d6ac27c8a9a197b272822f6cd57a55aa4f50ae317b13545f", 16);
+            ECCurve curve = new ECCurve.F2m(m, k, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "015D4860D088DDB3496B0C6064756260441CDE4AF1771D4DB01FFE5B34E59703DC255A868A1180515603AEAB60794E54BB7996A7"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "015D4860D088DDB3496B0C6064756260441CDE4AF1771D4DB01FFE5B34E59703DC255A868A1180515603AEAB60794E54BB7996A7"
+                + "0061B1CFAB6BE5F32BBFA78324ED106A7636B9C5A7BD198D0158AA4F5488D08F38514F1FDF4B4F40D2181B3681C364BA0273C706"));
 
-            ECCurve sect409r1Curve = new ECCurve.F2m(sect409r1m, sect409r1k1, sect409r1k2, sect409r1k3, sect409r1a, sect409r1b);
-
-            // x = 15d4860d088ddb3496b0c6064756260441cde4af1771d4db01ffe5b34e59703dc255a868a1180515603aeab60794e54bb7996a7
-            ECFieldElement sect409r1x = new ECFieldElement.F2m(
-                sect409r1m, sect409r1k1, sect409r1k2, sect409r1k3,
-                new BigInteger("15d4860d088ddb3496b0c6064756260441cde4af1771d4db01ffe5b34e59703dc255a868a1180515603aeab60794e54bb7996a7", 16));
-
-            // y = 61b1cfab6be5f32bbfa78324ed106a7636b9c5a7bd198d0158aa4f5488d08f38514f1fdf4b4f40d2181b3681c364ba0273c706
-            ECFieldElement sect409r1y = new ECFieldElement.F2m(
-                sect409r1m, sect409r1k1, sect409r1k2, sect409r1k3,
-                new BigInteger("61b1cfab6be5f32bbfa78324ed106a7636b9c5a7bd198d0158aa4f5488d08f38514f1fdf4b4f40d2181b3681c364ba0273c706", 16));
-
-            ECPoint sect409r1BasePoint = new ECPoint.F2m(
-                sect409r1Curve, sect409r1x, sect409r1y, false);
-
-            BigInteger sect409r1n = new BigInteger("661055968790248598951915308032771039828404682964281219284648798304157774827374805208143723762179110965979867288366567526771");
-
-            BigInteger sect409r1h = new BigInteger("2");
-
-            byte[] sect409r1Seed = null;
-
-            return new X9ECParameters(
-                sect409r1Curve,
-                sect409r1BasePoint,
-                sect409r1n,
-                sect409r1h,
-                sect409r1Seed);
+            return new X9ECParameters(curve, G, n, h, S);
         }
     };
 
+    /*
+     * sect571k1
+     */
+    static X9ECParametersHolder sect571k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            int m = 571;
+            int k1 = 2;
+            int k2 = 5;
+            int k3 = 10;
+
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(1);
+            byte[] S = null;
+            BigInteger n = fromHex("020000000000000000000000000000000000000000000000000000000000000000000000131850E1F19A63E4B391A8DB917F4138B630D84BE5D639381E91DEB45CFE778F637C1001");
+            BigInteger h = BigInteger.valueOf(4);
+
+            ECCurve curve = new ECCurve.F2m(m, k1, k2, k3, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+            //+ "026EB7A859923FBC82189631F8103FE4AC9CA2970012D5D46024804801841CA44370958493B205E647DA304DB4CEB08CBBD1BA39494776FB988B47174DCA88C7E2945283A01C8972"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "026EB7A859923FBC82189631F8103FE4AC9CA2970012D5D46024804801841CA44370958493B205E647DA304DB4CEB08CBBD1BA39494776FB988B47174DCA88C7E2945283A01C8972"
+                + "0349DC807F4FBF374F4AEADE3BCA95314DD58CEC9F307A54FFC61EFC006D8A2C9D4979C0AC44AEA74FBEBBB9F772AEDCB620B01A7BA7AF1B320430C8591984F601CD4C143EF1C7A3"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
 
     /*
-     * sect571r1 (NIST - B-571)
+     * sect571r1
      */
     static X9ECParametersHolder sect571r1 = new X9ECParametersHolder()
     {
         protected X9ECParameters createParameters()
         {
-            // m = 571, k1 = 2, k2 = 5, k3 = 10
-            int sect571r1m = 571;
-            int sect571r1k1 = 2;
-            int sect571r1k2 = 5;
-            int sect571r1k3 = 10;
+            int m = 571;
+            int k1 = 2;
+            int k2 = 5;
+            int k3 = 10;
 
-            // a = 1
-            BigInteger sect571r1a = ECConstants.ONE;
+            BigInteger a = BigInteger.valueOf(1);
+            BigInteger b = fromHex("02F40E7E2221F295DE297117B7F3D62F5C6A97FFCB8CEFF1CD6BA8CE4A9A18AD84FFABBD8EFA59332BE7AD6756A66E294AFD185A78FF12AA520E4DE739BACA0C7FFEFF7F2955727A");
+            byte[] S = Hex.decode("2AA058F73A0E33AB486B0F610410C53A7F132310");
+            BigInteger n = fromHex("03FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE661CE18FF55987308059B186823851EC7DD9CA1161DE93D5174D66E8382E9BB2FE84E47");
+            BigInteger h = BigInteger.valueOf(2);
 
-            // b = 2f40e7e2221f295de297117b7f3d62f5c6a97ffcb8ceff1cd6ba8ce4a9a18ad84ffabbd8efa59332be7ad6756a66e294afd185a78ff12aa520e4de739baca0c7ffeff7f2955727a
-            BigInteger sect571r1b = new BigInteger("2f40e7e2221f295de297117b7f3d62f5c6a97ffcb8ceff1cd6ba8ce4a9a18ad84ffabbd8efa59332be7ad6756a66e294afd185a78ff12aa520e4de739baca0c7ffeff7f2955727a", 16);
+            ECCurve curve = new ECCurve.F2m(m, k1, k2, k3, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "0303001D34B856296C16C0D40D3CD7750A93D1D2955FA80AA5F40FC8DB7B2ABDBDE53950F4C0D293CDD711A35B67FB1499AE60038614F1394ABFA3B4C850D927E1E7769C8EEC2D19"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "0303001D34B856296C16C0D40D3CD7750A93D1D2955FA80AA5F40FC8DB7B2ABDBDE53950F4C0D293CDD711A35B67FB1499AE60038614F1394ABFA3B4C850D927E1E7769C8EEC2D19"
+                + "037BF27342DA639B6DCCFFFEB73D69D78C6C27A6009CBBCA1980F8533921E8A684423E43BAB08A576291AF8F461BB2A8B3531D2F0485C19B16E2F1516E23DD3C1A4827AF1B8AC15B"));
 
-            ECCurve sect571r1Curve = new ECCurve.F2m(sect571r1m, sect571r1k1, sect571r1k2, sect571r1k3, sect571r1a, sect571r1b);
-
-            // x = 303001d34b856296c16c0d40d3cd7750a93d1d2955fa80aa5f40fc8db7b2abdbde53950f4c0d293cdd711a35b67fb1499ae60038614f1394abfa3b4c850d927e1e7769c8eec2d19
-            ECFieldElement sect571r1x = new ECFieldElement.F2m(
-                sect571r1m, sect571r1k1, sect571r1k2, sect571r1k3,
-                new BigInteger("303001d34b856296c16c0d40d3cd7750a93d1d2955fa80aa5f40fc8db7b2abdbde53950f4c0d293cdd711a35b67fb1499ae60038614f1394abfa3b4c850d927e1e7769c8eec2d19", 16));
-
-            // y = 37bf27342da639b6dccfffeb73d69d78c6c27a6009cbbca1980f8533921e8a684423e43bab08a576291af8f461bb2a8b3531d2f0485c19b16e2f1516e23dd3c1a4827af1b8ac15b
-            ECFieldElement sect571r1y = new ECFieldElement.F2m(
-                sect571r1m, sect571r1k1, sect571r1k2, sect571r1k3,
-                new BigInteger("37bf27342da639b6dccfffeb73d69d78c6c27a6009cbbca1980f8533921e8a684423e43bab08a576291af8f461bb2a8b3531d2f0485c19b16e2f1516e23dd3c1a4827af1b8ac15b", 16));
-
-            ECPoint sect571r1BasePoint = new ECPoint.F2m(
-                sect571r1Curve, sect571r1x, sect571r1y, false);
-
-            BigInteger sect571r1n = new BigInteger("3864537523017258344695351890931987344298927329706434998657235251451519142289560424536143999389415773083133881121926944486246872462816813070234528288303332411393191105285703");
-
-            BigInteger sect571r1h = new BigInteger("2");
-
-            byte[] sect571r1Seed = null;
-
-            return new X9ECParameters(
-                sect571r1Curve,
-                sect571r1BasePoint,
-                sect571r1n,
-                sect571r1h,
-                sect571r1Seed);
+            return new X9ECParameters(curve, G, n, h, S);
         }
     };
 
@@ -693,23 +948,23 @@ public class SECNamedCurves
         defineCurve("secp384r1", SECObjectIdentifiers.secp384r1, secp384r1); 
         defineCurve("secp521r1", SECObjectIdentifiers.secp521r1, secp521r1); 
 
-//        defineCurve("sect113r1", SECObjectIdentifiers.sect113r1, sect113r1);
-//        defineCurve("sect113r2", SECObjectIdentifiers.sect113r2, sect113r2);
-//        defineCurve("sect131r1", SECObjectIdentifiers.sect131r1, sect131r1);
-//        defineCurve("sect131r2", SECObjectIdentifiers.sect131r2, sect131r2);
-//        defineCurve("sect163k1", SECObjectIdentifiers.sect163k1, sect163k1);
-//        defineCurve("sect163r1", SECObjectIdentifiers.sect163r1, sect163r1);
+        defineCurve("sect113r1", SECObjectIdentifiers.sect113r1, sect113r1);
+        defineCurve("sect113r2", SECObjectIdentifiers.sect113r2, sect113r2);
+        defineCurve("sect131r1", SECObjectIdentifiers.sect131r1, sect131r1);
+        defineCurve("sect131r2", SECObjectIdentifiers.sect131r2, sect131r2);
+        defineCurve("sect163k1", SECObjectIdentifiers.sect163k1, sect163k1);
+        defineCurve("sect163r1", SECObjectIdentifiers.sect163r1, sect163r1);
         defineCurve("sect163r2", SECObjectIdentifiers.sect163r2, sect163r2);
-//        defineCurve("sect193r1", SECObjectIdentifiers.sect193r1, sect193r1);
-//        defineCurve("sect193r2", SECObjectIdentifiers.sect193r2, sect193r2);
-//        defineCurve("sect233k1", SECObjectIdentifiers.sect233k1, sect233k1);
+        defineCurve("sect193r1", SECObjectIdentifiers.sect193r1, sect193r1);
+        defineCurve("sect193r2", SECObjectIdentifiers.sect193r2, sect193r2);
+        defineCurve("sect233k1", SECObjectIdentifiers.sect233k1, sect233k1);
         defineCurve("sect233r1", SECObjectIdentifiers.sect233r1, sect233r1);
-//        defineCurve("sect239k1", SECObjectIdentifiers.sect239k1, sect239k1);
-//        defineCurve("sect283k1", SECObjectIdentifiers.sect283k1, sect283k1);
+        defineCurve("sect239k1", SECObjectIdentifiers.sect239k1, sect239k1);
+        defineCurve("sect283k1", SECObjectIdentifiers.sect283k1, sect283k1);
         defineCurve("sect283r1", SECObjectIdentifiers.sect283r1, sect283r1);
-//        defineCurve("sect409k1", SECObjectIdentifiers.sect409k1, sect409k1);
+        defineCurve("sect409k1", SECObjectIdentifiers.sect409k1, sect409k1);
         defineCurve("sect409r1", SECObjectIdentifiers.sect409r1, sect409r1);
-//        defineCurve("sect571k1", SECObjectIdentifiers.sect571k1, sect571k1);
+        defineCurve("sect571k1", SECObjectIdentifiers.sect571k1, sect571k1);
         defineCurve("sect571r1", SECObjectIdentifiers.sect571r1, sect571r1); 
     }
 
