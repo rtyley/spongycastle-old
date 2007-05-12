@@ -449,37 +449,24 @@ public class SECNamedCurves
     static final Hashtable curves = new Hashtable();
     static final Hashtable names = new Hashtable();
 
+    static void defineCurve(String name, DERObjectIdentifier oid, X9ECParametersHolder holder)
+    {
+        objIds.put(name, oid);
+        names.put(oid, name);
+        curves.put(oid, holder);
+    }
+
     static
     {
-        objIds.put("sect571r1", SECObjectIdentifiers.sect571r1);
-        objIds.put("sect409r1", SECObjectIdentifiers.sect409r1);
-        objIds.put("sect283r1", SECObjectIdentifiers.sect283r1);
-        objIds.put("sect233r1", SECObjectIdentifiers.sect233r1);
-        objIds.put("sect163r2", SECObjectIdentifiers.sect163r2);
-        objIds.put("secp521r1", SECObjectIdentifiers.secp521r1);
-        objIds.put("secp256r1", SECObjectIdentifiers.secp256r1);
-        objIds.put("secp224r1", SECObjectIdentifiers.secp224r1);
-        objIds.put("secp384r1", SECObjectIdentifiers.secp384r1);
-
-        names.put(SECObjectIdentifiers.sect571r1, "sect571r1");
-        names.put(SECObjectIdentifiers.sect409r1, "sect409r1");
-        names.put(SECObjectIdentifiers.sect283r1, "sect283r1");
-        names.put(SECObjectIdentifiers.sect233r1, "sect233r1");
-        names.put(SECObjectIdentifiers.sect163r2, "sect163r2");
-        names.put(SECObjectIdentifiers.secp521r1, "secp521r1");
-        names.put(SECObjectIdentifiers.secp256r1, "secp256r1");
-        names.put(SECObjectIdentifiers.secp224r1, "secp224r1");
-        names.put(SECObjectIdentifiers.secp384r1, "secp384r1");
-
-        curves.put(SECObjectIdentifiers.sect571r1, sect571r1);
-        curves.put(SECObjectIdentifiers.sect409r1, sect409r1);
-        curves.put(SECObjectIdentifiers.sect283r1, sect283r1);
-        curves.put(SECObjectIdentifiers.sect233r1, sect233r1);
-        curves.put(SECObjectIdentifiers.sect163r2, sect163r2);
-        curves.put(SECObjectIdentifiers.secp521r1, secp521r1);
-        curves.put(SECObjectIdentifiers.secp256r1, secp256r1);
-        curves.put(SECObjectIdentifiers.secp224r1, secp224r1);
-        curves.put(SECObjectIdentifiers.secp384r1, secp384r1);
+        defineCurve("secp224r1", SECObjectIdentifiers.secp224r1, secp224r1);
+        defineCurve("secp256r1", SECObjectIdentifiers.secp256r1, secp256r1);
+        defineCurve("secp384r1", SECObjectIdentifiers.secp384r1, secp384r1);
+        defineCurve("secp521r1", SECObjectIdentifiers.secp521r1, secp521r1);
+        defineCurve("sect163r2", SECObjectIdentifiers.sect163r2, sect163r2);
+        defineCurve("sect233r1", SECObjectIdentifiers.sect233r1, sect233r1);
+        defineCurve("sect283r1", SECObjectIdentifiers.sect283r1, sect283r1);
+        defineCurve("sect409r1", SECObjectIdentifiers.sect409r1, sect409r1);
+        defineCurve("sect571r1", SECObjectIdentifiers.sect571r1, sect571r1);
     }
 
     public static X9ECParameters getByName(
