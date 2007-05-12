@@ -5,12 +5,14 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -698,6 +700,22 @@ public class SignedMailValidator
                 // add next cert to path
                 X509CertSelector select = new X509CertSelector();
                 select.setSubject(cert.getIssuerX500Principal());
+                byte[] authKeyIdentBytes = cert.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
+                if (authKeyIdentBytes != null)
+                {
+                    try
+                    {
+                        AuthorityKeyIdentifier kid = AuthorityKeyIdentifier.getInstance(getObject(authKeyIdentBytes));
+                        if (kid.getKeyIdentifier() != null)
+                        {
+                            select.setSubjectKeyIdentifier(new DEROctetString(kid.getKeyIdentifier()).getDEREncoded());
+                        }
+                    }
+                    catch (IOException ioe)
+                    {
+                        // ignore
+                    }
+                }
                 boolean userProvided = false;
                 
                 cert = findNextCert(systemCertStores, select, certSet);

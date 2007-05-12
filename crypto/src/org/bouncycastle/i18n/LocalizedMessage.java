@@ -25,8 +25,8 @@ public class LocalizedMessage
     public static final String DEFAULT_ENCODING = "ISO-8859-1";
     protected String encoding = DEFAULT_ENCODING;
     
-    protected Object[] arguments;
-    protected Object[] filteredArguments;
+    protected FilteredArguments arguments;
+    protected FilteredArguments extraArgs = null;
     
     protected Filter filter = null;
     
@@ -47,7 +47,7 @@ public class LocalizedMessage
         }
         this.id = id;
         this.resource = resource;
-        initArguments(new Object[0]);
+        arguments = new FilteredArguments();
     }
     
     /**
@@ -67,7 +67,7 @@ public class LocalizedMessage
         }
         this.id = id;
         this.resource = resource;
-        initArguments(new Object[0]);
+        arguments = new FilteredArguments();
         if (!Charset.isSupported(encoding))
         {
             throw new UnsupportedEncodingException("The encoding \"" + encoding + "\" is not supported.");
@@ -91,7 +91,7 @@ public class LocalizedMessage
         }
         this.id = id;
         this.resource = resource;
-        initArguments(arguments);
+        this.arguments = new FilteredArguments(arguments);
     }
     
     /**
@@ -112,33 +112,12 @@ public class LocalizedMessage
         }
         this.id = id;
         this.resource = resource;
-        initArguments(arguments);
+        this.arguments = new FilteredArguments(arguments);
         if (!Charset.isSupported(encoding))
         {
             throw new UnsupportedEncodingException("The encoding \"" + encoding + "\" is not supported.");
         }
         this.encoding = encoding;
-    }
-    
-    private final void initArguments(Object[] arguments)
-    {
-        this.arguments = new Object[arguments.length];
-        for (int i = 0; i < arguments.length; i++)
-        {
-            if (arguments[i] instanceof TrustedInput)
-            {
-                this.arguments[i] = ((TrustedInput) arguments[i]).getInput(); 
-            } 
-            else if (arguments[i] instanceof UntrustedInput)
-            {
-                this.arguments[i] = arguments[i];
-            }
-            else
-            {
-                this.arguments[i] = new UntrustedInput(arguments[i]);
-            }
-        }
-        this.filteredArguments = this.arguments;
     }
     
     /**
@@ -152,7 +131,11 @@ public class LocalizedMessage
      */
     public String getEntry(String key,Locale loc, TimeZone timezone) throws MissingEntryException
     {
-        String entry = id + "." + key;
+        String entry = id;
+        if (key != null)
+        {
+            entry += "." + key;
+        }
         
         try
         {
@@ -165,19 +148,17 @@ public class LocalizedMessage
             {
                 bundle = ResourceBundle.getBundle(resource, loc, loader);
             }
-            String template = bundle.getString(entry);
+            String result = bundle.getString(entry);
             if (!encoding.equals(DEFAULT_ENCODING))
             {
-                template = new String(template.getBytes(DEFAULT_ENCODING), encoding);
+                result = new String(result.getBytes(DEFAULT_ENCODING), encoding);
             }
-            if (arguments == null || arguments.length == 0)
+            if (!arguments.isEmpty())
             {
-                return template;
+                result = formatWithTimeZone(result,arguments.getFilteredArgs(loc),loc,timezone);
             }
-            else
-            {
-                return formatWithTimeZone(template,filteredArguments,loc,timezone);
-            }
+            result = addExtraArgs(result, loc);
+            return result;
         }
         catch (MissingResourceException mre)
         {
@@ -219,37 +200,31 @@ public class LocalizedMessage
         return mf.format(arguments);
     }
     
+    protected String addExtraArgs(String msg, Locale locale)
+    {
+        if (extraArgs != null)
+        {
+            StringBuffer sb = new StringBuffer(msg);
+            Object[] filteredArgs = extraArgs.getFilteredArgs(locale);
+            for (int i = 0; i < filteredArgs.length; i++)
+            {
+                sb.append(filteredArgs[i]);
+            }
+            msg = sb.toString();
+        }
+        return msg;
+    }
+    
     /**
      * Sets the {@link Filter} that is used to filter the arguments of this message
      * @param filter the {@link Filter} to use. <code>null</code> to disable filtering.
      */
     public void setFilter(Filter filter)
     {
-        if (filter == null)
+        arguments.setFilter(filter);
+        if (extraArgs != null)
         {
-            filteredArguments = arguments;
-        }
-        else if (!filter.equals(this.filter))
-        {
-            filteredArguments = new Object[arguments.length];
-            for (int i = 0; i < arguments.length; i++)
-            {
-                if (arguments[i] instanceof UntrustedInput) 
-                {
-                    if (arguments[i] instanceof UntrustedUrlInput)
-                    {
-                        filteredArguments[i] = filter.doFilterUrl(((UntrustedUrlInput) arguments[i]).getString());
-                    }
-                    else
-                    {
-                        filteredArguments[i] = filter.doFilter(((UntrustedInput) arguments[i]).getString());
-                    }
-                }
-                else
-                {
-                    filteredArguments[i] = arguments[i];
-                }
-            }
+            extraArgs.setFilter(filter);
         }
         this.filter = filter;
     }
@@ -307,7 +282,179 @@ public class LocalizedMessage
      */
     public Object[] getArguments()
     {
-        return arguments;
+        return arguments.getArguments();
+    }
+    
+    /**
+     * 
+     * @param extraArg
+     */
+    public void setExtraArgument(Object extraArg)
+    {
+        setExtraArguments(new Object[] {extraArg});
+    }
+    
+    /**
+     * 
+     * @param extraArgs
+     */
+    public void setExtraArguments(Object[] extraArgs)
+    {
+        if (extraArgs != null)
+        {
+            this.extraArgs = new FilteredArguments(extraArgs);
+            this.extraArgs.setFilter(filter);
+        }
+        else
+        {
+            this.extraArgs = null;
+        }
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public Object[] getExtraArgs()
+    {
+        return (extraArgs == null) ? null : extraArgs.getArguments();
+    }
+    
+    protected class FilteredArguments
+    {
+        protected static final int NO_FILTER = 0;
+        protected static final int FILTER = 1;
+        protected static final int FILTER_URL = 2;
+        
+        protected Filter filter = null;
+        
+        protected boolean[] isLocaleSpecific;
+        protected int[] argFilterType;
+        protected Object[] arguments;
+        protected Object[] unpackedArgs;
+        protected Object[] filteredArgs;
+        
+        FilteredArguments()
+        {
+            this(new Object[0]);
+        }
+        
+        FilteredArguments(Object[] args)
+        {
+            this.arguments = args;
+            this.unpackedArgs = new Object[args.length];
+            this.filteredArgs = new Object[args.length];
+            this.isLocaleSpecific = new boolean[args.length];
+            this.argFilterType = new int[args.length];
+            for (int i = 0; i < args.length; i++)
+            {
+                if (args[i] instanceof TrustedInput)
+                {
+                    this.unpackedArgs[i] = ((TrustedInput) args[i]).getInput();
+                    argFilterType[i] = NO_FILTER;
+                }
+                else if (args[i] instanceof UntrustedInput)
+                {
+                    this.unpackedArgs[i] = ((UntrustedInput) args[i]).getInput();
+                    if (args[i] instanceof UntrustedUrlInput)
+                    {
+                        argFilterType[i] = FILTER_URL;
+                    }
+                    else
+                    {
+                        argFilterType[i] = FILTER;
+                    }
+                }
+                else
+                {
+                    this.unpackedArgs[i] = args[i];
+                    argFilterType[i] = FILTER;
+                }
+                
+                // locale specific
+                this.isLocaleSpecific[i] = (this.unpackedArgs[i] instanceof LocaleString);
+            }
+        }
+        
+        public boolean isEmpty()
+        {
+            return unpackedArgs.length == 0;
+        }
+        
+        public Object[] getArguments()
+        {
+            return arguments;
+        }
+        
+        public Object[] getFilteredArgs(Locale locale)
+        {
+            Object[] result = new Object[unpackedArgs.length];
+            for (int i = 0; i < unpackedArgs.length; i++)
+            {
+                Object arg;
+                if (filteredArgs[i] != null)
+                {
+                    arg = filteredArgs[i];
+                }
+                else
+                {
+                    arg = unpackedArgs[i];
+                    if (isLocaleSpecific[i])
+                    {
+                        // get locale
+                        arg = ((LocaleString) arg).getLocaleString(locale);
+                        arg = filter(argFilterType[i], arg);
+                    }
+                    else
+                    {
+                        arg = filter(argFilterType[i], arg);
+                        filteredArgs[i] = arg;
+                    }
+                }
+                result[i] = arg;
+            }
+            return result;
+        }
+        
+        private Object filter(int type, Object obj)
+        {
+            if (filter != null)
+            {
+                switch (type)
+                {
+                case NO_FILTER:
+                    return obj;
+                case FILTER:
+                    return filter.doFilter(obj.toString());
+                case FILTER_URL:
+                    return filter.doFilterUrl(obj.toString());
+                default:
+                    return null;
+                }
+            }
+            else
+            {
+                return obj;
+            }
+        }
+
+        public Filter getFilter()
+        {
+            return filter;
+        }
+
+        public void setFilter(Filter filter)
+        {
+            if (filter != this.filter)
+            {
+                for (int i = 0; i < unpackedArgs.length; i++)
+                {
+                    filteredArgs[i] = null;
+                }
+            }
+            this.filter = filter;
+        }
+        
     }
     
 }

@@ -27,6 +27,7 @@ import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
 import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
 import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.i18n.LocaleString;
 import org.bouncycastle.i18n.filter.TrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedUrlInput;
@@ -1911,14 +1912,14 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     {
                         msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.QcLimitValueAlpha",
                                 new Object[] {limit.getCurrency().getAlphabetic(),
-                                              new Double(value),
+                                              new TrustedInput(new Double(value)),
                                               limit});
                     }
                     else
                     {
                         msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.QcLimitValueNum",
                                 new Object[] {new Integer(limit.getCurrency().getNumeric()),
-                                              new Double(value),
+                                              new TrustedInput(new Double(value)),
                                               limit});
                     }
                     addNotification(msg,index);
@@ -2174,20 +2175,25 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     {
                         reason = crlReasons[reasonCode.getValue().intValue()];
                     }
+                    else
+                    {
+                        reason = crlReasons[7];
+                    }
                 }
                 
-                // FIXME reason not i18n
+                // i18n reason
+                LocaleString ls = new LocaleString(RESOURCE_NAME, reason);
                 
                 if (!validDate.before(crl_entry.getRevocationDate()))
                 {
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.certRevoked",
-                            new Object[] {new TrustedInput(crl_entry.getRevocationDate()),reason});
+                            new Object[] {new TrustedInput(crl_entry.getRevocationDate()),ls});
                     throw new CertPathReviewerException(msg);
                 }
                 else // cert was revoked after validation date
                 {
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.revokedAfterValidation",
-                            new Object[] {new TrustedInput(crl_entry.getRevocationDate()),reason});
+                            new Object[] {new TrustedInput(crl_entry.getRevocationDate()),ls});
                     addNotification(msg,index);
                 }
             }
