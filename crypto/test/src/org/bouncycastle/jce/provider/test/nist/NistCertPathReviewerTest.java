@@ -198,7 +198,7 @@ public class NistCertPathReviewerTest
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "NegativeSerialNumberCACRL" },
                 0,
                 "CertPathReviewer.certRevoked",
-                "The certificate was revoked at Apr 19, 2001 2:57:20 PM GMT. Reason: keyCompromise.");
+                "The certificate was revoked at Apr 19, 2001 2:57:20 PM GMT. Reason: Key Compromise.");
     }
     
     //

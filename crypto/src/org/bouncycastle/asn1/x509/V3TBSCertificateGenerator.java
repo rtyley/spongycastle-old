@@ -36,6 +36,8 @@ public class V3TBSCertificateGenerator
     SubjectPublicKeyInfo    subjectPublicKeyInfo;
     X509Extensions          extensions;
 
+    private boolean altNamePresentAndCritical;
+
     public V3TBSCertificateGenerator()
     {
     }
@@ -98,13 +100,22 @@ public class V3TBSCertificateGenerator
         X509Extensions    extensions)
     {
         this.extensions = extensions;
+        if (extensions != null)
+        {
+            X509Extension altName = extensions.getExtension(X509Extensions.SubjectAlternativeName);
+
+            if (altName != null && altName.isCritical())
+            {
+                altNamePresentAndCritical = true;
+            }
+        }
     }
 
     public TBSCertificateStructure generateTBSCertificate()
     {
         if ((serialNumber == null) || (signature == null)
             || (issuer == null) || (startDate == null) || (endDate == null)
-            || (subject == null) || (subjectPublicKeyInfo == null))
+            || (subject == null && !altNamePresentAndCritical) || (subjectPublicKeyInfo == null))
         {
             throw new IllegalStateException("not all mandatory fields set in V3 TBScertificate generator");
         }
@@ -126,7 +137,14 @@ public class V3TBSCertificateGenerator
 
         v.add(new DERSequence(validity));
 
-        v.add(subject);
+        if (subject != null)
+        {
+            v.add(subject);
+        }
+        else
+        {
+            v.add(new DERSequence());
+        }
 
         v.add(subjectPublicKeyInfo);
 

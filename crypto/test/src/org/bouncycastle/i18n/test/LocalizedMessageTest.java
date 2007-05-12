@@ -1,6 +1,7 @@
 package org.bouncycastle.i18n.test;
 
 import junit.framework.TestCase;
+import org.bouncycastle.i18n.LocaleString;
 import org.bouncycastle.i18n.LocalizedMessage;
 import org.bouncycastle.i18n.MissingEntryException;
 import org.bouncycastle.i18n.filter.HTMLFilter;
@@ -132,6 +133,48 @@ public class LocalizedMessageTest extends TestCase
             
         }
 
+    }
+    
+    public void testLocalizedArgs()
+    {
+        LocaleString ls = new LocaleString(TEST_RESOURCE, "name");
+        
+        // without filter
+        Object[] args = new Object[] { ls };
+        LocalizedMessage msg = new LocalizedMessage(TEST_RESOURCE, argsTestId, args);
+        assertEquals("My name is John.", msg.getEntry("text", Locale.ENGLISH,
+                TimeZone.getDefault()));
+        assertEquals("Mein Name ist Hans.", msg.getEntry("text",
+                Locale.GERMAN, TimeZone.getDefault()));
+        
+        // with filter
+        msg.setFilter(new HTMLFilter());
+        assertEquals("My name is John.", msg.getEntry("text", Locale.ENGLISH,
+                TimeZone.getDefault()));
+        assertEquals("Mein Name ist Hans.", msg.getEntry("text",
+                Locale.GERMAN, TimeZone.getDefault()));
+        
+        // add extra args
+        LocaleString lsExtra = new LocaleString(TEST_RESOURCE, "hello.text");
+        msg.setExtraArguments(new Object[] {" ", lsExtra});
+        assertEquals("My name is John. Hello world.", msg.getEntry("text", Locale.ENGLISH,
+                TimeZone.getDefault()));
+        assertEquals("Mein Name ist Hans. Hallo Welt.", msg.getEntry("text",
+                Locale.GERMAN, TimeZone.getDefault()));
+        
+        // missing localized arg
+        try
+        {
+            ls = new LocaleString(TEST_RESOURCE, "noname");
+            args = new Object[] { ls };
+            msg = new LocalizedMessage(TEST_RESOURCE, argsTestId, args);
+            msg.getEntry("text", Locale.ENGLISH, TimeZone.getDefault());
+            fail();
+        }
+        catch (MissingEntryException e)
+        {
+            assertEquals("Can't find entry noname in resource file org.bouncycastle.i18n.test.I18nTestMessages.", e.getMessage());
+        }
     }
 
 }

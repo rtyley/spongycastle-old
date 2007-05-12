@@ -15,6 +15,7 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import java.io.InputStream;
 import java.security.Security;
+import java.security.cert.CertPath;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CollectionCertStoreParameters;
@@ -155,7 +156,7 @@ public class SignedMailValidatorTest extends TestCase
         assertContainsMessage(
                 review.getErrors(0),
                 "CertPathReviewer.certRevoked",
-                "The certificate was revoked at Sep 1, 2006 9:30:00 AM GMT. Reason: keyCompromise.");
+                "The certificate was revoked at Sep 1, 2006 9:30:00 AM GMT. Reason: Key Compromise.");
     }
     
     public void testLongValidity() throws Exception
@@ -248,6 +249,42 @@ public class SignedMailValidatorTest extends TestCase
         {
             fail();
         }
+    }
+    
+    public void testCreateCertPath() throws Exception
+    {
+        // load trust anchor
+        Set trustanchors = new HashSet();
+        TrustAnchor ta = getTrustAnchor("certpath_root.crt");
+        trustanchors.add(ta);
+        
+        X509Certificate rootCert = ta.getTrustedCert();
+        X509Certificate interCert1 = loadCert("certpath_inter1.crt");
+        X509Certificate interCert2 = loadCert("certpath_inter2.crt");
+        X509Certificate endCert1 = loadCert("certpath_end1.crt");
+        X509Certificate endCert2 = loadCert("certpath_end2.crt");
+        
+        // init cert stores
+        List certStores = new ArrayList();
+        List certList = new ArrayList();
+        certList.add(interCert1);
+        certList.add(interCert2);
+        CertStore store = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certList));
+        certStores.add(store);
+        
+        // first path
+        CertPath path = SignedMailValidator.createCertPath(endCert1, trustanchors, certStores);
+        assertTrue("path size is not 3", path.getCertificates().size() == 3);
+        assertEquals("different end certificate", path.getCertificates().get(0), endCert1);
+        assertEquals("different intermediate certificate", path.getCertificates().get(1), interCert1);
+        assertEquals("different root certificate", path.getCertificates().get(2), rootCert);
+        
+        // second path
+        path = SignedMailValidator.createCertPath(endCert2, trustanchors, certStores);
+        assertTrue("path size is not 3", path.getCertificates().size() == 3);
+        assertEquals("different end certificate", path.getCertificates().get(0), endCert2);
+        assertEquals("different intermediate certificate", path.getCertificates().get(1), interCert2);
+        assertEquals("different root certificate", path.getCertificates().get(2), rootCert);
     }
     
     private SignedMailValidator.ValidationResult doTest(String message,
