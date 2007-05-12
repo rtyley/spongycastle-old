@@ -8,6 +8,7 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Strings;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.Enumeration;
@@ -15,186 +16,404 @@ import java.util.Hashtable;
 
 public class SECNamedCurves
 {
+    private static BigInteger fromHex(
+        String hex)
+    {
+        // TODO Figure out if one is faster?
+        return new BigInteger(hex, 16);
+        //return new BigInteger(1, Hex.decode(hex));
+    }
+
     /*
-     * secp224r1 (NIST P-224)
+     * secp112r1
+     */
+    static X9ECParametersHolder secp112r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = (2^128 - 3) / 76439
+            BigInteger p = fromHex("DB7C2ABF62E35E668076BEAD208B");
+            BigInteger a = fromHex("DB7C2ABF62E35E668076BEAD2088");
+            BigInteger b = fromHex("659EF8BA043916EEDE8911702B22");
+            byte[] S = Hex.decode("00F50B028E4D696E676875615175290472783FB1");
+            BigInteger n = fromHex("DB7C2ABF62E35E7628DFAC6561C5");
+            BigInteger h = BigInteger.valueOf(1);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+            //+ "09487239995A5EE76B55F9C2F098"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "09487239995A5EE76B55F9C2F098"
+                + "A89CE5AF8724C0A23E0E0FF77500"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp112r2
+     */
+    static X9ECParametersHolder secp112r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = (2^128 - 3) / 76439
+            BigInteger p = fromHex("DB7C2ABF62E35E668076BEAD208B");
+            BigInteger a = fromHex("6127C24C05F38A0AAAF65C0EF02C");
+            BigInteger b = fromHex("51DEF1815DB5ED74FCC34C85D709");
+            byte[] S = Hex.decode("002757A1114D696E6768756151755316C05E0BD4");
+            BigInteger n = fromHex("36DF0AAFD8B8D7597CA10520D04B");
+            BigInteger h = BigInteger.valueOf(4);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "4BA30AB5E892B4E1649DD0928643"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "4BA30AB5E892B4E1649DD0928643"
+                + "ADCD46F5882E3747DEF36E956E97"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp128r1
+     */
+    static X9ECParametersHolder secp128r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = 2^128 - 2^97 - 1
+            BigInteger p = fromHex("FFFFFFFDFFFFFFFFFFFFFFFFFFFFFFFF");
+            BigInteger a = fromHex("FFFFFFFDFFFFFFFFFFFFFFFFFFFFFFFC");
+            BigInteger b = fromHex("E87579C11079F43DD824993C2CEE5ED3");
+            byte[] S = Hex.decode("000E0D4D696E6768756151750CC03A4473D03679");
+            BigInteger n = fromHex("FFFFFFFE0000000075A30D1B9038A115");
+            BigInteger h = BigInteger.valueOf(1);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "161FF7528B899B2D0C28607CA52C5B86"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "161FF7528B899B2D0C28607CA52C5B86"
+                + "CF5AC8395BAFEB13C02DA292DDED7A83"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp128r2
+     */
+    static X9ECParametersHolder secp128r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = 2^128 - 2^97 - 1
+            BigInteger p = fromHex("FFFFFFFDFFFFFFFFFFFFFFFFFFFFFFFF");
+            BigInteger a = fromHex("D6031998D1B3BBFEBF59CC9BBFF9AEE1");
+            BigInteger b = fromHex("5EEEFCA380D02919DC2C6558BB6D8A5D");
+            byte[] S = Hex.decode("004D696E67687561517512D8F03431FCE63B88F4");
+            BigInteger n = fromHex("3FFFFFFF7FFFFFFFBE0024720613B5A3");
+            BigInteger h = BigInteger.valueOf(4);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+            //+ "7B6AA5D85E572983E6FB32A7CDEBC140"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "7B6AA5D85E572983E6FB32A7CDEBC140"
+                + "27B6916A894D3AEE7106FE805FC34B44"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp160k1
+     */
+    static X9ECParametersHolder secp160k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = 2^160 - 2^32 - 2^14 - 2^12 - 2^9 - 2^8 - 2^7 - 2^3 - 2^2 - 1
+            BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFAC73");
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(7);
+            byte[] S = null;
+            BigInteger n = fromHex("0100000000000000000001B8FA16DFAB9ACA16B6B3");
+            BigInteger h = BigInteger.valueOf(1);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+                //+ "3B4C382CE37AA192A4019E763036F4F5DD4D7EBB"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "3B4C382CE37AA192A4019E763036F4F5DD4D7EBB"
+                + "938CF935318FDCED6BC28286531733C3F03C4FEE"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp160r1
+     */
+    static X9ECParametersHolder secp160r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = 2^160 - 2^31 - 1
+            BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFF");
+            BigInteger a = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFC");
+            BigInteger b = fromHex("1C97BEFC54BD7A8B65ACF89F81D4D4ADC565FA45");
+            byte[] S = Hex.decode("1053CDE42C14D696E67687561517533BF3F83345");
+            BigInteger n = fromHex("0100000000000000000001F4C8F927AED3CA752257");
+            BigInteger h = BigInteger.valueOf(1);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+                //+ "4A96B5688EF573284664698968C38BB913CBFC82"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "4A96B5688EF573284664698968C38BB913CBFC82"
+                + "23A628553168947D59DCC912042351377AC5FB32"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp160r2
+     */
+    static X9ECParametersHolder secp160r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = 2^160 - 2^32 - 2^14 - 2^12 - 2^9 - 2^8 - 2^7 - 2^3 - 2^2 - 1
+            BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFAC73");
+            BigInteger a = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFAC70");
+            BigInteger b = fromHex("B4E134D3FB59EB8BAB57274904664D5AF50388BA");
+            byte[] S = Hex.decode("B99B99B099B323E02709A4D696E6768756151751");
+            BigInteger n = fromHex("0100000000000000000000351EE786A818F3A1A16B");
+            BigInteger h = BigInteger.valueOf(1);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+            //+ "52DCB034293A117E1F4FF11B30F7199D3144CE6D"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "52DCB034293A117E1F4FF11B30F7199D3144CE6D"
+                + "FEAFFEF2E331F296E071FA0DF9982CFEA7D43F2E"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp192k1
+     */
+    static X9ECParametersHolder secp192k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = 2^192 - 2^32 - 2^12 - 2^8 - 2^7 - 2^6 - 2^3 - 1
+            BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFEE37");
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(3);
+            byte[] S = null;
+            BigInteger n = fromHex("FFFFFFFFFFFFFFFFFFFFFFFE26F2FC170F69466A74DEFD8D");
+            BigInteger h = BigInteger.valueOf(1);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "DB4FF10EC057E9AE26B07D0280B7F4341DA5D1B1EAE06C7D"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "DB4FF10EC057E9AE26B07D0280B7F4341DA5D1B1EAE06C7D"
+                + "9B2F2F6D9C5628A7844163D015BE86344082AA88D95E2F9D"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp192r1
+     */
+    static X9ECParametersHolder secp192r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = 2^192 - 2^64 - 1
+            BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF");
+            BigInteger a = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFC");
+            BigInteger b = fromHex("64210519E59C80E70FA7E9AB72243049FEB8DEECC146B9B1");
+            byte[] S = Hex.decode("3045AE6FC8422F64ED579528D38120EAE12196D5");
+            BigInteger n = fromHex("FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831");
+            BigInteger h = BigInteger.valueOf(1);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012"
+                + "07192B95FFC8DA78631011ED6B24CDD573F977A11E794811"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp224k1
+     */
+    static X9ECParametersHolder secp224k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = 2^224 - 2^32 - 2^12 - 2^11 - 2^9 - 2^7 - 2^4 - 2 - 1
+            BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFE56D");
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(5);
+            byte[] S = null;
+            BigInteger n = fromHex("010000000000000000000000000001DCE8D2EC6184CAF0A971769FB1F7");
+            BigInteger h = BigInteger.valueOf(1);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "A1455B334DF099DF30FC28A169A467E9E47075A90F7E650EB6B7A45C"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "A1455B334DF099DF30FC28A169A467E9E47075A90F7E650EB6B7A45C"
+                + "7E089FED7FBA344282CAFBD6F7E319F7C0B0BD59E2CA4BDB556D61A5"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp224r1
      */
     static X9ECParametersHolder secp224r1 = new X9ECParametersHolder()
     {
         protected X9ECParameters createParameters()
         {
             // p = 2^224 - 2^96 + 1
-            BigInteger secp224r1P = new BigInteger(
-                "26959946667150639794667015087019630673557916260026308143510066298881");
+            BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000001");
+            BigInteger a = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFE");
+            BigInteger b = fromHex("B4050A850C04B3ABF54132565044B0B7D7BFD8BA270B39432355FFB4");
+            byte[] S = Hex.decode("BD71344799D5C7FCDC45B59FA3B9AB8F6A948BC5");
+            BigInteger n = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFF16A2E0B8F03E13DD29455C5C2A3D");
+            BigInteger h = BigInteger.valueOf(1);
 
-            // a = -3, b = b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4
-            ECCurve secp224r1Curve = new ECCurve.Fp(secp224r1P,
-                new BigInteger("26959946667150639794667015087019630673557916260026308143510066298878"),
-                new BigInteger("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4", 16));
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+            //+ "B70E0CBD6BB4BF7F321390B94A03C1D356C21122343280D6115C1D21"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "B70E0CBD6BB4BF7F321390B94A03C1D356C21122343280D6115C1D21"
+                + "BD376388B5F723FB4C22DFE6CD4375A05A07476444D5819985007E34"));
 
-            // x = b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21
-            ECFieldElement secp224r1x = new ECFieldElement.Fp(
-                secp224r1P,
-                new BigInteger("b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21", 16));
-
-            // y = bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34
-            ECFieldElement secp224r1y = new ECFieldElement.Fp(
-                secp224r1P,
-                new BigInteger("bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34", 16));
-
-            ECPoint secp224r1BasePoint = new ECPoint.Fp(
-                secp224r1Curve, secp224r1x, secp224r1y, false);
-
-            BigInteger secp224r1n = new BigInteger("26959946667150639794667015087019625940457807714424391721682722368061");
-
-            BigInteger secp224r1h = new BigInteger("1");
-
-//    static final byte[] secp224r1Seed = (Hex.decode("bd71344799d5c7fcdc45b59fa3b9ab8f6a948bc5"));
-            byte[] secp224r1Seed = null;
-
-            return new X9ECParameters(
-                secp224r1Curve,
-                secp224r1BasePoint,
-                secp224r1n,
-                secp224r1h,
-                secp224r1Seed);
+            return new X9ECParameters(curve, G, n, h, S);
         }
     };
 
     /*
-     * secp256r1 (NIST P-256)
+     * secp256k1
+     */
+    static X9ECParametersHolder secp256k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            // p = 2^256 - 2^32 - 2^9 - 2^8 - 2^7 - 2^6 - 2^4 - 1
+            BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(7);
+            byte[] S = null;
+            BigInteger n = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
+            BigInteger h = BigInteger.valueOf(1);
+
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+            //+ "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
+                + "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"));
+
+            return new X9ECParameters(curve, G, n, h, S);
+        }
+    };
+
+    /*
+     * secp256r1
      */
     static X9ECParametersHolder secp256r1 = new X9ECParametersHolder()
     {
         protected X9ECParameters createParameters()
         {
-            // p = 2^256 - 2^224 + 2^192 + 2^96 - 1
-            BigInteger secp256r1P = new BigInteger(
-                "115792089210356248762697446949407573530086143415290314195533631308867097853951");
+            // p = 2^224 (2^32 - 1) + 2^192 + 2^96 - 1
+            BigInteger p = fromHex("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF");
+            BigInteger a = fromHex("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC");
+            BigInteger b = fromHex("5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B");
+            byte[] S = Hex.decode("C49D360886E704936A6678E1139D26B7819F7E90");
+            BigInteger n = fromHex("FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551");
+            BigInteger h = BigInteger.valueOf(1);
 
-            // a = -3, b = 5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b
-            ECCurve secp256r1Curve = new ECCurve.Fp(secp256r1P,
-                new BigInteger("115792089210356248762697446949407573530086143415290314195533631308867097853948"),
-                new BigInteger("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16));
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296"
+                + "4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5"));
 
-            // x = 6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296
-            ECFieldElement secp256r1x = new ECFieldElement.Fp(
-                secp256r1P,
-                new BigInteger("6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296", 16));
-
-            // y = 4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5
-            ECFieldElement secp256r1y = new ECFieldElement.Fp(
-                secp256r1P,
-                new BigInteger("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5", 16));
-
-            ECPoint secp256r1BasePoint = new ECPoint.Fp(
-                secp256r1Curve, secp256r1x, secp256r1y, false);
-
-            BigInteger secp256r1n = new BigInteger("115792089210356248762697446949407573529996955224135760342422259061068512044369");
-
-            BigInteger secp256r1h = new BigInteger("1");
-
-//    static final byte[] secp256r1Seed = (Hex.decode("c49d360886e704936a6678e1139d26b7819f7e90"));
-            byte[] secp256r1Seed = null;
-
-            return new X9ECParameters(
-                secp256r1Curve,
-                secp256r1BasePoint,
-                secp256r1n,
-                secp256r1h,
-                secp256r1Seed);
+            return new X9ECParameters(curve, G, n, h, S);
         }
     };
 
     /*
-     * secp384r1 (NIST P-384)
+     * secp384r1
      */
     static X9ECParametersHolder secp384r1 = new X9ECParametersHolder()
     {
         protected X9ECParameters createParameters()
         {
             // p = 2^384 - 2^128 - 2^96 + 2^32 - 1
+            BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFF");
+            BigInteger a = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFC");
+            BigInteger b = fromHex("B3312FA7E23EE7E4988E056BE3F82D19181D9C6EFE8141120314088F5013875AC656398D8A2ED19D2A85C8EDD3EC2AEF");
+            byte[] S = Hex.decode("A335926AA319A27A1D00896A6773A4827ACDAC73");
+            BigInteger n = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC7634D81F4372DDF581A0DB248B0A77AECEC196ACCC52973");
+            BigInteger h = BigInteger.valueOf(1);
 
-            BigInteger secp384r1P = new BigInteger(
-                "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFF", 16);
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("03"
+            //+ "AA87CA22BE8B05378EB1C71EF320AD746E1D3B628BA79B9859F741E082542A385502F25DBF55296C3A545E3872760AB7"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "AA87CA22BE8B05378EB1C71EF320AD746E1D3B628BA79B9859F741E082542A385502F25DBF55296C3A545E3872760AB7"
+                + "3617DE4A96262C6F5D9E98BF9292DC29F8F41DBD289A147CE9DA3113B5F0B8C00A60B1CE1D7E819D7A431D7C90EA0E5F"));
 
-            // a, b
-            ECCurve secp384r1Curve = new ECCurve.Fp(secp384r1P,
-                new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFC", 16),
-                new BigInteger("B3312FA7E23EE7E4988E056BE3F82D19181D9C6EFE8141120314088F5013875AC656398D8A2ED19D2A85C8EDD3EC2AEF", 16));
-
-            // x
-            ECFieldElement secp384r1x = new ECFieldElement.Fp(
-                secp384r1P,
-                new BigInteger("AA87CA22BE8B05378EB1C71EF320AD746E1D3B628BA79B9859F741E082542A385502F25DBF55296C3A545E3872760AB7", 16));
-
-            // y
-            ECFieldElement secp384r1y = new ECFieldElement.Fp(
-                secp384r1P,
-                new BigInteger("3617DE4A96262C6F5D9E98BF9292DC29F8F41DBD289A147CE9DA3113B5F0B8C00A60B1CE1D7E819D7A431D7C90EA0E5F", 16));
-
-            ECPoint secp384r1BasePoint = new ECPoint.Fp(
-                secp384r1Curve, secp384r1x, secp384r1y, false);
-
-            BigInteger secp384r1n = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC7634D81F4372DDF581A0DB248B0A77AECEC196ACCC52973", 16);
-
-            BigInteger secp384r1h = new BigInteger("1");
-
-//    static final byte[] secp384r1Seed = (Hex.decode("A335926AA319A27A1D00896A6773A4827ACDAC73"));
-            byte[] secp384r1Seed = null;
-
-            return new X9ECParameters(
-                secp384r1Curve,
-                secp384r1BasePoint,
-                secp384r1n,
-                secp384r1h,
-                secp384r1Seed);
+            return new X9ECParameters(curve, G, n, h, S);
         }
     };
 
     /*
-     * secp521r1 - (NIST P-521)
+     * secp521r1
      */
     static X9ECParametersHolder secp521r1 = new X9ECParametersHolder()
     {
         protected X9ECParameters createParameters()
         {
             // p = 2^521 - 1
-            BigInteger secp521r1P = new BigInteger(
-                "6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151");
+            BigInteger p = fromHex("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+            BigInteger a = fromHex("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC");
+            BigInteger b = fromHex("0051953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00");
+            byte[] S = Hex.decode("D09E8800291CB85396CC6717393284AAA0DA64BA");
+            BigInteger n = fromHex("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA51868783BF2F966B7FCC0148F709A5D03BB5C9B8899C47AEBB6FB71E91386409");
+            BigInteger h = BigInteger.valueOf(1);
 
-            // a = -3, b = 051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00
-            ECCurve secp521r1Curve = new ECCurve.Fp(secp521r1P,
-                new BigInteger("6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057148"),
-                new BigInteger("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16));
+            ECCurve curve = new ECCurve.Fp(p, a, b);
+            //ECPoint G = curve.decodePoint(Hex.decode("02"
+            //+ "00C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66"));
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "00C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66"
+                + "011839296A789A3BC0045C8A5FB42C7D1BD998F54449579B446817AFBD17273E662C97EE72995EF42640C550B9013FAD0761353C7086A272C24088BE94769FD16650"));
 
-            // x = c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66
-            ECFieldElement secp521r1x = new ECFieldElement.Fp(
-                secp521r1P,
-                new BigInteger("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16));
-
-            // y = 11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650
-            ECFieldElement secp521r1y = new ECFieldElement.Fp(
-                secp521r1P,
-                new BigInteger("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16));
-
-            ECPoint secp521r1BasePoint = new ECPoint.Fp(
-                secp521r1Curve, secp521r1x, secp521r1y, false);
-
-            BigInteger secp521r1n = new BigInteger("6864797660130609714981900799081393217269435300143305409394463459185543183397655394245057746333217197532963996371363321113864768612440380340372808892707005449");
-
-            BigInteger secp521r1h = new BigInteger("1");
-
-//    byte[] secp521r1Seed = (Hex.decode("d09e8800291cb85396cc6717393284aaa0da64ba"));
-            byte[] secp521r1Seed = null;
-
-            return new X9ECParameters(
-                secp521r1Curve,
-                secp521r1BasePoint,
-                secp521r1n,
-                secp521r1h,
-                secp521r1Seed);
+            return new X9ECParameters(curve, G, n, h, S);
         }
     };
+    
 
     /*
      * sect163r2 (NIST B-163)
@@ -458,15 +677,40 @@ public class SECNamedCurves
 
     static
     {
-        defineCurve("secp224r1", SECObjectIdentifiers.secp224r1, secp224r1);
-        defineCurve("secp256r1", SECObjectIdentifiers.secp256r1, secp256r1);
-        defineCurve("secp384r1", SECObjectIdentifiers.secp384r1, secp384r1);
-        defineCurve("secp521r1", SECObjectIdentifiers.secp521r1, secp521r1);
+        defineCurve("secp112r1", SECObjectIdentifiers.secp112r1, secp112r1);
+        defineCurve("secp112r2", SECObjectIdentifiers.secp112r2, secp112r2);
+        defineCurve("secp128r1", SECObjectIdentifiers.secp128r1, secp128r1);
+        defineCurve("secp128r2", SECObjectIdentifiers.secp128r2, secp128r2);
+        defineCurve("secp160k1", SECObjectIdentifiers.secp160k1, secp160k1);
+        defineCurve("secp160r1", SECObjectIdentifiers.secp160r1, secp160r1);
+        defineCurve("secp160r2", SECObjectIdentifiers.secp160r2, secp160r2);
+        defineCurve("secp192k1", SECObjectIdentifiers.secp192k1, secp192k1);
+        defineCurve("secp192r1", SECObjectIdentifiers.secp192r1, secp192r1);
+        defineCurve("secp224k1", SECObjectIdentifiers.secp224k1, secp224k1); 
+        defineCurve("secp224r1", SECObjectIdentifiers.secp224r1, secp224r1); 
+        defineCurve("secp256k1", SECObjectIdentifiers.secp256k1, secp256k1); 
+        defineCurve("secp256r1", SECObjectIdentifiers.secp256r1, secp256r1); 
+        defineCurve("secp384r1", SECObjectIdentifiers.secp384r1, secp384r1); 
+        defineCurve("secp521r1", SECObjectIdentifiers.secp521r1, secp521r1); 
+
+//        defineCurve("sect113r1", SECObjectIdentifiers.sect113r1, sect113r1);
+//        defineCurve("sect113r2", SECObjectIdentifiers.sect113r2, sect113r2);
+//        defineCurve("sect131r1", SECObjectIdentifiers.sect131r1, sect131r1);
+//        defineCurve("sect131r2", SECObjectIdentifiers.sect131r2, sect131r2);
+//        defineCurve("sect163k1", SECObjectIdentifiers.sect163k1, sect163k1);
+//        defineCurve("sect163r1", SECObjectIdentifiers.sect163r1, sect163r1);
         defineCurve("sect163r2", SECObjectIdentifiers.sect163r2, sect163r2);
+//        defineCurve("sect193r1", SECObjectIdentifiers.sect193r1, sect193r1);
+//        defineCurve("sect193r2", SECObjectIdentifiers.sect193r2, sect193r2);
+//        defineCurve("sect233k1", SECObjectIdentifiers.sect233k1, sect233k1);
         defineCurve("sect233r1", SECObjectIdentifiers.sect233r1, sect233r1);
+//        defineCurve("sect239k1", SECObjectIdentifiers.sect239k1, sect239k1);
+//        defineCurve("sect283k1", SECObjectIdentifiers.sect283k1, sect283k1);
         defineCurve("sect283r1", SECObjectIdentifiers.sect283r1, sect283r1);
+//        defineCurve("sect409k1", SECObjectIdentifiers.sect409k1, sect409k1);
         defineCurve("sect409r1", SECObjectIdentifiers.sect409r1, sect409r1);
-        defineCurve("sect571r1", SECObjectIdentifiers.sect571r1, sect571r1);
+//        defineCurve("sect571k1", SECObjectIdentifiers.sect571k1, sect571k1);
+        defineCurve("sect571r1", SECObjectIdentifiers.sect571r1, sect571r1); 
     }
 
     public static X9ECParameters getByName(
