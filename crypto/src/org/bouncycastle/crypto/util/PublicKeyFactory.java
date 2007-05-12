@@ -9,10 +9,13 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
@@ -92,6 +95,21 @@ public class PublicKeyFactory
             {
                 DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
                 X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
+
+                if (ecP == null)
+                {
+                    ecP = SECNamedCurves.getByOID(oid);
+
+                    if (ecP == null)
+                    {
+                        ecP = NISTNamedCurves.getByOID(oid);
+
+                        if (ecP == null)
+                        {
+                            ecP = TeleTrusTNamedCurves.getByOID(oid);
+                        }
+                    }
+                }
 
                 dParams = new ECDomainParameters(
                                             ecP.getCurve(),
