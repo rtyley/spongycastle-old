@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.util;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
@@ -32,12 +34,45 @@ import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Factory for creating private key objects from PKCS8 PrivateKeyInfo objects.
  */
 public class PrivateKeyFactory
 {
+    /**
+     * Create a private key parameter from a PKCS8 PrivateKeyInfo encoding.
+     * 
+     * @param privateKeyInfoData the PrivateKeyInfo encoding
+     * @return a suitable private key parameter
+     * @throws IOException on an error decoding the key
+     */
+    public static AsymmetricKeyParameter createKey(
+        byte[] privateKeyInfoData)
+        throws IOException
+    {
+        return createKey(
+            PrivateKeyInfo.getInstance(
+                ASN1Object.fromByteArray(privateKeyInfoData)));
+    }
+
+    /**
+     * Create a private key parameter from a PKCS8 PrivateKeyInfo encoding read from a stream.
+     * 
+     * @param inStr the stream to read the PrivateKeyInfo encoding from
+     * @return a suitable private key parameter
+     * @throws IOException on an error decoding the key
+     */
+    public static AsymmetricKeyParameter createKey(
+        InputStream inStr)
+        throws IOException
+    {
+        return createKey(
+            PrivateKeyInfo.getInstance(
+                new ASN1InputStream(inStr).readObject()));
+    }
+
     /**
      * Create a private key parameter from the passed in PKCS8 PrivateKeyInfo object.
      * 

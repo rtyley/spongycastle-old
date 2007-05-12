@@ -1,7 +1,7 @@
 package org.bouncycastle.crypto.util;
 
-import java.io.IOException;
-
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
@@ -37,12 +37,47 @@ import org.bouncycastle.crypto.params.ElGamalParameters;
 import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Factory to create asymmetric public key parameters for asymmetric ciphers
  * from range of ASN.1 encoded SubjectPublicKeyInfo objects.
  */
 public class PublicKeyFactory
 {
+    /**
+     * Create a public key from a SubjectPublicKeyInfo encoding
+     * 
+     * @param keyInfoData the SubjectPublicKeyInfo encoding
+     * @return the appropriate key parameter
+     * @throws IOException on an error decoding the key
+     */
+    public static AsymmetricKeyParameter createKey(
+        byte[] keyInfoData)
+        throws IOException
+    {
+        return createKey(
+            SubjectPublicKeyInfo.getInstance(
+                ASN1Object.fromByteArray(keyInfoData)));
+    }
+
+    /**
+     * Create a public key from a SubjectPublicKeyInfo encoding read from a stream
+     * 
+     * @param inStr the stream to read the SubjectPublicKeyInfo encoding from
+     * @return the appropriate key parameter
+     * @throws IOException on an error decoding the key
+     */
+    public static AsymmetricKeyParameter createKey(
+        InputStream inStr)
+        throws IOException
+    {
+        return createKey(
+            SubjectPublicKeyInfo.getInstance(
+                new ASN1InputStream(inStr).readObject()));
+    }
+
     /**
      * Create a public key from the passed in SubjectPublicKeyInfo
      * 
