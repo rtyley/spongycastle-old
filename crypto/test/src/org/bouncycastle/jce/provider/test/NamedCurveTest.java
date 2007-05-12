@@ -231,11 +231,7 @@ public class NamedCurveTest
 
         for (Enumeration en = SECNamedCurves.getNames(); en.hasMoreElements();)
         {
-            String name = (String)en.nextElement();
-            if (!(name.equals("secp192r1") || name.equals("secp256r1")))
-            {
-                testECDSA(name);
-            }
+            testECDSA((String)en.nextElement());
         }
 
         for (Enumeration en = TeleTrusTNamedCurves.getNames(); en.hasMoreElements();)
