@@ -2,6 +2,7 @@ package org.bouncycastle.math.ec.test;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Enumeration;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -21,22 +22,6 @@ import org.bouncycastle.math.ec.ECPoint;
  */
 public class ECPointTest extends TestCase
 {
-
-    /**
-     * The standard curves on which the tests are done
-     */
-    public static final String[] CURVES =
-    {
-        "sect163r2",
-        "sect233r1",
-        "sect283r1",
-        "sect409r1",
-        "sect571r1",
-        "secp224r1",
-        "secp256r1",
-        "secp521r1",
-    };
-
     /**
      * Random source used to generate random points
      */
@@ -432,13 +417,15 @@ public class ECPointTest extends TestCase
     /**
      * Calls <code>implTestAddSubtract()</code>,
      * <code>implTestMultiply</code> and <code>implTestEncoding</code> for
-     * the standard elliptic curves as given in <code>CURVES</code>.
+     * the standard elliptic curves as given in <code>SECNamedCurves</code>.
      */
     public void testAddSubtractMultiplyTwiceEncoding()
     {
-        for (int i = 0; i < CURVES.length; i++)
+        Enumeration curveEnum = SECNamedCurves.getNames();
+        while (curveEnum.hasMoreElements())
         {
-            X9ECParameters x9ECParameters = SECNamedCurves.getByName(CURVES[i]);
+            String name = (String) curveEnum.nextElement();
+            X9ECParameters x9ECParameters = SECNamedCurves.getByName(name);
 
             BigInteger n = x9ECParameters.getN();
 
