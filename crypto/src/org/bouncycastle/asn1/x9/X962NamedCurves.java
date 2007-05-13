@@ -475,79 +475,38 @@ public class X962NamedCurves
     static final Hashtable curves = new Hashtable();
     static final Hashtable names = new Hashtable();
 
+    static void defineCurve(String name, DERObjectIdentifier oid, X9ECParametersHolder holder)
+    {
+        objIds.put(name, oid);
+        names.put(oid, name);
+        curves.put(oid, holder);
+    }
+
     static
     {
-        objIds.put("prime192v1", X9ObjectIdentifiers.prime192v1);
-        objIds.put("prime192v2", X9ObjectIdentifiers.prime192v2);
-        objIds.put("prime192v3", X9ObjectIdentifiers.prime192v3);
-        objIds.put("prime239v1", X9ObjectIdentifiers.prime239v1);
-        objIds.put("prime239v2", X9ObjectIdentifiers.prime239v2);
-        objIds.put("prime239v3", X9ObjectIdentifiers.prime239v3);
-        objIds.put("prime256v1", X9ObjectIdentifiers.prime256v1);
-        objIds.put("c2pnb163v1", X9ObjectIdentifiers.c2pnb163v1);
-        objIds.put("c2pnb163v2", X9ObjectIdentifiers.c2pnb163v2);
-        objIds.put("c2pnb163v3", X9ObjectIdentifiers.c2pnb163v3);
-        objIds.put("c2pnb176w1", X9ObjectIdentifiers.c2pnb176w1);
-        objIds.put("c2tnb191v1", X9ObjectIdentifiers.c2tnb191v1);
-        objIds.put("c2tnb191v2", X9ObjectIdentifiers.c2tnb191v2);
-        objIds.put("c2tnb191v3", X9ObjectIdentifiers.c2tnb191v3);
-        objIds.put("c2pnb208w1", X9ObjectIdentifiers.c2pnb208w1);
-        objIds.put("c2tnb239v1", X9ObjectIdentifiers.c2tnb239v1);
-        objIds.put("c2tnb239v2", X9ObjectIdentifiers.c2tnb239v2);
-        objIds.put("c2tnb239v3", X9ObjectIdentifiers.c2tnb239v3);
-        objIds.put("c2pnb272w1", X9ObjectIdentifiers.c2pnb272w1);
-        objIds.put("c2pnb304w1", X9ObjectIdentifiers.c2pnb304w1);
-        objIds.put("c2tnb359v1", X9ObjectIdentifiers.c2tnb359v1);
-        objIds.put("c2pnb368w1", X9ObjectIdentifiers.c2pnb368w1);
-        objIds.put("c2tnb431r1", X9ObjectIdentifiers.c2tnb431r1);
-
-        names.put(X9ObjectIdentifiers.prime192v1, "prime192v1");
-        names.put(X9ObjectIdentifiers.prime192v2, "prime192v2");
-        names.put(X9ObjectIdentifiers.prime192v3, "prime192v3");
-        names.put(X9ObjectIdentifiers.prime239v1, "prime239v1");
-        names.put(X9ObjectIdentifiers.prime239v2, "prime239v2");
-        names.put(X9ObjectIdentifiers.prime239v3, "prime239v3");
-        names.put(X9ObjectIdentifiers.prime256v1, "prime256v1");
-        names.put(X9ObjectIdentifiers.c2pnb163v1, "c2pnb163v1");
-        names.put(X9ObjectIdentifiers.c2pnb163v2, "c2pnb163v2");
-        names.put(X9ObjectIdentifiers.c2pnb163v3, "c2pnb163v3");
-        names.put(X9ObjectIdentifiers.c2pnb176w1, "c2pnb176w1");
-        names.put(X9ObjectIdentifiers.c2tnb191v1, "c2tnb191v1");
-        names.put(X9ObjectIdentifiers.c2tnb191v2, "c2tnb191v2");
-        names.put(X9ObjectIdentifiers.c2tnb191v3, "c2tnb191v3");
-        names.put(X9ObjectIdentifiers.c2pnb208w1, "c2pnb208w1");
-        names.put(X9ObjectIdentifiers.c2tnb239v1, "c2tnb239v1");
-        names.put(X9ObjectIdentifiers.c2tnb239v2, "c2tnb239v2");
-        names.put(X9ObjectIdentifiers.c2tnb239v3, "c2tnb239v3");
-        names.put(X9ObjectIdentifiers.c2pnb272w1, "c2pnb272w1");
-        names.put(X9ObjectIdentifiers.c2pnb304w1, "c2pnb304w1");
-        names.put(X9ObjectIdentifiers.c2tnb359v1, "c2tnb359v1");
-        names.put(X9ObjectIdentifiers.c2pnb368w1, "c2pnb368w1");
-        names.put(X9ObjectIdentifiers.c2tnb431r1, "c2tnb431r1");
-
-        curves.put(X9ObjectIdentifiers.prime192v1, prime192v1);
-        curves.put(X9ObjectIdentifiers.prime192v2, prime192v2);
-        curves.put(X9ObjectIdentifiers.prime192v3, prime192v3);
-        curves.put(X9ObjectIdentifiers.prime239v1, prime239v1);
-        curves.put(X9ObjectIdentifiers.prime239v2, prime239v2);
-        curves.put(X9ObjectIdentifiers.prime239v3, prime239v3);
-        curves.put(X9ObjectIdentifiers.prime256v1, prime256v1);
-        curves.put(X9ObjectIdentifiers.c2pnb163v1, c2pnb163v1);
-        curves.put(X9ObjectIdentifiers.c2pnb163v2, c2pnb163v2);
-        curves.put(X9ObjectIdentifiers.c2pnb163v3, c2pnb163v3);
-        curves.put(X9ObjectIdentifiers.c2pnb176w1, c2pnb176w1);
-        curves.put(X9ObjectIdentifiers.c2tnb191v1, c2tnb191v1);
-        curves.put(X9ObjectIdentifiers.c2tnb191v2, c2tnb191v2);
-        curves.put(X9ObjectIdentifiers.c2tnb191v3, c2tnb191v3);
-        curves.put(X9ObjectIdentifiers.c2pnb208w1, c2pnb208w1);
-        curves.put(X9ObjectIdentifiers.c2tnb239v1, c2tnb239v1);
-        curves.put(X9ObjectIdentifiers.c2tnb239v2, c2tnb239v2);
-        curves.put(X9ObjectIdentifiers.c2tnb239v3, c2tnb239v3);
-        curves.put(X9ObjectIdentifiers.c2pnb272w1, c2pnb272w1);
-        curves.put(X9ObjectIdentifiers.c2pnb304w1, c2pnb304w1);
-        curves.put(X9ObjectIdentifiers.c2tnb359v1, c2tnb359v1);
-        curves.put(X9ObjectIdentifiers.c2pnb368w1, c2pnb368w1);
-        curves.put(X9ObjectIdentifiers.c2tnb431r1, c2tnb431r1);
+        defineCurve("prime192v1", X9ObjectIdentifiers.prime192v1, prime192v1);
+        defineCurve("prime192v2", X9ObjectIdentifiers.prime192v2, prime192v2);
+        defineCurve("prime192v3", X9ObjectIdentifiers.prime192v3, prime192v3);
+        defineCurve("prime239v1", X9ObjectIdentifiers.prime239v1, prime239v1);
+        defineCurve("prime239v2", X9ObjectIdentifiers.prime239v2, prime239v2);
+        defineCurve("prime239v3", X9ObjectIdentifiers.prime239v3, prime239v3);
+        defineCurve("prime256v1", X9ObjectIdentifiers.prime256v1, prime256v1);
+        defineCurve("c2pnb163v1", X9ObjectIdentifiers.c2pnb163v1, c2pnb163v1);
+        defineCurve("c2pnb163v2", X9ObjectIdentifiers.c2pnb163v2, c2pnb163v2);
+        defineCurve("c2pnb163v3", X9ObjectIdentifiers.c2pnb163v3, c2pnb163v3);
+        defineCurve("c2pnb176w1", X9ObjectIdentifiers.c2pnb176w1, c2pnb176w1);
+        defineCurve("c2tnb191v1", X9ObjectIdentifiers.c2tnb191v1, c2tnb191v1);
+        defineCurve("c2tnb191v2", X9ObjectIdentifiers.c2tnb191v2, c2tnb191v2);
+        defineCurve("c2tnb191v3", X9ObjectIdentifiers.c2tnb191v3, c2tnb191v3);
+        defineCurve("c2pnb208w1", X9ObjectIdentifiers.c2pnb208w1, c2pnb208w1);
+        defineCurve("c2tnb239v1", X9ObjectIdentifiers.c2tnb239v1, c2tnb239v1);
+        defineCurve("c2tnb239v2", X9ObjectIdentifiers.c2tnb239v2, c2tnb239v2);
+        defineCurve("c2tnb239v3", X9ObjectIdentifiers.c2tnb239v3, c2tnb239v3);
+        defineCurve("c2pnb272w1", X9ObjectIdentifiers.c2pnb272w1, c2pnb272w1);
+        defineCurve("c2pnb304w1", X9ObjectIdentifiers.c2pnb304w1, c2pnb304w1);
+        defineCurve("c2tnb359v1", X9ObjectIdentifiers.c2tnb359v1, c2tnb359v1);
+        defineCurve("c2pnb368w1", X9ObjectIdentifiers.c2pnb368w1, c2pnb368w1);
+        defineCurve("c2tnb431r1", X9ObjectIdentifiers.c2tnb431r1, c2tnb431r1);
     }
 
     public static X9ECParameters getByName(
