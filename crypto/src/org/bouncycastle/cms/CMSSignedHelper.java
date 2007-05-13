@@ -41,7 +41,7 @@ class CMSSignedHelper
 
     private static final Map     encryptionAlgs = new HashMap();
     private static final Map     digestAlgs = new HashMap();
-
+    private static final Map     digestAliases = new HashMap();
 
     static
     {
@@ -80,6 +80,12 @@ class CMSSignedHelper
         digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd256.getId(), "RIPEMD256");
         digestAlgs.put(CryptoProObjectIdentifiers.gostR3411.getId(),  "GOST3411");
         digestAlgs.put("1.3.6.1.4.1.5849.1.2.1",  "GOST3411");
+
+        digestAliases.put("SHA1", new String[] { "SHA-1" });
+        digestAliases.put("SHA224", new String[] { "SHA-224" });
+        digestAliases.put("SHA256", new String[] { "SHA-256" });
+        digestAliases.put("SHA384", new String[] { "SHA-384" });
+        digestAliases.put("SHA512", new String[] { "SHA-512" });
     }
     
     /**
@@ -98,7 +104,20 @@ class CMSSignedHelper
 
         return digestAlgOID;
     }
-    
+
+    String[] getDigestAliases(
+        String algName)
+    {
+        String[] aliases = (String[])digestAliases.get(algName);
+
+        if (aliases != null)
+        {
+            return aliases;
+        }
+
+        return new String[0];
+    }
+
     /**
      * Return the digest encryption algorithm using one of the standard
      * JCA string representations rather the the algorithm identifier (if
@@ -122,23 +141,47 @@ class CMSSignedHelper
         String provider) 
         throws NoSuchProviderException, NoSuchAlgorithmException
     {
+        try
+        {
+            return createDigestInstance(algorithm, provider);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            String[] aliases = getDigestAliases(algorithm);
+            for (int i = 0; i != aliases.length; i++)
+            {
+                try
+                {
+                    return createDigestInstance(aliases[i], provider);
+                }
+                catch (NoSuchAlgorithmException ex)
+                {
+                    // continue
+                }
+            }
+            if (provider != null)
+            {
+                return getDigestInstance(algorithm, null); // try rolling back
+            }
+            throw e;
+        }
+    }
+
+    private MessageDigest createDigestInstance(
+        String algorithm,
+        String provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException
+    {
         if (provider != null)
         {
-            try
-            {
-                return MessageDigest.getInstance(algorithm, provider);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                return MessageDigest.getInstance(algorithm); // try rolling back
-            }
+            return MessageDigest.getInstance(algorithm, provider);
         }
         else
         {
             return MessageDigest.getInstance(algorithm);
         }
     }
-    
+
     Signature getSignatureInstance(
         String algorithm, 
         String provider) 

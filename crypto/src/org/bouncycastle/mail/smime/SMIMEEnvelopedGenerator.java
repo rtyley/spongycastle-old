@@ -7,7 +7,6 @@ import org.bouncycastle.cms.CMSException;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
@@ -166,7 +165,7 @@ public class SMIMEEnvelopedGenerator
         //
         // check the base algorithm and provider is available
         //
-        KeyGenerator.getInstance(encryptionOID, provider);
+        createSymmetricKeyGenerator(encryptionOID, provider);
                 
         try
         {  

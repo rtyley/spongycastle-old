@@ -59,7 +59,8 @@ public class RegressionTest
         new NamingAuthorityUnitTest(),
         new MonetaryLimitUnitTest(),
         new NameOrPseudonymUnitTest(),
-        new PersonalDataUnitTest()
+        new PersonalDataUnitTest(),
+        new DERApplicationSpecificTest()
     };
 
     public static void main(

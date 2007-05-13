@@ -1,14 +1,10 @@
 package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERSet;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -184,8 +180,6 @@ public class CMSEnvelopedDataStreamGenerator
     {
         try
         {
-            AlgorithmIdentifier encAlgId = getAlgorithmIdentifier(encryptionOID, params);
-            
             //
             // ContentInfo
             //
@@ -209,14 +203,25 @@ public class CMSEnvelopedDataStreamGenerator
                 envGen.getRawOutputStream().write(new DERSet(recipientInfos).getEncoded());
             }
 
-            Cipher cipher = Cipher.getInstance(encryptionOID, provider);
+            Cipher cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encryptionOID, provider);
             
             cipher.init(Cipher.ENCRYPT_MODE, encKey, params);
 
             BERSequenceGenerator eiGen = new BERSequenceGenerator(envGen.getRawOutputStream());
             
             eiGen.addObject(PKCSObjectIdentifiers.data);
-            
+
+            //
+            // If params are null we try and second guess on them as some providers don't provide
+            // algorithm parameter generation explicity but instead generate them under the hood.
+            //
+            if (params == null)
+            {
+                params = cipher.getParameters();
+            }
+
+            AlgorithmIdentifier encAlgId = getAlgorithmIdentifier(encryptionOID, params);
+                        
             eiGen.getRawOutputStream().write(encAlgId.getEncoded());
             
             BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, false);
@@ -256,28 +261,6 @@ public class CMSEnvelopedDataStreamGenerator
         }
     }
 
-    private AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
-    {
-        DEREncodable asn1Params;
-        if (params != null)
-        {
-            ASN1InputStream             aIn = new ASN1InputStream(params.getEncoded("ASN.1"));
-      
-            asn1Params = aIn.readObject();
-        }
-        else
-        {
-            asn1Params = new DERNull();
-        }
-        
-        AlgorithmIdentifier  encAlgId = new AlgorithmIdentifier(
-                new DERObjectIdentifier(encryptionOID),
-                asn1Params);
-        return encAlgId;
-    }
-    
-
-    
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
@@ -291,7 +274,7 @@ public class CMSEnvelopedDataStreamGenerator
     {
         try
         {
-            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
+            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
                                                     
             return open(out, encryptionOID, keyGen, provider);
         }
@@ -315,7 +298,7 @@ public class CMSEnvelopedDataStreamGenerator
     {
         try
         {
-            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
+            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
             
             keyGen.init(keySize);
 

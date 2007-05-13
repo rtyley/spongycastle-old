@@ -25,16 +25,54 @@ public class DERApplicationSpecific
         DEREncodable         object) 
         throws IOException 
     {
-        this.tag = tag | DERTags.CONSTRUCTED;
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DEROutputStream dos = new DEROutputStream(baos);
-        
-        dos.writeObject(object);
-        
-        this.octets = baos.toByteArray();
+        this(true, tag, object);
     }
-    
+
+    public DERApplicationSpecific(
+        boolean      explicit,
+        int          tag,
+        DEREncodable object)
+        throws IOException
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        DEROutputStream dos = new DEROutputStream(bOut);
+
+        dos.writeObject(object);
+
+        byte[] data = bOut.toByteArray();
+
+        if (tag >= 0x1f)
+        {
+            throw new IOException("unsupported tag number");
+        }
+
+        if (explicit)
+        {
+            this.tag = tag | DERTags.CONSTRUCTED;
+            this.octets = data;
+        }
+        else
+        {
+            this.tag = tag;
+            int lenBytes = getLengthOfLength(data);
+            byte[] tmp = new byte[data.length - lenBytes];
+            System.arraycopy(data, lenBytes, tmp, 0, tmp.length);
+            this.octets = tmp;
+        }
+    }
+
+    private int getLengthOfLength(byte[] data)
+    {
+        int count = 2;               // TODO: assumes only a 1 byte tag number
+
+        while((data[count - 1] & 0x80) != 0)
+        {
+            count++;
+        }
+
+        return count;
+    }
+
     public boolean isConstructed()
     {
         return (tag & DERTags.CONSTRUCTED) != 0;
@@ -54,6 +92,28 @@ public class DERApplicationSpecific
         throws IOException 
     {
         return new ASN1InputStream(getContents()).readObject();
+    }
+
+    /**
+     * Return the enclosed object assuming implicit tagging.
+     *
+     * @param derTagNo the type tag that should be applied to the object's contents.
+     * @return  the resulting object
+     * @throws IOException if reconstruction fails.
+     */
+    public DERObject getObject(int derTagNo)
+        throws IOException
+    {
+        if (tag >= 0x1f)
+        {
+            throw new IOException("unsupported tag number");
+        }
+                
+        byte[] tmp = this.getEncoded();
+
+        tmp[0] = (byte)derTagNo;
+        
+        return new ASN1InputStream(tmp).readObject();
     }
     
     /* (non-Javadoc)
