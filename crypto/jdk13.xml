@@ -44,6 +44,7 @@
                 <exclude name="**/nist/NistCertPathReviewerTest.java" />
                 <exclude name="**/CRL5Test.java" />
                 <exclude name="**/SignedMailValidatorTest.java" />
+                <exclude name="**/LocalizedMessageTest.java" />
                 <exclude name="**/DummyCertPathReviewer.java" />
                 <exclude name="**/X509LDAP*.java" />
                 <exclude name="**/tls/test/*.java" />
