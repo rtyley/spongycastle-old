@@ -257,52 +257,29 @@ public class TeleTrusTNamedCurves
     static final Hashtable curves = new Hashtable();
     static final Hashtable names = new Hashtable();
 
+    static void defineCurve(String name, DERObjectIdentifier oid, X9ECParametersHolder holder)
+    {
+        objIds.put(name, oid);
+        names.put(oid, name);
+        curves.put(oid, holder);
+    }
+
     static
     {
-        objIds.put("brainpoolp160r1", TeleTrusTObjectIdentifiers.brainpoolP160r1);
-        objIds.put("brainpoolp160t1", TeleTrusTObjectIdentifiers.brainpoolP160t1);
-        objIds.put("brainpoolp192r1", TeleTrusTObjectIdentifiers.brainpoolP192r1);
-        objIds.put("brainpoolp192t1", TeleTrusTObjectIdentifiers.brainpoolP192t1);
-        objIds.put("brainpoolp224r1", TeleTrusTObjectIdentifiers.brainpoolP224r1);
-        objIds.put("brainpoolp224t1", TeleTrusTObjectIdentifiers.brainpoolP224t1);
-        objIds.put("brainpoolp256r1", TeleTrusTObjectIdentifiers.brainpoolP256r1);
-        objIds.put("brainpoolp256t1", TeleTrusTObjectIdentifiers.brainpoolP256t1);
-        objIds.put("brainpoolp320r1", TeleTrusTObjectIdentifiers.brainpoolP320r1);
-        objIds.put("brainpoolp320t1", TeleTrusTObjectIdentifiers.brainpoolP320t1);
-        objIds.put("brainpoolp384r1", TeleTrusTObjectIdentifiers.brainpoolP384r1);
-        objIds.put("brainpoolp384t1", TeleTrusTObjectIdentifiers.brainpoolP384t1);
-        objIds.put("brainpoolp512r1", TeleTrusTObjectIdentifiers.brainpoolP512r1);
-        objIds.put("brainpoolp512t1", TeleTrusTObjectIdentifiers.brainpoolP512t1);
-
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP160r1, "brainpoolP160r1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP160t1, "brainpoolP160t1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP192r1, "brainpoolP192r1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP192t1, "brainpoolP192t1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP224r1, "brainpoolP224r1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP224t1, "brainpoolP224t1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP256r1, "brainpoolP256r1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP256t1, "brainpoolP256t1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP320r1, "brainpoolP320r1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP320t1, "brainpoolP320t1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP384r1, "brainpoolP384r1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP384t1, "brainpoolP384t1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP512r1, "brainpoolP512r1");
-        names.put(TeleTrusTObjectIdentifiers.brainpoolP512t1, "brainpoolP512t1");
-
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP160r1, brainpoolP160r1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP160t1, brainpoolP160t1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP192r1, brainpoolP192r1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP192t1, brainpoolP192t1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP224r1, brainpoolP224r1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP224t1, brainpoolP224t1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP256r1, brainpoolP256r1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP256t1, brainpoolP256t1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP320r1, brainpoolP320r1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP320t1, brainpoolP320t1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP384r1, brainpoolP384r1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP384t1, brainpoolP384t1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP512r1, brainpoolP512r1);
-        curves.put(TeleTrusTObjectIdentifiers.brainpoolP512t1, brainpoolP512t1);
+        defineCurve("brainpoolp160r1", TeleTrusTObjectIdentifiers.brainpoolP160r1, brainpoolP160r1);
+        defineCurve("brainpoolp160t1", TeleTrusTObjectIdentifiers.brainpoolP160t1, brainpoolP160t1);
+        defineCurve("brainpoolp192r1", TeleTrusTObjectIdentifiers.brainpoolP192r1, brainpoolP192r1);
+        defineCurve("brainpoolp192t1", TeleTrusTObjectIdentifiers.brainpoolP192t1, brainpoolP192t1);
+        defineCurve("brainpoolp224r1", TeleTrusTObjectIdentifiers.brainpoolP224r1, brainpoolP224r1);
+        defineCurve("brainpoolp224t1", TeleTrusTObjectIdentifiers.brainpoolP224t1, brainpoolP224t1);
+        defineCurve("brainpoolp256r1", TeleTrusTObjectIdentifiers.brainpoolP256r1, brainpoolP256r1);
+        defineCurve("brainpoolp256t1", TeleTrusTObjectIdentifiers.brainpoolP256t1, brainpoolP256t1);
+        defineCurve("brainpoolp320r1", TeleTrusTObjectIdentifiers.brainpoolP320r1, brainpoolP320r1);
+        defineCurve("brainpoolp320t1", TeleTrusTObjectIdentifiers.brainpoolP320t1, brainpoolP320t1);
+        defineCurve("brainpoolp384r1", TeleTrusTObjectIdentifiers.brainpoolP384r1, brainpoolP384r1);
+        defineCurve("brainpoolp384t1", TeleTrusTObjectIdentifiers.brainpoolP384t1, brainpoolP384t1);
+        defineCurve("brainpoolp512r1", TeleTrusTObjectIdentifiers.brainpoolP512r1, brainpoolP512r1);
+        defineCurve("brainpoolp512t1", TeleTrusTObjectIdentifiers.brainpoolP512t1, brainpoolP512t1);
     }
 
     public static X9ECParameters getByName(
