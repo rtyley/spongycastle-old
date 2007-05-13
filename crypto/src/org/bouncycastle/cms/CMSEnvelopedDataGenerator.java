@@ -3,7 +3,6 @@ package org.bouncycastle.cms;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.EncryptedContentInfo;
@@ -70,10 +69,9 @@ public class CMSEnvelopedDataGenerator
 
         try
         {
-            Cipher              cipher = Cipher.getInstance(encryptionOID, encProviderName);
+            Cipher cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encryptionOID, encProviderName);
 
             AlgorithmParameters params;
-            DEREncodable        asn1Params;
             
             encKey = keyGen.generateKey();
 
