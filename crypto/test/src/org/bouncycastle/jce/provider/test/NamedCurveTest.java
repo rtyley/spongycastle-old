@@ -30,7 +30,8 @@ public class NamedCurveTest
     extends SimpleTest
 {
     private static Hashtable CURVE_NAMES = new Hashtable();
-    
+    private static Hashtable CURVE_ALIASES = new Hashtable();
+
     static
     {
         CURVE_NAMES.put("prime192v1", "prime192v1"); // X9.62
@@ -38,7 +39,10 @@ public class NamedCurveTest
         CURVE_NAMES.put("secp224r1", "secp224r1");
         CURVE_NAMES.put("B-409", SECNamedCurves.getName(NISTNamedCurves.getOID("B-409")));   // nist
         CURVE_NAMES.put("P-521", SECNamedCurves.getName(NISTNamedCurves.getOID("P-521")));
-        CURVE_NAMES.put("brainpoolP512r1", "brainpoolP512r1");         // TeleTrusT
+        CURVE_NAMES.put("brainpoolp160r1", "brainpoolp160r1");         // TeleTrusT
+
+        CURVE_ALIASES.put("secp192r1", "prime192v1");
+        CURVE_ALIASES.put("secp256r1", "prime256v1");
     }
     
     public void testCurve(
@@ -203,7 +207,8 @@ public class NamedCurveTest
         }
 
         ECNamedCurveSpec privSpec = (ECNamedCurveSpec)privKey.getParams();
-        if (!privSpec.getName().equalsIgnoreCase(name))
+        if (!privSpec.getName().equalsIgnoreCase(name)
+            && !privSpec.getName().equalsIgnoreCase((String)CURVE_ALIASES.get(name)))
         {
             fail("private key encoding wrong named curve. Expected: " + name + " got " + privSpec.getName());
         }
@@ -222,7 +227,7 @@ public class NamedCurveTest
         testCurve("secp224r1");
         testCurve("B-409");   // nist
         testCurve("P-521");
-        testCurve("brainpoolP160r1");    // TeleTrusT
+        testCurve("brainpoolp160r1");    // TeleTrusT
 
         for (Enumeration en = X962NamedCurves.getNames(); en.hasMoreElements();)
         {
