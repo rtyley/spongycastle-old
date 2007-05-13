@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -38,6 +39,7 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -450,5 +452,25 @@ public class CMSEnvelopedGenerator
         {
             throw new InvalidKeyException("cannot extract originator public key: " + e);
         }
+    }
+
+    protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
+    {
+        DEREncodable asn1Params;
+        if (params != null)
+        {
+            ASN1InputStream             aIn = new ASN1InputStream(params.getEncoded("ASN.1"));
+
+            asn1Params = aIn.readObject();
+        }
+        else
+        {
+            asn1Params = new DERNull();
+        }
+
+        AlgorithmIdentifier  encAlgId = new AlgorithmIdentifier(
+                new DERObjectIdentifier(encryptionOID),
+                asn1Params);
+        return encAlgId;
     }
 }

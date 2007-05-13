@@ -1,12 +1,9 @@
 package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.EncryptedContentInfo;
@@ -99,22 +96,24 @@ public class CMSEnvelopedDataGenerator
                 }
                 
                 params = pGen.generateParameters();
-
-                ASN1InputStream             aIn = new ASN1InputStream(params.getEncoded("ASN.1"));
-
-                asn1Params = aIn.readObject();
             }
             catch (NoSuchAlgorithmException e)
             {
                 params = null;
-                asn1Params = new DERNull();
             }
 
-            encAlgId = new AlgorithmIdentifier(
-                                new DERObjectIdentifier(encryptionOID),
-                                asn1Params);
-
             cipher.init(Cipher.ENCRYPT_MODE, encKey, params);
+
+            //
+            // If params are null we try and second guess on them as some providers don't provide
+            // algorithm parameter generation explicity but instead generate them under the hood.
+            //
+            if (params == null)
+            {
+                params = cipher.getParameters();
+            }
+            
+            encAlgId = getAlgorithmIdentifier(encryptionOID, params);
 
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
             CipherOutputStream      cOut = new CipherOutputStream(bOut, cipher);
@@ -192,7 +191,7 @@ public class CMSEnvelopedDataGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
+        KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
 
         return generate(content, encryptionOID, keyGen, provider);
     }
@@ -209,7 +208,7 @@ public class CMSEnvelopedDataGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createKeyGenerator(encryptionOID, provider);
+        KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
 
         keyGen.init(keySize);
 

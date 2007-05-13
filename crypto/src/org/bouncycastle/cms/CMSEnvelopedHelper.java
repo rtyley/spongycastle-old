@@ -15,7 +15,8 @@ class CMSEnvelopedHelper
     static final CMSEnvelopedHelper INSTANCE = new CMSEnvelopedHelper();
 
     private static final Map KEYSIZES = new HashMap();
-    private static final Map CIPHERS = new HashMap();
+    private static final Map BASE_CIPHER_NAMES = new HashMap();
+    private static final Map CIPHER_ALG_NAMES = new HashMap();
 
     static
     {
@@ -24,13 +25,18 @@ class CMSEnvelopedHelper
         KEYSIZES.put(CMSEnvelopedGenerator.AES192_CBC,  new Integer(192));
         KEYSIZES.put(CMSEnvelopedGenerator.AES256_CBC,  new Integer(256));
 
-        CIPHERS.put(CMSEnvelopedGenerator.DES_EDE3_CBC,  "DESEDE");
-        CIPHERS.put(CMSEnvelopedGenerator.AES128_CBC,  "AES");
-        CIPHERS.put(CMSEnvelopedGenerator.AES192_CBC,  "AES");
-        CIPHERS.put(CMSEnvelopedGenerator.AES256_CBC,  "AES");
+        BASE_CIPHER_NAMES.put(CMSEnvelopedGenerator.DES_EDE3_CBC,  "DESEDE");
+        BASE_CIPHER_NAMES.put(CMSEnvelopedGenerator.AES128_CBC,  "AES");
+        BASE_CIPHER_NAMES.put(CMSEnvelopedGenerator.AES192_CBC,  "AES");
+        BASE_CIPHER_NAMES.put(CMSEnvelopedGenerator.AES256_CBC,  "AES");
+
+        CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.DES_EDE3_CBC,  "DESEDE/CBC/PKCS5Padding");
+        CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.AES128_CBC,  "AES/CBC/PKCS5Padding");
+        CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.AES192_CBC,  "AES/CBC/PKCS5Padding");
+        CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.AES256_CBC,  "AES/CBC/PKCS5Padding");
     }
 
-    private String getEncryptionAlgName(
+    private String getAsymmetricEncryptionAlgName(
         String encryptionAlgOID)
     {
         if (PKCSObjectIdentifiers.rsaEncryption.getId().equals(encryptionAlgOID))
@@ -48,35 +54,48 @@ class CMSEnvelopedHelper
     {
         try
         {
-            return Cipher.getInstance(encryptionOid, provider);
+            return createCipher(encryptionOid, provider);
         }
         catch (NoSuchAlgorithmException e)
         {
-            return Cipher.getInstance(getEncryptionAlgName(encryptionOid), provider);
+            return createCipher(getAsymmetricEncryptionAlgName(encryptionOid), provider);
         }
     }
-    
-    KeyGenerator createKeyGenerator(
+
+    KeyGenerator createSymmetricKeyGenerator(
         String encryptionOID, 
         String provider) 
         throws NoSuchProviderException, NoSuchAlgorithmException
     {
-        KeyGenerator keyGen;
-        
         try
         {
-            keyGen = KeyGenerator.getInstance(encryptionOID, provider);
+            return createKeyGenerator(encryptionOID, provider);
         }
         catch (NoSuchAlgorithmException e)
         {
-            keyGen = KeyGenerator.getInstance(encryptionOID);
+            try
+            {
+                String algName = (String)BASE_CIPHER_NAMES.get(encryptionOID);
+                if (algName != null)
+                {
+                    return createKeyGenerator(algName, provider);
+                }
+            }
+            catch (NoSuchAlgorithmException ex)
+            {
+                // ignore
+            }
+            if (provider != null)
+            {
+                return createSymmetricKeyGenerator(encryptionOID, null);
+            }
+            throw e;
         }
-        return keyGen;
     }
 
     String getRFC3211WrapperName(String oid)
     {
-        String alg = (String)CIPHERS.get(oid);
+        String alg = (String)BASE_CIPHER_NAMES.get(oid);
 
         if (alg == null)
         {
@@ -96,5 +115,61 @@ class CMSEnvelopedHelper
         }
 
         return keySize.intValue();
+    }
+
+    private Cipher createCipher(
+        String algName,
+        String provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException
+    {
+        if (provider != null)
+        {
+            return Cipher.getInstance(algName, provider);
+        }
+        else
+        {
+            return Cipher.getInstance(algName);
+        }
+    }
+
+    private KeyGenerator createKeyGenerator(
+        String algName,
+        String provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException
+    {
+        if (provider != null)
+        {
+            return KeyGenerator.getInstance(algName, provider);
+        }
+        else
+        {
+            return KeyGenerator.getInstance(algName);
+        }
+    }
+
+    Cipher getSymmetricCipher(String encryptionOID, String provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException
+    {
+        try
+        {
+            return createCipher(encryptionOID, provider);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            String alternate = (String)CIPHER_ALG_NAMES.get(encryptionOID);
+
+            try
+            {
+                return createCipher(alternate, provider);
+            }
+            catch (NoSuchAlgorithmException ex)
+            {
+                if (provider != null)
+                {
+                    return getSymmetricCipher(encryptionOID, null); // roll back to default
+                }
+                throw e;
+            }
+        }
     }
 }
