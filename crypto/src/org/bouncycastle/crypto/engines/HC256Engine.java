@@ -18,6 +18,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  * See
  * 
  * http://www.ecrypt.eu.org/stream/hcp3.html
+ * </p>
  */
 public class HC256Engine
     implements StreamCipher

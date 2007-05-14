@@ -17,6 +17,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  * No attacks are known as of today (April 2007). See
  *
  * http://www.ecrypt.eu.org/stream/hcp3.html
+ * </p>
  */
 public class HC128Engine
     implements StreamCipher
