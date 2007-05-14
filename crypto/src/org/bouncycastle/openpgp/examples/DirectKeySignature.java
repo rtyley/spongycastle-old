@@ -27,13 +27,14 @@ import java.util.Iterator;
  * A simple utility class that directly signs a public key and writes the signed key to "SignedKey.asc" in 
  * the current working directory.
  * <p>
- * To sign a key: DirectKeySignature secretKeyFile secretKeyPass publicKeyFile(key to be signed) NotationName NotationValue.<br>
- * <p>
- * To display a NotationData packet from a publicKey previously signed: DirectKeySignature signedPublicKeyFile.<br>
- * <p>
+ * To sign a key: DirectKeySignature secretKeyFile secretKeyPass publicKeyFile(key to be signed) NotationName NotationValue.<br/>
+ * </p><p>
+ * To display a NotationData packet from a publicKey previously signed: DirectKeySignature signedPublicKeyFile.<br/>
+ * </p><p>
  * <b>Note</b>: this example will silently overwrite files, nor does it pay any attention to
  * the specification of "_CONSOLE" in the filename. It also expects that a single pass phrase
  * will have been used.
+ * </p>
  */
 public class DirectKeySignature
 {
