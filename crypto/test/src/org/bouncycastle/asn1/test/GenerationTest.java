@@ -112,7 +112,7 @@ public class GenerationTest
         //
         // read back test
         //
-        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v2CertList));
+        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v1Cert));
         DERObject       o = aIn.readObject();
 
         bOut = new ByteArrayOutputStream();
@@ -120,7 +120,7 @@ public class GenerationTest
 
         aOut.writeObject(o);
 
-        if (!Arrays.areEqual(bOut.toByteArray(), v2CertList))
+        if (!Arrays.areEqual(bOut.toByteArray(), v1Cert))
         {
             fail("failed v1 cert read back test");
         }
@@ -193,7 +193,7 @@ public class GenerationTest
         //
         // read back test
         //
-        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v2CertList));
+        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v3Cert));
         DERObject       o = aIn.readObject();
 
         bOut = new ByteArrayOutputStream();
@@ -201,7 +201,7 @@ public class GenerationTest
 
         aOut.writeObject(o);
 
-        if (!Arrays.areEqual(bOut.toByteArray(), v2CertList))
+        if (!Arrays.areEqual(bOut.toByteArray(), v3Cert))
         {
             fail("failed v3 cert read back test");
         }
@@ -268,7 +268,7 @@ public class GenerationTest
         //
         // read back test
         //
-        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v2CertList));
+        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v3CertNullSubject));
         DERObject       o = aIn.readObject();
 
         bOut = new ByteArrayOutputStream();
@@ -276,9 +276,9 @@ public class GenerationTest
 
         aOut.writeObject(o);
 
-        if (!Arrays.areEqual(bOut.toByteArray(), v2CertList))
+        if (!Arrays.areEqual(bOut.toByteArray(), v3CertNullSubject))
         {
-            fail("failed v3 cert read back test");
+            fail("failed v3 null sub cert read back test");
         }
     }
 
