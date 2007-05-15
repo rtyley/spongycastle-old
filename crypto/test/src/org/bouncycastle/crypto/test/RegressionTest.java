@@ -89,6 +89,7 @@ public class RegressionTest
         new CMacTest(),
         new EAXTest(),
         new HCFamilyTest(),
+        new ISAACTest(),
         //new NaccacheSternTest(),
         new NullTest()
     };
