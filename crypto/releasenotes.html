@@ -29,6 +29,9 @@ Release 1.37
 the file to be signed. This has been fixed.</li>
 <li>A possible infinite loop in the CertPathBuilder and SignedMailValidator have been removed.</li>
 <li>Requesting DES, DESede, or Blowfish keys using regular Diffie-Hellman now returns the same length keys as the regular JCE provider.</li>
+<li>Some uncompressed EC certificates were being interpreted as uncompressed and causing an exception. This has been fixed.</li>
+<li>Adding a CRL with no revocations on it to the CRL generator could cause an exception to be thrown. This has been fixed.</li>
+<li>Using the default JDK provider with the CMS library would cause exceptions in some circumstances. This has been fixed.</li>
 </ul>
 <h3>2.1.2 Additional Features and Functionality</h3>
 <ul>
@@ -40,6 +43,7 @@ the file to be signed. This has been fixed.</li>
 <li>Support for implicit tagging has been added to DERApplicationSpecific.</li>
 <li>CMS better supports basic Sun provider.</li>
 <li>A full set of SEC-2 EC curves is now provided in the SEC lookup table.</li>
+<li>Specifying a null provider in CMS now always uses the default provider, rather than causing an exception.</li>
 </ul>
 
 <h3>2.2.1 Version</h3>
