@@ -313,15 +313,20 @@ public class JCEECPublicKey
             if (data[0] == 0x04 && data[1] == data.length - 2 
                 && (data[2] == 0x02 || data[2] == 0x03))
             {
-                try
+                int aLength = ecSpec.getCurve().getA().toByteArray().length;
+
+                if (aLength >= data.length - 3 && aLength <= data.length - 4)
                 {
-                    ASN1InputStream         aIn = new ASN1InputStream(data);
-    
-                    key = (ASN1OctetString)aIn.readObject();
-                }
-                catch (IOException ex)
-                {
-                    throw new IllegalArgumentException("error recovering public key");
+                    try
+                    {
+                        ASN1InputStream         aIn = new ASN1InputStream(data);
+
+                        key = (ASN1OctetString)aIn.readObject();
+                    }
+                    catch (IOException ex)
+                    {
+                        throw new IllegalArgumentException("error recovering public key");
+                    }
                 }
             }
             X9ECPoint       derQ = new X9ECPoint(curve, key);
