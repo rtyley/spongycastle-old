@@ -130,21 +130,24 @@ public class X509V2CRLGenerator
         throws CRLException
     {
         Set revocations = other.getRevokedCertificates();
-        
-        Iterator it = revocations.iterator();
-        while (it.hasNext())
+
+        if (revocations != null)
         {
-            X509CRLEntry entry = (X509CRLEntry)it.next();
-            
-            ASN1InputStream aIn = new ASN1InputStream(entry.getEncoded());
-            
-            try
+            Iterator it = revocations.iterator();
+            while (it.hasNext())
             {
-                tbsGen.addCRLEntry(ASN1Sequence.getInstance(aIn.readObject()));
-            }
-            catch (IOException e)
-            {
-                throw new CRLException("exception processing encoding of CRL: " + e.toString());
+                X509CRLEntry entry = (X509CRLEntry)it.next();
+
+                ASN1InputStream aIn = new ASN1InputStream(entry.getEncoded());
+
+                try
+                {
+                    tbsGen.addCRLEntry(ASN1Sequence.getInstance(aIn.readObject()));
+                }
+                catch (IOException e)
+                {
+                    throw new CRLException("exception processing encoding of CRL: " + e.toString());
+                }
             }
         }
     }
