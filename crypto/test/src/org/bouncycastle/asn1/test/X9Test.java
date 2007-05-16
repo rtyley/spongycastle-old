@@ -20,6 +20,7 @@ import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ECPoint;
+import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
 public class X9Test
@@ -47,6 +48,18 @@ public class X9Test
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         DEROutputStream         dOut = new DEROutputStream(bOut);
         X9ECParameters          ecP = X962NamedCurves.getByOID(X9ObjectIdentifiers.prime239v3);
+
+        X9IntegerConverter conv = new X9IntegerConverter();
+
+        if (conv.getByteLength(ecP.getCurve()) != 30)
+        {
+            fail("wrong byte length reported for curve");
+        }
+
+        if (conv.getFieldSize(ecP.getCurve()) != 239)
+        {
+            fail("wrong field size reported for curve");
+        }
 
         //
         // named curve
