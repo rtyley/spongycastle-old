@@ -17,6 +17,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ECPoint;
+import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
@@ -313,9 +314,9 @@ public class JCEECPublicKey
             if (data[0] == 0x04 && data[1] == data.length - 2 
                 && (data[2] == 0x02 || data[2] == 0x03))
             {
-                int qLength = (ecSpec.getCurve().getField().getFieldSize() + 7) / 8;
+                int qLength = new X9IntegerConverter().getByteLength(curve);
 
-                if (qLength == data.length - 3)
+                if (qLength >= data.length - 3)
                 {
                     try
                     {
