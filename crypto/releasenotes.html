@@ -29,7 +29,7 @@ Release 1.37
 the file to be signed. This has been fixed.</li>
 <li>A possible infinite loop in the CertPathBuilder and SignedMailValidator have been removed.</li>
 <li>Requesting DES, DESede, or Blowfish keys using regular Diffie-Hellman now returns the same length keys as the regular JCE provider.</li>
-<li>Some uncompressed EC certificates were being interpreted as uncompressed and causing an exception. This has been fixed.</li>
+<li>Some uncompressed EC certificates were being interpreted as compressed and causing an exception. This has been fixed.</li>
 <li>Adding a CRL with no revocations on it to the CRL generator could cause an exception to be thrown. This has been fixed.</li>
 <li>Using the default JDK provider with the CMS library would cause exceptions in some circumstances. This has been fixed.</li>
 </ul>
