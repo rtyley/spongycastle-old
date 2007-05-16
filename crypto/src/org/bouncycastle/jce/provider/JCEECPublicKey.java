@@ -313,9 +313,9 @@ public class JCEECPublicKey
             if (data[0] == 0x04 && data[1] == data.length - 2 
                 && (data[2] == 0x02 || data[2] == 0x03))
             {
-                int aLength = ecSpec.getCurve().getA().toByteArray().length;
+                int qLength = (ecSpec.getCurve().getField().getFieldSize() + 7) / 8;
 
-                if (aLength >= data.length - 3 && aLength <= data.length - 4)
+                if (qLength == data.length - 3)
                 {
                     try
                     {
