@@ -24,11 +24,11 @@ public class X9IntegerConverter
     {
         if (c instanceof ECCurve.Fp)
         {
-            return ((ECCurve.Fp) c).getQ().bitLength();
+            return ((ECCurve.Fp)c).getQ().bitLength();
         }
         else
         {
-            return ((ECCurve.F2m) c).getM();
+            return ((ECCurve.F2m)c).getM();
         }
     }
 

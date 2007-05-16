@@ -241,12 +241,12 @@ public class JCEECPublicKey
             //
             // extra octet string - one of our old certs...
             //
-            if (data[0] == 0x04 && data[1] == data.length - 2
+            if (data[0] == 0x04 && data[1] == data.length - 2 
                 && (data[2] == 0x02 || data[2] == 0x03))
             {
-                int aLength = ecSpec.getCurve().getA().toByteArray().length;
+                int qLength = new X9IntegerConverter().getByteLength(curve);
 
-                if (aLength >= data.length - 3 && aLength <= data.length - 4)
+                if (qLength >= data.length - 3)
                 {
                     try
                     {
