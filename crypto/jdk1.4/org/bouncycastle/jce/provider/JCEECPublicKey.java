@@ -25,6 +25,7 @@ import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ECPoint;
+import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
@@ -77,9 +78,7 @@ public class JCEECPublicKey
             {
                 org.bouncycastle.jce.spec.ECParameterSpec s = ProviderUtil.getEcImplicitlyCa();
 
-                q = (q instanceof org.bouncycastle.math.ec.ECPoint.Fp)
-                                ? (org.bouncycastle.math.ec.ECPoint)new org.bouncycastle.math.ec.ECPoint.Fp(s.getCurve(), q.getX(), q.getY())
-                                : (org.bouncycastle.math.ec.ECPoint)new org.bouncycastle.math.ec.ECPoint.F2m(s.getCurve(), q.getX(), q.getY());
+                q = s.getCurve().createPoint(q.getX().toBigInteger(), q.getY().toBigInteger(), false);
             }
             this.ecSpec = null;
         }
@@ -177,25 +176,7 @@ public class JCEECPublicKey
 
             ecSpec = spec;
 
-            ECCurve curve = spec.getCurve();
-            if (curve instanceof ECCurve.Fp) 
-            {
-                ECCurve.Fp curveFp = (ECCurve.Fp) curve;
-                this.q = new ECPoint.Fp(curveFp, new ECFieldElement.Fp(curveFp.getQ(), new BigInteger(1, x)), new ECFieldElement.Fp(curveFp.getQ(), new BigInteger(1, y)));
-            } 
-            else if (curve instanceof ECCurve.F2m) 
-            {
-                ECCurve.F2m curveF2m = (ECCurve.F2m) curve;
-                int m = curveF2m.getM();
-                int k1 = curveF2m.getK1();
-                int k2 = curveF2m.getK2();
-                int k3 = curveF2m.getK3();
-                this.q = new ECPoint.F2m(curveF2m, new ECFieldElement.F2m(m, k1, k2, k3, new BigInteger(1, x)), new ECFieldElement.F2m(m, k1, k2, k3, new BigInteger(1, y)), false);
-            }
-            else 
-            {
-                throw new UnsupportedOperationException("Subclass of ECPoint " + curve.getClass().toString() + "not supported");
-            }
+            this.q = spec.getCurve().createPoint(new BigInteger(1, x), new BigInteger(1, y), false);
         }
         else
         {
@@ -295,8 +276,10 @@ public class JCEECPublicKey
                                    CryptoProObjectIdentifiers.gostR3411_94_CryptoProParamSet);
             }
 
-            ASN1OctetString    p = (ASN1OctetString)(new X9ECPoint(new org.bouncycastle.math.ec.ECPoint.Fp(this.getQ().getCurve(), this.getQ().getX(), this.getQ().getY(), false)).getDERObject());
-            
+            ECPoint qq = this.getQ();
+            ECPoint point = qq.getCurve().createPoint(qq.getX().toBigInteger(), qq.getY().toBigInteger(), false);
+            ASN1OctetString p = (ASN1OctetString)(new X9ECPoint(point).getDERObject());
+
             BigInteger      bX = this.q.getX().toBigInteger();
             BigInteger      bY = this.q.getY().toBigInteger();
             byte[]          encKey = new byte[64];
@@ -335,19 +318,7 @@ public class JCEECPublicKey
                 ECParameterSpec         p = (ECParameterSpec)ecSpec;
 
                 ECCurve curve = p.getG().getCurve();
-                ECPoint generator;
-                if (curve instanceof ECCurve.Fp)
-                {
-                    generator = new ECPoint.Fp(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression);
-                }
-                else if (curve instanceof ECCurve.F2m)
-                {
-                    generator = new ECPoint.F2m(p.getG().getCurve(), p.getG().getX(), p.getG().getY(), withCompression);
-                }
-                else
-                {
-                    throw new UnsupportedOperationException("Subclass of ECPoint " + curve.getClass().toString() + "not supported");
-                }
+                ECPoint generator = curve.createPoint(p.getG().getX().toBigInteger(), p.getG().getY().toBigInteger(), withCompression);
 
                 X9ECParameters ecP = new X9ECParameters(
                     p.getCurve(), generator, p.getN(), p.getH(), p.getSeed());
@@ -356,20 +327,9 @@ public class JCEECPublicKey
             }
 
             ECCurve curve = this.engineGetQ().getCurve();
-            ASN1OctetString p;
-            if (curve instanceof ECCurve.Fp) 
-            {
-                p = (ASN1OctetString)(new X9ECPoint(new ECPoint.Fp(curve, this.getQ().getX(), this.getQ().getY(), withCompression)).getDERObject());
-            } 
-            else if (curve instanceof ECCurve.F2m)
-            {
-                p = (ASN1OctetString)(new X9ECPoint(new ECPoint.F2m(curve, this.getQ().getX(), this.getQ().getY(), withCompression)).getDERObject());
-            } 
-            else 
-            {
-                throw new UnsupportedOperationException("Subclass of ECPoint " + curve.getClass().toString() + "not supported");
-            }
-            
+            ECPoint point = curve.createPoint(this.getQ().getX().toBigInteger(), this.getQ().getY().toBigInteger(), withCompression);
+            ASN1OctetString p = (ASN1OctetString)(new X9ECPoint(point).getDERObject());;
+
             info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), p.getOctets());
         }
         
