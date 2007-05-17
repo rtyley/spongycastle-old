@@ -52,7 +52,7 @@ public class PKIXNameConstraints
     public void checkExcludedDN(ASN1Sequence dns)
         throws CertPathValidatorException
     {
-        checkPermittedDN(excludedSubtreesDN, dns);
+        checkExcludedDN(excludedSubtreesDN, dns);
     }
 
     private void checkPermittedDN(Set permitted, ASN1Sequence dns)
