@@ -263,31 +263,15 @@ public class JCEECPrivateKey
         }
         else
         {
-            ECField field = ecSpec.getCurve().getField();
-            ECCurve curve;
-            org.bouncycastle.math.ec.ECPoint ecPoint;
+            ECCurve curve = EC5Util.convertCurve(ecSpec.getCurve());
 
-            if (field instanceof ECFieldFp)
-            {
-                curve = new ECCurve.Fp(((ECFieldFp)field).getP(), ecSpec.getCurve().getA(), ecSpec.getCurve().getB());
-                ecPoint = new org.bouncycastle.math.ec.ECPoint.Fp(curve, new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), ecSpec.getGenerator().getAffineX()), new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), ecSpec.getGenerator().getAffineY()), withCompression);
-            }
-            else
-            {
-                ECFieldF2m fieldF2m = (ECFieldF2m)field;
-                int m = fieldF2m.getM();
-                int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
-                curve = new ECCurve.F2m(m, ks[0], ks[1], ks[2], ecSpec.getCurve().getA(), ecSpec.getCurve().getB());
-                ecPoint = new org.bouncycastle.math.ec.ECPoint.F2m(curve, new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], ecSpec.getGenerator().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], ecSpec.getGenerator().getAffineY()), withCompression);
-            }
+            X9ECParameters ecP = new X9ECParameters(
+                curve,
+                EC5Util.convertPoint(curve, ecSpec.getGenerator(), withCompression),
+                ecSpec.getOrder(),
+                BigInteger.valueOf(ecSpec.getCofactor()),
+                ecSpec.getCurve().getSeed());
 
-            X9ECParameters          ecP = new X9ECParameters(
-                                            curve,
-                                            ecPoint,
-                                            ecSpec.getOrder(),
-                                            BigInteger.valueOf(ecSpec.getCofactor()),
-                                            ecSpec.getCurve().getSeed());
-            
             params = new X962Parameters(ecP);
         }
         

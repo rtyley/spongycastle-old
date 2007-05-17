@@ -50,7 +50,6 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
 
-import javax.crypto.spec.DHParameterSpec;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;
@@ -65,6 +64,8 @@ import java.security.spec.ECFieldFp;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Hashtable;
+
+import javax.crypto.spec.DHParameterSpec;
 
 public abstract class JDKKeyPairGenerator
     extends KeyPairGenerator
@@ -480,25 +481,11 @@ public abstract class JDKKeyPairGenerator
                 java.security.spec.ECParameterSpec p = (java.security.spec.ECParameterSpec)params;
                 this.ecParams = params;
 
-                ECCurve curve;
-                ECPoint g;
-                ECField field = p.getCurve().getField();
+                ECCurve curve = EC5Util.convertCurve(p.getCurve());
+                ECPoint g = EC5Util.convertPoint(curve, p.getGenerator(), false);
 
-                if (field instanceof ECFieldFp)
-                {
-                    curve = new ECCurve.Fp(((ECFieldFp)p.getCurve().getField()).getP(), p.getCurve().getA(), p.getCurve().getB());
-                    g = new ECPoint.Fp(curve, new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), p.getGenerator().getAffineX()), new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), p.getGenerator().getAffineY()));
-                }
-                else
-                {
-                    ECFieldF2m fieldF2m = (ECFieldF2m)field;
-                    int m = fieldF2m.getM();
-                    int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
-                    curve = new ECCurve.F2m(m, ks[0], ks[1], ks[2], p.getCurve().getA(), p.getCurve().getB());
-                    g = new ECPoint.F2m(curve, new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineY()), false);
-                }
                 param = new ECKeyGenerationParameters(new ECDomainParameters(curve, g, p.getOrder(), BigInteger.valueOf(p.getCofactor())), random);
-    
+
                 engine.init(param);
                 initialised = true;
             }
@@ -550,23 +537,9 @@ public abstract class JDKKeyPairGenerator
                 }
 
                 java.security.spec.ECParameterSpec p = (java.security.spec.ECParameterSpec)ecParams;
-                ECCurve curve;
-                ECPoint g;
-                ECField field = p.getCurve().getField();
 
-                if (field instanceof ECFieldFp)
-                {
-                    curve = new ECCurve.Fp(((ECFieldFp)p.getCurve().getField()).getP(), p.getCurve().getA(), p.getCurve().getB());
-                    g = new ECPoint.Fp(curve, new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), p.getGenerator().getAffineX()), new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), p.getGenerator().getAffineY()));
-                }
-                else
-                {
-                    ECFieldF2m fieldF2m = (ECFieldF2m)field;
-                    int m = fieldF2m.getM();
-                    int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
-                    curve = new ECCurve.F2m(m, ks[0], ks[1], ks[2], p.getCurve().getA(), p.getCurve().getB());
-                    g = new ECPoint.F2m(curve, new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], p.getGenerator().getAffineY()), false);
-                }
+                ECCurve curve = EC5Util.convertCurve(p.getCurve());
+                ECPoint g = EC5Util.convertPoint(curve, p.getGenerator(), false);
 
                 param = new ECKeyGenerationParameters(new ECDomainParameters(curve, g, p.getOrder(), BigInteger.valueOf(p.getCofactor())), random);
 
