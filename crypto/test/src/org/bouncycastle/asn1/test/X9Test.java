@@ -56,7 +56,7 @@ public class X9Test
             fail("wrong byte length reported for curve");
         }
 
-        if (conv.getFieldSize(ecP.getCurve()) != 239)
+        if (ecP.getCurve().getFieldSize() != 239)
         {
             fail("wrong field size reported for curve");
         }
