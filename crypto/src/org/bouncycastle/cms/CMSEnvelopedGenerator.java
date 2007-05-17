@@ -37,10 +37,13 @@ import org.bouncycastle.jce.PrincipalUtil;
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -472,5 +475,41 @@ public class CMSEnvelopedGenerator
                 new DERObjectIdentifier(encryptionOID),
                 asn1Params);
         return encAlgId;
+    }
+
+    protected AlgorithmParameters generateParameters(String encryptionOID, SecretKey encKey, String encProvider)
+        throws NoSuchProviderException, CMSException
+    {
+        try
+        {
+            AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, encProvider);
+
+            if (encryptionOID.equals(RC2_CBC))
+            {
+                byte[]  iv = new byte[8];
+
+                //
+                // mix in a bit extra...
+                //
+                rand.setSeed(System.currentTimeMillis());
+
+                rand.nextBytes(iv);
+
+                try
+                {
+                    pGen.init(new RC2ParameterSpec(encKey.getEncoded().length * 8, iv));
+                }
+                catch (InvalidAlgorithmParameterException e)
+                {
+                    throw new CMSException("parameters generation error: " + e, e);
+                }
+            }
+
+            return pGen.generateParameters();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            return null;
+        }
     }
 }

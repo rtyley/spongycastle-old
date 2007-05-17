@@ -5,6 +5,8 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.HashMap;
@@ -93,6 +95,36 @@ class CMSEnvelopedHelper
         }
     }
 
+    AlgorithmParameters createAlgorithmParameters(
+        String encryptionOID, 
+        String provider) 
+        throws NoSuchProviderException, NoSuchAlgorithmException
+    {
+        try
+        {
+            return createAlgorithmParams(encryptionOID, provider);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            try
+            {
+                String algName = (String)BASE_CIPHER_NAMES.get(encryptionOID);
+                if (algName != null)
+                {
+                    return createAlgorithmParams(algName, provider);
+                }
+            }
+            catch (NoSuchAlgorithmException ex)
+            {
+                // ignore
+            }
+            //
+            // can't try with default provider here as parameters must be from the specified provider.
+            //
+            throw e;
+        }
+    }
+
     String getRFC3211WrapperName(String oid)
     {
         String alg = (String)BASE_CIPHER_NAMES.get(oid);
@@ -129,6 +161,21 @@ class CMSEnvelopedHelper
         else
         {
             return Cipher.getInstance(algName);
+        }
+    }
+
+    private AlgorithmParameters createAlgorithmParams(
+        String algName,
+        String provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException
+    {
+        if (provider != null)
+        {
+            return AlgorithmParameters.getInstance(algName, provider);
+        }
+        else
+        {
+            return AlgorithmParameters.getInstance(algName);
         }
     }
 
@@ -171,5 +218,44 @@ class CMSEnvelopedHelper
                 throw e;
             }
         }
+    }
+
+    AlgorithmParameters getEncryptionAlgorithmParameters(
+        String encOID,
+        byte[] encParams,
+        String  provider)
+        throws CMSException, NoSuchProviderException
+    {
+        if (encParams == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            AlgorithmParameters params = createAlgorithmParameters(encOID, provider);
+
+            params.init(encParams, "ASN.1");
+
+            return params;
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new CMSException("can't find parameters for algorithm", e);
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("can't find parse parameters", e);
+        }
+    }
+
+    String getSymmetricCipherName(String oid)
+    {
+        String algName = (String)BASE_CIPHER_NAMES.get(oid);
+        if (algName != null)
+        {
+            return algName;
+        }
+        return oid;
     }
 }

@@ -91,6 +91,17 @@ public class EnvelopedDataTest
          + "KoZIhvcNAQcBMBQGCCqGSIb3DQMHBAjwnsDMsafCrKCABBjyPvqFOVMKxxut"
          + "VfTx4fQlNGJN8S2ATRgECMcTQ/dsmeViAAAAAAAAAAAAAA==");
 
+   private byte[] ecMQVKeyAgreeMsgAES128 = Base64.decode(
+          "MIAGCSqGSIb3DQEHA6CAMIACAQIxgf2hgfoCAQOgQ6FBMAsGByqGSM49AgEF"
+        + "AAMyAAPDKU+0H58tsjpoYmYCInMr/FayvCCkupebgsnpaGEB7qS9vzcNVUj6"
+        + "mrnmiC2grpmhRwRFMEMwQTALBgcqhkjOPQIBBQADMgACZpD13z9c7DzRWx6S"
+        + "0xdbq3S+EJ7vWO+YcHVjTD8NcQDcZcWASW899l1PkL936zsuMBoGCSuBBRCG"
+        + "SD8AEDANBglghkgBZQMEAQUFADBLMEkwLTAoMRMwEQYDVQQDEwpBZG1pbi1N"
+        + "RFNFMREwDwYDVQQKEwg0QkNULTJJRAIBAQQYFq58L71nyMK/70w3nc6zkkRy"
+        + "RL7DHmpZMIAGCSqGSIb3DQEHATAdBglghkgBZQMEAQIEEDzRUpreBsZXWHBe"
+        + "onxOtSmggAQQ7csAZXwT1lHUqoazoy8bhAQQq+9Zjj8iGdOWgyebbfj67QAA"
+        + "AAAAAAAAAAA=");
+
 
     private byte[] ecKeyAgreeKey = Base64.decode(
         "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDC8vp7xVTbKSgYVU5Wc"
@@ -165,9 +176,10 @@ public class EnvelopedDataTest
     }
     
     public static void main(
-        String args[]) 
+        String args[])
+        throws Exception
     {
-        junit.textui.TestRunner.run(EnvelopedDataTest.class);
+        junit.textui.TestRunner.run(EnvelopedDataTest.suite());
     }
 
     public static Test suite() 
@@ -655,7 +667,17 @@ public class EnvelopedDataTest
         verifyECKeyAgreeVectors(privKey, "2.16.840.1.101.3.4.1.2", ecKeyAgreeMsgAES128);
         verifyECKeyAgreeVectors(privKey, "1.2.840.113549.3.7", ecKeyAgreeMsgDESEDE);
     }
+    /*
+    public void testECMQVKeyAgreeVectors()
+        throws Exception
+    {
+        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(ecKeyAgreeKey);
+        KeyFactory          fact = KeyFactory.getInstance("ECDH", "BC");
+        PrivateKey          privKey = fact.generatePrivate(privSpec);
 
+        verifyECMQVKeyAgreeVectors(privKey, "2.16.840.1.101.3.4.1.2", ecMQVKeyAgreeMsgAES128);
+    }
+    */
     public void testPasswordAES256()
         throws Exception
     {
@@ -737,6 +759,17 @@ public class EnvelopedDataTest
         }
     }
 
+    public void testOriginatorInfo()
+        throws Exception
+    {
+        CMSEnvelopedData env = new CMSEnvelopedData(CMSSampleMessages.originatorMessage);
+
+        RecipientInformationStore  recipients = env.getRecipientInfos();
+
+        assertEquals(CMSEnvelopedDataGenerator.DES_EDE3_CBC, env.getEncryptionAlgOID());
+
+    }
+
     private void passwordTest(String algorithm)
         throws Exception
     {
@@ -790,6 +823,36 @@ public class EnvelopedDataTest
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
             assertEquals("1.3.133.16.840.63.0.2", recipient.getKeyEncryptionAlgOID());
+
+            byte[] recData = recipient.getContent(privKey, "BC");
+
+            assertTrue(Arrays.equals(data, recData));
+        }
+        else
+        {
+            fail("no recipient found");
+        }
+    }
+
+    private void verifyECMQVKeyAgreeVectors(PrivateKey privKey, String wrapAlg, byte[] message)
+        throws CMSException, GeneralSecurityException
+    {
+        byte[] data = Hex.decode("504b492d4320434d5320456e76656c6f706564446174612053616d706c65");
+
+        CMSEnvelopedData ed = new CMSEnvelopedData(message);
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        assertEquals(wrapAlg, ed.getEncryptionAlgOID());
+
+        if (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals("1.3.133.16.840.63.0.16", recipient.getKeyEncryptionAlgOID());
 
             byte[] recData = recipient.getContent(privKey, "BC");
 

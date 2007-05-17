@@ -397,7 +397,15 @@ public class SignerInformation
         {
             if (algorithm.equals("RSA"))
             {
-                Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding", sigProvider);
+                Cipher c;
+                if (sigProvider != null)
+                {
+                    c = Cipher.getInstance("RSA/ECB/PKCS1Padding", sigProvider);
+                }
+                else
+                {
+                    c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+                }
                 
                 c.init(Cipher.DECRYPT_MODE, key);
                 
@@ -419,7 +427,15 @@ public class SignerInformation
             }
             else if (algorithm.equals("DSA"))
             {
-                Signature sig = Signature.getInstance("NONEwithDSA", sigProvider);
+                Signature sig;
+                if (sigProvider != null)
+                {
+                    sig = Signature.getInstance("NONEwithDSA", sigProvider);
+                }
+                else
+                {
+                    sig = Signature.getInstance("NONEwithDSA", sigProvider);
+                }
                 
                 sig.initVerify(key);
                 

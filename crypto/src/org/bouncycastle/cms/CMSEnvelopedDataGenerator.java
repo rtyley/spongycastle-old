@@ -15,10 +15,8 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.RC2ParameterSpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -74,31 +72,7 @@ public class CMSEnvelopedDataGenerator
             AlgorithmParameters params;
             
             encKey = keyGen.generateKey();
-
-            try
-            {
-                AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, encProviderName);
-
-                if (encryptionOID.equals(RC2_CBC))
-                {
-                    byte[]  iv = new byte[8];
-
-                    //
-                    // mix in a bit extra...
-                    //
-                    rand.setSeed(System.currentTimeMillis());
-
-                    rand.nextBytes(iv);
-
-                    pGen.init(new RC2ParameterSpec(encKey.getEncoded().length * 8, iv));
-                }
-                
-                params = pGen.generateParameters();
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                params = null;
-            }
+            params = generateParameters(encryptionOID, encKey, encProviderName);
 
             cipher.init(Cipher.ENCRYPT_MODE, encKey, params);
 
