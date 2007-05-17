@@ -26,14 +26,10 @@ import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECFieldElement;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECField;
-import java.security.spec.ECFieldF2m;
-import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
@@ -65,19 +61,7 @@ public class JCEECPublicKey
     {
         this.algorithm = algorithm;
         this.ecSpec = spec.getParams();
-        ECField field = ecSpec.getCurve().getField();
-
-        if (field instanceof ECFieldFp)
-        {
-            this.q = new org.bouncycastle.math.ec.ECPoint.Fp(new ECCurve.Fp(((ECFieldFp)field).getP(), ecSpec.getCurve().getA(), ecSpec.getCurve().getB()), new ECFieldElement.Fp(((ECFieldFp)field).getP(), spec.getW().getAffineX()), new ECFieldElement.Fp(((ECFieldFp)field).getP(), spec.getW().getAffineY()));
-        }
-        else
-        {
-            ECFieldF2m fieldF2m = (ECFieldF2m)field;
-            int m = fieldF2m.getM();
-            int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
-            this.q = new org.bouncycastle.math.ec.ECPoint.F2m(new ECCurve.F2m(m, ks[0], ks[1], ks[2], ecSpec.getCurve().getA(), ecSpec.getCurve().getB()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], spec.getW().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[2], spec.getW().getAffineY()), false);
-        }
+        this.q = EC5Util.convertPoint(ecSpec, spec.getW(), false);
     }
 
     JCEECPublicKey(
@@ -90,9 +74,7 @@ public class JCEECPublicKey
         if (spec.getParams() != null) // can be null if implictlyCa
         {
             ECCurve curve = spec.getParams().getCurve();
-            EllipticCurve ellipticCurve;
-
-            ellipticCurve = EC5Util.convertCurve(curve, spec.getParams().getSeed());
+            EllipticCurve ellipticCurve = EC5Util.convertCurve(curve, spec.getParams().getSeed());
 
             this.ecSpec = EC5Util.convertSpec(ellipticCurve, spec.getParams());
         }
@@ -102,9 +84,7 @@ public class JCEECPublicKey
             {
                 org.bouncycastle.jce.spec.ECParameterSpec s = ProviderUtil.getEcImplicitlyCa();
 
-                q = (q instanceof org.bouncycastle.math.ec.ECPoint.Fp)
-                                ? (org.bouncycastle.math.ec.ECPoint)new org.bouncycastle.math.ec.ECPoint.Fp(s.getCurve(), q.getX(), q.getY())
-                                : (org.bouncycastle.math.ec.ECPoint)new org.bouncycastle.math.ec.ECPoint.F2m(s.getCurve(), q.getX(), q.getY());
+                q = s.getCurve().createPoint(q.getX().toBigInteger(), q.getY().toBigInteger(), false);
             }               
             this.ecSpec = null;
         }
@@ -184,20 +164,7 @@ public class JCEECPublicKey
     {
         this.algorithm = key.getAlgorithm();
         this.ecSpec = key.getParams();
-
-        ECField field = this.ecSpec.getCurve().getField();
-        if (field instanceof ECFieldFp)
-        {
-            this.q = new org.bouncycastle.math.ec.ECPoint.Fp(new ECCurve.Fp(((ECFieldFp)field).getP(), ecSpec.getCurve().getA(), ecSpec.getCurve().getB()), new ECFieldElement.Fp(((ECFieldFp)ecSpec.getCurve().getField()).getP(), key.getW().getAffineX()), new ECFieldElement.Fp(((ECFieldFp)ecSpec.getCurve().getField()).getP(), key.getW().getAffineY()));
-        }
-        else
-        {
-            ECFieldF2m fieldF2m = (ECFieldF2m)field;
-            int m = fieldF2m.getM();
-            int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
-            
-            this.q = new org.bouncycastle.math.ec.ECPoint.F2m(new ECCurve.F2m(m, ks[0], ks[1], ks[0], ecSpec.getCurve().getA(), ecSpec.getCurve().getB()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[0], key.getW().getAffineX()), new ECFieldElement.F2m(m, ks[0], ks[1], ks[0], key.getW().getAffineY()), false);
-        }
+        this.q = EC5Util.convertPoint(this.ecSpec, key.getW(), false);
     }
 
     JCEECPublicKey(
@@ -241,15 +208,7 @@ public class JCEECPublicKey
             ECCurve curve = spec.getCurve();
             EllipticCurve ellipticCurve = EC5Util.convertCurve(curve, spec.getSeed());
 
-            if (curve instanceof ECCurve.Fp) 
-            {
-                this.q = new org.bouncycastle.math.ec.ECPoint.Fp(curve, new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), new BigInteger(1, x)), new ECFieldElement.Fp(((ECCurve.Fp)curve).getQ(), new BigInteger(1, y)));
-            }
-            else
-            {
-                ECCurve.F2m curveF2m = (ECCurve.F2m) curve;
-                this.q = new org.bouncycastle.math.ec.ECPoint.F2m(curveF2m, new ECFieldElement.F2m(curveF2m.getM(), curveF2m.getK1(), curveF2m.getK2(), curveF2m.getK3(), new BigInteger(1, x)), new ECFieldElement.F2m(curveF2m.getM(), curveF2m.getK1(), curveF2m.getK2(), curveF2m.getK3(), new BigInteger(1, y)), false);
-            }
+            this.q = curve.createPoint(new BigInteger(1, x), new BigInteger(1, y), false);
 
             ecSpec = new ECNamedCurveSpec(
                     ECGOST3410NamedCurves.getName(gostParams.getPublicKeyParamSet()),
@@ -388,48 +347,25 @@ public class JCEECPublicKey
             }
             else
             {
-                ECField field = ecSpec.getCurve().getField();
-                X9ECParameters ecP;
-                org.bouncycastle.math.ec.ECPoint ecPoint;
-                ECCurve curve;
+                ECCurve curve = EC5Util.convertCurve(ecSpec.getCurve());
 
-                if (field instanceof ECFieldFp) 
-                {                    
-                    curve = new ECCurve.Fp(((ECFieldFp)field).getP(), ecSpec.getCurve().getA(), ecSpec.getCurve().getB());
-                    ecPoint = new org.bouncycastle.math.ec.ECPoint.Fp(curve, curve.fromBigInteger(ecSpec.getGenerator().getAffineX()), curve.fromBigInteger(ecSpec.getGenerator().getAffineY()), withCompression);
-                }
-                else
-                {
-                    ECFieldF2m fieldF2m = (ECFieldF2m)field;
-                    int ks[] = ECUtil.convertMidTerms(fieldF2m.getMidTermsOfReductionPolynomial());
+                X9ECParameters ecP = new X9ECParameters(
+                    curve,
+                    EC5Util.convertPoint(curve, ecSpec.getGenerator(), withCompression),
+                    ecSpec.getOrder(),
+                    BigInteger.valueOf(ecSpec.getCofactor()),
+                    ecSpec.getCurve().getSeed());
 
-                    curve = new ECCurve.F2m(fieldF2m.getM(), ks[0], ks[1], ks[2], ecSpec.getCurve().getA(), ecSpec.getCurve().getB());
-                    ecPoint = new org.bouncycastle.math.ec.ECPoint.F2m(curve, curve.fromBigInteger(ecSpec.getGenerator().getAffineX()), curve.fromBigInteger(ecSpec.getGenerator().getAffineY()), withCompression);
-                }
-
-                ecP = new X9ECParameters(
-                        curve,
-                        ecPoint,
-                        ecSpec.getOrder(),
-                        BigInteger.valueOf(ecSpec.getCofactor()),
-                        ecSpec.getCurve().getSeed());
                 params = new X962Parameters(ecP);
             }
 
             ECCurve curve = this.engineGetQ().getCurve();
+            ASN1OctetString p = (ASN1OctetString)
+                new X9ECPoint(curve.createPoint(this.getQ().getX().toBigInteger(), this.getQ().getY().toBigInteger(), withCompression)).getDERObject();
 
-            if (curve instanceof ECCurve.Fp)
-            {
-                ASN1OctetString    p = (ASN1OctetString)(new X9ECPoint(new org.bouncycastle.math.ec.ECPoint.Fp(curve, this.getQ().getX(), this.getQ().getY(), withCompression)).getDERObject());
-                info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), p.getOctets());
-            }
-            else
-            {
-                ASN1OctetString    p = (ASN1OctetString)(new X9ECPoint(new org.bouncycastle.math.ec.ECPoint.F2m(curve, this.getQ().getX(), this.getQ().getY(), withCompression)).getDERObject());
-                info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), p.getOctets());
-            }
+            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), p.getOctets());
         }
-        
+
         return info.getDEREncoded();
     }
 
