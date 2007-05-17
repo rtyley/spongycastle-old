@@ -10,6 +10,8 @@ public abstract class ECCurve
 {
     ECFieldElement a, b;
 
+    public abstract int getFieldSize();
+
     public abstract ECFieldElement fromBigInteger(BigInteger x);
 
     public abstract ECPoint decodePoint(byte[] encoded);
@@ -45,6 +47,11 @@ public abstract class ECCurve
         public BigInteger getQ()
         {
             return q;
+        }
+
+        public int getFieldSize()
+        {
+            return q.bitLength();
         }
 
         public ECFieldElement fromBigInteger(BigInteger x)
@@ -269,7 +276,12 @@ public abstract class ECCurve
             this.b = fromBigInteger(b);
             this.infinity = new ECPoint.F2m(this, null, null);
         }
-        
+
+        public int getFieldSize()
+        {
+            return m;
+        }
+
         public ECFieldElement fromBigInteger(BigInteger x)
         {
             return new ECFieldElement.F2m(this.m, this.k1, this.k2, this.k3, x);

@@ -9,6 +9,7 @@ public abstract class ECFieldElement
 
     public abstract BigInteger     toBigInteger();
     public abstract String         getFieldName();
+    public abstract int            getFieldSize();
     public abstract ECFieldElement add(ECFieldElement b);
     public abstract ECFieldElement subtract(ECFieldElement b);
     public abstract ECFieldElement multiply(ECFieldElement b);
@@ -54,6 +55,11 @@ public abstract class ECFieldElement
         public String getFieldName()
         {
             return "Fp";
+        }
+
+        public int getFieldSize()
+        {
+            return q.bitLength();
         }
 
         public BigInteger getQ()
@@ -923,6 +929,11 @@ public abstract class ECFieldElement
         public String getFieldName()
         {
             return "F2m";
+        }
+
+        public int getFieldSize()
+        {
+            return m;
         }
 
         /**
