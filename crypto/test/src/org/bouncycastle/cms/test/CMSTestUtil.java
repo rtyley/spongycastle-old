@@ -307,7 +307,7 @@ public class CMSTestUtil
         
         if (issPub instanceof RSAPublicKey)
         {
-            v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
+            v3CertGen.setSignatureAlgorithm("SHA1WithRSA");
         }
         else if (issPub.getAlgorithm().equals("DSA"))
         {

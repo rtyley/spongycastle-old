@@ -228,6 +228,8 @@ public class CMSSignedDataParser
     {
         if (_signerInfoStore == null)
         {
+            populateCertCrlSets();
+            
             List      signerInfos = new ArrayList();
             Map       hashes = new HashMap();
             

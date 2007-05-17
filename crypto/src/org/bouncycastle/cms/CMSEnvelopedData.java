@@ -19,7 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.List;
@@ -154,31 +153,10 @@ public class CMSEnvelopedData
      * @throws NoSuchProviderException if the provider cannot be found.
      */
     public AlgorithmParameters getEncryptionAlgorithmParameters(
-            String  provider) 
+        String  provider) 
     throws CMSException, NoSuchProviderException    
-    {        
-        try
-        {
-            byte[]  enc = this.encodeObj(encAlg.getParameters());
-            if (enc == null)
-            {
-                return null;
-            }
-            
-            AlgorithmParameters params = AlgorithmParameters.getInstance(getEncryptionAlgOID(), provider); 
-            
-            params.init(enc, "ASN.1");
-            
-            return params;
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find parameters for algorithm", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("can't find parse parameters", e);
-        }  
+    {
+        return CMSEnvelopedHelper.INSTANCE.getEncryptionAlgorithmParameters(getEncryptionAlgOID(), getEncryptionAlgParams(), provider);
     }
     
     /**

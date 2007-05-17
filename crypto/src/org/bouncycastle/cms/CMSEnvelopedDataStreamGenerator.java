@@ -15,10 +15,8 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.RC2ParameterSpec;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -107,40 +105,8 @@ public class CMSEnvelopedDataStreamGenerator
     {
         String              encProvider = keyGen.getProvider().getName();
         SecretKey           encKey = keyGen.generateKey();
-        AlgorithmParameters params;
-        
-        try
-        {
-            AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, encProvider);
+        AlgorithmParameters params = generateParameters(encryptionOID, encKey, encProvider);
 
-            if (encryptionOID.equals(RC2_CBC))
-            {
-                byte[]  iv = new byte[8];
-
-                //
-                // mix in a bit extra...
-                //
-                rand.setSeed(System.currentTimeMillis());
-
-                rand.nextBytes(iv);
-
-                try
-                {
-                    pGen.init(new RC2ParameterSpec(encKey.getEncoded().length * 8, iv));
-                }
-                catch (InvalidAlgorithmParameterException e)
-                {
-                    throw new CMSException("parameters generation error: " + e, e);
-                }
-            }
-            
-            params = pGen.generateParameters();
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            params = null;
-        }
-        
         Iterator            it = recipientInfs.iterator();
         ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
         
@@ -168,7 +134,7 @@ public class CMSEnvelopedDataStreamGenerator
         
         return open(out, encryptionOID, encKey, params, recipientInfos, encProvider);
     }
-        
+
     protected OutputStream open(
         OutputStream        out,
         String              encryptionOID,

@@ -23,7 +23,10 @@ public class AllTests
         suite.addTest(CompressedDataStreamTest.suite());
         suite.addTest(SignedDataStreamTest.suite());
         suite.addTest(EnvelopedDataStreamTest.suite());
-        
+
+        suite.addTest(SunProviderTest.suite());
+        suite.addTest(NullProviderTest.suite());
+
         return suite;
     }
 }

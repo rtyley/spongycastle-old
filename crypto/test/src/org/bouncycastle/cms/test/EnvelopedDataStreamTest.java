@@ -613,6 +613,16 @@ public class EnvelopedDataStreamTest
         ep.close();
     }
 
+    public void testOriginatorInfo()
+        throws Exception
+    {
+        CMSEnvelopedDataParser env = new CMSEnvelopedDataParser(CMSSampleMessages.originatorMessage);
+
+        RecipientInformationStore  recipients = env.getRecipientInfos();
+
+        assertEquals(CMSEnvelopedDataGenerator.DES_EDE3_CBC, env.getEncryptionAlgOID());
+    }
+    
     public static Test suite()
         throws Exception
     {

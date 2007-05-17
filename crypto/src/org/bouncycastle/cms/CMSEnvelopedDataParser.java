@@ -2,6 +2,7 @@ package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1SetParser;
@@ -19,10 +20,10 @@ import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -158,7 +159,7 @@ public class CMSEnvelopedDataParser
     {
         try
         {
-            return _encAlg.getParameters().getDERObject().getEncoded();
+            return encodeObj(_encAlg.getParameters());
         }
         catch (Exception e)
         {
@@ -178,29 +179,8 @@ public class CMSEnvelopedDataParser
     public AlgorithmParameters getEncryptionAlgorithmParameters(
         String  provider) 
         throws CMSException, NoSuchProviderException
-    {        
-        try
-        {
-            byte[]  enc = this.getEncryptionAlgParams();
-            if (enc == null)
-            {
-                return null;
-            }
-            
-            AlgorithmParameters params = AlgorithmParameters.getInstance(getEncryptionAlgOID(), provider); 
-            
-            params.init(enc, "ASN.1");
-            
-            return params;
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find parameters for algorithm", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("can't find parse parameters", e);
-        }  
+    {
+        return CMSEnvelopedHelper.INSTANCE.getEncryptionAlgorithmParameters(getEncryptionAlgOID(), getEncryptionAlgParams(), provider);
     }
     
     /**
@@ -242,5 +222,22 @@ public class CMSEnvelopedDataParser
         }
 
         return _unprotectedAttributes;
+    }
+
+    private byte[] encodeObj(
+        DEREncodable    obj)
+        throws IOException
+    {
+        if (obj != null)
+        {
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            ASN1OutputStream aOut = new ASN1OutputStream(bOut);
+
+            aOut.writeObject(obj);
+
+            return bOut.toByteArray();
+        }
+
+        return null;
     }
 }

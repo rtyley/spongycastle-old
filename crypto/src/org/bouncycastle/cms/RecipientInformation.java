@@ -1,5 +1,16 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,19 +21,6 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-
-import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public abstract class RecipientInformation
 {
@@ -67,6 +65,7 @@ public abstract class RecipientInformation
     
     /**
      * return the object identifier for the key encryption algorithm.
+     * @return OID for key encryption algorithm.
      */
     public String getKeyEncryptionAlgOID()
     {
@@ -76,6 +75,7 @@ public abstract class RecipientInformation
     /**
      * return the ASN.1 encoded key encryption algorithm parameters, or null if
      * there aren't any.
+     * @return ASN.1 encoding of key encryption algorithm parameters.
      */
     public byte[] getKeyEncryptionAlgParams()
     {
@@ -110,16 +110,7 @@ public abstract class RecipientInformation
                 return null;
             }
             
-            AlgorithmParameters params;
-            
-            try
-            {
-                params = AlgorithmParameters.getInstance(getKeyEncryptionAlgOID(), provider);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                params = AlgorithmParameters.getInstance(getKeyEncryptionAlgOID());
-            }
+            AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(getKeyEncryptionAlgOID(), provider);
             
             params.init(enc, "ASN.1");
             
@@ -134,95 +125,35 @@ public abstract class RecipientInformation
             throw new CMSException("can't find parse parameters", e);
         }  
     }
-    
-    protected String getDataEncryptionAlgorithmName(
-        DERObjectIdentifier oid)
-    {
-        if (NISTObjectIdentifiers.id_aes128_CBC.equals(oid))
-        {
-            return "AES";
-        }
-        else if (NISTObjectIdentifiers.id_aes192_CBC.equals(oid))
-        {
-            return "AES";
-        }
-        else if (NISTObjectIdentifiers.id_aes256_CBC.equals(oid))
-        {
-            return "AES";
-        }
-        
-        return oid.getId();
-    }
-    
-    private String getDataEncryptionCipherName(
-        DERObjectIdentifier oid)
-    {
-        if (NISTObjectIdentifiers.id_aes128_CBC.equals(oid))
-        {
-            return "AES/CBC/PKCS5Padding";
-        }
-        else if (NISTObjectIdentifiers.id_aes192_CBC.equals(oid))
-        {
-            return "AES/CBC/PKCS5Padding";
-        }
-        else if (NISTObjectIdentifiers.id_aes256_CBC.equals(oid))
-        {
-            return "AES/CBC/PKCS5Padding";
-        }
-        
-        return oid.getId();
-    }
-    
+
     protected CMSTypedStream getContentFromSessionKey(
         Key     sKey,
         String  provider)
         throws CMSException, NoSuchProviderException
     {
-        String              alg = getDataEncryptionAlgorithmName(_encAlg.getObjectId());
+        String              encAlg = _encAlg.getObjectId().getId();
         
         try
         {
             Cipher              cipher;
-            String              cipherName = getDataEncryptionCipherName(_encAlg.getObjectId());
-            
-            try
-            {
-                cipher = Cipher.getInstance(cipherName, provider);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                cipher = Cipher.getInstance(cipherName);
-            }
-            
-            DEREncodable        sParams = _encAlg.getParameters();
+
+            cipher =  CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encAlg, provider);
+           
+            ASN1Object sParams = (ASN1Object)_encAlg.getParameters();
     
             if (sParams != null && !asn1Null.equals(sParams))
             {
-                AlgorithmParameters     params;
-                
-                try
-                {
-                    params = AlgorithmParameters.getInstance(alg, provider);
-                }
-                catch (NoSuchAlgorithmException e)
-                {
-                    params = AlgorithmParameters.getInstance(alg);
-                }
-    
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-    
-                aOut.writeObject(_encAlg.getParameters());
-    
-                params.init(bOut.toByteArray(), "ASN.1");
+                AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encAlg, cipher.getProvider().getName());
+
+                params.init(sParams.getEncoded(), "ASN.1");
     
                 cipher.init(Cipher.DECRYPT_MODE, sKey, params);
             }
             else
             {
-                if (alg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
-                    || alg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
-                    || alg.equals(CMSEnvelopedDataGenerator.CAST5_CBC))
+                if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                    || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                    || encAlg.equals(CMSEnvelopedDataGenerator.CAST5_CBC))
                 {
                     cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(new byte[8]));
                 }

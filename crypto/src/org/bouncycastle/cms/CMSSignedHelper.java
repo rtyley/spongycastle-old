@@ -317,7 +317,14 @@ class CMSSignedHelper
 
         try
         {
-            return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
+            if (provider != null)
+            {
+                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
+            }
+            else
+            {
+                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls));
+            }
         }
         catch (InvalidAlgorithmParameterException e)
         {
@@ -332,7 +339,14 @@ class CMSSignedHelper
 
         try
         {
-            cf = CertificateFactory.getInstance("X.509", provider);
+            if (provider != null)
+            {
+                cf = CertificateFactory.getInstance("X.509", provider);
+            }
+            else
+            {
+                cf = CertificateFactory.getInstance("X.509");
+            }
         }
         catch (CertificateException ex)
         {
@@ -372,7 +386,14 @@ class CMSSignedHelper
 
         try
         {
-            cf = CertificateFactory.getInstance("X.509", provider);
+            if (provider != null)
+            {
+                cf = CertificateFactory.getInstance("X.509", provider);
+            }
+            else
+            {
+                cf = CertificateFactory.getInstance("X.509");
+            }
         }
         catch (CertificateException ex)
         {

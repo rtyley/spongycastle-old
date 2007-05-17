@@ -96,11 +96,11 @@ public class KeyTransRecipientInformation
     {
         byte[]  encryptedKey = _info.getEncryptedKey().getOctets();
         String  keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(_keyEncAlg.getObjectId());
-        String  alg = getDataEncryptionAlgorithmName(_encAlg.getObjectId());
+        String  alg = CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(_encAlg.getObjectId().getId());
 
         try
         {
-            Cipher  keyCipher = Cipher.getInstance(keyExchangeAlgorithm, prov);
+            Cipher  keyCipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(keyExchangeAlgorithm, prov);
             Key     sKey;
             
             try
