@@ -14,6 +14,8 @@ public abstract class ECCurve
 
     public abstract ECFieldElement fromBigInteger(BigInteger x);
 
+    public abstract ECPoint createPoint(BigInteger x, BigInteger y, boolean withCompression);
+
     public abstract ECPoint decodePoint(byte[] encoded);
 
     public abstract ECPoint getInfinity();
@@ -57,6 +59,11 @@ public abstract class ECCurve
         public ECFieldElement fromBigInteger(BigInteger x)
         {
             return new ECFieldElement.Fp(this.q, x);
+        }
+
+        public ECPoint createPoint(BigInteger x, BigInteger y, boolean withCompression)
+        {
+            return new ECPoint.Fp(this, fromBigInteger(x), fromBigInteger(y), withCompression);
         }
 
         /**
@@ -285,6 +292,11 @@ public abstract class ECCurve
         public ECFieldElement fromBigInteger(BigInteger x)
         {
             return new ECFieldElement.F2m(this.m, this.k1, this.k2, this.k3, x);
+        }
+
+        public ECPoint createPoint(BigInteger x, BigInteger y, boolean withCompression)
+        {
+            return new ECPoint.F2m(this, fromBigInteger(x), fromBigInteger(y), withCompression);
         }
 
         /* (non-Javadoc)
