@@ -10,39 +10,13 @@ public class X9IntegerConverter
     public int getByteLength(
         ECCurve c)
     {
-        return (getFieldSize(c) + 7) / 8;
+        return (c.getFieldSize() + 7) / 8;
     }
 
     public int getByteLength(
         ECFieldElement fe)
     {
-        return (getFieldSize(fe) + 7) / 8;
-    }
-
-    public int getFieldSize(
-        ECCurve c)
-    {
-        if (c instanceof ECCurve.Fp)
-        {
-            return ((ECCurve.Fp)c).getQ().bitLength();
-        }
-        else
-        {
-            return ((ECCurve.F2m)c).getM();
-        }
-    }
-
-    public int getFieldSize(
-        ECFieldElement fe)
-    {
-        if (fe instanceof ECFieldElement.Fp)
-        {
-            return ((ECFieldElement.Fp)fe).getQ().bitLength();
-        }
-        else
-        {
-            return ((ECFieldElement.F2m)fe).getM();
-        }
+        return (fe.getFieldSize() + 7) / 8;
     }
 
     public byte[] integerToBytes(
