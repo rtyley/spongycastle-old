@@ -36,6 +36,7 @@ import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.cert.CRL;
 import java.security.cert.CertPath;
@@ -51,6 +52,9 @@ import java.security.cert.X509CRLEntry;
 import java.security.cert.X509CRLSelector;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPublicKey;
+import java.security.spec.DSAPublicKeySpec;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1198,5 +1202,70 @@ public class CertPathValidatorUtilities
         {
             return getValidDate(paramsPKIX);
         }
+    }
+
+    /**
+     * Return the next working key inheriting DSA parameters if necessary.
+     * <p>
+     * This methods inherits DSA parameters from the indexed certificate or
+     * previous certificates in the certificate chain to the returned
+     * <code>PublicKey</code>. The list is searched upwards, meaning the end
+     * certificate is at position 0 and previous certificates are following.
+     * </p>
+     * <p>
+     * If the indexed certificate does not contain a DSA key this method simply
+     * returns the public key. If the DSA key already contains DSA parameters
+     * the key is also only returned.
+     * </p>
+     * 
+     * @param certs The certification path.
+     * @param index The index of the certificate which contains the public key
+     *            which should be extended with DSA parameters.
+     * @return The public key of the certificate in list position
+     *         <code>index</code> extended with DSA parameters if applicable.
+     * @throws AnnotatedException if DSA parameters cannot be inherited.
+     */
+    protected static PublicKey getNextWorkingKey(X509Certificate cert, List certs, int index)
+        throws AnnotatedException
+    {
+        PublicKey pubKey = cert.getPublicKey();
+        if (!(pubKey instanceof DSAPublicKey))
+        {
+            return pubKey;
+        }
+        DSAPublicKey dsaPubKey = (DSAPublicKey) pubKey;
+        if (dsaPubKey.getParams() != null)
+        {
+            return dsaPubKey;
+        }
+        for (int i = index + 1; i < certs.size(); i++)
+        {
+            X509Certificate parentCert = (X509Certificate)certs.get(i);
+            pubKey = parentCert.getPublicKey();
+            if (!(pubKey instanceof DSAPublicKey))
+            {
+                throw new AnnotatedException(
+                    "DSA parameters cannot be inherited from previous certificate.");
+            }
+            DSAPublicKey prevDSAPubKey = (DSAPublicKey) pubKey;
+            if (prevDSAPubKey.getParams() == null)
+            {
+                continue;
+            }
+            DSAParams dsaParams = prevDSAPubKey.getParams();
+            DSAPublicKeySpec dsaPubKeySpec = new DSAPublicKeySpec(
+                dsaPubKey.getY(), dsaParams.getP(), dsaParams.getQ(), dsaParams.getG());
+            try
+            {
+                KeyFactory keyFactory = KeyFactory.getInstance("DSA", "BC");
+                return keyFactory.generatePublic(dsaPubKeySpec);
+            }
+            catch (Exception exception)
+            {
+                throw new RuntimeException(exception.getMessage());
+            }
+        }
+        throw new AnnotatedException(
+            "DSA parameters cannot be inherited from previous certificate.");
     }
 }

@@ -1,7 +1,12 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.TBSCertList;
@@ -30,13 +35,15 @@ public class X509CRLEntryObject extends X509CRLEntry
 {
     private TBSCertList.CRLEntry c;
 
-    private boolean isIndirect = false;
+    private boolean isIndirect;
 
-    private X500Principal previousCertificateIssuer = null;
+    private X500Principal previousCertificateIssuer;
+    private X500Principal certificateIssuer;
 
     public X509CRLEntryObject(TBSCertList.CRLEntry c)
     {
         this.c = c;
+        this.certificateIssuer = loadCertificateIssuer();
     }
 
     /**
@@ -64,6 +71,7 @@ public class X509CRLEntryObject extends X509CRLEntry
         this.c = c;
         this.isIndirect = isIndirect;
         this.previousCertificateIssuer = previousCertificateIssuer;
+        this.certificateIssuer = loadCertificateIssuer();
     }
 
     /**
@@ -73,15 +81,11 @@ public class X509CRLEntryObject extends X509CRLEntry
     public boolean hasUnsupportedCriticalExtension()
     {
         Set extns = getCriticalExtensionOIDs();
-        if (extns != null && !extns.isEmpty())
-        {
-            return true;
-        }
 
-        return false;
+        return extns != null && !extns.isEmpty();
     }
 
-    public X500Principal getCertificateIssuer()
+    private X500Principal loadCertificateIssuer()
     {
         if (!isIndirect)
         {
@@ -111,6 +115,11 @@ public class X509CRLEntryObject extends X509CRLEntry
         {
             return null;
         }
+    }
+
+    public X500Principal getCertificateIssuer()
+    {
+        return certificateIssuer;
     }
 
     private Set getExtensionOIDs(boolean critical)
@@ -213,6 +222,7 @@ public class X509CRLEntryObject extends X509CRLEntry
 
         buf.append("      userCertificate: ").append(this.getSerialNumber()).append(nl);
         buf.append("       revocationDate: ").append(this.getRevocationDate()).append(nl);
+        buf.append("       certificateIssuer: ").append(this.getCertificateIssuer()).append(nl);
 
         X509Extensions extensions = c.getExtensions();
 
@@ -227,7 +237,37 @@ public class X509CRLEntryObject extends X509CRLEntry
                 {
                     DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
                     X509Extension ext = extensions.getExtension(oid);
-                    buf.append(ext);
+                    if (ext.getValue() != null)
+                    {
+                        byte[]                  octs = ext.getValue().getOctets();
+                        ASN1InputStream dIn = new ASN1InputStream(octs);
+                        buf.append("                       critical(").append(ext.isCritical()).append(") ");
+                        try
+                        {
+                            if (oid.equals(X509Extensions.ReasonCode))
+                            {
+                                buf.append(new CRLReason(DEREnumerated.getInstance(dIn.readObject()))).append(nl);
+                            }
+                            else if (oid.equals(X509Extensions.CertificateIssuer))
+                            {
+                                buf.append("Certificate issuer: ").append(new GeneralNames((ASN1Sequence)dIn.readObject())).append(nl);
+                            }
+                            else 
+                            {
+                                buf.append(oid.getId());
+                                buf.append(" value = ").append(ASN1Dump.dumpAsString(dIn.readObject())).append(nl);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            buf.append(oid.getId());
+                            buf.append(" value = ").append("*****").append(nl);
+                        }
+                    }
+                    else
+                    {
+                        buf.append(nl);
+                    }
                 }
             }
         }

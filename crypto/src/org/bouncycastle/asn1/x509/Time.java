@@ -125,4 +125,9 @@ public class Time
     {
         return time;
     }
+
+    public String toString()
+    {
+        return getTime();
+    }
 }

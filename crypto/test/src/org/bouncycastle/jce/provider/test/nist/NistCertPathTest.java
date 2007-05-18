@@ -1,5 +1,12 @@
 package org.bouncycastle.jce.provider.test.nist;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.Security;
@@ -22,14 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
  * NIST CertPath test data for RFC 3280
@@ -105,7 +104,7 @@ public class NistCertPathTest
                 new String[] { "DSACACert", "ValidDSASignaturesTest4EE" }, 
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "DSACACRL" });
     }
-    /*
+
     public void testValidDSAParameterInheritanceTest5()
         throws Exception
     {
@@ -113,7 +112,7 @@ public class NistCertPathTest
                 new String[] { "DSACACert", "DSAParametersInheritedCACert", "ValidDSAParameterInheritanceTest5EE" }, 
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "DSACACRL", "DSAParametersInheritedCACRL" });
     }
-    */
+
     public void testInvalidDSASignaturesTest6()
         throws Exception
     {

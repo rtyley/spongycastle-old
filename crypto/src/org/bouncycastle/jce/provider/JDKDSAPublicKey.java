@@ -1,7 +1,9 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -53,8 +55,8 @@ public class JDKDSAPublicKey
     JDKDSAPublicKey(
         SubjectPublicKeyInfo    info)
     {
-        DSAParameter            params = new DSAParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
-        DERInteger              derY = null;
+
+        DERInteger              derY;
 
         try
         {
@@ -66,7 +68,18 @@ public class JDKDSAPublicKey
         }
 
         this.y = derY.getValue();
-        this.dsaSpec = new DSAParameterSpec(params.getP(), params.getQ(), params.getG());
+
+        if (isNotNull(info.getAlgorithmId().getParameters()))
+        {
+            DSAParameter params = new DSAParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
+            
+            this.dsaSpec = new DSAParameterSpec(params.getP(), params.getQ(), params.getG());
+        }
+    }
+
+    private boolean isNotNull(DEREncodable parameters)
+    {
+        return parameters != null && !DERNull.INSTANCE.equals(parameters);
     }
 
     public String getAlgorithm()
@@ -81,9 +94,12 @@ public class JDKDSAPublicKey
 
     public byte[] getEncoded()
     {
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).getDERObject()), new DERInteger(y));
+        if (dsaSpec == null)
+        {
+            return new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa), new DERInteger(y)).getDEREncoded();
+        }
 
-        return info.getDEREncoded();
+        return new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).getDERObject()), new DERInteger(y)).getDEREncoded();
     }
 
     public DSAParams getParams()

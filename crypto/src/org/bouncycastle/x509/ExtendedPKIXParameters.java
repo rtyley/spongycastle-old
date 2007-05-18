@@ -31,7 +31,7 @@ public class ExtendedPKIXParameters
 
     private Selector selector;
 
-    private boolean additionalLocationsEnabled = false;
+    private boolean additionalLocationsEnabled;
 
     private List additionalStores;
 
@@ -78,7 +78,7 @@ public class ExtendedPKIXParameters
      */
     public static ExtendedPKIXParameters getInstance(PKIXParameters pkixParams)
     {
-        ExtendedPKIXParameters params = null;
+        ExtendedPKIXParameters params;
         try
         {
             params = new ExtendedPKIXParameters(pkixParams.getTrustAnchors());
@@ -165,7 +165,7 @@ public class ExtendedPKIXParameters
 
     private int validityModel = PKIX_VALIDITY_MODEL;
 
-    private boolean useDeltas = false;
+    private boolean useDeltas;
 
     /**
      * Defaults to <code>false</code>.
@@ -229,7 +229,7 @@ public class ExtendedPKIXParameters
         if (store.getCertStoreParameters() instanceof LDAPCertStoreParameters
             || store.getCertStoreParameters() instanceof X509LDAPCertStoreParameters)
         {
-            X509LDAPCertStoreParameters params = null;
+            X509LDAPCertStoreParameters params;
             if (store.getCertStoreParameters() instanceof X509LDAPCertStoreParameters)
             {
                 params = (X509LDAPCertStoreParameters) store
@@ -399,7 +399,7 @@ public class ExtendedPKIXParameters
 
     public Object clone()
     {
-        ExtendedPKIXParameters params = null;
+        ExtendedPKIXParameters params;
         try
         {
             params = new ExtendedPKIXParameters(getTrustAnchors());
@@ -686,7 +686,7 @@ public class ExtendedPKIXParameters
      * <p>
      * The given set is cloned.
      * 
-     * @param attrCertChecker The attribute certificate checkers to set. Is
+     * @param attrCertCheckers The attribute certificate checkers to set. Is
      *            never <code>null</code>.
      * @throws ClassCastException if an element of <code>attrCertCheckers</code>
      *             is not a <code>PKIXAttrCertChecker</code>.

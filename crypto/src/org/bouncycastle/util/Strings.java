@@ -1,6 +1,8 @@
 package org.bouncycastle.util;
 
 import java.io.ByteArrayOutputStream;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 public final class Strings
 {
@@ -205,5 +207,24 @@ public final class Strings
         }
 
         return bytes;
+    }
+
+    public static String[] split(String input, String delimiters)
+    {
+        StringTokenizer st = new StringTokenizer(input, delimiters);
+        Vector           v = new Vector();
+
+        while (st.hasMoreTokens())
+        {
+            v.addElement(st.nextToken());
+        }
+
+        String[] res = new String[v.size()];
+
+        for (int i = 0; i != res.length; i++)
+        {
+            res[i] = (String)v.elementAt(i);
+        }
+        return res;
     }
 }
