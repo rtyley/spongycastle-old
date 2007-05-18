@@ -60,7 +60,8 @@ public class RegressionTest
         new MonetaryLimitUnitTest(),
         new NameOrPseudonymUnitTest(),
         new PersonalDataUnitTest(),
-        new DERApplicationSpecificTest()
+        new DERApplicationSpecificTest(),
+        new TargetInformationTest()
     };
 
     public static void main(

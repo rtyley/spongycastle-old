@@ -1,5 +1,7 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.jce.exception.ExtCertPathBuilderException;
+
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -12,9 +14,6 @@ import java.security.cert.CertPathParameters;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertSelector;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXBuilderParameters;
@@ -75,11 +74,11 @@ public class PKIXCertPathBuilderSpi
 
         try
         {
-            targets = findCertificates(certSelect, pkixParams.getCertStores());
+            targets = CertPathValidatorUtilities.findCertificates(certSelect, pkixParams.getCertStores());
         }
-        catch (CertStoreException e)
+        catch (AnnotatedException e)
         {
-            throw new CertPathBuilderException(e);
+            throw new ExtCertPathBuilderException("Error finding target certificate.", e.getCause());
         }
 
         if (targets.isEmpty())
@@ -187,11 +186,7 @@ public class PKIXCertPathBuilderSpi
      * @return the <code>TrustAnchor</code> object if found or
      * <code>null</code> if not.
      *
-     * @exception CertPathValidatorException if a TrustAnchor  was
-     * found but the signature verificytion on the given certificate
-     * has thrown an exception. This Exception can be obtainted with
-     * <code>getCause()</code> method.
-     **/
+     */
     final TrustAnchor findTrustAnchor(
         X509Certificate cert,
         Set             trustAnchors) 
@@ -274,37 +269,6 @@ public class PKIXCertPathBuilderSpi
 
         return trust;
     }
-
-    /**
-     * Return a Collection of all certificates found in the
-     * CertStore's that are matching the certSelect criteriums.
-     *
-     * @param certSelect a {@link CertSelector CertSelector}
-     * object that will be used to select the certificates
-     * @param certStores a List containing only {@link CertStore
-     * CertStore} objects. These are used to search for
-     * certificates
-     *
-     * @return a Collection of all found {@link Certificate Certificate}
-     * objects. May be empty but never <code>null</code>.
-     **/
-    private final Collection findCertificates(
-        CertSelector    certSelect,
-        List            certStores) 
-        throws CertStoreException
-    {
-        Set certs = new HashSet();
-        Iterator iter = certStores.iterator();
-
-        while (iter.hasNext())
-        {
-            CertStore   certStore = (CertStore)iter.next();
-
-            certs.addAll(certStore.getCertificates(certSelect));
-        }
-
-        return certs;
-    }
     
     /**
      * Find the issuer certificate of the given certificate.
@@ -322,7 +286,7 @@ public class PKIXCertPathBuilderSpi
      * has thrown an exception. This Exception can be obtainted with
      * <code>getCause()</code> method.
      **/
-    private final X509Certificate findIssuer(
+    private X509Certificate findIssuer(
         X509Certificate cert,
         List certStores)
         throws CertPathValidatorException
@@ -341,11 +305,11 @@ public class PKIXCertPathBuilderSpi
         Iterator iter;
         try
         {
-            iter = findCertificates(certSelect, certStores).iterator();
+            iter = CertPathValidatorUtilities.findCertificates(certSelect, certStores).iterator();
         }
-        catch (CertStoreException e)
+        catch (AnnotatedException e)
         {
-            throw new CertPathValidatorException(e);
+            throw new CertPathValidatorException(e.getCause());
         }
         
         X509Certificate issuer = null;

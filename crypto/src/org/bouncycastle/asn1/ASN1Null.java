@@ -33,6 +33,6 @@ public abstract class ASN1Null
 
     public String toString()
     {
-      return "NULL";
+         return "NULL";
     }
 }

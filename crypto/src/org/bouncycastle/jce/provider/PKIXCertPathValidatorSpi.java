@@ -302,6 +302,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 //
                 try
                 {
+
                     // (a) (1)
                     //
                     cert.verify(workingPublicKey, "BC");
@@ -948,7 +949,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     
                     // set signing certificate for next round
                 sign = cert;
-                workingPublicKey = sign.getPublicKey();
+                workingPublicKey = CertPathValidatorUtilities.getNextWorkingKey(sign, certs, index);
                 try
                 {
                     workingIssuerName = CertPathValidatorUtilities.getSubjectPrincipal(sign);

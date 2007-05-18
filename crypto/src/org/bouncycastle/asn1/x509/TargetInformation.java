@@ -86,6 +86,18 @@ public class TargetInformation
     }
 
     /**
+     * According to RFC 3281 only one targets element must be produced. If
+     * multiple targets are given they must be merged in
+     * into one targets element.
+     *
+     * @param targets An array with {@link Targets}.
+     */
+    public TargetInformation(Target[] targets)
+    {
+        this(new Targets(targets));
+    }
+
+    /**
      * Produce an object suitable for an ASN1OutputStream.
      * 
      * Returns:

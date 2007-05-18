@@ -125,6 +125,11 @@ public class GeneralName
             this.tag = tag;
             this.obj = new DERObjectIdentifier(name);
         }
+        else if (tag == directoryName)
+        {
+            this.tag = tag;
+            this.obj = new X509Name(name);
+        }
         else
         {
             throw new IllegalArgumentException("can't process String for tag: " + tag);

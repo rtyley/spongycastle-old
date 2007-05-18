@@ -122,12 +122,12 @@ public class X509CertificateObject
         Date    date)
         throws CertificateExpiredException, CertificateNotYetValidException
     {
-        if (date.after(this.getNotAfter()))
+        if (date.getTime() > this.getNotAfter().getTime())  // for other VM compatibility
         {
             throw new CertificateExpiredException("certificate expired on " + c.getEndDate().getTime());
         }
 
-        if (date.before(this.getNotBefore()))
+        if (date.getTime() < this.getNotBefore().getTime())
         {
             throw new CertificateNotYetValidException("certificate not valid till " + c.getStartDate().getTime());
         }
