@@ -226,20 +226,23 @@ public class TimeStampTokenGenerator
             CMSSignedDataGenerator  signedDataGenerator = new CMSSignedDataGenerator();
             
             dOut.writeObject(tstInfo);
-            
+
+            // TODO Check for certsAndCrls != null here?
+
+            CertStore genCertStore;
             if (request.getCertReq())
             {
-                signedDataGenerator.addCertificatesAndCRLs(certsAndCrls);
-                
-                signedDataGenerator.addSigner(key, cert, digestOID, signedAttr, unsignedAttr);
+                genCertStore = certsAndCrls;
             }
             else
             {
-                signedDataGenerator.addCertificatesAndCRLs(CertStore.getInstance("Collection", new CollectionCertStoreParameters(certsAndCrls.getCRLs(null))));
-                
-                signedDataGenerator.addSigner(key, cert, digestOID, signedAttr, unsignedAttr);
+                genCertStore = CertStore.getInstance("Collection",
+                    new CollectionCertStoreParameters(certsAndCrls.getCRLs(null)));
             }
-            
+
+            signedDataGenerator.addCertificatesAndCRLs(genCertStore);
+            signedDataGenerator.addSigner(key, cert, digestOID, signedAttr, unsignedAttr);
+
             CMSSignedData signedData = signedDataGenerator.generate(PKCSObjectIdentifiers.id_ct_TSTInfo.getId(), new CMSProcessableByteArray(bOut.toByteArray()), true, provider);
             
             return new TimeStampToken(signedData);
