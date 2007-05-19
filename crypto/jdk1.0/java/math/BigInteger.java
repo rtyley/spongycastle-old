@@ -385,9 +385,18 @@ public class BigInteger
 //            {
 //                mag[magnitudeIndex] = v;
 //            }
-            return inc(mag);
-        }
+            mag = inc(mag);
 
+            // TODO Fix above so that this is not necessary?
+            if (mag[0] == 0)
+            {
+                int[] tmp = new int[mag.length - 1];
+                System.arraycopy(mag, 1, tmp, 0, tmp.length);
+                mag = tmp;
+            }
+
+            return mag;
+        }
     }
 
     public BigInteger(int sign, byte[] mag) throws NumberFormatException
@@ -523,6 +532,8 @@ public class BigInteger
             {
                 for (int rep = 0; rep < 10000; ++rep)
                 {
+                    int n = 33 + rnd.nextInt(bitLength - 2);
+                    this.magnitude[this.magnitude.length - (n >>> 5)] ^= (1 << (n & 31));
                     this.magnitude[this.magnitude.length - 1] ^= (rnd.nextInt() << 1);
                     this.mQuote = -1L;
 
@@ -697,7 +708,8 @@ public class BigInteger
                 // Check if magnitude is a power of two
                 boolean pow2 = ((bitCounts[mag[indx] & 0xff])
                         + (bitCounts[(mag[indx] >> 8) & 0xff])
-                        + (bitCounts[(mag[indx] >> 16) & 0xff]) + (bitCounts[(mag[indx] >> 24) & 0xff])) == 1;
+                        + (bitCounts[(mag[indx] >> 16) & 0xff])
+                        + (bitCounts[(mag[indx] >> 24) & 0xff])) == 1;
 
                 for (int i = indx + 1; i < mag.length && pow2; i++)
                 {
@@ -1732,6 +1744,13 @@ public class BigInteger
         return y;
     }
 
+    public static BigInteger probablePrime(
+        int bitLength,
+        Random random)
+    {
+        return new BigInteger(bitLength, 100, random);
+    }
+
     private int remainder(int m)
     {
         long acc = 0;
@@ -2094,6 +2113,11 @@ public class BigInteger
 
     public byte[] toByteArray()
     {
+        if (sign == 0)
+        {
+            return new byte[1]; 
+        }
+
         int bitLength = bitLength();
         byte[] bytes = new byte[bitLength / 8 + 1];
 
@@ -2132,6 +2156,12 @@ public class BigInteger
             }
 
             bytes[i] = (byte)mag;
+        }
+
+        // TODO Fix above so that this is not necessary?
+        if (sign < 0 && bytes[0] == 0)
+        {
+            bytes[0] = (byte)0xFF;
         }
 
         return bytes;
@@ -2428,28 +2458,34 @@ public class BigInteger
 
     public int getLowestSetBit()
     {
-        if (this.equals(ZERO))
+        if (this.sign == 0)
         {
             return -1;
         }
 
-        int w = magnitude.length - 1;
+        int w = magnitude.length;
 
-        while (w >= 0)
+        while (--w > 0)
         {
             if (magnitude[w] != 0)
             {
                 break;
             }
-
-            w--;
         }
 
-        int b = 31;
+        int word = magnitude[w];
+
+        int b = (word & 0x0000FFFF) == 0
+            ?   (word & 0x00FF0000) == 0
+                ?   7
+                :   15
+            :   (word & 0x000000FF) == 0
+                ?   23
+                :   31;
 
         while (b > 0)
         {
-            if ((magnitude[w] << b) == 0x80000000)
+            if ((word << b) == 0x80000000)
             {
                 break;
             }
@@ -2457,7 +2493,7 @@ public class BigInteger
             b--;
         }
 
-        return (((magnitude.length - 1) - w) * 32 + (31 - b));
+        return ((magnitude.length - w) * 32 - (b + 1));
     }
 
     public boolean testBit(int n) 
