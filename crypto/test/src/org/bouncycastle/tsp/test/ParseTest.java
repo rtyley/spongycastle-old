@@ -267,7 +267,7 @@ public class ParseTest
             fail("request not rejected.");
         }
         
-        if (resp.getFailInfo().intValue() != PKIFailureInfo.UNACCEPTED_POLICY)
+        if (resp.getFailInfo().intValue() != PKIFailureInfo.unacceptedPolicy)
         {
             fail("request not rejected.");
         }

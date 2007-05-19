@@ -198,7 +198,7 @@ public class TSPTest
             fail("incorrectHash - failInfo set to null.");
         }
         
-        if (failInfo.intValue() != PKIFailureInfo.BAD_DATA_FORMAT)
+        if (failInfo.intValue() != PKIFailureInfo.badDataFormat)
         {
             fail("incorrectHash - wrong failure info returned.");
         }
@@ -238,7 +238,7 @@ public class TSPTest
             fail("badAlgorithm - failInfo set to null.");
         }
         
-        if (failInfo.intValue() != PKIFailureInfo.BAD_ALG)
+        if (failInfo.intValue() != PKIFailureInfo.badAlg)
         {
             fail("badAlgorithm - wrong failure info returned.");
         }
@@ -281,7 +281,7 @@ public class TSPTest
             fail("badPolicy - failInfo set to null.");
         }
         
-        if (failInfo.intValue() != PKIFailureInfo.UNACCEPTED_POLICY)
+        if (failInfo.intValue() != PKIFailureInfo.unacceptedPolicy)
         {
             fail("badPolicy - wrong failure info returned.");
         }
