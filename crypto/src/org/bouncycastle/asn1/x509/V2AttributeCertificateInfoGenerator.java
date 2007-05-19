@@ -33,11 +33,13 @@ public class V2AttributeCertificateInfoGenerator
     private AttCertIssuer issuer;
     private AlgorithmIdentifier signature;
     private DERInteger serialNumber;
-    private AttCertValidityPeriod attrCertValidityPeriod;
     private ASN1EncodableVector attributes;
     private DERBitString issuerUniqueID;
     private X509Extensions extensions;
-    private DERGeneralizedTime startDate, endDate;
+
+    // Note: validity period start/end dates stored directly
+    //private AttCertValidityPeriod attrCertValidityPeriod;
+    private DERGeneralizedTime startDate, endDate; 
 
     public V2AttributeCertificateInfoGenerator()
     {
