@@ -2121,47 +2121,68 @@ public class BigInteger
         int bitLength = bitLength();
         byte[] bytes = new byte[bitLength / 8 + 1];
 
-        int bytesCopied = 4;
-        int mag = 0;
-        int ofs = magnitude.length - 1;
-        int carry = 1;
-        long lMag;
-        for (int i = bytes.length - 1; i >= 0; i--)
+        int magIndex = magnitude.length;
+        int bytesIndex = bytes.length;
+
+        if (sign > 0)
         {
-            if (bytesCopied == 4 && ofs >= 0)
+            while (magIndex > 1)
             {
-                if (sign < 0)
-                {
-                    // we are dealing with a +ve number and we want a -ve one, so
-                    // invert the magnitude ints and add 1 (propagating the carry)
-                    // to make a 2's complement -ve number
-                    lMag = ~magnitude[ofs--] & IMASK;
-                    lMag += carry;
-                    if ((lMag & ~IMASK) != 0)
-                        carry = 1;
-                    else
-                        carry = 0;
-                    mag = (int)(lMag & IMASK);
-                }
-                else
-                {
-                    mag = magnitude[ofs--];
-                }
-                bytesCopied = 1;
-            }
-            else
-            {
-                mag >>>= 8;
-                bytesCopied++;
+                int mag = magnitude[--magIndex];
+                bytes[--bytesIndex] = (byte) mag;
+                bytes[--bytesIndex] = (byte)(mag >>> 8);
+                bytes[--bytesIndex] = (byte)(mag >>> 16);
+                bytes[--bytesIndex] = (byte)(mag >>> 24);
             }
 
-            bytes[i] = (byte)mag;
+            int lastMag = magnitude[0];
+            while ((lastMag & 0xFFFFFF00) != 0)
+            {
+                bytes[--bytesIndex] = (byte) lastMag;
+                lastMag >>>= 8;
+            }
+
+            bytes[--bytesIndex] = (byte) lastMag;
         }
-
-        // TODO Fix above so that this is not necessary?
-        if (sign < 0 && bytes[0] == 0)
+        else
         {
-            bytes[0] = (byte)0xFF;
+            boolean carry = true;
+
+            while (magIndex > 1)
+            {
+                int mag = ~magnitude[--magIndex];
+
+                if (carry)
+                {
+                    carry = (++mag == 0);
+                }
+
+                bytes[--bytesIndex] = (byte) mag;
+                bytes[--bytesIndex] = (byte)(mag >>> 8);
+                bytes[--bytesIndex] = (byte)(mag >>> 16);
+                bytes[--bytesIndex] = (byte)(mag >>> 24);
+            }
+
+            int lastMag = magnitude[0];
+
+            if (carry)
+            {
+                // Never wraps because magnitude[0] != 0
+                --lastMag;
+            }
+
+            while ((lastMag & 0xFFFFFF00) != 0)
+            {
+                bytes[--bytesIndex] = (byte) ~lastMag;
+                lastMag >>>= 8;
+            }
+
+            bytes[--bytesIndex] = (byte) ~lastMag;
+
+            if (bytesIndex > 0)
+            {
+                bytes[--bytesIndex] = (byte)0xFF;
+            }
         }
 
         return bytes;
