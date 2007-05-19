@@ -12,9 +12,6 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
-import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
@@ -23,16 +20,11 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Reader;
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -41,7 +33,6 @@ import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
@@ -474,7 +465,7 @@ public class PEMReader extends BufferedReader
 
         if (type.equals("RSA"))
         {
-            DERInteger              v = (DERInteger)seq.getObjectAt(0);
+//            DERInteger              v = (DERInteger)seq.getObjectAt(0);
             DERInteger              mod = (DERInteger)seq.getObjectAt(1);
             DERInteger              pubExp = (DERInteger)seq.getObjectAt(2);
             DERInteger              privExp = (DERInteger)seq.getObjectAt(3);
@@ -494,7 +485,7 @@ public class PEMReader extends BufferedReader
         }
         else    // "DSA"
         {
-            DERInteger              v = (DERInteger)seq.getObjectAt(0);
+//            DERInteger              v = (DERInteger)seq.getObjectAt(0);
             DERInteger              p = (DERInteger)seq.getObjectAt(1);
             DERInteger              q = (DERInteger)seq.getObjectAt(2);
             DERInteger              g = (DERInteger)seq.getObjectAt(3);
