@@ -3,6 +3,8 @@ package org.bouncycastle.cms.test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import javax.crypto.Cipher;
+
 public class AllTests 
 {
     public static void main (String[] args) 
@@ -24,8 +26,17 @@ public class AllTests
         suite.addTest(SignedDataStreamTest.suite());
         suite.addTest(EnvelopedDataStreamTest.suite());
 
-        suite.addTest(SunProviderTest.suite());
-        suite.addTest(NullProviderTest.suite());
+        try
+        {
+            Cipher.getInstance("RSA", "SunJCE");
+
+            suite.addTest(SunProviderTest.suite());
+            suite.addTest(NullProviderTest.suite());
+        }
+        catch (Exception e)
+        {
+            // ignore
+        }
 
         return suite;
     }

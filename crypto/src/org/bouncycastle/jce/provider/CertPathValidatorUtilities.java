@@ -1226,7 +1226,7 @@ public class CertPathValidatorUtilities
      * @throws AnnotatedException if DSA parameters cannot be inherited.
      */
     protected static PublicKey getNextWorkingKey(X509Certificate cert, List certs, int index)
-        throws AnnotatedException
+        throws CertPathValidatorException
     {
         PublicKey pubKey = cert.getPublicKey();
         if (!(pubKey instanceof DSAPublicKey))
@@ -1244,7 +1244,7 @@ public class CertPathValidatorUtilities
             pubKey = parentCert.getPublicKey();
             if (!(pubKey instanceof DSAPublicKey))
             {
-                throw new AnnotatedException(
+                throw new CertPathValidatorException(
                     "DSA parameters cannot be inherited from previous certificate.");
             }
             DSAPublicKey prevDSAPubKey = (DSAPublicKey) pubKey;
@@ -1262,10 +1262,10 @@ public class CertPathValidatorUtilities
             }
             catch (Exception exception)
             {
-                throw new RuntimeException(exception.getMessage());
+                throw new CertPathValidatorException(exception);
             }
         }
-        throw new AnnotatedException(
+        throw new CertPathValidatorException(
             "DSA parameters cannot be inherited from previous certificate.");
     }
 }
