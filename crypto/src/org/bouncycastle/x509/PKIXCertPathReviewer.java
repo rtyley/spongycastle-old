@@ -1030,14 +1030,11 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
 
             workingIssuerName = cert.getSubjectX500Principal();
 
-            // d)
-
-            workingPublicKey = cert.getPublicKey();
-
-            // e) f)
+            // d) e) f)
 
             try
             {
+                workingPublicKey = getNextWorkingKey(sign, certs, index);
                 workingAlgId = getAlgorithmIdentifier(workingPublicKey);
                 workingPublicKeyAlgorithm = workingAlgId.getObjectId();
                 workingPublicKeyParameters = workingAlgId.getParameters();

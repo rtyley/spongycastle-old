@@ -506,6 +506,7 @@ public final class BouncyCastleProvider extends Provider
         put("CertPathBuilder.PKIX ValidationAlgorithm", "RFC2459");
         put("CertStore.Collection", "org.bouncycastle.jce.provider.CertStoreCollectionSpi");
         put("CertStore.LDAP", "org.bouncycastle.jce.provider.X509LDAPCertStoreSpi");
+        put("CertStore.Multi", "org.bouncycastle.jce.provider.MultiCertStoreSpi");
         put("Alg.Alias.CertStore.X509LDAP", "LDAP");
     }
 

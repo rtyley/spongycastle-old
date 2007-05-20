@@ -48,6 +48,9 @@
                 <exclude name="**/DummyCertPathReviewer.java" />
                 <exclude name="**/X509LDAP*.java" />
                 <exclude name="**/tls/test/*.java" />
+                <exclude name="**/SunProviderTest.java" />
+                <exclude name="**/NullProviderTest.java" />
+                <exclude name="**/PKIXNameConstraintsTest.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />

@@ -576,7 +576,7 @@ public class PKIXNameConstraints
     private void checkPermittedDNS(Set permitted, String dns)
         throws CertPathValidatorException
     {
-        if (permitted == null)
+        if (permitted.isEmpty())
         {
             return;
         }
@@ -771,10 +771,148 @@ public class PKIXNameConstraints
       }
    }
 
+   private void unionURI(String email1, String email2, Set union)
+   {
+      // email1 is a particular address
+      if (email1.indexOf('@') != -1)
+      {
+         String _sub = email1.substring(email1.indexOf('@') + 1);
+         // both are a particular mailbox
+         if (email2.indexOf('@') != -1)
+         {
+            if (email1.equalsIgnoreCase(email2))
+            {
+               union.add(email1);
+            }
+            else
+            {
+               union.add(email1);
+               union.add(email2);
+            }
+         }
+         // email2 specifies a domain
+         else if (email2.startsWith("."))
+         {
+            if (withinDomain(_sub, email2))
+            {
+               union.add(email2);
+            }
+            else
+            {
+               union.add(email1);
+               union.add(email2);
+            }
+         }
+         // email2 specifies a particular host
+         else
+         {
+            if (_sub.equalsIgnoreCase(email2))
+            {
+               union.add(email2);
+            }
+            else
+            {
+               union.add(email1);
+               union.add(email2);
+            }
+         }
+      }
+      // email1 specifies a domain
+      else if (email1.startsWith("."))
+      {
+         if (email2.indexOf('@') != -1)
+         {
+            String _sub = email2.substring(email1.indexOf('@') + 1);
+            if (withinDomain(_sub, email1))
+            {
+               union.add(email1);
+            }
+            else
+            {
+               union.add(email1);
+               union.add(email2);
+            }
+         }
+         // email2 specifies a domain
+         else if (email2.startsWith("."))
+         {
+            if (withinDomain(email1, email2)
+               || email1.equalsIgnoreCase(email2))
+            {
+               union.add(email2);
+            }
+            else if (withinDomain(email2, email1))
+            {
+               union.add(email1);
+            }
+            else
+            {
+               union.add(email1);
+               union.add(email2);
+            }
+         }
+         else
+         {
+            if (withinDomain(email2, email1))
+            {
+               union.add(email1);
+            }
+            else
+            {
+               union.add(email1);
+               union.add(email2);
+            }
+         }
+      }
+      // email specifies a host
+      else
+      {
+         if (email2.indexOf('@') != -1)
+         {
+            String _sub = email2.substring(email1.indexOf('@') + 1);
+            if (_sub.equalsIgnoreCase(email1))
+            {
+               union.add(email1);
+            }
+            else
+            {
+               union.add(email1);
+               union.add(email2);
+            }
+         }
+         // email2 specifies a domain
+         else if (email2.startsWith("."))
+         {
+            if (withinDomain(email1, email2))
+            {
+               union.add(email2);
+            }
+            else
+            {
+               union.add(email1);
+               union.add(email2);
+            }
+         }
+         // email2 specifies a particular host
+         else
+         {
+            if (email1.equalsIgnoreCase(email2))
+            {
+               union.add(email1);
+            }
+            else
+            {
+               union.add(email1);
+               union.add(email2);
+            }
+         }
+      }
+   }
+
    private Set intersectDNS(Set permitted, String dns)
    {
       Set intersect = new HashSet();
-      if (permitted == null)
+      if (permitted.isEmpty())
       {
          intersect.add(dns);
 
@@ -966,7 +1104,7 @@ public class PKIXNameConstraints
     private Set intersectURI(Set permitted, String uri)
     {
         Set intersect = new HashSet();
-        if (permitted == null)
+        if (permitted.isEmpty())
         {
             intersect.add(uri);
 
@@ -978,7 +1116,7 @@ public class PKIXNameConstraints
             while (_iter.hasNext())
             {
                 String _permitted = (String)_iter.next();
-                intersectEmail(_permitted, uri, intersect);
+                intersectURI(_permitted, uri, intersect);
             }
 
             return intersect;
@@ -1002,10 +1140,106 @@ public class PKIXNameConstraints
             {
                 String _excluded = (String)_iter.next();
 
-                unionEmail(_excluded, uri, union);
+                unionURI(_excluded, uri, union);
             }
 
             return union;
+        }
+    }
+
+    private void intersectURI(
+        String email1,
+        String email2,
+        Set intersect)
+    {
+        // email1 is a particular address
+        if (email1.indexOf('@') != -1)
+        {
+            String _sub = email1.substring(email1.indexOf('@') + 1);
+            // both are a particular mailbox
+            if (email2.indexOf('@') != -1)
+            {
+                if (email1.equalsIgnoreCase(email2))
+                {
+                    intersect.add(email1);
+                }
+            }
+            // email2 specifies a domain
+            else if (email2.startsWith("."))
+            {
+                if (withinDomain(_sub, email2))
+                {
+                    intersect.add(email1);
+                }
+            }
+            // email2 specifies a particular host
+            else
+            {
+                if (_sub.equalsIgnoreCase(email2))
+                {
+                    intersect.add(email1);
+                }
+            }
+        }
+        // email specifies a domain
+        else if (email1.startsWith("."))
+        {
+            if (email2.indexOf('@') != -1)
+            {
+                String _sub = email2.substring(email1.indexOf('@') + 1);
+                if (withinDomain(_sub, email1))
+                {
+                    intersect.add(email2);
+                }
+            }
+            // email2 specifies a domain
+            else if (email2.startsWith("."))
+            {
+                if (withinDomain(email1, email2)
+                    || email1.equalsIgnoreCase(email2))
+                {
+                    intersect.add(email1);
+                }
+                else if (withinDomain(email2, email1))
+                {
+                    intersect.add(email2);
+                }
+            }
+            else
+            {
+                if (withinDomain(email2, email1))
+                {
+                    intersect.add(email2);
+                }
+            }
+        }
+        // email1 specifies a host
+        else
+        {
+            if (email2.indexOf('@') != -1)
+            {
+                String _sub = email2.substring(email2.indexOf('@') + 1);
+                if (_sub.equalsIgnoreCase(email1))
+                {
+                    intersect.add(email2);
+                }
+            }
+            // email2 specifies a domain
+            else if (email2.startsWith("."))
+            {
+                if (withinDomain(email1, email2))
+                {
+                    intersect.add(email1);
+                }
+            }
+            // email2 specifies a particular host
+            else
+            {
+                if (email1.equalsIgnoreCase(email2))
+                {
+                    intersect.add(email1);
+                }
+            }
         }
     }
 
@@ -1038,23 +1272,23 @@ public class PKIXNameConstraints
 
     private boolean isUriConstrained(String uri, String constraint)
     {
-            String host = extractHostFromURL(uri);
-            // a host
-            if (!constraint.startsWith("."))
-            {
-                    if (host.equalsIgnoreCase(constraint))
-                    {
-                            return true;
-                    }
-            }
+        String host = extractHostFromURL(uri);
+        // a host
+        if (!constraint.startsWith("."))
+        {
+                if (host.equalsIgnoreCase(constraint))
+                {
+                        return true;
+                }
+        }
 
-            // in sub domain or domain
-            else if (withinDomain(host, constraint))
-            {
-                    return true;
-            }
+        // in sub domain or domain
+        else if (withinDomain(host, constraint))
+        {
+                return true;
+        }
 
-            return false;
+        return false;
     }
 
     private static String extractHostFromURL(String url)
@@ -1089,15 +1323,13 @@ public class PKIXNameConstraints
         switch(name.getTagNo())
         {
         case 1:
-            String email = DERIA5String.getInstance(name.getName()).getString();
-
-            checkPermittedEmail(permittedSubtreesEmail, email);
+            checkPermittedEmail(permittedSubtreesEmail, extractNameAsString(name));
             break;
         case 2:
             checkPermittedDNS(permittedSubtreesDNS, DERIA5String.getInstance(name.getName()).getString());
             break;
         case 4:
-            checkPermittedDN(ASN1Sequence.getInstance(name.getName()));
+            checkPermittedDN(ASN1Sequence.getInstance(name.getName().getDERObject()));
             break;
         case 6:
             checkPermittedURI(permittedSubtreesURI, DERIA5String.getInstance(name.getName()).getString());
@@ -1115,15 +1347,13 @@ public class PKIXNameConstraints
         switch(name.getTagNo())
         {
         case 1:
-            String email = DERIA5String.getInstance(name.getName()).getString();
-
-            checkExcludedEmail(excludedSubtreesEmail, email);
+            checkExcludedEmail(excludedSubtreesEmail, extractNameAsString(name));
             break;
         case 2:
             checkExcludedDNS(excludedSubtreesDNS, DERIA5String.getInstance(name.getName()).getString());
             break;
         case 4:
-            checkExcludedDN(ASN1Sequence.getInstance(name.getName()));
+            checkExcludedDN(ASN1Sequence.getInstance(name.getName().getDERObject()));
             break;
         case 6:
             checkExcludedURI(excludedSubtreesURI, DERIA5String.getInstance(name.getName()).getString());
@@ -1141,24 +1371,28 @@ public class PKIXNameConstraints
         switch(name.getTagNo())
         {
         case 1:
-            String email = DERIA5String.getInstance(name.getName()).getString();
-
-            intersectEmail(permittedSubtreesEmail, email);
+            permittedSubtreesEmail = intersectEmail(permittedSubtreesEmail, extractNameAsString(name));
             break;
         case 2:
-            intersectDNS(permittedSubtreesDNS, DERIA5String.getInstance(name.getName()).getString());
+            permittedSubtreesDNS = intersectDNS(permittedSubtreesDNS, DERIA5String.getInstance(name.getName()).getString());
             break;
         case 4:
-            intersectDN(permittedSubtreesDN, ASN1Sequence.getInstance(name.getName()));
+            permittedSubtreesDN = intersectDN(permittedSubtreesDN, ASN1Sequence.getInstance(name.getName().getDERObject()));
             break;
         case 6:
-            intersectURI(permittedSubtreesURI, DERIA5String.getInstance(name.getName()).getString());
+            permittedSubtreesURI = intersectURI(permittedSubtreesURI, DERIA5String.getInstance(name.getName()).getString());
             break;
         case 7:
             byte[] ip = ASN1OctetString.getInstance(name.getName()).getOctets();
 
-            intersectIP(permittedSubtreesIP, ip);
+            permittedSubtreesIP = intersectIP(permittedSubtreesIP, ip);
         }
+    }
+
+    private String extractNameAsString(GeneralName name)
+    {
+        String email = DERIA5String.getInstance(name.getName()).getString();
+        return email;
     }
 
     public void addExcludedSubtree(GeneralSubtree subtree)
@@ -1174,7 +1408,7 @@ public class PKIXNameConstraints
             excludedSubtreesDNS = unionDNS(excludedSubtreesDNS, DERIA5String.getInstance(base.getName()).getString());
             break;
         case 4:
-            excludedSubtreesDN = unionDN(excludedSubtreesDN, (ASN1Sequence)base.getName());
+            excludedSubtreesDN = unionDN(excludedSubtreesDN, (ASN1Sequence)base.getName().getDERObject());
             break;
         case 6:
             excludedSubtreesURI = unionURI(excludedSubtreesURI, DERIA5String.getInstance(base.getName()).getString());

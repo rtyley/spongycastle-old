@@ -58,6 +58,8 @@ public class RegressionTest
         new NISTCertPathTest(),
         new PKIXPolicyMappingTest(),
         new SlotTwoTest(),
+        new PKIXNameConstraintsTest(),
+        new MultiCertStoreTest(),
         new CRL5Test()
     };
 
