@@ -1,14 +1,5 @@
 package org.bouncycastle.openpgp.test;
 
-import java.io.ByteArrayInputStream;
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.util.Date;
-import java.util.Iterator;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.openpgp.PGPEncryptedData;
@@ -24,7 +15,17 @@ import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.io.ByteArrayInputStream;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Date;
+import java.util.Iterator;
 
 public class PGPKeyRingTest
     extends SimpleTest
@@ -923,6 +924,42 @@ public class PGPKeyRingTest
           + "8esfw+iLchfEwXtBIRwS");
 
     char[] rewrapPass = "voltage123".toCharArray();
+
+    byte[] pubWithX509 = Base64.decode(
+        "mQENBERabjABCACtmfyo6Nph9MQjv4nmCWjZrRYnhXbivomAdIwYkLZUj1bjqE+j"+
+        "uaLzjZV8xSI59odZvrmOiqlzOc4txitQ1OX7nRgbOJ7qku0dvwjtIn46+HQ+cAFn"+
+        "2mTi81RyXEpO2uiZXfsNTxUtMi+ZuFLufiMc2kdk27GZYWEuasdAPOaPJnA+wW6i"+
+        "ZHlt0NfXIGNz864gRwhD07fmBIr1dMFfATWxCbgMd/rH7Z/j4rvceHD2n9yrhPze"+
+        "YN7W4Nuhsr2w/Ft5Cm9xO7vXT/cpto45uxn8f7jERep6bnUwNOhH8G+6xLQgTLD0"+
+        "qFBGVSIneK3lobs6+xn6VaGN8W0tH3UOaxA1ABEBAAG0D0NOPXFhLWRlZXBzaWdo"+
+        "dIkFDgQQZAIFAQUCRFpuMAUDCWdU0gMF/3gCGwPELGQBAQQwggTkMIIDzKADAgEC"+
+        "AhBVUMV/M6rIiE+IzmnPheQWMA0GCSqGSIb3DQEBBQUAMG4xEzARBgoJkiaJk/Is"+
+        "ZAEZFgNjb20xEjAQBgoJkiaJk/IsZAEZFgJxYTEVMBMGCgmSJomT8ixkARkWBXRt"+
+        "czAxMRUwEwYKCZImiZPyLGQBGRYFV2ViZmUxFTATBgNVBAMTDHFhLWRlZXBzaWdo"+
+        "dDAeFw0wNjA1MDQyMTEyMTZaFw0xMTA1MDQyMTIwMDJaMG4xEzARBgoJkiaJk/Is"+
+        "ZAEZFgNjb20xEjAQBgoJkiaJk/IsZAEZFgJxYTEVMBMGCgmSJomT8ixkARkWBXRt"+
+        "czAxMRUwEwYKCZImiZPyLGQBGRYFV2ViZmUxFTATBgNVBAMTDHFhLWRlZXBzaWdo"+
+        "dDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2Z/Kjo2mH0xCO/ieYJ"+
+        "aNmtFieFduK+iYB0jBiQtlSPVuOoT6O5ovONlXzFIjn2h1m+uY6KqXM5zi3GK1DU"+
+        "5fudGBs4nuqS7R2/CO0ifjr4dD5wAWfaZOLzVHJcSk7a6Jld+w1PFS0yL5m4Uu5+"+
+        "IxzaR2TbsZlhYS5qx0A85o8mcD7BbqJkeW3Q19cgY3PzriBHCEPTt+YEivV0wV8B"+
+        "NbEJuAx3+sftn+Piu9x4cPaf3KuE/N5g3tbg26GyvbD8W3kKb3E7u9dP9ym2jjm7"+
+        "Gfx/uMRF6npudTA06Efwb7rEtCBMsPSoUEZVIid4reWhuzr7GfpVoY3xbS0fdQ5r"+
+        "EDUCAwEAAaOCAXwwggF4MAsGA1UdDwQEAwIBhjAPBgNVHRMBAf8EBTADAQH/MB0G"+
+        "A1UdDgQWBBSmFTRv5y65DHtTYae48zl0ExNWZzCCASUGA1UdHwSCARwwggEYMIIB"+
+        "FKCCARCgggEMhoHFbGRhcDovLy9DTj1xYS1kZWVwc2lnaHQsQ049cWEtd3VtYW4x"+
+        "LWRjLENOPUNEUCxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2aWNlcyxDTj1TZXJ2aWNl"+
+        "cyxDTj1Db25maWd1cmF0aW9uLERDPVdlYmZlLERDPXRtczAxLERDPXFhLERDPWNv"+
+        "bT9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JM"+
+        "RGlzdHJpYnV0aW9uUG9pbnSGQmh0dHA6Ly9xYS13dW1hbjEtZGMud2ViZmUudG1z"+
+        "MDEucWEuY29tL0NlcnRFbnJvbGwvcWEtZGVlcHNpZ2h0LmNybDAQBgkrBgEEAYI3"+
+        "FQEEAwIBADANBgkqhkiG9w0BAQUFAAOCAQEAfuZCW3XlB7Eok35zQbvYt9rhAndT"+
+        "DNw3wPNI4ZzD1nXoYWnwhNNvWRpsOt4ExOSNdaHErfgDXAMyyg66Sro0TkAx8eAj"+
+        "fPQsyRAh0nm0glzFmJN6TdOZbj7hqGZjc4opQ6nZo8h/ULnaEwMIUW4gcSkZt0ww"+
+        "CuErl5NUrN3DpkREeCG/fVvQZ8ays3ibQ5ZCZnYBkLYq/i0r3NLW34WfYhjDY48J"+
+        "oQWtvFSAxvRfz2NGmqnrCHPQZxqlfdta97kDa4VQ0zSeBaC70gZkLmD1GJMxWoXW"+
+        "6tmEcgPY5SghInUf+L2u52V55MjyAFzVp7kTK2KY+p7qw35vzckrWkwu8AAAAAAA"+
+        "AQE=");
 
     public void test1()
         throws Exception
@@ -1912,6 +1949,51 @@ public class PGPKeyRingTest
         }
     }
 
+    private void testPublicKeyRingWithX509()
+        throws Exception
+    {
+        checkPublicKeyRingWithX509(pubWithX509);
+
+        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(pubWithX509);
+
+        checkPublicKeyRingWithX509(pubRing.getEncoded());
+    }
+
+    private void checkPublicKeyRingWithX509(byte[] keyRing)
+        throws Exception
+    {
+        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(keyRing);
+        Iterator         it = pubRing.getPublicKeys();
+
+        if (it.hasNext())
+        {
+            PGPPublicKey key = (PGPPublicKey)it.next();
+
+            Iterator sIt = key.getSignatures();
+
+            if (sIt.hasNext())
+            {
+                PGPSignature sig = (PGPSignature)sIt.next();
+                if (sig.getKeyAlgorithm() != 100)
+                {
+                    fail("experimental signature not found");
+                }
+                if (!areEqual(sig.getSignature(), Hex.decode("000101")))
+                {
+                    fail("experimental encoding check failed");
+                }
+            }
+            else
+            {
+                fail("no signature found");
+            }
+        }
+        else
+        {
+            fail("no key found");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -1931,6 +2013,7 @@ public class PGPKeyRingTest
             generateTest();
             generateSha1Test();
             rewrapTest();
+            testPublicKeyRingWithX509();
         }
         catch (PGPException e)
         {
