@@ -1221,9 +1221,7 @@ public class BigInteger
         }
 
         BigInteger x = new BigInteger();
-        BigInteger y = new BigInteger();
-
-        BigInteger gcd = BigInteger.extEuclid(this, m, x, y);
+        BigInteger gcd = BigInteger.extEuclid(this, m, x, null);
 
         if (!gcd.equals(BigInteger.ONE))
         {
@@ -1258,34 +1256,35 @@ public class BigInteger
     private static BigInteger extEuclid(BigInteger a, BigInteger b, BigInteger u1Out,
             BigInteger u2Out)
     {
-        BigInteger res;
-
         BigInteger u1 = BigInteger.ONE;
         BigInteger u3 = a;
         BigInteger v1 = BigInteger.ZERO;
         BigInteger v3 = b;
 
-        while (v3.compareTo(BigInteger.ZERO) > 0)
+        while (v3.sign > 0)
         {
-            BigInteger q, tn;
+            BigInteger[] q = u3.divideAndRemainder(v3);
 
-            q = u3.divide(v3);
-
-            tn = u1.subtract(v1.multiply(q));
+            BigInteger tn = u1.subtract(v1.multiply(q[0]));
             u1 = v1;
             v1 = tn;
 
-            tn = u3.subtract(v3.multiply(q));
             u3 = v3;
-            v3 = tn;
+            v3 = q[1];
         }
 
-        u1Out.sign = u1.sign;
-        u1Out.magnitude = u1.magnitude;
+        if (u1Out != null)
+        {
+            u1Out.sign = u1.sign;
+            u1Out.magnitude = u1.magnitude;
+        }
 
-        res = u3.subtract(u1.multiply(a)).divide(b);
-        u2Out.sign = res.sign;
-        u2Out.magnitude = res.magnitude;
+        if (u2Out != null)
+        {
+            BigInteger res = u3.subtract(u1.multiply(a)).divide(b);
+            u2Out.sign = res.sign;
+            u2Out.magnitude = res.magnitude;
+        }
 
         return u3;
     }
@@ -1531,21 +1530,41 @@ public class BigInteger
      */
     private int[] multiply(int[] x, int[] y, int[] z)
     {
-        for (int i = z.length - 1; i >= 0; i--)
+        int i = z.length;
+
+        if (i < 1)
         {
-            long a = z[i] & IMASK;
-            long value = 0;
+            return x;
+        }
+
+        int xBase = x.length - y.length;
+
+        for (;;)
+        {
+            long a = z[--i] & IMASK;
+            long val = 0;
 
             for (int j = y.length - 1; j >= 0; j--)
             {
-                value += a * (y[j] & IMASK) + (x[i + j + 1] & IMASK);
+                val += a * (y[j] & IMASK) + (x[xBase + j] & IMASK);
 
-                x[i + j + 1] = (int)value;
+                x[xBase + j] = (int)val;
 
-                value >>>= 32;
+                val >>>= 32;
             }
 
-            x[i] = (int)value;
+            --xBase;
+
+            if (i < 1)
+            {
+                if (xBase >= 0)
+                {
+                    x[xBase] = (int)val;
+                }
+                break;
+            }
+
+            x[xBase] = (int)val;
         }
 
         return x;
@@ -1701,7 +1720,10 @@ public class BigInteger
         if (sign == 0 || val.sign == 0)
             return BigInteger.ZERO;
 
-        int[] res = new int[magnitude.length + val.magnitude.length];
+        int maxBitLength = this.bitLength() + val.bitLength();
+        int resLength = (maxBitLength + 31) / 32;
+
+        int[] res = new int[resLength];
 
         return new BigInteger(sign * val.sign, multiply(res, magnitude, val.magnitude));
     }
