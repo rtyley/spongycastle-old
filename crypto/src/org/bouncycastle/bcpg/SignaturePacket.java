@@ -1,12 +1,13 @@
 package org.bouncycastle.bcpg;
 
+import org.bouncycastle.bcpg.sig.IssuerKeyID;
+import org.bouncycastle.bcpg.sig.SignatureCreationTime;
+import org.bouncycastle.util.Arrays;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Vector;
-
-import org.bouncycastle.bcpg.sig.IssuerKeyID;
-import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 
 /**
  * generic signature packet
@@ -24,6 +25,7 @@ public class SignaturePacket
     private byte[]                 fingerPrint;
     private SignatureSubpacket[]   hashedData;
     private SignatureSubpacket[]   unhashedData;
+    private byte[]                 signatureEncoding;
     
     SignaturePacket(
         BCPGInputStream    in)
@@ -117,7 +119,7 @@ public class SignaturePacket
                     creationTime = ((SignatureCreationTime)p).getTime().getTime();
                 }
                 
-                unhashedData[i] = (SignatureSubpacket)p;
+                unhashedData[i] = p;
             }
         }
         else
@@ -157,7 +159,21 @@ public class SignaturePacket
             signature[2] = y;
             break;
         default:
-            throw new IOException("unknown signature key algorithm: " + keyAlgorithm);
+            if (keyAlgorithm >= PublicKeyAlgorithmTags.EXPERIMENTAL_1 && keyAlgorithm <= PublicKeyAlgorithmTags.EXPERIMENTAL_11)
+            {
+                signature = null;
+                ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+                int ch;
+                while ((ch = in.read()) >= 0)
+                {
+                    bOut.write(ch);
+                }
+                signatureEncoding = bOut.toByteArray();
+            }
+            else
+            {
+                throw new IOException("unknown signature key algorithm: " + keyAlgorithm);
+            }
         }
     }
     
@@ -340,14 +356,43 @@ public class SignaturePacket
     }
     
     /**
-     * return the signature bytes - note this is normalised to be the
+     * return the signature as a set of integers - note this is normalised to be the
      * ASN.1 encoding of what appears in the signature packet.
      */
     public MPInteger[] getSignature()
     {
         return signature;
     }
-    
+
+    /**
+     * Return the byte encoding of the signature section.
+     * @return uninterpreted signature bytes.
+     */
+    public byte[] getSignatureBytes()
+    {
+        if (signatureEncoding == null)
+        {
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            BCPGOutputStream bcOut = new BCPGOutputStream(bOut);
+
+            for (int i = 0; i != signature.length; i++)
+            {
+                try
+                {
+                    bcOut.writeObject(signature[i]);
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("internal error: " + e);
+                }
+            }
+            return bOut.toByteArray();
+        }
+        else
+        {
+            return Arrays.clone(signatureEncoding);
+        }
+    }
     public SignatureSubpacket[] getHashedSubPackets()
     {
         return hashedData;
@@ -439,10 +484,17 @@ public class SignaturePacket
         }
         
         pOut.write(fingerPrint);
-        
-        for (int i = 0; i != signature.length; i++)
+
+        if (signature != null)
         {
-            pOut.writeObject(signature[i]);
+            for (int i = 0; i != signature.length; i++)
+            {
+                pOut.writeObject(signature[i]);
+            }
+        }
+        else
+        {
+            pOut.write(signatureEncoding);
         }
 
         out.writePacket(SIGNATURE, bOut.toByteArray(), true);

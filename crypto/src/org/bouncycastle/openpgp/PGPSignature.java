@@ -1,14 +1,5 @@
 package org.bouncycastle.openpgp;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchProviderException;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.util.Date;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERInteger;
@@ -19,6 +10,15 @@ import org.bouncycastle.bcpg.MPInteger;
 import org.bouncycastle.bcpg.SignaturePacket;
 import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.TrustPacket;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchProviderException;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.util.Date;
 
 /**
  *A PGP signature object.
@@ -367,42 +367,49 @@ public class PGPSignature
         throws PGPException
     {
         MPInteger[]    sigValues = sigPck.getSignature();
-        byte[]            signature;
+        byte[]         signature;
 
-        if (sigValues.length == 1)    // an RSA signature
+        if (sigValues != null)
         {
-            byte[]    sBytes = sigValues[0].getValue().toByteArray();
-    
-            if (sBytes[0] == 0)
+            if (sigValues.length == 1)    // an RSA signature
             {
-                signature = new byte[sBytes.length - 1];
-                System.arraycopy(sBytes, 1, signature, 0, signature.length);
+                byte[]    sBytes = sigValues[0].getValue().toByteArray();
+
+                if (sBytes[0] == 0)
+                {
+                    signature = new byte[sBytes.length - 1];
+                    System.arraycopy(sBytes, 1, signature, 0, signature.length);
+                }
+                else
+                {
+                    signature = sBytes;
+                }
             }
             else
             {
-                signature = sBytes;
+                ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
+                ASN1OutputStream         aOut = new ASN1OutputStream(bOut);
+
+                try
+                {
+                    ASN1EncodableVector     v = new ASN1EncodableVector();
+
+                    v.add(new DERInteger(sigValues[0].getValue()));
+                    v.add(new DERInteger(sigValues[1].getValue()));
+
+                    aOut.writeObject(new DERSequence(v));
+                }
+                catch (IOException e)
+                {
+                    throw new PGPException("exception encoding DSA sig.", e);
+                }
+
+                signature = bOut.toByteArray();
             }
         }
         else
         {
-            ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-            ASN1OutputStream         aOut = new ASN1OutputStream(bOut);
-            
-            try
-            {
-                ASN1EncodableVector     v = new ASN1EncodableVector();
-
-                v.add(new DERInteger(sigValues[0].getValue()));
-                v.add(new DERInteger(sigValues[1].getValue()));
-
-                aOut.writeObject(new DERSequence(v));
-            }
-            catch (IOException e)
-            {
-                throw new PGPException("exception encoding DSA sig.", e);
-            }
-            
-            signature = bOut.toByteArray();
+            signature = sigPck.getSignatureBytes();
         }
         
         return signature;
