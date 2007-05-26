@@ -8,7 +8,7 @@ public class ECAlgorithms
      * "Shamir's Trick", originally due to E. G. Straus
      * (Addition chains of vectors. American Mathematical Monthly,
      * 71(7):806�808, Aug./Sept. 1964)
-     *  
+     * <pre>
      * Input: The points P, Q, scalar k = (km?, ... , k1, k0)
      * and scalar l = (lm?, ... , l1, l0).
      * Output: R = k * P + l * Q.
@@ -21,6 +21,7 @@ public class ECAlgorithms
      * 7:        if (ki = 1) and (li = 1) then R <- R + Z end if
      * 8: end for
      * 9: return R
+     * </pre>
      */
     public static ECPoint shamirsTrick(ECPoint P, BigInteger k,
         ECPoint Q, BigInteger l)
