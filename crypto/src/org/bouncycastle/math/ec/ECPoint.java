@@ -250,29 +250,23 @@ public abstract class ECPoint
 
             // BigInteger e = k.mod(n); // n == order this
             BigInteger e = k;
-
             BigInteger h = e.multiply(BigInteger.valueOf(3));
 
+            ECPoint neg = this.curve.getInfinity().subtract(this);
             ECPoint R = this;
 
             for (int i = h.bitLength() - 2; i > 0; i--)
             {             
-                R = R.twice();       
+                R = R.twice();
 
-                if (h.testBit(i) && !e.testBit(i))
-                {                    
-                    //System.out.print("+");
-                    R = R.add(this);
-                }
-                else if (!h.testBit(i) && e.testBit(i))
+                boolean hBit = h.testBit(i);
+                boolean eBit = e.testBit(i);
+
+                if (hBit != eBit)
                 {
-                    //System.out.print("-");
-                    R = R.subtract(this);
+                    R = R.add(hBit ? this : neg);
                 }
-                // else
-                // System.out.print(".");
             }
-            // System.out.println();
 
             return R;
         }
@@ -488,19 +482,37 @@ public abstract class ECPoint
         public ECPoint multiply(
             BigInteger k)
         {
-            ECPoint p = this;
-            ECPoint q = this.curve.getInfinity();
-
-            int t = k.bitLength();
-            for (int i = 0; i < t; i++) 
+            if (this.isInfinity())
             {
-                if (k.testBit(i)) 
-                {
-                    q = q.add(p);
-                }
-                p = p.twice();
+                return this;
             }
-            return q;
+
+            if (k.signum() == 0)
+            {
+                return this.curve.getInfinity();
+            }
+
+            // BigInteger e = k.mod(n); // n == order this
+            BigInteger e = k;
+            BigInteger h = e.multiply(BigInteger.valueOf(3));
+
+            ECPoint neg = this.curve.getInfinity().subtract(this);
+            ECPoint R = this;
+
+            for (int i = h.bitLength() - 2; i > 0; i--)
+            {             
+                R = R.twice();
+
+                boolean hBit = h.testBit(i);
+                boolean eBit = e.testBit(i);
+
+                if (hBit != eBit)
+                {
+                    R = R.add(hBit ? this : neg);
+                }
+            }
+
+            return R;
         }
     }
 }
