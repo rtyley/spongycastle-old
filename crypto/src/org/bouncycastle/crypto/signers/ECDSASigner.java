@@ -9,6 +9,7 @@ import org.bouncycastle.crypto.params.ECKeyParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECPoint;
 
@@ -134,7 +135,8 @@ public class ECDSASigner
         ECPoint G = key.getParameters().getG();
         ECPoint Q = ((ECPublicKeyParameters)key).getQ();
 
-        ECPoint point = G.multiply(u1).add(Q.multiply(u2));
+//        ECPoint point = G.multiply(u1).add(Q.multiply(u2));
+        ECPoint point = ECAlgorithms.ShamirsTrick(G, u1, Q, u2);
 
         BigInteger v = point.getX().toBigInteger().mod(n);
 

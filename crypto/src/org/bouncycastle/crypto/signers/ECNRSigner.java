@@ -10,6 +10,7 @@ import org.bouncycastle.crypto.params.ECKeyParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECPoint;
 
@@ -171,11 +172,12 @@ public class ECNRSigner
         ECPoint G = pubKey.getParameters().getG();
         ECPoint W = pubKey.getQ();
         // calculate P using Bouncy math
-        ECPoint P = G.multiply(s).add(W.multiply(r));
-        
+//        ECPoint P = G.multiply(s).add(W.multiply(r));
+        ECPoint P = ECAlgorithms.ShamirsTrick(G, s, W, r);
+
         BigInteger x = P.getX().toBigInteger();
         BigInteger t = r.subtract(x).mod(n);
-        
+
         return t.equals(e);
     }
 }
