@@ -9,7 +9,10 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.util.IPAddress;
+import org.bouncycastle.util.Strings;
 
 /**
  * The GeneralName object.
@@ -106,29 +109,56 @@ public class GeneralName
     }
     
     /**
-     * Create a General name for the given tag from the passed in String.
-     * 
+     * Create a GeneralName for the given tag from the passed in String.
+     * <p>
+     * This constructor can handle:
+     * <ul>
+     * <li>rfc822Name
+     * <li>iPAddress
+     * <li>directoryName
+     * <li>dNSName
+     * <li>uniformResourceIdentifier
+     * <li>registeredID
+     * </ul>
+     * For x400Address, otherName and ediPartyName there is no common string
+     * format defined.
+     * <p>
+     * Note: A directory name can be encoded in different ways into a byte
+     * representation. Be aware of this if the byte representation is used for
+     * comparing results.
+     *
      * @param tag tag number
      * @param name string representation of name
+     * @throws IllegalArgumentException if the string encoding is not correct or     *             not supported.
      */
     public GeneralName(
         int       tag,
         String    name)
     {
+        this.tag = tag;
+
         if (tag == rfc822Name || tag == dNSName || tag == uniformResourceIdentifier)
         {
-            this.tag = tag;
             this.obj = new DERIA5String(name);
         }
         else if (tag == registeredID)
         {
-            this.tag = tag;
             this.obj = new DERObjectIdentifier(name);
         }
         else if (tag == directoryName)
         {
-            this.tag = tag;
             this.obj = new X509Name(name);
+        }
+        else if (tag == iPAddress)
+        {
+            if (IPAddress.isValid(name))
+            {
+                this.obj = new DEROctetString(Strings.toUTF8ByteArray(name));
+            }
+            else
+            {
+                throw new IllegalArgumentException("IP Address is invalid");
+            }
         }
         else
         {
@@ -190,6 +220,28 @@ public class GeneralName
     public DEREncodable getName()
     {
         return obj;
+    }
+
+    public String toString()
+    {
+        StringBuffer buf = new StringBuffer();
+
+        buf.append(tag);
+        buf.append(": ");
+        switch (tag)
+        {
+        case rfc822Name:
+        case dNSName:
+        case uniformResourceIdentifier:
+            buf.append(DERIA5String.getInstance(obj).getString());
+            break;
+        case directoryName:
+            buf.append(X509Name.getInstance(obj).toString());
+            break;
+        default:
+            buf.append(obj.toString());
+        }
+        return buf.toString();
     }
 
     public DERObject toASN1Object()

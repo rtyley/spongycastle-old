@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 
 
 public class X509ExtensionUtil
@@ -62,7 +63,7 @@ public class X509ExtensionUtil
             while (it.hasMoreElements())
             {
                 GeneralName genName = GeneralName.getInstance(it.nextElement());
-                ArrayList list = new ArrayList();
+                List list = new ArrayList();
                 list.add(new Integer(genName.getTagNo()));
                 switch (genName.getTagNo())
                 {
