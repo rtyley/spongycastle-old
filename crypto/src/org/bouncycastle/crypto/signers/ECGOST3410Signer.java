@@ -1,17 +1,17 @@
 package org.bouncycastle.crypto.signers;
 
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.DSA;
+import org.bouncycastle.crypto.params.ECKeyParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.crypto.params.ECKeyParameters;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.DSA;
 
-import java.security.SecureRandom;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * GOST R 34.10-2001 Signature Algorithm
@@ -144,7 +144,7 @@ public class ECGOST3410Signer
         ECPoint Q = ((ECPublicKeyParameters)key).getQ();
 
 //        ECPoint point = G.multiply(z1).add(Q.multiply(z2));
-        ECPoint point = ECAlgorithms.ShamirsTrick(G, z1, Q, z2);
+        ECPoint point = ECAlgorithms.shamirsTrick(G, z1, Q, z2);
 
         BigInteger R = point.getX().toBigInteger().mod(n);
 
