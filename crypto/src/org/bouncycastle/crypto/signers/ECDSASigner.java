@@ -1,8 +1,5 @@
 package org.bouncycastle.crypto.signers;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.params.ECKeyParameters;
@@ -12,6 +9,9 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECPoint;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * EC-DSA as described in X9.62
@@ -136,7 +136,7 @@ public class ECDSASigner
         ECPoint Q = ((ECPublicKeyParameters)key).getQ();
 
 //        ECPoint point = G.multiply(u1).add(Q.multiply(u2));
-        ECPoint point = ECAlgorithms.ShamirsTrick(G, u1, Q, u2);
+        ECPoint point = ECAlgorithms.shamirsTrick(G, u1, Q, u2);
 
         BigInteger v = point.getX().toBigInteger().mod(n);
 

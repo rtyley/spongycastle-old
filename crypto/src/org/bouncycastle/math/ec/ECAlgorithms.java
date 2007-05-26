@@ -7,7 +7,7 @@ public class ECAlgorithms
     /*
      * "Shamir's Trick", originally due to E. G. Straus
      * (Addition chains of vectors. American Mathematical Monthly,
-     * 71(7):806–808, Aug./Sept. 1964)
+     * 71(7):806ï¿½808, Aug./Sept. 1964)
      *  
      * Input: The points P, Q, scalar k = (km?, ... , k1, k0)
      * and scalar l = (lm?, ... , l1, l0).
@@ -22,7 +22,7 @@ public class ECAlgorithms
      * 8: end for
      * 9: return R
      */
-    public static ECPoint ShamirsTrick(ECPoint P, BigInteger k,
+    public static ECPoint shamirsTrick(ECPoint P, BigInteger k,
         ECPoint Q, BigInteger l)
     {
         if (!P.getCurve().equals(Q.getCurve()))
