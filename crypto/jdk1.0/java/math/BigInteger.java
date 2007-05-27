@@ -95,12 +95,23 @@ public class BigInteger
     };
 
     private static int[] primeProducts;
-//    private static BigInteger[] PrimeProducts;
+
+    private static final long IMASK = 0xffffffffL;
+
+    private static final int[] ZERO_MAGNITUDE = new int[0];
+
+    public static final BigInteger ZERO = new BigInteger(0, ZERO_MAGNITUDE);
+    public static final BigInteger ONE = valueOf(1);
+    private static final BigInteger TWO = valueOf(2);
+    private static final BigInteger THREE = valueOf(3);
 
     static
     {
+        ZERO.nBits = 0; ZERO.nBitLength = 0;
+        ONE.nBits = 1;  ONE.nBitLength = 1;
+        TWO.nBits = 1;  TWO.nBitLength = 2;
+
         primeProducts = new int[primeLists.length];
-//        PrimeProducts = new BigInteger[primeLists.length];
 
         for (int i = 0; i < primeLists.length; ++i)
         {
@@ -111,17 +122,9 @@ public class BigInteger
                 product *= primeList[j];
             }
             primeProducts[i] = product;
-//            PrimeProducts[i] = BigInteger.valueOf(product);
         }
     }
     
-
-    
-
-    private static final long IMASK = 0xffffffffL;
-
-    private static final int[] ZERO_MAGNITUDE = new int[0];
-
     private int sign; // -1 means -ve; +1 means +ve; 0 means 0;
     private int[] magnitude; // array of ints with [0] being the most significant
     private int nBits = -1; // cache bitCount() value
@@ -215,7 +218,7 @@ public class BigInteger
         // storage in one hit?, then generate the magnitude in one hit too?
         //////
 
-        BigInteger b = BigInteger.ZERO;
+        BigInteger b = ZERO;
         BigInteger r = valueOf(rdx);
         while (index < sval.length())
         {
@@ -655,6 +658,63 @@ public class BigInteger
         bigCopy = add(bigCopy, small);
 
         return new BigInteger(this.sign, bigCopy);
+    }
+
+    public BigInteger and(
+        BigInteger value)
+    {
+        if (this.sign == 0 || value.sign == 0)
+        {
+            return ZERO;
+        }
+
+        int[] aMag = this.sign > 0
+            ? this.magnitude
+            : add(ONE).magnitude;
+
+        int[] bMag = value.sign > 0
+            ? value.magnitude
+            : value.add(ONE).magnitude;
+
+        boolean resultNeg = sign < 0 && value.sign < 0;
+        int resultLength = Math.max(aMag.length, bMag.length);
+        int[] resultMag = new int[resultLength];
+
+        int aStart = resultMag.length - aMag.length;
+        int bStart = resultMag.length - bMag.length;
+
+        for (int i = 0; i < resultMag.length; ++i)
+        {
+            int aWord = i >= aStart ? aMag[i - aStart] : 0;
+            int bWord = i >= bStart ? bMag[i - bStart] : 0;
+
+            if (this.sign < 0)
+            {
+                aWord = ~aWord;
+            }
+
+            if (value.sign < 0)
+            {
+                bWord = ~bWord;
+            }
+
+            resultMag[i] = aWord & bWord;
+
+            if (resultNeg)
+            {
+                resultMag[i] = ~resultMag[i];
+            }
+        }
+
+        BigInteger result = new BigInteger(1, resultMag);
+
+        // TODO Optimise this case
+        if (resultNeg)
+        {
+            result = result.not();
+        }
+
+        return result;
     }
 
     public int bitCount()
@@ -1880,9 +1940,9 @@ public class BigInteger
         return x;
     }
 
-    public BigInteger remainder(BigInteger val) throws ArithmeticException
+    public BigInteger remainder(BigInteger n) throws ArithmeticException
     {
-        if (val.sign == 0)
+        if (n.sign == 0)
         {
             throw new ArithmeticException("BigInteger: Divide by zero");
         }
@@ -1892,13 +1952,66 @@ public class BigInteger
             return BigInteger.ZERO;
         }
 
-        int[] res = new int[this.magnitude.length];
+        // For small values, use fast remainder method
+        if (n.magnitude.length == 1)
+        {
+            int val = n.magnitude[0];
 
-        System.arraycopy(this.magnitude, 0, res, 0, res.length);
+            if (val > 0)
+            {
+                if (val == 1)
+                    return ZERO;
 
-        return new BigInteger(sign, remainder(res, val.magnitude));
+                int rem = remainder(val);
+
+                return rem == 0
+                    ?   ZERO
+                    :   new BigInteger(sign, new int[]{ rem });
+            }
+        }
+
+        if (compareTo(0, magnitude, 0, n.magnitude) < 0)
+            return this;
+
+        int[] res;
+        if (n.nBits == 1)
+        {
+            // Opportunistic Power of two optimisation
+            res = lastNBits(n.bitLength() - 1);
+        }
+        else
+        {
+            res = new int[this.magnitude.length];
+            System.arraycopy(this.magnitude, 0, res, 0, res.length);
+            res = remainder(res, n.magnitude);
+        }
+
+        return new BigInteger(sign, res);
     }
 
+    private int[] lastNBits(
+        int n)
+    {
+        if (n < 1)
+        {
+            return ZERO_MAGNITUDE;
+        }
+
+        int numWords = (n + 31) / 32;
+        numWords = Math.min(numWords, this.magnitude.length);
+        int[] result = new int[numWords];
+
+        System.arraycopy(this.magnitude, this.magnitude.length - numWords, result, 0, numWords);
+
+        int hiBits = n % 32;
+        if (hiBits != 0)
+        {
+            result[0] &= ~(-1 << hiBits);
+        }
+
+        return result;
+    }
+    
     /**
      * do a left shift - this returns a new array.
      */
@@ -1951,6 +2064,7 @@ public class BigInteger
         {
             return ZERO;
         }
+
         if (n == 0)
         {
             return this;
@@ -1961,7 +2075,16 @@ public class BigInteger
             return shiftRight( -n);
         }
 
-        return new BigInteger(sign, shiftLeft(magnitude, n));
+        BigInteger result = new BigInteger(sign, shiftLeft(magnitude, n));
+
+        result.nBits = this.nBits;
+
+        if (this.nBitLength != -1)
+        {
+            result.nBitLength = this.nBitLength + n;
+        }
+
+        return result;
     }
 
     /**
@@ -2488,11 +2611,6 @@ public class BigInteger
 
         return s;
     }
-
-    public static final BigInteger ZERO = new BigInteger(0, ZERO_MAGNITUDE);
-    public static final BigInteger ONE = valueOf(1);
-    private static final BigInteger TWO = valueOf(2);
-    private static final BigInteger THREE = valueOf(3);
 
     public static BigInteger valueOf(long val)
     {
