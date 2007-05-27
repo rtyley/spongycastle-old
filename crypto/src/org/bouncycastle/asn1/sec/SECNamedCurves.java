@@ -17,9 +17,7 @@ public class SECNamedCurves
     private static BigInteger fromHex(
         String hex)
     {
-        // TODO Figure out if one is faster?
-        return new BigInteger(hex, 16);
-        //return new BigInteger(1, Hex.decode(hex));
+        return new BigInteger(1, Hex.decode(hex));
     }
 
     /*
