@@ -418,11 +418,13 @@ public abstract class ECPoint
                 return this.curve.getInfinity();
             }
 
+            ECFieldElement xSum = this.x.add(x2);
+
             ECFieldElement.F2m lambda
-                = (ECFieldElement.F2m)(this.y.add(y2)).divide(this.x.add(x2));
+                = (ECFieldElement.F2m)(this.y.add(y2)).divide(xSum);
 
             ECFieldElement.F2m x3
-                = (ECFieldElement.F2m)lambda.square().add(lambda).add(this.x).add(x2).add(this.curve.getA());
+                = (ECFieldElement.F2m)lambda.square().add(lambda).add(xSum).add(this.curve.getA());
 
             ECFieldElement.F2m y3
                 = (ECFieldElement.F2m)lambda.multiply(this.x.add(x3)).add(x3).add(this.y);
