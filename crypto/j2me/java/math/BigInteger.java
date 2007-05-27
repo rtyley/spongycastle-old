@@ -117,13 +117,15 @@ public class BigInteger
     
 
     
-    
-    
+
+    private static final long IMASK = 0xffffffffL;
+
+    private static final int[] ZERO_MAGNITUDE = new int[0];
+
     private int sign; // -1 means -ve; +1 means +ve; 0 means 0;
     private int[] magnitude; // array of ints with [0] being the most significant
     private int nBits = -1; // cache bitCount() value
     private int nBitLength = -1; // cache bitLength() value
-    private static final long IMASK = 0xffffffffL;
     private long mQuote = -1L; // -m^(-1) mod b, b = 2^32 (see Montgomery mult.)
     
     private BigInteger()
@@ -132,9 +134,10 @@ public class BigInteger
 
     private BigInteger(int signum, int[] mag)
     {
-        sign = signum;
         if (mag.length > 0)
         {
+            sign = signum;
+
             int i = 0;
             while (i < mag.length && mag[i] == 0)
             {
@@ -425,21 +428,26 @@ public class BigInteger
             throw new IllegalArgumentException("numBits must be non-negative");
         }
 
+        this.nBits = -1;
+        this.nBitLength = -1;
+
+        if (numBits == 0)
+        {
+//          this.sign = 0;
+            this.magnitude = ZERO_MAGNITUDE;
+            return;
+        }
+
         int nBytes = (numBits + 7) / 8;
 
         byte[] b = new byte[nBytes];
+        nextRndBytes(rnd, b);
 
-        if (nBytes > 0)
-        {
-            nextRndBytes(rnd, b);
-            // strip off any excess bits in the MSB
-            b[0] &= rndMask[8 * nBytes - numBits];
-        }
+        // strip off any excess bits in the MSB
+        b[0] &= rndMask[8 * nBytes - numBits];
 
         this.magnitude = makeMagnitude(b, 1);
-        this.sign = 1;
-        this.nBits = -1;
-        this.nBitLength = -1;
+        this.sign = this.magnitude.length < 1 ? 0 : 1;
     }
 
     private static final int BITS_PER_BYTE = 8;
@@ -2415,7 +2423,7 @@ public class BigInteger
             return "0";
         }
 
-        String s = "";
+        StringBuffer sb = new StringBuffer();
         String h;
 
         if (rdx == 16)
@@ -2424,7 +2432,16 @@ public class BigInteger
             {
                 h = "0000000" + Integer.toHexString(magnitude[i]);
                 h = h.substring(h.length() - 8);
-                s = s + h;
+                sb.append(h);
+            }
+        }
+        else if (rdx == 2)
+        {
+            sb.append('1');
+
+            for (int i = bitLength() - 2; i >= 0; --i)
+            {
+                sb.append(testBit(i) ? '1' : '0');
             }
         }
         else
@@ -2437,7 +2454,8 @@ public class BigInteger
             // unless we want to enter a recursion well. In their infinite wisdom, why did not 
             // the Sun engineers made a c'tor for BigIntegers taking a BigInteger as parameter?
             // (Answer: Becuase Sun's BigIntger is clonable, something bouncycastle's isn't.)
-            BigInteger u = new BigInteger(this.abs().toString(16), 16);
+//            BigInteger u = new BigInteger(this.abs().toString(16), 16);
+            BigInteger u = this.abs();
             BigInteger b;
 
             // For speed, maye these test should look directly a u.magnitude.length?
@@ -2452,8 +2470,13 @@ public class BigInteger
             }
             // Then pop the stack
             while (!S.empty())
-                s = s + S.pop();
+            {
+                sb.append((String) S.pop());
+            }
         }
+
+        String s = sb.toString();
+
         // Strip leading zeros.
         while (s.length() > 1 && s.charAt(0) == '0')
             s = s.substring(1);
@@ -2466,7 +2489,7 @@ public class BigInteger
         return s;
     }
 
-    public static final BigInteger ZERO = new BigInteger(0, new byte[0]);
+    public static final BigInteger ZERO = new BigInteger(0, ZERO_MAGNITUDE);
     public static final BigInteger ONE = valueOf(1);
     private static final BigInteger TWO = valueOf(2);
     private static final BigInteger THREE = valueOf(3);
