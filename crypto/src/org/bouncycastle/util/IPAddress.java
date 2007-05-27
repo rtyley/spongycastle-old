@@ -5,7 +5,7 @@ import java.math.BigInteger;
 public class IPAddress
 {
     /**
-     * Valdiate the given IPv4 or IPv6 address.
+     * Validate the given IPv4 or IPv6 address.
      * 
      * @param address the IP address as a String.
      * 
