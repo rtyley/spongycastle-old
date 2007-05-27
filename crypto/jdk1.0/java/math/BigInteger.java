@@ -1543,14 +1543,15 @@ public class BigInteger
      */
     private int[] square(int[] w, int[] x)
     {
-        long u1, 
-        u2, 
-        c;
+        // Note: this method allows w to be only 2 * x.Length if result will fit
+//        if (w.length != 2 * x.length)
+//        {
+//            throw new IllegalArgumentException("no I don't think so...");
+//        }
 
-        if (w.length != 2 * x.length)
-        {
-            throw new IllegalArgumentException("no I don't think so...");
-        }
+        long u1, u2, c;
+
+        int wBase = w.length - 1;
 
         for (int i = x.length - 1; i != 0; i--)
         {
@@ -1560,24 +1561,30 @@ public class BigInteger
             u2 = u1 >>> 32;
             u1 = u1 & IMASK;
 
-            u1 += (w[2 * i + 1] & IMASK);
+            u1 += (w[wBase] & IMASK);
 
-            w[2 * i + 1] = (int)u1;
+            w[wBase] = (int)u1;
             c = u2 + (u1 >> 32);
 
             for (int j = i - 1; j >= 0; j--)
             {
+                --wBase;
                 u1 = (x[j] & IMASK) * v;
                 u2 = u1 >>> 31; // multiply by 2!
                 u1 = (u1 & 0x7fffffff) << 1; // multiply by 2!
-                u1 += (w[i + j + 1] & IMASK) + c;
+                u1 += (w[wBase] & IMASK) + c;
 
-                w[i + j + 1] = (int)u1;
+                w[wBase] = (int)u1;
                 c = u2 + (u1 >>> 32);
             }
-            c += w[i] & IMASK;
-            w[i] = (int)c;
-            w[i - 1] = (int)(c >> 32);
+            c += w[--wBase] & IMASK;
+            w[wBase] = (int)c;
+
+            if (--wBase >= 0)
+            {
+                w[wBase] = (int)(c >> 32);
+            }
+            wBase += i;
         }
 
         u1 = (x[0] & IMASK);
@@ -1585,10 +1592,13 @@ public class BigInteger
         u2 = u1 >>> 32;
         u1 = u1 & IMASK;
 
-        u1 += (w[1] & IMASK);
+        u1 += (w[wBase] & IMASK);
 
-        w[1] = (int)u1;
-        w[0] = (int)(u2 + (u1 >> 32) + w[0]);
+        w[wBase] = (int)u1;
+        if (--wBase >= 0)
+        {
+            w[wBase] = (int)(u2 + (u1 >> 32) + w[wBase]);
+        }
 
         return w;
     }
@@ -1793,7 +1803,16 @@ public class BigInteger
 
         int[] res = new int[resLength];
 
-        return new BigInteger(sign * val.sign, multiply(res, magnitude, val.magnitude));
+        if (val == this)
+        {
+            square(res, this.magnitude);
+        }
+        else
+        {
+            multiply(res, this.magnitude, val.magnitude);
+        }
+
+        return new BigInteger(sign * val.sign, res);
     }
 
     public BigInteger negate()
