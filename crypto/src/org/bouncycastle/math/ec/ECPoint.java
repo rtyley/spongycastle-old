@@ -191,7 +191,7 @@ public abstract class ECPoint
 
             ECFieldElement gamma = b.y.subtract(this.y).divide(b.x.subtract(this.x));
 
-            ECFieldElement x3 = gamma.multiply(gamma).subtract(this.x).subtract(b.x);
+            ECFieldElement x3 = gamma.square().subtract(this.x).subtract(b.x);
             ECFieldElement y3 = gamma.multiply(this.x.subtract(x3)).subtract(this.y);
 
             return new ECPoint.Fp(curve, x3, y3);
@@ -215,9 +215,9 @@ public abstract class ECPoint
 
             ECFieldElement TWO = this.curve.fromBigInteger(BigInteger.valueOf(2));
             ECFieldElement THREE = this.curve.fromBigInteger(BigInteger.valueOf(3));
-            ECFieldElement gamma = this.x.multiply(this.x).multiply(THREE).add(curve.a).divide(y.multiply(TWO));
+            ECFieldElement gamma = this.x.square().multiply(THREE).add(curve.a).divide(y.multiply(TWO));
 
-            ECFieldElement x3 = gamma.multiply(gamma).subtract(this.x.multiply(TWO));
+            ECFieldElement x3 = gamma.square().subtract(this.x.multiply(TWO));
             ECFieldElement y3 = gamma.multiply(this.x.subtract(x3)).subtract(this.y);
                 
             return new ECPoint.Fp(curve, x3, y3, this.withCompression);
@@ -474,9 +474,10 @@ public abstract class ECPoint
                 = (ECFieldElement.F2m)lambda.square().add(lambda).
                     add(this.curve.getA());
 
+            ECFieldElement ONE = this.curve.fromBigInteger(BigInteger.ONE);
             ECFieldElement.F2m y3
-                = (ECFieldElement.F2m)this.x.square().add(lambda.multiply(x3)).
-                    add(x3);
+                = (ECFieldElement.F2m)this.x.square().add(
+                    x3.multiply(lambda.add(ONE)));
 
             return new ECPoint.F2m(this.curve, x3, y3, withCompression);
         }
