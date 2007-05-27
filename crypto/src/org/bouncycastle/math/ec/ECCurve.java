@@ -87,7 +87,7 @@ public abstract class ECCurve
                 System.arraycopy(encoded, 1, i, 0, i.length);
 
                 ECFieldElement x = new ECFieldElement.Fp(this.q, new BigInteger(1, i));
-                ECFieldElement alpha = x.multiply(x.square()).add(x.multiply(a).add(b));
+                ECFieldElement alpha = x.multiply(x.square().add(a)).add(b);
                 ECFieldElement beta = alpha.sqrt();
 
                 //
