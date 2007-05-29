@@ -126,6 +126,11 @@ public abstract class ECPoint
          */
         public byte[] getEncoded()
         {
+            if (this.isInfinity()) 
+            {
+                return new byte[1];
+            }
+
             int qLength = converter.getByteLength(x);
             
             if (withCompression)
@@ -335,7 +340,7 @@ public abstract class ECPoint
         {
             if (this.isInfinity()) 
             {
-                throw new RuntimeException("Point at infinity cannot be encoded");
+                return new byte[1];
             }
 
             int byteCount = converter.getByteLength(this.x);
