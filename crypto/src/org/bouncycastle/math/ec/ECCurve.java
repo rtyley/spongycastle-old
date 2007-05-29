@@ -78,6 +78,10 @@ public abstract class ECCurve
 
             switch (encoded[0])
             {
+                // infinity
+            case 0x00:
+                p = getInfinity();
+                break;
                 // compressed
             case 0x02:
             case 0x03:
@@ -111,7 +115,11 @@ public abstract class ECCurve
                         new ECFieldElement.Fp(this.q, q.subtract(beta.toBigInteger())), true);
                 }
                 break;
+                // uncompressed
             case 0x04:
+                // hybrid
+            case 0x06:
+            case 0x07:
                 byte[]  xEnc = new byte[(encoded.length - 1) / 2];
                 byte[]  yEnc = new byte[(encoded.length - 1) / 2];
 
@@ -308,6 +316,10 @@ public abstract class ECCurve
 
             switch (encoded[0])
             {
+                // infinity
+            case 0x00:
+                p = getInfinity();
+                break;
                 // compressed
             case 0x02:
             case 0x03:
@@ -322,7 +334,11 @@ public abstract class ECCurve
                         p = decompressPoint(enc, 1);
                 }
                 break;
+                // uncompressed
             case 0x04:
+                // hybrid
+            case 0x06:
+            case 0x07:
                 byte[] xEnc = new byte[(encoded.length - 1) / 2];
                 byte[] yEnc = new byte[(encoded.length - 1) / 2];
 
