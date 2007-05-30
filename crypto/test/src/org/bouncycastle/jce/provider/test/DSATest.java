@@ -14,7 +14,10 @@ import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
@@ -94,56 +97,22 @@ public class DSATest
         {
             fail("BC -> SUN verification failed");
         }
-        
+
         //
         // key encoding test - BC decoding Sun keys
         //
         KeyFactory          f = KeyFactory.getInstance("DSA", "BC");
         X509EncodedKeySpec  x509s = new X509EncodedKeySpec(vKey.getEncoded());
+
         DSAPublicKey        k1 = (DSAPublicKey)f.generatePublic(x509s);
-        
-        if (!k1.getY().equals(((DSAPublicKey)vKey).getY()))
-        {
-            fail("public number not decoded properly");
-        }
-        
-        if (!k1.getParams().getG().equals(((DSAPublicKey)vKey).getParams().getG()))
-        {
-            fail("public generator not decoded properly");
-        }
-        
-        if (!k1.getParams().getP().equals(((DSAPublicKey)vKey).getParams().getP()))
-        {
-            fail("public p value not decoded properly");
-        }
-        
-        if (!k1.getParams().getQ().equals(((DSAPublicKey)vKey).getParams().getQ()))
-        {
-            fail("public q value not decoded properly");
-        }
+
+        checkPublic(k1, vKey);
         
         PKCS8EncodedKeySpec  pkcs8 = new PKCS8EncodedKeySpec(sKey.getEncoded());
+
         DSAPrivateKey        k2 = (DSAPrivateKey)f.generatePrivate(pkcs8);
-        
-        if (!k2.getX().equals(((DSAPrivateKey)sKey).getX()))
-        {
-            fail("private number not decoded properly");
-        }
-        
-        if (!k2.getParams().getG().equals(((DSAPrivateKey)sKey).getParams().getG()))
-        {
-            fail("private generator not decoded properly");
-        }
-        
-        if (!k2.getParams().getP().equals(((DSAPrivateKey)sKey).getParams().getP()))
-        {
-            fail("private p value not decoded properly");
-        }
-        
-        if (!k2.getParams().getQ().equals(((DSAPrivateKey)sKey).getParams().getQ()))
-        {
-            fail("private q value not decoded properly");
-        }
+
+        checkPrivateKey(k2, sKey);
         
         //
         // key decoding test - SUN decoding BC keys
@@ -152,51 +121,73 @@ public class DSATest
         x509s = new X509EncodedKeySpec(k1.getEncoded());
         
         vKey = (DSAPublicKey)f.generatePublic(x509s);
+
+        checkPublic(k1, vKey);
         
+        pkcs8 = new PKCS8EncodedKeySpec(k2.getEncoded());
+        sKey = f.generatePrivate(pkcs8);
+
+        checkPrivateKey(k2, sKey);
+    }
+
+    private void checkPublic(DSAPublicKey k1, PublicKey vKey)
+    {
         if (!k1.getY().equals(((DSAPublicKey)vKey).getY()))
         {
             fail("public number not decoded properly");
         }
-        
+
         if (!k1.getParams().getG().equals(((DSAPublicKey)vKey).getParams().getG()))
         {
             fail("public generator not decoded properly");
         }
-        
+
         if (!k1.getParams().getP().equals(((DSAPublicKey)vKey).getParams().getP()))
         {
             fail("public p value not decoded properly");
         }
-        
+
         if (!k1.getParams().getQ().equals(((DSAPublicKey)vKey).getParams().getQ()))
         {
             fail("public q value not decoded properly");
         }
-        
-        pkcs8 = new PKCS8EncodedKeySpec(k2.getEncoded());
-        sKey = (DSAPrivateKey)f.generatePrivate(pkcs8);
-        
+    }
+
+    private void checkPrivateKey(DSAPrivateKey k2, PrivateKey sKey)
+    {
         if (!k2.getX().equals(((DSAPrivateKey)sKey).getX()))
         {
             fail("private number not decoded properly");
         }
-        
+
         if (!k2.getParams().getG().equals(((DSAPrivateKey)sKey).getParams().getG()))
         {
             fail("private generator not decoded properly");
         }
-        
+
         if (!k2.getParams().getP().equals(((DSAPrivateKey)sKey).getParams().getP()))
         {
             fail("private p value not decoded properly");
         }
-        
+
         if (!k2.getParams().getQ().equals(((DSAPrivateKey)sKey).getParams().getQ()))
         {
             fail("private q value not decoded properly");
         }
-        
-        //
+    }
+
+    private Object serializeDeserialize(Object o)
+        throws Exception
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ObjectOutputStream oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(o);
+        oOut.close();
+
+        ObjectInputStream oIn = new ObjectInputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+        return oIn.readObject();
     }
 
     /**
@@ -411,6 +402,18 @@ public class DSATest
         {
             fail("DSA verification failed");
         }
+
+        //
+        // key decoding test - serialisation test
+        //
+
+        DSAPublicKey k1 = (DSAPublicKey)serializeDeserialize(vKey);
+
+        checkPublic(k1, vKey);
+
+        DSAPrivateKey k2 = (DSAPrivateKey)serializeDeserialize(sKey);
+
+        checkPrivateKey(k2, sKey);
 
         //
         // ECDSA Fp generation test
