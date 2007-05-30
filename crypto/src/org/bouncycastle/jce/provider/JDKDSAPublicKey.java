@@ -11,6 +11,8 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPublicKey;
@@ -20,6 +22,8 @@ import java.security.spec.DSAPublicKeySpec;
 public class JDKDSAPublicKey
     implements DSAPublicKey
 {
+    private static final long serialVersionUID = 1752452449903495175L;
+
     private BigInteger      y;
     private DSAParams       dsaSpec;
 
@@ -143,5 +147,23 @@ public class JDKDSAPublicKey
             && this.getParams().getG().equals(other.getParams().getG()) 
             && this.getParams().getP().equals(other.getParams().getP()) 
             && this.getParams().getQ().equals(other.getParams().getQ());
+    }
+
+    private void readObject(
+        ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        this.y = (BigInteger)in.readObject();
+        this.dsaSpec = new DSAParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject());
+    }
+
+    private void writeObject(
+        ObjectOutputStream out)
+        throws IOException
+    {
+        out.writeObject(y);
+        out.writeObject(dsaSpec.getP());
+        out.writeObject(dsaSpec.getQ());
+        out.writeObject(dsaSpec.getG());
     }
 }

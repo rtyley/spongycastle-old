@@ -11,6 +11,9 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPrivateKey;
@@ -23,6 +26,8 @@ import java.util.Vector;
 public class JDKDSAPrivateKey
     implements DSAPrivateKey, PKCS12BagAttributeCarrier
 {
+    private static final long serialVersionUID = -4677259546958385734L;
+
     BigInteger          x;
     DSAParams           dsaSpec;
 
@@ -141,5 +146,29 @@ public class JDKDSAPrivateKey
     public Enumeration getBagAttributeKeys()
     {
         return pkcs12Ordering.elements();
+    }
+
+    private void readObject(
+        ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        this.x = (BigInteger)in.readObject();
+        this.dsaSpec = new DSAParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject());
+
+        this.pkcs12Attributes = (Hashtable)in.readObject();
+        this.pkcs12Ordering = (Vector)in.readObject();
+    }
+
+    private void writeObject(
+        ObjectOutputStream out)
+        throws IOException
+    {
+        out.writeObject(x);
+        out.writeObject(dsaSpec.getP());
+        out.writeObject(dsaSpec.getQ());
+        out.writeObject(dsaSpec.getG());
+
+        out.writeObject(pkcs12Attributes);
+        out.writeObject(pkcs12Ordering);
     }
 }
