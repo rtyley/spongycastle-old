@@ -26,6 +26,11 @@ public class MPInteger
     public MPInteger(
         BigInteger    value)
     {
+        if (value == null || value.signum() < 0)
+        {
+            throw new IllegalArgumentException("value must not be null, or negative");
+        }
+
         this.value = value;
     }
     
