@@ -1543,7 +1543,7 @@ public class BigInteger
      */
     private int[] square(int[] w, int[] x)
     {
-        // Note: this method allows w to be only 2 * x.Length if result will fit
+        // Note: this method allows w to be only (2 * x.Length - 1) words if result will fit
 //        if (w.length != 2 * x.length)
 //        {
 //            throw new IllegalArgumentException("no I don't think so...");
