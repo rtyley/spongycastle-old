@@ -61,8 +61,10 @@ public class DHAgreement
      */
     public BigInteger calculateMessage()
     {
-        this.privateValue = new BigInteger(
-                                    dhParams.getP().bitLength() - 1, 0, random);
+        int bits = dhParams.getP().bitLength() - 1;
+
+        // TODO Should the generated numbers always have length 'p.bitLength() - 1'?
+        this.privateValue = new BigInteger(bits, random).setBit(bits - 1);
 
         return dhParams.getG().modPow(privateValue, dhParams.getP());
     }
