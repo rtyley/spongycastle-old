@@ -247,6 +247,11 @@ public class DHTest
 
         DHParameters                dhParams = pGen.generateParameters();
 
+        if (dhParams.getJ() != 0)
+        {
+            fail("DHParametersGenerator failed to set J to 0 in generated DHParameters");
+        }
+
         DHKeyGenerationParameters   params = new DHKeyGenerationParameters(new SecureRandom(), dhParams);
 
         DHBasicKeyPairGenerator     kpGen = new DHBasicKeyPairGenerator();
