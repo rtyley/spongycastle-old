@@ -147,6 +147,11 @@ public class ElGamalTest
 
         ElGamalParameters                elParams = pGen.generateParameters();
 
+        if (elParams.getL() != 0)
+        {
+            fail("ElGamalParametersGenerator failed to set L to 0 in generated ElGamalParameters");
+        }
+
         ElGamalKeyGenerationParameters   params = new ElGamalKeyGenerationParameters(new SecureRandom(), elParams);
 
         ElGamalKeyPairGenerator          kpGen = new ElGamalKeyPairGenerator();
