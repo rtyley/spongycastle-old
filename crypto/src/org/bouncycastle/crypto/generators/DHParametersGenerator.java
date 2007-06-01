@@ -71,6 +71,6 @@ public class DHParametersGenerator
             break;
         }
 
-        return new DHParameters(p, g, q, 2);
+        return new DHParameters(p, g, q);
     }
 }
