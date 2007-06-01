@@ -24,6 +24,16 @@ public class DHParameters
     public DHParameters(
         BigInteger  p,
         BigInteger  g,
+        BigInteger  q)
+    {
+        this.g = g;
+        this.p = p;
+        this.q = q;
+    }
+
+    public DHParameters(
+        BigInteger  p,
+        BigInteger  g,
         BigInteger  q,
         int         j)
     {
