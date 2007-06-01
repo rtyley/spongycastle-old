@@ -83,6 +83,11 @@ public class DERT61String
         return string;
     }
 
+    public String toString()
+    {
+        return string;
+    }
+
     void encode(
         DEROutputStream  out)
         throws IOException
