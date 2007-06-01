@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.test;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERT61String;
 import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -70,6 +71,20 @@ public class StringTest
         if (!us.toString().equals("#1C08FEDCBA9876543210"))
         {
             fail("DERUniversalString.toString() result incorrect");
+        }
+
+        byte[] t61Bytes = new byte[] { -1, -2, -3, -4, -5, -6, -7, -8 };
+        String t61String = new String(t61Bytes, "iso-8859-1");
+        DERT61String t61 = new DERT61String(t61Bytes);
+
+        if (!t61.getString().equals(t61String))
+        {
+            fail("DERT61String.getString() result incorrect");
+        }
+
+        if (!t61.toString().equals(t61String))
+        {
+            fail("DERT61String.toString() result incorrect");
         }
     }
 
