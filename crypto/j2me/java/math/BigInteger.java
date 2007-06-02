@@ -717,17 +717,32 @@ public class BigInteger
         return result;
     }
 
+    public BigInteger andNot(
+        BigInteger value)
+    {
+        return and(value.not());
+    }
+
     public int bitCount()
     {
         if (nBits == -1)
         {
-            nBits = 0;
-            for (int i = 0; i < magnitude.length; i++)
+            if (sign < 0)
             {
-                nBits += bitCounts[magnitude[i] & 0xff];
-                nBits += bitCounts[(magnitude[i] >> 8) & 0xff];
-                nBits += bitCounts[(magnitude[i] >> 16) & 0xff];
-                nBits += bitCounts[(magnitude[i] >> 24) & 0xff];
+                // TODO Optimise this case
+                nBits = not().bitCount();
+            }
+            else
+            {
+                int sum = 0;
+                for (int i = 0; i < magnitude.length; i++)
+                {
+                    sum += bitCounts[magnitude[i] & 0xff];
+                    sum += bitCounts[(magnitude[i] >> 8) & 0xff];
+                    sum += bitCounts[(magnitude[i] >> 16) & 0xff];
+                    sum += bitCounts[(magnitude[i] >> 24) & 0xff];
+                }
+                nBits = sum;
             }
         }
 
@@ -827,6 +842,11 @@ public class BigInteger
                 : (w < 1 << 21 ? (w < 1 << 20 ? 20 : 21) : (w < 1 << 22 ? 22 : 23))) : (w < 1 << 27
                 ? (w < 1 << 25 ? (w < 1 << 24 ? 24 : 25) : (w < 1 << 26 ? 26 : 27))
                 : (w < 1 << 29 ? (w < 1 << 28 ? 28 : 29) : (w < 1 << 30 ? 30 : 31)))));
+    }
+
+    private boolean quickPow2Check()
+    {
+        return sign > 0 && nBits == 1;
     }
 
     public int compareTo(Object o)
@@ -1817,6 +1837,11 @@ public class BigInteger
 
     public BigInteger negate()
     {
+        if (sign == 0)
+        {
+            return this;
+        }
+
         return new BigInteger( -sign, magnitude);
     }
 
@@ -1993,10 +2018,10 @@ public class BigInteger
             return this;
 
         int[] res;
-        if (n.nBits == 1)
+        if (n.quickPow2Check())  // n is power of two
         {
-            // Opportunistic Power of two optimisation
-            res = lastNBits(n.bitLength() - 1);
+            // TODO Move before small values branch above?
+            res = lastNBits(n.abs().bitLength() - 1);
         }
         else
         {
@@ -2096,7 +2121,12 @@ public class BigInteger
 
         BigInteger result = new BigInteger(sign, shiftLeft(magnitude, n));
 
-        result.nBits = this.nBits;
+        if (this.nBits != -1)
+        {
+            result.nBits = sign > 0
+                ?   this.nBits
+                :   this.nBits + n;
+        }
 
         if (this.nBitLength != -1)
         {
@@ -2484,53 +2514,68 @@ public class BigInteger
     public BigInteger setBit(int n) 
         throws ArithmeticException 
     {
-        if (n<0)
+        if (n < 0)
         {
-             throw new ArithmeticException("Bit address less than zero");
+            throw new ArithmeticException("Bit address less than zero");
         }
-         
-        int wordNum = n/32;
-        int result[];
-        
-        result = createResult(wordNum);
-        
-        result[result.length - wordNum - 1] |= 1 << (n % 32);
-    
-        return new BigInteger(sign, result);
+
+        if (testBit(n))
+        {
+            return this;
+        }
+
+        if (n < (bitLength() - 1))
+        {
+            return flipExistingBit(n);
+        }
+
+        return or(ONE.shiftLeft(n));
     }
     
     public BigInteger clearBit(int n) 
         throws ArithmeticException 
     {
-        if (n<0)
+        if (n < 0)
         {
-             throw new ArithmeticException("Bit address less than zero");
+            throw new ArithmeticException("Bit address less than zero");
         }
-         
-        int wordNum = n/32;
-        int result[];
-        
-        result = createResult(wordNum);
-        
-        result[result.length - wordNum - 1] &= ~(1 << (n % 32));
-    
-        return new BigInteger(sign, result);
+
+        if (!testBit(n))
+        {
+            return this;
+        }
+
+        if (n < (bitLength() - 1))
+        {
+            return flipExistingBit(n);
+        }
+
+        return andNot(ONE.shiftLeft(n));
     }
 
     public BigInteger flipBit(int n) 
         throws ArithmeticException 
     {
-        if (n<0)
+        if (n < 0)
         {
-             throw new ArithmeticException("Bit address less than zero");
+            throw new ArithmeticException("Bit address less than zero");
         }
-         
-        int wordNum = n/32;
-        int[] result = createResult(wordNum);
-        
-        result[result.length - wordNum - 1] ^= (1 << (n % 32));
-    
-        return new BigInteger(sign, result);
+
+        if (n < (bitLength() - 1))
+        {
+            return flipExistingBit(n);
+        }
+
+        return xor(ONE.shiftLeft(n));
+    }
+
+    private BigInteger flipExistingBit(int n)
+    {
+        int[] mag = new int[this.magnitude.length];
+        System.arraycopy(this.magnitude, 0, mag, 0, mag.length);
+        mag[mag.length - 1 - (n >>> 5)] ^= (1 << (n & 31)); // Flip 0 bit to 1
+        //mag[mag.Length - 1 - (n / 32)] |= (1 << (n % 32));
+        return new BigInteger(this.sign, mag);
     }
 
     private int[] createResult(int wordNum)
