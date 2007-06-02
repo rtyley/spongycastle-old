@@ -2524,7 +2524,8 @@ public class BigInteger
             return this;
         }
 
-        if (n < (bitLength() - 1))
+        // TODO Handle negative values and zero
+        if (sign > 0 && n < (bitLength() - 1))
         {
             return flipExistingBit(n);
         }
@@ -2545,7 +2546,8 @@ public class BigInteger
             return this;
         }
 
-        if (n < (bitLength() - 1))
+        // TODO Handle negative values
+        if (sign > 0 && n < (bitLength() - 1))
         {
             return flipExistingBit(n);
         }
@@ -2561,7 +2563,8 @@ public class BigInteger
             throw new ArithmeticException("Bit address less than zero");
         }
 
-        if (n < (bitLength() - 1))
+        // TODO Handle negative values and zero
+        if (sign > 0 && n < (bitLength() - 1))
         {
             return flipExistingBit(n);
         }
@@ -2752,11 +2755,16 @@ public class BigInteger
             throw new ArithmeticException("Bit position must not be negative");
         }
 
-        if ((n / 32) >= magnitude.length)
+        if (sign < 0)
         {
-            return sign < 0;
+            return !not().testBit(n);
         }
 
-        return ((magnitude[(magnitude.length - 1) - n / 32] >> (n % 32)) & 1) > 0;
+        int wordNum = n / 32;
+        if (wordNum >= magnitude.length)
+            return false;
+
+        int word = magnitude[magnitude.length - 1 - wordNum];
+        return ((word >> (n % 32)) & 1) > 0;
     }
 }
