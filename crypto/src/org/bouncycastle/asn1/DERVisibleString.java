@@ -83,6 +83,11 @@ public class DERVisibleString
         return string;
     }
 
+    public String toString()
+    {
+        return string;
+    }
+
     public byte[] getOctets()
     {
         char[]  cs = string.toCharArray();

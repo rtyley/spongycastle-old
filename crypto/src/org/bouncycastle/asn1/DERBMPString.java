@@ -85,6 +85,11 @@ public class DERBMPString
         return string;
     }
 
+    public String toString()
+    {
+        return string;
+    }
+
     public int hashCode()
     {
         return this.getString().hashCode();

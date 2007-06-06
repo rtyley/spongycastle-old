@@ -79,6 +79,11 @@ public class DERUTF8String
         return string;
     }
 
+    public String toString()
+    {
+        return string;
+    }
+
     public int hashCode()
     {
         return this.getString().hashCode();

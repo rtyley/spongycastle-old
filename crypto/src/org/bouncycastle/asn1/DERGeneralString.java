@@ -52,7 +52,12 @@ public class DERGeneralString
     {
         return string;
     }
-    
+
+    public String toString()
+    {
+        return string;
+    }
+
     public byte[] getOctets() 
     {
         char[] cs = string.toCharArray();
