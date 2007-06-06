@@ -49,13 +49,19 @@ public class RSASecretBCPGKey
         //
         // pgp requires (p < q)
         //
-        if (p.compareTo(q) > 0)
+        int cmp = p.compareTo(q);
+        if (cmp >= 0)
         {
-            BigInteger    tmp = p;
+            if (cmp == 0)
+            {
+                throw new IllegalArgumentException("p and q cannot be equal");
+            }
+
+            BigInteger tmp = p;
             p = q;
             q = tmp;
         }
-        
+
         this.d = new MPInteger(d);
         this.p = new MPInteger(p);
         this.q = new MPInteger(q);
