@@ -81,9 +81,9 @@ public class PGPPublicKeyRing
         //
         // direct signatures and revocations
         //
-        while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
+        try
         {
-            try
+            while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
             {
                 SignaturePacket    s = (SignaturePacket)pIn.readPacket();
                 
@@ -96,12 +96,10 @@ public class PGPPublicKeyRing
                     keySigs.add(new PGPSignature(s));
                 }
             }
-            catch (PGPException e)
-            {
-                throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
-            }
-            
-
+        }
+        catch (PGPException e)
+        {
+            throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
         }
         
         while (pIn.nextPacketTag() == PacketTags.USER_ID
@@ -133,9 +131,9 @@ public class PGPPublicKeyRing
             
             idSigs.add(sigList);
 
-            while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
+            try
             {
-                try
+                while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
                 {
                     SignaturePacket    s = (SignaturePacket)pIn.readPacket();
 
@@ -148,10 +146,10 @@ public class PGPPublicKeyRing
                         sigList.add(new PGPSignature(s));
                     }
                 }
-                catch (PGPException e)
-                {
-                    throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
-                }
+            }
+            catch (PGPException e)
+            {
+                throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
             }
         }
         
