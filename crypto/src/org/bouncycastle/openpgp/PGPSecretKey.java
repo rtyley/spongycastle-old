@@ -100,7 +100,6 @@ public class PGPSecretKey
     PGPSecretKey(
         SecretKeyPacket secret,
         TrustPacket     trust,
-        MessageDigest   sha,
         List            keySigs,
         List            ids,
         List            idTrusts,
@@ -119,7 +118,6 @@ public class PGPSecretKey
     PGPSecretKey(
         SecretKeyPacket secret,
         TrustPacket     trust,
-        MessageDigest   sha,
         List            subSigs)
         throws IOException
     {
