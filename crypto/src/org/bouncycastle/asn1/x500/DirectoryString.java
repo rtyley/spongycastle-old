@@ -103,6 +103,11 @@ public class DirectoryString
         return string.getString();
     }
 
+    public String toString()
+    {
+        return string.getString();
+    }
+
     /**
      * <pre>
      *  DirectoryString ::= CHOICE {
