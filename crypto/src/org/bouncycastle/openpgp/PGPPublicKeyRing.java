@@ -1,5 +1,10 @@
 package org.bouncycastle.openpgp;
 
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.bcpg.PublicKeyPacket;
+import org.bouncycastle.bcpg.TrustPacket;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,20 +15,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.PacketTags;
-import org.bouncycastle.bcpg.PublicKeyPacket;
-import org.bouncycastle.bcpg.SignaturePacket;
-import org.bouncycastle.bcpg.TrustPacket;
-import org.bouncycastle.bcpg.UserAttributePacket;
-import org.bouncycastle.bcpg.UserIDPacket;
-
 /**
  * general class to hold a collection of PGP Public Keys.
  */
 public class PGPPublicKeyRing
+    extends PGPKeyRing
 {
-    List            keys = new ArrayList();
+    final List keys;
     
     public PGPPublicKeyRing(
         byte[]    encoding)
@@ -44,18 +42,11 @@ public class PGPPublicKeyRing
     public PGPPublicKeyRing(
         InputStream    in)
         throws IOException
-    {    
-        BCPGInputStream    pIn;
-        
-        if (in instanceof BCPGInputStream)
-        {
-            pIn = (BCPGInputStream)in;
-        }
-        else
-        {
-            pIn = new BCPGInputStream(in);
-        }
-        
+    {
+        this.keys = new ArrayList();
+
+        BCPGInputStream pIn = wrap(in);
+
         int initialTag = pIn.nextPacketTag();
         if (initialTag != PacketTags.PUBLIC_KEY && initialTag != PacketTags.PUBLIC_SUBKEY)
         {
@@ -63,133 +54,29 @@ public class PGPPublicKeyRing
                 "public key ring doesn't start with public key tag: " +
                 "tag 0x" + Integer.toHexString(initialTag));
         }
-        
-        PublicKeyPacket   pubPk;
-        TrustPacket       trustPk;
-        List              keySigs = new ArrayList();
-        List              ids = new ArrayList();
-        List              idTrust = new ArrayList();
-        List              idSigs = new ArrayList();
-    
-        pubPk = (PublicKeyPacket)pIn.readPacket();
-        trustPk = null;
-        if (pIn.nextPacketTag() == PacketTags.TRUST)
-        {
-            trustPk = (TrustPacket)pIn.readPacket();
-        }
-        
-        //
+
+        PublicKeyPacket pubPk = (PublicKeyPacket)pIn.readPacket();
+        TrustPacket     trustPk = readOptionalTrustPacket(pIn);
+
         // direct signatures and revocations
-        //
-        try
-        {
-            while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
-            {
-                SignaturePacket    s = (SignaturePacket)pIn.readPacket();
-                
-                if (pIn.nextPacketTag() == PacketTags.TRUST)
-                {
-                    keySigs.add(new PGPSignature(s, (TrustPacket)pIn.readPacket()));
-                }
-                else
-                {
-                    keySigs.add(new PGPSignature(s));
-                }
-            }
-        }
-        catch (PGPException e)
-        {
-            throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
-        }
-        
-        while (pIn.nextPacketTag() == PacketTags.USER_ID
-            || pIn.nextPacketTag() == PacketTags.USER_ATTRIBUTE)
-        {
-            Object    obj = pIn.readPacket();
-            
-            if (obj instanceof UserIDPacket)
-            {
-                UserIDPacket    id = (UserIDPacket)obj;
-                ids.add(id.getID());
-            }
-            else
-            {
-                UserAttributePacket    user = (UserAttributePacket)obj;
-                ids.add(new PGPUserAttributeSubpacketVector(user.getSubpackets()));
-            }
-            
-            if (pIn.nextPacketTag() == PacketTags.TRUST)
-            {
-                idTrust.add(pIn.readPacket());
-            }
-            else
-            {
-                idTrust.add(null);
-            }
-            
-            List             sigList = new ArrayList();
-            
-            idSigs.add(sigList);
+        List keySigs = readSignaturesAndTrust(pIn);
 
-            try
-            {
-                while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
-                {
-                    SignaturePacket    s = (SignaturePacket)pIn.readPacket();
+        ArrayList ids = new ArrayList();
+        ArrayList idTrusts = new ArrayList();
+        ArrayList idSigs = new ArrayList();
+        readUserIDs(pIn, ids, idTrusts, idSigs);
 
-                    if (pIn.nextPacketTag() == PacketTags.TRUST)
-                    {
-                        sigList.add(new PGPSignature(s, (TrustPacket)pIn.readPacket()));
-                    }
-                    else
-                    {
-                        sigList.add(new PGPSignature(s));
-                    }
-                }
-            }
-            catch (PGPException e)
-            {
-                throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
-            }
-        }
-        
-        keys.add(new PGPPublicKey(pubPk, trustPk, keySigs, ids, idTrust, idSigs));
+        keys.add(new PGPPublicKey(pubPk, trustPk, keySigs, ids, idTrusts, idSigs));
 
+
+        // Read subkeys
         while (pIn.nextPacketTag() == PacketTags.PUBLIC_SUBKEY)
         {
-            PublicKeyPacket    pk = (PublicKeyPacket)pIn.readPacket();
-            TrustPacket        kTrust = null;
-            
-            if (pIn.nextPacketTag() == PacketTags.TRUST)
-            {
-                kTrust = (TrustPacket)pIn.readPacket();
-            }
+            PublicKeyPacket pk = (PublicKeyPacket)pIn.readPacket();
+            TrustPacket     kTrust = readOptionalTrustPacket(pIn);
 
-            List         sigList = new ArrayList();
-            
-            try
-            {
-                //
-                // PGP 8 actually leaves out the signature.
-                //
-                while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
-                {
-                    SignaturePacket    s = (SignaturePacket)pIn.readPacket();
-    
-                    if (pIn.nextPacketTag() == PacketTags.TRUST)
-                    {
-                        sigList.add(new PGPSignature(s, (TrustPacket)pIn.readPacket()));
-                    }
-                    else
-                    {
-                        sigList.add(new PGPSignature(s));
-                    }
-                }
-            }
-            catch (PGPException e)
-            {
-                throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
-            }
+            // PGP 8 actually leaves out the signature.
+            List sigList = readSignaturesAndTrust(pIn);
 
             keys.add(new PGPPublicKey(pk, kTrust, sigList));
         }

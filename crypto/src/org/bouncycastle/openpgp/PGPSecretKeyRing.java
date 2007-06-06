@@ -4,18 +4,13 @@ import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.PacketTags;
 import org.bouncycastle.bcpg.SecretKeyPacket;
 import org.bouncycastle.bcpg.SecretSubkeyPacket;
-import org.bouncycastle.bcpg.SignaturePacket;
 import org.bouncycastle.bcpg.TrustPacket;
-import org.bouncycastle.bcpg.UserAttributePacket;
-import org.bouncycastle.bcpg.UserIDPacket;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -25,8 +20,9 @@ import java.util.List;
  * Holder for a collection of PGP secret keys.
  */
 public class PGPSecretKeyRing
+    extends PGPKeyRing
 {    
-    List            keys = new ArrayList();
+    final List keys;
     
     PGPSecretKeyRing(List keys)
     {
@@ -44,16 +40,9 @@ public class PGPSecretKeyRing
         InputStream    in)
         throws IOException, PGPException
     {
-        BCPGInputStream    pIn;
-        
-        if (in instanceof BCPGInputStream)
-        {
-            pIn = (BCPGInputStream)in;
-        }
-        else
-        {
-            pIn = new BCPGInputStream(in);
-        }
+        this.keys = new ArrayList();
+
+        BCPGInputStream pIn = wrap(in);
 
         int initialTag = pIn.nextPacketTag();
         if (initialTag != PacketTags.SECRET_KEY && initialTag != PacketTags.SECRET_SUBKEY)
@@ -62,13 +51,8 @@ public class PGPSecretKeyRing
                 "secret key ring doesn't start with secret key tag: " +
                 "tag 0x" + Integer.toHexString(initialTag));
         }
-        
+
         SecretKeyPacket secret = (SecretKeyPacket)pIn.readPacket();
-        TrustPacket     trust = null;
-        List            keySigs = new ArrayList();
-        List            ids = new ArrayList();
-        List            idTrusts = new ArrayList();
-        List            idSigs = new ArrayList();
 
         //
         // ignore GPG comment packets if found.
@@ -78,93 +62,24 @@ public class PGPSecretKeyRing
             pIn.readPacket();
         }
         
-        if (pIn.nextPacketTag() == PacketTags.TRUST)
-        {
-            trust = (TrustPacket)pIn.readPacket(); // ignore for the moment
-        }
-        
-        //
+        TrustPacket trust = readOptionalTrustPacket(pIn);
+
         // revocation and direct signatures
-        //
-        try
-        {
-            while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
-            {
-                SignaturePacket    s = (SignaturePacket)pIn.readPacket();
+        List keySigs = readSignaturesAndTrust(pIn);
 
-                if (pIn.nextPacketTag() == PacketTags.TRUST)
-                {
-                    keySigs.add(new PGPSignature(s, (TrustPacket)pIn.readPacket()));
-                }
-                else
-                {
-                    keySigs.add(new PGPSignature(s));
-                }
-            }
-        }
-        catch (PGPException e)
-        {
-            throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
-        }
-
-        while (pIn.nextPacketTag() == PacketTags.USER_ID
-            || pIn.nextPacketTag() == PacketTags.USER_ATTRIBUTE)
-        {
-            Object                obj = pIn.readPacket();
-            List                 sigList = new ArrayList();
-            
-            if (obj instanceof UserIDPacket)
-            {
-                UserIDPacket    id = (UserIDPacket)obj;
-                ids.add(id.getID());
-            }
-            else
-            {
-                UserAttributePacket    user = (UserAttributePacket)obj;
-                ids.add(new PGPUserAttributeSubpacketVector(user.getSubpackets()));
-            }
-            
-            if (pIn.nextPacketTag() == PacketTags.TRUST)
-            {
-                idTrusts.add(pIn.readPacket());
-            }
-            else
-            {
-                idTrusts.add(null);
-            }
-        
-            idSigs.add(sigList);
-
-            try
-            {
-                while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
-                {
-                    SignaturePacket    s = (SignaturePacket)pIn.readPacket();
-    
-                    if (pIn.nextPacketTag() == PacketTags.TRUST)
-                    {
-                        sigList.add(new PGPSignature(s, (TrustPacket)pIn.readPacket()));
-                    }
-                    else
-                    {
-                        sigList.add(new PGPSignature(s));
-                    }
-                }
-            }
-            catch (PGPException e)
-            {
-                throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
-            }
-        }
+        ArrayList ids = new ArrayList();
+        ArrayList idTrusts = new ArrayList();
+        ArrayList idSigs = new ArrayList();
+        readUserIDs(pIn, ids, idTrusts, idSigs);
 
         keys.add(new PGPSecretKey(secret, trust, keySigs, ids, idTrusts, idSigs));
 
+
+        // Read subkeys
         while (pIn.nextPacketTag() == PacketTags.SECRET_SUBKEY)
         {
             SecretSubkeyPacket    sub = (SecretSubkeyPacket)pIn.readPacket();
-            TrustPacket           subTrust = null;
-            List                  sigList = new ArrayList();
-            
+
             //
             // ignore GPG comment packets if found.
             //
@@ -173,31 +88,8 @@ public class PGPSecretKeyRing
                 pIn.readPacket();
             }
 
-            if (pIn.nextPacketTag() == PacketTags.TRUST)
-            {
-                subTrust = (TrustPacket)pIn.readPacket();
-            }
-
-            try
-            {
-                while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
-                {
-                    SignaturePacket    s = (SignaturePacket)pIn.readPacket();
-    
-                    if (pIn.nextPacketTag() == PacketTags.TRUST)
-                    {
-                        sigList.add(new PGPSignature(s, (TrustPacket)pIn.readPacket()));
-                    }
-                    else
-                    {
-                        sigList.add(new PGPSignature(s));
-                    }
-                }
-            }
-            catch (PGPException e)
-            {
-                throw new IOException("can't create signature object: " + e.getMessage() + ", cause: " + e.getUnderlyingException().toString());
-            }
+            TrustPacket subTrust = readOptionalTrustPacket(pIn);
+            List        sigList = readSignaturesAndTrust(pIn);
 
             keys.add(new PGPSecretKey(sub, subTrust, sigList));
         }
