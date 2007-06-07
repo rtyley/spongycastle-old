@@ -118,16 +118,9 @@ public class ArmoredInputStream
         InputStream    in) 
         throws IOException
     {
-        this.in = in;
-        
-        if (hasHeaders)
-        {
-            parseHeaders();
-        }
-
-        start = false;
+        this(in, true);
     }
-    
+
     /**
      * Create an armoured input stream which will assume the data starts
      * straight away, or parse for headers first depending on the value of 
