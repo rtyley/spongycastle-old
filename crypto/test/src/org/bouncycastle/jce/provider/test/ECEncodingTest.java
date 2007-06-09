@@ -167,7 +167,7 @@ public class ECEncodingTest
 
         if (!oldPublicKey.equals(newPublicKey))
         {
-            fail("failed private key comparison");
+            fail("failed public key comparison");
         }
     }
 
