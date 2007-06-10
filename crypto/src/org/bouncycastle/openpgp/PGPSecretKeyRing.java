@@ -67,9 +67,9 @@ public class PGPSecretKeyRing
         // revocation and direct signatures
         List keySigs = readSignaturesAndTrust(pIn);
 
-        ArrayList ids = new ArrayList();
-        ArrayList idTrusts = new ArrayList();
-        ArrayList idSigs = new ArrayList();
+        List ids = new ArrayList();
+        List idTrusts = new ArrayList();
+        List idSigs = new ArrayList();
         readUserIDs(pIn, ids, idTrusts, idSigs);
 
         keys.add(new PGPSecretKey(secret, trust, keySigs, ids, idTrusts, idSigs));

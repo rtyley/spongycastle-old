@@ -11,6 +11,7 @@ import org.bouncycastle.bcpg.UserIDPacket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class PGPKeyRing
 {
@@ -37,13 +38,13 @@ public abstract class PGPKeyRing
             :   null;
     }
 
-    static ArrayList readSignaturesAndTrust(
+    static List readSignaturesAndTrust(
         BCPGInputStream pIn)
         throws IOException
     {
         try
         {
-            ArrayList sigList = new ArrayList();
+            List sigList = new ArrayList();
 
             while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
             {
@@ -64,9 +65,9 @@ public abstract class PGPKeyRing
 
     static void readUserIDs(
         BCPGInputStream pIn,
-        ArrayList ids,
-        ArrayList idTrusts,
-        ArrayList idSigs)
+        List ids,
+        List idTrusts,
+        List idSigs)
         throws IOException
     {
         while (pIn.nextPacketTag() == PacketTags.USER_ID
