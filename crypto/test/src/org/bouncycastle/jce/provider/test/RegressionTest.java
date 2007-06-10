@@ -60,6 +60,7 @@ public class RegressionTest
         new SlotTwoTest(),
         new PKIXNameConstraintsTest(),
         new MultiCertStoreTest(),
+        new NoekeonTest(),
         new CRL5Test()
     };
 
