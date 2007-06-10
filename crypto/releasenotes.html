@@ -33,6 +33,7 @@ the file to be signed. This has been fixed.</li>
 <li>Adding a CRL with no revocations on it to the CRL generator could cause an exception to be thrown. This has been fixed.</li>
 <li>Using the default JDK provider with the CMS library would cause exceptions in some circumstances. This has been fixed.</li>
 <li>BC provider DSAKeys are now serializable.</li>
+<li>In BC 1.34 a default privatekey length for generated DiffieHellman parameters was introduced that was absurdly small, this has been fixed.</li>
 </ul>
 <h3>2.1.2 Additional Features and Functionality</h3>
 <ul>
@@ -47,7 +48,8 @@ the file to be signed. This has been fixed.</li>
 <li>Specifying a null provider in CMS now always uses the default provider, rather than causing an exception.</li>
 <li>Support has been added to the OpenPGP API for parsing experimental signatures</li>
 <li>CertPath validator now handles inherited DSA parameters and a wider range of name constraints.</li>
-<li>Further work has been done on improving the performance of ECDSA.</li>
+<li>Further work has been done on improving the performance of ECDSA - it is now about six times faster.</li>
+<li>The Noekeon block cipher has been added to the provider and the lightweight API.</li>
 </ul>
 
 <h3>2.2.1 Version</h3>

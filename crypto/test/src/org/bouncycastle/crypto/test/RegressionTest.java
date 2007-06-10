@@ -90,6 +90,7 @@ public class RegressionTest
         new EAXTest(),
         new HCFamilyTest(),
         new ISAACTest(),
+        new NoekeonTest(),
         //new NaccacheSternTest(),
         new NullTest()
     };

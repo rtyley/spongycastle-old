@@ -13,6 +13,7 @@ import org.bouncycastle.jce.provider.symmetric.AESMappings;
 import org.bouncycastle.jce.provider.symmetric.CAST5Mappings;
 import org.bouncycastle.jce.provider.symmetric.CamelliaMappings;
 import org.bouncycastle.jce.provider.symmetric.SEEDMappings;
+import org.bouncycastle.jce.provider.symmetric.NoekeonMappings;
 
 import java.security.Provider;
 import java.util.Iterator;
@@ -62,6 +63,7 @@ public final class BouncyCastleProvider extends Provider
         addMappings(new CamelliaMappings());
         addMappings(new CAST5Mappings());
         addMappings(new SEEDMappings());
+        addMappings(new NoekeonMappings());
 
         //
         // X509Store
