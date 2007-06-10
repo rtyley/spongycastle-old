@@ -61,9 +61,9 @@ public class PGPPublicKeyRing
         // direct signatures and revocations
         List keySigs = readSignaturesAndTrust(pIn);
 
-        ArrayList ids = new ArrayList();
-        ArrayList idTrusts = new ArrayList();
-        ArrayList idSigs = new ArrayList();
+        List ids = new ArrayList();
+        List idTrusts = new ArrayList();
+        List idSigs = new ArrayList();
         readUserIDs(pIn, ids, idTrusts, idSigs);
 
         keys.add(new PGPPublicKey(pubPk, trustPk, keySigs, ids, idTrusts, idSigs));
