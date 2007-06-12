@@ -49,20 +49,18 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 public class X509CertificateObject
     extends X509Certificate
     implements PKCS12BagAttributeCarrier
 {
     private X509CertificateStructure    c;
-    private Hashtable                   pkcs12Attributes = new Hashtable();
-    private Vector                      pkcs12Ordering = new Vector();
     private BasicConstraints            basicConstraints;
     private boolean[]                   keyUsage;
+
+    private PKCS12BagAttributeCarrier   attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     public X509CertificateObject(
         X509CertificateStructure    c)
@@ -577,19 +575,18 @@ public class X509CertificateObject
         DERObjectIdentifier oid,
         DEREncodable        attribute)
     {
-        pkcs12Attributes.put(oid, attribute);
-        pkcs12Ordering.addElement(oid);
+        attrCarrier.setBagAttribute(oid, attribute);
     }
 
     public DEREncodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return attrCarrier.getBagAttribute(oid);
     }
 
     public Enumeration getBagAttributeKeys()
     {
-        return pkcs12Ordering.elements();
+        return attrCarrier.getBagAttributeKeys();
     }
 
     public String toString()

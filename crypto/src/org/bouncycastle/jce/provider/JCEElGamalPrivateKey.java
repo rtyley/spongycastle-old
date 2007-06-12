@@ -1,17 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.math.BigInteger;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.DHPrivateKeySpec;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
@@ -26,6 +14,15 @@ import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
 
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.DHPrivateKeySpec;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.util.Enumeration;
+
 public class JCEElGamalPrivateKey
     implements ElGamalPrivateKey, DHPrivateKey, PKCS12BagAttributeCarrier
 {
@@ -33,8 +30,7 @@ public class JCEElGamalPrivateKey
 
     ElGamalParameterSpec   elSpec;
 
-    private Hashtable   pkcs12Attributes = new Hashtable();
-    private Vector      pkcs12Ordering = new Vector();
+    private PKCS12BagAttributeCarrierImpl   attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected JCEElGamalPrivateKey()
     {
@@ -150,18 +146,17 @@ public class JCEElGamalPrivateKey
         DERObjectIdentifier oid,
         DEREncodable        attribute)
     {
-        pkcs12Attributes.put(oid, attribute);
-        pkcs12Ordering.addElement(oid);
+        attrCarrier.setBagAttribute(oid, attribute);
     }
 
     public DEREncodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return attrCarrier.getBagAttribute(oid);
     }
 
     public Enumeration getBagAttributeKeys()
     {
-        return pkcs12Ordering.elements();
+        return attrCarrier.getBagAttributeKeys();
     }
 }

@@ -19,20 +19,14 @@ import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECFieldElement;
 
 import java.math.BigInteger;
 import java.security.interfaces.ECPrivateKey;
-import java.security.spec.ECField;
-import java.security.spec.ECFieldF2m;
-import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.EllipticCurve;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 public class JCEECPrivateKey
     implements ECPrivateKey, org.bouncycastle.jce.interfaces.ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder
@@ -42,8 +36,7 @@ public class JCEECPrivateKey
     private ECParameterSpec ecSpec;
     private boolean         withCompression;
 
-    private Hashtable   pkcs12Attributes = new Hashtable();
-    private Vector      pkcs12Ordering = new Vector();
+    private PKCS12BagAttributeCarrier attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected JCEECPrivateKey()
     {
@@ -97,8 +90,7 @@ public class JCEECPrivateKey
         this.d = key.d;
         this.ecSpec = key.ecSpec;
         this.withCompression = key.withCompression;
-        this.pkcs12Attributes = key.pkcs12Attributes;
-        this.pkcs12Ordering = key.pkcs12Ordering;
+        this.attrCarrier = key.attrCarrier;
     }
 
     JCEECPrivateKey(
@@ -328,19 +320,18 @@ public class JCEECPrivateKey
         DERObjectIdentifier oid,
         DEREncodable        attribute)
     {
-        pkcs12Attributes.put(oid, attribute);
-        pkcs12Ordering.addElement(oid);
+        attrCarrier.setBagAttribute(oid, attribute);
     }
 
     public DEREncodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return attrCarrier.getBagAttribute(oid);
     }
 
     public Enumeration getBagAttributeKeys()
     {
-        return pkcs12Ordering.elements();
+        return attrCarrier.getBagAttributeKeys();
     }
 
     public void setPointFormat(String style)

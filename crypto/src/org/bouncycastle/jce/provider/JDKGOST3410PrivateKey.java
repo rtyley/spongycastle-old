@@ -1,30 +1,23 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.cryptopro.GOST3410NamedParameters;
-import org.bouncycastle.asn1.cryptopro.GOST3410ParamSetParameters;
+import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.crypto.params.GOST3410PrivateKeyParameters;
-import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.interfaces.GOST3410Params;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
-import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PrivateKeySpec;
+import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
+
+import java.math.BigInteger;
+import java.util.Enumeration;
 
 public class JDKGOST3410PrivateKey
     implements GOST3410PrivateKey, PKCS12BagAttributeCarrier
@@ -32,8 +25,7 @@ public class JDKGOST3410PrivateKey
     BigInteger          x;
     GOST3410Params      gost3410Spec;
 
-    private Hashtable   pkcs12Attributes = new Hashtable();
-    private Vector      pkcs12Ordering = new Vector();
+    private PKCS12BagAttributeCarrier attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected JDKGOST3410PrivateKey()
     {
@@ -67,8 +59,6 @@ public class JDKGOST3410PrivateKey
         }
         
         this.x = new BigInteger(1, keyBytes);
-
-        GOST3410ParamSetParameters p = GOST3410NamedParameters.getByOID(params.getPublicKeyParamSet());
 
         if (params.getEncryptionParamSet() != null)
         {
@@ -160,18 +150,17 @@ public class JDKGOST3410PrivateKey
         DERObjectIdentifier oid,
         DEREncodable        attribute)
     {
-        pkcs12Attributes.put(oid, attribute);
-        pkcs12Ordering.addElement(oid);
+        attrCarrier.setBagAttribute(oid, attribute);
     }
 
     public DEREncodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return attrCarrier.getBagAttribute(oid);
     }
 
     public Enumeration getBagAttributeKeys()
     {
-        return pkcs12Ordering.elements();
+        return attrCarrier.getBagAttributeKeys();
     }
 }
