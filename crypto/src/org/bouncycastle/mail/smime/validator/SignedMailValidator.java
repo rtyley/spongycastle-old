@@ -28,6 +28,7 @@ import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
 
 import javax.mail.Address;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
@@ -183,17 +184,8 @@ public class SignedMailValidator
             fromAddresses = new String[froms.length];
             for (int i = 0; i < froms.length; i++)
             {
-                String addr = froms[i].toString();
-                int begin = addr.indexOf('<');
-                if (begin != -1)
-                {
-                    int end = addr.indexOf('>', begin);
-                    if (end != -1)
-                    {
-                        addr = addr.substring(begin + 1, end);
-                    }
-                }
-                fromAddresses[i] = addr;
+                InternetAddress inetAddr = (InternetAddress) froms[i];
+                fromAddresses[i] = inetAddr.getAddress();
             }
 
             // initialize results
@@ -408,7 +400,7 @@ public class SignedMailValidator
         {
             if (oids.get(i).equals(X509Principal.EmailAddress))
             {
-                String email = (String) names.get(i);
+                String email = ((String) names.get(i)).toLowerCase();
                 addresses.add(email);
                 break;
             }
