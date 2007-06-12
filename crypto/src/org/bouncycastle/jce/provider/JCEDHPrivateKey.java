@@ -19,8 +19,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 public class JCEDHPrivateKey
     implements DHPrivateKey, PKCS12BagAttributeCarrier
@@ -31,8 +29,7 @@ public class JCEDHPrivateKey
 
     DHParameterSpec dhSpec;
 
-    private Hashtable   pkcs12Attributes = new Hashtable();
-    private Vector      pkcs12Ordering = new Vector();
+    private PKCS12BagAttributeCarrier attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected JCEDHPrivateKey()
     {
@@ -137,18 +134,17 @@ public class JCEDHPrivateKey
         DERObjectIdentifier oid,
         DEREncodable        attribute)
     {
-        pkcs12Attributes.put(oid, attribute);
-        pkcs12Ordering.addElement(oid);
+        attrCarrier.setBagAttribute(oid, attribute);
     }
 
     public DEREncodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return attrCarrier.getBagAttribute(oid);
     }
 
     public Enumeration getBagAttributeKeys()
     {
-        return pkcs12Ordering.elements();
+        return attrCarrier.getBagAttributeKeys();
     }
 }

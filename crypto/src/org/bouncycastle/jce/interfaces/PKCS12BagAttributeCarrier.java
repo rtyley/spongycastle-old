@@ -10,12 +10,12 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
  */
 public interface PKCS12BagAttributeCarrier
 {
-    public void setBagAttribute(
+    void setBagAttribute(
         DERObjectIdentifier oid,
         DEREncodable        attribute);
 
-    public DEREncodable getBagAttribute(
+    DEREncodable getBagAttribute(
         DERObjectIdentifier oid);
 
-    public Enumeration getBagAttributeKeys();
+    Enumeration getBagAttributeKeys();
 }

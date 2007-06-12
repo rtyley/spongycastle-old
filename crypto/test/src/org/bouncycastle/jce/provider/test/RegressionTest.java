@@ -61,6 +61,7 @@ public class RegressionTest
         new PKIXNameConstraintsTest(),
         new MultiCertStoreTest(),
         new NoekeonTest(),
+        new AttrCertSelectorTest(),
         new CRL5Test()
     };
 

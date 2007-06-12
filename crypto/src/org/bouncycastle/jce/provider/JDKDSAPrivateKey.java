@@ -31,8 +31,7 @@ public class JDKDSAPrivateKey
     BigInteger          x;
     DSAParams           dsaSpec;
 
-    private Hashtable   pkcs12Attributes = new Hashtable();
-    private Vector      pkcs12Ordering = new Vector();
+    private PKCS12BagAttributeCarrierImpl   attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected JDKDSAPrivateKey()
     {
@@ -133,19 +132,18 @@ public class JDKDSAPrivateKey
         DERObjectIdentifier oid,
         DEREncodable        attribute)
     {
-        pkcs12Attributes.put(oid, attribute);
-        pkcs12Ordering.addElement(oid);
+        attrCarrier.setBagAttribute(oid, attribute);
     }
 
     public DEREncodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return attrCarrier.getBagAttribute(oid);
     }
 
     public Enumeration getBagAttributeKeys()
     {
-        return pkcs12Ordering.elements();
+        return attrCarrier.getBagAttributeKeys();
     }
 
     private void readObject(
@@ -154,9 +152,9 @@ public class JDKDSAPrivateKey
     {
         this.x = (BigInteger)in.readObject();
         this.dsaSpec = new DSAParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject());
-
-        this.pkcs12Attributes = (Hashtable)in.readObject();
-        this.pkcs12Ordering = (Vector)in.readObject();
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
+        
+        attrCarrier.readObject(in);
     }
 
     private void writeObject(
@@ -168,7 +166,6 @@ public class JDKDSAPrivateKey
         out.writeObject(dsaSpec.getQ());
         out.writeObject(dsaSpec.getG());
 
-        out.writeObject(pkcs12Attributes);
-        out.writeObject(pkcs12Ordering);
+        attrCarrier.writeObject(out);
     }
 }
