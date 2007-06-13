@@ -223,6 +223,24 @@ public class PBETest
                 {
                     fail("" + algorithm + "failed encryption/decryption test");
                 }
+
+                //
+                // try using PBESpec
+                //
+                c = Cipher.getInstance(algorithm, "BC");
+
+                keySpec = new PBEKeySpec(password);
+
+                c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec), param.getParameterSpec(PBEParameterSpec.class));
+
+                checkParameters(c, salt, iCount);
+
+                dec = c.doFinal(enc);
+
+                if (!arrayEquals(salt, dec))
+                {
+                    fail("" + algorithm + "failed encryption/decryption test");
+                }
             }
             catch (Exception e)
             {
@@ -262,7 +280,8 @@ public class PBETest
         new PKCS12Test("AES",    "PBEWithSHA256And128BitAES-CBC-BC", new SHA256Digest(), 128, 128),
         new PKCS12Test("AES",    "PBEWithSHA256And192BitAES-CBC-BC", new SHA256Digest(), 192, 128),   
         new PKCS12Test("AES",    "PBEWithSHA256And256BitAES-CBC-BC", new SHA256Digest(), 256, 128),
-        new PKCS12Test("Twofish","PBEWithSHAAndTwofish-CBC",         new SHA1Digest(),   256, 128)
+        new PKCS12Test("Twofish","PBEWithSHAAndTwofish-CBC",         new SHA1Digest(),   256, 128),
+        new PKCS12Test("IDEA",   "PBEWithSHAAndIDEA-CBC",            new SHA1Digest(),   128,  64)
     };
     
     private OpenSSLTest openSSLTests[] = {
