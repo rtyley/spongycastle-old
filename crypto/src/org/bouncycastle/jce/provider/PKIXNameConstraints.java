@@ -654,8 +654,8 @@ public class PKIXNameConstraints
         {
             tempDomain = tempDomain.substring(1);
         }
-        String[] domainParts = Strings.split(tempDomain, ".");
-        String[] testDomainParts = Strings.split(testDomain, ".");
+        String[] domainParts = Strings.split(tempDomain, '.');
+        String[] testDomainParts = Strings.split(testDomain, '.');
         // must have at least one subdomain
         if (testDomainParts.length <= domainParts.length)
         {

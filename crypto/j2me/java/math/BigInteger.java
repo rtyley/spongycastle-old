@@ -543,7 +543,7 @@ public class BigInteger
             {
                 for (int rep = 0; rep < 10000; ++rep)
                 {
-                    int n = 33 + rnd.nextInt(bitLength - 2);
+                    int n = 33 + maskInt(rnd.nextInt(),(bitLength - 2));
                     this.magnitude[this.magnitude.length - (n >>> 5)] ^= (1 << (n & 31));
                     this.magnitude[this.magnitude.length - 1] ^= (rnd.nextInt() << 1);
                     this.mQuote = -1L;
@@ -554,6 +554,11 @@ public class BigInteger
             }
         }
     }
+    
+    protected final int maskInt(int intValue, int numBits)
+    {
+        return intValue & ((1 << numBits) - 1);
+    }    
 
     public BigInteger abs()
     {
