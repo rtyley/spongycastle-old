@@ -211,26 +211,22 @@ public final class Strings
     public static String[] split(String input, char delimiter)
     {
         Vector           v = new Vector();
-
-        int position = 0;
         boolean moreTokens = true;
         String subString;
-        
+
         while (moreTokens)
         {
-            int tokenLocation = input.indexOf(delimiter, position);
-            if (tokenLocation > 0) {
-                subString = input.substring(position, tokenLocation);
+            int tokenLocation = input.indexOf(delimiter);
+            if (tokenLocation > 0)
+            {
+                subString = input.substring(0, tokenLocation);
                 v.addElement(subString);
-                position = tokenLocation;
+                input = input.substring(tokenLocation + 1);
             }
-            else {
+            else
+            {
                 moreTokens = false;
-                int inputLength = input.length();
-                if (position < inputLength) {
-                    subString = input.substring(position);
-                    v.addElement(subString);
-                }
+                v.addElement(input);
             }
         }
 
