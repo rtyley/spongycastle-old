@@ -3,6 +3,9 @@ package org.bouncycastle.jce.provider.test;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
@@ -335,7 +338,61 @@ public class DSATest
                 + " got      : " + sig[1]);
         }
     }
-    
+
+    private void testECDSA239bitBinary(String algorithm, DERObjectIdentifier oid)
+        throws Exception
+    {
+        BigInteger r = new BigInteger("21596333210419611985018340039034612628818151486841789642455876922391552");
+        BigInteger s = new BigInteger("197030374000731686738334997654997227052849804072198819102649413465737174");
+
+        byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("171278725565216523967285789236956265265265235675811949404040041670216363"));
+
+        SecureRandom    k = new FixedSecureRandom(kData);
+
+        ECCurve curve = new ECCurve.F2m(
+            239, // m
+            36, // k
+            new BigInteger("32010857077C5431123A46B808906756F543423E8D27877578125778AC76", 16), // a
+            new BigInteger("790408F2EEDAF392B012EDEFB3392F30F4327C0CA3F31FC383C422AA8C16", 16)); // b
+
+        ECParameterSpec params = new ECParameterSpec(
+            curve,
+            curve.decodePoint(Hex.decode("0457927098FA932E7C0A96D3FD5B706EF7E5F5C156E16B7E7C86038552E91D61D8EE5077C33FECF6F1A16B268DE469C3C7744EA9A971649FC7A9616305")), // G
+            new BigInteger("220855883097298041197912187592864814557886993776713230936715041207411783"), // n
+            BigInteger.valueOf(4)); // h
+
+        ECPrivateKeySpec priKeySpec = new ECPrivateKeySpec(
+            new BigInteger("145642755521911534651321230007534120304391871461646461466464667494947990"), // d
+            params);
+
+        ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(
+            curve.decodePoint(Hex.decode("045894609CCECF9A92533F630DE713A958E96C97CCB8F5ABB5A688A238DEED6DC2D9D0C94EBFB7D526BA6A61764175B99CB6011E2047F9F067293F57F5")), // Q
+            params);
+
+        Signature   sgr = Signature.getInstance(algorithm, "BC");
+        KeyFactory  f = KeyFactory.getInstance("ECDSA", "BC");
+        PrivateKey  sKey = f.generatePrivate(priKeySpec);
+        PublicKey   vKey = f.generatePublic(pubKeySpec);
+        byte[]      message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
+
+        sgr.initSign(sKey, k);
+
+        sgr.update(message);
+
+        byte[]  sigBytes = sgr.sign();
+
+        sgr = Signature.getInstance(oid.getId(), "BC");
+
+        sgr.initVerify(vKey);
+
+        sgr.update(message);
+
+        if (!sgr.verify(sigBytes))
+        {
+            fail("239 Bit EC RIPEMD160 verification failed");
+        }
+    }
+
     private void testGeneration()
         throws Exception
     {
@@ -554,6 +611,12 @@ public class DSATest
         testCompat();
         testECDSA239bitPrime();
         testECDSA239bitBinary();
+        testECDSA239bitBinary("RIPEMD160withECDSA", TeleTrusTObjectIdentifiers.ecSignWithRipemd160);
+        testECDSA239bitBinary("SHA1withECDSA", TeleTrusTObjectIdentifiers.ecSignWithSha1);
+        testECDSA239bitBinary("SHA224withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
+        testECDSA239bitBinary("SHA256withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
+        testECDSA239bitBinary("SHA384withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
+        testECDSA239bitBinary("SHA512withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
         testGeneration();
         testParameters();
     }
