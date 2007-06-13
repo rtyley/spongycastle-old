@@ -60,6 +60,7 @@ public class PBETest
         }
     
         public void performTest()
+            throws Exception
         {
             byte[] salt = new byte[16];
             int    iCount = 100;
@@ -68,54 +69,47 @@ public class PBETest
             {
                 salt[i] = (byte)i;
             }
-            
-            try
+
+            OpenSSLPBEParametersGenerator   pGen = new OpenSSLPBEParametersGenerator();
+
+            pGen.init(
+                    PBEParametersGenerator.PKCS5PasswordToBytes(password),
+                    salt,
+                    iCount);
+
+            ParametersWithIV params = (ParametersWithIV)pGen.generateDerivedParameters(keySize, ivSize);
+
+            SecretKeySpec   encKey = new SecretKeySpec(((KeyParameter)params.getParameters()).getKey(), baseAlgorithm);
+
+            Cipher          c;
+
+            if (baseAlgorithm.equals("RC4"))
             {
-                OpenSSLPBEParametersGenerator   pGen = new OpenSSLPBEParametersGenerator();
-                
-                pGen.init(
-                        PBEParametersGenerator.PKCS5PasswordToBytes(password),
-                        salt,
-                        iCount);
-                
-                ParametersWithIV params = (ParametersWithIV)pGen.generateDerivedParameters(keySize, ivSize);
-                
-                SecretKeySpec   encKey = new SecretKeySpec(((KeyParameter)params.getParameters()).getKey(), baseAlgorithm);
-                
-                Cipher          c;
-                
-                if (baseAlgorithm.equals("RC4"))
-                {
-                    c = Cipher.getInstance(baseAlgorithm, "BC");
-                    
-                    c.init(Cipher.ENCRYPT_MODE, encKey);
-                }
-                else
-                {
-                    c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "BC");
-                    
-                    c.init(Cipher.ENCRYPT_MODE, encKey, new IvParameterSpec(params.getIV()));
-                }
-                
-                byte[]          enc = c.doFinal(salt);
-                
-                c = Cipher.getInstance(algorithm, "BC");
-                
-                PBEKeySpec          keySpec = new PBEKeySpec(password, salt, iCount);
-                SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "BC");
-                
-                c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec));
-                
-                byte[]          dec = c.doFinal(enc);
-                
-                if (!arrayEquals(salt, dec))
-                {
-                    fail("" + algorithm + "failed encryption/decryption test");
-                }
+                c = Cipher.getInstance(baseAlgorithm, "BC");
+
+                c.init(Cipher.ENCRYPT_MODE, encKey);
             }
-            catch (Exception e)
+            else
             {
-                fail("" + algorithm + " failed - exception " + e, e);
+                c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "BC");
+
+                c.init(Cipher.ENCRYPT_MODE, encKey, new IvParameterSpec(params.getIV()));
+            }
+
+            byte[]          enc = c.doFinal(salt);
+
+            c = Cipher.getInstance(algorithm, "BC");
+
+            PBEKeySpec          keySpec = new PBEKeySpec(password, salt, iCount);
+            SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "BC");
+
+            c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec));
+
+            byte[]          dec = c.doFinal(enc);
+
+            if (!arrayEquals(salt, dec))
+            {
+                fail("" + algorithm + "failed encryption/decryption test");
             }
         }
     }
@@ -151,100 +145,94 @@ public class PBETest
         }
     
         public void performTest()
+            throws Exception
         {
             byte[] salt = new byte[digest.getDigestSize()];
             int    iCount = 100;
             
             digest.doFinal(salt, 0);
-            
-            try
+
+            PKCS12ParametersGenerator   pGen = new PKCS12ParametersGenerator(digest);
+
+            pGen.init(
+                    PBEParametersGenerator.PKCS12PasswordToBytes(password),
+                    salt,
+                    iCount);
+
+            ParametersWithIV params = (ParametersWithIV)pGen.generateDerivedParameters(keySize, ivSize);
+
+            SecretKeySpec   encKey = new SecretKeySpec(((KeyParameter)params.getParameters()).getKey(), baseAlgorithm);
+
+            Cipher          c;
+
+            if (baseAlgorithm.equals("RC4"))
             {
-                PKCS12ParametersGenerator   pGen = new PKCS12ParametersGenerator(digest);
-                
-                pGen.init(
-                        PBEParametersGenerator.PKCS12PasswordToBytes(password),
-                        salt,
-                        iCount);
-                
-                ParametersWithIV params = (ParametersWithIV)pGen.generateDerivedParameters(keySize, ivSize);
-                
-                SecretKeySpec   encKey = new SecretKeySpec(((KeyParameter)params.getParameters()).getKey(), baseAlgorithm);
-                
-                Cipher          c;
-                
-                if (baseAlgorithm.equals("RC4"))
-                {
-                    c = Cipher.getInstance(baseAlgorithm, "BC");
-                    
-                    c.init(Cipher.ENCRYPT_MODE, encKey);
-                }
-                else
-                {
-                    c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "BC");
-                    
-                    c.init(Cipher.ENCRYPT_MODE, encKey, new IvParameterSpec(params.getIV()));
-                }
-                
-                byte[]          enc = c.doFinal(salt);
-                
-                c = Cipher.getInstance(algorithm, "BC");
-                
-                PBEKeySpec          keySpec = new PBEKeySpec(password, salt, iCount);
-                SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "BC");
-                
-                c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec));
-                
-                byte[]          dec = c.doFinal(enc);
-                
-                if (!arrayEquals(salt, dec))
-                {
-                    fail("" + algorithm + "failed encryption/decryption test");
-                }
-                
-                //
-                // get the parameters
-                //
-                AlgorithmParameters param = checkParameters(c, salt, iCount);
-                
-                //
-                // try using parameters
-                //
-                c = Cipher.getInstance(algorithm, "BC");
-                
-                keySpec = new PBEKeySpec(password);
-                
-                c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec), param);
+                c = Cipher.getInstance(baseAlgorithm, "BC");
 
-                checkParameters(c, salt, iCount);
-                
-                dec = c.doFinal(enc);
-                
-                if (!arrayEquals(salt, dec))
-                {
-                    fail("" + algorithm + "failed encryption/decryption test");
-                }
-
-                //
-                // try using PBESpec
-                //
-                c = Cipher.getInstance(algorithm, "BC");
-
-                keySpec = new PBEKeySpec(password);
-
-                c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec), param.getParameterSpec(PBEParameterSpec.class));
-
-                checkParameters(c, salt, iCount);
-
-                dec = c.doFinal(enc);
-
-                if (!arrayEquals(salt, dec))
-                {
-                    fail("" + algorithm + "failed encryption/decryption test");
-                }
+                c.init(Cipher.ENCRYPT_MODE, encKey);
             }
-            catch (Exception e)
+            else
             {
-                fail("" + algorithm + " failed - exception " + e, e);
+                c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "BC");
+
+                c.init(Cipher.ENCRYPT_MODE, encKey, new IvParameterSpec(params.getIV()));
+            }
+
+            byte[]          enc = c.doFinal(salt);
+
+            c = Cipher.getInstance(algorithm, "BC");
+
+            PBEKeySpec          keySpec = new PBEKeySpec(password, salt, iCount);
+            SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "BC");
+
+            c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec));
+
+            byte[]          dec = c.doFinal(enc);
+
+            if (!arrayEquals(salt, dec))
+            {
+                fail("" + algorithm + "failed encryption/decryption test");
+            }
+
+            //
+            // get the parameters
+            //
+            AlgorithmParameters param = checkParameters(c, salt, iCount);
+
+            //
+            // try using parameters
+            //
+            c = Cipher.getInstance(algorithm, "BC");
+
+            keySpec = new PBEKeySpec(password);
+
+            c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec), param);
+
+            checkParameters(c, salt, iCount);
+
+            dec = c.doFinal(enc);
+
+            if (!arrayEquals(salt, dec))
+            {
+                fail("" + algorithm + "failed encryption/decryption test");
+            }
+
+            //
+            // try using PBESpec
+            //
+            c = Cipher.getInstance(algorithm, "BC");
+
+            keySpec = new PBEKeySpec(password);
+
+            c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec), param.getParameterSpec(PBEParameterSpec.class));
+
+            checkParameters(c, salt, iCount);
+
+            dec = c.doFinal(enc);
+
+            if (!arrayEquals(salt, dec))
+            {
+                fail("" + algorithm + "failed encryption/decryption test");
             }
         }
 
