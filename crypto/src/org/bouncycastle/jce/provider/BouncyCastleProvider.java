@@ -12,8 +12,8 @@ import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.symmetric.AESMappings;
 import org.bouncycastle.jce.provider.symmetric.CAST5Mappings;
 import org.bouncycastle.jce.provider.symmetric.CamelliaMappings;
-import org.bouncycastle.jce.provider.symmetric.SEEDMappings;
 import org.bouncycastle.jce.provider.symmetric.NoekeonMappings;
+import org.bouncycastle.jce.provider.symmetric.SEEDMappings;
 
 import java.security.Provider;
 import java.util.Iterator;
@@ -812,11 +812,13 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.SHA1WithECDSA", "ECDSA");
         put("Alg.Alias.Signature.ECDSAWithSHA1", "ECDSA");
         put("Alg.Alias.Signature.1.2.840.10045.4.1", "ECDSA");
+        put("Alg.Alias.Signature." + TeleTrusTObjectIdentifiers.ecSignWithSha1, "ECDSA");
 
         addSignatureAlgorithm("SHA224", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA224", X9ObjectIdentifiers.ecdsa_with_SHA224);
         addSignatureAlgorithm("SHA256", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA256", X9ObjectIdentifiers.ecdsa_with_SHA256);
         addSignatureAlgorithm("SHA384", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA384", X9ObjectIdentifiers.ecdsa_with_SHA384);
         addSignatureAlgorithm("SHA512", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA512", X9ObjectIdentifiers.ecdsa_with_SHA512);
+        addSignatureAlgorithm("RIPEMD160", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSARipeMD160",TeleTrusTObjectIdentifiers.ecSignWithRipemd160);
 
         addSignatureAlgorithm("SHA224", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa224", NISTObjectIdentifiers.dsa_with_sha224);
         addSignatureAlgorithm("SHA256", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa256", NISTObjectIdentifiers.dsa_with_sha256);

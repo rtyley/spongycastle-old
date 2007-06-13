@@ -16,6 +16,11 @@ public interface TeleTrusTObjectIdentifiers
     static final DERObjectIdentifier    rsaSignatureWithripemd128           = new DERObjectIdentifier(teleTrusTRSAsignatureAlgorithm + ".3");
     static final DERObjectIdentifier    rsaSignatureWithripemd256           = new DERObjectIdentifier(teleTrusTRSAsignatureAlgorithm + ".4");
 
+    static final DERObjectIdentifier    ecSign = new DERObjectIdentifier(teleTrusTAlgorithm + ".3.2");
+
+    static final DERObjectIdentifier    ecSignWithSha1  = new DERObjectIdentifier(ecSign + ".1");
+    static final DERObjectIdentifier    ecSignWithRipemd160  = new DERObjectIdentifier(ecSign + ".2");
+
     static final DERObjectIdentifier ecc_brainpool = new DERObjectIdentifier(teleTrusTAlgorithm + ".3.2.8");
     static final DERObjectIdentifier ellipticCurve = new DERObjectIdentifier(ecc_brainpool + ".1");
     static final DERObjectIdentifier versionOne = new DERObjectIdentifier(ellipticCurve + ".1");    

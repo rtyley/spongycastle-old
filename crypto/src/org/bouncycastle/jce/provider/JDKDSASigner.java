@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.digests.SHA224Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -356,8 +357,16 @@ public class JDKDSASigner
         }
     }
     
+    static public class ecDSARipeMD160
+        extends JDKDSASigner
+    {
+        public ecDSARipeMD160()
+        {
+            super("RIPEMD160withECDSA", new RIPEMD160Digest(), new ECDSASigner());
+        }
+    }
 
-    static public class ecNR 
+    static public class ecNR
         extends JDKDSASigner
     {
         public ecNR()
