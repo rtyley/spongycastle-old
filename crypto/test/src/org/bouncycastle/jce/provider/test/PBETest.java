@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider.test;
 
 import java.security.AlgorithmParameters;
 import java.security.Security;
+import java.security.spec.InvalidParameterSpecException;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -203,25 +204,18 @@ public class PBETest
                 //
                 // get the parameters
                 //
-                AlgorithmParameters param = c.getParameters();
-                PBEParameterSpec    spec = (PBEParameterSpec)param.getParameterSpec(PBEParameterSpec.class);
-                
-                if (!arrayEquals(salt, spec.getSalt()))
-                {
-                    fail("" + algorithm + "failed salt test");
-                }
-                
-                if (iCount != spec.getIterationCount())
-                {
-                    fail("" + algorithm + "failed count test");
-                }
+                AlgorithmParameters param = checkParameters(c, salt, iCount);
                 
                 //
                 // try using parameters
                 //
+                c = Cipher.getInstance(algorithm, "BC");
+                
                 keySpec = new PBEKeySpec(password);
                 
                 c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec), param);
+
+                checkParameters(c, salt, iCount);
                 
                 dec = c.doFinal(enc);
                 
@@ -234,6 +228,24 @@ public class PBETest
             {
                 fail("" + algorithm + " failed - exception " + e, e);
             }
+        }
+
+        private AlgorithmParameters checkParameters(Cipher c, byte[] salt, int iCount)
+            throws InvalidParameterSpecException
+        {
+            AlgorithmParameters param = c.getParameters();
+            PBEParameterSpec spec = (PBEParameterSpec)param.getParameterSpec(PBEParameterSpec.class);
+
+            if (!arrayEquals(salt, spec.getSalt()))
+            {
+                fail("" + algorithm + "failed salt test");
+            }
+
+            if (iCount != spec.getIterationCount())
+            {
+                fail("" + algorithm + "failed count test");
+            }
+            return param;
         }
     }
     
@@ -249,7 +261,8 @@ public class PBETest
         new PKCS12Test("AES",    "PBEWithSHA1And256BitAES-CBC-BC",   new SHA1Digest(),   256, 128),
         new PKCS12Test("AES",    "PBEWithSHA256And128BitAES-CBC-BC", new SHA256Digest(), 128, 128),
         new PKCS12Test("AES",    "PBEWithSHA256And192BitAES-CBC-BC", new SHA256Digest(), 192, 128),   
-        new PKCS12Test("AES",    "PBEWithSHA256And256BitAES-CBC-BC", new SHA256Digest(), 256, 128)
+        new PKCS12Test("AES",    "PBEWithSHA256And256BitAES-CBC-BC", new SHA256Digest(), 256, 128),
+        new PKCS12Test("Twofish","PBEWithSHAAndTwofish-CBC",         new SHA1Digest(),   256, 128)
     };
     
     private OpenSSLTest openSSLTests[] = {
@@ -324,9 +337,9 @@ public class PBETest
         String  hmacName,
         byte[]  output)
     {
-        SecretKey           key = null;
+        SecretKey           key;
         byte[]              out;
-        Mac                 mac = null;
+        Mac                 mac;
 
         try
         {
@@ -339,6 +352,7 @@ public class PBETest
         catch (Exception e)
         {
             fail("Failed - exception " + e.toString(), e);
+            return;
         }
 
         try
@@ -348,6 +362,7 @@ public class PBETest
         catch (Exception e)
         {
             fail("Failed - exception " + e.toString(), e);
+            return;
         }
 
         mac.reset();
