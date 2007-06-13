@@ -10,8 +10,8 @@
   
   $RCSfile: midp.xml,v $
   $Author: bouncy $
-  $Date: 2006-12-16 20:30:53 $
-  $Revision: 1.5 $
+  $Date: 2007-06-13 08:14:14 $
+  $Revision: 1.6 $
 -->
 
 <project name="midp" default="init" basedir=".">
@@ -106,6 +106,7 @@
                 <include name="**/util/test/*.java" />
                 <include name="**/util/Arrays.java" />
                 <include name="**/util/BigIntegers.java" />
+                <include name="**/util/IPAddress.java" />
                 <include name="**/util/Strings.java" />
                 <include name="**/encoders/*.java" />
 
