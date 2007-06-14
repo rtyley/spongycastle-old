@@ -37,6 +37,7 @@ then
         rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
         rm src/org/bouncycastle/asn1/test/OctetStringTest.java
         rm src/org/bouncycastle/asn1/test/ParseTest.java
+        rm src/org/bouncycastle/util/IPTest.java
 
         (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
             -header "$HEADER" \
@@ -149,6 +150,7 @@ then
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCRLs.java
     rm -rf src/org/bouncycastle/jce/provider/PKIXAttrCert*.java
     rm -rf src/org/bouncycastle/jce/provider/PKIXNameConstraints*.java
+    rm -rf src/org/bouncycastle/jce/provider/test/PKIXNameConstraintsTest.java
     rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
     rm -rf src/org/bouncycastle/x509/PKIXAttrCert*.java
     rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
@@ -158,6 +160,7 @@ then
     rm src/org/bouncycastle/asn1/test/OctetStringTest.java
     rm src/org/bouncycastle/asn1/test/ParseTest.java
     rm -rf src/org/bouncycastle/openssl/test
+    rm src/org/bouncycastle/util/IPTest.java
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \

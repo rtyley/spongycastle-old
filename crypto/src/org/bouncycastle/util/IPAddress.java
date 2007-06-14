@@ -4,6 +4,7 @@ import java.math.BigInteger;
 
 public class IPAddress
 {
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
     /**
      * Validate the given IPv4 or IPv6 address.
      * 
@@ -54,7 +55,7 @@ public class IPAddress
             {
                 return false;
             }
-            if (octet.compareTo(BigInteger.ZERO) == -1
+            if (octet.compareTo(ZERO) == -1
                 || octet.compareTo(BigInteger.valueOf(255)) == 1)
             {
                 return false;
@@ -103,7 +104,7 @@ public class IPAddress
             {
                 return false;
             }
-            if (octet.compareTo(BigInteger.ZERO) == -1
+            if (octet.compareTo(ZERO) == -1
                 || octet.compareTo(BigInteger.valueOf(0xFFFF)) == 1)
             {
                 return false;
