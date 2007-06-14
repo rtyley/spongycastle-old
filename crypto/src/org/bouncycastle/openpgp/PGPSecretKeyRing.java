@@ -22,7 +22,7 @@ import java.util.List;
 public class PGPSecretKeyRing
     extends PGPKeyRing
 {    
-    final List keys;
+    List keys;
     
     PGPSecretKeyRing(List keys)
     {
