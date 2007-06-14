@@ -29,7 +29,7 @@ class IntArray
         {
             throw new IllegalArgumentException("Only positive Integers allowed");
         }
-        if (bigInt.equals(BigInteger.ZERO))
+        if (bigInt.equals(ECConstants.ZERO))
         {
             m_ints = new int[] { 0 };
             return;
@@ -140,7 +140,7 @@ class IntArray
         int usedLen = getUsedLength();
         if (usedLen == 0)
         {
-            return BigInteger.ZERO;
+            return ECConstants.ZERO;
         }
 
         int highestInt = m_ints[usedLen - 1];

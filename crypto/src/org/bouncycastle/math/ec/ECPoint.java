@@ -479,7 +479,7 @@ public abstract class ECPoint
                 = (ECFieldElement.F2m)lambda.square().add(lambda).
                     add(this.curve.getA());
 
-            ECFieldElement ONE = this.curve.fromBigInteger(BigInteger.ONE);
+            ECFieldElement ONE = this.curve.fromBigInteger(ECConstants.ONE);
             ECFieldElement.F2m y3
                 = (ECFieldElement.F2m)this.x.square().add(
                     x3.multiply(lambda.add(ONE)));

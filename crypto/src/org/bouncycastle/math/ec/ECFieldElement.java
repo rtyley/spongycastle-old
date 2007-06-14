@@ -828,7 +828,7 @@ public abstract class ECFieldElement
         /**
          * The number of <code>int</code>s required to hold <code>m</code> bits.
          */
-        private final int t;
+        private int t;
 
         /**
          * Constructor for PPB.
