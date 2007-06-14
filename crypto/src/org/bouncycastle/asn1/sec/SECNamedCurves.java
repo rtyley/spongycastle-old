@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ECParametersHolder;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -133,7 +134,7 @@ public class SECNamedCurves
         {
             // p = 2^160 - 2^32 - 2^14 - 2^12 - 2^9 - 2^8 - 2^7 - 2^3 - 2^2 - 1
             BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFAC73");
-            BigInteger a = BigInteger.ZERO;
+            BigInteger a = ECConstants.ZERO;
             BigInteger b = BigInteger.valueOf(7);
             byte[] S = null;
             BigInteger n = fromHex("0100000000000000000001B8FA16DFAB9ACA16B6B3");
@@ -211,7 +212,7 @@ public class SECNamedCurves
         {
             // p = 2^192 - 2^32 - 2^12 - 2^8 - 2^7 - 2^6 - 2^3 - 1
             BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFEE37");
-            BigInteger a = BigInteger.ZERO;
+            BigInteger a = ECConstants.ZERO;
             BigInteger b = BigInteger.valueOf(3);
             byte[] S = null;
             BigInteger n = fromHex("FFFFFFFFFFFFFFFFFFFFFFFE26F2FC170F69466A74DEFD8D");
@@ -263,7 +264,7 @@ public class SECNamedCurves
         {
             // p = 2^224 - 2^32 - 2^12 - 2^11 - 2^9 - 2^7 - 2^4 - 2 - 1
             BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFE56D");
-            BigInteger a = BigInteger.ZERO;
+            BigInteger a = ECConstants.ZERO;
             BigInteger b = BigInteger.valueOf(5);
             byte[] S = null;
             BigInteger n = fromHex("010000000000000000000000000001DCE8D2EC6184CAF0A971769FB1F7");
@@ -315,7 +316,7 @@ public class SECNamedCurves
         {
             // p = 2^256 - 2^32 - 2^9 - 2^8 - 2^7 - 2^6 - 2^4 - 1
             BigInteger p = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
-            BigInteger a = BigInteger.ZERO;
+            BigInteger a = ECConstants.ZERO;
             BigInteger b = BigInteger.valueOf(7);
             byte[] S = null;
             BigInteger n = fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
@@ -673,7 +674,7 @@ public class SECNamedCurves
             int m = 233;
             int k = 74;
 
-            BigInteger a = BigInteger.ZERO;
+            BigInteger a = ECConstants.ZERO;
             BigInteger b = BigInteger.valueOf(1);
             byte[] S = null;
             BigInteger n = fromHex("8000000000000000000000000000069D5BB915BCD46EFB1AD5F173ABDF");
@@ -727,7 +728,7 @@ public class SECNamedCurves
             int m = 239;
             int k = 158;
 
-            BigInteger a = BigInteger.ZERO;
+            BigInteger a = ECConstants.ZERO;
             BigInteger b = BigInteger.valueOf(1);
             byte[] S = null;
             BigInteger n = fromHex("2000000000000000000000000000005A79FEC67CB6E91F1C1DA800E478A5");
@@ -756,7 +757,7 @@ public class SECNamedCurves
             int k2 = 7;
             int k3 = 12;
 
-            BigInteger a = BigInteger.ZERO;
+            BigInteger a = ECConstants.ZERO;
             BigInteger b = BigInteger.valueOf(1);
             byte[] S = null;
             BigInteger n = fromHex("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE9AE2ED07577265DFF7F94451E061E163C61");
@@ -812,7 +813,7 @@ public class SECNamedCurves
             int m = 409;
             int k = 87;
 
-            BigInteger a = BigInteger.ZERO;
+            BigInteger a = ECConstants.ZERO;
             BigInteger b = BigInteger.valueOf(1);
             byte[] S = null;
             BigInteger n = fromHex("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE5F83B2D4EA20400EC4557D5ED3E3E7CA5B4B5C83B8E01E5FCF");
@@ -868,7 +869,7 @@ public class SECNamedCurves
             int k2 = 5;
             int k3 = 10;
 
-            BigInteger a = BigInteger.ZERO;
+            BigInteger a = ECConstants.ZERO;
             BigInteger b = BigInteger.valueOf(1);
             byte[] S = null;
             BigInteger n = fromHex("020000000000000000000000000000000000000000000000000000000000000000000000131850E1F19A63E4B391A8DB917F4138B630D84BE5D639381E91DEB45CFE778F637C1001");
