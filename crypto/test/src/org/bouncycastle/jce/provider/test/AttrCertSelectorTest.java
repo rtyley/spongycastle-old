@@ -17,6 +17,7 @@ import org.bouncycastle.asn1.x509.Target;
 import org.bouncycastle.asn1.x509.TargetInformation;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
@@ -131,8 +132,7 @@ public class AttrCertSelectorTest
 			new DERSequence(roleSyntax));
 
 		gen.addAttribute(attributes);
-		gen.setHolder(new AttributeCertificateHolder(iCert
-			.getSubjectX500Principal()));
+		gen.setHolder(new AttributeCertificateHolder(PrincipalUtil.getSubjectX509Principal(iCert)));
 		gen.setIssuer(new AttributeCertificateIssuer(new X509Principal(
 			"cn=test")));
 		gen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
