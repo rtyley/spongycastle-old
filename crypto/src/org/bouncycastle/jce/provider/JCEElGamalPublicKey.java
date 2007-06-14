@@ -23,6 +23,8 @@ import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
 public class JCEElGamalPublicKey
     implements ElGamalPublicKey, DHPublicKey
 {
+    static final long serialVersionUID = 8712728417091216948L;
+        
     private BigInteger              y;
     private ElGamalParameterSpec    elSpec;
 
