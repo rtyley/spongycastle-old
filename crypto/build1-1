@@ -36,6 +36,7 @@ then
         rm src/org/bouncycastle/util/Selector.java
         rm src/org/bouncycastle/util/StreamParser.java
         rm src/org/bouncycastle/util/StreamParsingException.java
+        rm src/org/bouncycastle/util/IPTest.java
 
         mkdir classes; mkdir docs;
         (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
@@ -161,12 +162,15 @@ then
     rm -rf src/org/bouncycastle/sasn1/test
     rm -rf src/org/bouncycastle/tsp
     rm -rf src/org/bouncycastle/util/encoders/test
+    rm src/org/bouncycastle/util/IPTest.java
     rm -rf src/org/bouncycastle/x509/PKIXCertPathReviewer.java
     rm -rf src/org/bouncycastle/x509/CertPathReviewerException.java
     rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
     rm -rf src/org/bouncycastle/x509/util/LDAPStoreHelper.java
     rm -rf src/org/bouncycastle/jce/provider/PKIXAttrCert*.java
     rm -rf src/org/bouncycastle/jce/provider/PKIXNameConstraints*.java
+    rm -rf src/org/bouncycastle/jce/provider/test/PKIXNameConstraintsTest.java
+    rm -rf src/org/bouncycastle/jce/provider/test/AttrCertSelectorTest.java
     rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
     rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
     rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java

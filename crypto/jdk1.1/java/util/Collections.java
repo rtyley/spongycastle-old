@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Collections
 {
+    public static List EMPTY_LIST = new ArrayList();
+
     private Collections() {}
 
     public static Collection unmodifiableCollection(Collection c)

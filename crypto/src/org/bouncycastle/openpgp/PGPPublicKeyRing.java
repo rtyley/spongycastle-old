@@ -21,7 +21,7 @@ import java.util.List;
 public class PGPPublicKeyRing
     extends PGPKeyRing
 {
-    final List keys;
+    List keys;
     
     public PGPPublicKeyRing(
         byte[]    encoding)
