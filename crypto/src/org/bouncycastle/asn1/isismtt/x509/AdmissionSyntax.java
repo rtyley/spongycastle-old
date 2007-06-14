@@ -68,8 +68,8 @@ import java.util.Enumeration;
  * component namingAuthorityId are grouped under the OID-branch
  * id-isis-at-namingAuthorities and must be applied for.
  * <li>See
- * {@link http://www.teletrust.de/anwend.asp?Id=30200&Sprache=E_&HomePG=0} for
- * an application form and {@link http://www.teletrust.de/links.asp?id=30220,11}
+ * http://www.teletrust.de/anwend.asp?Id=30200&Sprache=E_&HomePG=0 for
+ * an application form and http://www.teletrust.de/links.asp?id=30220,11
  * for an overview of registered naming authorities.
  * <li> By means of the data type ProfessionInfo certain professions,
  * specializations, disciplines, fields of activity, etc. are identified. A

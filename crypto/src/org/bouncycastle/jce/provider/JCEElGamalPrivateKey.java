@@ -26,6 +26,8 @@ import java.util.Enumeration;
 public class JCEElGamalPrivateKey
     implements ElGamalPrivateKey, DHPrivateKey, PKCS12BagAttributeCarrier
 {
+    static final long serialVersionUID = 4819350091141529678L;
+        
     BigInteger      x;
 
     ElGamalParameterSpec   elSpec;

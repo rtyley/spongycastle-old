@@ -11,17 +11,7 @@ import org.bouncycastle.math.ec.ECPoint;
 
 /**
  * Compares the performance of the the window NAF point multiplication against
- * conventional point multiplication. To count multiplications, the static
- * fields <code>int addCounter</code> and <code>int doubleCounter</code>
- * have been added to the
- * {@link org.bouncycastle.math.ec.ECPointExperimental ECPointExperimental}
- * class. These fields are incremented on each call of <code>add()</code> or
- * <code>twice()</code> respectively. The nicer way of doing this would be to
- * add a class proxying
- * {@link org.bouncycastle.math.ec.ECPointExperimental ECPointExperimental}.
- * 
- * @author keller
- * 
+ * conventional point multiplication.
  */
 public class ECPointPerformanceTest extends TestCase
 {

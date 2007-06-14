@@ -48,7 +48,9 @@ public class RegressionTest
         new CertStoreTest(),
         new CertPathValidatorTest(),
         new CertPathBuilderTest(),
-        new NISTCertPathTest()
+        new NISTCertPathTest(),
+        new SerialisationTest(),
+        new AttrCertSelectorTest()
     };
 
     public static void main(

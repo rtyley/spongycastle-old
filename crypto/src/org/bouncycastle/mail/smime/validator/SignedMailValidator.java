@@ -605,7 +605,7 @@ public class SignedMailValidator
      * @param signerCert the end of the path
      * @param trustanchors trust anchors for the path
      * @param certStores
-     * @return
+     * @return the resulting certificate path.
      * @throws GeneralSecurityException
      */
     public static CertPath createCertPath(X509Certificate signerCert,
@@ -622,7 +622,7 @@ public class SignedMailValidator
      * @param trustanchors trust anchors for the path
      * @param systemCertStores list of {@link CertStore} provided by the system
      * @param userCertStores list of {@link CertStore} provided by the user
-     * @return
+     * @return a CertPath and a List of booleans.
      * @throws GeneralSecurityException
      */
     public static Object[] createCertPath(X509Certificate signerCert,

@@ -62,6 +62,7 @@ public class RegressionTest
         new MultiCertStoreTest(),
         new NoekeonTest(),
         new AttrCertSelectorTest(),
+        new SerialisationTest(),
         new CRL5Test()
     };
 
