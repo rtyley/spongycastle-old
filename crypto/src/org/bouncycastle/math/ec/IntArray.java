@@ -2,7 +2,8 @@ package org.bouncycastle.math.ec;
 
 import java.math.BigInteger;
 
-class IntArray {
+class IntArray
+{
     // TODO make m fixed for the IntArray, and hence compute T once and for all
 
     private int[] m_ints;
