@@ -147,6 +147,8 @@ be operated in.
 <tr><td><b>BufferedBlockCipher</b></td><td>BlockCipher</td><td>&nbsp;</td></tr>
 <tr><td><b>CBCBlockCipher</b></td><td>BlockCipher</td><td>&nbsp;</td></tr>
 <tr><td><b>CFBBlockCipher</b></td><td>BlockCipher, block size (in bits)</td><td>&nbsp;</td></tr>
+<tr><td><b>CCMBlockCipher</b></td><td>BlockCipher</td><td>Packet mode - requires all data up front.</td></tr>
+<tr><td><b>EAXBlockCipher</b></td><td>BlockCipher</td><td>&nbsp;</td></tr>
 <tr><td><b>OFBBlockCipher</b></td><td>BlockCipher, block size (in bits)</td><td>&nbsp;</td></tr>
 <tr><td><b>SICBlockCipher</b></td><td>BlockCipher, block size (in bits)</td><td>Also known as CTR mode</td></tr>
 <tr><td><b>OpenPGPCFBBlockCipher</b></td><td>BlockCipher</td><td>&nbsp;</td></tr>
@@ -181,12 +183,16 @@ used with the above modes.
 <tr><td><b>AESEngine</b></td><td>0 .. 256 </td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>AESWrapEngine</b></td><td>0 .. 256 </td><td>128 bit</td><td>Implements FIPS AES key wrapping</td></tr>
 <tr><td><b>BlowfishEngine</b></td><td>0 .. 448 </b></td><td>64 bit</td><td>&nbsp;</td></tr>
+<tr><td><b>CamelliaEngine</b></td><td>128, 192, 256</td><td>128 bit</td><td>&nbsp;</td></tr>
+<tr><td><b>CamelliaWrapEngine</b></td><td>128, 192, 256</td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>CAST5Engine</b></td><td>0 .. 128 </b></td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>CAST6Engine</b></td><td>0 .. 256 </b></td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>DESEngine</b></td><td>64</td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>DESedeEngine</b></td><td>128, 192</td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>DESedeWrapEngine</b></td><td>128, 192</td><td>64 bit</td><td>Implements Draft IETF DESede key wrapping</td></tr>
+<tr><td><b>GOST28147Engine</b></td><td>256</td><td>64 bit</td><td>Has a range of S-boxes</td></tr>
 <tr><td><b>IDEAEngine</b></td><td>128</td><td>64 bit</td><td>&nbsp;</td></tr>
+<tr><td><b>NoekeonEngine</b></td><td>128</td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>RC2Engine</b></td><td>0 .. 1024 </td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>RC532Engine</b></td><td>0 .. 128 </td><td>64 bit</td><td>Uses a 32 bit word</td></tr>
 <tr><td><b>RC564Engine</b></td><td>0 .. 128 </td><td>128 bit</td><td>Uses a 64 bit word</td></tr>
@@ -194,13 +200,10 @@ used with the above modes.
 <tr><td><b>RijndaelEngine</b></td><td>0 .. 256 </td><td>128 bit, 160 bit, 192 bit, 224 bit, 256 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>SEEDEngine</b></td><td>128</td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>SEEDWrapEngine</b></td><td>128</td><td>128 bit</td><td>&nbsp;</td></tr>
-<tr><td><b>SkipjackEngine</b></td><td>0 .. 128 </td><td>64 bit</td><td>&nbsp;</td></tr>
-<tr><td><b>TwofishEngine</b></td><td>128, 192, 256 </td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>SerpentEngine</b></td><td>128, 192, 256 </td><td>128 bit</td><td>&nbsp;</td></tr>
-<tr><td><b>GOST28147Engine</b></td><td>256</td><td>64 bit</td><td>Has a range of S-boxes</td></tr>
-<tr><td><b>CamelliaEngine</b></td><td>128, 192, 256</td><td>128 bit</td><td>&nbsp;</td></tr>
-<tr><td><b>CamelliaWrapEngine</b></td><td>128, 192, 256</td><td>128 bit</td><td>&nbsp;</td></tr>
+<tr><td><b>SkipjackEngine</b></td><td>0 .. 128 </td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>TEAEngine</b></td><td>128</td><td>64 bit</td><td>&nbsp;</td></tr>
+<tr><td><b>TwofishEngine</b></td><td>128, 192, 256 </td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td><b>XTEAEngine</b></td><td>128</td><td>64 bit</td><td>&nbsp;</td></tr>
 </table>
 
@@ -223,7 +226,10 @@ used with the above modes.
 <table cellpadding=5 cellspacing=0 border=1 width=80%>
 <tr><th>Name</th><th>KeySizes (in bits) </th><th>Notes</th></tr>
 <tr><td><b>RC4Engine</b></td><td>40 .. 2048</td><td>&nbsp;</td></tr>
+<tr><td><b>HC128Engine</b></td><td>128</td><td>&nbsp;</td></tr>
+<tr><td><b>HC256Engine</b></td><td>256</td><td>&nbsp;</td></tr>
 <tr><td><b>Salsa20Engine</b></td><td>128/256</td><td>&nbsp;</td></tr>
+<tr><td><b>ISAACEngine</b></td><td>32 .. 8192</td><td>&nbsp;</td></tr>
 </table>
 
 <h4>Block Asymmetric</h4>
@@ -437,6 +443,8 @@ The policy files can be found at the same place you downloaded the JDK.
 <li>OpenPGPCFB
 <li>CTS (equivalent to CBC/WithCTS)
 <li>GOFB
+<li>CCM
+<li>EAX
 </ul>
 
 <p>
@@ -477,11 +485,14 @@ Note: default key sizes are in bold.
 <tr><td>AES</td><td>0 .. 256 <b>(192)</b></td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td>AESWrap</td><td>0 .. 256 <b>(192)</b></td><td>128 bit</td><td>A FIPS AES key wrapper</td></tr>
 <tr><td>Blowfish</td><td>0 .. 448 <b>(448)</b></td><td>64 bit</td><td>&nbsp;</td></tr>
+<tr><td>Camellia</td><td>128, 192, 256</td><td>128 bit</td><td>&nbsp;</td></tr>
+<tr><td>CamelliaWrap</td><td>128, 192, 256</td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td>CAST5</td><td>0 .. 128<b>(128)</b></td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td>CAST6</td><td>0 .. 256<b>(256)</b></td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td>DES</td><td>64</td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td>DESede</td><td>128, 192</td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td>DESedeWrap</td><td>128, 192</td><td>128 bit</td><td>A Draft IETF DESede key wrapper</td></tr>
+<tr><td>GOST28147</td><td>256</td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td>IDEA</td><td>128 <b>(128)</b></td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td>Noekeon</td><td>128<b>(128)</b></td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td>RC2</td><td>0 .. 1024 <b>(128)</b></td><td>64 bit</td><td>&nbsp;</td></tr>
@@ -491,14 +502,11 @@ Note: default key sizes are in bold.
 <tr><td>Rijndael</td><td>0 .. 256 <b>(192)</b></td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td>SEED</td><td>128<b>(128)</b></td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td>SEEDWrap</td><td>128<b>(128)</b></td><td>128 bit</td><td>&nbsp;</td></tr>
+<tr><td>Serpent</td><td>128, 192, 256 <b>(256)</b></td><td>128 bit</td><td>&nbsp;</td></tr>
 <tr><td>Skipjack</td><td>0 .. 128 <b>(128)</b></td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td>TEA</td><td>128 <b>(128)</b></td><td>64 bit</td><td>&nbsp;</td></tr>
-<tr><td>XTEA</td><td>128 <b>(128)</b></td><td>64 bit</td><td>&nbsp;</td></tr>
 <tr><td>Twofish</td><td>128, 192, 256 <b>(256)</b></td><td>128 bit</td><td>&nbsp;</td></tr>
-<tr><td>Serpent</td><td>128, 192, 256 <b>(256)</b></td><td>128 bit</td><td>&nbsp;</td></tr>
-<tr><td>GOST28147</td><td>256</td><td>64 bit</td><td>&nbsp;</td></tr>
-<tr><td>Camellia</td><td>128, 192, 256</td><td>128 bit</td><td>&nbsp;</td></tr>
-<tr><td>CamelliaWrap</td><td>128, 192, 256</td><td>128 bit</td><td>&nbsp;</td></tr>
+<tr><td>XTEA</td><td>128 <b>(128)</b></td><td>64 bit</td><td>&nbsp;</td></tr>
 </table>
 
 <h4>Symmetric (Stream)</h4>
@@ -509,6 +517,8 @@ Note: default key sizes are in bold.
 <table cellpadding=5 cellspacing=0 border=1 width=80%>
 <tr><th>Name</th><th>KeySizes (in bits)</th><th>Notes</th></tr>
 <tr><td>RC4</td><td>40 .. 2048 bits <b>(128)</b></td><td>&nbsp;</td></tr>
+<tr><td><b>HC128</b></td><td>(128)</td><td>&nbsp;</td></tr>
+<tr><td><b>HC256</b></td><td>(256)</td><td>&nbsp;</td></tr>
 <tr><td>Salsa20</td><td>128/256<b>(128)</b></td><td>&nbsp;</td></tr>
 </table>
 
