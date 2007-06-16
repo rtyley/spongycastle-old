@@ -250,9 +250,13 @@ public class ASN1SequenceParserTest
                 assertTrue(o instanceof ASN1SequenceParser);
                 
                 ASN1SequenceParser s = (ASN1SequenceParser)o;
-                
-                s.readObject();
-                
+
+                // NB: Must exhaust the nested parser
+                while (s.readObject() != null)
+                {
+                    // Nothing
+                }
+
                 break;
             }
             count++;
