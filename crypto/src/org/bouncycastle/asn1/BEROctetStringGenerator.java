@@ -110,7 +110,26 @@ public class BEROctetStringGenerator
                 _off = 0;
             }
         }
-        
+
+        public void write(byte[] b, int off, int len) throws IOException
+        {
+            while (len > 0)
+            {
+                int numToCopy = Math.min(len, _buf.length - _off);
+                System.arraycopy(b, off, _buf, _off, numToCopy);
+
+                _off += numToCopy;
+                if (_off < _buf.length)
+                    break;
+
+                _out.write(new DEROctetString(_buf).getEncoded());
+                _off = 0;
+
+                off += numToCopy;
+                len -= numToCopy;
+            }
+        }
+
         public void close() 
             throws IOException
         {
