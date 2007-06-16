@@ -28,22 +28,60 @@ class IndefiniteLengthInputStream
         _eofOn00 = eofOn00;
     }
 
-    void checkForEof()
-        throws IOException
+    boolean checkForEof()
     {
         if (_eofOn00 && (_b1 == 0x00 && _b2 == 0x00))
         {
             _eofReached = true;
             setParentEofDetect(true);
         }
+        return _eofReached;
+    }
+
+    public int read(byte[] b, int off, int len)
+        throws IOException
+    {
+        // Only use this optimisation if we aren't checking for 00
+        if (_eofOn00 || len < 3)
+        {
+            return super.read(b, off, len);
+        }
+
+        if (_eofReached)
+        {
+            return -1;
+        }
+
+        int numRead = _in.read(b, off + 2, len - 2);
+
+        if (numRead < 0)
+        {
+//          throw new EOFException();
+            _eofReached = true;
+            return -1;
+        }
+
+        b[off] = (byte)_b1;
+        b[off + 1] = (byte)_b2;
+
+        _b1 = _in.read();
+        _b2 = _in.read();
+
+        if (_b2 < 0)
+        {
+            // Corrupted stream
+//            throw new EOFException();
+            _eofReached = true;
+            // Just fall thru...
+        }
+
+        return numRead + 2;
     }
 
     public int read()
         throws IOException
     {
-        checkForEof();
-
-        if (_eofReached)
+        if (checkForEof())
         {
             return -1;
         }
@@ -56,6 +94,8 @@ class IndefiniteLengthInputStream
         //
         if (b < 0)
         {
+            // Corrupted stream
+//            throw new EOFException();
             _eofReached = true;
 
             return -1;

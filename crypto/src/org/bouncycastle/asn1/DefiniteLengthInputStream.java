@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1;
 
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 
@@ -14,21 +15,61 @@ class DefiniteLengthInputStream
     {
         super(in);
 
+        if (length < 0)
+        {
+            throw new IllegalArgumentException("negative lengths not allowed");
+        }
+
         this._length = length;
     }
 
     public int read()
         throws IOException
     {
-        if (_length-- > 0)
+        if (_length > 0)
         {
-            return _in.read();
-        }
-        else
-        {
-            setParentEofDetect(true);
+            int b = _in.read();
 
-            return -1;
+            if (b < 0)
+            {
+                throw new EOFException();
+            }
+
+            --_length;
+            return b;
         }
+
+        setParentEofDetect(true);
+
+        return -1;
+    }
+
+    byte[] toByteArray()
+        throws IOException
+    {
+        byte[] bytes = new byte[_length];
+
+        if (_length > 0)
+        {
+            int pos = 0;
+            do
+            {
+                int read = _in.read(bytes, pos, _length - pos);
+
+                if (read < 0)
+                {
+                    throw new EOFException();
+                }
+
+                pos += read;
+            }
+            while (pos < _length);
+
+            _length = 0;
+        }
+
+        setParentEofDetect(true);
+
+        return bytes;
     }
 }
