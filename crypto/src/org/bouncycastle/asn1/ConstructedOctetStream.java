@@ -37,24 +37,33 @@ class ConstructedOctetStream
             _currentStream = s.getOctetStream();
         }
 
+        int totalRead = 0;
+
         for (;;)
         {
-            int numRead = _currentStream.read(b, off, len);
+            int numRead = _currentStream.read(b, off + totalRead, len - totalRead);
 
             if (numRead >= 0)
             {
-                return numRead;
+                totalRead += numRead;
+
+                if (totalRead == len)
+                {
+                    return totalRead;
+                }
             }
-
-            ASN1OctetStringParser aos = (ASN1OctetStringParser)_parser.readObject();
-
-            if (aos == null)
+            else
             {
-                _currentStream = null;
-                return -1;
-            }
+                ASN1OctetStringParser aos = (ASN1OctetStringParser)_parser.readObject();
 
-            _currentStream = aos.getOctetStream();
+                if (aos == null)
+                {
+                    _currentStream = null;
+                    return totalRead < 1 ? -1 : totalRead;
+                }
+
+                _currentStream = aos.getOctetStream();
+            }
         }
     }
 
