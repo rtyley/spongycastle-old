@@ -17,11 +17,15 @@ class ConstructedOctetStream
         _parser = parser;
     }
 
-    public int read()
-        throws IOException
+    public int read(byte[] b, int off, int len) throws IOException
     {
-        if (_first)
+        if (_currentStream == null)
         {
+            if (!_first)
+            {
+                return -1;
+            }
+
             ASN1OctetStringParser s = (ASN1OctetStringParser)_parser.readObject();
 
             if (s == null)
@@ -32,31 +36,67 @@ class ConstructedOctetStream
             _first = false;
             _currentStream = s.getOctetStream();
         }
-        else if (_currentStream == null)
+
+        for (;;)
         {
-            return -1;
+            int numRead = _currentStream.read(b, off, len);
+
+            if (numRead >= 0)
+            {
+                return numRead;
+            }
+
+            ASN1OctetStringParser aos = (ASN1OctetStringParser)_parser.readObject();
+
+            if (aos == null)
+            {
+                _currentStream = null;
+                return -1;
+            }
+
+            _currentStream = aos.getOctetStream();
+        }
+    }
+
+    public int read()
+        throws IOException
+    {
+        if (_currentStream == null)
+        {
+            if (!_first)
+            {
+                return -1;
+            }
+
+            ASN1OctetStringParser s = (ASN1OctetStringParser)_parser.readObject();
+    
+            if (s == null)
+            {
+                return -1;
+            }
+    
+            _first = false;
+            _currentStream = s.getOctetStream();
         }
 
-        int b = _currentStream.read();
-
-        if (b < 0)
+        for (;;)
         {
+            int b = _currentStream.read();
+
+            if (b >= 0)
+            {
+                return b;
+            }
+
             ASN1OctetStringParser s = (ASN1OctetStringParser)_parser.readObject();
 
             if (s == null)
             {
                 _currentStream = null;
-
                 return -1;
             }
 
             _currentStream = s.getOctetStream();
-
-            return _currentStream.read();
-        }
-        else
-        {
-            return b;
         }
     }
 }
