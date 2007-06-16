@@ -1,8 +1,6 @@
 package org.bouncycastle.asn1;
 
 import java.io.InputStream;
-import java.io.IOException;
-import java.io.ByteArrayOutputStream;
 
 abstract class LimitedInputStream
         extends InputStream
@@ -13,20 +11,6 @@ abstract class LimitedInputStream
         InputStream in)
     {
         this._in = in;
-    }
-
-    byte[] toByteArray()
-        throws IOException
-    {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-
-        int b;
-        while ((b = this.read()) >= 0)
-        {
-            bOut.write(b);
-        }
-
-        return bOut.toByteArray();
     }
 
     InputStream getUnderlyingStream()
