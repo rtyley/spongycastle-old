@@ -29,7 +29,7 @@ public class DERSequenceGenerator
         DEREncodable object) 
         throws IOException
     {
-        _bOut.write(object.getDERObject().getEncoded());
+        object.getDERObject().encode(new DEROutputStream(_bOut));
     }
     
     public OutputStream getRawOutputStream()

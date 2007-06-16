@@ -30,7 +30,7 @@ public class BERSequenceGenerator
         DEREncodable object)
         throws IOException
     {
-        _out.write(object.getDERObject().getEncoded());
+        object.getDERObject().encode(new DEROutputStream(_out));
     }
     
     public void close() 
