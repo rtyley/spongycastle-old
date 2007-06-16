@@ -56,7 +56,10 @@ public class BEROctetStringGenerator
             byte[] buf) 
             throws IOException
         {
-            _out.write(new DEROctetString(buf).getEncoded());
+            if (buf.length > 0)
+            {
+                _out.write(new DEROctetString(buf).getEncoded());
+            }
         }
         
         public void write(
@@ -65,11 +68,14 @@ public class BEROctetStringGenerator
             int    len) 
             throws IOException
         {
-            byte[] bytes = new byte[len];
-            
-            System.arraycopy(buf, offSet, bytes, 0, len);
-            
-            _out.write(new DEROctetString(bytes).getEncoded());
+            if (len > 0)
+            {
+                byte[] bytes = new byte[len];
+
+                System.arraycopy(buf, offSet, bytes, 0, len);
+
+                _out.write(new DEROctetString(bytes).getEncoded());
+            }
         }
         
         public void close() 
