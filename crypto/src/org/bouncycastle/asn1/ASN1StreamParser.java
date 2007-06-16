@@ -106,10 +106,7 @@ public class ASN1StreamParser
         //
         // turn of looking for "00" while we resolve the tag
         //
-        if (_in instanceof IndefiniteLengthInputStream)
-        {
-            ((IndefiniteLengthInputStream)_in).setEofOn00(false);
-        }
+        set00Check(false);
 
         //
         // calculate tag number
@@ -159,7 +156,8 @@ public class ASN1StreamParser
 
             if (baseTagNo == DERTags.NULL)
             {
-                reset00check();
+                // TODO Should we check that there is no extra content?
+                set00Check(true);
                 return BERNull.INSTANCE;
             }
 
@@ -177,15 +175,19 @@ public class ASN1StreamParser
         }
         else
         {
+            if (baseTagNo == DERTags.NULL)
+            {
+                // TODO Should we check that the length was actually 0 here?
+                set00Check(true);
+                return DERNull.INSTANCE;
+            }
+
             DefiniteLengthInputStream defIn = new DefiniteLengthInputStream(_in, length);
 
             switch (baseTagNo)
             {
             case DERTags.INTEGER:
                 return new DERInteger(defIn.toByteArray());
-            case DERTags.NULL:
-                reset00check();
-                return DERNull.INSTANCE;
             case DERTags.OBJECT_IDENTIFIER:
                 return new DERObjectIdentifier(defIn.toByteArray());
             case DERTags.OCTET_STRING:
@@ -200,11 +202,11 @@ public class ASN1StreamParser
         }
     }
 
-    private void reset00check()
+    private void set00Check(boolean enabled)
     {
         if (_in instanceof IndefiniteLengthInputStream)
         {
-            ((IndefiniteLengthInputStream)_in).setEofOn00(true);
+            ((IndefiniteLengthInputStream)_in).setEofOn00(enabled);
         }
     }
 
