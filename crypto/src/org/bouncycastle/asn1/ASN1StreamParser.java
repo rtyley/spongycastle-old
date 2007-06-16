@@ -159,6 +159,7 @@ public class ASN1StreamParser
 
             if (baseTagNo == DERTags.NULL)
             {
+                reset00check();
                 return BERNull.INSTANCE;
             }
 
@@ -183,6 +184,7 @@ public class ASN1StreamParser
             case DERTags.INTEGER:
                 return new DERInteger(defIn.toByteArray());
             case DERTags.NULL:
+                reset00check();
                 return DERNull.INSTANCE;
             case DERTags.OBJECT_IDENTIFIER:
                 return new DERObjectIdentifier(defIn.toByteArray());
@@ -195,6 +197,14 @@ public class ASN1StreamParser
             default:
                 return new BERTaggedObjectParser(tag, tagNo, defIn);
             }
+        }
+    }
+
+    private void reset00check()
+    {
+        if (_in instanceof IndefiniteLengthInputStream)
+        {
+            ((IndefiniteLengthInputStream)_in).setEofOn00(true);
         }
     }
 
