@@ -205,7 +205,7 @@ public class EnvelopedDataStreamTest
         int unbufferedLength = bOut.toByteArray().length;
         
         //
-        // buffered  - less than default of 1000
+        // Using buffered output - should be == to unbuffered
         //
         edGen = new CMSEnvelopedDataStreamGenerator();
     
@@ -226,7 +226,7 @@ public class EnvelopedDataStreamTest
         
         verifyData(bOut, CMSEnvelopedDataGenerator.AES128_CBC, data);
 
-        assertTrue(bOut.toByteArray().length > unbufferedLength);
+        assertTrue(bOut.toByteArray().length == unbufferedLength);
     }
     
     public void testKeyTransAES128Buffered()
@@ -618,7 +618,7 @@ public class EnvelopedDataStreamTest
     {
         CMSEnvelopedDataParser env = new CMSEnvelopedDataParser(CMSSampleMessages.originatorMessage);
 
-        RecipientInformationStore  recipients = env.getRecipientInfos();
+        env.getRecipientInfos();
 
         assertEquals(CMSEnvelopedDataGenerator.DES_EDE3_CBC, env.getEncryptionAlgOID());
     }

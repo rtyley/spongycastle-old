@@ -447,7 +447,7 @@ public class SignedDataStreamTest
         int unbufferedLength = bOut.toByteArray().length;
         
         //
-        // find buffered length
+        // find buffered length with buffered stream - should be equal
         //
         bOut = new ByteArrayOutputStream();
 
@@ -470,7 +470,7 @@ public class SignedDataStreamTest
         
         verifyEncodedData(bOut);
         
-        assertTrue(bOut.toByteArray().length < unbufferedLength);
+        assertTrue(bOut.toByteArray().length == unbufferedLength);
     }
 
     public void testSHA1WithRSAEncapsulatedBuffered()
@@ -512,7 +512,7 @@ public class SignedDataStreamTest
         int unbufferedLength = bOut.toByteArray().length;
         
         //
-        // find buffered length
+        // find buffered length - buffer size less than default
         //
         bOut = new ByteArrayOutputStream();
     
@@ -535,7 +535,7 @@ public class SignedDataStreamTest
         
         verifyEncodedData(bOut);
 
-        assertTrue(bOut.toByteArray().length < unbufferedLength);
+        assertTrue(bOut.toByteArray().length > unbufferedLength);
     }
     
     public void testSHA1WithRSAEncapsulated()
