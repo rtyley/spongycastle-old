@@ -71,7 +71,9 @@ public class BEROctetStringGenerator
 
                 _off += numToCopy;
                 if (_off < _buf.length)
+                {
                     break;
+                }
 
                 _out.write(new DEROctetString(_buf).getEncoded());
                 _off = 0;
