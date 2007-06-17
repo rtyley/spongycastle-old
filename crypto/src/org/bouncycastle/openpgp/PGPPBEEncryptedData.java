@@ -67,7 +67,7 @@ public class PGPPBEEncryptedData
             SecretKey    key = PGPUtil.makeKeyFromPassPhrase(keyAlgorithm, keyData.getS2K(), passPhrase, provider);
 
             byte[] secKeyData = keyData.getSecKeyData();
-            if (secKeyData != null)
+            if (secKeyData != null && secKeyData.length > 0)
             {
                 Cipher keyCipher = Cipher.getInstance(
                     PGPUtil.getSymmetricCipherName(keyAlgorithm) + "/CFB/NoPadding",
