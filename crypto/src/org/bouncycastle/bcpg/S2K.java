@@ -39,11 +39,11 @@ public class S2K
             {
                 iv = new byte[8];
                 dIn.readFully(iv, 0, iv.length);
-            }
-            
-            if (type == 3)
-            {
-                itCount = dIn.read();
+
+                if (type == 3)
+                {
+                    itCount = dIn.read();
+                }
             }
         }
         else
