@@ -584,13 +584,14 @@ public class PGPSecretKey
         String                provider)
         throws PGPException, NoSuchProviderException
     {
-        PublicKeyPacket            pubPk = secret.getPublicKeyPacket();
-    
-        if (secret.getSecretKeyData() == null)
+        byte[] secKeyData = secret.getSecretKeyData();
+        if (secKeyData == null || secKeyData.length < 1)
         {
             return null;
         }
-        
+
+        PublicKeyPacket pubPk = secret.getPublicKeyPacket();
+
         try
         {
             KeyFactory         fact;
