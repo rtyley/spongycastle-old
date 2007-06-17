@@ -328,7 +328,7 @@ public class JCEECPublicKey
 
             ECCurve curve = this.engineGetQ().getCurve();
             ECPoint point = curve.createPoint(this.getQ().getX().toBigInteger(), this.getQ().getY().toBigInteger(), withCompression);
-            ASN1OctetString p = (ASN1OctetString)(new X9ECPoint(point).getDERObject());;
+            ASN1OctetString p = (ASN1OctetString)(new X9ECPoint(point).getDERObject());
 
             info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), p.getOctets());
         }
