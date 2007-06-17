@@ -484,9 +484,9 @@ public class CMSSignedDataParser
         {
             BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
             byte[]                  inBuffer = new byte[4096];
-            byte[]                  outBuffer = new byte[4096];
             InputStream             inOctets = octs.getOctetStream();
-            OutputStream            outOctets = octGen.getOctetOutputStream(outBuffer);
+            // TODO Allow specification of a specific fragment size?
+            OutputStream            outOctets = octGen.getOctetOutputStream();
 
             int len;
             while ((len = inOctets.read(inBuffer, 0, inBuffer.length)) >= 0)
@@ -585,9 +585,9 @@ public class CMSSignedDataParser
         {
             BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
             byte[]                  inBuffer = new byte[4096];
-            byte[]                  outBuffer = new byte[4096];
             InputStream             inOctets = octs.getOctetStream();
-            OutputStream            outOctets = octGen.getOctetOutputStream(outBuffer);
+            // TODO Allow specification of a specific fragment size?
+            OutputStream            outOctets = octGen.getOctetOutputStream();
 
             int len;
             while ((len = inOctets.read(inBuffer, 0, inBuffer.length)) >= 0)
