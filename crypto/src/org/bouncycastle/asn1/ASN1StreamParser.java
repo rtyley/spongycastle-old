@@ -154,15 +154,14 @@ public class ASN1StreamParser
         {
             IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(_in);
 
-            if (baseTagNo == DERTags.NULL)
-            {
-                // TODO Should we check that there is no extra content?
-                set00Check(true);
-                return BERNull.INSTANCE;
-            }
-
             switch (baseTagNo)
             {
+            case DERTags.NULL:
+                while (indIn.read() >= 0)
+                {
+                    // make sure we skip to end of object
+                }
+                return BERNull.INSTANCE;
             case DERTags.OCTET_STRING:
                 return new BEROctetStringParser(new ASN1ObjectParser(tag, tagNo, indIn));
             case DERTags.SEQUENCE:
@@ -175,19 +174,15 @@ public class ASN1StreamParser
         }
         else
         {
-            if (baseTagNo == DERTags.NULL)
-            {
-                // TODO Should we check that the length was actually 0 here?
-                set00Check(true);
-                return DERNull.INSTANCE;
-            }
-
             DefiniteLengthInputStream defIn = new DefiniteLengthInputStream(_in, length);
 
             switch (baseTagNo)
             {
             case DERTags.INTEGER:
                 return new DERInteger(defIn.toByteArray());
+            case DERTags.NULL:
+                defIn.toByteArray(); // make sure we read to end of object bytes.
+                return DERNull.INSTANCE;
             case DERTags.OBJECT_IDENTIFIER:
                 return new DERObjectIdentifier(defIn.toByteArray());
             case DERTags.OCTET_STRING:

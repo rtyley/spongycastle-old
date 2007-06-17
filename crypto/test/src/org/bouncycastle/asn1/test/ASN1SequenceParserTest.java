@@ -1,20 +1,21 @@
 package org.bouncycastle.asn1.test;
 
-import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
-import java.util.Arrays;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERSequenceGenerator;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1StreamParser;
+import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSequenceGenerator;
+import org.bouncycastle.util.encoders.Hex;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Arrays;
 
 public class ASN1SequenceParserTest 
     extends TestCase 
@@ -30,7 +31,10 @@ public class ASN1SequenceParserTest
     private static final byte[] berDERNestedSeqData = Hex.decode("308002010006012930030201010000");
     private static final byte[] berNestedSeqData = Hex.decode("3080020100060129308002010100000000");
     private static final byte[] berExpTagSeqData = Hex.decode("a180308002010006012900000000");
-    
+
+    private static final byte[] berSeqWithBERNullData = Hex.decode("3080058000000201000601290000");
+    private static final byte[] berSeqWithDERNullData = Hex.decode("308005000201000601290000");
+
     public void testDERWriting()
         throws Exception
     {
@@ -224,7 +228,7 @@ public class ASN1SequenceParserTest
         assertEquals("wrong number of objects in sequence", 2, count);
     }
 
-    public void testNestedReading(
+    private void testNestedReading(
         byte[] data)
         throws Exception
     {
@@ -325,7 +329,49 @@ public class ASN1SequenceParserTest
       
        assertTrue("explicit BER tag writing test failed.", Arrays.equals(berExpTagSeqData, bOut.toByteArray()));
     }
-    
+
+    public void testSequenceWithBERNullReading()
+        throws Exception
+    {
+        testParseWithNull(berSeqWithBERNullData);
+    }
+
+    public void testSequenceWithDERNullReading()
+        throws Exception
+    {
+        testParseWithNull(berSeqWithDERNullData);
+    }
+
+    private void testParseWithNull(byte[] data)
+        throws IOException
+    {
+        ASN1StreamParser aIn = new ASN1StreamParser(data);
+        ASN1SequenceParser seq = (ASN1SequenceParser)aIn.readObject();
+        Object          o;
+        int             count = 0;
+
+        assertNotNull("null sequence returned", seq);
+
+        while ((o = seq.readObject()) != null)
+        {
+            switch (count)
+            {
+            case 0:
+                assertTrue(o instanceof ASN1Null);
+                break;
+            case 1:
+                assertTrue(o instanceof DERInteger);
+                break;
+            case 2:
+                assertTrue(o instanceof DERObjectIdentifier);
+                break;
+            }
+            count++;
+        }
+
+        assertEquals("wrong number of objects in sequence", 3, count);
+    }
+
     public static Test suite()
     {
         return new TestSuite(ASN1SequenceParserTest.class);

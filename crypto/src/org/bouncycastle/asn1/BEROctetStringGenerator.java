@@ -3,8 +3,6 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.bouncycastle.asn1.DEROctetString;
-
 public class BEROctetStringGenerator
     extends BERGenerator
 {
@@ -29,7 +27,7 @@ public class BEROctetStringGenerator
     
     public OutputStream getOctetOutputStream()
     {
-        return new BEROctetStream();
+        return getOctetOutputStream(new byte[1000]); // limit for CER encoding.
     }
 
     public OutputStream getOctetOutputStream(
@@ -37,54 +35,7 @@ public class BEROctetStringGenerator
     {
         return new BufferedBEROctetStream(buf);
     }
-    
-    private class BEROctetStream
-        extends OutputStream
-    {
-        private byte[] _buf = new byte[1];
-
-        public void write(
-            int b)
-            throws IOException
-        {
-            _buf[0] = (byte)b;
-            
-            _out.write(new DEROctetString(_buf).getEncoded()); 
-        }
-        
-        public void write(
-            byte[] buf) 
-            throws IOException
-        {
-            if (buf.length > 0)
-            {
-                _out.write(new DEROctetString(buf).getEncoded());
-            }
-        }
-        
-        public void write(
-            byte[] buf,
-            int    offSet,
-            int    len) 
-            throws IOException
-        {
-            if (len > 0)
-            {
-                byte[] bytes = new byte[len];
-
-                System.arraycopy(buf, offSet, bytes, 0, len);
-
-                _out.write(new DEROctetString(bytes).getEncoded());
-            }
-        }
-        
-        public void close() 
-            throws IOException
-        {
-             writeBEREnd();
-        }
-    }
-    
+   
     private class BufferedBEROctetStream
         extends OutputStream
     {
