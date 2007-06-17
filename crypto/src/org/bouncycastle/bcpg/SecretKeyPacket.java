@@ -165,7 +165,7 @@ public class SecretKeyPacket
             pOut.write(iv);
         }
         
-        if (secKeyData != null)
+        if (secKeyData != null && secKeyData.length > 0)
         {
             pOut.write(secKeyData);
         }

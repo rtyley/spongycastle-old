@@ -84,7 +84,7 @@ public class SymmetricKeyEncSessionPacket
         pOut.write(encAlgorithm);
         pOut.writeObject(s2k);
         
-        if (secKeyData != null)
+        if (secKeyData != null && secKeyData.length > 0)
         {
             pOut.write(secKeyData);
         }
