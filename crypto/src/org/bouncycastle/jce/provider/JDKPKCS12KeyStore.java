@@ -719,7 +719,7 @@ public class JDKPKCS12KeyStore
 
                     if (!Arrays.areEqual(res, dig))
                     {
-                        throw new IOException("PKCS12 key store MAC invalid - wrong password or corrupted file.");
+                        throw new IOException("PKCS12 key store mac invalid - wrong password or corrupted file.");
                     }
 
                     wrongPKCS12Zero = true;
