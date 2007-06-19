@@ -120,7 +120,15 @@ public interface PKCSObjectIdentifiers
     static final DERObjectIdentifier    pkcs_9_at_friendlyName  = new DERObjectIdentifier(pkcs_9 + ".20");
     static final DERObjectIdentifier    pkcs_9_at_localKeyId    = new DERObjectIdentifier(pkcs_9 + ".21");
 
+    /** @deprecated use x509Certificate instead */
     static final DERObjectIdentifier    x509certType            = new DERObjectIdentifier(pkcs_9 + ".22.1");
+
+    static final String                 certTypes               = pkcs_9 + ".22";
+    static final DERObjectIdentifier    x509Certificate         = new DERObjectIdentifier(certTypes + ".1");
+    static final DERObjectIdentifier    sdsiCertificate         = new DERObjectIdentifier(certTypes + ".2");
+
+    static final String                 crlTypes                = pkcs_9 + ".23";
+    static final DERObjectIdentifier    x509Crl                 = new DERObjectIdentifier(crlTypes + ".1");
 
     static final DERObjectIdentifier    id_alg_PWRI_KEK    = new DERObjectIdentifier(pkcs_9 + ".16.3.9");
 
