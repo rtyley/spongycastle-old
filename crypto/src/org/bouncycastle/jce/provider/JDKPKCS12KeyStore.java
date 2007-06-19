@@ -34,15 +34,10 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -66,6 +61,13 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
 
 public class JDKPKCS12KeyStore
     extends KeyStoreSpi
@@ -741,65 +743,24 @@ public class JDKPKCS12KeyStore
 
             try
             {
-                Mac                 mac = Mac.getInstance(algId.getObjectId().getId(), "BC");
-                SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(algId.getObjectId().getId(), "BC");
-                PBEParameterSpec    defParams = new PBEParameterSpec(salt, itCount);
-                PBEKeySpec          pbeSpec = new PBEKeySpec(password);
+                byte[] res = calculatePbeMac(algId.getObjectId(), salt, itCount, password, false, data);
+                byte[] dig = dInfo.getDigest();
 
-                mac.init(keyFact.generateSecret(pbeSpec), defParams);
-
-                mac.update(data);
-
-                byte[]  res = mac.doFinal();
-                byte[]  dig = dInfo.getDigest();
-
-                if (res.length != dInfo.getDigest().length)
+                if (!Arrays.areEqual(res, dig))
                 {
-                    throw new IOException("PKCS12 key store mac invalid - wrong password or corrupted file.");
-                }
-
-                boolean okay = true;
-                
-                for (int i = 0; i != res.length; i++)
-                {
-                    if (res[i] != dig[i])
+                    if (password.length > 0)
                     {
-                        if (password.length != 0)  // may be dodgey zero password
-                        {
-                            throw new IOException("PKCS12 key store mac invalid - wrong password or corrupted file.");
-                        }
-                        else
-                        {
-                            okay = false;
-                            break;
-                        }
+                        throw new IOException("PKCS12 key store mac invalid - wrong password or corrupted file.");
                     }
-                }
-                
-                //
-                // may be incorrect zero length password
-                //
-                if (!okay)
-                {
-                    SecretKey k = keyFact.generateSecret(pbeSpec);
-                    
-                    ((JCEPBEKey)k).setTryWrongPKCS12Zero(true);
-                    
-                    mac.init(k, defParams);
-    
-                    mac.update(data);
-    
-                    res = mac.doFinal();
-                    dig = dInfo.getDigest();
-                    
-                    for (int i = 0; i != res.length; i++)
+
+                    // Try with incorrect zero length password
+                    res = calculatePbeMac(algId.getObjectId(), salt, itCount, password, true, data);
+
+                    if (!Arrays.areEqual(res, dig))
                     {
-                        if (res[i] != dig[i])
-                        {
-                           throw new IOException("PKCS12 key store mac invalid - wrong password or corrupted file.");
-                        }
+                        throw new IOException("PKCS12 key store MAC invalid - wrong password or corrupted file.");
                     }
-                    
+
                     wrongPKCS12Zero = true;
                 }
             }
@@ -1038,6 +999,12 @@ public class JDKPKCS12KeyStore
         {
             SafeBag     b = (SafeBag)chain.elementAt(i);
             CertBag     cb = new CertBag((ASN1Sequence)b.getBagValue());
+
+            if (!cb.getCertId().equals(x509Certificate))
+            {
+                throw new RuntimeException("Unsupported certificate type: " + cb.getCertId());
+            }
+
             Certificate cert;
 
             try
@@ -1240,7 +1207,7 @@ public class JDKPKCS12KeyStore
                 Certificate         cert = engineGetCertificate(name);
                 boolean             cAttrSet = false;
                 CertBag             cBag = new CertBag(
-                                        x509certType,
+                                        x509Certificate,
                                         new DEROctetString(cert.getEncoded()));
                 ASN1EncodableVector fName = new ASN1EncodableVector();
 
@@ -1322,7 +1289,7 @@ public class JDKPKCS12KeyStore
                 }
 
                 CertBag             cBag = new CertBag(
-                                        x509certType,
+                                        x509Certificate,
                                         new DEROctetString(cert.getEncoded()));
                 ASN1EncodableVector fName = new ASN1EncodableVector();
 
@@ -1389,7 +1356,7 @@ public class JDKPKCS12KeyStore
                 }
 
                 CertBag             cBag = new CertBag(
-                                        x509certType,
+                                        x509Certificate,
                                         new DEROctetString(cert.getEncoded()));
                 ASN1EncodableVector fName = new ASN1EncodableVector();
 
@@ -1460,16 +1427,7 @@ public class JDKPKCS12KeyStore
 
         try
         {
-            Mac                 mac = Mac.getInstance(id_SHA1.getId(), "BC");
-            SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(id_SHA1.getId(), "BC");
-            PBEParameterSpec    defParams = new PBEParameterSpec(mSalt, itCount);
-            PBEKeySpec          pbeSpec = new PBEKeySpec(password);
-
-            mac.init(keyFact.generateSecret(pbeSpec), defParams);
-
-            mac.update(data);
-
-            byte[]      res = mac.doFinal();
+            byte[] res = calculatePbeMac(id_SHA1, mSalt, itCount, password, false, data);
 
             AlgorithmIdentifier     algId = new AlgorithmIdentifier(id_SHA1, new DERNull());
             DigestInfo              dInfo = new DigestInfo(algId, res);
@@ -1491,6 +1449,27 @@ public class JDKPKCS12KeyStore
         berOut.writeObject(pfx);
     }
 
+    private static byte[] calculatePbeMac(
+        DERObjectIdentifier oid,
+        byte[]              salt,
+        int                 itCount,
+        char[]              password,
+        boolean             wrongPkcs12Zero,
+        byte[]              data)
+        throws Exception
+    {
+        SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(oid.getId(), "BC");
+        PBEParameterSpec    defParams = new PBEParameterSpec(salt, itCount);
+        PBEKeySpec          pbeSpec = new PBEKeySpec(password);
+        JCEPBEKey           key = (JCEPBEKey) keyFact.generateSecret(pbeSpec);
+        key.setTryWrongPKCS12Zero(wrongPkcs12Zero);
+
+        Mac mac = Mac.getInstance(oid.getId(), "BC");
+        mac.init(key, defParams);
+        mac.update(data);
+        return mac.doFinal();
+    }
+    
     public static class BCPKCS12KeyStore
         extends JDKPKCS12KeyStore
     {
