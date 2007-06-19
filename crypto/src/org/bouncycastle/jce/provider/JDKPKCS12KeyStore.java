@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
@@ -12,7 +13,6 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.pkcs.AuthenticatedSafe;
@@ -79,12 +79,12 @@ public class JDKPKCS12KeyStore
     //
     // SHA-1 and 3-key-triple DES.
     //
-    private static final String KEY_ALGORITHM = "1.2.840.113549.1.12.1.3";
+    private static final DERObjectIdentifier KEY_ALGORITHM = pbeWithSHAAnd3_KeyTripleDES_CBC;
 
     //
     // SHA-1 and 40 bit RC2.
     //
-    private static final String CERT_ALGORITHM = "1.2.840.113549.1.12.1.6";
+    private static final DERObjectIdentifier CERT_ALGORITHM = pbewithSHAAnd40BitRC2_CBC;
 
     private IgnoresCaseHashtable            keys = new IgnoresCaseHashtable();
     private Hashtable                       localIds = new Hashtable();
@@ -619,76 +619,37 @@ public class JDKPKCS12KeyStore
         return out;
     }
 
-    protected ASN1Sequence decryptData(
+    protected byte[] cryptData(
+        boolean               forEncryption,
         AlgorithmIdentifier   algId,
-        byte[]                data,
         char[]                password,
-        boolean               wrongPKCS12Zero)
+        boolean               wrongPKCS12Zero,
+        byte[]                data)
         throws IOException
     {
-        String              algorithm = algId.getObjectId().getId();
-        PKCS12PBEParams     pbeParams = new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
-
-        PBEKeySpec          pbeSpec = new PBEKeySpec(password);
-        byte[]              out;
+        String          algorithm = algId.getObjectId().getId();
+        PKCS12PBEParams pbeParams = new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
+        PBEKeySpec      pbeSpec = new PBEKeySpec(password);
 
         try
         {
-            SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(
-                                                algorithm, "BC");
-            PBEParameterSpec    defParams = new PBEParameterSpec(
-                                                pbeParams.getIV(),
-                                                pbeParams.getIterations().intValue());
-            SecretKey           k = keyFact.generateSecret(pbeSpec);
-            
-            ((JCEPBEKey)k).setTryWrongPKCS12Zero(wrongPKCS12Zero);
+            SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithm, "BC");
+            PBEParameterSpec defParams = new PBEParameterSpec(
+                pbeParams.getIV(),
+                pbeParams.getIterations().intValue());
+            JCEPBEKey        key = (JCEPBEKey) keyFact.generateSecret(pbeSpec);
+
+            key.setTryWrongPKCS12Zero(wrongPKCS12Zero);
 
             Cipher cipher = Cipher.getInstance(algorithm, "BC");
-
-            cipher.init(Cipher.DECRYPT_MODE, k, defParams);
-
-            out = cipher.doFinal(data);
+            int mode = forEncryption ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
+            cipher.init(mode, key, defParams);
+            return cipher.doFinal(data);
         }
         catch (Exception e)
         {
             throw new IOException("exception decrypting data - " + e.toString());
         }
-
-        ASN1InputStream  aIn = new ASN1InputStream(out);
-
-        return (ASN1Sequence)aIn.readObject();
-    }
-
-    protected byte[] encryptData(
-        String                  algorithm,
-        byte[]                  data,
-        PKCS12PBEParams         pbeParams,
-        char[]                  password)
-        throws IOException
-    {
-        PBEKeySpec          pbeSpec = new PBEKeySpec(password);
-        byte[]              out;
-
-        try
-        {
-            SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(
-                                                algorithm, "BC");
-            PBEParameterSpec    defParams = new PBEParameterSpec(
-                                                pbeParams.getIV(),
-                                                pbeParams.getIterations().intValue());
-
-            Cipher cipher = Cipher.getInstance(algorithm, "BC");
-
-            cipher.init(Cipher.ENCRYPT_MODE, keyFact.generateSecret(pbeSpec), defParams);
-
-            out = cipher.doFinal(data);
-        }
-        catch (Exception e)
-        {
-            throw new IOException("exception encrypting data - " + e.toString());
-        }
-
-        return out;
     }
 
     public void engineLoad(
@@ -868,7 +829,9 @@ public class JDKPKCS12KeyStore
                 else if (c[i].getContentType().equals(encryptedData))
                 {
                     EncryptedData d = new EncryptedData((ASN1Sequence)c[i].getContent());
-                    ASN1Sequence seq = decryptData(d.getEncryptionAlgorithm(), d.getContent().getOctets(), password, wrongPKCS12Zero);
+                    byte[] octets = cryptData(false, d.getEncryptionAlgorithm(),
+                        password, wrongPKCS12Zero, d.getContent().getOctets());
+                    ASN1Sequence seq = (ASN1Sequence) ASN1Object.fromByteArray(octets);
 
                     for (int j = 0; j != seq.size(); j++)
                     {
@@ -1090,9 +1053,6 @@ public class JDKPKCS12KeyStore
             throw new NullPointerException("No password supplied for PKCS#12 KeyStore.");
         }
 
-        ContentInfo[]   c = new ContentInfo[2];
-
-
         //
         // handle the key
         //
@@ -1110,8 +1070,8 @@ public class JDKPKCS12KeyStore
             String                  name = (String)ks.nextElement();
             PrivateKey              privKey = (PrivateKey)keys.get(name);
             PKCS12PBEParams         kParams = new PKCS12PBEParams(kSalt, MIN_ITERATIONS);
-            byte[]                  kBytes = wrapKey(KEY_ALGORITHM, privKey, kParams, password);
-            AlgorithmIdentifier     kAlgId = new AlgorithmIdentifier(new DERObjectIdentifier(KEY_ALGORITHM), kParams.getDERObject());
+            byte[]                  kBytes = wrapKey(KEY_ALGORITHM.getId(), privKey, kParams, password);
+            AlgorithmIdentifier     kAlgId = new AlgorithmIdentifier(KEY_ALGORITHM, kParams.getDERObject());
             org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo kInfo = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo(kAlgId, kBytes);
             boolean                 attrSet = false;
             ASN1EncodableVector     kName = new ASN1EncodableVector();
@@ -1179,12 +1139,8 @@ public class JDKPKCS12KeyStore
             keyS.add(kBag);
         }
 
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
-        dOut.writeObject(new DERSequence(keyS));
-
-        BERConstructedOctetString          keyString = new BERConstructedOctetString(bOut.toByteArray());
+        byte[]                    keySEncoded = new DERSequence(keyS).getDEREncoded();
+        BERConstructedOctetString keyString = new BERConstructedOctetString(keySEncoded);
 
         //
         // certficate processing
@@ -1195,7 +1151,7 @@ public class JDKPKCS12KeyStore
 
         ASN1EncodableVector  certSeq = new ASN1EncodableVector();
         PKCS12PBEParams         cParams = new PKCS12PBEParams(cSalt, MIN_ITERATIONS);
-        AlgorithmIdentifier     cAlgId = new AlgorithmIdentifier(new DERObjectIdentifier(CERT_ALGORITHM), cParams.getDERObject());
+        AlgorithmIdentifier     cAlgId = new AlgorithmIdentifier(CERT_ALGORITHM, cParams.getDERObject());
         Hashtable               doneCerts = new Hashtable();
 
         Enumeration cs = keys.keys();
@@ -1386,25 +1342,19 @@ public class JDKPKCS12KeyStore
             }
         }
 
-        bOut.reset();
+        byte[]          certSeqEncoded = new DERSequence(certSeq).getDEREncoded();
+        byte[]          certBytes = cryptData(true, cAlgId, password, false, certSeqEncoded);
+        EncryptedData   cInfo = new EncryptedData(data, cAlgId, new BERConstructedOctetString(certBytes));
 
-        dOut = new DEROutputStream(bOut);
+        ContentInfo[] info = new ContentInfo[]
+        {
+            new ContentInfo(data, keyString),
+            new ContentInfo(encryptedData, cInfo.getDERObject())
+        };
 
-        dOut.writeObject(new DERSequence(certSeq));
+        AuthenticatedSafe   auth = new AuthenticatedSafe(info);
 
-        dOut.close();
-
-        byte[]                  certBytes = encryptData(CERT_ALGORITHM, bOut.toByteArray(), cParams, password);
-        EncryptedData           cInfo = new EncryptedData(data, cAlgId, new BERConstructedOctetString(certBytes));
-
-        c[0] = new ContentInfo(data, keyString);
-
-        c[1] = new ContentInfo(encryptedData, cInfo.getDERObject());
-
-        AuthenticatedSafe   auth = new AuthenticatedSafe(c);
-
-        bOut.reset();
-
+        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         BEROutputStream         berOut = new BEROutputStream(bOut);
 
         berOut.writeObject(auth);
