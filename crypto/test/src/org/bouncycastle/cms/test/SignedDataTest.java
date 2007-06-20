@@ -5,6 +5,10 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -445,6 +449,48 @@ public class SignedDataTest
         //
         MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
         
+        verifySignatures(s, md.digest("Hello world!".getBytes()));
+    }
+
+    public void testSHA1WithRSAAndAttributeTable()
+        throws Exception
+    {
+        MessageDigest       md = MessageDigest.getInstance("SHA1", "BC");
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        Attribute attr = new Attribute(CMSAttributes.messageDigest,
+                                       new DERSet(
+                                            new DEROctetString(
+                                                md.digest("Hello world!".getBytes()))));
+
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(attr);
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1, new AttributeTable(v), null);
+
+        gen.addCertificatesAndCRLs(certs);
+
+
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, null, false, "BC");
+
+        //
+        // the signature is detached, so need to add msg before passing on
+        //
+        s = new CMSSignedData(msg, s.getEncoded());
+        //
+        // compute expected content digest
+        //
+
         verifySignatures(s, md.digest("Hello world!".getBytes()));
     }
 
