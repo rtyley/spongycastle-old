@@ -210,6 +210,15 @@ public interface PKCSObjectIdentifiers
     static final DERObjectIdentifier id_aa_otherSigCert = id_aa_ets_otherSigCert;
     
     //
+    // id-spq OBJECT IDENTIFIER ::= {iso(1) member-body(2) usa(840)
+    // rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) id-spq(5)}
+    //
+    final String id_spq = "1.2.840.113549.1.9.16.5";
+
+    static final DERObjectIdentifier id_spq_ets_uri = new DERObjectIdentifier(id_spq + ".1");
+    static final DERObjectIdentifier id_spq_ets_unotice = new DERObjectIdentifier(id_spq + ".2");
+
+    //
     // pkcs-12 OBJECT IDENTIFIER ::= {
     //       iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) 12 }
     //
