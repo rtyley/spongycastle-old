@@ -181,11 +181,34 @@ public interface PKCSObjectIdentifiers
     static DERObjectIdentifier id_aa_signingCertificate = new DERObjectIdentifier(id_aa + ".12");
 
     static final DERObjectIdentifier id_aa_contentIdentifier = new DERObjectIdentifier(id_aa + ".7"); // See RFC 2634
-    static final DERObjectIdentifier id_aa_signatureTimeStampToken = new DERObjectIdentifier(id_aa + ".14"); // See RFC 3126
-    static final DERObjectIdentifier id_aa_sigPolicyId = new DERObjectIdentifier(id_aa + ".15"); // See RFC 3126
-    static final DERObjectIdentifier id_aa_commitmentType = new DERObjectIdentifier(id_aa + ".16"); // See RFC 3126
-    static final DERObjectIdentifier id_aa_signerLocation = new DERObjectIdentifier(id_aa + ".17"); // See RFC 3126
-    static final DERObjectIdentifier id_aa_otherSigCert = new DERObjectIdentifier(id_aa + ".19"); // See RFC 3126
+
+    /*
+     * RFC 3126
+     */
+    static final DERObjectIdentifier id_aa_signatureTimeStampToken = new DERObjectIdentifier(id_aa + ".14");
+    static final DERObjectIdentifier id_aa_ets_sigPolicyId = new DERObjectIdentifier(id_aa + ".15");
+    static final DERObjectIdentifier id_aa_ets_commitmentType = new DERObjectIdentifier(id_aa + ".16");
+    static final DERObjectIdentifier id_aa_ets_signerLocation = new DERObjectIdentifier(id_aa + ".17");
+    static final DERObjectIdentifier id_aa_ets_signerAttr = new DERObjectIdentifier(id_aa + ".18");
+    static final DERObjectIdentifier id_aa_ets_otherSigCert = new DERObjectIdentifier(id_aa + ".19");
+    static final DERObjectIdentifier id_aa_ets_contentTimestamp = new DERObjectIdentifier(id_aa + ".20");
+    static final DERObjectIdentifier id_aa_ets_certificateRefs = new DERObjectIdentifier(id_aa + ".21");
+    static final DERObjectIdentifier id_aa_ets_revocationRefs = new DERObjectIdentifier(id_aa + ".22");
+    static final DERObjectIdentifier id_aa_ets_certValues = new DERObjectIdentifier(id_aa + ".23");
+    static final DERObjectIdentifier id_aa_ets_revocationValues = new DERObjectIdentifier(id_aa + ".24");
+    static final DERObjectIdentifier id_aa_ets_escTimeStamp = new DERObjectIdentifier(id_aa + ".25");
+    static final DERObjectIdentifier id_aa_ets_certCRLTimestamp = new DERObjectIdentifier(id_aa + ".26");
+    static final DERObjectIdentifier id_aa_ets_archiveTimestamp = new DERObjectIdentifier(id_aa + ".27");
+
+    /** @deprecated use id_aa_ets_sigPolicyId instead */
+    static final DERObjectIdentifier id_aa_sigPolicyId = id_aa_ets_sigPolicyId;
+    /** @deprecated use id_aa_ets_commitmentType instead */
+    static final DERObjectIdentifier id_aa_commitmentType = id_aa_ets_commitmentType;
+    /** @deprecated use id_aa_ets_signerLocation instead */
+    static final DERObjectIdentifier id_aa_signerLocation = id_aa_ets_signerLocation;
+    /** @deprecated use id_aa_ets_otherSigCert instead */
+    static final DERObjectIdentifier id_aa_otherSigCert = id_aa_ets_otherSigCert;
+    
     //
     // pkcs-12 OBJECT IDENTIFIER ::= {
     //       iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) 12 }
