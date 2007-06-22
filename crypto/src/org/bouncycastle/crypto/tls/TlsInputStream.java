@@ -9,6 +9,7 @@ import java.io.InputStream;
 public class TlsInputStream
     extends InputStream
 {
+    private byte[] buf = new byte[1];
     private TlsProtocolHandler handler = null;
     
     protected TlsInputStream (TlsProtocolHandler handler)
@@ -25,12 +26,11 @@ public class TlsInputStream
     public int read()
         throws IOException
     {
-        byte[] buf = new byte[1];
         if (this.read(buf) < 0)
         {
             return -1;
         }
-        return buf[0];
+        return buf[0] & 0xff;
     }
     
     public void close()
