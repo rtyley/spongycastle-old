@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERTaggedObject;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObject;
 
 public class EncryptedData
     extends ASN1Encodable
@@ -28,7 +28,7 @@ public class EncryptedData
             return new EncryptedData((ASN1Sequence)o);
         }
 
-        throw new IllegalArgumentException("Invalid EnvelopedData: " + o.getClass().getName());
+        throw new IllegalArgumentException("Invalid EncryptedData: " + o.getClass().getName());
     }
 
     public EncryptedData(EncryptedContentInfo encInfo)
