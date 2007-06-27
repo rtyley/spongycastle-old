@@ -96,7 +96,7 @@ public class CMSSignedData
     }
 
     /**
-     * base constructor
+     * base constructor - content with detached signature.
      *
      * @param signedContent the content that was signed.
      * @param sigData the signature object.
