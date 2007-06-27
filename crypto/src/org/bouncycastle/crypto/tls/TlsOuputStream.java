@@ -29,7 +29,7 @@ public class TlsOuputStream extends OutputStream
     }
 
 
-    public void cose() throws IOException
+    public void close() throws IOException
     {
         handler.close();
     }
