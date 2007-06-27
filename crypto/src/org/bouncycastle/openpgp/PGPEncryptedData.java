@@ -1,5 +1,6 @@
 package org.bouncycastle.openpgp;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
@@ -24,7 +25,10 @@ public abstract class PGPEncryptedData
         {
             for (int i = 0; i != lookAhead.length; i++)
             {
-                lookAhead[i] = in.read();
+                if ((lookAhead[i] = in.read()) < 0)
+                {
+                    throw new EOFException();
+                }
             }
             
             bufPtr = 0;
