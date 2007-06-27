@@ -28,6 +28,11 @@ public class TlsOuputStream extends OutputStream
         this.write(buf, 0, 1);
     }
 
+    /** @deprecated Use 'close' instead */
+    public void cose() throws IOException
+    {
+        handler.close();
+    }
 
     public void close() throws IOException
     {
