@@ -25,6 +25,21 @@ public class CertificationRequest
     protected AlgorithmIdentifier sigAlgId = null;
     protected DERBitString sigBits = null;
 
+    public static CertificationRequest getInstance(Object o)
+    {
+        if (o instanceof CertificationRequest)
+        {
+            return (CertificationRequest)o;
+        }
+
+        if (o instanceof ASN1Sequence)
+        {
+            return new CertificationRequest((ASN1Sequence)o);
+        }
+
+        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
     protected CertificationRequest()
     {
     }
