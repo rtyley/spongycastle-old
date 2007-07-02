@@ -8,7 +8,7 @@ import java.io.OutputStream;
  */
 public class TlsOuputStream extends OutputStream
 {
-
+    private byte[] buf = new byte[1];
     private TlsProtocolHandler handler;
 
     protected TlsOuputStream(TlsProtocolHandler handler)
@@ -23,7 +23,6 @@ public class TlsOuputStream extends OutputStream
 
     public void write(int arg0) throws IOException
     {
-        byte[] buf = new byte[1];
         buf[0] = (byte)arg0;
         this.write(buf, 0, 1);
     }
