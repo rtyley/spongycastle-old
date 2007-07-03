@@ -1019,18 +1019,30 @@ public class TlsProtocolHandler
 
     }
 
-    /**
-     * @return An OutputStream which can be used to send data.
-     */
+    /** @deprecated use 'getOutputStream' instead */
     public TlsOuputStream getTlsOuputStream()
     {
         return this.tlsOutputStream;
     }
 
     /**
+     * @return An OutputStream which can be used to send data.
+     */
+    public OutputStream getOutputStream()
+    {
+        return this.tlsOutputStream;
+    }
+
+    /** @deprecated use 'getInputStream' instead */
+    public TlsInputStream getTlsInputStream()
+    {
+        return this.tlsInputStream;
+    }
+
+    /**
      * @return An InputStream which can be used to read data.
      */
-    public TlsInputStream getTlsInputStream()
+    public InputStream getInputStream()
     {
         return this.tlsInputStream;
     }
