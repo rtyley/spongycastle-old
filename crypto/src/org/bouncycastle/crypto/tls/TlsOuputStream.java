@@ -11,7 +11,7 @@ public class TlsOuputStream extends OutputStream
     private byte[] buf = new byte[1];
     private TlsProtocolHandler handler;
 
-    protected TlsOuputStream(TlsProtocolHandler handler)
+    TlsOuputStream(TlsProtocolHandler handler)
     {
         this.handler = handler;
     }
