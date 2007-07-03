@@ -11,8 +11,8 @@ public class TlsInputStream
 {
     private byte[] buf = new byte[1];
     private TlsProtocolHandler handler = null;
-    
-    protected TlsInputStream (TlsProtocolHandler handler)
+
+    TlsInputStream (TlsProtocolHandler handler)
     {
         this.handler = handler;
     }
