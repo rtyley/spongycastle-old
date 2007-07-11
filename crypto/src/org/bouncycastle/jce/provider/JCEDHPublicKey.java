@@ -42,7 +42,7 @@ public class JCEDHPublicKey
         DHPublicKeyParameters  params)
     {
         this.y = params.getY();
-        this.dhSpec = new DHParameterSpec(params.getParameters().getP(), params.getParameters().getG(), params.getParameters().getJ());
+        this.dhSpec = new DHParameterSpec(params.getParameters().getP(), params.getParameters().getG(), params.getParameters().getL());
     }
 
     JCEDHPublicKey(
