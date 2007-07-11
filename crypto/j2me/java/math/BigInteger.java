@@ -1188,7 +1188,7 @@ public class BigInteger
             return false;
 
         // Try to reduce the penalty for really small numbers
-        int numLists = Math.min(n.bitLength() - 2, primeLists.length);
+        int numLists = Math.min(n.bitLength() - 1, primeLists.length);
 
         for (int i = 0; i < numLists; ++i)
         {
@@ -1211,39 +1211,42 @@ public class BigInteger
         // let n = 1 + 2^kq
         //
         BigInteger nMinusOne = n.subtract(ONE);
-        BigInteger q = nMinusOne;
-        int k = q.getLowestSetBit();
-        q = q.shiftRight(k);
+        int s = nMinusOne.getLowestSetBit();
+        BigInteger r = nMinusOne.shiftRight(s);
 
-        Random rnd = new Random();
+        Random random = new Random();
         do
         {
-            BigInteger x;
+            BigInteger a;
 
             do
             {
-                x = new BigInteger(n.bitLength(), rnd);
+                a = new BigInteger(n.bitLength(), random);
             }
-            // NB: Spec says 0 < x < n, but 1 is trivial
-            while (x.compareTo(ONE) <= 0 || x.compareTo(n) >= 0);
+            while (a.compareTo(ONE) <= 0 || a.compareTo(nMinusOne) >= 0);
 
-            BigInteger y = x.modPow(q, n);
+            BigInteger y = a.modPow(r, n);
 
             if (!y.equals(ONE))
             {
-                // check already = x.ModPow(q << 0, n)
-                int r = 0;
+                int j = 0;
                 while (!y.equals(nMinusOne))
                 {
-                    if (++r == k)
+                    if (++j == s)
+                    {
                         return false;
+                    }
 
-                    // check becomes a.ModPow(q << r, n)
                     y = y.modPow(TWO, n);
+
+                    if (y.equals(ONE))
+                    {
+                        return false;
+                    }
                 }
             }
 
-            certainty -= 2; // composites pass for only 1/4 possible 'x'
+            certainty -= 2; // composites pass for only 1/4 possible 'a'
         }
         while (certainty > 0);
 
