@@ -1,8 +1,5 @@
 package org.bouncycastle.crypto.test;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.agreement.DHAgreement;
 import org.bouncycastle.crypto.agreement.DHBasicAgreement;
@@ -15,6 +12,9 @@ import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 public class DHTest
     extends SimpleTest
@@ -247,7 +247,7 @@ public class DHTest
 
         DHParameters                dhParams = pGen.generateParameters();
 
-        if (dhParams.getJ() != 0)
+        if (dhParams.getL() != 0)
         {
             fail("DHParametersGenerator failed to set J to 0 in generated DHParameters");
         }

@@ -10,7 +10,8 @@ public class DHParameters
     private BigInteger              g;
     private BigInteger              p;
     private BigInteger              q;
-    private int                     j;
+    private BigInteger              j;
+    private int                     l;
     private DHValidationParameters  validation;
 
     public DHParameters(
@@ -35,24 +36,36 @@ public class DHParameters
         BigInteger  p,
         BigInteger  g,
         BigInteger  q,
-        int         j)
+        int         l)
     {
         this.g = g;
         this.p = p;
         this.q = q;
-        this.j = j;
+        this.l = l;
     }   
 
     public DHParameters(
         BigInteger              p,
         BigInteger              g,
         BigInteger              q,
-        int                     j,
+        BigInteger              j,
+        DHValidationParameters  validation)
+    {
+        this(p, g, q, 0, j, validation);
+    }
+
+    public DHParameters(
+        BigInteger              p,
+        BigInteger              g,
+        BigInteger              q,
+        int                     l,
+        BigInteger              j,
         DHValidationParameters  validation)
     {
         this.g = g;
         this.p = p;
         this.q = q;
+        this.l = l;
         this.j = j;
         this.validation = validation;
     }
@@ -73,13 +86,23 @@ public class DHParameters
     }
 
     /**
-     * Return the private value length in bits - if set, zero otherwise (use bitLength(P) - 1).
-     * 
-     * @return the private value length in bits, zero otherwise.
+     * Return the subgroup factor J.
+     *
+     * @return subgroup factor
      */
-    public int getJ()
+    public BigInteger getJ()
     {
         return j;
+    }
+
+    /**
+     * Return the private value length in bits - if set, zero otherwise (use bitLength(P) - 1).
+     *
+     * @return the private value length in bits, zero otherwise.
+     */
+    public int getL()
+    {
+        return l;
     }
 
     public DHValidationParameters getValidationParameters()
@@ -111,12 +134,27 @@ public class DHParameters
                 return false;
             }
         }
-        
-        return (j == pm.getJ()) && pm.getP().equals(p) && pm.getG().equals(g);
+
+        if (this.getJ() != null)
+        {
+            if (!this.getJ().equals(pm.getJ()))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (pm.getJ() != null)
+            {
+                return false;
+            }
+        }
+
+        return (l == pm.getL()) && pm.getP().equals(p) && pm.getG().equals(g);
     }
     
     public int hashCode()
     {
-        return getJ() ^ getP().hashCode() ^ getG().hashCode() ^ (getQ() != null ? getQ().hashCode() : 0);
+        return getL() ^ getP().hashCode() ^ getG().hashCode() ^ (getQ() != null ? getQ().hashCode() : 0);
     }
 }

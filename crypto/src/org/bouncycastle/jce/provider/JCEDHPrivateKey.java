@@ -70,7 +70,7 @@ public class JCEDHPrivateKey
         DHPrivateKeyParameters  params)
     {
         this.x = params.getX();
-        this.dhSpec = new DHParameterSpec(params.getParameters().getP(), params.getParameters().getG(), params.getParameters().getJ());
+        this.dhSpec = new DHParameterSpec(params.getParameters().getP(), params.getParameters().getG(), params.getParameters().getL());
     }
 
     public String getAlgorithm()
