@@ -7,10 +7,13 @@ import java.math.BigInteger;
 public class DHParameters
     implements CipherParameters
 {
+    private static final int DEFAULT_MINIMUM_LENGTH = 160;
+
     private BigInteger              g;
     private BigInteger              p;
     private BigInteger              q;
     private BigInteger              j;
+    private int                     m = DEFAULT_MINIMUM_LENGTH;
     private int                     l;
     private DHValidationParameters  validation;
 
@@ -18,8 +21,7 @@ public class DHParameters
         BigInteger  p,
         BigInteger  g)
     {
-        this.g = g;
-        this.p = p;
+        this(p, g, null, DEFAULT_MINIMUM_LENGTH, 0, null, null);
     }
 
     public DHParameters(
@@ -27,9 +29,7 @@ public class DHParameters
         BigInteger  g,
         BigInteger  q)
     {
-        this.g = g;
-        this.p = p;
-        this.q = q;
+        this(p, g, q, DEFAULT_MINIMUM_LENGTH, 0, null, null);
     }
 
     public DHParameters(
@@ -38,33 +38,47 @@ public class DHParameters
         BigInteger  q,
         int         l)
     {
-        this.g = g;
-        this.p = p;
-        this.q = q;
-        this.l = l;
+        this(p, g, q, DEFAULT_MINIMUM_LENGTH, l, null, null);
     }   
 
     public DHParameters(
-        BigInteger              p,
-        BigInteger              g,
-        BigInteger              q,
-        BigInteger              j,
-        DHValidationParameters  validation)
+        BigInteger  p,
+        BigInteger  g,
+        BigInteger  q,
+        int         m,
+        int         l)
     {
-        this(p, g, q, 0, j, validation);
+        this(p, g, q, m, l, null, null);
     }
 
     public DHParameters(
         BigInteger              p,
         BigInteger              g,
         BigInteger              q,
+        BigInteger              j,
+        DHValidationParameters  validation)
+    {
+        this(p, g, q, DEFAULT_MINIMUM_LENGTH, 0, j, validation);
+    }
+
+    public DHParameters(
+        BigInteger              p,
+        BigInteger              g,
+        BigInteger              q,
+        int                     m,
         int                     l,
         BigInteger              j,
         DHValidationParameters  validation)
     {
+        if (l != 0 && m > l)
+        {
+            throw new IllegalArgumentException("l value must be greater than m value if provided");
+        }
+
         this.g = g;
         this.p = p;
         this.q = q;
+        this.m = m;
         this.l = l;
         this.j = j;
         this.validation = validation;
@@ -93,6 +107,16 @@ public class DHParameters
     public BigInteger getJ()
     {
         return j;
+    }
+
+    /**
+     * Return the minimum length of the private value.
+     *
+     * @return the minimum length of the private value in bits.
+     */
+    public int getM()
+    {
+        return m;
     }
 
     /**
