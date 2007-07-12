@@ -47,30 +47,47 @@ public class DHParametersGenerator
         BigInteger p = safePrimes[0];
         BigInteger q = safePrimes[1];
 
+        BigInteger pMinusTwo = p.subtract(TWO);
         BigInteger g;
-        int qLength = size - 1;
 
         //
         // calculate the generator g - the advantage of using the 2q+1 
         // approach is that we know the prime factorisation of (p - 1)...
         //
-        for (;;)
+
+        // Handbook of Applied Cryptography 4.86
+        do
         {
-            g = new BigInteger(qLength, random);
-
-            if (g.modPow(TWO, p).equals(ONE))
-            {
-                continue;
-            }
-
-            if (g.modPow(q, p).equals(ONE))
-            {
-                continue;
-            }
-
-            break;
+            g = createInRange(TWO, pMinusTwo, random);
         }
+        while (g.modPow(TWO, p).equals(ONE)
+            || g.modPow(q, p).equals(ONE));
+
+/*
+        // RFC 2631 2.1.1 (and see Handbook of Applied Cryptography 4.81)
+        do
+        {
+            BigInteger h = createInRange(TWO, pMinusTwo, random);
+
+            g = h.modPow(TWO, p);
+        }
+        while (g.equals(ONE));
+*/
 
         return new DHParameters(p, g, q, TWO, null);
+    }
+
+    private static BigInteger createInRange(
+        BigInteger      min,
+        BigInteger      max,
+        SecureRandom    random)
+    {
+        BigInteger x;
+        do
+        {
+            x = new BigInteger(max.bitLength(), random);
+        }
+        while (x.compareTo(min) < 0 || x.compareTo(max) > 0);
+        return x;
     }
 }
