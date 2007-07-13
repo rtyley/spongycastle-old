@@ -11,9 +11,6 @@ public class ElGamalParametersGenerator
     private int             certainty;
     private SecureRandom    random;
 
-    private static final BigInteger ONE = BigInteger.valueOf(1);
-    private static final BigInteger TWO = BigInteger.valueOf(2);
-
     public void init(
         int             size,
         int             certainty,
@@ -39,30 +36,7 @@ public class ElGamalParametersGenerator
 
         BigInteger p = safePrimes[0];
         BigInteger q = safePrimes[1];
-
-        BigInteger g;
-        int qLength = size - 1;
-
-        //
-        // calculate the generator g - the advantage of using the 2q+1 
-        // approach is that we know the prime factorisation of (p - 1)...
-        //
-        for (;;)
-        {
-            g = new BigInteger(qLength, random);
-
-            if (g.modPow(TWO, p).equals(ONE))
-            {
-                continue;
-            }
-
-            if (g.modPow(q, p).equals(ONE))
-            {
-                continue;
-            }
-
-            break;
-        }
+        BigInteger g = DHParametersHelper.selectGenerator(p, q, random);
 
         return new ElGamalParameters(p, g);
     }

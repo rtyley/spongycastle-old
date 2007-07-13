@@ -5,7 +5,8 @@ import java.security.SecureRandom;
 
 class DHParametersHelper
 {
-    private static BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger TWO = BigInteger.valueOf(2);
 
     // Finds a pair of prime BigInteger's {p, q: p = 2q + 1}
     static BigInteger[] generateSafePrimes(
@@ -31,5 +32,51 @@ class DHParametersHelper
         }
 
         return new BigInteger[] { p, q };
+    }
+
+    // Select a high order element of the multiplicative group Zp*
+    // p and q must be s.t. p = 2*q + 1, where p and q are prime
+    static BigInteger selectGenerator(
+        BigInteger      p,
+        BigInteger      q,
+        SecureRandom    random)
+    {
+        BigInteger pMinusTwo = p.subtract(TWO);
+        BigInteger g;
+
+        // Handbook of Applied Cryptography 4.86
+        do
+        {
+            g = createInRange(TWO, pMinusTwo, random);
+        }
+        while (g.modPow(TWO, p).equals(ONE)
+            || g.modPow(q, p).equals(ONE));
+
+/*
+        // RFC 2631 2.1.1 (and see Handbook of Applied Cryptography 4.81)
+        do
+        {
+            BigInteger h = createInRange(TWO, pMinusTwo, random);
+
+            g = h.modPow(TWO, p);
+        }
+        while (g.equals(ONE));
+*/
+
+        return g;
+    }
+
+    private static BigInteger createInRange(
+        BigInteger      min,
+        BigInteger      max,
+        SecureRandom    random)
+    {
+        BigInteger x;
+        do
+        {
+            x = new BigInteger(max.bitLength(), random);
+        }
+        while (x.compareTo(min) < 0 || x.compareTo(max) > 0);
+        return x;
     }
 }
