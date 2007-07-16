@@ -3,10 +3,9 @@ package org.bouncycastle.cms.test;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -39,8 +38,10 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class SignedDataTest
     extends TestCase
@@ -318,7 +319,44 @@ public class SignedDataTest
     {
         verifySignatures(s, null);
     }
-    
+
+    public void testDetachedVerification()
+        throws Exception
+    {
+        byte[]              data = "Hello World!".getBytes();
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray(data);
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_MD5);
+
+        gen.addCertificatesAndCRLs(certs);
+
+        CMSSignedData s = gen.generate(msg, "BC");
+
+        MessageDigest sha1 = MessageDigest.getInstance("SHA1", "BC");
+        MessageDigest md5 = MessageDigest.getInstance("MD5", "BC");
+        Map hashes = new HashMap();
+        byte[] sha1Hash = sha1.digest(data);
+        byte[] md5Hash = md5.digest(data);
+
+        hashes.put("SHA1", sha1Hash);
+        hashes.put("MD5", md5Hash);
+
+        s = new CMSSignedData(hashes, s.getEncoded());
+
+        verifySignatures(s, null);
+    }
+
     public void testSHA1AndMD5WithRSAEncapsulatedRepeated()
         throws Exception
     {

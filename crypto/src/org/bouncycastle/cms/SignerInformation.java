@@ -52,8 +52,8 @@ public class SignerInformation
     private CMSProcessable          content;
     private byte[]                  signature;
     private DERObjectIdentifier     contentType;
-    private byte[]                  _digest;
-    private byte[]                  _resultDigest;
+    private byte[]                  hash;
+    private byte[]                  resultDigest;
 
     SignerInformation(
         SignerInfo          info,
@@ -100,7 +100,7 @@ public class SignerInformation
         this.signature = info.getEncryptedDigest().getOctets();
 
         this.content = content;
-        _digest = digest;
+        hash = digest;
     }
 
     private byte[] encodeObj(
@@ -161,12 +161,12 @@ public class SignerInformation
      */
     public byte[] getContentDigest()
     {
-        if (_resultDigest == null)
+        if (resultDigest == null)
         {
             throw new IllegalStateException("method can only be called after verify.");
         }
         
-        return (byte[])_resultDigest.clone();
+        return (byte[])resultDigest.clone();
     }
     
     /**
@@ -273,14 +273,14 @@ public class SignerInformation
                     content.write(
                             new CMSSignedDataGenerator.DigOutputStream(digest));
     
-                    _resultDigest = digest.digest();
+                    resultDigest = digest.digest();
                 }
                 else
                 {
-                    _resultDigest = _digest;
+                    resultDigest = hash;
                     
                     // need to decrypt signature and check message bytes
-                    return verifyDigest(_digest, key, this.getSignature(), sigProvider);
+                    return verifyDigest(hash, key, this.getSignature(), sigProvider);
                 }
             }
             else
@@ -296,10 +296,10 @@ public class SignerInformation
                 }
                 else
                 {
-                    hash = _digest;
+                    hash = this.hash;
                 }
 
-                _resultDigest = hash;
+                resultDigest = hash;
                 
                 Attribute dig = signedAttrTable.get(
                                 CMSAttributes.messageDigest);
@@ -372,7 +372,7 @@ public class SignerInformation
     
     private DigestInfo derDecode(
         byte[]  encoding)
-        throws IOException
+        throws IOException, CMSException
     {
         if (encoding[0] != (DERTags.CONSTRUCTED | DERTags.SEQUENCE))
         {
@@ -381,7 +381,16 @@ public class SignerInformation
         
         ASN1InputStream         aIn = new ASN1InputStream(encoding);
 
-        return new DigestInfo((ASN1Sequence)aIn.readObject());
+        DigestInfo digInfo = new DigestInfo((ASN1Sequence)aIn.readObject());
+
+        // length check to avoid Bleichenbacher vulnerability
+
+        if (digInfo.getEncoded().length != encoding.length)
+        {
+            throw new CMSException("malformed RSA signature");
+        }
+
+        return digInfo;
     }
     
     private boolean verifyDigest(

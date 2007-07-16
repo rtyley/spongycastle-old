@@ -38,7 +38,7 @@ public class DHParameters
         BigInteger  q,
         int         l)
     {
-        this(p, g, q, DEFAULT_MINIMUM_LENGTH, l, null, null);
+        this(p, g, q, l, l, null, null);
     }   
 
     public DHParameters(
@@ -159,26 +159,11 @@ public class DHParameters
             }
         }
 
-        if (this.getJ() != null)
-        {
-            if (!this.getJ().equals(pm.getJ()))
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if (pm.getJ() != null)
-            {
-                return false;
-            }
-        }
-
-        return (l == pm.getL()) && pm.getP().equals(p) && pm.getG().equals(g);
+        return pm.getP().equals(p) && pm.getG().equals(g);
     }
     
     public int hashCode()
     {
-        return getL() ^ getP().hashCode() ^ getG().hashCode() ^ (getQ() != null ? getQ().hashCode() : 0);
+        return getP().hashCode() ^ getG().hashCode() ^ (getQ() != null ? getQ().hashCode() : 0);
     }
 }

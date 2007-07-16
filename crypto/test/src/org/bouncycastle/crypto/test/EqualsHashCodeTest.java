@@ -102,12 +102,12 @@ public class EqualsHashCodeTest
         doTest(pv1, pv2, pv3);
 
         DHParameters                pr1 = pu1.getParameters();
-        DHParameters                pr2 = new DHParameters(pr1.getP(), pr1.getG(), pr1.getQ(), pr1.getL(), pr1.getJ(), pr1.getValidationParameters());
-        DHParameters                pr3 = new DHParameters(pr1.getG(), pr1.getP(), pr1.getQ(), pr1.getL(), pr1.getJ(), pr1.getValidationParameters());
+        DHParameters                pr2 = new DHParameters(pr1.getP(), pr1.getG(), pr1.getQ(), pr1.getM(), pr1.getL(), pr1.getJ(), pr1.getValidationParameters());
+        DHParameters                pr3 = new DHParameters(pr1.getG(), pr1.getP(), pr1.getQ(), pr1.getM(), pr1.getL(), pr1.getJ(), pr1.getValidationParameters());
 
         doTest(pr1, pr2, pr3);
 
-        pr3 = new DHParameters(pr1.getG(), pr1.getP(), null, pr1.getL(), pr1.getJ(), pr1.getValidationParameters());
+        pr3 = new DHParameters(pr1.getG(), pr1.getP(), null, pr1.getM(), pr1.getL(), pr1.getJ(), pr1.getValidationParameters());
 
         doTest(pr1, pr2, pr3);        
 
