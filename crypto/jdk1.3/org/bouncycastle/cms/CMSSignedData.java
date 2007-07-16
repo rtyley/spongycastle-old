@@ -28,6 +28,7 @@ import org.bouncycastle.jce.cert.CertStoreException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -69,6 +70,7 @@ public class CMSSignedData
     X509Store               attributeStore;
     X509Store               certificateStore;
     X509Store               crlStore;
+    private Map             hashes;
 
     private CMSSignedData(
         CMSSignedData   c)
@@ -96,7 +98,24 @@ public class CMSSignedData
     }
 
     /**
-     * base constructor
+     * Content with detached signature, digest precomputed
+     * <p>
+     * Note: this assumes all signers for the data that will be verified against have
+     * used the same hash algorithm.
+     * </p>
+     * @param hashes a map of precomputed digests for content indexed by name of hash.
+     * @param sigBlock the signature object.
+     */
+    public CMSSignedData(
+        Map     hashes,
+        byte[]  sigBlock)
+        throws CMSException
+    {
+        this(hashes, CMSUtils.readContentInfo(sigBlock));
+    }
+
+    /**
+     * base constructor - content with detached signature.
      *
      * @param signedContent the content that was signed.
      * @param sigData the signature object.
@@ -124,6 +143,15 @@ public class CMSSignedData
         ContentInfo     sigData)
     {
         this.signedContent = signedContent;
+        this.contentInfo = sigData;
+        this.signedData = SignedData.getInstance(contentInfo.getContent());
+    }
+
+    public CMSSignedData(
+        Map             hashes,
+        ContentInfo     sigData)
+    {
+        this.hashes = hashes;
         this.contentInfo = sigData;
         this.signedData = SignedData.getInstance(contentInfo.getContent());
     }
@@ -171,7 +199,19 @@ public class CMSSignedData
 
             for (int i = 0; i != s.size(); i++)
             {
-                signerInfos.add(new SignerInformation(SignerInfo.getInstance(s.getObjectAt(i)), signedData.getEncapContentInfo().getContentType(), signedContent, null));
+                if (hashes == null)
+                {
+                    signerInfos.add(new SignerInformation(SignerInfo.getInstance(s.getObjectAt(i)), signedData.getEncapContentInfo().getContentType(), signedContent, null));
+                }
+                else
+                {
+                    SignerInfo info = SignerInfo.getInstance(s.getObjectAt(i));
+                    String     digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
+
+                    byte[] hash = (byte[])hashes.get(digestName);
+
+                    signerInfos.add(new SignerInformation(info, signedData.getEncapContentInfo().getContentType(), null, hash));
+                }
             }
 
             signerInfoStore = new SignerInformationStore(signerInfos);
@@ -349,7 +389,7 @@ public class CMSSignedData
             }
             catch (IOException e)
             {
-                throw new RuntimeException("encoding error: " + e);
+                throw new RuntimeException("encoding error.", e);
             }
 
             digestAlgs.add(digAlgId);
