@@ -98,11 +98,8 @@ public class CMSSignedData
     }
 
     /**
-     * Content with detached signature, digest precomputed
-     * <p>
-     * Note: this assumes all signers for the data that will be verified against have
-     * used the same hash algorithm.
-     * </p>
+     * Content with detached signature, digests precomputed
+     *
      * @param hashes a map of precomputed digests for content indexed by name of hash.
      * @param sigBlock the signature object.
      */
