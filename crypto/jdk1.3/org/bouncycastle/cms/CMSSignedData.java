@@ -203,9 +203,7 @@ public class CMSSignedData
                 else
                 {
                     SignerInfo info = SignerInfo.getInstance(s.getObjectAt(i));
-                    String     digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
-
-                    byte[] hash = (byte[])hashes.get(digestName);
+                    byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getObjectId().getId());
 
                     signerInfos.add(new SignerInformation(info, signedData.getEncapContentInfo().getContentType(), null, hash));
                 }

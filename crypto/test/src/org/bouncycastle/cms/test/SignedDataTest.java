@@ -349,8 +349,8 @@ public class SignedDataTest
         byte[] sha1Hash = sha1.digest(data);
         byte[] md5Hash = md5.digest(data);
 
-        hashes.put("SHA1", sha1Hash);
-        hashes.put("MD5", md5Hash);
+        hashes.put(CMSSignedDataGenerator.DIGEST_SHA1, sha1Hash);
+        hashes.put(CMSSignedDataGenerator.DIGEST_MD5, md5Hash);
 
         s = new CMSSignedData(hashes, s.getEncoded());
 
