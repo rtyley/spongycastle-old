@@ -8,15 +8,18 @@ import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
+import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
+import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
+import org.bouncycastle.mail.smime.SMIMEUtil;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -181,7 +184,37 @@ public class SMIMEMiscTest
     
         verifySigners(certs, s.getSignerInfos());
     }
-    
+
+    public void testQuotePrintableSigPreservation()
+        throws Exception
+    {
+        MimeMessage msg = new MimeMessage((Session)null, getClass().getResourceAsStream("qp-soft-break.eml"));
+
+        SMIMEEnvelopedGenerator  encGen = new SMIMEEnvelopedGenerator();
+
+        encGen.addKeyTransRecipient(origCert);
+
+        MimeBodyPart   mp = encGen.generate(msg, SMIMEEnvelopedGenerator.AES128_CBC, "BC");
+
+        SMIMEEnveloped       env = new SMIMEEnveloped(mp);
+        RecipientInformation ri = (RecipientInformation)env.getRecipientInfos().getRecipients().iterator().next();
+        SMIMESigned          s = new SMIMESigned((MimeMultipart)SMIMEUtil.toMimeBodyPart(ri.getContentStream(origKP.getPrivate(), "BC")).getContent());
+        Collection           c = s.getSignerInfos().getSigners();
+        Iterator             it = c.iterator();
+        CertStore            certs = s.getCertificatesAndCRLs("Collection", "BC");
+
+        while (it.hasNext())
+        {
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certs.getCertificates(signer.getSID());
+
+            Iterator        certIt = certCollection.iterator();
+            X509Certificate cert = (X509Certificate)certIt.next();
+
+            assertEquals(true, signer.verify(cert, "BC"));
+        }
+    }
+
     public void testSHA256WithRSAParserCompressed()
         throws Exception
     {
