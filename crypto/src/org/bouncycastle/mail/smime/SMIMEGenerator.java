@@ -6,6 +6,7 @@ import org.bouncycastle.util.Strings;
 import javax.crypto.KeyGenerator;
 import javax.mail.Header;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -119,20 +120,30 @@ public class SMIMEGenerator
         //
         try
         {
-            
-            message.removeHeader("Message-Id");      
+            message.removeHeader("Message-Id");
             message.removeHeader("Mime-Version");
-            
+
+            // JavaMail has a habit of reparsing some content types, if the bodypart is
+            // a multipart it might be signed, we rebuild the body part using the raw input stream for the message.
+            try
+            {
+                if (message.getContent() instanceof Multipart)
+                {
+                    content.setContent(message.getRawInputStream(), message.getContentType());
+
+                    extractHeaders(content, message);
+                    
+                    return content;
+                }
+            }
+            catch (MessagingException e)
+            {
+                // fall back to usual method below
+            }
+       
             content.setContent(message.getContent(), message.getContentType());
 
-            Enumeration e = message.getAllHeaders();
-
-            while (e.hasMoreElements())
-            {
-                Header  hdr =(Header)e.nextElement();
-
-                content.setHeader(hdr.getName(), hdr.getValue());
-            }
+            extractHeaders(content, message);
         }
         catch (MessagingException e)
         {
@@ -144,6 +155,19 @@ public class SMIMEGenerator
         }
 
         return content;
+    }
+
+    private void extractHeaders(MimeBodyPart content, MimeMessage message)
+        throws MessagingException
+    {
+        Enumeration e = message.getAllHeaders();
+
+        while (e.hasMoreElements())
+        {
+            Header hdr =(Header)e.nextElement();
+
+            content.setHeader(hdr.getName(), hdr.getValue());
+        }
     }
 
     protected KeyGenerator createSymmetricKeyGenerator(
