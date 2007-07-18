@@ -177,8 +177,8 @@ public interface PKCSObjectIdentifiers
      * id-aa-encrypKeyPref OBJECT IDENTIFIER ::= {id-aa 11}
      * 
      */
-    static DERObjectIdentifier id_aa_encrypKeyPref = new DERObjectIdentifier(id_aa + ".11");
-    static DERObjectIdentifier id_aa_signingCertificate = new DERObjectIdentifier(id_aa + ".12");
+    static final DERObjectIdentifier id_aa_encrypKeyPref = new DERObjectIdentifier(id_aa + ".11");
+    static final DERObjectIdentifier id_aa_signingCertificate = new DERObjectIdentifier(id_aa + ".12");
 
     static final DERObjectIdentifier id_aa_contentIdentifier = new DERObjectIdentifier(id_aa + ".7"); // See RFC 2634
 
