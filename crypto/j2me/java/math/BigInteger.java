@@ -1558,7 +1558,11 @@ public class BigInteger
             multiplyMonty(yAccum, yVal, zVal, m.magnitude, mQ);
         }
 
-        return new BigInteger(1, yVal);
+        BigInteger result = new BigInteger(1, yVal);
+
+        return exponent.sign > 0
+            ?   result
+            :   result.modInverse(m);
     }
 
     /**
