@@ -445,7 +445,12 @@ public abstract class ECFieldElement
 //        {
 //            return "F2m";
 //        }
-//        
+//
+//        public int getFieldSize()
+//        {
+//            return m;
+//        }
+//
 //        /**
 //         * Checks, if the ECFieldElements <code>a</code> and <code>b</code>
 //         * are elements of the same field <code>F<sub>2<sup>m</sup></sub></code>
@@ -1055,7 +1060,8 @@ public abstract class ECFieldElement
             IntArray g2z = new IntArray(t);
 
             // while u != 0
-            while (uz.getUsedLength() > 0)
+            while (!uz.isZero())
+//            while (uz.getUsedLength() > 0)
 //            while (uz.bitLength() > 1)
             {
                 // j := deg(u(z)) - deg(v(z))
