@@ -91,6 +91,12 @@ class IntArray
         }
     }
 
+    public boolean isZero()
+    {
+        return m_ints.length == 0
+            || (m_ints[0] == 0 && getUsedLength() == 0);
+    }
+
     public int getUsedLength()
     {
         int highestIntPos;
