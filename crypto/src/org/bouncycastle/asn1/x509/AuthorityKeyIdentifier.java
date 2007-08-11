@@ -149,6 +149,17 @@ public class AuthorityKeyIdentifier
     }
 
     /**
+      * create an AuthorityKeyIdentifier with a precomupted key identifier
+      */
+     public AuthorityKeyIdentifier(
+         byte[]                  keyIdentifier)
+     {
+         this.keyidentifier = new DEROctetString(keyIdentifier);
+         this.certissuer = null;
+         this.certserno = null;
+     }
+
+    /**
      * create an AuthorityKeyIdentifier with a precomupted key identifier
      * and the GeneralNames tag and the serial number provided as well.
      */
