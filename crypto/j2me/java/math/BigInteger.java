@@ -870,29 +870,28 @@ public class BigInteger
             yIndx++;
         }
 
-        if ((x.length - xIndx) < (y.length - yIndx))
-        {
-            return -1;
-        }
+        return compareNoLeadingZeroes(xIndx, x, yIndx, y);
+    }
 
-        if ((x.length - xIndx) > (y.length - yIndx))
+    private int compareNoLeadingZeroes(int xIndx, int[] x, int yIndx, int[] y)
+    {
+        int diff = (x.length - y.length) - (xIndx - yIndx);
+
+        if (diff != 0)
         {
-            return 1;
+            return diff < 0 ? -1 : 1;
         }
 
         // lengths of magnitudes the same, test the magnitude values
 
         while (xIndx < x.length)
         {
-            long v1 = (long)(x[xIndx++]) & IMASK;
-            long v2 = (long)(y[yIndx++]) & IMASK;
-            if (v1 < v2)
+            int v1 = x[xIndx++];
+            int v2 = y[yIndx++];
+
+            if (v1 != v2)
             {
-                return -1;
-            }
-            if (v1 > v2)
-            {
-                return 1;
+                return (v1 ^ Integer.MIN_VALUE) < (v2 ^ Integer.MIN_VALUE) ? -1 : 1;
             }
         }
 
@@ -981,13 +980,13 @@ public class BigInteger
 
                     if (shift == 0)
                     {
-                        c = shiftRightOne(cStart, c);
-                        iCount = shiftRightOne(iCountStart, iCount);
+                        c = shiftRightOneInPlace(cStart, c);
+                        iCount = shiftRightOneInPlace(iCountStart, iCount);
                     }
                     else
                     {
-                        c = shiftRight(cStart, c, shift);
-                        iCount = shiftRight(iCountStart, iCount, shift);
+                        c = shiftRightInPlace(cStart, c, shift);
+                        iCount = shiftRightInPlace(iCountStart, iCount, shift);
                     }
 
                     if (c[cStart] == 0)
@@ -1908,81 +1907,91 @@ public class BigInteger
      */
     private int[] remainder(int[] x, int[] y)
     {
-        int xyCmp = compareTo(0, x, 0, y);
+        int xStart = 0;
+        while (xStart < x.length && x[xStart] == 0)
+        {
+            ++xStart;
+        }
+
+        int yStart = 0;
+        while (yStart < y.length && y[yStart] == 0)
+        {
+            ++yStart;
+        }
+
+        int xyCmp = compareNoLeadingZeroes(xStart, x, yStart, y);
 
         if (xyCmp > 0)
         {
-            int[] c;
-            int shift = bitLength(0, x) - bitLength(0, y);
+            int yBitLength = bitLength(yStart, y);
+            int xBitLength = bitLength(xStart, x);
+            int shift = xBitLength - yBitLength;
 
-            if (shift > 1)
+            int[] c;
+            int cStart = 0;
+            int cBitLength = yBitLength;
+            if (shift > 0)
             {
-                c = shiftLeft(y, shift - 1);
+                c = shiftLeft(y, shift);
+                cBitLength += shift;
             }
             else
             {
-                c = new int[x.length];
-
-                System.arraycopy(y, 0, c, c.length - y.length, y.length);
+                int len = y.length - yStart; 
+                c = new int[len];
+                System.arraycopy(y, yStart, c, 0, len);
             }
 
-            subtract(0, x, 0, c);
-
-            int xStart = 0;
-            int cStart = 0;
-
-            for (; ; )
+            for (;;)
             {
-                int cmp = compareTo(xStart, x, cStart, c);
-
-                while (cmp >= 0)
+                if (cBitLength < xBitLength
+                    || compareNoLeadingZeroes(xStart, x, cStart, c) >= 0)
                 {
                     subtract(xStart, x, cStart, c);
-                    cmp = compareTo(xStart, x, cStart, c);
+
+                    while (x[xStart] == 0)
+                    {
+                        if (++xStart == x.length)
+                        {
+                            return x;
+                        }
+                    }
+
+                    xyCmp = compareNoLeadingZeroes(xStart, x, yStart, y);
+
+                    if (xyCmp <= 0)
+                    {
+                        break;
+                    }
+
+                    //xBitLength = bitLength(xStart, x);
+                    xBitLength = 32 * (x.length - xStart - 1) + bitLen(x[xStart]);
                 }
 
-                xyCmp = compareTo(xStart, x, 0, y);
+                shift = cBitLength - xBitLength;
 
-                if (xyCmp > 0)
+                if (shift < 2)
                 {
-                    if (x[xStart] == 0)
-                    {
-                        xStart++;
-                    }
-
-                    shift = bitLength(cStart, c) - bitLength(xStart, x);
-
-                    if (shift == 0)
-                    {
-                        c = shiftRightOne(cStart, c);
-                    }
-                    else
-                    {
-                        c = shiftRight(cStart, c, shift);
-                    }
-
-                    if (c[cStart] == 0)
-                    {
-                        cStart++;
-                    }
-                }
-                else if (xyCmp == 0)
-                {
-                    for (int i = xStart; i != x.length; i++)
-                    {
-                        x[i] = 0;
-                    }
-                    break;
+                    c = shiftRightOneInPlace(cStart, c);
+                    --cBitLength;
                 }
                 else
                 {
-                    break;
+                    c = shiftRightInPlace(cStart, c, shift);
+                    cBitLength -= shift;
+                }
+
+//              cStart = c.length - ((cBitLength + 31) / 32);
+                while (c[cStart] == 0)
+                {
+                    ++cStart;
                 }
             }
         }
-        else if (xyCmp == 0)
+
+        if (xyCmp == 0)
         {
-            for (int i = 0; i != x.length; i++)
+            for (int i = xStart; i < x.length; ++i)
             {
                 x[i] = 0;
             }
@@ -2146,17 +2155,17 @@ public class BigInteger
     /**
      * do a right shift - this does it in place.
      */
-    private int[] shiftRight(int start, int[] mag, int n)
+    private int[] shiftRightInPlace(int start, int[] mag, int n)
     {
         int nInts = (n >>> 5) + start;
         int nBits = n & 0x1f;
-        int magLen = mag.length;
+        int magEnd = mag.length - 1;
 
         if (nInts != start)
         {
             int delta = (nInts - start);
 
-            for (int i = magLen - 1; i >= nInts; i--)
+            for (int i = magEnd; i >= nInts; i--)
             {
                 mag[i] = mag[i - delta];
             }
@@ -2169,9 +2178,9 @@ public class BigInteger
         if (nBits != 0)
         {
             int nBits2 = 32 - nBits;
-            int m = mag[magLen - 1];
+            int m = mag[magEnd];
 
-            for (int i = magLen - 1; i >= nInts + 1; i--)
+            for (int i = magEnd; i >= nInts + 1; i--)
             {
                 int next = mag[i - 1];
 
@@ -2188,13 +2197,13 @@ public class BigInteger
     /**
      * do a right shift by one - this does it in place.
      */
-    private int[] shiftRightOne(int start, int[] mag)
+    private int[] shiftRightOneInPlace(int start, int[] mag)
     {
-        int magLen = mag.length;
+        int magEnd = mag.length - 1;
 
-        int m = mag[magLen - 1];
+        int m = mag[magEnd];
 
-        for (int i = magLen - 1; i >= start + 1; i--)
+        for (int i = magEnd; i > start; i--)
         {
             int next = mag[i - 1];
 
@@ -2228,7 +2237,9 @@ public class BigInteger
 
         System.arraycopy(this.magnitude, 0, res, 0, res.length);
 
-        return new BigInteger(this.sign, shiftRight(0, res, n));
+        return new BigInteger(this.sign, shiftRightInPlace(0, res, n));
+
+        // TODO Port C# version's optimisations...
     }
 
     public int signum()
@@ -2241,39 +2252,25 @@ public class BigInteger
      */
     private int[] subtract(int xStart, int[] x, int yStart, int[] y)
     {
-        int iT = x.length - 1;
-        int iV = y.length - 1;
+        int iT = x.length;
+        int iV = y.length;
         long m;
         int borrow = 0;
 
         do
         {
-            m = (((long)x[iT]) & IMASK) - (((long)y[iV--]) & IMASK) + borrow;
+            m = ((long)x[--iT] & IMASK) - ((long)y[--iV] & IMASK) + borrow;
+            x[iT] = (int)m;
 
-            x[iT--] = (int)m;
+//            borrow = (m < 0) ? -1 : 0;
+            borrow = (int)(m >> 63);
+        }
+        while (iV > yStart);
 
-            if (m < 0)
-            {
-                borrow = -1;
-            }
-            else
-            {
-                borrow = 0;
-            }
-        } while (iV >= yStart);
-
-        while (iT >= xStart)
+        if (borrow != 0)
         {
-            m = (((long)x[iT]) & IMASK) + borrow;
-            x[iT--] = (int)m;
-
-            if (m < 0)
+            while (--x[--iT] == -1)
             {
-                borrow = -1;
-            }
-            else
-            {
-                break;
             }
         }
 
