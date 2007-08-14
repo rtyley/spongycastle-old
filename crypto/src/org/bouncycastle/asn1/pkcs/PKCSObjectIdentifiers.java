@@ -179,6 +179,7 @@ public interface PKCSObjectIdentifiers
      */
     static final DERObjectIdentifier id_aa_encrypKeyPref = new DERObjectIdentifier(id_aa + ".11");
     static final DERObjectIdentifier id_aa_signingCertificate = new DERObjectIdentifier(id_aa + ".12");
+    static final DERObjectIdentifier id_aa_signingCertificateV2 = new DERObjectIdentifier(id_aa + ".47");
 
     static final DERObjectIdentifier id_aa_contentIdentifier = new DERObjectIdentifier(id_aa + ".7"); // See RFC 2634
 
@@ -186,6 +187,7 @@ public interface PKCSObjectIdentifiers
      * RFC 3126
      */
     static final DERObjectIdentifier id_aa_signatureTimeStampToken = new DERObjectIdentifier(id_aa + ".14");
+    
     static final DERObjectIdentifier id_aa_ets_sigPolicyId = new DERObjectIdentifier(id_aa + ".15");
     static final DERObjectIdentifier id_aa_ets_commitmentType = new DERObjectIdentifier(id_aa + ".16");
     static final DERObjectIdentifier id_aa_ets_signerLocation = new DERObjectIdentifier(id_aa + ".17");

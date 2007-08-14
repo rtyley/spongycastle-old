@@ -50,6 +50,7 @@ class CMSSignedHelper
         encryptionAlgs.put(OIWObjectIdentifiers.dsaWithSHA1.getId(), "DSA");
         encryptionAlgs.put(PKCSObjectIdentifiers.rsaEncryption.getId(), "RSA");
         encryptionAlgs.put(PKCSObjectIdentifiers.sha1WithRSAEncryption.getId(), "RSA");
+        encryptionAlgs.put(OIWObjectIdentifiers.sha1WithRSA.getId(), "RSA");
         encryptionAlgs.put(TeleTrusTObjectIdentifiers.teleTrusTRSAsignatureAlgorithm, "RSA");
         encryptionAlgs.put(X509ObjectIdentifiers.id_ea_rsa.getId(), "RSA");
         encryptionAlgs.put(CMSSignedDataGenerator.ENCRYPTION_ECDSA, "ECDSA");

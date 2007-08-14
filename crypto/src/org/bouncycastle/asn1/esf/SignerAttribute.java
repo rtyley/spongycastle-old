@@ -15,7 +15,7 @@ public class SignerAttribute
     {
         if (o == null || o instanceof SignerAttribute)
         {
-            return (SignerAttribute)o;
+            return (SignerAttribute) o;
         }
         else if (o instanceof ASN1Sequence)
         {
@@ -30,8 +30,8 @@ public class SignerAttribute
     private SignerAttribute(
         Object o)
     {
-        ASN1Sequence seq = (ASN1Sequence)o;
-        DERTaggedObject taggedObject = (DERTaggedObject)seq.getObjectAt(0);
+        ASN1Sequence seq = (ASN1Sequence) o;
+        DERTaggedObject taggedObject = (DERTaggedObject) seq.getObjectAt(0);
         if (taggedObject.getTagNo() == 0)
         {
             claimedAttributes = ASN1Sequence.getInstance(taggedObject, true);
