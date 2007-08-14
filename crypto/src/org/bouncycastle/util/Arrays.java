@@ -123,4 +123,13 @@ public final class Arrays
 
         return copy;
     }
+
+    public static int[] clone(int[] data)
+    {
+        int[] copy = new int[data.length];
+
+        System.arraycopy(data, 0, copy, 0, data.length);
+
+        return copy;
+    }
 }
