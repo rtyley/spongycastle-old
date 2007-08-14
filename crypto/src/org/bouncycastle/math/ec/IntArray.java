@@ -99,14 +99,31 @@ class IntArray
 
     public int getUsedLength()
     {
-        int highestIntPos;
-        for (highestIntPos = m_ints.length - 1; highestIntPos >= 0; highestIntPos--)
+        int highestIntPos = m_ints.length;
+
+        if (highestIntPos < 1)
         {
-            if (m_ints[highestIntPos] != 0)
+            return 0;
+        }
+
+        // Check if first element will act as sentinel
+        if (m_ints[0] != 0)
+        {
+            while (m_ints[--highestIntPos] == 0)
+            {
+            }
+            return highestIntPos + 1;
+        }
+
+        do
+        {
+            if (m_ints[--highestIntPos] != 0)
             {
                 return highestIntPos + 1;
             }
         }
+        while (highestIntPos > 0);
+
         return 0;
     }
 
@@ -119,17 +136,37 @@ class IntArray
             return 0;
         }
 
-        int highest = m_ints[intLen - 1];
-        int i;
-        for (i = 0; i < 32; i++)
+        int last = intLen - 1;
+        int highest = m_ints[last];
+        int bits = (last << 5) + 1;
+
+        // A couple of binary search steps
+        if ((highest & 0xffff0000) != 0)
         {
-            if (highest == 0)
+            if ((highest & 0xff000000) != 0)
             {
-                break;
+                bits += 24;
+                highest >>>= 24;
             }
+            else
+            {
+                bits += 16;
+                highest >>>= 16;
+            }
+        }
+        else if (highest > 0x000000ff)
+        {
+            bits += 8;
+            highest >>>= 8;
+        }
+
+        while (highest != 1)
+        {
+            ++bits;
             highest >>>= 1;
         }
-        return (((intLen - 1) << 5) + i);
+
+        return bits;
     }
 
     private int[] resizedInts(int newLen)
@@ -361,16 +398,13 @@ class IntArray
         {
             if (testBit(i))
             {
-                // int j = (i - m) / 32;
-                int j = (i - m) >> 5;
-                // int jTimes32 = j * 32;
-                int jTimes32 = j << 5;
-                int k = (i - m) - jTimes32;
-                flipBit(k + jTimes32);
-                flipBit(m + k + jTimes32);
-                for (int l = 0; l < redPol.length; l++)
+                int bit = i - m;
+                flipBit(bit);
+                flipBit(i);
+                int l = redPol.length;
+                while (--l >= 0)
                 {
-                    flipBit(redPol[l] + k + jTimes32);
+                    flipBit(redPol[l] + bit);
                 }
             }
         }
