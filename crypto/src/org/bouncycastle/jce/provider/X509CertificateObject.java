@@ -225,11 +225,15 @@ public class X509CertificateObject
     public String getSigAlgName()
     {
         Provider    prov = Security.getProvider("BC");
-        String      algName = prov.getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
 
-        if (algName != null)
+        if (prov != null)
         {
-            return algName;
+            String      algName = prov.getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
+
+            if (algName != null)
+            {
+                return algName;
+            }
         }
 
         Provider[] provs = Security.getProviders();
@@ -239,7 +243,7 @@ public class X509CertificateObject
         //
         for (int i = 0; i != provs.length; i++)
         {
-            algName = provs[i].getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
+            String algName = provs[i].getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
             if (algName != null)
             {
                 return algName;

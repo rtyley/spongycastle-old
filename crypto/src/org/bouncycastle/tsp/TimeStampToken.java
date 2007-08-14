@@ -44,7 +44,7 @@ public class TimeStampToken
     
     ESSCertID   certID;
 
-    TimeStampToken(ContentInfo contentInfo)
+    public TimeStampToken(ContentInfo contentInfo)
         throws TSPException, IOException
     {
         this(new CMSSignedData(contentInfo));

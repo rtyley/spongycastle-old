@@ -91,4 +91,9 @@ public class TimeStampTokenInfo
     {
         return tstInfo.getEncoded();
     }
+
+    public TSTInfo toTSTInfo()
+    {
+        return tstInfo;
+    }
 }
