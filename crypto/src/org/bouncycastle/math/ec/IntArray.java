@@ -1,5 +1,7 @@
 package org.bouncycastle.math.ec;
 
+import org.bouncycastle.util.Arrays;
+
 import java.math.BigInteger;
 
 class IntArray
@@ -487,7 +489,7 @@ class IntArray
 
     public Object clone()
     {
-        return new IntArray((int[]) m_ints.clone());
+        return new IntArray(Arrays.clone(m_ints));
     }
 
     public String toString()
