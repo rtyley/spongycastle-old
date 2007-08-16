@@ -198,7 +198,7 @@ public class IESEngine
 
             byte[] tmp = new byte[c_text_length];
 
-            int len = cipher.processBytes(in, inOff, inLen, C, 0);
+            int len = cipher.processBytes(in, inOff, inLen, tmp, 0);
 
             len += cipher.doFinal(tmp, len);
 
