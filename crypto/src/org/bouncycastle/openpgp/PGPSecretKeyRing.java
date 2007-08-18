@@ -177,6 +177,7 @@ public class PGPSecretKeyRing
     {
         List       keys = new ArrayList(secRing.keys);
         boolean    found = false;
+        boolean    masterFound = false;
         
         for (int i = 0; i != keys.size();i++)
         {
@@ -187,10 +188,18 @@ public class PGPSecretKeyRing
                 found = true;
                 keys.set(i, secKey);
             }
+            if (key.isMasterKey())
+            {
+                masterFound = true;
+            }
         }
         
         if (!found)
         {
+            if (secKey.isMasterKey() && masterFound)
+            {
+                throw new IllegalArgumentException("cannot add a master key to a ring that already has one");
+            }
             keys.add(secKey);
         }
         

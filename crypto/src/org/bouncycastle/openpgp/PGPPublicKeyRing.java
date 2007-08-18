@@ -163,7 +163,8 @@ public class PGPPublicKeyRing
     {
         List       keys = new ArrayList(pubRing.keys);
         boolean    found = false;
-        
+        boolean    masterFound = false;
+
         for (int i = 0; i != keys.size();i++)
         {
             PGPPublicKey   key = (PGPPublicKey)keys.get(i);
@@ -173,10 +174,18 @@ public class PGPPublicKeyRing
                 found = true;
                 keys.set(i, pubKey);
             }
+            if (key.isMasterKey())
+            {
+                masterFound = true;
+            }
         }
-        
+
         if (!found)
         {
+            if (pubKey.isMasterKey() && masterFound)
+            {
+                throw new IllegalArgumentException("cannot add a master key to a ring that already has one");
+            }
             keys.add(pubKey);
         }
         
