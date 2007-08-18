@@ -1819,7 +1819,57 @@ public class PGPKeyRingTest
             }
         }
     }
-    
+
+    private void insertMasterTest()
+        throws Exception
+    {
+        char[]              passPhrase = "hello".toCharArray();
+        KeyPairGenerator    rsaKpg = KeyPairGenerator.getInstance("RSA", "BC");
+
+        rsaKpg.initialize(512);
+
+        //
+        // this is quicker because we are using pregenerated parameters.
+        //
+        KeyPair           rsaKp = rsaKpg.generateKeyPair();
+        PGPKeyPair        rsaKeyPair1 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date(), "BC");
+                          rsaKp = rsaKpg.generateKeyPair();
+        PGPKeyPair        rsaKeyPair2 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date(), "BC");
+
+        PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, rsaKeyPair1,
+                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+        PGPSecretKeyRing       secRing1 = keyRingGen.generateSecretKeyRing();
+        PGPPublicKeyRing       pubRing1 = keyRingGen.generatePublicKeyRing();
+        keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, rsaKeyPair2,
+                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+        PGPSecretKeyRing       secRing2 = keyRingGen.generateSecretKeyRing();
+        PGPPublicKeyRing       pubRing2 = keyRingGen.generatePublicKeyRing();
+
+        try
+        {
+            PGPPublicKeyRing.insertPublicKey(pubRing1, pubRing2.getPublicKey());
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (!e.getMessage().equals("cannot add a master key to a ring that already has one"))
+            {
+                fail("wrong message in public test");
+            }
+        }
+
+        try
+        {
+            PGPSecretKeyRing.insertSecretKey(secRing1, secRing2.getSecretKey());
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (!e.getMessage().equals("cannot add a master key to a ring that already has one"))
+            {
+                fail("wrong message in secret test");
+            }
+        }
+    }
+
     public void generateSha1Test()
         throws Exception
     {
@@ -2014,6 +2064,7 @@ public class PGPKeyRingTest
             generateSha1Test();
             rewrapTest();
             testPublicKeyRingWithX509();
+            insertMasterTest();
         }
         catch (PGPException e)
         {
