@@ -1848,6 +1848,7 @@ public class PGPKeyRingTest
         try
         {
             PGPPublicKeyRing.insertPublicKey(pubRing1, pubRing2.getPublicKey());
+            fail("adding second master key (public) should throw an IllegalArgumentException");
         }
         catch (IllegalArgumentException e)
         {
@@ -1860,6 +1861,7 @@ public class PGPKeyRingTest
         try
         {
             PGPSecretKeyRing.insertSecretKey(secRing1, secRing2.getSecretKey());
+            fail("adding second master key (secret) should throw an IllegalArgumentException");
         }
         catch (IllegalArgumentException e)
         {
