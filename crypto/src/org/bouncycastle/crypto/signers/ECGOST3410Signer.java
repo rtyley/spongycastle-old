@@ -143,8 +143,7 @@ public class ECGOST3410Signer
         ECPoint G = key.getParameters().getG(); // P
         ECPoint Q = ((ECPublicKeyParameters)key).getQ();
 
-//        ECPoint point = G.multiply(z1).add(Q.multiply(z2));
-        ECPoint point = ECAlgorithms.shamirsTrick(G, z1, Q, z2);
+        ECPoint point = ECAlgorithms.sumOfTwoMultiplies(G, z1, Q, z2);
 
         BigInteger R = point.getX().toBigInteger().mod(n);
 
