@@ -1445,7 +1445,14 @@ public class JDKPKCS12KeyStore
 
         public void put(String key, Object value)
         {
-            keys.put(Strings.toLowerCase(key), key);
+            String lower = Strings.toLowerCase(key);
+            String k = (String)keys.get(lower);
+            if (k != null)
+            {
+                orig.remove(k);
+            }
+
+            keys.put(lower, key);
             orig.put(key, value);
         }
 
