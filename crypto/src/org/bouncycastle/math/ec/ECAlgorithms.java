@@ -4,6 +4,29 @@ import java.math.BigInteger;
 
 public class ECAlgorithms
 {
+    public static ECPoint sumOfTwoMultiplies(ECPoint P, BigInteger a,
+        ECPoint Q, BigInteger b)
+    {
+        ECCurve c = P.getCurve();
+        if (!c.equals(Q.getCurve()))
+        {
+            throw new IllegalArgumentException("P and Q must be on same curve");
+        }
+
+        // TODO Add special case back in when WTNAF is enabled
+//        // Point multiplication for Koblitz curves (using WTNAF) beats Shamir's trick
+//        if (c instanceof ECCurve.F2m)
+//        {
+//            ECCurve.F2m f2mCurve = (ECCurve.F2m) c;
+//            if (f2mCurve.isKoblitz())
+//            {
+//                return P.multiply(a).add(Q.multiply(b));
+//            }
+//        }
+
+        return implShamirsTrick(P, a, Q, b);
+    }
+
     /*
      * "Shamir's Trick", originally due to E. G. Straus
      * (Addition chains of vectors. American Mathematical Monthly,
@@ -31,6 +54,12 @@ public class ECAlgorithms
             throw new IllegalArgumentException("P and Q must be on same curve");
         }
 
+        return implShamirsTrick(P, k, Q, l);
+    }
+
+    private static ECPoint implShamirsTrick(ECPoint P, BigInteger k,
+        ECPoint Q, BigInteger l)
+    {
         int m = Math.max(k.bitLength(), l.bitLength());
         ECPoint Z = P.add(Q);
         ECPoint R = P.getCurve().getInfinity();

@@ -176,7 +176,7 @@ public abstract class ECCurve
         /**
          * The exponent <code>m</code> of <code>F<sub>2<sup>m</sup></sub></code>.
          */
-        private int m;
+        private final int m;
 
         /**
          * TPB: The integer <code>k</code> where <code>x<sup>m</sup> +
@@ -186,7 +186,7 @@ public abstract class ECCurve
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private int k1;
+        private final int k1;
 
         /**
          * TPB: Always set to <code>0</code><br>
@@ -194,7 +194,7 @@ public abstract class ECCurve
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private int k2;
+        private final int k2;
 
         /**
          * TPB: Always set to <code>0</code><br>
@@ -202,9 +202,35 @@ public abstract class ECCurve
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private int k3;
+        private final int k3;
 
-        private ECPoint.F2m infinity;
+        /**
+         * The order of the base point of the curve.
+         */
+        private final BigInteger n;
+
+        /**
+         * The cofactor of the curve.
+         */
+        private final BigInteger h;
+        
+         /**
+         * The point at infinity on this curve.
+         */
+        private final ECPoint.F2m infinity;
+
+        /**
+         * The parameter <code>&mu;</code> of the elliptic curve if this is
+         * a Koblitz curve.
+         */
+        private byte mu = 0;
+
+        /**
+         * The auxiliary values <code>s<sub>0</sub></code> and
+         * <code>s<sub>1</sub></code> used for partial modular reduction for
+         * Koblitz curves.
+         */
+        private BigInteger[] si = null;
 
         /**
          * Constructor for Trinomial Polynomial Basis (TPB).
@@ -221,12 +247,40 @@ public abstract class ECCurve
          * <code>F<sub>2<sup>m</sup></sub></code>.
          */
         public F2m(
+			int m,
+            int k,
+            BigInteger a,
+            BigInteger b)
+        {
+            this(m, k, 0, 0, a, b, null, null);
+        }
+
+        /**
+         * Constructor for Trinomial Polynomial Basis (TPB).
+         * @param m  The exponent <code>m</code> of
+         * <code>F<sub>2<sup>m</sup></sub></code>.
+         * @param k The integer <code>k</code> where <code>x<sup>m</sup> +
+         * x<sup>k</sup> + 1</code> represents the reduction
+         * polynomial <code>f(z)</code>.
+         * @param a The coefficient <code>a</code> in the Weierstrass equation
+         * for non-supersingular elliptic curves over
+         * <code>F<sub>2<sup>m</sup></sub></code>.
+         * @param b The coefficient <code>b</code> in the Weierstrass equation
+         * for non-supersingular elliptic curves over
+         * <code>F<sub>2<sup>m</sup></sub></code>.
+         * @param n The order of the main subgroup of the elliptic curve.
+         * @param h The cofactor of the elliptic curve, i.e.
+         * <code>#E<sub>a</sub>(F<sub>2<sup>m</sup></sub>) = h * n</code>.
+         */
+        public F2m(
             int m, 
             int k, 
             BigInteger a, 
-            BigInteger b)
+            BigInteger b,
+            BigInteger n,
+            BigInteger h)
         {
-            this(m, k, 0, 0, a, b);
+            this(m, k, 0, 0, a, b, n, h);
         }
 
         /**
@@ -250,18 +304,56 @@ public abstract class ECCurve
          * <code>F<sub>2<sup>m</sup></sub></code>.
          */
         public F2m(
+			int m,
+            int k1,
+            int k2,
+            int k3,
+            BigInteger a,
+            BigInteger b)
+		{
+			this(m, k1, k2, k3, a, b, null, null);
+		}
+
+        /**
+         * Constructor for Pentanomial Polynomial Basis (PPB).
+         * @param m  The exponent <code>m</code> of
+         * <code>F<sub>2<sup>m</sup></sub></code>.
+         * @param k1 The integer <code>k1</code> where <code>x<sup>m</sup> +
+         * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
+         * represents the reduction polynomial <code>f(z)</code>.
+         * @param k2 The integer <code>k2</code> where <code>x<sup>m</sup> +
+         * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
+         * represents the reduction polynomial <code>f(z)</code>.
+         * @param k3 The integer <code>k3</code> where <code>x<sup>m</sup> +
+         * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
+         * represents the reduction polynomial <code>f(z)</code>.
+         * @param a The coefficient <code>a</code> in the Weierstrass equation
+         * for non-supersingular elliptic curves over
+         * <code>F<sub>2<sup>m</sup></sub></code>.
+         * @param b The coefficient <code>b</code> in the Weierstrass equation
+         * for non-supersingular elliptic curves over
+         * <code>F<sub>2<sup>m</sup></sub></code>.
+         * @param n The order of the main subgroup of the elliptic curve.
+         * @param h The cofactor of the elliptic curve, i.e.
+         * <code>#E<sub>a</sub>(F<sub>2<sup>m</sup></sub>) = h * n</code>.
+         */
+        public F2m(
             int m, 
             int k1, 
             int k2, 
             int k3,
             BigInteger a, 
-            BigInteger b)
+            BigInteger b,
+            BigInteger n,
+            BigInteger h)
         {
             this.m = m;
             this.k1 = k1;
             this.k2 = k2;
             this.k3 = k3;
-            
+            this.n = n;
+            this.h = h;
+
             if (k1 == 0)
             {
                 throw new IllegalArgumentException("k1 must be > 0");
@@ -362,6 +454,47 @@ public abstract class ECCurve
         public ECPoint getInfinity()
         {
             return infinity;
+        }
+
+        /**
+         * Returns true if this is a Koblitz curve (ABC curve).
+         * @return true if this is a Koblitz curve (ABC curve), false otherwise
+         */
+        public boolean isKoblitz()
+        {
+            return ((n != null) && (h != null) &&
+                    ((a.toBigInteger().equals(ECConstants.ZERO)) ||
+                    (a.toBigInteger().equals(ECConstants.ONE))) &&
+                    (b.toBigInteger().equals(ECConstants.ONE)));
+        }
+
+        /**
+         * Returns the parameter <code>&mu;</code> of the elliptic curve.
+         * @return <code>&mu;</code> of the elliptic curve.
+         * @throws IllegalArgumentException if the given ECCurve is not a
+         * Koblitz curve.
+         */
+        synchronized byte getMu()
+        {
+            if (mu == 0)
+            {
+                mu = Tnaf.getMu(this);
+            }
+            return mu;
+        }
+
+        /**
+         * @return the auxiliary values <code>s<sub>0</sub></code> and
+         * <code>s<sub>1</sub></code> used for partial modular reduction for
+         * Koblitz curves.
+         */
+        synchronized BigInteger[] getSi()
+        {
+            if (si == null)
+            {
+                si = Tnaf.getSi(this);
+            }
+            return si;
         }
 
         /**
@@ -512,6 +645,16 @@ public abstract class ECCurve
         public int getK3()
         {
             return k3;
-        }    
+        }
+
+        public BigInteger getN()
+        {
+            return n;
+        }
+
+        public BigInteger getH()
+        {
+            return h;
+        }
     }
 }

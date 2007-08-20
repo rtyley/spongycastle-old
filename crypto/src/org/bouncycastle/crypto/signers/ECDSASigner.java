@@ -135,8 +135,7 @@ public class ECDSASigner
         ECPoint G = key.getParameters().getG();
         ECPoint Q = ((ECPublicKeyParameters)key).getQ();
 
-//        ECPoint point = G.multiply(u1).add(Q.multiply(u2));
-        ECPoint point = ECAlgorithms.shamirsTrick(G, u1, Q, u2);
+        ECPoint point = ECAlgorithms.sumOfTwoMultiplies(G, u1, Q, u2);
 
         BigInteger v = point.getX().toBigInteger().mod(n);
 
