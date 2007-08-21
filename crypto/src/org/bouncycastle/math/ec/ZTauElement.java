@@ -9,7 +9,6 @@ import java.math.BigInteger;
  * components <code>u</code> and <code>v</code> may be used directly, there
  * are no accessor methods.
  * Immutable class.
- * @author keller
  */
 class ZTauElement
 {
