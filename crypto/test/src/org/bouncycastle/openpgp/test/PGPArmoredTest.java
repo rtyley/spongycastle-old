@@ -2,9 +2,12 @@ package org.bouncycastle.openpgp.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.ArmoredInputStream;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -37,6 +40,17 @@ public class PGPArmoredTest
           + "ZJhfg0htdgAfIy8ppm05vLACAAA=");
 
     byte[] marker = Hex.decode("2d2d2d2d2d454e4420504750205055424c4943204b455920424c4f434b2d2d2d2d2d");
+
+    // Contains "Hello World!" as an armored message
+    // The 'blank line' after the headers contains (legal) whitespace - see RFC2440 6.2
+    private static final String blankLineData =
+          "-----BEGIN PGP MESSAGE-----\n"
+        + "Version: BCPG v1.32\n"
+        + "Comment: A dummy message\n"
+        + " \t \t\n"
+        + "SGVsbG8gV29ybGQh\n"
+        + "=d9Xi\n"
+        + "-----END PGP MESSAGE-----\n";
 
     private int markerCount(
         byte[] data)
@@ -72,6 +86,27 @@ public class PGPArmoredTest
         }
 
         return matches;
+    }
+
+    private void blankLineTest() throws Exception
+    {
+        byte[] blankLineBytes = Strings.toByteArray(blankLineData);
+        ByteArrayInputStream bIn = new ByteArrayInputStream(blankLineBytes);
+        ArmoredInputStream aIn = new ArmoredInputStream(bIn, true);
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        int c;
+        while ((c = aIn.read()) >= 0)
+        {
+            bOut.write(c);
+        }
+
+        byte[] expected = Strings.toByteArray("Hello World!");
+
+        if (!Arrays.areEqual(expected, bOut.toByteArray()))
+        {
+            fail("Incorrect message retrieved in blank line test.");
+        }
     }
 
     public void performTest()
@@ -204,6 +239,8 @@ public class PGPArmoredTest
         {
             fail("wrong number of objects found: " + count);
         }
+
+        blankLineTest();
     }
 
     public String getName()

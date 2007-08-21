@@ -210,7 +210,12 @@ public class ArmoredInputStream
                 }
                 if (c == '\r' || (last != '\r' && c == '\n'))
                 {
-                    headerList.addElement(buf.toString());
+                    String line = buf.toString();
+                    if (line.trim().isEmpty())
+                    {
+                        break;
+                    }
+                    headerList.addElement(line);
                     buf.setLength(0);
                 }
 
