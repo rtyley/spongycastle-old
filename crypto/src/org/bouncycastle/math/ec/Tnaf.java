@@ -7,8 +7,7 @@ import java.math.BigInteger;
  * &tau;-adic nonadjacent form (WTNAF). The algorithms are based on the
  * paper "Improved Algorithms for Arithmetic on Anomalous Binary Curves"
  * by Jerome A. Solinas. The paper first appeared in the Proceedings of
- * Crypto 1997. 
- * @author keller
+ * Crypto 1997.
  */
 class Tnaf
 {
@@ -37,7 +36,8 @@ class Tnaf
      * The <code>&alpha;<sub>u</sub></code>'s for <code>a=0</code> as an array
      * of <code>ZTauElement</code>s.
      */
-    public static final ZTauElement[] alpha0 = {null,
+    public static final ZTauElement[] alpha0 = {
+        null,
         new ZTauElement(ECConstants.ONE, ECConstants.ZERO), null,
         new ZTauElement(MINUS_THREE, MINUS_ONE), null,
         new ZTauElement(MINUS_ONE, MINUS_ONE), null,
