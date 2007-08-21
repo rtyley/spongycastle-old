@@ -310,7 +310,26 @@ public class CMSSignedDataStreamGenerator
     {
         return open(out, DATA, encapsulate);
     }
-    
+
+    /**
+     * generate a signed object that for a CMS Signed Data
+     * object using the given provider - if encapsulate is true a copy
+     * of the message will be included in the signature with the
+     * default content type "data". If dataOutputStream is non null the data
+     * being signed will be written to the stream as it is processed.
+     * @param out stream the CMS object is to be written to.
+     * @param encapsulate true if data should be encapsulated.
+     * @param dataOutputStream output stream to copy the data being signed to.
+     */
+    public OutputStream open(
+        OutputStream out,
+        boolean      encapsulate,
+        OutputStream dataOutputStream)
+        throws IOException
+    {
+        return open(out, DATA, encapsulate, dataOutputStream);
+    }
+
     /**
      * generate a signed object that for a CMS Signed Data
      * object using the given provider - if encapsulate is true a copy
@@ -321,6 +340,26 @@ public class CMSSignedDataStreamGenerator
         OutputStream out,
         String       signedContentType,
         boolean      encapsulate)
+        throws IOException
+    {
+        return open(out, signedContentType, encapsulate, null);
+    }
+
+    /**
+     * generate a signed object that for a CMS Signed Data
+     * object using the given provider - if encapsulate is true a copy
+     * of the message will be included in the signature. The content type
+     * is set according to the OID represented by the string signedContentType.
+     * @param out stream the CMS object is to be written to.
+     * @param signedContentType OID for data to be signed.
+     * @param encapsulate true if data should be encapsulated.
+     * @param dataOutputStream output stream to copy the data being signed to.
+     */
+    public OutputStream open(
+        OutputStream out,
+        String       signedContentType,
+        boolean      encapsulate,
+        OutputStream dataOutputStream)
         throws IOException
     {
         //
@@ -385,12 +424,25 @@ public class CMSSignedDataStreamGenerator
             {
                 digStream = octGen.getOctetOutputStream();
             }
+
+            if (dataOutputStream != null)
+            {
+                digStream = new TeeOutputStream(dataOutputStream, digStream);
+            }
         }
         else
-        {   
-            digStream = new NullOutputStream();
+        {
+            if (dataOutputStream != null)
+            {
+                digStream = dataOutputStream;
+            }
+            else
+            {
+                digStream = new NullOutputStream();
+            }
         }
-        
+
+
         for (Iterator it = _messageDigests.iterator(); it.hasNext();)
         {
             digStream = new DigestOutputStream(digStream, (MessageDigest)it.next());
@@ -517,12 +569,65 @@ public class CMSSignedDataStreamGenerator
     private class NullOutputStream
         extends OutputStream
     {
+        public void write(byte[] buf)
+            throws IOException
+        {
+            // do nothing
+        }
+
+        public void write(byte[] buf, int off, int len)
+            throws IOException
+        {
+            // do nothing
+        }
+        
         public void write(int b) throws IOException
         {
             // do nothing
         }
     }
-    
+
+    private class TeeOutputStream
+        extends OutputStream
+    {
+        private OutputStream s1;
+        private OutputStream s2;
+
+        public TeeOutputStream(OutputStream dataOutputStream, OutputStream digStream)
+        {
+            s1 = dataOutputStream;
+            s2 = digStream;
+        }
+
+        public void write(byte[] buf)
+            throws IOException
+        {
+            s1.write(buf);
+            s2.write(buf);
+        }
+
+        public void write(byte[] buf, int off, int len)
+            throws IOException
+        {
+            s1.write(buf, off, len);
+            s2.write(buf, off, len);
+        }
+
+        public void write(int b)
+            throws IOException
+        {
+            s1.write(b);
+            s2.write(b);
+        }
+
+        public void close()
+            throws IOException
+        {
+            s1.close();
+            s2.close();
+        }
+    }
+
     private class CmsSignedDataOutputStream
         extends OutputStream
     {
