@@ -16,7 +16,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * general class to hold a collection of PGP Public Keys.
+ * Class to hold a single master public key and its subkeys.
+ * <p>
+ * Often PGP keyring files consist of multiple master keys, if you are trying to process
+ * or construct one of these you should use the PGPPublicKeyRingCollection class.
  */
 public class PGPPublicKeyRing
     extends PGPKeyRing
