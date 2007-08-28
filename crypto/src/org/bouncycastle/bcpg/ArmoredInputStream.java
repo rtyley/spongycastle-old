@@ -211,7 +211,7 @@ public class ArmoredInputStream
                 if (c == '\r' || (last != '\r' && c == '\n'))
                 {
                     String line = buf.toString();
-                    if (line.trim().isEmpty())
+                    if (line.trim().length() == 0)
                     {
                         break;
                     }
