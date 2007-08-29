@@ -384,7 +384,7 @@ public class CMSSignedData
             }
             catch (IOException e)
             {
-                throw new RuntimeException("encoding error.", e);
+                throw new RuntimeException("encoding error:" + e);
             }
 
             digestAlgs.add(digAlgId);
