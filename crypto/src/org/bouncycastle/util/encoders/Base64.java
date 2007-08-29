@@ -16,7 +16,8 @@ public class Base64
     public static byte[] encode(
         byte[]    data)
     {
-        ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
+        int len = (data.length + 2) / 3 * 4;
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream(len);
         
         try
         {
@@ -66,7 +67,8 @@ public class Base64
     public static byte[] decode(
         byte[]    data)
     {
-        ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
+        int len = data.length / 4 * 3;
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream(len);
         
         try
         {
@@ -88,7 +90,8 @@ public class Base64
     public static byte[] decode(
         String    data)
     {
-        ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
+        int len = data.length() / 4 * 3;
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream(len);
         
         try
         {
