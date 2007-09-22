@@ -20,6 +20,7 @@ import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
 import org.bouncycastle.mail.smime.SMIMEUtil;
+import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -153,36 +154,38 @@ public class SMIMEMiscTest
         throws Exception
     {
         List certList = new ArrayList();
-        
+
         certList.add(origCert);
         certList.add(signCert);
-    
+
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
-    
+
         SMIMECompressedGenerator  cGen = new SMIMECompressedGenerator();
-        
+
         MimeBodyPart   mp = cGen.generate(msg, SMIMECompressedGenerator.ZLIB);
-        
+
         ASN1EncodableVector signedAttrs = generateSignedAttributes();
-    
+
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
-    
-        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);   
+
+        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);
         gen.addCertificatesAndCRLs(certs);
-    
+
         MimeMultipart     smm = gen.generate(mp, "BC");
         File              tmpFile = File.createTempFile("bcTest", ".mime");
 
         MimeMessage       msg = createMimeMessage(tmpFile, smm);
-        
+
         SMIMESigned       s = new SMIMESigned((MimeMultipart)msg.getContent());
-    
+
         certs = s.getCertificatesAndCRLs("Collection", "BC");
-    
+
         verifyMessageBytes(mp, s.getContent());
-    
+
         verifySigners(certs, s.getSignerInfos());
+
+        tmpFile.delete();
     }
 
     public void testQuotePrintableSigPreservation()
@@ -198,7 +201,8 @@ public class SMIMEMiscTest
 
         SMIMEEnveloped       env = new SMIMEEnveloped(mp);
         RecipientInformation ri = (RecipientInformation)env.getRecipientInfos().getRecipients().iterator().next();
-        SMIMESigned          s = new SMIMESigned((MimeMultipart)SMIMEUtil.toMimeBodyPart(ri.getContentStream(origKP.getPrivate(), "BC")).getContent());
+        MimeBodyPart         mm = SMIMEUtil.toMimeBodyPart(ri.getContentStream(origKP.getPrivate(), "BC"));
+        SMIMESigned          s = new SMIMESigned((MimeMultipart)mm.getContent());
         Collection           c = s.getSignerInfos().getSigners();
         Iterator             it = c.iterator();
         CertStore            certs = s.getCertificatesAndCRLs("Collection", "BC");
@@ -213,42 +217,46 @@ public class SMIMEMiscTest
 
             assertEquals(true, signer.verify(cert, "BC"));
         }
+
+        ((FileBackedMimeBodyPart)mm).dispose();
     }
 
     public void testSHA256WithRSAParserCompressed()
         throws Exception
     {
         List certList = new ArrayList();
-        
+
         certList.add(origCert);
         certList.add(signCert);
-    
+
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
-    
+
         SMIMECompressedGenerator  cGen = new SMIMECompressedGenerator();
-        
+
         MimeBodyPart   mp = cGen.generate(msg, SMIMECompressedGenerator.ZLIB);
-        
+
         ASN1EncodableVector signedAttrs = generateSignedAttributes();
-    
+
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
-    
-        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);   
+
+        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);
         gen.addCertificatesAndCRLs(certs);
-    
+
         MimeMultipart     smm = gen.generate(mp, "BC");
         File              tmpFile = File.createTempFile("bcTest", ".mime");
 
         MimeMessage       msg = createMimeMessage(tmpFile, smm);
-        
+
         SMIMESignedParser s = new SMIMESignedParser((MimeMultipart)msg.getContent());
 
         certs = s.getCertificatesAndCRLs("Collection", "BC");
-    
+
         verifyMessageBytes(mp, s.getContent());
-    
+
         verifySigners(certs, s.getSignerInfos());
+
+        tmpFile.delete();
     }
 
     private void verifySigners(CertStore certs, SignerInformationStore signers) 
