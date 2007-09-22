@@ -13,7 +13,7 @@ class ReferenceMultiplier implements ECMultiplier
      * @param k The factor by which to multiply.
      * @return The result of the point multiplication <code>k * p</code>.
      */
-	public ECPoint multiply(ECPoint p, BigInteger k, PreCompInfo preCompInfo)
+    public ECPoint multiply(ECPoint p, BigInteger k, PreCompInfo preCompInfo)
     {
         ECPoint q = p.getCurve().getInfinity();
         int t = k.bitLength();
