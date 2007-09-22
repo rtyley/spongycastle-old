@@ -301,7 +301,25 @@ public class SMIMEUtil
             throw new SMIMEException("exception creating body part.", e);
         }
     }
-    
+
+    static FileBackedMimeBodyPart toWriteOnceBodyPart(
+        CMSTypedStream    content)
+        throws SMIMEException
+    {
+        try
+        {
+            return new WriteOnceFileBackedMimeBodyPart(content.getContentStream(), File.createTempFile("bcMail", ".mime"));
+        }
+        catch (IOException e)
+        {
+            throw new SMIMEException("IOException creating tmp file:" + e.getMessage(), e);
+        }
+        catch (MessagingException e)
+        {
+            throw new SMIMEException("can't create part: " + e, e);
+        }
+    }
+
     /**
      * return a file backed MimeBodyPart described in {@link CMSTypedStream} content. 
      * </p>
@@ -316,7 +334,7 @@ public class SMIMEUtil
         }
         catch (IOException e)
         {
-            throw new SMIMEException("IOException creating tmp file:" + e.getMessage());
+            throw new SMIMEException("IOException creating tmp file:" + e.getMessage(), e);
         }
     }
     
@@ -365,6 +383,24 @@ public class SMIMEUtil
         catch (Exception e)
         {
             throw new CertificateParsingException("exception extracting issuer and serial number: " + e);
+        }
+    }
+
+    private static class WriteOnceFileBackedMimeBodyPart
+        extends FileBackedMimeBodyPart
+    {
+        public WriteOnceFileBackedMimeBodyPart(InputStream content, File file)
+            throws MessagingException, IOException
+        {
+            super(content, file);
+        }
+
+        public void writeTo(OutputStream out)
+            throws MessagingException, IOException
+        {
+            super.writeTo(out);
+
+            this.dispose();
         }
     }
 }

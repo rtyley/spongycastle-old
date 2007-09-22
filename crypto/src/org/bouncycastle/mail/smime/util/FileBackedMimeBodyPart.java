@@ -92,7 +92,7 @@ public class FileBackedMimeBodyPart
     {
         ((SharedFileInputStream)contentStream).getRoot().dispose();
         
-        if (!_file.delete())
+        if (_file.exists() && !_file.delete())
         {
             throw new IOException("deletion of underlying file <" + _file.getCanonicalPath() + "> failed.");
         }
