@@ -8,7 +8,7 @@ import java.math.BigInteger;
 class FpNafMultiplier implements ECMultiplier
 {
     /**
-	 * D.3.2 pg 101
+     * D.3.2 pg 101
      * @see org.bouncycastle.math.ec.ECMultiplier#multiply(org.bouncycastle.math.ec.ECPoint, java.math.BigInteger)
      */
     public ECPoint multiply(ECPoint p, BigInteger k, PreCompInfo preCompInfo)
