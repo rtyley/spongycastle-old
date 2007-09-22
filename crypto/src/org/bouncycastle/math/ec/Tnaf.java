@@ -313,7 +313,8 @@ class Tnaf
      */
     public static byte[] tauAdicNaf(byte mu, ZTauElement lambda)
     {
-        if (!((mu == 1) || (mu == -1))) {
+        if (!((mu == 1) || (mu == -1)))
+        {
             throw new IllegalArgumentException("mu must be 1 or -1");
         }
         
@@ -338,7 +339,8 @@ class Tnaf
         while(!((r0.equals(ECConstants.ZERO)) && (r1.equals(ECConstants.ZERO))))
         {
             // If r0 is odd
-            if (r0.testBit(0)) {
+            if (r0.testBit(0))
+            {
                 u[i] = ECConstants.TWO.subtract((r0.subtract(r1.shiftLeft(1))).mod(ECConstants.FOUR)).byteValue();
 
                 // r0 = r0 - u[i]
@@ -448,7 +450,8 @@ class Tnaf
      */
     public static BigInteger[] getLucas(byte mu, int k, boolean doV)
     {
-        if (!((mu == 1) || (mu == -1))) {
+        if (!((mu == 1) || (mu == -1)))
+        {
             throw new IllegalArgumentException("mu must be 1 or -1");
         }
 
@@ -500,7 +503,8 @@ class Tnaf
      * @param w The window width of the WTNAF.
      * @return the auxiliary value <code>t<sub>w</sub></code>
      */
-    public static BigInteger getTw(byte mu, int w) {
+    public static BigInteger getTw(byte mu, int w)
+    {
         if (w == 4)
         {
             if (mu == 1)
@@ -537,13 +541,13 @@ class Tnaf
      */
     public static BigInteger[] getSi(ECCurve.F2m curve)
     {
-    	if (!curve.isKoblitz())
-    	{
+        if (!curve.isKoblitz())
+        {
             throw new IllegalArgumentException("si is defined for Koblitz curves only");
-    	}
+        }
 
-    	int m = curve.getM();
-    	int a = curve.getA().toBigInteger().intValue();
+        int m = curve.getM();
+        int a = curve.getA().toBigInteger().intValue();
         byte mu = curve.getMu();
         int h = curve.getH().intValue();
         int index = m + 3 - a;
@@ -644,7 +648,7 @@ class Tnaf
      */
     public static ECPoint.F2m multiplyRTnaf(ECPoint.F2m p, BigInteger k)
     {
-    	ECCurve.F2m curve = (ECCurve.F2m) p.getCurve();
+        ECCurve.F2m curve = (ECCurve.F2m) p.getCurve();
         int m = curve.getM();
         byte a = curve.getA().toBigInteger().byteValue();
         byte mu = curve.getMu();
@@ -719,7 +723,8 @@ class Tnaf
     public static byte[] tauAdicWNaf(byte mu, ZTauElement lambda,
             byte width, BigInteger pow2w, BigInteger tw, ZTauElement[] alpha)
     {
-        if (!((mu == 1) || (mu == -1))) {
+        if (!((mu == 1) || (mu == -1)))
+        {
             throw new IllegalArgumentException("mu must be 1 or -1");
         }
 
@@ -746,7 +751,8 @@ class Tnaf
         while (!((r0.equals(ECConstants.ZERO))&&(r1.equals(ECConstants.ZERO))))
         {
             // if r0 is odd
-            if (r0.testBit(0)) {
+            if (r0.testBit(0))
+            {
                 // uUnMod = r0 + r1*tw mod 2^width
                 BigInteger uUnMod
                     = r0.add(r1.multiply(tw)).mod(pow2w);
@@ -765,13 +771,15 @@ class Tnaf
 
                 u[i] = uLocal;
                 boolean s = true;
-                if (uLocal < 0) {
+                if (uLocal < 0)
+                {
                     s = false;
                     uLocal = (byte)-uLocal;
                 }
                 // uLocal is now >= 0
 
-                if (s) {
+                if (s)
+                {
                     r0 = r0.subtract(alpha[uLocal].u);
                     r1 = r1.subtract(alpha[uLocal].v);
                 }

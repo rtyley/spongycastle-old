@@ -23,7 +23,7 @@ class WTauNafPreCompInfo implements PreCompInfo
      */
     WTauNafPreCompInfo(ECPoint.F2m[] preComp)
     {
-    	this.preComp = preComp;
+        this.preComp = preComp;
     }
 
     /**

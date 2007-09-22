@@ -152,7 +152,8 @@ class WNafMultiplier implements ECMultiplier
                                 width = 7;
                                 reqPreCompLen = 32;
                             }
-                            else {
+                            else
+                            {
                                 width = 8;
                                 reqPreCompLen = 127;
                             }

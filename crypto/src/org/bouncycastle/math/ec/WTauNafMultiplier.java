@@ -18,15 +18,15 @@ class WTauNafMultiplier implements ECMultiplier
      */
     public ECPoint multiply(ECPoint point, BigInteger k, PreCompInfo preCompInfo)
     {
-    	if (!(point instanceof ECPoint.F2m))
-    	{
-    		throw new IllegalArgumentException("Only ECPoint.F2m can be " +
-    				"used in WTauNafMultiplier");
-    	}
+        if (!(point instanceof ECPoint.F2m))
+        {
+            throw new IllegalArgumentException("Only ECPoint.F2m can be " +
+                    "used in WTauNafMultiplier");
+        }
 
-    	ECPoint.F2m p = (ECPoint.F2m)point;
+        ECPoint.F2m p = (ECPoint.F2m)point;
 
-    	ECCurve.F2m curve = (ECCurve.F2m) p.getCurve();
+        ECCurve.F2m curve = (ECCurve.F2m) p.getCurve();
         int m = curve.getM();
         byte a = curve.getA().toBigInteger().byteValue();
         byte mu = curve.getMu();
@@ -48,7 +48,7 @@ class WTauNafMultiplier implements ECMultiplier
      * @return <code>p</code> multiplied by <code>&lambda;</code>.
      */
     private ECPoint.F2m multiplyWTnaf(ECPoint.F2m p, ZTauElement lambda,
-    		PreCompInfo preCompInfo, byte a, byte mu)
+            PreCompInfo preCompInfo, byte a, byte mu)
     {
         ZTauElement[] alpha;
         if (a == 0)
@@ -64,7 +64,7 @@ class WTauNafMultiplier implements ECMultiplier
         BigInteger tw = Tnaf.getTw(mu, Tnaf.WIDTH);
 
         byte[]u = Tnaf.tauAdicWNaf(mu, lambda, Tnaf.WIDTH,
-        		BigInteger.valueOf(Tnaf.POW_2_WIDTH), tw, alpha);
+                BigInteger.valueOf(Tnaf.POW_2_WIDTH), tw, alpha);
 
         return multiplyFromWTnaf(p, u, preCompInfo);
     }
@@ -79,7 +79,7 @@ class WTauNafMultiplier implements ECMultiplier
      * @return <code>&lambda; * p</code>
      */
     private static ECPoint.F2m multiplyFromWTnaf(ECPoint.F2m p, byte[] u,
-    		PreCompInfo preCompInfo)
+            PreCompInfo preCompInfo)
     {
         ECCurve.F2m curve = (ECCurve.F2m)p.getCurve();
         byte a = curve.getA().toBigInteger().byteValue();

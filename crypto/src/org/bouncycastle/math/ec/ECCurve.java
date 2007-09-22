@@ -247,7 +247,7 @@ public abstract class ECCurve
          * <code>F<sub>2<sup>m</sup></sub></code>.
          */
         public F2m(
-			int m,
+            int m,
             int k,
             BigInteger a,
             BigInteger b)
@@ -304,15 +304,15 @@ public abstract class ECCurve
          * <code>F<sub>2<sup>m</sup></sub></code>.
          */
         public F2m(
-			int m,
+            int m,
             int k1,
             int k2,
             int k3,
             BigInteger a,
             BigInteger b)
-		{
-			this(m, k1, k2, k3, a, b, null, null);
-		}
+        {
+            this(m, k1, k2, k3, a, b, null, null);
+        }
 
         /**
          * Constructor for Pentanomial Polynomial Basis (PPB).

@@ -7,6 +7,7 @@ import java.util.Date;
 
 import org.bouncycastle.asn1.tsp.Accuracy;
 import org.bouncycastle.asn1.tsp.TSTInfo;
+import org.bouncycastle.asn1.x509.GeneralName;
 
 public class TimeStampTokenInfo
 {
@@ -62,7 +63,12 @@ public class TimeStampTokenInfo
     {
         return tstInfo.getSerialNumber().getValue();
     }
-    
+
+    public GeneralName getTsa()
+    {
+        return tstInfo.getTsa();
+    }
+
     /**
      * @return the nonce value, null if there isn't one.
      */
