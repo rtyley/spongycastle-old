@@ -40,14 +40,12 @@ import org.bouncycastle.crypto.params.GOST3410PublicKeyParameters;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
@@ -58,9 +56,6 @@ import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.DSAParameterSpec;
-import java.security.spec.ECField;
-import java.security.spec.ECFieldF2m;
-import java.security.spec.ECFieldFp;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Hashtable;
@@ -499,7 +494,7 @@ public abstract class JDKKeyPairGenerator
                         throw new InvalidAlgorithmParameterException("unknown curve name: " + ((ECGenParameterSpec)params).getName());
                     }
 
-                    this.ecParams = new ECNamedCurveParameterSpec(
+                    this.ecParams = new ECNamedCurveSpec(
                                                     ((ECGenParameterSpec)params).getName(),
                                                     ecP.getCurve(),
                                                     ecP.getG(),

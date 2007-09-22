@@ -4,6 +4,7 @@ import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
+import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.util.test.SimpleTest;
@@ -214,6 +215,86 @@ public class NamedCurveTest
         }
     }
 
+    public void testECGOST(
+        String name)
+        throws Exception
+    {
+        ECGenParameterSpec     ecSpec = new ECGenParameterSpec(name);
+
+        if (ecSpec == null)
+        {
+            fail("no curve for " + name + " found.");
+        }
+
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("ECGOST3410", "BC");
+
+        g.initialize(ecSpec, new SecureRandom());
+
+        Signature sgr = Signature.getInstance("ECGOST3410", "BC");
+        KeyPair   pair = g.generateKeyPair();
+        PrivateKey sKey = pair.getPrivate();
+        PublicKey vKey = pair.getPublic();
+
+        sgr.initSign(sKey);
+
+        byte[] message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
+
+        sgr.update(message);
+
+        byte[]  sigBytes = sgr.sign();
+
+        sgr.initVerify(vKey);
+
+        sgr.update(message);
+
+        if (!sgr.verify(sigBytes))
+        {
+            fail(name + " verification failed");
+        }
+
+        //
+        // public key encoding test
+        //
+        byte[]              pubEnc = vKey.getEncoded();
+        KeyFactory          keyFac = KeyFactory.getInstance("ECGOST3410", "BC");
+        X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
+        ECPublicKey         pubKey = (ECPublicKey)keyFac.generatePublic(pubX509);
+
+        if (!pubKey.getW().equals(((ECPublicKey)vKey).getW()))
+        {
+            fail("public key encoding (Q test) failed");
+        }
+
+        if (!(pubKey.getParams() instanceof ECNamedCurveSpec))
+        {
+            fail("public key encoding not named curve");
+        }
+
+        //
+        // private key encoding test
+        //
+        byte[]              privEnc = sKey.getEncoded();
+        PKCS8EncodedKeySpec privPKCS8 = new PKCS8EncodedKeySpec(privEnc);
+        ECPrivateKey        privKey = (ECPrivateKey)keyFac.generatePrivate(privPKCS8);
+
+        if (!privKey.getS().equals(((ECPrivateKey)sKey).getS()))
+        {
+            fail("GOST private key encoding (S test) failed");
+        }
+
+        if (!(privKey.getParams() instanceof ECNamedCurveSpec))
+        {
+            fail("GOST private key encoding not named curve");
+        }
+
+        ECNamedCurveSpec privSpec = (ECNamedCurveSpec)privKey.getParams();
+        if (!privSpec.getName().equalsIgnoreCase(name)
+            && !privSpec.getName().equalsIgnoreCase((String)CURVE_ALIASES.get(name)))
+        {
+            fail("GOST private key encoding wrong named curve. Expected: " + name + " got " + privSpec.getName());
+        }
+    }
+
     public String getName()
     {
         return "NamedCurve";
@@ -242,6 +323,11 @@ public class NamedCurveTest
         for (Enumeration en = TeleTrusTNamedCurves.getNames(); en.hasMoreElements();)
         {
             testECDSA((String)en.nextElement());
+        }
+
+        for (Enumeration en = ECGOST3410NamedCurves.getNames(); en.hasMoreElements();)
+        {
+            testECGOST((String)en.nextElement());
         }
     }
     
