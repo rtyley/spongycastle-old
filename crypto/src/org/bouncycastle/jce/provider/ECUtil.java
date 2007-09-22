@@ -1,6 +1,7 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
@@ -159,6 +160,10 @@ public class ECUtil
             if (oid == null)
             {
                 oid = TeleTrusTNamedCurves.getOID(name);
+            }
+            if (oid == null)
+            {
+                oid = ECGOST3410NamedCurves.getOID(name);
             }
         }
 

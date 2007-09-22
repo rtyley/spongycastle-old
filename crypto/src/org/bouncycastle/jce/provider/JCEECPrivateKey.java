@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -175,16 +176,34 @@ public class JCEECPrivateKey
         {
             DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
             X9ECParameters      ecP = ECUtil.getNamedCurveByOid(oid);
-            EllipticCurve       ellipticCurve = EC5Util.convertCurve(ecP.getCurve(), ecP.getSeed());
 
-            ecSpec = new ECNamedCurveSpec(
-                    ECUtil.getCurveName(oid),
-                    ellipticCurve,
-                    new ECPoint(
-                            ecP.getG().getX().toBigInteger(),
-                            ecP.getG().getY().toBigInteger()),
-                    ecP.getN(),
-                    ecP.getH());
+            if (ecP == null) // GOST Curve
+            {
+                ECDomainParameters gParam = ECGOST3410NamedCurves.getByOID(oid);
+                EllipticCurve ellipticCurve = EC5Util.convertCurve(gParam.getCurve(), gParam.getSeed());
+
+                ecSpec = new ECNamedCurveSpec(
+                        ECGOST3410NamedCurves.getName(oid),
+                        ellipticCurve,
+                        new ECPoint(
+                                gParam.getG().getX().toBigInteger(),
+                                gParam.getG().getY().toBigInteger()),
+                        gParam.getN(),
+                        gParam.getH());
+            }
+            else
+            {
+                EllipticCurve ellipticCurve = EC5Util.convertCurve(ecP.getCurve(), ecP.getSeed());
+
+                ecSpec = new ECNamedCurveSpec(
+                        ECUtil.getCurveName(oid),
+                        ellipticCurve,
+                        new ECPoint(
+                                ecP.getG().getX().toBigInteger(),
+                                ecP.getG().getY().toBigInteger()),
+                        ecP.getN(),
+                        ecP.getH());
+            }
         }
         else if (params.isImplicitlyCA())
         {
