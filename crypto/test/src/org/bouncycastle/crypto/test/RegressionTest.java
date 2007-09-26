@@ -91,6 +91,8 @@ public class RegressionTest
         new HCFamilyTest(),
         new ISAACTest(),
         new NoekeonTest(),
+        new VMPCKSA3Test(),
+        new VMPCTest(),
         //new NaccacheSternTest(),
         new NullTest()
     };

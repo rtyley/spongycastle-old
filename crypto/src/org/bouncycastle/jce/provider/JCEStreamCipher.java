@@ -15,6 +15,8 @@ import org.bouncycastle.crypto.engines.RC4Engine;
 import org.bouncycastle.crypto.engines.Salsa20Engine;
 import org.bouncycastle.crypto.engines.SkipjackEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
+import org.bouncycastle.crypto.engines.VMPCEngine;
+import org.bouncycastle.crypto.engines.VMPCKSA3Engine;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -586,6 +588,30 @@ public class JCEStreamCipher
         public HC256()
         {
             super(new HC256Engine(), 32);
+        }
+    }
+
+    /**
+     * VMPC
+     */
+    static public class VMPC
+        extends JCEStreamCipher
+    {
+        public VMPC()
+        {
+            super(new VMPCEngine(), 16);
+        }
+    }
+
+    /**
+     * VMPC-KSA3
+     */
+    static public class VMPCKSA3
+        extends JCEStreamCipher
+    {
+        public VMPCKSA3()
+        {
+            super(new VMPCKSA3Engine(), 16);
         }
     }
 }

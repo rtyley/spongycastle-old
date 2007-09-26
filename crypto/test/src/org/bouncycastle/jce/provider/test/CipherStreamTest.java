@@ -292,6 +292,12 @@ public class CipherStreamTest
         runTest("HC256");
         testException("HC256");
         testAlgorithm("HC256", HCK256A, HCIV, HCIN, HC256A);
+        runTest("VMPC");
+        testException("VMPC");
+        //testAlgorithm("VMPC", a, iv, in, a);
+        runTest("VMPC-KSA3");
+        testException("VMPC-KSA3");
+        //testAlgorithm("VMPC-KSA3", a, iv, in, a);
         runTest("DES/ECB/PKCS7Padding");
         runTest("DES/CFB8/NoPadding");
     }
