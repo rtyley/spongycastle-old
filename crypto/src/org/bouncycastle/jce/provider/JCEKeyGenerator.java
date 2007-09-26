@@ -398,6 +398,30 @@ public class JCEKeyGenerator
         }
     }
 
+    /**
+     * VMPC
+     */
+    public static class VMPC
+        extends JCEKeyGenerator
+    {
+        public VMPC()
+        {
+            super("VMPC", 128, new CipherKeyGenerator());
+        }
+    }
+
+    /**
+     * VMPC-KSA3
+     */
+    public static class VMPCKSA3
+        extends JCEKeyGenerator
+    {
+        public VMPCKSA3()
+        {
+            super("VMPC-KSA3", 128, new CipherKeyGenerator());
+        }
+    }
+
     // HMAC Related secret keys..
   
     /**
