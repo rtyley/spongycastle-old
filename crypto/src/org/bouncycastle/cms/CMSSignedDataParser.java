@@ -156,11 +156,15 @@ public class CMSSignedDataParser
                 try
                 {
                     String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(id.getObjectId().toString());
-                    MessageDigest dig = MessageDigest.getInstance(digestName);
+                    MessageDigest dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, null);
 
                     this._digests.put(digestName, dig);
                 }
                 catch (NoSuchAlgorithmException e)
+                {
+                     //  ignore
+                }
+                catch (NoSuchProviderException e)
                 {
                      //  ignore
                 }
