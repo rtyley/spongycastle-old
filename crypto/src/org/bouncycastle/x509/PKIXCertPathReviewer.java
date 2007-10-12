@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -35,6 +36,7 @@ import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
 import org.bouncycastle.jce.provider.PKIXNameConstraints;
 import org.bouncycastle.jce.provider.PKIXPolicyNode;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
@@ -869,9 +871,49 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     addError(msg,index);
                 }
             }
+            else if (isSelfIssued(cert))
+            {
+                try
+                {
+                    cert.verify(cert.getPublicKey(), "BC");
+                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.rootKeyIsValidButNotATrustAnchor");
+                    addError(msg, index);
+                }
+                catch (GeneralSecurityException ex)
+                {
+                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.signatureNotVerified",
+                            new Object[] {ex.getMessage(),ex,ex.getClass().getName()}); 
+                    addError(msg,index);
+                }
+            }
             else
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.NoIssuerPublicKey");
+                // if there is an authority key extension add the serial and issuer of the missing certificate
+                byte[] akiBytes = cert.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
+                if (akiBytes != null)
+                {
+                    try
+                    {
+                        AuthorityKeyIdentifier aki = (AuthorityKeyIdentifier) X509ExtensionUtil.fromExtensionValue(akiBytes);
+                        GeneralNames issuerNames = aki.getAuthorityCertIssuer();
+                        if (issuerNames != null)
+                        {
+                            GeneralName name = issuerNames.getNames()[0];
+                            BigInteger serial = aki.getAuthorityCertSerialNumber(); 
+                            if (serial != null)
+                            {
+                                Object[] extraArgs = {new LocaleString(RESOURCE_NAME, "missingIssuer"), " \"", name , 
+                                        "\" ", new LocaleString(RESOURCE_NAME, "missingSerial") , " ", serial};
+                                msg.setExtraArguments(extraArgs);
+                            }
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        // ignore
+                    }
+                }
                 addError(msg,index);
             }
 
