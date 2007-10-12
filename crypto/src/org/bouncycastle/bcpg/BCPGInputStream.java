@@ -1,6 +1,8 @@
 package org.bouncycastle.bcpg;
 
-import java.io.*;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * reader for PGP objects
@@ -312,7 +314,7 @@ public class BCPGInputStream
         {
             int avail = in.available();
 
-            if (avail <= dataLength)
+            if (avail <= dataLength || dataLength < 0)
             {
                 return avail;
             }
@@ -361,9 +363,9 @@ public class BCPGInputStream
         public int read(byte[] buf, int offset, int len)
             throws IOException
         {
-            if (dataLength > 0)
+            if (dataLength != 0)
             {
-                int readLen = (dataLength > len) ? len : dataLength;
+                int readLen = (dataLength > len || dataLength < 0) ? len : dataLength;
                 
                 readLen = in.read(buf, offset, readLen);
 
@@ -387,7 +389,7 @@ public class BCPGInputStream
         public int read()
             throws IOException
         {
-            if (dataLength > 0)
+            if (dataLength != 0)
             {
                 dataLength--;
                 return in.read();
