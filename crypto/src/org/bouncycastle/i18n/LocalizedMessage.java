@@ -420,14 +420,15 @@ public class LocalizedMessage
         {
             if (filter != null)
             {
+                Object o = (null == obj) ? "null" : obj;
                 switch (type)
                 {
                 case NO_FILTER:
-                    return obj;
+                    return o;
                 case FILTER:
-                    return filter.doFilter(obj.toString());
+                    return filter.doFilter(o.toString());
                 case FILTER_URL:
-                    return filter.doFilterUrl(obj.toString());
+                    return filter.doFilterUrl(o.toString());
                 default:
                     return null;
                 }
