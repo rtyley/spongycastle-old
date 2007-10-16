@@ -286,15 +286,17 @@ abstract public class ASN1Set
         if (set.size() > 1)
         {
             boolean    swapped = true;
+            int        lastSwap = set.size() - 1;
 
             while (swapped)
             {
                 int    index = 0;
+                int    swapIndex = 0;
                 byte[] a = getEncoded((DEREncodable)set.elementAt(0));
                 
                 swapped = false;
-                
-                while (index != set.size() - 1)
+
+                while (index != lastSwap)
                 {
                     byte[] b = getEncoded((DEREncodable)set.elementAt(index + 1));
 
@@ -310,10 +312,13 @@ abstract public class ASN1Set
                         set.setElementAt(o, index + 1);
 
                         swapped = true;
+                        swapIndex = index;
                     }
 
                     index++;
                 }
+
+                lastSwap = swapIndex;
             }
         }
     }
