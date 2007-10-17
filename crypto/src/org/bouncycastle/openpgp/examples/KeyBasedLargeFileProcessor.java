@@ -106,26 +106,23 @@ public class KeyBasedLargeFileProcessor
     }
     
     /**
-     * Load a secret key ring collection from keyIn and find the secret key corresponding to
+     * Search a secret key ring collection for a secret key corresponding to
      * keyID if it exists.
      * 
-     * @param keyIn input stream representing a key ring collection.
+     * @param pgpSec a secret key ring collection.
      * @param keyID keyID we want.
      * @param pass passphrase to decrypt secret key with.
      * @return
-     * @throws IOException
      * @throws PGPException
      * @throws NoSuchProviderException
      */
     private static PGPPrivateKey findSecretKey(
-        InputStream    keyIn,
-        long           keyID,
-        char[]         pass)
-        throws IOException, PGPException, NoSuchProviderException
+        PGPSecretKeyRingCollection  pgpSec,
+        long                        keyID,
+        char[]                      pass)
+        throws PGPException, NoSuchProviderException
     {    
-        PGPSecretKeyRingCollection    pgpSec = new PGPSecretKeyRingCollection(
-                                                       PGPUtil.getDecoderStream(keyIn));                                                                 
-        PGPSecretKey                  pgpSecKey = pgpSec.getSecretKey(keyID);
+        PGPSecretKey pgpSecKey = pgpSec.getSecretKey(keyID);
         
         if (pgpSecKey == null)
         {
@@ -170,12 +167,14 @@ public class KeyBasedLargeFileProcessor
             Iterator                    it = enc.getEncryptedDataObjects();
             PGPPrivateKey               sKey = null;
             PGPPublicKeyEncryptedData   pbe = null;
+            PGPSecretKeyRingCollection  pgpSec = new PGPSecretKeyRingCollection(
+                PGPUtil.getDecoderStream(keyIn));                                                                 
             
             while (sKey == null && it.hasNext())
             {
                 pbe = (PGPPublicKeyEncryptedData)it.next();
                 
-                sKey = findSecretKey(keyIn, pbe.getKeyID(), passwd);
+                sKey = findSecretKey(pgpSec, pbe.getKeyID(), passwd);
             }
             
             if (sKey == null)
