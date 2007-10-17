@@ -292,7 +292,7 @@ public class BCPGInputStream
     /**
      * a stream that overlays our input stream, allowing the user to only read a segment of it.
      *
-     * NB: dataLength will be zero if the segment length is in the upper range above 2**31.
+     * NB: dataLength will be negative if the segment length is in the upper range above 2**31.
      */
     private static class PartialInputStream
         extends InputStream
