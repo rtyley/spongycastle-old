@@ -365,46 +365,42 @@ public class BCPGInputStream
         public int read(byte[] buf, int offset, int len)
             throws IOException
         {
-            if (dataLength != 0)
+            do
             {
-                int readLen = (dataLength > len || dataLength < 0) ? len : dataLength;
-                
-                readLen = in.read(buf, offset, readLen);
-
-                dataLength -= readLen;
-               
-                return readLen;
-            }
-            else if (partial)
-            {
-                if (loadDataLength() < 0)
+                if (dataLength != 0)
                 {
-                    return -1;
+                    int readLen = (dataLength > len || dataLength < 0) ? len : dataLength;
+                    readLen = in.read(buf, offset, readLen);
+                    if (readLen < 0)
+                    {
+                        throw new EOFException("premature end of stream in PartialInputStream");
+                    }
+                    dataLength -= readLen;
+                    return readLen;
                 }
-                
-                return this.read(buf, offset, len);
             }
-            
+            while (partial && loadDataLength() >= 0);
+
             return -1;
         }
         
         public int read()
             throws IOException
         {
-            if (dataLength != 0)
+            do
             {
-                dataLength--;
-                return in.read();
-            }
-            else if (partial)
-            {
-                if (loadDataLength() < 0)
+                if (dataLength != 0)
                 {
-                    return -1;
+                    int ch = in.read();
+                    if (ch < 0)
+                    {
+                        throw new EOFException("premature end of stream in PartialInputStream");
+                    }
+                    dataLength--;
+                    return ch;
                 }
-            
-                return this.read();
             }
+            while (partial && loadDataLength() >= 0);
 
             return -1;
         }
