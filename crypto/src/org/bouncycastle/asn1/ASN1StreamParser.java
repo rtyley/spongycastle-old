@@ -188,9 +188,9 @@ public class ASN1StreamParser
             case DERTags.OCTET_STRING:
                 return new DEROctetString(defIn.toByteArray());
             case DERTags.SEQUENCE:
-                return new DERSequence(loadVector(defIn.toByteArray())).parser();
+                return new DERSequence(loadVector(defIn, length)).parser();
             case DERTags.SET:
-                return new DERSet(loadVector(defIn.toByteArray())).parser();
+                return new DERSet(loadVector(defIn, length)).parser();
             default:
                 return new BERTaggedObjectParser(tag, tagNo, defIn);
             }
@@ -205,10 +205,10 @@ public class ASN1StreamParser
         }
     }
 
-    private ASN1EncodableVector loadVector(byte[] bytes)
+    private ASN1EncodableVector loadVector(InputStream in, int length)
         throws IOException
     {
-        ASN1InputStream         aIn = new ASN1InputStream(bytes);
+        ASN1InputStream         aIn = new ASN1InputStream(in, length);
         ASN1EncodableVector     v = new ASN1EncodableVector();
 
         DERObject obj;
