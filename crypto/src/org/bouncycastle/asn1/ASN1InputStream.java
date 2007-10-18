@@ -166,33 +166,17 @@ public class ASN1InputStream
         switch (tag)
         {
         case NULL:
-            return new DERNull();   
+            return DERNull.INSTANCE;   
         case SEQUENCE | CONSTRUCTED:
-            ASN1InputStream         aIn = new ASN1InputStream(bytes);
-            ASN1EncodableVector     v = new ASN1EncodableVector();
-
-            DERObject   obj = aIn.readObject();
-
-            while (obj != null)
-            {
-                v.add(obj);
-                obj = aIn.readObject();
-            }
-
+        {
+            ASN1EncodableVector v = buildDerEncodableVector(bytes);
             return new DERSequence(v);
+        }
         case SET | CONSTRUCTED:
-            aIn = new ASN1InputStream(bytes);
-            v = new ASN1EncodableVector();
-
-            obj = aIn.readObject();
-
-            while (obj != null)
-            {
-                v.add(obj);
-                obj = aIn.readObject();
-            }
-
+        {
+            ASN1EncodableVector v = buildDerEncodableVector(bytes);
             return new DERSet(v, false);
+        }
         case BOOLEAN:
             return new DERBoolean(bytes);
         case INTEGER:
@@ -202,12 +186,14 @@ public class ASN1InputStream
         case OBJECT_IDENTIFIER:
             return new DERObjectIdentifier(bytes);
         case BIT_STRING:
+        {
             int     padBits = bytes[0];
             byte[]  data = new byte[bytes.length - 1];
 
             System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
 
             return new DERBitString(data, padBits);
+        }
         case NUMERIC_STRING:
             return new DERNumericString(bytes);
         case UTF8_STRING:
@@ -235,33 +221,33 @@ public class ASN1InputStream
         case GENERALIZED_TIME:
             return new DERGeneralizedTime(bytes);
         default:
+        {
             //
             // with tagged object tag number is bottom 5 bits
             //
             
             if ((tag & TAGGED) != 0)  
             {
+                boolean isImplicit = ((tag & CONSTRUCTED) == 0);
+
                 if (bytes.length == 0)        // empty tag!
                 {
-                    if ((tag & CONSTRUCTED) == 0)
-                    {
-                        return new DERTaggedObject(false, tagNo, new DERNull());
-                    }
-                    else
-                    {
-                        return new DERTaggedObject(false, tagNo, new DERSequence());
-                    }
+                    DEREncodable obj = isImplicit
+                        ?   DERNull.INSTANCE
+                        :   new DERSequence();
+
+                    return new DERTaggedObject(false, tagNo, obj);
                 }
 
                 //
                 // simple type - implicit... return an octet string
                 //
-                if ((tag & CONSTRUCTED) == 0)
+                if (isImplicit)
                 {
                     return new DERTaggedObject(false, tagNo, new DEROctetString(bytes));
                 }
 
-                aIn = new ASN1InputStream(bytes);
+                ASN1InputStream aIn = new ASN1InputStream(bytes);
 
                 DEREncodable dObj = aIn.readObject();
 
@@ -277,7 +263,7 @@ public class ASN1InputStream
                 //
                 // another implicit object, we'll create a sequence...
                 //
-                v = new ASN1EncodableVector();
+                ASN1EncodableVector v = new ASN1EncodableVector();
 
                 while (dObj != null)
                 {
@@ -289,6 +275,7 @@ public class ASN1InputStream
             }
 
             return new DERUnknownTag(tag, bytes);
+        }
         }
     }
 
@@ -355,6 +342,28 @@ public class ASN1InputStream
         return new BERConstructedOctetString(octs);
     }
 
+    private ASN1EncodableVector buildEncodableVector(DERObject sentinel)
+        throws IOException
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+        DERObject o;
+
+        while ((o = readObject()) != sentinel)
+        {
+            v.add(o);
+        }
+
+        return v;
+    }
+
+    private static ASN1EncodableVector buildDerEncodableVector(byte[] input)
+        throws IOException
+    {
+        ASN1InputStream aIn = new ASN1InputStream(input);
+
+        return aIn.buildEncodableVector(null);
+    }
+
     public DERObject readObject()
         throws IOException
     {
@@ -385,40 +394,21 @@ public class ASN1InputStream
             switch (tag)
             {
             case NULL:
-                return new BERNull();
+                return BERNull.INSTANCE;
             case SEQUENCE | CONSTRUCTED:
-                ASN1EncodableVector  v = new ASN1EncodableVector();
-    
-                for (;;)
-                {
-                    DERObject   obj = readObject();
-
-                    if (obj == END_OF_STREAM)
-                    {
-                        break;
-                    }
-
-                    v.add(obj);
-                }
+            {
+                ASN1EncodableVector v = buildEncodableVector(END_OF_STREAM);
                 return new BERSequence(v);
+            }
             case SET | CONSTRUCTED:
-                v = new ASN1EncodableVector();
-    
-                for (;;)
-                {
-                    DERObject   obj = readObject();
-
-                    if (obj == END_OF_STREAM)
-                    {
-                        break;
-                    }
-
-                    v.add(obj);
-                }
+            {
+                ASN1EncodableVector v = buildEncodableVector(END_OF_STREAM);
                 return new BERSet(v, false);
+            }
             case OCTET_STRING | CONSTRUCTED:
                 return buildConstructedOctetString();
             default:
+            {
                 //
                 // with tagged object tag number is bottom 5 bits
                 //
@@ -429,7 +419,7 @@ public class ASN1InputStream
                     //
                     if ((tag & CONSTRUCTED) == 0)
                     {
-                        byte[]  bytes = readIndefiniteLengthFully();
+                        byte[] bytes = readIndefiniteLengthFully();
 
                         return new BERTaggedObject(false, tagNo, new DEROctetString(bytes));
                     }
@@ -437,14 +427,14 @@ public class ASN1InputStream
                     //
                     // either constructed or explicitly tagged
                     //
-                    DERObject        dObj = readObject();
+                    DERObject dObj = readObject();
 
                     if (dObj == END_OF_STREAM)     // empty tag!
                     {
                         return new DERTaggedObject(tagNo);
                     }
 
-                    DERObject       next = readObject();
+                    DERObject next = readObject();
 
                     //
                     // explicitly tagged (probably!) - if it isn't we'd have to
@@ -458,7 +448,7 @@ public class ASN1InputStream
                     //
                     // another implicit object, we'll create a sequence...
                     //
-                    v = new ASN1EncodableVector();
+                    ASN1EncodableVector v = new ASN1EncodableVector();
 
                     v.add(dObj);
 
@@ -473,6 +463,7 @@ public class ASN1InputStream
                 }
 
                 throw new IOException("unknown BER object encountered");
+            }
             }
         }
         else
