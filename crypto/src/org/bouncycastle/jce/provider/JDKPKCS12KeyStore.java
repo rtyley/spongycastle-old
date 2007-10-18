@@ -480,9 +480,9 @@ public class JDKPKCS12KeyStore
         Certificate cert) 
         throws KeyStoreException
     {
-        if (certs.get(alias) != null)
+        if (keys.get(alias) != null)
         {
-            throw new KeyStoreException("There is already a certificate with the name " + alias + ".");
+            throw new KeyStoreException("There is a key entry with the name " + alias + ".");
         }
 
         certs.put(alias, cert);
@@ -510,9 +510,9 @@ public class JDKPKCS12KeyStore
             throw new KeyStoreException("no certificate chain for private key");
         }
 
-        if (keys.get(alias) != null && !key.equals(keys.get(alias)))
+        if (keys.get(alias) != null)
         {
-            throw new KeyStoreException("There is already a key with the name " + alias + ".");
+            engineDeleteEntry(alias);
         }
 
         keys.put(alias, key);

@@ -633,7 +633,7 @@ public class JDKKeyStore
 
         if (entry != null && entry.getType() != CERTIFICATE)
         {
-            throw new KeyStoreException("key store already has an entry with alias " + alias);
+            throw new KeyStoreException("key store already has a key entry with alias " + alias);
         }
 
         table.put(alias, new StoreEntry(alias, cert));
@@ -645,13 +645,6 @@ public class JDKKeyStore
         Certificate[] chain) 
         throws KeyStoreException
     {
-        StoreEntry  entry = (StoreEntry)table.get(alias);
-
-        if (entry != null)
-        {
-            throw new KeyStoreException("key store already has an entry with alias " + alias);
-        }
-
         table.put(alias, new StoreEntry(alias, key, chain));
     }
 
@@ -665,13 +658,6 @@ public class JDKKeyStore
         if ((key instanceof PrivateKey) && (chain == null))
         {
             throw new KeyStoreException("no certificate chain for private key");
-        }
-
-        StoreEntry  entry = (StoreEntry)table.get(alias);
-
-        if (entry != null && entry.getType() == CERTIFICATE)
-        {
-            throw new KeyStoreException("key store already has an entry with alias " + alias);
         }
 
         try
