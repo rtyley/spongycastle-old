@@ -211,12 +211,10 @@ public class ASN1StreamParser
         ASN1InputStream         aIn = new ASN1InputStream(bytes);
         ASN1EncodableVector     v = new ASN1EncodableVector();
 
-        DERObject   obj = aIn.readObject();
-
-        while (obj != null)
+        DERObject obj;
+        while ((obj = aIn.readObject()) != null)
         {
             v.add(obj);
-            obj = aIn.readObject();
         }
 
         return v;
