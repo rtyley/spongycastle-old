@@ -102,7 +102,7 @@ public class PGPLiteralDataGenerator implements StreamGenerator
     
     /**
      * Open a literal data packet, returning a stream to store the data inside
-     * the packet as an indefiinite length stream. The stream is written out as a 
+     * the packet as an indefinite length stream. The stream is written out as a 
      * series of partial packets with a chunk size determined by the size of the
      * passed in buffer.The stream can be closed off by either calling close()
      * on the stream or close() on the generator.
