@@ -460,7 +460,7 @@ public class LocalizedMessage
     
     public String toString()
     {
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         sb.append("Resource: \"").append(resource);
         sb.append("\" Id: \"").append(id).append("\"");
         sb.append(" Arguments: ").append(arguments.getArguments().length).append(" normal, ")
