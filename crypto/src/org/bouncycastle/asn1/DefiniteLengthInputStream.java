@@ -44,6 +44,26 @@ class DefiniteLengthInputStream
         return -1;
     }
 
+    public int read(byte[] buf, int off, int len)
+        throws IOException
+    {
+        if (_length > 0)
+        {
+            int toRead = Math.min(len, _length);
+            int numRead = _in.read(buf, off, toRead);
+
+            if (numRead < 0)
+                throw new EOFException();
+
+            _length -= numRead;
+            return numRead;
+        }
+
+        setParentEofDetect(true);
+
+        return -1;
+    }
+
     byte[] toByteArray()
         throws IOException
     {
