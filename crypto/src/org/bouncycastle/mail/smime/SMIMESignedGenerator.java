@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
+import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 import org.bouncycastle.x509.X509Store;
 
@@ -88,6 +89,7 @@ public class SMIMESignedGenerator
 
     private List                _certStores = new ArrayList();
     private List                _signers = new ArrayList();
+    private List                _oldSigners = new ArrayList();
     private List                _attributeCerts = new ArrayList();
     private Map                 _digests = new HashMap();
     
@@ -162,6 +164,22 @@ public class SMIMESignedGenerator
         throws IllegalArgumentException
     {
         _signers.add(new Signer(key, cert, digestOID, signedAttr, unsignedAttr));
+    }
+
+    /**
+     * Add a store of precalculated signers to the generator.
+     *
+     * @param signerStore store of signers
+     */
+    public void addSigners(
+        SignerInformationStore signerStore)
+    {
+        Iterator    it = signerStore.getSigners().iterator();
+
+        while (it.hasNext())
+        {
+            _oldSigners.add(it.next());
+        }
     }
 
     /**
@@ -554,6 +572,8 @@ public class SMIMESignedGenerator
                 gen.addSigner(signer.getKey(), signer.getCert(), signer.getDigestOID(), signer.getSignedAttr(), signer.getUnsignedAttr(), _provider);
             }
 
+            gen.addSigners(new SignerInformationStore(_oldSigners));
+            
             return gen;
         }
 

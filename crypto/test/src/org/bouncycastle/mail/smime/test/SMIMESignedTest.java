@@ -355,7 +355,36 @@ public class SMIMESignedTest
 
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
     }
-    
+
+    public void testSHA1WithRSAAddSigners()
+        throws Exception
+    {
+        MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA1, msg);
+        SMIMESigned   s = new SMIMESigned(smm);
+
+                List certList = new ArrayList();
+
+        certList.add(_signCert);
+        certList.add(_origCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+
+        gen.addSigners(s.getSignerInfos());
+
+        gen.addCertificatesAndCRLs(certs);
+
+        SMIMESigned newS =  new SMIMESigned(gen.generate(msg, "BC"));
+
+        verifyMessageBytes(msg, newS.getContent());
+
+        verifySigners(newS.getCertificatesAndCRLs("Collection", "BC"), newS.getSignerInfos());
+    }
+
     public void testSHA1WithRSACanonicalization()
         throws Exception
     {
