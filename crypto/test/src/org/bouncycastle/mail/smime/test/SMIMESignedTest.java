@@ -370,8 +370,6 @@ public class SMIMESignedTest
         CertStore certs = CertStore.getInstance("Collection",
                         new CollectionCertStoreParameters(certList), "BC");
 
-        ASN1EncodableVector signedAttrs = generateSignedAttributes();
-
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
 
         gen.addSigners(s.getSignerInfos());
