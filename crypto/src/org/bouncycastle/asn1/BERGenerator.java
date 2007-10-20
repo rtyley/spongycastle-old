@@ -46,10 +46,10 @@ public class BERGenerator
         int tag) 
         throws IOException
     {
-        int tagNum = _tagNo | DERTags.TAGGED;
-        
         if (_tagged)
         {
+            int tagNum = _tagNo | DERTags.TAGGED;
+
             if (_isExplicit)
             {
                 writeHdr(tagNum | DERTags.CONSTRUCTED);
