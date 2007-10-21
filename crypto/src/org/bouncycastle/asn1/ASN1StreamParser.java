@@ -75,12 +75,12 @@ public class ASN1StreamParser
 
             if (length < 0)
             {
-                throw new IOException("corrupted steam - negative length found");
+                throw new IOException("corrupted stream - negative length found");
             }
 
             if (length >= _limit)   // after all we must have read at least 1 byte
             {
-                throw new IOException("corrupted steam - out of bounds length found");
+                throw new IOException("corrupted stream - out of bounds length found");
             }
         }
 

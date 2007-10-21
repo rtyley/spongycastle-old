@@ -45,7 +45,7 @@ public class InputStreamTest
         }
         catch (IOException e)
         {
-            if (!e.getMessage().equals("corrupted steam - negative length found"))
+            if (!e.getMessage().equals("corrupted stream - negative length found"))
             {
                 fail("wrong exception: " + e.getMessage());
             }
@@ -60,7 +60,7 @@ public class InputStreamTest
         }
         catch (IOException e)
         {
-            if (!e.getMessage().equals("corrupted steam - out of bounds length found"))
+            if (!e.getMessage().equals("corrupted stream - out of bounds length found"))
             {
                 fail("wrong exception: " + e.getMessage());
             }

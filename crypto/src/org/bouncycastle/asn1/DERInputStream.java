@@ -62,7 +62,7 @@ public class DERInputStream
             
             if (length < 0)
             {
-                throw new IOException("corrupted steam - negative length found");
+                throw new IOException("corrupted stream - negative length found");
             }
         }
 
