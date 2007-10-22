@@ -3,6 +3,9 @@ package org.bouncycastle.sasn1;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * @deprecated use corresponding classes in org.bouncycastle.asn1.
+ */
 class ConstructedOctetStream
     extends InputStream
 {
