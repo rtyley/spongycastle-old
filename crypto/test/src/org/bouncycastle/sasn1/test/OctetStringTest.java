@@ -23,6 +23,9 @@ import org.bouncycastle.sasn1.DerSequenceGenerator;
 import org.bouncycastle.sasn1.cms.CompressedDataParser;
 import org.bouncycastle.sasn1.cms.ContentInfoParser;
 
+/**
+ * @deprecated obsolete test case
+ */
 public class OctetStringTest 
     extends TestCase 
 {
