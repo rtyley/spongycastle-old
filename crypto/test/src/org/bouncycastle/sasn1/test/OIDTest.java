@@ -13,6 +13,8 @@ import org.bouncycastle.util.encoders.Hex;
 
 /**
  * X.690 test example
+ *
+ * @deprecated obsolete test case
  */
 public class OIDTest
     extends TestCase

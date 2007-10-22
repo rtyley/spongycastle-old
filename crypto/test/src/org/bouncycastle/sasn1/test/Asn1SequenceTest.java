@@ -16,6 +16,9 @@ import org.bouncycastle.sasn1.BerSequenceGenerator;
 import org.bouncycastle.sasn1.DerSequenceGenerator;
 import org.bouncycastle.util.encoders.Hex;
 
+/**
+ * @deprecated obsolete test case
+ */
 public class Asn1SequenceTest 
     extends TestCase 
 {

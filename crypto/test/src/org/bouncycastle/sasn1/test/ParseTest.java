@@ -16,6 +16,9 @@ import org.bouncycastle.sasn1.cms.EnvelopedDataParser;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
+/**
+ * @deprecated obsolete test case
+ */
 public class ParseTest
     extends TestCase
 {

@@ -3,6 +3,9 @@ package org.bouncycastle.sasn1.test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+/**
+ * @deprecated obsolete test case
+ */
 public class AllTests
 {
     public static void main(String[] args)
