@@ -1,7 +1,5 @@
 package org.bouncycastle.jce.provider.symmetric;
 
-import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
-
 import java.util.HashMap;
 
 public class NoekeonMappings

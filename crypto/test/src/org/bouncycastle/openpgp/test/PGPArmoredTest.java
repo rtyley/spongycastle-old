@@ -2,7 +2,6 @@ package org.bouncycastle.openpgp.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.ArmoredInputStream;
