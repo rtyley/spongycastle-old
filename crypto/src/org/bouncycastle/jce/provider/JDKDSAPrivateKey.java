@@ -20,8 +20,6 @@ import java.security.interfaces.DSAPrivateKey;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.DSAPrivateKeySpec;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 public class JDKDSAPrivateKey
     implements DSAPrivateKey, PKCS12BagAttributeCarrier

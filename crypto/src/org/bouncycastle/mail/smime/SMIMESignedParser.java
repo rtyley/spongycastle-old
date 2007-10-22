@@ -3,7 +3,6 @@ package org.bouncycastle.mail.smime;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSTypedStream;
-import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
