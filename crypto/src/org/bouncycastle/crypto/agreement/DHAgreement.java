@@ -70,7 +70,7 @@ public class DHAgreement
     }
 
     /**
-     * given a message from a given party and the coresponding public key
+     * given a message from a given party and the corresponding public key,
      * calculate the next message in the agreement sequence. In this case
      * this will represent the shared secret.
      */
