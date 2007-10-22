@@ -1,7 +1,6 @@
 package org.bouncycastle.crypto.agreement;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.CipherParameters;
@@ -23,7 +22,6 @@ public class DHBasicAgreement
 {
     private DHPrivateKeyParameters  key;
     private DHParameters            dhParams;
-    private SecureRandom            random;
 
     public void init(
         CipherParameters    param)
@@ -32,18 +30,14 @@ public class DHBasicAgreement
 
         if (param instanceof ParametersWithRandom)
         {
-            ParametersWithRandom    rParam = (ParametersWithRandom)param;
-
-            this.random = rParam.getRandom();
+            ParametersWithRandom rParam = (ParametersWithRandom)param;
             kParam = (AsymmetricKeyParameter)rParam.getParameters();
         }
         else
         {
-            this.random = new SecureRandom();
             kParam = (AsymmetricKeyParameter)param;
         }
 
-        
         if (!(kParam instanceof DHPrivateKeyParameters))
         {
             throw new IllegalArgumentException("DHEngine expects DHPrivateKeyParameters");
