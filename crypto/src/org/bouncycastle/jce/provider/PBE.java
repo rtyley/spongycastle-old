@@ -37,7 +37,7 @@ public interface PBE
     static final int        OPENSSL     = 3;
 
     /**
-     * uses the appropriate mixer to generate the key and IV if neccessary.
+     * uses the appropriate mixer to generate the key and IV if necessary.
      */
     static class Util
     {
@@ -97,7 +97,7 @@ public interface PBE
         }
 
         /**
-         * construct a key and iv (if neccessary) suitable for use with a 
+         * construct a key and iv (if necessary) suitable for use with a 
          * Cipher.
          */
         static CipherParameters makePBEParameters(
@@ -192,7 +192,7 @@ public interface PBE
         }
     
         /**
-         * construct a key and iv (if neccessary) suitable for use with a 
+         * construct a key and iv (if necessary) suitable for use with a 
          * Cipher.
          */
         static CipherParameters makePBEParameters(
