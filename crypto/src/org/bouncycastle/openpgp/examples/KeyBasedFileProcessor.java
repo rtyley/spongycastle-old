@@ -69,36 +69,29 @@ public class KeyBasedFileProcessor
         // we just loop through the collection till we find a key suitable for encryption, in the real
         // world you would probably want to be a bit smarter about this.
         //
-        PGPPublicKey    key = null;
         
         //
         // iterate through the key rings.
         //
         Iterator rIt = pgpPub.getKeyRings();
         
-        while (key == null && rIt.hasNext())
+        while (rIt.hasNext())
         {
             PGPPublicKeyRing    kRing = (PGPPublicKeyRing)rIt.next();    
             Iterator                        kIt = kRing.getPublicKeys();
-            boolean                        encryptionKeyFound = false;
             
-            while (key == null && kIt.hasNext())
+            while (kIt.hasNext())
             {
                 PGPPublicKey    k = (PGPPublicKey)kIt.next();
                 
                 if (k.isEncryptionKey())
                 {
-                    key = k;
+                    return k;
                 }
             }
         }
         
-        if (key == null)
-        {
-            throw new IllegalArgumentException("Can't find encryption key in key ring.");
-        }
-        
-        return key;
+        throw new IllegalArgumentException("Can't find encryption key in key ring.");
     }
     
     /**
