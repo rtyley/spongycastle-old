@@ -153,30 +153,9 @@ public class JCEKeyGenerator
     public static class DESede3
         extends JCEKeyGenerator
     {
-        private boolean     keySizeSet = false;
-
         public DESede3()
         {
             super("DESede3", 192, new DESedeKeyGenerator());
-        }
-
-        protected void engineInit(
-            int             keySize,
-            SecureRandom    random)
-        {
-            super.engineInit(keySize, random);
-            keySizeSet = true;
-        }
-
-        protected SecretKey engineGenerateKey()
-        {
-            if (uninitialised)
-            {
-                engine.init(new KeyGenerationParameters(
-                                        new SecureRandom(), defaultKeySize));
-            }
-
-            return (SecretKey)(new SecretKeySpec(engine.generateKey(), algName));
         }
     }
 
