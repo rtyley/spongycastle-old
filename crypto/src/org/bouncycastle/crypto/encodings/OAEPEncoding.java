@@ -62,19 +62,15 @@ public class OAEPEncoding
         boolean             forEncryption,
         CipherParameters    param)
     {
-        AsymmetricKeyParameter  kParam;
-
         if (param instanceof ParametersWithRandom)
         {
             ParametersWithRandom  rParam = (ParametersWithRandom)param;
 
             this.random = rParam.getRandom();
-            kParam = (AsymmetricKeyParameter)rParam.getParameters();
         }
         else
         {   
             this.random = new SecureRandom();
-            kParam = (AsymmetricKeyParameter)param;
         }
 
         engine.init(forEncryption, param);
