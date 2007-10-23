@@ -285,11 +285,9 @@ public class CFBBlockCipherMac
     public void update(
         byte        in)
     {
-        int         resultLen = 0;
-
         if (bufOff == buf.length)
         {
-            resultLen = cipher.processBlock(buf, 0, mac, 0);
+            cipher.processBlock(buf, 0, mac, 0);
             bufOff = 0;
         }
 
