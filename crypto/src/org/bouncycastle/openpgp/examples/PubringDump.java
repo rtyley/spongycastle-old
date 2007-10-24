@@ -2,8 +2,6 @@ package org.bouncycastle.openpgp.examples;
 
 import java.io.*;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.Security;
 import java.util.Iterator;
 
