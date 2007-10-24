@@ -57,16 +57,13 @@ public class PubringDump
     {
         Security.addProvider(new BouncyCastleProvider());
         
-        PGPPublicKey pubKey = null;
-        PrivateKey privKey = null;
-        
         PGPUtil.setDefaultProvider("BC");
 
         //
         // Read the public key rings
         //
         PGPPublicKeyRingCollection    pubRings = new PGPPublicKeyRingCollection(
-                                                            PGPUtil.getDecoderStream(new FileInputStream(args[0])));
+            PGPUtil.getDecoderStream(new FileInputStream(args[0])));
 
         Iterator    rIt = pubRings.getKeyRings();
             
@@ -76,7 +73,7 @@ public class PubringDump
 
             try
             {
-                pubKey = pgpPub.getPublicKey();
+                pgpPub.getPublicKey();
             }
             catch (Exception e)
             {
@@ -84,9 +81,6 @@ public class PubringDump
                 continue;
             }
 
-            long        pgpKeyID = 0;
-            PublicKey   pKey = null;
-            
             Iterator    it = pgpPub.getPublicKeys();
             boolean     first = true;
             while (it.hasNext())
