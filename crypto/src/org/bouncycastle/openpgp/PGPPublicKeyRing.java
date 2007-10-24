@@ -96,7 +96,7 @@ public class PGPPublicKeyRing
     }
     
     /**
-     * Return the public key refered to by the passed in keyID if it
+     * Return the public key referred to by the passed in keyID if it
      * is present.
      * 
      * @param keyID
