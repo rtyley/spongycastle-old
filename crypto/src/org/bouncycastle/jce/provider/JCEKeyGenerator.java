@@ -46,9 +46,8 @@ public class JCEKeyGenerator
     {
         if (random != null)
         {
-            uninitialised = false;
-    
             engine.init(new KeyGenerationParameters(random, defaultKeySize));
+            uninitialised = false;
         }
     }
 
@@ -56,11 +55,10 @@ public class JCEKeyGenerator
         int             keySize,
         SecureRandom    random)
     {
-        uninitialised = false;
-
         try
         {
             engine.init(new KeyGenerationParameters(random, keySize));
+            uninitialised = false;
         }
         catch (IllegalArgumentException e)
         {
@@ -72,8 +70,8 @@ public class JCEKeyGenerator
     {
         if (uninitialised)
         {
-            engine.init(new KeyGenerationParameters(
-                                    new SecureRandom(), defaultKeySize));
+            engine.init(new KeyGenerationParameters(new SecureRandom(), defaultKeySize));
+            uninitialised = false;
         }
 
         return new SecretKeySpec(engine.generateKey(), algName);
@@ -124,8 +122,8 @@ public class JCEKeyGenerator
         {
             if (uninitialised)
             {
-                engine.init(new KeyGenerationParameters(
-                                        new SecureRandom(), defaultKeySize));
+                engine.init(new KeyGenerationParameters(new SecureRandom(), defaultKeySize));
+                uninitialised = false;
             }
 
             //
