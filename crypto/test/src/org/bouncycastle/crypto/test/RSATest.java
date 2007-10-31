@@ -409,6 +409,22 @@ public class RSATest
         {
             fail("failed key generation (1024) test");
         }
+
+        genParam = new RSAKeyGenerationParameters(
+            BigInteger.valueOf(0x11), new SecureRandom(), 16, 25);
+        pGen.init(genParam);
+
+        for (int i = 0; i < 100; ++i)
+        {
+            pair = pGen.generateKeyPair();
+            RSAPrivateCrtKeyParameters privKey = (RSAPrivateCrtKeyParameters) pair.getPrivate();
+            BigInteger pqDiff = privKey.getP().subtract(privKey.getQ()).abs();
+
+            if (pqDiff.bitLength() < 5)
+            {
+                fail("P and Q too close in RSA key pair");
+            }
+        }
         
         testOAEP(pubParameters, privParameters);
         testStrictPKCS1Length(pubParameters, privParameters);
