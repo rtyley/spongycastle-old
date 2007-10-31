@@ -32,8 +32,10 @@ public class RSAKeyPairGenerator
         //
         // p and q values should have a length of half the strength in bits
         //
-        int pbitlength = (param.getStrength() + 1) / 2;
-        int qbitlength = (param.getStrength() - pbitlength);
+        int strength = param.getStrength();
+        int pbitlength = (strength + 1) / 2;
+        int qbitlength = strength - pbitlength;
+        int mindiffbits = strength / 3;
 
         e = param.getPublicExponent();
 
@@ -71,8 +73,8 @@ public class RSAKeyPairGenerator
             for (;;)
             {
                 q = new BigInteger(qbitlength, 1, param.getRandom());
-                
-                if (q.equals(p))
+
+                if (q.subtract(p).abs().bitLength() < mindiffbits)
                 {
                     continue;
                 }
