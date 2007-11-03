@@ -2,6 +2,11 @@ package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 
@@ -16,8 +21,10 @@ import java.util.Enumeration;
 public class JCERSAPrivateKey
     implements RSAPrivateKey, PKCS12BagAttributeCarrier
 {
-    static final long serialVersionUID = 5110188922551353628L;   
-    
+    static final long serialVersionUID = 5110188922551353628L;
+
+    private static BigInteger ZERO = BigInteger.valueOf(0);
+
     protected BigInteger modulus;
     protected BigInteger privateExponent;
 
@@ -70,7 +77,9 @@ public class JCERSAPrivateKey
 
     public byte[] getEncoded()
     {
-        return null;
+        PrivateKeyInfo info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull()), new RSAPrivateKeyStructure(getModulus(), ZERO, getPrivateExponent(), ZERO, ZERO, ZERO, ZERO, ZERO).getDERObject());
+
+        return info.getDEREncoded();
     }
 
     public boolean equals(Object o)
