@@ -72,7 +72,7 @@ public class JCERSAPrivateKey
 
     public String getFormat()
     {
-        return "NULL";
+        return "PKCS#8";
     }
 
     public byte[] getEncoded()
