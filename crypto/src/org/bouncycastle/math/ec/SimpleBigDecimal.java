@@ -199,12 +199,12 @@ class SimpleBigDecimal extends Number
         BigInteger fract = bigInt.subtract(floorBigInt.shiftLeft(scale));
         if (bigInt.signum() == -1)
         {
-            fract = BigInteger.ONE.shiftLeft(scale).subtract(fract);
+            fract = ECConstants.ONE.shiftLeft(scale).subtract(fract);
         }
 
-        if ((floorBigInt.signum() == -1) && (!(fract.equals(BigInteger.ZERO))))
+        if ((floorBigInt.signum() == -1) && (!(fract.equals(ECConstants.ZERO))))
         {
-            floorBigInt = floorBigInt.add(BigInteger.ONE);
+            floorBigInt = floorBigInt.add(ECConstants.ONE);
         }
         String leftOfPoint = floorBigInt.toString();
 
