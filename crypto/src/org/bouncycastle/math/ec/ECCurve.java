@@ -176,7 +176,7 @@ public abstract class ECCurve
         /**
          * The exponent <code>m</code> of <code>F<sub>2<sup>m</sup></sub></code>.
          */
-        private final int m;
+        private int m;  // can't be final - JDK 1.1
 
         /**
          * TPB: The integer <code>k</code> where <code>x<sup>m</sup> +
@@ -186,7 +186,7 @@ public abstract class ECCurve
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private final int k1;
+        private int k1;  // can't be final - JDK 1.1
 
         /**
          * TPB: Always set to <code>0</code><br>
@@ -194,7 +194,7 @@ public abstract class ECCurve
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private final int k2;
+        private int k2;  // can't be final - JDK 1.1
 
         /**
          * TPB: Always set to <code>0</code><br>
@@ -202,22 +202,22 @@ public abstract class ECCurve
          * x<sup>k3</sup> + x<sup>k2</sup> + x<sup>k1</sup> + 1</code>
          * represents the reduction polynomial <code>f(z)</code>.<br>
          */
-        private final int k3;
+        private int k3;  // can't be final - JDK 1.1
 
         /**
          * The order of the base point of the curve.
          */
-        private final BigInteger n;
+        private BigInteger n;  // can't be final - JDK 1.1
 
         /**
          * The cofactor of the curve.
          */
-        private final BigInteger h;
+        private BigInteger h;  // can't be final - JDK 1.1
         
          /**
          * The point at infinity on this curve.
          */
-        private final ECPoint.F2m infinity;
+        private ECPoint.F2m infinity;  // can't be final - JDK 1.1
 
         /**
          * The parameter <code>&mu;</code> of the elliptic curve if this is
