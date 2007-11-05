@@ -103,7 +103,7 @@ public class X509V2CRLGenerator
     }
 
     /**
-     * Reason being as indicated by ReasonFlags, i.e. ReasonFlags.keyCompromise
+     * Reason being as indicated by CRLReason, i.e. CRLReasonFlags.keyCompromise
      * or 0 if ReasonFlags are not to be used
      **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason)
@@ -113,8 +113,8 @@ public class X509V2CRLGenerator
 
     /**
      * Add a CRL entry with an Invalidity Date extension as well as a CRLReason extension.
-     * Reason being as indicated by ReasonFlags, i.e. ReasonFlags.keyCompromise
-     * or 0 if ReasonFlags are not to be used
+     * Reason being as indicated by CRLReason, i.e. CRLReason.keyCompromise
+     * or 0 if CRLReason are not to be used
      **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason, Date invalidityDate)
     {
