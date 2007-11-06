@@ -62,15 +62,18 @@ src/org/bouncycastle/asn1 \
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/DataGroupHashUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/DERUTF8StringTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/EqualsAndHashCodeTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/GeneralizedTimeTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/GenerationTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/InputStreamTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/Iso4217CurrencyCodeUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/KeyUsageTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/LDSSecurityObjectUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/MonetaryValueUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/NameOrPseudonymUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/NetscapeCertTypeTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/OctetStringTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/ParseTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/PersonalDataUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/PKIFailureInfoTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/QCStatementUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/ReasonFlagsTest.java
@@ -80,7 +83,10 @@ src/org/bouncycastle/asn1 \
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/SMIMETest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TagTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TypeOfBiometricDataUnitTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/UTCTimeTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AESVectorFileTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/RSABlindedTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/examples/DESExample.java
 
    (2>&1 find lcrypto-j2me-$base -name CVS -exec rm -rf \{\} \; ) > /dev/null
 
