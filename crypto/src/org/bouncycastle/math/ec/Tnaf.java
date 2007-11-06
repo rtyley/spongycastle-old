@@ -341,7 +341,7 @@ class Tnaf
             // If r0 is odd
             if (r0.testBit(0))
             {
-                u[i] = ECConstants.TWO.subtract((r0.subtract(r1.shiftLeft(1))).mod(ECConstants.FOUR)).byteValue();
+                u[i] = (byte) ECConstants.TWO.subtract((r0.subtract(r1.shiftLeft(1))).mod(ECConstants.FOUR)).intValue();
 
                 // r0 = r0 - u[i]
                 if (u[i] == 1)
@@ -650,7 +650,7 @@ class Tnaf
     {
         ECCurve.F2m curve = (ECCurve.F2m) p.getCurve();
         int m = curve.getM();
-        byte a = curve.getA().toBigInteger().byteValue();
+        byte a = (byte) curve.getA().toBigInteger().intValue();
         byte mu = curve.getMu();
         BigInteger[] s = curve.getSi();
         ZTauElement rho = partModReduction(k, m, a, s, mu, (byte)10);
@@ -761,11 +761,11 @@ class Tnaf
                 // if uUnMod >= 2^(width - 1)
                 if (uUnMod.compareTo(pow2wMin1) >= 0)
                 {
-                    uLocal = (uUnMod.subtract(pow2w)).byteValue();
+                    uLocal = (byte) uUnMod.subtract(pow2w).intValue();
                 }
                 else
                 {
-                    uLocal = uUnMod.byteValue();
+                    uLocal = (byte) uUnMod.intValue();
                 }
                 // uLocal is now in [-2^(width-1), 2^(width-1)-1]
 

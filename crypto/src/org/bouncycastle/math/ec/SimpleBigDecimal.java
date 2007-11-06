@@ -15,7 +15,8 @@ import java.math.BigInteger;
  * <code>SimpleBigDecimal</code> with double scale.
  * @author keller
  */
-class SimpleBigDecimal extends Number
+class SimpleBigDecimal
+    //extends Number   // not in J2ME - add compatibility class?
 {
     private static final long serialVersionUID = 1L;
 
@@ -174,12 +175,12 @@ class SimpleBigDecimal extends Number
 
     public double doubleValue()
     {
-        return new Double(toString()).doubleValue();
+        return Double.valueOf(toString()).doubleValue();
     }
 
     public float floatValue()
     {
-        return new Float(toString()).floatValue();
+        return Float.valueOf(toString()).floatValue();
     }
 
     public int getScale()
