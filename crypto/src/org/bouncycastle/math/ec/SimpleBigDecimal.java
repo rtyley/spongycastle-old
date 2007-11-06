@@ -13,7 +13,6 @@ import java.math.BigInteger;
  * taking part in the same arithmetic operation must have equal scale. The
  * result of a multiplication of two <code>SimpleBigDecimal</code>s returns a
  * <code>SimpleBigDecimal</code> with double scale.
- * @author keller
  */
 class SimpleBigDecimal
     //extends Number   // not in J2ME - add compatibility class?
