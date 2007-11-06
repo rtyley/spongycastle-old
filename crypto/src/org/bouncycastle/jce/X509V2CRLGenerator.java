@@ -110,8 +110,8 @@ public class X509V2CRLGenerator
     }
 
     /**
-     * Reason being as indicated by ReasonFlags, i.e. ReasonFlags.KEY_COMPROMISE
-     * or 0 if ReasonFlags are not to be used
+     * Reason being as indicated by CRLReason, i.e. CRLReason.KEY_COMPROMISE
+     * or 0 if CRLReason are not to be used
      **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason)
     {
