@@ -4,8 +4,6 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.cryptopro.GOST3410NamedParameters;
-import org.bouncycastle.asn1.cryptopro.GOST3410ParamSetParameters;
 import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -79,8 +77,6 @@ public class JDKGOST3410PublicKey
         {
             throw new IllegalArgumentException("invalid info structure in GOST3410 public key");
         }
-
-        GOST3410ParamSetParameters p = GOST3410NamedParameters.getByOID(params.getPublicKeyParamSet());
 
         if (params.getEncryptionParamSet() != null)
         {
