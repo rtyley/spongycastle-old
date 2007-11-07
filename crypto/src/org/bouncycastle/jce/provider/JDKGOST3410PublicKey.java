@@ -78,14 +78,7 @@ public class JDKGOST3410PublicKey
             throw new IllegalArgumentException("invalid info structure in GOST3410 public key");
         }
 
-        if (params.getEncryptionParamSet() != null)
-        {
-            this.gost3410Spec = new GOST3410ParameterSpec(params.getPublicKeyParamSet().getId(), params.getDigestParamSet().getId(), params.getEncryptionParamSet().getId());
-        }
-        else
-        {
-            this.gost3410Spec = new GOST3410ParameterSpec(params.getPublicKeyParamSet().getId(), params.getDigestParamSet().getId());
-        }
+        this.gost3410Spec = GOST3410ParameterSpec.fromPublicKeyAlg(params);
     }
 
     public String getAlgorithm()

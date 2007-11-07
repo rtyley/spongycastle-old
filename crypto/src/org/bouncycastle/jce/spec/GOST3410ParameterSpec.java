@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.GOST3410NamedParameters;
 import org.bouncycastle.asn1.cryptopro.GOST3410ParamSetParameters;
+import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.jce.interfaces.GOST3410Params;
 
 /**
@@ -115,5 +116,18 @@ public class GOST3410ParameterSpec
     {
         return this.keyParameters.hashCode() ^ this.digestParamSetOID.hashCode() 
                        ^ (this.encryptionParamSetOID != null ? this.encryptionParamSetOID.hashCode() : 0);
+    }
+
+    public static GOST3410ParameterSpec fromPublicKeyAlg(
+        GOST3410PublicKeyAlgParameters params)
+    {
+        if (params.getEncryptionParamSet() != null)
+        {
+            return new GOST3410ParameterSpec(params.getPublicKeyParamSet().getId(), params.getDigestParamSet().getId(), params.getEncryptionParamSet().getId());
+        }
+        else
+        {
+            return new GOST3410ParameterSpec(params.getPublicKeyParamSet().getId(), params.getDigestParamSet().getId());
+        }
     }
 }
