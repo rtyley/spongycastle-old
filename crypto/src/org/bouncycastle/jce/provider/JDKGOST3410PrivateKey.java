@@ -59,15 +59,7 @@ public class JDKGOST3410PrivateKey
         }
         
         this.x = new BigInteger(1, keyBytes);
-
-        if (params.getEncryptionParamSet() != null)
-        {
-            this.gost3410Spec = new GOST3410ParameterSpec(params.getPublicKeyParamSet().getId(), params.getDigestParamSet().getId(), params.getEncryptionParamSet().getId());
-        }
-        else
-        {
-            this.gost3410Spec = new GOST3410ParameterSpec(params.getPublicKeyParamSet().getId(), params.getDigestParamSet().getId());
-        }
+        this.gost3410Spec = GOST3410ParameterSpec.fromPublicKeyAlg(params);
     }
 
     JDKGOST3410PrivateKey(

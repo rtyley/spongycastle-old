@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
@@ -842,13 +843,12 @@ public abstract class JDKAlgorithmParameters
                 byte[] params)
         throws IOException
         {
-            ASN1InputStream        dIn = new ASN1InputStream(params);
-            
             try
             {
-                GOST3410PublicKeyAlgParameters gost3410P = new GOST3410PublicKeyAlgParameters((ASN1Sequence)dIn.readObject());
-                
-                currentSpec = new GOST3410ParameterSpec(gost3410P.getPublicKeyParamSet().getId(), gost3410P.getDigestParamSet().getId(), gost3410P.getEncryptionParamSet().getId());
+                ASN1Sequence seq = (ASN1Sequence) ASN1Object.fromByteArray(params);
+
+                this.currentSpec = GOST3410ParameterSpec.fromPublicKeyAlg(
+                    new GOST3410PublicKeyAlgParameters(seq));
             }
             catch (ClassCastException e)
             {
