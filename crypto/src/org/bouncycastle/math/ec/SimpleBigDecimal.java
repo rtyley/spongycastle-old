@@ -171,7 +171,7 @@ class SimpleBigDecimal
     {
         return floor().longValue();
     }
-
+          /* NON-J2ME compliant.
     public double doubleValue()
     {
         return Double.valueOf(toString()).doubleValue();
@@ -181,7 +181,7 @@ class SimpleBigDecimal
     {
         return Float.valueOf(toString()).floatValue();
     }
-
+       */
     public int getScale()
     {
         return scale;
