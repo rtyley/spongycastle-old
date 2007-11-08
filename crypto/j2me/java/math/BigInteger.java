@@ -404,6 +404,8 @@ public class BigInteger
             return mag;
         }
     }
+    
+    
 
     public BigInteger(int sign, byte[] mag) throws NumberFormatException
     {
@@ -1162,6 +1164,11 @@ public class BigInteger
         {
             return magnitude[magnitude.length - 1];
         }
+    }
+    
+    public byte byteValue()
+    {
+        return (byte)intValue();
     }
 
     /**
