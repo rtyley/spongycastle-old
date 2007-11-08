@@ -1,6 +1,6 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -55,6 +55,46 @@ public abstract class JDKKeyFactory
     {
     }
 
+    protected PrivateKey engineGeneratePrivate(
+        KeySpec keySpec)
+        throws InvalidKeySpecException
+    {
+        if (keySpec instanceof PKCS8EncodedKeySpec)
+        {
+            try
+            {
+                return JDKKeyFactory.createPrivateKeyFromDERStream(
+                    ((PKCS8EncodedKeySpec)keySpec).getEncoded());
+            }
+            catch (Exception e)
+            {
+                throw new InvalidKeySpecException(e.toString());
+            }
+        }
+
+        throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+    }
+
+    protected PublicKey engineGeneratePublic(
+        KeySpec    keySpec)
+        throws InvalidKeySpecException
+    {
+        if (keySpec instanceof X509EncodedKeySpec)
+        {
+            try
+            {
+                return JDKKeyFactory.createPublicKeyFromDERStream(
+                    ((X509EncodedKeySpec)keySpec).getEncoded());
+            }
+            catch (Exception e)
+            {
+                throw new InvalidKeySpecException(e.toString());
+            }
+        }
+
+        throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+    }
+    
     protected KeySpec engineGetKeySpec(
         Key    key,
         Class    spec)
@@ -193,7 +233,7 @@ public abstract class JDKKeyFactory
         throws IOException
     {
         return createPublicKeyFromPublicKeyInfo(
-                new SubjectPublicKeyInfo((ASN1Sequence)(new ASN1InputStream(in).readObject())));
+            new SubjectPublicKeyInfo((ASN1Sequence) ASN1Object.fromByteArray(in)));
     }
 
     /**
@@ -254,7 +294,7 @@ public abstract class JDKKeyFactory
         throws IOException
     {
         return createPrivateKeyFromPrivateKeyInfo(
-                new PrivateKeyInfo((ASN1Sequence)(new ASN1InputStream(in).readObject())));
+            new PrivateKeyInfo((ASN1Sequence) ASN1Object.fromByteArray(in)));
     }
 
     /**
@@ -326,7 +366,7 @@ public abstract class JDKKeyFactory
                     {
                         return new JCERSAPrivateCrtKey(
                             new RSAPrivateKeyStructure(
-                                (ASN1Sequence)new ASN1InputStream(((PKCS8EncodedKeySpec)keySpec).getEncoded()).readObject()));
+                                (ASN1Sequence) ASN1Object.fromByteArray(((PKCS8EncodedKeySpec)keySpec).getEncoded())));
                     }
                     catch (Exception ex)
                     {
@@ -350,24 +390,12 @@ public abstract class JDKKeyFactory
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof X509EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPublicKeyFromDERStream(
-                                ((X509EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof RSAPublicKeySpec)
+            if (keySpec instanceof RSAPublicKeySpec)
             {
                 return new JCERSAPublicKey((RSAPublicKeySpec)keySpec);
             }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePublic(keySpec);
         }
     }
 
@@ -382,48 +410,24 @@ public abstract class JDKKeyFactory
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof PKCS8EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof DHPrivateKeySpec)
+            if (keySpec instanceof DHPrivateKeySpec)
             {
                 return new JCEDHPrivateKey((DHPrivateKeySpec)keySpec);
             }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePrivate(keySpec);
         }
     
         protected PublicKey engineGeneratePublic(
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof X509EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPublicKeyFromDERStream(
-                                ((X509EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof DHPublicKeySpec)
+            if (keySpec instanceof DHPublicKeySpec)
             {
                 return new JCEDHPublicKey((DHPublicKeySpec)keySpec);
             }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePublic(keySpec);
         }
     }
 
@@ -438,48 +442,24 @@ public abstract class JDKKeyFactory
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof PKCS8EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof DSAPrivateKeySpec)
+            if (keySpec instanceof DSAPrivateKeySpec)
             {
                 return new JDKDSAPrivateKey((DSAPrivateKeySpec)keySpec);
             }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePrivate(keySpec);
         }
     
         protected PublicKey engineGeneratePublic(
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof X509EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPublicKeyFromDERStream(
-                                ((X509EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof DSAPublicKeySpec)
+            if (keySpec instanceof DSAPublicKeySpec)
             {
                 return new JDKDSAPublicKey((DSAPublicKeySpec)keySpec);
             }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePublic(keySpec);
         }
     }
 
@@ -494,48 +474,24 @@ public abstract class JDKKeyFactory
                 KeySpec    keySpec)
         throws InvalidKeySpecException
         {
-            if (keySpec instanceof PKCS8EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPrivateKeyFromDERStream(
-                            ((PKCS8EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof GOST3410PrivateKeySpec)
+            if (keySpec instanceof GOST3410PrivateKeySpec)
             {
                 return new JDKGOST3410PrivateKey((GOST3410PrivateKeySpec)keySpec);
             }
-            
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePrivate(keySpec);
         }
         
         protected PublicKey engineGeneratePublic(
                 KeySpec    keySpec)
         throws InvalidKeySpecException
         {
-            if (keySpec instanceof X509EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPublicKeyFromDERStream(
-                            ((X509EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof GOST3410PublicKeySpec)
+            if (keySpec instanceof GOST3410PublicKeySpec)
             {
                 return new JDKGOST3410PublicKey((GOST3410PublicKeySpec)keySpec);
             }
-            
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePublic(keySpec);
         }
     }
     
@@ -551,19 +507,7 @@ public abstract class JDKKeyFactory
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof PKCS8EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof ElGamalPrivateKeySpec)
+            if (keySpec instanceof ElGamalPrivateKeySpec)
             {
                 return new JCEElGamalPrivateKey((ElGamalPrivateKeySpec)keySpec);
             }
@@ -571,27 +515,15 @@ public abstract class JDKKeyFactory
             {
                 return new JCEElGamalPrivateKey((DHPrivateKeySpec)keySpec);
             }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePrivate(keySpec);
         }
     
         protected PublicKey engineGeneratePublic(
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof X509EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPublicKeyFromDERStream(
-                                ((X509EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof ElGamalPublicKeySpec)
+            if (keySpec instanceof ElGamalPublicKeySpec)
             {
                 return new JCEElGamalPublicKey((ElGamalPublicKeySpec)keySpec);
             }
@@ -599,8 +531,8 @@ public abstract class JDKKeyFactory
             {
                 return new JCEElGamalPublicKey((DHPublicKeySpec)keySpec);
             }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePublic(keySpec);
         }
     }
 
@@ -614,46 +546,6 @@ public abstract class JDKKeyFactory
     {
         public X509()
         {
-        }
-    
-        protected PrivateKey engineGeneratePrivate(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof PKCS8EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
-        }
-    
-        protected PublicKey engineGeneratePublic(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof X509EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPublicKeyFromDERStream(
-                                ((X509EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     }
     
@@ -677,21 +569,7 @@ public abstract class JDKKeyFactory
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof PKCS8EncodedKeySpec)
-            {
-                try
-                {
-                    JCEECPrivateKey key = (JCEECPrivateKey)JDKKeyFactory.createPrivateKeyFromDERStream(
-                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
-
-                    return new JCEECPrivateKey(algorithm, key);
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof ECPrivateKeySpec)
+            if (keySpec instanceof ECPrivateKeySpec)
             {
                 return new JCEECPrivateKey(algorithm, (ECPrivateKeySpec)keySpec);
             }
@@ -699,29 +577,15 @@ public abstract class JDKKeyFactory
             {
                 return new JCEECPrivateKey(algorithm, (java.security.spec.ECPrivateKeySpec)keySpec);
             }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePrivate(keySpec);
         }
     
         protected PublicKey engineGeneratePublic(
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof X509EncodedKeySpec)
-            {
-                try
-                {
-                    JCEECPublicKey key = (JCEECPublicKey)JDKKeyFactory.createPublicKeyFromDERStream(
-                                ((X509EncodedKeySpec)keySpec).getEncoded());
-
-                    return new JCEECPublicKey(algorithm, key);
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof ECPublicKeySpec)
+            if (keySpec instanceof ECPublicKeySpec)
             {
                 return new JCEECPublicKey(algorithm, (ECPublicKeySpec)keySpec);
             }
@@ -729,8 +593,8 @@ public abstract class JDKKeyFactory
             {
                 return new JCEECPublicKey(algorithm, (java.security.spec.ECPublicKeySpec)keySpec);
             }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+
+            return super.engineGeneratePublic(keySpec);
         }
     }
 
