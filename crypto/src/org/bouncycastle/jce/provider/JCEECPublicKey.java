@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
@@ -178,9 +179,7 @@ public class JCEECPublicKey
             
             try
             {
-                ASN1InputStream         aIn = new ASN1InputStream(bits.getBytes());
-
-                key = (ASN1OctetString)aIn.readObject();
+                key = (ASN1OctetString) ASN1Object.fromByteArray(bits.getBytes());
             }
             catch (IOException ex)
             {
@@ -191,12 +190,12 @@ public class JCEECPublicKey
             byte[]          x = new byte[32];
             byte[]          y = new byte[32];
 
-            for (int i = 0; i != y.length; i++)
+            for (int i = 0; i != x.length; i++)
             {
                 x[i] = keyEnc[32 - 1 - i];
             }
             
-            for (int i = 0; i != x.length; i++)
+            for (int i = 0; i != y.length; i++)
             {
                 y[i] = keyEnc[64 - 1 - i];
             }
@@ -279,9 +278,7 @@ public class JCEECPublicKey
                 {
                     try
                     {
-                        ASN1InputStream         aIn = new ASN1InputStream(data);
-
-                        key = (ASN1OctetString)aIn.readObject();
+                        key = (ASN1OctetString) ASN1Object.fromByteArray(data);
                     }
                     catch (IOException ex)
                     {
