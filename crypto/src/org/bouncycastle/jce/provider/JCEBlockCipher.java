@@ -229,18 +229,11 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
         else if (modeName.startsWith("PGP"))
         {
-            if (modeName.equalsIgnoreCase("PGPCFBwithIV"))
-            {
-                ivLength = baseEngine.getBlockSize();
-                cipher = new BufferedGenericBlockCipher(
-                    new PGPCFBBlockCipher(baseEngine, true));
-            }
-            else
-            {
-                ivLength = baseEngine.getBlockSize();
-                cipher = new BufferedGenericBlockCipher(
-                    new PGPCFBBlockCipher(baseEngine, false));
-            }
+            boolean inlineIV = modeName.equalsIgnoreCase("PGPCFBwithIV");
+
+            ivLength = baseEngine.getBlockSize();
+            cipher = new BufferedGenericBlockCipher(
+                new PGPCFBBlockCipher(baseEngine, inlineIV));
         }
         else if (modeName.equalsIgnoreCase("OpenPGPCFB"))
         {
@@ -678,6 +671,11 @@ public class JCEBlockCipher extends WrapCipherSpi
         catch (InvalidCipherTextException e)
         {
             throw new BadPaddingException(e.getMessage());
+        }
+
+        if (len == tmp.length)
+        {
+            return tmp;
         }
 
         byte[]  out = new byte[len];
