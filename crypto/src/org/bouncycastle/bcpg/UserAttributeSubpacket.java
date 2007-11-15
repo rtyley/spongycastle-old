@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Basic type for a PGP Signature sub-packet.
+ * Basic type for a user attribute sub-packet.
  */
 public class UserAttributeSubpacket 
 {
