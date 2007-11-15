@@ -43,39 +43,57 @@ class CMSSignedHelper
     private static final Map     digestAlgs = new HashMap();
     private static final Map     digestAliases = new HashMap();
 
+    private static void addEntries(String alias, String digest, String encryption)
+    {
+        digestAlgs.put(alias, digest);
+        encryptionAlgs.put(alias, encryption);
+    }
+
     static
     {
-        encryptionAlgs.put(X9ObjectIdentifiers.id_dsa_with_sha1.getId(), "DSA");
+        addEntries(NISTObjectIdentifiers.dsa_with_sha224.getId(), "SHA224", "DSA");
+        addEntries(NISTObjectIdentifiers.dsa_with_sha256.getId(), "SHA256", "DSA");
+        addEntries(NISTObjectIdentifiers.dsa_with_sha384.getId(), "SHA384", "DSA");
+        addEntries(NISTObjectIdentifiers.dsa_with_sha512.getId(), "SHA512", "DSA");
+        addEntries(OIWObjectIdentifiers.dsaWithSHA1.getId(), "SHA1", "DSA");
+        addEntries(OIWObjectIdentifiers.md4WithRSA.getId(), "MD4", "RSA");
+        addEntries(OIWObjectIdentifiers.md4WithRSAEncryption.getId(), "MD4", "RSA");
+        addEntries(OIWObjectIdentifiers.md5WithRSA.getId(), "MD5", "RSA");
+        addEntries(OIWObjectIdentifiers.sha1WithRSA.getId(), "SHA1", "RSA");
+        addEntries(PKCSObjectIdentifiers.md2WithRSAEncryption.getId(), "MD2", "RSA");
+        addEntries(PKCSObjectIdentifiers.md4WithRSAEncryption.getId(), "MD4", "RSA");
+        addEntries(PKCSObjectIdentifiers.md5WithRSAEncryption.getId(), "MD5", "RSA");
+        addEntries(PKCSObjectIdentifiers.sha1WithRSAEncryption.getId(), "SHA1", "RSA");
+        addEntries(PKCSObjectIdentifiers.sha224WithRSAEncryption.getId(), "SHA224", "RSA");
+        addEntries(PKCSObjectIdentifiers.sha256WithRSAEncryption.getId(), "SHA256", "RSA");
+        addEntries(PKCSObjectIdentifiers.sha384WithRSAEncryption.getId(), "SHA384", "RSA");
+        addEntries(PKCSObjectIdentifiers.sha512WithRSAEncryption.getId(), "SHA512", "RSA");
+        addEntries(X9ObjectIdentifiers.ecdsa_with_SHA1.getId(), "SHA1", "ECDSA");
+        addEntries(X9ObjectIdentifiers.ecdsa_with_SHA2.getId(), "SHA2", "ECDSA"); // TODO Should this be an entry?
+        addEntries(X9ObjectIdentifiers.ecdsa_with_SHA224.getId(), "SHA224", "ECDSA");
+        addEntries(X9ObjectIdentifiers.ecdsa_with_SHA256.getId(), "SHA256", "ECDSA");
+        addEntries(X9ObjectIdentifiers.ecdsa_with_SHA384.getId(), "SHA384", "ECDSA");
+        addEntries(X9ObjectIdentifiers.ecdsa_with_SHA512.getId(), "SHA512", "ECDSA");
+        addEntries(X9ObjectIdentifiers.id_dsa_with_sha1.getId(), "SHA1", "DSA");
+
         encryptionAlgs.put(X9ObjectIdentifiers.id_dsa.getId(), "DSA");
-        encryptionAlgs.put(OIWObjectIdentifiers.dsaWithSHA1.getId(), "DSA");
         encryptionAlgs.put(PKCSObjectIdentifiers.rsaEncryption.getId(), "RSA");
-        encryptionAlgs.put(PKCSObjectIdentifiers.sha1WithRSAEncryption.getId(), "RSA");
-        encryptionAlgs.put(OIWObjectIdentifiers.sha1WithRSA.getId(), "RSA");
         encryptionAlgs.put(TeleTrusTObjectIdentifiers.teleTrusTRSAsignatureAlgorithm, "RSA");
         encryptionAlgs.put(X509ObjectIdentifiers.id_ea_rsa.getId(), "RSA");
-        encryptionAlgs.put(CMSSignedDataGenerator.ENCRYPTION_ECDSA, "ECDSA");
-        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA2.getId(), "ECDSA");
-        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA224.getId(), "ECDSA");
-        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA256.getId(), "ECDSA");
-        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA384.getId(), "ECDSA");
-        encryptionAlgs.put(X9ObjectIdentifiers.ecdsa_with_SHA512.getId(), "ECDSA");
         encryptionAlgs.put(CMSSignedDataGenerator.ENCRYPTION_RSA_PSS, "RSAandMGF1");
         encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_94.getId(), "GOST3410");
         encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_2001.getId(), "ECGOST3410");
         encryptionAlgs.put("1.3.6.1.4.1.5849.1.6.2", "ECGOST3410");
         encryptionAlgs.put("1.3.6.1.4.1.5849.1.1.5", "GOST3410");
 
+        digestAlgs.put(PKCSObjectIdentifiers.md2.getId(), "MD2");
+        digestAlgs.put(PKCSObjectIdentifiers.md4.getId(), "MD4");
         digestAlgs.put(PKCSObjectIdentifiers.md5.getId(), "MD5");
         digestAlgs.put(OIWObjectIdentifiers.idSHA1.getId(), "SHA1");
         digestAlgs.put(NISTObjectIdentifiers.id_sha224.getId(), "SHA224");
         digestAlgs.put(NISTObjectIdentifiers.id_sha256.getId(), "SHA256");
         digestAlgs.put(NISTObjectIdentifiers.id_sha384.getId(), "SHA384");
         digestAlgs.put(NISTObjectIdentifiers.id_sha512.getId(), "SHA512");
-        digestAlgs.put(PKCSObjectIdentifiers.sha1WithRSAEncryption.getId(), "SHA1");
-        digestAlgs.put(PKCSObjectIdentifiers.sha224WithRSAEncryption.getId(), "SHA224");
-        digestAlgs.put(PKCSObjectIdentifiers.sha256WithRSAEncryption.getId(), "SHA256");
-        digestAlgs.put(PKCSObjectIdentifiers.sha384WithRSAEncryption.getId(), "SHA384");
-        digestAlgs.put(PKCSObjectIdentifiers.sha512WithRSAEncryption.getId(), "SHA512");
         digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd128.getId(), "RIPEMD128");
         digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd160.getId(), "RIPEMD160");
         digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd256.getId(), "RIPEMD256");
