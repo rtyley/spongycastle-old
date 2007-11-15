@@ -39,7 +39,7 @@ public class GOFBBlockCipher
         
         if (blockSize != 8)
         {
-            throw new IllegalArgumentException("GTCR only for 64 bit block ciphers");
+            throw new IllegalArgumentException("GCTR only for 64 bit block ciphers");
         }
 
         this.IV = new byte[cipher.getBlockSize()];
