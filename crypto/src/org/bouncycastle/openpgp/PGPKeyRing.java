@@ -48,7 +48,7 @@ public abstract class PGPKeyRing
 
             while (pIn.nextPacketTag() == PacketTags.SIGNATURE)
             {
-                SignaturePacket signaturePacket = (SignaturePacket) pIn.readPacket();
+                SignaturePacket signaturePacket = (SignaturePacket)pIn.readPacket();
                 TrustPacket trustPacket = readOptionalTrustPacket(pIn);
 
                 sigList.add(new PGPSignature(signaturePacket, trustPacket));
@@ -81,7 +81,7 @@ public abstract class PGPKeyRing
             }
             else
             {
-                UserAttributePacket user = (UserAttributePacket) obj;
+                UserAttributePacket user = (UserAttributePacket)obj;
                 ids.add(new PGPUserAttributeSubpacketVector(user.getSubpackets()));
             }
 
