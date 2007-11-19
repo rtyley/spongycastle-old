@@ -157,7 +157,7 @@ public class TlsUtils
     {
         int read = 0;
         int i = 0;
-        do
+        while (read != buf.length)
         {
             i = is.read(buf, read, (buf.length - read));
             if (i == -1)
@@ -166,7 +166,6 @@ public class TlsUtils
             }
             read += i;
         }
-        while (read != buf.length);
     }
 
     protected static void checkVersion(byte[] readVersion, TlsProtocolHandler handler) throws IOException
