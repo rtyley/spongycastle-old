@@ -4,12 +4,8 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.MPInteger;
-import org.bouncycastle.bcpg.SignaturePacket;
-import org.bouncycastle.bcpg.SignatureSubpacket;
-import org.bouncycastle.bcpg.TrustPacket;
+import org.bouncycastle.bcpg.*;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -205,7 +201,70 @@ public class PGPSignature
             
         return sig.verify(this.getSignature());
     }
+
+
+    private void updateWithIdData(int header, byte[] idBytes)
+        throws SignatureException
+    {
+        this.update((byte)header);
+        this.update((byte)(idBytes.length >> 24));
+        this.update((byte)(idBytes.length >> 16));
+        this.update((byte)(idBytes.length >> 8));
+        this.update((byte)(idBytes.length));
+        this.update(idBytes);
+    }
     
+    private void updateWithPublicKey(PGPPublicKey key)
+        throws PGPException, SignatureException
+    {
+        byte[] keyBytes = getEncodedPublicKey(key);
+
+        this.update((byte)0x99);
+        this.update((byte)(keyBytes.length >> 8));
+        this.update((byte)(keyBytes.length));
+        this.update(keyBytes);
+    }
+
+    /**
+     * Verify the signature as certifying the passed in public key as associated
+     * with the passed in user attributes.
+     *
+     * @param userAttributes user attributes the key was stored under
+     * @param key the key to be verified.
+     * @return true if the signature matches, false otherwise.
+     * @throws PGPException
+     * @throws SignatureException
+     */
+    public boolean verifyCertification(
+        PGPUserAttributeSubpacketVector userAttributes,
+        PGPPublicKey    key)
+        throws PGPException, SignatureException
+    {
+        updateWithPublicKey(key);
+
+        //
+        // hash in the userAttributes
+        //
+        try
+        {
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            UserAttributeSubpacket[] packets = userAttributes.toSubpacketArray();
+            for (int i = 0; i != packets.length; i++)
+            {
+                packets[i].encode(bOut);
+            }
+            updateWithIdData(0xd1, bOut.toByteArray());
+        }
+        catch (IOException e)
+        {
+            throw new PGPException("cannot encode subpacket array");
+        }
+
+        this.update(sigPck.getSignatureTrailer());
+
+        return sig.verify(this.getSignature());
+    }
+
     /**
      * Verify the signature as certifying the passed in public key as associated
      * with the passed in id.
@@ -221,12 +280,7 @@ public class PGPSignature
         PGPPublicKey    key)
         throws PGPException, SignatureException
     {
-        byte[] keyBytes = getEncodedPublicKey(key);
-        
-        this.update((byte)0x99);
-        this.update((byte)(keyBytes.length >> 8));
-        this.update((byte)(keyBytes.length));
-        this.update(keyBytes);
+        updateWithPublicKey(key);
             
         //
         // hash in the id
@@ -237,19 +291,14 @@ public class PGPSignature
         {
             idBytes[i] = (byte)id.charAt(i);
         }
-            
-        this.update((byte)0xb4);
-        this.update((byte)(idBytes.length >> 24));
-        this.update((byte)(idBytes.length >> 16));
-        this.update((byte)(idBytes.length >> 8));
-        this.update((byte)(idBytes.length));
-        this.update(idBytes);
+
+        updateWithIdData(0xb4, idBytes);
 
         this.update(sigPck.getSignatureTrailer());
         
         return sig.verify(this.getSignature());
     }
-    
+
     /**
      * Verify a certification for the passed in key against the passed in
      * master key.
@@ -265,19 +314,8 @@ public class PGPSignature
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
-        byte[]    keyBytes = getEncodedPublicKey(masterKey);
-
-        this.update((byte)0x99);
-        this.update((byte)(keyBytes.length >> 8));
-        this.update((byte)(keyBytes.length));
-        this.update(keyBytes);
-        
-        keyBytes = getEncodedPublicKey(pubKey);
-
-        this.update((byte)0x99);
-        this.update((byte)(keyBytes.length >> 8));
-        this.update((byte)(keyBytes.length));
-        this.update(keyBytes);
+        updateWithPublicKey(masterKey);
+        updateWithPublicKey(pubKey);
         
         this.update(sigPck.getSignatureTrailer());
         
@@ -301,13 +339,8 @@ public class PGPSignature
         {
             throw new IllegalStateException("signature is not a key signature");
         }
-        
-        byte[] keyBytes = getEncodedPublicKey(pubKey);
 
-        this.update((byte)0x99);
-        this.update((byte)(keyBytes.length >> 8));
-        this.update((byte)(keyBytes.length));
-        this.update(keyBytes);
+        updateWithPublicKey(pubKey);
         
         this.update(sigPck.getSignatureTrailer());
         

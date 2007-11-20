@@ -5,28 +5,7 @@ import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedDataList;
-import org.bouncycastle.openpgp.PGPKeyPair;
-import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPOnePassSignature;
-import org.bouncycastle.openpgp.PGPOnePassSignatureList;
-import org.bouncycastle.openpgp.PGPPBEEncryptedData;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPSignatureGenerator;
-import org.bouncycastle.openpgp.PGPSignatureList;
-import org.bouncycastle.openpgp.PGPUtil;
-import org.bouncycastle.openpgp.PGPV3SignatureGenerator;
+import org.bouncycastle.openpgp.*;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -273,6 +252,58 @@ public class PGPRSATest
             + "MzLSiE8EGBECAA8FAkNZt/YCGwwFCQAnjQAACgkQ/ED9ULlOyqsTqQCcDnAZ"
             + "7YymCfhm1yJiuFQg3qiX6Z4An19OSEgeSKugVcH49g1sxUB0zNdIsAIAAw==");
 
+    byte[] embeddedJPEGKey = Base64.decode(
+            "mI0ER0JXuwEEAKNqsXwLU6gu6P2Q/HJqEJVt3A7Kp1yucn8HWVeJF9JLAKVjVU8jrvz9Bw4NwaRJ"+
+            "NGYEAgdRq8Hx3WP9FXFCIVfCdi+oQrphcHWzzBFul8sykUGT+LmcBdqQGU9WaWSJyCOmUht4j7t0"+
+            "zk/IXX0YxGmkqR+no5rTj9LMDG8AQQrFABEBAAG0P0VyaWMgSCBFY2hpZG5hIChpbWFnZSB0ZXN0"+
+            "IGtleSkgPGVyaWMuZWNoaWRuYUBib3VuY3ljYXN0bGUub3JnPoi2BBMBAgAgBQJHQle7AhsDBgsJ"+
+            "CAcDAgQVAggDBBYCAwECHgECF4AACgkQ1+RWqFFpjMTKtgP+Okqkn0gVpQyNYXM/hWX6f3UQcyXk"+
+            "2Sd/fWW0XG+LBjhhBo+lXRWK0uYF8OMdZwsSl9HimpgYD5/kNs0Seh417DioP1diOgxkgezyQgMa"+
+            "+ODZfNnIvVaBr1pHLPLeqIBxBVMWBfa4wDXnLLGu8018uvI2yBhz5vByB1ntxwgKMXCwAgAD0cf3"+
+            "x/UBEAABAQAAAAAAAAAAAAAAAP/Y/+AAEEpGSUYAAQEBAEgASAAA/+EAFkV4aWYAAE1NACoAAAAI"+
+            "AAAAAAAA/9sAQwAFAwQEBAMFBAQEBQUFBgcMCAcHBwcPCwsJDBEPEhIRDxERExYcFxMUGhURERgh"+
+            "GBodHR8fHxMXIiQiHiQcHh8e/8AACwgAOgBQAQEiAP/EABwAAAIDAAMBAAAAAAAAAAAAAAUHAAQG"+
+            "AQIIA//EADEQAAIBAwQBAwMDBAEFAAAAAAECAwQFEQAGEiExByJBExRRI2FxFTJCkQglM0OBof/a"+
+            "AAgBAQAAPwD19U3SgppWjqKqKFl8824j/Z1mku9ZV7gNraq4KKQTsachsliwBBHeBgH9/nzoyz16"+
+            "FWjnDc2AIZfB7JAA8AD89+3986KUryPTI8qcHK+5fwdV7hcEpqE1aKJYwfcQ2AB+dVaK9fdRfXSh"+
+            "m+j8t8qOIbsHB8H/AGD+2SyMroGUhgRkEHo651NTSp9RKlYt7GSTgQsMcSKfcc5LH2+T0fjHYGvp"+
+            "Y6iCo3tUzQQTU6GGIFOOO+x8EAZ/c/P51upqsS0dDc6SZDC8fJSVJDhgCMeCP9H+NZSfd1JJK0cV"+
+            "SrzSlY2X6UnukcqoQqe8Akg/PRBA0VqaRJIKinWKIRnKGQIwJUjDHGfjxx/96HbBulS1tqmqKlfp"+
+            "08hWaRzhUC9EnPQAxk5x1rWWqRKaGpiZv04GJH4CeR/8xrionlSSBpKgoJnwiRRcuuLN2fjoefHx"+
+            "8jXxmr4qSCdga2XClwPpsxHfWDgnByP4A1etks7wRioUB2jVs4/I7z++dKDf8TN6pLISzxLLToY+"+
+            "yFcr5GPn+zXe4X/b23PUG1W+53WnS5XanNNBTAsJZmZwq4C9r/3AMkjwT8Eg/v8Avtx21sd6y22q"+
+            "lvNQlRzlp3rTGY0ZvYe1bwpXI6Awez8pj073pvmuq6MbwtdLHd0nJpbnHRMlLUQA8XYnHvcGNz0B"+
+            "kYI+Dpx1N7uUVvqKeopqOKvigNVChkP28657dG4lsZIBTiSvWcgglV+n909UYfUWsG5bXUDb9fAh"+
+            "ntsMQQ0Mrxq6MCCXdeRxJx7z/jgY16Bs0tLTU6UIqRUyMOPF5+UkgVVDMOXucDIGf4/OslTb72fU"+
+            "3g0dXPV0ldG5eON3ZmGV4gkgkY78ZI0dS9W+OolqUraSESzlpAqsp4j/ACY8TyJ4gY6/nrRXbtdQ"+
+            "1bt9tVmYhR0Y2XAP4LDvrHjWH31aaup9RKOSjQEyGJm+Qce3LD+M/wCs/Gl9TekO1txbllq0tU0c"+
+            "4vrV0rrVBEkIQholQLyVUYH3HB5HonTOrUpk26bPURyB+CqKgvI/1QvEdPgkknGS3ZJz2RoDX2KV"+
+            "FFM33sMcXFqaKVm4S+9eSoASEDAkHOAPOPnQ/et1+8sENDSFVutKqs5MyH6LMwDBlDclBzkZA6x8"+
+            "aN7EmjobV9oZ6d7jURfW+4arTg8TN0XI93TAjx1yxnzpC7j3XafUf1Yjmutiqaait1XLb7M9FMpS"+
+            "rVn4F8t/i/FiGRQRkYbONO60023LhQ0VprbDRiGdTDBFPRj6kaKyj3CRM4YnIfAJ89+dFpNs7Njr"+
+            "E+w+0WSaQoTBJNDKMqSWVlcDPWc41sNpWymoqBY0Mv1PbIS8ruxLIuSSxJ7IJ0JWkqoamslkkWeS"+
+            "WokkjT6AQoqueIz7icgNlvkHwPha0l6uG3bpWR0aVkc6QKzytEkjVBMYdeKgeHOV/Yqc+NWbndI7"+
+            "laLlaKBzeq62SlWqHpP1YWIKhOL+3GT03zx8E+7WV9HtjVVFeaytpLvU3mOmhWSehriwCyszZ4sx"+
+            "OArKhyMgcSQpOAGBTbdsElBMZqT9ZaoKtc5H11LSIJIjhR0ArAjP5HzrWVOxrDWVNRRXNZa6gkjU"+
+            "pRTkPEiZPJAuP7ScdazMG1rdFQlttVVvpK1aBUwkazwtG3/jRfKHKjHE/wCIOhFRef6fVOsz1y1R"+
+            "RqaCpUqTIhJJ4kgnKlWPnkCD1jVC3/1DcSTUtHYZJbvEivS3KOqVHBK9CTrtR0O8/keTp3WiOZXl"+
+            "ldFUOeJAOSpViMfxqndrer3KnhSFzSTLO9UqAjLELhuY7DfAAI8k56xpbeplZarMLUtEhu9TU16U"+
+            "ogkBaaIHJJZemOML8g/zk6FXe97S3nXWuDa94kStpqiYVtStKsUkhiX9TkzgMMFQAy5APXz1dlu+"+
+            "5rFXz0wpTUVMiQpWtEqkuXUeSW9pJbipUHOQWx51rtsU0tBuKpo70qukcKzxyVDB5JGA4cyR1yIZ"+
+            "gQB58aWi+o94pdw+oNVS7ks9ZNYbf/0ukmUOCqEyOjMjDm/YUfOR3nTP9MKp90bAtG4YKv6UFfSf"+
+            "VhCxBWjVhgEYPtOMZHfecY0E3nX+nO1PsrJd5rTBSXuSWBpJJgFSoCmQmRs5VWwcknpgPzoL6WVE"+
+            "Mb2qorYKKkrIl+lyoeUcFQgT9PCgkyKFPFScg4yAPAbNnuQqaw00fFV4vKUYMsmTIfKkDAx8/OdG"+
+            "TpVb99EbFuW5XC+Ut2utuvtXKk4qxUNKiSIAEAjY4CDHhSp/cEAjAN6Nr6a3Gv3LadvSb+v92qGe"+
+            "CEUcdPHQuQ/J1kL+xSWBwcnrr86OUlp9WdrbWobrRWam3BuiSuWS7tUzRM81KuQEjclcOqcVDHOT"+
+            "nOc50eisl335XVFVuKwXGwKqLBFKtaq1M1JMMvGxQfpuGSNiAWwCQGznWrtPp5smyWKntNu2rbzR"+
+            "00ZWKJoVc/k5Z/JJ8knJ+dI//kjsnd1TtqA7Zj3DT2KiYA7dt8SrTiIk8uoGDv2eWDnABxrCf8d/"+
+            "TYG87g3PtGzbev8AMkppbW1xr35Wk/Ek9O8QYyEd9EY7C/nXsfbsE/8ASqOouVLTxXR6eP7v6YBA"+
+            "k4jkA2ASAcgfsNEVRFZmVFDN/cQOz/Ou2pqampqamqtPQUMFfUVsFFTRVNQFE0yRKHkC5xyYDJxk"+
+            "4z+dWtTX/9mItgQTAQIAIAUCR0JYkAIbAwYLCQgHAwIEFQIIAwQWAgMBAh4BAheAAAoJENfkVqhR"+
+            "aYzEAPYD/iHdLOAE8r8HHF3F4z28vtIT8iiRB9aPC/YH0xqV1qeEKG8+VosBaQAOCEquONtRWsww"+
+            "gO3XB0d6VAq2kMOKc2YiB4ZtZcFvvmP9KdmVIZxVjpa9ozjP5j9zFso1HOpFcsn/VDBEqy5TvsNx"+
+            "Qvmtc8X7lqK/zLRVkSSBItik2IIhsAIAAw==");
+
     private void fingerPrintTest()
         throws Exception
     {
@@ -393,6 +424,47 @@ public class PGPRSATest
         }
     }
 
+    private void embeddedJpegTest()
+        throws Exception
+    {
+        PGPPublicKeyRing pgpPub = new PGPPublicKeyRing(embeddedJPEGKey);
+
+        PGPPublicKey pubKey = pgpPub.getPublicKey();
+
+        Iterator it = pubKey.getUserAttributes();
+        int      count = 0;
+        while (it.hasNext())
+        {
+            PGPUserAttributeSubpacketVector attributes = (PGPUserAttributeSubpacketVector)it.next();
+
+            Iterator    sigs = pubKey.getSignaturesForUserAttribute(attributes);
+            int sigCount = 0;
+            while (sigs.hasNext())
+            {
+                PGPSignature sig = (PGPSignature)sigs.next();
+
+                sig.initVerify(pubKey, "BC");
+
+                if (!sig.verifyCertification(attributes, pubKey))
+                {
+                    fail("signature failed verification");
+                }
+
+                sigCount++;
+            }
+
+            if (sigCount != 1)
+            {
+                fail("Failed user attributes signature check");
+            }
+            count++;
+        }
+
+        if (count != 1)
+        {
+            fail("didn't find user attributes");
+        }
+    }
     public void performTest()
         throws Exception
     {
@@ -971,6 +1043,7 @@ public class PGPRSATest
         testExpiry(expiry60and30daysSig13Key, 60, 30);
         
         fingerPrintTest();
+        embeddedJpegTest();
     }
     
     private void testExpiry(
