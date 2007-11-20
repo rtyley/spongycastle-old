@@ -1,23 +1,13 @@
 package org.bouncycastle.openpgp;
 
-import org.bouncycastle.bcpg.MPInteger;
-import org.bouncycastle.bcpg.OnePassSignaturePacket;
-import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
-import org.bouncycastle.bcpg.SignaturePacket;
-import org.bouncycastle.bcpg.SignatureSubpacket;
-import org.bouncycastle.bcpg.SignatureSubpacketTags;
+import org.bouncycastle.bcpg.*;
 import org.bouncycastle.bcpg.sig.IssuerKeyID;
 import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.util.Date;
 
 /**
@@ -320,12 +310,7 @@ public class PGPSignatureGenerator
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
-        byte[]    keyBytes = getEncodedPublicKey(pubKey);
-
-        this.update((byte)0x99);
-        this.update((byte)(keyBytes.length >> 8));
-        this.update((byte)(keyBytes.length));
-        this.update(keyBytes);
+        updateWithPublicKey(pubKey);
             
         //
         // hash in the id
@@ -336,17 +321,48 @@ public class PGPSignatureGenerator
         {
             idBytes[i] = (byte)id.charAt(i);
         }
-            
-        this.update((byte)0xb4);
-        this.update((byte)(idBytes.length >> 24));
-        this.update((byte)(idBytes.length >> 16));
-        this.update((byte)(idBytes.length >> 8));
-        this.update((byte)(idBytes.length));
-        this.update(idBytes);
+
+        updateWithIdData(0xb4, idBytes);
         
         return this.generate();
     }
-    
+
+    /**
+     * Generate a certification for the passed in userAttributes
+     * @param userAttributes the id we are certifying against the public key.
+     * @param pubKey the key we are certifying against the id.
+     * @return the certification.
+     * @throws SignatureException
+     * @throws PGPException
+     */
+    public PGPSignature generateCertification(
+        PGPUserAttributeSubpacketVector userAttributes,
+        PGPPublicKey                    pubKey)
+        throws SignatureException, PGPException
+    {
+        updateWithPublicKey(pubKey);
+
+        //
+        // hash in the attributes
+        //
+        try
+        {
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            UserAttributeSubpacket[] packets = userAttributes.toSubpacketArray();
+            for (int i = 0; i != packets.length; i++)
+            {
+                packets[i].encode(bOut);
+            }
+            updateWithIdData(0xd1, bOut.toByteArray());
+        }
+        catch (IOException e)
+        {
+            throw new PGPException("cannot encode subpacket array");
+        }
+
+        return this.generate();
+    }
+
     /**
      * Generate a certification for the passed in key against the passed in
      * master key.
@@ -362,19 +378,8 @@ public class PGPSignatureGenerator
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
-        byte[]    keyBytes = getEncodedPublicKey(masterKey);
-
-        this.update((byte)0x99);
-        this.update((byte)(keyBytes.length >> 8));
-        this.update((byte)(keyBytes.length));
-        this.update(keyBytes);
-        
-        keyBytes = getEncodedPublicKey(pubKey);
-
-        this.update((byte)0x99);
-        this.update((byte)(keyBytes.length >> 8));
-        this.update((byte)(keyBytes.length));
-        this.update(keyBytes);
+        updateWithPublicKey(masterKey);
+        updateWithPublicKey(pubKey);
         
         return this.generate();
     }
@@ -444,5 +449,27 @@ public class PGPSignatureGenerator
         System.arraycopy(packets, 0, tmp, 1, packets.length);
 
         return tmp;
+    }
+
+    private void updateWithIdData(int header, byte[] idBytes)
+        throws SignatureException
+    {
+        this.update((byte)header);
+        this.update((byte)(idBytes.length >> 24));
+        this.update((byte)(idBytes.length >> 16));
+        this.update((byte)(idBytes.length >> 8));
+        this.update((byte)(idBytes.length));
+        this.update(idBytes);
+    }
+
+    private void updateWithPublicKey(PGPPublicKey key)
+        throws PGPException, SignatureException
+    {
+        byte[] keyBytes = getEncodedPublicKey(key);
+
+        this.update((byte)0x99);
+        this.update((byte)(keyBytes.length >> 8));
+        this.update((byte)(keyBytes.length));
+        this.update(keyBytes);
     }
 }
