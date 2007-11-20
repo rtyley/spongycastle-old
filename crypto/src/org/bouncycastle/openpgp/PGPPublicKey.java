@@ -758,7 +758,7 @@ public class PGPPublicKey
 
 
     /**
-     * Add a certification to the given public key.
+     * Add a certification for an id to the given public key.
      * 
      * @param key the key the certification is to be added to.
      * @param id the id the certification is associated with.
@@ -797,7 +797,48 @@ public class PGPPublicKey
         
         return returnKey;
     }
-    
+
+    /**
+     * Add a certification for the given UserAttributeSubpackets to the given public key.
+     *
+     * @param key the key the certification is to be added to.
+     * @param userAttributes the attributes the certification is associated with.
+     * @param certification the new certification.
+     * @return the re-certified key.
+     */
+    public static PGPPublicKey addCertification(
+        PGPPublicKey                    key,
+        PGPUserAttributeSubpacketVector userAttributes,
+        PGPSignature                    certification)
+    {
+        PGPPublicKey    returnKey = new PGPPublicKey(key);
+        List            sigList = null;
+
+        for (int i = 0; i != returnKey.ids.size(); i++)
+        {
+            if (userAttributes.equals(returnKey.ids.get(i)))
+            {
+                sigList = (List)returnKey.idSigs.get(i);
+            }
+        }
+
+        if (sigList != null)
+        {
+            sigList.add(certification);
+        }
+        else
+        {
+            sigList = new ArrayList();
+
+            sigList.add(certification);
+            returnKey.ids.add(userAttributes);
+            returnKey.idTrusts.add(null);
+            returnKey.idSigs.add(sigList);
+        }
+
+        return returnKey;
+    }
+
     /**
      * Remove any certifications associated with a given id on a key.
      * 
