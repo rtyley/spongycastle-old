@@ -10,14 +10,14 @@ public class PGPUserAttributeSubpacketVectorGenerator
 {
     private List list = new ArrayList();
 
-    public void setImageAttribute(ImageAttribute attribute)
+    public void setImageAttribute(int imageType, byte[] imageData)
     {
-        if (attribute == null)
+        if (imageData == null)
         {
-            throw new IllegalArgumentException("attempt to set null ImageAttribute");
+            throw new IllegalArgumentException("attempt to set null image");
         }
 
-        list.add(attribute);
+        list.add(new ImageAttribute(imageType, imageData));
     }
 
     public PGPUserAttributeSubpacketVector generate()
