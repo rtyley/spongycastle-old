@@ -50,7 +50,7 @@ public class RecordStream
 
     protected void writeMessage(short type, byte[] message, int offset, int len) throws IOException
     {
-        if (type == 22)
+        if (type == 22) // TlsProtocolHandler.RL_HANDSHAKE
         {
             hash1.update(message, offset, len);
             hash2.update(message, offset, len);
