@@ -7,6 +7,7 @@ import javax.crypto.spec.PBEParameterSpec;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.PBEParametersGenerator;
+import org.bouncycastle.crypto.digests.MD2Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -30,6 +31,7 @@ public interface PBE
     static final int        RIPEMD160   = 2;
     static final int        TIGER       = 3;
     static final int        SHA256      = 4;
+    static final int        MD2         = 5;
 
     static final int        PKCS5S1     = 0;
     static final int        PKCS5S2     = 1;
@@ -51,6 +53,9 @@ public interface PBE
             {
                 switch (hash)
                 {
+                case MD2:
+                    generator = new PKCS5S1ParametersGenerator(new MD2Digest());
+                    break;
                 case MD5:
                     generator = new PKCS5S1ParametersGenerator(new MD5Digest());
                     break;
@@ -58,7 +63,7 @@ public interface PBE
                     generator = new PKCS5S1ParametersGenerator(new SHA1Digest());
                     break;
                 default:
-                    throw new IllegalStateException("PKCS5 scheme 1 only supports only MD5 and SHA1.");
+                    throw new IllegalStateException("PKCS5 scheme 1 only supports MD2, MD5 and SHA1.");
                 }
             }
             else if (type == PKCS5S2)
@@ -69,6 +74,9 @@ public interface PBE
             {
                 switch (hash)
                 {
+                case MD2:
+                    generator = new PKCS12ParametersGenerator(new MD2Digest());
+                    break;
                 case MD5:
                     generator = new PKCS12ParametersGenerator(new MD5Digest());
                     break;
