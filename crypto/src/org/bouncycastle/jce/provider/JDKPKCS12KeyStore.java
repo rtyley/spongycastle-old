@@ -130,20 +130,17 @@ public class JDKPKCS12KeyStore
 
         public int hashCode()
         {
-            int hash = id[0] & 0xff;
-
-            for (int i = 1; i != id.length - 4; i++)
-            {
-                hash ^= ((id[i] & 0xff) << 24) | ((id[i + 1] & 0xff) << 16)
-                          | ((id[i + 2] & 0xff) << 8) | (id[i + 3] & 0xff);
-            }
-
-            return hash;
+            return Arrays.hashCode(id);
         }
 
         public boolean equals(
             Object  o)
         {
+            if (o == this)
+            {
+                return true;
+            }
+
             if (!(o instanceof CertId))
             {
                 return false;
@@ -151,20 +148,7 @@ public class JDKPKCS12KeyStore
 
             CertId  cId = (CertId)o;
 
-            if (cId.id.length != id.length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i != id.length; i++)
-            {
-                if (cId.id[i] != id[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return Arrays.areEqual(id, cId.id);
         }
     }
 
@@ -194,7 +178,7 @@ public class JDKPKCS12KeyStore
         try
         {
             SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-                (ASN1Sequence)new ASN1InputStream(pubKey.getEncoded()).readObject());
+                (ASN1Sequence) ASN1Object.fromByteArray(pubKey.getEncoded()));
 
             return new SubjectKeyIdentifier(info);
         }
@@ -240,7 +224,7 @@ public class JDKPKCS12KeyStore
     }
 
     /**
-     * this is quite complete - we should follow up on the chain, a bit
+     * this is not quite complete - we should follow up on the chain, a bit
      * tricky if a certificate appears in more than one chain...
      */
     public void engineDeleteEntry(
@@ -1139,7 +1123,7 @@ public class JDKPKCS12KeyStore
         BERConstructedOctetString keyString = new BERConstructedOctetString(keySEncoded);
 
         //
-        // certficate processing
+        // certificate processing
         //
         byte[]                  cSalt = new byte[SALT_SIZE];
 
