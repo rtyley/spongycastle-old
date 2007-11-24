@@ -3,6 +3,7 @@ package org.bouncycastle.openpgp;
 import org.bouncycastle.bcpg.*;
 import org.bouncycastle.bcpg.sig.IssuerKeyID;
 import org.bouncycastle.bcpg.sig.SignatureCreationTime;
+import org.bouncycastle.util.Strings;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -311,19 +312,12 @@ public class PGPSignatureGenerator
         throws SignatureException, PGPException
     {
         updateWithPublicKey(pubKey);
-            
+
         //
         // hash in the id
         //
-        byte[]    idBytes = new byte[id.length()];
-            
-        for (int i = 0; i != idBytes.length; i++)
-        {
-            idBytes[i] = (byte)id.charAt(i);
-        }
+        updateWithIdData(0xb4, Strings.toByteArray(id));
 
-        updateWithIdData(0xb4, idBytes);
-        
         return this.generate();
     }
 
@@ -357,7 +351,7 @@ public class PGPSignatureGenerator
         }
         catch (IOException e)
         {
-            throw new PGPException("cannot encode subpacket array");
+            throw new PGPException("cannot encode subpacket array", e);
         }
 
         return this.generate();
@@ -396,13 +390,8 @@ public class PGPSignatureGenerator
         PGPPublicKey    pubKey)
         throws SignatureException, PGPException
     {
-        byte[]    keyBytes = getEncodedPublicKey(pubKey);
+        updateWithPublicKey(pubKey);
 
-        this.update((byte)0x99);
-        this.update((byte)(keyBytes.length >> 8));
-        this.update((byte)(keyBytes.length));
-        this.update(keyBytes);
-        
         return this.generate();
     }
     

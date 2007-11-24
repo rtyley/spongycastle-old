@@ -5,6 +5,8 @@ import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.bcpg.*;
+import org.bouncycastle.util.BigIntegers;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.ByteArrayOutputStream;
@@ -257,7 +259,7 @@ public class PGPSignature
         }
         catch (IOException e)
         {
-            throw new PGPException("cannot encode subpacket array");
+            throw new PGPException("cannot encode subpacket array", e);
         }
 
         this.update(sigPck.getSignatureTrailer());
@@ -285,14 +287,7 @@ public class PGPSignature
         //
         // hash in the id
         //
-        byte[]    idBytes = new byte[id.length()];
-            
-        for (int i = 0; i != idBytes.length; i++)
-        {
-            idBytes[i] = (byte)id.charAt(i);
-        }
-
-        updateWithIdData(0xb4, idBytes);
+        updateWithIdData(0xb4, Strings.toByteArray(id));
 
         this.update(sigPck.getSignatureTrailer());
         
@@ -406,38 +401,22 @@ public class PGPSignature
         {
             if (sigValues.length == 1)    // an RSA signature
             {
-                byte[]    sBytes = sigValues[0].getValue().toByteArray();
-
-                if (sBytes[0] == 0)
-                {
-                    signature = new byte[sBytes.length - 1];
-                    System.arraycopy(sBytes, 1, signature, 0, signature.length);
-                }
-                else
-                {
-                    signature = sBytes;
-                }
+                signature = BigIntegers.asUnsignedByteArray(sigValues[0].getValue());
             }
             else
             {
-                ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-                ASN1OutputStream         aOut = new ASN1OutputStream(bOut);
-
                 try
                 {
-                    ASN1EncodableVector     v = new ASN1EncodableVector();
-
+                    ASN1EncodableVector v = new ASN1EncodableVector();
                     v.add(new DERInteger(sigValues[0].getValue()));
                     v.add(new DERInteger(sigValues[1].getValue()));
 
-                    aOut.writeObject(new DERSequence(v));
+                    signature = new DERSequence(v).getEncoded();
                 }
                 catch (IOException e)
                 {
                     throw new PGPException("exception encoding DSA sig.", e);
                 }
-
-                signature = bOut.toByteArray();
             }
         }
         else
