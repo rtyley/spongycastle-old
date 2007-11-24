@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 /**
- * BER TaggedObject - in ASN.1 nottation this is any object proceeded by
- * a [n] where n is some number - these are assume to follow the construction
+ * BER TaggedObject - in ASN.1 notation this is any object preceded by
+ * a [n] where n is some number - these are assumed to follow the construction
  * rules (as with sequences).
  */
 public class BERTaggedObject
