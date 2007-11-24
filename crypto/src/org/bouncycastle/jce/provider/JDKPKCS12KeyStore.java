@@ -690,15 +690,11 @@ public class JDKPKCS12KeyStore
 
         if (bag.getMacData() != null)           // check the mac code
         {
-            ByteArrayOutputStream       bOut = new ByteArrayOutputStream();
-            BEROutputStream             berOut = new BEROutputStream(bOut);
             MacData                     mData = bag.getMacData();
             DigestInfo                  dInfo = mData.getMac();
             AlgorithmIdentifier         algId = dInfo.getAlgorithmId();
             byte[]                      salt = mData.getSalt();
             int                         itCount = mData.getIterationCount().intValue();
-        
-            berOut.writeObject(info);
 
             byte[]  data = ((ASN1OctetString)info.getContent()).getOctets();
 
