@@ -321,6 +321,30 @@ public class JCESecretKeyFactory
         }
     }
     
+    /**
+     * PBEWithMD2AndDES
+     */
+    static public class PBEWithMD2AndDES
+        extends DESPBEKeyFactory
+    {
+        public PBEWithMD2AndDES()
+        {
+            super("PBEwithMD2andDES", PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, true, PKCS5S1, MD2, 64, 64);
+        }
+    }
+
+    /**
+     * PBEWithMD2AndRC2
+     */
+    static public class PBEWithMD2AndRC2
+        extends PBEKeyFactory
+    {
+        public PBEWithMD2AndRC2()
+        {
+            super("PBEwithMD2andRC2", PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, true, PKCS5S1, MD2, 64, 64);
+        }
+    }
+
    /**
     * PBEWithMD5AndDES
     */
@@ -329,7 +353,7 @@ public class JCESecretKeyFactory
    {
        public PBEWithMD5AndDES()
        {
-           super("PBEwithMD5andDES", null, true, PKCS5S1, MD5, 64, 64);
+           super("PBEwithMD5andDES", PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, true, PKCS5S1, MD5, 64, 64);
        }
    }
 
@@ -341,7 +365,7 @@ public class JCESecretKeyFactory
    {
        public PBEWithMD5AndRC2()
        {
-           super("PBEwithMD5andRC2", null, true, PKCS5S1, MD5, 64, 64);
+           super("PBEwithMD5andRC2", PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, true, PKCS5S1, MD5, 64, 64);
        }
    }
 
@@ -353,7 +377,7 @@ public class JCESecretKeyFactory
    {
        public PBEWithSHA1AndDES()
        {
-           super("PBEwithSHA1andDES", null, true, PKCS5S1, SHA1, 64, 64);
+           super("PBEwithSHA1andDES", PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, true, PKCS5S1, SHA1, 64, 64);
        }
    }
 
@@ -365,7 +389,7 @@ public class JCESecretKeyFactory
    {
        public PBEWithSHA1AndRC2()
        {
-           super("PBEwithSHA1andRC2", null, true, PKCS5S1, SHA1, 64, 64);
+           super("PBEwithSHA1andRC2", PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC, true, PKCS5S1, SHA1, 64, 64);
        }
    }
 
