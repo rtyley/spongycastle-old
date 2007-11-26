@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Wrapper;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
 
 /**
  * an implementation of the AES Key Wrapper from the NIST Key Wrap
@@ -36,6 +37,11 @@ public class RFC3394WrapEngine
         CipherParameters    param)
     {
         this.forWrapping = forWrapping;
+
+        if (param instanceof ParametersWithRandom)
+        {
+            param = ((ParametersWithRandom) param).getParameters();
+        }
 
         if (param instanceof KeyParameter)
         {
