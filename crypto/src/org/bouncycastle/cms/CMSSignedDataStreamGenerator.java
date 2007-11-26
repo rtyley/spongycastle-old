@@ -32,6 +32,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
@@ -188,6 +189,16 @@ public class CMSSignedDataStreamGenerator
     }
 
     /**
+     * constructor allowing specific source of randomness
+     * @param rand instance of SecureRandom to use
+     */
+    public CMSSignedDataStreamGenerator(
+        SecureRandom rand)
+    {
+        super(rand);
+    }
+
+    /**
      * Set the underlying string size for encapsulated data
      * 
      * @param bufferSize length of octet strings to buffer the data.
@@ -249,7 +260,7 @@ public class CMSSignedDataStreamGenerator
         Signature     sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
         MessageDigest dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);
 
-        sig.initSign(key);
+        sig.initSign(key, rand);
 
         _signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _messageDigests.add(dig);
