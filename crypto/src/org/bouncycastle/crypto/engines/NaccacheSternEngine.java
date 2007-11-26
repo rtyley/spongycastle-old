@@ -10,6 +10,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.NaccacheSternKeyParameters;
 import org.bouncycastle.crypto.params.NaccacheSternPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
 
 /**
  * NaccacheStern Engine. For details on this cipher, please see
@@ -38,6 +39,12 @@ public class NaccacheSternEngine
     public void init(boolean forEncryption, CipherParameters param)
     {
         this.forEncryption = forEncryption;
+
+        if (param instanceof ParametersWithRandom)
+        {
+            param = ((ParametersWithRandom) param).getParameters();
+        }
+
         key = (NaccacheSternKeyParameters)param;
 
         // construct lookup table for faster decryption if necessary
