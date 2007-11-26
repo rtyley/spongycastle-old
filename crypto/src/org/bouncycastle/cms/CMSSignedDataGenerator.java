@@ -30,6 +30,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
@@ -208,6 +209,7 @@ public class CMSSignedDataGenerator
         SignerInfo toSignerInfo(
             DERObjectIdentifier contentType,
             CMSProcessable      content,
+            SecureRandom        random,
             String              sigProvider,
             boolean             addDefaultAttributes)
             throws IOException, SignatureException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, CertificateEncodingException, CMSException
@@ -260,7 +262,7 @@ public class CMSSignedDataGenerator
                 content.write(bOut);
             }
 
-            sig.initSign(key);
+            sig.initSign(key, random);
 
             sig.update(bOut.toByteArray());
 
@@ -290,7 +292,17 @@ public class CMSSignedDataGenerator
     public CMSSignedDataGenerator()
     {
     }
-    
+
+    /**
+     * constructor allowing specific source of randomness
+     * @param rand instance of SecureRandom to use
+     */
+    public CMSSignedDataGenerator(
+        SecureRandom rand)
+    {
+        super(rand);
+    }
+
     /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
@@ -461,7 +473,7 @@ public class CMSSignedDataGenerator
 
                 digestAlgs.add(digAlgId);
 
-                signerInfos.add(signer.toSignerInfo(contentTypeOID, content, sigProvider, addDefaultAttributes));
+                signerInfos.add(signer.toSignerInfo(contentTypeOID, content, rand, sigProvider, addDefaultAttributes));
             }
             catch (IOException e)
             {
