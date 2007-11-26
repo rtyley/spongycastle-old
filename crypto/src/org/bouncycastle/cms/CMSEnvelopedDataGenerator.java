@@ -165,6 +165,8 @@ public class CMSEnvelopedDataGenerator
     {
         KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
 
+        keyGen.init(rand);
+
         return generate(content, encryptionOID, keyGen, provider);
     }
 
@@ -182,7 +184,7 @@ public class CMSEnvelopedDataGenerator
     {
         KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
 
-        keyGen.init(keySize);
+        keyGen.init(keySize, rand);
 
         return generate(content, encryptionOID, keyGen, provider);
     }

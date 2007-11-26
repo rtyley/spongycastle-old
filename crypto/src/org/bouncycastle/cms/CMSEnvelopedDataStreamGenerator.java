@@ -241,7 +241,9 @@ public class CMSEnvelopedDataStreamGenerator
         try
         {
             KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
-                                                    
+
+            keyGen.init(rand);
+
             return open(out, encryptionOID, keyGen, provider);
         }
         catch (NoSuchAlgorithmException e)
@@ -266,7 +268,7 @@ public class CMSEnvelopedDataStreamGenerator
         {
             KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
             
-            keyGen.init(keySize);
+            keyGen.init(keySize, rand);
 
             return open(out, encryptionOID, keyGen, provider);
         }
