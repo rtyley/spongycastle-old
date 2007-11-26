@@ -85,7 +85,7 @@ public class CMSEnvelopedDataGenerator
             encKey = keyGen.generateKey();
             params = generateParameters(encryptionOID, encKey, encProviderName);
 
-            cipher.init(Cipher.ENCRYPT_MODE, encKey, params);
+            cipher.init(Cipher.ENCRYPT_MODE, encKey, params, rand);
 
             //
             // If params are null we try and second guess on them as some providers don't provide
@@ -136,7 +136,7 @@ public class CMSEnvelopedDataGenerator
 
             try
             {
-                recipientInfos.add(recipient.toRecipientInfo(encKey, provider));
+                recipientInfos.add(recipient.toRecipientInfo(encKey, rand, provider));
             }
             catch (IOException e)
             {

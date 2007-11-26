@@ -256,6 +256,7 @@ public class CMSEnvelopedGenerator
 
         RecipientInfo toRecipientInfo(
             SecretKey           key,
+            SecureRandom        random,
             String              prov)
             throws IOException, GeneralSecurityException
         {
@@ -266,25 +267,25 @@ public class CMSEnvelopedGenerator
                 Cipher keyCipher = HELPER.createAsymmetricCipher(keyEncAlg.getObjectId().getId(), prov);
                 try
                 {
-                    keyCipher.init(Cipher.WRAP_MODE, pubKey);
+                    keyCipher.init(Cipher.WRAP_MODE, pubKey, random);
 
                     encKey = new DEROctetString(keyCipher.wrap(key));
                 }
                 catch (GeneralSecurityException e)   // some providers do not support wrap
                 {
-                    keyCipher.init(Cipher.ENCRYPT_MODE, pubKey);
+                    keyCipher.init(Cipher.ENCRYPT_MODE, pubKey, random);
 
                     encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
                 }
                 catch (IllegalStateException e)   // some providers do not support wrap
                 {
-                    keyCipher.init(Cipher.ENCRYPT_MODE, pubKey);
+                    keyCipher.init(Cipher.ENCRYPT_MODE, pubKey, random);
 
                     encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
                 }
                 catch (UnsupportedOperationException e)   // some providers do not support UNWRAP
                 {
-                    keyCipher.init(Cipher.ENCRYPT_MODE, key);
+                    keyCipher.init(Cipher.ENCRYPT_MODE, key, random);
 
                     encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
                 }
@@ -313,7 +314,7 @@ public class CMSEnvelopedGenerator
                 Cipher              keyCipher = HELPER.createAsymmetricCipher(
                                                       DERObjectIdentifier.getInstance(ASN1Sequence.getInstance(keyEncAlg.getParameters()).getObjectAt(0)).getId(), prov);
 
-                keyCipher.init(Cipher.WRAP_MODE, secKey);
+                keyCipher.init(Cipher.WRAP_MODE, secKey, random);
 
                 ASN1OctetString         encKey = new DEROctetString(
                                                         keyCipher.wrap(key));
@@ -329,7 +330,7 @@ public class CMSEnvelopedGenerator
                 Cipher              keyCipher = HELPER.createAsymmetricCipher(
                                                                   HELPER.getRFC3211WrapperName(secKey.getAlgorithm()), prov);
 
-                keyCipher.init(Cipher.WRAP_MODE, secKey);
+                keyCipher.init(Cipher.WRAP_MODE, secKey, random);
 
                 ASN1OctetString         encKey = new DEROctetString(keyCipher.wrap(key));
 
@@ -347,7 +348,7 @@ public class CMSEnvelopedGenerator
                 Cipher              keyCipher = HELPER.createAsymmetricCipher(
                                                                keyEncAlg.getObjectId().getId(), prov);
 
-                keyCipher.init(Cipher.WRAP_MODE, secKey);
+                keyCipher.init(Cipher.WRAP_MODE, secKey, random);
 
                 ASN1OctetString         encKey = new DEROctetString(keyCipher.wrap(key));
 
@@ -448,7 +449,7 @@ public class CMSEnvelopedGenerator
     {
         KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, provider);
 
-        agreement.init(senderPrivateKey);
+        agreement.init(senderPrivateKey, rand);
 
         agreement.doPhase(recipientCert.getPublicKey(), true);
 
@@ -508,7 +509,7 @@ public class CMSEnvelopedGenerator
 
                 try
                 {
-                    pGen.init(new RC2ParameterSpec(encKey.getEncoded().length * 8, iv));
+                    pGen.init(new RC2ParameterSpec(encKey.getEncoded().length * 8, iv), rand);
                 }
                 catch (InvalidAlgorithmParameterException e)
                 {

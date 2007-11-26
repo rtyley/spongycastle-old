@@ -126,7 +126,7 @@ public class CMSEnvelopedDataStreamGenerator
 
             try
             {
-                recipientInfos.add(recipient.toRecipientInfo(encKey, provider));
+                recipientInfos.add(recipient.toRecipientInfo(encKey, rand, provider));
             }
             catch (IOException e)
             {
@@ -181,7 +181,7 @@ public class CMSEnvelopedDataStreamGenerator
 
             Cipher cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encryptionOID, provider);
             
-            cipher.init(Cipher.ENCRYPT_MODE, encKey, params);
+            cipher.init(Cipher.ENCRYPT_MODE, encKey, params, rand);
 
             BERSequenceGenerator eiGen = new BERSequenceGenerator(envGen.getRawOutputStream());
             
