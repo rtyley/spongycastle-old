@@ -23,6 +23,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.util.Iterator;
 
 /**
@@ -46,6 +47,16 @@ public class CMSEnvelopedDataGenerator
      */
     public CMSEnvelopedDataGenerator()
     {
+    }
+
+    /**
+     * constructor allowing specific source of randomness
+     * @param rand instance of SecureRandom to use
+     */
+    public CMSEnvelopedDataGenerator(
+        SecureRandom rand)
+    {
+        super(rand);
     }
 
     /**

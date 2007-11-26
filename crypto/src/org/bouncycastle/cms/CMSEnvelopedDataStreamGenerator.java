@@ -23,6 +23,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.util.Iterator;
 
 /**
@@ -58,6 +59,15 @@ public class CMSEnvelopedDataStreamGenerator
     {
     }
 
+    /**
+     * constructor allowing specific source of randomness
+     * @param rand instance of SecureRandom to use
+     */
+    public CMSEnvelopedDataStreamGenerator(
+        SecureRandom rand)
+    {
+        super(rand);
+    }
 
     /**
      * Set the underlying string size for encapsulated data

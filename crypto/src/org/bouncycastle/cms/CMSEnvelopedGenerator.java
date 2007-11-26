@@ -95,8 +95,8 @@ public class CMSEnvelopedGenerator
 
     private static final CMSEnvelopedHelper HELPER = CMSEnvelopedHelper.INSTANCE;
 
-    List recipientInfs = new ArrayList();
-    SecureRandom rand = new SecureRandom();
+    final List recipientInfs = new ArrayList();
+    final SecureRandom rand;
 
     protected class RecipientInf
     {
@@ -361,6 +361,17 @@ public class CMSEnvelopedGenerator
      */
     public CMSEnvelopedGenerator()
     {
+        this(new SecureRandom());
+    }
+
+    /**
+     * constructor allowing specific source of randomness
+     * @param rand instance of SecureRandom to use
+     */
+    public CMSEnvelopedGenerator(
+        SecureRandom rand)
+    {
+        this.rand = rand;
     }
 
     /**
