@@ -10,6 +10,7 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
 
 /**
  * Wrap keys according to
@@ -65,6 +66,18 @@ public class DESedeWrapEngine
         this.forWrapping = forWrapping;
         this.engine = new CBCBlockCipher(new DESedeEngine());
 
+        SecureRandom sr;
+        if (param instanceof ParametersWithRandom)
+        {
+            ParametersWithRandom pr = (ParametersWithRandom) param;
+            param = pr.getParameters();
+            sr = pr.getRandom();
+        }
+        else
+        {
+            sr = new SecureRandom();
+        }
+
         if (param instanceof KeyParameter)
         {
             this.param = (KeyParameter)param;
@@ -75,9 +88,6 @@ public class DESedeWrapEngine
                 // Hm, we have no IV but we want to wrap ?!?
                 // well, then we have to create our own IV.
                 this.iv = new byte[8];
-
-                SecureRandom sr = new SecureRandom();
-
                 sr.nextBytes(iv);
 
                 this.paramPlusIV = new ParametersWithIV(this.param, this.iv);
