@@ -89,15 +89,15 @@ public class CMSEnvelopedDataParser
         this._envelopedData = new EnvelopedDataParser((ASN1SequenceParser)_contentInfo.getContent(DERTags.SEQUENCE));
 
         //
-        // load the RecepientInfoStore
+        // load the RecipientInfoStore
         //
         ASN1SetParser s = _envelopedData.getRecipientInfos();
         List          baseInfos = new ArrayList();
-        ASN1Set       set = ASN1Set.getInstance(s.getDERObject());
 
-        for (Enumeration en = set.getObjects(); en.hasMoreElements();)
+        DEREncodable entry;
+        while ((entry = s.readObject()) != null)
         {
-            baseInfos.add(RecipientInfo.getInstance(en.nextElement()));
+            baseInfos.add(RecipientInfo.getInstance(entry.getDERObject()));
         }
 
         //
@@ -108,7 +108,7 @@ public class CMSEnvelopedDataParser
         this._encAlg = encInfo.getContentEncryptionAlgorithm();
         
         //
-        // prime the recepients
+        // prime the recipients
         //
         List        infos = new ArrayList();
         Iterator    it = baseInfos.iterator();
