@@ -65,7 +65,7 @@ public class CMSEnvelopedData
         this._encAlg = encInfo.getContentEncryptionAlgorithm();
         
         //
-        // load the RecepientInfoStore
+        // load the RecipientInfoStore
         //
         ASN1Set     s = envData.getRecipientInfos();
         List        infos = new ArrayList();
