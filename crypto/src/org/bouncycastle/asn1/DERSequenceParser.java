@@ -2,12 +2,12 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
-public class BERSequenceParser
+public class DERSequenceParser
     implements ASN1SequenceParser
 {
     private ASN1StreamParser _parser;
 
-    BERSequenceParser(ASN1StreamParser parser)
+    DERSequenceParser(ASN1StreamParser parser)
     {
         this._parser = parser;
     }
@@ -22,7 +22,7 @@ public class BERSequenceParser
     {
         try
         {
-            return new BERSequence(_parser.readVector());
+            return new DERSequence(_parser.readVector());
         }
         catch (IOException e)
         {

@@ -49,29 +49,31 @@ public class BERTaggedObjectParser
             case DERTags.SET:
                 if (_indefiniteLength)
                 {
-                    return new BERSetParser(new ASN1ObjectParser(_baseTag, _tagNumber, _contentStream));
+                    return new BERSetParser(new ASN1StreamParser(_contentStream));
                 }
                 else
                 {
                     return new DERSet(loadVector(_contentStream)).parser();
+                    //return new DERSetParser(new ASN1StreamParser(_contentStream));
                 }
             case DERTags.SEQUENCE:
                 if (_indefiniteLength)
                 {
-                    return new BERSequenceParser(new ASN1ObjectParser(_baseTag, _tagNumber, _contentStream));
+                    return new BERSequenceParser(new ASN1StreamParser(_contentStream));
                 }
                 else
                 {
                     return new DERSequence(loadVector(_contentStream)).parser();
+                    //return new DERSequenceParser(new ASN1StreamParser(_contentStream));
                 }
             case DERTags.OCTET_STRING:
                 if (_indefiniteLength || this.isConstructed())
                 {
-                    return new BEROctetStringParser(new ASN1ObjectParser(_baseTag, _tagNumber, _contentStream));
+                    return new BEROctetStringParser(new ASN1StreamParser(_contentStream));
                 }
                 else
                 {
-                    return new DEROctetString(((DefiniteLengthInputStream)_contentStream).toByteArray()).parser();
+                    return new DEROctetStringParser((DefiniteLengthInputStream)_contentStream);
                 }
             }
         }
@@ -82,17 +84,7 @@ public class BERTaggedObjectParser
     private ASN1EncodableVector loadVector(InputStream in)
         throws IOException
     {
-        ASN1StreamParser        aIn = new ASN1StreamParser(in);
-        ASN1EncodableVector     v = new ASN1EncodableVector();
-        DEREncodable            obj = aIn.readObject();
-
-        while (obj != null)
-        {
-            v.add(obj.getDERObject());
-            obj = aIn.readObject();
-        }
-
-        return v;
+        return new ASN1StreamParser(in).readVector();
     }
 
     private ASN1EncodableVector rLoadVector(InputStream in)

@@ -6,13 +6,13 @@ import java.io.IOException;
 class ConstructedOctetStream
     extends InputStream
 {
-    private final ASN1ObjectParser _parser;
+    private final ASN1StreamParser _parser;
 
     private boolean                _first = true;
     private InputStream            _currentStream;
 
     ConstructedOctetStream(
-        ASN1ObjectParser parser)
+        ASN1StreamParser parser)
     {
         _parser = parser;
     }

@@ -5,9 +5,9 @@ import java.io.IOException;
 public class BERSetParser
     implements ASN1SetParser
 {
-    private ASN1ObjectParser _parser;
+    private ASN1StreamParser _parser;
 
-    BERSetParser(ASN1ObjectParser parser)
+    BERSetParser(ASN1StreamParser parser)
     {
         this._parser = parser;
     }
@@ -20,6 +20,13 @@ public class BERSetParser
 
     public DERObject getDERObject()
     {
-        return new BERSet(_parser.readVector());
+        try
+        {
+            return new BERSet(_parser.readVector());
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 }
