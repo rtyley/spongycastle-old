@@ -334,7 +334,7 @@ public class ASN1InputStream
         return aIn.buildConstructedOctetString(null);
     }
 
-    private ASN1EncodableVector buildEncodableVector(DERObject sentinel)
+    ASN1EncodableVector buildEncodableVector(DERObject sentinel)
         throws IOException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();

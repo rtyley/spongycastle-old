@@ -163,11 +163,11 @@ public class ASN1StreamParser
                 }
                 return BERNull.INSTANCE;
             case DERTags.OCTET_STRING:
-                return new BEROctetStringParser(new ASN1ObjectParser(tag, tagNo, indIn));
+                return new BEROctetStringParser(new ASN1StreamParser(indIn));
             case DERTags.SEQUENCE:
-                return new BERSequenceParser(new ASN1ObjectParser(tag, tagNo, indIn));
+                return new BERSequenceParser(new ASN1StreamParser(indIn));
             case DERTags.SET:
-                return new BERSetParser(new ASN1ObjectParser(tag, tagNo, indIn));
+                return new BERSetParser(new ASN1StreamParser(indIn));
             default:
                 return new BERTaggedObjectParser(tag, tagNo, indIn);
             }
@@ -176,22 +176,63 @@ public class ASN1StreamParser
         {
             DefiniteLengthInputStream defIn = new DefiniteLengthInputStream(_in, length);
 
+            // TODO Handle DERTags.Application (see ASN1InputStream.buildObject())
+
             switch (baseTagNo)
             {
+            case DERTags.BIT_STRING:
+            {
+                byte[] bytes = defIn.toByteArray();                
+                int     padBits = bytes[0];
+                byte[]  data = new byte[bytes.length - 1];
+
+                System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
+
+                return new DERBitString(data, padBits);
+            }
+            case DERTags.BMP_STRING:
+                return new DERBMPString(defIn.toByteArray());
+            case DERTags.BOOLEAN:
+                return new DERBoolean(defIn.toByteArray());
+            case DERTags.ENUMERATED:
+                return new DEREnumerated(defIn.toByteArray());
+            case DERTags.GENERALIZED_TIME:
+                return new DERGeneralizedTime(defIn.toByteArray());
+            case DERTags.GENERAL_STRING:
+                return new DERGeneralString(defIn.toByteArray());
+            case DERTags.IA5_STRING:
+                return new DERIA5String(defIn.toByteArray());
             case DERTags.INTEGER:
                 return new DERInteger(defIn.toByteArray());
             case DERTags.NULL:
                 defIn.toByteArray(); // make sure we read to end of object bytes.
                 return DERNull.INSTANCE;
+            case DERTags.NUMERIC_STRING:
+              return new DERNumericString(defIn.toByteArray());
             case DERTags.OBJECT_IDENTIFIER:
                 return new DERObjectIdentifier(defIn.toByteArray());
             case DERTags.OCTET_STRING:
-                return new DEROctetString(defIn.toByteArray());
+                return new DEROctetStringParser(defIn);
+            case DERTags.PRINTABLE_STRING:
+                return new DERPrintableString(defIn.toByteArray());
             case DERTags.SEQUENCE:
                 return new DERSequence(loadVector(defIn, length)).parser();
+                //return new DERSequenceParser(new ASN1StreamParser(defIn));
             case DERTags.SET:
                 return new DERSet(loadVector(defIn, length)).parser();
+                //return new DERSetParser(new ASN1StreamParser(defIn));
+            case DERTags.T61_STRING:
+                return new DERT61String(defIn.toByteArray());
+            case DERTags.UNIVERSAL_STRING:
+                return new DERUniversalString(defIn.toByteArray());
+            case DERTags.UTC_TIME:
+                return new DERUTCTime(defIn.toByteArray());
+            case DERTags.UTF8_STRING:
+                return new DERUTF8String(defIn.toByteArray());
+            case DERTags.VISIBLE_STRING:
+                return new DERVisibleString(defIn.toByteArray());
             default:
+                // TODO Potentially DERUnknownTag (see ASN1InputStream.buildObject())
                 return new BERTaggedObjectParser(tag, tagNo, defIn);
             }
         }
@@ -208,13 +249,17 @@ public class ASN1StreamParser
     private ASN1EncodableVector loadVector(InputStream in, int length)
         throws IOException
     {
-        ASN1InputStream         aIn = new ASN1InputStream(in, length);
-        ASN1EncodableVector     v = new ASN1EncodableVector();
+        return new ASN1InputStream(in, length).buildEncodableVector(null);
+    }
 
-        DERObject obj;
-        while ((obj = aIn.readObject()) != null)
+    ASN1EncodableVector readVector() throws IOException
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        DEREncodable obj;
+        while ((obj = readObject()) != null)
         {
-            v.add(obj);
+            v.add(obj.getDERObject());
         }
 
         return v;
