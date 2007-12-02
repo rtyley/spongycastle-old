@@ -4,7 +4,6 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1SequenceParser;
-import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
@@ -26,7 +25,6 @@ import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
