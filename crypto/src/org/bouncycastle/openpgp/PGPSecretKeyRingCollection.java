@@ -1,6 +1,7 @@
 package org.bouncycastle.openpgp;
 
 import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.util.Strings;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -100,7 +101,21 @@ public class PGPSecretKeyRingCollection
     {
         return secretRings.values().iterator();
     }
-    
+
+    /**
+     * Return an iterator of the key rings associated with the passed in userID.
+     * 
+     * @param userID the user ID to be matched.
+     * @return an iterator (possibly empty) of key rings which matched.
+     * @throws PGPException
+     */
+    public Iterator getKeyRings(
+        String    userID) 
+        throws PGPException
+    {   
+        return getKeyRings(userID, false, false);
+    }
+
     /**
      * Return an iterator of the key rings associated with the passed in userID.
      * <p>
@@ -115,9 +130,33 @@ public class PGPSecretKeyRingCollection
         boolean   matchPartial) 
         throws PGPException
     {
+        return getKeyRings(userID, matchPartial, false);
+    }
+
+    /**
+     * Return an iterator of the key rings associated with the passed in userID.
+     * <p>
+     * 
+     * @param userID the user ID to be matched.
+     * @param matchPartial if true userID need only be a substring of an actual ID string to match.
+     * @param ignoreCase if true case is ignored in user ID comparisons.
+     * @return an iterator (possibly empty) of key rings which matched.
+     * @throws PGPException
+     */
+    public Iterator getKeyRings(
+        String    userID,
+        boolean   matchPartial,
+        boolean   ignoreCase) 
+        throws PGPException
+    {
         Iterator    it = this.getKeyRings();
         List        rings = new ArrayList();
-        
+
+        if (ignoreCase)
+        {
+            userID = Strings.toLowerCase(userID);
+        }
+
         while (it.hasNext())
         {
             PGPSecretKeyRing secRing = (PGPSecretKeyRing)it.next();
@@ -125,16 +164,22 @@ public class PGPSecretKeyRingCollection
             
             while (uIt.hasNext())
             {
+                String next = (String)uIt.next();
+                if (ignoreCase)
+                {
+                    next = Strings.toLowerCase(next);
+                }
+
                 if (matchPartial)
                 {
-                    if (((String)uIt.next()).indexOf(userID) > -1)
+                    if (next.indexOf(userID) > -1)
                     {
                         rings.add(secRing);
                     }
                 }
                 else
                 {
-                    if (uIt.next().equals(userID))
+                    if (next.equals(userID))
                     {
                         rings.add(secRing);
                     }
@@ -144,21 +189,7 @@ public class PGPSecretKeyRingCollection
     
         return rings.iterator();
     }
-    
-    /**
-     * Return an iterator of the key rings associated with the passed in userID.
-     * 
-     * @param userID the user ID to be matched.
-     * @return an iterator (possibly empty) of key rings which matched.
-     * @throws PGPException
-     */
-    public Iterator getKeyRings(
-        String    userID) 
-        throws PGPException
-    {   
-        return getKeyRings(userID, false);
-    }
-    
+
     /**
      * Return the PGP secret key associated with the given key id.
      * 
