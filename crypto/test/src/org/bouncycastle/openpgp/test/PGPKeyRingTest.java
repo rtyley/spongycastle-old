@@ -1054,6 +1054,22 @@ public class PGPKeyRingTest
         {
             fail("wrong number of public keyrings on partial match 0");
         }
+
+        //
+        // case-insensitive partial match
+        //
+        rIt = pubRings.getKeyRings("TEST@ubicall.com", true, true);
+        count = 0;
+        while (rIt.hasNext())
+        {
+            count++;
+            rIt.next();
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of public keyrings on case-insensitive partial match");
+        }
         
         PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec1);
 
@@ -1144,6 +1160,22 @@ public class PGPKeyRingTest
         if (count != 0)
         {
             fail("wrong number of secret keyrings on partial match 0");
+        }
+
+        //
+        // case-insensitive partial match
+        //
+        rIt = secretRings.getKeyRings("TEST@ubicall.com", true, true);
+        count = 0;
+        while (rIt.hasNext())
+        {
+            count++;
+            rIt.next();
+        }
+        
+        if (count != 1)
+        {
+            fail("wrong number of secret keyrings on case-insensitive partial match");
         }
     }
     
