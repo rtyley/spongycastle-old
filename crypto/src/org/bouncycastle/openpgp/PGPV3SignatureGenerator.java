@@ -2,12 +2,7 @@ package org.bouncycastle.openpgp;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.util.Date;
 
 import org.bouncycastle.bcpg.MPInteger;
@@ -64,12 +59,36 @@ public class PGPV3SignatureGenerator
         PGPPrivateKey key)
         throws PGPException
     {
+        initSign(signatureType, key, null);
+    }
+
+    /**
+     * Initialise the generator for signing.
+     * 
+     * @param signatureType
+     * @param key
+     * @param random
+     * @throws PGPException
+     */
+    public void initSign(
+        int           signatureType,
+        PGPPrivateKey key,
+        SecureRandom  random)
+        throws PGPException
+    {
         this.privKey = key;
         this.signatureType = signatureType;
         
         try
         {
-            sig.initSign(key.getKey());
+            if (random == null)
+            {
+                sig.initSign(key.getKey());
+            }
+            else
+            {
+                sig.initSign(key.getKey(), random);
+            }
         }
         catch (InvalidKeyException e)
         {
