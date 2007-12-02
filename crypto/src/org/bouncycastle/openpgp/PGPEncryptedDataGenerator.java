@@ -127,7 +127,7 @@ public class PGPEncryptedDataGenerator
 
             Key key = pubKey.getKey(defProvider);
             
-            c.init(Cipher.ENCRYPT_MODE, key);
+            c.init(Cipher.ENCRYPT_MODE, key, rand);
         
             byte[]    encKey = c.doFinal(sessionInfo);
             
@@ -392,8 +392,9 @@ public class PGPEncryptedDataGenerator
             {
                 c = Cipher.getInstance(cName + "/OpenPGPCFB/NoPadding", defProvider);
             }
-            
-            c.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(new byte[c.getBlockSize()]));
+
+            byte[] iv = new byte[c.getBlockSize()];
+            c.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv), rand);
             
             if (buffer == null)
             {

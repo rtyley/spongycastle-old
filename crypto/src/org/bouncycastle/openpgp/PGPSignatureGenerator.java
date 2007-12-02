@@ -84,12 +84,36 @@ public class PGPSignatureGenerator
         PGPPrivateKey   key)
         throws PGPException
     {
+        initSign(signatureType, key, null);
+    }
+
+    /**
+     * Initialise the generator for signing.
+     * 
+     * @param signatureType
+     * @param key
+     * @param random
+     * @throws PGPException
+     */
+    public void initSign(
+        int             signatureType,
+        PGPPrivateKey   key,
+        SecureRandom    random)
+        throws PGPException
+    {
         this.privKey = key;
         this.signatureType = signatureType;
         
         try
         {
-            sig.initSign(key.getKey());
+            if (random == null)
+            {
+                sig.initSign(key.getKey());
+            }
+            else
+            {
+                sig.initSign(key.getKey(), random);
+            }
         }
         catch (InvalidKeyException e)
         {
