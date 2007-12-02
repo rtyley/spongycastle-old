@@ -1,13 +1,11 @@
 package org.bouncycastle.openpgp;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.bcpg.*;
 import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
