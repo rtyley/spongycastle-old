@@ -33,7 +33,7 @@ public class KeyTransRecipientInformation
     extends RecipientInformation
 {
     private KeyTransRecipientInfo _info;
-    private AlgorithmIdentifier   _encAlg;
+//    private AlgorithmIdentifier   _encAlg;
 
     public KeyTransRecipientInformation(
         KeyTransRecipientInfo   info,
@@ -43,7 +43,7 @@ public class KeyTransRecipientInformation
         super(encAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
         
         this._info = info;
-        this._encAlg = encAlg;
+//        this._encAlg = encAlg;
         this._rid = new RecipientId();
 
         RecipientIdentifier r = info.getRecipientIdentifier();
