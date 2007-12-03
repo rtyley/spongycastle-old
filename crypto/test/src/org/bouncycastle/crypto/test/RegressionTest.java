@@ -92,6 +92,7 @@ public class RegressionTest
         new ISAACTest(),
         new NoekeonTest(),
         new VMPCKSA3Test(),
+        new VMPCMacTest(),
         new VMPCTest(),
         //new NaccacheSternTest(),
         new NullTest()

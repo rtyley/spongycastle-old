@@ -25,6 +25,7 @@ import org.bouncycastle.crypto.macs.GOST28147Mac;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.macs.ISO9797Alg3Mac;
 import org.bouncycastle.crypto.macs.OldHMac;
+import org.bouncycastle.crypto.macs.VMPCMac;
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
@@ -229,7 +230,19 @@ public class JCEMac
             super(new GOST28147Mac());
         }
     }
-    
+
+    /**
+     * VMPC
+     */
+    public static class VMPC
+        extends JCEMac
+    {
+        public VMPC()
+        {
+            super(new VMPCMac());
+        }
+    }
+
     /**
      * DES
      */

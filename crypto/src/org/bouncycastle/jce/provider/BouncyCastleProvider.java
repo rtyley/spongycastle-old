@@ -602,6 +602,10 @@ public final class BouncyCastleProvider extends Provider
         put("Mac.GOST28147MAC", "org.bouncycastle.jce.provider.JCEMac$GOST28147");
         put("Alg.Alias.Mac.GOST28147", "GOST28147MAC");
 
+        put("Mac.VMPCMAC", "org.bouncycastle.jce.provider.JCEMac$VMPC");
+        put("Alg.Alias.Mac.VMPC", "VMPCMAC");
+        put("Alg.Alias.Mac.VMPC-MAC", "VMPCMAC");
+
         put("Mac.OLDHMACSHA384", "org.bouncycastle.jce.provider.JCEMac$OldSHA384");
 
         put("Mac.OLDHMACSHA512", "org.bouncycastle.jce.provider.JCEMac$OldSHA512");
