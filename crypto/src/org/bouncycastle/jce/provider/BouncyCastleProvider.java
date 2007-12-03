@@ -600,6 +600,7 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Mac.RC5/CFB8", "RC5MAC/CFB8");
 
         put("Mac.GOST28147MAC", "org.bouncycastle.jce.provider.JCEMac$GOST28147");
+        put("Alg.Alias.Mac.GOST28147", "GOST28147MAC");
 
         put("Mac.OLDHMACSHA384", "org.bouncycastle.jce.provider.JCEMac$OldSHA384");
 
