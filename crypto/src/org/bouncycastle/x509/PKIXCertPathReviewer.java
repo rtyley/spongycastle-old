@@ -895,7 +895,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 {
                     try
                     {
-                        AuthorityKeyIdentifier aki = (AuthorityKeyIdentifier) X509ExtensionUtil.fromExtensionValue(akiBytes);
+                        AuthorityKeyIdentifier aki = AuthorityKeyIdentifier.getInstance(
+                            X509ExtensionUtil.fromExtensionValue(akiBytes));
                         GeneralNames issuerNames = aki.getAuthorityCertIssuer();
                         if (issuerNames != null)
                         {
