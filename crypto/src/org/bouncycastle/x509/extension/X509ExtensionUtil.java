@@ -1,6 +1,5 @@
 package org.bouncycastle.x509.extension;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -23,7 +22,7 @@ import java.util.List;
 
 public class X509ExtensionUtil
 {
-    public static ASN1Encodable fromExtensionValue(
+    public static ASN1Object fromExtensionValue(
         byte[]  encodedValue) 
         throws IOException
     {
