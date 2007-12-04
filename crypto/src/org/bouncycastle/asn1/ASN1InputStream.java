@@ -166,13 +166,16 @@ public class ASN1InputStream
 
         if (isConstructed)
         {
-            switch (tag)
+            int baseTagNo = tag & ~CONSTRUCTED;
+
+            // TODO There are other tags that may be constructed (e.g. BitString)
+            switch (baseTagNo)
             {
-            case SEQUENCE | CONSTRUCTED:
+            case SEQUENCE:
                 return new DERSequence(buildDerEncodableVector(length));
-            case SET | CONSTRUCTED:
+            case SET:
                 return new DERSet(buildDerEncodableVector(length), false);
-            case OCTET_STRING | CONSTRUCTED:
+            case OCTET_STRING:
                 return buildDerConstructedOctetString(length);
             default:
             {
@@ -363,6 +366,7 @@ public class ASN1InputStream
         int tag = read();
         if (tag == -1)
         {
+            // TODO I don't think it's right to throw an exception here - just return null
             if (eofFound)
             {
                 throw new EOFException("attempt to read past end of file.");
@@ -372,69 +376,95 @@ public class ASN1InputStream
 
             return null;
         }
-    
+
+        //
+        // calculate tag number
+        //
         int tagNo = 0;
-        
         if ((tag & TAGGED) != 0 || (tag & APPLICATION) != 0)
         {
             tagNo = readTagNumber(tag);
         }
-        
-        int     length = readLength();
 
-        if (length < 0)    // indefinite length method
+        //
+        // calculate length
+        //
+        int length = readLength();
+
+        if (length < 0) // indefinite length method
         {
+            boolean isConstructed = (tag & CONSTRUCTED) != 0;
+
+            if (isConstructed)
+            {
+                int baseTagNo = tag & ~CONSTRUCTED;
+
+                switch (baseTagNo)
+                {
+                    case SEQUENCE:
+                        return new BERSequence(buildEncodableVector(END_OF_STREAM));
+                    case SET:
+                        return new BERSet(buildEncodableVector(END_OF_STREAM), false);
+                    case OCTET_STRING:
+                        return buildConstructedOctetString(END_OF_STREAM);
+                    default:
+                    {
+                        //
+                        // with tagged object tag number is bottom 5 bits
+                        //
+                        if ((tag & TAGGED) != 0)  
+                        {
+                            //
+                            // either constructed or explicitly tagged
+                            //
+                            ASN1EncodableVector v = buildEncodableVector(END_OF_STREAM);
+
+                            if (v.size() == 0)     // empty tag!
+                            {
+                                return new DERTaggedObject(tagNo);
+                            }
+
+                            if (v.size() == 1)
+                            {
+                                //
+                                // explicitly tagged (probably!) - if it isn't we'd have to
+                                // tell from the context
+                                //
+                                return new BERTaggedObject(tagNo, v.get(0));
+                            }
+
+                            return new BERTaggedObject(false, tagNo, new BERSequence(v));
+                        }
+
+                        throw new IOException("unknown BER object encountered");
+                    }
+                }
+            }
+
+            // TODO Do we really want to accept primitive encodings with indefinite length?
+
             switch (tag)
             {
-            case NULL:
-                return BERNull.INSTANCE;
-            case SEQUENCE | CONSTRUCTED:
-                return new BERSequence(buildEncodableVector(END_OF_STREAM));
-            case SET | CONSTRUCTED:
-                return new BERSet(buildEncodableVector(END_OF_STREAM), false);
-            case OCTET_STRING | CONSTRUCTED:
-                return buildConstructedOctetString(END_OF_STREAM);
-            default:
-            {
-                //
-                // with tagged object tag number is bottom 5 bits
-                //
-                if ((tag & TAGGED) != 0)  
+                case NULL:
+                    // TODO Need to read excess bytes (see Asn1StreamParser)?
+                    return BERNull.INSTANCE;
+                default:
                 {
                     //
-                    // simple type - implicit... return an octet string
+                    // with tagged object tag number is bottom 5 bits
                     //
-                    if ((tag & CONSTRUCTED) == 0)
+                    if ((tag & TAGGED) != 0)  
                     {
+                        //
+                        // simple type - implicit... return an octet string
+                        //
                         byte[] bytes = readIndefiniteLengthFully();
 
                         return new BERTaggedObject(false, tagNo, new DEROctetString(bytes));
                     }
 
-                    //
-                    // either constructed or explicitly tagged
-                    //
-                    ASN1EncodableVector v = buildEncodableVector(END_OF_STREAM);
-
-                    if (v.size() == 0)     // empty tag!
-                    {
-                        return new DERTaggedObject(tagNo);
-                    }
-
-                    if (v.size() == 1)
-                    {
-                        //
-                        // explicitly tagged (probably!) - if it isn't we'd have to
-                        // tell from the context
-                        //
-                        return new BERTaggedObject(tagNo, v.get(0));
-                    }
-
-                    return new BERTaggedObject(false, tagNo, new BERSequence(v));
+                    throw new IOException("unknown BER object encountered");
                 }
-
-                throw new IOException("unknown BER object encountered");
-            }
             }
         }
         else
@@ -453,11 +483,14 @@ public class ASN1InputStream
     {
         int tagNo = tag & 0x1f;
 
+        //
+        // with tagged object tag number is bottom 5 bits, or stored at the start of the content
+        //
         if (tagNo == 0x1f)
         {
-            int b = read();
-
             tagNo = 0;
+
+            int b = read();
 
             while ((b >= 0) && ((b & 0x80) != 0))
             {

@@ -42,10 +42,9 @@ public class BERTaggedObjectParser
         {
             return new ASN1StreamParser(_contentStream).readObject();
         }
-        else
+
+        switch (tag)
         {
-            switch (tag)
-            {
             case DERTags.SET:
                 if (_indefiniteLength)
                 {
@@ -53,8 +52,7 @@ public class BERTaggedObjectParser
                 }
                 else
                 {
-                    return new DERSet(loadVector(_contentStream)).parser();
-                    //return new DERSetParser(new ASN1StreamParser(_contentStream));
+                    return new DERSetParser(new ASN1StreamParser(_contentStream));
                 }
             case DERTags.SEQUENCE:
                 if (_indefiniteLength)
@@ -63,10 +61,10 @@ public class BERTaggedObjectParser
                 }
                 else
                 {
-                    return new DERSequence(loadVector(_contentStream)).parser();
-                    //return new DERSequenceParser(new ASN1StreamParser(_contentStream));
+                    return new DERSequenceParser(new ASN1StreamParser(_contentStream));
                 }
             case DERTags.OCTET_STRING:
+                // TODO Is the handling of definite length constructed encodings correct?
                 if (_indefiniteLength || this.isConstructed())
                 {
                     return new BEROctetStringParser(new ASN1StreamParser(_contentStream));
@@ -75,23 +73,16 @@ public class BERTaggedObjectParser
                 {
                     return new DEROctetStringParser((DefiniteLengthInputStream)_contentStream);
                 }
-            }
         }
 
         throw new RuntimeException("implicit tagging not implemented");
-    }
-
-    private ASN1EncodableVector loadVector(InputStream in)
-        throws IOException
-    {
-        return new ASN1StreamParser(in).readVector();
     }
 
     private ASN1EncodableVector rLoadVector(InputStream in)
     {
         try
         {
-            return loadVector(in);
+            return new ASN1StreamParser(in).readVector();
         }
         catch (IOException e)
         {
