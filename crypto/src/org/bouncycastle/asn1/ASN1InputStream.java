@@ -446,7 +446,7 @@ public class ASN1InputStream
             switch (tag)
             {
                 case NULL:
-                    // TODO Need to read excess bytes (see Asn1StreamParser)?
+                    readIndefiniteLengthFully();
                     return BERNull.INSTANCE;
                 default:
                 {
