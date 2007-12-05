@@ -23,7 +23,7 @@ public class DEROctetStringParser
     {
         try
         {
-            return new DERObjectIdentifier(stream.toByteArray());
+            return new DEROctetString(stream.toByteArray());
         }
         catch (IOException e)
         {
