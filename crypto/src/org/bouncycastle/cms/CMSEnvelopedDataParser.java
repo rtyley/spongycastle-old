@@ -115,26 +115,27 @@ public class CMSEnvelopedDataParser
         while (it.hasNext())
         {
             RecipientInfo   info = (RecipientInfo)it.next();
+            DEREncodable    recipInfo = info.getInfo();    
 
-            if (info.getInfo() instanceof KeyTransRecipientInfo)
+            if (recipInfo instanceof KeyTransRecipientInfo)
             {
                 infos.add(new KeyTransRecipientInformation(
-                            (KeyTransRecipientInfo)info.getInfo(), _encAlg, dataStream));
+                            (KeyTransRecipientInfo)recipInfo, _encAlg, dataStream));
             }
-            else if (info.getInfo() instanceof KEKRecipientInfo)
+            else if (recipInfo instanceof KEKRecipientInfo)
             {
                 infos.add(new KEKRecipientInformation(
-                            (KEKRecipientInfo)info.getInfo(), _encAlg, dataStream));
+                            (KEKRecipientInfo)recipInfo, _encAlg, dataStream));
             }
-            else if (info.getInfo() instanceof KeyAgreeRecipientInfo)
+            else if (recipInfo instanceof KeyAgreeRecipientInfo)
             {
                 infos.add(new KeyAgreeRecipientInformation(
-                            (KeyAgreeRecipientInfo)info.getInfo(), _encAlg, dataStream));
+                            (KeyAgreeRecipientInfo)recipInfo, _encAlg, dataStream));
             }
-            else if (info.getInfo() instanceof PasswordRecipientInfo)
+            else if (recipInfo instanceof PasswordRecipientInfo)
             {
                 infos.add(new PasswordRecipientInformation(
-                            (PasswordRecipientInfo)info.getInfo(), _encAlg, dataStream));
+                            (PasswordRecipientInfo)recipInfo, _encAlg, dataStream));
             }
         }
         
