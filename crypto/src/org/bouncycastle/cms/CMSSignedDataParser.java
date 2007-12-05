@@ -181,22 +181,19 @@ public class CMSSignedDataParser
 
             if (octs != null)
             {
+                CMSTypedStream ctStr = new CMSTypedStream(
+                    cont.getContentType().getId(), octs.getOctetStream());
+
                 if (_signedContent == null)
                 {
-                    _signedContent = new CMSTypedStream(
-                        cont.getContentType().getId(), octs.getOctetStream());
+                    _signedContent = ctStr; 
                 }
                 else
                 {
                     //
                     // content passed in, need to read past empty encapsulated content info object if present
                     //
-                    InputStream in = octs.getOctetStream();
-
-                    while (in.read() >= 0)
-                    {
-                        // ignore
-                    }
+                    ctStr.drain();
                 }
             }
         }
