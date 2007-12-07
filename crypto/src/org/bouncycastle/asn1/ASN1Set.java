@@ -30,7 +30,7 @@ abstract public class ASN1Set
     /**
      * Return an ASN1 set from a tagged object. There is a special
      * case here, if an object appears to have been explicitly tagged on 
-     * reading but we were expecting it to be implictly tagged in the 
+     * reading but we were expecting it to be implicitly tagged in the 
      * normal course of events it indicates that we lost the surrounding
      * set - so we need to add it back (this will happen if the tagged
      * object is a sequence that contains other sequences). If you are
@@ -97,8 +97,7 @@ abstract public class ASN1Set
             }
         }
 
-        throw new IllegalArgumentException(
-                    "unknown object in getInstanceFromTagged");
+        throw new IllegalArgumentException("unknown object in getInstance");
     }
 
     public ASN1Set()
@@ -111,10 +110,10 @@ abstract public class ASN1Set
     }
 
     /**
-     * return the object at the set postion indicated by index.
+     * return the object at the set position indicated by index.
      *
      * @param index the set number (starting at zero) of the object
-     * @return the object at the set postion indicated by index.
+     * @return the object at the set position indicated by index.
      */
     public DEREncodable getObjectAt(
         int index)
