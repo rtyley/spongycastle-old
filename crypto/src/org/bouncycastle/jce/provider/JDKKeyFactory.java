@@ -569,7 +569,21 @@ public abstract class JDKKeyFactory
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof ECPrivateKeySpec)
+            if (keySpec instanceof PKCS8EncodedKeySpec)
+            {
+                try
+                {
+                    JCEECPrivateKey key = (JCEECPrivateKey)JDKKeyFactory.createPrivateKeyFromDERStream(
+                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
+
+                    return new JCEECPrivateKey(algorithm, key);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidKeySpecException(e.toString());
+                }
+            }
+            else if (keySpec instanceof ECPrivateKeySpec)
             {
                 return new JCEECPrivateKey(algorithm, (ECPrivateKeySpec)keySpec);
             }
@@ -577,15 +591,29 @@ public abstract class JDKKeyFactory
             {
                 return new JCEECPrivateKey(algorithm, (java.security.spec.ECPrivateKeySpec)keySpec);
             }
-
-            return super.engineGeneratePrivate(keySpec);
+    
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     
         protected PublicKey engineGeneratePublic(
             KeySpec    keySpec)
             throws InvalidKeySpecException
         {
-            if (keySpec instanceof ECPublicKeySpec)
+            if (keySpec instanceof X509EncodedKeySpec)
+            {
+                try
+                {
+                    JCEECPublicKey key = (JCEECPublicKey)JDKKeyFactory.createPublicKeyFromDERStream(
+                                ((X509EncodedKeySpec)keySpec).getEncoded());
+
+                    return new JCEECPublicKey(algorithm, key);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidKeySpecException(e.toString());
+                }
+            }
+            else if (keySpec instanceof ECPublicKeySpec)
             {
                 return new JCEECPublicKey(algorithm, (ECPublicKeySpec)keySpec);
             }
@@ -593,8 +621,8 @@ public abstract class JDKKeyFactory
             {
                 return new JCEECPublicKey(algorithm, (java.security.spec.ECPublicKeySpec)keySpec);
             }
-
-            return super.engineGeneratePublic(keySpec);
+    
+            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
         }
     }
 
