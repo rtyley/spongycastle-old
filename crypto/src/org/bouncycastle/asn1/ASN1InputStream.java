@@ -78,7 +78,7 @@ public class ASN1InputStream
         int length = read();
         if (length < 0)
         {
-            throw new IOException("EOF found when length expected");
+            throw new EOFException("EOF found when length expected");
         }
 
         if (length == 0x80)
@@ -102,7 +102,7 @@ public class ASN1InputStream
 
                 if (next < 0)
                 {
-                    throw new IOException("EOF found reading length");
+                    throw new EOFException("EOF found reading length");
                 }
 
                 length = (length << 8) + next;
