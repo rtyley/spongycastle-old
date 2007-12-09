@@ -400,6 +400,7 @@ public class ASN1InputStream
             {
                 int baseTagNo = tag & ~CONSTRUCTED;
 
+                // TODO There are other tags that may be constructed (e.g. BitString)
                 switch (baseTagNo)
                 {
                     case SEQUENCE:
@@ -422,6 +423,7 @@ public class ASN1InputStream
 
                             if (v.size() == 0)     // empty tag!
                             {
+                                // TODO Should be BerTaggedObject?
                                 return new DERTaggedObject(tagNo);
                             }
 
