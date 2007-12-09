@@ -36,14 +36,13 @@ public class ASN1InputStream
             return o == this;
         }
     };
-    
-    boolean eofFound = false;
-    int     limit = Integer.MAX_VALUE;
+
+    private final int limit;
 
     public ASN1InputStream(
         InputStream is)
     {
-        super(is);
+        this(is, Integer.MAX_VALUE);
     }
 
     /**
@@ -319,6 +318,11 @@ public class ASN1InputStream
 
         while ((o = readObject()) != sentinel)
         {
+            if (o == null)
+            {
+                throw new EOFException("attempt to read past end of file.");
+            }
+
             octs.addElement(o);
         }
 
@@ -345,6 +349,11 @@ public class ASN1InputStream
 
         while ((o = readObject()) != sentinel)
         {
+            if (o == null)
+            {
+                throw new EOFException("attempt to read past end of file.");
+            }
+
             v.add(o);
         }
 
@@ -366,14 +375,6 @@ public class ASN1InputStream
         int tag = read();
         if (tag == -1)
         {
-            // TODO I don't think it's right to throw an exception here - just return null
-            if (eofFound)
-            {
-                throw new EOFException("attempt to read past end of file.");
-            }
-
-            eofFound = true;
-
             return null;
         }
 
@@ -501,7 +502,6 @@ public class ASN1InputStream
 
             if (b < 0)
             {
-                eofFound = true;
                 throw new EOFException("EOF found inside tag value.");
             }
             
