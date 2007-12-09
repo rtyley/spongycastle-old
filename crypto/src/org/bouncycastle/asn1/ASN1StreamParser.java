@@ -7,10 +7,8 @@ import java.io.InputStream;
 
 public class ASN1StreamParser
 {
-    InputStream _in;
-
-    private int     _limit;
-    private boolean _eofFound;
+    private final InputStream _in;
+    private final int         _limit;
 
     public ASN1StreamParser(
         InputStream in)
@@ -30,11 +28,6 @@ public class ASN1StreamParser
         byte[] encoding)
     {
         this(new ByteArrayInputStream(encoding), encoding.length);
-    }
-
-    InputStream getParentStream()
-    {
-        return _in;
     }
 
     private int readLength()
@@ -93,14 +86,6 @@ public class ASN1StreamParser
         int tag = _in.read();
         if (tag == -1)
         {
-            // TODO I don't think it's right to throw an exception here - just return null
-            if (_eofFound)
-            {
-                throw new EOFException("attempt to read past end of file.");
-            }
-
-            _eofFound = true;
-
             return null;
         }
 
@@ -281,7 +266,6 @@ public class ASN1StreamParser
 
             if (b < 0)
             {
-                _eofFound = true;
                 throw new EOFException("EOF found inside tag value.");
             }
 
