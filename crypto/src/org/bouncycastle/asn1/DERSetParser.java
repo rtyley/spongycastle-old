@@ -22,7 +22,7 @@ public class DERSetParser
     {
         try
         {
-            return new DERSet(_parser.readVector());
+            return new DERSet(_parser.readVector(), false);
         }
         catch (IOException e)
         {
