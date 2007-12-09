@@ -22,7 +22,7 @@ public class BERSetParser
     {
         try
         {
-            return new BERSet(_parser.readVector());
+            return new BERSet(_parser.readVector(), false);
         }
         catch (IOException e)
         {
