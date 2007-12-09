@@ -100,7 +100,7 @@ public class ASN1StreamParser
         int tagNo = 0;
         if ((tag & DERTags.TAGGED) != 0 || (tag & DERTags.APPLICATION) != 0)
         {
-            tagNo = readTagNumber(tag);
+            tagNo = ASN1InputStream.readTagNumber(_in, tag);
         }
 
         boolean isConstructed = (tag & DERTags.CONSTRUCTED) != 0;
@@ -241,37 +241,5 @@ public class ASN1StreamParser
         }
 
         return v;
-    }
-
-    private int readTagNumber(int tag)
-        throws IOException
-    {
-        int tagNo = tag & 0x1f;
-
-        //
-        // with tagged object tag number is bottom 5 bits, or stored at the start of the content
-        //
-        if (tagNo == 0x1f)
-        {
-            tagNo = 0;
-
-            int b = _in.read();
-
-            while ((b >= 0) && ((b & 0x80) != 0))
-            {
-                tagNo |= (b & 0x7f);
-                tagNo <<= 7;
-                b = _in.read();
-            }
-
-            if (b < 0)
-            {
-                throw new EOFException("EOF found inside tag value.");
-            }
-
-            tagNo |= (b & 0x7f);
-        }
-
-        return tagNo;
     }
 }

@@ -384,7 +384,7 @@ public class ASN1InputStream
         int tagNo = 0;
         if ((tag & TAGGED) != 0 || (tag & APPLICATION) != 0)
         {
-            tagNo = readTagNumber(tag);
+            tagNo = readTagNumber(this, tag);
         }
 
         //
@@ -479,7 +479,7 @@ public class ASN1InputStream
         }
     }
 
-    private int readTagNumber(int tag) 
+    static int readTagNumber(InputStream s, int tag) 
         throws IOException
     {
         int tagNo = tag & 0x1f;
@@ -491,13 +491,13 @@ public class ASN1InputStream
         {
             tagNo = 0;
 
-            int b = read();
+            int b = s.read();
 
             while ((b >= 0) && ((b & 0x80) != 0))
             {
                 tagNo |= (b & 0x7f);
                 tagNo <<= 7;
-                b = read();
+                b = s.read();
             }
 
             if (b < 0)
