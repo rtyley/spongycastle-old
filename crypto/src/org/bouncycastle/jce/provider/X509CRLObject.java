@@ -91,22 +91,26 @@ public class X509CRLObject
     {
         if (this.getVersion() == 2)
         {
-            Set             set = new HashSet();
-            X509Extensions  extensions = c.getTBSCertList().getExtensions();
-            Enumeration     e = extensions.oids();
+            X509Extensions extensions = c.getTBSCertList().getExtensions();
 
-            while (e.hasMoreElements())
+            if (extensions != null)
             {
-                DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
-                X509Extension       ext = extensions.getExtension(oid);
+                Set set = new HashSet();
+                Enumeration e = extensions.oids();
 
-                if (critical == ext.isCritical())
+                while (e.hasMoreElements())
                 {
-                    set.add(oid.getId());
-                }
-            }
+                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                    X509Extension ext = extensions.getExtension(oid);
 
-            return set;
+                    if (critical == ext.isCritical())
+                    {
+                        set.add(oid.getId());
+                    }
+                }
+
+                return set;
+            }
         }
 
         return null;
