@@ -190,11 +190,6 @@ public class X509Name
     public static final DERObjectIdentifier UID = new DERObjectIdentifier("0.9.2342.19200300.100.1.1");
 
     /**
-     * look up table translating OID values into their common symbols - this static is scheduled for deletion
-     */
-    public static Hashtable OIDLookUp = new Hashtable();
-
-    /**
      * determines whether or not strings should be processed and printed
      * from back to front.
      */
@@ -204,30 +199,36 @@ public class X509Name
      * default look up table translating OID values into their common symbols following
      * the convention in RFC 2253 with a few extras
      */
-    public static Hashtable DefaultSymbols = OIDLookUp;
+    public static final Hashtable DefaultSymbols = new Hashtable();
 
     /**
      * look up table translating OID values into their common symbols following the convention in RFC 2253
      * 
      */
-    public static Hashtable RFC2253Symbols = new Hashtable();
+    public static final Hashtable RFC2253Symbols = new Hashtable();
 
     /**
      * look up table translating OID values into their common symbols following the convention in RFC 1779
      * 
      */
-    public static Hashtable RFC1779Symbols = new Hashtable();
-
-    /**
-     * look up table translating string values into their OIDS -
-     * this static is scheduled for deletion
-     */
-    public static Hashtable SymbolLookUp = new Hashtable();
+    public static final Hashtable RFC1779Symbols = new Hashtable();
 
     /**
      * look up table translating common symbols into their OIDS.
      */
-    public static Hashtable DefaultLookUp = SymbolLookUp;
+    public static final Hashtable DefaultLookUp = new Hashtable();
+
+    /**
+     * look up table translating OID values into their common symbols
+     * @deprecated use DefaultSymbols
+     */
+    public static final Hashtable OIDLookUp = DefaultSymbols;
+
+    /**
+     * look up table translating string values into their OIDS -
+     * @deprecated use DefaultLookUp
+     */
+    public static final Hashtable SymbolLookUp = DefaultLookUp;
 
     private static final Boolean TRUE = new Boolean(true); // for J2ME compatibility
     private static final Boolean FALSE = new Boolean(false);
