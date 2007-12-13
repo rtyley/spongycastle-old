@@ -1111,9 +1111,9 @@ public class PGPRSATest
             sGen.update((byte)ch);
         }
 
-        sGen.generate().encode(bcOut);
-
         lOut.close();
+
+        sGen.generate().encode(bcOut);
 
         bcOut.close();
 
