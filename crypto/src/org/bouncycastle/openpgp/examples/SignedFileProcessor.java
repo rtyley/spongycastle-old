@@ -217,9 +217,9 @@ public class SignedFileProcessor
             sGen.update((byte)ch);
         }
         
-        sGen.generate().encode(bOut);
-        
         lGen.close();
+        
+        sGen.generate().encode(bOut);
         
         cGen.close();
         

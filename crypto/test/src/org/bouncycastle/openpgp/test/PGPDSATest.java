@@ -477,9 +477,9 @@ public class PGPDSATest
             sGen.update((byte)ch);
         }
 
-        sGen.generate().encode(bcOut);
-
         lGen.close();
+
+        sGen.generate().encode(bcOut);
 
         cGen.close();
 
