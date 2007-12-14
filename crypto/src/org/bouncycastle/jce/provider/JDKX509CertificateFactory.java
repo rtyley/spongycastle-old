@@ -10,9 +10,9 @@ import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.security.cert.CRL;
 import java.security.cert.CRLException;
 import java.security.cert.CertPath;
@@ -190,29 +190,26 @@ public class JDKX509CertificateFactory
                     return null;
                 }
             }
-            
-            if (!in.markSupported())
-            {
-                in = new BufferedInputStream(in);
-            }
-            
-            in.mark(10);
-            int    tag = in.read();
-            
+
+            int limit = ProviderUtil.getReadLimit(in);
+
+            PushbackInputStream pis = new PushbackInputStream(in);
+            int tag = pis.read();
+
             if (tag == -1)
             {
                 return null;
             }
-            
+
+            pis.unread(tag);
+
             if (tag != 0x30)  // assume ascii PEM encoded.
             {
-                in.reset();
-                return readPEMCertificate(in);
+                return readPEMCertificate(pis);
             }
             else
             {
-                in.reset();
-                return readDERCertificate(new ASN1InputStream(in, ProviderUtil.getReadLimit(in)));
+                return readDERCertificate(new ASN1InputStream(pis, limit));
             }
         }
         catch (Exception e)
@@ -276,22 +273,26 @@ public class JDKX509CertificateFactory
                     return null;
                 }
             }
-            
-            if (!inStream.markSupported())
+
+            int limit = ProviderUtil.getReadLimit(inStream);
+
+            PushbackInputStream pis = new PushbackInputStream(inStream);
+            int tag = pis.read();
+
+            if (tag == -1)
             {
-                inStream = new BufferedInputStream(inStream);
+                return null;
             }
-            
-            inStream.mark(10);
-            if (inStream.read() != 0x30)  // assume ascii PEM encoded.
+
+            pis.unread(tag);
+
+            if (tag != 0x30)  // assume ascii PEM encoded.
             {
-                inStream.reset();
-                return readPEMCRL(inStream);
+                return readPEMCRL(pis);
             }
             else
             {
-                inStream.reset();
-                return readDERCRL(new ASN1InputStream(inStream, ProviderUtil.getReadLimit(inStream)));
+                return readDERCRL(new ASN1InputStream(pis, limit));
             }
         }
         catch (CRLException e)
