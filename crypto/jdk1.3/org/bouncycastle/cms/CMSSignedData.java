@@ -203,9 +203,10 @@ public class CMSSignedData
                 else
                 {
                     SignerInfo info = SignerInfo.getInstance(s.getObjectAt(i));
+
                     byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getObjectId().getId());
 
-                    signerInfos.add(new SignerInformation(info, signedData.getEncapContentInfo().getContentType(), null, hash));
+                    signerInfos.add(new SignerInformation(info, signedData.getEncapContentInfo().getContentType(), null, new BaseDigestCalculator(hash)));
                 }
             }
 
@@ -384,7 +385,7 @@ public class CMSSignedData
             }
             catch (IOException e)
             {
-                throw new RuntimeException("encoding error:" + e);
+                throw new RuntimeException("encoding error: " + e);
             }
 
             digestAlgs.add(digAlgId);

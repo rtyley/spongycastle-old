@@ -21,6 +21,7 @@ import org.bouncycastle.x509.X509Store;
 
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.interfaces.DSAPrivateKey;
@@ -89,9 +90,24 @@ public class CMSSignedGenerator
     protected List _signers = new ArrayList();
     protected Map  _digests = new HashMap();
 
+    protected final SecureRandom rand;
+
+    /**
+     * base constructor
+     */
     protected CMSSignedGenerator()
     {
-        
+        this(new SecureRandom());
+    }
+
+    /**
+     * constructor allowing specific source of randomness
+     * @param rand instance of SecureRandom to use
+     */
+    protected CMSSignedGenerator(
+        SecureRandom rand)
+    {
+        this.rand = rand;
     }
     
     protected String getEncOID(
