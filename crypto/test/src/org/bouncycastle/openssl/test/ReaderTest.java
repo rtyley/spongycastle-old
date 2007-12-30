@@ -126,7 +126,7 @@ public class ReaderTest
 
         if (!pair.getPublic().getAlgorithm().equals("ECDSA"))
         {
-            fail("wrong algorithm name on public");
+            fail("wrong algorithm name on public got: " + pair.getPublic().getAlgorithm());
         }
 
         if (!pair.getPrivate().getAlgorithm().equals("ECDSA"))

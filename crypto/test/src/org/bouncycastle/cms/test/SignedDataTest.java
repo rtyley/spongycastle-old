@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -20,6 +21,7 @@ import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.CMSAttributeTableGenerator;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
@@ -625,6 +627,47 @@ public class SignedDataTest
         throws Exception
     {
         encapsulatedTest(_signEcGostKP, _signEcGostCert, CMSSignedDataGenerator.DIGEST_GOST3411);
+    }
+
+    public void testSHA1WithRSACounterSignature()
+        throws Exception
+    {
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
+
+        certList.add(_signCert);
+        certList.add(_origCert);
+
+        certList.add(_signCrl);
+
+        CertStore           certsAndCrls = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        gen.addSigner(_signKP.getPrivate(), _signCert, CMSSignedDataGenerator.DIGEST_SHA1);
+
+        gen.addCertificatesAndCRLs(certsAndCrls);
+
+        CMSSignedData s = gen.generate(msg, true, "BC");
+        SignerInformation origSigner = (SignerInformation)s.getSignerInfos().getSigners().toArray()[0];
+        SignerInformationStore counterSigners = gen.generateCounterSigners(origSigner, "BC");
+
+        SignerInformation signer = SignerInformation.addCounterSigners(origSigner, counterSigners);
+
+        SignerInformationStore signers = signer.getCounterSignatures();
+        Iterator it = signers.getSigners().iterator();
+        while (it.hasNext())
+        {
+            SignerInformation   cSigner = (SignerInformation)it.next();
+            Collection          certCollection = certsAndCrls.getCertificates(cSigner.getSID());
+
+            Iterator        certIt = certCollection.iterator();
+            X509Certificate cert = (X509Certificate)certIt.next();
+
+            assertNull(cSigner.getSignedAttributes().get(PKCSObjectIdentifiers.pkcs_9_at_contentType));
+            assertEquals(true, cSigner.verify(cert, "BC"));
+        }
     }
 
     private void encapsulatedTest(
