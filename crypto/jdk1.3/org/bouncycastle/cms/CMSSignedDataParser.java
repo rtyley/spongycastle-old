@@ -1,12 +1,14 @@
 package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Generator;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.ASN1StreamParser;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERSetParser;
@@ -170,34 +172,28 @@ public class CMSSignedDataParser
                 }
             }
 
-            if (_signedContent == null)
-            {
-                //
-                // If the message is simply a certificate chain message getContent() may return null.
-                //
-                ContentInfoParser     cont = _signedData.getEncapContentInfo();
-                ASN1OctetStringParser octs = (ASN1OctetStringParser)cont.getContent(DERTags.OCTET_STRING);
+            //
+            // If the message is simply a certificate chain message getContent() may return null.
+            //
+            ContentInfoParser     cont = _signedData.getEncapContentInfo();
+            ASN1OctetStringParser octs = (ASN1OctetStringParser)
+                cont.getContent(DERTags.OCTET_STRING);
 
-                if (octs != null)
-                {
-                    _signedContent = new CMSTypedStream(cont.getContentType().getId(), octs.getOctetStream());
-                }
-            }
-            else
+            if (octs != null)
             {
-                //
-                // content passed in, need to read past empty encapsulated content info object if present
-                //
-                ASN1OctetStringParser octs = (ASN1OctetStringParser)_signedData.getEncapContentInfo().getContent(DERTags.OCTET_STRING);
-                
-                if (octs != null)
+                CMSTypedStream ctStr = new CMSTypedStream(
+                    cont.getContentType().getId(), octs.getOctetStream());
+
+                if (_signedContent == null)
                 {
-                    InputStream     in = octs.getOctetStream();
-                    
-                    while (in.read() >= 0)
-                    {
-                        // ignore
-                    }
+                    _signedContent = ctStr; 
+                }
+                else
+                {
+                    //
+                    // content passed in, need to read past empty encapsulated content info object if present
+                    //
+                    ctStr.drain();
                 }
             }
         }
@@ -232,6 +228,8 @@ public class CMSSignedDataParser
     {
         if (_signerInfoStore == null)
         {
+            populateCertCrlSets();
+            
             List      signerInfos = new ArrayList();
             Map       hashes = new HashMap();
             
@@ -255,7 +253,7 @@ public class CMSSignedDataParser
                     
                     byte[] hash = (byte[])hashes.get(digestName);
                     
-                    signerInfos.add(new SignerInformation(info, new DERObjectIdentifier(_signedContent.getContentType()), null, hash));
+                    signerInfos.add(new SignerInformation(info, new DERObjectIdentifier(_signedContent.getContentType()), null, new BaseDigestCalculator(hash)));
                 }
             }
             catch (IOException e)
@@ -380,21 +378,11 @@ public class CMSSignedDataParser
 
         _isCertCrlParsed = true;
 
-        ASN1SetParser sCerts, sCrls;
-
         try
         {
             // care! Streaming - these must be done in exactly this order.
-            sCerts = _signedData.getCertificates();
-            if (sCerts != null)
-            {
-                _certSet = ASN1Set.getInstance(sCerts.getDERObject());
-            }
-            sCrls = _signedData.getCrls();
-            if (sCrls != null)
-            {
-                _crlSet = ASN1Set.getInstance(sCrls.getDERObject());
-            }
+            _certSet = getASN1Set(_signedData.getCertificates());
+            _crlSet = getASN1Set(_signedData.getCrls());
         }
         catch (IOException e)
         {
@@ -480,48 +468,20 @@ public class CMSSignedDataParser
 
         eiGen.addObject(encapContentInfo.getContentType());
 
-        ASN1OctetStringParser octs = (ASN1OctetStringParser)encapContentInfo.getContent(DERTags.OCTET_STRING);
+        ASN1OctetStringParser octs = (ASN1OctetStringParser)
+            encapContentInfo.getContent(DERTags.OCTET_STRING);
 
         if (octs != null)
         {
-            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
-            byte[]                  inBuffer = new byte[4096];
-            byte[]                  outBuffer = new byte[4096];
-            InputStream             inOctets = octs.getOctetStream();
-            OutputStream            outOctets = octGen.getOctetOutputStream(outBuffer);
-
-            int len;
-            while ((len = inOctets.read(inBuffer, 0, inBuffer.length)) >= 0)
-            {
-                outOctets.write(inBuffer, 0, len);
-            }
-
-            outOctets.close();
+            pipeOctetString(octs, eiGen.getRawOutputStream());
         }
 
         eiGen.close();
 
-        ASN1SetParser set = signedData.getCertificates();
 
-        if (set instanceof BERSetParser)
-        {
-            sigGen.getRawOutputStream().write(new BERTaggedObject(false, 0, set.getDERObject()).getEncoded());
-        }
-        else if (set != null)
-        {
-            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 0, set.getDERObject()).getEncoded());
-        }
+        writeSetToGeneratorTagged(sigGen, signedData.getCertificates(), 0);
+        writeSetToGeneratorTagged(sigGen, signedData.getCrls(), 1);
 
-        set = signedData.getCrls();
-
-        if (set instanceof BERSetParser)
-        {
-            sigGen.getRawOutputStream().write(new BERTaggedObject(false, 1, set.getDERObject()).getEncoded());
-        }
-        else if (set != null)
-        {
-            sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, set.getDERObject()).getEncoded());
-        }
 
         ASN1EncodableVector signerInfos = new ASN1EncodableVector();
         for (Iterator it = signerInformationStore.getSigners().iterator(); it.hasNext();)
@@ -581,23 +541,12 @@ public class CMSSignedDataParser
 
         eiGen.addObject(encapContentInfo.getContentType());
 
-        ASN1OctetStringParser octs = (ASN1OctetStringParser)encapContentInfo.getContent(DERTags.OCTET_STRING);
+        ASN1OctetStringParser octs = (ASN1OctetStringParser)
+            encapContentInfo.getContent(DERTags.OCTET_STRING);
 
         if (octs != null)
         {
-            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
-            byte[]                  inBuffer = new byte[4096];
-            byte[]                  outBuffer = new byte[4096];
-            InputStream             inOctets = octs.getOctetStream();
-            OutputStream            outOctets = octGen.getOctetOutputStream(outBuffer);
-
-            int len;
-            while ((len = inOctets.read(inBuffer, 0, inBuffer.length)) >= 0)
-            {
-                outOctets.write(inBuffer, 0, len);
-            }
-
-            outOctets.close();
+            pipeOctetString(octs, eiGen.getRawOutputStream());
         }
 
         eiGen.close();
@@ -605,19 +554,8 @@ public class CMSSignedDataParser
         //
         // skip existing certs and CRLs
         //
-        ASN1SetParser set = signedData.getCertificates();
-
-        if (set != null)
-        {
-            set.getDERObject();
-        }
-
-        set = signedData.getCrls();
-
-        if (set != null)
-        {
-            set.getDERObject();
-        }
+        getASN1Set(signedData.getCertificates());
+        getASN1Set(signedData.getCrls());
 
         //
         // replace the certs and crls in the SignedData object
@@ -692,5 +630,51 @@ public class CMSSignedDataParser
             return new AlgorithmIdentifier(
                             new DERObjectIdentifier(oid), new DERNull());
         }
+    }
+
+    private static void writeSetToGeneratorTagged(
+        ASN1Generator asn1Gen,
+        ASN1SetParser asn1SetParser,
+        int           tagNo)
+        throws IOException
+    {
+        ASN1Set asn1Set = getASN1Set(asn1SetParser);
+
+        if (asn1Set != null)
+        {
+            ASN1TaggedObject taggedObj = (asn1SetParser instanceof BERSetParser)
+                ?   new BERTaggedObject(false, tagNo, asn1Set)
+                :   new DERTaggedObject(false, tagNo, asn1Set);
+
+            asn1Gen.getRawOutputStream().write(taggedObj.getEncoded());                
+        }
+    }
+
+    private static ASN1Set getASN1Set(
+        ASN1SetParser asn1SetParser)
+    {
+        return asn1SetParser == null
+            ?   null
+            :   ASN1Set.getInstance(asn1SetParser.getDERObject());
+    }
+
+    private static void pipeOctetString(
+        ASN1OctetStringParser octs,
+        OutputStream          output)
+        throws IOException
+    {
+        BEROctetStringGenerator octGen = new BEROctetStringGenerator(output, 0, true);
+        byte[]                  inBuffer = new byte[4096];
+        InputStream             inOctets = octs.getOctetStream();
+        // TODO Allow specification of a specific fragment size?
+        OutputStream            outOctets = octGen.getOctetOutputStream();
+
+        int len;
+        while ((len = inOctets.read(inBuffer, 0, inBuffer.length)) >= 0)
+        {
+            outOctets.write(inBuffer, 0, len);
+        }
+
+        outOctets.close();
     }
 }
