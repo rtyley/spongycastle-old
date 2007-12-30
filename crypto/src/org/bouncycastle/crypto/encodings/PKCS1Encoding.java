@@ -7,6 +7,8 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 
 import java.security.SecureRandom;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * this does your basic PKCS 1 v1.5 padding - whether or not you should be using this
@@ -49,7 +51,14 @@ public class PKCS1Encoding
     //
     private boolean useStrict()
     {
-        String strict = System.getProperty(STRICT_LENGTH_ENABLED_PROPERTY);
+        // required if security manager has been installed.
+        String strict = (String)AccessController.doPrivileged(new PrivilegedAction()
+        {
+            public Object run()
+            {
+                return System.getProperty(STRICT_LENGTH_ENABLED_PROPERTY);
+            }
+        });
 
         return strict == null || strict.equals("true");
     }

@@ -1,5 +1,6 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -37,6 +38,10 @@ import java.security.SignatureException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * an expanded SignerInfo block from a CMS Signed message
@@ -52,14 +57,14 @@ public class SignerInformation
     private CMSProcessable          content;
     private byte[]                  signature;
     private DERObjectIdentifier     contentType;
-    private byte[]                  hash;
+    private DigestCalculator        digestCalculator;
     private byte[]                  resultDigest;
 
     SignerInformation(
         SignerInfo          info,
         DERObjectIdentifier contentType,
         CMSProcessable      content,
-        byte[]              digest)
+        DigestCalculator digestCalculator)
     {
         this.info = info;
         this.sid = new SignerId();
@@ -100,7 +105,7 @@ public class SignerInformation
         this.signature = info.getEncryptedDigest().getOctets();
 
         this.content = content;
-        hash = digest;
+        this.digestCalculator = digestCalculator;
     }
 
     private byte[] encodeObj(
@@ -230,6 +235,39 @@ public class SignerInformation
     }
 
     /**
+     * Return the list of all the counter signature of this signature.
+     * If no counter signature are present, an empty collection is returned.
+     */
+    public SignerInformationStore getCounterSignatures()
+    {
+        AttributeTable unsignedAttributeTable = getUnsignedAttributes();
+        if (unsignedAttributeTable == null)
+        {
+            return new SignerInformationStore(new ArrayList(0));
+        }
+        
+        List counterSignatures = new ArrayList();
+
+        Attribute counterSignatureAttribute = unsignedAttributeTable.get(CMSAttributes.counterSignature);
+        if (counterSignatureAttribute != null)
+        {
+            ASN1Set values = counterSignatureAttribute.getAttrValues();
+            counterSignatures = new ArrayList(values.size());
+
+            for (Enumeration en = values.getObjects(); en.hasMoreElements();)
+            {
+                SignerInfo si = SignerInfo.getInstance(en.nextElement());
+
+                String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(si.getDigestAlgorithm().getObjectId().getId());
+                
+                counterSignatures.add(new SignerInformation(si, CMSAttributes.counterSignature, null, new CounterSignatureDigestCalculator(digestName, null, getSignature())));
+            }
+        }
+
+        return new SignerInformationStore(counterSignatures);
+    }
+    
+    /**
      * return the DER encoding of the signed attributes.
      * @throws IOException if an encoding error occurs.
      */
@@ -277,10 +315,10 @@ public class SignerInformation
                 }
                 else
                 {
-                    resultDigest = hash;
+                    resultDigest = digestCalculator.getDigest();
                     
                     // need to decrypt signature and check message bytes
-                    return verifyDigest(hash, key, this.getSignature(), sigProvider);
+                    return verifyDigest(resultDigest, key, this.getSignature(), sigProvider);
                 }
             }
             else
@@ -294,9 +332,13 @@ public class SignerInformation
     
                     hash = digest.digest();
                 }
+                else if (digestCalculator != null)
+                {
+                    hash = digestCalculator.getDigest();
+                }
                 else
                 {
-                    hash = this.hash;
+                    hash = null;
                 }
 
                 resultDigest = hash;
@@ -311,7 +353,7 @@ public class SignerInformation
                     throw new SignatureException("no hash for content found in signed attributes");
                 }
 
-                if (type == null)
+                if (type == null && !contentType.equals(CMSAttributes.counterSignature))
                 {
                     throw new SignatureException("no content type id found in signed attributes");
                 }
@@ -335,11 +377,14 @@ public class SignerInformation
                     }
                 }
 
-                DERObjectIdentifier  typeOID = (DERObjectIdentifier)type.getAttrValues().getObjectAt(0);
-
-                if (!typeOID.equals(contentType))
+                if (type != null)
                 {
-                    throw new SignatureException("contentType in signed attributes different");
+                    DERObjectIdentifier  typeOID = (DERObjectIdentifier)type.getAttrValues().getObjectAt(0);
+
+                    if (!typeOID.equals(contentType))
+                    {
+                        throw new SignatureException("contentType in signed attributes different");
+                    }
                 }
 
                 sig.update(this.getEncodedSignedAttributes());
@@ -554,5 +599,44 @@ public class SignerInformation
                     sInfo.getAuthenticatedAttributes(), sInfo.getDigestEncryptionAlgorithm(), sInfo.getEncryptedDigest(), unsignedAttr),
                     signerInformation.contentType, signerInformation.content, null);
     }
-}
 
+    /**
+     * Return a signer information object with passed in SignerInformationStore representing counter
+     * signatures attached as an unsigned attribute.
+     *
+     * @param signerInformation the signerInfo to be used as the basis.
+     * @param counterSigners signer info objects carrying counter signature.
+     * @return a copy of the original SignerInformationObject with the changed attributes.
+     */
+    public static SignerInformation addCounterSigners(
+        SignerInformation        signerInformation,
+        SignerInformationStore   counterSigners)
+    {
+        SignerInfo          sInfo = signerInformation.info;
+        AttributeTable      unsignedAttr = signerInformation.getUnsignedAttributes();
+        ASN1EncodableVector v;
+
+        if (unsignedAttr != null)
+        {
+            v = unsignedAttr.toASN1EncodableVector();
+        }
+        else
+        {
+            v = new ASN1EncodableVector();
+        }
+
+        ASN1EncodableVector sigs = new ASN1EncodableVector();
+
+        for (Iterator it = counterSigners.getSigners().iterator(); it.hasNext();)
+        {
+            sigs.add(((SignerInformation)it.next()).toSignerInfo());
+        }
+
+        v.add(new Attribute(CMSAttributes.counterSignature, new DERSet(sigs)));
+
+        return new SignerInformation(
+                new SignerInfo(sInfo.getSID(), sInfo.getDigestAlgorithm(),
+                    sInfo.getAuthenticatedAttributes(), sInfo.getDigestEncryptionAlgorithm(), sInfo.getEncryptedDigest(), new DERSet(v)),
+                    signerInformation.contentType, signerInformation.content, null);
+    }
+}

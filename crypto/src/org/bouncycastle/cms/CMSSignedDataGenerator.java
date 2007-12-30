@@ -12,6 +12,8 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignedData;
@@ -37,6 +39,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -211,7 +214,8 @@ public class CMSSignedDataGenerator
             CMSProcessable      content,
             SecureRandom        random,
             String              sigProvider,
-            boolean             addDefaultAttributes)
+            boolean             addDefaultAttributes,
+            boolean             isCounterSignature)
             throws IOException, SignatureException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, CertificateEncodingException, CMSException
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
@@ -245,6 +249,15 @@ public class CMSSignedDataGenerator
                 signed = baseSignedTable;
             }
 
+            if (isCounterSignature)
+            {
+                Hashtable ats = signed.toHashtable();
+
+                ats.remove(CMSAttributes.contentType);
+
+                signed = new AttributeTable(ats);
+            }
+            
             ASN1Set signedAttr = getAttributeSet(signed);
 
             //
@@ -427,8 +440,6 @@ public class CMSSignedDataGenerator
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
 
-        DERObjectIdentifier      contentTypeOID = new DERObjectIdentifier(signedContentType);
-
         _digests.clear();  // clear the current preserved digest state
 
         //
@@ -459,11 +470,25 @@ public class CMSSignedDataGenerator
         //
         // add the SignerInfo objects
         //
+        DERObjectIdentifier  contentTypeOID;
+        boolean              isCounterSignature;
+
+        if (signedContentType != null)
+        {
+            contentTypeOID = new DERObjectIdentifier(signedContentType);
+            isCounterSignature = false;
+        }
+        else
+        {
+            contentTypeOID = CMSObjectIdentifiers.data;
+            isCounterSignature = true;
+        }
+
         it = signerInfs.iterator();
 
         while (it.hasNext())
         {
-            SignerInf                   signer = (SignerInf)it.next();
+            SignerInf               signer = (SignerInf)it.next();
             AlgorithmIdentifier     digAlgId;
 
             try
@@ -473,7 +498,7 @@ public class CMSSignedDataGenerator
 
                 digestAlgs.add(digAlgId);
 
-                signerInfos.add(signer.toSignerInfo(contentTypeOID, content, rand, sigProvider, addDefaultAttributes));
+                signerInfos.add(signer.toSignerInfo(contentTypeOID, content, rand, sigProvider, addDefaultAttributes, isCounterSignature));
             }
             catch (IOException e)
             {
@@ -558,6 +583,20 @@ public class CMSSignedDataGenerator
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
         return this.generate(DATA, content, encapsulate, sigProvider);
+    }
+
+    /**
+     * generate a set of one or more SignerInformation objects representing counter signatures on
+     * the passed in SignerInformation object.
+     *
+     * @param signer the signer to be countersigned
+     * @param sigProvider the provider to be used for counter signing.
+     * @return a store containing the signers.
+     */
+    public SignerInformationStore generateCounterSigners(SignerInformation signer, String sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        return this.generate(null, new CMSProcessableByteArray(signer.getSignature()), false, sigProvider).getSignerInfos();
     }
 }
 

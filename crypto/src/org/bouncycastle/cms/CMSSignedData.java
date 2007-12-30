@@ -206,7 +206,7 @@ public class CMSSignedData
 
                     byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getObjectId().getId());
 
-                    signerInfos.add(new SignerInformation(info, signedData.getEncapContentInfo().getContentType(), null, hash));
+                    signerInfos.add(new SignerInformation(info, signedData.getEncapContentInfo().getContentType(), null, new BaseDigestCalculator(hash)));
                 }
             }
 

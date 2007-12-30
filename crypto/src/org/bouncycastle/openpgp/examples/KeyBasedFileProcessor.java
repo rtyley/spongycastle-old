@@ -42,9 +42,12 @@ import java.util.Iterator;
  * <p>
  * To decrypt: KeyBasedFileProcessor -d fileName secretKeyFile passPhrase.
  * <p>
- * Note: this example will silently overwrite files, nor does it pay any attention to
+ * Note 1: this example will silently overwrite files, nor does it pay any attention to
  * the specification of "_CONSOLE" in the filename. It also expects that a single pass phrase
  * will have been used.
+ * <p>
+ * Note 2: if an empty file name has been specified in the literal data object contained in the
+ * encrypted packet a file with the name filename.out will be generated in the current working directory.
  */
 public class KeyBasedFileProcessor
 {
@@ -127,7 +130,8 @@ public class KeyBasedFileProcessor
     private static void decryptFile(
         InputStream in,
         InputStream keyIn,
-        char[]      passwd)
+        char[]      passwd,
+        String      defaultFileName)
         throws Exception
     {
         in = PGPUtil.getDecoderStream(in);
@@ -188,8 +192,12 @@ public class KeyBasedFileProcessor
             if (message instanceof PGPLiteralData)
             {
                 PGPLiteralData      ld = (PGPLiteralData)message;
-                
-                FileOutputStream    fOut = new FileOutputStream(ld.getFileName());
+                String              outFileName = ld.getFileName();
+                if (ld.getFileName().length() == 0)
+                {
+                    outFileName = defaultFileName;
+                }
+                FileOutputStream    fOut = new FileOutputStream(outFileName);
                 
                 InputStream    unc = ld.getInputStream();
                 int    ch;
@@ -320,7 +328,7 @@ public class KeyBasedFileProcessor
         {
             FileInputStream    in = new FileInputStream(args[1]);
             FileInputStream    keyIn = new FileInputStream(args[2]);
-            decryptFile(in, keyIn, args[3].toCharArray());
+            decryptFile(in, keyIn, args[3].toCharArray(), new File(args[1]).getName() + ".out");
         }
         else
         {
