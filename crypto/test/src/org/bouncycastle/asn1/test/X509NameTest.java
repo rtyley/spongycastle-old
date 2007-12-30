@@ -440,9 +440,32 @@ public class X509NameTest
         }
 
         //
+        // try escaped.
+        //
+        converted = (DERUTF8String)
+            new X509DefaultEntryConverter().getConvertedValue(
+                X509Name.L , "\\" + hexEncodedString);
+
+        if (!converted.equals(new DERUTF8String(hexEncodedString)))
+        {
+            fail("failed X509DefaultEntryConverter test got " + converted + " expected: " + hexEncodedString);
+        }
+        
+        //
         // try a weird value
         //
+        X509Name n = new X509Name("CN=\\#nothex#string");
 
+        if (!n.toString().equals("CN=\\#nothex#string"))
+        {
+            fail("# string not properly escaped.");
+        }
+
+        Vector vls = n.getValues(X509Name.CN);
+        if (vls.size() != 1 && vls.elementAt(0).equals("#nothex#string"))
+        {
+            fail("escaped # not reduced properly");
+        }
     }
 
     private boolean compareVectors(Vector a, Vector b)    // for compatibility with early JDKs

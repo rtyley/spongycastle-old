@@ -32,31 +32,14 @@ import org.bouncycastle.x509.X509Store;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.InternetHeaders;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import javax.mail.internet.*;
+import java.io.*;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class SMIMESignedTest
     extends TestCase
@@ -926,6 +909,36 @@ public class SMIMESignedTest
         SMIMESignedParser s = new SMIMESignedParser(mm, "binary");
 
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testMimeMultipartBinaryParserGetMimeContent()
+        throws Exception
+    {
+        MimeBodyPart m = createMultipartMessage();
+
+        List certList = new ArrayList();
+
+        certList.add(_signCert);
+        certList.add(_origCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator("binary");
+
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addCertificatesAndCRLs(certs);
+
+        MimeMultipart mm = gen.generate(m, "BC");
+
+        SMIMESignedParser s = new SMIMESignedParser(mm, "binary");
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+
+        MimeMessage bp = s.getContentAsMimeMessage(Session.getDefaultInstance(new Properties()));
+        bp.writeTo(System.out);
     }
 
     private MimeBodyPart createMultipartMessage()
