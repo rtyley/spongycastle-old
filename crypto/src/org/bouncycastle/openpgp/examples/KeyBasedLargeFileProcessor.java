@@ -50,6 +50,9 @@ import java.util.Iterator;
  * Note 2: this example generates partial packets to encode the file, the output it generates
  * will not be readable by older PGP products or products that don't support partial packet 
  * encoding.
+ * <p>
+ * Note 3: if an empty file name has been specified in the literal data object contained in the
+ * encrypted packet a file with the name filename.out will be generated in the current working directory.
  */
 public class KeyBasedLargeFileProcessor
 {
@@ -138,7 +141,8 @@ public class KeyBasedLargeFileProcessor
     private static void decryptFile(
         InputStream in,
         InputStream keyIn,
-        char[]      passwd)
+        char[]      passwd,
+        String      defaultFileName)
         throws Exception
     {    
         in = PGPUtil.getDecoderStream(in);
@@ -196,8 +200,13 @@ public class KeyBasedLargeFileProcessor
             if (message instanceof PGPLiteralData)
             {
                 PGPLiteralData       ld = (PGPLiteralData)message;
-                
-                FileOutputStream     fOut = new FileOutputStream(ld.getFileName());
+
+                String               outFileName = ld.getFileName();
+                if (outFileName.length() == 0)
+                {
+                    outFileName = defaultFileName;
+                }
+                FileOutputStream     fOut = new FileOutputStream(outFileName);
                 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
                 
                 InputStream    unc = ld.getInputStream();
@@ -324,7 +333,7 @@ public class KeyBasedLargeFileProcessor
         {
             FileInputStream    in = new FileInputStream(args[1]);
             FileInputStream    keyIn = new FileInputStream(args[2]);
-            decryptFile(in, keyIn, args[3].toCharArray());
+            decryptFile(in, keyIn, args[3].toCharArray(), new File(args[1]).getName() + ".out");
         }
         else
         {

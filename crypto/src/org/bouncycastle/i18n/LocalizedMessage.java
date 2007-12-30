@@ -463,8 +463,11 @@ public class LocalizedMessage
         StringBuffer sb = new StringBuffer();
         sb.append("Resource: \"").append(resource);
         sb.append("\" Id: \"").append(id).append("\"");
-        sb.append(" Arguments: ").append(arguments.getArguments().length).append(" normal, ")
-        .append(extraArgs.getArguments().length).append(" extra");
+        sb.append(" Arguments: ").append(arguments.getArguments().length).append(" normal");
+        if (extraArgs != null && extraArgs.getArguments().length > 0)
+        {
+            sb.append(", ").append(extraArgs.getArguments().length).append(" extra");
+        }
         sb.append(" Encoding: ").append(encoding);
         sb.append(" ClassLoader: ").append(loader);
         return sb.toString();

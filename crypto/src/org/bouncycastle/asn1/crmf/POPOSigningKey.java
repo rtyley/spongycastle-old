@@ -43,6 +43,11 @@ public class POPOSigningKey
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public static POPOSigningKey getInstance(ASN1TaggedObject obj, boolean explicit)
+    {
+        return getInstance(ASN1Sequence.getInstance(obj, explicit));
+    }
+
     /**
      * <pre>
      * POPOSigningKey ::= SEQUENCE {

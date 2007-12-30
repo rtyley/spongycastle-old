@@ -39,18 +39,25 @@ public class X509DefaultEntryConverter
                 throw new RuntimeException("can't recode value for oid " + oid.getId());
             }
         }
-        else if (oid.equals(X509Name.EmailAddress) || oid.equals(X509Name.DC))
+        else
         {
-            return new DERIA5String(value);
+            if (value.length() != 0 && value.charAt(0) == '\\')
+            {
+                value = value.substring(1);
+            }
+            if (oid.equals(X509Name.EmailAddress) || oid.equals(X509Name.DC))
+            {
+                return new DERIA5String(value);
+            }
+            else if (oid.equals(X509Name.DATE_OF_BIRTH))  // accept time string as well as # (for compatibility)
+            {
+                return new DERGeneralizedTime(value);
+            }
+            else if (oid.equals(X509Name.C) || oid.equals(X509Name.SN) || oid.equals(X509Name.DN_QUALIFIER))
+            {
+                 return new DERPrintableString(value);
+            }
         }
-        else if (oid.equals(X509Name.DATE_OF_BIRTH))  // accept time string as well as # (for compatibility)
-        {
-            return new DERGeneralizedTime(value);
-        }
-        else if (oid.equals(X509Name.C) || oid.equals(X509Name.SN) || oid.equals(X509Name.DN_QUALIFIER))
-        {
-             return new DERPrintableString(value);
-        }        
         
         return new DERUTF8String(value);
     }

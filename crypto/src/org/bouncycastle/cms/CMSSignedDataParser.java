@@ -253,7 +253,7 @@ public class CMSSignedDataParser
                     
                     byte[] hash = (byte[])hashes.get(digestName);
                     
-                    signerInfos.add(new SignerInformation(info, new DERObjectIdentifier(_signedContent.getContentType()), null, hash));
+                    signerInfos.add(new SignerInformation(info, new DERObjectIdentifier(_signedContent.getContentType()), null, new BaseDigestCalculator(hash)));
                 }
             }
             catch (IOException e)

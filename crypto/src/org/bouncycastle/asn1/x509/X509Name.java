@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERString;
+import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
@@ -322,7 +323,7 @@ public class X509Name
     private Vector                  ordering = new Vector();
     private Vector                  values = new Vector();
     private Vector                  added = new Vector();
-    
+
     private ASN1Sequence            seq;
 
     /**
@@ -382,9 +383,17 @@ public class X509Name
                    ordering.addElement(DERObjectIdentifier.getInstance(s.getObjectAt(0)));
                    
                    DEREncodable value = s.getObjectAt(1);
-                   if (value instanceof DERString)
+                   if (value instanceof DERString && !(value instanceof DERUniversalString))
                    {
-                       values.addElement(((DERString)value).getString());
+                       String v = ((DERString)value).getString();
+                       if (v.charAt(0) == '#')
+                       {
+                           values.addElement("\\" + v);
+                       }
+                       else
+                       {
+                           values.addElement(v);
+                       }
                    }
                    else
                    {
@@ -512,6 +521,16 @@ public class X509Name
             this.values.addElement(values.elementAt(i));
             this.added.addElement(FALSE);
         }
+    }
+
+    private Boolean isEncoded(String s)
+    {
+        if (s.charAt(0) == '#')
+        {
+            return TRUE;
+        }
+
+        return FALSE;
     }
 
     /**
@@ -647,9 +666,10 @@ public class X509Name
             if (value.indexOf('+') > 0)
             {
                 X509NameTokenizer   vTok = new X509NameTokenizer(value, '+');
+                String  v = vTok.nextToken();
 
                 this.ordering.addElement(oid);
-                this.values.addElement(vTok.nextToken());
+                this.values.addElement(v);
                 this.added.addElement(FALSE);
 
                 while (vTok.hasMoreTokens())
@@ -677,6 +697,7 @@ public class X509Name
             Vector  o = new Vector();
             Vector  v = new Vector();
             Vector  a = new Vector();
+
             int count = 1;
 
             for (int i = 0; i < this.ordering.size(); i++)
@@ -747,7 +768,16 @@ public class X509Name
         {
             if (ordering.elementAt(i).equals(oid))
             {
-                v.addElement(values.elementAt(i));
+                String val = (String)values.elementAt(i);
+
+                if (val.length() > 2 && val.charAt(0) == '\\' && val.charAt(1) == '#')
+                {
+                    v.addElement(val.substring(1));
+                }
+                else
+                {
+                    v.addElement(val);
+                }
             }
         }
 
@@ -1038,10 +1068,15 @@ public class X509Name
         buf.append('=');
 
         int     index = buf.length();
-
+        
         buf.append(value);
 
         int     end = buf.length();
+
+        if (value.length() >= 2 && value.charAt(0) == '\\' && value.charAt(1) == '#')
+        {
+            index += 2;   
+        }
 
         while (index != end)
         {

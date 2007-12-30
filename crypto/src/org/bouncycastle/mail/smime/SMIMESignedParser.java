@@ -6,22 +6,12 @@ import org.bouncycastle.cms.CMSTypedStream;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.Part;
-import javax.mail.Session;
+import javax.mail.*;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.Enumeration;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -211,7 +201,8 @@ public class SMIMESignedParser
      * base constructor for a signed message with encapsulated content.
      * <p>
      * Note: in this case the encapsulated MimeBody part will only be suitable for a single
-     * writeTo - once writeTo has been called the file containing the body part will be deleted.
+     * writeTo - once writeTo has been called the file containing the body part will be deleted. If writeTo is not
+     * called the file will be left in the temp directory.
      * </p>
      * @param message the message containing the encapsulated signed data.
      * @exception MessagingException on an error extracting the signature or
@@ -285,7 +276,15 @@ public class SMIMESignedParser
     public MimeMessage getContentAsMimeMessage(Session session)
         throws MessagingException, IOException
     {
-        return new MimeMessage(session, getSignedContent().getContentStream());
+        if (message instanceof MimeMultipart)
+        {
+            BodyPart    bp = ((MimeMultipart)message).getBodyPart(0);
+            return new MimeMessage(session, bp.getInputStream());
+        }
+        else
+        {
+            return new MimeMessage(session, getSignedContent().getContentStream());
+        }
     }
 
     /**

@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERNull;
 
 public class ProofOfPossession
     extends ASN1Encodable
@@ -16,6 +17,21 @@ public class ProofOfPossession
     private ProofOfPossession(ASN1TaggedObject tagged)
     {
         tagNo = tagged.getTagNo();
+        switch (tagNo)
+        {
+        case 0:
+            obj = DERNull.INSTANCE;
+            break;
+        case 1:
+            obj = POPOSigningKey.getInstance(tagged, false);
+            break;
+        case 2:
+        case 3:
+            obj = POPOPrivKey.getInstance(tagged, false);
+            break;
+        default:
+            throw new IllegalArgumentException("unknown tag: " + tagNo);
+        }
     }
 
     public static ProofOfPossession getInstance(Object o)
@@ -33,6 +49,16 @@ public class ProofOfPossession
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public int getType()
+    {
+        return tagNo;
+    }
+
+    public ASN1Encodable getObject()
+    {
+        return obj;
+    }
+
     /**
      * <pre>
      * ProofOfPossession ::= CHOICE {
@@ -47,6 +73,6 @@ public class ProofOfPossession
      */
     public DERObject toASN1Object()
     {
-        return new DERTaggedObject(tagNo, obj);
+        return new DERTaggedObject(false, tagNo, obj);
     }
 }

@@ -66,6 +66,10 @@ public class X509NameTokenizer
             {
                 if (escaped || quoted)
                 {
+                    if (c == '#' && buf.charAt(buf.length() - 1) == '=')
+                    {
+                        buf.append('\\');
+                    }
                     buf.append(c);
                     escaped = false;
                 }
