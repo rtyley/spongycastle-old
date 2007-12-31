@@ -26,11 +26,15 @@ import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.ess.ESSCertID;
 import org.bouncycastle.asn1.ess.SigningCertificate;
+import org.bouncycastle.asn1.ess.SigningCertificateV2;
+import org.bouncycastle.asn1.ess.ESSCertIDv2;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.tsp.TSTInfo;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 
 public class TimeStampToken
 {
@@ -42,7 +46,7 @@ public class TimeStampToken
 
     TimeStampTokenInfo tstInfo;
     
-    ESSCertID   certID;
+    CertID   certID;
 
     public TimeStampToken(ContentInfo contentInfo)
         throws TSPException, IOException
@@ -83,15 +87,28 @@ public class TimeStampToken
             this.tstInfo = new TimeStampTokenInfo(TSTInfo.getInstance(aIn.readObject()));
             
             Attribute   attr = tsaSignerInfo.getSignedAttributes().get(PKCSObjectIdentifiers.id_aa_signingCertificate);
-            
-            if (attr == null)
+
+            if (attr != null)
             {
-                throw new TSPValidationException("no signing certificate attribute found, time stamp invalid.");
+                SigningCertificate    signCert = SigningCertificate.getInstance(attr.getAttrValues().getObjectAt(0));
+
+                this.certID = new CertID(ESSCertID.getInstance(signCert.getCerts()[0]));
+            }
+            else
+            {
+                attr = tsaSignerInfo.getSignedAttributes().get(PKCSObjectIdentifiers.id_aa_signingCertificateV2);
+
+                if (attr == null)
+                {
+                    throw new TSPValidationException("no signing certificate attribute found, time stamp invalid.");
+                }
+
+                SigningCertificateV2 signCertV2 = SigningCertificateV2.getInstance(attr.getAttrValues().getObjectAt(0));
+
+                this.certID = new CertID(ESSCertIDv2.getInstance(signCertV2.getCerts()[0]));
             }
             
-            SigningCertificate    signCert = SigningCertificate.getInstance(attr.getAttrValues().getObjectAt(0));
 
-            this.certID = ESSCertID.getInstance(signCert.getCerts()[0]);
         }
         catch (CMSException e)
         {
@@ -149,7 +166,7 @@ public class TimeStampToken
     {
         try
         {
-            if (!MessageDigest.isEqual(certID.getCertHash(), MessageDigest.getInstance("SHA-1").digest(cert.getEncoded())))
+            if (!MessageDigest.isEqual(certID.getCertHash(), MessageDigest.getInstance(certID.getHashAlgorithm()).digest(cert.getEncoded())))
             {
                 throw new TSPValidationException("certificate hash does not match certID hash.");
             }
@@ -229,5 +246,64 @@ public class TimeStampToken
         throws IOException
     {
         return tsToken.getEncoded();
+    }
+
+    // perhaps this should be done using an interface on the ASN.1 classes...
+    private class CertID
+    {
+        private ESSCertID certID;
+        private ESSCertIDv2 certIDv2;
+
+        CertID(ESSCertID certID)
+        {
+            this.certID = certID;
+            this.certIDv2 = null;
+        }
+
+        CertID(ESSCertIDv2 certID)
+        {
+            this.certIDv2 = certID;
+            this.certID = null;
+        }
+
+        public String getHashAlgorithm()
+        {
+            if (certID != null)
+            {
+                return "SHA-1";
+            }
+            else
+            {
+                if (NISTObjectIdentifiers.id_sha256.equals(certIDv2.getHashAlgorithm().getObjectId()))
+                {
+                    return "SHA-256";
+                }
+                return certIDv2.getHashAlgorithm().getObjectId().getId();
+            }
+        }
+
+        public byte[] getCertHash()
+        {
+            if (certID != null)
+            {
+                return certID.getCertHash();
+            }
+            else
+            {
+                return certIDv2.getCertHash();
+            }
+        }
+
+        public IssuerSerial getIssuerSerial()
+        {
+            if (certID != null)
+            {
+                return certID.getIssuerSerial();
+            }
+            else
+            {
+                return certIDv2.getIssuerSerial();
+            }
+        }
     }
 }
