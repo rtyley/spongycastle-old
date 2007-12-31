@@ -4,7 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStore;
 
 import junit.framework.TestCase;
 
