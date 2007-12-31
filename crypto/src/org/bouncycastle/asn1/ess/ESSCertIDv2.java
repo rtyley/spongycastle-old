@@ -11,6 +11,7 @@ public class ESSCertIDv2
     private AlgorithmIdentifier hashAlgorithm;
     private byte[]              certHash;
     private IssuerSerial        issuerSerial;
+    private static final AlgorithmIdentifier DEFAULT_ALG_ID = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
 
     public static ESSCertIDv2 getInstance(
         Object o)
@@ -37,12 +38,23 @@ public class ESSCertIDv2
             throw new IllegalArgumentException("Bad sequence size: " + seq.size());
         }
 
-        this.hashAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(0).getDERObject());
-        this.certHash = ASN1OctetString.getInstance(seq.getObjectAt(1).getDERObject()).getOctets();
+        int count = 0;
 
-        if (seq.size() > 2)
+        if (seq.getObjectAt(0) instanceof ASN1OctetString)
         {
-            this.issuerSerial = new IssuerSerial(ASN1Sequence.getInstance(seq.getObjectAt(2).getDERObject()));
+            // Default value
+            this.hashAlgorithm = DEFAULT_ALG_ID;
+        }
+        else
+        {
+            this.hashAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(count++).getDERObject());
+        }
+
+        this.certHash = ASN1OctetString.getInstance(seq.getObjectAt(count++).getDERObject()).getOctets();
+
+        if (seq.size() > count)
+        {
+            this.issuerSerial = new IssuerSerial(ASN1Sequence.getInstance(seq.getObjectAt(count).getDERObject()));
         }
     }
 
@@ -61,7 +73,7 @@ public class ESSCertIDv2
         if (algId == null)
         {
             // Default value
-            this.hashAlgorithm = new AlgorithmIdentifier(NISTObjectIdentifiers.dsa_with_sha256);
+            this.hashAlgorithm = DEFAULT_ALG_ID;
         }
         else
         {
@@ -108,7 +120,10 @@ public class ESSCertIDv2
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        v.add(hashAlgorithm);
+        if (!hashAlgorithm.equals(DEFAULT_ALG_ID))
+        {
+            v.add(hashAlgorithm);
+        }
 
         v.add(new DEROctetString(certHash).toASN1Object());
 

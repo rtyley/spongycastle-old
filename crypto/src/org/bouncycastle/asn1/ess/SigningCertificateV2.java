@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1.ess;
 
 import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 
 public class SigningCertificateV2
