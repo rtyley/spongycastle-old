@@ -462,7 +462,7 @@ public class X509NameTest
         }
 
         Vector vls = n.getValues(X509Name.CN);
-        if (vls.size() != 1 && vls.elementAt(0).equals("#nothex#string"))
+        if (vls.size() != 1 || !vls.elementAt(0).equals("#nothex#string"))
         {
             fail("escaped # not reduced properly");
         }
