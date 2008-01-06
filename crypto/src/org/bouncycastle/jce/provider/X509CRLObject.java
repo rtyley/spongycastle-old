@@ -32,6 +32,8 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Collections;
 
 /**
  * The following extensions are listed in RFC 2459 as relevant to CRLs
@@ -49,6 +51,7 @@ public class X509CRLObject
     private String sigAlgName;
     private byte[] sigAlgParams;
     private boolean isIndirect;
+    private HashMap certsMap;
 
     public X509CRLObject(
         CertificateList c)
@@ -235,52 +238,48 @@ public class X509CRLObject
 
         return null;
     }
+ 
+    private void loadCRLEntryMap()
+    {
+        certsMap = new HashMap();
+
+        Enumeration certs = c.getRevokedCertificateEnumeration();
+
+        X500Principal previousCertificateIssuer = getIssuerX500Principal();
+        while (certs.hasMoreElements())
+        {
+            TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)certs.nextElement();
+            X509CRLEntry crlEntry = new X509CRLEntryObject(entry, isIndirect, previousCertificateIssuer);
+            certsMap.put(crlEntry.getSerialNumber(), crlEntry);
+            previousCertificateIssuer = crlEntry.getCertificateIssuer();
+        }
+    }
 
     public X509CRLEntry getRevokedCertificate(BigInteger serialNumber)
     {
-        Enumeration certs = c.getRevokedCertificateEnumeration();
-
-        if (certs != null)
+        if (certsMap == null)
         {
-            X500Principal previousCertificateIssuer = getIssuerX500Principal();
-            while (certs.hasMoreElements())
-            {
-                TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)certs.nextElement();
-                X509CRLEntryObject crlentry = new X509CRLEntryObject(entry, isIndirect, previousCertificateIssuer);
-                if (crlentry.getSerialNumber().equals(serialNumber))
-                {
-                    return crlentry;
-                }
-
-                previousCertificateIssuer = crlentry.getCertificateIssuer();
-            }
+            loadCRLEntryMap();
         }
 
-        return null;
+        return (X509CRLEntry)certsMap.get(serialNumber);
     }
 
     public Set getRevokedCertificates()
     {
-        TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
-
-        if (certs != null)
+        if (certsMap == null)
         {
-            Set set = new HashSet();
-            X500Principal previousCertificateIssuer = getIssuerX500Principal();
-            for (int i = 0; i < certs.length; i++)
-            {
-                X509CRLEntryObject crlentry = new X509CRLEntryObject(certs[i],
-                        isIndirect, previousCertificateIssuer);
-                set.add(crlentry);
-                previousCertificateIssuer = crlentry.getCertificateIssuer();
-            }
+            loadCRLEntryMap();
+        }
 
-            return set;
+        if (!certsMap.isEmpty())
+        {
+            return Collections.unmodifiableSet(new HashSet(certsMap.values()));
         }
 
         return null;
     }
-  
+
     public byte[] getTBSCertList()
         throws CRLException
     {
