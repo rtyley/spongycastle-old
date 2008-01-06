@@ -9,6 +9,8 @@ import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
+import java.util.Enumeration;
+
 /**
  * PKIX RFC-2459
  *
@@ -74,6 +76,11 @@ public class CertificateList
     public TBSCertList.CRLEntry[] getRevokedCertificates()
     {
         return tbsCertList.getRevokedCertificates();
+    }
+
+    public Enumeration getRevokedCertificateEnumeration()
+    {
+        return tbsCertList.getRevokedCertificateEnumeration();
     }
 
     public AlgorithmIdentifier getSignatureAlgorithm()

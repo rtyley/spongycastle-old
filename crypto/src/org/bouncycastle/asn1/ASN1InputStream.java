@@ -171,7 +171,7 @@ public class ASN1InputStream
             switch (baseTagNo)
             {
             case SEQUENCE:
-                return new DERSequence(buildDerEncodableVector(length));
+                return new LazyDERSequence(readDefiniteLengthFully(length));
             case SET:
                 return new DERSet(buildDerEncodableVector(length), false);
             case OCTET_STRING:
