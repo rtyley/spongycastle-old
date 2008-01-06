@@ -39,6 +39,8 @@ public class X509CRLEntryObject extends X509CRLEntry
 
     private X500Principal previousCertificateIssuer;
     private X500Principal certificateIssuer;
+    private int           hashValue;
+    private boolean       isHashValueSet;
 
     public X509CRLEntryObject(TBSCertList.CRLEntry c)
     {
@@ -180,6 +182,21 @@ public class X509CRLEntryObject extends X509CRLEntry
         }
 
         return null;
+    }
+
+    /**
+     * Cache the hashCode value - calculating it with the standard method.
+     * @return  calculated hashCode.
+     */
+    public int hashCode()
+    {
+        if (!isHashValueSet)
+        {
+            hashValue = super.hashCode();
+            isHashValueSet = true;
+        }
+
+        return hashValue;
     }
 
     public byte[] getEncoded()

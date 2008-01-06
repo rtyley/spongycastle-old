@@ -238,20 +238,21 @@ public class X509CRLObject
 
     public X509CRLEntry getRevokedCertificate(BigInteger serialNumber)
     {
-        TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
+        Enumeration certs = c.getRevokedCertificateEnumeration();
 
         if (certs != null)
         {
             X500Principal previousCertificateIssuer = getIssuerX500Principal();
-            for (int i = 0; i < certs.length; i++)
+            while (certs.hasMoreElements())
             {
-                X509CRLEntryObject crlentry = new X509CRLEntryObject(certs[i],
-                        isIndirect, previousCertificateIssuer);
-                previousCertificateIssuer = crlentry.getCertificateIssuer();
+                TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)certs.nextElement();
+                X509CRLEntryObject crlentry = new X509CRLEntryObject(entry, isIndirect, previousCertificateIssuer);
                 if (crlentry.getSerialNumber().equals(serialNumber))
                 {
                     return crlentry;
                 }
+
+                previousCertificateIssuer = crlentry.getCertificateIssuer();
             }
         }
 
