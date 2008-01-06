@@ -97,12 +97,12 @@ public class EqualsAndHashCodeTest
                 DERObject   o = aIn.readObject();
                 if (!o.equals(values[i]))
                 {
-                    return new SimpleTestResult(false, getName() + ": Failed equality test for " + o);
+                    return new SimpleTestResult(false, getName() + ": Failed equality test for " + o.getClass());
                 }
                 
                 if (o.hashCode() != values[i].hashCode())
                 {
-                    return new SimpleTestResult(false, getName() + ": Failed hashCode test for " + o);
+                    return new SimpleTestResult(false, getName() + ": Failed hashCode test for " + o.getClass());
                 }
             }
         }
