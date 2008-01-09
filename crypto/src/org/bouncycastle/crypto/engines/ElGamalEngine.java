@@ -146,8 +146,8 @@ public class ElGamalEngine
             BigInteger  phi = new BigInteger(1, in2);
 
             ElGamalPrivateKeyParameters  priv = (ElGamalPrivateKeyParameters)key;
-
-            BigInteger  m = gamma.modPow(p.subtract(ONE).subtract(priv.getX()), p).multiply(phi).mod(p);
+            
+            BigInteger  m = phi.multiply(gamma.modPow(priv.getX(), p).modInverse(p)).mod(p);
 
             return BigIntegers.asUnsignedByteArray(m);
         }
