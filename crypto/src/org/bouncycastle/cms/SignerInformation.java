@@ -235,8 +235,8 @@ public class SignerInformation
     }
 
     /**
-     * Return the list of all the counter signature of this signature.
-     * If no counter signature are present, an empty collection is returned.
+     * Return a SignerInformationStore containing the counter signatures attached to this
+     * signer. If no counter signatures are present an empty store is returned.
      */
     public SignerInformationStore getCounterSignatures()
     {
