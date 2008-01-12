@@ -52,7 +52,9 @@ public class ElGamalEngine
 
         this.forEncryption = forEncryption;
 
-        bitSize = key.getParameters().getP().bitLength();
+        BigInteger p = key.getParameters().getP();
+
+        bitSize = p.bitLength();
 
         if (forEncryption)
         {
@@ -146,8 +148,9 @@ public class ElGamalEngine
             BigInteger  phi = new BigInteger(1, in2);
 
             ElGamalPrivateKeyParameters  priv = (ElGamalPrivateKeyParameters)key;
-            
-            BigInteger  m = phi.multiply(gamma.modPow(priv.getX(), p).modInverse(p)).mod(p);
+            // a shortcut, which generally relies on p being prime amongst other things.
+            // if a problem with this shows up, check the p and g values!
+            BigInteger  m = gamma.modPow(p.subtract(ONE).subtract(priv.getX()), p).multiply(phi).mod(p);
 
             return BigIntegers.asUnsignedByteArray(m);
         }
