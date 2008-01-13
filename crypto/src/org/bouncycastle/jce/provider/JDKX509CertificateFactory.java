@@ -104,6 +104,12 @@ public class JDKX509CertificateFactory
         return null;
     }
 
+    protected CRL createCRL(CertificateList c)
+    throws CRLException
+    {
+        return new X509CRLObject(c);
+    }
+    
     private CRL readPEMCRL(
         InputStream  in)
         throws IOException, CRLException
@@ -112,7 +118,7 @@ public class JDKX509CertificateFactory
 
         if (seq != null)
         {
-            return new X509CRLObject(
+            return createCRL(
                             CertificateList.getInstance(seq));
         }
 
@@ -137,7 +143,7 @@ public class JDKX509CertificateFactory
             }
         }
 
-        return new X509CRLObject(
+        return createCRL(
                      CertificateList.getInstance(seq));
     }
 
@@ -149,7 +155,7 @@ public class JDKX509CertificateFactory
             return null;
         }
 
-        return new X509CRLObject(
+        return createCRL(
                             CertificateList.getInstance(
                                     sCrlData.getObjectAt(sCrlDataObjectCount++)));
     }
@@ -291,8 +297,8 @@ public class JDKX509CertificateFactory
                 return readPEMCRL(pis);
             }
             else
-            {
-                return readDERCRL(new ASN1InputStream(pis, limit));
+            {       // lazy evaluate to help processing of large CRLs
+                return readDERCRL(new ASN1InputStream(pis, limit, true));
             }
         }
         catch (CRLException e)
