@@ -38,6 +38,7 @@ public class ASN1InputStream
     };
 
     private final int limit;
+    private final boolean lazyEvaluate;
 
     public ASN1InputStream(
         InputStream is)
@@ -67,10 +68,27 @@ public class ASN1InputStream
         InputStream input,
         int         limit)
     {
+        this(input, limit, false);
+    }
+
+    /**
+     * Create an ASN1InputStream where no DER object will be longer than limit, and constructed
+     * objects such as sequences will be parsed lazily.
+     *
+     * @param input stream containing ASN.1 encoded data.
+     * @param limit maximum size of a DER encoded object.
+     * @param lazyEvaluate true if parsing inside constructed objects can be delayed.
+     */
+    public ASN1InputStream(
+        InputStream input,
+        int         limit,
+        boolean     lazyEvaluate)
+    {
         super(input);
         this.limit = limit;
+        this.lazyEvaluate = lazyEvaluate;
     }
-    
+
     protected int readLength()
         throws IOException
     {
@@ -171,7 +189,14 @@ public class ASN1InputStream
             switch (baseTagNo)
             {
             case SEQUENCE:
-                return new LazyDERSequence(readDefiniteLengthFully(length));
+                if (lazyEvaluate)
+                {
+                    return new LazyDERSequence(readDefiniteLengthFully(length));
+                }
+                else
+                {
+                    return new DERSequence(buildDerEncodableVector(length));   
+                }
             case SET:
                 return new DERSet(buildDerEncodableVector(length), false);
             case OCTET_STRING:

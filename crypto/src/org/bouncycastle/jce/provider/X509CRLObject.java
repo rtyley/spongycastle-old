@@ -51,7 +51,6 @@ public class X509CRLObject
     private String sigAlgName;
     private byte[] sigAlgParams;
     private boolean isIndirect;
-    private HashMap certsMap;
 
     public X509CRLObject(
         CertificateList c)
@@ -239,42 +238,51 @@ public class X509CRLObject
         return null;
     }
  
-    private void loadCRLEntryMap()
+    private Set loadCRLEntries()
     {
-        certsMap = new HashMap();
-
+        Set entrySet = new HashSet();
         Enumeration certs = c.getRevokedCertificateEnumeration();
 
         X500Principal previousCertificateIssuer = getIssuerX500Principal();
         while (certs.hasMoreElements())
         {
             TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)certs.nextElement();
-            X509CRLEntry crlEntry = new X509CRLEntryObject(entry, isIndirect, previousCertificateIssuer);
-            certsMap.put(crlEntry.getSerialNumber(), crlEntry);
+            X509CRLEntryObject crlEntry = new X509CRLEntryObject(entry, isIndirect, previousCertificateIssuer);
+            entrySet.add(crlEntry);
             previousCertificateIssuer = crlEntry.getCertificateIssuer();
         }
+
+        return entrySet;
     }
 
     public X509CRLEntry getRevokedCertificate(BigInteger serialNumber)
     {
-        if (certsMap == null)
+        Enumeration certs = c.getRevokedCertificateEnumeration();
+
+        X500Principal previousCertificateIssuer = getIssuerX500Principal();
+        while (certs.hasMoreElements())
         {
-            loadCRLEntryMap();
+            TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)certs.nextElement();
+            X509CRLEntryObject crlEntry = new X509CRLEntryObject(entry, isIndirect, previousCertificateIssuer);
+
+            if (serialNumber.equals(entry.getUserCertificate().getValue()))
+            {
+                return crlEntry;
+            }
+
+            previousCertificateIssuer = crlEntry.getCertificateIssuer();
         }
 
-        return (X509CRLEntry)certsMap.get(serialNumber);
+        return null;
     }
 
     public Set getRevokedCertificates()
     {
-        if (certsMap == null)
-        {
-            loadCRLEntryMap();
-        }
+        Set entrySet = loadCRLEntries();
 
-        if (!certsMap.isEmpty())
+        if (!entrySet.isEmpty())
         {
-            return Collections.unmodifiableSet(new HashSet(certsMap.values()));
+            return Collections.unmodifiableSet(entrySet);
         }
 
         return null;
