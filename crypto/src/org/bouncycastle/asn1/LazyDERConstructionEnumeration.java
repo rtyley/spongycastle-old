@@ -11,7 +11,7 @@ class LazyDERConstructionEnumeration
 
     public LazyDERConstructionEnumeration(byte[] encoded)
     {
-        aIn = new ASN1InputStream(encoded);
+        aIn = new ASN1InputStream(encoded, true);
         nextObj = readObject();
     }
 

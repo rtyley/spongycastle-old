@@ -57,6 +57,20 @@ public class ASN1InputStream
     {
         this(new ByteArrayInputStream(input), input.length);
     }
+
+    /**
+     * Create an ASN1InputStream based on the input byte array. The length of DER objects in
+     * the stream is automatically limited to the length of the input array.
+     *
+     * @param input array containing ASN.1 encoded data.
+     * @param lazyEvaluate true if parsing inside constructed objects can be delayed.
+     */
+    public ASN1InputStream(
+        byte[] input,
+        boolean lazyEvaluate)
+    {
+        this(new ByteArrayInputStream(input), input.length, lazyEvaluate);
+    }
     
     /**
      * Create an ASN1InputStream where no DER object will be longer than limit.
