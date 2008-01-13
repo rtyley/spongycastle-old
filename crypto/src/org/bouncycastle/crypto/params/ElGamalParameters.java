@@ -15,8 +15,7 @@ public class ElGamalParameters
         BigInteger  p,
         BigInteger  g)
     {
-        this.g = g;
-        this.p = p;
+        this(p, g, 0);
     }
 
     public ElGamalParameters(
