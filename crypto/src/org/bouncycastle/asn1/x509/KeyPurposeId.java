@@ -49,15 +49,15 @@ public class KeyPurposeId
      */
     public static final KeyPurposeId id_kp_emailProtection = new KeyPurposeId(id_kp + ".4");
     /**
-     * @deprecated Deprecated by RFC4945 - was { id-kp 5 }
+     * Usage deprecated by RFC4945 - was { id-kp 5 }
      */
     public static final KeyPurposeId id_kp_ipsecEndSystem = new KeyPurposeId(id_kp + ".5");
     /**
-     * @deprecated Deprecated by RFC4945 - was { id-kp 6 }
+     * Usage deprecated by RFC4945 - was { id-kp 6 }
      */
     public static final KeyPurposeId id_kp_ipsecTunnel = new KeyPurposeId(id_kp + ".6");
     /**
-     * @deprecated Deprecated by RFC4945 - was { idkp 7 }
+     * Usage deprecated by RFC4945 - was { idkp 7 }
      */
     public static final KeyPurposeId id_kp_ipsecUser = new KeyPurposeId(id_kp + ".7");
     /**
