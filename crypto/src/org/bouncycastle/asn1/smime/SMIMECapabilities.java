@@ -57,7 +57,7 @@ public class SMIMECapabilities
                 (ASN1Sequence)(((Attribute)o).getAttrValues().getObjectAt(0)));
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + o.getClass().getName());
     }
     
     public SMIMECapabilities(

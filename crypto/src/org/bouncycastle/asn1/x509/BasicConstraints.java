@@ -42,7 +42,7 @@ public class BasicConstraints
             return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     public BasicConstraints(

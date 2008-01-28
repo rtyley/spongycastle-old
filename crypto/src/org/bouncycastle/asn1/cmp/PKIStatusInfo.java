@@ -37,7 +37,7 @@ public class PKIStatusInfo
             return new PKIStatusInfo((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass());
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public PKIStatusInfo(

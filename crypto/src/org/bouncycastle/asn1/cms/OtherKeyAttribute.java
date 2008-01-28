@@ -33,7 +33,7 @@ public class OtherKeyAttribute
             return new OtherKeyAttribute((ASN1Sequence)o);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + o.getClass().getName());
     }
     
     public OtherKeyAttribute(

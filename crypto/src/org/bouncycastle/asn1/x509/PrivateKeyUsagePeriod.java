@@ -38,7 +38,7 @@ public class PrivateKeyUsagePeriod
             return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
         }
 
-        throw new IllegalArgumentException("unknown object in getInstance");
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }
 
     private DERGeneralizedTime _notBefore, _notAfter;

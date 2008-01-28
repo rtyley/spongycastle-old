@@ -24,7 +24,7 @@ abstract public class ASN1Set
             return (ASN1Set)obj;
         }
 
-        throw new IllegalArgumentException("unknown object in getInstance");
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }
 
     /**
@@ -97,7 +97,7 @@ abstract public class ASN1Set
             }
         }
 
-        throw new IllegalArgumentException("unknown object in getInstance");
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }
 
     public ASN1Set()

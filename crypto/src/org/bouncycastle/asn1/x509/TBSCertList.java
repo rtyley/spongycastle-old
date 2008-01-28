@@ -148,7 +148,7 @@ public class TBSCertList
             return new TBSCertList((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public TBSCertList(

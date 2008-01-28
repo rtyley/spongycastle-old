@@ -46,7 +46,7 @@ public class X509CertificateStructure
             return new X509CertificateStructure((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public X509CertificateStructure(

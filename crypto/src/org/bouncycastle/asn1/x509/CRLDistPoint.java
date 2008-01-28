@@ -31,7 +31,7 @@ public class CRLDistPoint
             return new CRLDistPoint((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public CRLDistPoint(

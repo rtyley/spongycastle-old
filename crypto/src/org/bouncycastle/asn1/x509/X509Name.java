@@ -352,7 +352,7 @@ public class X509Name
             return new X509Name((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory \"" + obj.getClass().getName()+"\"");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     /**

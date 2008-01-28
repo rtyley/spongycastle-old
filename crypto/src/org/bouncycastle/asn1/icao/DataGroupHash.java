@@ -57,7 +57,7 @@ public class DataGroupHash
         }
         else
         {
-            throw new IllegalArgumentException("unknown object in getInstance");
+            throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
         }
     }                
             

@@ -38,7 +38,7 @@ public class AttCertIssuer
             return new AttCertIssuer(GeneralNames.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass());
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     public static AttCertIssuer getInstance(
