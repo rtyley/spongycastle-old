@@ -77,7 +77,7 @@ public class Time
             return new Time((DERGeneralizedTime)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public String getTime()

@@ -33,7 +33,7 @@ public class PKIFreeText
             return new PKIFreeText((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("Unknown object in factory");
+        throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
     }
 
     public PKIFreeText(

@@ -35,7 +35,7 @@ public class RSAESOAEPparams
             return new RSAESOAEPparams((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     /**

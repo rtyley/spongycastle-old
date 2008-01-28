@@ -44,7 +44,7 @@ public class RSAPrivateKeyStructure
             return new RSAPrivateKeyStructure((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     public RSAPrivateKeyStructure(

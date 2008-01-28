@@ -127,18 +127,18 @@ public class DisplayText
       contents = de;
    }
 
-   public static DisplayText getInstance(Object de) 
+   public static DisplayText getInstance(Object obj) 
    {
-      if (de instanceof DERString)
+      if (obj instanceof DERString)
       {
-          return new DisplayText((DERString)de);
+          return new DisplayText((DERString)obj);
       }
-      else if (de instanceof DisplayText)
+      else if (obj instanceof DisplayText)
       {
-          return (DisplayText)de;
+          return (DisplayText)obj;
       }
 
-      throw new IllegalArgumentException("illegal object in getInstance");
+      throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
    }
 
    public static DisplayText getInstance(

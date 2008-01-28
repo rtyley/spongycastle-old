@@ -46,7 +46,7 @@ public class AlgorithmIdentifier
             return new AlgorithmIdentifier((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass());
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public AlgorithmIdentifier(

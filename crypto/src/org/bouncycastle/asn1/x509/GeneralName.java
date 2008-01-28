@@ -202,7 +202,7 @@ public class GeneralName
             }
         }
 
-        throw new IllegalArgumentException("unknown object in getInstance");
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }
 
     public static GeneralName getInstance(

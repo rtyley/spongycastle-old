@@ -34,7 +34,7 @@ public class V2Form
             return new V2Form((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     public V2Form(

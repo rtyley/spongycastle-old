@@ -32,7 +32,7 @@ public class PBKDF2Params
             return new PBKDF2Params((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     public PBKDF2Params(

@@ -48,7 +48,7 @@ public class LDSSecurityObject
             return new LDSSecurityObject(ASN1Sequence.getInstance(obj));            
         }
         
-        throw new IllegalArgumentException("unknown object in getInstance");
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }    
     
     public LDSSecurityObject(

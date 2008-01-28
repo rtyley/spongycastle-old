@@ -46,7 +46,7 @@ public class DistributionPointName
             return new DistributionPointName((ASN1TaggedObject)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     /*

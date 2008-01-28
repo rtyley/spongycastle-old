@@ -69,7 +69,7 @@ public class CertStatus
             return new CertStatus((ASN1TaggedObject)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public static CertStatus getInstance(

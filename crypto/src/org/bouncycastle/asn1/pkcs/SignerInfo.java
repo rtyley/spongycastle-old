@@ -31,7 +31,7 @@ public class SignerInfo
             return new SignerInfo((ASN1Sequence)o);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + o.getClass().getName());
     }
 
     public SignerInfo(

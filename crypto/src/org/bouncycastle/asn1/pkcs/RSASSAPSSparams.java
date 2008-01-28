@@ -37,7 +37,7 @@ public class RSASSAPSSparams
             return new RSASSAPSSparams((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     /**

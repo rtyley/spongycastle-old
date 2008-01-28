@@ -23,7 +23,7 @@ public abstract class ASN1Sequence
             return (ASN1Sequence)obj;
         }
 
-        throw new IllegalArgumentException("unknown object in getInstance");
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }
 
     /**
@@ -82,7 +82,7 @@ public abstract class ASN1Sequence
             }
         }
 
-        throw new IllegalArgumentException("unknown object in getInstance");
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }
 
     public Enumeration getObjects()

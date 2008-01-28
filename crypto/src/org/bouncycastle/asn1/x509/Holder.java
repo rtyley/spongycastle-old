@@ -63,7 +63,7 @@ public class Holder
             return new Holder((ASN1TaggedObject)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     /**

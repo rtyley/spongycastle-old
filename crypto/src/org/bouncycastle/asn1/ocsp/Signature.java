@@ -67,7 +67,7 @@ public class Signature
             return new Signature((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public AlgorithmIdentifier getSignatureAlgorithm()

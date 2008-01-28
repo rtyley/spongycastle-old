@@ -53,7 +53,7 @@ public class OCSPRequest
             return new OCSPRequest((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     public TBSRequest getTbsRequest()

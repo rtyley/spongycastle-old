@@ -36,7 +36,7 @@ public class PublicKeyAndChallenge
             return new PublicKeyAndChallenge((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unkown object in factory");
+        throw new IllegalArgumentException("unkown object in factory: " + obj.getClass().getName());
     }
 
     public PublicKeyAndChallenge(ASN1Sequence seq)
