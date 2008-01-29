@@ -43,6 +43,15 @@ public class PGPSignatureSubpacketGenerator
         list.add(new Exportable(isCritical, isExportable));
     }
     
+    /**
+     * Add a TrustSignature packet to the signature. The values for 
+     * depth and trust are largely installation dependent but there
+     * are some guidelines in RFC 4880 - 5.2.3.13.
+     * 
+     * @param isCritical true if the packet is critical.
+     * @param depth depth level.
+     * @param trust trust amount.
+     */
     public void setTrust(
         boolean     isCritical,
         int         depth,
