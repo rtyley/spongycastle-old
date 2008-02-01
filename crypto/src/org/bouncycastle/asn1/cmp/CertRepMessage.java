@@ -5,6 +5,8 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERTaggedObject;
 
 public class CertRepMessage
     extends ASN1Encodable
@@ -18,7 +20,7 @@ public class CertRepMessage
 
         if (seq.size() > 1)
         {
-            caPubs = ASN1Sequence.getInstance(seq.getObjectAt(index++));
+            caPubs = ASN1Sequence.getInstance((ASN1TaggedObject)seq.getObjectAt(index++), true);
         }
 
         response = ASN1Sequence.getInstance(seq.getObjectAt(index));
@@ -84,7 +86,7 @@ public class CertRepMessage
 
         if (caPubs != null)
         {
-            v.add(caPubs);
+            v.add(new DERTaggedObject(true, 1, caPubs));
         }
 
         v.add(response);
