@@ -34,8 +34,9 @@ import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedUrlInput;
 import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
-import org.bouncycastle.jce.provider.PKIXNameConstraints;
+import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
 import org.bouncycastle.jce.provider.PKIXPolicyNode;
+import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import javax.security.auth.x500.X500Principal;
@@ -385,7 +386,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         //
         
         // (b)  and (c)
-        PKIXNameConstraints nameConstraints = new PKIXNameConstraints();
+        PKIXNameConstraintValidator nameConstraintValidator = new PKIXNameConstraintValidator();
 
         //
         // process each certificate except the last in the path
@@ -426,9 +427,9 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     
                     try
                     {
-                        nameConstraints.checkPermittedDN(dns);
+                        nameConstraintValidator.checkPermittedDN(dns);
                     }
-                    catch (CertPathValidatorException cpve)
+                    catch (PKIXNameConstraintValidatorException cpve)
                     {
                         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedDN", 
                                 new Object[] {new UntrustedInput(principal.getName())});
@@ -437,9 +438,9 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     
                     try
                     {
-                        nameConstraints.checkExcludedDN(dns);
+                        nameConstraintValidator.checkExcludedDN(dns);
                     }
-                    catch (CertPathValidatorException cpve)
+                    catch (PKIXNameConstraintValidatorException cpve)
                     {
                         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.excludedDN",
                                 new Object[] {new UntrustedInput(principal.getName())});
@@ -465,10 +466,10 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
 
                             try
                             {
-                                nameConstraints.checkPermitted(name);
-                                nameConstraints.checkExcluded(name);
+                                nameConstraintValidator.checkPermitted(name);
+                                nameConstraintValidator.checkExcluded(name);
                             }
-                            catch (CertPathValidatorException cpve)
+                            catch (PKIXNameConstraintValidatorException cpve)
                             {
                                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedEmail",
                                         new Object[] {new UntrustedInput(name)});
@@ -592,7 +593,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                         {
                             GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
 
-                            nameConstraints.intersectPermittedSubtree(subtree);
+                            nameConstraintValidator.intersectPermittedSubtree(subtree);
                         }
                     }
                 
@@ -607,7 +608,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                         {
                             GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
 
-                            nameConstraints.addExcludedSubtree(subtree);
+                            nameConstraintValidator.addExcludedSubtree(subtree);
                         }
                     }
                 }

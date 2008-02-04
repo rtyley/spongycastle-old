@@ -8,14 +8,13 @@ import org.bouncycastle.asn1.x509.GeneralSubtree;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Strings;
 
-import java.security.cert.CertPathValidatorException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class PKIXNameConstraints
+public class PKIXNameConstraintValidator
 {
     private Set excludedSubtreesDN = new HashSet();
 
@@ -37,7 +36,7 @@ public class PKIXNameConstraints
 
     private Set permittedSubtreesIP;
 
-    public PKIXNameConstraints()
+    public PKIXNameConstraintValidator()
     {
     }
 
@@ -67,19 +66,19 @@ public class PKIXNameConstraints
     }
 
     public void checkPermittedDN(ASN1Sequence dns)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         checkPermittedDN(permittedSubtreesDN, dns);
     }
 
     public void checkExcludedDN(ASN1Sequence dns)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         checkExcludedDN(excludedSubtreesDN, dns);
     }
 
     private void checkPermittedDN(Set permitted, ASN1Sequence dns)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (permitted == null)
         {
@@ -98,12 +97,12 @@ public class PKIXNameConstraints
             }
         }
 
-        throw new CertPathValidatorException(
+        throw new PKIXNameConstraintValidatorException(
             "Subject distinguished name is not from a permitted subtree");
     }
 
     private void checkExcludedDN(Set excluded, ASN1Sequence dns)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (excluded.isEmpty())
         {
@@ -118,7 +117,7 @@ public class PKIXNameConstraints
 
             if (withinDNSubtree(dns, subtree))
             {
-                throw new CertPathValidatorException(
+                throw new PKIXNameConstraintValidatorException(
                     "Subject distinguished name is from an excluded subtree");
             }
         }
@@ -467,7 +466,7 @@ public class PKIXNameConstraints
     }
 
     private void checkPermittedEmail(Set permitted, String email)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (permitted == null)
         {
@@ -491,12 +490,12 @@ public class PKIXNameConstraints
             return;
         }
 
-        throw new CertPathValidatorException(
+        throw new PKIXNameConstraintValidatorException(
             "Subject email address is not from a permitted subtree.");
     }
 
     private void checkExcludedEmail(Set excluded, String email)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (excluded.isEmpty())
         {
@@ -511,7 +510,7 @@ public class PKIXNameConstraints
 
             if (emailIsConstrained(email, str))
             {
-                throw new CertPathValidatorException(
+                throw new PKIXNameConstraintValidatorException(
                     "Email address is from an excluded subtree.");
             }
         }
@@ -524,10 +523,10 @@ public class PKIXNameConstraints
      * @param permitted A <code>Set</code> of permitted IP addresses with
      *            their subnet mask as byte arrays.
      * @param ip The IP address.
-     * @throws CertPathValidatorException if the IP is not permitted.
+     * @throws PKIXNameConstraintValidatorException if the IP is not permitted.
      */
     private void checkPermittedIP(Set permitted, byte[] ip)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (permitted == null)
         {
@@ -549,7 +548,7 @@ public class PKIXNameConstraints
         {
             return;
         }
-        throw new CertPathValidatorException(
+        throw new PKIXNameConstraintValidatorException(
             "IP is not from a permitted subtree.");
     }
 
@@ -560,10 +559,10 @@ public class PKIXNameConstraints
      * @param excluded A <code>Set</code> of excluded IP addresses with their
      *            subnet mask as byte arrays.
      * @param ip The IP address.
-     * @throws CertPathValidatorException if the IP is excluded.
+     * @throws PKIXNameConstraintValidatorException if the IP is excluded.
      */
     private void checkExcludedIP(Set excluded, byte[] ip)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (excluded.isEmpty())
         {
@@ -578,7 +577,7 @@ public class PKIXNameConstraints
 
             if (isIPConstrained(ip, ipWithSubnet))
             {
-                throw new CertPathValidatorException(
+                throw new PKIXNameConstraintValidatorException(
                     "IP is from an excluded subtree.");
             }
         }
@@ -680,7 +679,7 @@ public class PKIXNameConstraints
     }
 
     private void checkPermittedDNS(Set permitted, String dns)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (permitted == null)
         {
@@ -703,12 +702,12 @@ public class PKIXNameConstraints
         {
             return;
         }
-        throw new CertPathValidatorException(
+        throw new PKIXNameConstraintValidatorException(
             "DNS is not from a permitted subtree.");
     }
 
     private void checkExcludedDNS(Set excluded, String dns)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (excluded.isEmpty())
         {
@@ -724,7 +723,7 @@ public class PKIXNameConstraints
             // is sub domain or the same
             if (withinDomain(dns, str) || dns.equalsIgnoreCase(str))
             {
-                throw new CertPathValidatorException(
+                throw new PKIXNameConstraintValidatorException(
                     "DNS is from an excluded subtree.");
             }
         }
@@ -1191,7 +1190,7 @@ public class PKIXNameConstraints
     }
 
     private void checkExcludedURI(Set excluded, String uri)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (excluded.isEmpty())
         {
@@ -1206,7 +1205,7 @@ public class PKIXNameConstraints
 
             if (isUriConstrained(uri, str))
             {
-                throw new CertPathValidatorException(
+                throw new PKIXNameConstraintValidatorException(
                     "URI is from an excluded subtree.");
             }
         }
@@ -1360,7 +1359,7 @@ public class PKIXNameConstraints
     }
 
     private void checkPermittedURI(Set permitted, String uri)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         if (permitted == null)
         {
@@ -1382,7 +1381,7 @@ public class PKIXNameConstraints
         {
             return;
         }
-        throw new CertPathValidatorException(
+        throw new PKIXNameConstraintValidatorException(
             "URI is not from a permitted subtree.");
     }
 
@@ -1437,10 +1436,10 @@ public class PKIXNameConstraints
      * Checks if the given GeneralName is in the permitted set.
      * 
      * @param name The GeneralName
-     * @throws CertPathValidatorException If the <code>name</code>
+     * @throws PKIXNameConstraintValidatorException If the <code>name</code>
      */
     public void checkPermitted(GeneralName name)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         switch (name.getTagNo())
         {
@@ -1471,11 +1470,11 @@ public class PKIXNameConstraints
      * Check if the given GeneralName is contained in the excluded set.
      * 
      * @param name The GeneralName.
-     * @throws CertPathValidatorException If the <code>name</code> is
+     * @throws PKIXNameConstraintValidatorException If the <code>name</code> is
      *             excluded.
      */
     public void checkExcluded(GeneralName name)
-        throws CertPathValidatorException
+        throws PKIXNameConstraintValidatorException
     {
         switch (name.getTagNo())
         {
@@ -1693,30 +1692,30 @@ public class PKIXNameConstraints
 
     public boolean equals(Object o)
     {
-        if (!(o instanceof PKIXNameConstraints))
+        if (!(o instanceof PKIXNameConstraintValidator))
         {
             return false;
         }
-        PKIXNameConstraints constraints = (PKIXNameConstraints) o;
-        return collectionsAreEqual(constraints.excludedSubtreesDN,
+        PKIXNameConstraintValidator constraintValidator = (PKIXNameConstraintValidator) o;
+        return collectionsAreEqual(constraintValidator.excludedSubtreesDN,
             excludedSubtreesDN)
-            && collectionsAreEqual(constraints.excludedSubtreesDNS,
+            && collectionsAreEqual(constraintValidator.excludedSubtreesDNS,
                 excludedSubtreesDNS)
-            && collectionsAreEqual(constraints.excludedSubtreesEmail,
+            && collectionsAreEqual(constraintValidator.excludedSubtreesEmail,
                 excludedSubtreesEmail)
-            && collectionsAreEqual(constraints.excludedSubtreesIP,
+            && collectionsAreEqual(constraintValidator.excludedSubtreesIP,
                 excludedSubtreesIP)
-            && collectionsAreEqual(constraints.excludedSubtreesURI,
+            && collectionsAreEqual(constraintValidator.excludedSubtreesURI,
                 excludedSubtreesURI)
-            && collectionsAreEqual(constraints.permittedSubtreesDN,
+            && collectionsAreEqual(constraintValidator.permittedSubtreesDN,
                 permittedSubtreesDN)
-            && collectionsAreEqual(constraints.permittedSubtreesDNS,
+            && collectionsAreEqual(constraintValidator.permittedSubtreesDNS,
                 permittedSubtreesDNS)
-            && collectionsAreEqual(constraints.permittedSubtreesEmail,
+            && collectionsAreEqual(constraintValidator.permittedSubtreesEmail,
                 permittedSubtreesEmail)
-            && collectionsAreEqual(constraints.permittedSubtreesIP,
+            && collectionsAreEqual(constraintValidator.permittedSubtreesIP,
                 permittedSubtreesIP)
-            && collectionsAreEqual(constraints.permittedSubtreesURI,
+            && collectionsAreEqual(constraintValidator.permittedSubtreesURI,
                 permittedSubtreesURI);
     }
 
