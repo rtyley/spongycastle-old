@@ -172,7 +172,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         //
         // (b) and (c)
         //
-        PKIXNameConstraints nameConstraints = new PKIXNameConstraints();
+        PKIXNameConstraintValidator nameConstraintValidator = new PKIXNameConstraintValidator();
     
         //
         // (d)
@@ -364,8 +364,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         throw new CertPathValidatorException("exception extracting subject name when checking subtrees");
                     }
     
-                    nameConstraints.checkPermittedDN(dns);
-                    nameConstraints.checkExcludedDN(dns);
+                    nameConstraintValidator.checkPermittedDN(dns);
+                    nameConstraintValidator.checkExcludedDN(dns);
             
                     ASN1Sequence   altName = (ASN1Sequence)CertPathValidatorUtilities.getExtensionValue(cert, SUBJECT_ALTERNATIVE_NAME);
                     if (altName != null)
@@ -374,8 +374,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         {
                             GeneralName name = GeneralName.getInstance(altName.getObjectAt(j));
 
-                            nameConstraints.checkPermitted(name);
-                            nameConstraints.checkExcluded(name);
+                            nameConstraintValidator.checkPermitted(name);
+                            nameConstraintValidator.checkExcluded(name);
                         }
                     }
                 }
@@ -756,7 +756,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             {
                                 GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
 
-                                nameConstraints.intersectPermittedSubtree(subtree);
+                                nameConstraintValidator.intersectPermittedSubtree(subtree);
                             }
                         }
                     
@@ -770,7 +770,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                             while (e.hasMoreElements())
                             {
                                 GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
-                                nameConstraints.addExcludedSubtree(subtree);
+                                nameConstraintValidator.addExcludedSubtree(subtree);
                             }
                         }
                     }
@@ -931,14 +931,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     tmpIter = pathCheckers.iterator();
                     while (tmpIter.hasNext())
                     {
-                        try
-                        {
-                            ((PKIXCertPathChecker)tmpIter.next()).check(cert, criticalExtensions);
-                        }
-                        catch (CertPathValidatorException e)
-                        {
-                            throw new CertPathValidatorException(e.getMessage(), e.getCause(), certPath, index);
-                        }
+                        ((PKIXCertPathChecker)tmpIter.next()).check(cert, criticalExtensions);
                     }
                     if (!criticalExtensions.isEmpty())
                     {
@@ -961,6 +954,14 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 workingAlgId = CertPathValidatorUtilities.getAlgorithmIdentifier(workingPublicKey);
                 workingPublicKeyAlgorithm = workingAlgId.getObjectId();
                 workingPublicKeyParameters = workingAlgId.getParameters();
+            }
+            catch (CertPathValidatorException e)
+            {
+                throw new CertPathValidatorException(e.getMessage(), e.getCause(), certPath, index);
+            }
+            catch (PKIXNameConstraintValidatorException e)
+            {
+                throw new CertPathValidatorException(e.getMessage(), e, certPath, index);
             }
             catch (AnnotatedException e)
             {
