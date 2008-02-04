@@ -3,13 +3,12 @@ package org.bouncycastle.jce.provider.test;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralSubtree;
-import org.bouncycastle.jce.provider.PKIXNameConstraints;
+import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
+import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
 import org.bouncycastle.util.test.SimpleTest;
 
-import java.security.cert.CertPathValidatorException;
-
 /**
- * Test class for {@link PKIXNameConstraints}.
+ * Test class for {@link PKIXNameConstraintValidator}.
  * <p>
  * The field testXYZ is the name to test.
  * <p>
@@ -246,74 +245,74 @@ public class PKIXNameConstraintsTest
     {
         for (int i = 0; i < testNameIsConstraint.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.intersectPermittedSubtree(new GeneralSubtree(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, testNameIsConstraint[i])));
-            constraints.checkPermitted(new GeneralName(nameType, testName));
+            constraintValidator.checkPermitted(new GeneralName(nameType, testName));
         }
         for (int i = 0; i < testNameIsNotConstraint.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.intersectPermittedSubtree(new GeneralSubtree(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, testNameIsNotConstraint[i])));
             try
             {
-                constraints.checkPermitted(new GeneralName(nameType, testName));
+                constraintValidator.checkPermitted(new GeneralName(nameType, testName));
                 fail("not permitted name allowed: " + nameType);
             }
-            catch (CertPathValidatorException e)
+            catch (PKIXNameConstraintValidatorException e)
             {
                 // expected
             }
         }
         for (int i = 0; i < testNameIsConstraint.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.addExcludedSubtree(new GeneralSubtree(new GeneralName(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.addExcludedSubtree(new GeneralSubtree(new GeneralName(
                 nameType, testNameIsConstraint[i])));
             try
             {
-                constraints.checkExcluded(new GeneralName(nameType, testName));
+                constraintValidator.checkExcluded(new GeneralName(nameType, testName));
                 fail("excluded name missed: " + nameType);
             }
-            catch (CertPathValidatorException e)
+            catch (PKIXNameConstraintValidatorException e)
             {
                 // expected
             }
         }
         for (int i = 0; i < testNameIsNotConstraint.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.addExcludedSubtree(new GeneralSubtree(new GeneralName(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.addExcludedSubtree(new GeneralSubtree(new GeneralName(
                 nameType, testNameIsNotConstraint[i])));
-            constraints.checkExcluded(new GeneralName(nameType, testName));
+            constraintValidator.checkExcluded(new GeneralName(nameType, testName));
         }
         for (int i = 0; i < testNames1.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.addExcludedSubtree(new GeneralSubtree(new GeneralName(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.addExcludedSubtree(new GeneralSubtree(new GeneralName(
                 nameType, testNames1[i])));
-            constraints.addExcludedSubtree(new GeneralSubtree(new GeneralName(
+            constraintValidator.addExcludedSubtree(new GeneralSubtree(new GeneralName(
                 nameType, testNames2[i])));
-            PKIXNameConstraints constraints2 = new PKIXNameConstraints();
+            PKIXNameConstraintValidator constraints2 = new PKIXNameConstraintValidator();
             for (int j = 0; j < testUnion[i].length; j++)
             {
                 constraints2.addExcludedSubtree(new GeneralSubtree(
                     new GeneralName(nameType, testUnion[i][j])));
             }
-            if (!constraints2.equals(constraints))
+            if (!constraints2.equals(constraintValidator))
             {
                 fail("union wrong: " + nameType);
             }
-            constraints = new PKIXNameConstraints();
-            constraints.intersectPermittedSubtree(new GeneralSubtree(
+            constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, testNames1[i])));
-            constraints.intersectPermittedSubtree(new GeneralSubtree(
+            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, testNames2[i])));
-            constraints2 = new PKIXNameConstraints();
+            constraints2 = new PKIXNameConstraintValidator();
             constraints2.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, testInterSection[i])));
-            if (!constraints2.equals(constraints))
+            if (!constraints2.equals(constraintValidator))
             {
                 fail("intersection wrong: " + nameType);
             }
@@ -349,82 +348,82 @@ public class PKIXNameConstraintsTest
     {
         for (int i = 0; i < testNameIsConstraint.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.intersectPermittedSubtree(new GeneralSubtree(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, new DEROctetString(
                     testNameIsConstraint[i]))));
-            constraints.checkPermitted(new GeneralName(nameType,
+            constraintValidator.checkPermitted(new GeneralName(nameType,
                 new DEROctetString(testName)));
         }
         for (int i = 0; i < testNameIsNotConstraint.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.intersectPermittedSubtree(new GeneralSubtree(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, new DEROctetString(
                     testNameIsNotConstraint[i]))));
             try
             {
-                constraints.checkPermitted(new GeneralName(nameType,
+                constraintValidator.checkPermitted(new GeneralName(nameType,
                     new DEROctetString(testName)));
                 fail("not permitted name allowed: " + nameType);
             }
-            catch (CertPathValidatorException e)
+            catch (PKIXNameConstraintValidatorException e)
             {
                 // expected
             }
         }
         for (int i = 0; i < testNameIsConstraint.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.addExcludedSubtree(new GeneralSubtree(new GeneralName(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.addExcludedSubtree(new GeneralSubtree(new GeneralName(
                 nameType, new DEROctetString(testNameIsConstraint[i]))));
             try
             {
-                constraints.checkExcluded(new GeneralName(nameType,
+                constraintValidator.checkExcluded(new GeneralName(nameType,
                     new DEROctetString(testName)));
                 fail("excluded name missed: " + nameType);
             }
-            catch (CertPathValidatorException e)
+            catch (PKIXNameConstraintValidatorException e)
             {
                 // expected
             }
         }
         for (int i = 0; i < testNameIsNotConstraint.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.addExcludedSubtree(new GeneralSubtree(new GeneralName(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.addExcludedSubtree(new GeneralSubtree(new GeneralName(
                 nameType, new DEROctetString(testNameIsNotConstraint[i]))));
-            constraints.checkExcluded(new GeneralName(nameType,
+            constraintValidator.checkExcluded(new GeneralName(nameType,
                 new DEROctetString(testName)));
         }
         for (int i = 0; i < testNames1.length; i++)
         {
-            PKIXNameConstraints constraints = new PKIXNameConstraints();
-            constraints.addExcludedSubtree(new GeneralSubtree(new GeneralName(
+            PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.addExcludedSubtree(new GeneralSubtree(new GeneralName(
                 nameType, new DEROctetString(testNames1[i]))));
-            constraints.addExcludedSubtree(new GeneralSubtree(new GeneralName(
+            constraintValidator.addExcludedSubtree(new GeneralSubtree(new GeneralName(
                 nameType, new DEROctetString(testNames2[i]))));
-            PKIXNameConstraints constraints2 = new PKIXNameConstraints();
+            PKIXNameConstraintValidator constraints2 = new PKIXNameConstraintValidator();
             for (int j = 0; j < testUnion[i].length; j++)
             {
                 constraints2.addExcludedSubtree(new GeneralSubtree(
                     new GeneralName(nameType, new DEROctetString(
                         testUnion[i][j]))));
             }
-            if (!constraints2.equals(constraints))
+            if (!constraints2.equals(constraintValidator))
             {
                 fail("union wrong: " + nameType);
             }
-            constraints = new PKIXNameConstraints();
-            constraints.intersectPermittedSubtree(new GeneralSubtree(
+            constraintValidator = new PKIXNameConstraintValidator();
+            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, new DEROctetString(testNames1[i]))));
-            constraints.intersectPermittedSubtree(new GeneralSubtree(
+            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, new DEROctetString(testNames2[i]))));
-            constraints2 = new PKIXNameConstraints();
+            constraints2 = new PKIXNameConstraintValidator();
             constraints2.intersectPermittedSubtree(new GeneralSubtree(
                 new GeneralName(nameType, new DEROctetString(
                     testInterSection[i]))));
-            if (!constraints2.equals(constraints))
+            if (!constraints2.equals(constraintValidator))
             {
                 fail("intersection wrong: " + nameType);
             }
