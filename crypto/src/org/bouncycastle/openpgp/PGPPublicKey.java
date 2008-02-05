@@ -840,22 +840,23 @@ public class PGPPublicKey
     }
 
     /**
-     * Remove any certifications associated with a given id on a key.
+     * Remove any certifications associated with a given user attribute subpacket
+     *  on a key.
      * 
      * @param key the key the certifications are to be removed from.
-     * @param id the id that is to be removed.
-     * @return the re-certified key, null if the id was not found on the key.
+     * @param userAttributes the attributes to be removed.
+     * @return the re-certified key, null if the user attribute subpacket was not found on the key.
      */
     public static PGPPublicKey removeCertification(
-        PGPPublicKey    key,
-        String          id)
+        PGPPublicKey                    key,
+        PGPUserAttributeSubpacketVector userAttributes)
     {
         PGPPublicKey    returnKey = new PGPPublicKey(key);
         boolean         found = false;
         
         for (int i = 0; i < returnKey.ids.size(); i++)
         {
-            if (id.equals(returnKey.ids.get(i)))
+            if (userAttributes.equals(returnKey.ids.get(i)))
             {
                 found = true;
                 returnKey.ids.remove(i);
@@ -871,7 +872,40 @@ public class PGPPublicKey
         
         return returnKey;
     }
-    
+
+    /**
+     * Remove any certifications associated with a given id on a key.
+     *
+     * @param key the key the certifications are to be removed from.
+     * @param id the id that is to be removed.
+     * @return the re-certified key, null if the id was not found on the key.
+     */
+    public static PGPPublicKey removeCertification(
+        PGPPublicKey    key,
+        String          id)
+    {
+        PGPPublicKey    returnKey = new PGPPublicKey(key);
+        boolean         found = false;
+
+        for (int i = 0; i < returnKey.ids.size(); i++)
+        {
+            if (id.equals(returnKey.ids.get(i)))
+            {
+                found = true;
+                returnKey.ids.remove(i);
+                returnKey.idTrusts.remove(i);
+                returnKey.idSigs.remove(i);
+            }
+        }
+
+        if (!found)
+        {
+            return null;
+        }
+
+        return returnKey;
+    }
+
     /**
      * Remove any certifications associated with a given id on a key.
      * 

@@ -587,6 +587,17 @@ public class PGPRSATest
         {
             fail("didn't find added user attributes");
         }
+
+        nKey = PGPPublicKey.removeCertification(nKey, uVec);
+        count = 0;
+        for (it = nKey.getUserAttributes(); it.hasNext();)
+        {
+            count++;
+        }
+        if (count != 0)
+        {
+            fail("found attributes where none expected");
+        }
     }
 
     public void performTest()
