@@ -59,6 +59,7 @@ public class DERSequence
         DEROutputStream out)
         throws IOException
     {
+        // TODO Intermediate buffer could be avoided if we could calculate expected length
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         DEROutputStream         dOut = new DEROutputStream(bOut);
         Enumeration             e = this.getObjects();
