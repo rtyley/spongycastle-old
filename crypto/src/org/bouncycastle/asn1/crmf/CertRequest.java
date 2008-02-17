@@ -18,7 +18,10 @@ public class CertRequest
     {
         certReqId = DERInteger.getInstance(seq.getObjectAt(0));
         certTemplate = CertTemplate.getInstance(seq.getObjectAt(1));
-        controls = Controls.getInstance(seq.getObjectAt(2));
+        if (seq.size() > 2)
+        {
+            controls = Controls.getInstance(seq.getObjectAt(2));
+        }
     }
 
     public static CertRequest getInstance(Object o)
