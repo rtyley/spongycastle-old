@@ -71,17 +71,19 @@ public class TlsProtocolHandler
 
     private static final short CS_SERVER_KEY_EXCHANGE_RECEIVED = 4;
 
-    private static final short CS_SERVER_HELLO_DONE_RECEIVED = 5;
+    private static final short CS_CERTIFICATE_REQUEST_RECEIVED = 5;
 
-    private static final short CS_CLIENT_KEY_EXCHANGE_SEND = 6;
+    private static final short CS_SERVER_HELLO_DONE_RECEIVED = 6;
 
-    private static final short CS_CLIENT_CHANGE_CIPHER_SPEC_SEND = 7;
+    private static final short CS_CLIENT_KEY_EXCHANGE_SEND = 7;
 
-    private static final short CS_CLIENT_FINISHED_SEND = 8;
+    private static final short CS_CLIENT_CHANGE_CIPHER_SPEC_SEND = 8;
 
-    private static final short CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED = 9;
+    private static final short CS_CLIENT_FINISHED_SEND = 9;
 
-    private static final short CS_DONE = 10;
+    private static final short CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED = 10;
+
+    private static final short CS_DONE = 11;
 
 
     protected static final short AP_close_notify = 0;
@@ -439,9 +441,16 @@ public class TlsProtocolHandler
                                     */
 
                                 case CS_SERVER_KEY_EXCHANGE_RECEIVED:
+                                case CS_CERTIFICATE_REQUEST_RECEIVED:
 
                                     assertEmpty(is);
+                                    boolean isCertReq = (connection_state == CS_CERTIFICATE_REQUEST_RECEIVED);
                                     connection_state = CS_SERVER_HELLO_DONE_RECEIVED;
+
+                                    if (isCertReq)
+                                    {
+                                        sendClientCertificate();
+                                    }
 
                                     /*
                                     * Send the client key exchange message, depending
@@ -687,9 +696,45 @@ public class TlsProtocolHandler
                                     this.failWithError(AL_fatal, AP_unexpected_message);
                             }
                             break;
+                        case HP_CERTIFICATE_REQUEST:
+                            switch (connection_state)
+                            {
+
+                                case CS_SERVER_CERTIFICATE_RECEIVED:
+                                    /*
+                                    * There was no server key exchange message, check
+                                    * that we are doing RSA key exchange.
+                                    */
+                                    if (this.choosenCipherSuite.getKeyExchangeAlgorithm() != TlsCipherSuite.KE_RSA)
+                                    {
+                                        this.failWithError(AL_fatal, AP_unexpected_message);
+                                    }
+
+                                    /*
+                                    * NB: Fall through to next case label to continue RSA key exchange
+                                    */
+
+                                case CS_SERVER_KEY_EXCHANGE_RECEIVED:
+
+                                    short typesLength = TlsUtils.readUint8(is);
+                                    byte[] types = new byte[typesLength];
+                                    TlsUtils.readFully(types, is);
+
+                                    int authsLength = TlsUtils.readUint16(is);
+                                    byte[] auths = new byte[authsLength];
+                                    TlsUtils.readFully(auths, is);
+
+                                    assertEmpty(is);
+
+                                    this.connection_state = CS_CERTIFICATE_REQUEST_RECEIVED;
+                                    read = true;
+                                    break;
+                                default:
+                                    this.failWithError(AL_fatal, AP_unexpected_message);
+                            }
+                            break;
                         case HP_HELLO_REQUEST:
                         case HP_CLIENT_KEY_EXCHANGE:
-                        case HP_CERTIFICATE_REQUEST:
                         case HP_CERTIFICATE_VERIFY:
                         case HP_CLIENT_HELLO:
                         default:
@@ -813,6 +858,21 @@ public class TlsProtocolHandler
             }
         }
 
+    }
+
+    private void sendClientCertificate() throws IOException
+    {
+        /*
+         * just write back the "no client certificate" message
+         * see also gnutls, auth_cert.c:643 (0B 00 00 03 00 00 00)
+         */
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        TlsUtils.writeUint8(HP_CERTIFICATE, bos);
+        TlsUtils.writeUint24(3, bos);
+        TlsUtils.writeUint24(0, bos);
+        byte[] message = bos.toByteArray();
+
+        rs.writeMessage((short)RL_HANDSHAKE, message, 0, message.length);
     }
 
     /**
