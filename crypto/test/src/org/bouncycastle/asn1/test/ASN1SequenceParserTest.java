@@ -32,7 +32,6 @@ public class ASN1SequenceParserTest
     private static final byte[] berNestedSeqData = Hex.decode("3080020100060129308002010100000000");
     private static final byte[] berExpTagSeqData = Hex.decode("a180308002010006012900000000");
 
-    private static final byte[] berSeqWithBERNullData = Hex.decode("3080058000000201000601290000");
     private static final byte[] berSeqWithDERNullData = Hex.decode("308005000201000601290000");
 
     public void testDERWriting()
@@ -328,12 +327,6 @@ public class ASN1SequenceParserTest
        seqGen.close();
       
        assertTrue("explicit BER tag writing test failed.", Arrays.equals(berExpTagSeqData, bOut.toByteArray()));
-    }
-
-    public void testSequenceWithBERNullReading()
-        throws Exception
-    {
-        testParseWithNull(berSeqWithBERNullData);
     }
 
     public void testSequenceWithDERNullReading()
