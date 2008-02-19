@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.util.io.Streams;
+
 import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
@@ -73,20 +75,10 @@ class DefiniteLengthInputStream
         if (_length > 0)
         {
             bytes = new byte[_length];
-            int pos = 0;
-            do
+            if (Streams.readFully(_in, bytes) < _length)
             {
-                int read = _in.read(bytes, pos, _length - pos);
-
-                if (read < 0)
-                {
-                    throw new EOFException();
-                }
-
-                pos += read;
+                throw new EOFException();
             }
-            while (pos < _length);
-
             _length = 0;
         }
         else
