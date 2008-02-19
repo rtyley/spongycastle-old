@@ -7,7 +7,9 @@ import java.io.IOException;
 class DefiniteLengthInputStream
         extends LimitedInputStream
 {
-    private int               _length;
+    private static final byte[] EMPTY_BYTES = new byte[0];
+
+    private int _length;
 
     DefiniteLengthInputStream(
         InputStream in,
@@ -67,10 +69,10 @@ class DefiniteLengthInputStream
     byte[] toByteArray()
         throws IOException
     {
-        byte[] bytes = new byte[_length];
-
+        byte[] bytes;
         if (_length > 0)
         {
+            bytes = new byte[_length];
             int pos = 0;
             do
             {
@@ -86,6 +88,10 @@ class DefiniteLengthInputStream
             while (pos < _length);
 
             _length = 0;
+        }
+        else
+        {
+            bytes = EMPTY_BYTES;
         }
 
         setParentEofDetect(true);
