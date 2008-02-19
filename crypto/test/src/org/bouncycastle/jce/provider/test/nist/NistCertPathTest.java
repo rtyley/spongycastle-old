@@ -242,7 +242,7 @@ public class NistCertPathTest
                 new String[] { "NoPoliciesCACert", "AllCertificatesNoPoliciesTest2EE" }, 
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "NoPoliciesCACRL" },
                 noPolicies,
-                -1,
+                1,
                 "No valid policy tree found when one expected.");
     }
     
@@ -257,14 +257,14 @@ public class NistCertPathTest
                 new String[] { GOOD_CA_CERT, "PoliciesP2subCACert", "DifferentPoliciesTest3EE" }, 
                 new String[] { TRUST_ANCHOR_ROOT_CRL, GOOD_CA_CRL, "PoliciesP2subCACRL" },
                 noPolicies,
-                -1,
+                1,
                 "No valid policy tree found when one expected.");
         
         doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, 
                 new String[] { GOOD_CA_CERT, "PoliciesP2subCACert", "DifferentPoliciesTest3EE" }, 
                 new String[] { TRUST_ANCHOR_ROOT_CRL, GOOD_CA_CRL, "PoliciesP2subCACRL" },
                 nistTestPolicy1And2,
-                -1,
+                1,
                 "No valid policy tree found when one expected.");
     }
     
@@ -274,7 +274,7 @@ public class NistCertPathTest
         doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, 
                 new String[] { GOOD_CA_CERT, "GoodsubCACert", "DifferentPoliciesTest4EE" }, 
                 new String[] { TRUST_ANCHOR_ROOT_CRL, GOOD_CA_CRL, "GoodsubCACRL" },
-                -1,
+                0,
                 "No valid policy tree found when one expected."); 
     }
     
@@ -284,7 +284,7 @@ public class NistCertPathTest
         doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, 
                 new String[] { GOOD_CA_CERT, "PoliciesP2subCA2Cert", "DifferentPoliciesTest5EE" }, 
                 new String[] { TRUST_ANCHOR_ROOT_CRL, GOOD_CA_CRL, "PoliciesP2subCA2CRL" },
-                -1,
+                0,
                 "No valid policy tree found when one expected."); 
     }
     
@@ -310,7 +310,7 @@ public class NistCertPathTest
         String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "PoliciesP123CACRL", "PoliciesP123subCAP12CRL", "PoliciesP123subsubCAP12P1CRL" };
         
         doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList,
-                -1,
+                0,
                 "No valid policy tree found when one expected."); 
     }
     
@@ -321,7 +321,7 @@ public class NistCertPathTest
         String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "PoliciesP12CACRL", "PoliciesP12subCAP1CRL", "PoliciesP12subsubCAP1P2CRL" };
         
         doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList,
-                -1,
+                1,
                 "No valid policy tree found when one expected.");
     }
     
@@ -332,7 +332,7 @@ public class NistCertPathTest
         String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "PoliciesP123CACRL", "PoliciesP123subCAP12CRL", "PoliciesP123subsubCAP2P2CRL", "PoliciesP123subsubsubCAP12P2P1CRL" };
         
         doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList,
-                -1,
+                1,
                 "No valid policy tree found when one expected.");
     }
     
@@ -365,7 +365,7 @@ public class NistCertPathTest
         String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "PoliciesP3CACRL" };
         
         doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList,
-                -1,
+                0,
                 "No valid policy tree found when one expected.");
     }
     
