@@ -115,7 +115,7 @@ public class TlsProtocolHandler
     private static final String TLS_ERROR_MESSAGE = "Internal TLS error, this could be an attack";
 
     /*
-    * Queues for data from some protocolls.
+    * Queues for data from some protocols.
     */
 
     private ByteQueue applicationDataQueue = new ByteQueue();
@@ -338,7 +338,7 @@ public class TlsProtocolHandler
                                     assertEmpty(is);
 
                                     /*
-                                    * Calculate our owne checksum.
+                                    * Calculate our own checksum.
                                     */
                                     byte[] checksum = new byte[12];
                                     byte[] md5andsha1 = new byte[16 + 20];
@@ -387,7 +387,7 @@ public class TlsProtocolHandler
                                     TlsUtils.readFully(this.serverRandom, is);
 
                                     /*
-                                    * Currenty, we don't support session ids
+                                    * Currently, we don't support session ids
                                     */
                                     short sessionIdLength = TlsUtils.readUint8(is);
                                     byte[] sessionId = new byte[sessionIdLength];
@@ -395,7 +395,7 @@ public class TlsProtocolHandler
 
                                     /*
                                     * Find out which ciphersuite the server has
-                                    * choosen. If we don't support this ciphersuite,
+                                    * chosen. If we don't support this ciphersuite,
                                     * the TlsCipherSuiteManager will throw an
                                     * exception.
                                     */
@@ -519,8 +519,8 @@ public class TlsProtocolHandler
                                             break;
                                         default:
                                             /*
-                                            * Proble during handshake, we don't know
-                                            * how to thandle this key exchange method.
+                                            * Problem during handshake, we don't know
+                                            * how to handle this key exchange method.
                                             */
                                             this.failWithError(AL_fatal, AP_unexpected_message);
 
@@ -829,7 +829,7 @@ public class TlsProtocolHandler
      *
      * @param verifyer Will be used when a certificate is received to verify
      *                 that this certificate is accepted by the client.
-     * @throws IOException If handshake was not successfull.
+     * @throws IOException If handshake was not successful.
      */
     public void connect(CertificateVerifyer verifyer) throws IOException
     {
@@ -895,8 +895,8 @@ public class TlsProtocolHandler
     }
 
     /**
-     * Read data from the network. The method will return immed, if there is
-     * still some data left in the buffer, or block untill some application
+     * Read data from the network. The method will return immediately, if there is
+     * still some data left in the buffer, or block until some application
      * data has been read from the network.
      *
      * @param buf    The buffer where the data will be copied to.
