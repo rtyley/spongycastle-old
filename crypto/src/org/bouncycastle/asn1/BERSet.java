@@ -6,6 +6,21 @@ import java.util.Enumeration;
 public class BERSet
     extends DERSet
 {
+    public static final BERSet EMPTY = new BERSet();
+
+    public static BERSet fromVector(
+        ASN1EncodableVector v)
+    {
+        return v.size() < 1 ? EMPTY : new BERSet(v);
+    }
+
+    static BERSet fromVector(
+        ASN1EncodableVector v,
+        boolean             needsSorting)
+    {
+        return v.size() < 1 ? EMPTY : new BERSet(v, needsSorting);
+    }
+
     /**
      * create an empty sequence
      */

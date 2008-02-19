@@ -7,6 +7,14 @@ import java.util.Enumeration;
 public class DERSequence
     extends ASN1Sequence
 {
+    public static final DERSequence EMPTY = new DERSequence();
+
+    public static DERSequence fromVector(
+        ASN1EncodableVector v)
+    {
+        return v.size() < 1 ? EMPTY : new DERSequence(v);
+    }
+
     /**
      * create an empty sequence
      */
