@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -56,9 +57,8 @@ class IndefiniteLengthInputStream
 
         if (numRead < 0)
         {
-//          throw new EOFException();
-            _eofReached = true;
-            return -1;
+            // Corrupted stream
+            throw new EOFException();
         }
 
         b[off] = (byte)_b1;
@@ -70,9 +70,7 @@ class IndefiniteLengthInputStream
         if (_b2 < 0)
         {
             // Corrupted stream
-//            throw new EOFException();
-            _eofReached = true;
-            // Just fall thru...
+            throw new EOFException();
         }
 
         return numRead + 2;
@@ -88,17 +86,10 @@ class IndefiniteLengthInputStream
 
         int b = _in.read();
 
-        //
-        // strictly speaking we should return b1 and b2, but if this happens the stream
-        // is corrupted so we are already in trouble.
-        //
         if (b < 0)
         {
             // Corrupted stream
-//            throw new EOFException();
-            _eofReached = true;
-
-            return -1;
+            throw new EOFException();
         }
 
         int v = _b1;
