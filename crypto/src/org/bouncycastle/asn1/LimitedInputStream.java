@@ -13,11 +13,6 @@ abstract class LimitedInputStream
         this._in = in;
     }
 
-    InputStream getUnderlyingStream()
-    {
-        return _in;
-    }
-
     protected void setParentEofDetect(boolean on)
     {
         if (_in instanceof IndefiniteLengthInputStream)
