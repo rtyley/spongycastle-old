@@ -13,11 +13,31 @@ public final class Streams
         throws IOException
     {
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        doPipe(inStr, buf);
+        pipeAll(inStr, buf);
         return buf.toByteArray();
     }
 
-    private static void doPipe(InputStream inStr, OutputStream outStr)
+    public static int readFully(InputStream inStr, byte[] buf)
+        throws IOException
+    {
+        return readFully(inStr, buf, 0, buf.length);
+    }
+
+    public static int readFully(InputStream inStr, byte[] buf, int off, int len)
+        throws IOException
+    {
+        int totalRead = 0;
+        while (totalRead < len)
+        {
+            int numRead = inStr.read(buf, off + totalRead, len - totalRead);
+            if (numRead < 0)
+                break;
+            totalRead += numRead;
+        }
+        return totalRead;
+    }
+
+    public static void pipeAll(InputStream inStr, OutputStream outStr)
         throws IOException
     {
         byte[] bs = new byte[BUFFER_SIZE];
