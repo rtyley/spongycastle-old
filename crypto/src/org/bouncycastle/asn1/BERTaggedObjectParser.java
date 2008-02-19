@@ -96,42 +96,28 @@ public class BERTaggedObjectParser
         {
             ASN1EncodableVector v = rLoadVector(_contentStream);
 
-            if (v.size() > 1)
-            {
-                return new BERTaggedObject(false, _tagNumber, new BERSequence(v));
-            }
-            else if (v.size() == 1)
-            {
-                return new BERTaggedObject(true, _tagNumber, v.get(0));
-            }
-            else
-            {
-                return new BERTaggedObject(false, _tagNumber, new BERSequence());
-            }
+            return v.size() == 1
+                ?   new BERTaggedObject(true, _tagNumber, v.get(0))
+                :   new BERTaggedObject(false, _tagNumber, BERSequence.fromVector(v));
         }
-        else
+
+        if (this.isConstructed())
         {
-            if (this.isConstructed())
-            {
-                ASN1EncodableVector v = rLoadVector(_contentStream);
+            ASN1EncodableVector v = rLoadVector(_contentStream);
 
-                if (v.size() == 1)
-                {
-                    return new DERTaggedObject(true, _tagNumber, v.get(0));
-                }
-
-                return new DERTaggedObject(false, _tagNumber, new DERSequence(v));                
-            }
-
-            try
-            {
-                return new DERTaggedObject(false, _tagNumber, new DEROctetString(((DefiniteLengthInputStream)_contentStream).toByteArray()));
-            }
-            catch (IOException e)
-            {
-                throw new IllegalStateException(e.getMessage());
-            }
+            return v.size() == 1
+                ?   new DERTaggedObject(true, _tagNumber, v.get(0))
+                :   new DERTaggedObject(false, _tagNumber, DERSequence.fromVector(v));
         }
 
+        try
+        {
+            DefiniteLengthInputStream defIn = (DefiniteLengthInputStream)_contentStream;
+            return new DERTaggedObject(false, _tagNumber, new DEROctetString(defIn.toByteArray()));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 }
