@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
+import org.bouncycastle.util.BigIntegers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -677,17 +678,7 @@ public class TlsProtocolHandler
                                     BigInteger Ys = new BigInteger(1, YsByte);
                                     BigInteger x = new BigInteger(p.bitLength() - 1, this.random);
                                     Yc = g.modPow(x, p);
-                                    this.pms = (Ys.modPow(x, p)).toByteArray();
-
-                                    /*
-                                    * Remove leading zero byte, if present.
-                                    */
-                                    if (this.pms[0] == 0)
-                                    {
-                                        byte[] tmp = new byte[this.pms.length - 1];
-                                        System.arraycopy(this.pms, 1, tmp, 0, tmp.length);
-                                        this.pms = tmp;
-                                    }
+                                    this.pms = BigIntegers.asUnsignedByteArray(Ys.modPow(x, p));
 
                                     this.connection_state = CS_SERVER_KEY_EXCHANGE_RECEIVED;
                                     read = true;
