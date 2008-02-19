@@ -10,8 +10,8 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.util.io.Streams;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CRLException;
@@ -167,14 +167,6 @@ class CMSUtils
         InputStream in) 
         throws IOException
     {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        int ch;
-        
-        while ((ch = in.read()) >= 0)
-        {
-            bOut.write(ch);
-        }
-        
-        return bOut.toByteArray();
+        return Streams.readAll(in);
     }
 }

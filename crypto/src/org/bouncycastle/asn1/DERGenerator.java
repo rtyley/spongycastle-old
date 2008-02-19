@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.util.io.Streams;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,19 +114,6 @@ public abstract class DERGenerator
         InputStream  in)
         throws IOException
     {
-        out.write(tag);
-        
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        
-        int b = 0;
-        while ((b = in.read()) >= 0)
-        {
-            bOut.write(b);
-        }
-        
-        byte[] bytes = bOut.toByteArray();
-        
-        writeLength(out, bytes.length);
-        out.write(bytes);
+        writeDEREncoded(out, tag, Streams.readAll(in));
     }
 }

@@ -48,24 +48,15 @@ public class CMSCompressedData
         ASN1OctetString bytes = (ASN1OctetString)content.getContent();
 
         InflaterInputStream     zIn = new InflaterInputStream(new ByteArrayInputStream(bytes.getOctets()));
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-
-        byte[]  buf = new byte[1024];
-        int     len;
 
         try
         {
-            while ((len = zIn.read(buf, 0, buf.length)) > 0)
-            {
-                bOut.write(buf, 0, len);
-            }
+            return CMSUtils.streamToByteArray(zIn);
         }
         catch (IOException e)
         {
             throw new CMSException("exception reading compressed stream.", e);
         }
-
-        return bOut.toByteArray();
     }
 
     /**

@@ -1,7 +1,8 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.util.io.Streams;
+
 import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class BEROctetStringParser
@@ -31,22 +32,13 @@ public class BEROctetStringParser
 
     public DERObject getDERObject()
     {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        InputStream in = this.getOctetStream();
-        int         ch;
-
         try
         {
-            while ((ch = in.read()) >= 0)
-            {
-                bOut.write(ch);
-            }
+            return new BERConstructedOctetString(Streams.readAll(getOctetStream()));
         }
         catch (IOException e)
         {
             throw new IllegalStateException("IOException converting stream to byte array: " + e.getMessage());
         }
-
-        return new BERConstructedOctetString(bOut.toByteArray());
     }
 }
