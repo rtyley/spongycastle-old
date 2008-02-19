@@ -1,5 +1,7 @@
 package org.bouncycastle.bcpg;
 
+import org.bouncycastle.util.io.Streams;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,34 +78,9 @@ public class BCPGInputStream
         int       len)
         throws IOException
     {
-        //
-        // make sure we pick up nextB if set.
-        //
-        if (len > 0)
+        if (Streams.readFully(this, buf, off, len) < len)
         {
-            int    b = this.read();
-            
-            if (b < 0)
-            {
-                throw new EOFException();
-            }
-            
-            buf[off] = (byte)b;
-            off++;
-            len--;
-        }
-        
-        while (len > 0)
-        {
-            int    l = in.read(buf, off, len);
-            
-            if (l < 0)
-            {
-                throw new EOFException();
-            }
-            
-            off += l;
-            len -= l;
+            throw new EOFException();
         }
     }
     

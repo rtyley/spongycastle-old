@@ -12,6 +12,7 @@ import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 import org.bouncycastle.bcpg.sig.SignatureExpirationTime;
 import org.bouncycastle.bcpg.sig.SignerUserID;
 import org.bouncycastle.bcpg.sig.TrustSignature;
+import org.bouncycastle.util.io.Streams;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -42,41 +43,7 @@ public class SignatureSubpacketInputStream
     {
         return in.read();
     }
-    
-    private void readFully(
-        byte[]    buf,
-        int       off,
-        int       len)
-        throws IOException
-    {
-        if (len > 0)
-        {
-            int    b = this.read();
-            
-            if (b < 0)
-            {
-                throw new EOFException();
-            }
-            
-            buf[off] = (byte)b;
-            off++;
-            len--;
-        }
-        
-        while (len > 0)
-        {
-            int    l = in.read(buf, off, len);
-            
-            if (l < 0)
-            {
-                throw new EOFException();
-            }
-            
-            off += l;
-            len -= l;
-        }
-    }
-    
+
     public SignatureSubpacket readPacket()
         throws IOException
     {
@@ -109,8 +76,10 @@ public class SignatureSubpacketInputStream
         }
        
         byte[]    data = new byte[bodyLen - 1];
-       
-        this.readFully(data, 0, data.length);
+        if (Streams.readFully(in, data) < data.length)
+        {
+            throw new EOFException();
+        }
        
         boolean   isCritical = ((tag & 0x80) != 0);
         int       type = tag & 0x7f;
