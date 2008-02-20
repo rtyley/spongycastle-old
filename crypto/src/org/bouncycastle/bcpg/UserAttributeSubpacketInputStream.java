@@ -79,13 +79,17 @@ public class UserAttributeSubpacketInputStream
         {
             bodyLen = l;
         }
-        else if (l < 223)
+        else if (l <= 223)
         {
             bodyLen = ((l - 192) << 8) + (in.read()) + 192;
         }
         else if (l == 255)
         {
             bodyLen = (in.read() << 24) | (in.read() << 16) |  (in.read() << 8)  | in.read();
+        }
+        else
+        {
+            // TODO Error?
         }
 
        int        tag = in.read();
