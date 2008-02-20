@@ -533,7 +533,7 @@ public class SignerInformation
     }
 
     /**
-     * verify that the given certificate succesfully handles and confirms
+     * verify that the given certificate successfully handles and confirms
      * the signature associated with this signer and, if a signingTime
      * attribute is available, that the certificate was valid at the time the
      * signature was generated.
@@ -549,14 +549,29 @@ public class SignerInformation
 
         if (attr != null)
         {
-            Attribute t = attr.get(CMSAttributes.signingTime);
-
-            if (t != null)
+            ASN1EncodableVector v = attr.getAll(CMSAttributes.signingTime);
+            switch (v.size())
             {
-                Time   time = Time.getInstance(
-                                    t.getAttrValues().getObjectAt(0).getDERObject());
+                case 0:
+                    break;
+                case 1:
+                {
+                    Attribute t = (Attribute)v.get(0);
+//                    assert t != null;
 
-                cert.checkValidity(time.getDate());
+                    ASN1Set attrValues = t.getAttrValues();
+                    if (attrValues.size() != 1)
+                    {
+                        throw new CMSException("A signing-time attribute MUST have a single attribute value");
+                    }
+
+                    Time time = Time.getInstance(attrValues.getObjectAt(0).getDERObject());
+
+                    cert.checkValidity(time.getDate());
+                    break;
+                }
+                default:
+                    throw new CMSException("The SignedAttributes in a signerInfo MUST NOT include multiple instances of the signing-time attribute");
             }
         }
 
