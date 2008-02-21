@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.util.Arrays;
+
 import java.io.IOException;
 
 /**
@@ -49,38 +51,12 @@ public class DERUnknownTag
         }
         
         DERUnknownTag other = (DERUnknownTag)o;
-        
-        if (tag != other.tag)
-        {
-            return false;
-        }
-        
-        if (data.length != other.data.length)
-        {
-            return false;
-        }
-        
-        for (int i = 0; i < data.length; i++) 
-        {
-            if(data[i] != other.data[i])
-            {
-                return false;
-            }
-        }
-        
-        return true;
+
+        return tag == other.tag && Arrays.areEqual(data, other.data);
     }
     
     public int hashCode()
     {
-        byte[]  b = this.getData();
-        int     value = 0;
-
-        for (int i = 0; i != b.length; i++)
-        {
-            value ^= (b[i] & 0xff) << (i % 4);
-        }
-
-        return value ^ this.getTag();
+        return tag ^ Arrays.hashCode(data);
     }
 }
