@@ -9,6 +9,8 @@ public class DERIA5String
     extends ASN1Object
     implements DERString
 {
+    private static final String EMPTY_STRING = "";
+
     String  string;
 
     /**
@@ -90,12 +92,12 @@ public class DERIA5String
         String   string,
         boolean  validate)
     {
+        this.string = (string == null) ? EMPTY_STRING : string;
+        
         if (validate && !isIA5String(string))
         {
             throw new IllegalArgumentException("string contains illegal characters");
         }
-
-        this.string = string;
     }
 
     public String getString()
