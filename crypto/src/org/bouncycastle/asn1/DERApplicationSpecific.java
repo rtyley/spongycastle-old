@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.util.Arrays;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -133,38 +135,12 @@ public class DERApplicationSpecific
         }
         
         DERApplicationSpecific other = (DERApplicationSpecific)o;
-        
-        if (tag != other.tag)
-        {
-            return false;
-        }
-        
-        if (octets.length != other.octets.length)
-        {
-            return false;
-        }
-        
-        for (int i = 0; i < octets.length; i++) 
-        {
-            if (octets[i] != other.octets[i])
-            {
-                return false;
-            }
-        }
-        
-        return true;
+
+        return tag == other.tag && Arrays.areEqual(octets, other.octets);
     }
     
     public int hashCode()
     {
-        byte[]  b = this.getContents();
-        int     value = 0;
-
-        for (int i = 0; i != b.length; i++)
-        {
-            value ^= (b[i] & 0xff) << (i % 4);
-        }
-
-        return value ^ this.getApplicationTag();
+        return tag ^ Arrays.hashCode(octets);
     }
 }
