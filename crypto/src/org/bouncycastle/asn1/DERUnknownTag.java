@@ -15,7 +15,7 @@ public class DERUnknownTag
 
     /**
      * @param tag the tag value.
-     * @param data the octets making up the time.
+     * @param data the contents octets.
      */
     public DERUnknownTag(
         int     tag,
