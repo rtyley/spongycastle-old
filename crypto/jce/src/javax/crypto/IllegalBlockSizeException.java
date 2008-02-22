@@ -10,6 +10,8 @@ import java.security.GeneralSecurityException;
 public class IllegalBlockSizeException
     extends GeneralSecurityException
 {
+    private static final long serialVersionUID = -1965144811953540392L;
+
     /**
      * Constructs an IllegalBlockSizeException with no detail message.
      * (A detail message is a String that describes this particular

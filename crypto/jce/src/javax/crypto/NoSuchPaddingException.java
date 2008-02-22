@@ -9,6 +9,8 @@ import java.security.GeneralSecurityException;
 public class NoSuchPaddingException
     extends GeneralSecurityException
 {
+    private static final long serialVersionUID = -4572885201200175466L;
+
     /**
      * Constructs a NoSuchPaddingException with no detail
      * message. A detail message is a String that describes this

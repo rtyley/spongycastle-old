@@ -66,6 +66,8 @@ import java.security.*;
 public class SealedObject
     implements Serializable
 {
+    private static final long serialVersionUID = 4482838265551344752L;
+
     private byte[]  encodedParams;
     private byte[]  encryptedContent;
     private String  paramsAlg;
