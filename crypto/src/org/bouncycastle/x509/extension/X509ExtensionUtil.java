@@ -31,7 +31,7 @@ public class X509ExtensionUtil
         return ASN1Object.fromByteArray(octs.getOctets());
     }
 
-    private static Collection getIssuerAlternativeNames(X509Certificate cert)
+    public static Collection getIssuerAlternativeNames(X509Certificate cert)
             throws CertificateParsingException
     {
         byte[] extVal = cert.getExtensionValue(X509Extensions.IssuerAlternativeName.getId());
@@ -39,7 +39,7 @@ public class X509ExtensionUtil
         return getAlternativeName(extVal);
     }
 
-    private static Collection getSubjectAlternativeNames(X509Certificate cert)
+    public static Collection getSubjectAlternativeNames(X509Certificate cert)
             throws CertificateParsingException
     {        
         byte[] extVal = cert.getExtensionValue(X509Extensions.SubjectAlternativeName.getId());

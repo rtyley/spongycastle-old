@@ -751,13 +751,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         ASN1Sequence permitted = nc.getPermittedSubtrees();
                         if (permitted != null)
                         {
-                            Enumeration e = permitted.getObjects();
-                            while (e.hasMoreElements())
-                            {
-                                GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
-
-                                nameConstraintValidator.intersectPermittedSubtree(subtree);
-                            }
+                            nameConstraintValidator.intersectPermittedSubtree(permitted);
                         }
                     
                         //
