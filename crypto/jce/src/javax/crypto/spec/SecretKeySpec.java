@@ -20,6 +20,8 @@ import java.security.spec.KeySpec;
 public class SecretKeySpec
     implements KeySpec, SecretKey
 {
+    private static final long serialVersionUID = 6577238317307289933L;
+
     private String  algorithm;
     private byte[]  key;
 

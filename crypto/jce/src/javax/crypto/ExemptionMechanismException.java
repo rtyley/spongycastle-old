@@ -9,6 +9,8 @@ import java.security.GeneralSecurityException;
 public class ExemptionMechanismException
     extends GeneralSecurityException
 {
+    private static final long serialVersionUID = 1572699429277957109L;
+
     /**
      * Constructs a ExemptionMechanismException with no detailed message.
      * (A detailed message is a String that describes this particular exception.)

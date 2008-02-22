@@ -9,6 +9,8 @@ import java.security.GeneralSecurityException;
 public class ShortBufferException
     extends GeneralSecurityException
 {
+    private static final long serialVersionUID = 8427718640832943747L;
+
     /**
      * Constructs a ShortBufferException with no detail
      * message. A detail message is a String that describes this

@@ -10,6 +10,8 @@ import java.security.GeneralSecurityException;
 public class BadPaddingException
     extends GeneralSecurityException
 {
+    private static final long serialVersionUID = -5315033893984728443L;
+
     /**
      * Constructs a BadPaddingException with no detail
      * message. A detail message is a String that describes this
