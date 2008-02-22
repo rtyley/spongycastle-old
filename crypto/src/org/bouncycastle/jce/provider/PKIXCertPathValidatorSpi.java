@@ -132,8 +132,16 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
         //
         // (d)
-        // 
-        TrustAnchor trust = CertPathValidatorUtilities.findTrustAnchor((X509Certificate)certs.get(certs.size() - 1), certPath, certs.size() - 1, paramsPKIX.getTrustAnchors());
+        //
+        TrustAnchor trust;
+        try
+        {
+            trust = CertPathValidatorUtilities.findTrustAnchor((X509Certificate)certs.get(certs.size() - 1), paramsPKIX.getTrustAnchors());
+        }
+        catch (AnnotatedException e)
+        {
+            throw new CertPathValidatorException(e.getMessage(), e.getCause(), certPath, certs.size() - 1);
+        }
 
         if (trust == null)
         {
