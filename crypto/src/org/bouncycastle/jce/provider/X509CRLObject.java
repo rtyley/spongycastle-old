@@ -1,15 +1,22 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.asn1.x509.CRLDistPoint;
+import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import javax.security.auth.x500.X500Principal;
@@ -31,8 +38,8 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
-import java.util.HashMap;
 import java.util.Collections;
 
 /**
@@ -337,7 +344,128 @@ public class X509CRLObject
      */
     public String toString()
     {
-        return "X.509 CRL";
+		StringBuffer buf = new StringBuffer();
+		String nl = System.getProperty("line.separator");
+
+		buf.append("              Version: ").append(this.getVersion()).append(
+			nl);
+		buf.append("             IssuerDN: ").append(this.getIssuerDN())
+			.append(nl);
+		buf.append("          This update: ").append(this.getThisUpdate())
+			.append(nl);
+		buf.append("          Next update: ").append(this.getNextUpdate())
+			.append(nl);
+		buf.append("  Signature Algorithm: ").append(this.getSigAlgName())
+			.append(nl);
+
+		byte[] sig = this.getSignature();
+
+		buf.append("            Signature: ").append(
+			new String(Hex.encode(sig, 0, 20))).append(nl);
+		for (int i = 20; i < sig.length; i += 20)
+		{
+			if (i < sig.length - 20)
+			{
+				buf.append("                       ").append(
+					new String(Hex.encode(sig, i, 20))).append(nl);
+			}
+			else
+			{
+				buf.append("                       ").append(
+					new String(Hex.encode(sig, i, sig.length - i))).append(nl);
+			}
+		}
+
+		X509Extensions extensions = c.getTBSCertList().getExtensions();
+
+		if (extensions != null)
+		{
+			Enumeration e = extensions.oids();
+
+			if (e.hasMoreElements())
+			{
+				buf.append("           Extensions: \n");
+			}
+
+			while (e.hasMoreElements())
+			{
+				DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
+				X509Extension ext = extensions.getExtension(oid);
+
+				if (ext.getValue() != null)
+				{
+					byte[] octs = ext.getValue().getOctets();
+					ASN1InputStream dIn = new ASN1InputStream(octs);
+					buf.append("                       critical(").append(
+						ext.isCritical()).append(") ");
+					try
+					{
+						if (oid.equals(X509Extensions.CRLNumber))
+						{
+							buf.append(
+								new CRLNumber(DERInteger.getInstance(
+									dIn.readObject()).getPositiveValue()))
+								.append(nl);
+						}
+						else if (oid.equals(X509Extensions.DeltaCRLIndicator))
+						{
+							buf.append(
+								"Base CRL: "
+									+ new CRLNumber(DERInteger.getInstance(
+										dIn.readObject()).getPositiveValue()))
+								.append(nl);
+						}
+						else if (oid
+							.equals(X509Extensions.IssuingDistributionPoint))
+						{
+							buf.append(
+								new IssuingDistributionPoint((ASN1Sequence) dIn
+									.readObject())).append(nl);
+						}
+						else if (oid
+							.equals(X509Extensions.CRLDistributionPoints))
+						{
+							buf.append(
+								new CRLDistPoint((ASN1Sequence) dIn
+									.readObject())).append(nl);
+						}
+						else if (oid.equals(X509Extensions.FreshestCRL))
+						{
+							buf.append(
+								new CRLDistPoint((ASN1Sequence) dIn
+									.readObject())).append(nl);
+						}
+						else
+						{
+							buf.append(oid.getId());
+							buf.append(" value = ").append(
+								ASN1Dump.dumpAsString(dIn.readObject()))
+								.append(nl);
+						}
+					}
+					catch (Exception ex)
+					{
+						buf.append(oid.getId());
+						buf.append(" value = ").append("*****").append(nl);
+					}
+				}
+				else
+				{
+					buf.append(nl);
+				}
+			}
+		}
+		Set set = getRevokedCertificates();
+		if (set != null)
+		{
+			Iterator it = set.iterator();
+			while (it.hasNext())
+			{
+				buf.append(it.next());
+				buf.append(nl);
+			}
+		}
+		return buf.toString();
     }
 
     /**
@@ -386,7 +514,7 @@ public class X509CRLObject
                         .isIndirectCRL();
             }
         }
-        catch (IOException e)
+		catch (Exception e)
         {
             throw new ExtCRLException(
                     "Exception reading IssuingDistributionPoint", e);

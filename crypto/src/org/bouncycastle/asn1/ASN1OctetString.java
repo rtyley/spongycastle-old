@@ -13,8 +13,6 @@ public abstract class ASN1OctetString
     extends ASN1Object
     implements ASN1OctetStringParser
 {
-    private static final byte[] EMPTY_STRING = new byte[0];
-
     byte[]  string;
 
     /**
@@ -74,7 +72,11 @@ public abstract class ASN1OctetString
     public ASN1OctetString(
         byte[]  string)
     {
-        this.string = (string == null) ? EMPTY_STRING : string;
+        if (string == null)
+        {
+            throw new NullPointerException("string cannot be null");
+        }
+        this.string = string;
     }
 
     public ASN1OctetString(
