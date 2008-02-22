@@ -1,6 +1,7 @@
 package org.bouncycastle.jce.provider.test;
 
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralSubtree;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
@@ -246,15 +247,15 @@ public class PKIXNameConstraintsTest
         for (int i = 0; i < testNameIsConstraint.length; i++)
         {
             PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
-            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
-                new GeneralName(nameType, testNameIsConstraint[i])));
+            constraintValidator.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
+                new GeneralName(nameType, testNameIsConstraint[i]))));
             constraintValidator.checkPermitted(new GeneralName(nameType, testName));
         }
         for (int i = 0; i < testNameIsNotConstraint.length; i++)
         {
             PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
-            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
-                new GeneralName(nameType, testNameIsNotConstraint[i])));
+            constraintValidator.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
+                new GeneralName(nameType, testNameIsNotConstraint[i]))));
             try
             {
                 constraintValidator.checkPermitted(new GeneralName(nameType, testName));
@@ -305,13 +306,20 @@ public class PKIXNameConstraintsTest
                 fail("union wrong: " + nameType);
             }
             constraintValidator = new PKIXNameConstraintValidator();
-            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
-                new GeneralName(nameType, testNames1[i])));
-            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
-                new GeneralName(nameType, testNames2[i])));
+            constraintValidator.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
+                new GeneralName(nameType, testNames1[i]))));
+            constraintValidator.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
+                new GeneralName(nameType, testNames2[i]))));
             constraints2 = new PKIXNameConstraintValidator();
-            constraints2.intersectPermittedSubtree(new GeneralSubtree(
-                new GeneralName(nameType, testInterSection[i])));
+            if (testInterSection[i] != null)
+            {
+                constraints2.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
+                    new GeneralName(nameType, testInterSection[i]))));
+            }
+            else
+            {
+                constraints2.intersectEmptyPermittedSubtree(nameType);
+            }
             if (!constraints2.equals(constraintValidator))
             {
                 fail("intersection wrong: " + nameType);
@@ -349,18 +357,18 @@ public class PKIXNameConstraintsTest
         for (int i = 0; i < testNameIsConstraint.length; i++)
         {
             PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
-            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
+            constraintValidator.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
                 new GeneralName(nameType, new DEROctetString(
-                    testNameIsConstraint[i]))));
+                    testNameIsConstraint[i])))));
             constraintValidator.checkPermitted(new GeneralName(nameType,
                 new DEROctetString(testName)));
         }
         for (int i = 0; i < testNameIsNotConstraint.length; i++)
         {
             PKIXNameConstraintValidator constraintValidator = new PKIXNameConstraintValidator();
-            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
+            constraintValidator.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
                 new GeneralName(nameType, new DEROctetString(
-                    testNameIsNotConstraint[i]))));
+                    testNameIsNotConstraint[i])))));
             try
             {
                 constraintValidator.checkPermitted(new GeneralName(nameType,
@@ -415,14 +423,22 @@ public class PKIXNameConstraintsTest
                 fail("union wrong: " + nameType);
             }
             constraintValidator = new PKIXNameConstraintValidator();
-            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
-                new GeneralName(nameType, new DEROctetString(testNames1[i]))));
-            constraintValidator.intersectPermittedSubtree(new GeneralSubtree(
-                new GeneralName(nameType, new DEROctetString(testNames2[i]))));
+            constraintValidator.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
+                new GeneralName(nameType, new DEROctetString(testNames1[i])))));
+            constraintValidator.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
+                new GeneralName(nameType, new DEROctetString(testNames2[i])))));
             constraints2 = new PKIXNameConstraintValidator();
-            constraints2.intersectPermittedSubtree(new GeneralSubtree(
+            if (testInterSection[i] != null)
+            {
+                constraints2.intersectPermittedSubtree(new DERSequence(new GeneralSubtree(
                 new GeneralName(nameType, new DEROctetString(
-                    testInterSection[i]))));
+                    testInterSection[i])))));
+            }
+            else
+            {
+                constraints2.intersectEmptyPermittedSubtree(nameType);
+            }
+
             if (!constraints2.equals(constraintValidator))
             {
                 fail("intersection wrong: " + nameType);
