@@ -50,6 +50,18 @@ public class DEROutputStream
         write(bytes);
     }
 
+    void writeEncodedHigh(
+        int     leadingOctet,
+        int     tag,
+        byte[]  bytes)
+        throws IOException
+    {
+        write(leadingOctet);
+        write(tag); // FIXME Assumes tag < 128
+        writeLength(bytes.length);
+        write(bytes);
+    }
+
     protected void writeNull()
         throws IOException
     {

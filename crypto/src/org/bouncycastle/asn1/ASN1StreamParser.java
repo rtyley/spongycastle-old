@@ -95,7 +95,7 @@ public class ASN1StreamParser
 
             if ((tag & DERTags.APPLICATION) != 0)
             {
-                return new DERApplicationSpecific(tagNo, defIn.toByteArray());
+                return new DERApplicationSpecific(isConstructed, tagNo, defIn.toByteArray());
             }
 
             if ((tag & DERTags.TAGGED) != 0)
