@@ -253,6 +253,13 @@ public class ASN1InputStream
 
             int b = s.read();
 
+            // X.690-0207 8.1.2.4.2
+            // "c) bits 7 to 1 of the first subsequent octet shall not all be zero."
+            if ((b & 0x7f) == 0) // Note: -1 will pass
+            {
+                throw new IOException("corrupted stream - invalid high tag number found");
+            }
+
             while ((b >= 0) && ((b & 0x80) != 0))
             {
                 tagNo |= (b & 0x7f);
