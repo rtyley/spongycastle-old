@@ -2,7 +2,6 @@ package org.bouncycastle.asn1;
 
 import org.bouncycastle.util.Arrays;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
@@ -11,17 +10,27 @@ import java.io.IOException;
 public class DERApplicationSpecific 
     extends ASN1Object
 {
-    private int       tag;
-    private byte[]    octets;
-    
-    public DERApplicationSpecific(
-        int        tag,
-        byte[]    octets)
+    private final boolean   isConstructed;
+    private final int       tag;
+    private final byte[]    octets;
+
+    DERApplicationSpecific(
+        boolean isConstructed,
+        int     tag,
+        byte[]  octets)
     {
+        this.isConstructed = isConstructed;
         this.tag = tag;
         this.octets = octets;
     }
-    
+
+    public DERApplicationSpecific(
+        int    tag,
+        byte[] octets)
+    {
+        this(false, tag, octets);
+    }
+
     public DERApplicationSpecific(
         int                  tag, 
         DEREncodable         object) 
@@ -36,26 +45,22 @@ public class DERApplicationSpecific
         DEREncodable object)
         throws IOException
     {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        DEROutputStream dos = new DEROutputStream(bOut);
-
-        dos.writeObject(object);
-
-        byte[] data = bOut.toByteArray();
-
         if (tag >= 0x1f)
         {
             throw new IOException("unsupported tag number");
         }
 
+        byte[] data = object.getDERObject().getDEREncoded();
+
+        this.isConstructed = explicit;
+        this.tag = tag;
+
         if (explicit)
         {
-            this.tag = tag | DERTags.CONSTRUCTED;
             this.octets = data;
         }
         else
         {
-            this.tag = tag;
             int lenBytes = getLengthOfLength(data);
             byte[] tmp = new byte[data.length - lenBytes];
             System.arraycopy(data, lenBytes, tmp, 0, tmp.length);
@@ -77,7 +82,7 @@ public class DERApplicationSpecific
 
     public boolean isConstructed()
     {
-        return (tag & DERTags.CONSTRUCTED) != 0;
+        return isConstructed;
     }
     
     public byte[] getContents()
@@ -123,7 +128,20 @@ public class DERApplicationSpecific
      */
     void encode(DEROutputStream out) throws IOException
     {
-        out.writeEncoded(DERTags.APPLICATION | tag, octets);
+        int classBits = DERTags.APPLICATION;
+        if (isConstructed)
+        {
+            classBits |= DERTags.CONSTRUCTED; 
+        }
+
+        if (tag < 31)
+        {
+            out.writeEncoded(classBits | tag, octets);
+        }
+        else
+        {
+            out.writeEncodedHigh(classBits | 0x1f, tag, octets);
+        }
     }
     
     boolean asn1Equals(
@@ -133,14 +151,16 @@ public class DERApplicationSpecific
         {
             return false;
         }
-        
+
         DERApplicationSpecific other = (DERApplicationSpecific)o;
 
-        return tag == other.tag && Arrays.areEqual(octets, other.octets);
+        return isConstructed == other.isConstructed
+            && tag == other.tag
+            && Arrays.areEqual(octets, other.octets);
     }
-    
+
     public int hashCode()
     {
-        return tag ^ Arrays.hashCode(octets);
+        return (isConstructed ? 1 : 0) ^ tag ^ Arrays.hashCode(octets);
     }
 }

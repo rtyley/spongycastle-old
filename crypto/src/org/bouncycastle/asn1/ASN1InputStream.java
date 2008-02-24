@@ -116,7 +116,7 @@ public class ASN1InputStream
 
         if ((tag & APPLICATION) != 0)
         {
-            return new DERApplicationSpecific(tagNo, defIn.toByteArray());
+            return new DERApplicationSpecific(isConstructed, tagNo, defIn.toByteArray());
         }
 
         if ((tag & TAGGED) != 0)
