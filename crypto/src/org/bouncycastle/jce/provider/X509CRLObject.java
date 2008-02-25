@@ -384,7 +384,7 @@ public class X509CRLObject
 
 			if (e.hasMoreElements())
 			{
-				buf.append("           Extensions: \n");
+				buf.append("           Extensions: ").append(nl);
 			}
 
 			while (e.hasMoreElements())
