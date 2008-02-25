@@ -22,6 +22,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.ProviderException;
 
 
 /**
@@ -122,6 +123,12 @@ public class KeyTransRecipientInformation
                 sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
             catch (UnsupportedOperationException e)   // some providers do not support UNWRAP
+            {
+                keyCipher.init(Cipher.DECRYPT_MODE, key);
+
+                sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
+            }
+            catch (ProviderException e)   // some providers do not support UNWRAP
             {
                 keyCipher.init(Cipher.DECRYPT_MODE, key);
 
