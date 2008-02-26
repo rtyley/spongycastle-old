@@ -50,7 +50,7 @@ public class PGPSignatureSubpacketGenerator
      * 
      * @param isCritical true if the packet is critical.
      * @param depth depth level.
-     * @param trust trust amount.
+     * @param trustAmount trust amount.
      */
     public void setTrust(
         boolean     isCritical,

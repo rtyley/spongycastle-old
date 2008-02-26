@@ -92,7 +92,8 @@ public  class PKIXCertPath
         
         // find end-entity cert
         List       retList = new ArrayList(certs.size());
-        
+        List       orig = new ArrayList(certs);
+
         for (int i = 0; i < certs.size(); i++)
         {
             X509Certificate cert = (X509Certificate)certs.get(i);
@@ -120,12 +121,7 @@ public  class PKIXCertPath
         // can only have one end entity cert - something's wrong, give up.
         if (retList.size() > 1)
         {
-            for (int i = 0; i != certs.size(); i++)
-            {
-                retList.add(certs.get(i));
-            }
-            
-            return retList;
+            return orig;
         }
 
         for (int i = 0; i != retList.size(); i++)
@@ -145,9 +141,9 @@ public  class PKIXCertPath
         }
         
         // make sure all certificates are accounted for.
-        for (int i = 0; i != certs.size(); i++)
+        if (certs.size() > 0)
         {
-            retList.add(certs.get(i));
+            return orig;
         }
         
         return retList;
@@ -185,7 +181,7 @@ public  class PKIXCertPath
                 ByteArrayOutputStream outStream;
                 DEROutputStream derOutStream;
                 certificates = new ArrayList();
-                CertificateFactory certFactory= CertificateFactory.getInstance("X.509", "BC");
+                CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
                 while (e.hasMoreElements())
                 {
                     outStream = new ByteArrayOutputStream();

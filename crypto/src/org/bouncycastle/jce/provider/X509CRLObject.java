@@ -93,7 +93,16 @@ public class X509CRLObject
     public boolean hasUnsupportedCriticalExtension()
     {
         Set extns = getCriticalExtensionOIDs();
-        return extns != null && !extns.isEmpty();
+
+        if (extns == null)
+        {
+            return false;
+        }
+
+        extns.remove(RFC3280CertPathUtilities.ISSUING_DISTRIBUTION_POINT);
+        extns.remove(RFC3280CertPathUtilities.DELTA_CRL_INDICATOR);
+
+        return !extns.isEmpty();
     }
 
     private Set getExtensionOIDs(boolean critical)

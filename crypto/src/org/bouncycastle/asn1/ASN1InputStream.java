@@ -141,10 +141,10 @@ public class ASN1InputStream
                     }
                     else
                     {
-                        return DERSequence.fromVector(buildDEREncodableVector(defIn));   
+                        return DERFactory.createSequence(buildDEREncodableVector(defIn));   
                     }
                 case SET:
-                    return DERSet.fromVector(buildDEREncodableVector(defIn), false);
+                    return DERFactory.createSet(buildDEREncodableVector(defIn), false);
                 default:
                     return new DERUnknownTag(tag, defIn.toByteArray());
             }

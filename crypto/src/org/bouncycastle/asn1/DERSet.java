@@ -10,21 +10,6 @@ import java.util.Enumeration;
 public class DERSet
     extends ASN1Set
 {
-    public static final DERSet EMPTY = new DERSet();
-
-    public static DERSet fromVector(
-        ASN1EncodableVector v)
-    {
-        return v.size() < 1 ? EMPTY : new DERSet(v);
-    }
-
-    static DERSet fromVector(
-        ASN1EncodableVector v,
-        boolean             needsSorting)
-    {
-        return v.size() < 1 ? EMPTY : new DERSet(v, needsSorting);
-    }
-
     /**
      * create an empty set
      */

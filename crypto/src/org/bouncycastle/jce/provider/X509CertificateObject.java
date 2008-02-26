@@ -485,8 +485,19 @@ public class X509CertificateObject
                 while (e.hasMoreElements())
                 {
                     DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
-                    if (oid.getId().equals("2.5.29.15")
-                       || oid.getId().equals("2.5.29.19"))
+                    String              oidId = oid.getId();
+
+                    if (oidId.equals(RFC3280CertPathUtilities.KEY_USAGE)
+                     || oidId.equals(RFC3280CertPathUtilities.CERTIFICATE_POLICIES)
+                     || oidId.equals(RFC3280CertPathUtilities.POLICY_MAPPINGS)
+                     || oidId.equals(RFC3280CertPathUtilities.INHIBIT_ANY_POLICY)
+                     || oidId.equals(RFC3280CertPathUtilities.CRL_DISTRIBUTION_POINTS)
+                     || oidId.equals(RFC3280CertPathUtilities.ISSUING_DISTRIBUTION_POINT)
+                     || oidId.equals(RFC3280CertPathUtilities.DELTA_CRL_INDICATOR)
+                     || oidId.equals(RFC3280CertPathUtilities.POLICY_CONSTRAINTS)
+                     || oidId.equals(RFC3280CertPathUtilities.BASIC_CONSTRAINTS)
+                     || oidId.equals(RFC3280CertPathUtilities.SUBJECT_ALTERNATIVE_NAME)
+                     || oidId.equals(RFC3280CertPathUtilities.NAME_CONSTRAINTS))
                     {
                         continue;
                     }
