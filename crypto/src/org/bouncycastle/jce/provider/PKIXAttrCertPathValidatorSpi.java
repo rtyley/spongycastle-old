@@ -93,7 +93,7 @@ public class PKIXAttrCertPathValidatorSpi
             throw new ExtCertPathValidatorException(
                 "Could not get validity date from attribute certificate.", e);
         }
-        RFC3281CertPathUtilities.checkCRLs(attrCert, pkixParams, issuerCert, date);
+        RFC3281CertPathUtilities.checkCRLs(attrCert, pkixParams, issuerCert, date, certPath.getCertificates());
         return result;
     }
 }

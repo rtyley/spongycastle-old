@@ -6,14 +6,6 @@ import java.util.Enumeration;
 public class BERSequence
     extends DERSequence
 {
-    public static final BERSequence EMPTY = new BERSequence();
-
-    public static BERSequence fromVector(
-        ASN1EncodableVector v)
-    {
-        return v.size() < 1 ? EMPTY : new BERSequence(v);
-    }
-
     /**
      * create an empty sequence
      */

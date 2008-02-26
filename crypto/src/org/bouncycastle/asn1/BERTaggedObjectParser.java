@@ -98,7 +98,7 @@ public class BERTaggedObjectParser
 
             return v.size() == 1
                 ?   new BERTaggedObject(true, _tagNumber, v.get(0))
-                :   new BERTaggedObject(false, _tagNumber, BERSequence.fromVector(v));
+                :   new BERTaggedObject(false, _tagNumber, BERFactory.createSequence(v));
         }
 
         if (this.isConstructed())
@@ -107,7 +107,7 @@ public class BERTaggedObjectParser
 
             return v.size() == 1
                 ?   new DERTaggedObject(true, _tagNumber, v.get(0))
-                :   new DERTaggedObject(false, _tagNumber, DERSequence.fromVector(v));
+                :   new DERTaggedObject(false, _tagNumber, DERFactory.createSequence(v));
         }
 
         try

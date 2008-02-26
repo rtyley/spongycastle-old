@@ -1,10 +1,8 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.jce.exception.ExtCertPathBuilderException;
 import org.bouncycastle.util.Selector;
 import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
-import org.bouncycastle.x509.ExtendedPKIXParameters;
 import org.bouncycastle.x509.X509AttributeCertStoreSelector;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CertStoreSelector;
@@ -13,7 +11,6 @@ import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.Principal;
-import java.security.PublicKey;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertPathBuilderResult;
@@ -25,8 +22,6 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.PKIXCertPathBuilderResult;
 import java.security.cert.PKIXCertPathValidatorResult;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -202,7 +197,7 @@ public class PKIXAttrCertPathBuilderSpi
         try
         {
             cFact = CertificateFactory.getInstance("X.509", "BC");
-            validator = CertPathValidator.getInstance("PKIX", "BC");
+            validator = CertPathValidator.getInstance("RFC3281", "BC");
         }
         catch (Exception e)
         {
@@ -213,8 +208,8 @@ public class PKIXAttrCertPathBuilderSpi
 
         try
         {
-            // check wether the issuer of <tbvCert> is a TrustAnchor
-            if (findTrustAnchor(tbvCert, pkixParams.getTrustAnchors()) != null)
+            // check whether the issuer of <tbvCert> is a TrustAnchor
+            if (CertPathValidatorUtilities.findTrustAnchor(tbvCert, pkixParams.getTrustAnchors()) != null)
             {
                 CertPath certPath;
                 PKIXCertPathValidatorResult result;
@@ -251,7 +246,7 @@ public class PKIXAttrCertPathBuilderSpi
                 // add additional X.509 stores from locations in certificate
                 try
                 {
-                    addAdditionalStoresFromAltNames(tbvCert, pkixParams);
+                    CertPathValidatorUtilities.addAdditionalStoresFromAltNames(tbvCert, pkixParams);
                 }
                 catch (CertificateParsingException e)
                 {
@@ -264,11 +259,11 @@ public class PKIXAttrCertPathBuilderSpi
                 // of the stores
                 try
                 {
-                    issuers.addAll(findIssuerCerts(tbvCert, pkixParams
+                    issuers.addAll(CertPathValidatorUtilities.findIssuerCerts(tbvCert, pkixParams
                             .getStores()));
                     if (issuers.isEmpty())
                     {
-                        issuers.addAll(findIssuerCerts(tbvCert, pkixParams
+                        issuers.addAll(CertPathValidatorUtilities.findIssuerCerts(tbvCert, pkixParams
                                 .getAddionalStores()));
                     }
                 }
@@ -308,205 +303,6 @@ public class PKIXAttrCertPathBuilderSpi
             tbvPath.remove(tbvCert);
         }
         return builderResult;
-    }
-
-    private void addAdditionalStoresFromAltNames(X509Certificate cert,
-            ExtendedPKIXParameters pkixParams)
-            throws CertificateParsingException
-    {
-        // if in the IssuerAltName extension an URI
-        // is given, add an additinal X.509 store
-        if (cert.getIssuerAlternativeNames() != null)
-        {
-            Iterator it = cert.getIssuerAlternativeNames().iterator();
-            while (it.hasNext())
-            {
-                // look for URI
-                List list = (List) it.next();
-                if (list.get(0).equals(
-                        new Integer(GeneralName.uniformResourceIdentifier)))
-                {
-                    // found
-                    String temp = (String) list.get(1);
-                    CertPathValidatorUtilities.addAdditionalStoreFromLocation(
-                            temp, pkixParams);
-                }
-            }
-        }
-    }
-
-    /**
-     * Search the given <code>Set</code> of TrustAnchor's for one that is the
-     * issuer of the given X.509 certificate.
-     * 
-     * @param cert The X.509 certificate.
-     * @param trustAnchors A <code>Set</code> of TrustAnchor's
-     * 
-     * @return The <code>TrustAnchor</code> object if found or
-     *         <code>null</code> if not.
-     * 
-     * @exception AnnotatedException if a TrustAnchor was found but the
-     *                signature verification on the given certificate has thrown
-     *                an exception.
-     */
-    private TrustAnchor findTrustAnchor(X509Certificate cert, Set trustAnchors)
-            throws AnnotatedException
-    {
-        Iterator iter = trustAnchors.iterator();
-        TrustAnchor trust = null;
-        PublicKey trustPublicKey = null;
-        Exception invalidKeyEx = null;
-
-        X509CertSelector certSelectX509 = new X509CertSelector();
-
-        try
-        {
-            certSelectX509.setSubject(cert.getIssuerX500Principal()
-                    .getEncoded());
-        }
-        catch (IOException ex)
-        {
-            throw new AnnotatedException(
-                                    "Cannot set subject search criteria for trust anchor.",
-                                    ex);
-        }
-
-        while (iter.hasNext() && trust == null)
-        {
-            trust = (TrustAnchor) iter.next();
-            if (trust.getTrustedCert() != null)
-            {
-                if (certSelectX509.match(trust.getTrustedCert()))
-                {
-                    trustPublicKey = trust.getTrustedCert().getPublicKey();
-                }
-                else
-                {
-                    trust = null;
-                }
-            }
-            else if (trust.getCAName() != null
-                    && trust.getCAPublicKey() != null)
-            {
-                try
-                {
-                    X500Principal certIssuer = cert.getIssuerX500Principal();
-                    if (certIssuer.getName().equals(trust.getCAName()))
-                    {
-                        trustPublicKey = trust.getCAPublicKey();
-                    }
-                    else
-                    {
-                        trust = null;
-                    }
-                }
-                catch (IllegalArgumentException ex)
-                {
-                    trust = null;
-                }
-            }
-            else
-            {
-                trust = null;
-            }
-
-            if (trustPublicKey != null)
-            {
-                try
-                {
-                    cert.verify(trustPublicKey);
-                }
-                catch (Exception ex)
-                {
-                    invalidKeyEx = ex;
-                    trust = null;
-                }
-            }
-        }
-
-        if (trust == null && invalidKeyEx != null)
-        {
-            throw new AnnotatedException(
-                                    "Trust anchor found, but certificate validation failed for certificate.",
-                                    invalidKeyEx);
-        }
-
-        return trust;
-    }
-
-    /**
-     * Find the issuer certificates of the given certificate.
-     * 
-     * @param cert The certificate for which the issuer certificate should be
-     *            found.
-     * @param certStores A list of <code>X509Store</code> object that will be
-     *            searched through.
-     * 
-     * @return A <code>Collection</code> object containing the issuer
-     *         <code>X509Certificate</code>s. Never <code>null</code>.
-     * 
-     * @exception AnnotatedException if the signature verification on the given
-     *                certificate fails for all found issuer certificates or an
-     *                other error occurrs.
-     */
-    private Collection findIssuerCerts(X509Certificate cert,
-            List certStores) throws AnnotatedException
-    {
-        X509CertStoreSelector certSelect = new X509CertStoreSelector();
-        Set certs = new HashSet();
-        try
-        {
-            certSelect.setSubject(cert.getIssuerX500Principal().getEncoded());
-        }
-        catch (IOException ex)
-        {
-            throw new AnnotatedException(
-                                    "Subject criteria for certificate selector to find issuer certificate could not be set.",
-                                    ex);
-        }
-
-        Iterator iter;
-
-        try
-        {
-            iter = CertPathValidatorUtilities.findCertificates(
-                    (Selector) certSelect, certStores).iterator();
-        }
-        catch (AnnotatedException e)
-        {
-            throw new AnnotatedException(
-                            "Issuer certificate cannot be searched.", e);
-        }
-
-        AnnotatedException lastException = null;
-        boolean issuerCertFound = false;
-
-        X509Certificate issuer;
-        while (iter.hasNext())
-        {
-            issuer = (X509Certificate) iter.next();
-            try
-            {
-                cert.verify(issuer.getPublicKey());
-                certs.add(issuer);
-                issuerCertFound = true;
-            }
-            catch (Exception ex)
-            {
-                lastException = new AnnotatedException(
-                                        "Issued certificate could not be verified with issuer certificate.",
-                                        ex);
-            }
-        }
-
-        if (!issuerCertFound && lastException != null)
-        {
-            throw new AnnotatedException(
-                                    "Issuer certificate found but certificate validation failed for certificate.",
-                                    lastException);
-        }
-
-        return certs;
     }
 
 }
