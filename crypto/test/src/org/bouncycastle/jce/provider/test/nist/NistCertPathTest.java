@@ -10,7 +10,6 @@ import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.Security;
-import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
@@ -21,6 +20,13 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.X509CertSelector;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.CertPathBuilderResult;
+import java.security.cert.CertPathBuilderException;
+import java.security.cert.CertPath;
+import java.security.cert.PKIXCertPathBuilderResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,15 +53,17 @@ public class NistCertPathTest
     private static final String TRUST_ANCHOR_ROOT_CERTIFICATE = "TrustAnchorRootCertificate";
 
     private static final char[] PKCS12_PASSWORD = "password".toCharArray();
-    
-    private static String NIST_TEST_POLICY_1 = "2.16.840.1.101.3.2.1.48.1";
-    private static String NIST_TEST_POLICY_2 = "2.16.840.1.101.3.2.1.48.2";
-    private static String NIST_TEST_POLICY_3 = "2.16.840.1.101.3.2.1.48.3";
+
+    private static final String ANY_POLICY = "2.5.29.32.0";
+    private static final String NIST_TEST_POLICY_1 = "2.16.840.1.101.3.2.1.48.1";
+    private static final String NIST_TEST_POLICY_2 = "2.16.840.1.101.3.2.1.48.2";
+    private static final String NIST_TEST_POLICY_3 = "2.16.840.1.101.3.2.1.48.3";
     
     private static Map   certs = new HashMap();
     private static Map   crls = new HashMap();
     
     private static Set   noPolicies = Collections.EMPTY_SET;
+    private static Set   anyPolicy = Collections.singleton(ANY_POLICY);
     private static Set   nistTestPolicy1 = Collections.singleton(NIST_TEST_POLICY_1);
     private static Set   nistTestPolicy2 = Collections.singleton(NIST_TEST_POLICY_2);
     private static Set   nistTestPolicy3 = Collections.singleton(NIST_TEST_POLICY_3);
@@ -68,7 +76,7 @@ public class NistCertPathTest
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         }
     }
-    
+
     public void testValidSignaturesTest1()
         throws Exception
     {
@@ -105,6 +113,7 @@ public class NistCertPathTest
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "DSACACRL" });
     }
 
+    // 4.1.5
     public void testValidDSAParameterInheritanceTest5()
         throws Exception
     {
@@ -211,7 +220,7 @@ public class NistCertPathTest
         doTest(TRUST_ANCHOR_ROOT_CERTIFICATE, 
                 certList, 
                 crlList,
-                noPolicies); 
+                noPolicies);
         
         doTest(TRUST_ANCHOR_ROOT_CERTIFICATE, 
                 certList, 
@@ -454,7 +463,131 @@ public class NistCertPathTest
                 -1,
                 "Path processing failed on policy.");
     }
-    
+
+    public void testInvalidInhibitPolicyMappingTest1()
+        throws Exception
+    {
+        String[] certList = new String[] { "inhibitPolicyMapping0CACert", "inhibitPolicyMapping0subCACert", "InvalidinhibitPolicyMappingTest1EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "inhibitPolicyMapping0CACRL", "inhibitPolicyMapping0subCACRL" };
+
+        doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null,
+                0,
+                "No valid policy tree found when one expected.");
+    }
+
+    public void testValidinhibitPolicyMappingTest2()
+        throws Exception
+    {
+        String[] certList = new String[] { "inhibitPolicyMapping1P12CACert", "inhibitPolicyMapping1P12subCACert", "ValidinhibitPolicyMappingTest2EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "inhibitPolicyMapping1P12CACRL", "inhibitPolicyMapping1P12subCACRL" };
+
+        doTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, nistTestPolicy1);
+    }
+
+    // 4.12.7
+    public void testValidSelfIssuedinhibitAnyPolicyTest7()
+        throws Exception
+    {
+        String[] certList = new String[] { "inhibitAnyPolicy1CACert", "inhibitAnyPolicy1SelfIssuedCACert", "inhibitAnyPolicy1subCA2Cert", "ValidSelfIssuedinhibitAnyPolicyTest7EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "inhibitAnyPolicy1CACRL", "inhibitAnyPolicy1subCA2CRL" };
+
+        doBuilderTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null, false, false);
+    }
+
+    // 4.4.19
+    public void testValidSeparateCertificateandCRLKeysTest19()
+        throws Exception
+    {
+        String[] certList = new String[] { "SeparateCertificateandCRLKeysCertificateSigningCACert", "SeparateCertificateandCRLKeysCRLSigningCert", "ValidSeparateCertificateandCRLKeysTest19EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "SeparateCertificateandCRLKeysCRL" };
+
+        doBuilderTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null, false, false);
+    }
+
+    public void testValidpathLenConstraintTest13()
+        throws Exception
+    {
+        String[] certList = new String[] { "pathLenConstraint6CACert", "pathLenConstraint6subCA4Cert", "pathLenConstraint6subsubCA41Cert", "pathLenConstraint6subsubsubCA41XCert", "ValidpathLenConstraintTest13EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "pathLenConstraint6CACRL", "pathLenConstraint6subCA4CRL", "pathLenConstraint6subsubCA41CRL", "pathLenConstraint6subsubsubCA41XCRL" };
+
+        doTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null);
+    }
+
+    // 4.4.10
+    public void testInvalidUnknownCRLExtensionTest10()
+        throws Exception
+    {
+        String[] certList = new String[] { "UnknownCRLExtensionCACert", "InvalidUnknownCRLExtensionTest10EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "UnknownCRLExtensionCACRL" };
+
+        doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null,
+                0,
+                "CRL contains unsupported critical extensions.");
+        
+    }
+
+    // 4.14.3
+    public void testInvaliddistributionPointTest3()
+        throws Exception
+    {
+        String[] certList = new String[] { "distributionPoint1CACert", "InvaliddistributionPointTest3EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "distributionPoint1CACRL" };
+
+        doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null,
+                0,
+                "No match for certificate CRL issuing distribution point name to cRLIssuer CRL distribution point.");
+    }
+
+    // 4.14.5
+    public void testValiddistributionPointTest5()
+        throws Exception
+    {
+        String[] certList = new String[] { "distributionPoint2CACert", "ValiddistributionPointTest5EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "distributionPoint2CACRL" };
+
+        doTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null);
+    }
+
+
+    // 4.14.8
+    public void testInvaliddistributionPointTest8()
+        throws Exception
+    {
+        String[] certList = new String[] { "distributionPoint2CACert", "InvaliddistributionPointTest8EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "distributionPoint2CACRL" };
+
+        doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null,
+                0,
+                "No match for certificate CRL issuing distribution point name to cRLIssuer CRL distribution point.");
+    }
+
+    // 4.14.9
+    public void testInvaliddistributionPointTest9()
+        throws Exception
+    {
+        String[] certList = new String[] { "distributionPoint2CACert", "InvaliddistributionPointTest9EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "distributionPoint2CACRL" };
+
+        doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null,
+                0,
+                "No match for certificate CRL issuing distribution point name to cRLIssuer CRL distribution point.");
+    }
+
+    // 4.14.17
+    public void testInvalidonlySomeReasonsTest17()
+        throws Exception
+    {
+        String[] certList = new String[] { "onlySomeReasonsCA2Cert", "InvalidonlySomeReasonsTest17EE" };
+        String[] crlList = new String[] { TRUST_ANCHOR_ROOT_CRL, "onlySomeReasonsCA2CRL1", "onlySomeReasonsCA2CRL2" };
+
+        doExceptionTest(TRUST_ANCHOR_ROOT_CERTIFICATE, certList, crlList, null,
+                0,
+                "Certificate status could not be determined.");
+    }
+
+    // section 4.14: tests 17, 24, 25, 30, 31, 32, 33, 35
+
+    // section 4.15: tests 5, 7
     private void doExceptionTest(
         String      trustAnchor,
         String[]    certs,
@@ -524,9 +657,9 @@ public class NistCertPathTest
         }
         
         certsAndCrls.add(endCert);
-    
+
         CertPath certPath = CertificateFactory.getInstance("X.509","BC").generateCertPath(certsAndCrls);
-    
+
         for (int i = 0; i != crls.length; i++)
         {
             certsAndCrls.add(loadCrl(crls[i]));
@@ -547,6 +680,67 @@ public class NistCertPathTest
         }
         
         return (PKIXCertPathValidatorResult)validator.validate(certPath, params);
+    }
+
+    private PKIXCertPathBuilderResult doBuilderTest(
+        String trustAnchor,
+        String[] certs,
+        String[] crls,
+        Set initialPolicies,
+        boolean policyMappingInhibited,
+        boolean anyPolicyInhibited)
+        throws Exception
+    {
+        Set  trustedSet = Collections.singleton(getTrustAnchor(trustAnchor));
+        List certsAndCrls = new ArrayList();
+        X509Certificate endCert = loadCert(certs[certs.length - 1]);
+        
+        for (int i = 0; i != certs.length - 1; i++)
+        {
+            certsAndCrls.add(loadCert(certs[i]));
+        }
+        
+        certsAndCrls.add(endCert);
+
+        for (int i = 0; i != crls.length; i++)
+        {
+            certsAndCrls.add(loadCrl(crls[i]));
+        }
+    
+        CertStore  store = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certsAndCrls), "BC");
+
+        CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
+
+        X509CertSelector endSelector = new X509CertSelector();
+
+        endSelector.setCertificate(endCert);
+
+        PKIXBuilderParameters builderParams = new PKIXBuilderParameters(trustedSet, endSelector);
+
+        if (initialPolicies != null)
+        {
+            builderParams.setInitialPolicies(initialPolicies);
+            builderParams.setExplicitPolicyRequired(true);
+        }
+        if (policyMappingInhibited)
+        {
+            builderParams.setPolicyMappingInhibited(policyMappingInhibited);
+        }
+        if (anyPolicyInhibited)
+        {
+            builderParams.setAnyPolicyInhibited(anyPolicyInhibited);
+        }
+
+        builderParams.addCertStore(store);
+
+        try
+        {
+            return (PKIXCertPathBuilderResult)builder.build(builderParams);
+        }
+        catch (CertPathBuilderException e)
+        {
+            throw (Exception)e.getCause();
+        }
     }
 
     private X509Certificate loadCert(
