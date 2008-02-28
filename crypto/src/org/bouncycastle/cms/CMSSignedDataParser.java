@@ -25,6 +25,7 @@ import org.bouncycastle.asn1.cms.ContentInfoParser;
 import org.bouncycastle.asn1.cms.SignedDataParser;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.x509.NoSuchStoreException;
 import org.bouncycastle.x509.X509Store;
 
@@ -664,17 +665,9 @@ public class CMSSignedDataParser
         throws IOException
     {
         BEROctetStringGenerator octGen = new BEROctetStringGenerator(output, 0, true);
-        byte[]                  inBuffer = new byte[4096];
-        InputStream             inOctets = octs.getOctetStream();
         // TODO Allow specification of a specific fragment size?
-        OutputStream            outOctets = octGen.getOctetOutputStream();
-
-        int len;
-        while ((len = inOctets.read(inBuffer, 0, inBuffer.length)) >= 0)
-        {
-            outOctets.write(inBuffer, 0, len);
-        }
-
+        OutputStream outOctets = octGen.getOctetOutputStream();
+        Streams.pipeAll(octs.getOctetStream(), outOctets);
         outOctets.close();
     }
 }
