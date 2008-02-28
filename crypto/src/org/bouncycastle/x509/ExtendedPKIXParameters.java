@@ -165,7 +165,7 @@ public class ExtendedPKIXParameters
 
     private int validityModel = PKIX_VALIDITY_MODEL;
 
-    private boolean useDeltas;
+    private boolean useDeltas = true;
 
     /**
      * Defaults to <code>false</code>.
@@ -199,7 +199,7 @@ public class ExtendedPKIXParameters
 
     /**
      * Adds a Java CertStore to this extended PKIX parameters. If the store uses
-     * initialisation parameters of type
+     * initialization parameters of type
      * <code>CollectionCertStoreParameters</code> or <code></code> the
      * corresponding Bouncy Castle {@link Store} type is created additionally to
      * it.
