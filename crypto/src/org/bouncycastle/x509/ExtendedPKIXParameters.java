@@ -198,73 +198,7 @@ public class ExtendedPKIXParameters
     }
 
     /**
-     * Adds a Java CertStore to this extended PKIX parameters. If the store uses
-     * initialization parameters of type
-     * <code>CollectionCertStoreParameters</code> or <code></code> the
-     * corresponding Bouncy Castle {@link Store} type is created additionally to
-     * it.
-     */
-    public void addCertStore(CertStore store)
-    {
-        super.addCertStore(store);
-        if (store.getCertStoreParameters() instanceof CollectionCertStoreParameters)
-        {
-            Collection coll = ((CollectionCertStoreParameters) store
-                .getCertStoreParameters()).getCollection();
-            X509CollectionStoreParameters params = new X509CollectionStoreParameters(
-                coll);
-            try
-            {
-                stores.add(X509Store.getInstance("CERTIFICATE/COLLECTION",
-                    params, "BC"));
-                stores.add(X509Store
-                    .getInstance("CRL/COLLECTION", params, "BC"));
-            }
-            catch (Exception e)
-            {
-                // cannot happen
-                throw new RuntimeException(e.getMessage());
-            }
-        }
-        if (store.getCertStoreParameters() instanceof LDAPCertStoreParameters
-            || store.getCertStoreParameters() instanceof X509LDAPCertStoreParameters)
-        {
-            X509LDAPCertStoreParameters params;
-            if (store.getCertStoreParameters() instanceof X509LDAPCertStoreParameters)
-            {
-                params = (X509LDAPCertStoreParameters) store
-                    .getCertStoreParameters();
-            }
-            else
-            {
-                int port = ((LDAPCertStoreParameters) store
-                    .getCertStoreParameters()).getPort();
-                String server = ((LDAPCertStoreParameters) store
-                    .getCertStoreParameters()).getServerName();
-                params = new X509LDAPCertStoreParameters.Builder("ldap://"
-                    + server + ":" + port, null).build();
-            }
-            try
-            {
-                stores.add(X509Store.getInstance("CERTIFICATE/LDAP", params,
-                    "BC"));
-                stores.add(X509Store.getInstance("CRL/LDAP", params, "BC"));
-            }
-            catch (Exception e)
-            {
-                // cannot happen
-                throw new RuntimeException(e.getMessage());
-            }
-        }
-
-    }
-
-    /**
-     * Sets the Java CertStore to this extended PKIX parameters. If the stores
-     * use initialisation parameters of type
-     * <code>CollectionCertStoreParameters</code> or <code></code> the
-     * corresponding Bouncy Castle {@link Store} types are created additionally
-     * to it.
+     * Sets the Java CertStore to this extended PKIX parameters.
      * 
      * @throws ClassCastException if an element of <code>stores</code> is not
      *             a <code>CertStore</code>.
@@ -276,7 +210,7 @@ public class ExtendedPKIXParameters
             Iterator it = stores.iterator();
             while (it.hasNext())
             {
-                addCertStore((CertStore) it.next());
+                addCertStore((CertStore)it.next());
             }
         }
     }
@@ -367,7 +301,7 @@ public class ExtendedPKIXParameters
      * 
      * @see #addAddionalStore(Store)
      */
-    public List getAddionalStores()
+    public List getAdditionalStores()
     {
         return Collections.unmodifiableList(additionalStores);
     }

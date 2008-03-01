@@ -23,6 +23,7 @@ import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.PKIXCertPathBuilderResult;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.X509Certificate;
+import java.security.cert.X509CertSelector;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -82,8 +83,7 @@ public class PKIXAttrCertPathBuilderSpi
 
         try
         {
-            targets = CertPathValidatorUtilities.findCertificates(certSelect,
-                    pkixParams.getStores());
+            targets = CertPathValidatorUtilities.findCertificates((X509AttributeCertStoreSelector)certSelect, pkixParams.getStores());
         }
         catch (AnnotatedException e)
         {
@@ -115,9 +115,8 @@ public class PKIXAttrCertPathBuilderSpi
                     {
                         selector.setSubject(((X500Principal)principals[i]).getEncoded());
                     }
-                    issuers.addAll(CertPathValidatorUtilities
-                        .findCertificates((Selector) selector, pkixParams
-                            .getStores()));
+                    issuers.addAll(CertPathValidatorUtilities.findCertificates(selector, pkixParams.getStores()));
+                    issuers.addAll(CertPathValidatorUtilities.findCertificates(selector, pkixParams.getCertStores()));
                 }
                 catch (AnnotatedException e)
                 {
@@ -259,13 +258,7 @@ public class PKIXAttrCertPathBuilderSpi
                 // of the stores
                 try
                 {
-                    issuers.addAll(CertPathValidatorUtilities.findIssuerCerts(tbvCert, pkixParams
-                            .getStores()));
-                    if (issuers.isEmpty())
-                    {
-                        issuers.addAll(CertPathValidatorUtilities.findIssuerCerts(tbvCert, pkixParams
-                                .getAddionalStores()));
-                    }
+                    issuers.addAll(CertPathValidatorUtilities.findIssuerCerts(tbvCert, pkixParams));
                 }
                 catch (AnnotatedException e)
                 {

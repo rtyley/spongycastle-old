@@ -18,7 +18,6 @@ import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.PKIXCertPathBuilderResult;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.X509Certificate;
-import java.security.cert.CertPathValidatorException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -80,8 +79,8 @@ public class PKIXCertPathBuilderSpi
 
         try
         {
-            targets = CertPathValidatorUtilities.findCertificates(certSelect,
-                pkixParams.getStores());
+            targets = CertPathValidatorUtilities.findCertificates((X509CertStoreSelector)certSelect, pkixParams.getStores());
+            targets.addAll(CertPathValidatorUtilities.findCertificates((X509CertStoreSelector)certSelect, pkixParams.getCertStores()));
         }
         catch (AnnotatedException e)
         {
@@ -91,6 +90,7 @@ public class PKIXCertPathBuilderSpi
 
         if (targets.isEmpty())
         {
+
             throw new CertPathBuilderException(
                 "No certificate found matching targetContraints.");
         }
@@ -224,14 +224,7 @@ public class PKIXCertPathBuilderSpi
                 // of the stores
                 try
                 {
-                    issuers.addAll(CertPathValidatorUtilities.findIssuerCerts(
-                        tbvCert, pkixParams.getStores()));
-                    if (issuers.isEmpty())
-                    {
-                        issuers.addAll(CertPathValidatorUtilities
-                            .findIssuerCerts(tbvCert, pkixParams
-                                .getAddionalStores()));
-                    }
+                    issuers.addAll(CertPathValidatorUtilities.findIssuerCerts(tbvCert, pkixParams));
                 }
                 catch (AnnotatedException e)
                 {
