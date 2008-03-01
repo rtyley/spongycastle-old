@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509CertSelector;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;

@@ -30,8 +30,10 @@ import org.bouncycastle.util.StoreException;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CRLStoreSelector;
-import org.bouncycastle.x509.X509CertStoreSelector;
 import org.bouncycastle.x509.X509Store;
+import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
+import org.bouncycastle.x509.X509CertStoreSelector;
+import org.bouncycastle.x509.X509AttributeCertStoreSelector;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayOutputStream;
@@ -335,52 +337,7 @@ public class CertPathValidatorUtilities
     }
     
     // crl checking
-    
-    /**
-     * Return a Collection of all CRLs found in the CertStore's that are
-     * matching the crlSelect criteria.
-     *
-     * @param crlSelect a {@link CertSelector CertSelector}
-     * object that will be used to select the CRLs
-     * @param crlStores a List containing only {@link CertStore
-     * CertStore} objects. These are used to search for
-     * CRLs
-     *
-     * @return a Collection of all found {@link CRL CRL}
-     * objects. May be empty but never <code>null</code>.
-     */
-    protected static final Collection findCRLs(
-        X509CRLSelector crlSelect,
-        List            crlStores)
-        throws AnnotatedException
-    {
-        Set crls = new HashSet();
-        Iterator iter = crlStores.iterator();
-    
-        AnnotatedException lastException = null;
-        boolean foundValidStore = false;
-        while (iter.hasNext())
-        {
-            CertStore   certStore = (CertStore)iter.next();
-    
-            try
-            {
-                crls.addAll(certStore.getCRLs(crlSelect));
-                foundValidStore = true;
-            }
-            catch (CertStoreException e)
-            {
-                lastException = new AnnotatedException("Exception searching in X.509 CRL store.", e);
-            }
-        }
-    
-        if (!foundValidStore && lastException != null)
-        {
-            throw lastException;
-        }
-        return crls;
-    }
-    
+
     /**
      * Return a Collection of all CRLs found in the X509Store's that are
      * matching the crlSelect criteriums.
@@ -405,17 +362,37 @@ public class CertPathValidatorUtilities
 
         while (iter.hasNext())
         {
-            X509Store store = (X509Store) iter.next();
+            Object obj = iter.next();
 
-            try
+            if (obj instanceof X509Store)
             {
-                crls.addAll(store.getMatches(crlSelect));
-                foundValidStore = true;
+                X509Store store = (X509Store)obj;
+
+                try
+                {
+                    crls.addAll(store.getMatches(crlSelect));
+                    foundValidStore = true;
+                }
+                catch (StoreException e)
+                {
+                    lastException = new AnnotatedException(
+                        "Exception searching in X.509 CRL store.", e);
+                }
             }
-            catch (StoreException e)
+            else
             {
-                lastException = new AnnotatedException(
-                    "Exception searching in X.509 CRL store.", e);
+                CertStore store = (CertStore)obj;
+
+                try
+                {
+                    crls.addAll(store.getCRLs(crlSelect));
+                    foundValidStore = true;
+                }
+                catch (CertStoreException e)
+                {
+                    lastException = new AnnotatedException(
+                        "Exception searching in X.509 CRL store.", e);
+                }
             }
         }
         if (!foundValidStore && lastException != null)
@@ -759,45 +736,6 @@ public class CertPathValidatorUtilities
     }
 
     /**
-     * Return a Collection of all certificates found in the CertStore's that are
-     * matching the certSelect criteriums.
-     *
-     * @param certSelect a {@link CertSelector CertSelector} object that will
-     *            be used to select the certificates
-     * @param certStores a List containing only {@link CertStore CertStore}
-     *            objects. These are used to search for certificates
-     *
-     * @return a Collection of all found {@link java.security.cert.Certificate Certificate}
-     *         objects. May be empty but never <code>null</code>.
-     */
-    protected static Collection findCertificates(CertSelector certSelect,
-        List certStores) throws AnnotatedException
-    {
-        Set certs = new HashSet();
-        Iterator iter = certStores.iterator();
-
-        while (iter.hasNext())
-        {
-            CertStore certStore = (CertStore) iter.next();
-
-            try
-            {
-                certs.addAll(certStore.getCertificates(certSelect));
-            }
-            catch (CertStoreException e)
-            {
-                throw
-
-                new AnnotatedException(
-                    "Problem while picking certificates from certificate store.",
-                    e);
-            }
-        }
-
-        return certs;
-    }
-
-    /**
      * Return a Collection of all certificates or attribute certificates found
      * in the X509Store's that are matching the certSelect criteriums.
      *
@@ -810,7 +748,7 @@ public class CertPathValidatorUtilities
      *         {@link org.bouncycastle.x509.X509AttributeCertificate} objects.
      *         May be empty but never <code>null</code>.
      */
-    protected static Collection findCertificates(Selector certSelect,
+    protected static Collection findCertificates(X509CertStoreSelector certSelect,
         List certStores) throws AnnotatedException
     {
         Set certs = new HashSet();
@@ -818,17 +756,67 @@ public class CertPathValidatorUtilities
 
         while (iter.hasNext())
         {
-            X509Store certStore = (X509Store) iter.next();
-            try
-            {
-                certs.addAll(certStore.getMatches(certSelect));
-            }
-            catch (StoreException e)
-            {
-                throw
+            Object obj = iter.next();
 
-                new AnnotatedException(
-                    "Problem while picking certificates from X.509 store.", e);
+            if (obj instanceof X509Store)
+            {
+                X509Store certStore = (X509Store)obj;
+                try
+                {
+                    certs.addAll(certStore.getMatches(certSelect));
+                }
+                catch (StoreException e)
+                {
+                    throw
+
+                    new AnnotatedException(
+                        "Problem while picking certificates from X.509 store.", e);
+                }
+            }
+            else
+            {
+                CertStore certStore = (CertStore)obj;
+
+                try
+                {
+                    certs.addAll(certStore.getCertificates(certSelect));
+                }
+                catch (CertStoreException e)
+                {
+                    throw new AnnotatedException(
+                        "Problem while picking certificates from certificate store.",
+                        e);
+                }
+            }
+        }
+        return certs;
+    }
+
+    protected static Collection findCertificates(X509AttributeCertStoreSelector certSelect,
+                                                 List certStores)
+    throws AnnotatedException
+    {
+        Set certs = new HashSet();
+        Iterator iter = certStores.iterator();
+
+        while (iter.hasNext())
+        {
+            Object obj = iter.next();
+
+            if (obj instanceof X509Store)
+            {
+                X509Store certStore = (X509Store)obj;
+                try
+                {
+                    certs.addAll(certStore.getMatches(certSelect));
+                }
+                catch (StoreException e)
+                {
+                    throw
+
+                        new AnnotatedException(
+                            "Problem while picking certificates from X.509 store.", e);
+                }
             }
         }
         return certs;
@@ -898,8 +886,10 @@ public class CertPathValidatorUtilities
      * contain only <code>X500Principal</code>s.
      */
     protected static void getCRLIssuersFromDistributionPoint(
-        DistributionPoint dp, Collection issuerPrincipals,
-        X509CRLStoreSelector selector, ExtendedPKIXParameters pkixParams)
+        DistributionPoint dp,
+        Collection issuerPrincipals,
+        X509CRLSelector selector,
+        ExtendedPKIXParameters pkixParams)
         throws AnnotatedException
     {
         List issuers = new ArrayList();
@@ -1147,25 +1137,25 @@ public class CertPathValidatorUtilities
                 "Issuing distribution point extension value could not be read.",
                 e);
         }
-        deltaSelect.setIssuingDistributionPoint(idp);
-        deltaSelect.setIssuingDistributionPointEnabled(true);
-
-        // 5.2.4 (c)
-        deltaSelect.setMaxBaseCRLNumber(completeCRLNumber);
 
         // 5.2.4 (d)
 
         deltaSelect.setMinCRLNumber(completeCRLNumber == null ? null : completeCRLNumber
             .add(BigInteger.valueOf(1)));
 
+        deltaSelect.setIssuingDistributionPoint(idp);
+        deltaSelect.setIssuingDistributionPointEnabled(true);
+
+        // 5.2.4 (c)
+        deltaSelect.setMaxBaseCRLNumber(completeCRLNumber);
+
         Set temp = new HashSet();
         // find delta CRLs
         try
         {
-            temp.addAll(CertPathValidatorUtilities.findCRLs(deltaSelect,
-                paramsPKIX.getAddionalStores()));
-            temp.addAll(CertPathValidatorUtilities.findCRLs(deltaSelect,
-                paramsPKIX.getStores()));
+            temp.addAll(CertPathValidatorUtilities.findCRLs(deltaSelect, paramsPKIX.getAdditionalStores()));
+            temp.addAll(CertPathValidatorUtilities.findCRLs(deltaSelect, paramsPKIX.getStores()));
+            temp.addAll(CertPathValidatorUtilities.findCRLs(deltaSelect, paramsPKIX.getCertStores()));
         }
         catch (AnnotatedException e)
         {
@@ -1205,8 +1195,7 @@ public class CertPathValidatorUtilities
             {
                 issuers.add(getEncodedIssuerPrincipal(cert));
             }
-            CertPathValidatorUtilities.getCRLIssuersFromDistributionPoint(dp,
-                issuers, crlselect, paramsPKIX);
+            CertPathValidatorUtilities.getCRLIssuersFromDistributionPoint(dp, issuers, crlselect, paramsPKIX);
         }
         catch (AnnotatedException e)
         {
@@ -1215,14 +1204,13 @@ public class CertPathValidatorUtilities
         }
         if (cert instanceof X509Certificate)
         {
-            crlselect.setCertificateChecking((X509Certificate) cert);
+            crlselect.setCertificateChecking((X509Certificate)cert);
         }
-        else
+        else if (cert instanceof X509AttributeCertificate)
         {
-            crlselect
-                .setAttrCertificateChecking((X509AttributeCertificate) cert);
+            crlselect.setAttrCertificateChecking((X509AttributeCertificate)cert);
         }
-        crlselect.setCompleteCRLEnabled(true);
+
         if (paramsPKIX.getDate() != null)
         {
             crlselect.setDateAndTime(paramsPKIX.getDate());
@@ -1232,13 +1220,14 @@ public class CertPathValidatorUtilities
             crlselect.setDateAndTime(currentDate);
         }
 
+        crlselect.setCompleteCRLEnabled(true);
+
         Set crls = new HashSet();
         try
         {
-            crls.addAll(CertPathValidatorUtilities.findCRLs(crlselect,
-                paramsPKIX.getStores()));
-            crls.addAll(CertPathValidatorUtilities.findCRLs(crlselect,
-                paramsPKIX.getAddionalStores()));
+            crls.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getStores()));
+            crls.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getAdditionalStores()));
+            crls.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getCertStores()));
         }
         catch (AnnotatedException e)
         {
@@ -1380,10 +1369,7 @@ public class CertPathValidatorUtilities
      * 
      * @param cert
      *            The certificate for which an issuer should be found.
-     * @param certStores
-     *            A list of <code>X509Store</code> object that will be
-     *            searched through.
-     * 
+     * @param pkixParams
      * @return A <code>Collection</code> object containing the issuer
      *         <code>X509Certificate</code>s. Never <code>null</code>.
      * 
@@ -1391,8 +1377,8 @@ public class CertPathValidatorUtilities
      *                if an error occurs.
      */
     protected static Collection findIssuerCerts(
-            X509Certificate cert,
-            List certStores)
+        X509Certificate cert,
+        ExtendedPKIXBuilderParameters pkixParams)
             throws AnnotatedException
     {
         X509CertStoreSelector certSelect = new X509CertStoreSelector();
@@ -1411,8 +1397,14 @@ public class CertPathValidatorUtilities
 
         try
         {
-            iter = CertPathValidatorUtilities.findCertificates((Selector) certSelect, certStores).iterator();
-            }
+            List matches = new ArrayList();
+
+            matches.addAll(CertPathValidatorUtilities.findCertificates(certSelect, pkixParams.getCertStores()));
+            matches.addAll(CertPathValidatorUtilities.findCertificates(certSelect, pkixParams.getStores()));
+            matches.addAll(CertPathValidatorUtilities.findCertificates(certSelect, pkixParams.getAdditionalStores()));
+
+            iter = matches.iterator();
+        }
         catch (AnnotatedException e)
         {
             throw new AnnotatedException("Issuer certificate cannot be searched.", e);

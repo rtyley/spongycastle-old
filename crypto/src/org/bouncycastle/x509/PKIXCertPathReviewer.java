@@ -2025,8 +2025,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             int index) 
         throws CertPathReviewerException
     {
-        X509CRLSelector crlselect;
-        crlselect = new X509CRLSelector();
+        X509CRLStoreSelector crlselect;
+        crlselect = new X509CRLStoreSelector();
         
         try
         {
@@ -2049,7 +2049,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             if (crl_coll.isEmpty())
             {
                 // notifcation - no local crls found
-                crl_coll = findCRLs(new X509CRLSelector(),paramsPKIX.getCertStores());
+                crl_coll = findCRLs(new X509CRLStoreSelector(),paramsPKIX.getCertStores());
                 Iterator it = crl_coll.iterator();
                 List nonMatchingCrlNames = new ArrayList();
                 while (it.hasNext())
@@ -2274,7 +2274,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
 
             if (dci != null)
             {
-                X509CRLSelector baseSelect = new X509CRLSelector();
+                X509CRLStoreSelector baseSelect = new X509CRLStoreSelector();
 
                 try
                 {

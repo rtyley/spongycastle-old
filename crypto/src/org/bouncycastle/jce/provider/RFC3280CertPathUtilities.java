@@ -45,6 +45,8 @@ import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.cert.X509Extension;
+import java.security.cert.X509CertSelector;
+import java.security.cert.X509CRLSelector;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -56,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.Collections;
 
 public class RFC3280CertPathUtilities
 {
@@ -447,7 +448,8 @@ public class RFC3280CertPathUtilities
         X509CertStoreSelector selector = new X509CertStoreSelector();
         try
         {
-            selector.setSubject(CertPathValidatorUtilities.getIssuerPrincipal(crl).getEncoded());
+            byte[] issuerPrincipal = CertPathValidatorUtilities.getIssuerPrincipal(crl).getEncoded();
+            selector.setSubject(issuerPrincipal);
         }
         catch (IOException e)
         {
@@ -456,12 +458,12 @@ public class RFC3280CertPathUtilities
         }
 
         // get CRL signing certs
-        Collection coll = null;
+        Collection coll;
         try
         {
-            coll = CertPathValidatorUtilities.findCertificates((Selector)selector, paramsPKIX.getStores());
-            coll.addAll(CertPathValidatorUtilities
-                .findCertificates((Selector)selector, paramsPKIX.getAddionalStores()));
+            coll = CertPathValidatorUtilities.findCertificates(selector, paramsPKIX.getStores());
+            coll.addAll(CertPathValidatorUtilities.findCertificates(selector, paramsPKIX.getAdditionalStores()));
+            coll.addAll(CertPathValidatorUtilities.findCertificates(selector, paramsPKIX.getCertStores()));
         }
         catch (AnnotatedException e)
         {
@@ -680,7 +682,6 @@ public class RFC3280CertPathUtilities
         Set deltaSet = new HashSet();
         X509CRLStoreSelector crlselect = new X509CRLStoreSelector();
         crlselect.setCertificateChecking(cert);
-        crlselect.setCompleteCRLEnabled(true);
 
         if (paramsPKIX.getDate() != null)
         {
@@ -699,11 +700,15 @@ public class RFC3280CertPathUtilities
         {
             throw new AnnotatedException("Cannot extract issuer from CRL." + e, e);
         }
+
+        crlselect.setCompleteCRLEnabled(true);
+
         // get complete CRL(s)
         try
         {
-            completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getAddionalStores()));
+            completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getAdditionalStores()));
             completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getStores()));
+            completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getCertStores()));
         }
         catch (AnnotatedException e)
         {

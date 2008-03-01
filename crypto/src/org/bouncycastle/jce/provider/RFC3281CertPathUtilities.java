@@ -434,12 +434,11 @@ class RFC3281CertPathUtilities
                 {
                     if (principals[i] instanceof X500Principal)
                     {
-                        selector.setIssuer(((X500Principal) principals[i])
+                        selector.setIssuer(((X500Principal)principals[i])
                             .getEncoded());
                     }
                     holderPKCs.addAll(CertPathValidatorUtilities
-                        .findCertificates((Selector) selector, pkixParams
-                            .getStores()));
+                        .findCertificates(selector, pkixParams.getStores()));
                 }
                 catch (AnnotatedException e)
                 {
@@ -473,8 +472,7 @@ class RFC3281CertPathUtilities
                             .getEncoded());
                     }
                     holderPKCs.addAll(CertPathValidatorUtilities
-                        .findCertificates((Selector) selector, pkixParams
-                            .getStores()));
+                        .findCertificates(selector, pkixParams.getStores()));
                 }
                 catch (AnnotatedException e)
                 {

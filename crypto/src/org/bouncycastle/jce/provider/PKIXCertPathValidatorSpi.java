@@ -46,14 +46,14 @@ public class PKIXCertPathValidatorSpi
                     + " instance.");
         }
 
-        ExtendedPKIXParameters paramsPKIX = null;
+        ExtendedPKIXParameters paramsPKIX;
         if (params instanceof ExtendedPKIXParameters)
         {
-            paramsPKIX = (ExtendedPKIXParameters) params;
+            paramsPKIX = (ExtendedPKIXParameters)params;
         }
         else
         {
-            paramsPKIX = ExtendedPKIXParameters.getInstance((PKIXParameters) params);
+            paramsPKIX = ExtendedPKIXParameters.getInstance((PKIXParameters)params);
         }
         if (paramsPKIX.getTrustAnchors() == null)
         {
@@ -89,7 +89,7 @@ public class PKIXCertPathValidatorSpi
         //
         // (d)
         // 
-        TrustAnchor trust = null;
+        TrustAnchor trust;
         try
         {
             trust = CertPathValidatorUtilities.findTrustAnchor((X509Certificate) certs.get(certs.size() - 1),
