@@ -2,7 +2,6 @@ package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -13,10 +12,6 @@ import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
-import javax.crypto.NoSuchPaddingException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
@@ -27,6 +22,10 @@ import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
+
 /**
  * the RecipientInfo class for a recipient who has been sent a message
  * encrypted using key agreement.
@@ -35,7 +34,7 @@ public class KeyAgreeRecipientInformation
     extends RecipientInformation
 {
     private KeyAgreeRecipientInfo _info;
-    private AlgorithmIdentifier   _encAlg;
+//    private AlgorithmIdentifier   _encAlg;
     private ASN1OctetString       _encryptedKey;
 
     public KeyAgreeRecipientInformation(
@@ -46,7 +45,7 @@ public class KeyAgreeRecipientInformation
         super(encAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
 
         _info = info;
-        _encAlg = encAlg;
+//        _encAlg = encAlg;
 
         try
         {
@@ -55,14 +54,8 @@ public class KeyAgreeRecipientInformation
 
             IssuerAndSerialNumber iAnds = id.getIdentifier().getIssuerAndSerialNumber();
 
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            ASN1OutputStream aOut = new ASN1OutputStream(bOut);
-
-            aOut.writeObject(iAnds.getName());
-
             _rid = new RecipientId();
-
-            _rid.setIssuer(bOut.toByteArray());
+            _rid.setIssuer(iAnds.getName().getEncoded());
             _rid.setSerialNumber(iAnds.getSerialNumber().getValue());
 
             _encryptedKey = id.getEncryptedKey();
