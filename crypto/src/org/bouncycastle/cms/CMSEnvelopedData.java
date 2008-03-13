@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -15,7 +14,6 @@ import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
@@ -108,12 +106,7 @@ public class CMSEnvelopedData
     {
         if (obj != null)
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-            aOut.writeObject(obj);
-
-            return bOut.toByteArray();
+            return obj.getDERObject().getEncoded();
         }
 
         return null;
@@ -168,6 +161,14 @@ public class CMSEnvelopedData
     }
 
     /**
+     * return the ContentInfo 
+     */
+    public ContentInfo getContentInfo()
+    {
+        return contentInfo;
+    }
+
+    /**
      * return a table of the unprotected attributes indexed by
      * the OID of the attribute.
      */
@@ -187,11 +188,6 @@ public class CMSEnvelopedData
     public byte[] getEncoded()
         throws IOException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-        aOut.writeObject(contentInfo);
-
-        return bOut.toByteArray();
+        return contentInfo.getEncoded();
     }
 }
