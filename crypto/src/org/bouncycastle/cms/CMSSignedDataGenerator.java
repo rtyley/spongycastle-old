@@ -1,5 +1,6 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -9,7 +10,6 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -263,21 +263,21 @@ public class CMSSignedDataGenerator
             //
             // sig must be composed from the DER encoding.
             //
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
- 
+            byte[] tmp;
             if (signedAttr != null) 
             {
-                DEROutputStream         dOut = new DEROutputStream(bOut);
-                dOut.writeObject(signedAttr);
+                tmp = signedAttr.getEncoded(ASN1Encodable.DER);
             } 
             else
             {
+                ByteArrayOutputStream bOut = new ByteArrayOutputStream();
                 content.write(bOut);
+                tmp = bOut.toByteArray();
             }
 
             sig.initSign(key, random);
 
-            sig.update(bOut.toByteArray());
+            sig.update(tmp);
 
             ASN1OctetString         encDigest = new DEROctetString(sig.sign());
 
