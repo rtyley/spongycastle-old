@@ -62,32 +62,20 @@ public class DefaultSignedAttributeTableGenerator
     {
         Hashtable std = (Hashtable)table.clone();
 
-        if (table.containsKey(CMSAttributes.contentType))
-        {
-            std.put(CMSAttributes.contentType, table.get(CMSAttributes.contentType));
-        }
-        else
+        if (!std.containsKey(CMSAttributes.contentType))
         {
             Attribute attr = new Attribute(CMSAttributes.contentType,
                               new DERSet((DERObjectIdentifier)parameters.get(CMSAttributeTableGenerator.CONTENT_TYPE)));
             std.put(attr.getAttrType(), attr);
         }
 
-        if (table.containsKey(CMSAttributes.signingTime))
-        {
-            std.put(CMSAttributes.signingTime, table.get(CMSAttributes.signingTime));
-        }
-        else
+        if (!std.containsKey(CMSAttributes.signingTime))
         {
             Attribute attr = new Attribute(CMSAttributes.signingTime, new DERSet(new Time(new Date())));
             std.put(attr.getAttrType(), attr);
         }
 
-        if (table.containsKey(CMSAttributes.messageDigest))
-        {
-            std.put(CMSAttributes.messageDigest, table.get(CMSAttributes.messageDigest));
-        }
-        else
+        if (!std.containsKey(CMSAttributes.messageDigest))
         {
             byte[] hash = (byte[])parameters.get(CMSAttributeTableGenerator.DIGEST);
             Attribute attr;
