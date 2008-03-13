@@ -1,7 +1,6 @@
 package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
@@ -9,12 +8,6 @@ import org.bouncycastle.asn1.cms.RecipientIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -23,6 +16,12 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.ProviderException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 
 
 /**
@@ -61,12 +60,7 @@ public class KeyTransRecipientInformation
             {
                 IssuerAndSerialNumber   iAnds = IssuerAndSerialNumber.getInstance(r.getId());
 
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-                aOut.writeObject(iAnds.getName());
-
-                _rid.setIssuer(bOut.toByteArray());
+                _rid.setIssuer(iAnds.getName().getEncoded());
                 _rid.setSerialNumber(iAnds.getSerialNumber().getValue());
             }
         }

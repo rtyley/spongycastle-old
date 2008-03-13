@@ -1,17 +1,16 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -24,8 +23,6 @@ import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
 
-import javax.crypto.Cipher;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
@@ -42,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.crypto.Cipher;
 
 /**
  * an expanded SignerInfo block from a CMS Signed message
@@ -84,12 +83,7 @@ public class SignerInformation
             {
                 IssuerAndSerialNumber   iAnds = IssuerAndSerialNumber.getInstance(s.getId());
 
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-                aOut.writeObject(iAnds.getName());
-
-                sid.setIssuer(bOut.toByteArray());
+                sid.setIssuer(iAnds.getName().getEncoded());
                 sid.setSerialNumber(iAnds.getSerialNumber().getValue());
             }
         }
@@ -114,12 +108,7 @@ public class SignerInformation
     {
         if (obj != null)
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-            aOut.writeObject(obj);
-
-            return bOut.toByteArray();
+            return obj.getDERObject().getEncoded();
         }
 
         return null;
@@ -276,12 +265,7 @@ public class SignerInformation
     {
         if (signedAttributes != null)
         {
-            ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-            DEROutputStream        aOut = new DEROutputStream(bOut);
-
-            aOut.writeObject(signedAttributes);
-
-            return bOut.toByteArray();
+            return signedAttributes.getEncoded(ASN1Encodable.DER);
         }
 
         return null;

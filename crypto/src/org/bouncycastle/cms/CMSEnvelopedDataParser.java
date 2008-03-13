@@ -2,7 +2,6 @@ package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.DEREncodable;
@@ -19,7 +18,6 @@ import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
@@ -229,12 +227,7 @@ public class CMSEnvelopedDataParser
     {
         if (obj != null)
         {
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            ASN1OutputStream aOut = new ASN1OutputStream(bOut);
-
-            aOut.writeObject(obj);
-
-            return bOut.toByteArray();
+            return obj.getDERObject().getEncoded();
         }
 
         return null;
