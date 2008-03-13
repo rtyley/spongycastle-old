@@ -1,5 +1,6 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -13,7 +14,6 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
@@ -23,7 +23,6 @@ import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.DigestOutputStream;
@@ -147,19 +146,17 @@ public class CMSSignedDataStreamGenerator
             //
             // sig must be composed from the DER encoding.
             //
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
- 
+            byte[] tmp;
             if (signedAttr != null) 
             {
-                DEROutputStream         dOut = new DEROutputStream(bOut);
-                dOut.writeObject(signedAttr);
+                tmp = signedAttr.getEncoded(ASN1Encodable.DER);
             } 
             else
             {
                 throw new RuntimeException("signatures without signed attributes not implemented.");
             }
 
-            _signature.update(bOut.toByteArray());
+            _signature.update(tmp);
 
             ASN1OctetString         encDigest = new DEROctetString(_signature.sign());
 
