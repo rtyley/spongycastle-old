@@ -3,7 +3,6 @@ package org.bouncycastle.cms;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequence;
@@ -18,7 +17,6 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.x509.NoSuchStoreException;
 import org.bouncycastle.x509.X509Store;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
@@ -329,17 +327,20 @@ public class CMSSignedData
     }
 
     /**
+     * return the ContentInfo 
+     */
+    public ContentInfo getContentInfo()
+    {
+        return contentInfo;
+    }
+
+    /**
      * return the ASN.1 encoded representation of this object.
      */
     public byte[] getEncoded()
         throws IOException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-        aOut.writeObject(contentInfo);
-
-        return bOut.toByteArray();
+        return contentInfo.getEncoded();
     }
     
     /**
