@@ -5,14 +5,12 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.util.Arrays;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -198,14 +196,9 @@ public class X509V2AttributeCertificate
 
             if (ext != null)
             {
-                ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-                DEROutputStream            dOut = new DEROutputStream(bOut);
-                
                 try
                 {
-                    dOut.writeObject(ext.getValue());
-
-                    return bOut.toByteArray();
+                    return ext.getValue().getEncoded(ASN1Encodable.DER);
                 }
                 catch (Exception e)
                 {

@@ -1,42 +1,41 @@
 package org.bouncycastle.tsp;
 
-import java.io.ByteArrayOutputStream;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.DERBoolean;
+import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.ess.ESSCertID;
+import org.bouncycastle.asn1.ess.SigningCertificate;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.tsp.Accuracy;
+import org.bouncycastle.asn1.tsp.MessageImprint;
+import org.bouncycastle.asn1.tsp.TSTInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
+
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.Hashtable;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.X509Certificate;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
-
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.tsp.MessageImprint;
-import org.bouncycastle.asn1.tsp.TSTInfo;
-import org.bouncycastle.asn1.tsp.Accuracy;
-import org.bouncycastle.asn1.ess.ESSCertID;
-import org.bouncycastle.asn1.ess.SigningCertificate;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.Attribute;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.DERSet;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.Hashtable;
 
 public class TimeStampTokenGenerator
 {
@@ -218,14 +217,11 @@ public class TimeStampTokenGenerator
                 new DERGeneralizedTime(genTime), accuracy, derOrdering,
                 nonce, tsa, request.getExtensions());
         
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
         try
         {
             CMSSignedDataGenerator  signedDataGenerator = new CMSSignedDataGenerator();
             
-            dOut.writeObject(tstInfo);
+            byte[] derEncodedTSTInfo = tstInfo.getEncoded(ASN1Encodable.DER);
 
             // TODO Check for certsAndCrls != null here?
 
@@ -243,7 +239,7 @@ public class TimeStampTokenGenerator
             signedDataGenerator.addCertificatesAndCRLs(genCertStore);
             signedDataGenerator.addSigner(key, cert, digestOID, signedAttr, unsignedAttr);
 
-            CMSSignedData signedData = signedDataGenerator.generate(PKCSObjectIdentifiers.id_ct_TSTInfo.getId(), new CMSProcessableByteArray(bOut.toByteArray()), true, provider);
+            CMSSignedData signedData = signedDataGenerator.generate(PKCSObjectIdentifiers.id_ct_TSTInfo.getId(), new CMSProcessableByteArray(derEncodedTSTInfo), true, provider);
             
             return new TimeStampToken(signedData);
         }
