@@ -250,7 +250,7 @@ public class EAXBlockCipher
             {
                 size = cipher.processBlock(bufBlock, 0, out, outOff);
 
-                mac.update(out, 0, blockSize);
+                mac.update(out, outOff, blockSize);
             }
             else
             {
