@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
 import org.bouncycastle.crypto.modes.EAXBlockCipher;
 import org.bouncycastle.crypto.params.AEADParameters;
@@ -11,6 +12,9 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+
+import java.security.SecureRandom;
+import java.util.Arrays;
 
 public class EAXTest
     extends SimpleTest
@@ -92,6 +96,10 @@ public class EAXTest
     private byte[] C11 = Hex.decode("CB8920F87A6C75CFF39627B56E3ED197C552D295A7CFC46AFC");
     private byte[] T11 = Hex.decode("CFC46AFC");
 
+    private static final int NONCE_LEN = 8;
+    private static final int MAC_LEN = 8;
+    private static final int AUTHEN_LEN = 20;
+
     public String getName()
     {
         return "EAX";
@@ -146,6 +154,8 @@ public class EAXTest
         {
             // expected
         }
+
+        randomTests();
     }
 
     private void checkVectors(
@@ -228,6 +238,56 @@ public class EAXTest
         if (!areEqual(p, dec))
         {
             fail("decrypted stream fails to match in test " + count);
+        }
+    }
+
+    private void randomTests()
+        throws InvalidCipherTextException
+    {
+        SecureRandom srng = new SecureRandom();
+        for (int i = 0; i < 10; ++i)
+        {
+            int DAT_LEN = srng.nextInt() >>> 22; // Note: JDK1.0 compatibility
+            randomTest(srng, DAT_LEN); 
+        }
+    }
+
+    private void randomTest(SecureRandom srng, int DAT_LEN)
+        throws InvalidCipherTextException
+    {
+        byte[] nonce = new byte[NONCE_LEN];
+        byte[] authen = new byte[AUTHEN_LEN];
+        byte[] datIn = new byte[DAT_LEN];
+        byte[] key = new byte[16];
+        srng.nextBytes(nonce);
+        srng.nextBytes(authen);
+        srng.nextBytes(datIn);
+        srng.nextBytes(key);
+
+        AESFastEngine eengine = new AESFastEngine();
+        KeyParameter sessKey = new KeyParameter(key);
+        EAXBlockCipher eeaxCipher = new EAXBlockCipher(eengine);
+
+        AEADParameters params = new AEADParameters(sessKey, MAC_LEN * 8, nonce,
+            authen);
+        eeaxCipher.init(true, params);
+
+        byte[] intrDat = new byte[eeaxCipher.getOutputSize(datIn.length)];
+        int outOff = eeaxCipher.processBytes(datIn, 0, DAT_LEN, intrDat, 0);
+        outOff += eeaxCipher.doFinal(intrDat, outOff);
+
+        AESFastEngine dengine = new AESFastEngine();
+        AEADParameters dparams = new AEADParameters(sessKey, MAC_LEN * 8,
+            nonce, authen);
+        EAXBlockCipher deaxCipher = new EAXBlockCipher(dengine);
+        deaxCipher.init(false, dparams);
+        byte[] datOut = new byte[deaxCipher.getOutputSize(outOff)];
+        int resultLen = deaxCipher.processBytes(intrDat, 0, outOff, datOut, 0);
+        deaxCipher.doFinal(datOut, resultLen);
+
+        if (!areEqual(datIn, datOut))
+        {
+            fail("EAX roundtrip failed to match");
         }
     }
 
