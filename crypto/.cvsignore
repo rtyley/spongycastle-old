@@ -7,3 +7,4 @@ verify
 .settings
 classes
 build
+*.swp

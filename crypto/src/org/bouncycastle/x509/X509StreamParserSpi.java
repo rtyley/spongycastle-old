@@ -1,6 +1,6 @@
 package org.bouncycastle.x509;
 
-import org.bouncycastle.util.StreamParsingException;
+import org.bouncycastle.x509.util.StreamParsingException;
 
 import java.io.InputStream;
 import java.util.Collection;

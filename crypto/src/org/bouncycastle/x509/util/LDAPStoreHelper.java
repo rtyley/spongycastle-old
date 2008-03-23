@@ -9,7 +9,6 @@ import org.bouncycastle.jce.provider.X509CRLParser;
 import org.bouncycastle.jce.provider.X509CertPairParser;
 import org.bouncycastle.jce.provider.X509CertParser;
 import org.bouncycastle.util.StoreException;
-import org.bouncycastle.util.StreamParsingException;
 import org.bouncycastle.x509.X509AttributeCertStoreSelector;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CRLStoreSelector;

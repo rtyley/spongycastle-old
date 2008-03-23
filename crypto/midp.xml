@@ -10,8 +10,8 @@
   
   $RCSfile: midp.xml,v $
   $Author: bouncy $
-  $Date: 2007-06-13 08:14:14 $
-  $Revision: 1.6 $
+  $Date: 2008-03-23 21:29:08 $
+  $Revision: 1.7 $
 -->
 
 <project name="midp" default="init" basedir=".">
@@ -108,11 +108,15 @@
                 <include name="**/util/BigIntegers.java" />
                 <include name="**/util/IPAddress.java" />
                 <include name="**/util/Strings.java" />
+                <include name="**/util/Stream*.java" />
+                <include name="**/util/io/Streams.java" />
                 <include name="**/encoders/*.java" />
 
                 <exclude name="**/crypto/examples/*.java" />
                 <exclude name="**/util/Dump.java" />
                 <exclude name="**/crypto/util/*.java" />
+                <exclude name="**/x509/util/Stream*.java" />
+                <exclude name="**/x509/X509Stream*.java" />
             </fileset>
         </copy>
 
@@ -135,6 +139,7 @@
                 <exclude name="**/asn1/test/SMIMETest.java" /> 
                 <exclude name="**/crypto/test/AESVectorFileTest.java" />
                 <exclude name="**/crypto/test/RSABlindedTest.java" />
+                <exclude name="**/crypto/test/EAXTest.java" />
                 <exclude name="**/util/encoders/test/*.java" />
                 <exclude name="**/math/ec/test/*.java" />
             </fileset>
@@ -142,7 +147,7 @@
 
 
         <echo message="Copying j2me files" />
-        <copy todir="${build.src}" overwrite="true" >
+        <copy todir="${build.src}" overwrite="true" verbose="false" >
             <fileset dir="${j2me.src}" >
                 <include name="org/**/*.java" />
 
