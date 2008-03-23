@@ -8,8 +8,8 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.util.StreamParsingException;
 import org.bouncycastle.x509.X509StreamParserSpi;
+import org.bouncycastle.x509.util.StreamParsingException;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

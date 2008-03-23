@@ -6,10 +6,6 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 
-import java.security.SecureRandom;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 /**
  * this does your basic PKCS 1 v1.5 padding - whether or not you should be using this
  * depends on your application - see PKCS1 Version 2 for details.
