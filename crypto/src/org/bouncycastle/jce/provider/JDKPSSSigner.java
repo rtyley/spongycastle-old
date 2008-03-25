@@ -14,8 +14,8 @@ import java.security.InvalidParameterException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 import java.security.SignatureException;
+import java.security.SignatureSpi;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
@@ -23,7 +23,7 @@ import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
 public class JDKPSSSigner
-    extends Signature
+    extends SignatureSpi
 {
     private AlgorithmParameters    engineParams;
     private PSSParameterSpec       paramSpec;
@@ -47,12 +47,9 @@ public class JDKPSSSigner
     }
     
     protected JDKPSSSigner(
-        String                name,
         AsymmetricBlockCipher signer,
-        PSSParameterSpec      paramSpec)
+        PSSParameterSpec paramSpec)
     {
-        super(name);
-
         this.signer = signer;
         
         if (paramSpec == null)
@@ -238,7 +235,7 @@ public class JDKPSSSigner
     {
         public PSSwithRSA()
         {
-            super("SHA1withRSAandMGF1", new RSABlindedEngine(), null);
+            super(new RSABlindedEngine(), null);
         }
     }
     
@@ -247,7 +244,7 @@ public class JDKPSSSigner
     {
         public SHA1withRSA()
         {
-            super("SHA1withRSAandMGF1", new RSABlindedEngine(), PSSParameterSpec.DEFAULT);
+            super(new RSABlindedEngine(), PSSParameterSpec.DEFAULT);
         }
     }
 
@@ -256,7 +253,7 @@ public class JDKPSSSigner
     {
         public SHA224withRSA()
         {
-            super("SHA224withRSAandMGF1", new RSABlindedEngine(), new PSSParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), 28, 1));
+            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), 28, 1));
         }
     }
     
@@ -265,7 +262,7 @@ public class JDKPSSSigner
     {
         public SHA256withRSA()
         {
-            super("SHA256withRSAandMGF1", new RSABlindedEngine(), new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
+            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
         }
     }
 
@@ -274,7 +271,7 @@ public class JDKPSSSigner
     {
         public SHA384withRSA()
         {
-            super("SHA384withRSAandMGF1", new RSABlindedEngine(), new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 48, 1));
+            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 48, 1));
         }
     }
 
@@ -283,7 +280,7 @@ public class JDKPSSSigner
     {
         public SHA512withRSA()
         {
-            super("SHA512withRSAandMGF1", new RSABlindedEngine(), new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
+            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
         }
     }
 }
