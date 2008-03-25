@@ -215,10 +215,6 @@ public class CMSEnvelopedDataStreamGenerator
 
             return new CmsEnvelopedDataOutputStream(cOut, cGen, envGen, eiGen);
         }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find algorithm.", e);
-        }
         catch (InvalidKeyException e)
         {
             throw new CMSException("key invalid in message.", e);
@@ -248,18 +244,11 @@ public class CMSEnvelopedDataStreamGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException
     {
-        try
-        {
-            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
+        KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
 
-            keyGen.init(rand);
+        keyGen.init(rand);
 
-            return open(out, encryptionOID, keyGen, provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find key generation algorithm.", e);
-        }
+        return open(out, encryptionOID, keyGen, provider);
     }
 
     /**
@@ -274,18 +263,11 @@ public class CMSEnvelopedDataStreamGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException
     {
-        try
-        {
-            KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
-            
-            keyGen.init(keySize, rand);
+        KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
 
-            return open(out, encryptionOID, keyGen, provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find key generation algorithm.", e);
-        }
+        keyGen.init(keySize, rand);
+
+        return open(out, encryptionOID, keyGen, provider);
     }
 
     private class CmsEnvelopedDataOutputStream
