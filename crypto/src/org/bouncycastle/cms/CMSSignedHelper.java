@@ -193,7 +193,7 @@ class CMSSignedHelper
     {
         if (provider != null)
         {
-            return MessageDigest.getInstance(algorithm, provider);
+            return MessageDigest.getInstance(algorithm, CMSContext.getProvider(provider));
         }
         else
         {
@@ -208,7 +208,7 @@ class CMSSignedHelper
     {
         if (provider != null)
         {
-            return Signature.getInstance(algorithm, provider);
+            return Signature.getInstance(algorithm, CMSContext.getProvider(provider));
         }
         else
         {
