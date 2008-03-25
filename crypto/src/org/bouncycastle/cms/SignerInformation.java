@@ -486,14 +486,6 @@ public class SignerInformation
                 throw new CMSException("algorithm: " + algorithm + " not supported in base signatures.");
             }
         }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw e;
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw e;
-        }
         catch (GeneralSecurityException e)
         {
             throw new CMSException("Exception processing signature: " + e, e);

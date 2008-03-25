@@ -107,10 +107,6 @@ public class CMSEnvelopedDataGenerator
 
             encContent = new BERConstructedOctetString(bOut.toByteArray());
         }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find algorithm.", e);
-        }
         catch (InvalidKeyException e)
         {
             throw new CMSException("key invalid in message.", e);
