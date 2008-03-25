@@ -5,8 +5,8 @@ import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 import java.security.SignatureException;
+import java.security.SignatureSpi;
 import java.security.spec.AlgorithmParameterSpec;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -23,19 +23,17 @@ import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410Key;
 
 public class JDKGOST3410Signer
-    extends Signature implements PKCSObjectIdentifiers, X509ObjectIdentifiers
+    extends SignatureSpi
+    implements PKCSObjectIdentifiers, X509ObjectIdentifiers
 {
     private Digest                  digest;
     private DSA                     signer;
     private SecureRandom            random;
 
     protected JDKGOST3410Signer(
-        String                  name,
-        Digest                  digest,
-        DSA                     signer)
+        Digest digest,
+        DSA signer)
     {
-        super(name);
-
         this.digest = digest;
         this.signer = signer;
     }
@@ -234,7 +232,7 @@ public class JDKGOST3410Signer
     {
         public gost3410()
         {
-            super("GOST3411withGOST3410", new GOST3411Digest(), new GOST3410Signer());
+            super(new GOST3411Digest(), new GOST3410Signer());
         }
     }
     
@@ -243,7 +241,7 @@ public class JDKGOST3410Signer
     {
         public ecgost3410()
         {
-            super("GOST3411withECGOST3410", new GOST3411Digest(), new ECGOST3410Signer());
+            super(new GOST3411Digest(), new ECGOST3410Signer());
         }
     }
 }

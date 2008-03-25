@@ -32,25 +32,23 @@ import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 import java.security.SignatureException;
+import java.security.SignatureSpi;
 import java.security.interfaces.DSAKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 public class JDKDSASigner
-    extends Signature implements PKCSObjectIdentifiers, X509ObjectIdentifiers
+    extends SignatureSpi
+    implements PKCSObjectIdentifiers, X509ObjectIdentifiers
 {
     private Digest                  digest;
     private DSA                     signer;
     private SecureRandom            random;
 
     protected JDKDSASigner(
-        String                  name,
         Digest                  digest,
         DSA                     signer)
     {
-        super(name);
-
         this.digest = digest;
         this.signer = signer;
     }
@@ -59,7 +57,7 @@ public class JDKDSASigner
         PublicKey   publicKey)
         throws InvalidKeyException
     {
-        CipherParameters    param = null;
+        CipherParameters    param;
 
         if (publicKey instanceof ECPublicKey)
         {
@@ -117,7 +115,7 @@ public class JDKDSASigner
         PrivateKey  privateKey)
         throws InvalidKeyException
     {
-        CipherParameters    param = null;
+        CipherParameters    param;
 
         if (privateKey instanceof ECKey)
         {
@@ -263,7 +261,7 @@ public class JDKDSASigner
     {
         public stdDSA()
         {
-            super("SHA1withDSA", new SHA1Digest(), new DSASigner());
+            super(new SHA1Digest(), new DSASigner());
         }
     }
 
@@ -272,7 +270,7 @@ public class JDKDSASigner
     {
         public dsa224()
         {
-            super("SHA224withDSA", new SHA224Digest(), new DSASigner());
+            super(new SHA224Digest(), new DSASigner());
         }
     }
     
@@ -281,7 +279,7 @@ public class JDKDSASigner
     {
         public dsa256()
         {
-            super("SHA256withDSA", new SHA256Digest(), new DSASigner());
+            super(new SHA256Digest(), new DSASigner());
         }
     }
     
@@ -290,7 +288,7 @@ public class JDKDSASigner
     {
         public dsa384()
         {
-            super("SHA384withDSA", new SHA384Digest(), new DSASigner());
+            super(new SHA384Digest(), new DSASigner());
         }
     }
     
@@ -299,7 +297,7 @@ public class JDKDSASigner
     {
         public dsa512()
         {
-            super("SHA512withDSA", new SHA512Digest(), new DSASigner());
+            super(new SHA512Digest(), new DSASigner());
         }
     }
 
@@ -308,7 +306,7 @@ public class JDKDSASigner
     {
         public noneDSA()
         {
-            super("NONEwithDSA", new NullDigest(), new DSASigner());
+            super(new NullDigest(), new DSASigner());
         }
     }
     
@@ -317,7 +315,7 @@ public class JDKDSASigner
     {
         public ecDSA()
         {
-            super("SHA1withECDSA", new SHA1Digest(), new ECDSASigner());
+            super(new SHA1Digest(), new ECDSASigner());
         }
     }
     
@@ -326,7 +324,7 @@ public class JDKDSASigner
     {
         public ecDSA224()
         {
-            super("SHA224withECDSA", new SHA224Digest(), new ECDSASigner());
+            super(new SHA224Digest(), new ECDSASigner());
         }
     }
     
@@ -335,7 +333,7 @@ public class JDKDSASigner
     {
         public ecDSA256()
         {
-            super("SHA256withECDSA", new SHA256Digest(), new ECDSASigner());
+            super(new SHA256Digest(), new ECDSASigner());
         }
     }
     
@@ -344,7 +342,7 @@ public class JDKDSASigner
     {
         public ecDSA384()
         {
-            super("SHA384withECDSA", new SHA384Digest(), new ECDSASigner());
+            super(new SHA384Digest(), new ECDSASigner());
         }
     }
     
@@ -353,7 +351,7 @@ public class JDKDSASigner
     {
         public ecDSA512()
         {
-            super("SHA512withECDSA", new SHA512Digest(), new ECDSASigner());
+            super(new SHA512Digest(), new ECDSASigner());
         }
     }
     
@@ -362,7 +360,7 @@ public class JDKDSASigner
     {
         public ecDSARipeMD160()
         {
-            super("RIPEMD160withECDSA", new RIPEMD160Digest(), new ECDSASigner());
+            super(new RIPEMD160Digest(), new ECDSASigner());
         }
     }
 
@@ -371,7 +369,7 @@ public class JDKDSASigner
     {
         public ecNR()
         {
-            super("SHA1withECNR", new SHA1Digest(), new ECNRSigner());
+            super(new SHA1Digest(), new ECNRSigner());
         }
     }
 
@@ -380,7 +378,7 @@ public class JDKDSASigner
     {
         public ecNR224()
         {
-            super("SHA224withECNR", new SHA224Digest(), new ECNRSigner());
+            super(new SHA224Digest(), new ECNRSigner());
         }
     }
 
@@ -389,7 +387,7 @@ public class JDKDSASigner
     {
         public ecNR256()
         {
-            super("SHA256withECNR", new SHA256Digest(), new ECNRSigner());
+            super(new SHA256Digest(), new ECNRSigner());
         }
     }
 
@@ -398,7 +396,7 @@ public class JDKDSASigner
     {
         public ecNR384()
         {
-            super("SHA384withECNR", new SHA384Digest(), new ECNRSigner());
+            super(new SHA384Digest(), new ECNRSigner());
         }
     }
 
@@ -407,7 +405,7 @@ public class JDKDSASigner
     {
         public ecNR512()
         {
-            super("SHA512withECNR", new SHA512Digest(), new ECNRSigner());
+            super(new SHA512Digest(), new ECNRSigner());
         }
     }
     
