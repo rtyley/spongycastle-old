@@ -14,7 +14,6 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 public class EAXTest
     extends SimpleTest
