@@ -55,10 +55,13 @@ public class PGPCompressedDataGenerator
 
     /**
      * Return an outputstream which will save the data being written to 
-     * the compressed object. The stream can be closed off by either calling close() 
-     * on the stream or close() on the generator.
+     * the compressed object.
+     * <p>
+     * The stream created can be closed off by either calling close()
+     * on the stream or close() on the generator. Closing the returned
+     * stream does not close off the OutputStream parameter out.
      * 
-     * @param out
+     * @param out underlying OutputStream to be used.
      * @return OutputStream
      * @throws IOException, IllegalStateException
      */        
@@ -105,8 +108,11 @@ public class PGPCompressedDataGenerator
     /**
      * Return an outputstream which will compress the data as it is written
      * to it. The stream will be written out in chunks according to the size of the
-     * passed in buffer and can be closed off by either calling close() on the stream or close() on
-     * the generator.
+     * passed in buffer.
+     * <p>
+     * The stream created can be closed off by either calling close()
+     * on the stream or close() on the generator. Closing the returned
+     * stream does not close off the OutputStream parameter out.
      * <p>
      * <b>Note</b>: if the buffer is not a power of 2 in length only the largest power of 2
      * bytes worth of the buffer will be used.
@@ -116,7 +122,7 @@ public class PGPCompressedDataGenerator
      * implementations are capable of accepting these streams.
      * </p>
      * 
-     * @param out
+     * @param out underlying OutputStream to be used.
      * @param buffer the buffer to use.
      * @return OutputStream
      * @throws IOException

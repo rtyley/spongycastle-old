@@ -7,14 +7,10 @@ import org.bouncycastle.util.Selector;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import java.io.IOException;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Collection;
 import java.math.BigInteger;
+import java.security.cert.CRL;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLSelector;
-import javax.security.auth.x500.X500Principal;
 
 /**
  * This class is a Selector implementation for X.509 certificate revocation
@@ -28,8 +24,6 @@ public class X509CRLStoreSelector
     extends X509CRLSelector
     implements Selector
 {
-    private Set     issuers = new HashSet();
-
     private boolean deltaCRLIndicator = false;
 
     private boolean completeCRLEnabled = false;
@@ -136,7 +130,7 @@ public class X509CRLStoreSelector
 
             if (maxBaseCRLNumber != null)
             {
-                if (dci.getPositiveValue().compareTo(maxBaseCRLNumber)== 1)
+                if (dci.getPositiveValue().compareTo(maxBaseCRLNumber) == 1)
                 {
                     return false;
                 }
@@ -164,6 +158,11 @@ public class X509CRLStoreSelector
 
         }
         return super.match((X509CRL)obj);
+    }
+
+    public boolean match(CRL crl)
+    {
+        return match((Object)crl);
     }
 
     /**
@@ -220,6 +219,7 @@ public class X509CRLStoreSelector
             // cannot happen
             throw new IllegalArgumentException(e.getMessage());
         }
+        //cs.setIssuers(selector.getIssuers());
         cs.setMaxCRLNumber(selector.getMaxCRL());
         cs.setMinCRLNumber(selector.getMinCRL());
         return cs;
@@ -235,31 +235,6 @@ public class X509CRLStoreSelector
         sel.issuingDistributionPointEnabled = issuingDistributionPointEnabled;
         sel.issuingDistributionPoint = Arrays.clone(issuingDistributionPoint);
         return sel;
-    }
-
-    public void setIssuers(Collection issuers)
-    {
-        this.issuers = new HashSet(issuers);
-        Set issuerNames = new HashSet();
-
-        for (Iterator it = issuers.iterator(); it.hasNext();)
-        {
-            issuerNames.add(((X500Principal)it.next()).getEncoded());
-        }
-
-        try
-        {
-            setIssuerNames(issuerNames);
-        } 
-        catch (IOException e)
-        {
-            throw new IllegalStateException("malformed issuer name set");
-        }
-    }
-
-    public Collection getIssuers()
-    {
-        return new HashSet(issuers);
     }
 
     /**

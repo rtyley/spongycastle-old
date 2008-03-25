@@ -64,7 +64,9 @@
             <fileset dir="test/data" includes="**/*.message" />
         </copy>
         <copy todir="${src.dir}" overwrite="true">
-            <fileset dir="jdk1.4" includes="**/*.java" />
+            <fileset dir="jdk1.4">
+                <exclude name="**/LDAP*.java" />
+            </fileset>
             <fileset dir="test/jdk1.4" includes="**/*.java" />
         </copy>
         <copy todir="${src.dir}" overwrite="true">

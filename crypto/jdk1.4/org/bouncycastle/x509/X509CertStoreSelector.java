@@ -5,8 +5,7 @@ import org.bouncycastle.util.Selector;
 import java.io.IOException;
 import java.security.cert.Certificate;
 import java.security.cert.X509CertSelector;
-
-import javax.security.auth.x500.X500Principal;
+import java.security.cert.X509Certificate;
 
 /**
  * This class is a Selector implementation for X.509 certificates.
@@ -15,55 +14,32 @@ import javax.security.auth.x500.X500Principal;
  * @see org.bouncycastle.x509.X509Store
  * @see org.bouncycastle.jce.provider.X509StoreCertCollection
  */
-public class X509CertStoreSelector extends X509CertSelector implements Selector
+public class X509CertStoreSelector
+    extends X509CertSelector
+    implements Selector
 {
-
     public boolean match(Object obj)
     {
-        if (!(obj instanceof Certificate))
+        if (!(obj instanceof X509Certificate))
         {
             return false;
         }
 
-        return super.match((Certificate)obj);
+        X509Certificate other = (X509Certificate)obj;
+
+        return super.match(other);
     }
 
-    public X500Principal getSubject()
+    public boolean match(Certificate cert)
     {
-        try
-        {
-            byte[] enc = getSubjectAsBytes();
-
-            if (enc != null)
-            {
-                return new X500Principal(enc);
-            }
-        }
-        catch (IOException e)
-        {
-            throw new IllegalStateException("badly encoded subject");
-        }
-
-        return null;
+        return match((Object)cert);
     }
 
-    public X500Principal getIssuer()
+    public Object clone()
     {
-        try
-        {
-            byte[] enc = getIssuerAsBytes();
+        X509CertStoreSelector selector = (X509CertStoreSelector)super.clone();
 
-            if (enc != null)
-            {
-                return new X500Principal(enc);
-            }
-        }
-        catch (IOException e)
-        {
-            throw new IllegalStateException("badly encoded issuer");
-        }
-
-        return null;
+        return selector;
     }
 
     /**
@@ -84,11 +60,12 @@ public class X509CertStoreSelector extends X509CertSelector implements Selector
         cs.setBasicConstraints(selector.getBasicConstraints());
         cs.setCertificate(selector.getCertificate());
         cs.setCertificateValid(selector.getCertificateValid());
+        cs.setMatchAllSubjectAltNames(selector.getMatchAllSubjectAltNames());
         try
         {
+            cs.setPathToNames(selector.getPathToNames());
             cs.setExtendedKeyUsage(selector.getExtendedKeyUsage());
             cs.setNameConstraints(selector.getNameConstraints());
-            cs.setPathToNames(selector.getPathToNames());
             cs.setPolicy(selector.getPolicy());
             cs.setSubjectPublicKeyAlgID(selector.getSubjectPublicKeyAlgID());
             cs.setIssuer(selector.getIssuerAsBytes());
@@ -96,15 +73,14 @@ public class X509CertStoreSelector extends X509CertSelector implements Selector
         }
         catch (IOException e)
         {
-            // cannot happen
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException("error in passed in selector: " + e);
         }
         cs.setKeyUsage(selector.getKeyUsage());
-        cs.setMatchAllSubjectAltNames(selector.getMatchAllSubjectAltNames());
         cs.setPrivateKeyValid(selector.getPrivateKeyValid());
         cs.setSerialNumber(selector.getSerialNumber());
         cs.setSubjectKeyIdentifier(selector.getSubjectKeyIdentifier());
         cs.setSubjectPublicKey(selector.getSubjectPublicKey());
         return cs;
     }
+
 }

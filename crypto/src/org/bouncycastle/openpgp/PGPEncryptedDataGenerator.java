@@ -294,9 +294,12 @@ public class PGPEncryptedDataGenerator
     }
 
     /**
-     * If buffer is non null stream assumed to be partial, otherwise the length will be used
-     * to output a fixed length packet. The stream can be closed off by either calling close()
-     * on the stream or close() on the generator.
+     * If buffer is non null stream assumed to be partial, otherwise the
+     * length will be used to output a fixed length packet.
+     * <p>
+     * The stream created can be closed off by either calling close()
+     * on the stream or close() on the generator. Closing the returned
+     * stream does not close off the OutputStream parameter out.
      * 
      * @param out
      * @param length
@@ -451,8 +454,11 @@ public class PGPEncryptedDataGenerator
 
     /**
      * Return an outputstream which will encrypt the data as it is written
-     * to it. The stream can be closed off by either calling close()
-     * on the stream or close() on the generator.
+     * to it.
+     * <p>
+     * The stream created can be closed off by either calling close()
+     * on the stream or close() on the generator. Closing the returned
+     * stream does not close off the OutputStream parameter out.
      * 
      * @param out
      * @param length
@@ -471,8 +477,11 @@ public class PGPEncryptedDataGenerator
     /**
      * Return an outputstream which will encrypt the data as it is written
      * to it. The stream will be written out in chunks according to the size of the
-     * passed in buffer. The stream can be closed off by either calling close()
-     * on the stream or close() on the generator.
+     * passed in buffer.
+     * <p>
+     * The stream created can be closed off by either calling close()
+     * on the stream or close() on the generator. Closing the returned
+     * stream does not close off the OutputStream parameter out.
      * <p>
      * <b>Note</b>: if the buffer is not a power of 2 in length only the largest power of 2
      * bytes worth of the buffer will be used.
@@ -494,7 +503,8 @@ public class PGPEncryptedDataGenerator
     /**
      * Close off the encrypted object - this is equivalent to calling close on the stream
      * returned by the open() method.
-     * 
+     * <p>
+     * <b>Note</b>: This does not close the underlying output stream, only the stream on top of it created by the open() method.
      * @throws IOException
      */
     public void close()

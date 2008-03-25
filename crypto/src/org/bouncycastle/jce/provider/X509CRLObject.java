@@ -353,128 +353,128 @@ public class X509CRLObject
      */
     public String toString()
     {
-		StringBuffer buf = new StringBuffer();
-		String nl = System.getProperty("line.separator");
+        StringBuffer buf = new StringBuffer();
+        String nl = System.getProperty("line.separator");
 
-		buf.append("              Version: ").append(this.getVersion()).append(
-			nl);
-		buf.append("             IssuerDN: ").append(this.getIssuerDN())
-			.append(nl);
-		buf.append("          This update: ").append(this.getThisUpdate())
-			.append(nl);
-		buf.append("          Next update: ").append(this.getNextUpdate())
-			.append(nl);
-		buf.append("  Signature Algorithm: ").append(this.getSigAlgName())
-			.append(nl);
+        buf.append("              Version: ").append(this.getVersion()).append(
+            nl);
+        buf.append("             IssuerDN: ").append(this.getIssuerDN())
+            .append(nl);
+        buf.append("          This update: ").append(this.getThisUpdate())
+            .append(nl);
+        buf.append("          Next update: ").append(this.getNextUpdate())
+            .append(nl);
+        buf.append("  Signature Algorithm: ").append(this.getSigAlgName())
+            .append(nl);
 
-		byte[] sig = this.getSignature();
+        byte[] sig = this.getSignature();
 
-		buf.append("            Signature: ").append(
-			new String(Hex.encode(sig, 0, 20))).append(nl);
-		for (int i = 20; i < sig.length; i += 20)
-		{
-			if (i < sig.length - 20)
-			{
-				buf.append("                       ").append(
-					new String(Hex.encode(sig, i, 20))).append(nl);
-			}
-			else
-			{
-				buf.append("                       ").append(
-					new String(Hex.encode(sig, i, sig.length - i))).append(nl);
-			}
-		}
+        buf.append("            Signature: ").append(
+            new String(Hex.encode(sig, 0, 20))).append(nl);
+        for (int i = 20; i < sig.length; i += 20)
+        {
+            if (i < sig.length - 20)
+            {
+                buf.append("                       ").append(
+                    new String(Hex.encode(sig, i, 20))).append(nl);
+            }
+            else
+            {
+                buf.append("                       ").append(
+                    new String(Hex.encode(sig, i, sig.length - i))).append(nl);
+            }
+        }
 
-		X509Extensions extensions = c.getTBSCertList().getExtensions();
+        X509Extensions extensions = c.getTBSCertList().getExtensions();
 
-		if (extensions != null)
-		{
-			Enumeration e = extensions.oids();
+        if (extensions != null)
+        {
+            Enumeration e = extensions.oids();
 
-			if (e.hasMoreElements())
-			{
-				buf.append("           Extensions: ").append(nl);
-			}
+            if (e.hasMoreElements())
+            {
+                buf.append("           Extensions: ").append(nl);
+            }
 
-			while (e.hasMoreElements())
-			{
-				DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
-				X509Extension ext = extensions.getExtension(oid);
+            while (e.hasMoreElements())
+            {
+                DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
+                X509Extension ext = extensions.getExtension(oid);
 
-				if (ext.getValue() != null)
-				{
-					byte[] octs = ext.getValue().getOctets();
-					ASN1InputStream dIn = new ASN1InputStream(octs);
-					buf.append("                       critical(").append(
-						ext.isCritical()).append(") ");
-					try
-					{
-						if (oid.equals(X509Extensions.CRLNumber))
-						{
-							buf.append(
-								new CRLNumber(DERInteger.getInstance(
-									dIn.readObject()).getPositiveValue()))
-								.append(nl);
-						}
-						else if (oid.equals(X509Extensions.DeltaCRLIndicator))
-						{
-							buf.append(
-								"Base CRL: "
-									+ new CRLNumber(DERInteger.getInstance(
-										dIn.readObject()).getPositiveValue()))
-								.append(nl);
-						}
-						else if (oid
-							.equals(X509Extensions.IssuingDistributionPoint))
-						{
-							buf.append(
-								new IssuingDistributionPoint((ASN1Sequence) dIn
-									.readObject())).append(nl);
-						}
-						else if (oid
-							.equals(X509Extensions.CRLDistributionPoints))
-						{
-							buf.append(
-								new CRLDistPoint((ASN1Sequence) dIn
-									.readObject())).append(nl);
-						}
-						else if (oid.equals(X509Extensions.FreshestCRL))
-						{
-							buf.append(
-								new CRLDistPoint((ASN1Sequence) dIn
-									.readObject())).append(nl);
-						}
-						else
-						{
-							buf.append(oid.getId());
-							buf.append(" value = ").append(
-								ASN1Dump.dumpAsString(dIn.readObject()))
-								.append(nl);
-						}
-					}
-					catch (Exception ex)
-					{
-						buf.append(oid.getId());
-						buf.append(" value = ").append("*****").append(nl);
-					}
-				}
-				else
-				{
-					buf.append(nl);
-				}
-			}
-		}
-		Set set = getRevokedCertificates();
-		if (set != null)
-		{
-			Iterator it = set.iterator();
-			while (it.hasNext())
-			{
-				buf.append(it.next());
-				buf.append(nl);
-			}
-		}
-		return buf.toString();
+                if (ext.getValue() != null)
+                {
+                    byte[] octs = ext.getValue().getOctets();
+                    ASN1InputStream dIn = new ASN1InputStream(octs);
+                    buf.append("                       critical(").append(
+                        ext.isCritical()).append(") ");
+                    try
+                    {
+                        if (oid.equals(X509Extensions.CRLNumber))
+                        {
+                            buf.append(
+                                new CRLNumber(DERInteger.getInstance(
+                                    dIn.readObject()).getPositiveValue()))
+                                .append(nl);
+                        }
+                        else if (oid.equals(X509Extensions.DeltaCRLIndicator))
+                        {
+                            buf.append(
+                                "Base CRL: "
+                                    + new CRLNumber(DERInteger.getInstance(
+                                        dIn.readObject()).getPositiveValue()))
+                                .append(nl);
+                        }
+                        else if (oid
+                            .equals(X509Extensions.IssuingDistributionPoint))
+                        {
+                            buf.append(
+                                new IssuingDistributionPoint((ASN1Sequence) dIn
+                                    .readObject())).append(nl);
+                        }
+                        else if (oid
+                            .equals(X509Extensions.CRLDistributionPoints))
+                        {
+                            buf.append(
+                                new CRLDistPoint((ASN1Sequence) dIn
+                                    .readObject())).append(nl);
+                        }
+                        else if (oid.equals(X509Extensions.FreshestCRL))
+                        {
+                            buf.append(
+                                new CRLDistPoint((ASN1Sequence) dIn
+                                    .readObject())).append(nl);
+                        }
+                        else
+                        {
+                            buf.append(oid.getId());
+                            buf.append(" value = ").append(
+                                ASN1Dump.dumpAsString(dIn.readObject()))
+                                .append(nl);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        buf.append(oid.getId());
+                        buf.append(" value = ").append("*****").append(nl);
+                    }
+                }
+                else
+                {
+                    buf.append(nl);
+                }
+            }
+        }
+        Set set = getRevokedCertificates();
+        if (set != null)
+        {
+            Iterator it = set.iterator();
+            while (it.hasNext())
+            {
+                buf.append(it.next());
+                buf.append(nl);
+            }
+        }
+        return buf.toString();
     }
 
     /**
@@ -523,7 +523,7 @@ public class X509CRLObject
                         .isIndirectCRL();
             }
         }
-		catch (Exception e)
+        catch (Exception e)
         {
             throw new ExtCRLException(
                     "Exception reading IssuingDistributionPoint", e);

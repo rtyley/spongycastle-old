@@ -57,7 +57,9 @@ class DefiniteLengthInputStream
             int numRead = _in.read(buf, off, toRead);
 
             if (numRead < 0)
+            {
                 throw new EOFException();
+            }
 
             _length -= numRead;
             return numRead;
