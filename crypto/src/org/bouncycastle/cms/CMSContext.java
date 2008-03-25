@@ -17,7 +17,7 @@ public class CMSContext
      */
     public static void addProvider(Provider provider)
     {
-        provider.put(provider.getName(), provider);
+        providers.put(provider.getName(), provider);
     }
 
     /**
@@ -27,7 +27,7 @@ public class CMSContext
      */
     public static void removeProvider(Provider provider)
     {
-        provider.remove(provider.getName());
+        providers.remove(provider.getName());
     }
 
     static Provider getProvider(String name)
