@@ -154,6 +154,7 @@ then
     rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
     rm -rf src/org/bouncycastle/x509/PKIXAttrCert*.java
     rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
+    rm -rf src/org/bouncycastle/jce/provider/RFC3280*.java
     rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
     find src -name AllTests.java -exec rm {} \;
     rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java

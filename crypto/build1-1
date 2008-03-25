@@ -22,6 +22,7 @@ then
     mkdir lcrypto-jdk11-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/LICENSE.java src/org/bouncycastle/math src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1 | (cd lcrypto-jdk11-$base; tar xf -)
     (cd test; tar cf - src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1) | (cd lcrypto-jdk11-$base; tar xf -)
+    (cd jdk1.1; tar cf - org/bouncycastle/crypto org/bouncycastle/asn1) | (cd lcrypto-jdk11-$base/src; tar xf -)
     rm -f lcrypto-jdk11-$base/src/org/bouncycastle/crypto/test/AESVector*
 
     (
@@ -173,12 +174,14 @@ then
     rm -rf src/org/bouncycastle/jce/provider/test/AttrCertSelectorTest.java
     rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
     rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
+    rm -rf src/org/bouncycastle/jce/provider/RFC3280*.java
     rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
     rm -rf src/org/bouncycastle/jce/ProviderConfigurationPermission.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPAttrCerts.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCertPairs.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCerts.java
     rm -rf src/org/bouncycastle/jce/provider/X509StoreLDAPCRLs.java
+    rm -rf src/org/bouncycastle/jce/provider/PKIXNameConstraint*.java
     rm -rf src/org/bouncycastle/jce/exception
     rm -rf src/org/bouncycastle/openssl/test/WriterTest.java
     find src -name AllTests.java -exec rm {} \;
