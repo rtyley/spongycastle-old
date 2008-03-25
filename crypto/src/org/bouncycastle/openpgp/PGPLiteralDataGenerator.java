@@ -71,8 +71,11 @@ public class PGPLiteralDataGenerator implements StreamGenerator
     
     /**
      * Open a literal data packet, returning a stream to store the data inside
-     * the packet. The stream can be closed off by either calling close()
-     * on the stream or close() on the generator.
+     * the packet.
+     * <p>
+     * The stream created can be closed off by either calling close()
+     * on the stream or close() on the generator. Closing the returned
+     * stream does not close off the OutputStream parameter out.
      * 
      * @param out the stream we want the packet in
      * @param format the format we are using
@@ -104,8 +107,11 @@ public class PGPLiteralDataGenerator implements StreamGenerator
      * Open a literal data packet, returning a stream to store the data inside
      * the packet as an indefinite length stream. The stream is written out as a 
      * series of partial packets with a chunk size determined by the size of the
-     * passed in buffer.The stream can be closed off by either calling close()
-     * on the stream or close() on the generator.
+     * passed in buffer.
+     * <p>
+     * The stream created can be closed off by either calling close()
+     * on the stream or close() on the generator. Closing the returned
+     * stream does not close off the OutputStream parameter out.
      * <p>
      * <b>Note</b>: if the buffer is not a power of 2 in length only the largest power of 2
      * bytes worth of the buffer will be used.
@@ -138,8 +144,11 @@ public class PGPLiteralDataGenerator implements StreamGenerator
     
     /**
      * Open a literal data packet for the passed in File object, returning
-     * an output stream for saving the file contents. The stream can be closed off by either calling close()
-     * on the stream or close() on the generator.
+     * an output stream for saving the file contents.
+     * <p>
+     * The stream created can be closed off by either calling close()
+     * on the stream or close() on the generator. Closing the returned
+     * stream does not close off the OutputStream parameter out.
      * 
      * @param out
      * @param format

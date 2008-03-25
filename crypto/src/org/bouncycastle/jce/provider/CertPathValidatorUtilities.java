@@ -1114,9 +1114,9 @@ public class CertPathValidatorUtilities
         {
             DERObject derObect = CertPathValidatorUtilities.getExtensionValue(completeCRL,
                     CRL_NUMBER);
-            if (derObect != null) {
-            completeCRLNumber = CRLNumber.getInstance(derObect
-                ).getPositiveValue();
+            if (derObect != null)
+            {
+                completeCRLNumber = CRLNumber.getInstance(derObect).getPositiveValue();
             }
         }
         catch (Exception e)

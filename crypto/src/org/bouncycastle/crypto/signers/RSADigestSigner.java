@@ -69,7 +69,7 @@ public class RSADigestSigner
      *
      * @param forSigning
      *            true if for signing, false otherwise
-     * @param param
+     * @param parameters
      *            necessary parameters.
      */
     public void init(

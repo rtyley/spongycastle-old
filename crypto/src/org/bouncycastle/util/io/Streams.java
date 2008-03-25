@@ -31,7 +31,9 @@ public final class Streams
         {
             int numRead = inStr.read(buf, off + totalRead, len - totalRead);
             if (numRead < 0)
+            {
                 break;
+            }
             totalRead += numRead;
         }
         return totalRead;
