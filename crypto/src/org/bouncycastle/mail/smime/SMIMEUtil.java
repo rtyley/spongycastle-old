@@ -271,7 +271,9 @@ public class SMIMEUtil
                 out = new CRLFOutputStream(out);
             }
 
-            bodyPart.writeTo(new CRLFOutputStream(out));
+            bodyPart.writeTo(out);
+
+            out.flush();
         }
     }
 
