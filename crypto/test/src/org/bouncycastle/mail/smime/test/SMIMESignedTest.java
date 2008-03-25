@@ -815,7 +815,7 @@ public class SMIMESignedTest
         gen.addCertificatesAndCRLs(certs);
         
         MimeBodyPart smm = gen.generateCertificateManagement("BC");
-
+        
         SMIMESigned s = new  SMIMESigned(smm);
 
         certs = s.getCertificatesAndCRLs("Collection", "BC");
@@ -938,7 +938,6 @@ public class SMIMESignedTest
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
 
         MimeMessage bp = s.getContentAsMimeMessage(Session.getDefaultInstance(new Properties()));
-        bp.writeTo(System.out);
     }
 
     private MimeBodyPart createMultipartMessage()
