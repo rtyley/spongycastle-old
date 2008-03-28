@@ -438,7 +438,7 @@ public class SignerInformation
                 Cipher c;
                 if (sigProvider != null)
                 {
-                    c = Cipher.getInstance("RSA/ECB/PKCS1Padding", CMSContext.getProvider(sigProvider));
+                    c = Cipher.getInstance("RSA/ECB/PKCS1Padding", sigProvider);
                 }
                 else
                 {
@@ -468,7 +468,7 @@ public class SignerInformation
                 Signature sig;
                 if (sigProvider != null)
                 {
-                    sig = Signature.getInstance("NONEwithDSA", CMSContext.getProvider(sigProvider));
+                    sig = Signature.getInstance("NONEwithDSA", sigProvider);
                 }
                 else
                 {
