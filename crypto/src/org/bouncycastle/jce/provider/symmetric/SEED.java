@@ -36,7 +36,7 @@ public final class SEED
     {
         public CBC()
         {
-            super(new CBCBlockCipher(new SEEDEngine()));
+            super(new CBCBlockCipher(new SEEDEngine()), 128);
         }
     }
 

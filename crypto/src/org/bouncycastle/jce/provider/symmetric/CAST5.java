@@ -38,7 +38,7 @@ public final class CAST5
     {
         public CBC()
         {
-            super(new CBCBlockCipher(new CAST5Engine()));
+            super(new CBCBlockCipher(new CAST5Engine()), 64);
         }
     }
 
