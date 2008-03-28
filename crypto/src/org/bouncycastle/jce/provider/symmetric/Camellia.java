@@ -37,7 +37,7 @@ public final class Camellia
     {
         public CBC()
         {
-            super(new CBCBlockCipher(new CamelliaEngine()));
+            super(new CBCBlockCipher(new CamelliaEngine()), 128);
         }
     }
 
