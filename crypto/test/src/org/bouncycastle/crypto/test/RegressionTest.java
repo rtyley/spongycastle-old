@@ -89,6 +89,7 @@ public class RegressionTest
         new Salsa20Test(),
         new CMacTest(),
         new EAXTest(),
+        new GCMTest(),
         new HCFamilyTest(),
         new ISAACTest(),
         new NoekeonTest(),

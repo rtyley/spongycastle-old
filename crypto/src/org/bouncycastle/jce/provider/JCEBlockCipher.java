@@ -30,6 +30,7 @@ import org.bouncycastle.crypto.modes.CCMBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.CTSBlockCipher;
 import org.bouncycastle.crypto.modes.EAXBlockCipher;
+import org.bouncycastle.crypto.modes.GCMBlockCipher;
 import org.bouncycastle.crypto.modes.GOFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 import org.bouncycastle.crypto.modes.OpenPGPCFBBlockCipher;
@@ -278,6 +279,11 @@ public class JCEBlockCipher extends WrapCipherSpi
             ivLength = baseEngine.getBlockSize();
             cipher = new AEADGenericBlockCipher(new EAXBlockCipher(baseEngine));
         }
+        else if (modeName.startsWith("GCM"))
+        {
+            ivLength = baseEngine.getBlockSize();
+            cipher = new AEADGenericBlockCipher(new GCMBlockCipher(baseEngine));
+        }
         else
         {
             throw new NoSuchAlgorithmException("can't support mode " + mode);
@@ -299,7 +305,7 @@ public class JCEBlockCipher extends WrapCipherSpi
                 cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(cipher.getUnderlyingCipher()));
             }
         }
-        else if ("CCM".equals(modeName) || "EAX".equals(modeName))
+        else if (isAEADModeName(modeName))
         {
             throw new NoSuchPaddingException("Only NoPadding can be used with AEAD modes.");
         }
@@ -413,7 +419,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             {
                 IvParameterSpec p = (IvParameterSpec)params;
 
-                if (p.getIV().length != ivLength && !modeName.equals("CCM") && !modeName.equals("EAX"))
+                if (p.getIV().length != ivLength && !isAEADModeName(modeName))
                 {
                     throw new InvalidAlgorithmParameterException("IV must be " + ivLength + " bytes long.");
                 }
@@ -712,6 +718,12 @@ public class JCEBlockCipher extends WrapCipherSpi
         {
             throw new BadPaddingException(e.getMessage());
         }
+    }
+
+    private boolean isAEADModeName(
+        String modeName)
+    {
+        return "CCM".equals(modeName) || "EAX".equals(modeName) || "GCM".equals(modeName);
     }
 
     /*
