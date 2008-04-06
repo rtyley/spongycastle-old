@@ -229,6 +229,63 @@ public class AESTest
         }
     }
 
+    private void gcmTest()
+        throws Exception
+    {
+        // Test Case 15 from McGrew/Viega
+        byte[] K = Hex.decode(
+              "feffe9928665731c6d6a8f9467308308"
+            + "feffe9928665731c6d6a8f9467308308");
+        byte[] P = Hex.decode(
+              "d9313225f88406e5a55909c5aff5269a"
+            + "86a7a9531534f7da2e4c303d8a318a72"
+            + "1c3c0c95956809532fcf0e2449a6b525"
+            + "b16aedf5aa0de657ba637b391aafd255");
+        byte[] N = Hex.decode("cafebabefacedbaddecaf888");
+        String T = "b094dac5d93471bdec1a502270e3cc6c";
+        byte[] C = Hex.decode(
+              "522dc1f099567d07f47f37a32a84427d"
+            + "643a8cdcbfe5c0c97598a2bd2555d1aa"
+            + "8cb08e48590dbb3da7b08b1056828838"
+            + "c5f61e6393ba7a0abcc9f662898015ad"
+            + T);
+
+        Key                     key;
+        Cipher                  in, out;
+
+        key = new SecretKeySpec(K, "AES");
+
+        in = Cipher.getInstance("AES/GCM/NoPadding", "BC");
+        out = Cipher.getInstance("AES/GCM/NoPadding", "BC");
+
+        in.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(N));
+
+        byte[] enc = in.doFinal(P);
+        if (!areEqual(enc, C))
+        {
+            fail("ciphertext doesn't match in GCM");
+        }
+
+        out.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(N));
+
+        byte[] dec = out.doFinal(C);
+        if (!areEqual(dec, P))
+        {
+            fail("plaintext doesn't match in GCM");
+        }
+
+        try
+        {
+            in = Cipher.getInstance("AES/GCM/PKCS5Padding", "BC");
+    
+            fail("bad padding missed in GCM");
+        }
+        catch (NoSuchPaddingException e)
+        {
+            // expected
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -289,6 +346,7 @@ public class AESTest
 
         eaxTest();
         ccmTest();
+        gcmTest();
     }
 
     public static void main(
