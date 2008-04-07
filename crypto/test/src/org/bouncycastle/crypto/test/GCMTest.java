@@ -312,12 +312,28 @@ public class GCMTest
 
 //        System.out.println(testName);
 
-        GCMBlockCipher cipher = new GCMBlockCipher(new AESFastEngine());
+        GCMBlockCipher encCipher = new GCMBlockCipher(new AESFastEngine());
+        GCMBlockCipher decCipher = new GCMBlockCipher(new AESFastEngine());
         AEADParameters parameters = new AEADParameters(new KeyParameter(K), T.length * 8, IV, A);
-        cipher.init(true, parameters);
-        byte[] enc = new byte[cipher.getOutputSize(P.length)];
-        int len = cipher.processBytes(P, 0, P.length, enc, 0);
-        len += cipher.doFinal(enc, len);
+        encCipher.init(true, parameters);
+        decCipher.init(false, parameters);
+
+        checkTestCase(encCipher, decCipher, testName, P, C, T);
+        checkTestCase(encCipher, decCipher, testName + " (reused)", P, C, T);
+    }
+
+    private void checkTestCase(
+        GCMBlockCipher  encCipher,
+        GCMBlockCipher  decCipher,
+        String          testName,
+        byte[]          P,
+        byte[]          C,
+        byte[]          T)
+        throws InvalidCipherTextException
+    {
+        byte[] enc = new byte[encCipher.getOutputSize(P.length)];
+        int len = encCipher.processBytes(P, 0, P.length, enc, 0);
+        len += encCipher.doFinal(enc, len);
 
         if (enc.length != len)
         {
@@ -325,7 +341,7 @@ public class GCMTest
             fail("encryption reported incorrect length: " + testName);
         }
 
-        byte[] mac = cipher.getMac();
+        byte[] mac = encCipher.getMac();
 
         byte[] data = new byte[P.length];
         System.arraycopy(enc, 0, data, 0, data.length);
@@ -347,11 +363,10 @@ public class GCMTest
             fail("stream contained wrong mac in: " + testName);
         }
 
-        cipher.init(false, parameters);
-        byte[] dec = new byte[cipher.getOutputSize(enc.length)];
-        len = cipher.processBytes(enc, 0, enc.length, dec, 0);
-        len += cipher.doFinal(dec, len);
-        mac = cipher.getMac();
+        byte[] dec = new byte[decCipher.getOutputSize(enc.length)];
+        len = decCipher.processBytes(enc, 0, enc.length, dec, 0);
+        len += decCipher.doFinal(dec, len);
+        mac = decCipher.getMac();
 
         data = new byte[C.length];
         System.arraycopy(dec, 0, data, 0, data.length);
