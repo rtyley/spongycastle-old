@@ -272,10 +272,18 @@ public class GCMBlockCipher
             }
         }
 
+        reset(false);
+
         return resultLen;
     }
 
     public void reset()
+    {
+        reset(true);
+    }
+
+    private void reset(
+        boolean clearMac)
     {
         // Debug
 //        nCount = xCount = yCount = 0;
@@ -290,7 +298,10 @@ public class GCMBlockCipher
             Arrays.fill(bufBlock, (byte)0);
         }
 
-        macBlock = null;
+        if (clearMac)
+        {
+            macBlock = null;
+        }
 
         cipher.reset();
     }
