@@ -107,20 +107,19 @@ public class EAXTest
     public void performTest()
         throws Exception
     {
-        EAXBlockCipher eax = new EAXBlockCipher(new AESEngine());
+        checkVectors(1, K1, 128, N1, A1, P1, T1, C1);
+        checkVectors(2, K2, 128, N2, A2, P2, T2, C2);
+        checkVectors(3, K3, 128, N3, A3, P3, T3, C3);
+        checkVectors(4, K4, 128, N4, A4, P4, T4, C4);
+        checkVectors(5, K5, 128, N5, A5, P5, T5, C5);
+        checkVectors(6, K6, 128, N6, A6, P6, T6, C6);
+        checkVectors(7, K7, 128, N7, A7, P7, T7, C7);
+        checkVectors(8, K8, 128, N8, A8, P8, T8, C8);
+        checkVectors(9, K9, 128, N9, A9, P9, T9, C9);
+        checkVectors(10, K10, 128, N10, A10, P10, T10, C10);
+        checkVectors(11, K11, 32, N11, A11, P11, T11, C11);
 
-        checkVectors(1, eax, K1, 128, N1, A1, P1, T1, C1);
-        checkVectors(2, eax, K2, 128, N2, A2, P2, T2, C2);
-        checkVectors(3, eax, K3, 128, N3, A3, P3, T3, C3);
-        checkVectors(4, eax, K4, 128, N4, A4, P4, T4, C4);
-        checkVectors(5, eax, K5, 128, N5, A5, P5, T5, C5);
-        checkVectors(6, eax, K6, 128, N6, A6, P6, T6, C6);
-        checkVectors(7, eax, K7, 128, N7, A7, P7, T7, C7);
-        checkVectors(8, eax, K8, 128, N8, A8, P8, T8, C8);
-        checkVectors(9, eax, K9, 128, N9, A9, P9, T9, C9);
-        checkVectors(10, eax, K10, 128, N10, A10, P10, T10, C10);
-        checkVectors(11, eax, K11, 32, N11, A11, P11, T11, C11);
-
+        EAXBlockCipher eax = new EAXBlockCipher(new AESFastEngine());
         ivParamTest(1, eax, K1, N1);
 
         //
@@ -159,7 +158,6 @@ public class EAXTest
 
     private void checkVectors(
         int count,
-        EAXBlockCipher eax,
         byte[] k,
         int macSize,
         byte[] n,
@@ -169,26 +167,42 @@ public class EAXTest
         byte[] c)
         throws InvalidCipherTextException
     {
-        eax.init(true, new AEADParameters(new KeyParameter(k), macSize, n, a));
+        EAXBlockCipher encEax = new EAXBlockCipher(new AESFastEngine());
+        EAXBlockCipher decEax = new EAXBlockCipher(new AESFastEngine());
 
+        AEADParameters parameters = new AEADParameters(new KeyParameter(k), macSize, n, a);
+        encEax.init(true, parameters);
+        decEax.init(false, parameters);
+
+        runCheckVectors(count, encEax, decEax, p, t, c);
+        runCheckVectors(count, encEax, decEax, p, t, c);
+    }
+
+    private void runCheckVectors(
+        int count,
+        EAXBlockCipher encEax,
+        EAXBlockCipher decEax,
+        byte[] p,
+        byte[] t,
+        byte[] c)
+        throws InvalidCipherTextException
+    {
         byte[] enc = new byte[c.length];
 
-        int len = eax.processBytes(p, 0, p.length, enc, 0);
+        int len = encEax.processBytes(p, 0, p.length, enc, 0);
 
-        len += eax.doFinal(enc, len);
+        len += encEax.doFinal(enc, len);
 
         if (!areEqual(c, enc))
         {
             fail("encrypted stream fails to match in test " + count);
         }
 
-        eax.init(false, new AEADParameters(new KeyParameter(k), macSize, n, a));
-
         byte[] tmp = new byte[enc.length];
 
-        len = eax.processBytes(enc, 0, enc.length, tmp, 0);
+        len = decEax.processBytes(enc, 0, enc.length, tmp, 0);
 
-        len += eax.doFinal(tmp, len);
+        len += decEax.doFinal(tmp, len);
 
         byte[] dec = new byte[len];
         
@@ -199,7 +213,7 @@ public class EAXTest
             fail("decrypted stream fails to match in test " + count);
         }
 
-        if (!areEqual(t, eax.getMac()))
+        if (!areEqual(t, decEax.getMac()))
         {
             fail("MAC fails to match in test " + count);
         }
@@ -207,28 +221,28 @@ public class EAXTest
 
     private void ivParamTest(
         int count,
-        AEADBlockCipher ccm,
+        AEADBlockCipher eax,
         byte[] k,
         byte[] n)
         throws InvalidCipherTextException
     {
         byte[] p = Strings.toByteArray("hello world!!");
 
-        ccm.init(true, new ParametersWithIV(new KeyParameter(k), n));
+        eax.init(true, new ParametersWithIV(new KeyParameter(k), n));
 
         byte[] enc = new byte[p.length + 8];
 
-        int len = ccm.processBytes(p, 0, p.length, enc, 0);
+        int len = eax.processBytes(p, 0, p.length, enc, 0);
 
-        len += ccm.doFinal(enc, len);
+        len += eax.doFinal(enc, len);
 
-        ccm.init(false, new ParametersWithIV(new KeyParameter(k), n));
+        eax.init(false, new ParametersWithIV(new KeyParameter(k), n));
 
         byte[] tmp = new byte[enc.length];
 
-        len = ccm.processBytes(enc, 0, enc.length, tmp, 0);
+        len = eax.processBytes(enc, 0, enc.length, tmp, 0);
 
-        len += ccm.doFinal(tmp, len);
+        len += eax.doFinal(tmp, len);
 
         byte[] dec = new byte[len];
 
@@ -246,14 +260,15 @@ public class EAXTest
         SecureRandom srng = new SecureRandom();
         for (int i = 0; i < 10; ++i)
         {
-            int DAT_LEN = srng.nextInt() >>> 22; // Note: JDK1.0 compatibility
-            randomTest(srng, DAT_LEN); 
+            randomTest(srng); 
         }
     }
 
-    private void randomTest(SecureRandom srng, int DAT_LEN)
+    private void randomTest(
+        SecureRandom srng)
         throws InvalidCipherTextException
     {
+        int DAT_LEN = srng.nextInt() >>> 22; // Note: JDK1.0 compatibility
         byte[] nonce = new byte[NONCE_LEN];
         byte[] authen = new byte[AUTHEN_LEN];
         byte[] datIn = new byte[DAT_LEN];
@@ -263,26 +278,21 @@ public class EAXTest
         srng.nextBytes(datIn);
         srng.nextBytes(key);
 
-        AESFastEngine eengine = new AESFastEngine();
+        AESFastEngine engine = new AESFastEngine();
         KeyParameter sessKey = new KeyParameter(key);
-        EAXBlockCipher eeaxCipher = new EAXBlockCipher(eengine);
+        EAXBlockCipher eaxCipher = new EAXBlockCipher(engine);
 
-        AEADParameters params = new AEADParameters(sessKey, MAC_LEN * 8, nonce,
-            authen);
-        eeaxCipher.init(true, params);
+        AEADParameters params = new AEADParameters(sessKey, MAC_LEN * 8, nonce, authen);
+        eaxCipher.init(true, params);
 
-        byte[] intrDat = new byte[eeaxCipher.getOutputSize(datIn.length)];
-        int outOff = eeaxCipher.processBytes(datIn, 0, DAT_LEN, intrDat, 0);
-        outOff += eeaxCipher.doFinal(intrDat, outOff);
+        byte[] intrDat = new byte[eaxCipher.getOutputSize(datIn.length)];
+        int outOff = eaxCipher.processBytes(datIn, 0, DAT_LEN, intrDat, 0);
+        outOff += eaxCipher.doFinal(intrDat, outOff);
 
-        AESFastEngine dengine = new AESFastEngine();
-        AEADParameters dparams = new AEADParameters(sessKey, MAC_LEN * 8,
-            nonce, authen);
-        EAXBlockCipher deaxCipher = new EAXBlockCipher(dengine);
-        deaxCipher.init(false, dparams);
-        byte[] datOut = new byte[deaxCipher.getOutputSize(outOff)];
-        int resultLen = deaxCipher.processBytes(intrDat, 0, outOff, datOut, 0);
-        deaxCipher.doFinal(datOut, resultLen);
+        eaxCipher.init(false, params);
+        byte[] datOut = new byte[eaxCipher.getOutputSize(outOff)];
+        int resultLen = eaxCipher.processBytes(intrDat, 0, outOff, datOut, 0);
+        eaxCipher.doFinal(datOut, resultLen);
 
         if (!areEqual(datIn, datOut))
         {
