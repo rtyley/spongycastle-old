@@ -8,6 +8,7 @@ import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.macs.CMac;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.util.Arrays;
 
 /**
  * A Two-Pass Authenticated-Encryption Scheme Optimized for Simplicity and 
@@ -141,10 +142,26 @@ public class EAXBlockCipher
 
     public void reset()
     {
+        reset(true);
+    }
+
+    private void reset(
+        boolean clearMac)
+    {
         cipher.reset();
         mac.reset();
 
         bufOff = 0;
+        Arrays.fill(bufBlock, (byte)0);
+
+        if (clearMac)
+        {
+            Arrays.fill(macBlock, (byte)0);
+        }
+
+        byte[] tag = new byte[blockSize];
+        tag[blockSize - 1] = cTAG;
+        mac.update(tag, 0, blockSize);
     }
 
     public int processByte(byte in, byte[] out, int outOff)
@@ -187,6 +204,8 @@ public class EAXBlockCipher
 
             System.arraycopy(macBlock, 0, out, outOff + extra, macSize);
 
+            reset(false);
+
             return extra + macSize;
         }
         else
@@ -207,6 +226,8 @@ public class EAXBlockCipher
             {
                 throw new InvalidCipherTextException("mac check in EAX failed");
             }
+
+            reset(false);
 
             return extra - macSize;
         }
