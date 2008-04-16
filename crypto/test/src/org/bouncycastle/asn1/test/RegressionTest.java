@@ -61,6 +61,7 @@ public class RegressionTest
         new NameOrPseudonymUnitTest(),
         new PersonalDataUnitTest(),
         new DERApplicationSpecificTest(),
+        new IssuingDistributionPointUnitTest(),
         new TargetInformationTest()
     };
 
