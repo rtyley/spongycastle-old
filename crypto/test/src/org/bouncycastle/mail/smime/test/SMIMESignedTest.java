@@ -1003,6 +1003,26 @@ public class SMIMESignedTest
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
     }
 
+    public void testMultiAlternative()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("multi-alternative.eml");
+
+        SMIMESigned s = new SMIMESigned((MimeMultipart)message.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testMultiAlternativeParser()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("multi-alternative.eml");
+
+        SMIMESignedParser s = new SMIMESignedParser((MimeMultipart)message.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
     public void testBasicAS2()
         throws Exception
     {
