@@ -94,11 +94,11 @@ public class IssuingDistributionPoint
         {                                    // CHOICE item so explicitly tagged
             vec.add(new DERTaggedObject(true, 0, distributionPoint));
         }
-        if (!onlyContainsUserCerts)
+        if (onlyContainsUserCerts)
         {
             vec.add(new DERTaggedObject(false, 1, new DERBoolean(true)));
         }
-        if (!onlyContainsCACerts)
+        if (onlyContainsCACerts)
         {
             vec.add(new DERTaggedObject(false, 2, new DERBoolean(true)));
         }
@@ -106,11 +106,11 @@ public class IssuingDistributionPoint
         {
             vec.add(new DERTaggedObject(false, 3, onlySomeReasons));
         }
-        if (!indirectCRL)
+        if (indirectCRL)
         {
             vec.add(new DERTaggedObject(false, 4, new DERBoolean(true)));
         }
-        if (!onlyContainsAttributeCerts)
+        if (onlyContainsAttributeCerts)
         {
             vec.add(new DERTaggedObject(false, 5, new DERBoolean(true)));
         }
