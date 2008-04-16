@@ -67,7 +67,13 @@ public class DistributionPointName
         this.type = type;
         this.name = name;
     }
-    
+
+    public DistributionPointName(
+        GeneralNames name)
+    {
+        this(FULL_NAME, name);
+    }
+
     /**
      * Return the tag number applying to the underlying choice.
      * 
