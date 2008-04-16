@@ -2,20 +2,14 @@ package org.bouncycastle.asn1.test;
 
 import java.io.IOException;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.asn1.x509.ReasonFlags;
 import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.qualified.BiometricData;
-import org.bouncycastle.asn1.x509.qualified.TypeOfBiometricData;
+import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
+import org.bouncycastle.asn1.x509.ReasonFlags;
+import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.util.test.SimpleTest;
 
 public class IssuingDistributionPointUnitTest 
@@ -106,8 +100,6 @@ public class IssuingDistributionPointUnitTest
 
         if (!isEquiv(distributionPoint, point.getDistributionPoint()))
         {
-            System.out.println(distributionPoint);
-            System.out.println(point.getDistributionPoint());
             fail("mismatch on distributionPoint");
         }
     }
