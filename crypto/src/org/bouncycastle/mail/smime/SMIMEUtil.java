@@ -191,7 +191,8 @@ public class SMIMEUtil
                 Enumeration headers = mimePart.getAllHeaderLines();
                 while (headers.hasMoreElements())
                 {
-                    lOut.writeln((String)headers.nextElement());
+                    String header = (String)headers.nextElement();
+                    lOut.writeln(header);
                 }
 
                 lOut.writeln();      // CRLF separator
@@ -201,8 +202,12 @@ public class SMIMEUtil
                 for (int i = 0; i < mp.getCount(); i++)
                 {
                     lOut.writeln(boundary);
-                    outputBodyPart(out, mp.getBodyPart(i), defaultContentTransferEncoding);
-                    lOut.writeln();       // CRLF terminator
+                    BodyPart part = mp.getBodyPart(i);
+                    outputBodyPart(out, part, defaultContentTransferEncoding);
+                    if (!(part.getContent() instanceof MimeMultipart))
+                    {
+                        lOut.writeln();       // CRLF terminator needed
+                    }
                 }
 
                 lOut.writeln(boundary + "--");
@@ -242,7 +247,8 @@ public class SMIMEUtil
             LineOutputStream outLine = new LineOutputStream(out);
             for (Enumeration e = mimePart.getAllHeaderLines(); e.hasMoreElements();) 
             {
-                outLine.writeln((String)e.nextElement());
+                String header = (String)e.nextElement();
+                outLine.writeln(header);
             }
 
             outLine.writeln();
