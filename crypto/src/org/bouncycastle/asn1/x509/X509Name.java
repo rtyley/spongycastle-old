@@ -386,7 +386,7 @@ public class X509Name
                    if (value instanceof DERString && !(value instanceof DERUniversalString))
                    {
                        String v = ((DERString)value).getString();
-                       if (v.charAt(0) == '#')
+                       if (v.length() > 0 && v.charAt(0) == '#')
                        {
                            values.addElement("\\" + v);
                        }
