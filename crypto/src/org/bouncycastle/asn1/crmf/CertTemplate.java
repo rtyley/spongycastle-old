@@ -49,13 +49,13 @@ public class CertTemplate
                 signingAlg = AlgorithmIdentifier.getInstance(tObj, false);
                 break;
             case 3:
-                issuer = X509Name.getInstance(tObj, false);
+                issuer = X509Name.getInstance(tObj, true); // CHOICE
                 break;
             case 4:
                 validity = OptionalValidity.getInstance(ASN1Sequence.getInstance(tObj, false));
                 break;
             case 5:
-                subject = X509Name.getInstance(tObj, false);
+                subject = X509Name.getInstance(tObj, true); // CHOICE
                 break;
             case 6:
                 publicKey = SubjectPublicKeyInfo.getInstance(tObj, false);
@@ -110,25 +110,25 @@ public class CertTemplate
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        addOptional(v, 0, version);
-        addOptional(v, 1, serialNumber);
-        addOptional(v, 2, signingAlg);
-        addOptional(v, 3, issuer);
-        addOptional(v, 4, validity);
-        addOptional(v, 5, subject);
-        addOptional(v, 6, publicKey);
-        addOptional(v, 7, issuerUID);
-        addOptional(v, 8, subjectUID);
-        addOptional(v, 9, extensions);
+        addOptional(v, 0, false, version);
+        addOptional(v, 1, false, serialNumber);
+        addOptional(v, 2, false, signingAlg);
+        addOptional(v, 3, true, issuer); // CHOICE
+        addOptional(v, 4, false, validity);
+        addOptional(v, 5, true, subject); // CHOICE
+        addOptional(v, 6, false, publicKey);
+        addOptional(v, 7, false, issuerUID);
+        addOptional(v, 8, false, subjectUID);
+        addOptional(v, 9, false, extensions);
 
         return new DERSequence(v);
     }
 
-    private void addOptional(ASN1EncodableVector v, int tagNo, ASN1Encodable obj)
+    private void addOptional(ASN1EncodableVector v, int tagNo, boolean isExplicit, ASN1Encodable obj)
     {
         if (obj != null)
         {
-            v.add(new DERTaggedObject(false, tagNo, obj));
+            v.add(new DERTaggedObject(isExplicit, tagNo, obj));
         }
     }
 }
