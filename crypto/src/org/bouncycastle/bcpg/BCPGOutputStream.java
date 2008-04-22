@@ -60,6 +60,7 @@ public class BCPGOutputStream
             this.writeHeader(tag, false, true, 0);
             this.partialBufferLength = 1 << BUF_SIZE_POWER;
             this.partialBuffer = new byte[partialBufferLength];
+            this.partialPower = BUF_SIZE_POWER;
             this.partialOffset = 0;
         }
         else
