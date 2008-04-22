@@ -28,6 +28,10 @@ Release 1.40
 <li>EAX mode ciphers were not resetting correctly after a doFinal/reset. This has been fixed.</li>
 <li>The SMIME API was failing to verify doubly nested multipart objects in signatures correctly. This has been fixed.</li>
 <li>Some boolean parameters to IssuingDistributionPoint were being reversed. This has been fixed.</li>
+<li>A zero length RDN would cause an exception in an X509Name. This has been fixed.</li>
+<li>Passing a null to ExtendedPKIXParameters.setTrustedACIssuers() would cause a NullPointerException. This has been fixed.</li>
+<li>CertTemplate was incorrectly encoding issuer and subject fields when set.</li>
+<li>Using the default partial packet generation in BCPG generated garbage files. This has been fixed.</li>
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
