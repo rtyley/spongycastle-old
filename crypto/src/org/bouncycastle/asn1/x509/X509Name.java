@@ -160,8 +160,12 @@ public class X509Name
      * RFC 3039 PostalAddress - SEQUENCE SIZE (1..6) OF
      * DirectoryString(SIZE(1..30))
      */
-    public static final DERObjectIdentifier POSTAL_ADDRESS = new DERObjectIdentifier(
-                    "2.5.4.16");
+    public static final DERObjectIdentifier POSTAL_ADDRESS = new DERObjectIdentifier("2.5.4.16");
+
+    /**
+     * id-at-telephoneNumber
+     */
+    public static final DERObjectIdentifier TELEPHONE_NUMBER = new DERObjectIdentifier("2.5.4.20");
 
     /**
      * Email address (RSA PKCS#9 extension) - IA5String.
@@ -266,6 +270,7 @@ public class X509Name
         DefaultSymbols.put(DATE_OF_BIRTH, "DateOfBirth");
         DefaultSymbols.put(POSTAL_CODE, "PostalCode");
         DefaultSymbols.put(BUSINESS_CATEGORY, "BusinessCategory");
+        DefaultSymbols.put(TELEPHONE_NUMBER, "TelephoneNumber");
 
         RFC2253Symbols.put(C, "C");
         RFC2253Symbols.put(O, "O");
@@ -317,6 +322,7 @@ public class X509Name
         DefaultLookUp.put("dateofbirth", DATE_OF_BIRTH);
         DefaultLookUp.put("postalcode", POSTAL_CODE);
         DefaultLookUp.put("businesscategory", BUSINESS_CATEGORY);
+        DefaultLookUp.put("telephonenumber", TELEPHONE_NUMBER);
     }
 
     private X509NameEntryConverter  converter = null;
