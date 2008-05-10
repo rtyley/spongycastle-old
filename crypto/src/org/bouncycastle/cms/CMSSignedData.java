@@ -58,7 +58,7 @@ import java.util.Map;
  */
 public class CMSSignedData
 {
-    private static CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
+    private static final CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
     
     SignedData              signedData;
     ContentInfo             contentInfo;

@@ -92,7 +92,7 @@ import java.util.Map;
 public class CMSSignedDataParser
     extends CMSContentInfoParser
 {
-    private static CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
+    private static final CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
 
     private SignedDataParser        _signedData;
     private CMSTypedStream          _signedContent;
@@ -158,8 +158,8 @@ public class CMSSignedDataParser
                 AlgorithmIdentifier id = AlgorithmIdentifier.getInstance(o.getDERObject());
                 try
                 {
-                    String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(id.getObjectId().toString());
-                    MessageDigest dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, null);
+                    String        digestName = HELPER.getDigestAlgName(id.getObjectId().toString());
+                    MessageDigest dig = HELPER.getDigestInstance(digestName, null);
 
                     this._digests.put(digestName, dig);
                 }
@@ -250,7 +250,7 @@ public class CMSSignedDataParser
                 while ((o = s.readObject()) != null)
                 {
                     SignerInfo info = SignerInfo.getInstance(o.getDERObject());
-                    String     digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
+                    String     digestName = HELPER.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
                     
                     byte[] hash = (byte[])hashes.get(digestName);
                     
