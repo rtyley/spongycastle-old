@@ -529,15 +529,15 @@ public class X509Name
         }
     }
 
-    private Boolean isEncoded(String s)
-    {
-        if (s.charAt(0) == '#')
-        {
-            return TRUE;
-        }
-
-        return FALSE;
-    }
+//    private Boolean isEncoded(String s)
+//    {
+//        if (s.charAt(0) == '#')
+//        {
+//            return TRUE;
+//        }
+//
+//        return FALSE;
+//    }
 
     /**
      * Takes an X509 dir name as a string of the format "C=AU, ST=Victoria", or
