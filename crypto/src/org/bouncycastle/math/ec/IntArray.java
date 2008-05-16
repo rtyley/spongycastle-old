@@ -479,10 +479,10 @@ class IntArray
     public int hashCode()
     {
         int usedLen = getUsedLength();
-        int hash = 0;
+        int hash = 1;
         for (int i = 0; i < usedLen; i++)
         {
-            hash ^= m_ints[i];
+            hash = hash * 31 + m_ints[i];
         }
         return hash;
     }

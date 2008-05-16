@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.util.Arrays;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -220,14 +222,7 @@ public class DERBitString
 
     public int hashCode()
     {
-        int     value = 0;
-
-        for (int i = 0; i != data.length; i++)
-        {
-            value ^= (data[i] & 0xff) << (i % 4);
-        }
-
-        return value;
+        return Arrays.hashCode(data);
     }
     
     protected boolean asn1Equals(

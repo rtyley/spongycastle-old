@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1;
 
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.Arrays;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -115,15 +116,7 @@ public abstract class ASN1OctetString
 
     public int hashCode()
     {
-        byte[]  b = this.getOctets();
-        int     value = 0;
-
-        for (int i = 0; i != b.length; i++)
-        {
-            value ^= (b[i] & 0xff) << (i % 4);
-        }
-
-        return value;
+        return Arrays.hashCode(this.getOctets());
     }
 
     boolean asn1Equals(

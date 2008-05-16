@@ -321,15 +321,7 @@ public class X509V2AttributeCertificate
     {
         try
         {
-            byte[]  b = this.getEncoded();
-            int     value = 0;
-
-            for (int i = 0; i != b.length; i++)
-            {
-                value ^= (b[i] & 0xff) << (i % 4);
-            }
-
-            return value;
+            return Arrays.hashCode(this.getEncoded());
         }
         catch (IOException e)
         {
