@@ -102,13 +102,13 @@ public final class Arrays
 
     public static int hashCode(byte[] data)
     {
-        int value = 0;
+        int value = 1;
 
         if (data != null)
         {
             for (int i = 0; i != data.length; i++)
             {
-                value ^= (data[i] & 0xff) << (i % 4);
+                value = value * 31 + data[i];
             }
         }
 
