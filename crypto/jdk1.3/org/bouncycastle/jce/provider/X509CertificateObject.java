@@ -527,7 +527,7 @@ public class X509CertificateObject
 
             for (int i = 0; i != b.length; i++)
             {
-                value ^= (b[i] & 0xff) << (i % 4);
+                value ^= (b[i] & 0xff) << ((i % 4) * 8);
             }
 
             return value;
