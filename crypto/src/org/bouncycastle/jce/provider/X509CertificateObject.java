@@ -59,6 +59,8 @@ public class X509CertificateObject
     private X509CertificateStructure    c;
     private BasicConstraints            basicConstraints;
     private boolean[]                   keyUsage;
+    private boolean                     hashValueSet;
+    private int                         hashValue;
 
     private PKCS12BagAttributeCarrier   attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
@@ -568,24 +570,27 @@ public class X509CertificateObject
     
     public int hashCode()
     {
+        if (!hashValueSet)
+        {
+            hashValue = calculateHashCode();
+            hashValueSet = true;
+        }
+
+        return hashValue;
+    }
+    
+    private int calculateHashCode()
+    {
         try
         {
-            byte[]  b = this.getEncoded();
-            int     value = 0;
-
-            for (int i = 0; i != b.length; i++)
-            {
-                value ^= (b[i] & 0xff) << ((i % 4) * 8);
-            }
-
-            return value;
+            return Arrays.hashCode(this.getEncoded());
         }
         catch (CertificateEncodingException e)
         {
             return 0;
         }
     }
-    
+
     public void setBagAttribute(
         DERObjectIdentifier oid,
         DEREncodable        attribute)

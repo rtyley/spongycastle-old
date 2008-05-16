@@ -520,17 +520,20 @@ public class X509CertificateObject
     
     public int hashCode()
     {
+        if (!hashValueSet)
+        {
+            hashValue = calculateHashCode();
+            hashValueSet = true;
+        }
+
+        return hashValue;
+    }
+    
+    private int calculateHashCode()
+    {
         try
         {
-            byte[]  b = this.getEncoded();
-            int     value = 0;
-
-            for (int i = 0; i != b.length; i++)
-            {
-                value ^= (b[i] & 0xff) << ((i % 4) * 8);
-            }
-
-            return value;
+            return Arrays.hashCode(this.getEncoded());
         }
         catch (CertificateEncodingException e)
         {
