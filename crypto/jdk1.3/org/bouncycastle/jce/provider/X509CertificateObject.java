@@ -62,6 +62,8 @@ public class X509CertificateObject
     private Vector                      pkcs12Ordering = new Vector();
     private BasicConstraints            basicConstraints;
     private boolean[]                   keyUsage;
+    private boolean                     hashValueSet;
+    private int                         hashValue;
 
     public X509CertificateObject(
         X509CertificateStructure    c)
