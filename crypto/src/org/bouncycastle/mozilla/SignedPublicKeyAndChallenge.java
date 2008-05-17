@@ -79,13 +79,26 @@ public class SignedPublicKeyAndChallenge
         return pkac;
     }
 
+    public boolean verify()
+        throws NoSuchAlgorithmException, SignatureException, 
+               NoSuchProviderException, InvalidKeyException
+    {
+        return verify(null);
+    }
+
     public boolean verify(String provider)
         throws NoSuchAlgorithmException, SignatureException, 
                NoSuchProviderException, InvalidKeyException
     {
         Signature sig = null;
-        sig = Signature.getInstance(signatureAlgorithm.getObjectId().getId(),
-                                    provider);
+        if (provider == null)
+        {
+            sig = Signature.getInstance(signatureAlgorithm.getObjectId().getId());
+        }
+        else
+        {
+            sig = Signature.getInstance(signatureAlgorithm.getObjectId().getId(), provider);
+        }
         PublicKey pubKey = this.getPublicKey(provider);
         sig.initVerify(pubKey);
         DERBitString pkBytes = new DERBitString(pkac);

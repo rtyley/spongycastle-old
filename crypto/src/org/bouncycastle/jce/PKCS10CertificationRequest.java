@@ -341,7 +341,15 @@ public class PKCS10CertificationRequest
             throw new IllegalArgumentException("can't encode public key");
         }
 
-        Signature sig = Signature.getInstance(signatureAlgorithm, provider);
+        Signature sig;
+        if (provider == null)
+        {
+            sig = Signature.getInstance(signatureAlgorithm);
+        }
+        else
+        {
+            sig = Signature.getInstance(signatureAlgorithm, provider);
+        }
 
         sig.initSign(signingKey);
 
@@ -385,7 +393,14 @@ public class PKCS10CertificationRequest
         {
             try
             {
-                return KeyFactory.getInstance(keyAlg.getObjectId().getId(), provider).generatePublic(xspec);
+                if (provider == null)
+                {
+                    return KeyFactory.getInstance(keyAlg.getObjectId().getId()).generatePublic(xspec);
+                }
+                else
+                {
+                    return KeyFactory.getInstance(keyAlg.getObjectId().getId(), provider).generatePublic(xspec);
+                }
             }
             catch (NoSuchAlgorithmException e)
             {
@@ -396,7 +411,14 @@ public class PKCS10CertificationRequest
                 {
                     String  keyAlgorithm = (String)keyAlgorithms.get(keyAlg.getObjectId());
                     
-                    return KeyFactory.getInstance(keyAlgorithm, provider).generatePublic(xspec);
+                    if (provider == null)
+                    {
+                        return KeyFactory.getInstance(keyAlgorithm).generatePublic(xspec);
+                    }
+                    else
+                    {
+                        return KeyFactory.getInstance(keyAlgorithm, provider).generatePublic(xspec);
+                    }
                 }
                 
                 throw e;
@@ -442,7 +464,10 @@ public class PKCS10CertificationRequest
 
         try
         {
-            sig = Signature.getInstance(getSignatureName(sigAlgId), provider);
+            if (provider == null)
+                sig = Signature.getInstance(getSignatureName(sigAlgId));
+            else
+                sig = Signature.getInstance(getSignatureName(sigAlgId), provider);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -453,7 +478,10 @@ public class PKCS10CertificationRequest
             {
                 String  signatureAlgorithm = (String)oids.get(sigAlgId.getObjectId());
 
-                sig = Signature.getInstance(signatureAlgorithm, provider);
+                if (provider == null)
+                    sig = Signature.getInstance(signatureAlgorithm);
+                else
+                    sig = Signature.getInstance(signatureAlgorithm, provider);
             }
             else
             {
@@ -461,10 +489,10 @@ public class PKCS10CertificationRequest
             }
         }
 
-        setSignatureParameters(sig, sigAlgId.getParameters());
-        
         sig.initVerify(pubKey);
 
+        setSignatureParameters(sig, sigAlgId.getParameters());
+        
         try
         {
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
