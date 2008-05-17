@@ -14,7 +14,7 @@ public abstract class ASN1Null
 
     public int hashCode()
     {
-        return 0;
+        return -1;
     }
 
     boolean asn1Equals(
