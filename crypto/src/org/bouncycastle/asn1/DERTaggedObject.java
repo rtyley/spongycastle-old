@@ -1,11 +1,10 @@
 package org.bouncycastle.asn1;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * DER TaggedObject - in ASN.1 nottation this is any object proceeded by
- * a [n] where n is some number - these are assume to follow the construction
+ * DER TaggedObject - in ASN.1 notation this is any object preceded by
+ * a [n] where n is some number - these are assumed to follow the construction
  * rules (as with sequences).
  */
 public class DERTaggedObject
@@ -53,13 +52,7 @@ public class DERTaggedObject
     {
         if (!empty)
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(obj);
-            dOut.close();
-
-            byte[]  bytes = bOut.toByteArray();
+            byte[] bytes = obj.getDERObject().getEncoded(DER);
 
             if (explicit)
             {
