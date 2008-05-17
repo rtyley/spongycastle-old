@@ -102,17 +102,21 @@ public final class Arrays
 
     public static int hashCode(byte[] data)
     {
-        int value = 1;
-
-        if (data != null)
+        if (data == null)
         {
-            for (int i = 0; i != data.length; i++)
-            {
-                value = value * 31 + data[i];
-            }
+            return 0;
         }
 
-        return value;
+        int i = data.length;
+        int hc = i + 1;
+
+        while (--i >= 0)
+        {
+            hc *= 257;
+            hc ^= data[i];
+        }
+
+        return hc;
     }
 
     public static byte[] clone(byte[] data)

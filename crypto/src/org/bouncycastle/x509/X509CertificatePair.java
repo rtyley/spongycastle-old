@@ -143,16 +143,16 @@ public class X509CertificatePair
 
     public int hashCode()
     {
-        int hash = 0;
+        int hash = -1;
         if (forward != null)
         {
-            hash += forward.hashCode();
+            hash ^= forward.hashCode();
         }
         if (reverse != null)
         {
-            hash += reverse.hashCode();
+            hash *= 17;
+            hash ^= reverse.hashCode();
         }
-
         return hash;
     }
 }
