@@ -3,8 +3,8 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 
 /**
- * ASN.1 TaggedObject - in ASN.1 nottation this is any object proceeded by
- * a [n] where n is some number - these are assume to follow the construction
+ * ASN.1 TaggedObject - in ASN.1 notation this is any object preceded by
+ * a [n] where n is some number - these are assumed to follow the construction
  * rules (as with sequences).
  */
 public abstract class ASN1TaggedObject
@@ -118,6 +118,11 @@ public abstract class ASN1TaggedObject
     public int hashCode()
     {
         int code = tagNo;
+
+        if (explicit)
+        {
+            code = ~code;
+        }
 
         if (obj != null)
         {
