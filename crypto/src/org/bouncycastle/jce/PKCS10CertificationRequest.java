@@ -465,9 +465,13 @@ public class PKCS10CertificationRequest
         try
         {
             if (provider == null)
+            {
                 sig = Signature.getInstance(getSignatureName(sigAlgId));
+            }
             else
+            {
                 sig = Signature.getInstance(getSignatureName(sigAlgId), provider);
+            }
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -479,9 +483,13 @@ public class PKCS10CertificationRequest
                 String  signatureAlgorithm = (String)oids.get(sigAlgId.getObjectId());
 
                 if (provider == null)
+                {
                     sig = Signature.getInstance(signatureAlgorithm);
+                }
                 else
+                {
                     sig = Signature.getInstance(signatureAlgorithm, provider);
+                }
             }
             else
             {
@@ -489,10 +497,10 @@ public class PKCS10CertificationRequest
             }
         }
 
-        sig.initVerify(pubKey);
-
         setSignatureParameters(sig, sigAlgId.getParameters());
         
+        sig.initVerify(pubKey);
+
         try
         {
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
