@@ -38,7 +38,7 @@ public class PSSSigner
     /**
      * basic constructor
      *
-     * @param cipher the assymetric cipher to use.
+     * @param cipher the asymmetric cipher to use.
      * @param digest the digest to use.
      * @param sLen the length of the salt to use (in bytes).
      */
