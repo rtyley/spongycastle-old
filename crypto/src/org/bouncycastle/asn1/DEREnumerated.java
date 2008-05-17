@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.util.Arrays;
+
 import java.io.IOException;
 import java.math.BigInteger;
 
@@ -90,22 +92,9 @@ public class DEREnumerated
 
         DEREnumerated other = (DEREnumerated)o;
 
-        if (bytes.length != other.bytes.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != bytes.length; i++)
-        {
-            if (bytes[i] != other.bytes[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.areEqual(this.bytes, other.bytes);
     }
-    
+
     public int hashCode()
     {
         return this.getValue().hashCode();
