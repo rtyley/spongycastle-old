@@ -171,11 +171,16 @@ abstract public class ASN1Set
     public int hashCode()
     {
         Enumeration             e = this.getObjects();
-        int                     hashCode = 0;
+        int                     hashCode = size();
 
         while (e.hasMoreElements())
         {
-            hashCode ^= e.nextElement().hashCode();
+            Object o = e.nextElement();
+            hashCode *= 17;
+            if (o != null)
+            {
+                hashCode ^= o.hashCode();
+            }
         }
 
         return hashCode;

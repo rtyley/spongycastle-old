@@ -152,12 +152,12 @@ public abstract class ASN1Sequence
     public int hashCode()
     {
         Enumeration             e = this.getObjects();
-        int                     hashCode = 0;
+        int                     hashCode = size();
 
         while (e.hasMoreElements())
         {
-            Object    o = e.nextElement();
-            
+            Object o = e.nextElement();
+            hashCode *= 17;
             if (o != null)
             {
                 hashCode ^= o.hashCode();
