@@ -568,7 +568,7 @@ public class X509CertificateObject
         }
     }
     
-    public int hashCode()
+    public synchronized int hashCode()
     {
         if (!hashValueSet)
         {
@@ -749,7 +749,8 @@ public class X509CertificateObject
         }
 
         DEREncodable params = c.getSignatureAlgorithm().getParameters();
-        
+
+        // TODO This should go after the initVerify?
         X509SignatureUtil.setSignatureParameters(signature, params);
 
         signature.initVerify(key);
