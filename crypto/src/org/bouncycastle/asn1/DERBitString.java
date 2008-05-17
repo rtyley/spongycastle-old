@@ -222,9 +222,9 @@ public class DERBitString
 
     public int hashCode()
     {
-        return Arrays.hashCode(data);
+        return padBits ^ Arrays.hashCode(data);
     }
-    
+
     protected boolean asn1Equals(
         DERObject  o)
     {
@@ -233,22 +233,10 @@ public class DERBitString
             return false;
         }
 
-        DERBitString  other = (DERBitString)o;
+        DERBitString other = (DERBitString)o;
 
-        if (data.length != other.data.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != data.length; i++)
-        {
-            if (data[i] != other.data[i])
-            {
-                return false;
-            }
-        }
-
-        return (padBits == other.padBits);
+        return this.padBits == other.padBits
+            && Arrays.areEqual(this.data, other.data);
     }
 
     public String getString()
