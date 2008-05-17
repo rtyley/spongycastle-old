@@ -97,6 +97,6 @@ public class DEREnumerated
 
     public int hashCode()
     {
-        return this.getValue().hashCode();
+        return Arrays.hashCode(bytes);
     }
 }
