@@ -51,7 +51,7 @@ public class BERTaggedObject
     {
         if (out instanceof ASN1OutputStream || out instanceof BEROutputStream)
         {
-            out.write(CONSTRUCTED | TAGGED | tagNo);
+            out.writeTag(CONSTRUCTED | TAGGED, tagNo);
             out.write(0x80);
 
             if (!empty)

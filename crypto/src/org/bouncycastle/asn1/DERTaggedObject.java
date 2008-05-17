@@ -11,6 +11,8 @@ import java.io.IOException;
 public class DERTaggedObject
     extends ASN1TaggedObject
 {
+    private static final byte[] ZERO_BYTES = new byte[0];
+
     /**
      * @param tagNo the tag number for this object.
      * @param obj the tagged object.
@@ -61,28 +63,30 @@ public class DERTaggedObject
 
             if (explicit)
             {
-                out.writeEncoded(CONSTRUCTED | TAGGED | tagNo, bytes);
+                out.writeEncoded(CONSTRUCTED | TAGGED, tagNo, bytes);
             }
             else
             {
                 //
                 // need to mark constructed types...
                 //
+                int flags;
                 if ((bytes[0] & CONSTRUCTED) != 0)
                 {
-                    bytes[0] = (byte)(CONSTRUCTED | TAGGED | tagNo);
+                    flags = CONSTRUCTED | TAGGED;
                 }
                 else
                 {
-                    bytes[0] = (byte)(TAGGED | tagNo);
+                    flags = TAGGED;
                 }
 
-                out.write(bytes);
+                out.writeTag(flags, tagNo);
+                out.write(bytes, 1, bytes.length - 1);
             }
         }
         else
         {
-            out.writeEncoded(CONSTRUCTED | TAGGED | tagNo, new byte[0]);
+            out.writeEncoded(CONSTRUCTED | TAGGED, tagNo, ZERO_BYTES);
         }
     }
 }

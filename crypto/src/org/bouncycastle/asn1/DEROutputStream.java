@@ -50,14 +50,31 @@ public class DEROutputStream
         write(bytes);
     }
 
-    void writeEncodedHigh(
-        int     leadingOctet,
-        int     tag,
-        byte[]  bytes)
+    void writeTag(int flags, int tagNo)
         throws IOException
     {
-        write(leadingOctet);
-        write(tag); // FIXME Assumes tag < 128
+        if (tagNo < 31)
+        {
+            write(flags | tagNo);
+        }
+        else
+        {
+            write(flags | 0x1f);
+            if (tagNo < 128)
+            {
+                write(tagNo);    // FIXME
+            }
+            else
+            {
+                throw new IOException("can't encode high tag of " + tagNo);
+            }
+        }
+    }
+
+    void writeEncoded(int flags, int tagNo, byte[] bytes)
+        throws IOException
+    {
+        writeTag(flags, tagNo);
         writeLength(bytes.length);
         write(bytes);
     }
