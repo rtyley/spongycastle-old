@@ -13,6 +13,7 @@ import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.X509DefaultEntryConverter;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.util.Arrays;
@@ -526,6 +527,13 @@ public class X509NameTest
         {
             fail("Failed composite string to encoding test");
         }
+        
+        //
+        // dud name test - handle empty DN without barfing.
+        //
+        n = new X509Name("C=CH,O=,OU=dummy,CN=mail@dummy.com");
+
+        n = X509Name.getInstance(ASN1Object.fromByteArray(n.getEncoded()));
     }
 
     private void equalityTest(X509Name x509Name, X509Name x509Name1)
