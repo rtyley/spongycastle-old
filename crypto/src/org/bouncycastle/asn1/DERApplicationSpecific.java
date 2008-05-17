@@ -134,14 +134,7 @@ public class DERApplicationSpecific
             classBits |= DERTags.CONSTRUCTED; 
         }
 
-        if (tag < 31)
-        {
-            out.writeEncoded(classBits | tag, octets);
-        }
-        else
-        {
-            out.writeEncodedHigh(classBits | 0x1f, tag, octets);
-        }
+        out.writeEncoded(classBits, tag, octets);
     }
     
     boolean asn1Equals(

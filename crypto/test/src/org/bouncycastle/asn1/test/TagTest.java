@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.test;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERApplicationSpecific;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -52,11 +53,25 @@ public class TagTest
             fail("unexpected tag value found - not 32");
         }
 
+        tagged = (ASN1TaggedObject)ASN1Object.fromByteArray(tagged.getEncoded());
+
+        if (tagged.getTagNo() != 32)
+        {
+            fail("unexpected tag value found on recode - not 32");
+        }
+
         tagged = (ASN1TaggedObject)aIn.readObject();
 
         if (tagged.getTagNo() != 33)
         {
-            fail("unexpected tag value found - not 32");
+            fail("unexpected tag value found - not 33");
+        }
+
+        tagged = (ASN1TaggedObject)ASN1Object.fromByteArray(tagged.getEncoded());
+
+        if (tagged.getTagNo() != 33)
+        {
+            fail("unexpected tag value found on recode - not 33");
         }
 
         aIn = new ASN1InputStream(longAppSpecificTag);
@@ -68,6 +83,12 @@ public class TagTest
             fail("incorrect tag number read");
         }
 
+        app = (DERApplicationSpecific)ASN1Object.fromByteArray(app.getEncoded());
+
+        if (app.getApplicationTag() != 97)
+        {
+            fail("incorrect tag number read on recode");
+        }
     }
 
     public static void main(
