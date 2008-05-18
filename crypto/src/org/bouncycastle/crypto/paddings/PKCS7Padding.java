@@ -58,7 +58,7 @@ public class PKCS7Padding
     {
         int count = in[in.length - 1] & 0xff;
 
-        if (count > in.length)
+        if (count > in.length || count == 0)
         {
             throw new InvalidCipherTextException("pad block corrupted");
         }

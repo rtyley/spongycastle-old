@@ -12,6 +12,7 @@ import org.bouncycastle.crypto.paddings.TBCPadding;
 import org.bouncycastle.crypto.paddings.X923Padding;
 import org.bouncycastle.crypto.paddings.ZeroBytePadding;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -116,6 +117,21 @@ public class PaddingTest
         testPadding(new PKCS7Padding(), rand,
                                     Hex.decode("ffffff0505050505"),
                                     Hex.decode("0000000004040404"));
+
+        PKCS7Padding padder = new PKCS7Padding();
+        try
+        {
+            padder.padCount(new byte[8]);
+
+            fail("invalid padding not detected");
+        }
+        catch (InvalidCipherTextException e)
+        {
+            if (!"pad block corrupted".equals(e.getMessage()))
+            {
+                fail("wrong exception for corrupt padding: " + e);
+            }
+        } 
 
         testPadding(new ISO10126d2Padding(), rand,
                                     null,
