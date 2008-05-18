@@ -28,7 +28,7 @@ public class RSASSAPSSparams
     public static RSASSAPSSparams getInstance(
         Object  obj)
     {
-        if (obj instanceof RSASSAPSSparams)
+        if (obj == null || obj instanceof RSASSAPSSparams)
         {
             return (RSASSAPSSparams)obj;
         }
