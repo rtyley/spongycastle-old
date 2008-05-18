@@ -34,6 +34,7 @@ Release 1.40
 <li>Using the default partial packet generation in BCPG generated garbage files. This has been fixed.</li>
 <li>hashCode() for X509CertificateObject was very poor. This has been fixed.<li>
 <li>Specifying a greater than 32bit length for a stream and relying on the default BCPGOutputStream resulted in corrupted data. This has been fixed.</li>
+<li>PKCS7Padding validation would not fail if pad length was 0. This has been fixed.</li>
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
