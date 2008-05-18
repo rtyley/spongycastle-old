@@ -1040,20 +1040,6 @@ public class X509Name
         return res.toString();
     }
 
-    public int hashCode()
-    {
-        ASN1Sequence  seq = (ASN1Sequence)this.getDERObject();
-        Enumeration   e = seq.getObjects();
-        int           hashCode = 0;
-
-        while (e.hasMoreElements())
-        {
-            hashCode ^= e.nextElement().hashCode();
-        }
-
-        return hashCode;
-    }
-
     private void appendValue(
         StringBuffer        buf,
         Hashtable           oidSymbols,

@@ -48,7 +48,6 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -144,15 +143,12 @@ public class SignedMailValidator
             throws SignedMailValidatorException
     {
         this.certPathReviewerClass = certPathReviewerClass;
-        try
-        {
-            certPathReviewerClass.asSubclass(DEFAULT_CERT_PATH_REVIEWER);
-        }
-        catch (ClassCastException e)
+        boolean isSubclass = certPathReviewerClass.isAssignableFrom(DEFAULT_CERT_PATH_REVIEWER);
+        if(!isSubclass)
         {
             throw new IllegalArgumentException("certPathReviewerClass is not a subclass of " + DEFAULT_CERT_PATH_REVIEWER.getName());
         }
-        
+
         SMIMESigned s;
 
         try
@@ -337,17 +333,17 @@ public class SignedMailValidator
                     PKIXCertPathReviewer review;
                     try
                     {
-                        review = (PKIXCertPathReviewer) certPathReviewerClass.newInstance();
+                        review = (PKIXCertPathReviewer)certPathReviewerClass.newInstance();
                     }
                     catch (IllegalAccessException e)
                     {
                         throw new IllegalArgumentException("Cannot instantiate object of type " +
-                                certPathReviewerClass.getName() + ": " + e.getMessage(), e);
+                                certPathReviewerClass.getName() + ": " + e.getMessage());
                     }
                     catch (InstantiationException e)
                     {
                         throw new IllegalArgumentException("Cannot instantiate object of type " +
-                                certPathReviewerClass.getName() + ": " + e.getMessage(), e);
+                                certPathReviewerClass.getName() + ": " + e.getMessage());
                     }
                     review.init(certPath, usedParameters);
                     if (!review.isValidCertPath())
@@ -533,8 +529,8 @@ public class SignedMailValidator
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                             "SignedMailValidator.emailFromCertMismatch",
                             new Object[] {
-                                    new UntrustedInput(Arrays
-                                            .toString(fromAddresses)),
+                                    new UntrustedInput(
+                                            addressesToString(fromAddresses)),
                                     new UntrustedInput(certEmails) });
                     errors.add(msg);
                 }
@@ -547,6 +543,28 @@ public class SignedMailValidator
                             e.getMessage(), e, e.getClass().getName() });
             errors.add(msg);
         }
+    }
+
+    static String addressesToString(Object[] a)
+    {
+        if (a == null)
+        {
+            return "null";
+        }
+
+        StringBuffer b = new StringBuffer();
+        b.append('[');
+
+        for (int i = 0; i != a.length; i++)
+        {
+            b.append(String.valueOf(a[i]));
+            if (i == a.length - 1)
+            {
+                b.append(", ");
+            }
+        }
+
+        return b.append(']').toString();
     }
 
     public static Date getSignatureTime(SignerInformation signer)
@@ -691,7 +709,14 @@ public class SignedMailValidator
             {
                 // add next cert to path
                 X509CertSelector select = new X509CertSelector();
-                select.setSubject(cert.getIssuerX500Principal());
+                try
+                {
+                    select.setSubject(cert.getIssuerX500Principal().getEncoded());
+                }
+                catch (IOException e)
+                {
+                    throw new IllegalStateException(e.toString());
+                }
                 byte[] authKeyIdentBytes = cert.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
                 if (authKeyIdentBytes != null)
                 {
@@ -738,8 +763,16 @@ public class SignedMailValidator
             else
             {
                 X509CertSelector select = new X509CertSelector();
-                select.setSubject(cert.getIssuerX500Principal());
-                select.setIssuer(cert.getIssuerX500Principal());
+
+                try
+                {
+                    select.setSubject(cert.getIssuerX500Principal().getEncoded());
+                    select.setIssuer(cert.getIssuerX500Principal().getEncoded());
+                }
+                catch (IOException e)
+                {
+                    throw new IllegalStateException(e.toString());
+                }
     
                 boolean userProvided = false;
                 
