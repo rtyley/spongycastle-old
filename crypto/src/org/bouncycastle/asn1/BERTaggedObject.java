@@ -58,10 +58,9 @@ public class BERTaggedObject
             {
                 if (!explicit)
                 {
+                    Enumeration e;
                     if (obj instanceof ASN1OctetString)
                     {
-                        Enumeration  e;
-
                         if (obj instanceof BERConstructedOctetString)
                         {
                             e = ((BERConstructedOctetString)obj).getObjects();
@@ -70,36 +69,25 @@ public class BERTaggedObject
                         {
                             ASN1OctetString             octs = (ASN1OctetString)obj;
                             BERConstructedOctetString   berO = new BERConstructedOctetString(octs.getOctets());
-
                             e = berO.getObjects();
-                        }
-
-                        while (e.hasMoreElements())
-                        {
-                            out.writeObject(e.nextElement());
                         }
                     }
                     else if (obj instanceof ASN1Sequence)
                     {
-                        Enumeration  e = ((ASN1Sequence)obj).getObjects();
-
-                        while (e.hasMoreElements())
-                        {
-                            out.writeObject(e.nextElement());
-                        }
+                        e = ((ASN1Sequence)obj).getObjects();
                     }
                     else if (obj instanceof ASN1Set)
                     {
-                        Enumeration  e = ((ASN1Set)obj).getObjects();
-
-                        while (e.hasMoreElements())
-                        {
-                            out.writeObject(e.nextElement());
-                        }
+                        e = ((ASN1Set)obj).getObjects();
                     }
                     else
                     {
                         throw new RuntimeException("not implemented: " + obj.getClass().getName());
+                    }
+
+                    while (e.hasMoreElements())
+                    {
+                        out.writeObject(e.nextElement());
                     }
                 }
                 else
