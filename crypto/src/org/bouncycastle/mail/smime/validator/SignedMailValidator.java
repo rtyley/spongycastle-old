@@ -143,7 +143,7 @@ public class SignedMailValidator
             throws SignedMailValidatorException
     {
         this.certPathReviewerClass = certPathReviewerClass;
-        boolean isSubclass = certPathReviewerClass.isAssignableFrom(DEFAULT_CERT_PATH_REVIEWER);
+        boolean isSubclass = DEFAULT_CERT_PATH_REVIEWER.isAssignableFrom(certPathReviewerClass);
         if(!isSubclass)
         {
             throw new IllegalArgumentException("certPathReviewerClass is not a subclass of " + DEFAULT_CERT_PATH_REVIEWER.getName());
