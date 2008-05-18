@@ -31,7 +31,6 @@ public class CMSEnvelopedData
     
     private AlgorithmIdentifier    encAlg;
     private ASN1Set                unprotectedAttributes;
-    private AlgorithmIdentifier _encAlg;
 
     public CMSEnvelopedData(
         byte[]    envelopedData) 
@@ -59,43 +58,44 @@ public class CMSEnvelopedData
         // read the encrypted content info
         //
         EncryptedContentInfo encInfo = envData.getEncryptedContentInfo();
-        
-        this._encAlg = encInfo.getContentEncryptionAlgorithm();
-        
+
+        this.encAlg = encInfo.getContentEncryptionAlgorithm();
+
         //
         // load the RecipientInfoStore
         //
         ASN1Set     s = envData.getRecipientInfos();
         List        infos = new ArrayList();
+        byte[]      contentOctets = encInfo.getEncryptedContent().getOctets();
 
         for (int i = 0; i != s.size(); i++)
         {
             RecipientInfo   info = RecipientInfo.getInstance(s.getObjectAt(i));
+            InputStream     contentStream = new ByteArrayInputStream(contentOctets);
             Object          type = info.getInfo();
 
             if (type instanceof KeyTransRecipientInfo)
             {
                 infos.add(new KeyTransRecipientInformation(
-                            (KeyTransRecipientInfo)type, _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
+                    (KeyTransRecipientInfo)type, encAlg, contentStream));
             }
             else if (type instanceof KEKRecipientInfo)
             {
                 infos.add(new KEKRecipientInformation(
-                            (KEKRecipientInfo)type, _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
+                    (KEKRecipientInfo)type, encAlg, contentStream));
             }
             else if (type instanceof KeyAgreeRecipientInfo)
             {
                 infos.add(new KeyAgreeRecipientInformation(
-                            (KeyAgreeRecipientInfo)type, _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
+                    (KeyAgreeRecipientInfo)type, encAlg, contentStream));
             }
             else if (type instanceof PasswordRecipientInfo)
             {
                 infos.add(new PasswordRecipientInformation(
-                            (PasswordRecipientInfo)type, _encAlg, new ByteArrayInputStream(encInfo.getEncryptedContent().getOctets())));
+                    (PasswordRecipientInfo)type, encAlg, contentStream));
             }
         }
 
-        this.encAlg = envData.getEncryptedContentInfo().getContentEncryptionAlgorithm();
         this.recipientInfoStore = new RecipientInformationStore(infos);
         this.unprotectedAttributes = envData.getUnprotectedAttrs();
     }
