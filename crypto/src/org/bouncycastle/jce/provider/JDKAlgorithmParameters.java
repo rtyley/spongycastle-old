@@ -1125,7 +1125,7 @@ public abstract class JDKAlgorithmParameters
         OAEPParameterSpec     currentSpec;
     
         /**
-         * Return the PKCS#1 ASN.1 structure RSA-ES-OAEP-params.
+         * Return the PKCS#1 ASN.1 structure RSAES-OAEP-params.
          */
         protected byte[] engineGetEncoded() 
         {
@@ -1245,7 +1245,7 @@ public abstract class JDKAlgorithmParameters
         PSSParameterSpec     currentSpec;
     
         /**
-         * Return the PKCS#1 ASN.1 structure RSA-ES-OAEP-params.
+         * Return the PKCS#1 ASN.1 structure RSASSA-PSS-params.
          */
         protected byte[] engineGetEncoded() 
             throws IOException
