@@ -172,7 +172,7 @@ public class SignerInformation
     }
 
     /**
-     * return the signature/encyrption algorithm parameters, or null if
+     * return the signature/encryption algorithm parameters, or null if
      * there aren't any.
      */
     public byte[] getEncryptionAlgParams()
