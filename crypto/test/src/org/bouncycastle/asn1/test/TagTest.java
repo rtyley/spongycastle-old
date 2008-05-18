@@ -9,6 +9,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 
 
 /**
@@ -88,6 +89,19 @@ public class TagTest
         if (app.getApplicationTag() != 97)
         {
             fail("incorrect tag number read on recode");
+        }
+
+        SecureRandom sr = new SecureRandom();
+        for (int i = 0; i < 100; ++i)
+        {
+            int testTag = sr.nextInt() >>> (1 + (sr.nextInt() >>> 1) % 26);
+            app = new DERApplicationSpecific(testTag, new byte[]{ 1 });
+            app = (DERApplicationSpecific)ASN1Object.fromByteArray(app.getEncoded());
+
+            if (app.getApplicationTag() != testTag)
+            {
+                fail("incorrect tag number read on recode (random test value: " + testTag + ")");
+            }
         }
     }
 
