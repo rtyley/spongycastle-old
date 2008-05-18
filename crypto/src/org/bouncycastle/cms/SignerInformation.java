@@ -20,11 +20,15 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.cms.Time;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
 
 import java.io.IOException;
+import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -35,6 +39,9 @@ import java.security.SignatureException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.PSSParameterSpec;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -281,7 +288,56 @@ public class SignerInformation
         String          signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
         Signature       sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
         MessageDigest   digest = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider); 
-        
+
+        // TODO [BJA-109] Note: PSSParameterSpec requires JDK1.4+ 
+/*
+        try
+        {
+            DERObjectIdentifier sigAlgOID = encryptionAlgorithm.getObjectId();
+            if (sigAlgOID.equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
+            {
+                DERObject sigParams = this.encryptionAlgorithm.getParameters()
+                    .getDERObject();
+
+                // RFC 4056
+                // When the id-RSASSA-PSS algorithm identifier is used for a signature,
+                // the AlgorithmIdentifier parameters field MUST contain RSASSA-PSS-params.
+                if (sigParams == null || sigParams instanceof ASN1Null)
+                {
+                    throw new CMSException(
+                        "RSASSA-PSS signature must specify algorithm parameters");
+                }
+
+                AlgorithmParameters params = AlgorithmParameters.getInstance(
+                    sigAlgOID.getId(), sig.getProvider().getName());
+                params.init(sigParams.getEncoded(), "ASN.1");
+
+                PSSParameterSpec spec = (PSSParameterSpec)params.getParameterSpec(PSSParameterSpec.class);
+                sig.setParameter(spec);
+            }
+            else
+            {
+                // TODO Are there other signature algorithms that provide parameters?
+                if (sigParams != null && !(sigParams instanceof ASN1Null))
+                {
+                    throw new CMSException("unrecognised signature parameters provided");
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("error encoding signature parameters.", e);
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            throw new CMSException("error setting signature parameters.", e);
+        }
+        catch (InvalidParameterSpecException e)
+        {
+            throw new CMSException("error processing signature parameters.", e);
+        }
+*/
+
         try
         {
             sig.initVerify(key);
