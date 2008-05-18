@@ -62,11 +62,23 @@ public class DEROutputStream
             write(flags | 0x1f);
             if (tagNo < 128)
             {
-                write(tagNo);    // FIXME
+                write(tagNo);
             }
             else
             {
-                throw new IOException("can't encode high tag of " + tagNo);
+                byte[] stack = new byte[5];
+                int pos = stack.length;
+
+                stack[--pos] = (byte)(tagNo & 0x7F);
+
+                do
+                {
+                    tagNo >>= 7;
+                    stack[--pos] = (byte)(tagNo & 0x7F | 0x80);
+                }
+                while (tagNo > 127);
+
+                write(stack, pos, stack.length - pos);
             }
         }
     }
