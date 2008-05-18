@@ -23,8 +23,6 @@ import javax.crypto.spec.IvParameterSpec;
 
 public abstract class RecipientInformation
 {
-    private static final ASN1Null   asn1Null = new DERNull();
-    
     protected RecipientId           _rid = new RecipientId();
     protected AlgorithmIdentifier   _encAlg;
     protected AlgorithmIdentifier   _keyEncAlg;
@@ -135,7 +133,7 @@ public abstract class RecipientInformation
            
             ASN1Object sParams = (ASN1Object)_encAlg.getParameters();
     
-            if (sParams != null && !asn1Null.equals(sParams))
+            if (sParams != null && !(sParams instanceof ASN1Null))
             {
                 AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encAlg, cipher.getProvider().getName());
 
