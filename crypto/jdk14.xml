@@ -19,8 +19,6 @@
         <mkdir dir="${artifacts.dir}/checkstyle" />
         <copy todir="${src.dir}">
             <fileset dir="src">
-                <exclude name="**/PKIXCertPathReviewer.java" />
-                <exclude name="**/SignedMailValidator.java"/>
                 <exclude name="**/ValidateSignedMail.java"/>
                 <exclude name="**/ECPointUtil.java" />
                 <exclude name="**/ECNamedCurveSpec.java" />
@@ -32,9 +30,6 @@
                 <exclude name="**/ECDSA5Test.java" />
                 <exclude name="**/CRL5Test.java" />
                 <exclude name="**/NamedCurveTest.java" />
-                <exclude name="**/SignedMailValidatorTest.java" />
-                <exclude name="**/NistCertPathReviewerTest.java" />
-                <exclude name="**/DummyCertPathReviewer.java" />
                 <exclude name="**/X509LDAPCertStoreTest.java" />
                 <exclude name="**/X509StoreTest.java" />
             </fileset>

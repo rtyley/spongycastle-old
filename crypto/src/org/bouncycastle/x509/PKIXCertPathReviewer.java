@@ -2059,7 +2059,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 int numbOfCrls = nonMatchingCrlNames.size();
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                         "CertPathReviewer.noCrlInCertstore",
-                        new Object[] {new UntrustedInput(crlselect.getIssuers()),
+                        new Object[] {new UntrustedInput(crlselect.getIssuerNames()),
                                       new UntrustedInput(nonMatchingCrlNames),
                                       new Integer(numbOfCrls)});
                 addNotification(msg,index);
@@ -2452,7 +2452,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             {
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setUseCaches(false);
-                conn.setConnectTimeout(2000);
+                //conn.setConnectTimeout(2000);
                 conn.setDoInput(true);
                 conn.connect();
                 if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
