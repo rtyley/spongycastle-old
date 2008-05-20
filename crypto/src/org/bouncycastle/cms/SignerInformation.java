@@ -287,15 +287,13 @@ public class SignerInformation
         try
         {
             DERObjectIdentifier sigAlgOID = encryptionAlgorithm.getObjectId();
+            DEREncodable sigParams = this.encryptionAlgorithm.getParameters();
             if (sigAlgOID.equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
             {
-                DERObject sigParams = this.encryptionAlgorithm.getParameters()
-                    .getDERObject();
-
                 // RFC 4056
                 // When the id-RSASSA-PSS algorithm identifier is used for a signature,
                 // the AlgorithmIdentifier parameters field MUST contain RSASSA-PSS-params.
-                if (sigParams == null || sigParams instanceof ASN1Null)
+                if (sigParams == null)
                 {
                     throw new CMSException(
                         "RSASSA-PSS signature must specify algorithm parameters");
@@ -311,7 +309,7 @@ public class SignerInformation
             else
             {
                 // TODO Are there other signature algorithms that provide parameters?
-                if (sigParams != null && !(sigParams instanceof ASN1Null))
+                if (sigParams != null)
                 {
                     throw new CMSException("unrecognised signature parameters provided");
                 }
