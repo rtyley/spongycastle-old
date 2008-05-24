@@ -189,7 +189,7 @@ public class CMSEnvelopedDataStreamGenerator
 
             //
             // If params are null we try and second guess on them as some providers don't provide
-            // algorithm parameter generation explicity but instead generate them under the hood.
+            // algorithm parameter generation explicitly but instead generate them under the hood.
             //
             if (params == null)
             {
