@@ -40,44 +40,6 @@ public class EnvelopedDataParser
         return _version;
     }
 
-    public ASN1SetParser getCertificates() 
-        throws IOException
-    {
-        if (_nextObject == null)
-        {
-            _nextObject = _seq.readObject();
-        }
-        
-        if (_nextObject instanceof ASN1TaggedObjectParser && ((ASN1TaggedObjectParser)_nextObject).getTagNo() == 0)
-        {
-            ASN1SetParser certs = (ASN1SetParser)((ASN1TaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
-            _nextObject = null;
-            
-            return certs;
-        }
-        
-        return null;
-    }
-    
-    public ASN1SetParser getCrls() 
-        throws IOException
-    {
-        if (_nextObject == null)
-        {
-            _nextObject = _seq.readObject();
-        }
-        
-        if (_nextObject instanceof ASN1TaggedObjectParser && ((ASN1TaggedObjectParser)_nextObject).getTagNo() == 1)
-        {
-            ASN1SetParser crls = (ASN1SetParser)((ASN1TaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
-            _nextObject = null;
-            
-            return crls;
-        }
-        
-        return null;
-    }
-    
     public OriginatorInfo getOriginatorInfo() 
         throws IOException
     {
