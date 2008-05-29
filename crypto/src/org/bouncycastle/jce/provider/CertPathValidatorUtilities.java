@@ -156,22 +156,23 @@ public class CertPathValidatorUtilities
         String          sigProvider) 
             throws AnnotatedException
     {
-        Iterator iter = trustAnchors.iterator();
         TrustAnchor trust = null;
         PublicKey trustPublicKey = null;
         Exception invalidKeyEx = null;
 
         X509CertSelector certSelectX509 = new X509CertSelector();
+        X500Principal certIssuer = getEncodedIssuerPrincipal(cert);
 
         try
         {
-            certSelectX509.setSubject(getEncodedIssuerPrincipal(cert).getEncoded());
+            certSelectX509.setSubject(certIssuer.getEncoded());
         }
         catch (IOException ex)
         {
             throw new AnnotatedException("Cannot set subject search criteria for trust anchor.", ex);
         }
 
+        Iterator iter = trustAnchors.iterator();
         while (iter.hasNext() && trust == null)
         {
             trust = (TrustAnchor) iter.next();
@@ -191,7 +192,6 @@ public class CertPathValidatorUtilities
             {
                 try
                 {
-                    X500Principal certIssuer = getEncodedIssuerPrincipal(cert);
                     X500Principal caName = new X500Principal(trust.getCAName());
                     if (certIssuer.equals(caName))
                     {
