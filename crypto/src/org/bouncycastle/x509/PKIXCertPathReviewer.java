@@ -741,7 +741,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 }
                 try
                 {
-                    cert.verify(trustPublicKey);
+                    CertPathValidatorUtilities.verifyX509Certificate(cert, trustPublicKey,
+                        pkixParams.getSigProvider());
                 }
                 catch (SignatureException e)
                 {
@@ -857,7 +858,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             {
                 try
                 {
-                    cert.verify(workingPublicKey, "BC");
+                    CertPathValidatorUtilities.verifyX509Certificate(cert, workingPublicKey,
+                        pkixParams.getSigProvider());
                 }
                 catch (GeneralSecurityException ex)
                 {
@@ -870,7 +872,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             {
                 try
                 {
-                    cert.verify(cert.getPublicKey(), "BC");
+                    CertPathValidatorUtilities.verifyX509Certificate(cert, cert.getPublicKey(),
+                        pkixParams.getSigProvider());
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.rootKeyIsValidButNotATrustAnchor");
                     addError(msg, index);
                 }

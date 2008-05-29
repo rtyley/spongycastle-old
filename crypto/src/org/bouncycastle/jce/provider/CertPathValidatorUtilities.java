@@ -39,6 +39,7 @@ import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.cert.CRL;
@@ -111,7 +112,8 @@ public class CertPathValidatorUtilities
     
     /**
      * Search the given Set of TrustAnchor's for one that is the
-     * issuer of the given X509 certificate.
+     * issuer of the given X509 certificate. Uses the default provider
+     * for signature verification.
      *
      * @param cert the X509 certificate
      * @param trustAnchors a Set of TrustAnchor's
@@ -125,7 +127,33 @@ public class CertPathValidatorUtilities
      */
     protected static TrustAnchor findTrustAnchor(
         X509Certificate cert,
-        Set             trustAnchors) 
+        Set             trustAnchors)
+            throws AnnotatedException
+    {
+        return findTrustAnchor(cert, trustAnchors, null);
+    }
+    
+    /**
+     * Search the given Set of TrustAnchor's for one that is the
+     * issuer of the given X509 certificate. Uses the specified
+     * provider for signature verification, or the default provider
+     * if null.
+     *
+     * @param cert the X509 certificate
+     * @param trustAnchors a Set of TrustAnchor's
+     * @param sigProvider the provider to use for signature verification
+     *
+     * @return the <code>TrustAnchor</code> object if found or
+     * <code>null</code> if not.
+     *
+     * @exception AnnotatedException
+     *                if a TrustAnchor was found but the signature verification
+     *                on the given certificate has thrown an exception.
+     */
+    protected static TrustAnchor findTrustAnchor(
+        X509Certificate cert,
+        Set             trustAnchors,
+        String          sigProvider) 
             throws AnnotatedException
     {
         Iterator iter = trustAnchors.iterator();
@@ -188,7 +216,7 @@ public class CertPathValidatorUtilities
             {
                 try
                 {
-                    cert.verify(trustPublicKey);
+                    verifyX509Certificate(cert, trustPublicKey, sigProvider);
                 }
                 catch (Exception ex)
                 {
@@ -1420,5 +1448,18 @@ public class CertPathValidatorUtilities
         }
         return certs;
     }
-    
+
+    protected static void verifyX509Certificate(X509Certificate cert, PublicKey publicKey,
+        String sigProvider)
+            throws GeneralSecurityException
+    {
+        if (sigProvider == null)
+        {
+            cert.verify(publicKey);
+        }
+        else
+        {
+            cert.verify(publicKey, sigProvider);
+        }
+    }
 }

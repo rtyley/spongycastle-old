@@ -93,7 +93,7 @@ public class PKIXCertPathValidatorSpi
         try
         {
             trust = CertPathValidatorUtilities.findTrustAnchor((X509Certificate) certs.get(certs.size() - 1),
-                    paramsPKIX.getTrustAnchors());
+                    paramsPKIX.getTrustAnchors(), paramsPKIX.getSigProvider());
         }
         catch (AnnotatedException e)
         {
