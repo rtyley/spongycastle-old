@@ -1473,7 +1473,8 @@ public class RFC3280CertPathUtilities
         {
             // (a) (1)
             //
-            cert.verify(workingPublicKey, "BC");
+            CertPathValidatorUtilities.verifyX509Certificate(cert, workingPublicKey,
+                paramsPKIX.getSigProvider());
         }
         catch (GeneralSecurityException e)
         {
