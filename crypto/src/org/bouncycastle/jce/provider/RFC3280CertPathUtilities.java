@@ -1460,6 +1460,7 @@ public class RFC3280CertPathUtilities
         ExtendedPKIXParameters paramsPKIX,
         int index,
         PublicKey workingPublicKey,
+        boolean verificationAlreadyPerformed,
         X500Principal workingIssuerName,
         X509Certificate sign)
         throws ExtCertPathValidatorException
@@ -1469,17 +1470,20 @@ public class RFC3280CertPathUtilities
         //
         // (a) verify
         //
-        try
+        if (!verificationAlreadyPerformed)
         {
-            // (a) (1)
-            //
-            CertPathValidatorUtilities.verifyX509Certificate(cert, workingPublicKey,
-                paramsPKIX.getSigProvider());
-        }
-        catch (GeneralSecurityException e)
-        {
-            throw new ExtCertPathValidatorException("Could not validate certificate signature.", e, certPath, index);
-        }
+            try
+            {
+                // (a) (1)
+                //
+                CertPathValidatorUtilities.verifyX509Certificate(cert, workingPublicKey,
+                    paramsPKIX.getSigProvider());
+            }
+            catch (GeneralSecurityException e)
+            {
+                throw new ExtCertPathValidatorException("Could not validate certificate signature.", e, certPath, index);
+            }
+		}
 
         try
         {

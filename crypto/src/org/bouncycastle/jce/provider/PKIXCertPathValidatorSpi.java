@@ -265,13 +265,14 @@ public class PKIXCertPathValidatorSpi
             // first time from the TrustAnchor
             //
             cert = (X509Certificate) certs.get(index);
+            boolean verificationAlreadyPerformed = (index == certs.size() - 1);
 
             //
             // 6.1.3
             //
 
-            RFC3280CertPathUtilities.processCertA(certPath, paramsPKIX, index, workingPublicKey, workingIssuerName,
-                    sign);
+            RFC3280CertPathUtilities.processCertA(certPath, paramsPKIX, index, workingPublicKey,
+                verificationAlreadyPerformed, workingIssuerName, sign);
 
             RFC3280CertPathUtilities.processCertBC(certPath, index, nameConstraintValidator);
 
