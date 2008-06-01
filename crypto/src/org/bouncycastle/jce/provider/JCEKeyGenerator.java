@@ -304,18 +304,6 @@ public class JCEKeyGenerator
     }
 
     /**
-     * IDEA
-     */
-    public static class IDEA
-        extends JCEKeyGenerator
-    {
-        public IDEA()
-        {
-            super("IDEA", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
      * TEA
      */
     public static class TEA

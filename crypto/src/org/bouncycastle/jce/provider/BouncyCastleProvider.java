@@ -9,11 +9,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
-import org.bouncycastle.jce.provider.symmetric.AESMappings;
-import org.bouncycastle.jce.provider.symmetric.CAST5Mappings;
-import org.bouncycastle.jce.provider.symmetric.CamelliaMappings;
-import org.bouncycastle.jce.provider.symmetric.NoekeonMappings;
-import org.bouncycastle.jce.provider.symmetric.SEEDMappings;
 
 import java.security.Provider;
 import java.util.Iterator;
@@ -50,6 +45,15 @@ public final class BouncyCastleProvider extends Provider
 
     public static String PROVIDER_NAME = "BC";
 
+    /*
+     * Configurable symmetric ciphers
+     */
+    private static final String SYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.symmetric.";
+    private static final String[] SYMMETRIC_CIPHERS =
+    {
+        "AES", "Camellia", "CAST5", "IDEA", "Noekeon", "SEED"
+    };
+
     /**
      * Construct a new provider.  This should only be required when
      * using runtime registration of the provider using the
@@ -59,11 +63,31 @@ public final class BouncyCastleProvider extends Provider
     {
         super(PROVIDER_NAME, 1.395, info);
 
-        addMappings(new AESMappings());
-        addMappings(new CamelliaMappings());
-        addMappings(new CAST5Mappings());
-        addMappings(new SEEDMappings());
-        addMappings(new NoekeonMappings());
+        for (int i = 0; i != SYMMETRIC_CIPHERS.length; i++)
+        {
+            Class clazz = null;
+            try
+            {
+                clazz = Class.forName(SYMMETRIC_CIPHER_PACKAGE + SYMMETRIC_CIPHERS[i] + "Mappings");
+            }
+            catch (ClassNotFoundException e)
+            {
+                // ignore
+            }
+
+            if (clazz != null)
+            {
+                try
+                {
+                    addMappings((Map)clazz.newInstance());
+                }
+                catch (Exception e)
+                {   // this should never ever happen!!
+                    throw new InternalError("cannot create instance of "
+                        + SYMMETRIC_CIPHER_PACKAGE + SYMMETRIC_CIPHERS[i] + "Mappings : " + e);
+                }
+            }
+        }
 
         //
         // X509Store
@@ -116,8 +140,6 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameterGenerator.DESEDE", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
         put("AlgorithmParameterGenerator.1.2.840.113549.3.7", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
         put("AlgorithmParameterGenerator.1.3.14.3.2.7", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
-        put("AlgorithmParameterGenerator.IDEA", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$IDEA");
-        put("AlgorithmParameterGenerator.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$IDEA");
         put("AlgorithmParameterGenerator.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
         put("AlgorithmParameterGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
 
@@ -133,8 +155,6 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameters.IES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IES");
         put("AlgorithmParameters.PKCS12PBE", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PKCS12PBE");
         put("AlgorithmParameters.1.2.840.113549.3.7", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("AlgorithmParameters.IDEA", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IDEAAlgorithmParameters");
-        put("AlgorithmParameters.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IDEAAlgorithmParameters");
 
         put("AlgorithmParameters.GOST3410", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$GOST3410");
         put("Alg.Alias.AlgorithmParameters.GOST-3410", "GOST3410");
@@ -144,7 +164,6 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDRC2", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDRC4", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDTWOFISH", "PKCS12PBE");
-        put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHA1ANDRC2-CBC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", "PKCS12PBE");
@@ -155,9 +174,7 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITRC2-CBC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITRC4", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDTWOFISH", "PKCS12PBE");
-        put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDTWOFISH-CBC", "PKCS12PBE");
-        put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA-CBC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.1", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.2", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.3", "PKCS12PBE");
@@ -239,8 +256,6 @@ public final class BouncyCastleProvider extends Provider
 
 
         put("Cipher.CAST6", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST6");
-        put("Cipher.IDEA", "org.bouncycastle.jce.provider.JCEBlockCipher$IDEA");
-        put("Cipher.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JCEBlockCipher$IDEACBC");
         put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES",  "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         
         put("Cipher.GOST28147", "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147");
@@ -324,7 +339,6 @@ public final class BouncyCastleProvider extends Provider
         
         put("Cipher.PBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndTwofish");
         put("Cipher.OLDPBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$OldPBEWithSHAAndTwofish");
-        put("Cipher.PBEWITHSHAANDIDEA-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndIDEA");
 
         put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.1", "PBEWITHSHAAND128BITRC4");
         put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.2", "PBEWITHSHAAND40BITRC4");
@@ -363,8 +377,6 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.VMPC-KSA3", "org.bouncycastle.jce.provider.JCEKeyGenerator$VMPCKSA3");
 
         put("KeyGenerator.CAST6", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST6");
-        put("KeyGenerator.IDEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$IDEA");
-        put("KeyGenerator.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$IDEA");
         put("KeyGenerator.TEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$TEA");
         put("KeyGenerator.XTEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$XTEA");
 
@@ -459,7 +471,6 @@ public final class BouncyCastleProvider extends Provider
         put("SecretKeyFactory.PBEWITHSHAAND128BITRC2-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitRC2");
         put("SecretKeyFactory.PBEWITHSHAAND40BITRC2-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd40BitRC2");
         put("SecretKeyFactory.PBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndTwofish");
-        put("SecretKeyFactory.PBEWITHSHAANDIDEA-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndIDEA");
         put("SecretKeyFactory.PBEWITHHMACRIPEMD160", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithRIPEMD160");
         put("SecretKeyFactory.PBEWITHHMACSHA1", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA");
         put("SecretKeyFactory.PBEWITHHMACTIGER", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithTiger");
@@ -585,11 +596,6 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Mac.SKIPJACK", "SKIPJACKMAC");
         put("Mac.SKIPJACKMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$SkipjackCFB8");
         put("Alg.Alias.Mac.SKIPJACK/CFB8", "SKIPJACKMAC/CFB8");
-
-        put("Mac.IDEAMAC", "org.bouncycastle.jce.provider.JCEMac$IDEA");
-        put("Alg.Alias.Mac.IDEA", "IDEAMAC");
-        put("Mac.IDEAMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$IDEACFB8");
-        put("Alg.Alias.Mac.IDEA/CFB8", "IDEAMAC/CFB8");
 
         put("Mac.RC2MAC", "org.bouncycastle.jce.provider.JCEMac$RC2");
         put("Alg.Alias.Mac.RC2", "RC2MAC");

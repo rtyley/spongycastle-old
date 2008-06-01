@@ -12,7 +12,6 @@ import org.bouncycastle.crypto.engines.CAST6Engine;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
-import org.bouncycastle.crypto.engines.IDEAEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.engines.RC532Engine;
 import org.bouncycastle.crypto.engines.RC564Engine;
@@ -1006,18 +1005,6 @@ public class JCEBlockCipher extends WrapCipherSpi
     }
 
     /**
-     * IDEA
-     */
-    static public class IDEA
-        extends JCEBlockCipher
-    {
-        public IDEA()
-        {
-            super(new IDEAEngine());
-        }
-    }
-
-    /**
      * TEA
      */
     static public class TEA
@@ -1050,18 +1037,6 @@ public class JCEBlockCipher extends WrapCipherSpi
         public SEED()
         {
             super(new SEEDEngine());
-        }
-    }
-
-    /**
-     * IDEA CBC
-     */
-    static public class IDEACBC
-        extends JCEBlockCipher
-    {
-        public IDEACBC()
-        {
-            super(new CBCBlockCipher(new IDEAEngine()), 64);
         }
     }
 
@@ -1173,18 +1148,6 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
     }
 
-    /**
-     * PBEWithSHAAndIDEA-CBC
-     */
-    static public class PBEWithSHAAndIDEA
-        extends JCEBlockCipher
-    {
-        public PBEWithSHAAndIDEA()
-        {
-            super(new CBCBlockCipher(new IDEAEngine()));
-        }
-    }
-    
     /**
      * PBEWithAES-CBC
      */
