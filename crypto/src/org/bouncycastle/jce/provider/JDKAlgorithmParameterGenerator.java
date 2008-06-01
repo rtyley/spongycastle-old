@@ -336,42 +336,4 @@ public abstract class JDKAlgorithmParameterGenerator
             return params;
         }
     }
-
-    public static class IDEA
-        extends JDKAlgorithmParameterGenerator
-    {
-        protected void engineInit(
-            AlgorithmParameterSpec  genParamSpec,
-            SecureRandom            random)
-            throws InvalidAlgorithmParameterException
-        {
-            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for IDEA parameter generation.");
-        }
-
-        protected AlgorithmParameters engineGenerateParameters()
-        {
-            byte[]  iv = new byte[8];
-
-            if (random == null)
-            {
-                random = new SecureRandom();
-            }
-
-            random.nextBytes(iv);
-
-            AlgorithmParameters params;
-
-            try
-            {
-                params = AlgorithmParameters.getInstance("IDEA", "BC");
-                params.init(new IvParameterSpec(iv));
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e.getMessage());
-            }
-
-            return params;
-        }
-    }
 }

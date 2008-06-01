@@ -15,7 +15,6 @@ import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.digests.TigerDigest;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
-import org.bouncycastle.crypto.engines.IDEAEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.engines.RC532Engine;
 import org.bouncycastle.crypto.engines.SkipjackEngine;
@@ -184,18 +183,6 @@ public class JCEMac
     }
 
     /**
-     * IDEA
-     */
-    public static class IDEA
-        extends JCEMac
-    {
-        public IDEA()
-        {
-            super(new CBCBlockCipherMac(new IDEAEngine()));
-        }
-    }
-
-    /**
      * RC2
      */
     public static class RC2
@@ -276,18 +263,6 @@ public class JCEMac
         public SkipjackCFB8()
         {
             super(new CFBBlockCipherMac(new SkipjackEngine()));
-        }
-    }
-
-    /**
-     * IDEACFB8
-     */
-    public static class IDEACFB8
-        extends JCEMac
-    {
-        public IDEACFB8()
-        {
-            super(new CFBBlockCipherMac(new IDEAEngine()));
         }
     }
 

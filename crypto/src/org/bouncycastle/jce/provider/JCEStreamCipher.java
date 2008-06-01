@@ -10,7 +10,6 @@ import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.HC128Engine;
 import org.bouncycastle.crypto.engines.HC256Engine;
-import org.bouncycastle.crypto.engines.IDEAEngine;
 import org.bouncycastle.crypto.engines.RC4Engine;
 import org.bouncycastle.crypto.engines.Salsa20Engine;
 import org.bouncycastle.crypto.engines.SkipjackEngine;
@@ -436,18 +435,6 @@ public class JCEStreamCipher
     }
 
     /**
-     * IDEA
-     */
-    static public class IDEA_CFB8
-        extends JCEStreamCipher
-    {
-        public IDEA_CFB8()
-        {
-            super(new CFBBlockCipher(new IDEAEngine(), 8), 64);
-        }
-    }
-
-    /**
      * DES
      */
     static public class DES_OFB8
@@ -504,18 +491,6 @@ public class JCEStreamCipher
         public Twofish_OFB8()
         {
             super(new OFBBlockCipher(new TwofishEngine(), 8), 128);
-        }
-    }
-
-    /**
-     * IDEA
-     */
-    static public class IDEA_OFB8
-        extends JCEStreamCipher
-    {
-        public IDEA_OFB8()
-        {
-            super(new OFBBlockCipher(new IDEAEngine(), 8), 64);
         }
     }
 
