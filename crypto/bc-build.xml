@@ -53,6 +53,7 @@
     <macrodef name="compile">
         <attribute name="target" />
         <element name="manifestElements" />
+        <element name="jarFileSet" />
         <sequential>
             <mkdir dir="${build.dir}/@{target}/classes" />
             <mkdir dir="${artifacts.dir}/@{target}" />
@@ -71,8 +72,9 @@
                 <manifest>
                     <manifestElements/>
                 </manifest>
-                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.class" />
-                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.properties" />
+                <fileset dir="${build.dir}/@{target}/classes">
+                    <jarFileSet/>
+                </fileset>
             </jar>
         </sequential>
     </macrodef>
@@ -180,6 +182,7 @@
     -->
     <target name="build-provider">
         <property name="provider" value="bcprov-${target.name}" />
+        <property name="extprovider" value="bcprov-ext-${target.name}" />
 
         <mkdir dir="${artifacts.jars.dir}" />
         <delete dir="${provider.target.dir}" />
@@ -207,6 +210,12 @@
         </copy>
 
         <compile target="${provider}">
+            <jarFileSet>
+                <include name="**/*.class"/>
+                <exclude name="**/IDEA*.class"/>
+                <exclude name="**/javax/crypto/**/*.class"/>
+                <include name="**/*.properties"/>
+            </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
                 <attribute name="Extension-Name" value="org.bouncycastle.bcprovider" />
@@ -218,6 +227,23 @@
             </manifestElements>
         </compile>
         
+        <jar jarfile="${artifacts.jars.dir}/${extprovider}.jar">
+            <manifest>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Extension-Name" value="org.bouncycastle.bcproviderext" />
+                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                <attribute name="Specification-Version" value="1.1" />
+                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                <attribute name="Implementation-Version" value="${release.name}.0" />
+            </manifest>
+            <fileset dir="${build.dir}/${provider}/classes">
+                <include name="**/*.class"/>
+                <exclude name="**/javax/crypto/**/*.class"/>
+                <include name="**/*.properties"/>
+            </fileset>
+        </jar>
+
     </target>
 
     <!--
@@ -225,6 +251,7 @@
     -->
     <target name="build-jce">
         <property name="jce" value="jce-${target.name}" />
+        <property name="extjce" value="jce-ext-${target.name}" />
 
         <mkdir dir="${artifacts.jars.dir}" />
         <delete dir="${jce.target.dir}" />
@@ -253,6 +280,11 @@
         </copy>
 
         <compile target="${jce}">
+            <jarFileSet>
+                <include name="**/*.class"/>
+                <exclude name="**/IDEA*.class"/>
+                <include name="**/*.properties"/>
+            </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
                 <attribute name="Extension-Name" value="org.bouncycastle.bcjce" />
@@ -264,6 +296,21 @@
             </manifestElements>
         </compile>
         
+        <jar jarfile="${artifacts.jars.dir}/${extjce}.jar">
+            <manifest>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Extension-Name" value="org.bouncycastle.bcjceext" />
+                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                <attribute name="Specification-Version" value="1.1" />
+                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                <attribute name="Implementation-Version" value="${release.name}.0" />
+            </manifest>
+            <fileset dir="${build.dir}/${jce}/classes">
+                <include name="**/*.class"/>
+                <include name="**/*.properties"/>
+            </fileset>
+        </jar>
     </target>
 
     <target name="build-libraries" depends="build-mail, build-tsp, build-pg" />
@@ -289,6 +336,10 @@
         </copy>
 
         <compile target="${mail.target}">
+            <jarFileSet>
+                <include name="**/*.class"/>
+                <include name="**/*.properties"/>
+            </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
                 <attribute name="Extension-Name" value="org.bouncycastle.bcmail" />
@@ -320,6 +371,10 @@
         </copy>
 
         <compile target="${tsp.target}">
+            <jarFileSet>
+                <include name="**/*.class"/>
+                <include name="**/*.properties"/>
+            </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
                 <attribute name="Extension-Name" value="org.bouncycastle.bctsp" />
@@ -360,6 +415,10 @@
         </copy>
 
         <compile target="${pg.target}">
+            <jarFileSet>
+                <include name="**/*.class"/>
+                <include name="**/*.properties"/>
+            </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
                 <attribute name="Extension-Name" value="org.bouncycastle.bcpg" />
@@ -417,6 +476,7 @@
             <classpath>
                 <fileset dir="${artifacts.jars.dir}">
                     <include name="**/*.jar" />
+                    <exclude name="**/bcprov-jdk*.jar" />
                 </fileset>
             </classpath>
             <sysproperty key="bc.test.data.home" value="test/data" />
@@ -445,6 +505,7 @@
             <classpath>
                 <fileset dir="${artifacts.jars.dir}">
                     <include name="**/*.jar" />
+                    <exclude name="**/bcprov-jdk*.jar" />
                 </fileset>
             </classpath>
 
