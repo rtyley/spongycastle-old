@@ -389,18 +389,6 @@ public class JCESecretKeyFactory
    }
 
    /**
-    * PBEWithSHAAndIDEA-CBC
-    */
-   static public class PBEWithSHAAndIDEA
-       extends PBEKeyFactory
-   {
-       public PBEWithSHAAndIDEA()
-       {
-           super("PBEwithSHAandIDEA-CBC", null, true, PKCS12, SHA1, 128, 64);
-       }
-   }
-   
-   /**
     * PBEWithSHAAnd128BitRC4
     */
    static public class PBEWithSHAAnd128BitRC4

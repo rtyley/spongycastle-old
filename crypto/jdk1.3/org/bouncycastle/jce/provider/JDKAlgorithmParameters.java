@@ -12,7 +12,6 @@ import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.asn1.misc.CAST5CBCParameters;
-import org.bouncycastle.asn1.misc.IDEACBCPar;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
@@ -172,98 +171,6 @@ public abstract class JDKAlgorithmParameters
         protected String engineToString() 
         {
             return "IV Parameters";
-        }
-    }
-
-    public static class IDEAAlgorithmParameters
-        extends JDKAlgorithmParameters
-    {
-        private byte[]  iv;
-
-        protected byte[] engineGetEncoded() 
-            throws IOException
-        {
-            return engineGetEncoded("ASN.1");
-        }
-
-        protected byte[] engineGetEncoded(
-            String format) 
-            throws IOException
-        {
-            if (this.isASN1FormatString(format))
-            {
-                return new IDEACBCPar(engineGetEncoded("RAW")).getEncoded();
-            }
-            
-            if (format.equals("RAW"))
-            {
-                byte[]  tmp = new byte[iv.length];
-
-                System.arraycopy(iv, 0, tmp, 0, iv.length);
-                return tmp;
-            }
-
-            return null;
-        }
-
-        protected AlgorithmParameterSpec localEngineGetParameterSpec(
-            Class paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (paramSpec == IvParameterSpec.class)
-            {
-                return new IvParameterSpec(iv);
-            }
-
-            throw new InvalidParameterSpecException("unknown parameter spec passed to IV parameters object.");
-        }
-
-        protected void engineInit(
-            AlgorithmParameterSpec paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (!(paramSpec instanceof IvParameterSpec))
-            {
-                throw new InvalidParameterSpecException("IvParameterSpec required to initialise a IV parameters algorithm parameters object");
-            }
-
-            this.iv = ((IvParameterSpec)paramSpec).getIV();
-        }
-
-        protected void engineInit(
-            byte[] params) 
-            throws IOException
-        {
-            this.iv = new byte[params.length];
-
-            System.arraycopy(params, 0, iv, 0, iv.length);
-        }
-
-        protected void engineInit(
-            byte[] params,
-            String format) 
-            throws IOException
-        {
-            if (format.equals("RAW"))
-            {
-                engineInit(params);
-                return;
-            }
-            if (format.equals("ASN.1"))
-            {
-                ASN1InputStream         aIn = new ASN1InputStream(params);
-                IDEACBCPar              oct = new IDEACBCPar((ASN1Sequence)aIn.readObject());
-
-                engineInit(oct.getIV());
-                return;
-            }
-
-            throw new IOException("Unknown parameters format in IV parameters object");
-        }
-
-        protected String engineToString() 
-        {
-            return "IDEA Parameters";
         }
     }
 
