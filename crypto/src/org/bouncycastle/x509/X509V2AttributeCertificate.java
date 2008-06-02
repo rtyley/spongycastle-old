@@ -74,7 +74,7 @@ public class X509V2AttributeCertificate
     
     public int getVersion()
     {
-        return cert.getAcinfo().getVersion().getValue().intValue();
+        return cert.getAcinfo().getVersion().getValue().intValue() + 1;
     }
     
     public BigInteger getSerialNumber()
