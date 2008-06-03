@@ -172,7 +172,8 @@ SecureRandom.</li>
 <li>Atsuhiko Yamanaka &lt;ymnk&#064jcraft.com&gt; - patch for improving use of Montgomery numbers in BigInteger library. Patch to use size of private exponent in DH parameters.</li>
 <li>Nickolay Bolshackov &lt;tyrex&#064reksoft.ru&gt; - patch for class cast exception in AuthorityInformationAccess class.</li>
 <li>Soren Hilmer &lt;soren.hilmer&#064tietoenator.com&gt; - patches for CertID with issuerSerial set in TSP implementation, additional compliance testing.</li>
-<li>Steve Mitchell &lt;mitchell&#064intertrust.com&gt; - patch for stateful path validator fix. Patch to allow BigInteger class to create negative numbers from byte arrays. Additions to allow different providers to be used for asymmetric/symmetric encryption in OpenPGP.</li>
+<li>Steve Mitchell &lt;mitchell&#064intertrust.com&gt; - patch for stateful path validator fix. Patch to allow BigInteger class to create negative numbers from byte arrays. Additions to allow different providers to be used for asymmetric/symmetric encryption in OpenPGP.
+Optimisation to avoid redundant verification in path validator. Suggestion to use PKIXParameters.getSigProvider() correctly.</li>
 <li>Dirk Eisner &lt;D.Eisner&#064seeburger.de&gt; - initial implementation of ISO 78164-4 padding.</li>
 <li>Julien Pasquier &lt;julienpasquier&#064free.fr&gt; - initial implementation of attribute classes from RFC 3126. Fix to KEKIdentifier, OtherKeyAttribute parsing. Initial ContentHints class.</li>
 <li>Matteo &lt;matartuso&#064libero.it&gt; - sequence patch to ASN1Dump.</li>
