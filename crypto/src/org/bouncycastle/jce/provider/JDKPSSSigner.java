@@ -77,6 +77,7 @@ public class JDKPSSSigner
             throw new InvalidKeyException("Supplied key is not a RSAPublicKey instance");
         }
 
+		// Note: trailerField defaults to the only legal value
         pss = new PSSSigner(signer, digest, saltLength);
         pss.init(false,
             RSAUtil.generatePublicKeyParameter((RSAPublicKey)publicKey));
