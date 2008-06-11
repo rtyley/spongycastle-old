@@ -84,6 +84,9 @@ public class CMSEnvelopedDataParser
         this._attrNotRead = true;
         this._envelopedData = new EnvelopedDataParser((ASN1SequenceParser)_contentInfo.getContent(DERTags.SEQUENCE));
 
+        // TODO Validate version?
+		//DERInteger version = this._envelopedData.getVersion();
+
         //
         // load the RecipientInfoStore
         //
