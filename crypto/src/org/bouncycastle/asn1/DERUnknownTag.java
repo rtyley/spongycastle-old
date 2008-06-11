@@ -10,8 +10,9 @@ import java.io.IOException;
 public class DERUnknownTag
     extends DERObject
 {
-    int         tag;
-    byte[]      data;
+    private boolean   isConstructed;
+    private int       tag;
+    private byte[]    data;
 
     /**
      * @param tag the tag value.
@@ -21,8 +22,22 @@ public class DERUnknownTag
         int     tag,
         byte[]  data)
     {
+        this(false, tag, data);
+    }
+
+    public DERUnknownTag(
+        boolean isConstructed,
+        int     tag,
+        byte[]  data)
+    {
+        this.isConstructed = isConstructed;
         this.tag = tag;
         this.data = data;
+    }
+
+    public boolean isConstructed()
+    {
+        return isConstructed;
     }
 
     public int getTag()
@@ -39,7 +54,7 @@ public class DERUnknownTag
         DEROutputStream  out)
         throws IOException
     {
-        out.writeEncoded(tag, data);
+        out.writeEncoded(isConstructed ? DERTags.CONSTRUCTED : 0, tag, data);
     }
     
     public boolean equals(
@@ -52,11 +67,13 @@ public class DERUnknownTag
         
         DERUnknownTag other = (DERUnknownTag)o;
 
-        return tag == other.tag && Arrays.areEqual(data, other.data);
+        return isConstructed == other.isConstructed
+        	&& tag == other.tag
+            && Arrays.areEqual(data, other.data);
     }
     
     public int hashCode()
     {
-        return tag ^ Arrays.hashCode(data);
+        return (isConstructed ? ~0 : 0) ^ tag ^ Arrays.hashCode(data);
     }
 }
