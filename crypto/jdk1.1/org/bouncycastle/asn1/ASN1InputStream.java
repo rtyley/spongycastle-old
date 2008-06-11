@@ -110,7 +110,6 @@ public class ASN1InputStream
         throws IOException
     {
         boolean isConstructed = (tag & CONSTRUCTED) != 0;
-        int baseTagNo = tag & ~CONSTRUCTED;
 
         DefiniteLengthInputStream defIn = new DefiniteLengthInputStream(this, length);
 
@@ -127,7 +126,7 @@ public class ASN1InputStream
         if (isConstructed)
         {
             // TODO There are other tags that may be constructed (e.g. BIT_STRING)
-            switch (baseTagNo)
+            switch (tagNo)
             {
                 case OCTET_STRING:
                     //
@@ -146,11 +145,11 @@ public class ASN1InputStream
                 case SET:
                     return DERFactory.createSet(buildDEREncodableVector(defIn), false);
                 default:
-                    return new DERUnknownTag(tag, defIn.toByteArray());
+                    return new DERUnknownTag(true, tagNo, defIn.toByteArray());
             }
         }
 
-        return createPrimitiveDERObject(tag, defIn.toByteArray());
+        return createPrimitiveDERObject(tagNo, defIn.toByteArray());
     }
 
     ASN1EncodableVector buildEncodableVector()
@@ -190,14 +189,9 @@ public class ASN1InputStream
         //
         // calculate tag number
         //
-        int tagNo = 0;
-        if ((tag & TAGGED) != 0 || (tag & APPLICATION) != 0)
-        {
-            tagNo = readTagNumber(this, tag);
-        }
+        int tagNo = readTagNumber(this, tag);
 
         boolean isConstructed = (tag & CONSTRUCTED) != 0;
-        int baseTagNo = tag & ~CONSTRUCTED;
 
         //
         // calculate length
@@ -221,7 +215,7 @@ public class ASN1InputStream
             ASN1StreamParser sp = new ASN1StreamParser(indIn);
 
             // TODO There are other tags that may be constructed (e.g. BIT_STRING)
-            switch (baseTagNo)
+            switch (tagNo)
             {
                 case OCTET_STRING:
                     return new BEROctetStringParser(sp).getDERObject();
@@ -329,12 +323,10 @@ public class ASN1InputStream
     }
 
     static DERObject createPrimitiveDERObject(
-        int     tag,
+        int     tagNo,
         byte[]  bytes)
     {
-//        assert (tag & (APPLICATION | CONSTRUCTED | TAGGED)) == 0;
-
-        switch (tag)
+        switch (tagNo)
         {
             case BIT_STRING:
             {
@@ -378,7 +370,7 @@ public class ASN1InputStream
             case VISIBLE_STRING:
                 return new DERVisibleString(bytes);
             default:
-                return new DERUnknownTag(tag, bytes);
+                return new DERUnknownTag(false, tagNo, bytes);
         }
     }
 }

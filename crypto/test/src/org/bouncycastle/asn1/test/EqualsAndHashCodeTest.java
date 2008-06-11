@@ -71,7 +71,7 @@ public class EqualsAndHashCodeTest
                 new DERT61String("hello world"),
                 new DERTaggedObject(0, new DERPrintableString("hello world")),
                 new DERUniversalString(data),
-                new DERUnknownTag(0xff & (~(DERTags.TAGGED | DERTags.APPLICATION)), data),
+                new DERUnknownTag(true, 500, data),
                 new DERUTCTime(new Date()),
                 new DERUTF8String("hello world"),
                 new DERVisibleString("hello world")

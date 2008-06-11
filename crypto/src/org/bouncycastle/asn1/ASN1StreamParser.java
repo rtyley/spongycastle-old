@@ -46,14 +46,9 @@ public class ASN1StreamParser
         //
         // calculate tag number
         //
-        int tagNo = 0;
-        if ((tag & DERTags.TAGGED) != 0 || (tag & DERTags.APPLICATION) != 0)
-        {
-            tagNo = ASN1InputStream.readTagNumber(_in, tag);
-        }
+        int tagNo = ASN1InputStream.readTagNumber(_in, tag);
 
         boolean isConstructed = (tag & DERTags.CONSTRUCTED) != 0;
-        int baseTagNo = tag & ~DERTags.CONSTRUCTED;
 
         //
         // calculate length
@@ -77,7 +72,7 @@ public class ASN1StreamParser
             ASN1StreamParser sp = new ASN1StreamParser(indIn);
 
             // TODO There are other tags that may be constructed (e.g. BIT_STRING)
-            switch (baseTagNo)
+            switch (tagNo)
             {
                 case DERTags.OCTET_STRING:
                     return new BEROctetStringParser(sp);
@@ -106,7 +101,7 @@ public class ASN1StreamParser
             if (isConstructed)
             {
                 // TODO There are other tags that may be constructed (e.g. BIT_STRING)
-                switch (baseTagNo)
+                switch (tagNo)
                 {
                     case DERTags.OCTET_STRING:
                         //
@@ -119,18 +114,18 @@ public class ASN1StreamParser
                         return new DERSetParser(new ASN1StreamParser(defIn));
                     default:
                         // TODO Add DERUnknownTagParser class?
-                        return new DERUnknownTag(tag, defIn.toByteArray());
+                        return new DERUnknownTag(true, tagNo, defIn.toByteArray());
                 }
             }
 
             // Some primitive encodings can be handled by parsers too...
-            switch (baseTagNo)
+            switch (tagNo)
             {
                 case DERTags.OCTET_STRING:
                     return new DEROctetStringParser(defIn);
             }
 
-            return ASN1InputStream.createPrimitiveDERObject(tag, defIn.toByteArray());
+            return ASN1InputStream.createPrimitiveDERObject(tagNo, defIn.toByteArray());
         }
     }
 
