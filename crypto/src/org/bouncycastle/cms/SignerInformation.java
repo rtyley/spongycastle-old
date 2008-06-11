@@ -301,7 +301,7 @@ public class SignerInformation
 
                 AlgorithmParameters params = AlgorithmParameters.getInstance(
                     sigAlgOID.getId(), sig.getProvider().getName());
-                params.init(sigParams.getEncoded(), "ASN.1");
+                params.init(sigParams.getDERObject().getEncoded(), "ASN.1");
 
                 PSSParameterSpec spec = (PSSParameterSpec)params.getParameterSpec(PSSParameterSpec.class);
                 sig.setParameter(spec);
