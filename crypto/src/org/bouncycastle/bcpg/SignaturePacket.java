@@ -246,7 +246,10 @@ public class SignaturePacket
         this.fingerPrint = fingerPrint;
         this.signature = signature;
 
-        setCreationTime();
+        if (hashedData != null)
+        {
+            setCreationTime();
+        }
     }
     
     /**
