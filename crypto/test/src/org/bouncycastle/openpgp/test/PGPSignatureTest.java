@@ -544,7 +544,14 @@ public class PGPSignatureTest
         
         lGen.close();
     
-        sGen.generate().encode(bOut);
+        PGPSignature sig = sGen.generate();
+
+        if (sig.getCreationTime().getTime() == 0)
+        {
+            fail("creation time not set in v4 signature");
+        }
+
+        sig.encode(bOut);
     
         verifySignature(bOut.toByteArray(), hashAlgorithm, pubKey, canonicalData);
     }
@@ -632,8 +639,15 @@ public class PGPSignatureTest
         
         lGen.close();
     
-        sGen.generate().encode(bOut);
-    
+        PGPSignature sig = sGen.generate();
+
+        if (sig.getCreationTime().getTime() == 0)
+        {
+            fail("creation time not set in v4 signature");
+        }
+
+        sig.encode(bOut);
+
         verifySignature(bOut.toByteArray(), hashAlgorithm, pubKey, canonicalData);
     }
     
