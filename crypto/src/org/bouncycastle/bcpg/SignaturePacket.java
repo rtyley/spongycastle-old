@@ -245,6 +245,8 @@ public class SignaturePacket
         this.unhashedData = unhashedData;
         this.fingerPrint = fingerPrint;
         this.signature = signature;
+
+        setCreationTime();
     }
     
     /**
@@ -498,5 +500,17 @@ public class SignaturePacket
         }
 
         out.writePacket(SIGNATURE, bOut.toByteArray(), true);
+    }
+
+    private void setCreationTime()
+    {
+        for (int i = 0; i != hashedData.length; i++)
+        {
+            if (hashedData[i] instanceof SignatureCreationTime)
+            {
+                creationTime = ((SignatureCreationTime)hashedData[i]).getTime().getTime();
+                break;
+            }
+        }
     }
 }
