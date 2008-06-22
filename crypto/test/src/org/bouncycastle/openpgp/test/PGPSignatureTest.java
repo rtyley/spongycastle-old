@@ -643,7 +643,7 @@ public class PGPSignatureTest
 
         if (sig.getCreationTime().getTime() == 0)
         {
-            fail("creation time not set in v4 signature");
+            fail("creation time not set in v3 signature");
         }
 
         sig.encode(bOut);
