@@ -114,10 +114,6 @@ public class SignaturePacket
                 {
                     keyID = ((IssuerKeyID)p).getKeyID();
                 }
-                else if (p instanceof SignatureCreationTime)
-                {
-                    creationTime = ((SignatureCreationTime)p).getTime().getTime();
-                }
                 
                 unhashedData[i] = p;
             }
