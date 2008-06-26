@@ -821,6 +821,11 @@ public class PGPRSATest
         
         pgpPrivKey = pgpPriv.getSecretKey(encP.getKeyID()).extractPrivateKey(pass, "BC");
 
+        if (encP.getSymmetricAlgorithm(pgpPrivKey, "BC") != SymmetricKeyAlgorithmTags.CAST5)
+        {
+            fail("symmetric algorithm mismatch");
+        }
+
         clear = encP.getDataStream(pgpPrivKey, "BC");
         
         bOut.reset();
