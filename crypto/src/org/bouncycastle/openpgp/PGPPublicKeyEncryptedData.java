@@ -95,6 +95,21 @@ public class PGPPublicKeyEncryptedData
     }
 
     /**
+     * Return the algorithm code for the symmetric algorithm used to encrypt the data.
+     *
+     * @return integer algorithm code
+     */
+    public int getSymmetricAlgorithm(
+        PGPPrivateKey  privKey,
+        String         provider)
+        throws PGPException, NoSuchProviderException
+    {
+        byte[] plain = fetchSymmetricKeyData(privKey, provider);
+
+        return plain[0];
+    }
+
+    /**
      * Return the decrypted data stream for the packet.
      *
      * @param privKey private key to use
@@ -126,82 +141,8 @@ public class PGPPublicKeyEncryptedData
         String         asymProvider,
         String         provider)
         throws PGPException, NoSuchProviderException
-    {        
-        Cipher    c1 = getKeyCipher(keyData.getAlgorithm(), asymProvider);
-        
-        try
-        {
-            c1.init(Cipher.DECRYPT_MODE, privKey.getKey());
-        }
-        catch (InvalidKeyException e)
-        {
-            throw new PGPException("error setting asymmetric cipher", e);
-        }
-        
-        BigInteger[]    keyD = keyData.getEncSessionKey();
-        
-        if (keyData.getAlgorithm() == PGPPublicKey.RSA_ENCRYPT
-            || keyData.getAlgorithm() == PGPPublicKey.RSA_GENERAL)
-        {
-            byte[]    bi = keyD[0].toByteArray();
-
-            if (bi[0] == 0)
-            {
-                c1.update(bi, 1, bi.length - 1);
-            }
-            else
-            {
-                c1.update(bi);
-            }
-        }
-        else
-        {
-            ElGamalKey    k = (ElGamalKey)privKey.getKey();
-            int           size = (k.getParameters().getP().bitLength() + 7) / 8;
-            byte[]        tmp = new byte[size];
-            
-            byte[]        bi = keyD[0].toByteArray();
-            if (bi.length > size)
-            {
-                c1.update(bi, 1, bi.length - 1);
-            }
-            else
-            {
-                System.arraycopy(bi, 0, tmp, tmp.length - bi.length, bi.length);
-                c1.update(tmp);
-            }
-            
-            bi = keyD[1].toByteArray();
-            for (int i = 0; i != tmp.length; i++)
-            {
-                tmp[i] = 0;
-            }
-            
-            if (bi.length > size)
-            {
-                c1.update(bi, 1, bi.length - 1);
-            }
-            else
-            {
-                System.arraycopy(bi, 0, tmp, tmp.length - bi.length, bi.length);
-                c1.update(tmp);
-            }
-        }
-        
-        byte[] plain;
-        try
-        {
-            plain = c1.doFinal();
-        }
-        catch (Exception e)
-        {
-            throw new PGPException("exception decrypting secret key", e);
-        }
-        
-        if (!confirmCheckSum(plain))
-        {
-            throw new PGPKeyValidationException("key checksum failed");
-        }
+    {
+        byte[] plain = fetchSymmetricKeyData(privKey, asymProvider);
         
         Cipher         c2;
         
@@ -305,5 +246,87 @@ public class PGPPublicKeyEncryptedData
         {
             return encData.getInputStream();
         }
+    }
+
+    private byte[] fetchSymmetricKeyData(PGPPrivateKey privKey, String asymProvider)
+        throws NoSuchProviderException, PGPException
+    {
+        Cipher c1 = getKeyCipher(keyData.getAlgorithm(), asymProvider);
+
+        try
+        {
+            c1.init(Cipher.DECRYPT_MODE, privKey.getKey());
+        }
+        catch (InvalidKeyException e)
+        {
+            throw new PGPException("error setting asymmetric cipher", e);
+        }
+
+        BigInteger[]    keyD = keyData.getEncSessionKey();
+
+        if (keyData.getAlgorithm() == PGPPublicKey.RSA_ENCRYPT
+            || keyData.getAlgorithm() == PGPPublicKey.RSA_GENERAL)
+        {
+            byte[]    bi = keyD[0].toByteArray();
+
+            if (bi[0] == 0)
+            {
+                c1.update(bi, 1, bi.length - 1);
+            }
+            else
+            {
+                c1.update(bi);
+            }
+        }
+        else
+        {
+            ElGamalKey k = (ElGamalKey)privKey.getKey();
+            int           size = (k.getParameters().getP().bitLength() + 7) / 8;
+            byte[]        tmp = new byte[size];
+
+            byte[]        bi = keyD[0].toByteArray();
+            if (bi.length > size)
+            {
+                c1.update(bi, 1, bi.length - 1);
+            }
+            else
+            {
+                System.arraycopy(bi, 0, tmp, tmp.length - bi.length, bi.length);
+                c1.update(tmp);
+            }
+
+            bi = keyD[1].toByteArray();
+            for (int i = 0; i != tmp.length; i++)
+            {
+                tmp[i] = 0;
+            }
+
+            if (bi.length > size)
+            {
+                c1.update(bi, 1, bi.length - 1);
+            }
+            else
+            {
+                System.arraycopy(bi, 0, tmp, tmp.length - bi.length, bi.length);
+                c1.update(tmp);
+            }
+        }
+
+        byte[] plain;
+        try
+        {
+            plain = c1.doFinal();
+        }
+        catch (Exception e)
+        {
+            throw new PGPException("exception decrypting secret key", e);
+        }
+
+        if (!confirmCheckSum(plain))
+        {
+            throw new PGPKeyValidationException("key checksum failed");
+        }
+
+        return plain;
     }
 }
