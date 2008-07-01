@@ -174,6 +174,11 @@ public class CertPathValidatorTest
         PolicyNode policyTree = result.getPolicyTree();
         PublicKey subjectPublicKey = result.getPublicKey();
 
+        if (!subjectPublicKey.equals(finalCert.getPublicKey()))
+        {
+            fail("wrong public key returned");
+        }
+
         //
         // invalid path containing a valid one test
         //

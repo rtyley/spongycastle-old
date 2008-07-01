@@ -410,7 +410,7 @@ public class PKIXCertPathValidatorSpi
 
         if ((explicitPolicy > 0) || (intersection != null))
         {
-            return new PKIXCertPathValidatorResult(trust, intersection, workingPublicKey);
+            return new PKIXCertPathValidatorResult(trust, intersection, cert.getPublicKey());
         }
 
         throw new CertPathValidatorException("Path processing failed on policy.", null, certPath, index);
