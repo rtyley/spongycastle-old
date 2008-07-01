@@ -566,7 +566,7 @@ public class ExtendedPKIXParameters
      */
     public Set getProhibitedACAttributes()
     {
-        return prohibitedACAttributes;
+        return Collections.unmodifiableSet(prohibitedACAttributes);
     }
 
     /**
