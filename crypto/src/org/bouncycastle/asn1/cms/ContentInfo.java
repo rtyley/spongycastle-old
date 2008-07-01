@@ -22,7 +22,7 @@ public class ContentInfo
     public static ContentInfo getInstance(
         Object  obj)
     {
-        if (obj instanceof ContentInfo)
+        if (obj == null || obj instanceof ContentInfo)
         {
             return (ContentInfo)obj;
         }
