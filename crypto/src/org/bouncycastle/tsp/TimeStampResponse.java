@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cmp.PKIFreeText;
 import org.bouncycastle.asn1.cmp.PKIStatus;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.cms.Attribute;
 
 /**
  * Base class for an RFC 3161 Time Stamp Response object.
@@ -150,8 +151,10 @@ public class TimeStampResponse
             {
                 throw new TSPValidationException("response for different message imprint algorithm.");
             }
-            
-            if (tok.getSignedAttributes().get(PKCSObjectIdentifiers.id_aa_signingCertificate) == null)
+
+            Attribute scV1 = tok.getSignedAttributes().get(PKCSObjectIdentifiers.id_aa_signingCertificate);
+            Attribute scV2 = tok.getSignedAttributes().get(PKCSObjectIdentifiers.id_aa_signingCertificateV2);
+            if (scV1 == null && scV2 == null && !(scV1 != null && scV2 != null))
             {
                 throw new TSPValidationException("no signing certificate attribute present.");
             }
