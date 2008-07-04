@@ -14,13 +14,17 @@ import org.bouncycastle.crypto.params.KeyParameter;
  * <p>
  * It can be found at ftp://ftp.funet.fi/pub/crypt/cryptography/symmetric/idea/
  * <p>
- * Note: This algorithm is patented in the USA, Japan, and Europe including
+ * Note 1: This algorithm is patented in the USA, Japan, and Europe including
  * at least Austria, France, Germany, Italy, Netherlands, Spain, Sweden, Switzerland
  * and the United Kingdom. Non-commercial use is free, however any commercial
  * products are liable for royalties. Please see
  * <a href="http://www.mediacrypt.com">www.mediacrypt.com</a> for
  * further details. This announcement has been included at the request of
  * the patent holders.
+ * <p>
+ * Note 2: Due to the requests concerning the above, this algorithm is now only
+ * included in the extended Bouncy Castle provider and JCE signed jars. It is
+ * not included in the default distributions.
  */
 public class IDEAEngine
     implements BlockCipher
