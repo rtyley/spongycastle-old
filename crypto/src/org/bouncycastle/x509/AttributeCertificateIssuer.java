@@ -31,7 +31,7 @@ public class AttributeCertificateIssuer
      * 
      * @param issuer The issuer
      */
-    AttributeCertificateIssuer(AttCertIssuer issuer)
+    public AttributeCertificateIssuer(AttCertIssuer issuer)
     {
         form = issuer.getIssuer();
     }
