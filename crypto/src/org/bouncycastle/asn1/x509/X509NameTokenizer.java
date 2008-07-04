@@ -70,6 +70,10 @@ public class X509NameTokenizer
                     {
                         buf.append('\\');
                     }
+                    else if (c == '+' && seperator != '+')
+                    {
+                        buf.append('\\');
+                    }
                     buf.append(c);
                     escaped = false;
                 }
