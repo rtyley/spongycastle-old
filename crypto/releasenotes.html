@@ -37,11 +37,14 @@ Release 1.40
 <li>PKCS7Padding validation would not fail if pad length was 0. This has been fixed.</li>
 <li>javax.crypto classes no longer appear in the JDK 1.3 provider jar.</li>
 <li>Signature creation time was not being properly initialised in new V4 PGP signature objects although the encoding was correct. This has been fixed.</li>
+<li>The '+' character can now be escaped or quoted in the constructor for X509Name, X509Prinicipal.</li>
+<li>Regression: PKIXCertPathValidatorResult.getPublicKey was returning the wrong public key when the BC certificate path validator was used.<li>
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
 <li>Galois/Counter Mode (GCM) has been added to the lightweight API and the JCE provider.</li>
 <li>SignedPublicKeyAndChallenge and PKCS10CertificationRequest can now take null providers if you need to fall back to the default provider mechanism.</li>
+<li>The TSP package now supports validation of responses with V2 signing certificate entries.</li>
 </ul>
 <h3>2.1.4 Additional Notes</h3>
 <ul>
