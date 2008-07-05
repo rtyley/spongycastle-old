@@ -43,6 +43,18 @@ public class PGPSignatureSubpacketVector
     }
 
     /**
+     * Return true if a particular subpacket type exists.
+     *
+     * @param type type to look for.
+     * @return true if present, false otherwise.
+     */
+    public boolean hasSubpacket(
+        int type)
+    {
+        return getSubpacket(type) != null;
+    }
+
+    /**
      * Return all signature subpackets of the passed in type.
      * @param type subpacket type code
      * @return an array of zero or more matching subpackets.

@@ -368,7 +368,17 @@ public class PGPSignature
     {
         return sigPck.getSignatureTrailer();
     }
-    
+
+    /**
+     * Return true if the signature has either hashed or unhashed subpackets.
+     * 
+     * @return true if either hashed or unhashed subpackets are present, false otherwise.
+     */
+    public boolean hasSubpackets()
+    {
+        return sigPck.getHashedSubPackets() != null || sigPck.getUnhashedSubPackets() != null;
+    }
+
     public PGPSignatureSubpacketVector getHashedSubPackets()
     {
         return createSubpacketVector(sigPck.getHashedSubPackets());

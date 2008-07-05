@@ -12,6 +12,8 @@ import org.bouncycastle.bcpg.RSAPublicBCPGKey;
 import org.bouncycastle.bcpg.TrustPacket;
 import org.bouncycastle.bcpg.UserAttributePacket;
 import org.bouncycastle.bcpg.UserIDPacket;
+import org.bouncycastle.bcpg.SignatureSubpacketTags;
+import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
@@ -25,6 +27,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -421,8 +424,12 @@ public class PGPPublicKey
     }
     
     /**
-     * Return true if this key is marked as suitable for using for encryption.
-     * @return true if this key is marked as suitable for using for encryption.
+     * Return true if this key has an algorithm type that makes it suitable to use for encryption.
+     * <p>
+     * Note: with version 4 keys KeyFlags subpackets should also be considered when present for
+     * determining the preferred use of the key.
+     *
+     * @return true if the key algorithm is suitable for encryption.
      */
     public boolean isEncryptionKey()
     {
@@ -460,7 +467,7 @@ public class PGPPublicKey
     {
         return keyStrength;
     }
-    
+
     /**
      * Return the public key contained in the object.
      * 

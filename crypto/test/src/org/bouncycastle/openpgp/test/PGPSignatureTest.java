@@ -5,6 +5,7 @@ import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
@@ -297,6 +298,11 @@ public class PGPSignatureTest
         {
             fail("found wrong number of hashed packets in override test");
         }
+
+        if (!hashedPcks.hasSubpacket(SignatureSubpacketTags.CREATION_TIME))
+        {
+            fail("hasSubpacket test for creation time failed");
+        }
         
         if (!hashedPcks.getSignatureCreationTime().equals(new Date(0L)))
         {
@@ -394,6 +400,30 @@ public class PGPSignatureTest
         testMissingSubpackets(nullPacketsSubKeyBinding);
         
         testMissingSubpackets(generateV3BinarySig(pgpPrivKey, PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1));
+
+        // keyflags
+        testKeyFlagsValues();
+    }
+
+    private void testKeyFlagsValues()
+    {
+        checkValue(KeyFlags.CERTIFY_OTHER, 0x01);
+        checkValue(KeyFlags.SIGN_DATA, 0x02);
+        checkValue(KeyFlags.ENCRYPT_COMMS, 0x04);
+        checkValue(KeyFlags.ENCRYPT_STORAGE, 0x08);
+        checkValue(KeyFlags.SPLIT, 0x10);
+        checkValue(KeyFlags.AUTHENTICATION, 0x20);
+        checkValue(KeyFlags.SHARED, 0x80);
+    }
+
+    private void checkValue(int flag, int value)
+    {
+        KeyFlags f = new KeyFlags(true, flag);
+
+        if (f.getFlags() != value)
+        {
+            fail("flag value mismatch");
+        }
     }
 
     private void testMissingSubpackets(byte[] signature) 
@@ -425,6 +455,11 @@ public class PGPSignatureTest
             {
                 fail("key expiration time not zero for missing subpackets");
             }
+
+            if (!sig.hasSubpackets())
+            {
+                fail("hasSubpackets() returns false with packets");
+            }
         }
         else
         {
@@ -435,6 +470,11 @@ public class PGPSignatureTest
             if (sig.getUnhashedSubPackets() != null)
             {
                 fail("unhashed sub packets found when none expected");
+            }
+
+            if (sig.hasSubpackets())
+            {
+                fail("hasSubpackets() returns true with no packets");
             }
         }
     }

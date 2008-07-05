@@ -368,7 +368,12 @@ public class PGPSecretKey
     }
 
     /**
-     * return true if this key is marked as suitable for signature generation.
+     * Return true if this key has an algorithm type that makes it suitable to use for signing.
+     * <p>
+     * Note: with version 4 keys KeyFlags subpackets should also be considered when present for
+     * determining the preferred use of the key.
+     *
+     * @return true if this key algorithm is suitable for use with signing.
      */
     public boolean isSigningKey()
     {
