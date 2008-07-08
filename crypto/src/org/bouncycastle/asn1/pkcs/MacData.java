@@ -15,6 +15,8 @@ import org.bouncycastle.asn1.x509.DigestInfo;
 public class MacData
     extends ASN1Encodable
 {
+    private static final BigInteger ONE = BigInteger.valueOf(1);
+
     DigestInfo                  digInfo;
     byte[]                      salt;
     BigInteger                  iterationCount;
@@ -47,7 +49,7 @@ public class MacData
         }
         else
         {
-            this.iterationCount = BigInteger.valueOf(1);
+            this.iterationCount = ONE;
         }
     }
 
@@ -76,13 +78,28 @@ public class MacData
         return iterationCount;
     }
 
+    /**
+     * <pre>
+     * MacData ::= SEQUENCE {
+     *     mac      DigestInfo,
+     *     macSalt  OCTET STRING,
+     *     iterations INTEGER DEFAULT 1
+     *     -- Note: The default is for historic reasons and its use is deprecated. A
+     *     -- higher value, like 1024 is recommended.
+     * </pre>
+     * @return
+     */
     public DERObject toASN1Object()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 
         v.add(digInfo);
         v.add(new DEROctetString(salt));
-        v.add(new DERInteger(iterationCount));
+        
+        if (!iterationCount.equals(ONE))
+        {
+            v.add(new DERInteger(iterationCount));
+        }
 
         return new DERSequence(v);
     }

@@ -3,12 +3,21 @@ package org.bouncycastle.asn1;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/**
+ * Base class for objects which can be written directly to ASN.1 output streams.
+ */
 public abstract class ASN1Encodable
     implements DEREncodable
 {
     public static final String DER = "DER";
     public static final String BER = "BER";
-    
+
+    /**
+     * Return the default BER or DER encoding for this object.
+     *
+     * @return BER/DER byte encoded object.
+     * @throws IOException on encoding error.
+     */
     public byte[] getEncoded() 
         throws IOException
     {
@@ -19,7 +28,14 @@ public abstract class ASN1Encodable
         
         return bOut.toByteArray();
     }
-    
+
+    /**
+     * Return either the default for "BER" or a DER encoding if "DER" is specified.
+     *
+     * @param encoding name of encoding to use.
+     * @return byte encoded object.
+     * @throws IOException on encoding error.
+     */
     public byte[] getEncoded(
         String encoding) 
         throws IOException
