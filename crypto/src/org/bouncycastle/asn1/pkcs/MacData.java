@@ -87,7 +87,7 @@ public class MacData
      *     -- Note: The default is for historic reasons and its use is deprecated. A
      *     -- higher value, like 1024 is recommended.
      * </pre>
-     * @return
+     * @return the basic DERObject construction.
      */
     public DERObject toASN1Object()
     {
