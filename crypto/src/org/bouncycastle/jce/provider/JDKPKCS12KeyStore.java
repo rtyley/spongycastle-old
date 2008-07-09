@@ -980,36 +980,16 @@ public class JDKPKCS12KeyStore
                     if (cert instanceof PKCS12BagAttributeCarrier)
                     {
                         bagAttr = (PKCS12BagAttributeCarrier)cert;
-
+                        bagAttr.setBagAttribute(oid, attr);
                     }
 
                     if (oid.equals(pkcs_9_at_friendlyName))
                     {
                         alias = ((DERBMPString)attr).getString();
-                        if (bagAttr != null)
-                        {
-                            bagAttr.setBagAttribute(oid, attr);
-                        }
                     }
                     else if (oid.equals(pkcs_9_at_localKeyId))
                     {
                         localId = (ASN1OctetString)attr;
-
-                        String    name = new String(Hex.encode(localId.getOctets()));
-
-                        //
-                        // only add the localKeyId attribute if there is a key in the store that
-                        // corresponds. Some PKCS12 implementations get confused if an unassociated
-                        // attribute is found.
-                        //
-                        if (bagAttr != null && localIds.containsKey(name))
-                        {
-                            bagAttr.setBagAttribute(oid, attr);
-                        }
-                        else
-                        {
-                            localId = null;
-                        }
                     }
                 }
             }
@@ -1266,6 +1246,16 @@ public class JDKPKCS12KeyStore
                     while (e.hasMoreElements())
                     {
                         DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+
+                        // a certificate not immediately linked to a key doesn't require
+                        // a localKeyID and will confuse some PKCS12 implementations.
+                        //
+                        // If we find one, we'll prune it out.
+                        if (oid.equals(PKCSObjectIdentifiers.pkcs_9_at_localKeyId))
+                        {
+                            continue;
+                        }
+
                         ASN1EncodableVector fSeq = new ASN1EncodableVector();
 
                         fSeq.add(oid);
@@ -1324,6 +1314,16 @@ public class JDKPKCS12KeyStore
                     while (e.hasMoreElements())
                     {
                         DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+
+                        // a certificate not immediately linked to a key doesn't require
+                        // a localKeyID and will confuse some PKCS12 implementations.
+                        //
+                        // If we find one, we'll prune it out.
+                        if (oid.equals(PKCSObjectIdentifiers.pkcs_9_at_localKeyId))
+                        {
+                            continue;
+                        }
+
                         ASN1EncodableVector fSeq = new ASN1EncodableVector();
 
                         fSeq.add(oid);

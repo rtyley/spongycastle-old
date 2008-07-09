@@ -1,10 +1,12 @@
 package org.bouncycastle.jce.provider.test;
 
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,6 +16,8 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
+import java.security.KeyPairGenerator;
+import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
@@ -408,19 +412,29 @@ public class PKCS12StoreTest
      */
     public Certificate createCert(
         PublicKey       pubKey,
-        PrivateKey      privKey)
+        PrivateKey      privKey,
+        String          issuerEmail,
+        String          subjectEmail)
         throws Exception
     {
         //
         // distinguished name table.
         //
-        Hashtable                   attrs = new Hashtable();
+        Hashtable                   issuerAttrs = new Hashtable();
 
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.L, "Melbourne");
-        attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.EmailAddress, "feedback-crypto@bouncycastle.org");
+        issuerAttrs.put(X509Principal.C, "AU");
+        issuerAttrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
+        issuerAttrs.put(X509Principal.L, "Melbourne");
+        issuerAttrs.put(X509Principal.ST, "Victoria");
+        issuerAttrs.put(X509Principal.EmailAddress, issuerEmail);
+
+        Hashtable                   subjectAttrs = new Hashtable();
+
+        subjectAttrs.put(X509Principal.C, "AU");
+        subjectAttrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
+        subjectAttrs.put(X509Principal.L, "Melbourne");
+        subjectAttrs.put(X509Principal.ST, "Victoria");
+        subjectAttrs.put(X509Principal.EmailAddress, subjectEmail);
 
         //
         // extensions
@@ -432,20 +446,14 @@ public class PKCS12StoreTest
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
 
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(issuerAttrs));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30)));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(subjectAttrs));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
 
-        X509Certificate cert = certGen.generateX509Certificate(privKey);
-
-        cert.checkValidity(new Date());
-
-        cert.verify(pubKey);
-
-        return cert;
+        return certGen.generate(privKey);
     }
 
     public void testPKCS12Store()
@@ -532,7 +540,7 @@ public class PKCS12StoreTest
         {
             fail("Failed null chain test.");
         }
-        
+
         //
         // UTF 8 single cert test
         //
@@ -583,7 +591,7 @@ public class PKCS12StoreTest
 
         Certificate[] chain = new Certificate[1];
 
-        chain[0] = createCert(pubKey, privKey);
+        chain[0] = createCert(pubKey, privKey, "issuer@bouncycastle.org", "subject@bouncycastle.org");
 
         store = KeyStore.getInstance("PKCS12", "BC");
 
@@ -611,7 +619,11 @@ public class PKCS12StoreTest
             fail("Did not return alias for key certificate privateKey");
         }
 
-        store.store(new ByteArrayOutputStream(), passwd);
+        ByteArrayOutputStream store1Stream = new ByteArrayOutputStream();
+
+        store.store(store1Stream, passwd);
+
+        testNoExtraLocalKeyID(store1Stream.toByteArray());
 
         //
         // no friendly name test
@@ -772,6 +784,53 @@ public class PKCS12StoreTest
         stream = new ByteArrayInputStream(pkcs12nopass);
         
         store.load(stream, "".toCharArray());
+    }
+
+    private void testNoExtraLocalKeyID(byte[] store1data)
+        throws Exception
+    {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "BC");
+
+        kpg.initialize(512);
+
+        KeyPair newPair = kpg.genKeyPair();
+
+        KeyStore store1 = KeyStore.getInstance("PKCS12", "BC");
+
+        store1.load(new ByteArrayInputStream(store1data), passwd);
+
+        KeyStore store2 = KeyStore.getInstance("PKCS12", "BC");
+
+        store2.load(null, null);
+        
+        PrivateKey k1 = (PrivateKey)store1.getKey("privatekey", null);
+        Certificate[] chain1 = store1.getCertificateChain("privatekey");
+
+        Certificate[] chain2 = new Certificate[chain1.length + 1];
+
+        System.arraycopy(chain1, 0, chain2, 1, chain1.length);
+
+        chain2[0] = createCert(newPair.getPublic(), k1, "subject@bouncycastle.org", "extra@bouncycaste.org");
+
+        if (((PKCS12BagAttributeCarrier)chain1[0]).getBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_localKeyId) == null)
+        {
+            fail("localKeyID not found initially");
+        }
+        
+        store2.setKeyEntry("new", newPair.getPrivate(), null, chain2);
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        store2.store(bOut, passwd);
+
+        store2.load(new ByteArrayInputStream(bOut.toByteArray()), passwd);
+
+        chain2 = store2.getCertificateChain("new");
+
+        if (((PKCS12BagAttributeCarrier)chain2[1]).getBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_localKeyId) != null)
+        {
+            fail("localKeyID found after save");
+        }
     }
 
     public String getName()
