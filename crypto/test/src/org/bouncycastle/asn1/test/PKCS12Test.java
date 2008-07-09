@@ -1,5 +1,8 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
@@ -16,16 +19,12 @@ import org.bouncycastle.asn1.pkcs.Pfx;
 import org.bouncycastle.asn1.pkcs.SafeBag;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class PKCS12Test
-    implements Test
+    extends SimpleTest
 {
     byte[] pkcs12 = Base64.decode(
           "MIACAQMwgAYJKoZIhvcNAQcBoIAkgASCA+gwgDCABgkqhkiG9w0BBwGggCSA"
@@ -123,124 +122,95 @@ public class PKCS12Test
         + "XVHdWhPmOoqNdBQdRgAAAAAAAAAAAAAAAAAAAAAAADA8MCEwCQYFKw4DAhoF"
         + "AAQUJMZn7MEKv4vW/+voCVyHBa6B0EMEFJOzH/BEjRtNNsZWlo/4L840aE5r"
         + "AgFkAAA=");
-
     
-    private boolean isSameAs(
-            byte[]  a,
-            byte[]  b)
+    public void performTest()
+        throws Exception
     {
-        if (a.length != b.length)
+        ASN1InputStream     aIn = new ASN1InputStream(new ByteArrayInputStream(pkcs12));
+        ASN1Sequence        obj = (ASN1Sequence)aIn.readObject();
+        Pfx                 bag = new Pfx(obj);
+        ContentInfo         info = bag.getAuthSafe();
+        MacData             mData = bag.getMacData();
+        DigestInfo          dInfo = mData.getMac();
+        AlgorithmIdentifier algId = dInfo.getAlgorithmId();
+        byte[]              salt = mData.getSalt();
+        int                 itCount = mData.getIterationCount().intValue();
+
+        aIn = new ASN1InputStream(new ByteArrayInputStream(((ASN1OctetString)info.getContent()).getOctets()));
+
+        AuthenticatedSafe   authSafe = new AuthenticatedSafe((ASN1Sequence)aIn.readObject());
+        ContentInfo[]       c = authSafe.getContentInfo();
+
+        //
+        // private key section
+        //
+        if (!c[0].getContentType().equals(PKCSObjectIdentifiers.data))
         {
-            return false;
+            fail("failed comparison data test");
         }
-        
-        for (int i = 0; i != a.length; i++)
+
+        aIn = new ASN1InputStream(new ByteArrayInputStream(((ASN1OctetString)c[0].getContent()).getOctets()));
+        ASN1Sequence    seq = (ASN1Sequence)aIn.readObject();
+
+        SafeBag b = new SafeBag((ASN1Sequence)seq.getObjectAt(0));
+        if (!b.getBagId().equals(PKCSObjectIdentifiers.pkcs8ShroudedKeyBag))
         {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
+            fail("failed comparison shroudedKeyBag test");
         }
-        
-        return true;
-    }
-    
-    public TestResult perform()
-    {
-        try
+
+        EncryptedPrivateKeyInfo encInfo = EncryptedPrivateKeyInfo.getInstance(b.getBagValue());
+
+        encInfo = new EncryptedPrivateKeyInfo(encInfo.getEncryptionAlgorithm(), encInfo.getEncryptedData());
+
+        b = new SafeBag(PKCSObjectIdentifiers.pkcs8ShroudedKeyBag, encInfo.toASN1Object(), b.getBagAttributes());
+
+        ByteArrayOutputStream abOut = new ByteArrayOutputStream();
+        ASN1OutputStream      berOut = new ASN1OutputStream(abOut);
+
+        berOut.writeObject(new DERSequence(b));
+
+        c[0] = new ContentInfo(PKCSObjectIdentifiers.data, new BERConstructedOctetString(abOut.toByteArray()));
+
+        //
+        // certificates
+        //
+        if (!c[1].getContentType().equals(PKCSObjectIdentifiers.encryptedData))
         {
-            ASN1InputStream     aIn = new ASN1InputStream(new ByteArrayInputStream(pkcs12));
-            ASN1Sequence        obj = (ASN1Sequence)aIn.readObject();
-            Pfx                 bag = new Pfx(obj);
-            ContentInfo         info = bag.getAuthSafe();
-            MacData             mData = bag.getMacData();
-            DigestInfo          dInfo = mData.getMac();
-            AlgorithmIdentifier algId = dInfo.getAlgorithmId();
-            byte[]              salt = mData.getSalt();
-            int                 itCount = mData.getIterationCount().intValue();
-
-            aIn = new ASN1InputStream(new ByteArrayInputStream(((ASN1OctetString)info.getContent()).getOctets()));
-
-            AuthenticatedSafe   authSafe = new AuthenticatedSafe((ASN1Sequence)aIn.readObject());
-            ContentInfo[]       c = authSafe.getContentInfo();
-
-            //
-            // private key section
-            //
-            if (!c[0].getContentType().equals(PKCSObjectIdentifiers.data))
-            {
-                return new SimpleTestResult(false, getName() + ": failed comparison data test");
-            }
-            
-            aIn = new ASN1InputStream(new ByteArrayInputStream(((ASN1OctetString)c[0].getContent()).getOctets()));
-            ASN1Sequence    seq = (ASN1Sequence)aIn.readObject();
-            
-            SafeBag b = new SafeBag((ASN1Sequence)seq.getObjectAt(0));
-            if (!b.getBagId().equals(PKCSObjectIdentifiers.pkcs8ShroudedKeyBag))
-            {
-                return new SimpleTestResult(false, getName() + ": failed comparison shroudedKeyBag test");
-            }
-            
-            EncryptedPrivateKeyInfo encInfo = EncryptedPrivateKeyInfo.getInstance(b.getBagValue());
-            
-            encInfo = new EncryptedPrivateKeyInfo(encInfo.getEncryptionAlgorithm(), encInfo.getEncryptedData());
-            
-            b = new SafeBag(PKCSObjectIdentifiers.pkcs8ShroudedKeyBag, encInfo.toASN1Object(), b.getBagAttributes());
-            
-            ByteArrayOutputStream abOut = new ByteArrayOutputStream();
-            ASN1OutputStream      berOut = new ASN1OutputStream(abOut);
-            
-            berOut.writeObject(new DERSequence(b));
-            
-            c[0] = new ContentInfo(PKCSObjectIdentifiers.data, new BERConstructedOctetString(abOut.toByteArray()));
-            
-            //
-            // certificates
-            //
-            if (!c[1].getContentType().equals(PKCSObjectIdentifiers.encryptedData))
-            {
-                return new SimpleTestResult(false, getName() + ": failed comparison encryptedData test");
-            }
-            
-            EncryptedData   eData = EncryptedData.getInstance(c[1].getContent());
-            
-            c[1] = new ContentInfo(PKCSObjectIdentifiers.encryptedData, eData);
-            
-            //
-            // create an octet stream represent the BER encoding of authSafe
-            //
-            authSafe = new AuthenticatedSafe(c);
-            
-            abOut = new ByteArrayOutputStream();
-            berOut = new ASN1OutputStream(abOut);
-
-            berOut.writeObject(authSafe);
-            
-            info = new ContentInfo(PKCSObjectIdentifiers.data, new BERConstructedOctetString(abOut.toByteArray()));
-            
-            mData = new MacData(new DigestInfo(algId, dInfo.getDigest()), salt, itCount);
-            
-            bag = new Pfx(info, mData);
-
-            //
-            // comparison test
-            //
-            
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-            
-            aOut.writeObject(bag);
-            
-            if (!isSameAs(bOut.toByteArray(), pkcs12))
-            {
-                return new SimpleTestResult(false, getName() + ": failed comparison test");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
+            fail("failed comparison encryptedData test");
         }
-        catch (Exception e)
+
+        EncryptedData   eData = EncryptedData.getInstance(c[1].getContent());
+
+        c[1] = new ContentInfo(PKCSObjectIdentifiers.encryptedData, eData);
+
+        //
+        // create an octet stream represent the BER encoding of authSafe
+        //
+        authSafe = new AuthenticatedSafe(c);
+
+        abOut = new ByteArrayOutputStream();
+        berOut = new ASN1OutputStream(abOut);
+
+        berOut.writeObject(authSafe);
+
+        info = new ContentInfo(PKCSObjectIdentifiers.data, new BERConstructedOctetString(abOut.toByteArray()));
+
+        mData = new MacData(new DigestInfo(algId, dInfo.getDigest()), salt, itCount);
+
+        bag = new Pfx(info, mData);
+
+        //
+        // comparison test
+        //
+
+        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
+
+        aOut.writeObject(bag);
+
+        if (!Arrays.areEqual(bOut.toByteArray(), pkcs12))
         {
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString(), e);
+            fail("failed comparison test");
         }
     }
 
@@ -252,9 +222,6 @@ public class PKCS12Test
     public static void main(
         String[] args)
     {
-        PKCS12Test    test = new PKCS12Test();
-        TestResult      result = test.perform();
-
-        System.out.println(result);
+        runTest(new PKCS12Test());
     }
 }
