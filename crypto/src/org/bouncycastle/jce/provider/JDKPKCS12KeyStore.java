@@ -961,12 +961,11 @@ public class JDKPKCS12KeyStore
                 throw new RuntimeException(e.toString());
             }
 
-
             //
             // set the attributes
             //
-            ASN1OctetString              localId = null;
-            String                      alias = null;
+            ASN1OctetString localId = null;
+            String          alias = null;
 
             if (b.getBagAttributes() != null)
             {
@@ -976,20 +975,41 @@ public class JDKPKCS12KeyStore
                     ASN1Sequence  sq = (ASN1Sequence)e.nextElement();
                     DERObjectIdentifier     oid = (DERObjectIdentifier)sq.getObjectAt(0);
                     DERObject               attr = (DERObject)((ASN1Set)sq.getObjectAt(1)).getObjectAt(0);
+                    PKCS12BagAttributeCarrier   bagAttr = null;
 
                     if (cert instanceof PKCS12BagAttributeCarrier)
                     {
-                        PKCS12BagAttributeCarrier   bagAttr = (PKCS12BagAttributeCarrier)cert;
-                        bagAttr.setBagAttribute(oid, attr);
+                        bagAttr = (PKCS12BagAttributeCarrier)cert;
+
                     }
 
                     if (oid.equals(pkcs_9_at_friendlyName))
                     {
                         alias = ((DERBMPString)attr).getString();
+                        if (bagAttr != null)
+                        {
+                            bagAttr.setBagAttribute(oid, attr);
+                        }
                     }
                     else if (oid.equals(pkcs_9_at_localKeyId))
                     {
                         localId = (ASN1OctetString)attr;
+
+                        String    name = new String(Hex.encode(localId.getOctets()));
+
+                        //
+                        // only add the localKeyId attribute if there is a key in the store that
+                        // corresponds. Some PKCS12 implementations get confused if an unassociated
+                        // attribute is found.
+                        //
+                        if (bagAttr != null && localIds.containsKey(name))
+                        {
+                            bagAttr.setBagAttribute(oid, attr);
+                        }
+                        else
+                        {
+                            localId = null;
+                        }
                     }
                 }
             }

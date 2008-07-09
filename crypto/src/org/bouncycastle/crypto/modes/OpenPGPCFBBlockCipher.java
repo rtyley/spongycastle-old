@@ -18,7 +18,6 @@ public class OpenPGPCFBBlockCipher
     private byte[] IV;
     private byte[] FR;
     private byte[] FRE;
-    private byte[] tmp;
 
     private BlockCipher cipher;
 
@@ -41,7 +40,6 @@ public class OpenPGPCFBBlockCipher
         this.IV = new byte[blockSize];
         this.FR = new byte[blockSize];
         this.FRE = new byte[blockSize];
-        this.tmp = new byte[blockSize];
     }
 
     /**
@@ -183,10 +181,8 @@ public class OpenPGPCFBBlockCipher
 
             for (int n = 2; n < blockSize; n++) 
             {
-                out[outOff + n] = encryptByte(in[inOff + n], n - 2);
+                FR[n - 2] = out[outOff + n] = encryptByte(in[inOff + n], n - 2);
             }
-            
-            System.arraycopy(out, outOff + 2, FR, 0, blockSize - 2);
         }
         else if (count == 0)
         {
@@ -194,11 +190,9 @@ public class OpenPGPCFBBlockCipher
 
             for (int n = 0; n < blockSize; n++) 
             {
-                out[outOff + n] = encryptByte(in[inOff + n], n);
+                FR[n] = out[outOff + n] = encryptByte(in[inOff + n], n);
             }
             
-            System.arraycopy(out, outOff, FR, 0, blockSize);
-
             count += blockSize;
         }
         else if (count == blockSize)
@@ -218,10 +212,8 @@ public class OpenPGPCFBBlockCipher
 
             for (int n = 2; n < blockSize; n++) 
             {
-                out[outOff + n] = encryptByte(in[inOff + n], n - 2);
+                FR[n - 2] = out[outOff + n] = encryptByte(in[inOff + n], n - 2);
             }
-
-            System.arraycopy(out, outOff + 2, FR, 0, blockSize - 2);
 
             count += blockSize;
         }
@@ -260,22 +252,22 @@ public class OpenPGPCFBBlockCipher
         
         if (count > blockSize)
         {
-            // copy in buffer so that this mode works if in and out are the same 
-            System.arraycopy(in, inOff, tmp, 0, blockSize);
+            byte inVal = in[inOff];
+            FR[blockSize - 2] = inVal;
+            out[outOff] = encryptByte(inVal, blockSize - 2);
 
-            out[outOff    ] = encryptByte(tmp[0], blockSize - 2);
-            out[outOff + 1] = encryptByte(tmp[1], blockSize - 1);
-
-            System.arraycopy(tmp, 0, FR, blockSize - 2, 2);
+            inVal = in[inOff + 1];
+            FR[blockSize - 1] = inVal;
+            out[outOff + 1] = encryptByte(inVal, blockSize - 1);
 
             cipher.processBlock(FR, 0, FRE, 0);
             
             for (int n = 2; n < blockSize; n++) 
             {
-                out[outOff + n] = encryptByte(tmp[n], n - 2);
+                inVal = in[inOff + n];
+                FR[n - 2] = inVal;
+                out[outOff + n] = encryptByte(inVal, n - 2);
             }
-            
-            System.arraycopy(tmp, 2, FR, 0, blockSize - 2);
         } 
         else if (count == 0)
         {
@@ -291,24 +283,25 @@ public class OpenPGPCFBBlockCipher
         }
         else if (count == blockSize)
         {
-            System.arraycopy(in, inOff, tmp, 0, blockSize);
-            
             cipher.processBlock(FR, 0, FRE, 0);
 
-            out[outOff    ] = encryptByte(tmp[0], 0);
-            out[outOff + 1] = encryptByte(tmp[1], 1);
+            byte inVal1 = in[inOff];
+            byte inVal2 = in[inOff + 1];
+            out[outOff    ] = encryptByte(inVal1, 0);
+            out[outOff + 1] = encryptByte(inVal2, 1);
             
             System.arraycopy(FR, 2, FR, 0, blockSize - 2);
-            
-            FR[blockSize - 2] = tmp[0];
-            FR[blockSize - 1] = tmp[1];
+
+            FR[blockSize - 2] = inVal1;
+            FR[blockSize - 1] = inVal2;
 
             cipher.processBlock(FR, 0, FRE, 0);
 
             for (int n = 2; n < blockSize; n++) 
             {
-                FR[n - 2] = in[inOff + n];
-                out[outOff + n] = encryptByte(in[inOff + n], n - 2);
+                byte inVal = in[inOff + n];
+                FR[n - 2] = inVal;
+                out[outOff + n] = encryptByte(inVal, n - 2);
             }
 
             count += blockSize;
