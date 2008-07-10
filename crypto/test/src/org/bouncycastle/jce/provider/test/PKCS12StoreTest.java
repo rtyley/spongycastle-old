@@ -1,23 +1,16 @@
 package org.bouncycastle.jce.provider.test;
 
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
+import java.security.Key;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
-import java.security.KeyPairGenerator;
-import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
@@ -26,6 +19,24 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.pkcs.ContentInfo;
+import org.bouncycastle.asn1.pkcs.EncryptedData;
+import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.Pfx;
+import org.bouncycastle.asn1.pkcs.SafeBag;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.X509CertificateObject;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 /**
  * Exercise the various key stores, making sure we at least get back what we put in!
@@ -593,6 +604,8 @@ public class PKCS12StoreTest
 
         chain[0] = createCert(pubKey, privKey, "issuer@bouncycastle.org", "subject@bouncycastle.org");
 
+        testSupportedTypes(privKey, chain);
+
         store = KeyStore.getInstance("PKCS12", "BC");
 
         store.load(null, null);
@@ -784,6 +797,145 @@ public class PKCS12StoreTest
         stream = new ByteArrayInputStream(pkcs12nopass);
         
         store.load(stream, "".toCharArray());
+    }
+
+    private void testSupportedTypes(PrivateKey privKey, Certificate[] chain)
+        throws Exception
+    {
+        basicStoreTest(privKey, chain, "PKCS12");
+        basicStoreTest(privKey, chain, "BCPKCS12");
+        basicStoreTest(privKey, chain, "PKCS12-DEF");
+
+        basicStoreTest(privKey, chain, "PKCS12-3DES-40RC2");
+        basicStoreTest(privKey, chain, "PKCS12-3DES-3DES");
+
+        basicStoreTest(privKey, chain, "PKCS12-DEF-3DES-40RC2");
+        basicStoreTest(privKey, chain, "PKCS12-DEF-3DES-3DES");
+    }
+
+    private void basicStoreTest(PrivateKey privKey, Certificate[] chain, String type)
+        throws Exception
+    {
+        KeyStore store = KeyStore.getInstance(type, "BC");
+
+        store.load(null, null);
+
+        store.setKeyEntry("key", privKey, null, chain);
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        store.store(bOut, passwd);
+
+        store.load(new ByteArrayInputStream(bOut.toByteArray()), passwd);
+
+        Key k = store.getKey("key", null);
+
+        if (!k.equals(privKey))
+        {
+            fail("private key didn't match");
+        }
+
+        Certificate[] c = store.getCertificateChain("key");
+
+        if (c.length != chain.length || !c[0].equals(chain[0]))
+        {
+            fail("certificates didn't match");
+        }
+
+        if (type.contains("DEF"))
+        {
+            if (c[0] instanceof X509CertificateObject)
+            {
+                fail("wrong certificate type found");
+            }
+        }
+
+        // check attributes
+        PKCS12BagAttributeCarrier b1 = (PKCS12BagAttributeCarrier)k;
+        PKCS12BagAttributeCarrier b2 = (PKCS12BagAttributeCarrier)chain[0];
+
+        if (b1.getBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName) != null)
+        {
+            DERBMPString name = (DERBMPString)b1.getBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName);
+
+            if (!name.equals(new DERBMPString("key")))
+            {
+                fail("friendly name wrong");
+            }
+        }
+        else
+        {
+            fail("no friendly name found on key");
+        }
+
+        if (b1.getBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_localKeyId) != null)
+        {
+            ASN1OctetString id = (ASN1OctetString)b1.getBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_localKeyId);
+
+            if (!id.equals(b2.getBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_localKeyId)))
+            {
+                fail("local key id mismatch");
+            }
+        }
+        else
+        {
+            fail("no local key id found");
+        }
+
+        //
+        // check algorithm types.
+        //
+        ASN1InputStream aIn = new ASN1InputStream(bOut.toByteArray());
+
+        Pfx pfx = new Pfx((ASN1Sequence)aIn.readObject());
+
+        ContentInfo cInfo = pfx.getAuthSafe();
+
+        ASN1OctetString auth = (ASN1OctetString)cInfo.getContent();
+
+        aIn = new ASN1InputStream(auth.getOctets());
+        ASN1Sequence s1 = (ASN1Sequence)aIn.readObject();
+
+        ContentInfo c1 = ContentInfo.getInstance(s1.getObjectAt(0));
+        ContentInfo c2 = ContentInfo.getInstance(s1.getObjectAt(1));
+
+        aIn = new ASN1InputStream(((ASN1OctetString)c1.getContent()).getOctets());
+
+        SafeBag sb = new SafeBag((ASN1Sequence)(((ASN1Sequence)aIn.readObject()).getObjectAt(0)));
+
+        EncryptedPrivateKeyInfo encInfo = EncryptedPrivateKeyInfo.getInstance(sb.getBagValue());
+
+        if (!encInfo.getEncryptionAlgorithm().getObjectId().equals(PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC))
+        {
+            fail("key encryption algorithm wrong");
+        }
+
+        // check the key encryption
+
+        // check the certificate encryption
+        EncryptedData cb = new EncryptedData((ASN1Sequence)c2.getContent());
+
+        if (type.endsWith("3DES"))
+        {
+            if (!cb.getEncryptionAlgorithm().getObjectId().equals(PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC))
+            {
+                fail("expected 3DES found: " + cb.getEncryptionAlgorithm().getObjectId());
+            }
+        }
+        else if (type.endsWith("40RC2"))
+        {
+            if (!cb.getEncryptionAlgorithm().getObjectId().equals(PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC))
+            {
+                fail("expected 40 bit RC2 found: " + cb.getEncryptionAlgorithm().getObjectId());
+            }
+        }
+        else
+        {
+            if (!cb.getEncryptionAlgorithm().getObjectId().equals(PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC))
+            {
+                fail("expected 40 bit RC2 found: " + cb.getEncryptionAlgorithm().getObjectId());
+            }
+        }
     }
 
     private void testNoExtraLocalKeyID(byte[] store1data)
