@@ -75,16 +75,6 @@ public class JDKPKCS12KeyStore
 {
     private static final int    SALT_SIZE = 20;
     private static final int    MIN_ITERATIONS = 1024;
-    
-    //
-    // SHA-1 and 3-key-triple DES.
-    //
-    private static final DERObjectIdentifier KEY_ALGORITHM = pbeWithSHAAnd3_KeyTripleDES_CBC;
-
-    //
-    // SHA-1 and 40 bit RC2.
-    //
-    private static final DERObjectIdentifier CERT_ALGORITHM = pbewithSHAAnd40BitRC2_CBC;
 
     private IgnoresCaseHashtable            keys = new IgnoresCaseHashtable();
     private Hashtable                       localIds = new Hashtable();
@@ -110,7 +100,9 @@ public class JDKPKCS12KeyStore
 
     protected SecureRandom      random = new SecureRandom();
 
-    private CertificateFactory  certFact = null;
+    private final CertificateFactory  certFact;
+    private final DERObjectIdentifier keyAlgorithm;
+    private final DERObjectIdentifier certAlgorithm;
 
     private class CertId
     {
@@ -153,8 +145,13 @@ public class JDKPKCS12KeyStore
     }
 
     public JDKPKCS12KeyStore(
-        String provider)
+        String provider,
+        DERObjectIdentifier keyAlgorithm,
+        DERObjectIdentifier certAlgorithm)
     {
+        this.keyAlgorithm = keyAlgorithm;
+        this.certAlgorithm = certAlgorithm;
+
         try
         {
             if (provider != null)
@@ -1050,8 +1047,8 @@ public class JDKPKCS12KeyStore
             String                  name = (String)ks.nextElement();
             PrivateKey              privKey = (PrivateKey)keys.get(name);
             PKCS12PBEParams         kParams = new PKCS12PBEParams(kSalt, MIN_ITERATIONS);
-            byte[]                  kBytes = wrapKey(KEY_ALGORITHM.getId(), privKey, kParams, password);
-            AlgorithmIdentifier     kAlgId = new AlgorithmIdentifier(KEY_ALGORITHM, kParams.getDERObject());
+            byte[]                  kBytes = wrapKey(keyAlgorithm.getId(), privKey, kParams, password);
+            AlgorithmIdentifier     kAlgId = new AlgorithmIdentifier(keyAlgorithm, kParams.getDERObject());
             org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo kInfo = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo(kAlgId, kBytes);
             boolean                 attrSet = false;
             ASN1EncodableVector     kName = new ASN1EncodableVector();
@@ -1131,7 +1128,7 @@ public class JDKPKCS12KeyStore
 
         ASN1EncodableVector  certSeq = new ASN1EncodableVector();
         PKCS12PBEParams         cParams = new PKCS12PBEParams(cSalt, MIN_ITERATIONS);
-        AlgorithmIdentifier     cAlgId = new AlgorithmIdentifier(CERT_ALGORITHM, cParams.getDERObject());
+        AlgorithmIdentifier     cAlgId = new AlgorithmIdentifier(certAlgorithm, cParams.getDERObject());
         Hashtable               doneCerts = new Hashtable();
 
         Enumeration cs = keys.keys();
@@ -1425,7 +1422,16 @@ public class JDKPKCS12KeyStore
     {
         public BCPKCS12KeyStore()
         {
-            super("BC");
+            super("BC", pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
+        }
+    }
+
+    public static class BCPKCS12KeyStore3DES
+        extends JDKPKCS12KeyStore
+    {
+        public BCPKCS12KeyStore3DES()
+        {
+            super("BC", pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
         }
     }
 
@@ -1434,7 +1440,16 @@ public class JDKPKCS12KeyStore
     {
         public DefPKCS12KeyStore()
         {
-            super(null);
+            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
+        }
+    }
+
+    public static class DefPKCS12KeyStore3DES
+        extends JDKPKCS12KeyStore
+    {
+        public DefPKCS12KeyStore3DES()
+        {
+            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
         }
     }
 
