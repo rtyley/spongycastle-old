@@ -353,6 +353,11 @@ public class BlockCipherTest
                 baseAlgorithm = algorithm;
             }
 
+            if (baseAlgorithm.equals("IDEA") & noIDEA())
+            {
+                return;
+            }
+
             keyGen = KeyGenerator.getInstance(baseAlgorithm, "BC");
             if (!keyGen.getAlgorithm().equals(baseAlgorithm))
             {
@@ -508,6 +513,20 @@ public class BlockCipherTest
         if (!areEqual(bytes, input))
         {
             fail("" + algorithm + " failed decryption - expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(bytes)));
+        }
+    }
+
+    private boolean noIDEA()
+    {
+        try
+        {
+            Cipher.getInstance("IDEA", "BC");
+
+            return false;
+        }
+        catch (Exception e)
+        {
+            return true;
         }
     }
 

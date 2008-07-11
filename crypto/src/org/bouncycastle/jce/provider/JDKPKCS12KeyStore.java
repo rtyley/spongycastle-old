@@ -100,9 +100,10 @@ public class JDKPKCS12KeyStore
 
     protected SecureRandom      random = new SecureRandom();
 
-    private final CertificateFactory  certFact;
-    private final DERObjectIdentifier keyAlgorithm;
-    private final DERObjectIdentifier certAlgorithm;
+    // use of final causes problems with JDK 1.2 compiler
+    private CertificateFactory  certFact;
+    private DERObjectIdentifier keyAlgorithm;
+    private DERObjectIdentifier certAlgorithm;
 
     private class CertId
     {
