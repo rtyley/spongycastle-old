@@ -256,6 +256,12 @@ then
     rm -rf classes/org/bouncycastle/crypto/test
     rm -rf classes/org/bouncycastle/jce/provider/test
 
+    (cd classes; jar cf ../../bcprov-ext-jdk12-$base.jar java org)
+    (cd classes; jar cf ../../jce-ext-jdk12-$base.jar java javax org)
+
+    rm -rf classes/org/bouncycastle/jce/provider/symmetric/IDEA.class
+    rm -rf classes/org/bouncycastle/jce/provider/symmetric/IDEAMappings.class
+    rm -rf classes/org/bouncycastle/crypto/engines/IDEAEngine.class
 
     (cd classes; jar cf ../../bcprov-jdk12-$base.jar java org)
     (cd classes; jar cf ../../jce-jdk12-$base.jar java javax org)
