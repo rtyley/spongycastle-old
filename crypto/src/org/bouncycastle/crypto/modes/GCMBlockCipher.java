@@ -22,6 +22,7 @@ public class GCMBlockCipher
     private static final int    BLOCK_SIZE = 16;
     private static final byte[] ZEROES = new byte[BLOCK_SIZE];
     private static final BigInteger R = new BigInteger("11100001", 2).shiftLeft(120);
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
 
     private final BlockCipher   cipher;
 
@@ -344,7 +345,7 @@ public class GCMBlockCipher
     private BigInteger gHASH(byte[] b, boolean nonce)
     {
         //trace("" + b.length);
-        BigInteger Y = BigInteger.ZERO;
+        BigInteger Y = ZERO;
 
         for (int pos = 0; pos < b.length; pos += 16)
         {
@@ -398,7 +399,7 @@ public class GCMBlockCipher
 
     private BigInteger multiply(BigInteger X, BigInteger Y)
     {
-        BigInteger Z = BigInteger.ZERO;
+        BigInteger Z = ZERO;
         BigInteger V = X;
 
         for (int i = 0; i < 128; ++i)
