@@ -49,6 +49,11 @@ public class DSATest
     public void testCompat()
         throws Exception
     {
+        if (Security.getProvider("SUN") == null)
+        {
+            return;
+        }
+
         Signature           s = Signature.getInstance("DSA", "SUN");
         KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "SUN");
         byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };

@@ -4,12 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
+import javax.crypto.Cipher;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -128,10 +130,28 @@ public class SMIMEEnvelopedTest
     public void testIDEAEncrypted()
         throws Exception
     {
+        if (isPresent("IDEA"))
+        {
         MimeBodyPart  msg      = SMIMETestUtil.makeMimeBodyPart("WallaWallaWashington");
         String        algorithm = SMIMEEnvelopedGenerator.IDEA_CBC;
         
         verifyAlgorithm(algorithm, msg);
+        }
+    }
+
+    private boolean isPresent(String algorithm)
+        throws Exception
+    {
+        try
+        {
+            Cipher.getInstance(algorithm, "BC");
+
+            return true;
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            return false;
+        }
     }
 
     public void testRC2Encrypted()

@@ -27,6 +27,8 @@ import java.security.Security;
 import java.util.Date;
 import java.util.Iterator;
 
+import javax.crypto.Cipher;
+
 public class PGPKeyRingTest
     extends SimpleTest
 {
@@ -1480,7 +1482,12 @@ public class PGPKeyRingTest
         {
             fail("wrong number of public keyrings");
         }
-        
+
+        if (noIDEA())
+        {
+            return;
+        }
+
         PGPSecretKeyRingCollection    secretRings = new PGPSecretKeyRingCollection(sec5);
 
         rIt = secretRings.getKeyRings();
@@ -1523,7 +1530,21 @@ public class PGPKeyRingTest
             fail("wrong number of secret keyrings");
         }
     }
-    
+
+    private boolean noIDEA()
+    {
+        try
+        {
+            Cipher.getInstance("IDEA", "BC");
+
+            return false;
+        }
+        catch (Exception e)
+        {
+            return true;
+        }
+    }
+
     public void test6()
         throws Exception
     {

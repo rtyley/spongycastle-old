@@ -659,29 +659,30 @@ public class PGPRSATest
         //
         char[]                  passP = "FIXCITY_QA".toCharArray();
 
-        PGPSecretKeyRing        pgpPriv = new PGPSecretKeyRing(testPrivKeyV3);
-
-        PGPPrivateKey            pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(passP, "BC");
-
-        //
-        // write a v3 private key
-        //
-        bOut = new ByteArrayOutputStream();
-        pOut = new BCPGOutputStream(bOut);
-        
-        pgpPriv.encode(pOut);
-
-        if (!areEqual(bOut.toByteArray(), testPrivKeyV3))    
+        if (!noIDEA())
         {
-            fail("private key V3 rewrite failed");
+            PGPSecretKeyRing        pgpPriv = new PGPSecretKeyRing(testPrivKeyV3);
+            PGPPrivateKey           pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(passP, "BC");
+
+            //
+            // write a v3 private key
+            //
+            bOut = new ByteArrayOutputStream();
+            pOut = new BCPGOutputStream(bOut);
+
+            pgpPriv.encode(pOut);
+
+            if (!areEqual(bOut.toByteArray(), testPrivKeyV3))
+            {
+                fail("private key V3 rewrite failed");
+            }
         }
 
         //
         // Read the private key
         //
-        pgpPriv = new PGPSecretKeyRing(testPrivKey);
-
-        pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(pass, "BC");
+        PGPSecretKeyRing pgpPriv = new PGPSecretKeyRing(testPrivKey);
+        PGPPrivateKey pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(pass, "BC");
         
         //
         // write a private key
@@ -1212,7 +1213,21 @@ public class PGPRSATest
             fail("mismatch on subkey valid days.");
         }
     }
-    
+
+    private boolean noIDEA()
+    {
+        try
+        {
+            Cipher.getInstance("IDEA", "BC");
+
+            return false;
+        }
+        catch (Exception e)
+        {
+            return true;
+        }
+    }
+
     public String getName()
     {
         return "PGPRSATest";
