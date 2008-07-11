@@ -21,7 +21,7 @@ import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.mail.smime.SMIMESignedGenerator;
+import org.bouncycastle.cms.CMSSignedGenerator;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
@@ -568,7 +568,7 @@ public class SignedDataStreamTest
         
         verifySignatures(sp);
         
-        byte[] contentDigest = (byte[])gen.getGeneratedDigests().get(SMIMESignedGenerator.DIGEST_SHA1);
+        byte[] contentDigest = (byte[])gen.getGeneratedDigests().get(CMSSignedGenerator.DIGEST_SHA1);
 
         AttributeTable table = ((SignerInformation)sp.getSignerInfos().getSigners().iterator().next()).getSignedAttributes();
         Attribute hash = table.get(CMSAttributes.messageDigest);
