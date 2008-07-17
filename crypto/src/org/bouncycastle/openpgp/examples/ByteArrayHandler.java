@@ -172,7 +172,9 @@ public class ByteArrayHandler
         cOut.write(bytes);  // obtain the actual bytes from the compressed stream
 
         cOut.close();
-        
+
+        out.close();
+
         return  encOut.toByteArray();
     }
 
