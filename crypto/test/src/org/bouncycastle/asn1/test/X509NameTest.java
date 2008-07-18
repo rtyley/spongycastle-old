@@ -483,7 +483,7 @@ public class X509NameTest
         {
             fail("escaped + not reduced properly");
         }
-        System.out.println(n);
+
         if (!n.toString().equals("CN=a\\+b"))
         {
             fail("+ in string not properly escaped.");

@@ -12,7 +12,6 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.util.IPAddress;
-import org.bouncycastle.util.Strings;
 
 /**
  * The GeneralName object.
@@ -151,9 +150,10 @@ public class GeneralName
         }
         else if (tag == iPAddress)
         {
-            if (IPAddress.isValid(name))
+            byte[] enc = IPAddress.toGeneralNameEncoding(name);
+            if (enc != null)
             {
-                this.obj = new DEROctetString(Strings.toUTF8ByteArray(name));
+                this.obj = new DEROctetString(enc);
             }
             else
             {
