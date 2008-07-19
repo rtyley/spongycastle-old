@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
+import java.util.StringTokenizer;
+
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -150,7 +152,7 @@ public class GeneralName
         }
         else if (tag == iPAddress)
         {
-            byte[] enc = IPAddress.toGeneralNameEncoding(name);
+            byte[] enc = toGeneralNameEncoding(name);
             if (enc != null)
             {
                 this.obj = new DEROctetString(enc);
@@ -242,6 +244,170 @@ public class GeneralName
             buf.append(obj.toString());
         }
         return buf.toString();
+    }
+
+    private byte[] toGeneralNameEncoding(String ip)
+    {
+        if (IPAddress.isValidIPv6WithNetmask(ip) || IPAddress.isValidIPv6(ip))
+        {
+            int    slashIndex = ip.indexOf('/');
+
+            if (slashIndex < 0)
+            {
+                byte[] addr = new byte[16];
+                int[]  parsedIp = parseIPv6(ip);
+                copyInts(parsedIp, addr, 0);
+
+                return addr;
+            }
+            else
+            {
+                byte[] addr = new byte[32];
+                int[]  parsedIp = parseIPv6(ip.substring(0, slashIndex));
+                copyInts(parsedIp, addr, 0);
+                String mask = ip.substring(slashIndex + 1);
+                if (mask.indexOf(':') > 0)
+                {
+                    parsedIp = parseIPv6(mask);
+                }
+                else
+                {
+                    parsedIp = parseMask(mask);
+                }
+                copyInts(parsedIp, addr, 16);
+
+                return addr;
+            }
+        }
+        else if (IPAddress.isValidIPv4WithNetmask(ip) || IPAddress.isValidIPv4(ip))
+        {
+            int    slashIndex = ip.indexOf('/');
+
+            if (slashIndex < 0)
+            {
+                byte[] addr = new byte[4];
+
+                parseIPv4(ip, addr, 0);
+
+                return addr;
+            }
+            else
+            {
+                byte[] addr = new byte[8];
+
+                parseIPv4(ip.substring(0, slashIndex), addr, 0);
+
+                String mask = ip.substring(slashIndex + 1);
+                if (mask.indexOf('.') > 0)
+                {
+                    parseIPv4(mask, addr, 4);
+                }
+                else
+                {
+                    parseIPv4Mask(mask, addr, 4);
+                }
+
+                return addr;
+            }
+        }
+
+        return null;
+    }
+
+    private void parseIPv4Mask(String mask, byte[] addr, int offset)
+    {
+        int   maskVal = Integer.parseInt(mask);
+
+        for (int i = 0; i != maskVal; i++)
+        {
+            addr[(i / 8) + offset] |= 1 << (i % 8);
+        }
+    }
+
+    private void parseIPv4(String ip, byte[] addr, int offset)
+    {
+        StringTokenizer sTok = new StringTokenizer(ip, "./");
+        int    index = 0;
+
+        while (sTok.hasMoreTokens())
+        {
+            addr[offset + index++] = (byte)Integer.parseInt(sTok.nextToken());
+        }
+    }
+
+    private int[] parseMask(String mask)
+    {
+        int[] res = new int[8];
+        int   maskVal = Integer.parseInt(mask);
+
+        for (int i = 0; i != maskVal; i++)
+        {
+            res[i / 16] |= 1 << (i % 16);
+        }
+        return res;
+    }
+
+    private void copyInts(int[] parsedIp, byte[] addr, int offSet)
+    {
+        for (int i = 0; i != parsedIp.length; i++)
+        {
+            addr[(i * 2) + offSet] = (byte)(parsedIp[i] >> 8);
+            addr[(i * 2 + 1) + offSet] = (byte)parsedIp[i];
+        }
+    }
+
+    private int[] parseIPv6(String ip)
+    {
+        StringTokenizer sTok = new StringTokenizer(ip, ":", true);
+        int index = 0;
+        int[] val = new int[8];
+
+        if (ip.charAt(0) == ':' && ip.charAt(1) == ':')
+        {
+           sTok.nextToken(); // skip the first one
+        }
+
+        int doubleColon = -1;
+
+        while (sTok.hasMoreTokens())
+        {
+            String e = sTok.nextToken();
+
+            if (e.equals(":"))
+            {
+                doubleColon = index;
+                val[index++] = 0;
+            }
+            else
+            {
+                if (e.indexOf('.') < 0)
+                {
+                    val[index++] = Integer.parseInt(e, 16);
+                    if (sTok.hasMoreTokens())
+                    {
+                        sTok.nextToken();
+                    }
+                }
+                else
+                {
+                    StringTokenizer eTok = new StringTokenizer(e, ".");
+
+                    val[index++] = (Integer.parseInt(eTok.nextToken()) << 8) | Integer.parseInt(eTok.nextToken());
+                    val[index++] = (Integer.parseInt(eTok.nextToken()) << 8) | Integer.parseInt(eTok.nextToken());
+                }
+            }
+        }
+
+        if (index != val.length)
+        {
+            System.arraycopy(val, doubleColon, val, val.length - (index - doubleColon), index - doubleColon);
+            for (int i = doubleColon; i != val.length - (index - doubleColon); i++)
+            {
+                val[i] = 0;
+            }
+        }
+
+        return val;
     }
 
     public DERObject toASN1Object()
