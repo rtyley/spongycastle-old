@@ -154,11 +154,17 @@ public class TimeStampResponse
 
             Attribute scV1 = tok.getSignedAttributes().get(PKCSObjectIdentifiers.id_aa_signingCertificate);
             Attribute scV2 = tok.getSignedAttributes().get(PKCSObjectIdentifiers.id_aa_signingCertificateV2);
-            if (scV1 == null && scV2 == null && !(scV1 != null && scV2 != null))
+
+            if (scV1 == null && scV2 == null)
             {
                 throw new TSPValidationException("no signing certificate attribute present.");
             }
-            
+
+            if (scV1 != null && scV2 != null)
+            {
+                throw new TSPValidationException("conflicting signing certificate attributes present.");
+            }
+
             if (request.getReqPolicy() != null && !request.getReqPolicy().equals(tstInfo.getPolicy()))
             {
                 throw new TSPValidationException("TSA policy wrong for request.");
