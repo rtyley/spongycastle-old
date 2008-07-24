@@ -15,11 +15,14 @@ import java.security.cert.PolicyNode;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.security.cert.PKIXCertPathChecker;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Collection;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -169,11 +172,19 @@ public class CertPathValidatorTest
         PKIXParameters param = new PKIXParameters(trust);
         param.addCertStore(store);
         param.setDate(validDate.getTime());
+        MyChecker checker = new MyChecker();
+        param.addCertPathChecker(checker);
+
         PKIXCertPathValidatorResult result =
             (PKIXCertPathValidatorResult) cpv.validate(cp, param);
         PolicyNode policyTree = result.getPolicyTree();
         PublicKey subjectPublicKey = result.getPublicKey();
 
+        if (checker.getCount() != 2)
+        {
+            fail("checker not evaluated for each certificate");
+        }
+        
         if (!subjectPublicKey.equals(finalCert.getPublicKey()))
         {
             fail("wrong public key returned");
@@ -212,7 +223,7 @@ public class CertPathValidatorTest
             param.addCertStore(store);
             param.setRevocationEnabled(false);
             param.setDate(validDate.getTime());
-            
+
             result =(PKIXCertPathValidatorResult) cpv.validate(cp, param);
             policyTree = result.getPolicyTree();
             subjectPublicKey = result.getPublicKey();
@@ -241,6 +252,40 @@ public class CertPathValidatorTest
         Security.addProvider(new BouncyCastleProvider());
 
         runTest(new CertPathValidatorTest());
+    }
+
+
+    private static class MyChecker
+       extends PKIXCertPathChecker
+    {
+        private static int count;
+
+        public void init(boolean forward)
+        throws CertPathValidatorException
+        {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public boolean isForwardCheckingSupported()
+        {
+            return true;
+        }
+
+        public Set<String> getSupportedExtensions()
+        {
+            return null;
+        }
+
+        public void check(Certificate cert, Collection<String> unresolvedCritExts)
+        throws CertPathValidatorException
+        {
+            count++;
+        }
+
+        public int getCount()
+        {
+           return count;
+        }
     }
 }
 

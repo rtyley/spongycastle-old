@@ -28,6 +28,8 @@ import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
+import java.security.cert.PKIXCertPathChecker;
+import java.security.cert.CertPathValidatorException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,6 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+import java.util.Collection;
 
 public class CertPathTest
     extends SimpleTest
@@ -363,6 +366,5 @@ public class CertPathTest
             return Collections.unmodifiableCollection(encodingNames).iterator();
         }
     }
-
 }
 

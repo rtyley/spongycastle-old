@@ -22,8 +22,16 @@ to conform the algorithms to the JCE framework.
 <h2>2.0 Release History</h2>
 
 <h3>2.1.1 Version</h3>
-Release 1.40
+Release 1.41
 <h3>2.1.2 Defects Fixed</h3>
+<ul>
+<li>The GeneralName String constructor now supports IPv4 and IPv6 address parsing.</li>
+<li>Fix to regression from 1.38: PKIXCertPathCheckers were not being called on intermediate certificates.</li>
+</ul>
+
+<h3>2.2.1 Version</h3>
+Release 1.40
+<h3>2.2.2 Defects Fixed</h3>
 <ul>
 <li>EAX mode ciphers were not resetting correctly after a doFinal/reset. This has been fixed.</li>
 <li>The SMIME API was failing to verify doubly nested multipart objects in signatures correctly. This has been fixed.</li>
@@ -37,9 +45,9 @@ Release 1.40
 <li>javax.crypto classes no longer appear in the JDK 1.3 provider jar.</li>
 <li>Signature creation time was not being properly initialised in new V4 PGP signature objects although the encoding was correct. This has been fixed.</li>
 <li>The '+' character can now be escaped or quoted in the constructor for X509Name, X509Prinicipal.</li>
-<li>Regression: PKIXCertPathValidatorResult.getPublicKey was returning the wrong public key when the BC certificate path validator was used.</li>
+<li>Fix to regression from 1.38: PKIXCertPathValidatorResult.getPublicKey was returning the wrong public key when the BC certificate path validator was used.</li>
 </ul>
-<h3>2.1.3 Additional Features and Functionality</h3>
+<h3>2.2.3 Additional Features and Functionality</h3>
 <ul>
 <li>Galois/Counter Mode (GCM) has been added to the lightweight API and the JCE provider.</li>
 <li>SignedPublicKeyAndChallenge and PKCS10CertificationRequest can now take null providers if you need to fall back to the default provider mechanism.</li>
@@ -47,14 +55,14 @@ Release 1.40
 <li>Unnecessary local ID attributes on certificates in PKCS12 files are now automatically removed.</li>
 <li>The PKCS12 store types PKCS12-3DES-3DES and PKCS12-DEF-3DES-3DES have been added to support generation of PKCS12 files with both certificates and keys protected by 3DES.</li>
 </ul>
-<h3>2.1.4 Additional Notes</h3>
+<h3>2.2.4 Additional Notes</h3>
 <ul>
 <li>Due to problems for some users caused by the presence of the IDEA algorithm, an implementation is no longer included in the default signed jars. Only the providers of the form bcprov-ext-*-*.jar now include IDEA.</li>
 </ul>
 
-<h3>2.2.1 Version</h3>
+<h3>2.3.1 Version</h3>
 Release 1.39
-<h3>2.2.2 Defects Fixed</h3>
+<h3>2.3.2 Defects Fixed</h3>
 <ul>
 <li>A bug causing the odd NullPointerException has been removed from the LocalizedMessage class.</li>
 <li>IV handling in CMS for the SEED and Camellia was incorrect. This has been fixed.</li>
@@ -67,7 +75,7 @@ Release 1.39
 <li>A decoding issue with a mis-identified tagged object in CertRepMessage has been fixed.</li>
 <li>\# is now properly recognised in the X509Name class.</li>
 </ul>
-<h3>2.2.3 Additional Features and Functionality</h3>
+<h3>2.3.3 Additional Features and Functionality</h3>
 <ul>
 <li>Certifications associated with user attributes can now be created, verified and removed in OpenPGP.</li>
 <li>API support now exists for CMS countersignature reading and production.</li>
@@ -81,9 +89,9 @@ Release 1.39
 <li>The ProofOfPossession class now better supports the underlying ASN.1 structure.</li>
 <li>Support has been added to the provider for the VMPC MAC.</li>
 </ul>
-<h3>2.3.1 Version</h3>
+<h3>2.4.1 Version</h3>
 Release 1.38
-<h3>2.3.2 Defects Fixed</h3>
+<h3>2.4.2 Defects Fixed</h3>
 <ul>
 <li>SMIME signatures containing non-standard quote-printable data could be altered by SMIME encryption. This has been fixed.</li>
 <li>CMS signatures that do not use signed attributes were vulnerable to one of Bleichenbacher's RSA signature forgery attacks. This has been fixed.</li>
@@ -97,7 +105,7 @@ Release 1.38
 <li>Overwriting entities in a PKCS#12 file was not fully compliant with the JavaDoc for KeyStore. This has been fixed.</li>
 <li>TlsInputStream.read() could appear to return end of file when end of file had not been reached. This has been fixed.</li>
 </ul>
-<h3>2.3.3 Additional Features and Functionality</h3>
+<h3>2.4.3 Additional Features and Functionality</h3>
 <ul>
 <li>Buffering in the streaming CMS has been reworked. Throughput is now usually higher and the behaviour is more predictable.</li>
 <li>It's now possible to pass a table of hashes to a CMS detached signature rather than having to always pass the data.</li>
@@ -108,9 +116,9 @@ Release 1.38
 <li>CertPathReviewer has better handling for problem trust anchors.</li>
 <li>Base64 encoder now does initial size calculations to try to improve resource usage.</li>
 </ul>
-<h3>2.4.1 Version</h3>
+<h3>2.5.1 Version</h3>
 Release 1.37
-<h3>2.4.2 Defects Fixed</h3>
+<h3>2.5.2 Defects Fixed</h3>
 <ul>
 <li>The ClearSignedFileProcessor example for OpenPGP did not take into account trailing white space in
 the file to be signed. This has been fixed.</li>
@@ -124,7 +132,7 @@ the file to be signed. This has been fixed.</li>
 <li>The default private key length in the lightweght API for generated DiffieHellman parameters was absurdly small, this has been fixed.</li>
 <li>Cipher.getParameters() for PBEwithSHAAndTwofish-CBC was returning null after intialisation. This has been fixed.</li>
 </ul>
-<h3>2.4.3 Additional Features and Functionality</h3>
+<h3>2.5.3 Additional Features and Functionality</h3>
 <ul>
 <li>The block cipher mode CCM has been added to the provider and light weight API.</li>
 <li>The block cipher mode EAX has been added to the provider and light weight API.</li>
@@ -143,9 +151,9 @@ the file to be signed. This has been fixed.</li>
 <li>The JCE provider now supports RIPEMD160withECDSA.</li>
 </ul>
 
-<h3>2.5.1 Version</h3>
+<h3>2.6.1 Version</h3>
 Release 1.36
-<h3>2.5.2 Defects Fixed</h3>
+<h3>2.6.2 Defects Fixed</h3>
 <ul>
 <li>DSA key generator now checks range and keysize.</li>
 <li>Class loader issues with i18n classes should now be fixed.</li>
@@ -159,7 +167,7 @@ regression for processing some messages with embedded multiparts that contained 
 <li>Some surrogate pairs were not assembled correctly by the UTF8 decoder. This has been fixed.</li>
 <li>Alias resolution in PKCS#12 is now case insensitive.</li>
 </ul>
-<h3>2.5.3 Additional Features and Functionality</h3>
+<h3>2.6.3 Additional Features and Functionality</h3>
 <ul>
 <li>CMS/SMIME now supports basic EC KeyAgreement with X9.63.</li>
 <li>CMS/SMIME now supports RFC 3211 password based encryption.</li>
@@ -175,9 +183,9 @@ regression for processing some messages with embedded multiparts that contained 
 <li>DSASigner now handles long messages. SHA2 family digest support for DSA has been added to the provider.</li>
 </ul>
 
-<h3>2.6.1 Version</h3>
+<h3>2.7.1 Version</h3>
 Release 1.35
-<h3>2.6.2 Defects Fixed</h3>
+<h3>2.7.2 Defects Fixed</h3>
 <ul>
 <li>Test data files are no longer in the provider jars.</li>
 <li>SMIMESignedParser now handles indefinite length data in SignerInfos.</li>
@@ -192,7 +200,7 @@ Release 1.35
 <li>The IESEngine could incorrectly encrypt data when used in block cipher mode. This has been fixed.
 <li>An error in the encoding of the KEKRecipientInfo has been fixed. Compatability warning: this may mean that versions of BC mail prior to 1.35 will have trouble processing KEK messages produced by 1.35 or later.
 </ul>
-<h3>2.6.3 Additional Features and Functionality</h3>
+<h3>2.7.3 Additional Features and Functionality</h3>
 <ul>
 <li>Further optimisations to elliptic curve math libraries.</li>
 <li>API now incorporates a CertStore which should be suitable for use with LDAP.</li>
@@ -213,9 +221,9 @@ Release 1.35
 <li>PEMReader now supports OpenSSL ECDSA key pairs.</li>
 <li>PGP packet streams can now be closed off using close() on the returned stream as well as closing the generator.</li>
 </ul>
-<h3>2.7.1 Version</h3>
+<h3>2.8.1 Version</h3>
 Release 1.34
-<h3>2.7.2 Defects Fixed</h3>
+<h3>2.8.2 Defects Fixed</h3>
 <ul>
 <li>Endianess of integer conversion in KDF2BytesGenerator was incorrect. This has been fixed.
 <li>Generating critical signature subpackets in OpenPGP would result in a zero packet tag. This has been fixed.
@@ -227,7 +235,7 @@ Bleichenbacher's RSA signature forgery attack. This has been fixed.
 <li>PGP Identity strings were only being interpreted as ASCII rather than UTF8. This has been fixed.
 <li>CertificateFactory.generateCRLs now returns a Collection rather than null.
 </ul>
-<h3>2.7.3 Additional Features and Functionality</h3>
+<h3>2.8.3 Additional Features and Functionality</h3>
 <ul>
 <li>An ISO18033KDFParameters class had been added to support ISO18033 KDF generators.
 <li>An implemention of the KDF1 bytes generator algorithm has been added.
@@ -247,14 +255,14 @@ The build scripts now run this target by default.
 <li>Performance of the prime number generation in the BigInteger library has been further improved.
 <li>In line with RFC 3280 section 4.1.2.4 DN's are now encoded using UTF8String by default rather than PrintableString.
 </ul>
-<h3>2.7.5 Security Advisory</h3>
+<h3>2.8.5 Security Advisory</h3>
 <ul>
 <li>If you are using public exponents with the value three you *must* upgrade to this release, otherwise it
 will be possible for attackers to exploit some of Bleichenbacher's RSA signature forgery attacks on your applications.
 </ul>
-<h3>2.8.1 Version</h3>
+<h3>2.9.1 Version</h3>
 Release 1.33
-<h3>2.8.2 Defects Fixed</h3>
+<h3>2.9.2 Defects Fixed</h3>
 <ul>
 <li>OCSPResponseData was including the default version in its encoding. This has been fixed.
 <li>BasicOCSPResp.getVersion() would throw a NullPointer exception if called on a default version response. This has been fixed.
@@ -263,7 +271,7 @@ Release 1.33
 <li>ArmoredInputStream was not closing the underlying stream on close. This has been fixed.
 <li>Small base64 encoded strings with embedded white space could decode incorrectly using the Base64 class. This has been fixed.
 </ul>
-<h3>2.8.3 Additional Features and Functionality</h3>
+<h3>2.9.3 Additional Features and Functionality</h3>
 <ul>
 <li>The X509V2CRLGenerator now supports adding general extensions to CRL entries.
 <li>A RoleSyntax implementation has been added to the x509 ASN.1 package, and the AttributeCertificateHolder class now support the IssuerSerial option.
@@ -271,9 +279,9 @@ Release 1.33
 <li>DERUTF8String now supports surrogate pairs.
 </ul>
 
-<h3>2.9.1 Version</h3>
+<h3>2.10.1 Version</h3>
 Release 1.32
-<h3>2.9.2 Defects Fixed</h3>
+<h3>2.10.2 Defects Fixed</h3>
 <ul>
 <li>Further work has been done on RFC 3280 compliance.
 <li>The ASN1Sequence constructor for SemanticsInformation would sometimes throw a ClassCastException on reconstruction an object from a byte stream. This has been fixed.
@@ -290,7 +298,7 @@ which has a dispose method on it which should allow removal of the file backing 
 <li>OpenPGP clear text signatures containing '\r' as line separators were not being correctly canonicalized. This has been fixed.
 </ul>
 
-<h3>2.9.3 Additional Features and Functionality</h3>
+<h3>2.10.3 Additional Features and Functionality</h3>
 <ul>
 <li>The ASN.1 library now includes classes for the ICAO Electronic Passport.
 <li>Support has been added to CMS and S/MIME for ECDSA.
@@ -299,7 +307,7 @@ which has a dispose method on it which should allow removal of the file backing 
 <li>Support has been added for repeated attributes in CMS and S/MIME messages.
 <li>A wider range of RSA-PSS signature types is now supported for CRL and Certificate verification.
 </ul>
-<h3>2.9.4 Possible compatibility issue</h3>
+<h3>2.10.4 Possible compatibility issue</h3>
 <ul>
 <li>Previously elliptic curve keys and points were generated with point compression enabled by default.
 Owing to patent issues in some jurisdictions, they are now generated with point compression disabled by default.
