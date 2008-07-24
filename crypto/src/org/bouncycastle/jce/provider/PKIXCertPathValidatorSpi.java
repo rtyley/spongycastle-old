@@ -341,6 +341,9 @@ public class PKIXCertPathValidatorSpi
                 criticalExtensions.remove(RFC3280CertPathUtilities.SUBJECT_ALTERNATIVE_NAME);
                 criticalExtensions.remove(RFC3280CertPathUtilities.NAME_CONSTRAINTS);
 
+                // (o)
+                RFC3280CertPathUtilities.prepareNextCertO(certPath, index, criticalExtensions, pathCheckers);
+                
                 // set signing certificate for next round
                 sign = cert;
 
