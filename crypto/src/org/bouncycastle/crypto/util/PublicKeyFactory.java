@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -116,10 +117,17 @@ public class PublicKeyFactory
         else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa)
                  || algId.getObjectId().equals(OIWObjectIdentifiers.dsaWithSHA1))
         {
-            DSAParameter    params = new DSAParameter((ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
-            DERInteger      derY = (DERInteger)keyInfo.getPublicKey();
+            DERInteger derY = (DERInteger)keyInfo.getPublicKey();
+            DEREncodable de = keyInfo.getAlgorithmId().getParameters();
 
-            return new DSAPublicKeyParameters(derY.getValue(), new DSAParameters(params.getP(), params.getQ(), params.getG()));
+            DSAParameters parameters = null;
+            if (de != null)
+            {
+                DSAParameter params = DSAParameter.getInstance(de.getDERObject());
+                parameters = new DSAParameters(params.getP(), params.getQ(), params.getG());
+            }
+
+            return new DSAPublicKeyParameters(derY.getValue(), parameters);
         }
         else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
