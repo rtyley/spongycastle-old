@@ -3,6 +3,7 @@ package org.bouncycastle.crypto.util;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -116,10 +117,17 @@ public class PrivateKeyFactory
         }
         else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa))
         {
-            DSAParameter    params = new DSAParameter((ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
-            DERInteger      derX = (DERInteger)keyInfo.getPrivateKey();
+            DERInteger derX = (DERInteger)keyInfo.getPrivateKey();
+            DEREncodable de = keyInfo.getAlgorithmId().getParameters();
 
-            return new DSAPrivateKeyParameters(derX.getValue(), new DSAParameters(params.getP(), params.getQ(), params.getG()));
+            DSAParameters parameters = null;
+            if (de != null)
+            {
+                DSAParameter params = DSAParameter.getInstance(de.getDERObject());
+                parameters = new DSAParameters(params.getP(), params.getQ(), params.getG());
+            }
+
+            return new DSAPrivateKeyParameters(derX.getValue(), parameters);
         }
         else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
