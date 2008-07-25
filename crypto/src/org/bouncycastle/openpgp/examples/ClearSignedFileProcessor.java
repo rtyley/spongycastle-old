@@ -35,7 +35,6 @@ import java.util.Iterator;
  * A simple utility class that creates clear signed files and verifies them.
  * <p>
  * To sign a file: ClearSignedFileProcessor -s fileName secretKey passPhrase.<br>
- * If -a is specified the output file will be "ascii-armored".
  * <p>
  * To decrypt: ClearSignedFileProcessor -v fileName signatureFile publicKeyFile.
  */
@@ -130,6 +129,11 @@ public class ClearSignedFileProcessor
         }
         while ((ch = fIn.read()) >= 0);
 
+        if (ch < 0)
+        {
+            lookAhead = -1;
+        }
+        
         return lookAhead;
     }
 
@@ -173,7 +177,7 @@ public class ClearSignedFileProcessor
         if (lookAhead != -1 && aIn.isClearText())
         {
             byte[] line = lineOut.toByteArray();
-            out.write(line, 0, getLengthWithoutSeperator(line));
+            out.write(line, 0, getLengthWithoutSeparator(line));
             out.write(lineSep);
 
             while (lookAhead != -1 && aIn.isClearText())
@@ -181,7 +185,7 @@ public class ClearSignedFileProcessor
                 lookAhead = readInputLine(lineOut, lookAhead, aIn);
                 
                 line = lineOut.toByteArray();
-                out.write(line, 0, getLengthWithoutSeperator(line));
+                out.write(line, 0, getLengthWithoutSeparator(line));
                 out.write(lineSep);
             }
         }
@@ -353,7 +357,7 @@ public class ClearSignedFileProcessor
         aOut.write(line, 0, line.length);
     }
 
-    private static int getLengthWithoutSeperator(byte[] line)
+    private static int getLengthWithoutSeparator(byte[] line)
     {
         int    end = line.length - 1;
 

@@ -235,7 +235,7 @@ public class AllTests
     public void testClearSigned()
         throws Exception
     {
-        createTestKey(clearSignedPublicKey, "pub.bpg");
+        createTestFile(clearSignedPublicKey, "pub.bpg");
 
         checkClearSignedVerify(nlOnlySignedMessage);
         checkClearSignedVerify(crOnlySignedMessage);
@@ -250,6 +250,14 @@ public class AllTests
         checkClearSigned(nlOnlyMessage);
         checkClearSigned(crNlMessage);
         checkClearSigned(crNlMessageTrailingWhiteSpace);
+    }
+
+    public void testClearSignedBogusInput()
+        throws Exception
+    {
+        createTestFile(clearSignedPublicKey, "test.txt");
+
+        ClearSignedFileProcessor.main(new String[] { "-s", "test.txt", "secret.bpg", "password" });
     }
 
     private void checkClearSignedVerify(String message)
@@ -370,7 +378,7 @@ public class AllTests
         bfOut.close();
     }
 
-    private void createTestKey(byte[] keyData, String name)
+    private void createTestFile(byte[] keyData, String name)
         throws IOException
     {
         FileOutputStream fOut = new FileOutputStream(name);
