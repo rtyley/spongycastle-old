@@ -2,7 +2,6 @@ package org.bouncycastle.bcpg.sig;
 
 import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
-import org.bouncycastle.util.encoders.Hex;
 
 /**
  * Packet holding the key flag values.
@@ -18,7 +17,7 @@ public class KeyFlags
     public static final int AUTHENTICATION = 0x20;
     public static final int SHARED = 0x80;
     
-    private static final byte[] intToByteArray(
+    private static byte[] intToByteArray(
         int    v)
     {
         byte[] tmp = new byte[4];
