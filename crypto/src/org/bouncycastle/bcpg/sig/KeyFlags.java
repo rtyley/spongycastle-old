@@ -2,6 +2,7 @@ package org.bouncycastle.bcpg.sig;
 
 import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  * Packet holding the key flag values.
@@ -35,7 +36,7 @@ public class KeyFlags
         byte[]    data = new byte[size + 1];
         
         System.arraycopy(tmp, 0, data, 0, data.length);
-        
+
         return data;
     }
     
@@ -65,7 +66,7 @@ public class KeyFlags
 
         for (int i = 0; i != data.length; i++)
         {
-            flags = (data[i] & 0xff) << (i * 8);
+            flags |= (data[i] & 0xff) << (i * 8);
         }
 
         return flags;
