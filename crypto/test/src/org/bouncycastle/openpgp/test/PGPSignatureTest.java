@@ -414,9 +414,25 @@ public class PGPSignatureTest
         checkValue(KeyFlags.SPLIT, 0x10);
         checkValue(KeyFlags.AUTHENTICATION, 0x20);
         checkValue(KeyFlags.SHARED, 0x80);
+
+        // yes this actually happens
+        checkValue(new byte[] { 4, 0, 0, 0 }, 0x04);
+        checkValue(new byte[] { 4, 0, 0 }, 0x04);
+        checkValue(new byte[] { 4, 0 }, 0x04);
+        checkValue(new byte[] { 4 }, 0x04);
     }
 
     private void checkValue(int flag, int value)
+    {
+        KeyFlags f = new KeyFlags(true, flag);
+
+        if (f.getFlags() != value)
+        {
+            fail("flag value mismatch");
+        }
+    }
+
+    private void checkValue(byte[] flag, int value)
     {
         KeyFlags f = new KeyFlags(true, flag);
 
