@@ -14,15 +14,16 @@ public class XTEAEngine
     private static final int rounds     = 32,
                              block_size = 8,
                              key_size   = 16,
-                             delta      = 0x9E3779B9,
-                             d_sum      = 0xC6EF3720; // sum on decrypt
+                             delta      = 0x9E3779B9;
 
     /*
      * the expanded key array of 4 subkeys
      */
-    private int[]   _S = new int[4];
-    private boolean _initialised;
-    private boolean _forEncryption;
+    private int[]   _S    = new int[4],
+                    _sum0 = new int[32],
+                    _sum1 = new int[32];
+    private boolean _initialised,
+                    _forEncryption;
 
     /**
      * Create an instance of the TEA encryption algorithm
@@ -105,10 +106,16 @@ public class XTEAEngine
     private void setKey(
         byte[]      key)
     {
-        _S[0] = bytesToInt(key, 0);
-        _S[1] = bytesToInt(key, 4);
-        _S[2] = bytesToInt(key, 8);
-        _S[3] = bytesToInt(key, 12);
+        int i, j;
+        for (i = j = 0; i < 4; i++,j+=4)
+            _S[i] = bytesToInt(key, j);
+            
+        for (i = j = 0; i < rounds; i++)
+        {
+                _sum0[i] = (j + _S[j & 3]);
+                j += delta;
+                _sum1[i] = (j + _S[j >>> 11 & 3]);
+        }
     }
 
     private int encryptBlock(
@@ -121,13 +128,10 @@ public class XTEAEngine
         int v0 = bytesToInt(in, inOff);
         int v1 = bytesToInt(in, inOff + 4);
 
-        int sum = 0;
-
-        for (int i = 0; i != rounds; i++)
+        for (int i = 0; i < rounds; i++)
         {
-            v0    += ((v1 << 4 ^ v1 >>> 5) + v1) ^ (sum + _S[sum & 3]);
-            sum += delta;
-            v1    += ((v0 << 4 ^ v0 >>> 5) + v0) ^ (sum + _S[sum >>> 11 & 3]);
+            v0    += ((v1 << 4 ^ v1 >>> 5) + v1) ^ _sum0[i];
+            v1    += ((v0 << 4 ^ v0 >>> 5) + v0) ^ _sum1[i];
         }
 
         unpackInt(v0, out, outOff);
@@ -146,13 +150,10 @@ public class XTEAEngine
         int v0 = bytesToInt(in, inOff);
         int v1 = bytesToInt(in, inOff + 4);
 
-        int sum = d_sum;
-
-        for (int i = 0; i != rounds; i++)
+        for (int i = rounds-1; i >= 0; i--)
         {
-            v1  -= ((v0 << 4 ^ v0 >>> 5) + v0) ^ (sum + _S[sum >>> 11 & 3]);
-            sum -= delta;
-            v0  -= ((v1 << 4 ^ v1 >>> 5) + v1) ^ (sum + _S[sum & 3]);
+            v1  -= ((v0 << 4 ^ v0 >>> 5) + v0) ^ _sum1[i];
+            v0  -= ((v1 << 4 ^ v1 >>> 5) + v1) ^ _sum0[i];
         }
 
         unpackInt(v0, out, outOff);
