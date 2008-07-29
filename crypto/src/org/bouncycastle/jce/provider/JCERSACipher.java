@@ -209,23 +209,23 @@ public class JCERSACipher extends WrapCipherSpi
         {
             initFromSpec(OAEPParameterSpec.DEFAULT);
         }
-        else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-1ANDMGF1PADDING"))
         {
             initFromSpec(OAEPParameterSpec.DEFAULT);
         }
-        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-224ANDMGF1PADDING"))
         {
             initFromSpec(new OAEPParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), PSource.PSpecified.DEFAULT));
         }
-        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-256ANDMGF1PADDING"))
         {
             initFromSpec(new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT));
         }
-        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-384ANDMGF1PADDING"))
         {
             initFromSpec(new OAEPParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, PSource.PSpecified.DEFAULT));
         }
-        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-512ANDMGF1PADDING"))
         {
             initFromSpec(new OAEPParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, PSource.PSpecified.DEFAULT));
         }
@@ -286,22 +286,23 @@ public class JCERSACipher extends WrapCipherSpi
                 {
                     throw new InvalidAlgorithmParameterException("unkown MGF parameters");
                 }
-                
-                MGF1ParameterSpec   mgfParams = (MGF1ParameterSpec)spec.getMGFParameters();
-                
-                if (!JCEDigestUtil.isSameDigest(mgfParams.getDigestAlgorithm(), spec.getDigestAlgorithm()))
-                {
-                    throw new InvalidAlgorithmParameterException("digest algorithm for MGF should be the same as for OAEP parameters.");
-                }
-                
-                Digest              digest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
-                
+    
+                Digest digest = JCEDigestUtil.getDigest(spec.getDigestAlgorithm());
+
                 if (digest == null)
+                {
+                    throw new InvalidAlgorithmParameterException("no match on digest algorithm: "+ spec.getDigestAlgorithm());
+                }
+
+                MGF1ParameterSpec mgfParams = (MGF1ParameterSpec)spec.getMGFParameters();
+                Digest mgfDigest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+                
+                if (mgfDigest == null)
                 {
                     throw new InvalidAlgorithmParameterException("no match on MGF digest algorithm: "+ mgfParams.getDigestAlgorithm());
                 }
                 
-                cipher = new OAEPEncoding(new RSABlindedEngine(), digest, ((PSource.PSpecified)spec.getPSource()).getValue());
+                cipher = new OAEPEncoding(new RSABlindedEngine(), digest, mgfDigest, ((PSource.PSpecified)spec.getPSource()).getValue());
             }
         }
         else
