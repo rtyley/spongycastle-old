@@ -10,8 +10,10 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.util.Arrays;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 import java.math.BigInteger;
@@ -23,6 +25,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.MGF1ParameterSpec;
@@ -541,8 +544,71 @@ public class RSATest
         {
             fail("public key equality check failed");
         }
+
+        oaepCompatibilityTest("SHA-1", priv2048Key, pub2048Key);
+        oaepCompatibilityTest("SHA-224", priv2048Key, pub2048Key);
+        oaepCompatibilityTest("SHA-256", priv2048Key, pub2048Key);
+        oaepCompatibilityTest("SHA-384", priv2048Key, pub2048Key);
+        oaepCompatibilityTest("SHA-512", priv2048Key, pub2048Key);
     }
 
+    private void oaepCompatibilityTest(String digest, PrivateKey privKey, PublicKey pubKey)
+        throws Exception
+    {
+        if (Security.getProvider("SunJCE") == null || Security.getProvider("SunRsaSign") == null)
+        {   System.out.println("return");
+            return;
+        }
+
+        KeyFactory  fact = KeyFactory.getInstance("RSA", "SunRsaSign");
+        PrivateKey  priv2048Key = fact.generatePrivate(priv2048KeySpec);
+        PublicKey   pub2048Key = fact.generatePublic(pub2048KeySpec);
+
+        byte[] data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+
+        Cipher sCipher;
+        try
+        {
+            sCipher = Cipher.getInstance("RSA/ECB/OAEPWith" + digest + "AndMGF1Padding", "SunJCE");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            return;
+        }
+        catch (NoSuchPaddingException e)
+        {
+            return;
+        }
+
+        sCipher.init(Cipher.ENCRYPT_MODE, pub2048Key);
+
+        byte[] enctext = sCipher.doFinal(data);
+
+        Cipher bcCipher = Cipher.getInstance("RSA/ECB/OAEPWith" + digest + "AndMGF1Padding", "BC");
+
+        bcCipher.init(Cipher.DECRYPT_MODE, privKey, new OAEPParameterSpec(digest, "MGF1", MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT));
+
+        byte[] plaintext = bcCipher.doFinal(enctext);
+
+        if (!Arrays.areEqual(plaintext, data))
+        {
+            fail("data did not decrypt first time");
+        }
+
+        bcCipher.init(Cipher.ENCRYPT_MODE, pubKey, new OAEPParameterSpec(digest, "MGF1", MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT));
+
+        enctext = bcCipher.doFinal(data);
+
+        sCipher.init(Cipher.DECRYPT_MODE, priv2048Key);
+
+        plaintext = sCipher.doFinal(enctext);
+
+        if (!Arrays.areEqual(plaintext, data))
+        {
+            fail("data did not decrypt second time");
+        }
+    }
+    
     public String getName()
     {
         return "RSATest";
