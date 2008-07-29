@@ -271,7 +271,7 @@ public class CertPathValidatorTest
             return true;
         }
 
-        public Set<String> getSupportedExtensions()
+        public Set getSupportedExtensions()
         {
             return null;
         }
