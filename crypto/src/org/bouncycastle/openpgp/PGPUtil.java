@@ -10,6 +10,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Provider;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -250,6 +252,18 @@ public class PGPUtil
         String  provider) 
         throws PGPException, NoSuchProviderException
     {
+        Provider prov = getProvider(provider);
+
+        return makeKeyFromPassPhrase(algorithm, s2k, passPhrase, prov);
+    }
+
+    public static SecretKey makeKeyFromPassPhrase(
+        int     algorithm,
+        S2K     s2k,
+        char[]  passPhrase,
+        Provider provider)
+        throws PGPException, NoSuchProviderException
+    {
         String    algName = null;
         int        keySize = 0;
         
@@ -424,8 +438,8 @@ public class PGPUtil
 
     static MessageDigest getDigestInstance(
         String digestName, 
-        String provider)
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         try
         {       
@@ -611,5 +625,18 @@ public class PGPUtil
             
             return new ArmoredInputStream(in);
         }
+    }
+
+    static Provider getProvider(String providerName)
+        throws NoSuchProviderException
+    {
+        Provider prov = Security.getProvider(providerName);
+
+        if (prov == null)
+        {
+            throw new NoSuchProviderException("provider " + providerName + " not found.");
+        }
+
+        return prov;
     }
 }

@@ -27,8 +27,15 @@ public class SecretKeyPacket
     SecretKeyPacket(
         BCPGInputStream    in)
         throws IOException
-    {      
-        pubKeyPacket = new PublicKeyPacket(in);
+    {
+        if (this instanceof SecretSubkeyPacket)
+        {
+            pubKeyPacket = new PublicSubkeyPacket(in);
+        }
+        else
+        {
+            pubKeyPacket = new PublicKeyPacket(in);
+        }
 
         s2kUsage = in.read();
 

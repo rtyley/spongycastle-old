@@ -20,6 +20,8 @@ import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.security.Provider;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -168,7 +170,7 @@ public class PGPEncryptedDataGenerator
     private List            methods = new ArrayList();
     private int             defAlgorithm;
     private SecureRandom    rand;
-    private String          defProvider;
+    private Provider        defProvider;
     
     /**
      * Base constructor.
@@ -182,11 +184,19 @@ public class PGPEncryptedDataGenerator
         SecureRandom        rand,
         String              provider)
     {
+        this(encAlgorithm, rand, Security.getProvider(provider));
+    }
+
+    public PGPEncryptedDataGenerator(
+        int                 encAlgorithm,
+        SecureRandom        rand,
+        Provider            provider)
+    {
         this.defAlgorithm = encAlgorithm;
         this.rand = rand;
         this.defProvider = provider;
     }
-    
+
     /**
      * Creates a cipher stream which will have an integrity packet
      * associated with it.
@@ -202,12 +212,21 @@ public class PGPEncryptedDataGenerator
         SecureRandom        rand,
         String              provider)
     {
+        this(encAlgorithm, withIntegrityPacket, rand, Security.getProvider(provider));
+    }
+
+    public PGPEncryptedDataGenerator(
+        int                 encAlgorithm,
+        boolean             withIntegrityPacket,
+        SecureRandom        rand,
+        Provider            provider)
+    {
         this.defAlgorithm = encAlgorithm;
         this.rand = rand;
         this.defProvider = provider;
         this.withIntegrityPacket = withIntegrityPacket;
     }
-    
+
     /**
      * Base constructor.
      *
@@ -224,10 +243,22 @@ public class PGPEncryptedDataGenerator
     {
         this.defAlgorithm = encAlgorithm;
         this.rand = rand;
+        this.defProvider = Security.getProvider(provider);
+        this.oldFormat = oldFormat;
+    }
+
+    public PGPEncryptedDataGenerator(
+        int                 encAlgorithm,
+        SecureRandom        rand,
+        boolean             oldFormat,
+        Provider            provider)
+    {
+        this.defAlgorithm = encAlgorithm;
+        this.rand = rand;
         this.defProvider = provider;
         this.oldFormat = oldFormat;
     }
-    
+
     /**
      * Add a PBE encryption method to the encrypted object.
      * 
@@ -239,6 +270,11 @@ public class PGPEncryptedDataGenerator
         char[]    passPhrase) 
         throws NoSuchProviderException, PGPException
     {
+        if (defProvider == null)
+        {
+            throw new NoSuchProviderException("unable to find provider.");
+        }
+
         byte[]        iv = new byte[8];
         
         rand.nextBytes(iv);
@@ -263,7 +299,12 @@ public class PGPEncryptedDataGenerator
         {
             throw new IllegalArgumentException("passed in key not an encryption key!");
         }
-        
+
+        if (defProvider == null)
+        {
+            throw new NoSuchProviderException("unable to find provider.");
+        }
+
         methods.add(new PubMethod(key));
     }
     
@@ -323,6 +364,11 @@ public class PGPEncryptedDataGenerator
         if (methods.size() == 0)
         {
             throw new IllegalStateException("no encryption methods specified");
+        }
+
+        if (defProvider == null)
+        {
+            throw new IllegalStateException("provider resolves to null");
         }
 
         Key key = null;
