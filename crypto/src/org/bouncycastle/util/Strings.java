@@ -82,8 +82,13 @@ public final class Strings
     
     public static byte[] toUTF8ByteArray(String string)
     {
+        return toUTF8ByteArray(string.toCharArray());
+    }
+
+    public static byte[] toUTF8ByteArray(char[] string)
+    {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        char[] c = string.toCharArray();
+        char[] c = string;
         int i = 0;
 
         while (i < c.length)

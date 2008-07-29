@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ class CMSEnvelopedHelper
     
     Cipher createAsymmetricCipher(
         String encryptionOid,
-        String provider) 
+        Provider provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException
     {
         try
@@ -66,8 +67,8 @@ class CMSEnvelopedHelper
 
     KeyGenerator createSymmetricKeyGenerator(
         String encryptionOID, 
-        String provider) 
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         try
         {
@@ -97,8 +98,8 @@ class CMSEnvelopedHelper
 
     AlgorithmParameters createAlgorithmParameters(
         String encryptionOID, 
-        String provider) 
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         try
         {
@@ -151,8 +152,8 @@ class CMSEnvelopedHelper
 
     private Cipher createCipher(
         String algName,
-        String provider)
-        throws NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException
+        Provider provider)
+        throws NoSuchAlgorithmException, NoSuchPaddingException
     {
         if (provider != null)
         {
@@ -166,8 +167,8 @@ class CMSEnvelopedHelper
 
     private AlgorithmParameters createAlgorithmParams(
         String algName,
-        String provider)
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         if (provider != null)
         {
@@ -181,8 +182,8 @@ class CMSEnvelopedHelper
 
     private KeyGenerator createKeyGenerator(
         String algName,
-        String provider)
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         if (provider != null)
         {
@@ -194,8 +195,8 @@ class CMSEnvelopedHelper
         }
     }
 
-    Cipher getSymmetricCipher(String encryptionOID, String provider)
-        throws NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException
+    Cipher getSymmetricCipher(String encryptionOID, Provider provider)
+        throws NoSuchAlgorithmException, NoSuchPaddingException
     {
         try
         {
@@ -223,8 +224,8 @@ class CMSEnvelopedHelper
     AlgorithmParameters getEncryptionAlgorithmParameters(
         String encOID,
         byte[] encParams,
-        String  provider)
-        throws CMSException, NoSuchProviderException
+        Provider provider)
+        throws CMSException
     {
         if (encParams == null)
         {

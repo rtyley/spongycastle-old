@@ -1,18 +1,18 @@
 package org.bouncycastle.cms;
 
 import java.security.MessageDigest;
-import java.security.NoSuchProviderException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 
 
 class CounterSignatureDigestCalculator
     implements DigestCalculator
 {
     private final String alg;
-    private final String provider;
+    private final Provider provider;
     private final byte[] data;
 
-    CounterSignatureDigestCalculator(String alg, String provider, byte[] data)
+    CounterSignatureDigestCalculator(String alg, Provider provider, byte[] data)
     {
         this.alg = alg;
         this.provider = provider;
@@ -20,7 +20,7 @@ class CounterSignatureDigestCalculator
     }
 
     public byte[] getDigest()
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        throws NoSuchAlgorithmException
     {
         MessageDigest digest = CMSSignedHelper.INSTANCE.getDigestInstance(alg, provider);
 

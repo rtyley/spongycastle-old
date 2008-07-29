@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Provider;
 import java.security.cert.X509Certificate;
 
 /**
@@ -144,6 +145,27 @@ public class SMIMEEnvelopedGenerator
     }
 
     /**
+     * Add a key agreement based recipient.
+     *
+     * @param senderPrivateKey private key to initialise sender side of agreement with.
+     * @param senderPublicKey sender public key to include with message.
+     * @param recipientCert recipient's public key certificate.
+     * @param cekWrapAlgorithm OID for key wrapping algorithm to use.
+     * @param provider provider to use for the agreement calculation.
+     */
+    public void addKeyAgreementRecipient(
+        String           agreementAlgorithm,
+        PrivateKey       senderPrivateKey,
+        PublicKey        senderPublicKey,
+        X509Certificate  recipientCert,
+        String           cekWrapAlgorithm,
+        Provider         provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException
+    {
+        fact.addKeyAgreementRecipient(agreementAlgorithm, senderPrivateKey, senderPublicKey, recipientCert, cekWrapAlgorithm, provider);
+    }
+
+    /**
      * Use a BER Set to store the recipient information
      */
     public void setBerEncodeRecipients(
@@ -159,8 +181,8 @@ public class SMIMEEnvelopedGenerator
         MimeBodyPart    content,
         String          encryptionOID,
         int             keySize,
-        String          provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+        Provider        provider)
+        throws NoSuchAlgorithmException, SMIMEException
     {
         //
         // check the base algorithm and provider is available
@@ -195,6 +217,19 @@ public class SMIMEEnvelopedGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
     {
+        return make(makeContentBodyPart(content), encryptionOID, 0, SMIMEUtil.getProvider(provider));
+    }
+
+    /**
+     * generate an enveloped object that contains an SMIME Enveloped
+     * object using the given provider.
+     */
+    public MimeBodyPart generate(
+        MimeBodyPart    content,
+        String          encryptionOID,
+        Provider        provider)
+        throws NoSuchAlgorithmException, SMIMEException
+    {
         return make(makeContentBodyPart(content), encryptionOID, 0, provider);
     }
 
@@ -207,6 +242,20 @@ public class SMIMEEnvelopedGenerator
         MimeMessage     message,
         String          encryptionOID,
         String          provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+    {
+        return generate(message, encryptionOID, SMIMEUtil.getProvider(provider));
+    }
+
+    /**
+     * generate an enveloped object that contains an SMIME Enveloped
+     * object using the given provider from the contents of the passed in
+     * message
+     */
+    public MimeBodyPart generate(
+        MimeMessage     message,
+        String          encryptionOID,
+        Provider        provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
     {
         try
@@ -233,6 +282,21 @@ public class SMIMEEnvelopedGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
     {
+        return generate(content, encryptionOID, keySize, SMIMEUtil.getProvider(provider));
+    }
+
+    /**
+     * generate an enveloped object that contains an SMIME Enveloped
+     * object using the given provider. The size of the encryption key
+     * is determined by keysize.
+     */
+    public MimeBodyPart generate(
+        MimeBodyPart    content,
+        String          encryptionOID,
+        int             keySize,
+        Provider        provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+    {
         return make(makeContentBodyPart(content), encryptionOID, keySize, provider);
     }
 
@@ -248,6 +312,22 @@ public class SMIMEEnvelopedGenerator
         int             keySize,
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+    {
+        return generate(message, encryptionOID, keySize, SMIMEUtil.getProvider(provider));
+    }
+
+    /**
+     * generate an enveloped object that contains an SMIME Enveloped
+     * object using the given provider from the contents of the passed in
+     * message. The size of the encryption key used to protect the message
+     * is determined by keysize.
+     */
+    public MimeBodyPart generate(
+        MimeMessage     message,
+        String          encryptionOID,
+        int             keySize,
+        Provider        provider)
+        throws NoSuchAlgorithmException, SMIMEException
     {
         try
         {
@@ -267,7 +347,7 @@ public class SMIMEEnvelopedGenerator
         private final MimeBodyPart _content;
         private final String _encryptionOid;
         private final int    _keySize;
-        private final String _provider;
+        private final Provider _provider;
         
         private boolean _firstTime = true;
         
@@ -275,7 +355,7 @@ public class SMIMEEnvelopedGenerator
             MimeBodyPart content,
             String       encryptionOid,
             int          keySize,
-            String       provider)
+            Provider     provider)
         {
             _content = content;
             _encryptionOid = encryptionOid;
@@ -345,20 +425,20 @@ public class SMIMEEnvelopedGenerator
             SecretKey           encKey,
             AlgorithmParameters params,
             ASN1EncodableVector recepientInfos,
-            String              provider)
-            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+            Provider            provider)
+            throws NoSuchAlgorithmException, CMSException
         {
             _encryptionOID = encryptionOID;
             _encKey = encKey;
             _params = params;
             _recipientInfos = recepientInfos;
-            
+
             return super.open(out, encryptionOID, encKey, params, recepientInfos, provider);
         }
 
         OutputStream regenerate(
             OutputStream out,
-            String       provider)
+            Provider     provider)
             throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
         {
             return super.open(out, _encryptionOID, _encKey, _params, _recipientInfos, provider);

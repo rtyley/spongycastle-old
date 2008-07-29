@@ -35,6 +35,7 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.Provider;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -213,10 +214,10 @@ public class CMSSignedDataGenerator
             DERObjectIdentifier contentType,
             CMSProcessable      content,
             SecureRandom        random,
-            String              sigProvider,
+            Provider            sigProvider,
             boolean             addDefaultAttributes,
             boolean             isCounterSignature)
-            throws IOException, SignatureException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, CertificateEncodingException, CMSException
+            throws IOException, SignatureException, InvalidKeyException, NoSuchAlgorithmException, CertificateEncodingException, CMSException
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
                   new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
@@ -404,6 +405,18 @@ public class CMSSignedDataGenerator
         String         sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
+        return generate(content, CMSUtils.getProvider(sigProvider));
+    }
+
+    /**
+     * generate a signed object that for a CMS Signed Data
+     * object using the given provider.
+     */
+    public CMSSignedData generate(
+        CMSProcessable content,
+        Provider       sigProvider)
+        throws NoSuchAlgorithmException, CMSException
+    {
         return generate(content, false, sigProvider);
     }
 
@@ -420,9 +433,42 @@ public class CMSSignedDataGenerator
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
+        return generate(signedContentType, content, encapsulate, CMSUtils.getProvider(sigProvider), true);
+    }
+
+    /**
+     * generate a signed object that for a CMS Signed Data
+     * object using the given provider - if encapsulate is true a copy
+     * of the message will be included in the signature. The content type
+     * is set according to the OID represented by the string signedContentType.
+     */
+    public CMSSignedData generate(
+        String          signedContentType,
+        CMSProcessable  content,
+        boolean         encapsulate,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, CMSException
+    {
         return generate(signedContentType, content, encapsulate, sigProvider, true);
     }
-    
+
+    /**
+     * Similar method to the other generate methods. The additional argument
+     * addDefaultAttributes indicates whether or not a default set of signed attributes
+     * need to be added automatically. If the argument is set to false, no
+     * attributes will get added at all.
+     */
+    public CMSSignedData generate(
+        String                  signedContentType,
+        CMSProcessable          content,
+        boolean                 encapsulate,
+        String                  sigProvider,
+        boolean                 addDefaultAttributes)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        return generate(signedContentType, content, encapsulate, CMSUtils.getProvider(sigProvider), addDefaultAttributes);
+    }
+
     /**
      * Similar method to the other generate methods. The additional argument
      * addDefaultAttributes indicates whether or not a default set of signed attributes
@@ -433,9 +479,9 @@ public class CMSSignedDataGenerator
         String                  signedContentType,
         CMSProcessable          content,
         boolean                 encapsulate,
-        String                  sigProvider,
+        Provider                sigProvider,
         boolean                 addDefaultAttributes)
-        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+        throws NoSuchAlgorithmException, CMSException
     {
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
@@ -586,6 +632,35 @@ public class CMSSignedDataGenerator
     }
 
     /**
+     * generate a signed object that for a CMS Signed Data
+     * object using the given provider - if encapsulate is true a copy
+     * of the message will be included in the signature with the
+     * default content type "data".
+     */
+    public CMSSignedData generate(
+        CMSProcessable  content,
+        boolean         encapsulate,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, CMSException
+    {
+        return this.generate(DATA, content, encapsulate, sigProvider);
+    }
+
+    /**
+     * generate a set of one or more SignerInformation objects representing counter signatures on
+     * the passed in SignerInformation object.
+     *
+     * @param signer the signer to be countersigned
+     * @param sigProvider the provider to be used for counter signing.
+     * @return a store containing the signers.
+     */
+    public SignerInformationStore generateCounterSigners(SignerInformation signer, Provider sigProvider)
+        throws NoSuchAlgorithmException, CMSException
+    {
+        return this.generate(null, new CMSProcessableByteArray(signer.getSignature()), false, sigProvider).getSignerInfos();
+    }
+
+    /**
      * generate a set of one or more SignerInformation objects representing counter signatures on
      * the passed in SignerInformation object.
      *
@@ -596,7 +671,7 @@ public class CMSSignedDataGenerator
     public SignerInformationStore generateCounterSigners(SignerInformation signer, String sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        return this.generate(null, new CMSProcessableByteArray(signer.getSignature()), false, sigProvider).getSignerInfos();
+        return this.generate(null, new CMSProcessableByteArray(signer.getSignature()), false, CMSUtils.getProvider(sigProvider)).getSignerInfos();
     }
 }
 

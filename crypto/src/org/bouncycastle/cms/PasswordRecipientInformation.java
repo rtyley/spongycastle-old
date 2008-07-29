@@ -3,6 +3,7 @@ package org.bouncycastle.cms;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -16,6 +17,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -40,12 +42,65 @@ public class PasswordRecipientInformation
     }
 
     /**
+     * return the object identifier for the key derivation algorithm, or null
+     * if there is none present.
+     *
+     * @return OID for key derivation algorithm, if present.
+     */
+    public String getKeyEncryptionAlgOID()
+    {
+        if (_info.getKeyDerivationAlgorithm() != null)
+        {
+            return _info.getKeyDerivationAlgorithm().getObjectId().getId();
+        }
+
+        return null;
+    }
+
+    /**
+     * return the ASN.1 encoded key dervivation algorithm parameters, or null if
+     * there aren't any.
+     * @return ASN.1 encoding of key derivation algorithm parameters.
+     */
+    public byte[] getKeyDerivationAlgParams()
+    {
+        try
+        {
+            if (_info.getKeyDerivationAlgorithm() != null)
+            {
+                DEREncodable params = _info.getKeyDerivationAlgorithm().getParameters();
+                if (params != null)
+                {
+                    return params.getDERObject().getEncoded();
+                }
+            }
+
+            return null;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("exception getting encryption parameters " + e);
+        }
+    }
+
+    /**
      * decrypt the content and return an input stream.
      */
     public CMSTypedStream getContentStream(
         Key key,
         String   prov)
         throws CMSException, NoSuchProviderException
+    {
+        return getContentStream(key, CMSUtils.getProvider(prov));
+    }
+
+    /**
+     * decrypt the content and return an input stream.
+     */
+    public CMSTypedStream getContentStream(
+        Key key,
+        Provider prov)
+        throws CMSException
     {
         try
         {

@@ -1,11 +1,5 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,11 +9,17 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
+
+import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public abstract class RecipientInformation
 {
@@ -93,7 +93,22 @@ public abstract class RecipientInformation
     public AlgorithmParameters getKeyEncryptionAlgorithmParameters(
         String  provider) 
         throws CMSException, NoSuchProviderException    
-    {        
+    {
+        return getKeyEncryptionAlgorithmParameters(CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * Return an AlgorithmParameters object giving the encryption parameters
+     * used to encrypt the key this recipient holds.
+     *
+     * @param provider the provider to generate the parameters for.
+     * @return the parameters object, null if there is not one.
+     * @throws CMSException if the algorithm cannot be found, or the parameters can't be parsed.
+     */
+    public AlgorithmParameters getKeyEncryptionAlgorithmParameters(
+        Provider provider)
+        throws CMSException
+    {
         try
         {
             byte[]  enc = this.encodeObj(_keyEncAlg.getParameters());
@@ -120,8 +135,8 @@ public abstract class RecipientInformation
 
     protected CMSTypedStream getContentFromSessionKey(
         Key     sKey,
-        String  provider)
-        throws CMSException, NoSuchProviderException
+        Provider  provider)
+        throws CMSException
     {
         String              encAlg = _encAlg.getObjectId().getId();
         
@@ -135,7 +150,7 @@ public abstract class RecipientInformation
     
             if (sParams != null && !(sParams instanceof ASN1Null))
             {
-                AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encAlg, cipher.getProvider().getName());
+                AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encAlg, cipher.getProvider());
 
                 params.init(sParams.getEncoded(), "ASN.1");
     

@@ -25,6 +25,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
+import java.security.Provider;
 import java.security.cert.CRLException;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
@@ -157,8 +158,8 @@ class CMSSignedHelper
     
     MessageDigest getDigestInstance(
         String algorithm, 
-        String provider) 
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         try
         {
@@ -188,8 +189,8 @@ class CMSSignedHelper
 
     private MessageDigest createDigestInstance(
         String algorithm,
-        String provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         if (provider != null)
         {
@@ -203,8 +204,8 @@ class CMSSignedHelper
 
     Signature getSignatureInstance(
         String algorithm, 
-        String provider) 
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         if (provider != null)
         {
@@ -218,9 +219,9 @@ class CMSSignedHelper
 
     X509Store createAttributeStore(
         String type,
-        String provider,
+        Provider provider,
         ASN1Set certSet)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+        throws NoSuchStoreException, CMSException
     {
         List certs = new ArrayList();
 
@@ -265,9 +266,9 @@ class CMSSignedHelper
 
     X509Store createCertificateStore(
         String type,
-        String provider,
+        Provider provider,
         ASN1Set certSet)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+        throws NoSuchStoreException, CMSException
     {
         List certs = new ArrayList();
 
@@ -289,9 +290,9 @@ class CMSSignedHelper
 
     X509Store createCRLsStore(
         String type,
-        String provider,
+        Provider provider,
         ASN1Set crlSet)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+        throws NoSuchStoreException, CMSException
     {
         List crls = new ArrayList();
 
@@ -313,10 +314,10 @@ class CMSSignedHelper
 
     CertStore createCertStore(
         String type,
-        String provider,
+        Provider provider,
         ASN1Set certSet,
         ASN1Set crlSet)
-        throws NoSuchProviderException, CMSException, NoSuchAlgorithmException
+        throws CMSException, NoSuchAlgorithmException
     {
         List certsAndcrls = new ArrayList();
 
@@ -351,8 +352,8 @@ class CMSSignedHelper
         }
     }
 
-    private void addCertsFromSet(List certs, ASN1Set certSet, String provider)
-        throws NoSuchProviderException, CMSException
+    private void addCertsFromSet(List certs, ASN1Set certSet, Provider provider)
+        throws CMSException
     {
         CertificateFactory cf;
 
@@ -398,8 +399,8 @@ class CMSSignedHelper
         }
     }
 
-    private void addCRLsFromSet(List crls, ASN1Set certSet, String provider)
-        throws NoSuchProviderException, CMSException
+    private void addCRLsFromSet(List crls, ASN1Set certSet, Provider provider)
+        throws CMSException
     {
         CertificateFactory cf;
 

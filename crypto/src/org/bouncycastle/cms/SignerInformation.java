@@ -32,6 +32,7 @@ import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.Provider;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
@@ -274,8 +275,8 @@ public class SignerInformation
     private boolean doVerify(
         PublicKey       key,
         AttributeTable  signedAttrTable,
-        String          sigProvider)
-        throws CMSException, NoSuchAlgorithmException, NoSuchProviderException
+        Provider        sigProvider)
+        throws CMSException, NoSuchAlgorithmException
     {
         String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(this.getDigestAlgOID());
         String          signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
@@ -473,8 +474,8 @@ public class SignerInformation
         byte[]    digest, 
         PublicKey key,
         byte[]    signature,
-        String    sigProvider) 
-        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+        Provider  sigProvider)
+        throws NoSuchAlgorithmException, CMSException
     {
         String algorithm = CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
         
@@ -552,7 +553,19 @@ public class SignerInformation
         String      sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        return doVerify(key, this.getSignedAttributes(), sigProvider); 
+        return doVerify(key, this.getSignedAttributes(), CMSUtils.getProvider(sigProvider));
+    }
+
+    /**
+     * verify that the given public key succesfully handles and confirms the
+     * signature associated with this signer.
+     */
+    public boolean verify(
+        PublicKey   key,
+        Provider    sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        return doVerify(key, this.getSignedAttributes(), sigProvider);
     }
 
     /**
@@ -565,6 +578,22 @@ public class SignerInformation
         X509Certificate cert,
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException,
+            CertificateExpiredException, CertificateNotYetValidException,
+            CMSException
+    {
+        return verify(cert, CMSUtils.getProvider(sigProvider));
+    }
+
+    /**
+     * verify that the given certificate successfully handles and confirms
+     * the signature associated with this signer and, if a signingTime
+     * attribute is available, that the certificate was valid at the time the
+     * signature was generated.
+     */
+    public boolean verify(
+        X509Certificate cert,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException,
             CertificateExpiredException, CertificateNotYetValidException,
             CMSException
     {

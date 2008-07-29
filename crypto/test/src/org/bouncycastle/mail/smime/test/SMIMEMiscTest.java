@@ -128,7 +128,7 @@ public class SMIMEMiscTest
 
         MimeBodyPart   mp = encGen.generate(msg, SMIMEEnvelopedGenerator.AES128_CBC, "BC");
         ASN1EncodableVector signedAttrs = generateSignedAttributes();
-    
+
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
     
         gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);   

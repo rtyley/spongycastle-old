@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -62,7 +63,7 @@ public class CMSEnvelopedDataParser
     extends CMSContentInfoParser
 {
     RecipientInformationStore   _recipientInfoStore;
-    EnvelopedDataParser _envelopedData;
+    EnvelopedDataParser         _envelopedData;
     
     private AlgorithmIdentifier _encAlg;
     private AttributeTable      _unprotectedAttributes;
@@ -171,7 +172,7 @@ public class CMSEnvelopedDataParser
      * Return an AlgorithmParameters object giving the encryption parameters
      * used to encrypt the message content.
      * 
-     * @param provider the provider to generate the parameters for.
+     * @param provider the name of the provider to generate the parameters for.
      * @return the parameters object, null if there is not one.
      * @throws CMSException if the algorithm cannot be found, or the parameters can't be parsed.
      * @throws NoSuchProviderException if the provider cannot be found.
@@ -180,9 +181,24 @@ public class CMSEnvelopedDataParser
         String  provider) 
         throws CMSException, NoSuchProviderException
     {
+        return getEncryptionAlgorithmParameters(CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * Return an AlgorithmParameters object giving the encryption parameters
+     * used to encrypt the message content.
+     *
+     * @param provider the provider to generate the parameters for.
+     * @return the parameters object, null if there is not one.
+     * @throws CMSException if the algorithm cannot be found, or the parameters can't be parsed.
+     */
+    public AlgorithmParameters getEncryptionAlgorithmParameters(
+        Provider provider)
+        throws CMSException
+    {
         return CMSEnvelopedHelper.INSTANCE.getEncryptionAlgorithmParameters(getEncryptionAlgOID(), getEncryptionAlgParams(), provider);
     }
-    
+
     /**
      * return a store of the intended recipients for this message
      */
