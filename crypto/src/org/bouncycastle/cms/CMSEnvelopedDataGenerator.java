@@ -24,6 +24,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.security.Provider;
 import java.util.Iterator;
 
 /**
@@ -67,10 +68,10 @@ public class CMSEnvelopedDataGenerator
         CMSProcessable  content,
         String          encryptionOID,
         KeyGenerator    keyGen,
-        String          provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+        Provider        provider)
+        throws NoSuchAlgorithmException, CMSException
     {
-        String                  encProviderName = keyGen.getProvider().getName();
+        Provider                encProvider = keyGen.getProvider();
         ASN1EncodableVector     recipientInfos = new ASN1EncodableVector();
         AlgorithmIdentifier     encAlgId;
         SecretKey               encKey;
@@ -78,12 +79,12 @@ public class CMSEnvelopedDataGenerator
 
         try
         {
-            Cipher cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encryptionOID, encProviderName);
+            Cipher cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encryptionOID, encProvider);
 
             AlgorithmParameters params;
             
             encKey = keyGen.generateKey();
-            params = generateParameters(encryptionOID, encKey, encProviderName);
+            params = generateParameters(encryptionOID, encKey, encProvider);
 
             cipher.init(Cipher.ENCRYPT_MODE, encKey, params, rand);
 
@@ -170,13 +171,25 @@ public class CMSEnvelopedDataGenerator
         String          provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
+        return generate(content, encryptionOID, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * generate an enveloped object that contains an CMS Enveloped Data
+     * object using the given provider.
+     */
+    public CMSEnvelopedData generate(
+        CMSProcessable  content,
+        String          encryptionOID,
+        Provider        provider)
+        throws NoSuchAlgorithmException, CMSException
+    {
         KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
 
         keyGen.init(rand);
 
         return generate(content, encryptionOID, keyGen, provider);
     }
-
 
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
@@ -187,6 +200,20 @@ public class CMSEnvelopedDataGenerator
         String          encryptionOID,
         int             keySize,
         String          provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        return generate(content, encryptionOID, keySize, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * generate an enveloped object that contains an CMS Enveloped Data
+     * object using the given provider.
+     */
+    public CMSEnvelopedData generate(
+        CMSProcessable  content,
+        String          encryptionOID,
+        int             keySize,
+        Provider        provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
         KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);

@@ -6,5 +6,5 @@ import java.security.NoSuchAlgorithmException;
 interface DigestCalculator
 {
     byte[] getDigest()
-        throws NoSuchProviderException, NoSuchAlgorithmException;
+        throws NoSuchAlgorithmException;
 }

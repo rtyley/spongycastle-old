@@ -33,7 +33,7 @@ public class X509Store
     }
 
     public static X509Store getInstance(String type, X509StoreParameters parameters, Provider provider)
-        throws NoSuchStoreException, NoSuchProviderException
+        throws NoSuchStoreException
     {
         try
         {

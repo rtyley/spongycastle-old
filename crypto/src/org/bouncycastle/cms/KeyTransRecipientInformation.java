@@ -16,6 +16,7 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.ProviderException;
+import java.security.Provider;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -88,6 +89,14 @@ public class KeyTransRecipientInformation
         Key      key,
         String   prov)
         throws CMSException, NoSuchProviderException
+    {
+        return getContentStream(key, CMSUtils.getProvider(prov));
+    }
+
+    public CMSTypedStream getContentStream(
+        Key      key,
+        Provider prov)
+        throws CMSException
     {
         byte[]  encryptedKey = _info.getEncryptedKey().getOctets();
         String  keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(_keyEncAlg.getObjectId());

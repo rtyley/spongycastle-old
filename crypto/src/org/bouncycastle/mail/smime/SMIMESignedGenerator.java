@@ -27,6 +27,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.cert.X509Certificate;
@@ -303,8 +304,8 @@ public class SMIMESignedGenerator
      */
     private MimeMultipart make(
         MimeBodyPart    content,
-        String          sigProvider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, SMIMEException
     {
         try
         {
@@ -342,8 +343,8 @@ public class SMIMESignedGenerator
      */
     private MimeBodyPart makeEncapsulated(
         MimeBodyPart    content,
-        String          sigProvider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, SMIMEException
     {
         try
         {
@@ -389,6 +390,23 @@ public class SMIMESignedGenerator
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
     {
+        return make(makeContentBodyPart(content), SMIMEUtil.getProvider(sigProvider));
+    }
+
+    /**
+     * generate a signed object that contains an SMIME Signed Multipart
+     * object using the given provider.
+     * @param content the MimeBodyPart to be signed.
+     * @param sigProvider the provider to be used for the signature.
+     * @return a Multipart containing the content and signature.
+     * @throws NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
+     * @throws SMIMEException if an exception occurs in processing the signature.
+     */
+    public MimeMultipart generate(
+        MimeBodyPart    content,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, SMIMEException
+    {
         return make(makeContentBodyPart(content), sigProvider);
     }
 
@@ -404,6 +422,22 @@ public class SMIMESignedGenerator
         MimeMessage     message,
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+    {
+        return generate(message, SMIMEUtil.getProvider(sigProvider));
+    }
+
+    /**
+     * generate a signed object that contains an SMIME Signed Multipart
+     * object using the given provider from the given MimeMessage
+     *
+     * @throws NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
+     * @throws NoSuchProviderException if no provider can be found.
+     * @throws SMIMEException if an exception occurs in processing the signature.
+     */
+    public MimeMultipart generate(
+        MimeMessage     message,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, SMIMEException
     {
         try
         {
@@ -429,7 +463,38 @@ public class SMIMESignedGenerator
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
     {
+        return makeEncapsulated(makeContentBodyPart(content), SMIMEUtil.getProvider(sigProvider));
+    }
+
+    /**
+     * generate a signed message with encapsulated content
+     * <p>
+     * Note: doing this is strongly <b>not</b> recommended as it means a
+     * recipient of the message will have to be able to read the signature to read the
+     * message.
+     */
+    public MimeBodyPart generateEncapsulated(
+        MimeBodyPart    content,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+    {
         return makeEncapsulated(makeContentBodyPart(content), sigProvider);
+    }
+
+    /**
+     * generate a signed object that contains an SMIME Signed Multipart
+     * object using the given provider from the given MimeMessage.
+     * <p>
+     * Note: doing this is strongly <b>not</b> recommended as it means a
+     * recipient of the message will have to be able to read the signature to read the
+     * message.
+     */
+    public MimeBodyPart generateEncapsulated(
+        MimeMessage     message,
+        String          sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+    {
+        return generateEncapsulated(message, SMIMEUtil.getProvider(sigProvider));
     }
 
     /**
@@ -442,8 +507,8 @@ public class SMIMESignedGenerator
      */
     public MimeBodyPart generateEncapsulated(
         MimeMessage     message,
-        String          sigProvider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, SMIMEException
     {
         try
         {
@@ -456,7 +521,20 @@ public class SMIMESignedGenerator
 
         return makeEncapsulated(makeContentBodyPart(message), sigProvider);
     }
-    
+
+    /**
+     * Creates a certificate management message which is like a signed message with no content
+     * or signers but that still carries certificates and CRLs.
+     *
+     * @return a MimeBodyPart containing the certs and CRLs.
+     */
+    public MimeBodyPart generateCertificateManagement(
+       String provider)
+       throws SMIMEException, NoSuchProviderException
+    {
+        return generateCertificateManagement(SMIMEUtil.getProvider(provider));
+    }
+
     /**
      * Creates a certificate management message which is like a signed message with no content
      * or signers but that still carries certificates and CRLs.
@@ -464,8 +542,8 @@ public class SMIMESignedGenerator
      * @return a MimeBodyPart containing the certs and CRLs.
      */
     public MimeBodyPart generateCertificateManagement(
-       String provider) 
-       throws SMIMEException, NoSuchProviderException
+       Provider provider)
+       throws SMIMEException
     {
         try
         {
@@ -538,12 +616,12 @@ public class SMIMESignedGenerator
     {
         private final MimeBodyPart _content;
         private final boolean      _encapsulate;
-        private final String       _provider;
+        private final Provider     _provider;
 
         ContentSigner(
             MimeBodyPart content,
             boolean      encapsulate,
-            String       provider)
+            Provider     provider)
         {
             _content = content;
             _encapsulate = encapsulate;

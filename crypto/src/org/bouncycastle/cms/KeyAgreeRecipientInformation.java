@@ -19,6 +19,7 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -73,6 +74,14 @@ public class KeyAgreeRecipientInformation
         Key key,
         String   prov)
         throws CMSException, NoSuchProviderException
+    {
+        return getContentStream(key, CMSUtils.getProvider(prov));
+    }
+
+    public CMSTypedStream getContentStream(
+        Key key,
+        Provider prov)
+        throws CMSException
     {
         try
         {

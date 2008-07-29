@@ -20,6 +20,9 @@ import java.security.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.security.Provider;
+import java.security.Security;
+import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -168,5 +171,23 @@ class CMSUtils
         throws IOException
     {
         return Streams.readAll(in);
+    }
+
+    public static Provider getProvider(String providerName)
+        throws NoSuchProviderException
+    {
+        if (providerName != null)
+        {
+            Provider prov = Security.getProvider(providerName);
+
+            if (prov != null)
+            {
+                return prov;
+            }
+
+            throw new NoSuchProviderException("provider " + providerName + " not found.");
+        }
+
+        return null; 
     }
 }

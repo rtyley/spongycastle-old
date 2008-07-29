@@ -13,6 +13,7 @@ import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -172,8 +173,8 @@ public class SMIMEGenerator
 
     protected KeyGenerator createSymmetricKeyGenerator(
         String encryptionOID,
-        String provider)
-    throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+    throws NoSuchAlgorithmException
     {
         try
         {
@@ -203,8 +204,8 @@ public class SMIMEGenerator
 
     private KeyGenerator createKeyGenerator(
         String algName,
-        String provider)
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         if (provider != null)
         {

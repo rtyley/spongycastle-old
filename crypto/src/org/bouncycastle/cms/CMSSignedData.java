@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.util.ArrayList;
@@ -219,7 +220,7 @@ public class CMSSignedData
      * in this message.
      *
      * @param type type of store to create
-     * @param provider provider to use
+     * @param provider name of provider to use
      * @return a store of attribute certificates
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
@@ -230,12 +231,50 @@ public class CMSSignedData
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
     {
+        return getAttributeCertificates(type, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * return a X509Store containing the attribute certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of attribute certificates
+     * @exception NoSuchProviderException if the provider requested isn't available.
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getAttributeCertificates(
+        String type,
+        Provider provider)
+        throws NoSuchStoreException, CMSException
+    {
         if (attributeStore == null)
         {
             attributeStore = HELPER.createAttributeStore(type, provider, signedData.getCertificates());
         }
 
         return attributeStore;
+    }
+
+    /**
+     * return a X509Store containing the public key certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider name of provider to use
+     * @return a store of public key certificates
+     * @exception NoSuchProviderException if the provider requested isn't available.
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCertificates(
+        String type,
+        String provider)
+        throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        return getCertificates(type, CMSUtils.getProvider(provider));
     }
 
     /**
@@ -251,8 +290,8 @@ public class CMSSignedData
      */
     public X509Store getCertificates(
         String type,
-        String provider)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+        Provider provider)
+        throws NoSuchStoreException, CMSException
     {
         if (certificateStore == null)
         {
@@ -260,6 +299,25 @@ public class CMSSignedData
         }
 
         return certificateStore;
+    }
+
+    /**
+     * return a X509Store containing CRLs, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider name of provider to use
+     * @return a store of CRLs
+     * @exception NoSuchProviderException if the provider requested isn't available.
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCRLs(
+        String type,
+        String provider)
+        throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        return getCRLs(type, CMSUtils.getProvider(provider));
     }
 
     /**
@@ -275,8 +333,8 @@ public class CMSSignedData
      */
     public X509Store getCRLs(
         String type,
-        String provider)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+        Provider provider)
+        throws NoSuchStoreException, CMSException
     {
         if (crlStore == null)
         {
@@ -284,6 +342,22 @@ public class CMSSignedData
         }
 
         return crlStore;
+    }
+  
+    /**
+     * return a CertStore containing the certificates and CRLs associated with
+     * this message.
+     *
+     * @exception NoSuchProviderException if the provider requested isn't available.
+     * @exception NoSuchAlgorithmException if the cert store isn't available.
+     * @exception CMSException if a general exception prevents creation of the CertStore
+     */
+    public CertStore getCertificatesAndCRLs(
+        String  type,
+        String  provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        return getCertificatesAndCRLs(type, CMSUtils.getProvider(provider));
     }
 
     /**
@@ -296,7 +370,7 @@ public class CMSSignedData
      */
     public CertStore getCertificatesAndCRLs(
         String  type,
-        String  provider)
+        Provider  provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
         if (certStore == null)

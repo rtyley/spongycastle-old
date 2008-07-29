@@ -50,6 +50,7 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Provider;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -257,7 +258,7 @@ public class CMSEnvelopedGenerator
         RecipientInfo toRecipientInfo(
             SecretKey           key,
             SecureRandom        random,
-            String              prov)
+            Provider            prov)
             throws IOException, GeneralSecurityException
         {
             if (pubKey != null)
@@ -447,6 +448,31 @@ public class CMSEnvelopedGenerator
         String           provider)
         throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException
     {
+        addKeyAgreementRecipient(agreementAlgorithm, senderPrivateKey, senderPublicKey, recipientCert,  cekWrapAlgorithm, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * Add a key agreement based recipient.
+     *
+     * @param agreementAlgorithm key agreement algorithm to use.
+     * @param senderPrivateKey private key to initialise sender side of agreement with.
+     * @param senderPublicKey sender public key to include with message.
+     * @param recipientCert recipient's public key certificate.
+     * @param cekWrapAlgorithm OID for key wrapping algorithm to use.
+     * @param provider provider to use for the agreement calculation.
+     * @exception NoSuchProviderException if the specified provider cannot be found
+     * @exception NoSuchAlgorithmException if the algorithm requested cannot be found
+     * @exception InvalidKeyException if the keys are inappropriate for the algorithm specified
+     */
+    public void addKeyAgreementRecipient(
+        String           agreementAlgorithm,
+        PrivateKey       senderPrivateKey,
+        PublicKey        senderPublicKey,
+        X509Certificate  recipientCert,
+        String           cekWrapAlgorithm,
+        Provider         provider)
+        throws NoSuchAlgorithmException, InvalidKeyException
+    {
         KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, provider);
 
         agreement.init(senderPrivateKey, rand);
@@ -489,8 +515,8 @@ public class CMSEnvelopedGenerator
         return encAlgId;
     }
 
-    protected AlgorithmParameters generateParameters(String encryptionOID, SecretKey encKey, String encProvider)
-        throws NoSuchProviderException, CMSException
+    protected AlgorithmParameters generateParameters(String encryptionOID, SecretKey encKey, Provider encProvider)
+        throws CMSException
     {
         try
         {

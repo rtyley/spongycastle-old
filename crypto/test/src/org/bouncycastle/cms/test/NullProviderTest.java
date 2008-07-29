@@ -1,5 +1,30 @@
 package org.bouncycastle.cms.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.cert.CertStore;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -21,30 +46,6 @@ import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.CertStore;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 public class NullProviderTest
     extends TestCase
@@ -84,14 +85,14 @@ public class NullProviderTest
 
         gen.addCertificatesAndCRLs(certsAndCrls);
 
-        CMSSignedData s = gen.generate(msg, true, null);
+        CMSSignedData s = gen.generate(msg, true, (Provider)null);
 
         ByteArrayInputStream bIn = new ByteArrayInputStream(s.getEncoded());
         ASN1InputStream aIn = new ASN1InputStream(bIn);
 
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
 
-        certsAndCrls = s.getCertificatesAndCRLs("Collection", null);
+        certsAndCrls = s.getCertificatesAndCRLs("Collection", (String)null); // make sure String works as well
 
         SignerInformationStore signers = s.getSignerInfos();
         Collection c = signers.getSigners();
@@ -105,7 +106,7 @@ public class NullProviderTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, null));
+            assertEquals(true, signer.verify(cert, (Provider)null));
         }
     }
 
@@ -122,7 +123,7 @@ public class NullProviderTest
 
         CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
 
-        gen.addSigner(keyPair.getPrivate(), keyCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, null);
+        gen.addSigner(keyPair.getPrivate(), keyCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, (String)null);
 
         gen.addCertificatesAndCRLs(certsAndCrls);
 
@@ -143,7 +144,7 @@ public class NullProviderTest
         MessageDigest md = MessageDigest.getInstance("SHA1");
 
         byte[]                  contentDigest = md.digest(TEST_MESSAGE.getBytes());
-        CertStore               certStore = sp.getCertificatesAndCRLs("Collection", null);
+        CertStore               certStore = sp.getCertificatesAndCRLs("Collection", (String)null);
         SignerInformationStore  signers = sp.getSignerInfos();
 
         Collection              c = signers.getSigners();
@@ -157,7 +158,7 @@ public class NullProviderTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, null));
+            assertEquals(true, signer.verify(cert, (Provider)null));
 
             if (contentDigest != null)
             {
@@ -201,7 +202,7 @@ public class NullProviderTest
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
-                                algorithm, null);
+                                algorithm, (String)null);
 
         RecipientInformationStore recipients = ed.getRecipientInfos();
 

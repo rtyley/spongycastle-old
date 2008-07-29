@@ -19,6 +19,7 @@ import org.bouncycastle.cms.KeyTransRecipientInformation;
 import org.bouncycastle.cms.PKCS5Scheme2PBEKey;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.PKCS5Scheme2UTF8PBEKey;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -682,12 +683,14 @@ public class EnvelopedDataTest
         throws Exception
     {
         passwordTest(CMSEnvelopedDataGenerator.AES256_CBC);
+        passwordUTF8Test(CMSEnvelopedDataGenerator.AES256_CBC);
     }
 
     public void testPasswordDESEDE()
         throws Exception
     {
         passwordTest(CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+        passwordUTF8Test(CMSEnvelopedDataGenerator.DES_EDE3_CBC);
     }
 
     public void testRFC4134ex5_1()
@@ -796,6 +799,40 @@ public class EnvelopedDataTest
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
             byte[] recData = recipient.getContent(new PKCS5Scheme2PBEKey("password".toCharArray(), new byte[20], 5), "BC");
+            assertEquals(true, Arrays.equals(data, recData));
+        }
+        else
+        {
+            fail("no recipient found");
+        }
+    }
+
+    private void passwordUTF8Test(String algorithm)
+        throws Exception
+    {
+        byte[] data = Hex.decode("504b492d4320434d5320456e76656c6f706564446174612053616d706c65");
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        edGen.addPasswordRecipient(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), new byte[20], 5), algorithm);
+
+        CMSEnvelopedData ed = edGen.generate(
+                              new CMSProcessableByteArray(data),
+                              CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(),
+                                   CMSEnvelopedDataGenerator.AES128_CBC);
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        if (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            byte[] recData = recipient.getContent(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), new byte[20], 5), "BC");
             assertEquals(true, Arrays.equals(data, recData));
         }
         else

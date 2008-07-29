@@ -5,6 +5,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -46,6 +47,17 @@ public class KEKRecipientInformation
         Key      key,
         String   prov)
         throws CMSException, NoSuchProviderException
+    {
+        return getContentStream(key, CMSUtils.getProvider(prov));
+    }
+
+    /**
+     * decrypt the content and return an input stream.
+     */
+    public CMSTypedStream getContentStream(
+        Key      key,
+        Provider prov)
+        throws CMSException
     {
         try
         {
