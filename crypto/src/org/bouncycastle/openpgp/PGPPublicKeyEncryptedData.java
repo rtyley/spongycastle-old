@@ -19,6 +19,7 @@ import java.security.DigestInputStream;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 
 /**
  * A public key encrypted data object.
@@ -39,8 +40,8 @@ public class PGPPublicKeyEncryptedData
     
     private static Cipher getKeyCipher(
         int       algorithm,
-        String    provider)
-        throws NoSuchProviderException, PGPException
+        Provider  provider)
+        throws PGPException
     {
         try
         {
@@ -55,10 +56,6 @@ public class PGPPublicKeyEncryptedData
             default:
                 throw new PGPException("unknown asymmetric algorithm: " + algorithm);
             }
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw e;
         }
         catch (PGPException e)
         {
@@ -104,6 +101,14 @@ public class PGPPublicKeyEncryptedData
         String         provider)
         throws PGPException, NoSuchProviderException
     {
+        return getSymmetricAlgorithm(privKey, PGPUtil.getProvider(provider));
+    }
+
+    public int getSymmetricAlgorithm(
+        PGPPrivateKey  privKey,
+        Provider       provider)
+        throws PGPException, NoSuchProviderException
+    {
         byte[] plain = fetchSymmetricKeyData(privKey, provider);
 
         return plain[0];
@@ -126,6 +131,14 @@ public class PGPPublicKeyEncryptedData
         return getDataStream(privKey, provider, provider);
     }
 
+    public InputStream getDataStream(
+        PGPPrivateKey  privKey,
+        Provider       provider)
+        throws PGPException
+    {
+        return getDataStream(privKey, provider, provider);
+    }
+
     /**
      * Return the decrypted data stream for the packet.
      * 
@@ -141,6 +154,15 @@ public class PGPPublicKeyEncryptedData
         String         asymProvider,
         String         provider)
         throws PGPException, NoSuchProviderException
+    {
+        return getDataStream(privKey, PGPUtil.getProvider(asymProvider), PGPUtil.getProvider(provider));
+    }
+
+    public InputStream getDataStream(
+        PGPPrivateKey  privKey,
+        Provider       asymProvider,
+        Provider       provider)
+        throws PGPException
     {
         byte[] plain = fetchSymmetricKeyData(privKey, asymProvider);
         
@@ -162,10 +184,6 @@ public class PGPPublicKeyEncryptedData
                         PGPUtil.getSymmetricCipherName(plain[0]) + "/OpenPGPCFB/NoPadding",
                         provider);
             }
-        }
-        catch (NoSuchProviderException e)
-        {
-           throw e;
         }
         catch (PGPException e)
         {
@@ -248,8 +266,8 @@ public class PGPPublicKeyEncryptedData
         }
     }
 
-    private byte[] fetchSymmetricKeyData(PGPPrivateKey privKey, String asymProvider)
-        throws NoSuchProviderException, PGPException
+    private byte[] fetchSymmetricKeyData(PGPPrivateKey privKey, Provider asymProvider)
+        throws PGPException
     {
         Cipher c1 = getKeyCipher(keyData.getAlgorithm(), asymProvider);
 

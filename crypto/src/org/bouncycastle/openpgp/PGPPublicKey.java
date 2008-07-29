@@ -28,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.security.Provider;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -477,7 +478,14 @@ public class PGPPublicKey
      * @throws NoSuchProviderException if the provider cannot be found.
      */
     public PublicKey getKey(
-        String                provider)
+        String provider)
+        throws PGPException, NoSuchProviderException
+    {
+        return getKey(PGPUtil.getProvider(provider));
+    }
+
+    public PublicKey getKey(
+        Provider provider)
         throws PGPException, NoSuchProviderException
     {
         KeyFactory                        fact;

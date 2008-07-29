@@ -47,13 +47,22 @@ public class PGPSignatureGenerator
         this(keyAlgorithm, provider, hashAlgorithm, provider);
     }
 
+    public PGPSignatureGenerator(
+        int      keyAlgorithm,
+        int      hashAlgorithm,
+        Provider provider)
+        throws NoSuchAlgorithmException, PGPException
+    {
+        this(keyAlgorithm, provider, hashAlgorithm, provider);
+    }
+
     /**
      * Create a generator for the passed in keyAlgorithm and hashAlgorithm codes.
      *
      * @param keyAlgorithm keyAlgorithm to use for signing
      * @param sigProvider provider to use for signature generation
      * @param hashAlgorithm algorithm to use for digest
-     * @param provider provider to use for digest algorithm
+     * @param digProvider provider to use for digest algorithm
      * @throws NoSuchAlgorithmException
      * @throws NoSuchProviderException
      * @throws PGPException
@@ -62,13 +71,23 @@ public class PGPSignatureGenerator
         int     keyAlgorithm,
         String  sigProvider,
         int     hashAlgorithm,
-        String  provider)
+        String  digProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, PGPException
+    {
+        this(keyAlgorithm, PGPUtil.getProvider(sigProvider), hashAlgorithm, PGPUtil.getProvider(digProvider));
+    }
+
+    public PGPSignatureGenerator(
+        int      keyAlgorithm,
+        Provider sigProvider,
+        int      hashAlgorithm,
+        Provider digProvider)
+        throws NoSuchAlgorithmException, PGPException
     {
         this.keyAlgorithm = keyAlgorithm;
         this.hashAlgorithm = hashAlgorithm;
 
-        dig = PGPUtil.getDigestInstance(PGPUtil.getDigestName(hashAlgorithm), provider);
+        dig = PGPUtil.getDigestInstance(PGPUtil.getDigestName(hashAlgorithm), digProvider);
         sig = Signature.getInstance(PGPUtil.getSignatureName(keyAlgorithm, hashAlgorithm), sigProvider);
     }
 

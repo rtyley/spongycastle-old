@@ -14,7 +14,8 @@ public class PGPLiteralData
 {
     public static final char    BINARY = 'b';
     public static final char    TEXT = 't';
-    
+    public static final char    UTF8 = 'u';
+
     /**
      * The special name indicating a "for your eyes only" packet.
      */

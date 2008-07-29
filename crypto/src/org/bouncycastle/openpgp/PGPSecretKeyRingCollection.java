@@ -206,7 +206,7 @@ public class PGPSecretKeyRingCollection
         while (it.hasNext())
         {
             PGPSecretKeyRing    secRing = (PGPSecretKeyRing)it.next();
-            PGPSecretKey        sec =secRing.getSecretKey(keyID);
+            PGPSecretKey        sec = secRing.getSecretKey(keyID);
             
             if (sec != null)
             {
@@ -250,7 +250,19 @@ public class PGPSecretKeyRingCollection
     
         return null;
     }
-    
+
+    /**
+     * Return true if a key matching the passed in key ID is present, false otherwise.
+     *
+     * @param keyID key ID to look for.
+     * @return true if keyID present, false otherwise.
+     */
+    public boolean contains(long keyID)
+        throws PGPException
+    {
+        return getSecretKey(keyID) != null;
+    }
+
     public byte[] getEncoded() 
         throws IOException
     {

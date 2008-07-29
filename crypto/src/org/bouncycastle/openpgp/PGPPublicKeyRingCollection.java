@@ -221,7 +221,7 @@ public class PGPPublicKeyRingCollection
     /**
      * Return the public key ring which contains the key referred to by keyID.
      * 
-     * @param keyID
+     * @param keyID key ID to match against
      * @return the public key ring
      * @throws PGPException
      */
@@ -252,6 +252,18 @@ public class PGPPublicKeyRingCollection
         return null;
     }
     
+    /**
+     * Return true if a key matching the passed in key ID is present, false otherwise.
+     *
+     * @param keyID key ID to look for.
+     * @return true if keyID present, false otherwise.
+     */
+    public boolean contains(long keyID)
+        throws PGPException
+    {
+        return getPublicKey(keyID) != null;
+    }
+
     public byte[] getEncoded() 
         throws IOException
     {

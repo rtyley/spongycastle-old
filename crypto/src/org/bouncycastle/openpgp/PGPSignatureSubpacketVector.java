@@ -10,6 +10,7 @@ import org.bouncycastle.bcpg.sig.PreferredAlgorithms;
 import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 import org.bouncycastle.bcpg.sig.SignatureExpirationTime;
 import org.bouncycastle.bcpg.sig.SignerUserID;
+import org.bouncycastle.bcpg.sig.PrimaryUserID;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -206,7 +207,19 @@ public class PGPSignatureSubpacketVector
                     
         return ((SignerUserID)p).getID();
     }
-    
+
+    public boolean isPrimaryUserID()
+    {
+        PrimaryUserID primaryId = (PrimaryUserID)this.getSubpacket(SignatureSubpacketTags.PRIMARY_USER_ID);
+
+        if (primaryId != null)
+        {
+            return primaryId.isPrimaryUserID();
+        }
+
+        return false;
+    }
+
     public int[] getCriticalTags()
     {
         int    count = 0;

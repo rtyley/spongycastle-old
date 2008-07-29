@@ -11,6 +11,8 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Provider;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.DSAPrivateKeySpec;
@@ -443,9 +445,9 @@ public class PGPSecretKey
     }
     
     private byte[] extractKeyData(
-        char[] passPhrase,
-        String provider)
-        throws PGPException, NoSuchProviderException
+        char[]   passPhrase,
+        Provider provider)
+        throws PGPException
     {
         String          cName = PGPUtil.getSymmetricCipherName(secret.getEncAlgorithm());
         Cipher          c = null;
@@ -455,10 +457,6 @@ public class PGPSecretKey
             try
             {
                 c = Cipher.getInstance(cName + "/CFB/NoPadding", provider);
-            }
-            catch (NoSuchProviderException e)
-            {
-                throw e;
             }
             catch (Exception e)
             {
@@ -588,6 +586,22 @@ public class PGPSecretKey
         char[]                passPhrase,
         String                provider)
         throws PGPException, NoSuchProviderException
+    {
+        return extractPrivateKey(passPhrase, PGPUtil.getProvider(provider));
+    }
+
+    /**
+     * Extract a PGPPrivate key from the SecretKey's encrypted contents.
+     *
+     * @param passPhrase
+     * @param provider
+     * @return PGPPrivateKey
+     * @throws PGPException
+     */
+    public  PGPPrivateKey extractPrivateKey(
+        char[]   passPhrase,
+        Provider provider)
+        throws PGPException
     {
         byte[] secKeyData = secret.getSecretKeyData();
         if (secKeyData == null || secKeyData.length < 1)
@@ -786,11 +800,23 @@ public class PGPSecretKey
         String          provider)
         throws PGPException, NoSuchProviderException
     {
+        return copyWithNewPassword(key, oldPassPhrase, newPassPhrase, newEncAlgorithm, rand, PGPUtil.getProvider(provider));
+    }
+
+    public static PGPSecretKey copyWithNewPassword(
+        PGPSecretKey    key,
+        char[]          oldPassPhrase,
+        char[]          newPassPhrase,
+        int             newEncAlgorithm,
+        SecureRandom    rand,
+        Provider        provider)
+        throws PGPException
+    {
         byte[]   rawKeyData = key.extractKeyData(oldPassPhrase, provider);
         int        s2kUsage = key.secret.getS2KUsage();
         byte[]           iv = null;
         S2K             s2k = null;
-        byte[]      keyData = null;
+        byte[]      keyData;
 
         if (newEncAlgorithm == SymmetricKeyAlgorithmTags.NULL)
         {
@@ -819,10 +845,6 @@ public class PGPSecretKey
             try
             {
                 c = Cipher.getInstance(cName + "/CFB/NoPadding", provider);
-            }
-            catch (NoSuchProviderException e)
-            {
-                throw e;
             }
             catch (Exception e)
             {

@@ -34,11 +34,20 @@ public class PGPV3SignatureGenerator
      * @throws NoSuchProviderException
      * @throws PGPException
      */
-    public PGPV3SignatureGenerator(
+     public PGPV3SignatureGenerator(
         int  keyAlgorithm,
         int  hashAlgorithm,
         String provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, PGPException
+    {
+        this(keyAlgorithm, hashAlgorithm, PGPUtil.getProvider(provider));
+    }
+
+    public PGPV3SignatureGenerator(
+        int  keyAlgorithm,
+        int  hashAlgorithm,
+        Provider provider)
+        throws NoSuchAlgorithmException, PGPException
     {
         this.keyAlgorithm = keyAlgorithm;
         this.hashAlgorithm = hashAlgorithm;
