@@ -17,6 +17,7 @@ public class OAEPEncoding
 {
     private byte[]                  defHash;
     private Digest                  hash;
+    private Digest                  mgf1Hash;
 
     private AsymmetricBlockCipher   engine;
     private SecureRandom            random;
@@ -40,18 +41,28 @@ public class OAEPEncoding
         Digest                      hash,
         byte[]                      encodingParams)
     {
+        this(cipher, hash, hash, encodingParams);
+    }
+
+    public OAEPEncoding(
+        AsymmetricBlockCipher       cipher,
+        Digest                      hash,
+        Digest                      mgf1Hash,
+        byte[]                      encodingParams)
+    {
         this.engine = cipher;
         this.hash = hash;
+        this.mgf1Hash = mgf1Hash;
         this.defHash = new byte[hash.getDigestSize()];
-        
+
         if (encodingParams != null)
         {
             hash.update(encodingParams, 0, encodingParams.length);
         }
-        
+
         hash.doFinal(defHash, 0);
     }
-    
+
     public AsymmetricBlockCipher getUnderlyingCipher()
     {
         return engine;
@@ -195,7 +206,7 @@ public class OAEPEncoding
         throws InvalidCipherTextException
     {
         byte[]  data = engine.processBlock(in, inOff, inLen);
-        byte[]  block = null;
+        byte[]  block;
 
         //
         // as we may have zeros in our leading bytes for the block we produced
@@ -303,7 +314,7 @@ public class OAEPEncoding
         int     length)
     {
         byte[]  mask = new byte[length];
-        byte[]  hashBuf = new byte[defHash.length];
+        byte[]  hashBuf = new byte[mgf1Hash.getDigestSize()];
         byte[]  C = new byte[4];
         int     counter = 0;
 
@@ -313,23 +324,23 @@ public class OAEPEncoding
         {
             ItoOSP(counter, C);
 
-            hash.update(Z, zOff, zLen);
-            hash.update(C, 0, C.length);
-            hash.doFinal(hashBuf, 0);
+            mgf1Hash.update(Z, zOff, zLen);
+            mgf1Hash.update(C, 0, C.length);
+            mgf1Hash.doFinal(hashBuf, 0);
 
-            System.arraycopy(hashBuf, 0, mask, counter * defHash.length, defHash.length);
+            System.arraycopy(hashBuf, 0, mask, counter * hashBuf.length, hashBuf.length);
         }
-        while (++counter < (length / defHash.length));
+        while (++counter < (length / hashBuf.length));
 
-        if ((counter * defHash.length) < length)
+        if ((counter * hashBuf.length) < length)
         {
             ItoOSP(counter, C);
 
-            hash.update(Z, zOff, zLen);
-            hash.update(C, 0, C.length);
-            hash.doFinal(hashBuf, 0);
+            mgf1Hash.update(Z, zOff, zLen);
+            mgf1Hash.update(C, 0, C.length);
+            mgf1Hash.doFinal(hashBuf, 0);
 
-            System.arraycopy(hashBuf, 0, mask, counter * defHash.length, mask.length - (counter * defHash.length));
+            System.arraycopy(hashBuf, 0, mask, counter * hashBuf.length, mask.length - (counter * hashBuf.length));
         }
 
         return mask;
