@@ -276,7 +276,7 @@ public class CertPathValidatorTest
             return null;
         }
 
-        public void check(Certificate cert, Collection<String> unresolvedCritExts)
+        public void check(Certificate cert, Collection unresolvedCritExts)
         throws CertPathValidatorException
         {
             count++;
