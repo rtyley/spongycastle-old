@@ -47,7 +47,7 @@ public class PasswordRecipientInformation
      *
      * @return OID for key derivation algorithm, if present.
      */
-    public String getKeyEncryptionAlgOID()
+    public String getKeyDerivationAlgOID()
     {
         if (_info.getKeyDerivationAlgorithm() != null)
         {
