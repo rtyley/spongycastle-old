@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.security.NoSuchProviderException;
 import java.security.NoSuchAlgorithmException;
 
 interface DigestCalculator

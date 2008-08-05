@@ -1,19 +1,15 @@
 package org.bouncycastle.x509;
 
-import org.bouncycastle.jce.X509LDAPCertStoreParameters;
 import org.bouncycastle.util.Selector;
 import org.bouncycastle.util.Store;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertSelector;
 import java.security.cert.CertStore;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.LDAPCertStoreParameters;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
