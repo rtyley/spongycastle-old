@@ -1,7 +1,6 @@
 package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
 import org.bouncycastle.crypto.modes.EAXBlockCipher;

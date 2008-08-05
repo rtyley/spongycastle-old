@@ -12,7 +12,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.util.Enumeration;
 import java.util.HashMap;
