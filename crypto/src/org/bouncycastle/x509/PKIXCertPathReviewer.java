@@ -35,11 +35,10 @@ import org.bouncycastle.i18n.filter.UntrustedUrlInput;
 import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
-import org.bouncycastle.jce.provider.PKIXPolicyNode;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
+import org.bouncycastle.jce.provider.PKIXPolicyNode;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
-import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -60,7 +59,6 @@ import java.security.cert.PolicyNode;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
-import java.security.cert.X509CRLSelector;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -74,6 +72,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+
+import javax.security.auth.x500.X500Principal;
 
 /**
  * PKIXCertPathReviewer<br>
