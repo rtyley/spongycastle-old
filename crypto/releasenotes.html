@@ -71,7 +71,8 @@ Release 1.39
 <li>The BC X509CertificateFactory now handles multiple certificates and CRLs in streams that don't support marking.</li>
 <li>The BC CRL implementation could lead to a NullPointer exception being thrown if critical extensions were missing. This has been fixed.</li>
 <li>Some ASN.1 structures would cause a class cast exception in AuthorityKeyIdentifier. This has been fixed.</li>
-<li>The CertID class used by the TSP library was incomplete. This has been fixed<li>A system property check in PKCS1Encoding to cause a AccessControlException under some circumstances. This has been fixed.</li>
+<li>The CertID class used by the TSP library was incomplete. This has been fixed.</li>
+<li>A system property check in PKCS1Encoding to cause a AccessControlException under some circumstances. This has been fixed.</li>
 <li>A decoding issue with a mis-identified tagged object in CertRepMessage has been fixed.</li>
 <li>\# is now properly recognised in the X509Name class.</li>
 </ul>
@@ -81,7 +82,7 @@ Release 1.39
 <li>API support now exists for CMS countersignature reading and production.</li>
 <li>The TSP package now supports parsing of responses with V2 signing certificate entries.</li>
 <li>Lazy evaluation of DER sequences has been introduced to ASN1InputStream to allow support for larger sequences.</li>
-<li>KeyPurposeId class has been updated RFC 4945.</li>
+<li>KeyPurposeId class has been updated for RFC 4945.</li>
 <li>CertPath processing has been further extended to encompass the NIST CertPath evaluation suite.</li>
 <li>Initial support has been added for HP_CERTIFICATE_REQUEST in the TLS API.</li>
 <li>Providers for JDK 1.4 and up now use SignatureSpi directly rather than extending Signature. This is more in track with the way dynamic provider selection now works.</li>
