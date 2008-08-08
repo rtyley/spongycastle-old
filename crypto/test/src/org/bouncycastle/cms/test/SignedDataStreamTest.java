@@ -151,7 +151,22 @@ public class SignedDataStreamTest
         
         sp.close();
     }
-    
+
+    private void checkSigParseable(byte[] sig)
+        throws Exception
+    {
+        CMSSignedDataParser sp = new CMSSignedDataParser(sig);
+        sp.getVersion();
+        CMSTypedStream sc = sp.getSignedContent();
+        if (sc != null)
+        {
+            sc.drain();
+        }
+        sp.getCertificatesAndCRLs("Collection", "BC");
+        sp.getSignerInfos();
+        sp.close();
+    }
+
     public void testSha1EncapsulatedSignature()
         throws Exception
     {
@@ -290,7 +305,9 @@ public class SignedDataStreamTest
         sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
-        
+
+        checkSigParseable(bOut.toByteArray());
+
         CMSSignedDataParser     sp = new CMSSignedDataParser(
                 new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), bOut.toByteArray());
     
@@ -399,7 +416,9 @@ public class SignedDataStreamTest
         sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
-        
+
+        checkSigParseable(bOut.toByteArray());
+
         CMSSignedDataParser     sp = new CMSSignedDataParser(
                 new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), bOut.toByteArray());
     
@@ -751,6 +770,8 @@ public class SignedDataStreamTest
 
         sigOut.close();
 
+        checkSigParseable(bOut.toByteArray());
+
         //
         // create new Signer
         //
@@ -769,6 +790,8 @@ public class SignedDataStreamTest
         sigOut.write(data);
 
         sigOut.close();
+
+        checkSigParseable(bOut.toByteArray());
 
         CMSSignedData sd = new CMSSignedData(bOut.toByteArray());
 
@@ -878,6 +901,8 @@ public class SignedDataStreamTest
         sigOut.write(data);
 
         sigOut.close();
+
+        checkSigParseable(bOut.toByteArray());
 
         //
         // create new certstore with the right certificates
