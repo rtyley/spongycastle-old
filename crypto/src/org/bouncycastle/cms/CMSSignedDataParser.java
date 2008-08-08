@@ -96,6 +96,7 @@ public class CMSSignedDataParser
     private static final CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
 
     private SignedDataParser        _signedData;
+    private DERObjectIdentifier     _signedContentType;
     private CMSTypedStream          _signedContent;
     private Map                     _digests;
     
@@ -194,6 +195,15 @@ public class CMSSignedDataParser
                     ctStr.drain();
                 }
             }
+
+            if (signedContent == null)
+            {
+                _signedContentType = cont.getContentType();
+            }
+            else
+            {
+                _signedContentType = new DERObjectIdentifier(_signedContent.getContentType());
+            }
         }
         catch (IOException e)
         {
@@ -251,7 +261,7 @@ public class CMSSignedDataParser
                     
                     byte[] hash = (byte[])hashes.get(digestName);
                     
-                    signerInfos.add(new SignerInformation(info, new DERObjectIdentifier(_signedContent.getContentType()), null, new BaseDigestCalculator(hash)));
+                    signerInfos.add(new SignerInformation(info, _signedContentType, null, new BaseDigestCalculator(hash)));
                 }
             }
             catch (IOException e)
