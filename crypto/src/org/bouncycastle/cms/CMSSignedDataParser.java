@@ -471,6 +471,17 @@ public class CMSSignedDataParser
         }
     }
 
+    /**
+     * Return the a string representation of the OID associated with the
+     * encapsulated content info structure carried in the signed data.
+     * 
+     * @return the OID for the content type.
+     */
+    public String getSignedContentTypeOID()
+    {
+        return _signedContentType.getId();
+    }
+
     public CMSTypedStream getSignedContent()
     {
         if (_signedContent != null)
