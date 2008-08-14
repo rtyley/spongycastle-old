@@ -164,6 +164,46 @@ public class SMIMEUtil
         }
     }
 
+    static void outputPostamble(LineOutputStream lOut, BodyPart parent, String parentBoundary, BodyPart part)
+        throws MessagingException, IOException
+    {
+        InputStream in;
+
+        try
+        {
+            in = ((MimeBodyPart)parent).getRawInputStream();
+        }
+        catch (MessagingException e)
+        {
+            return;   // no underlying content rely on default generation
+        }
+
+
+        MimeMultipart multipart = (MimeMultipart)part.getContent();
+        ContentType contentType = new ContentType(multipart.getContentType());
+        String boundary = "--" + contentType.getParameter("boundary");
+        int count = multipart.getCount() + 1;
+        String line;
+        while (count != 0 && (line = readLine(in)) != null)
+        {
+            if (line.startsWith(boundary))
+            {
+                count--;
+            }
+        }
+
+        while ((line = readLine(in)) != null)
+        {
+            if (line.startsWith(parentBoundary))
+            {
+                break;
+            }
+            lOut.writeln(line);
+        }
+
+        in.close();
+    }
+
     /*
      * read a line of input stripping of the tailing \r\n
      */
@@ -229,9 +269,14 @@ public class SMIMEUtil
                     {
                         lOut.writeln();       // CRLF terminator needed
                     }
+                    else
+                    {
+                        outputPostamble(lOut, mimePart, boundary, part);
+                    }
                 }
 
                 lOut.writeln(boundary + "--");
+
                 return;
             }
 
