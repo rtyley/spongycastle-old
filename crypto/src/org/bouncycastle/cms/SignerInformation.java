@@ -78,7 +78,7 @@ public class SignerInformation
             {
                 ASN1OctetString octs = ASN1OctetString.getInstance(s.getId());
 
-                sid.setSubjectKeyIdentifier(octs.getOctets());
+                sid.setSubjectKeyIdentifier(octs.getEncoded());
             }
             else
             {

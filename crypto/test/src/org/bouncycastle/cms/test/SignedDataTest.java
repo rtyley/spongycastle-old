@@ -1,32 +1,5 @@
 package org.bouncycastle.cms.test;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.Attribute;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSAttributes;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.cms.CMSProcessable;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
-import org.bouncycastle.cms.CMSSignedDataParser;
-import org.bouncycastle.cms.SignerId;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.CMSAttributeTableGenerator;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509CollectionStoreParameters;
-import org.bouncycastle.x509.X509Store;
-
 import java.io.ByteArrayInputStream;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -44,6 +17,33 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
+import org.bouncycastle.cms.CMSSignedDataParser;
+import org.bouncycastle.cms.SignerId;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CollectionStoreParameters;
+import org.bouncycastle.x509.X509Store;
 
 public class SignedDataTest
     extends TestCase
@@ -539,7 +539,13 @@ public class SignedDataTest
     {
         encapsulatedTest(_signKP, _signCert, CMSSignedDataGenerator.DIGEST_SHA1);
     }
-    
+
+    public void testSHA1WithRSAEncapsulatedSubjectKeyID()
+        throws Exception
+    {
+        subjectKeyIDTest(_signKP, _signCert, CMSSignedDataGenerator.DIGEST_SHA1);
+    }
+
     public void testSHA224WithRSAEncapsulated()
         throws Exception
     {
@@ -574,6 +580,12 @@ public class SignedDataTest
         throws Exception
     {
         encapsulatedTest(_signEcDsaKP, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA1);
+    }
+
+    public void testECDSAEncapsulatedSubjectKeyID()
+        throws Exception
+    {
+        subjectKeyIDTest(_signEcDsaKP, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA1);
     }
 
     public void testECDSASHA224Encapsulated()
@@ -616,7 +628,13 @@ public class SignedDataTest
     {
         encapsulatedTest(_signDsaKP, _signDsaCert, CMSSignedDataGenerator.DIGEST_SHA1);
     }
-    
+
+    public void testDSAEncapsulatedSubjectKeyID()
+        throws Exception
+    {
+        subjectKeyIDTest(_signDsaKP, _signDsaCert, CMSSignedDataGenerator.DIGEST_SHA1);
+    }
+        
     public void testGOST3411WithGOST3410Encapsulated()
         throws Exception
     {
@@ -668,6 +686,99 @@ public class SignedDataTest
             assertNull(cSigner.getSignedAttributes().get(PKCSObjectIdentifiers.pkcs_9_at_contentType));
             assertEquals(true, cSigner.verify(cert, "BC"));
         }
+    }
+
+    private void subjectKeyIDTest(
+        KeyPair         signaturePair,
+        X509Certificate signatureCert,
+        String          digestAlgorithm)
+        throws Exception
+    {
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
+
+        certList.add(signatureCert);
+        certList.add(_origCert);
+
+        certList.add(_signCrl);
+
+        CertStore           certsAndCrls = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        gen.addSigner(signaturePair.getPrivate(), CMSTestUtil.createSubjectKeyId(signatureCert.getPublicKey()).getKeyIdentifier(), digestAlgorithm);
+
+        gen.addCertificatesAndCRLs(certsAndCrls);
+
+        CMSSignedData s = gen.generate(msg, true, "BC");
+
+        ByteArrayInputStream bIn = new ByteArrayInputStream(s.getEncoded());
+        ASN1InputStream      aIn = new ASN1InputStream(bIn);
+
+        s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
+
+        certsAndCrls = s.getCertificatesAndCRLs("Collection", "BC");
+
+        SignerInformationStore  signers = s.getSignerInfos();
+        Collection              c = signers.getSigners();
+        Iterator                it = c.iterator();
+
+        while (it.hasNext())
+        {
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
+
+            Iterator        certIt = certCollection.iterator();
+            X509Certificate cert = (X509Certificate)certIt.next();
+
+            assertEquals(true, signer.verify(cert, "BC"));
+        }
+
+        //
+        // check for CRLs
+        //
+        Collection crls = certsAndCrls.getCRLs(null);
+
+        assertEquals(1, crls.size());
+
+        assertTrue(crls.contains(_signCrl));
+
+        //
+        // try using existing signer
+        //
+
+        gen = new CMSSignedDataGenerator();
+
+        gen.addSigners(s.getSignerInfos());
+
+        gen.addCertificatesAndCRLs(s.getCertificatesAndCRLs("Collection", "BC"));
+
+        s = gen.generate(msg, true, "BC");
+
+        bIn = new ByteArrayInputStream(s.getEncoded());
+        aIn = new ASN1InputStream(bIn);
+
+        s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
+
+        certsAndCrls = s.getCertificatesAndCRLs("Collection", "BC");
+
+        signers = s.getSignerInfos();
+        c = signers.getSigners();
+        it = c.iterator();
+
+        while (it.hasNext())
+        {
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
+
+            Iterator        certIt = certCollection.iterator();
+            X509Certificate cert = (X509Certificate)certIt.next();
+
+            assertEquals(true, signer.verify(cert, "BC"));
+        }
+
+        checkSignerStoreReplacement(s, signers);
     }
 
     private void encapsulatedTest(

@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
@@ -137,13 +138,14 @@ public class CMSSignedDataGenerator
 
     private class SignerInf
     {
-        PrivateKey                  key;
-        X509Certificate             cert;
-        String                      digestOID;
-        String                      encOID;
-        CMSAttributeTableGenerator  sAttr;
-        CMSAttributeTableGenerator  unsAttr;
-        AttributeTable              baseSignedTable;
+        private PrivateKey                  key;
+        private X509Certificate             cert;
+        private String                      digestOID;
+        private String                      encOID;
+        private CMSAttributeTableGenerator  sAttr;
+        private CMSAttributeTableGenerator  unsAttr;
+        private AttributeTable              baseSignedTable;
+        private byte[]                      keyIdentifier;
 
         SignerInf(
             PrivateKey      key,
@@ -151,10 +153,16 @@ public class CMSSignedDataGenerator
             String          digestOID,
             String          encOID)
         {
-            this.key = key;
-            this.cert = cert;
-            this.digestOID = digestOID;
-            this.encOID = encOID;
+            this(key, cert, digestOID, encOID, null, null, null);
+        }
+
+        SignerInf(
+            PrivateKey      key,
+            byte[]          keyIdentifier,
+            String          digestOID,
+            String          encOID)
+        {
+            this(key, keyIdentifier, digestOID, encOID, null, null, null);
         }
 
         SignerInf(
@@ -168,6 +176,24 @@ public class CMSSignedDataGenerator
         {
             this.key = key;
             this.cert = cert;
+            this.digestOID = digestOID;
+            this.encOID = encOID;
+            this.sAttr = sAttr;
+            this.unsAttr = unsAttr;
+            this.baseSignedTable = baseSigneTable;
+        }
+
+        SignerInf(
+            PrivateKey                 key,
+            byte[]                     keyIdentifier,
+            String                     digestOID,
+            String                     encOID,
+            CMSAttributeTableGenerator sAttr,
+            CMSAttributeTableGenerator unsAttr,
+            AttributeTable             baseSigneTable)
+        {
+            this.key = key;
+            this.keyIdentifier = keyIdentifier;
             this.digestOID = digestOID;
             this.encOID = encOID;
             this.sAttr = sAttr;
@@ -289,13 +315,22 @@ public class CMSSignedDataGenerator
 
             ASN1Set unsignedAttr = getAttributeSet(unsigned);
 
-            X509Certificate         cert = this.getCertificate();
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getTBSCertificate());
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
-            TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
-            IssuerAndSerialNumber   encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
+            X509Certificate  cert = this.getCertificate();
+            SignerIdentifier identifier;
 
-            return new SignerInfo(new SignerIdentifier(encSid), digAlgId,
+            if (cert != null)
+            {
+                TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(ASN1Object.fromByteArray(cert.getTBSCertificate()));
+                IssuerAndSerialNumber   encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
+
+                identifier = new SignerIdentifier(encSid);
+            }
+            else
+            {
+                identifier = new SignerIdentifier(new DEROctetString(keyIdentifier));
+            }
+
+            return new SignerInfo(identifier, digAlgId,
                         signedAttr, encAlgId, encDigest, unsignedAttr);
         }
     }
@@ -333,6 +368,21 @@ public class CMSSignedDataGenerator
     }
 
     /**
+     * add a signer - no attributes other than the default ones will be
+     * provided here.
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          digestOID)
+        throws IllegalArgumentException
+    {
+        String  encOID = getEncOID(key, digestOID);
+
+        signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encOID, new DefaultSignedAttributeTableGenerator(), null, null));
+    }
+
+    /**
      * add a signer with extra signed/unsigned attributes.
      */
     public void addSigner(
@@ -349,6 +399,22 @@ public class CMSSignedDataGenerator
     }
 
     /**
+     * add a signer with extra signed/unsigned attributes.
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          digestOID,
+        AttributeTable  signedAttr,
+        AttributeTable  unsignedAttr)
+        throws IllegalArgumentException
+    {
+        String  encOID = getEncOID(key, digestOID);
+
+        signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encOID, new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), signedAttr));
+    }
+
+    /**
      * add a signer with extra signed/unsigned attributes based on generators.
      */
     public void addSigner(
@@ -362,6 +428,22 @@ public class CMSSignedDataGenerator
         String  encOID = getEncOID(key, digestOID);
 
         signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGen, unsignedAttrGen, null));
+    }
+
+    /**
+     * add a signer with extra signed/unsigned attributes based on generators.
+     */
+    public void addSigner(
+        PrivateKey                  key,
+        byte[]                      subjectKeyID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGen,
+        CMSAttributeTableGenerator  unsignedAttrGen)
+        throws IllegalArgumentException
+    {
+        String  encOID = getEncOID(key, digestOID);
+
+        signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encOID, signedAttrGen, unsignedAttrGen, null));
     }
 
     private DERObject makeObj(
