@@ -618,6 +618,67 @@ public class SignedDataStreamTest
         verifyEncodedData(bOut);
     }
 
+    public void testSHA1WithRSAEncapsulatedSubjectKeyID()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), CMSTestUtil.createSubjectKeyId(_origCert.getPublicKey()).getKeyIdentifier(), CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        verifySignatures(sp);
+
+        byte[] contentDigest = (byte[])gen.getGeneratedDigests().get(CMSSignedGenerator.DIGEST_SHA1);
+
+        AttributeTable table = ((SignerInformation)sp.getSignerInfos().getSigners().iterator().next()).getSignedAttributes();
+        Attribute hash = table.get(CMSAttributes.messageDigest);
+
+        assertTrue(MessageDigest.isEqual(contentDigest, ((ASN1OctetString)hash.getAttrValues().getObjectAt(0)).getOctets()));
+
+        //
+        // try using existing signer
+        //
+        gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigners(sp.getSignerInfos());
+
+        gen.addCertificatesAndCRLs(sp.getCertificatesAndCRLs("Collection", "BC"));
+
+        bOut.reset();
+
+        sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedData sd = new CMSSignedData(new CMSProcessableByteArray(TEST_MESSAGE.getBytes()), bOut.toByteArray());
+
+        assertEquals(1, sd.getSignerInfos().getSigners().size());
+
+        verifyEncodedData(bOut);
+    }
+
     public void testAttributeGenerators()
         throws Exception
     {

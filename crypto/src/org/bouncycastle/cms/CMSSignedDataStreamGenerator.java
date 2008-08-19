@@ -15,6 +15,7 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -72,14 +73,15 @@ public class CMSSignedDataStreamGenerator
 
     private class SignerInf
     {
-        PrivateKey                  _key;
-        X509Certificate             _cert;
-        String                      _digestOID;
-        String                      _encOID;
-        CMSAttributeTableGenerator  _sAttr;
-        CMSAttributeTableGenerator  _unsAttr;
-        MessageDigest               _digest;
-        Signature                   _signature;
+        private PrivateKey                  _key;
+        private X509Certificate             _cert;
+        private String                      _digestOID;
+        private String                      _encOID;
+        private CMSAttributeTableGenerator  _sAttr;
+        private CMSAttributeTableGenerator  _unsAttr;
+        private MessageDigest               _digest;
+        private Signature                   _signature;
+        private byte[]                      _subjectKeyID;
 
         SignerInf(
             PrivateKey                  key,
@@ -93,6 +95,26 @@ public class CMSSignedDataStreamGenerator
         {
             _key = key;
             _cert = cert;
+            _digestOID = digestOID;
+            _encOID = encOID;
+            _sAttr = sAttr;
+            _unsAttr = unsAttr;
+            _digest = digest;
+            _signature = signature;
+        }
+
+        SignerInf(
+            PrivateKey                  key,
+            byte[]                      subjectKeyID,
+            String                      digestOID,
+            String                      encOID,
+            CMSAttributeTableGenerator  sAttr,
+            CMSAttributeTableGenerator  unsAttr,
+            MessageDigest               digest,
+            Signature                   signature)
+        {
+            _key = key;
+            _subjectKeyID = subjectKeyID;
             _digestOID = digestOID;
             _encOID = encOID;
             _sAttr = sAttr;
@@ -169,11 +191,22 @@ public class CMSSignedDataStreamGenerator
             ASN1Set unsignedAttr = getAttributeSet(unsigned);
 
             X509Certificate         cert = this.getCertificate();
-            ASN1InputStream         aIn = new ASN1InputStream(cert.getTBSCertificate());
-            TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(aIn.readObject());
-            IssuerAndSerialNumber   encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
+            SignerIdentifier        signerIdentifier;
 
-            return new SignerInfo(new SignerIdentifier(encSid), digAlgId,
+            if (cert != null)
+            {
+                TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(ASN1Object.fromByteArray(cert.getTBSCertificate()));
+                IssuerAndSerialNumber   encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
+
+                signerIdentifier = new SignerIdentifier(encSid);
+            }
+            else
+            {
+                signerIdentifier = new SignerIdentifier(new DEROctetString(_subjectKeyID));
+            }
+
+
+            return new SignerInfo(signerIdentifier, digAlgId,
                         signedAttr, encAlgId, encDigest, unsignedAttr);
         }
 
@@ -308,6 +341,109 @@ public class CMSSignedDataStreamGenerator
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
         addSigner(key, cert, digestOID, signedAttrGenerator, unsignedAttrGenerator, CMSUtils.getProvider(sigProvider));
+    }
+
+        /**
+     * add a signer - no attributes other than the default ones will be
+     * provided here.
+     * @throws NoSuchProviderException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          digestOID,
+        String          sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+        addSigner(key, subjectKeyID, digestOID, new DefaultSignedAttributeTableGenerator(), (CMSAttributeTableGenerator)null, sigProvider);
+    }
+
+    /**
+     * add a signer - no attributes other than the default ones will be
+     * provided here.
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          digestOID,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+       addSigner(key, subjectKeyID, digestOID, new DefaultSignedAttributeTableGenerator(), (CMSAttributeTableGenerator)null, sigProvider);
+    }
+
+    /**
+     * add a signer with extra signed/unsigned attributes.
+     * @throws NoSuchProviderException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          digestOID,
+        AttributeTable  signedAttr,
+        AttributeTable  unsignedAttr,
+        String          sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+        addSigner(key, subjectKeyID, digestOID,
+            new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), sigProvider);
+    }
+
+    /**
+     * add a signer with extra signed/unsigned attributes.
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          digestOID,
+        AttributeTable  signedAttr,
+        AttributeTable  unsignedAttr,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, InvalidKeyException
+    {
+        addSigner(key, subjectKeyID, digestOID,
+            new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), sigProvider);
+    }
+
+    public void addSigner(
+        PrivateKey                  key,
+        byte[]                      subjectKeyID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGenerator,
+        CMSAttributeTableGenerator  unsignedAttrGenerator,
+        Provider                    sigProvider)
+        throws NoSuchAlgorithmException, InvalidKeyException
+    {
+        String        encOID = getEncOID(key, digestOID);
+        String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
+        String        signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
+        Signature     sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+        MessageDigest dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);
+
+        sig.initSign(key, rand);
+
+        _signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
+        _messageDigests.add(dig);
+    }
+
+    public void addSigner(
+        PrivateKey                  key,
+        byte[]                      subjectKeyID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGenerator,
+        CMSAttributeTableGenerator  unsignedAttrGenerator,
+        String                      sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+        addSigner(key, subjectKeyID, digestOID, signedAttrGenerator, unsignedAttrGenerator, CMSUtils.getProvider(sigProvider));
     }
 
     private DERObject makeObj(
