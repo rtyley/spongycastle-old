@@ -26,7 +26,13 @@ Release 1.41
 <h3>2.1.2 Defects Fixed</h3>
 <ul>
 <li>The GeneralName String constructor now supports IPv4 and IPv6 address parsing.</li>
+<li>An issue with nested-multiparts with postamble for S/MIME that was causing signatures to fail verification has been fixed.</li>
 <li>Fix to regression from 1.38: PKIXCertPathCheckers were not being called on intermediate certificates.</li>
+</ul>
+<h3>2.2.3 Additional Features and Functionality</h3>
+<ul>
+<li>Camellia is now 12.5% faster than previously.</li>
+<li>CMSSignedData generation now supports SubjectKeyIdentifier as well as use of issuer/serial.</li>
 </ul>
 
 <h3>2.2.1 Version</h3>
