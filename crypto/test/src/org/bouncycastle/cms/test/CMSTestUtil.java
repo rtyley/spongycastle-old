@@ -387,7 +387,7 @@ public class CMSTestUtil
         return new AuthorityKeyIdentifier(_info);
     }
 
-    private static SubjectKeyIdentifier createSubjectKeyId(
+    static SubjectKeyIdentifier createSubjectKeyId(
         PublicKey _pubKey)
         throws IOException
     {
