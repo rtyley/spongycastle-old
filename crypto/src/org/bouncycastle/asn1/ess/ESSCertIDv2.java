@@ -11,7 +11,7 @@ public class ESSCertIDv2
     private AlgorithmIdentifier hashAlgorithm;
     private byte[]              certHash;
     private IssuerSerial        issuerSerial;
-    private static final AlgorithmIdentifier DEFAULT_ALG_ID = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
+    private static final AlgorithmIdentifier DEFAULT_ALG_ID = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256);
 
     public static ESSCertIDv2 getInstance(
         Object o)
@@ -103,7 +103,7 @@ public class ESSCertIDv2
      * <pre>
      * ESSCertIDv2 ::=  SEQUENCE {
      *     hashAlgorithm     AlgorithmIdentifier
-     *              DEFAULT {algorithm id-sha256 parameters NULL},
+     *              DEFAULT {algorithm id-sha256},
      *     certHash          Hash,
      *     issuerSerial      IssuerSerial OPTIONAL
      * }
