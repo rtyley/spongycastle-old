@@ -17,6 +17,8 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.security.Provider;
@@ -300,7 +302,9 @@ public class SMIMEUtil
                 out.flush();
                 return;
             }
-        
+
+            boolean base64 = contentTransferEncoding.equalsIgnoreCase("base64");
+
             // 
             // Special handling for Base64 or quoted-printable encoded
             // body part - this is to get around JavaMail's habit of
@@ -324,17 +328,40 @@ public class SMIMEUtil
             // Write raw content, performing canonicalization
             //
             InputStream inRaw = mimePart.getRawInputStream();
-            CRLFOutputStream outCRLF = new CRLFOutputStream(out);
 
-            byte[]      buf = new byte[BUF_SIZE];
-
-            int len;
-            while ((len = inRaw.read(buf, 0, buf.length)) > 0)
+            if (base64)
             {
-                outCRLF.write(buf, 0, len);
-            }
+                // special handling here as some providers introduce blank lines in the data,
+                // which they ignore in the signature calculation!!!
+                //
+                BufferedReader bRd = new BufferedReader(new InputStreamReader(inRaw));
+                LineOutputStream lOut = new LineOutputStream(out);
+                String line;
 
-            outCRLF.flush();
+                while ((line = bRd.readLine()) != null)
+                {
+                    if (line.length() == 0)
+                    {
+                        continue;
+                    }
+                    lOut.writeln(line);
+                }
+            }
+            else
+            {
+                CRLFOutputStream outCRLF = new CRLFOutputStream(out);
+
+                byte[]      buf = new byte[BUF_SIZE];
+
+                int len;
+                while ((len = inRaw.read(buf, 0, buf.length)) > 0)
+                {
+
+                    outCRLF.write(buf, 0, len);
+                }
+
+                outCRLF.flush();
+            }
         }
         else
         {
