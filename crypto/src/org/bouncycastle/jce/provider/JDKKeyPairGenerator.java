@@ -553,7 +553,7 @@ public abstract class JDKKeyPairGenerator
             }
             else if (params == null && ProviderUtil.getEcImplicitlyCa() == null)
             {
-                throw new InvalidAlgorithmParameterException("null parameter passed by no implicitCA set");
+                throw new InvalidAlgorithmParameterException("null parameter passed but no implicitCA set");
             }
             else
             {
