@@ -305,12 +305,6 @@ public class SMIMEUtil
 
             boolean base64 = contentTransferEncoding.equalsIgnoreCase("base64");
 
-            // 
-            // Special handling for Base64 or quoted-printable encoded
-            // body part - this is to get around JavaMail's habit of
-            // decoding and then re-encoding base64 data...
-            //
-
             //
             // Write headers
             //
@@ -328,40 +322,27 @@ public class SMIMEUtil
             // Write raw content, performing canonicalization
             //
             InputStream inRaw = mimePart.getRawInputStream();
+            OutputStream outCRLF;
 
             if (base64)
             {
-                // special handling here as some providers introduce blank lines in the data,
-                // which they ignore in the signature calculation!!!
-                //
-                BufferedReader bRd = new BufferedReader(new InputStreamReader(inRaw));
-                LineOutputStream lOut = new LineOutputStream(out);
-                String line;
-
-                while ((line = bRd.readLine()) != null)
-                {
-                    if (line.length() == 0)
-                    {
-                        continue;
-                    }
-                    lOut.writeln(line);
-                }
+                outCRLF = new Base64CRLFOutputStream(out);
             }
             else
             {
-                CRLFOutputStream outCRLF = new CRLFOutputStream(out);
-
-                byte[]      buf = new byte[BUF_SIZE];
-
-                int len;
-                while ((len = inRaw.read(buf, 0, buf.length)) > 0)
-                {
-
-                    outCRLF.write(buf, 0, len);
-                }
-
-                outCRLF.flush();
+                outCRLF = new CRLFOutputStream(out);
             }
+
+            byte[]      buf = new byte[BUF_SIZE];
+
+            int len;
+            while ((len = inRaw.read(buf, 0, buf.length)) > 0)
+            {
+
+                outCRLF.write(buf, 0, len);
+            }
+
+            outCRLF.flush();
         }
         else
         {
@@ -502,6 +483,76 @@ public class SMIMEUtil
             super.writeTo(out);
 
             this.dispose();
+        }
+    }
+
+    static class Base64CRLFOutputStream extends FilterOutputStream
+    {
+        protected int lastb;
+        protected static byte newline[];
+        private boolean isCrlfStream;
+
+        public Base64CRLFOutputStream(OutputStream outputstream)
+        {
+            super(outputstream);
+            lastb = -1;
+        }
+
+        public void write(int i)
+            throws IOException
+        {
+            if (i == '\r')
+            {
+                out.write(newline);
+            }
+            else if (i == '\n')
+            {
+                if (lastb != '\r')
+                {                                 // imagine my joy...
+                    if (!(isCrlfStream && lastb == '\n'))
+                    {
+                        out.write(newline);
+                    }
+                }
+                else
+                {
+                    isCrlfStream = true;
+                }
+            }
+            else
+            {
+                out.write(i);
+            }
+
+            lastb = i;
+        }
+
+        public void write(byte[] buf)
+            throws IOException
+        {
+            this.write(buf, 0, buf.length);
+        }
+
+        public void write(byte buf[], int off, int len)
+            throws IOException
+        {
+            for (int i = off; i != off + len; i++)
+            {
+                this.write(buf[i]);
+            }
+        }
+
+        public void writeln()
+            throws IOException
+        {
+            super.out.write(newline);
+        }
+
+        static
+        {
+            newline = new byte[2];
+            newline[0] = '\r';
+            newline[1] = '\n';
         }
     }
 }

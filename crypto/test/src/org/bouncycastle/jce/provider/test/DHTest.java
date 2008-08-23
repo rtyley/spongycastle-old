@@ -52,6 +52,7 @@ public class DHTest
     }
 
     private void testGP(
+        String      algName,
         int         size,
         int         privateValueSize,
         BigInteger  g,
@@ -60,7 +61,7 @@ public class DHTest
     {
         DHParameterSpec             dhParams = new DHParameterSpec(p, g, privateValueSize);
 
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH", "BC");
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algName, "BC");
 
         keyGen.initialize(dhParams);
 
@@ -69,7 +70,7 @@ public class DHTest
         //
         KeyPair aKeyPair = keyGen.generateKeyPair();
 
-        KeyAgreement aKeyAgree = KeyAgreement.getInstance("DH", "BC");
+        KeyAgreement aKeyAgree = KeyAgreement.getInstance(algName, "BC");
 
         checkKeySize(privateValueSize, aKeyPair);
 
@@ -80,7 +81,7 @@ public class DHTest
         //
         KeyPair bKeyPair = keyGen.generateKeyPair();
 
-        KeyAgreement bKeyAgree = KeyAgreement.getInstance("DH", "BC");
+        KeyAgreement bKeyAgree = KeyAgreement.getInstance(algName, "BC");
 
         checkKeySize(privateValueSize, bKeyPair);
 
@@ -104,7 +105,7 @@ public class DHTest
         // public key encoding test
         //
         byte[]              pubEnc = aKeyPair.getPublic().getEncoded();
-        KeyFactory          keyFac = KeyFactory.getInstance("DH", "BC");
+        KeyFactory          keyFac = KeyFactory.getInstance(algName, "BC");
         X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
         DHPublicKey         pubKey = (DHPublicKey)keyFac.generatePublic(pubX509);
         DHParameterSpec     spec = pubKey.getParams();
@@ -189,15 +190,15 @@ public class DHTest
         //
         // three party test
         //
-        KeyPairGenerator aPairGen = KeyPairGenerator.getInstance("DH", "BC");
+        KeyPairGenerator aPairGen = KeyPairGenerator.getInstance(algName, "BC");
         aPairGen.initialize(spec);
         KeyPair aPair = aPairGen.generateKeyPair();
 
-        KeyPairGenerator bPairGen = KeyPairGenerator.getInstance("DH", "BC");
+        KeyPairGenerator bPairGen = KeyPairGenerator.getInstance(algName, "BC");
         bPairGen.initialize(spec);
         KeyPair bPair = bPairGen.generateKeyPair();
 
-        KeyPairGenerator cPairGen = KeyPairGenerator.getInstance("DH", "BC");
+        KeyPairGenerator cPairGen = KeyPairGenerator.getInstance(algName, "BC");
         cPairGen.initialize(spec);
         KeyPair cPair = cPairGen.generateKeyPair();
 
@@ -205,7 +206,7 @@ public class DHTest
 
         bKeyAgree.init(bPair.getPrivate());
 
-        KeyAgreement cKeyAgree = KeyAgreement.getInstance("DH", "BC");
+        KeyAgreement cKeyAgree = KeyAgreement.getInstance(algName, "BC");
         cKeyAgree.init(cPair.getPrivate());
 
         Key ac = aKeyAgree.doPhase(cPair.getPublic(), false);
@@ -316,7 +317,7 @@ public class DHTest
 
         DHParameterSpec dhP = (DHParameterSpec)params.getParameterSpec(DHParameterSpec.class);
 
-        testGP(size, 0, dhP.getG(), dhP.getP());
+        testGP("DH", size, 0, dhP.getG(), dhP.getP());
     }
 
     private void testECDH(String algorithm)
@@ -476,12 +477,12 @@ public class DHTest
     public void performTest()
         throws Exception
     {
-        testGP(512, 0, g512, p512);
-        testGP(768, 0, g768, p768);
-        testGP(1024, 0, g1024, p1024);
-        testGP(512, 64, g512, p512);
-        testGP(768, 128, g768, p768);
-        testGP(1024, 256, g1024, p1024);
+        testGP("DH", 512, 0, g512, p512);
+        testGP("DiffieHellman", 768, 0, g768, p768);
+        testGP("DIFFIEHELLMAN", 1024, 0, g1024, p1024);
+        testGP("DH", 512, 64, g512, p512);
+        testGP("DiffieHellman", 768, 128, g768, p768);
+        testGP("DIFFIEHELLMAN", 1024, 256, g1024, p1024);
         testExplicitWrapping(512, 0, g512, p512);
         testRandom(256);
         testECDH("ECDH");

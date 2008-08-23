@@ -150,6 +150,7 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameterGenerator.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
         put("AlgorithmParameterGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
 
+        put("Alg.Alias.AlgorithmParameterGenerator.DIFFIEHELLMAN", "DH");
         put("Alg.Alias.AlgorithmParameterGenerator.GOST-3410", "GOST3410");
         //
         // algorithm parameters
@@ -157,6 +158,7 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameters.OAEP", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$OAEP");
         put("AlgorithmParameters.PSS", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PSS");
         put("AlgorithmParameters.DH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$DH");
+        put("Alg.Alias.AlgorithmParameters.DIFFIEHELLMAN", "DH");
         put("AlgorithmParameters.DSA", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$DSA");
         put("AlgorithmParameters.ELGAMAL", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$ElGamal");
         put("AlgorithmParameters.IES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IES");
@@ -224,6 +226,7 @@ public final class BouncyCastleProvider extends Provider
         // key agreement
         //
         put("KeyAgreement.DH", "org.bouncycastle.jce.provider.JCEDHKeyAgreement");
+        put("Alg.Alias.KeyAgreement.DIFFIEHELLMAN", "DH");
         put("KeyAgreement.ECDH", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DH");
         put("KeyAgreement.ECDHC", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DHC");
         put("KeyAgreement." + X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DHwithSHA1KDF");
@@ -405,6 +408,7 @@ public final class BouncyCastleProvider extends Provider
         put("KeyPairGenerator.ECDHC", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ECDHC");
         put("KeyPairGenerator.ECIES", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ECDH");
         put("Alg.Alias.KeyPairGenerator.1.2.840.113549.1.1.1", "RSA");
+        put("Alg.Alias.KeyPairGenerator.DIFFIEHELLMAN", "DH");
         
         put("KeyPairGenerator.GOST3410", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$GOST3410");
         put("Alg.Alias.KeyPairGenerator.GOST-3410", "GOST3410");
@@ -433,6 +437,7 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.KeyFactory.1.2.840.10040.4.1", "DSA");
         put("Alg.Alias.KeyFactory." + X9ObjectIdentifiers.id_ecPublicKey, "EC");
         put("Alg.Alias.KeyFactory." + X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "EC");
+        put("Alg.Alias.KeyFactory.DIFFIEHELLMAN", "DH");
 
         put("KeyFactory.GOST3410", "org.bouncycastle.jce.provider.JDKKeyFactory$GOST3410");
         put("Alg.Alias.KeyFactory.GOST-3410", "GOST3410");
