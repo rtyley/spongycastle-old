@@ -1,6 +1,11 @@
 package org.bouncycastle.cms;
 
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.spec.InvalidParameterSpecException;
+
 import javax.crypto.interfaces.PBEKey;
+import javax.crypto.spec.PBEParameterSpec;
 
 public abstract class CMSPBEKey
     implements PBEKey
@@ -9,6 +14,19 @@ public abstract class CMSPBEKey
     private byte[] salt;
     private int    iterationCount;
 
+    protected static PBEParameterSpec getParamSpec(AlgorithmParameters algParams)
+        throws InvalidAlgorithmParameterException
+    {
+        try
+        {
+            return algParams.getParameterSpec(PBEParameterSpec.class);
+        }
+        catch (InvalidParameterSpecException e)
+        {
+            throw new InvalidAlgorithmParameterException("cannot process PBE spec: " + e.getMessage());
+        }
+    }
+
     public CMSPBEKey(char[] password, byte[] salt, int iterationCount)
     {
         this.password = password;
@@ -16,6 +34,11 @@ public abstract class CMSPBEKey
         this.iterationCount = iterationCount;
     }
 
+    public CMSPBEKey(char[] password, PBEParameterSpec pbeSpec)
+    {
+        this(password, pbeSpec.getSalt(), pbeSpec.getIterationCount());
+    }
+    
     public char[] getPassword()
     {
         return password;

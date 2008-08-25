@@ -19,6 +19,7 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RC2CBCParameter;
 import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
+import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
@@ -353,6 +354,96 @@ public abstract class JDKAlgorithmParameters
         protected String engineToString() 
         {
             return "RC2 Parameters";
+        }
+    }
+
+    public static class PBKDF2
+        extends JDKAlgorithmParameters
+    {
+        PBKDF2Params params;
+
+        protected byte[] engineGetEncoded()
+        {
+            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+            DEROutputStream         dOut = new DEROutputStream(bOut);
+
+            try
+            {
+                dOut.writeObject(params);
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException("Oooops! " + e.toString());
+            }
+
+            return bOut.toByteArray();
+        }
+
+        protected byte[] engineGetEncoded(
+            String format)
+        {
+            if (isASN1FormatString(format))
+            {
+                return engineGetEncoded();
+            }
+
+            return null;
+        }
+
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(
+            Class paramSpec)
+            throws InvalidParameterSpecException
+        {
+            if (paramSpec == PBEParameterSpec.class)
+            {
+                return new PBEParameterSpec(params.getSalt(),
+                                params.getIterationCount().intValue());
+            }
+
+            throw new InvalidParameterSpecException("unknown parameter spec passed to PKCS12 PBE parameters object.");
+        }
+
+        protected void engineInit(
+            AlgorithmParameterSpec paramSpec)
+            throws InvalidParameterSpecException
+        {
+            if (!(paramSpec instanceof PBEParameterSpec))
+            {
+                throw new InvalidParameterSpecException("PBEParameterSpec required to initialise a PKCS12 PBE parameters algorithm parameters object");
+            }
+
+            PBEParameterSpec    pbeSpec = (PBEParameterSpec)paramSpec;
+
+            this.params = new PBKDF2Params(pbeSpec.getSalt(),
+                                pbeSpec.getIterationCount());
+        }
+
+        protected void engineInit(
+            byte[] params)
+            throws IOException
+        {
+            ASN1InputStream        aIn = new ASN1InputStream(params);
+
+            this.params = PBKDF2Params.getInstance(aIn.readObject());
+        }
+
+        protected void engineInit(
+            byte[] params,
+            String format)
+            throws IOException
+        {
+            if (isASN1FormatString(format))
+            {
+                engineInit(params);
+                return;
+            }
+
+            throw new IOException("Unknown parameters format in PWRIKEK parameters object");
+        }
+
+        protected String engineToString()
+        {
+            return "PBKDF2 Parameters";
         }
     }
 
