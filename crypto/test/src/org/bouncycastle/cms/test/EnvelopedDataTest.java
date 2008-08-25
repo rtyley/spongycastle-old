@@ -20,6 +20,7 @@ import org.bouncycastle.cms.PKCS5Scheme2PBEKey;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.PKCS5Scheme2UTF8PBEKey;
+import org.bouncycastle.cms.PasswordRecipientInformation;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -805,6 +806,16 @@ public class EnvelopedDataTest
         {
             fail("no recipient found");
         }
+
+        //
+        // try algorithm parameters constructor
+        //
+        it = c.iterator();
+
+        RecipientInformation   recipient = (RecipientInformation)it.next();
+
+        byte[] recData = recipient.getContent(new PKCS5Scheme2PBEKey("password".toCharArray(), ((PasswordRecipientInformation)recipient).getKeyDerivationAlgParameters("BC")), "BC");
+        assertEquals(true, Arrays.equals(data, recData));
     }
 
     private void passwordUTF8Test(String algorithm)
@@ -839,6 +850,16 @@ public class EnvelopedDataTest
         {
             fail("no recipient found");
         }
+
+        //
+        // try algorithm parameters constructor
+        //
+        it = c.iterator();
+
+        RecipientInformation   recipient = (RecipientInformation)it.next();
+
+        byte[] recData = recipient.getContent(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), ((PasswordRecipientInformation)recipient).getKeyDerivationAlgParameters("BC")), "BC");
+        assertEquals(true, Arrays.equals(data, recData));
     }
 
     private void verifyECKeyAgreeVectors(PrivateKey privKey, String wrapAlg, byte[] message)

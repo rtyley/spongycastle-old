@@ -18,6 +18,7 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
+import java.security.AlgorithmParameters;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -58,7 +59,7 @@ public class PasswordRecipientInformation
     }
 
     /**
-     * return the ASN.1 encoded key dervivation algorithm parameters, or null if
+     * return the ASN.1 encoded key derivation algorithm parameters, or null if
      * there aren't any.
      * @return ASN.1 encoding of key derivation algorithm parameters.
      */
@@ -72,6 +73,49 @@ public class PasswordRecipientInformation
                 if (params != null)
                 {
                     return params.getDERObject().getEncoded();
+                }
+            }
+
+            return null;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("exception getting encryption parameters " + e);
+        }
+    }
+
+    /**
+     * return an AlgorithmParameters object representing the parameters to the
+     * key derivation algorithm to the recipient.
+     *
+     * @return AlgorithmParameters object, null if there aren't any.
+     */
+    public AlgorithmParameters getKeyDerivationAlgParameters(String provider)
+        throws NoSuchProviderException
+    {
+        return getKeyDerivationAlgParameters(CMSUtils.getProvider(provider));
+    }
+    
+   /**
+     * return an AlgorithmParameters object representing the parameters to the
+     * key derivation algorithm to the recipient.
+     *
+     * @return AlgorithmParameters object, null if there aren't any.
+     */
+    public AlgorithmParameters getKeyDerivationAlgParameters(Provider provider)
+    {
+        try
+        {
+            if (_info.getKeyDerivationAlgorithm() != null)
+            {
+                DEREncodable params = _info.getKeyDerivationAlgorithm().getParameters();
+                if (params != null)
+                {
+                    AlgorithmParameters algP = AlgorithmParameters.getInstance(_info.getKeyDerivationAlgorithm().getObjectId().toString(), provider);
+
+                    algP.init(params.getDERObject().getEncoded());
+
+                    return algP;
                 }
             }
 

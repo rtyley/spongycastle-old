@@ -1,5 +1,8 @@
 package org.bouncycastle.cms;
 
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+
 import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -13,6 +16,12 @@ public class PKCS5Scheme2UTF8PBEKey
     public PKCS5Scheme2UTF8PBEKey(char[] password, byte[] salt, int iterationCount)
     {
         super(password, salt, iterationCount);
+    }
+
+    public PKCS5Scheme2UTF8PBEKey(char[] password, AlgorithmParameters pbeParams)
+        throws InvalidAlgorithmParameterException
+    {
+        super(password, getParamSpec(pbeParams));
     }
 
     byte[] getEncoded(String algorithmOid)
