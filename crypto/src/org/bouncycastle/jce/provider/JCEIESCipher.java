@@ -13,6 +13,7 @@ import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.IESKey;
 import org.bouncycastle.jce.spec.IESParameterSpec;
+import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;

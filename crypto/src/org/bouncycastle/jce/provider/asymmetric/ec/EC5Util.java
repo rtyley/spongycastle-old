@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jce.provider.asymmetric.ec;
 
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
@@ -14,7 +14,7 @@ import java.security.spec.EllipticCurve;
 
 public class EC5Util
 {
-    static EllipticCurve convertCurve(
+    public static EllipticCurve convertCurve(
         ECCurve curve, 
         byte[]  seed)
     {
@@ -42,7 +42,7 @@ public class EC5Util
         }
     }
 
-    static ECCurve convertCurve(
+    public static ECCurve convertCurve(
         EllipticCurve ec)
     {
         ECField field = ec.getField();
@@ -62,7 +62,7 @@ public class EC5Util
         }
     }
 
-    static ECParameterSpec convertSpec(
+    public static ECParameterSpec convertSpec(
         EllipticCurve ellipticCurve,
         org.bouncycastle.jce.spec.ECParameterSpec spec)
     {
@@ -89,7 +89,7 @@ public class EC5Util
         }
     }
 
-    static org.bouncycastle.jce.spec.ECParameterSpec convertSpec(
+    public static org.bouncycastle.jce.spec.ECParameterSpec convertSpec(
         ECParameterSpec ecSpec,
         boolean withCompression)
     {
@@ -103,7 +103,7 @@ public class EC5Util
             ecSpec.getCurve().getSeed());
     }
 
-    static org.bouncycastle.math.ec.ECPoint convertPoint(
+    public static org.bouncycastle.math.ec.ECPoint convertPoint(
         ECParameterSpec ecSpec,
         ECPoint point,
         boolean withCompression)
@@ -111,7 +111,7 @@ public class EC5Util
         return convertPoint(convertCurve(ecSpec.getCurve()), point, withCompression);
     }
 
-    static org.bouncycastle.math.ec.ECPoint convertPoint(
+    public static org.bouncycastle.math.ec.ECPoint convertPoint(
         ECCurve curve,
         ECPoint point,
         boolean withCompression)

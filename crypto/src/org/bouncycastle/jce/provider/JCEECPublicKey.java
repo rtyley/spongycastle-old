@@ -1,7 +1,6 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -23,6 +22,8 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
+import org.bouncycastle.jce.provider.asymmetric.ec.EC5Util;
+import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
@@ -45,7 +46,7 @@ public class JCEECPublicKey
     private boolean                 withCompression;
     private GOST3410PublicKeyAlgParameters       gostParams;
 
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String              algorithm,
         JCEECPublicKey      key)
     {
@@ -56,7 +57,7 @@ public class JCEECPublicKey
         this.gostParams = key.gostParams;
     }
     
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String              algorithm,
         ECPublicKeySpec     spec)
     {
@@ -65,7 +66,7 @@ public class JCEECPublicKey
         this.q = EC5Util.convertPoint(ecSpec, spec.getW(), false);
     }
 
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String              algorithm,
         org.bouncycastle.jce.spec.ECPublicKeySpec     spec)
     {
@@ -91,7 +92,7 @@ public class JCEECPublicKey
         }
     }
     
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String                  algorithm,
         ECPublicKeyParameters   params,
         ECParameterSpec         spec)
@@ -113,7 +114,7 @@ public class JCEECPublicKey
         }
     }
 
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String                  algorithm,
         ECPublicKeyParameters   params,
         org.bouncycastle.jce.spec.ECParameterSpec         spec)
@@ -140,7 +141,7 @@ public class JCEECPublicKey
     /*
      * called for implicitCA
      */
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String                  algorithm,
         ECPublicKeyParameters   params)
     {
@@ -418,7 +419,7 @@ public class JCEECPublicKey
         return q;
     }
 
-    org.bouncycastle.math.ec.ECPoint engineGetQ()
+    public org.bouncycastle.math.ec.ECPoint engineGetQ()
     {
         return q;
     }

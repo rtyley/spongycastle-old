@@ -19,6 +19,8 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
+import org.bouncycastle.jce.provider.asymmetric.ec.EC5Util;
+import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.math.ec.ECCurve;
 
 import java.math.BigInteger;
@@ -51,7 +53,7 @@ public class JCEECPrivateKey
         this.ecSpec = key.getParams();
     }
 
-    JCEECPrivateKey(
+    public JCEECPrivateKey(
         String              algorithm,
         org.bouncycastle.jce.spec.ECPrivateKeySpec     spec)
     {
@@ -74,7 +76,7 @@ public class JCEECPrivateKey
     }
 
 
-    JCEECPrivateKey(
+    public JCEECPrivateKey(
         String              algorithm,
         ECPrivateKeySpec    spec)
     {
@@ -83,7 +85,7 @@ public class JCEECPrivateKey
         this.ecSpec = spec.getParams();
     }
 
-    JCEECPrivateKey(
+    public JCEECPrivateKey(
         String             algorithm,
         JCEECPrivateKey    key)
     {
@@ -94,7 +96,7 @@ public class JCEECPrivateKey
         this.attrCarrier = key.attrCarrier;
     }
 
-    JCEECPrivateKey(
+    public JCEECPrivateKey(
         String                  algorithm,
         ECPrivateKeyParameters  params,
         ECParameterSpec         spec)
@@ -122,7 +124,7 @@ public class JCEECPrivateKey
         }
     }
 
-    JCEECPrivateKey(
+    public JCEECPrivateKey(
         String                  algorithm,
         ECPrivateKeyParameters  params,
         org.bouncycastle.jce.spec.ECParameterSpec         spec)
@@ -158,7 +160,7 @@ public class JCEECPrivateKey
         }
     }
 
-    JCEECPrivateKey(
+    public JCEECPrivateKey(
         String                  algorithm,
         ECPrivateKeyParameters  params)
     {

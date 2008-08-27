@@ -59,11 +59,7 @@ public class JDKDSASigner
     {
         CipherParameters    param;
 
-        if (publicKey instanceof ECPublicKey)
-        {
-            param = ECUtil.generatePublicKeyParameter(publicKey);
-        }
-        else if (publicKey instanceof GOST3410Key)
+        if (publicKey instanceof GOST3410Key)
         {
             param = GOST3410Util.generatePublicKeyParameter(publicKey);
         }
@@ -79,11 +75,7 @@ public class JDKDSASigner
 
                 publicKey = JDKKeyFactory.createPublicKeyFromDERStream(bytes);
 
-                if (publicKey instanceof ECPublicKey)
-                {
-                    param = ECUtil.generatePublicKeyParameter(publicKey);
-                }
-                else if (publicKey instanceof DSAKey)
+                if (publicKey instanceof DSAKey)
                 {
                     param = DSAUtil.generatePublicKeyParameter(publicKey);
                 }
@@ -117,11 +109,7 @@ public class JDKDSASigner
     {
         CipherParameters    param;
 
-        if (privateKey instanceof ECKey)
-        {
-            param = ECUtil.generatePrivateKeyParameter(privateKey);
-        }
-        else if (privateKey instanceof GOST3410Key)
+        if (privateKey instanceof GOST3410Key)
         {
             param = GOST3410Util.generatePrivateKeyParameter(privateKey);
         }
@@ -307,105 +295,6 @@ public class JDKDSASigner
         public noneDSA()
         {
             super(new NullDigest(), new DSASigner());
-        }
-    }
-    
-    static public class ecDSA
-        extends JDKDSASigner
-    {
-        public ecDSA()
-        {
-            super(new SHA1Digest(), new ECDSASigner());
-        }
-    }
-    
-    static public class ecDSA224
-        extends JDKDSASigner
-    {
-        public ecDSA224()
-        {
-            super(new SHA224Digest(), new ECDSASigner());
-        }
-    }
-    
-    static public class ecDSA256
-        extends JDKDSASigner
-    {
-        public ecDSA256()
-        {
-            super(new SHA256Digest(), new ECDSASigner());
-        }
-    }
-    
-    static public class ecDSA384
-        extends JDKDSASigner
-    {
-        public ecDSA384()
-        {
-            super(new SHA384Digest(), new ECDSASigner());
-        }
-    }
-    
-    static public class ecDSA512
-        extends JDKDSASigner
-    {
-        public ecDSA512()
-        {
-            super(new SHA512Digest(), new ECDSASigner());
-        }
-    }
-    
-    static public class ecDSARipeMD160
-        extends JDKDSASigner
-    {
-        public ecDSARipeMD160()
-        {
-            super(new RIPEMD160Digest(), new ECDSASigner());
-        }
-    }
-
-    static public class ecNR
-        extends JDKDSASigner
-    {
-        public ecNR()
-        {
-            super(new SHA1Digest(), new ECNRSigner());
-        }
-    }
-
-    static public class ecNR224 
-        extends JDKDSASigner
-    {
-        public ecNR224()
-        {
-            super(new SHA224Digest(), new ECNRSigner());
-        }
-    }
-
-    static public class ecNR256 
-        extends JDKDSASigner
-    {
-        public ecNR256()
-        {
-            super(new SHA256Digest(), new ECNRSigner());
-        }
-    }
-
-    static public class ecNR384 
-        extends JDKDSASigner
-    {
-        public ecNR384()
-        {
-            super(new SHA384Digest(), new ECNRSigner());
-        }
-    }
-
-    static public class ecNR512 
-        extends JDKDSASigner
-    {
-        public ecNR512()
-        {
-            super(new SHA512Digest(), new ECNRSigner());
         }
     }
     

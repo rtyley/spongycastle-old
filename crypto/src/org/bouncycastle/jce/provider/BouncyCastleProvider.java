@@ -54,6 +54,15 @@ public final class BouncyCastleProvider extends Provider
         "AES", "Camellia", "CAST5", "IDEA", "Noekeon", "SEED"
     };
 
+    /*
+     * Configurable asymmetric ciphers
+     */
+    private static final String ASYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.asymmetric.";
+    private static final String[] ASYMMETRIC_CIPHERS =
+    {
+        "EC"
+    };
+
     /**
      * Construct a new provider.  This should only be required when
      * using runtime registration of the provider using the
@@ -63,31 +72,8 @@ public final class BouncyCastleProvider extends Provider
     {
         super(PROVIDER_NAME, 1.405, info);
 
-        for (int i = 0; i != SYMMETRIC_CIPHERS.length; i++)
-        {
-            Class clazz = null;
-            try
-            {
-                clazz = Class.forName(SYMMETRIC_CIPHER_PACKAGE + SYMMETRIC_CIPHERS[i] + "Mappings");
-            }
-            catch (ClassNotFoundException e)
-            {
-                // ignore
-            }
-
-            if (clazz != null)
-            {
-                try
-                {
-                    addMappings((Map)clazz.newInstance());
-                }
-                catch (Exception e)
-                {   // this should never ever happen!!
-                    throw new InternalError("cannot create instance of "
-                        + SYMMETRIC_CIPHER_PACKAGE + SYMMETRIC_CIPHERS[i] + "Mappings : " + e);
-                }
-            }
-        }
+        loadAlgorithms(SYMMETRIC_CIPHER_PACKAGE, SYMMETRIC_CIPHERS);
+        loadAlgorithms(ASYMMETRIC_CIPHER_PACKAGE, ASYMMETRIC_CIPHERS);
 
         //
         // X509Store
@@ -228,10 +214,7 @@ public final class BouncyCastleProvider extends Provider
         //
         put("KeyAgreement.DH", "org.bouncycastle.jce.provider.JCEDHKeyAgreement");
         put("Alg.Alias.KeyAgreement.DIFFIEHELLMAN", "DH");
-        put("KeyAgreement.ECDH", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DH");
-        put("KeyAgreement.ECDHC", "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DHC");
-        put("KeyAgreement." + X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "org.bouncycastle.jce.provider.JCEECDHKeyAgreement$DHwithSHA1KDF");
-
+        
         //
         // cipher engines
         //
@@ -403,22 +386,13 @@ public final class BouncyCastleProvider extends Provider
         put("KeyPairGenerator.DH", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DH");
         put("KeyPairGenerator.DSA", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DSA");
         put("KeyPairGenerator.ELGAMAL", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ElGamal");
-        put("KeyPairGenerator.EC", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$EC");
-        put("KeyPairGenerator.ECDSA", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ECDSA");
-        put("KeyPairGenerator.ECDH", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ECDH");
-        put("KeyPairGenerator.ECDHC", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ECDHC");
-        put("KeyPairGenerator.ECIES", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ECDH");
+
         put("Alg.Alias.KeyPairGenerator.1.2.840.113549.1.1.1", "RSA");
         put("Alg.Alias.KeyPairGenerator.DIFFIEHELLMAN", "DH");
         
         put("KeyPairGenerator.GOST3410", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$GOST3410");
         put("Alg.Alias.KeyPairGenerator.GOST-3410", "GOST3410");
         put("Alg.Alias.KeyPairGenerator.GOST-3410-94", "GOST3410");
-        
-        put("KeyPairGenerator.ECGOST3410", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ECGOST3410");
-        put("Alg.Alias.KeyPairGenerator.ECGOST-3410", "ECGOST3410");
-        put("Alg.Alias.KeyPairGenerator.GOST-3410-2001", "ECGOST3410");
-
 
         //
         // key factories
@@ -428,26 +402,18 @@ public final class BouncyCastleProvider extends Provider
         put("KeyFactory.DSA", "org.bouncycastle.jce.provider.JDKKeyFactory$DSA");
         put("KeyFactory.ELGAMAL", "org.bouncycastle.jce.provider.JDKKeyFactory$ElGamal");
         put("KeyFactory.ElGamal", "org.bouncycastle.jce.provider.JDKKeyFactory$ElGamal");
-        put("KeyFactory.EC", "org.bouncycastle.jce.provider.JDKKeyFactory$EC");
-        put("KeyFactory.ECDSA", "org.bouncycastle.jce.provider.JDKKeyFactory$ECDSA");
-        put("KeyFactory.ECDH", "org.bouncycastle.jce.provider.JDKKeyFactory$ECDH");
-        put("KeyFactory.ECDHC", "org.bouncycastle.jce.provider.JDKKeyFactory$ECDHC");
+
         put("KeyFactory.X.509", "org.bouncycastle.jce.provider.JDKKeyFactory$X509");
         
         put("Alg.Alias.KeyFactory.1.2.840.113549.1.1.1", "RSA");
         put("Alg.Alias.KeyFactory.1.2.840.10040.4.1", "DSA");
-        put("Alg.Alias.KeyFactory." + X9ObjectIdentifiers.id_ecPublicKey, "EC");
-        put("Alg.Alias.KeyFactory." + X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "EC");
+
         put("Alg.Alias.KeyFactory.DIFFIEHELLMAN", "DH");
 
         put("KeyFactory.GOST3410", "org.bouncycastle.jce.provider.JDKKeyFactory$GOST3410");
         put("Alg.Alias.KeyFactory.GOST-3410", "GOST3410");
         put("Alg.Alias.KeyFactory.GOST-3410-94", "GOST3410");
         put("Alg.Alias.KeyFactory." + CryptoProObjectIdentifiers.gostR3410_94, "GOST3410");
-        put("KeyFactory.ECGOST3410", "org.bouncycastle.jce.provider.JDKKeyFactory$ECGOST3410");
-        put("Alg.Alias.KeyFactory.GOST-3410-2001", "ECGOST3410");
-        put("Alg.Alias.KeyFactory.ECGOST-3410", "ECGOST3410");
-        put("Alg.Alias.KeyFactory." + CryptoProObjectIdentifiers.gostR3410_2001, "ECGOST3410");
 
         //
         // Algorithm parameters
@@ -557,6 +523,35 @@ public final class BouncyCastleProvider extends Provider
         put("CertStore.LDAP", "org.bouncycastle.jce.provider.X509LDAPCertStoreSpi");
         put("CertStore.Multi", "org.bouncycastle.jce.provider.MultiCertStoreSpi");
         put("Alg.Alias.CertStore.X509LDAP", "LDAP");
+    }
+
+    private void loadAlgorithms(String packageName, String[] names)
+    {
+        for (int i = 0; i != names.length; i++)
+        {
+            Class clazz = null;
+            try
+            {
+                clazz = Class.forName(packageName + names[i] + "Mappings");
+            }
+            catch (ClassNotFoundException e)
+            {
+                // ignore
+            }
+
+            if (clazz != null)
+            {
+                try
+                {
+                    addMappings((Map)clazz.newInstance());
+                }
+                catch (Exception e)
+                {   // this should never ever happen!!
+                    throw new InternalError("cannot create instance of "
+                        + packageName + names[i] + "Mappings : " + e);
+                }
+            }
+        }
     }
 
     private void addMappings(Map mappings)
@@ -749,12 +744,6 @@ public final class BouncyCastleProvider extends Provider
         put("Signature.RIPEMD256WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD256WithRSAEncryption");
         put("Signature.DSA", "org.bouncycastle.jce.provider.JDKDSASigner$stdDSA");
         put("Signature.NONEWITHDSA", "org.bouncycastle.jce.provider.JDKDSASigner$noneDSA");
-        put("Signature.ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA");
-        put("Signature.SHA1WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR");
-        put("Signature.SHA224WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR224");
-        put("Signature.SHA256WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR256");
-        put("Signature.SHA384WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR384");
-        put("Signature.SHA512WITHECNR", "org.bouncycastle.jce.provider.JDKDSASigner$ecNR512");
         put("Signature.SHA1withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$SHA1WithRSAEncryption");
         put("Signature.MD5withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$MD5WithRSAEncryption");
         put("Signature.RIPEMD160withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$RIPEMD160WithRSAEncryption");
@@ -851,21 +840,6 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.RIPEMD160WITHRSA", "RIPEMD160WithRSAEncryption");
         put("Alg.Alias.Signature.RMD160WITHRSA", "RIPEMD160WithRSAEncryption");
         put("Alg.Alias.Signature.RIPEMD160WITHRSA", "RIPEMD160WithRSAEncryption");
-
-        put("Alg.Alias.Signature.SHA1withECDSA", "ECDSA");
-        put("Alg.Alias.Signature.ECDSAwithSHA1", "ECDSA");
-        put("Alg.Alias.Signature.SHA1WITHECDSA", "ECDSA");
-        put("Alg.Alias.Signature.ECDSAWITHSHA1", "ECDSA");
-        put("Alg.Alias.Signature.SHA1WithECDSA", "ECDSA");
-        put("Alg.Alias.Signature.ECDSAWithSHA1", "ECDSA");
-        put("Alg.Alias.Signature.1.2.840.10045.4.1", "ECDSA");
-        put("Alg.Alias.Signature." + TeleTrusTObjectIdentifiers.ecSignWithSha1, "ECDSA");
-
-        addSignatureAlgorithm("SHA224", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA224", X9ObjectIdentifiers.ecdsa_with_SHA224);
-        addSignatureAlgorithm("SHA256", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA256", X9ObjectIdentifiers.ecdsa_with_SHA256);
-        addSignatureAlgorithm("SHA384", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA384", X9ObjectIdentifiers.ecdsa_with_SHA384);
-        addSignatureAlgorithm("SHA512", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSA512", X9ObjectIdentifiers.ecdsa_with_SHA512);
-        addSignatureAlgorithm("RIPEMD160", "ECDSA", "org.bouncycastle.jce.provider.JDKDSASigner$ecDSARipeMD160",TeleTrusTObjectIdentifiers.ecSignWithRipemd160);
 
         addSignatureAlgorithm("SHA224", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa224", NISTObjectIdentifiers.dsa_with_sha224);
         addSignatureAlgorithm("SHA256", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa256", NISTObjectIdentifiers.dsa_with_sha256);
