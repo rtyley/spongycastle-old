@@ -4,6 +4,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -622,6 +623,10 @@ public class DSATest
         testECDSA239bitBinary("SHA256withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
         testECDSA239bitBinary("SHA384withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
         testECDSA239bitBinary("SHA512withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
+        testECDSA239bitBinary("SHA1withCVC-ECDSA", EACObjectIdentifiers.id_TA_ECDSA_SHA_1);
+        testECDSA239bitBinary("SHA224withCVC-ECDSA", EACObjectIdentifiers.id_TA_ECDSA_SHA_224);
+        testECDSA239bitBinary("SHA256withCVC-ECDSA", EACObjectIdentifiers.id_TA_ECDSA_SHA_256);
+        
         testGeneration();
         testParameters();
     }

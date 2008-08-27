@@ -21,6 +21,7 @@ import org.bouncycastle.crypto.signers.GOST3410Signer;
 import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410Key;
+import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 
 public class JDKGOST3410Signer
     extends SignatureSpi

@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jce.provider.asymmetric.ec;
 
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
@@ -14,6 +14,8 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.provider.ProviderUtil;
+import org.bouncycastle.jce.provider.JCEECPublicKey;
 
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
@@ -95,7 +97,7 @@ public class ECUtil
         return res;
     }
 
-    static AsymmetricKeyParameter generatePublicKeyParameter(
+    public static AsymmetricKeyParameter generatePublicKeyParameter(
         PublicKey    key)
         throws InvalidKeyException
     {
@@ -119,11 +121,19 @@ public class ECUtil
                             new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
             }
         }
+        else if (key instanceof java.security.interfaces.ECPublicKey)
+        {
+            java.security.interfaces.ECPublicKey pubKey = (java.security.interfaces.ECPublicKey)key;
+            ECParameterSpec s = EC5Util.convertSpec(pubKey.getParams(), false);
+            return new ECPublicKeyParameters(
+                EC5Util.convertPoint(pubKey.getParams(), pubKey.getW(), false),
+                            new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
+        }
 
-        throw new InvalidKeyException("can't identify EC public key.");
+        throw new InvalidKeyException("cannot identify EC public key.");
     }
 
-    static AsymmetricKeyParameter generatePrivateKeyParameter(
+    public static AsymmetricKeyParameter generatePrivateKeyParameter(
         PrivateKey    key)
         throws InvalidKeyException
     {

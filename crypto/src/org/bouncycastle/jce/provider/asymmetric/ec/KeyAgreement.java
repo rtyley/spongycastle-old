@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jce.provider.asymmetric.ec;
 
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -15,6 +15,7 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 
 import javax.crypto.KeyAgreementSpi;
 import javax.crypto.SecretKey;
@@ -35,7 +36,7 @@ import java.util.Hashtable;
  * Diffie-Hellman key agreement using elliptic curve keys, ala IEEE P1363
  * both the simple one, and the simple one with cofactors are supported.
  */
-public class JCEECDHKeyAgreement
+public class KeyAgreement
     extends KeyAgreementSpi
 {
     private static final X9IntegerConverter converter = new X9IntegerConverter();
@@ -67,13 +68,13 @@ public class JCEECDHKeyAgreement
         return converter.integerToBytes(r, converter.getByteLength(privKey.getParameters().getG().getX()));
     }
     
-    protected JCEECDHKeyAgreement(
+    protected KeyAgreement(
         BasicAgreement  agreement)
     {
         this.agreement = agreement;
     }
 
-    protected JCEECDHKeyAgreement(
+    protected KeyAgreement(
         BasicAgreement  agreement,
         DerivationFunction kdf)
     {
@@ -190,7 +191,7 @@ public class JCEECDHKeyAgreement
     }
 
     public static class DH
-        extends JCEECDHKeyAgreement
+        extends KeyAgreement
     {
         public DH()
         {
@@ -199,7 +200,7 @@ public class JCEECDHKeyAgreement
     }
 
     public static class DHC
-        extends JCEECDHKeyAgreement
+        extends KeyAgreement
     {
         public DHC()
         {
@@ -208,7 +209,7 @@ public class JCEECDHKeyAgreement
     }
 
     public static class DHwithSHA1KDF
-        extends JCEECDHKeyAgreement
+        extends KeyAgreement
     {
         public DHwithSHA1KDF()
         {

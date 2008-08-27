@@ -1,28 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
-import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
-import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
-import org.bouncycastle.jce.spec.GOST3410PrivateKeySpec;
-import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
-
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHPrivateKeySpec;
-import javax.crypto.spec.DHPublicKeySpec;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -45,6 +22,28 @@ import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHPrivateKeySpec;
+import javax.crypto.spec.DHPublicKeySpec;
+
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
+import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
+import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
+import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
+import org.bouncycastle.jce.spec.GOST3410PrivateKeySpec;
+import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
 
 public abstract class JDKKeyFactory
     extends KeyFactorySpi
@@ -228,7 +227,7 @@ public abstract class JDKKeyFactory
     /**
      * create a public key from the given DER encoded input stream. 
      */ 
-    static PublicKey createPublicKeyFromDERStream(
+    public static PublicKey createPublicKeyFromDERStream(
         byte[]         in)
         throws IOException
     {
@@ -289,7 +288,7 @@ public abstract class JDKKeyFactory
     /**
      * create a private key from the given DER encoded input stream. 
      */ 
-    static PrivateKey createPrivateKeyFromDERStream(
+    protected static PrivateKey createPrivateKeyFromDERStream(
         byte[]         in)
         throws IOException
     {
@@ -546,119 +545,6 @@ public abstract class JDKKeyFactory
     {
         public X509()
         {
-        }
-    }
-    
-    public static class EC
-        extends JDKKeyFactory
-    {
-        String  algorithm;
-
-        public EC()
-        {
-            this("EC");
-        }
-
-        public EC(
-            String  algorithm)
-        {
-            this.algorithm = algorithm;
-        }
-
-        protected PrivateKey engineGeneratePrivate(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof PKCS8EncodedKeySpec)
-            {
-                try
-                {
-                    JCEECPrivateKey key = (JCEECPrivateKey)JDKKeyFactory.createPrivateKeyFromDERStream(
-                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
-
-                    return new JCEECPrivateKey(algorithm, key);
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof ECPrivateKeySpec)
-            {
-                return new JCEECPrivateKey(algorithm, (ECPrivateKeySpec)keySpec);
-            }
-            else if (keySpec instanceof java.security.spec.ECPrivateKeySpec)
-            {
-                return new JCEECPrivateKey(algorithm, (java.security.spec.ECPrivateKeySpec)keySpec);
-            }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
-        }
-    
-        protected PublicKey engineGeneratePublic(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof X509EncodedKeySpec)
-            {
-                try
-                {
-                    JCEECPublicKey key = (JCEECPublicKey)JDKKeyFactory.createPublicKeyFromDERStream(
-                                ((X509EncodedKeySpec)keySpec).getEncoded());
-
-                    return new JCEECPublicKey(algorithm, key);
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-            else if (keySpec instanceof ECPublicKeySpec)
-            {
-                return new JCEECPublicKey(algorithm, (ECPublicKeySpec)keySpec);
-            }
-            else if (keySpec instanceof java.security.spec.ECPublicKeySpec)
-            {
-                return new JCEECPublicKey(algorithm, (java.security.spec.ECPublicKeySpec)keySpec);
-            }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
-        }
-    }
-
-    public static class ECDSA
-        extends EC
-    {
-        public ECDSA()
-        {
-            super("ECDSA");
-        }
-    }
-
-    public static class ECGOST3410
-        extends EC
-    {
-        public ECGOST3410()
-        {
-            super("ECGOST3410");
-        }
-    }
-    
-    public static class ECDH
-        extends EC
-    {
-        public ECDH()
-        {
-            super("ECDH");
-        }
-    }
-
-    public static class ECDHC
-        extends EC
-    {
-        public ECDHC()
-        {
-            super("ECDHC");
         }
     }
 }
