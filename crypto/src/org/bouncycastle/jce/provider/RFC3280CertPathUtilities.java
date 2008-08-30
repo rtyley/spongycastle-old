@@ -761,7 +761,6 @@ public class RFC3280CertPathUtilities
 
         if (pkixParams.isUseDeltasEnabled())
         {
-
             // (c) (1)
             if (!deltaCRL.getIssuerX500Principal().equals(completeCRL.getIssuerX500Principal()))
             {
@@ -769,64 +768,65 @@ public class RFC3280CertPathUtilities
             }
 
             // (c) (2)
-            if (completeidp != null)
+            IssuingDistributionPoint deltaidp = null;
+            try
             {
+                deltaidp = IssuingDistributionPoint.getInstance(CertPathValidatorUtilities.getExtensionValue(
+                    deltaCRL, ISSUING_DISTRIBUTION_POINT));
+            }
+            catch (Exception e)
+            {
+                throw new AnnotatedException(
+                    "Issuing distribution point extension from delta CRL could not be decoded.", e);
+            }
 
-                IssuingDistributionPoint deltaidp = null;
-                try
+            boolean match = false;
+            if (completeidp == null)
+            {
+                if (deltaidp == null)
                 {
-                    deltaidp = IssuingDistributionPoint.getInstance(CertPathValidatorUtilities.getExtensionValue(
-                        deltaCRL, ISSUING_DISTRIBUTION_POINT));
+                    match = true;
                 }
-                catch (Exception e)
+            }
+            else
+            {
+                if (completeidp.equals(deltaidp))
                 {
-                    throw new AnnotatedException(
-                        "Issuing distribution point extension from delta CRL could not be decoded.", e);
+                    match = true;
                 }
-                boolean match = false;
-                if (completeidp == null)
-                {
-                    if (deltaidp == null)
-                    {
-                        match = true;
-                    }
-                }
-                else
-                {
-                    if (completeidp.equals(deltaidp))
-                    {
-                        match = true;
-                    }
-                }
-                if (!match)
-                {
-                    throw new AnnotatedException(
-                        "Issuing distribution point extension from delta CRL and complete CRL does not match.");
-                }
+            }
+            if (!match)
+            {
+                throw new AnnotatedException(
+                    "Issuing distribution point extension from delta CRL and complete CRL does not match.");
             }
 
             // (c) (3)
             DERObject completeKeyIdentifier = null;
             try
             {
-                completeKeyIdentifier = CertPathValidatorUtilities
-                    .getExtensionValue(deltaCRL, AUTHORITY_KEY_IDENTIFIER);
+                completeKeyIdentifier = CertPathValidatorUtilities.getExtensionValue(
+                    completeCRL, AUTHORITY_KEY_IDENTIFIER);
             }
             catch (AnnotatedException e)
             {
                 throw new AnnotatedException(
                     "Authority key identifier extension could not be extracted from complete CRL.", e);
             }
+
             DERObject deltaKeyIdentifier = null;
             try
             {
-                deltaKeyIdentifier = CertPathValidatorUtilities.getExtensionValue(deltaCRL, AUTHORITY_KEY_IDENTIFIER);
+                deltaKeyIdentifier = CertPathValidatorUtilities.getExtensionValue(
+                    deltaCRL, AUTHORITY_KEY_IDENTIFIER);
             }
             catch (AnnotatedException e)
             {
                 throw new AnnotatedException(
                     "Authority key identifier extension could not be extracted from delta CRL.", e);
             }
+
+            // TODO Are these really allowed to be null?
             if (!(completeKeyIdentifier == null && deltaKeyIdentifier == null) && !completeKeyIdentifier.equals(deltaKeyIdentifier))
             {
                 throw new AnnotatedException(
