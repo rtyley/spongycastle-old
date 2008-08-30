@@ -1140,11 +1140,11 @@ public class CertPathValidatorUtilities
         BigInteger completeCRLNumber = null;
         try
         {
-            DERObject derObect = CertPathValidatorUtilities.getExtensionValue(completeCRL,
+            DERObject derObject = CertPathValidatorUtilities.getExtensionValue(completeCRL,
                     CRL_NUMBER);
-            if (derObect != null)
+            if (derObject != null)
             {
-                completeCRLNumber = CRLNumber.getInstance(derObect).getPositiveValue();
+                completeCRLNumber = CRLNumber.getInstance(derObject).getPositiveValue();
             }
         }
         catch (Exception e)
@@ -1307,7 +1307,7 @@ public class CertPathValidatorUtilities
                         catch (ParseException e)
                         {
                             throw new AnnotatedException(
-                                "Date from dat of cert gen extension could not be parsed.",
+                                "Date from date of cert gen extension could not be parsed.",
                                 e);
                         }
                     }
