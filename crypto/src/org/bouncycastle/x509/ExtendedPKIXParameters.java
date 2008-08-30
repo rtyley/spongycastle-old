@@ -259,7 +259,7 @@ public class ExtendedPKIXParameters
      */
     public void addStore(Store store)
     {
-        if (stores != null)
+        if (store != null)
         {
             stores.add(store);
         }
