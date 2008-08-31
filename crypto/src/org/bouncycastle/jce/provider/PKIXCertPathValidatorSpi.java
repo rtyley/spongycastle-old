@@ -328,18 +328,27 @@ public class PKIXCertPathValidatorSpi
                 // (n)
                 RFC3280CertPathUtilities.prepareNextCertN(certPath, index);
 
-                Set criticalExtensions = new HashSet(cert.getCriticalExtensionOIDs());
-                // these extensions are handle by the algorithem
-                criticalExtensions.remove(RFC3280CertPathUtilities.KEY_USAGE);
-                criticalExtensions.remove(RFC3280CertPathUtilities.CERTIFICATE_POLICIES);
-                criticalExtensions.remove(RFC3280CertPathUtilities.POLICY_MAPPINGS);
-                criticalExtensions.remove(RFC3280CertPathUtilities.INHIBIT_ANY_POLICY);
-                criticalExtensions.remove(RFC3280CertPathUtilities.ISSUING_DISTRIBUTION_POINT);
-                criticalExtensions.remove(RFC3280CertPathUtilities.DELTA_CRL_INDICATOR);
-                criticalExtensions.remove(RFC3280CertPathUtilities.POLICY_CONSTRAINTS);
-                criticalExtensions.remove(RFC3280CertPathUtilities.BASIC_CONSTRAINTS);
-                criticalExtensions.remove(RFC3280CertPathUtilities.SUBJECT_ALTERNATIVE_NAME);
-                criticalExtensions.remove(RFC3280CertPathUtilities.NAME_CONSTRAINTS);
+                Set criticalExtensions = cert.getCriticalExtensionOIDs();
+                if (criticalExtensions != null)
+                {
+                    criticalExtensions = new HashSet(criticalExtensions);
+
+                    // these extensions are handled by the algorithm
+                    criticalExtensions.remove(RFC3280CertPathUtilities.KEY_USAGE);
+                    criticalExtensions.remove(RFC3280CertPathUtilities.CERTIFICATE_POLICIES);
+                    criticalExtensions.remove(RFC3280CertPathUtilities.POLICY_MAPPINGS);
+                    criticalExtensions.remove(RFC3280CertPathUtilities.INHIBIT_ANY_POLICY);
+                    criticalExtensions.remove(RFC3280CertPathUtilities.ISSUING_DISTRIBUTION_POINT);
+                    criticalExtensions.remove(RFC3280CertPathUtilities.DELTA_CRL_INDICATOR);
+                    criticalExtensions.remove(RFC3280CertPathUtilities.POLICY_CONSTRAINTS);
+                    criticalExtensions.remove(RFC3280CertPathUtilities.BASIC_CONSTRAINTS);
+                    criticalExtensions.remove(RFC3280CertPathUtilities.SUBJECT_ALTERNATIVE_NAME);
+                    criticalExtensions.remove(RFC3280CertPathUtilities.NAME_CONSTRAINTS);
+                }
+                else
+                {
+                    criticalExtensions = new HashSet();
+                }
 
                 // (o)
                 RFC3280CertPathUtilities.prepareNextCertO(certPath, index, criticalExtensions, pathCheckers);
@@ -388,7 +397,7 @@ public class PKIXCertPathValidatorSpi
         if (criticalExtensions != null)
         {
             criticalExtensions = new HashSet(criticalExtensions);
-            // these extensions are handle by the algorithm
+            // these extensions are handled by the algorithm
             criticalExtensions.remove(RFC3280CertPathUtilities.KEY_USAGE);
             criticalExtensions.remove(RFC3280CertPathUtilities.CERTIFICATE_POLICIES);
             criticalExtensions.remove(RFC3280CertPathUtilities.POLICY_MAPPINGS);
