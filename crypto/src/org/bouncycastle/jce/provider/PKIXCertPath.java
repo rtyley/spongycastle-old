@@ -377,7 +377,7 @@ public  class PKIXCertPath
         }
         catch (IOException e)
         {
-            throw new CertificateEncodingException("Exeption thrown: " + e);
+            throw new CertificateEncodingException("Exception thrown: " + e);
         }
     }
 }
