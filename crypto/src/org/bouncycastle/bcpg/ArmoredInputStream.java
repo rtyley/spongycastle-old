@@ -107,6 +107,7 @@ public class ArmoredInputStream
     boolean        restart = false;
     Vector         headerList= new Vector();
     int            lastC = 0;
+    boolean        isEndOfStream;
     
     /**
      * Create a stream for reading a PGP armoured message, parsing up to a header 
@@ -260,7 +261,15 @@ public class ArmoredInputStream
     {
         return clearText;
     }
-    
+
+    /**
+     * @return true if the stream is actually at end of file.
+     */
+    public boolean isEndOfStream()
+    {
+        return isEndOfStream;
+    }
+
     /**
      * Return the armor header line (if there is one)
      * @return the armor header line, null if none present.
@@ -353,6 +362,11 @@ public class ArmoredInputStream
             
             lastC = c;
 
+            if (c < 0)
+            {
+                isEndOfStream = true;
+            }
+            
             return c;
         }
 
@@ -371,6 +385,7 @@ public class ArmoredInputStream
 
                 if (c < 0)                // EOF
                 {
+                    isEndOfStream = true;
                     return -1;
                 }
 
@@ -414,7 +429,12 @@ public class ArmoredInputStream
                     crcFound = false;
                     start = true;
                     bufPtr = 3;
-                    
+
+                    if (c < 0)
+                    {
+                        isEndOfStream = true;
+                    }
+
                     return -1;
                 }
                 else                   // data
@@ -430,6 +450,7 @@ public class ArmoredInputStream
                 }
                 else
                 {
+                    isEndOfStream = true;
                     return -1;
                 }
             }

@@ -4,7 +4,7 @@ import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
 
 /**
- * packet giving signature creation time.
+ * packet giving trust.
  */
 public class TrustSignature 
     extends SignatureSubpacket
