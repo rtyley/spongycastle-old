@@ -127,7 +127,7 @@ public class PKIXAttrCertPathBuilderSpi
                 catch (IOException e)
                 {
                     throw new ExtCertPathBuilderException(
-                        "cannot encode X500Proncipal.",
+                        "cannot encode X500Principal.",
                         e);
                 }
             }
@@ -277,6 +277,7 @@ public class PKIXAttrCertPathBuilderSpi
                 while (it.hasNext() && builderResult == null)
                 {
                     X509Certificate issuer = (X509Certificate) it.next();
+                    // TODO Use CertPathValidatorUtilities.isSelfIssued(issuer)?
                     // if untrusted self signed certificate continue
                     if (issuer.getIssuerX500Principal().equals(
                             issuer.getSubjectX500Principal()))
