@@ -26,4 +26,7 @@ public interface SignatureSubpacketTags
     public static final int KEY_FLAGS = 27;            // key flags
     public static final int SIGNER_USER_ID = 28;       // signer's user id
     public static final int REVOCATION_REASON = 29;    // reason for revocation
+    public static final int FEATURES = 30;             // features
+    public static final int SIGNATURE_TARGET = 31;     // signature target
+    public static final int EMBEDDED_SIGNATURE = 32;   // embedded signature
 }
