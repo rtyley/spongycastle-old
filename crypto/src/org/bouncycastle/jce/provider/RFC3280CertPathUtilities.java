@@ -826,7 +826,16 @@ public class RFC3280CertPathUtilities
                     "Authority key identifier extension could not be extracted from delta CRL.", e);
             }
 
-            // TODO Are these really allowed to be null?
+            if (completeKeyIdentifier == null)
+            {
+                throw new AnnotatedException("CRL authority key identifier is null.");
+            }
+
+            if (deltaKeyIdentifier == null)
+            {
+                throw new AnnotatedException("Delta CRL authority key identifier is null.");
+            }
+
             if (!(completeKeyIdentifier == null && deltaKeyIdentifier == null) && !completeKeyIdentifier.equals(deltaKeyIdentifier))
             {
                 throw new AnnotatedException(
