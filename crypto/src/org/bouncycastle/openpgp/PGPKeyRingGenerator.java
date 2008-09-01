@@ -2,6 +2,7 @@ package org.bouncycastle.openpgp;
 
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +26,7 @@ public class PGPKeyRingGenerator
     private PGPSignatureSubpacketVector hashedPcks;
     private PGPSignatureSubpacketVector unhashedPcks;
     private SecureRandom                rand;
-    private String                      provider;
+    private Provider                    provider;
     
     /**
      * Create a new key ring generator using old style checksumming. It is recommended to use
@@ -89,6 +90,39 @@ public class PGPKeyRingGenerator
         String                         provider)
         throws PGPException, NoSuchProviderException
     {
+        this(certificationLevel, masterKey, id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, PGPUtil.getProvider(provider));
+    }
+
+    /**
+     * Create a new key ring generator.
+     *
+     * @param certificationLevel the certification level for keys on this ring.
+     * @param masterKey the master key pair.
+     * @param id the id to be associated with the ring.
+     * @param encAlgorithm the algorithm to be used to protect secret keys.
+     * @param passPhrase the passPhrase to be used to protect secret keys.
+     * @param useSHA1 checksum the secret keys with SHA1 rather than the older 16 bit checksum.
+     * @param hashedPcks packets to be included in the certification hash.
+     * @param unhashedPcks packets to be attached unhashed to the certification.
+     * @param rand input secured random
+     * @param provider the provider to use for encryption.
+     *
+     * @throws PGPException
+     * @throws NoSuchProviderException
+     */
+    public PGPKeyRingGenerator(
+        int                            certificationLevel,
+        PGPKeyPair                     masterKey,
+        String                         id,
+        int                            encAlgorithm,
+        char[]                         passPhrase,
+        boolean                        useSHA1,
+        PGPSignatureSubpacketVector    hashedPcks,
+        PGPSignatureSubpacketVector    unhashedPcks,
+        SecureRandom                   rand,
+        Provider                       provider)
+        throws PGPException, NoSuchProviderException
+    {
         this.certificationLevel = certificationLevel;
         this.masterKey = masterKey;
         this.id = id;
@@ -99,10 +133,10 @@ public class PGPKeyRingGenerator
         this.unhashedPcks = unhashedPcks;
         this.rand = rand;
         this.provider = provider;
-        
+
         keys.add(new PGPSecretKey(certificationLevel, masterKey, id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider));
     }
-    
+
     /**
      * Add a sub key to the key ring to be generated with default certification and inheriting
      * the hashed/unhashed packets of the master key.

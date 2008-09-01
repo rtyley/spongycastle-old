@@ -53,8 +53,8 @@ public class DSAElGamalKeyRingGenerator
             secretOut = new ArmoredOutputStream(secretOut);
         }
 
-        PGPKeyPair        dsaKeyPair = new PGPKeyPair(PGPPublicKey.DSA, dsaKp, new Date(), "BC");
-        PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date(), "BC");
+        PGPKeyPair        dsaKeyPair = new PGPKeyPair(PGPPublicKey.DSA, dsaKp, new Date());
+        PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date());
         
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
                  identity, PGPEncryptedData.AES_256, passPhrase, true, null, null, new SecureRandom(), "BC");

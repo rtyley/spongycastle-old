@@ -12,6 +12,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -46,7 +47,24 @@ public class PGPPBEEncryptedData
     {
         return encData.getInputStream();
     }
-    
+
+    /**
+     * Return the decrypted input stream, using the passed in passPhrase.
+     *
+     * @param passPhrase
+     * @param provider
+     * @return InputStream
+     * @throws PGPException
+     * @throws NoSuchProviderException
+     */
+    public InputStream getDataStream(
+        char[]                passPhrase,
+        String                provider)
+        throws PGPException, NoSuchProviderException
+    {
+        return getDataStream(passPhrase, PGPUtil.getProvider(provider));
+    }
+
     /**
      * Return the decrypted input stream, using the passed in passPhrase.
      * 
@@ -58,8 +76,8 @@ public class PGPPBEEncryptedData
      */
     public InputStream getDataStream(
         char[]                passPhrase,
-        String                provider)
-        throws PGPException, NoSuchProviderException
+        Provider              provider)
+        throws PGPException
     {
         try
         {
@@ -147,7 +165,7 @@ public class PGPPBEEncryptedData
         }
     }
 
-    private Cipher createStreamCipher(int keyAlgorithm, String provider)
+    private Cipher createStreamCipher(int keyAlgorithm, Provider provider)
         throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException,
             PGPException
     {

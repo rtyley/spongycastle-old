@@ -11,6 +11,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.Provider;
 
 /**
  * A one pass signature object.
@@ -61,6 +62,22 @@ public class PGPOnePassSignature
         String          provider)
         throws NoSuchProviderException, PGPException
     {
+        initVerify(pubKey, PGPUtil.getProvider(provider));
+    }
+
+    /**
+     * Initialise the signature object for verification.
+     *
+     * @param pubKey
+     * @param provider
+     * @throws NoSuchProviderException
+     * @throws PGPException
+     */
+    public void initVerify(
+        PGPPublicKey    pubKey,
+        Provider        provider)
+        throws PGPException
+    {
         lastb = 0;
 
         try
@@ -72,7 +89,7 @@ public class PGPOnePassSignature
             throw new PGPException("invalid key.", e);
         }
     }
-    
+
     public void update(
         byte    b)
         throws SignatureException

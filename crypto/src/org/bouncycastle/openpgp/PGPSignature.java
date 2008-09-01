@@ -14,6 +14,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.Provider;
 import java.util.Date;
 
 /**
@@ -31,6 +32,7 @@ public class PGPSignature
     public static final int    POSITIVE_CERTIFICATION = 0x13;
     
     public static final int    SUBKEY_BINDING = 0x18;
+    public static final int    PRIMARYKEY_BINDING = 0x19;
     public static final int    DIRECT_KEY = 0x1f;
     public static final int    KEY_REVOCATION = 0x20;
     public static final int    SUBKEY_REVOCATION = 0x28;
@@ -71,7 +73,7 @@ public class PGPSignature
     }
     
     private void getSig(
-        String provider)
+        Provider provider)
         throws PGPException
     {
         try
@@ -111,11 +113,19 @@ public class PGPSignature
     {
         return sigPck.getHashAlgorithm();
     }
-    
+
     public void initVerify(
         PGPPublicKey    pubKey,
         String          provider)
         throws NoSuchProviderException, PGPException
+    {
+        initVerify(pubKey, PGPUtil.getProvider(provider));
+    }
+
+    public void initVerify(
+        PGPPublicKey    pubKey,
+        Provider        provider)
+        throws PGPException
     {    
         if (sig == null)
         {
