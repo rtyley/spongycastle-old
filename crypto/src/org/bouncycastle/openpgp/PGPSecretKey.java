@@ -11,6 +11,7 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.Provider;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
@@ -60,8 +61,8 @@ public class PGPSecretKey
     List            idTrusts;
     List            idSigs;
     PGPPublicKey    pub;
-    List       subSigs = null;
-    
+    List            subSigs = null;
+
     /**
      * copy constructor - master key.
      */
@@ -113,6 +114,7 @@ public class PGPSecretKey
         this.ids = ids;
         this.idTrusts = idTrusts;
         this.idSigs = idSigs;
+
         this.pub = new PGPPublicKey(secret.getPublicKeyPacket(), trust, keySigs, ids, idTrusts, idSigs);
     }
     
@@ -136,8 +138,8 @@ public class PGPSecretKey
         char[]          passPhrase,
         boolean         useSHA1,
         SecureRandom    rand,
-        String          provider) 
-        throws PGPException, NoSuchProviderException
+        Provider        provider)
+        throws PGPException
     {
         this(keyPair, encAlgorithm, passPhrase, useSHA1, rand, provider);
 
@@ -153,8 +155,8 @@ public class PGPSecretKey
         char[]          passPhrase,
         boolean         useSHA1,
         SecureRandom    rand,
-        String          provider) 
-        throws PGPException, NoSuchProviderException
+        Provider        provider) 
+        throws PGPException
     {
         PublicKeyPacket pubPk;
         BCPGObject      secKey;
@@ -193,10 +195,6 @@ public class PGPSecretKey
             try
             {
                 c = Cipher.getInstance(cName + "/CFB/NoPadding", provider);
-            }
-            catch (NoSuchProviderException e)
-            {
-                throw e;
             }
             catch (Exception e)
             {
@@ -287,20 +285,36 @@ public class PGPSecretKey
         String                      provider)
         throws PGPException, NoSuchProviderException
     {
+        this(certificationLevel, keyPair, id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, PGPUtil.getProvider(provider));
+    }
+    
+    public PGPSecretKey(
+        int                         certificationLevel,
+        PGPKeyPair                  keyPair,
+        String                      id,
+        int                         encAlgorithm,
+        char[]                      passPhrase,
+        boolean                     useSHA1,
+        PGPSignatureSubpacketVector hashedPcks,
+        PGPSignatureSubpacketVector unhashedPcks,
+        SecureRandom                rand,
+        Provider                    provider)
+        throws PGPException
+    {
         this(keyPair, encAlgorithm, passPhrase, useSHA1, rand, provider);
 
         try
         {
             this.trust = null;
-            
+
             this.ids = new ArrayList();
             ids.add(id);
-            
+
             this.idTrusts = new ArrayList();
             idTrusts.add(null);
-            
+
             this.idSigs = new ArrayList();
-            
+
             PGPSignatureGenerator    sGen = new PGPSignatureGenerator(keyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1, provider);
             
             //
@@ -314,11 +328,11 @@ public class PGPSecretKey
             PGPSignature    certification = sGen.generateCertification(id, keyPair.getPublicKey());
                 
             this.pub = PGPPublicKey.addCertification(keyPair.getPublicKey(), id, certification);
-            
+
             List      sigList = new ArrayList();
-            
+
             sigList.add(certification);
-            
+
             idSigs.add(sigList);
         }
         catch (PGPException e)
@@ -346,7 +360,7 @@ public class PGPSecretKey
         String                      provider)
         throws PGPException, NoSuchProviderException
     {
-        this(certificationLevel, new PGPKeyPair(algorithm,pubKey, privKey, time, provider), id, encAlgorithm, passPhrase, hashedPcks, unhashedPcks, rand, provider);
+        this(certificationLevel, new PGPKeyPair(algorithm,pubKey, privKey, time), id, encAlgorithm, passPhrase, hashedPcks, unhashedPcks, rand, provider);
     }
 
     public PGPSecretKey(
@@ -365,7 +379,7 @@ public class PGPSecretKey
         String                      provider)
         throws PGPException, NoSuchProviderException
     {
-        this(certificationLevel, new PGPKeyPair(algorithm,pubKey, privKey, time, provider), id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider);
+        this(certificationLevel, new PGPKeyPair(algorithm,pubKey, privKey, time), id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider);
     }
 
     /**
@@ -788,7 +802,7 @@ public class PGPSecretKey
      * @param newPassPhrase the new password for the key.
      * @param newEncAlgorithm the algorithm to be used for the encryption.
      * @param rand source of randomness.
-     * @param provider the provider to use
+     * @param provider name of the provider to use
      */
     public static PGPSecretKey copyWithNewPassword(
         PGPSecretKey    key,
@@ -802,6 +816,17 @@ public class PGPSecretKey
         return copyWithNewPassword(key, oldPassPhrase, newPassPhrase, newEncAlgorithm, rand, PGPUtil.getProvider(provider));
     }
 
+    /**
+     * Return a copy of the passed in secret key, encrypted using a new
+     * password and the passed in algorithm.
+     *
+     * @param key the PGPSecretKey to be copied.
+     * @param oldPassPhrase the current password for key.
+     * @param newPassPhrase the new password for the key.
+     * @param newEncAlgorithm the algorithm to be used for the encryption.
+     * @param rand source of randomness.
+     * @param provider the provider to use
+     */
     public static PGPSecretKey copyWithNewPassword(
         PGPSecretKey    key,
         char[]          oldPassPhrase,

@@ -1,5 +1,25 @@
 package org.bouncycastle.openpgp;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.KeyFactory;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.DSAPublicKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
 import org.bouncycastle.bcpg.BCPGKey;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.ContainedPacket;
@@ -16,26 +36,6 @@ import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
 import org.bouncycastle.util.Arrays;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.Provider;
-import java.security.interfaces.DSAParams;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.DSAPublicKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * general class to handle a PGP public key object.
@@ -152,26 +152,35 @@ public class PGPPublicKey
         String         provider) 
         throws PGPException, NoSuchProviderException
     {
+        this(algorithm, pubKey, time);
+    }
+
+    public PGPPublicKey(
+        int            algorithm,
+        PublicKey      pubKey,
+        Date           time)
+        throws PGPException
+    {
         BCPGKey bcpgKey;
 
         if (pubKey instanceof RSAPublicKey)
         {
             RSAPublicKey    rK = (RSAPublicKey)pubKey;
-            
+
             bcpgKey = new RSAPublicBCPGKey(rK.getModulus(), rK.getPublicExponent());
         }
         else if (pubKey instanceof DSAPublicKey)
         {
             DSAPublicKey    dK = (DSAPublicKey)pubKey;
             DSAParams       dP = dK.getParams();
-            
+
             bcpgKey = new DSAPublicBCPGKey(dP.getP(), dP.getQ(), dP.getG(), dK.getY());
         }
         else if (pubKey instanceof ElGamalPublicKey)
         {
             ElGamalPublicKey        eK = (ElGamalPublicKey)pubKey;
             ElGamalParameterSpec    eS = eK.getParameters();
-            
+
             bcpgKey = new ElGamalPublicBCPGKey(eS.getP(), eS.getG(), eK.getY());
         }
         else
@@ -192,7 +201,7 @@ public class PGPPublicKey
             throw new PGPException("exception calculating keyID", e);
         }
     }
-    
+
     /*
      * Constructor for a sub-key.
      */
@@ -483,7 +492,7 @@ public class PGPPublicKey
 
     public PublicKey getKey(
         Provider provider)
-        throws PGPException, NoSuchProviderException
+        throws PGPException
     {
         KeyFactory                        fact;
         
@@ -782,32 +791,7 @@ public class PGPPublicKey
         String          id,
         PGPSignature    certification)
     {
-        PGPPublicKey    returnKey = new PGPPublicKey(key);
-        List            sigList = null;
-        
-        for (int i = 0; i != returnKey.ids.size(); i++)
-        {
-            if (id.equals(returnKey.ids.get(i)))
-            {
-                sigList = (List)returnKey.idSigs.get(i);
-            }
-        }
-        
-        if (sigList != null)
-        {
-            sigList.add(certification);
-        }
-        else
-        {
-            sigList = new ArrayList();
-            
-            sigList.add(certification);
-            returnKey.ids.add(id);
-            returnKey.idTrusts.add(null);
-            returnKey.idSigs.add(sigList);
-        }
-        
-        return returnKey;
+        return addCert(key, id, certification);
     }
 
     /**
@@ -823,12 +807,20 @@ public class PGPPublicKey
         PGPUserAttributeSubpacketVector userAttributes,
         PGPSignature                    certification)
     {
+        return addCert(key, userAttributes, certification);
+    }
+
+    private static PGPPublicKey addCert(
+        PGPPublicKey  key,
+        Object        id,
+        PGPSignature  certification)
+    {
         PGPPublicKey    returnKey = new PGPPublicKey(key);
         List            sigList = null;
 
         for (int i = 0; i != returnKey.ids.size(); i++)
         {
-            if (userAttributes.equals(returnKey.ids.get(i)))
+            if (id.equals(returnKey.ids.get(i)))
             {
                 sigList = (List)returnKey.idSigs.get(i);
             }
@@ -843,7 +835,7 @@ public class PGPPublicKey
             sigList = new ArrayList();
 
             sigList.add(certification);
-            returnKey.ids.add(userAttributes);
+            returnKey.ids.add(id);
             returnKey.idTrusts.add(null);
             returnKey.idSigs.add(sigList);
         }
@@ -863,26 +855,7 @@ public class PGPPublicKey
         PGPPublicKey                    key,
         PGPUserAttributeSubpacketVector userAttributes)
     {
-        PGPPublicKey    returnKey = new PGPPublicKey(key);
-        boolean         found = false;
-        
-        for (int i = 0; i < returnKey.ids.size(); i++)
-        {
-            if (userAttributes.equals(returnKey.ids.get(i)))
-            {
-                found = true;
-                returnKey.ids.remove(i);
-                returnKey.idTrusts.remove(i);
-                returnKey.idSigs.remove(i);
-            }
-        }
-        
-        if (!found)
-        {
-            return null;
-        }
-        
-        return returnKey;
+        return removeCert(key, userAttributes);
     }
 
     /**
@@ -896,6 +869,13 @@ public class PGPPublicKey
         PGPPublicKey    key,
         String          id)
     {
+        return removeCert(key, id);
+    }
+
+    private static PGPPublicKey removeCert(
+        PGPPublicKey    key,
+        Object          id)
+    {
         PGPPublicKey    returnKey = new PGPPublicKey(key);
         boolean         found = false;
 
@@ -919,7 +899,7 @@ public class PGPPublicKey
     }
 
     /**
-     * Remove any certifications associated with a given id on a key.
+     * Remove a certification associated with a given id on a key.
      * 
      * @param key the key the certifications are to be removed from.
      * @param id the id that the certfication is to be removed from.
@@ -931,9 +911,33 @@ public class PGPPublicKey
         String          id,
         PGPSignature    certification)
     {
+        return removeCert(key, id, certification);
+    }
+
+    /**
+     * Remove a certification associated with a given user attributes on a key.
+     *
+     * @param key the key the certifications are to be removed from.
+     * @param userAttributes the user attributes that the certfication is to be removed from.
+     * @param certification the certfication to be removed.
+     * @return the re-certified key, null if the certification was not found.
+     */
+    public static PGPPublicKey removeCertification(
+        PGPPublicKey                     key,
+        PGPUserAttributeSubpacketVector  userAttributes,
+        PGPSignature                     certification)
+    {
+        return removeCert(key, userAttributes, certification);
+    }
+
+    private static PGPPublicKey removeCert(
+        PGPPublicKey    key,
+        Object          id,
+        PGPSignature    certification)
+    {
         PGPPublicKey    returnKey = new PGPPublicKey(key);
         boolean         found = false;
-        
+
         for (int i = 0; i < returnKey.ids.size(); i++)
         {
             if (id.equals(returnKey.ids.get(i)))
@@ -941,15 +945,15 @@ public class PGPPublicKey
                 found = ((List)returnKey.idSigs.get(i)).remove(certification);
             }
         }
-        
+
         if (!found)
         {
             return null;
         }
-        
+
         return returnKey;
     }
-    
+
     /**
      * Add a revocation or some other key certification to a key.
      * 
@@ -987,6 +991,64 @@ public class PGPPublicKey
             returnKey.keySigs.add(certification);
         }
         
+        return returnKey;
+    }
+
+    /**
+     * Remove a certification from the key.
+     *
+     * @param key the key the certifications are to be removed from.
+     * @param certification the certfication to be removed.
+     * @return the modified key, null if the certification was not found.
+     */
+    public static PGPPublicKey removeCertification(
+        PGPPublicKey    key,
+        PGPSignature    certification)
+    {
+        PGPPublicKey    returnKey = new PGPPublicKey(key);
+        boolean         found;
+
+        if (returnKey.subSigs != null)
+        {
+            found = returnKey.subSigs.remove(certification);
+        }
+        else
+        {
+            found = returnKey.keySigs.remove(certification);
+        }
+
+        if (!found)
+        {
+            for (Iterator it = key.getUserIDs(); it.hasNext();)
+            {
+                String id = (String)it.next();
+                for (Iterator sIt = key.getSignaturesForID(id); sIt.hasNext();)
+                {
+                    if (certification == sIt.next())
+                    {
+                        found = true;
+                        returnKey = PGPPublicKey.removeCertification(returnKey, id, certification);
+                    }
+                }
+            }
+
+            if (!found)
+            {
+                for (Iterator it = key.getUserAttributes(); it.hasNext();)
+                {
+                    PGPUserAttributeSubpacketVector id = (PGPUserAttributeSubpacketVector)it.next();
+                    for (Iterator sIt = key.getSignaturesForUserAttribute(id); sIt.hasNext();)
+                    {
+                        if (certification == sIt.next())
+                        {
+                            found = true;
+                            returnKey = PGPPublicKey.removeCertification(returnKey, id, certification);
+                        }
+                    }
+                }
+            }
+        }
+
         return returnKey;
     }
 }

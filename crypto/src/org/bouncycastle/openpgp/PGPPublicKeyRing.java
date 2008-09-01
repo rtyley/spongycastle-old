@@ -185,11 +185,19 @@ public class PGPPublicKeyRing
 
         if (!found)
         {
-            if (pubKey.isMasterKey() && masterFound)
+            if (pubKey.isMasterKey())
             {
-                throw new IllegalArgumentException("cannot add a master key to a ring that already has one");
+                if (masterFound)
+                {
+                    throw new IllegalArgumentException("cannot add a master key to a ring that already has one");
+                }
+
+                keys.add(0, pubKey);
             }
-            keys.add(pubKey);
+            else
+            {
+                keys.add(pubKey);
+            }
         }
         
         return new PGPPublicKeyRing(keys);

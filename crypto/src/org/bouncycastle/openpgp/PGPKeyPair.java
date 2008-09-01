@@ -20,7 +20,10 @@ public class PGPKeyPair
 {
     PGPPublicKey        pub;
     PGPPrivateKey       priv;
-    
+
+    /**
+     * @deprecated use version without provider.
+     */
     public PGPKeyPair(
         int             algorithm,
         KeyPair         keyPair,
@@ -30,7 +33,19 @@ public class PGPKeyPair
     {
         this(algorithm, keyPair.getPublic(), keyPair.getPrivate(), time, provider);
     }
-    
+
+    public PGPKeyPair(
+        int             algorithm,
+        KeyPair         keyPair,
+        Date            time)
+        throws PGPException
+    {
+        this(algorithm, keyPair.getPublic(), keyPair.getPrivate(), time);
+    }
+
+    /**
+     * @deprecated use version without provider.
+     */
     public PGPKeyPair(
         int             algorithm,
         PublicKey       pubKey,
@@ -39,10 +54,20 @@ public class PGPKeyPair
         String          provider)
         throws PGPException, NoSuchProviderException
     {
-        this.pub = new PGPPublicKey(algorithm, pubKey, time, provider);
+        this(algorithm, pubKey, privKey, time);
+    }
+
+    public PGPKeyPair(
+        int             algorithm,
+        PublicKey       pubKey,
+        PrivateKey      privKey,
+        Date            time)
+        throws PGPException
+    {
+        this.pub = new PGPPublicKey(algorithm, pubKey, time);
         this.priv = new PGPPrivateKey(privKey, pub.getKeyID());
     }
-    
+
     /**
      * Create a key pair from a PGPPrivateKey and a PGPPublicKey.
      * 
