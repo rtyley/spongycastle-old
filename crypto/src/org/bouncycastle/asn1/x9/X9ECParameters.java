@@ -51,10 +51,6 @@ public class X9ECParameters
         {
             this.h = ((DERInteger)seq.getObjectAt(5)).getValue();
         }
-        else
-        {
-            this.h = ONE;
-        }
     }
 
     public X9ECParameters(
@@ -149,7 +145,11 @@ public class X9ECParameters
         v.add(new X9Curve(curve, seed));
         v.add(new X9ECPoint(g));
         v.add(new DERInteger(n));
-        v.add(new DERInteger(h));
+
+        if (h != null)
+        {
+            v.add(new DERInteger(h));
+        }
 
         return new DERSequence(v);
     }
