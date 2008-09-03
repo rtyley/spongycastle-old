@@ -902,8 +902,8 @@ public class PGPPublicKey
      * Remove a certification associated with a given id on a key.
      * 
      * @param key the key the certifications are to be removed from.
-     * @param id the id that the certfication is to be removed from.
-     * @param certification the certfication to be removed.
+     * @param id the id that the certification is to be removed from.
+     * @param certification the certification to be removed.
      * @return the re-certified key, null if the certification was not found.
      */
     public static PGPPublicKey removeCertification(
@@ -918,8 +918,8 @@ public class PGPPublicKey
      * Remove a certification associated with a given user attributes on a key.
      *
      * @param key the key the certifications are to be removed from.
-     * @param userAttributes the user attributes that the certfication is to be removed from.
-     * @param certification the certfication to be removed.
+     * @param userAttributes the user attributes that the certification is to be removed from.
+     * @param certification the certification to be removed.
      * @return the re-certified key, null if the certification was not found.
      */
     public static PGPPublicKey removeCertification(
@@ -998,7 +998,7 @@ public class PGPPublicKey
      * Remove a certification from the key.
      *
      * @param key the key the certifications are to be removed from.
-     * @param certification the certfication to be removed.
+     * @param certification the certification to be removed.
      * @return the modified key, null if the certification was not found.
      */
     public static PGPPublicKey removeCertification(
