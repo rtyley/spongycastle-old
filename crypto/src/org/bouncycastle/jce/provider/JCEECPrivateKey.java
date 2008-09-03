@@ -376,4 +376,16 @@ public class JCEECPrivateKey
     {
         return getD().hashCode() ^ engineGetSpec().hashCode();
     }
+
+    public String toString()
+    {
+        StringBuffer    buf = new StringBuffer();
+        String          nl = System.getProperty("line.separator");
+
+        buf.append("EC Private Key").append(nl);
+        buf.append("             S: ").append(this.d.toString(16)).append(nl);
+
+        return buf.toString();
+
+    }
 }
