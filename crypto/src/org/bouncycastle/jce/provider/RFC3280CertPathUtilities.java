@@ -836,7 +836,7 @@ public class RFC3280CertPathUtilities
                 throw new AnnotatedException("Delta CRL authority key identifier is null.");
             }
 
-            if (!(completeKeyIdentifier == null && deltaKeyIdentifier == null) && !completeKeyIdentifier.equals(deltaKeyIdentifier))
+            if (!completeKeyIdentifier.equals(deltaKeyIdentifier))
             {
                 throw new AnnotatedException(
                     "Delta CRL authority key identifier does not match complete CRL authority key identifier.");
