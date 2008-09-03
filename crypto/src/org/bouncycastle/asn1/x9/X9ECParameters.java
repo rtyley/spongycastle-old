@@ -115,6 +115,11 @@ public class X9ECParameters
 
     public BigInteger getH()
     {
+        if (h == null)
+        {
+            return ONE;        // TODO - this should be calculated, it will cause issues with custom curves.
+        }
+
         return h;
     }
 
