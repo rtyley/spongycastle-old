@@ -20,6 +20,9 @@ import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
 
 /**
  * ECDSA tests are taken from X9.62.
@@ -309,14 +312,247 @@ public class ECTest
         }
     }
 
+    // L 4.1  X9.62 2005
+    private void testECDSAP224sha224()
+    {
+        X9ECParameters p = NISTNamedCurves.getByName("P-224");
+        ECDomainParameters params = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("6081831502424510080126737029209236539191290354021104541805484120491"), // d
+            params);
+        SecureRandom    k = new FixedSecureRandom(BigIntegers.asUnsignedByteArray(new BigInteger("15456715103636396133226117016818339719732885723579037388121116732601")));
+        
+        byte[] M = Hex.decode("8797A3C693CC292441039A4E6BAB7387F3B4F2A63D00ED384B378C79");
+
+        ECDSASigner dsa = new ECDSASigner();
+
+        dsa.init(true, new ParametersWithRandom(priKey, k));
+
+        BigInteger[] sig = dsa.generateSignature(M);
+
+        BigInteger r = new BigInteger("26477406756127720855365980332052585411804331993436302005017227573742");
+        BigInteger s = new BigInteger("17694958233103667059888193972742186995283044672015112738919822429978");
+        
+        if (!r.equals(sig[0]))
+        {
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
+
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+
+                // Verify the signature
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            params.getCurve().decodePoint(Hex.decode("03FD44EC11F9D43D9D23B1E1D1C9ED6519B40ECF0C79F48CF476CC43F1")), // Q
+            params);
+
+        dsa.init(false, pubKey);
+        if (!dsa.verifySignature(M, sig[0], sig[1]))
+        {
+            fail("signature fails");
+        }
+    }
+
+    private void testECDSASecP224k1sha256()
+    {
+        X9ECParameters p = SECNamedCurves.getByName("secp224k1");
+        ECDomainParameters params = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("BE6F6E91FE96840A6518B56F3FE21689903A64FA729057AB872A9F51", 16), // d
+            params);
+        SecureRandom    k = new FixedSecureRandom(Hex.decode("00c39beac93db21c3266084429eb9b846b787c094f23a4de66447efbb3"));
+       
+        byte[] M = Hex.decode("E5D5A7ADF73C5476FAEE93A2C76CE94DC0557DB04CDC189504779117920B896D");
+
+        ECDSASigner dsa = new ECDSASigner();
+
+        dsa.init(true, new ParametersWithRandom(priKey, k));
+
+        BigInteger[] sig = dsa.generateSignature(M);
+
+        BigInteger r = new BigInteger("8163E5941BED41DA441B33E653C632A55A110893133351E20CE7CB75", 16);
+        BigInteger s = new BigInteger("D12C3FC289DDD5F6890DCE26B65792C8C50E68BF551D617D47DF15A8", 16);
+
+        if (!r.equals(sig[0]))
+        {
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
+
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+
+                // Verify the signature
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            params.getCurve().decodePoint(Hex.decode("04C5C9B38D3603FCCD6994CBB9594E152B658721E483669BB42728520F484B537647EC816E58A8284D3B89DFEDB173AFDC214ECA95A836FA7C")), // Q
+            params);
+
+        dsa.init(false, pubKey);
+        if (!dsa.verifySignature(M, sig[0], sig[1]))
+        {
+            fail("signature fails");
+        }
+    }
+
+    // L4.2  X9.62 2005
+    private void testECDSAP256sha256()
+    {
+        X9ECParameters p = NISTNamedCurves.getByName("P-256");
+        ECDomainParameters params = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("20186677036482506117540275567393538695075300175221296989956723148347484984008"), // d
+            params);
+        SecureRandom    k = new FixedSecureRandom(BigIntegers.asUnsignedByteArray(new BigInteger("72546832179840998877302529996971396893172522460793442785601695562409154906335")));
+
+        byte[] M = Hex.decode("1BD4ED430B0F384B4E8D458EFF1A8A553286D7AC21CB2F6806172EF5F94A06AD");
+
+        ECDSASigner dsa = new ECDSASigner();
+
+        dsa.init(true, new ParametersWithRandom(priKey, k));
+
+        BigInteger[] sig = dsa.generateSignature(M);
+
+        BigInteger r = new BigInteger("97354732615802252173078420023658453040116611318111190383344590814578738210384");
+        BigInteger s = new BigInteger("98506158880355671805367324764306888225238061309262649376965428126566081727535");
+
+        if (!r.equals(sig[0]))
+        {
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
+
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+
+                // Verify the signature
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            params.getCurve().decodePoint(Hex.decode("03596375E6CE57E0F20294FC46BDFCFD19A39F8161B58695B3EC5B3D16427C274D")), // Q
+            params);
+
+        dsa.init(false, pubKey);
+        if (!dsa.verifySignature(M, sig[0], sig[1]))
+        {
+            fail("signature fails");
+        }
+    }
+
+    private void testECDSAP224OneByteOver()
+    {
+        X9ECParameters p = NISTNamedCurves.getByName("P-224");
+        ECDomainParameters params = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("6081831502424510080126737029209236539191290354021104541805484120491"), // d
+            params);
+        SecureRandom    k = new FixedSecureRandom(BigIntegers.asUnsignedByteArray(new BigInteger("15456715103636396133226117016818339719732885723579037388121116732601")));
+
+        byte[] M = Hex.decode("8797A3C693CC292441039A4E6BAB7387F3B4F2A63D00ED384B378C79FF");
+
+        ECDSASigner dsa = new ECDSASigner();
+
+        dsa.init(true, new ParametersWithRandom(priKey, k));
+
+        BigInteger[] sig = dsa.generateSignature(M);
+
+        BigInteger r = new BigInteger("26477406756127720855365980332052585411804331993436302005017227573742");
+        BigInteger s = new BigInteger("17694958233103667059888193972742186995283044672015112738919822429978");
+
+        if (!r.equals(sig[0]))
+        {
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
+
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+
+                // Verify the signature
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            params.getCurve().decodePoint(Hex.decode("03FD44EC11F9D43D9D23B1E1D1C9ED6519B40ECF0C79F48CF476CC43F1")), // Q
+            params);
+
+        dsa.init(false, pubKey);
+        if (!dsa.verifySignature(M, sig[0], sig[1]))
+        {
+            fail("signature fails");
+        }
+    }
+
+    // L4.3  X9.62 2005
+    private void testECDSAP521sha512()
+    {
+        X9ECParameters p = NISTNamedCurves.getByName("P-521");
+        ECDomainParameters params = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("617573726813476282316253885608633222275541026607493641741273231656161177732180358888434629562647985511298272498852936680947729040673640492310550142822667389"), // d
+            params);
+        SecureRandom    k = new FixedSecureRandom(BigIntegers.asUnsignedByteArray(new BigInteger("6806532878215503520845109818432174847616958675335397773700324097584974639728725689481598054743894544060040710846048585856076812050552869216017728862957612913")));
+
+        byte[] M = Hex.decode("6893B64BD3A9615C39C3E62DDD269C2BAAF1D85915526083183CE14C2E883B48B193607C1ED871852C9DF9C3147B574DC1526C55DE1FE263A676346A20028A66");
+
+        ECDSASigner dsa = new ECDSASigner();
+
+        dsa.init(true, new ParametersWithRandom(priKey, k));
+
+        BigInteger[] sig = dsa.generateSignature(M);
+
+        BigInteger r = new BigInteger("1368926195812127407956140744722257403535864168182534321188553460365652865686040549247096155740756318290773648848859639978618869784291633651685766829574104630");
+        BigInteger s = new BigInteger("1624754720348883715608122151214003032398685415003935734485445999065609979304811509538477657407457976246218976767156629169821116579317401249024208611945405790");
+
+        if (!r.equals(sig[0]))
+        {
+            fail("r component wrong." + System.getProperty("line.separator")
+                + " expecting: " + r + System.getProperty("line.separator")
+                + " got      : " + sig[0]);
+        }
+
+        if (!s.equals(sig[1]))
+        {
+            fail("s component wrong." + System.getProperty("line.separator")
+                + " expecting: " + s + System.getProperty("line.separator")
+                + " got      : " + sig[1]);
+        }
+
+                // Verify the signature
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            params.getCurve().decodePoint(Hex.decode("020145E221AB9F71C5FE740D8D2B94939A09E2816E2167A7D058125A06A80C014F553E8D6764B048FB6F2B687CEC72F39738F223D4CE6AFCBFF2E34774AA5D3C342CB3")), // Q
+            params);
+
+        dsa.init(false, pubKey);
+        if (!dsa.verifySignature(M, sig[0], sig[1]))
+        {
+            fail("signature fails");
+        }
+    }
+
     /**
      * General test for long digest.
      */
     private void testECDSA239bitBinaryAndLargeDigest()
     {
         BigInteger r = new BigInteger("21596333210419611985018340039034612628818151486841789642455876922391552");
-        BigInteger s = new BigInteger("87626799441093658509023277770579403014298417038607966989658087651831660");
-    
+        BigInteger s = new BigInteger("144940322424411242416373536877786566515839911620497068645600824084578597");
+
         byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("171278725565216523967285789236956265265265235675811949404040041670216363"));
         
         SecureRandom    k = new FixedSecureRandom(kData);
@@ -476,8 +712,6 @@ public class ECTest
         }
     }
 
-
-
     public String getName()
     {
         return "EC";
@@ -492,6 +726,12 @@ public class ECTest
         testECDSA239bitBinary();
         testECDSAKeyGenTest();
         testECBasicAgreementTest();
+
+        testECDSAP224sha224();
+        testECDSAP224OneByteOver();
+        testECDSAP256sha256();
+        testECDSAP521sha512();
+        testECDSASecP224k1sha256();
         testECDSA239bitBinaryAndLargeDigest();
     }
 

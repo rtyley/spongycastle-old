@@ -163,7 +163,7 @@ public class ECIESTest
         byte[] message = Hex.decode("1234567890abcdef");
 
         byte[]   out1 = i1.processBlock(message, 0, message.length);
-
+ 
         byte[]   out2 = i2.processBlock(out1, 0, out1.length);
 
         if (!areEqual(out2, message))
