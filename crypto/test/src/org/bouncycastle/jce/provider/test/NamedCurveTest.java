@@ -26,6 +26,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Set;
+import java.util.HashSet;
 
 public class NamedCurveTest
     extends SimpleTest
@@ -315,9 +317,22 @@ public class NamedCurveTest
             testECDSA((String)en.nextElement());
         }
 
+        // these curves can't be used under JDK 1.5
+        Set  problemCurves = new HashSet();
+
+        problemCurves.add("secp256k1");
+        problemCurves.add("secp160k1");
+        problemCurves.add("secp224k1");
+        problemCurves.add("secp192k1");
+        
         for (Enumeration en = SECNamedCurves.getNames(); en.hasMoreElements();)
         {
-            testECDSA((String)en.nextElement());
+            String curveName = (String)en.nextElement();
+
+            if (!problemCurves.contains(curveName))
+            {
+                testECDSA(curveName);
+            }
         }
 
         for (Enumeration en = TeleTrusTNamedCurves.getNames(); en.hasMoreElements();)

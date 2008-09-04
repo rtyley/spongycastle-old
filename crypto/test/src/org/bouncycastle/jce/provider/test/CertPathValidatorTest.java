@@ -156,10 +156,9 @@ public class CertPathValidatorTest
         list.add(rootCrl);
         list.add(interCrl);
         CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
-        CertStore store = CertStore.getInstance("Collection", ccsp);
+        CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
         Calendar validDate = Calendar.getInstance();
-        validDate.set(2002,2,21,2,21,10);
-
+        validDate.set(2008,8,4,14,49,10);
             //validating path
         List certchain = new ArrayList();
         certchain.add(finalCert);
@@ -209,7 +208,7 @@ public class CertPathValidatorTest
             store = CertStore.getInstance("Collection", ccsp);
             validDate = Calendar.getInstance();
             validDate.set(2004,2,21,2,21,10);
-    
+
                 //validating path
             certchain = new ArrayList();
             certchain.add(finalCert);
