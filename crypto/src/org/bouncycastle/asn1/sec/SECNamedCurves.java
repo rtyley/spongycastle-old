@@ -933,14 +933,14 @@ public class SECNamedCurves
         defineCurve("secp112r2", SECObjectIdentifiers.secp112r2, secp112r2);
         defineCurve("secp128r1", SECObjectIdentifiers.secp128r1, secp128r1);
         defineCurve("secp128r2", SECObjectIdentifiers.secp128r2, secp128r2);
-//        defineCurve("secp160k1", SECObjectIdentifiers.secp160k1, secp160k1);
+        defineCurve("secp160k1", SECObjectIdentifiers.secp160k1, secp160k1);
         defineCurve("secp160r1", SECObjectIdentifiers.secp160r1, secp160r1);
         defineCurve("secp160r2", SECObjectIdentifiers.secp160r2, secp160r2);
-//        defineCurve("secp192k1", SECObjectIdentifiers.secp192k1, secp192k1);
+        defineCurve("secp192k1", SECObjectIdentifiers.secp192k1, secp192k1);
         defineCurve("secp192r1", SECObjectIdentifiers.secp192r1, secp192r1);
-//        defineCurve("secp224k1", SECObjectIdentifiers.secp224k1, secp224k1);
+        defineCurve("secp224k1", SECObjectIdentifiers.secp224k1, secp224k1);
         defineCurve("secp224r1", SECObjectIdentifiers.secp224r1, secp224r1); 
-//        defineCurve("secp256k1", SECObjectIdentifiers.secp256k1, secp256k1);
+        defineCurve("secp256k1", SECObjectIdentifiers.secp256k1, secp256k1);
         defineCurve("secp256r1", SECObjectIdentifiers.secp256r1, secp256r1); 
         defineCurve("secp384r1", SECObjectIdentifiers.secp384r1, secp384r1); 
         defineCurve("secp521r1", SECObjectIdentifiers.secp521r1, secp521r1); 

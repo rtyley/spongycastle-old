@@ -28,19 +28,19 @@ public class X9Test
 {
     private byte[] namedPub = Base64.decode("MBowEwYHKoZIzj0CAQYIKoZIzj0DAQEDAwADAQ==");
     private byte[] expPub = Base64.decode(
-                "MIHcMIHUBgcqhkjOPQIBMIHIAgEBMCkGByqGSM49AQECHn///////////////3///////4AAAA"
+                "MIHfMIHXBgcqhkjOPQIBMIHLAgEBMCkGByqGSM49AQECHn///////////////3///////4AAAA"
               + "AAAH///////zBXBB5///////////////9///////+AAAAAAAB///////wEHiVXBfoqMGZUsfTL"
               + "A9anUKMMJQEC1JiHF9m6FattPgMVAH1zdBaP/jRxtgqFdoahlHXTv6L/BB8DZ2iujhi7ks/PAF"
-              + "yUmqLG2UhT0OZgu/hUsclQX+laAh5///////////////9///+XXetBs6YFfDxDIUZSZVEDAwAD"
-              + "AQ==");
+              + "yUmqLG2UhT0OZgu/hUsclQX+laAh5///////////////9///+XXetBs6YFfDxDIUZSZVECAQED"
+              + "AwADAQ==");
 
     private byte[] namedPriv = Base64.decode("MCICAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQEECDAGAgEBBAEK");
     private byte[] expPriv = Base64.decode(
-                "MIHkAgEAMIHUBgcqhkjOPQIBMIHIAgEBMCkGByqGSM49AQECHn///////////////3///////4"
+                "MIHnAgEAMIHXBgcqhkjOPQIBMIHLAgEBMCkGByqGSM49AQECHn///////////////3///////4"
               + "AAAAAAAH///////zBXBB5///////////////9///////+AAAAAAAB///////wEHiVXBfoqMGZU"
               + "sfTLA9anUKMMJQEC1JiHF9m6FattPgMVAH1zdBaP/jRxtgqFdoahlHXTv6L/BB8DZ2iujhi7ks"
-              + "/PAFyUmqLG2UhT0OZgu/hUsclQX+laAh5///////////////9///+XXetBs6YFfDxDIUZSZVEE"
-              + "CDAGAgEBBAEU");
+              + "/PAFyUmqLG2UhT0OZgu/hUsclQX+laAh5///////////////9///+XXetBs6YFfDxDIUZSZVEC"
+              + "AQEECDAGAgEBBAEU");
  
     private void encodePublicKey()
         throws Exception
