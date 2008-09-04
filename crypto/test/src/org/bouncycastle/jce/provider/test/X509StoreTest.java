@@ -59,7 +59,8 @@ public class X509StoreTest
         X509CertStoreSelector fwSelector = new X509CertStoreSelector();
 
         fwSelector.setSerialNumber(rootCert.getSerialNumber());
-
+        fwSelector.setSubject(rootCert.getIssuerDN().getName());
+        
         selector.setForwardSelector(fwSelector);
 
         Collection col = certStore.getMatches(selector);
