@@ -11,7 +11,6 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.Provider;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
@@ -42,7 +41,6 @@ import org.bouncycastle.bcpg.S2K;
 import org.bouncycastle.bcpg.SecretKeyPacket;
 import org.bouncycastle.bcpg.SecretSubkeyPacket;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.bcpg.TrustPacket;
 import org.bouncycastle.bcpg.UserAttributePacket;
 import org.bouncycastle.bcpg.UserIDPacket;
 import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
@@ -54,86 +52,20 @@ import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
  */
 public class PGPSecretKey
 {    
-    SecretKeyPacket secret;
-    TrustPacket     trust;
-    List            keySigs;
-    List            ids;
-    List            idTrusts;
-    List            idSigs;
-    PGPPublicKey    pub;
-    List            subSigs = null;
+    final SecretKeyPacket secret;
+    final PGPPublicKey    pub;
 
-    /**
-     * copy constructor - master key.
-     */
-    private PGPSecretKey(
+    PGPSecretKey(
         SecretKeyPacket secret,
-        TrustPacket     trust,
-        List            keySigs,
-        List            ids,
-        List            idTrusts,
-        List            idSigs,
         PGPPublicKey    pub)
     {
         this.secret = secret;
-        this.trust = trust;
-        this.keySigs = keySigs;
-        this.ids = ids;
-        this.idTrusts = idTrusts;
-        this.idSigs = idSigs;
         this.pub = pub;
-    }
-
-    /**
-     * copy constructor - subkey.
-     */
-    private PGPSecretKey(
-        SecretKeyPacket secret,
-        TrustPacket     trust,
-        List            subSigs,
-        PGPPublicKey    pub)
-    {
-        this.secret = secret;
-        this.trust = trust;
-        this.subSigs = subSigs;
-        this.pub = pub;
-    }
-
-    PGPSecretKey(
-        SecretKeyPacket secret,
-        TrustPacket     trust,
-        List            keySigs,
-        List            ids,
-        List            idTrusts,
-        List            idSigs)
-        throws IOException
-    {
-        this.secret = secret;
-        this.trust = trust;
-        this.keySigs = keySigs;
-        this.ids = ids;
-        this.idTrusts = idTrusts;
-        this.idSigs = idSigs;
-
-        this.pub = new PGPPublicKey(secret.getPublicKeyPacket(), trust, keySigs, ids, idTrusts, idSigs);
     }
     
     PGPSecretKey(
-        SecretKeyPacket secret,
-        TrustPacket     trust,
-        List            subSigs)
-        throws IOException
-    {
-        this.secret = secret;
-        this.trust = trust;
-        this.subSigs = subSigs;
-        this.pub = new PGPPublicKey(secret.getPublicKeyPacket(), trust, subSigs);
-    }
-    
-    PGPSecretKey(
-        PGPKeyPair      keyPair,
-        TrustPacket     trust,
-        List            subSigs,
+        PGPPrivateKey   privKey,
+        PGPPublicKey    pubKey,
         int             encAlgorithm,
         char[]          passPhrase,
         boolean         useSHA1,
@@ -141,45 +73,41 @@ public class PGPSecretKey
         Provider        provider)
         throws PGPException
     {
-        this(keyPair, encAlgorithm, passPhrase, useSHA1, rand, provider);
-
-        this.secret = new SecretSubkeyPacket(secret.getPublicKeyPacket(), secret.getEncAlgorithm(), secret.getS2KUsage(), secret.getS2K(), secret.getIV(), secret.getSecretKeyData());
-        this.trust = trust;
-        this.subSigs = subSigs;
-        this.pub = new PGPPublicKey(keyPair.getPublicKey(), trust, subSigs);
+        this(privKey, pubKey, encAlgorithm, passPhrase, useSHA1, rand, false, provider);
     }
     
     PGPSecretKey(
-        PGPKeyPair      keyPair,
+        PGPPrivateKey   privKey,
+        PGPPublicKey    pubKey,
         int             encAlgorithm,
         char[]          passPhrase,
         boolean         useSHA1,
         SecureRandom    rand,
+        boolean         isMasterKey,
         Provider        provider) 
         throws PGPException
     {
-        PublicKeyPacket pubPk;
         BCPGObject      secKey;
+
+        this.pub = pubKey;
         
-        pubPk = keyPair.getPublicKey().publicPk;
-        
-        switch (keyPair.getPublicKey().getAlgorithm())
+        switch (pubKey.getAlgorithm())
         {
         case PGPPublicKey.RSA_ENCRYPT:
         case PGPPublicKey.RSA_SIGN:
         case PGPPublicKey.RSA_GENERAL:
-            RSAPrivateCrtKey    rsK = (RSAPrivateCrtKey)keyPair.getPrivateKey().getKey();
+            RSAPrivateCrtKey    rsK = (RSAPrivateCrtKey)privKey.getKey();
             
             secKey = new RSASecretBCPGKey(rsK.getPrivateExponent(), rsK.getPrimeP(), rsK.getPrimeQ());
             break;
         case PGPPublicKey.DSA:
-            DSAPrivateKey       dsK = (DSAPrivateKey)keyPair.getPrivateKey().getKey();
+            DSAPrivateKey       dsK = (DSAPrivateKey)privKey.getKey();
             
             secKey = new DSASecretBCPGKey(dsK.getX());
             break;
         case PGPPublicKey.ELGAMAL_ENCRYPT:
         case PGPPublicKey.ELGAMAL_GENERAL:
-            ElGamalPrivateKey   esK = (ElGamalPrivateKey)keyPair.getPrivateKey().getKey();
+            ElGamalPrivateKey   esK = (ElGamalPrivateKey)privKey.getKey();
             
             secKey = new ElGamalSecretBCPGKey(esK.getX());
             break;
@@ -227,22 +155,37 @@ public class PGPSecretKey
                 iv = c.getIV();
     
                 byte[]    encData = c.doFinal(bOut.toByteArray());
-    
+
+                int s2kUsage;
+
                 if (useSHA1)
                 {
-                    this.secret = new SecretKeyPacket(pubPk, encAlgorithm, SecretKeyPacket.USAGE_SHA1, s2k, iv, encData);
+                    s2kUsage = SecretKeyPacket.USAGE_SHA1;
                 }
                 else
                 {
-                    this.secret = new SecretKeyPacket(pubPk, encAlgorithm, SecretKeyPacket.USAGE_CHECKSUM, s2k, iv, encData);
+                    s2kUsage = SecretKeyPacket.USAGE_CHECKSUM;
                 }
 
-                this.trust = null;
+                if (isMasterKey)
+                {
+                    this.secret = new SecretKeyPacket(pub.publicPk, encAlgorithm, s2kUsage, s2k, iv, encData);
+                }
+                else
+                {
+                    this.secret = new SecretSubkeyPacket(pub.publicPk, encAlgorithm, s2kUsage, s2k, iv, encData);
+                }
             }
             else
             {
-                this.secret = new SecretKeyPacket(pubPk, encAlgorithm, null, null, bOut.toByteArray());
-                this.trust = null;
+                if (isMasterKey)
+                {
+                    this.secret = new SecretKeyPacket(pub.publicPk, encAlgorithm, null, null, bOut.toByteArray());
+                }
+                else
+                {
+                    this.secret = new SecretSubkeyPacket(pub.publicPk, encAlgorithm, null, null, bOut.toByteArray());
+                }
             }
         }
         catch (PGPException e)
@@ -253,8 +196,6 @@ public class PGPSecretKey
         {
             throw new PGPException("Exception encrypting key", e);
         }
-        
-        this.keySigs = new ArrayList();
     }
     
     public PGPSecretKey(
@@ -301,50 +242,49 @@ public class PGPSecretKey
         Provider                    provider)
         throws PGPException
     {
-        this(keyPair, encAlgorithm, passPhrase, useSHA1, rand, provider);
+        this(keyPair.getPrivateKey(), certifiedPublicKey(certificationLevel, keyPair, id, hashedPcks, unhashedPcks, provider), encAlgorithm, passPhrase, useSHA1, rand, true, provider);
+    }
+
+    private static PGPPublicKey certifiedPublicKey(
+        int certificationLevel,
+        PGPKeyPair keyPair,
+        String id,
+        PGPSignatureSubpacketVector hashedPcks,
+        PGPSignatureSubpacketVector unhashedPcks,
+        Provider provider)
+        throws PGPException
+    {
+        PGPSignatureGenerator    sGen;
 
         try
         {
-            this.trust = null;
-
-            this.ids = new ArrayList();
-            ids.add(id);
-
-            this.idTrusts = new ArrayList();
-            idTrusts.add(null);
-
-            this.idSigs = new ArrayList();
-
-            PGPSignatureGenerator    sGen = new PGPSignatureGenerator(keyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1, provider);
-            
-            //
-            // generate the certification
-            //
-            sGen.initSign(certificationLevel, keyPair.getPrivateKey());
-            
-            sGen.setHashedSubpackets(hashedPcks);
-            sGen.setUnhashedSubpackets(unhashedPcks);
-            
-            PGPSignature    certification = sGen.generateCertification(id, keyPair.getPublicKey());
-                
-            this.pub = PGPPublicKey.addCertification(keyPair.getPublicKey(), id, certification);
-
-            List      sigList = new ArrayList();
-
-            sigList.add(certification);
-
-            idSigs.add(sigList);
-        }
-        catch (PGPException e)
-        {
-            throw e;
+            sGen = new PGPSignatureGenerator(keyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1, provider);
         }
         catch (Exception e)
         {
-            throw new PGPException("Exception encrypting key", e);
+            throw new PGPException("creating signature generator: " + e, e);
+        }
+
+        //
+        // generate the certification
+        //
+        sGen.initSign(certificationLevel, keyPair.getPrivateKey());
+
+        sGen.setHashedSubpackets(hashedPcks);
+        sGen.setUnhashedSubpackets(unhashedPcks);
+
+        try
+        {
+            PGPSignature    certification = sGen.generateCertification(id, keyPair.getPublicKey());
+
+            return PGPPublicKey.addCertification(keyPair.getPublicKey(), id, certification);
+        }
+        catch (Exception e)
+        {
+            throw new PGPException("exception doing certification: " + e, e);
         }
     }
-    
+
     public PGPSecretKey(
         int                         certificationLevel,
         int                         algorithm,
@@ -404,7 +344,7 @@ public class PGPSecretKey
      */
     public boolean isMasterKey()
     {
-        return (subSigs == null);
+        return pub.isMasterKey();
     }
     
     /**
@@ -689,11 +629,11 @@ public class PGPSecretKey
         {
             try
             {
-            MessageDigest dig = MessageDigest.getInstance("SHA1");
+                MessageDigest dig = MessageDigest.getInstance("SHA1");
 
-            dig.update(bytes, 0, length);
+                dig.update(bytes, 0, length);
 
-            return dig.digest();
+                return dig.digest();
             }
             catch (NoSuchAlgorithmException e)
             {
@@ -744,39 +684,39 @@ public class PGPSecretKey
         }
 
         out.writePacket(secret);
-        if (trust != null)
+        if (pub.trustPk != null)
         {
-            out.writePacket(trust);
+            out.writePacket(pub.trustPk);
         }
         
-        if (subSigs == null)        // is not a sub key
+        if (pub.subSigs == null)        // is not a sub key
         {
-            for (int i = 0; i != keySigs.size(); i++)
+            for (int i = 0; i != pub.keySigs.size(); i++)
             {
-                ((PGPSignature)keySigs.get(i)).encode(out);
+                ((PGPSignature)pub.keySigs.get(i)).encode(out);
             }
             
-            for (int i = 0; i != ids.size(); i++)
+            for (int i = 0; i != pub.ids.size(); i++)
             {
-                if (ids.get(i) instanceof String)
+                if (pub.ids.get(i) instanceof String)
                 {
-                    String    id = (String)ids.get(i);
+                    String    id = (String)pub.ids.get(i);
                     
                     out.writePacket(new UserIDPacket(id));
                 }
                 else
                 {
-                    PGPUserAttributeSubpacketVector    v = (PGPUserAttributeSubpacketVector)ids.get(i);
+                    PGPUserAttributeSubpacketVector    v = (PGPUserAttributeSubpacketVector)pub.ids.get(i);
 
                     out.writePacket(new UserAttributePacket(v.toSubpacketArray()));
                 }
                 
-                if (idTrusts.get(i) != null)
+                if (pub.idTrusts.get(i) != null)
                 {
-                    out.writePacket((ContainedPacket)idTrusts.get(i));
+                    out.writePacket((ContainedPacket)pub.idTrusts.get(i));
                 }
                 
-                List         sigs = (ArrayList)idSigs.get(i);
+                List         sigs = (ArrayList)pub.idSigs.get(i);
                 
                 for (int j = 0; j != sigs.size(); j++)
                 {
@@ -786,9 +726,9 @@ public class PGPSecretKey
         }
         else
         {        
-            for (int j = 0; j != subSigs.size(); j++)
+            for (int j = 0; j != pub.subSigs.size(); j++)
             {
-                ((PGPSignature)subSigs.get(j)).encode(out);
+                ((PGPSignature)pub.subSigs.get(j)).encode(out);
             }
         }
     }
@@ -913,15 +853,24 @@ public class PGPSecretKey
                 newEncAlgorithm, s2kUsage, s2k, iv, keyData);
         }
 
-        if (key.subSigs == null)
+        return new PGPSecretKey(secret, key.pub);
+    }
+
+    /**
+     * Replace the passed the public key on the passed in secret key.
+     *
+     * @param secretKey secret key to change
+     * @param publicKey new public key.
+     * @return a new secret key.
+     * @throws IllegalArgumentException is keyIDs do not match.
+     */
+    public static PGPSecretKey replacePublicKey(PGPSecretKey secretKey, PGPPublicKey publicKey)
+    {
+        if (publicKey.getKeyID() != secretKey.getKeyID())
         {
-            return new PGPSecretKey(
-                          secret, key.trust, key.keySigs, key.ids,
-                                          key.idTrusts, key.idSigs, key.pub);
+            throw new IllegalArgumentException("keyIDs do not match");
         }
-        else
-        {
-            return new PGPSecretKey(secret, key.trust, key.subSigs, key.pub);
-        }
+
+        return new PGPSecretKey(secretKey.secret, publicKey);
     }
 }
