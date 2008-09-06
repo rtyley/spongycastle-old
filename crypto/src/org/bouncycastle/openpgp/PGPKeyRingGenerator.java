@@ -182,7 +182,7 @@ public class PGPKeyRingGenerator
             
             subSigs.add(sGen.generateCertification(masterKey.getPublicKey(), keyPair.getPublicKey()));
             
-            keys.add(new PGPSecretKey(keyPair, null, subSigs, encAlgorithm, passPhrase, useSHA1, rand, provider));
+            keys.add(new PGPSecretKey(keyPair.getPrivateKey(), new PGPPublicKey(keyPair.getPublicKey(), null, subSigs), encAlgorithm, passPhrase, useSHA1, rand, provider));
         }
         catch (PGPException e)
         {
