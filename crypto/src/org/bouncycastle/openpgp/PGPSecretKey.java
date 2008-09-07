@@ -862,7 +862,7 @@ public class PGPSecretKey
      * @param secretKey secret key to change
      * @param publicKey new public key.
      * @return a new secret key.
-     * @throws IllegalArgumentException is keyIDs do not match.
+     * @throws IllegalArgumentException if keyIDs do not match.
      */
     public static PGPSecretKey replacePublicKey(PGPSecretKey secretKey, PGPPublicKey publicKey)
     {
