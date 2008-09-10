@@ -89,12 +89,16 @@ public class NotationData
 
     public String getNotationValue()
     {
+        return Strings.fromUTF8ByteArray(getNotationValueBytes());
+    }
+
+    public byte[] getNotationValueBytes()
+    {
         int nameLength = ((data[HEADER_FLAG_LENGTH] << 8) + (data[HEADER_FLAG_LENGTH + 1] << 0));
         int valueLength = ((data[HEADER_FLAG_LENGTH + HEADER_NAME_LENGTH] << 8) + (data[HEADER_FLAG_LENGTH + HEADER_NAME_LENGTH + 1] << 0));
 
         byte bValue[] = new byte[valueLength];
         System.arraycopy(data, HEADER_FLAG_LENGTH + HEADER_NAME_LENGTH + HEADER_VALUE_LENGTH + nameLength, bValue, 0, valueLength);
-
-        return Strings.fromUTF8ByteArray(bValue);
+        return bValue;
     }
 }
