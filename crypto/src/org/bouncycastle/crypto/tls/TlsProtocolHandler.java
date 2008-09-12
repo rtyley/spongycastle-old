@@ -154,7 +154,7 @@ public class TlsProtocolHandler
     private byte[] serverRandom;
     private byte[] ms;
 
-    private TlsCipherSuite choosenCipherSuite = null;
+    private TlsCipherSuite chosenCipherSuite = null;
 
     private BigInteger Yc;
     private byte[] pms;
@@ -402,7 +402,7 @@ public class TlsProtocolHandler
                                     * the TlsCipherSuiteManager will throw an
                                     * exception.
                                     */
-                                    this.choosenCipherSuite = TlsCipherSuiteManager.getCipherSuite(TlsUtils.readUint16(is), this);
+                                    this.chosenCipherSuite = TlsCipherSuiteManager.getCipherSuite(TlsUtils.readUint16(is), this);
 
                                     /*
                                     * We support only the null compression which
@@ -431,7 +431,7 @@ public class TlsProtocolHandler
                                     * There was no server key exchange message, check
                                     * that we are doing RSA key exchange.
                                     */
-                                    if (this.choosenCipherSuite.getKeyExchangeAlgorithm() != TlsCipherSuite.KE_RSA)
+                                    if (this.chosenCipherSuite.getKeyExchangeAlgorithm() != TlsCipherSuite.KE_RSA)
                                     {
                                         this.failWithError(AL_fatal, AP_unexpected_message);
                                     }
@@ -457,7 +457,7 @@ public class TlsProtocolHandler
                                     * on the key exchange we are using in our
                                     * ciphersuite.
                                     */
-                                    short ke = this.choosenCipherSuite.getKeyExchangeAlgorithm();
+                                    short ke = this.chosenCipherSuite.getKeyExchangeAlgorithm();
 
                                     switch (ke)
                                     {
@@ -559,7 +559,7 @@ public class TlsProtocolHandler
                                     /*
                                     * Initialize our cipher suite
                                     */
-                                    rs.writeSuite = this.choosenCipherSuite;
+                                    rs.writeSuite = this.chosenCipherSuite;
                                     rs.writeSuite.init(this.ms, clientRandom, serverRandom);
 
                                     /*
@@ -592,7 +592,7 @@ public class TlsProtocolHandler
                                     /*
                                     * Check that we are doing DHE key exchange
                                     */
-                                    if (this.choosenCipherSuite.getKeyExchangeAlgorithm() != TlsCipherSuite.KE_DHE_RSA)
+                                    if (this.chosenCipherSuite.getKeyExchangeAlgorithm() != TlsCipherSuite.KE_DHE_RSA)
                                     {
                                         this.failWithError(AL_fatal, AP_unexpected_message);
                                     }
@@ -705,7 +705,7 @@ public class TlsProtocolHandler
                                     * There was no server key exchange message, check
                                     * that we are doing RSA key exchange.
                                     */
-                                    if (this.choosenCipherSuite.getKeyExchangeAlgorithm() != TlsCipherSuite.KE_RSA)
+                                    if (this.chosenCipherSuite.getKeyExchangeAlgorithm() != TlsCipherSuite.KE_RSA)
                                     {
                                         this.failWithError(AL_fatal, AP_unexpected_message);
                                     }
