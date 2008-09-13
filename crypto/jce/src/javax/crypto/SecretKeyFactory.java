@@ -79,7 +79,7 @@ public class SecretKeyFactory
     {
         try
         {
-            JCEUtil.Implementation imp = JCEUtil.getImplementation("SecretKeyFactory", algorithm, null);
+            JCEUtil.Implementation imp = JCEUtil.getImplementation("SecretKeyFactory", algorithm, (String) null);
 
             if (imp == null)
             {
@@ -114,6 +114,41 @@ public class SecretKeyFactory
         String  algorithm,
         String  provider)
     throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+        if (provider == null)
+        {
+            throw new IllegalArgumentException("No provider specified to SecretKeyFactory.getInstance()");
+        }
+
+        JCEUtil.Implementation imp = JCEUtil.getImplementation("SecretKeyFactory", algorithm, provider);
+
+        if (imp == null)
+        {
+            throw new NoSuchAlgorithmException(algorithm + " not found");
+        }
+
+        SecretKeyFactory keyFact = new SecretKeyFactory(
+                                    (SecretKeyFactorySpi)imp.getEngine(), imp.getProvider(), algorithm);
+
+        return keyFact;
+    }
+
+    /**
+     * Generates a <code>SecretKeyFactory</code> object for the specified
+     * secret-key algorithm from the specified provider.
+     *
+     * @param algorithm the standard name of the requested secret-key algorithm. 
+     * See Appendix A in the Java Cryptography Extension API Specification &amp; Reference 
+     * for information about standard algorithm names.
+     * @param provider the provider.
+     * @return a <code>SecretKeyFactory</code> object for the specified secret-key algorithm.
+     * @exception NoSuchAlgorithmException if a secret-key factory for the specified algorithm is not
+     * available from the specified provider.
+     */
+    public static final SecretKeyFactory getInstance(
+        String    algorithm,
+        Provider  provider)
+    throws NoSuchAlgorithmException
     {
         if (provider == null)
         {

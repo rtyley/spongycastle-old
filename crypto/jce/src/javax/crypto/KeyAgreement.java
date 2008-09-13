@@ -91,7 +91,7 @@ public class KeyAgreement
     {
         try
         {
-            JCEUtil.Implementation imp = JCEUtil.getImplementation("KeyAgreement", algorithm, null);
+            JCEUtil.Implementation imp = JCEUtil.getImplementation("KeyAgreement", algorithm, (String) null);
 
             if (imp == null)
             {
@@ -108,6 +108,40 @@ public class KeyAgreement
         }
     }
 
+    /**
+     * Generates a <code>KeyAgreement</code> object for the specified key
+     * agreement algorithm from the specified provider.
+     *
+     * @param algorithm the standard name of the requested key agreement algorithm. 
+     * See Appendix A in the Java Cryptography Extension API Specification &amp; Reference 
+     * for information about standard algorithm names.
+     * @param provider the provider
+     * @return the new <code>KeyAgreement</code> object
+     * @exception NoSuchAlgorithmException if the specified algorithm is not
+     * available from the specified provider.
+     */
+    public static final KeyAgreement getInstance(
+            String      algorithm,
+            Provider      provider)
+        throws NoSuchAlgorithmException
+    {
+        if (provider == null)
+        {
+            throw new IllegalArgumentException("No provider specified to KeyAgreement.getInstance()");
+        }
+
+        JCEUtil.Implementation imp = JCEUtil.getImplementation("KeyAgreement", algorithm, provider);
+
+        if (imp == null)
+        {
+            throw new NoSuchAlgorithmException(algorithm + " not found");
+        }
+
+        KeyAgreement keyAgree = new KeyAgreement((KeyAgreementSpi)imp.getEngine(), imp.getProvider(), algorithm);
+
+        return keyAgree;
+    }
+    
     /**
      * Generates a <code>KeyAgreement</code> object for the specified key
      * agreement algorithm from the specified provider.

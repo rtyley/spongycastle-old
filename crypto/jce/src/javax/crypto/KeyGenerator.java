@@ -115,7 +115,7 @@ public class KeyGenerator
     {
         try
         {
-            JCEUtil.Implementation imp = JCEUtil.getImplementation("KeyGenerator", algorithm, null);
+            JCEUtil.Implementation imp = JCEUtil.getImplementation("KeyGenerator", algorithm, (String) null);
 
             if (imp == null)
             {
@@ -131,6 +131,40 @@ public class KeyGenerator
             throw new NoSuchAlgorithmException(algorithm + " not found");
         }
     }
+    
+    /**
+     * Generates a <code>KeyGenerator</code> object for the specified key
+     * algorithm from the specified provider.
+     *
+     * @param algorithm the standard name of the requested key algorithm. See Appendix A in the
+     * Java Cryptography Extension API Specification &amp; Reference for information about standard
+     * algorithm names.
+     * @param provider the provider
+     * @return the new <code>KeyGenerator</code> object
+     * @exception NoSuchAlgorithmException if a key generator for the specified algorithm is not
+     * available from the specified provider.
+     */
+	public static final KeyGenerator getInstance(
+			String   algorithm,
+			Provider provider) 
+	throws NoSuchAlgorithmException 
+	{
+        if (provider == null)
+        {
+            throw new IllegalArgumentException("No provider specified to KeyGenerator.getInstance()");
+        }
+
+        JCEUtil.Implementation imp = JCEUtil.getImplementation("KeyGenerator", algorithm, provider);
+
+        if (imp == null)
+        {
+            throw new NoSuchAlgorithmException(algorithm + " not found");
+        }
+
+        KeyGenerator keyGen = new KeyGenerator((KeyGeneratorSpi)imp.getEngine(), imp.getProvider(), algorithm);
+
+        return keyGen;
+	}
 
     /**
      * Generates a <code>KeyGenerator</code> object for the specified key

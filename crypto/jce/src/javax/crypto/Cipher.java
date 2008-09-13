@@ -114,7 +114,7 @@ public class Cipher
     {
         try
         {
-            JCEUtil.Implementation  imp = JCEUtil.getImplementation("Cipher", transformation, null);
+            JCEUtil.Implementation  imp = JCEUtil.getImplementation("Cipher", transformation, (String) null);
 
             if (imp != null)
             {
@@ -127,7 +127,7 @@ public class Cipher
             StringTokenizer tok = new StringTokenizer(transformation, "/");
             String          algorithm = tok.nextToken();
 
-            imp = JCEUtil.getImplementation("Cipher", algorithm, null);
+            imp = JCEUtil.getImplementation("Cipher", algorithm, (String) null);
 
             if (imp == null)
             {
@@ -165,6 +165,69 @@ public class Cipher
      * See Appendix A in the Java Cryptography Extension API Specification &amp; Reference 
      * for information about standard transformation names.
      *
+     * @param provider the provider
+     * @return a cipher that implements the requested transformation
+     * @exception NoSuchAlgorithmException if no transformation was specified, or if the specified
+     * transformation is not available from the specified provider.
+     * @exception NoSuchPaddingException if <code>transformation</code> contains a padding scheme
+     * that is not available.
+     */
+    public static final Cipher getInstance(
+        String      transformation,
+        Provider    provider)
+    throws NoSuchAlgorithmException, NoSuchPaddingException
+    {
+        if (transformation == null)
+        {
+            throw new IllegalArgumentException("No transformation specified for Cipher.getInstance()");
+        }
+
+        JCEUtil.Implementation  imp = JCEUtil.getImplementation("Cipher", transformation, provider);
+
+        if (imp != null)
+        {
+            return new Cipher((CipherSpi)imp.getEngine(), imp.getProvider(), transformation);
+        }
+
+        //
+        // try the long way
+        //
+        StringTokenizer tok = new StringTokenizer(transformation, "/");
+        String          algorithm = tok.nextToken();
+
+        imp = JCEUtil.getImplementation("Cipher", algorithm, provider);
+
+        if (imp == null)
+        {
+            throw new NoSuchAlgorithmException(transformation + " not found");
+        }
+
+        CipherSpi cipherSpi = (CipherSpi)imp.getEngine();
+
+        //
+        // make sure we don't get fooled by a "//" in the string
+        //
+        if (tok.hasMoreTokens() && !transformation.regionMatches(algorithm.length(), "//", 0, 2))
+        {
+            cipherSpi.engineSetMode(tok.nextToken());
+        }
+
+        if (tok.hasMoreTokens())
+        {
+            cipherSpi.engineSetPadding(tok.nextToken());
+        }
+
+        return new Cipher(cipherSpi, imp.getProvider(), transformation);
+    }
+
+    /**
+     * Creates a <code>Cipher</code> object that implements the specified
+     * transformation, as supplied by the specified provider.
+     *
+     * @param transformation the name of the transformation, e.g., <i>DES/CBC/PKCS5Padding</i>.
+     * See Appendix A in the Java Cryptography Extension API Specification &amp; Reference 
+     * for information about standard transformation names.
+     *
      * @param provider the name of the provider
      * @return a cipher that implements the requested transformation
      * @exception NoSuchAlgorithmException if no transformation was specified, or if the specified
@@ -178,6 +241,11 @@ public class Cipher
         String      provider)
     throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException
     {
+        if (transformation == null)
+        {
+            throw new IllegalArgumentException("No transformation specified for Cipher.getInstance()");
+        }
+
         JCEUtil.Implementation  imp = JCEUtil.getImplementation("Cipher", transformation, provider);
 
         if (imp != null)
