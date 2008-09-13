@@ -37,7 +37,7 @@ class JCEUtil
      *
      * @return null if no algorithm found, an Implementation if it is.
      */
-    static private Implementation getImplementation(
+    static private Implementation findImplementation(
         String      baseName,
         String      algorithm,
         Provider    prov)
@@ -109,13 +109,13 @@ class JCEUtil
                 //
                 // try case insensitive
                 //
-                Implementation imp = getImplementation(baseName, algorithm.toUpperCase(Locale.ENGLISH), prov[i]);
+                Implementation imp = findImplementation(baseName, algorithm.toUpperCase(Locale.ENGLISH), prov[i]);
                 if (imp != null)
                 {
                     return imp;
                 }
 
-                imp = getImplementation(baseName, algorithm, prov[i]);
+                imp = findImplementation(baseName, algorithm, prov[i]);
                 if (imp != null)
                 {
                     return imp;
@@ -134,13 +134,67 @@ class JCEUtil
             //
             // try case insensitive
             //
-            Implementation imp = getImplementation(baseName, algorithm.toUpperCase(Locale.ENGLISH), prov);
+            Implementation imp = findImplementation(baseName, algorithm.toUpperCase(Locale.ENGLISH), prov);
             if (imp != null)
             {
                 return imp;
             }
 
-            return getImplementation(baseName, algorithm, prov);
+            return findImplementation(baseName, algorithm, prov);
+        }
+
+        return null;
+    }
+
+    /**
+     * return an implementation for a given algorithm/provider.
+     * If the provider is null, we grab the first avalaible who has the required algorithm.
+     *
+     * @return null if no algorithm found, an Implementation if it is.
+     * @exception NoSuchProviderException if a provider is specified and not found.
+     */
+    static Implementation getImplementation(
+        String      baseName,
+        String      algorithm,
+        Provider    provider)
+    {
+        if (provider == null)
+        {
+            Provider[] prov = Security.getProviders();
+
+            //
+            // search every provider looking for the algorithm we want.
+            //
+            for (int i = 0; i != prov.length; i++)
+            {
+                //
+                // try case insensitive
+                //
+                Implementation imp = findImplementation(baseName, algorithm.toUpperCase(Locale.ENGLISH), prov[i]);
+                if (imp != null)
+                {
+                    return imp;
+                }
+
+                imp = findImplementation(baseName, algorithm, prov[i]);
+                if (imp != null)
+                {
+                    return imp;
+                }
+            }
+        }
+        else
+        {
+            //
+            // try case insensitive
+            //
+            Implementation imp = findImplementation(baseName, algorithm.toUpperCase(Locale.ENGLISH), provider);
+            if (imp != null)
+            {
+                return imp;
+            }
+
+            return findImplementation(baseName, algorithm, provider);
         }
 
         return null;

@@ -85,7 +85,7 @@ public class Mac
     {
         try
         {
-            JCEUtil.Implementation imp = JCEUtil.getImplementation("Mac", algorithm, null);
+            JCEUtil.Implementation imp = JCEUtil.getImplementation("Mac", algorithm, (String) null);
 
             if (imp == null)
             {
@@ -119,6 +119,40 @@ public class Mac
         String      algorithm,
         String      provider)
     throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+        if (provider == null)
+        {
+            throw new IllegalArgumentException("No provider specified to Mac.getInstance()");
+        }
+
+        JCEUtil.Implementation imp = JCEUtil.getImplementation("Mac", algorithm, provider);
+
+        if (imp == null)
+        {
+            throw new NoSuchAlgorithmException(algorithm + " not found");
+        }
+
+        Mac mac = new Mac((MacSpi)imp.getEngine(), imp.getProvider(), algorithm);
+
+        return mac;
+    }
+
+    /**
+     * Generates an <code>Mac</code> object for the specified MAC
+     * algorithm from the specified provider.
+     *
+     * @param algorithm the standard name of the requested MAC algorithm.
+     * See Appendix A in the Java Cryptography Extension API Specification &amp; Reference
+     * for information about standard algorithm names.
+     * @param provider the provider.
+     * @return the new <code>Mac</code> object.
+     * @exception NoSuchAlgorithmException if the specified algorithm is not available from the
+     * specified provider.
+     */
+    public static final Mac getInstance(
+        String      algorithm,
+        Provider    provider)
+    throws NoSuchAlgorithmException
     {
         if (provider == null)
         {
