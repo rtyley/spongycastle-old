@@ -512,11 +512,7 @@ public class OCSPTest
         BasicOCSPResp resp = respGen.generate("SHA1withRSA", signKP.getPrivate(), chain, new Date(), "BC");
         OCSPRespGenerator rGen = new OCSPRespGenerator();
 
-        FileOutputStream fOut = new FileOutputStream("/tmp/fred");
-
-        fOut.write(rGen.generate(OCSPRespGenerator.SUCCESSFUL, resp).getEncoded());
-
-        fOut.close();
+        byte[] enc = rGen.generate(OCSPRespGenerator.SUCCESSFUL, resp).getEncoded();
     }
 
     public void performTest()
