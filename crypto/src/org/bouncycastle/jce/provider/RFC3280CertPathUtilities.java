@@ -428,7 +428,7 @@ public class RFC3280CertPathUtilities
      * @param certPathCerts      The certificates on the certification path.
      * @return A <code>Set</code> with all keys of possible CRL issuer
      *         certificates.
-     * @throws AnnotatedException if the CRL is no valid or the status cannot be checked or
+     * @throws AnnotatedException if the CRL is not valid or the status cannot be checked or
      *                            some error occurs.
      */
     protected static Set processCRLF(
@@ -594,6 +594,7 @@ public class RFC3280CertPathUtilities
         Exception lastException = null;
         try
         {
+            // TODO Shouldn't this loop be around the try/catch ?
             for (Iterator it = deltacrls.iterator(); it.hasNext();)
             {
                 X509CRL crl = (X509CRL)it.next();
