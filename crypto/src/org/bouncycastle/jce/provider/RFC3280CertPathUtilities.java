@@ -592,20 +592,21 @@ public class RFC3280CertPathUtilities
         throws AnnotatedException
     {
         Exception lastException = null;
-        try
+
+        for (Iterator it = deltacrls.iterator(); it.hasNext();)
         {
-            // TODO Shouldn't this loop be around the try/catch ?
-            for (Iterator it = deltacrls.iterator(); it.hasNext();)
+            X509CRL crl = (X509CRL)it.next();
+            try
             {
-                X509CRL crl = (X509CRL)it.next();
                 crl.verify(key);
                 return crl;
             }
+            catch (Exception e)
+            {
+                lastException = e;
+            }
         }
-        catch (Exception e)
-        {
-            lastException = e;
-        }
+
         if (lastException != null)
         {
             throw new AnnotatedException("Cannot verify delta CRL.", lastException);
