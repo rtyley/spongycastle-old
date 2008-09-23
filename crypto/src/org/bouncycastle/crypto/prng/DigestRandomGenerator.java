@@ -1,6 +1,12 @@
 package org.bouncycastle.crypto.prng;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  * Random generation based on the digest with counter. Calling addSeedMaterial will
@@ -12,17 +18,25 @@ import org.bouncycastle.crypto.Digest;
 public class DigestRandomGenerator
     implements RandomGenerator
 {
-    private long                counter;
+    private static long         CYCLE_COUNT = 8;
+
+    private long                stateCounter;
+    private long                seedCounter;
     private Digest              digest;
     private byte[]              state;
+    private byte[]              seed;
 
     // public constructors
     public DigestRandomGenerator(
         Digest digest)
     {
         this.digest = digest;
+
+        this.seed = new byte[digest.getDigestSize()];
+        this.seedCounter = 1;
+
         this.state = new byte[digest.getDigestSize()];
-        this.counter = 1;
+        this.stateCounter = 1;
     }
 
     public void addSeedMaterial(byte[] inSeed)
@@ -30,6 +44,8 @@ public class DigestRandomGenerator
         synchronized (this)
         {
             digestUpdate(inSeed);
+            digestUpdate(seed);
+            digestDoFinal(seed);
         }
     }
 
@@ -37,11 +53,10 @@ public class DigestRandomGenerator
     {
         synchronized (this)
         {
-            for (int i = 0; i != 8; i++)
-            {
-                digestUpdate((byte)rSeed);
-                rSeed >>>= 8;
-            }
+            digestAddCounter(rSeed);
+            digestUpdate(seed);
+
+            digestDoFinal(seed);
         }
     }
 
@@ -56,27 +71,44 @@ public class DigestRandomGenerator
         {
             int stateOff = 0;
 
-            digestDoFinal(state);
+            generateState();
 
             int end = start + len;
             for (int i = start; i != end; i++)
             {
                 if (stateOff == state.length)
                 {
-                    digestUpdate(counter++);
-                    digestUpdate(state);
-                    digestDoFinal(state);
+                    generateState();
                     stateOff = 0;
                 }
                 bytes[i] = state[stateOff++];
             }
-
-            digestUpdate(counter++);
-            digestUpdate(state);
         }
     }
 
-    private void digestUpdate(long seed)
+    private void cycleSeed()
+    {
+        digestUpdate(seed);
+        digestAddCounter(seedCounter++);
+
+        digestDoFinal(seed);
+    }
+
+    private void generateState()
+    {
+        digestAddCounter(stateCounter++);
+        digestUpdate(state);
+        digestUpdate(seed);
+
+        digestDoFinal(state);
+
+        if ((stateCounter & CYCLE_COUNT) != 0)
+        {
+            cycleSeed();
+        }
+    }
+
+    private void digestAddCounter(long seed)
     {
         for (int i = 0; i != 8; i++)
         {
