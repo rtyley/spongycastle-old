@@ -1,12 +1,6 @@
 package org.bouncycastle.crypto.prng;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
 import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.util.encoders.Hex;
 
 /**
  * Random generation based on the digest with counter. Calling addSeedMaterial will
