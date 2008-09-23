@@ -33,6 +33,8 @@ public class RegressionTest
         new RijndaelTest(),
         new SerpentTest(),
         new CamelliaTest(),
+        new CamelliaLightTest(),
+        new DigestRandomNumberTest(),
         new SkipjackTest(),
         new BlowfishTest(),
         new TwofishTest(),
