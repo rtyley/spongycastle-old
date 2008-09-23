@@ -96,7 +96,7 @@ public class DigestRandomGenerator
 
         digestDoFinal(state);
 
-        if ((stateCounter & CYCLE_COUNT) == CYCLE_COUNT)
+        if ((stateCounter % CYCLE_COUNT) == 0)
         {
             cycleSeed();
         }
