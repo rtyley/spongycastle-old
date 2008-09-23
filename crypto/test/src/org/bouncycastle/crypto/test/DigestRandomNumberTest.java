@@ -15,17 +15,17 @@ public class DigestRandomNumberTest
 
     private static final byte[] TEST_SEED = Hex.decode("81dcfafc885914057876");
 
-    private static final byte[] expected0SHA1 = Hex.decode("ab02c2e86df828f7da5020d56e0fc258a67c06a9");
+    private static final byte[] expected0SHA1 = Hex.decode("0abca114c08f091b7f8e4034e3b859adc80b2068");
     private static final byte[] noCycle0SHA1 = Hex.decode("d57ccd0eb12c3938d59226412bc1268037b6b846");
-    private static final byte[] expected0SHA256 = Hex.decode("4224cd59d26b5033eeb5404cf4fb3b1c15306ca1608c1248725ce5a97070cb61");
+    private static final byte[] expected0SHA256 = Hex.decode("04d3a268c6b692bb30f3a07b348e5a196b8e43d3bc408774ad83dc6c84097d99");
     private static final byte[] noCycle0SHA256 = Hex.decode("e5776c4483486ba7be081f4e1b9dafbab25c8fae290fd5474c1ceda2c16f9509");
-    private static final byte[] expected100SHA1 = Hex.decode("39e2ba34bc93cbfadd35c5e2380cbca235f45c6c");
-    private static final byte[] expected100SHA256 = Hex.decode("81dcfafc885914057876e1a59be4322d89f1a2b55f5114570a595b4ae89aaf02");
-    private static final byte[] expectedTestSHA1 = Hex.decode("ddb3c8f6747d991bbe492f35d3c2f776e7fbddce");
-    private static final byte[] expectedTestSHA256 = Hex.decode("02322d6d60d552ae1948f05ac76cb82af0e0ab2ebcecc197e04118e4f946e54e");
+    private static final byte[] expected100SHA1 = Hex.decode("21d294a8b508308c9ec3fe12d3603d4b9bf86e60");
+    private static final byte[] expected100SHA256 = Hex.decode("e859016781291393ee96f104a58318923764a506be69f1f6a98c549b5f7f7584");
+    private static final byte[] expectedTestSHA1 = Hex.decode("f39ef23a6fa0a1c31a8c4a3ed8e92bf7b453f281");
+    private static final byte[] expectedTestSHA256 = Hex.decode("8637edc3706c98d00590704f19efb1457391b8ede7f71d6d5b0c568a3be6637a");
 
-    private static final byte[] sha1Xors = Hex.decode("084b8403297e0be0fc2eb5a9dc3d9edc095a21a0");
-    private static final byte[] sha256Xors = Hex.decode("c260f14a3bc773e07239e5260f16b0c458227a2920227462f8a9bb8416ed943f");
+    private static final byte[] sha1Xors = Hex.decode("5a45ec9dbbbc86bf18432510ebabc51152d61d24");
+    private static final byte[] sha256Xors = Hex.decode("c706bfc07e262339fc3850633bbec344b46b18c8bf9460391829955df0e2f9c3");
 
     public String getName()
     {
@@ -120,7 +120,7 @@ public class DigestRandomNumberTest
             }
             if (xors[i] != expectedXors[i])
             {
-                fail("or test failed for " + digest.getAlgorithmName());
+                fail("xor test failed for " + digest.getAlgorithmName());
             }
         }
     }

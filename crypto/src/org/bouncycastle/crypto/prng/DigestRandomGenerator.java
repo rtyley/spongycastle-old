@@ -18,7 +18,7 @@ import org.bouncycastle.util.encoders.Hex;
 public class DigestRandomGenerator
     implements RandomGenerator
 {
-    private static long         CYCLE_COUNT = 8;
+    private static long         CYCLE_COUNT = 10;
 
     private long                stateCounter;
     private long                seedCounter;
@@ -102,7 +102,7 @@ public class DigestRandomGenerator
 
         digestDoFinal(state);
 
-        if ((stateCounter & CYCLE_COUNT) != 0)
+        if ((stateCounter & CYCLE_COUNT) == CYCLE_COUNT)
         {
             cycleSeed();
         }
