@@ -341,6 +341,16 @@ public class X509NameTest
         equalityTest(new X509Name("CN=  The     Legion "), new X509Name("CN=The Legion"));
         equalityTest(new X509Name("CN=  the     legion "), new X509Name("CN=The Legion"));
 
+        // # test
+
+        X509Name n1 = new X509Name("SERIALNUMBER=8,O=ABC,CN=ABC Class 3 CA,C=LT");
+        X509Name n2 = new X509Name("2.5.4.5=8,O=ABC,CN=ABC Class 3 CA,C=LT");
+        X509Name n3 = new X509Name("2.5.4.5=#130138,O=ABC,CN=ABC Class 3 CA,C=LT");
+
+        equalityTest(n1, n2);
+        equalityTest(n2, n3);
+        equalityTest(n3, n1);
+
         //
         // inequality to sequences
         //
