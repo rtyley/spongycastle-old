@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.DERUniversalString;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
@@ -19,6 +20,7 @@ import org.bouncycastle.util.encoders.Hex;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.io.IOException;
 
 /**
  * <pre>
@@ -964,7 +966,7 @@ public class X509Name
             boolean              found = false;
             DERObjectIdentifier  oid = (DERObjectIdentifier)ordering.elementAt(i);
             String               value = (String)values.elementAt(i);
-            
+
             for (int j = 0; j < orderingSize; j++)
             {
                 if (indexes[j])
@@ -998,9 +1000,9 @@ public class X509Name
 
     private boolean equivalentStrings(String s1, String s2)
     {
-        String value = Strings.toLowerCase(s1.trim());
-        String oValue = Strings.toLowerCase(s2.trim());
-
+        String value = canonicalize(s1);
+        String oValue = canonicalize(s2);
+        
         if (!value.equals(oValue))
         {
             value = stripInternalSpaces(value);
@@ -1013,6 +1015,35 @@ public class X509Name
         }
 
         return true;
+    }
+
+    private String canonicalize(String s)
+    {
+        String value = Strings.toLowerCase(s.trim());
+
+        if (value.charAt(0) == '#')
+        {
+            DERObject obj = decodeObject(value);
+
+            if (obj instanceof DERString)
+            {
+                value = Strings.toLowerCase(((DERString)obj).getString().trim());
+            }
+        }
+
+        return value;
+    }
+
+    private ASN1Object decodeObject(String oValue)
+    {
+        try
+        {
+            return ASN1Object.fromByteArray(Hex.decode(oValue.substring(1)));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException("unknown encoding in name: " + e);
+        }
     }
 
     private String stripInternalSpaces(
