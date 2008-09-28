@@ -351,6 +351,15 @@ public class X509NameTest
         equalityTest(n2, n3);
         equalityTest(n3, n1);
 
+        n1 = new X509Name(true, "2.5.4.5=#130138,CN=SSC Class 3 CA,O=UAB Skaitmeninio sertifikavimo centras,C=LT");
+        n2 = new X509Name(true, "SERIALNUMBER=#130138,CN=SSC Class 3 CA,O=UAB Skaitmeninio sertifikavimo centras,C=LT");
+        n3 = X509Name.getInstance(ASN1Object.fromByteArray(Hex.decode("3063310b3009060355040613024c54312f302d060355040a1326"
+        + "55414220536b6169746d656e696e696f20736572746966696b6176696d6f2063656e74726173311730150603550403130e53534320436c6173732033204341310a30080603550405130138")));
+
+        equalityTest(n1, n2);
+        equalityTest(n2, n3);
+        equalityTest(n3, n1);
+
         //
         // inequality to sequences
         //
@@ -433,8 +442,6 @@ public class X509NameTest
             fail("failed to recover tagged name");
         }
         */
-
-
 
         DERUTF8String testString = new DERUTF8String("The Legion of the Bouncy Castle");
         byte[] encodedBytes = testString.getEncoded();
