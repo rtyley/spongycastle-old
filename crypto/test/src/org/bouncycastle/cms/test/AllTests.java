@@ -25,6 +25,7 @@ public class AllTests
         suite.addTest(CompressedDataStreamTest.suite());
         suite.addTest(SignedDataStreamTest.suite());
         suite.addTest(EnvelopedDataStreamTest.suite());
+        suite.addTest(MiscDataStreamTest.suite());
 
         try
         {
