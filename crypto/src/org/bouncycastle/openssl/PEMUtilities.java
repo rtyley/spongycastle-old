@@ -146,7 +146,7 @@ final class PEMUtilities
         }
         catch (Exception e)
         {
-            throw new IOException("exception using cipher: " + e.toString());
+            throw new IOException("exception using cipher - please check password and data: " + e.toString());
         }
     }
 
