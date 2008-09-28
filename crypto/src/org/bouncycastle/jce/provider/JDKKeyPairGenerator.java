@@ -42,6 +42,7 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Hashtable;
 
 import javax.crypto.spec.DHParameterSpec;
 
@@ -119,6 +120,8 @@ public abstract class JDKKeyPairGenerator
     public static class DH
         extends JDKKeyPairGenerator
     {
+        private static Hashtable   params = new Hashtable();
+
         DHKeyGenerationParameters  param;
         DHBasicKeyPairGenerator    engine = new DHBasicKeyPairGenerator();
         int                        strength = 1024;
@@ -160,17 +163,29 @@ public abstract class JDKKeyPairGenerator
         {
             if (!initialised)
             {
-                DHParametersGenerator   pGen = new DHParametersGenerator();
+                Integer paramStrength = new Integer(strength);
 
-                pGen.init(strength, certainty, random);
-                param = new DHKeyGenerationParameters(random, pGen.generateParameters());
+                if (params.containsKey(paramStrength))
+                {
+                    param = (DHKeyGenerationParameters)params.get(paramStrength);
+                }
+                else
+                {
+                    DHParametersGenerator   pGen = new DHParametersGenerator();
+
+                    pGen.init(strength, certainty, random);
+
+                    params.put(paramStrength, param);
+                }
+
                 engine.init(param);
+
                 initialised = true;
             }
 
-            AsymmetricCipherKeyPair   pair = engine.generateKeyPair();
-            DHPublicKeyParameters     pub = (DHPublicKeyParameters)pair.getPublic();
-            DHPrivateKeyParameters priv = (DHPrivateKeyParameters)pair.getPrivate();
+            AsymmetricCipherKeyPair pair = engine.generateKeyPair();
+            DHPublicKeyParameters   pub = (DHPublicKeyParameters)pair.getPublic();
+            DHPrivateKeyParameters  priv = (DHPrivateKeyParameters)pair.getPrivate();
 
             return new KeyPair(new JCEDHPublicKey(pub),
                                new JCEDHPrivateKey(priv));

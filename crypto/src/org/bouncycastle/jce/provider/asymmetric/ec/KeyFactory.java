@@ -2,10 +2,25 @@ package org.bouncycastle.jce.provider.asymmetric.ec;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Key;
+import java.security.InvalidKeyException;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPrivateCrtKeySpec;
+
+import javax.crypto.spec.DHPrivateKeySpec;
+import javax.crypto.spec.DHPublicKeySpec;
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
 
 import org.bouncycastle.jce.provider.JCEECPrivateKey;
 import org.bouncycastle.jce.provider.JCEECPublicKey;
@@ -22,6 +37,51 @@ public class KeyFactory
         String algorithm)
     {
         this.algorithm = algorithm;
+    }
+
+    protected Key engineTranslateKey(
+        Key    key)
+        throws InvalidKeyException
+    {
+        if (key instanceof ECPublicKey)
+        {
+            return new JCEECPublicKey((ECPublicKey)key);
+        }
+        else if (key instanceof ECPrivateKey)
+        {
+            return new JCEECPrivateKey((ECPrivateKey)key);
+        }
+
+        throw new InvalidKeyException("key type unknown");
+    }
+
+    protected KeySpec engineGetKeySpec(
+        Key    key,
+        Class    spec)
+    throws InvalidKeySpecException
+    {
+       if (spec.isAssignableFrom(PKCS8EncodedKeySpec.class) && key.getFormat().equals("PKCS#8"))
+       {
+               return new PKCS8EncodedKeySpec(key.getEncoded());
+       }
+       else if (spec.isAssignableFrom(X509EncodedKeySpec.class) && key.getFormat().equals("X.509"))
+       {
+               return new X509EncodedKeySpec(key.getEncoded());
+       }
+       else if (spec.isAssignableFrom(java.security.spec.ECPublicKeySpec.class) && key instanceof ECPublicKey)
+       {
+           ECPublicKey k = (ECPublicKey)key;
+
+           return new java.security.spec.ECPublicKeySpec(k.getW(), k.getParams());
+       }
+       else if (spec.isAssignableFrom(java.security.spec.ECPrivateKeySpec.class) && key instanceof ECPrivateKey)
+       {
+           ECPrivateKey k = (ECPrivateKey)key;
+
+           return new java.security.spec.ECPrivateKeySpec(k.getS(), k.getParams());
+       }
+
+       throw new RuntimeException("not implemented yet " + key + " " + spec);
     }
 
     protected PrivateKey engineGeneratePrivate(

@@ -161,7 +161,7 @@ public class JCEECPublicKey
                         dp.getH().intValue());
     }
     
-    JCEECPublicKey(
+    public JCEECPublicKey(
         ECPublicKey     key)
     {
         this.algorithm = key.getAlgorithm();

@@ -1,5 +1,9 @@
 package org.bouncycastle.jce.provider;
 
+import java.security.Provider;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
@@ -7,12 +11,7 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
-
-import java.security.Provider;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * To add the provider at runtime use:
