@@ -8,8 +8,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -142,18 +140,6 @@ public abstract class JDKKeyFactory
            
            return new DHPublicKeySpec(k.getY(), k.getParams().getP(), k.getParams().getG());
        }
-       else if (spec.isAssignableFrom(java.security.spec.ECPublicKeySpec.class) && key instanceof ECPublicKey)
-       {
-           ECPublicKey k = (ECPublicKey)key;
-
-           return new java.security.spec.ECPublicKeySpec(k.getW(), k.getParams());
-       }
-       else if (spec.isAssignableFrom(java.security.spec.ECPrivateKeySpec.class) && key instanceof ECPrivateKey)
-       {
-           ECPrivateKey k = (ECPrivateKey)key;
-
-           return new java.security.spec.ECPrivateKeySpec(k.getS(), k.getParams());
-       }
 
        throw new RuntimeException("not implemented yet " + key + " " + spec);
     }
@@ -211,14 +197,6 @@ public abstract class JDKKeyFactory
         else if (key instanceof ElGamalPrivateKey)
         {
             return new JCEElGamalPrivateKey((ElGamalPrivateKey)key);
-        }
-        else if (key instanceof ECPublicKey)
-        {
-            return new JCEECPublicKey((ECPublicKey)key);
-        }
-        else if (key instanceof ECPrivateKey)
-        {
-            return new JCEECPrivateKey((ECPrivateKey)key);
         }
 
         throw new InvalidKeyException("key type unknown");

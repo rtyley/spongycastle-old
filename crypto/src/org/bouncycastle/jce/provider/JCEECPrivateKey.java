@@ -45,7 +45,7 @@ public class JCEECPrivateKey
     {
     }
 
-    JCEECPrivateKey(
+    public JCEECPrivateKey(
         ECPrivateKey    key)
     {
         this.d = key.getS();
