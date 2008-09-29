@@ -1020,8 +1020,8 @@ public class X509Name
     private String canonicalize(String s)
     {
         String value = Strings.toLowerCase(s.trim());
-
-        if (value.charAt(0) == '#')
+        
+        if (value.length() > 0 && value.charAt(0) == '#')
         {
             DERObject obj = decodeObject(value);
 

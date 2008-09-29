@@ -360,6 +360,19 @@ public class X509NameTest
         equalityTest(n2, n3);
         equalityTest(n3, n1);
 
+        n1 = new X509Name("SERIALNUMBER=8,O=XX,CN=ABC Class 3 CA,C=LT");
+        n2 = new X509Name("2.5.4.5=8,O=,CN=ABC Class 3 CA,C=LT");
+
+        if (n1.equals(n2))
+        {
+            fail("empty inequality check failed");
+        }
+
+        n1 = new X509Name("SERIALNUMBER=8,O=,CN=ABC Class 3 CA,C=LT");
+        n2 = new X509Name("2.5.4.5=8,O=,CN=ABC Class 3 CA,C=LT");
+
+        equalityTest(n1, n2);
+        
         //
         // inequality to sequences
         //
