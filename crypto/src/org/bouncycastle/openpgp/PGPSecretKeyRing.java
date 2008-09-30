@@ -5,6 +5,7 @@ import org.bouncycastle.bcpg.PacketTags;
 import org.bouncycastle.bcpg.SecretKeyPacket;
 import org.bouncycastle.bcpg.SecretSubkeyPacket;
 import org.bouncycastle.bcpg.TrustPacket;
+import org.bouncycastle.bcpg.PublicSubkeyPacket;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,10 +30,17 @@ public class PGPSecretKeyRing
     extends PGPKeyRing
 {    
     List keys;
-    
+    List extraPubKeys;
+
     PGPSecretKeyRing(List keys)
     {
+        this(keys, new ArrayList());
+    }
+
+    private PGPSecretKeyRing(List keys, List extraPubKeys)
+    {
         this.keys = keys;
+        this.extraPubKeys = extraPubKeys;
     }
 
     public PGPSecretKeyRing(
@@ -47,6 +55,7 @@ public class PGPSecretKeyRing
         throws IOException, PGPException
     {
         this.keys = new ArrayList();
+        this.extraPubKeys = new ArrayList();
 
         BCPGInputStream pIn = wrap(in);
 
@@ -82,22 +91,35 @@ public class PGPSecretKeyRing
 
 
         // Read subkeys
-        while (pIn.nextPacketTag() == PacketTags.SECRET_SUBKEY)
+        while (pIn.nextPacketTag() == PacketTags.SECRET_SUBKEY
+            || pIn.nextPacketTag() == PacketTags.PUBLIC_SUBKEY)
         {
-            SecretSubkeyPacket    sub = (SecretSubkeyPacket)pIn.readPacket();
-
-            //
-            // ignore GPG comment packets if found.
-            //
-            while (pIn.nextPacketTag() == PacketTags.EXPERIMENTAL_2)
+            if (pIn.nextPacketTag() == PacketTags.SECRET_SUBKEY)
             {
-                pIn.readPacket();
+                SecretSubkeyPacket    sub = (SecretSubkeyPacket)pIn.readPacket();
+
+                //
+                // ignore GPG comment packets if found.
+                //
+                while (pIn.nextPacketTag() == PacketTags.EXPERIMENTAL_2)
+                {
+                    pIn.readPacket();
+                }
+
+                TrustPacket subTrust = readOptionalTrustPacket(pIn);
+                List        sigList = readSignaturesAndTrust(pIn);
+
+                keys.add(new PGPSecretKey(sub, new PGPPublicKey(sub.getPublicKeyPacket(), subTrust, sigList)));
             }
+            else
+            {
+                PublicSubkeyPacket sub = (PublicSubkeyPacket)pIn.readPacket();
 
-            TrustPacket subTrust = readOptionalTrustPacket(pIn);
-            List        sigList = readSignaturesAndTrust(pIn);
+                TrustPacket subTrust = readOptionalTrustPacket(pIn);
+                List        sigList = readSignaturesAndTrust(pIn);
 
-            keys.add(new PGPSecretKey(sub, new PGPPublicKey(sub.getPublicKeyPacket(), subTrust, sigList)));
+                extraPubKeys.add(new PGPPublicKey(sub, subTrust, sigList));
+            }
         }
     }
 
@@ -146,7 +168,19 @@ public class PGPSecretKeyRing
     
         return null;
     }
-    
+
+    /**
+     * Return an iterator of the public keys in the secret key ring that
+     * have no matching private key. At the moment only personal certificate data
+     * appears in this fashion.
+     *
+     * @return  iterator of unattached, or extra, public keys.
+     */
+    public Iterator getExtraPublicKeys()
+    {
+        return extraPubKeys.iterator();
+    }
+
     public byte[] getEncoded() 
         throws IOException
     {
@@ -165,6 +199,12 @@ public class PGPSecretKeyRing
         {
             PGPSecretKey    k = (PGPSecretKey)keys.get(i);
             
+            k.encode(outStream);
+        }
+        for (int i = 0; i != extraPubKeys.size(); i++)
+        {
+            PGPPublicKey    k = (PGPPublicKey)extraPubKeys.get(i);
+
             k.encode(outStream);
         }
     }
@@ -248,7 +288,7 @@ public class PGPSecretKeyRing
             newKeys.add(PGPSecretKey.copyWithNewPassword((PGPSecretKey)keys.next(), oldPassPhrase, newPassPhrase, newEncAlgorithm, rand, provider));
         }
 
-        return new PGPSecretKeyRing(newKeys);
+        return new PGPSecretKeyRing(newKeys, ring.extraPubKeys);
     }
 
     /**
@@ -299,7 +339,7 @@ public class PGPSecretKeyRing
             }
         }
         
-        return new PGPSecretKeyRing(keys);
+        return new PGPSecretKeyRing(keys, secRing.extraPubKeys);
     }
     
     /**
@@ -333,6 +373,6 @@ public class PGPSecretKeyRing
             return null;
         }
         
-        return new PGPSecretKeyRing(keys);
+        return new PGPSecretKeyRing(keys, secRing.extraPubKeys);
     }
 }
