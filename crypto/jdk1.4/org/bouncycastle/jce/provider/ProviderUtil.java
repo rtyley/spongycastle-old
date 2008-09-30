@@ -10,7 +10,7 @@ import org.bouncycastle.jce.ProviderConfigurationPermission;
 
 import java.security.Permission;
 
-class ProviderUtil
+public class ProviderUtil
 {
     private static final long  MAX_MEMORY = Runtime.getRuntime().maxMemory();
 
@@ -50,7 +50,7 @@ class ProviderUtil
         }
     }
 
-    static ECParameterSpec getEcImplicitlyCa()
+    public static ECParameterSpec getEcImplicitlyCa()
     {
         ECParameterSpec spec = (ECParameterSpec)threadSpec.get();
 

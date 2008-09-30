@@ -178,7 +178,7 @@ public abstract class JDKKeyFactory
     /**
      * create a public key from the given DER encoded input stream. 
      */ 
-    static PublicKey createPublicKeyFromDERStream(
+    public static PublicKey createPublicKeyFromDERStream(
         byte[]         in)
         throws IOException
     {
@@ -239,7 +239,7 @@ public abstract class JDKKeyFactory
     /**
      * create a private key from the given DER encoded input stream. 
      */ 
-    static PrivateKey createPrivateKeyFromDERStream(
+    public static PrivateKey createPrivateKeyFromDERStream(
         byte[]         in)
         throws IOException
     {
