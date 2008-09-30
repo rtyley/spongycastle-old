@@ -28,12 +28,21 @@ Release 1.41
 <li>The GeneralName String constructor now supports IPv4 and IPv6 address parsing.</li>
 <li>An issue with nested-multiparts with postamble for S/MIME that was causing signatures to fail verification has been fixed.</li>
 <li>ESSCertIDv2 encoding now complies with RFC 5035.</li>
+<li>ECDSA now computes correct signatures for oversized hashes when the order of the base point is not a multiple of 8 in compliance with X9.62-2005.</li>
+<li>J2ME SecureRandom now provides additional protection against predictive and backtracking attacks when high volumes random data is generated.</li>
 <li>Fix to regression from 1.38: PKIXCertPathCheckers were not being called on intermediate certificates.</li>
+<li>Standard name "DiffieHellman" is now supported in the provider.</li>
+<li>Better support for equality tests for '#' encoded entries has been added to X509Name.</li>
 </ul>
 <h3>2.2.3 Additional Features and Functionality</h3>
 <ul>
 <li>Camellia is now 12.5% faster than previously.</li>
+<li>A smaller version (around 8k compiled) of Camellia, CamelliaLightEngine has also been added.</li>
 <li>CMSSignedData generation now supports SubjectKeyIdentifier as well as use of issuer/serial.</li>
+<li>A CMSPBE key hold for UTF8 keys has been added to the CMS API.</li>
+<li>Salt and iteration count can now be recovered from PasswordRecipientInformation.</li>
+<li>Methods in the OpenPGP, CMS, and S/MIME APIs which previously could only take provider names can now take providers objects as well (JDK1.4 and greater).</li>
+<li>Support for reading and extracting personalised certificates in PGP Secret Key rings has been added.</li>
 </ul>
 
 <h3>2.2.1 Version</h3>
