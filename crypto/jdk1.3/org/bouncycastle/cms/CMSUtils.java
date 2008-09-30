@@ -10,8 +10,8 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.util.io.Streams;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CRLException;
@@ -20,6 +20,9 @@ import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.security.Provider;
+import java.security.Security;
+import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -160,14 +163,24 @@ class CMSUtils
         InputStream in) 
         throws IOException
     {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        int ch;
-        
-        while ((ch = in.read()) >= 0)
+        return Streams.readAll(in);
+    }
+
+    public static Provider getProvider(String providerName)
+        throws NoSuchProviderException
+    {
+        if (providerName != null)
         {
-            bOut.write(ch);
+            Provider prov = Security.getProvider(providerName);
+
+            if (prov != null)
+            {
+                return prov;
+            }
+
+            throw new NoSuchProviderException("provider " + providerName + " not found.");
         }
-        
-        return bOut.toByteArray();
+
+        return null; 
     }
 }

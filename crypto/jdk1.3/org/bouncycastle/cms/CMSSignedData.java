@@ -3,7 +3,6 @@ package org.bouncycastle.cms;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequence;
@@ -18,11 +17,11 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.x509.NoSuchStoreException;
 import org.bouncycastle.x509.X509Store;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CertStoreException;
 import java.util.ArrayList;
@@ -60,7 +59,7 @@ import java.util.Map;
  */
 public class CMSSignedData
 {
-    private static CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
+    private static final CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
     
     SignedData              signedData;
     ContentInfo             contentInfo;
@@ -221,7 +220,7 @@ public class CMSSignedData
      * in this message.
      *
      * @param type type of store to create
-     * @param provider provider to use
+     * @param provider name of provider to use
      * @return a store of attribute certificates
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
@@ -231,6 +230,24 @@ public class CMSSignedData
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        return getAttributeCertificates(type, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * return a X509Store containing the attribute certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of attribute certificates
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getAttributeCertificates(
+        String type,
+        Provider provider)
+        throws NoSuchStoreException, CMSException
     {
         if (attributeStore == null)
         {
@@ -245,7 +262,7 @@ public class CMSSignedData
      * in this message.
      *
      * @param type type of store to create
-     * @param provider provider to use
+     * @param provider name of provider to use
      * @return a store of public key certificates
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
@@ -255,6 +272,24 @@ public class CMSSignedData
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        return getCertificates(type, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * return a X509Store containing the public key certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of public key certificates
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCertificates(
+        String type,
+        Provider provider)
+        throws NoSuchStoreException, CMSException
     {
         if (certificateStore == null)
         {
@@ -269,7 +304,7 @@ public class CMSSignedData
      * in this message.
      *
      * @param type type of store to create
-     * @param provider provider to use
+     * @param provider name of provider to use
      * @return a store of CRLs
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
@@ -280,6 +315,24 @@ public class CMSSignedData
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
     {
+        return getCRLs(type, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * return a X509Store containing CRLs, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of CRLs
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCRLs(
+        String type,
+        Provider provider)
+        throws NoSuchStoreException, CMSException
+    {
         if (crlStore == null)
         {
             crlStore = HELPER.createCRLsStore(type, provider, signedData.getCRLs());
@@ -287,7 +340,7 @@ public class CMSSignedData
 
         return crlStore;
     }
-
+  
     /**
      * return a CertStore containing the certificates and CRLs associated with
      * this message.
@@ -300,6 +353,21 @@ public class CMSSignedData
         String  type,
         String  provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        return getCertificatesAndCRLs(type, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * return a CertStore containing the certificates and CRLs associated with
+     * this message.
+     *
+     * @exception NoSuchAlgorithmException if the cert store isn't available.
+     * @exception CMSException if a general exception prevents creation of the CertStore
+     */
+    public CertStore getCertificatesAndCRLs(
+        String  type,
+        Provider  provider)
+        throws NoSuchAlgorithmException, CMSException
     {
         if (certStore == null)
         {
@@ -329,17 +397,20 @@ public class CMSSignedData
     }
 
     /**
+     * return the ContentInfo 
+     */
+    public ContentInfo getContentInfo()
+    {
+        return contentInfo;
+    }
+
+    /**
      * return the ASN.1 encoded representation of this object.
      */
     public byte[] getEncoded()
         throws IOException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-        aOut.writeObject(contentInfo);
-
-        return bOut.toByteArray();
+        return contentInfo.getEncoded();
     }
     
     /**

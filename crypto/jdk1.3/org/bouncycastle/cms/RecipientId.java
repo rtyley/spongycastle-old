@@ -1,7 +1,9 @@
 package org.bouncycastle.cms;
 
+import org.bouncycastle.util.Arrays;
+
+import java.math.BigInteger;
 import org.bouncycastle.jce.cert.X509CertSelector;
-import java.util.Arrays;
 
 public class RecipientId
     extends X509CertSelector
@@ -27,34 +29,19 @@ public class RecipientId
 
     public int hashCode()
     {
-        int     code = 0;
+        int code = Arrays.hashCode(keyIdentifier)
+            ^ Arrays.hashCode(this.getSubjectKeyIdentifier());
 
-        if (keyIdentifier != null)
+        BigInteger serialNumber = this.getSerialNumber();
+        if (serialNumber != null)
         {
-            for (int i = 0; i != keyIdentifier.length; i++)
-            {
-                code ^= ((keyIdentifier[i] & 0xff) << (i % 4));
-            }
+            code ^= serialNumber.hashCode();
         }
 
-        byte[]  subKeyId = this.getSubjectKeyIdentifier();
-
-        if (subKeyId != null)
+        String issuer = this.getIssuerAsString();
+        if (issuer != null)
         {
-            for (int i = 0; i != subKeyId.length; i++)
-            {
-                code ^= ((subKeyId[i] & 0xff) << (i % 4));
-            }
-        }
-
-        if (this.getSerialNumber() != null)
-        {
-            code ^= this.getSerialNumber().hashCode();
-        }
-
-        if (this.getIssuerAsString() != null)
-        {
-            code ^= this.getIssuerAsString().hashCode();
+            code ^= issuer.hashCode();
         }
 
         return code;
@@ -70,8 +57,8 @@ public class RecipientId
 
         RecipientId id = (RecipientId)o;
 
-        return equalsByteArray(keyIdentifier, id.keyIdentifier)
-            && equalsByteArray(this.getSubjectKeyIdentifier(), id.getSubjectKeyIdentifier())
+        return Arrays.areEqual(keyIdentifier, id.keyIdentifier)
+            && Arrays.areEqual(this.getSubjectKeyIdentifier(), id.getSubjectKeyIdentifier())
             && equalsObj(this.getSerialNumber(), id.getSerialNumber())
             && equalsObj(this.getIssuerAsString(), id.getIssuerAsString());
     }
@@ -79,15 +66,5 @@ public class RecipientId
     private boolean equalsObj(Object a, Object b)
     {
         return (a != null) ? a.equals(b) : b == null;
-    }
-
-    private boolean equalsByteArray(byte[] a, byte[] b)
-    {
-        if (a != null)
-        {
-            return (b != null) && Arrays.equals(a, b);
-        }
-
-        return (b == null);
     }
 }

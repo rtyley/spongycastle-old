@@ -25,6 +25,7 @@ import org.bouncycastle.asn1.cms.ContentInfoParser;
 import org.bouncycastle.asn1.cms.SignedDataParser;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.x509.NoSuchStoreException;
 import org.bouncycastle.x509.X509Store;
 
@@ -36,6 +37,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CertStoreException;
 import java.util.ArrayList;
@@ -91,9 +93,10 @@ import java.util.Map;
 public class CMSSignedDataParser
     extends CMSContentInfoParser
 {
-    private static CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
+    private static final CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
 
     private SignedDataParser        _signedData;
+    private DERObjectIdentifier     _signedContentType;
     private CMSTypedStream          _signedContent;
     private Map                     _digests;
     
@@ -157,16 +160,12 @@ public class CMSSignedDataParser
                 AlgorithmIdentifier id = AlgorithmIdentifier.getInstance(o.getDERObject());
                 try
                 {
-                    String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(id.getObjectId().toString());
-                    MessageDigest dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, null);
+                    String        digestName = HELPER.getDigestAlgName(id.getObjectId().toString());
+                    MessageDigest dig = HELPER.getDigestInstance(digestName, null);
 
                     this._digests.put(digestName, dig);
                 }
                 catch (NoSuchAlgorithmException e)
-                {
-                     //  ignore
-                }
-                catch (NoSuchProviderException e)
                 {
                      //  ignore
                 }
@@ -195,6 +194,15 @@ public class CMSSignedDataParser
                     //
                     ctStr.drain();
                 }
+            }
+
+            if (signedContent == null)
+            {
+                _signedContentType = cont.getContentType();
+            }
+            else
+            {
+                _signedContentType = new DERObjectIdentifier(_signedContent.getContentType());
             }
         }
         catch (IOException e)
@@ -249,11 +257,11 @@ public class CMSSignedDataParser
                 while ((o = s.readObject()) != null)
                 {
                     SignerInfo info = SignerInfo.getInstance(o.getDERObject());
-                    String     digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
+                    String     digestName = HELPER.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
                     
                     byte[] hash = (byte[])hashes.get(digestName);
                     
-                    signerInfos.add(new SignerInformation(info, new DERObjectIdentifier(_signedContent.getContentType()), null, new BaseDigestCalculator(hash)));
+                    signerInfos.add(new SignerInformation(info, _signedContentType, null, new BaseDigestCalculator(hash)));
                 }
             }
             catch (IOException e)
@@ -272,7 +280,7 @@ public class CMSSignedDataParser
      * in this message.
      *
      * @param type type of store to create
-     * @param provider provider to use
+     * @param provider name of provider to use
      * @return a store of attribute certificates
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception org.bouncycastle.x509.NoSuchStoreException if the store type isn't available.
@@ -282,6 +290,24 @@ public class CMSSignedDataParser
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        return getAttributeCertificates(type, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * return a X509Store containing the attribute certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of attribute certificates
+     * @exception org.bouncycastle.x509.NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getAttributeCertificates(
+        String type,
+        Provider provider)
+        throws NoSuchStoreException, CMSException
     {
         if (_attributeStore == null)
         {
@@ -293,7 +319,7 @@ public class CMSSignedDataParser
         return _attributeStore;
     }
 
-        /**
+    /**
      * return a X509Store containing the public key certificates, if any, contained
      * in this message.
      *
@@ -308,6 +334,24 @@ public class CMSSignedDataParser
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        return getCertificates(type, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * return a X509Store containing the public key certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of public key certificates
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCertificates(
+        String type,
+        Provider provider)
+        throws NoSuchStoreException, CMSException
     {
         if (_certificateStore == null)
         {
@@ -324,7 +368,7 @@ public class CMSSignedDataParser
      * in this message.
      *
      * @param type type of store to create
-     * @param provider provider to use
+     * @param provider name of provider to use
      * @return a store of CRLs
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
@@ -334,6 +378,24 @@ public class CMSSignedDataParser
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
+    {
+        return getCRLs(type, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * return a X509Store containing CRLs, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @param provider provider to use
+     * @return a store of CRLs
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CMSException if a general exception prevents creation of the X509Store
+     */
+    public X509Store getCRLs(
+        String type,
+        Provider provider)
+        throws NoSuchStoreException, CMSException
     {
         if (_crlStore == null)
         {
@@ -358,10 +420,26 @@ public class CMSSignedDataParser
         String  provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
+        return getCertificatesAndCRLs(type, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * return a CertStore containing the certificates and CRLs associated with
+     * this message.
+     *
+     * @exception NoSuchProviderException if the provider requested isn't available.
+     * @exception NoSuchAlgorithmException if the cert store isn't available.
+     * @exception CMSException if a general exception prevents creation of the CertStore
+     */
+    public CertStore getCertificatesAndCRLs(
+        String  type,
+        Provider  provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
         if (_certStore == null)
         {
             populateCertCrlSets();
-            
+
             _certStore = HELPER.createCertStore(type, provider, _certSet, _crlSet);
         }
 
@@ -388,6 +466,17 @@ public class CMSSignedDataParser
         {
             throw new CMSException("problem parsing cert/crl sets", e);
         }
+    }
+
+    /**
+     * Return the a string representation of the OID associated with the
+     * encapsulated content info structure carried in the signed data.
+     * 
+     * @return the OID for the content type.
+     */
+    public String getSignedContentTypeOID()
+    {
+        return _signedContentType.getId();
     }
 
     public CMSTypedStream getSignedContent()
@@ -664,17 +753,9 @@ public class CMSSignedDataParser
         throws IOException
     {
         BEROctetStringGenerator octGen = new BEROctetStringGenerator(output, 0, true);
-        byte[]                  inBuffer = new byte[4096];
-        InputStream             inOctets = octs.getOctetStream();
         // TODO Allow specification of a specific fragment size?
-        OutputStream            outOctets = octGen.getOctetOutputStream();
-
-        int len;
-        while ((len = inOctets.read(inBuffer, 0, inBuffer.length)) >= 0)
-        {
-            outOctets.write(inBuffer, 0, len);
-        }
-
+        OutputStream outOctets = octGen.getOctetOutputStream();
+        Streams.pipeAll(octs.getOctetStream(), outOctets);
         outOctets.close();
     }
 }

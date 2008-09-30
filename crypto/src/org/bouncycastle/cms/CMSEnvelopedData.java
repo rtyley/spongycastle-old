@@ -160,7 +160,6 @@ public class CMSEnvelopedData
      * @param provider the provider to generate the parameters for.
      * @return the parameters object, null if there is not one.
      * @throws CMSException if the algorithm cannot be found, or the parameters can't be parsed.
-     * @throws NoSuchProviderException if the provider cannot be found.
      */
     public AlgorithmParameters getEncryptionAlgorithmParameters(
         Provider provider)
