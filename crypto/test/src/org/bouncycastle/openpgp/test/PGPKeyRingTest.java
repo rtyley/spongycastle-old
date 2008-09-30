@@ -963,6 +963,119 @@ public class PGPKeyRingTest
         "6tmEcgPY5SghInUf+L2u52V55MjyAFzVp7kTK2KY+p7qw35vzckrWkwu8AAAAAAA"+
         "AQE=");
 
+    private static byte[] secWithPersonalCertificate = Base64.decode(
+        "lQOYBEjGLGsBCACp1I1dZKsK4N/I0/4g02hDVNLdQkDZfefduJgyJUyBGo/I"
+            + "/ZBpc4vT1YwVIdic4ADjtGB4+7WohN4v8siGzwRSeXardSdZVIw2va0JDsQC"
+            + "yeoTnwVkUgn+w/MDgpL0BBhTpr9o3QYoo28/qKMni3eA8JevloZqlAbQ/sYq"
+            + "rToMAqn0EIdeVVh6n2lRQhUJaNkH/kA5qWBpI+eI8ot/Gm9kAy3i4e0Xqr3J"
+            + "Ff1lkGlZuV5H5p/ItZui9BDIRn4IDaeR511NQnKlxFalM/gP9R9yDVI1aXfy"
+            + "STcp3ZcsTOTGNzACtpvMvl6LZyL42DyhlOKlJQJS81wp4dg0LNrhMFOtABEB"
+            + "AAEAB/0QIH5UEg0pTqAG4r/3v1uKmUbKJVJ3KhJB5xeSG3dKWIqy3AaXR5ZN"
+            + "mrJfXK7EfC5ZcSAqx5br1mzVl3PHVBKQVQxvIlmG4r/LKvPVhQYZUFyJWckZ"
+            + "9QMR+EA0Dcran9Ds5fa4hH84jgcwalkj64XWRAKDdVh098g17HDw+IYnQanl"
+            + "7IXbYvh+1Lr2HyPo//vHX8DxXIJBv+E4skvqGoNfCIfwcMeLsrI5EKo+D2pu"
+            + "kAuBYI0VBiZkrJHFXWmQLW71Mc/Bj7wTG8Q1pCpu7YQ7acFSv+/IOCsB9l9S"
+            + "vdB7pNhB3lEjYFGoTgr03VfeixA7/x8uDuSXjnBdTZqmGqkZBADNwCqlzdaQ"
+            + "X6CjS5jc3vzwDSPgM7ovieypEL6NU3QDEUhuP6fVvD2NYOgVnAEbJzgOleZS"
+            + "W2AFXKAf5NDxfqHnBmo/jlYb5yZV5Y+8/poLLj/m8t7sAfAmcZqGXfYMbSbe"
+            + "tr6TGTUXcXgbRyU5oH1e4iq691LOwZ39QjL8lNQQywQA006XYEr/PS9uJkyM"
+            + "Cg+M+nmm40goW4hU/HboFh9Ru6ataHj+CLF42O9sfMAV02UcD3Agj6w4kb5L"
+            + "VswuwfmY+17IryT81d+dSmDLhpo6ufKoAp4qrdP+bzdlbfIim4Rdrw5vF/Yk"
+            + "rC/Nfm3CLJxTimHJhqFx4MG7yEC89lxgdmcD/iJ3m41fwS+bPN2rrCAf7j1u"
+            + "JNr/V/8GAnoXR8VV9150BcOneijftIIYKKyKkV5TGwcTfjaxRKp87LTeC3MV"
+            + "szFDw04MhlIKRA6nBdU0Ay8Yu+EjXHK2VSpLG/Ny+KGuNiFzhqgBxM8KJwYA"
+            + "ISa1UEqWjXoLU3qu1aD7cCvANPVCOASwAYe0GlBHUCBEZXNrdG9wIDxpbmZv"
+            + "QHBncC5jb20+sAMD//+JAW4EEAECAFgFAkjGLGswFIAAAAAAIAAHcHJlZmVy"
+            + "cmVkLWVtYWlsLWVuY29kaW5nQHBncC5jb21wZ3BtaW1lBwsJCAcDAgoCGQEF"
+            + "GwMAAAADFgECBR4BAAAABRUCCAkKAAoJEHHHqp2m1tlWsx8H/icpHl1Nw17A"
+            + "D6MJN6zJm+aGja+5BOFxOsntW+IV6JI+l5WwiIVE8xTDhoXW4zdH3IZTqoyY"
+            + "frtkqLGpvsPtAQmV6eiPgE3+25ahL+MmjXKsceyhbZeCPDtM2M382VCHYCZK"
+            + "DZ4vrHVgK/BpyTeP/mqoWra9+F5xErhody71/cLyIdImLqXgoAny6YywjuAD"
+            + "2TrFnzPEBmZrkISHVEso+V9sge/8HsuDqSI03BAVWnxcg6aipHtxm907sdVo"
+            + "jzl2yFbxCCCaDIKR7XVbmdX7VZgCYDvNSxX3WEOgFq9CYl4ZlXhyik6Vr4XP"
+            + "7EgqadtfwfMcf4XrYoImSQs0gPOd4QqwAWedA5gESMYsawEIALiazFREqBfi"
+            + "WouTjIdLuY09Ks7PCkn0eo/i40/8lEj1R6JKFQ5RlHNnabh+TLvjvb3nOSU0"
+            + "sDg+IKK/JUc8/Fo7TBdZvARX6BmltEGakqToDC3eaF9EQgHLEhyE/4xXiE4H"
+            + "EeIQeCHdC7k0pggEuWUn5lt6oeeiPUWhqdlUOvzjG+jqMPJL0bk9STbImHUR"
+            + "EiugCPTekC0X0Zn0yrwyqlJQMWnh7wbSl/uo4q45K7qOhxcijo+hNNrkRAMi"
+            + "fdNqD4s5qDERqqHdAAgpWqydo7zV5tx0YSz5fjh59Z7FxkUXpcu1WltT6uVn"
+            + "hubiMTWpXzXOQI8wZL2fb12JmRY47BEAEQEAAQAH+wZBeanj4zne+fBHrWAS"
+            + "2vx8LYiRV9EKg8I/PzKBVdGUnUs0vTqtXU1dXGXsAsPtu2r1bFh0TQH06gR1"
+            + "24iq2obgwkr6x54yj+sZlE6SU0SbF/mQc0NCNAXtSKV2hNXvy+7P+sVJR1bn"
+            + "b5ukuvkj1tgEln/0W4r20qJ60F+M5QxXg6kGh8GAlo2tetKEv1NunAyWY6iv"
+            + "FTnSaIJ/YaKQNcudNvOJjeIakkIzfzBL+trUiI5n1LTBB6+u3CF/BdZBTxOy"
+            + "QwjAh6epZr+GnQqeaomFxBc3mU00sjrsB1Loso84UIs6OKfjMkPoZWkQrQQW"
+            + "+xvQ78D33YwqNfXk/5zQAxkEANZxJGNKaAeDpN2GST/tFZg0R5GPC7uWYC7T"
+            + "pG100mir9ugRpdeIFvfAa7IX2jujxo9AJWo/b8hq0q0koUBdNAX3xxUaWy+q"
+            + "KVCRxBifpYVBfEViD3lsbMy+vLYUrXde9087YD0c0/XUrj+oowWJavblmZtS"
+            + "V9OjkQW9zoCigpf5BADcYV+6bkmJtstxJopJG4kD/lr1o35vOEgLkNsMLayc"
+            + "NuzES084qP+8yXPehkzSsDB83kc7rKfQCQMZ54V7KCCz+Rr4wVG7FCrFAw4e"
+            + "4YghfGVU/5whvbJohl/sXXCYGtVljvY/BSQrojRdP+/iZxFbeD4IKiTjV+XL"
+            + "WKSS56Fq2QQAzeoKBJFUq8nqc8/OCmc52WHSOLnB4AuHL5tNfdE9tjqfzZAE"
+            + "tx3QB7YGGP57tPQxPFDFJVRJDqw0YxI2tG9Pum8iriKGjHg+oEfFhxvCmPxf"
+            + "zDKaGibkLeD7I6ATpXq9If+Nqb5QjzPjFbXBIz/q2nGjamZmp4pujKt/aZxF"
+            + "+YRCebABh4kCQQQYAQIBKwUCSMYsbAUbDAAAAMBdIAQZAQgABgUCSMYsawAK"
+            + "CRCrkqZshpdZSNAiB/9+5nAny2O9/lp2K2z5KVXqlNAHUmd4S/dpqtsZCbAo"
+            + "8Lcr/VYayrNojga1U7cyhsvFky3N9wczzPHq3r9Z+R4WnRM1gpRWl+9+xxtd"
+            + "ZxGfGzMRlxX1n5rCqltKKk6IKuBAr2DtTnxThaQiISO2hEw+P1MT2HnSzMXt"
+            + "zse5CZ5OiOd/bm/rdvTRD/JmLqhXmOFaIwzdVP0dR9Ld4Dug2onOlIelIntC"
+            + "cywY6AmnL0DThaTy5J8MiMSPamSmATl4Bicm8YRbHHz58gCYxI5UMLwtwR1+"
+            + "rSEmrB6GwVHZt0/BzOpuGpvFZI5ZmC5yO/waR1hV+VYj025cIz+SNuDPyjy4"
+            + "AAoJEHHHqp2m1tlW/w0H/3w38SkB5n9D9JL3chp+8fex03t7CQowVMdsBYNY"
+            + "qI4QoVQkakkxzCz5eF7rijXt5eC3NE/quWhlMigT8LARiwBROBWgDRFW4WuX"
+            + "6MwYtjKKUkZSkBKxP3lmaqZrJpF6jfhPEN76zr/NxWPC/nHRNldUdqkzSu/r"
+            + "PeJyePMofJevzMkUzw7EVtbtWhZavCz+EZXRTZXub9M4mDMj64BG6JHMbVZI"
+            + "1iDF2yka5RmhXz9tOhYgq80m7UQUb1ttNn86v1zVbe5lmB8NG4Ndv+JaaSuq"
+            + "SBZOYQ0ZxtMAB3vVVLZCWxma1P5HdXloegh+hosqeu/bl0Wh90z5Bspt6eI4"
+            + "imqwAWeVAdgESMYtmwEEAM9ZeMFxor7oSoXnhQAXD9lXLLfBky6IcIWISY4F"
+            + "JWc8sK8+XiVzpOrefKro0QvmEGSYcDFQMHdScBLOTsiVJiqenA7fg1bkBr/M"
+            + "bnD7vTKMJe0DARlU27tE5hsWCDYTluxIFjGcAcecY2UqHkqpctYKY0WY9EIm"
+            + "dBA5TYaw3c0PABEBAAEAA/0Zg6318nC57cWLIp5dZiO/dRhTPZD0hI+BWZrg"
+            + "zJtPT8rXVY+qK3Jwquig8z29/r+nppEE+xQWVWDlv4M28BDJAbGE+qWKAZqT"
+            + "67lyKgc0c50W/lfbGvvs+F7ldCcNpFvlk79GODKxcEeTGDQKb9R6FnHFee/K"
+            + "cZum71O3Ku3vUQIA3B3PNM+tKocIUNDHnInuLyqLORwQBNGfjU/pLMM0MkpP"
+            + "lWeIfgUmn2zL/e0JrRoO0LQqX1LN/TlfcurDM0SEtwIA8Sba9OpDq99Yz360"
+            + "FiePJiGNNlbj9EZsuGJyMVXL1mTLA6WHnz5XZOfYqJXHlmKvaKDbARW4+0U7"
+            + "0/vPdYWSaQIAwYeo2Ce+b7M5ifbGMDWYBisEvGISg5xfvbe6qApmHS4QVQzE"
+            + "Ym81rdJJ8OfvgSbHcgn37S3OBXIQvNdejF4BWqM9sAGHtCBIeW5lay1JbnRy"
+            + "YW5ldCA8aHluZWtAYWxzb2Z0LmN6PrADA///iQDrBBABAgBVBQJIxi2bBQkB"
+            + "mgKAMBSAAAAAACAAB3ByZWZlcnJlZC1lbWFpbC1lbmNvZGluZ0BwZ3AuY29t"
+            + "cGdwbWltZQULBwgJAgIZAQUbAQAAAAUeAQAAAAIVAgAKCRDlTa3BE84gWVKW"
+            + "BACcoCFKvph9r9QiHT1Z3N4wZH36Uxqu/059EFALnBkEdVudX/p6S9mynGRk"
+            + "EfhmWFC1O6dMpnt+ZBEed/4XyFWVSLPwirML+6dxfXogdUsdFF1NCRHc3QGc"
+            + "txnNUT/zcZ9IRIQjUhp6RkIvJPHcyfTXKSbLviI+PxzHU2Padq8pV7ABZ7kA"
+            + "jQRIfg8tAQQAutJR/aRnfZYwlVv+KlUDYjG8YQUfHpTxpnmVu7W6N0tNg/Xr"
+            + "5dg50wq3I4HOamRxUwHpdPkXyNF1szpDSRZmlM+VmiIvJDBnyH5YVlxT6+zO"
+            + "8LUJ2VTbfPxoLFp539SQ0oJOm7IGMAGO7c0n/QV0N3hKUfWgCyJ+sENDa0Ft"
+            + "JycAEQEAAbABj4kEzQQYAQIENwUCSMYtnAUJAeEzgMLFFAAAAAAAFwNleDUw"
+            + "OWNlcnRpZmljYXRlQHBncC5jb20wggNhMIICyqADAgECAgkA1AoCoRKJCgsw"
+            + "DQYJKoZIhvcNAQEFBQAwgakxCzAJBgNVBAYTAkNaMRcwFQYDVQQIEw5DemVj"
+            + "aCBSZXB1YmxpYzESMBAGA1UEChQJQSYmTCBzb2Z0MSAwHgYDVQQLExdJbnRl"
+            + "cm5hbCBEZXZlbG9wbWVudCBDQTEqMCgGA1UEAxQhQSYmTCBzb2Z0IEludGVy"
+            + "bmFsIERldmVsb3BtZW50IENBMR8wHQYJKoZIhvcNAQkBFhBrYWRsZWNAYWxz"
+            + "b2Z0LmN6MB4XDTA4MDcxNjE1MDkzM1oXDTA5MDcxNjE1MDkzM1owaTELMAkG"
+            + "A1UEBhMCQ1oxFzAVBgNVBAgTDkN6ZWNoIFJlcHVibGljMRIwEAYDVQQKFAlB"
+            + "JiZMIHNvZnQxFDASBgNVBAsTC0RldmVsb3BtZW50MRcwFQYDVQQDEw5IeW5l"
+            + "ay1JbnRyYW5ldDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAutJR/aRn"
+            + "fZYwlVv+KlUDYjG8YQUfHpTxpnmVu7W6N0tNg/Xr5dg50wq3I4HOamRxUwHp"
+            + "dPkXyNF1szpDSRZmlM+VmiIvJDBnyH5YVlxT6+zO8LUJ2VTbfPxoLFp539SQ"
+            + "0oJOm7IGMAGO7c0n/QV0N3hKUfWgCyJ+sENDa0FtJycCAwEAAaOBzzCBzDAJ"
+            + "BgNVHRMEAjAAMCwGCWCGSAGG+EIBDQQfFh1PcGVuU1NMIEdlbmVyYXRlZCBD"
+            + "ZXJ0aWZpY2F0ZTAdBgNVHQ4EFgQUNaw7A6r10PtYZzAvr9CrSKeRYJgwHwYD"
+            + "VR0jBBgwFoAUmqSRM8rN3+T1+tkGiqef8S5suYgwGgYDVR0RBBMwEYEPaHlu"
+            + "ZWtAYWxzb2Z0LmN6MCgGA1UdHwQhMB8wHaAboBmGF2h0dHA6Ly9wZXRyazIv"
+            + "Y2EvY2EuY3JsMAsGA1UdDwQEAwIF4DANBgkqhkiG9w0BAQUFAAOBgQCUdOWd"
+            + "7mBLWj1/GSiYgfwgdTrgk/VZOJvMKBiiFyy1iFEzldz6Xx+mAexnFJKfZXZb"
+            + "EMEGWHfWPmgJzAtuTT0Jz6tUwDmeLH3MP4m8uOZtmyUJ2aq41kciV3rGxF0G"
+            + "BVlZ/bWTaOzHdm6cjylt6xxLt6MJzpPBA/9ZfybSBh1DaAUbDgAAAJ0gBBkB"
+            + "AgAGBQJIxi2bAAoJEAdYkEWLb2R2fJED/RK+JErZ98uGo3Z81cHkdP3rk8is"
+            + "DUL/PR3odBPFH2SIA5wrzklteLK/ZXmBUzcvxqHEgI1F7goXbsBgeTuGgZdx"
+            + "pINErxkNpcMl9FTldWKGiapKrhkZ+G8knDizF/Y7Lg6uGd2nKVxzutLXdHJZ"
+            + "pU89Q5nzq6aJFAZo5TBIcchQAAoJEOVNrcETziBZXvQD/1mvFqBfWqwXxoj3"
+            + "8fHUuFrE2pcp32y3ciO2i+uNVEkNDoaVVNw5eHQaXXWpllI/Pe6LnBl4vkyc"
+            + "n3pjONa4PKrePkEsCUhRbIySqXIHuNwZumDOlKzZHDpCUw72LaC6S6zwuoEf"
+            + "ucOcxTeGIUViANWXyTIKkHfo7HfigixJIL8nsAFn");
+
     public void test1()
         throws Exception
     {
@@ -2064,6 +2177,37 @@ public class PGPKeyRingTest
         checkPublicKeyRingWithX509(pubRing.getEncoded());
     }
 
+    private void testSecretKeyRingWithPersonalCertificate()
+        throws Exception
+    {
+        checkSecretKeyRingWithPersonalCertificate(secWithPersonalCertificate);
+
+        PGPSecretKeyRingCollection secRing = new PGPSecretKeyRingCollection(secWithPersonalCertificate);
+
+        checkSecretKeyRingWithPersonalCertificate(secRing.getEncoded());
+    }
+
+    private void checkSecretKeyRingWithPersonalCertificate(byte[] keyRing)
+        throws Exception
+    {
+        PGPSecretKeyRingCollection secCol = new PGPSecretKeyRingCollection(keyRing);
+
+        PGPSecretKeyRing ring = (PGPSecretKeyRing)secCol.getKeyRings().next();
+
+        int count = 0;
+
+        for (Iterator it = ring.getExtraPublicKeys(); it.hasNext();)
+        {
+            it.next();
+            count++;
+        }
+
+        if (count != 1)
+        {
+            fail("personal certificate data subkey not found - count = " + count);
+        }
+    }
+
     private void checkPublicKeyRingWithX509(byte[] keyRing)
         throws Exception
     {
@@ -2119,6 +2263,7 @@ public class PGPKeyRingTest
             generateSha1Test();
             rewrapTest();
             testPublicKeyRingWithX509();
+            testSecretKeyRingWithPersonalCertificate();
             insertMasterTest();
         }
         catch (PGPException e)
