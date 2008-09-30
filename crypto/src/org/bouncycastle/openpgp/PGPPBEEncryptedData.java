@@ -72,7 +72,6 @@ public class PGPPBEEncryptedData
      * @param provider
      * @return InputStream
      * @throws PGPException
-     * @throws NoSuchProviderException
      */
     public InputStream getDataStream(
         char[]                passPhrase,

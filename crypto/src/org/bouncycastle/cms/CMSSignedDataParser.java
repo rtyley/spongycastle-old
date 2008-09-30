@@ -301,7 +301,6 @@ public class CMSSignedDataParser
      * @param type type of store to create
      * @param provider provider to use
      * @return a store of attribute certificates
-     * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception org.bouncycastle.x509.NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
      */
@@ -346,7 +345,6 @@ public class CMSSignedDataParser
      * @param type type of store to create
      * @param provider provider to use
      * @return a store of public key certificates
-     * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
      */
@@ -391,7 +389,6 @@ public class CMSSignedDataParser
      * @param type type of store to create
      * @param provider provider to use
      * @return a store of CRLs
-     * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
      */

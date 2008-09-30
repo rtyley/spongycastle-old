@@ -10,7 +10,7 @@ import org.bouncycastle.jce.ProviderConfigurationPermission;
 
 import java.security.Permission;
 
-class ProviderUtil
+public class ProviderUtil
 {
     private static Permission BC_EC_LOCAL_PERMISSION = new ProviderConfigurationPermission(
                                                    "BC", ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA);
@@ -48,7 +48,7 @@ class ProviderUtil
         }
     }
 
-    static ECParameterSpec getEcImplicitlyCa()
+    public static ECParameterSpec getEcImplicitlyCa()
     {
         ECParameterSpec spec = (ECParameterSpec)threadSpec.get();
 

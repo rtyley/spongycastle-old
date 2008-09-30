@@ -70,7 +70,6 @@ public class PGPOnePassSignature
      *
      * @param pubKey
      * @param provider
-     * @throws NoSuchProviderException
      * @throws PGPException
      */
     public void initVerify(

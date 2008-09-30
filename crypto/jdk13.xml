@@ -51,6 +51,7 @@
                 <exclude name="**/SunProviderTest.java" />
                 <exclude name="**/NullProviderTest.java" />
                 <exclude name="**/PKIXNameConstraintsTest.java" />
+                <exclude name="**/MiscDataStreamTest.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />

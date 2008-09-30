@@ -25,6 +25,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
+import java.security.Provider;
 import java.security.cert.CRLException;
 import org.bouncycastle.jce.cert.CertStore;
 import java.security.cert.CertificateException;
@@ -157,8 +158,8 @@ class CMSSignedHelper
     
     MessageDigest getDigestInstance(
         String algorithm, 
-        String provider) 
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
         try
         {
@@ -188,39 +189,53 @@ class CMSSignedHelper
 
     private MessageDigest createDigestInstance(
         String algorithm,
-        String provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
-        if (provider != null)
+        try
         {
-            return MessageDigest.getInstance(algorithm, provider);
+            if (provider != null)
+            {
+                return MessageDigest.getInstance(algorithm, provider.getName());
+            }
+            else
+            {
+                return MessageDigest.getInstance(algorithm);
+            }
         }
-        else
+        catch (NoSuchProviderException e)
         {
-            return MessageDigest.getInstance(algorithm);
+            throw new IllegalStateException(e.toString());
         }
     }
 
     Signature getSignatureInstance(
         String algorithm, 
-        String provider) 
-        throws NoSuchProviderException, NoSuchAlgorithmException
+        Provider provider)
+        throws NoSuchAlgorithmException
     {
-        if (provider != null)
+        try
         {
-            return Signature.getInstance(algorithm, provider);
+            if (provider != null)
+            {
+                return Signature.getInstance(algorithm, provider.getName());
+            }
+            else
+            {
+                return Signature.getInstance(algorithm);
+            }
         }
-        else
+        catch (NoSuchProviderException e)
         {
-            return Signature.getInstance(algorithm);
+            throw new IllegalStateException(e.toString());
         }
     }
 
     X509Store createAttributeStore(
         String type,
-        String provider,
+        Provider provider,
         ASN1Set certSet)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+        throws NoSuchStoreException, CMSException
     {
         List certs = new ArrayList();
 
@@ -265,9 +280,9 @@ class CMSSignedHelper
 
     X509Store createCertificateStore(
         String type,
-        String provider,
+        Provider provider,
         ASN1Set certSet)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+        throws NoSuchStoreException, CMSException
     {
         List certs = new ArrayList();
 
@@ -289,9 +304,9 @@ class CMSSignedHelper
 
     X509Store createCRLsStore(
         String type,
-        String provider,
+        Provider provider,
         ASN1Set crlSet)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+        throws NoSuchStoreException, CMSException
     {
         List crls = new ArrayList();
 
@@ -313,10 +328,10 @@ class CMSSignedHelper
 
     CertStore createCertStore(
         String type,
-        String provider,
+        Provider provider,
         ASN1Set certSet,
         ASN1Set crlSet)
-        throws NoSuchProviderException, CMSException, NoSuchAlgorithmException
+        throws CMSException, NoSuchAlgorithmException
     {
         List certsAndcrls = new ArrayList();
 
@@ -351,8 +366,8 @@ class CMSSignedHelper
         }
     }
 
-    private void addCertsFromSet(List certs, ASN1Set certSet, String provider)
-        throws NoSuchProviderException, CMSException
+    private void addCertsFromSet(List certs, ASN1Set certSet, Provider provider)
+        throws CMSException
     {
         CertificateFactory cf;
 
@@ -360,12 +375,16 @@ class CMSSignedHelper
         {
             if (provider != null)
             {
-                cf = CertificateFactory.getInstance("X.509", provider);
+                cf = CertificateFactory.getInstance("X.509", provider.getName());
             }
             else
             {
                 cf = CertificateFactory.getInstance("X.509");
             }
+        }
+        catch (NoSuchProviderException ex)
+        {
+            throw new CMSException("can't get certificate factory.", ex);
         }
         catch (CertificateException ex)
         {
@@ -398,8 +417,8 @@ class CMSSignedHelper
         }
     }
 
-    private void addCRLsFromSet(List crls, ASN1Set certSet, String provider)
-        throws NoSuchProviderException, CMSException
+    private void addCRLsFromSet(List crls, ASN1Set certSet, Provider provider)
+        throws CMSException
     {
         CertificateFactory cf;
 
@@ -407,12 +426,16 @@ class CMSSignedHelper
         {
             if (provider != null)
             {
-                cf = CertificateFactory.getInstance("X.509", provider);
+                cf = CertificateFactory.getInstance("X.509", provider.getName());
             }
             else
             {
                 cf = CertificateFactory.getInstance("X.509");
             }
+        }
+        catch (NoSuchProviderException ex)
+        {
+            throw new CMSException("can't get certificate factory.", ex);
         }
         catch (CertificateException ex)
         {
