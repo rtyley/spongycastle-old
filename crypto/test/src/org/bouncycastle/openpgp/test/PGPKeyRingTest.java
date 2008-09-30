@@ -2181,9 +2181,9 @@ public class PGPKeyRingTest
         throws Exception
     {
         checkSecretKeyRingWithPersonalCertificate(secWithPersonalCertificate);
-
+         System.out.println("got here");
         PGPSecretKeyRingCollection secRing = new PGPSecretKeyRingCollection(secWithPersonalCertificate);
-
+         System.out.println("and here");
         checkSecretKeyRingWithPersonalCertificate(secRing.getEncoded());
     }
 
@@ -2192,14 +2192,18 @@ public class PGPKeyRingTest
     {
         PGPSecretKeyRingCollection secCol = new PGPSecretKeyRingCollection(keyRing);
 
-        PGPSecretKeyRing ring = (PGPSecretKeyRing)secCol.getKeyRings().next();
 
         int count = 0;
 
-        for (Iterator it = ring.getExtraPublicKeys(); it.hasNext();)
+        for (Iterator rIt = secCol.getKeyRings(); rIt.hasNext();)
         {
-            it.next();
-            count++;
+            PGPSecretKeyRing ring = (PGPSecretKeyRing)rIt.next();
+
+            for (Iterator it = ring.getExtraPublicKeys(); it.hasNext();)
+            {
+                it.next();
+                count++;
+            }
         }
 
         if (count != 1)
