@@ -32,7 +32,6 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.provider.ECUtil;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -40,6 +39,7 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 
 public class JCEECPublicKey
     implements ECPublicKey, ECPointEncoder
@@ -50,7 +50,7 @@ public class JCEECPublicKey
     private boolean         withCompression;
     private GOST3410PublicKeyAlgParameters       gostParams;
 
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String              algorithm,
         JCEECPublicKey      key)
     {
@@ -61,7 +61,7 @@ public class JCEECPublicKey
         this.gostParams = key.gostParams;
     }
 
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String              algorithm,
         ECPublicKeySpec     spec)
     {
@@ -84,7 +84,7 @@ public class JCEECPublicKey
         }
     }
 
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String                  algorithm,
         ECPublicKeyParameters   params,
         ECParameterSpec         spec)
@@ -109,7 +109,7 @@ public class JCEECPublicKey
         }
     }
 
-    JCEECPublicKey(
+    public JCEECPublicKey(
         String                  algorithm,
         ECPublicKeyParameters   params)
     {
@@ -363,7 +363,7 @@ public class JCEECPublicKey
         return q;
     }
 
-    org.bouncycastle.math.ec.ECPoint engineGetQ()
+    public org.bouncycastle.math.ec.ECPoint engineGetQ()
     {
         return q;
     }
