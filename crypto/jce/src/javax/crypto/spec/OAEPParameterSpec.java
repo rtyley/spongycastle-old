@@ -55,7 +55,10 @@ public class OAEPParameterSpec
     public OAEPParameterSpec(String mdName, String mgfName,
             AlgorithmParameterSpec mgfSpec, PSource pSrc)
     {
-
+        this.mdName = mdName;
+        this.mgfName = mgfName;
+        this.mgfSpec = mgfSpec;
+        this.pSrc = pSrc;
     }
 
     /**
