@@ -7,7 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-class ProviderUtil
+public class ProviderUtil
 {
     private static final long  MAX_MEMORY = Integer.MAX_VALUE;
 
@@ -24,7 +24,7 @@ class ProviderUtil
         }
     }
 
-    static ECParameterSpec getEcImplicitlyCa()
+    public static ECParameterSpec getEcImplicitlyCa()
     {
         return ecImplicitCaParams;
     }
