@@ -52,8 +52,8 @@ import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
  */
 public class PGPSecretKey
 {    
-    final SecretKeyPacket secret;
-    final PGPPublicKey    pub;
+    SecretKeyPacket secret;
+    PGPPublicKey    pub;
 
     PGPSecretKey(
         SecretKeyPacket secret,
