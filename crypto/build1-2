@@ -135,6 +135,7 @@ then
     rm -rf src/org/bouncycastle/jce/provider/X509LDAP*.java
     rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
     rm -rf src/org/bouncycastle/jce/provider/EC5*.java
+    rm -rf src/org/bouncycastle/jce/provider/asymmetric/ec/EC5*.java
     rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
     rm -rf src/org/bouncycastle/jce/provider/test/CRL5Test.java
@@ -151,6 +152,8 @@ then
     rm -rf src/org/bouncycastle/jce/provider/PKIXAttrCert*.java
     rm -rf src/org/bouncycastle/jce/provider/PKIXNameConstraints*.java
     rm -rf src/org/bouncycastle/jce/provider/test/PKIXNameConstraintsTest.java
+    rm -rf src/org/bouncycastle/jce/provider/test/nist
+    rm -rf src/org/bouncycastle/jce/provider/test/rsa3
     rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
     rm -rf src/org/bouncycastle/x509/PKIXAttrCert*.java
     rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
@@ -223,6 +226,9 @@ then
         org.bouncycastle.jce.spec \
         org.bouncycastle.jce.examples \
         org.bouncycastle.jce.provider \
+        org.bouncycastle.jce.provider.asymmetric \
+        org.bouncycastle.jce.provider.asymmetric.ec \
+        org.bouncycastle.jce.provider.symmetric \
         org.bouncycastle.jce.provider.test \
         org.bouncycastle.ocsp \
         org.bouncycastle.ocsp.test \
@@ -242,7 +248,7 @@ then
 
     (cd src/java/security/spec; javac -d ../../../../classes -classpath ../../../../classes *.java )
 
-    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java */*/*.java */*/*/*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java */*/*.java */*/*/*.java */*/*/*/*.java)
 
     (cd src/javax/crypto; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java)
 
@@ -278,6 +284,7 @@ then
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/bcpg src/org/bouncycastle/openpgp | (cd bcpg-jdk12-$base; tar xf -)
     (cd test/src; tar cf - org/bouncycastle/openpgp | (cd ../../bcpg-jdk12-$base/src; tar xf -))
     (cd bzip2 && tar cf - src | (cd ../bcpg-jdk12-$base; tar xf -))
+    (cd jdk1.3; tar cf - * | (cd ../bcpg-jdk12-$base/src; tar xf -))
     (cd jdk1.2; tar cf - * | (cd ../bcpg-jdk12-$base/src; tar xf -))
     (
     cd bcpg-jdk12-$base; mkdir classes; mkdir docs;
@@ -290,6 +297,8 @@ then
     rm -rf src/org/bouncycastle/ocsp
     rm -rf src/org/bouncycastle/mail
     rm -rf src/org/bouncycastle/cms
+    rm -rf src/org/bouncycastle/tsp
+    rm -rf src/org/bouncycastle/x509
     rm -rf src/org/bouncycastle/sasn1
     rm -f src/org/bouncycastle/openpgp/test/DSA2Test.java
     find src -name AllTests.java -exec rm {} \;
