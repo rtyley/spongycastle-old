@@ -21,6 +21,8 @@ public class TBSRequest
     ASN1Sequence    requestList;
     X509Extensions  requestExtensions;
 
+    boolean         versionSet;
+
     public TBSRequest(
         GeneralName     requestorName,
         ASN1Sequence    requestList,
@@ -43,6 +45,7 @@ public class TBSRequest
 
             if (o.getTagNo() == 0)
             {
+                versionSet = true;
                 version = DERInteger.getInstance((ASN1TaggedObject)seq.getObjectAt(0), true);
                 index++;
             }
@@ -126,9 +129,10 @@ public class TBSRequest
         ASN1EncodableVector    v = new ASN1EncodableVector();
 
         //
-        // if default don't include.
+        // if default don't include - unless explicitly provided. Not strictly correct
+        // but required for some requests
         //
-        if (!version.equals(V1))
+        if (!version.equals(V1) || versionSet)
         {
             v.add(new DERTaggedObject(true, 0, version));
         }
