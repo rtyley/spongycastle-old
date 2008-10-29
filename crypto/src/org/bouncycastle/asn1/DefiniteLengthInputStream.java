@@ -25,71 +25,75 @@ class DefiniteLengthInputStream
         }
 
         this._length = length;
+
+        if (length == 0)
+        {
+            setParentEofDetect(true);
+        }
     }
 
     public int read()
         throws IOException
     {
-        if (_length > 0)
+        if (_length == 0)
         {
-            int b = _in.read();
-
-            if (b < 0)
-            {
-                throw new EOFException();
-            }
-
-            --_length;
-            return b;
+            return -1;
         }
 
-        setParentEofDetect(true);
+        int b = _in.read();
 
-        return -1;
+        if (b < 0)
+        {
+            throw new EOFException();
+        }
+
+        if (--_length == 0)
+        {
+            setParentEofDetect(true);
+        }
+
+        return b;
     }
 
     public int read(byte[] buf, int off, int len)
         throws IOException
     {
-        if (_length > 0)
+        if (_length == 0)
         {
-            int toRead = Math.min(len, _length);
-            int numRead = _in.read(buf, off, toRead);
-
-            if (numRead < 0)
-            {
-                throw new EOFException();
-            }
-
-            _length -= numRead;
-            return numRead;
+            return -1;
         }
 
-        setParentEofDetect(true);
+        int toRead = Math.min(len, _length);
+        int numRead = _in.read(buf, off, toRead);
 
-        return -1;
+        if (numRead < 0)
+        {
+            throw new EOFException();
+        }
+
+        if ((_length -= numRead) == 0)
+        {
+            setParentEofDetect(true);
+        }
+
+        return numRead;
     }
 
     byte[] toByteArray()
         throws IOException
     {
-        byte[] bytes;
-        if (_length > 0)
+        if (_length == 0)
         {
-            bytes = new byte[_length];
-            if (Streams.readFully(_in, bytes) < _length)
-            {
-                throw new EOFException();
-            }
-            _length = 0;
-        }
-        else
-        {
-            bytes = EMPTY_BYTES;
+            return EMPTY_BYTES;
         }
 
+        byte[] bytes = new byte[_length];
+        if (Streams.readFully(_in, bytes) < _length)
+        {
+            throw new EOFException();
+        }
+        _length = 0;
         setParentEofDetect(true);
-
         return bytes;
     }
 }
