@@ -199,6 +199,14 @@ public abstract class RecipientInformation
         String provider)
         throws CMSException, NoSuchProviderException
     {
+        return getContent(key, CMSUtils.getProvider(provider));
+    }
+
+    public byte[] getContent(
+        Key    key,
+        Provider provider)
+        throws CMSException, NoSuchProviderException
+    {
         try
         {
             if (_data instanceof ByteArrayInputStream)
@@ -216,4 +224,11 @@ public abstract class RecipientInformation
     
     abstract public CMSTypedStream getContentStream(Key key, String provider)
         throws CMSException, NoSuchProviderException;
+
+    public CMSTypedStream getContentStream(Key key, Provider provider)
+        throws CMSException, NoSuchProviderException
+    {
+        // Default implementation provided in case subclasses exist already
+        return getContentStream(key, provider.getName());
+    }
 }
