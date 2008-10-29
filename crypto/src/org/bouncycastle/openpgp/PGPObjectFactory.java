@@ -107,6 +107,6 @@ public class PGPObjectFactory
             return in.readPacket();
         }
         
-        throw new IOException("unknown object in stream " + in.nextPacketTag());
+        throw new IOException("unknown object in stream: " + in.nextPacketTag());
     }
 }
