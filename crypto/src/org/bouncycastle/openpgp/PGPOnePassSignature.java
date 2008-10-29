@@ -38,15 +38,6 @@ public class PGPOnePassSignature
     {
         this.sigPack = sigPack;
         this.signatureType = sigPack.getSignatureType();
-        
-        try
-        {
-            this.sig = Signature.getInstance(PGPUtil.getSignatureName(sigPack.getKeyAlgorithm(), sigPack.getHashAlgorithm()), PGPUtil.getDefaultProvider());
-        }
-        catch (Exception e)
-        {    
-            throw new PGPException("can't set up signature object.",  e);
-        }
     }
     
     /**
@@ -78,6 +69,17 @@ public class PGPOnePassSignature
         throws PGPException
     {
         lastb = 0;
+
+        try
+        {
+            sig = Signature.getInstance(
+                PGPUtil.getSignatureName(sigPack.getKeyAlgorithm(), sigPack.getHashAlgorithm()),
+                provider);
+        }
+        catch (Exception e)
+        {    
+            throw new PGPException("can't set up signature object.",  e);
+        }
 
         try
         {
