@@ -20,18 +20,26 @@ class IndefiniteLengthInputStream
 
         _b1 = in.read();
         _b2 = in.read();
-        _eofReached = (_b2 < 0);
+
+        if (_b2 < 0)
+        {
+            // Corrupted stream
+            throw new EOFException();
+        }
+
+        checkForEof();
     }
 
     void setEofOn00(
         boolean eofOn00)
     {
         _eofOn00 = eofOn00;
+        checkForEof();
     }
 
-    boolean checkForEof()
+    private boolean checkForEof()
     {
-        if (_eofOn00 && (_b1 == 0x00 && _b2 == 0x00))
+        if (!_eofReached && _eofOn00 && (_b1 == 0x00 && _b2 == 0x00))
         {
             _eofReached = true;
             setParentEofDetect(true);
