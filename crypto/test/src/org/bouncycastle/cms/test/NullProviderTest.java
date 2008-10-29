@@ -221,7 +221,7 @@ public class NullProviderTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-            byte[] recData = recipient.getContent(keyPair.getPrivate(), null);
+            byte[] recData = recipient.getContent(keyPair.getPrivate(), (String)null);
 
             assertEquals(true, Arrays.equals(data, recData));
         }
