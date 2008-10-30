@@ -41,6 +41,7 @@ import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -52,6 +53,7 @@ import java.security.Security;
 import java.security.Signature;
 import java.security.cert.CRL;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
@@ -2285,10 +2287,15 @@ public class CertTest
     {
         CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
 
-        Certificate cert = cf.generateCertificate(new ByteArrayInputStream(PEMData.CERTIFICATE_1.getBytes("US-ASCII")));
+        Certificate cert = readPEMCert(cf, PEMData.CERTIFICATE_1);
         if (cert == null)
         {
             fail("PEM cert not read");
+        }
+        cert = readPEMCert(cf, "-----BEGIN CERTIFICATE-----" + PEMData.CERTIFICATE_2);
+        if (cert == null)
+        {
+            fail("PEM cert with extraneous header not read");
         }
         CRL crl = cf.generateCRL(new ByteArrayInputStream(PEMData.CRL_1.getBytes("US-ASCII")));
         if (crl == null)
@@ -2305,6 +2312,12 @@ public class CertTest
         {
             fail("PEM crl collection not right");
         }
+    }
+
+    private static Certificate readPEMCert(CertificateFactory cf, String pemData)
+        throws CertificateException, UnsupportedEncodingException
+    {
+        return cf.generateCertificate(new ByteArrayInputStream(pemData.getBytes("US-ASCII")));
     }
 
     private void pkcs7Test()
@@ -2474,6 +2487,7 @@ public class CertTest
     {
         checkCertificate(1, cert1);
         checkCertificate(2, cert2);
+        checkCertificate(3, cert3);
         checkCertificate(4, cert4);
         checkCertificate(5, cert5);
         checkCertificate(6, oldEcdsa);
