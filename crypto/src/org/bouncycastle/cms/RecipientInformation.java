@@ -205,7 +205,7 @@ public abstract class RecipientInformation
     public byte[] getContent(
         Key    key,
         Provider provider)
-        throws CMSException, NoSuchProviderException
+        throws CMSException
     {
         try
         {
@@ -221,14 +221,13 @@ public abstract class RecipientInformation
             throw new RuntimeException("unable to parse internal stream: " + e);
         }
     }
-    
-    abstract public CMSTypedStream getContentStream(Key key, String provider)
-        throws CMSException, NoSuchProviderException;
 
-    public CMSTypedStream getContentStream(Key key, Provider provider)
+    public CMSTypedStream getContentStream(Key key, String provider)
         throws CMSException, NoSuchProviderException
     {
-        // Default implementation provided in case subclasses exist already
-        return getContentStream(key, provider.getName());
+        return getContentStream(key, CMSUtils.getProvider(provider));
     }
+
+    public abstract CMSTypedStream getContentStream(Key key, Provider provider)
+        throws CMSException;
 }
