@@ -62,7 +62,7 @@ public class PEMUtil
 
         while ((line = readLine(in)) != null)
         {
-            if (line.equals(_header1) || line.equals(_header2))
+            if (line.startsWith(_header1) || line.startsWith(_header2))
             {
                 break;
             }
@@ -70,7 +70,7 @@ public class PEMUtil
 
         while ((line = readLine(in)) != null)
         {
-            if (line.equals(_footer1) || line.equals(_footer2))
+            if (line.startsWith(_footer1) || line.startsWith(_footer2))
             {
                 break;
             }
