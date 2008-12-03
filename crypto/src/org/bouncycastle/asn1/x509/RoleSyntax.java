@@ -121,7 +121,7 @@ public class RoleSyntax
                 roleAuthority = GeneralNames.getInstance(taggedObject, false);
                 break;
             case 1:
-                roleName = GeneralName.getInstance(taggedObject, false);
+                roleName = GeneralName.getInstance(taggedObject, true);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown tag in RoleSyntax");
@@ -208,7 +208,7 @@ public class RoleSyntax
         {
             v.add(new DERTaggedObject(false, 0, roleAuthority));
         }
-        v.add(new DERTaggedObject(false, 1, roleName));
+        v.add(new DERTaggedObject(true, 1, roleName));
         
         return new DERSequence(v);
     }
