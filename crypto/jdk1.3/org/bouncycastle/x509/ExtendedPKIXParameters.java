@@ -164,7 +164,7 @@ public class ExtendedPKIXParameters
 
     private int validityModel = PKIX_VALIDITY_MODEL;
 
-    private boolean useDeltas = true;
+    private boolean useDeltas = false;
 
     /**
      * Defaults to <code>false</code>.
