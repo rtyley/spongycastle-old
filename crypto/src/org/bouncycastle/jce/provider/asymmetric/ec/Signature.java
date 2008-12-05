@@ -113,6 +113,15 @@ public class Signature
         }
     }
 
+    static public class ecDSAnone
+        extends Signature
+    {
+        public ecDSAnone()
+        {
+            super(new NullDigest(), new ECDSASigner(), new StdDSAEncoder());
+        }
+    }
+
     static public class ecDSA224
         extends Signature
     {
@@ -326,6 +335,46 @@ public class Signature
             sig[1] = new BigInteger(1, second);
 
             return sig;
+        }
+    }
+
+    private static class NullDigest
+        implements Digest
+    {
+        private ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        public String getAlgorithmName()
+        {
+            return "NULL";
+        }
+
+        public int getDigestSize()
+        {
+            return bOut.size();
+        }
+
+        public void update(byte in)
+        {
+            bOut.write(in);
+        }
+
+        public void update(byte[] in, int inOff, int len)
+        {
+            bOut.write(in, inOff, len);
+        }
+
+        public int doFinal(byte[] out, int outOff)
+        {
+            byte[] res = bOut.toByteArray();
+
+            System.arraycopy(res, 0, out, outOff, res.length);
+
+            return res.length;
+        }
+
+        public void reset()
+        {
+            bOut.reset();
         }
     }
 }
