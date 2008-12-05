@@ -41,6 +41,7 @@ public class ECMappings
         put("Alg.Alias.KeyPairGenerator.GOST-3410-2001", "ECGOST3410");
 
         put("Signature.ECDSA", "org.bouncycastle.jce.provider.asymmetric.ec.Signature$ecDSA");
+	    put("Signature.NONEwithECDSA", "org.bouncycastle.jce.provider.asymmetric.ec.Signature$ecDSAnone");
 
         put("Alg.Alias.Signature.SHA1withECDSA", "ECDSA");
         put("Alg.Alias.Signature.ECDSAwithSHA1", "ECDSA");

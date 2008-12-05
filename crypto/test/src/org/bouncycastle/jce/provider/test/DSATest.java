@@ -13,6 +13,7 @@ import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.BigIntegers;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
@@ -33,6 +34,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.InvalidKeyException;
+import java.security.SignatureException;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.DSAPublicKey;
 import java.security.spec.DSAParameterSpec;
@@ -269,6 +272,78 @@ public class DSATest
             fail("s component wrong." + System.getProperty("line.separator")
                     + " expecting: " + s + System.getProperty("line.separator")
                     + " got      : " + sig[1]);
+        }
+    }
+
+    private void testNONEwithECDSA239bitPrime()
+        throws Exception
+    {
+        ECCurve curve = new ECCurve.Fp(
+                new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
+                new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+                new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+
+        ECParameterSpec spec = new ECParameterSpec(
+                curve,
+                curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+                new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
+
+
+        ECPrivateKeySpec priKey = new ECPrivateKeySpec(
+                new BigInteger("876300101507107567501066130761671078357010671067781776716671676178726717"), // d
+                spec);
+
+        ECPublicKeySpec pubKey = new ECPublicKeySpec(
+                curve.decodePoint(Hex.decode("025b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c70")), // Q
+                spec);
+
+        Signature           sgr = Signature.getInstance("NONEwithECDSA", "BC");
+        KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
+        PrivateKey          sKey = f.generatePrivate(priKey);
+        PublicKey           vKey = f.generatePublic(pubKey);
+        SecureRandom        k = new SecureRandom();
+
+        byte[] message = "abc".getBytes();
+        byte[] sig = Hex.decode("3040021e2cb7f36803ebb9c427c58d8265f11fc5084747133078fc279de874fbecb0021e64cb19604be06c57e761b3de5518f71de0f6e0cd2df677cec8a6ffcb690d");
+
+        checkMessage(sgr, sKey, vKey, message, sig);
+
+        message = "abcdefghijklmnopqrstuvwxyz".getBytes();
+        sig = Hex.decode("3040021e2cb7f36803ebb9c427c58d8265f11fc5084747133078fc279de874fbecb0021e43fd65b3363d76aabef8630572257dbb67c82818ad9fad31256539b1b02c");
+
+        checkMessage(sgr, sKey, vKey, message, sig);
+
+        message = "a very very long message gauranteed to cause an overflow".getBytes();
+        sig = Hex.decode("3040021e2cb7f36803ebb9c427c58d8265f11fc5084747133078fc279de874fbecb0021e7d5be84b22937a1691859a3c6fe45ed30b108574431d01b34025825ec17a");
+
+        checkMessage(sgr, sKey, vKey, message, sig);
+    }
+
+    private void checkMessage(Signature sgr, PrivateKey sKey, PublicKey vKey, byte[] message, byte[] sig)
+        throws InvalidKeyException, SignatureException
+    {
+        byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("700000017569056646655505781757157107570501575775705779575555657156756655"));
+
+        SecureRandom    k = new FixedSecureRandom(kData);
+
+        sgr.initSign(sKey, k);
+
+        sgr.update(message);
+
+        byte[]  sigBytes = sgr.sign();
+
+        if (!Arrays.areEqual(sigBytes, sig))
+        {
+            fail(new String(message) + " signature incorrect");
+        }
+
+        sgr.initVerify(vKey);
+
+        sgr.update(message);
+
+        if (!sgr.verify(sigBytes))
+        {
+            fail(new String(message) + " verification failed");
         }
     }
 
@@ -616,6 +691,7 @@ public class DSATest
     {
         testCompat();
         testECDSA239bitPrime();
+        testNONEwithECDSA239bitPrime();
         testECDSA239bitBinary();
         testECDSA239bitBinary("RIPEMD160withECDSA", TeleTrusTObjectIdentifiers.ecSignWithRipemd160);
         testECDSA239bitBinary("SHA1withECDSA", TeleTrusTObjectIdentifiers.ecSignWithSha1);
