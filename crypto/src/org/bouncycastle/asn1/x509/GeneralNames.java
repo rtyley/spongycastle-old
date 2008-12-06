@@ -9,7 +9,7 @@ import org.bouncycastle.asn1.DERSequence;
 public class GeneralNames
     extends ASN1Encodable
 {
-    ASN1Sequence            seq;
+    private final GeneralName[] names;
 
     public static GeneralNames getInstance(
         Object  obj)
@@ -42,25 +42,23 @@ public class GeneralNames
     public GeneralNames(
         GeneralName  name)
     {
-        this.seq = new DERSequence(name);
+        this.names = new GeneralName[] { name };
     }
     
     public GeneralNames(
         ASN1Sequence  seq)
     {
-        this.seq = seq;
-    }
+        this.names = new GeneralName[seq.size()];
 
-    public GeneralName[] getNames()
-    {
-        GeneralName[]   names = new GeneralName[seq.size()];
-        
         for (int i = 0; i != seq.size(); i++)
         {
             names[i] = GeneralName.getInstance(seq.getObjectAt(i));
         }
-        
-        return names;
+    }
+
+    public GeneralName[] getNames()
+    {
+        return (GeneralName[])names.clone();
     }
 
     /**
@@ -71,14 +69,13 @@ public class GeneralNames
      */
     public DERObject toASN1Object()
     {
-        return seq;
+        return new DERSequence(names);
     }
 
     public String toString()
     {
         StringBuffer  buf = new StringBuffer();
         String        sep = System.getProperty("line.separator");
-        GeneralName[] names = getNames();
 
         buf.append("GeneralNames:");
         buf.append(sep);
