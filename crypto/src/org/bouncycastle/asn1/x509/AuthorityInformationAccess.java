@@ -52,6 +52,11 @@ public class AuthorityInformationAccess
     public AuthorityInformationAccess(
         ASN1Sequence   seq)
     {
+        if (seq.size() < 1) 
+        {
+            throw new IllegalArgumentException("sequence may not be empty");
+        }
+
         descriptions = new AccessDescription[seq.size()];
         
         for (int i = 0; i != seq.size(); i++)

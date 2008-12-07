@@ -45,7 +45,7 @@ public class AccessDescription
     {
         if (seq.size() != 2) 
         {
-            throw new IllegalArgumentException("wrong number of elements in inner sequence");
+            throw new IllegalArgumentException("wrong number of elements in sequence");
         }
         
         accessMethod = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
