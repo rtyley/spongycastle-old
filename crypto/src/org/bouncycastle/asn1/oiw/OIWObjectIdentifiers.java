@@ -10,7 +10,12 @@ public interface OIWObjectIdentifiers
     static final DERObjectIdentifier    md5WithRSA              = new DERObjectIdentifier("1.3.14.3.2.3");
     static final DERObjectIdentifier    md4WithRSAEncryption    = new DERObjectIdentifier("1.3.14.3.2.4");
     
+    static final DERObjectIdentifier    desECB                  = new DERObjectIdentifier("1.3.14.3.2.6");
     static final DERObjectIdentifier    desCBC                  = new DERObjectIdentifier("1.3.14.3.2.7");
+    static final DERObjectIdentifier    desOFB                  = new DERObjectIdentifier("1.3.14.3.2.8");
+    static final DERObjectIdentifier    desCFB                  = new DERObjectIdentifier("1.3.14.3.2.9");
+
+    static final DERObjectIdentifier    desEDE                  = new DERObjectIdentifier("1.3.14.3.2.17");
     
     static final DERObjectIdentifier    idSHA1                  = new DERObjectIdentifier("1.3.14.3.2.26");
 
