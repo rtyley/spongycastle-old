@@ -65,41 +65,9 @@ public class DHTest
 
         keyGen.initialize(dhParams);
 
-        //
-        // a side
-        //
+        testTwoParty(algName, size, privateValueSize, keyGen);
+
         KeyPair aKeyPair = keyGen.generateKeyPair();
-
-        KeyAgreement aKeyAgree = KeyAgreement.getInstance(algName, "BC");
-
-        checkKeySize(privateValueSize, aKeyPair);
-
-        aKeyAgree.init(aKeyPair.getPrivate());
-
-        //
-        // b side
-        //
-        KeyPair bKeyPair = keyGen.generateKeyPair();
-
-        KeyAgreement bKeyAgree = KeyAgreement.getInstance(algName, "BC");
-
-        checkKeySize(privateValueSize, bKeyPair);
-
-        bKeyAgree.init(bKeyPair.getPrivate());
-
-        //
-        // agreement
-        //
-        aKeyAgree.doPhase(bKeyPair.getPublic(), true);
-        bKeyAgree.doPhase(aKeyPair.getPublic(), true);
-
-        BigInteger  k1 = new BigInteger(aKeyAgree.generateSecret());
-        BigInteger  k2 = new BigInteger(bKeyAgree.generateSecret());
-
-        if (!k1.equals(k2))
-        {
-            fail(size + " bit 2-way test failed");
-        }
 
         //
         // public key encoding test
@@ -202,8 +170,10 @@ public class DHTest
         cPairGen.initialize(spec);
         KeyPair cPair = cPairGen.generateKeyPair();
 
+        KeyAgreement aKeyAgree = KeyAgreement.getInstance(algName, "BC");
         aKeyAgree.init(aPair.getPrivate());
 
+        KeyAgreement bKeyAgree = KeyAgreement.getInstance(algName, "BC");
         bKeyAgree.init(bPair.getPrivate());
 
         KeyAgreement cKeyAgree = KeyAgreement.getInstance(algName, "BC");
@@ -233,6 +203,46 @@ public class DHTest
         if (!cShared.equals(bShared))
         {
             fail(size + " bit 3-way test failed (c and b differ)");
+        }
+    }
+
+    private void testTwoParty(String algName, int size, int privateValueSize, KeyPairGenerator keyGen)
+        throws Exception
+    {
+        //
+        // a side
+        //
+        KeyPair aKeyPair = keyGen.generateKeyPair();
+
+        KeyAgreement aKeyAgree = KeyAgreement.getInstance(algName, "BC");
+
+        checkKeySize(privateValueSize, aKeyPair);
+
+        aKeyAgree.init(aKeyPair.getPrivate());
+
+        //
+        // b side
+        //
+        KeyPair bKeyPair = keyGen.generateKeyPair();
+
+        KeyAgreement bKeyAgree = KeyAgreement.getInstance(algName, "BC");
+
+        checkKeySize(privateValueSize, bKeyPair);
+
+        bKeyAgree.init(bKeyPair.getPrivate());
+
+        //
+        // agreement
+        //
+        aKeyAgree.doPhase(bKeyPair.getPublic(), true);
+        bKeyAgree.doPhase(aKeyPair.getPublic(), true);
+
+        BigInteger  k1 = new BigInteger(aKeyAgree.generateSecret());
+        BigInteger  k2 = new BigInteger(bKeyAgree.generateSecret());
+
+        if (!k1.equals(k2))
+        {
+            fail(size + " bit 2-way test failed");
         }
     }
 
@@ -474,6 +484,18 @@ public class DHTest
         }
     }
 
+    private void testInitialise()
+        throws Exception
+    {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH", "BC");
+
+        keyGen.initialize(512);
+
+        keyGen.generateKeyPair();
+
+        testTwoParty("DH", 512, 0, keyGen);
+    }
+
     public void performTest()
         throws Exception
     {
@@ -489,6 +511,7 @@ public class DHTest
         testECDH("ECDHC");
         testExceptions();
         testDESAndDESede(g768, p768);
+        testInitialise();
     }
 
     public static void main(

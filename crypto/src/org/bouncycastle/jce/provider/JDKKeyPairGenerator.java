@@ -175,6 +175,8 @@ public abstract class JDKKeyPairGenerator
 
                     pGen.init(strength, certainty, random);
 
+                    param = new DHKeyGenerationParameters(random, pGen.generateParameters());
+
                     params.put(paramStrength, param);
                 }
 
