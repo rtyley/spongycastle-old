@@ -1189,7 +1189,27 @@ public class CertPathValidatorUtilities
         {
             throw new AnnotatedException("Could not search for delta CRLs.", e);
         }
-        return temp;
+
+        Set result = new HashSet();
+
+        for (Iterator it = temp.iterator(); it.hasNext();)
+        {
+            X509CRL crl = (X509CRL)it.next();
+            
+            if (isDeltaCRL(crl))
+            {
+                result.add(crl);
+            }
+        }
+
+        return result;
+    }
+
+    private static boolean isDeltaCRL(X509CRL crl)
+    {
+        Set critical = crl.getCriticalExtensionOIDs();
+
+        return critical.contains(RFC3280CertPathUtilities.DELTA_CRL_INDICATOR);
     }
 
     /**

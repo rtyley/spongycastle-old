@@ -61,6 +61,16 @@ public class CipherStreamTest
             + "9036db1e8189600500ade078491fbf9a"
             + "1cdc30136c3d6e2490f664b29cd57102");
 
+    private static final byte[] GRAIN_V1 = Hex.decode("0123456789abcdef1234");
+    private static final byte[] GRAIN_V1_IV = Hex.decode("0123456789abcdef");
+    private static final byte[] GRAIN_V1_IN = new byte[10];
+    private static final byte[] GRAIN_V1_OUT = Hex.decode("7f362bd3f7abae203664");
+
+    private static final byte[] GRAIN_128 = Hex.decode("0123456789abcdef123456789abcdef0");
+    private static final byte[] GRAIN_128_IV = Hex.decode("0123456789abcdef12345678");
+    private static final byte[] GRAIN_128_IN = new byte[16];
+    private static final byte[] GRAIN_128_OUT = Hex.decode("afb5babfa8de896b4b9c6acaf7c4fbfd");
+
     public CipherStreamTest()
     {
     }
@@ -298,6 +308,8 @@ public class CipherStreamTest
         runTest("VMPC-KSA3");
         testException("VMPC-KSA3");
         //testAlgorithm("VMPC-KSA3", a, iv, in, a);
+        testAlgorithm("Grainv1", GRAIN_V1, GRAIN_V1_IV, GRAIN_V1_IN, GRAIN_V1_OUT);
+        testAlgorithm("Grain128", GRAIN_128, GRAIN_128_IV, GRAIN_128_IN, GRAIN_128_OUT);
         runTest("DES/ECB/PKCS7Padding");
         runTest("DES/CFB8/NoPadding");
     }
