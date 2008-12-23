@@ -98,6 +98,8 @@ public class RegressionTest
         new VMPCKSA3Test(),
         new VMPCMacTest(),
         new VMPCTest(),
+        new Grainv1Test(),
+        new Grain128Test(),
         //new NaccacheSternTest(),
         new NullTest()
     };

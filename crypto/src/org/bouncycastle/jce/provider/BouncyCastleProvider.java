@@ -50,7 +50,7 @@ public final class BouncyCastleProvider extends Provider
     private static final String SYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.symmetric.";
     private static final String[] SYMMETRIC_CIPHERS =
     {
-        "AES", "Camellia", "CAST5", "IDEA", "Noekeon", "SEED"
+        "AES", "Camellia", "CAST5", "Grainv1", "Grain128", "IDEA", "Noekeon", "SEED"
     };
 
     /*

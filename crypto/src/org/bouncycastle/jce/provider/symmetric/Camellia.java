@@ -108,7 +108,7 @@ public final class Camellia
             SecureRandom random)
             throws InvalidAlgorithmParameterException
         {
-            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
+            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for Camellia parameter generation.");
         }
 
         protected AlgorithmParameters engineGenerateParameters()
