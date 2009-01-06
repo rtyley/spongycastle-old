@@ -98,6 +98,8 @@ public class DESKeySpec
             byte    keyByte = key[i + offset];
             int     count = 0;
 
+            keyByte = (byte)((keyByte & 0xff) >> 1);
+            
             while (keyByte != 0)
             {
                 /*
