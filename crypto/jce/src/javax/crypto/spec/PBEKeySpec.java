@@ -184,11 +184,16 @@ public class PBEKeySpec
      */
     public final byte[] getSalt()
     {
-        byte[] tmp = new byte[salt.length];
+        if (salt != null)
+        {
+            byte[] tmp = new byte[salt.length];
 
-        System.arraycopy(salt, 0, tmp, 0, salt.length);
+            System.arraycopy(salt, 0, tmp, 0, salt.length);
 
-        return tmp;
+            return tmp;
+        }
+
+        return null;
     }
 
     /**
