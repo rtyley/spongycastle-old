@@ -251,7 +251,7 @@ public class PKIXAttrCertPathBuilderSpi
                 catch (CertificateParsingException e)
                 {
                     throw new AnnotatedException(
-                                            "No additiontal X.509 stores can be added from certificate locations.",
+                                            "No additional X.509 stores can be added from certificate locations.",
                                             e);
                 }
                 Collection issuers = new HashSet();
