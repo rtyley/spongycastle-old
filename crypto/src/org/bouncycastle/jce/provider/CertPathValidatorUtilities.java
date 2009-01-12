@@ -562,8 +562,7 @@ public class CertPathValidatorUtilities
         for (int j = 0; j < policyNodeVec.size(); j++)
         {
             PKIXPolicyNode _node = (PKIXPolicyNode)policyNodeVec.get(j);
-            Set            _expectedPolicies = _node.getExpectedPolicies();
-            
+
             if (ANY_POLICY.equals(_node.getValidPolicy()))
             {
                 Set _childExpectedPolicies = new HashSet();
