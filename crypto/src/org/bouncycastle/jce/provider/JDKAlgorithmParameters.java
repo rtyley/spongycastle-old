@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
@@ -34,7 +33,6 @@ import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.PSource;
 import javax.crypto.spec.RC2ParameterSpec;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.AlgorithmParametersSpi;
 import java.security.spec.AlgorithmParameterSpec;
@@ -639,21 +637,16 @@ public abstract class JDKAlgorithmParameters
          */
         protected byte[] engineGetEncoded() 
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-            DSAParameter            dsaP = new DSAParameter(currentSpec.getP(), currentSpec.getQ(), currentSpec.getG());
+            DSAParameter dsaP = new DSAParameter(currentSpec.getP(), currentSpec.getQ(), currentSpec.getG());
 
             try
             {
-                dOut.writeObject(dsaP);
-                dOut.close();
+                return dsaP.getEncoded(ASN1Encodable.DER);
             }
             catch (IOException e)
             {
                 throw new RuntimeException("Error encoding DSAParameters");
             }
-
-            return bOut.toByteArray();
         }
 
         protected byte[] engineGetEncoded(
@@ -749,21 +742,16 @@ public abstract class JDKAlgorithmParameters
          */
         protected byte[] engineGetEncoded()
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-            GOST3410PublicKeyAlgParameters       gost3410P = new GOST3410PublicKeyAlgParameters(new DERObjectIdentifier(currentSpec.getPublicKeyParamSetOID()), new DERObjectIdentifier(currentSpec.getDigestParamSetOID()), new DERObjectIdentifier(currentSpec.getEncryptionParamSetOID()));
-            
+            GOST3410PublicKeyAlgParameters gost3410P = new GOST3410PublicKeyAlgParameters(new DERObjectIdentifier(currentSpec.getPublicKeyParamSetOID()), new DERObjectIdentifier(currentSpec.getDigestParamSetOID()), new DERObjectIdentifier(currentSpec.getEncryptionParamSetOID()));
+
             try
             {
-                dOut.writeObject(gost3410P);
-                dOut.close();
+                return gost3410P.getEncoded(ASN1Encodable.DER);
             }
             catch (IOException e)
             {
                 throw new RuntimeException("Error encoding GOST3410Parameters");
             }
-            
-            return bOut.toByteArray();
         }
         
         protected byte[] engineGetEncoded(
@@ -859,21 +847,16 @@ public abstract class JDKAlgorithmParameters
          */
         protected byte[] engineGetEncoded() 
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-            ElGamalParameter        elP = new ElGamalParameter(currentSpec.getP(), currentSpec.getG());
+            ElGamalParameter elP = new ElGamalParameter(currentSpec.getP(), currentSpec.getG());
 
             try
             {
-                dOut.writeObject(elP);
-                dOut.close();
+                return elP.getEncoded(ASN1Encodable.DER);
             }
             catch (IOException e)
             {
                 throw new RuntimeException("Error encoding ElGamalParameters");
             }
-
-            return bOut.toByteArray();
         }
 
         protected byte[] engineGetEncoded(
@@ -1081,8 +1064,6 @@ public abstract class JDKAlgorithmParameters
          */
         protected byte[] engineGetEncoded() 
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
             AlgorithmIdentifier     hashAlgorithm = new AlgorithmIdentifier(
                                                             JCEDigestUtil.getOID(currentSpec.getDigestAlgorithm()),
                                                             new DERNull());
@@ -1097,15 +1078,12 @@ public abstract class JDKAlgorithmParameters
     
             try
             {
-                dOut.writeObject(oaepP);
-                dOut.close();
+                return oaepP.getEncoded(ASN1Encodable.DER);
             }
             catch (IOException e)
             {
                 throw new RuntimeException("Error encoding OAEPParameters");
             }
-    
-            return bOut.toByteArray();
         }
     
         protected byte[] engineGetEncoded(
