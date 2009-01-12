@@ -434,19 +434,14 @@ public abstract class JDKAlgorithmParameters
 
         protected byte[] engineGetEncoded() 
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
             try
             {
-                dOut.writeObject(params);
+                return params.getEncoded(ASN1Encodable.DER);
             }
             catch (IOException e)
             {
                 throw new RuntimeException("Oooops! " + e.toString());
             }
-
-            return bOut.toByteArray();
         }
 
         protected byte[] engineGetEncoded(
@@ -532,21 +527,16 @@ public abstract class JDKAlgorithmParameters
          */
         protected byte[] engineGetEncoded() 
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-            DHParameter             dhP = new DHParameter(currentSpec.getP(), currentSpec.getG(), currentSpec.getL());
+            DHParameter dhP = new DHParameter(currentSpec.getP(), currentSpec.getG(), currentSpec.getL());
 
             try
             {
-                dOut.writeObject(dhP);
-                dOut.close();
+                return dhP.getEncoded(ASN1Encodable.DER);                
             }
             catch (IOException e)
             {
                 throw new RuntimeException("Error encoding DHParameters");
             }
-
-            return bOut.toByteArray();
         }
 
         protected byte[] engineGetEncoded(
