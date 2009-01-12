@@ -1009,7 +1009,7 @@ public abstract class JDKAlgorithmParameters
         IESParameterSpec     currentSpec;
 
         /**
-         * in the abscence of a standard way of doing it this will do for
+         * in the absence of a standard way of doing it this will do for
          * now...
          */
         protected byte[] engineGetEncoded() 
