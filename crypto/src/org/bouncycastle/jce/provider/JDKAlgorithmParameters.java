@@ -26,6 +26,7 @@ import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.jce.spec.IESParameterSpec;
+import org.bouncycastle.util.Arrays;
 
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
@@ -87,10 +88,7 @@ public abstract class JDKAlgorithmParameters
             
             if (format.equals("RAW"))
             {
-                byte[]  tmp = new byte[iv.length];
-
-                System.arraycopy(iv, 0, tmp, 0, iv.length);
-                return tmp;
+                return Arrays.clone(iv);
             }
 
             return null;
@@ -135,9 +133,7 @@ public abstract class JDKAlgorithmParameters
                 params = oct.getOctets();
             }
 
-            this.iv = new byte[params.length];
-
-            System.arraycopy(params, 0, iv, 0, iv.length);
+            this.iv = Arrays.clone(params);
         }
 
         protected void engineInit(
@@ -222,10 +218,7 @@ public abstract class JDKAlgorithmParameters
 
         protected byte[] engineGetEncoded() 
         {
-            byte[]  tmp = new byte[iv.length];
-
-            System.arraycopy(iv, 0, tmp, 0, iv.length);
-            return tmp;
+            return Arrays.clone(iv);
         }
 
         protected byte[] engineGetEncoded(
@@ -314,9 +307,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            this.iv = new byte[params.length];
-
-            System.arraycopy(params, 0, iv, 0, iv.length);
+            this.iv = Arrays.clone(params);
         }
 
         protected void engineInit(
