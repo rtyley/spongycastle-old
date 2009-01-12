@@ -1,7 +1,7 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -130,8 +130,7 @@ public abstract class JDKAlgorithmParameters
             if ((params.length % 8) != 0
                     && params[0] == 0x04 && params[1] == params.length - 2)
             {
-                ASN1InputStream         aIn = new ASN1InputStream(params);
-                ASN1OctetString         oct = (ASN1OctetString)aIn.readObject();
+                ASN1OctetString oct = (ASN1OctetString)ASN1Object.fromByteArray(params);
 
                 params = oct.getOctets();
             }
@@ -148,12 +147,10 @@ public abstract class JDKAlgorithmParameters
         {
             if (isASN1FormatString(format))
             {
-                ASN1InputStream         aIn = new ASN1InputStream(params);
-                
                 try
                 {
-                    ASN1OctetString         oct = (ASN1OctetString)aIn.readObject();
-    
+                    ASN1OctetString oct = (ASN1OctetString)ASN1Object.fromByteArray(params);
+
                     engineInit(oct.getOctets());
                 }
                 catch (Exception e)
@@ -329,8 +326,7 @@ public abstract class JDKAlgorithmParameters
         {
             if (isASN1FormatString(format))
             {
-                ASN1InputStream         aIn = new ASN1InputStream(params);
-                RC2CBCParameter         p = RC2CBCParameter.getInstance(aIn.readObject());
+                RC2CBCParameter p = RC2CBCParameter.getInstance(ASN1Object.fromByteArray(params));
 
                 if (p.getRC2ParameterVersion() != null)
                 {
@@ -364,19 +360,14 @@ public abstract class JDKAlgorithmParameters
 
         protected byte[] engineGetEncoded()
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
             try
             {
-                dOut.writeObject(params);
+                return params.getEncoded(ASN1Encodable.DER);
             }
             catch (IOException e)
             {
                 throw new RuntimeException("Oooops! " + e.toString());
             }
-
-            return bOut.toByteArray();
         }
 
         protected byte[] engineGetEncoded(
@@ -422,9 +413,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params)
             throws IOException
         {
-            ASN1InputStream        aIn = new ASN1InputStream(params);
-
-            this.params = PBKDF2Params.getInstance(aIn.readObject());
+            this.params = PBKDF2Params.getInstance(ASN1Object.fromByteArray(params));
         }
 
         protected void engineInit(
@@ -512,9 +501,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ASN1InputStream        aIn = new ASN1InputStream(params);
-
-            this.params = PKCS12PBEParams.getInstance(aIn.readObject());
+            this.params = PKCS12PBEParams.getInstance(ASN1Object.fromByteArray(params));
         }
 
         protected void engineInit(
@@ -610,11 +597,9 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ASN1InputStream        aIn = new ASN1InputStream(params);
-
             try
             {
-                DHParameter dhP = new DHParameter((ASN1Sequence)aIn.readObject());
+                DHParameter dhP = new DHParameter((ASN1Sequence)ASN1Object.fromByteArray(params));
 
                 if (dhP.getL() != null)
                 {
@@ -729,11 +714,9 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ASN1InputStream        aIn = new ASN1InputStream(params);
-
             try
             {
-                DSAParameter dsaP = new DSAParameter((ASN1Sequence)aIn.readObject());
+                DSAParameter dsaP = new DSAParameter((ASN1Sequence)ASN1Object.fromByteArray(params));
 
                 currentSpec = new DSAParameterSpec(dsaP.getP(), dsaP.getQ(), dsaP.getG());
             }
@@ -964,11 +947,9 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ASN1InputStream        aIn = new ASN1InputStream(params);
-
             try
             {
-                ElGamalParameter elP = new ElGamalParameter((ASN1Sequence)aIn.readObject());
+                ElGamalParameter elP = new ElGamalParameter((ASN1Sequence)ASN1Object.fromByteArray(params));
 
                 currentSpec = new ElGamalParameterSpec(elP.getP(), elP.getG());
             }
@@ -1014,26 +995,20 @@ public abstract class JDKAlgorithmParameters
          */
         protected byte[] engineGetEncoded() 
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
             try
             {
-                ASN1EncodableVector    v = new ASN1EncodableVector();
+                ASN1EncodableVector v = new ASN1EncodableVector();
 
                 v.add(new DEROctetString(currentSpec.getDerivationV()));
                 v.add(new DEROctetString(currentSpec.getEncodingV()));
                 v.add(new DERInteger(currentSpec.getMacKeySize()));
 
-                dOut.writeObject(new DERSequence(v));
-                dOut.close();
+                return new DERSequence(v).getEncoded(ASN1Encodable.DER);
             }
             catch (IOException e)
             {
                 throw new RuntimeException("Error encoding IESParameters");
             }
-
-            return bOut.toByteArray();
         }
 
         protected byte[] engineGetEncoded(
@@ -1075,11 +1050,9 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ASN1InputStream        aIn = new ASN1InputStream(params);
-
             try
             {
-                ASN1Sequence    s = (ASN1Sequence)aIn.readObject();
+                ASN1Sequence s = (ASN1Sequence)ASN1Object.fromByteArray(params);
 
                 this.currentSpec = new IESParameterSpec(
                                         ((ASN1OctetString)s.getObjectAt(0)).getOctets(),
@@ -1193,12 +1166,10 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ASN1InputStream        aIn = new ASN1InputStream(params);
-    
             try
             {
-                RSAESOAEPparams oaepP = new RSAESOAEPparams((ASN1Sequence)aIn.readObject());
-    
+                RSAESOAEPparams oaepP = new RSAESOAEPparams((ASN1Sequence)ASN1Object.fromByteArray(params));
+
                 currentSpec = new OAEPParameterSpec(
                                        oaepP.getHashAlgorithm().getObjectId().getId(), 
                                        oaepP.getMaskGenAlgorithm().getObjectId().getId(), 
@@ -1302,12 +1273,10 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            ASN1InputStream        aIn = new ASN1InputStream(params);
-    
             try
             {
-                RSASSAPSSparams pssP = new RSASSAPSSparams((ASN1Sequence)aIn.readObject());
-    
+                RSASSAPSSparams pssP = new RSASSAPSSparams((ASN1Sequence)ASN1Object.fromByteArray(params));
+
                 currentSpec = new PSSParameterSpec(
                                        pssP.getHashAlgorithm().getObjectId().getId(), 
                                        pssP.getMaskGenAlgorithm().getObjectId().getId(), 
