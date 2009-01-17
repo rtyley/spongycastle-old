@@ -59,7 +59,7 @@ public class X509LDAPCertStoreSpi
         if (!(params instanceof X509LDAPCertStoreParameters))
         {
             throw new InvalidAlgorithmParameterException(
-                "org.bouncycastle.jce.provider.LDAPCertStoreSpi: parameter must be a LDAPCertStoreParameters object\n"
+                X509LDAPCertStoreSpi.class.getName() + ": parameter must be a " + X509LDAPCertStoreParameters.class.getName() + " object\n"
                     + params.toString());
         }
 
