@@ -518,6 +518,19 @@ public class X509NameTest
         {
             fail("+ in string not properly escaped.");
         }
+
+        n = new X509Name("CN=a\\=b");
+
+        vls = n.getValues(X509Name.CN);
+        if (vls.size() != 1 || !vls.elementAt(0).equals("a=b"))
+        {
+            fail("escaped = not reduced properly");
+        }
+
+        if (!n.toString().equals("CN=a\\=b"))
+        {
+            fail("= in string not properly escaped.");
+        }
     }
 
     private boolean compareVectors(Vector a, Vector b)    // for compatibility with early JDKs
