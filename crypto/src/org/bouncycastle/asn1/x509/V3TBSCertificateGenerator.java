@@ -5,6 +5,8 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DEREncodable;
 
 /**
  * Generator for Version 3 TBSCertificateStructures.
@@ -37,6 +39,8 @@ public class V3TBSCertificateGenerator
     X509Extensions          extensions;
 
     private boolean altNamePresentAndCritical;
+    private DERBitString issuerUniqueID;
+    private DERBitString subjectUniqueID;
 
     public V3TBSCertificateGenerator()
     {
@@ -88,6 +92,18 @@ public class V3TBSCertificateGenerator
         X509Name    subject)
     {
         this.subject = subject;
+    }
+
+    public void setIssuerUniqueID(
+        DERBitString uniqueID)
+    {
+        this.issuerUniqueID = uniqueID;
+    }
+
+    public void setSubjectUniqueID(
+        DERBitString uniqueID)
+    {
+        this.subjectUniqueID = uniqueID;
     }
 
     public void setSubjectPublicKeyInfo(
@@ -147,6 +163,16 @@ public class V3TBSCertificateGenerator
         }
 
         v.add(subjectPublicKeyInfo);
+
+        if (issuerUniqueID != null)
+        {
+            v.add(new DERTaggedObject(false, 1, issuerUniqueID));
+        }
+
+        if (subjectUniqueID != null)
+        {
+            v.add(new DERTaggedObject(false, 2, subjectUniqueID));
+        }
 
         if (extensions != null)
         {

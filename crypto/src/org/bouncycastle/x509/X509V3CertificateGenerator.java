@@ -182,6 +182,43 @@ public class X509V3CertificateGenerator
     }
 
     /**
+     * Set the subject unique ID - note: it is very rare that it is correct to do this.
+     */
+    public void setSubjectUniqueID(boolean[] uniqueID)
+    {
+        tbsGen.setSubjectUniqueID(booleanToBitString(uniqueID));
+    }
+
+    /**
+     * Set the issuer unique ID - note: it is very rare that it is correct to do this.
+     */
+    public void setIssuerUniqueID(boolean[] uniqueID)
+    {
+        tbsGen.setIssuerUniqueID(booleanToBitString(uniqueID));
+    }
+
+    private DERBitString booleanToBitString(boolean[] id)
+    {
+        byte[] bytes = new byte[(id.length + 7) / 8];
+
+        for (int i = 0; i != id.length; i++)
+        {
+            bytes[i / 8] |= (id[i]) ? (1 << ((7 - (i % 8)))) : 0;
+        }
+
+        int pad = id.length % 8;
+
+        if (pad == 0)
+        {
+            return new DERBitString(bytes);
+        }
+        else
+        {
+            return new DERBitString(bytes, 8 - pad);
+        }
+    }
+    
+    /**
      * add a given extension field for the standard extensions tag (tag 3)
      */
     public void addExtension(
