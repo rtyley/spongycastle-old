@@ -167,7 +167,12 @@ public class X509Name
     /**
      * id-at-telephoneNumber
      */
-    public static final DERObjectIdentifier TELEPHONE_NUMBER = new DERObjectIdentifier("2.5.4.20");
+    public static final DERObjectIdentifier TELEPHONE_NUMBER = X509ObjectIdentifiers.id_at_telephoneNumber;
+
+    /**
+     * id-at-name
+     */
+    public static final DERObjectIdentifier NAME = X509ObjectIdentifiers.id_at_name;
 
     /**
      * Email address (RSA PKCS#9 extension) - IA5String.
