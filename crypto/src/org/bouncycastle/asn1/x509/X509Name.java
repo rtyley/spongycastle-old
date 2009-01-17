@@ -1112,6 +1112,7 @@ public class X509Name
                || (buf.charAt(index) == '"')
                || (buf.charAt(index) == '\\')
                || (buf.charAt(index) == '+')
+               || (buf.charAt(index) == '=')
                || (buf.charAt(index) == '<')
                || (buf.charAt(index) == '>')
                || (buf.charAt(index) == ';'))
