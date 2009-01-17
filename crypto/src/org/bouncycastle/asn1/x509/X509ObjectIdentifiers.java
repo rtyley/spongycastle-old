@@ -16,6 +16,9 @@ public interface X509ObjectIdentifiers
     static final DERObjectIdentifier    organization            = new DERObjectIdentifier(id + ".10");
     static final DERObjectIdentifier    organizationalUnitName  = new DERObjectIdentifier(id + ".11");
 
+    static final DERObjectIdentifier    id_at_telephoneNumber   = new DERObjectIdentifier("2.5.4.20");
+    static final DERObjectIdentifier    id_at_name              = new DERObjectIdentifier(id + ".41");
+
     // id-SHA1 OBJECT IDENTIFIER ::=    
     //   {iso(1) identified-organization(3) oiw(14) secsig(3) algorithms(2) 26 }    //
     static final DERObjectIdentifier    id_SHA1                 = new DERObjectIdentifier("1.3.14.3.2.26");
