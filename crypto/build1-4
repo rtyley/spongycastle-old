@@ -19,7 +19,7 @@ export PATH
 CLASSPATH=$JAVA_MAIL_HOME/mail.jar:$JAVA_ACTIVATION_HOME/activation.jar:$CLASSPATH
 export CLASSPATH
 
-if [ "$1" == "test" ]
+if [ "$1" = "test" ]
 then
     ant -f jdk14.xml test
 else
