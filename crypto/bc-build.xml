@@ -192,6 +192,7 @@
 
         <copy todir="${provider.target.src.dir}">
              <fileset dir="${src.dir}">
+                 <exclude name="PKITS/**" />
                  <exclude name="org/bouncycastle/**/test/*.java" />
                  <exclude name="org/bouncycastle/**/test/*/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
@@ -732,7 +733,7 @@
     </target>
 	
     <target name="zip-src-provider" if="provider.present">
-        <zip basedir="${provider.target.src.dir}" destfile="${provider.target.src.zip}" />
+        <zip basedir="${provider.target.src.dir}" destfile="${provider.target.src.zip}"/>
         <delete dir="${provider.target.src.dir}" />
     </target>
 	
