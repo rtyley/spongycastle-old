@@ -55,7 +55,15 @@ public class PGPLiteralData
     {
         return data.getFileName();
     }
-    
+
+    /**
+     * Return the file name as an unintrepreted byte array.
+     */
+    public byte[] getRawFileName()
+    {
+        return data.getRawFileName();
+    }
+
     /**
      * Return the modification time for the file.
      * 
