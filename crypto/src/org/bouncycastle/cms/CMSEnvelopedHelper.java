@@ -57,11 +57,12 @@ class CMSEnvelopedHelper
     {
         try
         {
-            return createCipher(encryptionOid, provider);
+            // this is reversed as the Sun policy files now allow unlimited strength RSA
+            return createCipher(getAsymmetricEncryptionAlgName(encryptionOid), provider);
         }
         catch (NoSuchAlgorithmException e)
         {
-            return createCipher(getAsymmetricEncryptionAlgName(encryptionOid), provider);
+            return createCipher(encryptionOid, provider);
         }
     }
 
