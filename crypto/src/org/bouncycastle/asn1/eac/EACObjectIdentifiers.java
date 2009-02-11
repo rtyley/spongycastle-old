@@ -42,4 +42,14 @@ public interface EACObjectIdentifiers
     static final DERObjectIdentifier    id_TA_ECDSA_SHA_1 = new DERObjectIdentifier(id_TA_ECDSA + ".1");
     static final DERObjectIdentifier    id_TA_ECDSA_SHA_224 = new DERObjectIdentifier(id_TA_ECDSA + ".2");
     static final DERObjectIdentifier    id_TA_ECDSA_SHA_256 = new DERObjectIdentifier(id_TA_ECDSA + ".3");
+
+    static final DERObjectIdentifier    id_TA_ECDSA_SHA_384 = new DERObjectIdentifier(id_TA_ECDSA + ".4");
+    static final DERObjectIdentifier    id_TA_ECDSA_SHA_512 = new DERObjectIdentifier(id_TA_ECDSA + ".5");
+
+    /**
+     * id-EAC-ePassport OBJECT IDENTIFIER ::= {
+     * bsi-de applications(3) mrtd(1) roles(2) 1}
+     */
+    static final DERObjectIdentifier id_EAC_ePassport = new DERObjectIdentifier(bsi_de + ".3.1.2.1");
+
 }
