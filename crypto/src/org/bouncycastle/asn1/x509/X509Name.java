@@ -278,6 +278,7 @@ public class X509Name
         DefaultSymbols.put(POSTAL_CODE, "PostalCode");
         DefaultSymbols.put(BUSINESS_CATEGORY, "BusinessCategory");
         DefaultSymbols.put(TELEPHONE_NUMBER, "TelephoneNumber");
+        DefaultSymbols.put(NAME, "Name");
 
         RFC2253Symbols.put(C, "C");
         RFC2253Symbols.put(O, "O");
@@ -330,6 +331,7 @@ public class X509Name
         DefaultLookUp.put("postalcode", POSTAL_CODE);
         DefaultLookUp.put("businesscategory", BUSINESS_CATEGORY);
         DefaultLookUp.put("telephonenumber", TELEPHONE_NUMBER);
+        DefaultLookUp.put("name", NAME);
     }
 
     private X509NameEntryConverter  converter = null;
