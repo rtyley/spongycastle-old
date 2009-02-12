@@ -1831,9 +1831,7 @@ public class BigInteger
         if (sign == 0 || val.sign == 0)
             return BigInteger.ZERO;
 
-        int maxBitLength = this.bitLength() + val.bitLength();
-        int resLength = (maxBitLength + 31) / 32;
-
+        int resLength = (this.bitLength() + val.bitLength()) / 32 + 1;
         int[] res = new int[resLength];
 
         if (val == this)
