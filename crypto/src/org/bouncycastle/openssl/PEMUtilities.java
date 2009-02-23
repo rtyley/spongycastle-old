@@ -118,13 +118,13 @@ final class PEMUtilities
             }
             else
             {
-                throw new IOException("unknown AES encryption with private key");
+                throw new EncryptionException("unknown AES encryption with private key");
             }
             sKey = getKey(password, "AES", keyBits / 8, salt);
         }
         else
         {
-            throw new IOException("unknown encryption with private key");
+            throw new EncryptionException("unknown encryption with private key");
         }
 
         String transformation = alg + "/" + blockMode + "/" + padding;
@@ -146,7 +146,7 @@ final class PEMUtilities
         }
         catch (Exception e)
         {
-            throw new IOException("exception using cipher - please check password and data: " + e.toString());
+            throw new EncryptionException("exception using cipher - please check password and data.", e);
         }
     }
 
@@ -155,7 +155,6 @@ final class PEMUtilities
         String  algorithm,
         int     keyLength,
         byte[]  salt)
-        throws IOException
     {
         return getKey(password, algorithm, keyLength, salt, false);
     }
@@ -166,7 +165,6 @@ final class PEMUtilities
         int     keyLength,
         byte[]  salt,
         boolean des2)
-        throws IOException
     {
         OpenSSLPBEParametersGenerator   pGen = new OpenSSLPBEParametersGenerator();
 
