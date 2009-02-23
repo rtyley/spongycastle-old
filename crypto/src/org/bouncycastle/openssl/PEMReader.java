@@ -376,7 +376,7 @@ public class PEMReader extends BufferedReader
 
         if (buf.length() != 0)
         {
-            throw new RuntimeException("base64 data appears to be truncated");
+            throw new IOException("base64 data appears to be truncated");
         }
         
         if (line == null)
@@ -440,14 +440,14 @@ public class PEMReader extends BufferedReader
         {
             if (pFinder == null)
             {
-                throw new IOException("No password finder specified, but a password is required");
+                throw new PasswordException("No password finder specified, but a password is required");
             }
 
             char[] password = pFinder.getPassword();
 
             if (password == null)
             {
-                throw new IOException("Password is null, but a password is required");
+                throw new PasswordException("Password is null, but a password is required");
             }
 
             StringTokenizer tknz = new StringTokenizer(dekInfo, ",");
