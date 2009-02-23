@@ -75,10 +75,10 @@ public class JDKPKCS12KeyStore
     extends KeyStoreSpi
     implements PKCSObjectIdentifiers, X509ObjectIdentifiers, BCKeyStore
 {
-    private static final int    SALT_SIZE = 20;
-    private static final int    MIN_ITERATIONS = 1024;
+    private static final int                SALT_SIZE = 20;
+    private static final int                MIN_ITERATIONS = 1024;
 
-    private static Provider     bcProvider = new BouncyCastleProvider();
+    private static final Provider           bcProvider = new BouncyCastleProvider();
 
     private IgnoresCaseHashtable            keys = new IgnoresCaseHashtable();
     private Hashtable                       localIds = new Hashtable();
