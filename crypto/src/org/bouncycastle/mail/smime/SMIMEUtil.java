@@ -8,6 +8,7 @@ import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
+import javax.mail.Part;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
@@ -306,24 +307,41 @@ public class SMIMEUtil
             boolean base64 = contentTransferEncoding.equalsIgnoreCase("base64");
 
             //
+            // Write raw content, performing canonicalization
+            //
+            InputStream inRaw;
+
+            try
+            {
+                inRaw = mimePart.getRawInputStream();
+            }
+            catch (MessagingException e)
+            {
+                // this is less than ideal, but if the raw output stream is unavailable it's the
+                // best option we've got.
+                out = new CRLFOutputStream(out);
+                bodyPart.writeTo(out);
+                out.flush();
+                return;
+            }
+
+            //
             // Write headers
             //
             LineOutputStream outLine = new LineOutputStream(out);
             for (Enumeration e = mimePart.getAllHeaderLines(); e.hasMoreElements();) 
             {
                 String header = (String)e.nextElement();
+  
                 outLine.writeln(header);
             }
 
             outLine.writeln();
             outLine.flush();
 
-            //
-            // Write raw content, performing canonicalization
-            //
-            InputStream inRaw = mimePart.getRawInputStream();
-            OutputStream outCRLF;
 
+            OutputStream outCRLF;
+              
             if (base64)
             {
                 outCRLF = new Base64CRLFOutputStream(out);

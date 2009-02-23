@@ -143,6 +143,8 @@ public class SMIMEGenerator
        
             content.setContent(message.getContent(), message.getContentType());
 
+            content.setDataHandler(message.getDataHandler());
+
             extractHeaders(content, message);
         }
         catch (MessagingException e)
@@ -161,7 +163,7 @@ public class SMIMEGenerator
         throws MessagingException
     {
         Enumeration e = message.getAllHeaders();
-
+        
         while (e.hasMoreElements())
         {
             Header hdr =(Header)e.nextElement();
