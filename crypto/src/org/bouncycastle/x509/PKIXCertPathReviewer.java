@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
@@ -38,6 +39,7 @@ import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
 import org.bouncycastle.jce.provider.PKIXPolicyNode;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -2490,6 +2492,14 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         try
         {
             certSelectX509.setSubject(getEncodedIssuerPrincipal(cert).getEncoded());
+            byte[] ext = cert.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
+
+            if (ext != null)
+            {
+                AuthorityKeyIdentifier authID = AuthorityKeyIdentifier.getInstance(ASN1Object.fromByteArray(ext));
+
+                certSelectX509.setSerialNumber(authID.getAuthorityCertSerialNumber());
+            }
         }
         catch (IOException ex)
         {
