@@ -163,8 +163,14 @@ public class X509LDAPCertStoreSpi
             while (it.hasNext())
             {
                 byte[] bytes = (byte[])it.next();
+                if (bytes == null || bytes.length == 0)
+                {
+                    continue;
+                }
+
                 List bytesList = new ArrayList();
                 bytesList.add(bytes);
+
                 try
                 {
                     CertificatePair pair = CertificatePair
