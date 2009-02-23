@@ -1,5 +1,37 @@
 package org.bouncycastle.mail.smime.test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.KeyPair;
+import java.security.MessageDigest;
+import java.security.cert.CertStore;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -28,18 +60,6 @@ import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509Store;
-
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.*;
-import java.io.*;
-import java.security.KeyPair;
-import java.security.MessageDigest;
-import java.security.cert.CertStore;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.X509Certificate;
-import java.util.*;
 
 public class SMIMESignedTest
     extends TestCase
@@ -101,7 +121,6 @@ public class SMIMESignedTest
 
             _signEcGostKP = CMSTestUtil.makeEcGostKeyPair();
             _signEcGostCert = CMSTestUtil.makeCertificate(_signEcGostKP, _signDN, _origKP, _origDN);
-
         }
         catch (Exception e)
         {
@@ -345,7 +364,7 @@ public class SMIMESignedTest
         MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA1, msg);
         SMIMESigned   s = new SMIMESigned(smm);
 
-                List certList = new ArrayList();
+        List certList = new ArrayList();
 
         certList.add(_signCert);
         certList.add(_origCert);
@@ -1011,6 +1030,39 @@ public class SMIMESignedTest
         SMIMESigned s = new SMIMESigned((MimeMultipart)message.getContent());
 
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
+    public void testSignAttachmentOnly()
+        throws Exception
+    {
+        MimeMessage m = loadMessage("attachonly.eml");
+
+        List certList = new ArrayList();
+
+        certList.add(_signCert);
+        certList.add(_origCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator("binary");
+
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addCertificatesAndCRLs(certs);
+
+        MimeMultipart mm = gen.generate(m, "BC");
+
+        mm.writeTo(new FileOutputStream("/tmp/fred"));
+        
+        SMIMESigned s = new SMIMESigned(mm);
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+
+        SMIMESignedParser sp = new SMIMESignedParser(mm);
+
+        verifySigners(sp.getCertificatesAndCRLs("Collection", "BC"), sp.getSignerInfos());
     }
 
     public void testMultiAlternativeParser()

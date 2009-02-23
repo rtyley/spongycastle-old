@@ -33,6 +33,7 @@ Release 1.42
 <ul>
 <li>Support for NONEwithECDSA has been added.</li>
 <li>Support for Grainv1 and Grain128 has been added.</li>
+<li>Support for EAC agorithms has been added to CMS/SMIME.</li>
 </ul>
 
 <h3>2.2.1 Version</h3>
@@ -192,7 +193,7 @@ Release 1.36
 <li>The fix for multipart messages with mixed content-transfer-encoding in 1.35 caused a
 regression for processing some messages with embedded multiparts that contained blank lines of preamble text - this should now be fixed.</li>
 <li>Another regression which sometimes affected the SMIMESignedParser has also been fixed.</li>
-<li>SharedFileInputStream compatability issues with JavaMail 1.4 have been addressed.</li>
+<li>SharedFileInputStream compatibility issues with JavaMail 1.4 have been addressed.</li>
 <li>JDK 1.5 and later KeyFactory now accepts ECPublicKey/ECPrivateKey to translateKey.</li>
 <li>JDK 1.5 and later KeyFactory now produces ECPublicKeySpec/ECPrivateKeySpec on getKeySpec.</li>
 <li>Some surrogate pairs were not assembled correctly by the UTF8 decoder. This has been fixed.</li>
@@ -357,7 +358,7 @@ Release 1.31
 <li>Another occasional defect in EC point encoding has been fixed.
 <li>In some cases AttributeCertificateHolder.getIssuer() would return an empty array for attribute certificates using the BaseCertificateID.
 This has been fixed.
-<li>OIDs with extremely large components would sometimes reencode with unecessary bytes in their encoding. The optimal DER encoding will now be produced instead.
+<li>OIDs with extremely large components would sometimes reencode with unnecessary bytes in their encoding. The optimal DER encoding will now be produced instead.
 </ul>
 <h3>2.12.3 Additional Features and Functionality</h3>
 <ul>
@@ -512,7 +513,7 @@ Release 1.26
 </ul>
 <h3>2.17.4 JDK 1.5 Changes</h3>
 <ul>
-<li>The JDK 1.5 version of the provider now supports the new Elliptic Curve classes found in the java.security packages. Note: while we have tried to preserve some backwards compatiblity people using Elliptic curve are likely to find some minor code changes are required when moving code from JDK 1.4 to JDK 1.5 as the java.security APIs have changed.
+<li>The JDK 1.5 version of the provider now supports the new Elliptic Curve classes found in the java.security packages. Note: while we have tried to preserve some backwards compatibility people using Elliptic curve are likely to find some minor code changes are required when moving code from JDK 1.4 to JDK 1.5 as the java.security APIs have changed.
 </ul>
 
 <h3>2.18.1 Version</h3>
@@ -573,7 +574,7 @@ sometimes throw a NullPointerException. This has been fixed.
 <li>Lightweight CBCBlockCipherMac was failing to add padding if padding was
 being explicitly provided and data length was a multiple of the block size. This has been fixed.
 <li>ZIP compression in PGP was failing to compress data in many cases. This has been fixed.
-<li>Signatures were occassionally produced with incorrect padding in their associated bit strings, this has been fixed.
+<li>Signatures were occasionally produced with incorrect padding in their associated bit strings, this has been fixed.
 <li>An encoding error introduced in 1.23 which affected generation of the
 KeyUsage extension has been fixed.
 </ul>
@@ -596,7 +597,7 @@ it to occasionally generate the wrong key has been fixed.
 <li>OpenPGP implementation can now read PGP 8 keys.
 <li>Decoding issues with Secret Sub Keys should now be fixed.
 <li>PGP would occasionally unpack ElGamal encrypted data incorrectly, this has been fixed.
-<li>OCSP TBSRequest now uses abreviated encoding if the default version is used.
+<li>OCSP TBSRequest now uses abbreviated encoding if the default version is used.
 <li>X509Name class will now print names with nested pairs in component sets correctly.
 <li>RC4 now resets correctly on doFinal.
 </ul>
@@ -726,7 +727,7 @@ Sun BigInteger library.
 Release 1.17
 <h3>2.26.2 Defects Fixed</h3>
 <ul>
-<li>Reuse of an CMSSignedObject could occassionally result in a class
+<li>Reuse of an CMSSignedObject could occasionally result in a class
 cast exception. This has been fixed.
 <li>The X.509 DistributionPointName occasionally encoded incorrectly. This has
 been fixed.
@@ -746,7 +747,7 @@ from CRLs.
 types recognised has been increased. 
 <li>CMS can create signed objects with encapsulated data. Note: while
 this was been done we realised we could simplify things, we did and
-for the most part people won't notice, other than the occassional
+for the most part people won't notice, other than the occasional
 reference to CMSSignable will need to be replaced with CMSProcessable.
 <li>X509Name and X509Principal now support forward and reverse X509Name
 to string conversion, with changeable lookup tables for converting OIDs
@@ -877,7 +878,7 @@ Release 1.13
     <li>A CertPath implementation that runs under jdk1.1 and jdk1.4 has also
     being contributed. A work around to allow it to be used with jdk1.2 and
     jdk1.3 has also been added. Note: the implementation is not quite complete
-    because policymapping, name and subtree contraints are not yet
+    because policymapping, name and subtree constraints are not yet
     implemented.
     <li>The API now supports the generation of PKCS7 signed objects. Note: this
     is still beta code - one known issue is that it doesn't support single
@@ -923,7 +924,7 @@ Release 1.11
 <h3>2.32.2 Defects Fixed</h3>
 <ul>
 <li>X9.23 padding of MACs now works correctly with block size aligned data.
-<li>Loading a corrupted "UBER" key store would occassionally cause the
+<li>Loading a corrupted "UBER" key store would occasionally cause the
 appearance of hanging. This has been fixed.
 <li>Loading a PKCS12 store where not all certificates had PKCS9 attributes
 assigned to them would cause a NullPointerException. This has been fixed.
@@ -1120,7 +1121,7 @@ a class in for dealing with Netscape Certificate Request objects.
 <h3>2.38.4 Additional Notes</h3>
 <p>
 Concerning the PKCS12 fix: in a few cases this may cause some backward
-compatability issues - if this happens to you, drop us a line at
+compatibility issues - if this happens to you, drop us a line at
 <a href="mailto:feedback-crypto@bouncycastle.org">feedback-crypto@bouncycastle.org</a>
 and we will help you get it sorted out.
 
