@@ -34,18 +34,25 @@ public class KeyTransRecipientInformation
     extends RecipientInformation
 {
     private KeyTransRecipientInfo _info;
-//    private AlgorithmIdentifier   _encAlg;
 
     public KeyTransRecipientInformation(
         KeyTransRecipientInfo   info,
         AlgorithmIdentifier     encAlg,
         InputStream             data)
     {
-        super(encAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
+        this(info, encAlg, null, data);
+    }
+    
+    public KeyTransRecipientInformation(
+        KeyTransRecipientInfo   info,
+        AlgorithmIdentifier     encAlg,
+        AlgorithmIdentifier     macAlg,
+        InputStream             data)
+    {
+        super(encAlg, macAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
         
         this._info = info;
-//        this._encAlg = encAlg;
-        this._rid = new RecipientId();
+        this.rid = new RecipientId();
 
         RecipientIdentifier r = info.getRecipientIdentifier();
 
@@ -55,14 +62,14 @@ public class KeyTransRecipientInformation
             {
                 ASN1OctetString octs = ASN1OctetString.getInstance(r.getId());
 
-                _rid.setSubjectKeyIdentifier(octs.getOctets());
+                rid.setSubjectKeyIdentifier(octs.getOctets());
             }
             else
             {
                 IssuerAndSerialNumber   iAnds = IssuerAndSerialNumber.getInstance(r.getId());
 
-                _rid.setIssuer(iAnds.getName().getEncoded());
-                _rid.setSerialNumber(iAnds.getSerialNumber().getValue());
+                rid.setIssuer(iAnds.getName().getEncoded());
+                rid.setSerialNumber(iAnds.getSerialNumber().getValue());
             }
         }
         catch (IOException e)
@@ -81,32 +88,29 @@ public class KeyTransRecipientInformation
         
         return oid.getId();
     }
-    
-    /**
-     * decrypt the content and return it as a byte array.
-     */
-    public CMSTypedStream getContentStream(
-        Key      key,
-        String   prov)
-        throws CMSException, NoSuchProviderException
-    {
-        return getContentStream(key, CMSUtils.getProvider(prov));
-    }
 
-    public CMSTypedStream getContentStream(
-        Key      key,
-        Provider prov)
+    protected Key unwrapKey(Key key, Provider prov)
         throws CMSException
     {
-        byte[]  encryptedKey = _info.getEncryptedKey().getOctets();
-        String  keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(_keyEncAlg.getObjectId());
-        String  alg = CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(_encAlg.getObjectId().getId());
+        byte[] encryptedKey = _info.getEncryptedKey().getOctets();
+        String keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(keyEncAlg.getObjectId());
+        String alg;
+
+        if (macAlg != null)
+        {
+            alg = CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(macAlg.getObjectId().getId());
+        }
+        else
+        {
+            alg = CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(encAlg.getObjectId().getId());
+        }
+        
+        Key sKey;
 
         try
         {
-            Cipher  keyCipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(keyExchangeAlgorithm, prov);
-            Key     sKey;
-            
+            Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(keyExchangeAlgorithm, prov);
+
             try
             {
                 keyCipher.init(Cipher.UNWRAP_MODE, key);
@@ -138,7 +142,7 @@ public class KeyTransRecipientInformation
                 sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
 
-            return getContentFromSessionKey(sKey, prov);
+            return sKey;
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -160,5 +164,26 @@ public class KeyTransRecipientInformation
         {
             throw new CMSException("bad padding in message.", e);
         }
+    }
+
+    /**
+     * decrypt the content and return it
+     */
+    public CMSTypedStream getContentStream(
+        Key key,
+        String prov)
+        throws CMSException, NoSuchProviderException
+    {
+        return getContentStream(key, CMSUtils.getProvider(prov));
+    }
+
+    public CMSTypedStream getContentStream(
+        Key key,
+        Provider prov)
+        throws CMSException
+    {
+        Key sKey = unwrapKey(key, prov);
+
+        return getContentFromSessionKey(sKey, prov);
     }
 }

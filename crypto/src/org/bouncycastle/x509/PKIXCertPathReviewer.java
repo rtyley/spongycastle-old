@@ -2482,7 +2482,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         return result;
     }
     
-    private Collection getTrustAnchors(X509Certificate cert, Set trustanchors) throws CertPathReviewerException
+    protected Collection getTrustAnchors(X509Certificate cert, Set trustanchors) throws CertPathReviewerException
     {
         Collection trustColl = new ArrayList();
         Iterator it = trustanchors.iterator();

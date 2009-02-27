@@ -22,22 +22,29 @@ public class KEKRecipientInformation
     extends RecipientInformation
 {
     private KEKRecipientInfo      _info;
-    private AlgorithmIdentifier   _encAlg;
 
     public KEKRecipientInformation(
         KEKRecipientInfo        info,
         AlgorithmIdentifier     encAlg,
         InputStream             data)
     {
-        super(encAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
+        this(info, encAlg, null, data);
+    }
+
+    public KEKRecipientInformation(
+        KEKRecipientInfo        info,
+        AlgorithmIdentifier     encAlg,
+        AlgorithmIdentifier     macAlg,
+        InputStream             data)
+    {
+        super(encAlg, macAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
         
         this._info = info;
-        this._encAlg = encAlg;
-        this._rid = new RecipientId();
+        this.rid = new RecipientId();
         
         KEKIdentifier       kekId = info.getKekid();
 
-        _rid.setKeyIdentifier(kekId.getKeyIdentifier().getOctets());
+        rid.setKeyIdentifier(kekId.getKeyIdentifier().getOctets());
     }
 
     /**
@@ -62,11 +69,16 @@ public class KEKRecipientInformation
         try
         {
             byte[]              encryptedKey = _info.getEncryptedKey().getOctets();
-            Cipher              keyCipher = Cipher.getInstance(_keyEncAlg.getObjectId().getId(), prov);
+            Cipher              keyCipher = Cipher.getInstance(keyEncAlg.getObjectId().getId(), prov);
 
             keyCipher.init(Cipher.UNWRAP_MODE, key);
 
-            AlgorithmIdentifier aid = _encAlg;
+            AlgorithmIdentifier aid = encAlg;
+            if (aid == null)
+            {
+                aid = macAlg;
+            }
+            
             String              alg = aid.getObjectId().getId();
             Key                 sKey = keyCipher.unwrap(
                                         encryptedKey, alg, Cipher.SECRET_KEY);
