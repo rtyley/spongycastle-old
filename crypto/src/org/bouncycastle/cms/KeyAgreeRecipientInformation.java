@@ -34,8 +34,7 @@ import javax.crypto.NoSuchPaddingException;
 public class KeyAgreeRecipientInformation
     extends RecipientInformation
 {
-    private KeyAgreeRecipientInfo _info;
-//    private AlgorithmIdentifier   _encAlg;
+    private KeyAgreeRecipientInfo info;
     private ASN1OctetString       _encryptedKey;
 
     public KeyAgreeRecipientInformation(
@@ -43,21 +42,29 @@ public class KeyAgreeRecipientInformation
         AlgorithmIdentifier   encAlg,
         InputStream data)
     {
-        super(encAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
+        this(info, encAlg, null, data);
+    }
 
-        _info = info;
-//        _encAlg = encAlg;
+    public KeyAgreeRecipientInformation(
+        KeyAgreeRecipientInfo info,
+        AlgorithmIdentifier   encAlg,
+        AlgorithmIdentifier   macAlg,
+        InputStream data)
+    {
+        super(encAlg, macAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
+
+        this.info = info;
 
         try
         {
-            ASN1Sequence s = _info.getRecipientEncryptedKeys();
+            ASN1Sequence s = this.info.getRecipientEncryptedKeys();
             RecipientEncryptedKey id = RecipientEncryptedKey.getInstance(s.getObjectAt(0));
 
             IssuerAndSerialNumber iAnds = id.getIdentifier().getIssuerAndSerialNumber();
 
-            _rid = new RecipientId();
-            _rid.setIssuer(iAnds.getName().getEncoded());
-            _rid.setSerialNumber(iAnds.getSerialNumber().getValue());
+            rid = new RecipientId();
+            rid.setIssuer(iAnds.getName().getEncoded());
+            rid.setSerialNumber(iAnds.getSerialNumber().getValue());
 
             _encryptedKey = id.getEncryptedKey();
         }
@@ -67,37 +74,24 @@ public class KeyAgreeRecipientInformation
         }
     }
 
-    /**
-     * decrypt the content and return an input stream.
-     */
-    public CMSTypedStream getContentStream(
-        Key key,
-        String   prov)
-        throws CMSException, NoSuchProviderException
-    {
-        return getContentStream(key, CMSUtils.getProvider(prov));
-    }
-
-    public CMSTypedStream getContentStream(
-        Key key,
-        Provider prov)
+    protected Key unwrapKey(Key key, Provider prov)
         throws CMSException
     {
         try
         {
-            OriginatorPublicKey origK = _info.getOriginator().getOriginatorKey();
+            OriginatorPublicKey origK = info.getOriginator().getOriginatorKey();
             PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(key.getEncoded()));
             SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(privInfo.getAlgorithmId(), origK.getPublicKey().getBytes());
             X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
-            KeyFactory fact = KeyFactory.getInstance(_keyEncAlg.getObjectId().getId(), prov);
-            KeyAgreement agreement = KeyAgreement.getInstance(_keyEncAlg.getObjectId().getId(), prov);
-                            
+            KeyFactory fact = KeyFactory.getInstance(keyEncAlg.getObjectId().getId(), prov);
+            KeyAgreement agreement = KeyAgreement.getInstance(keyEncAlg.getObjectId().getId(), prov);
+
             agreement.init(key);
 
             agreement.doPhase(fact.generatePublic(pubSpec), true);
 
             String wrapAlg = DERObjectIdentifier.getInstance(
-                                   ASN1Sequence.getInstance(_keyEncAlg.getParameters()).getObjectAt(0)).getId();
+                                   ASN1Sequence.getInstance(keyEncAlg.getParameters()).getObjectAt(0)).getId();
 
             Key wKey = agreement.generateSecret(wrapAlg);
 
@@ -105,14 +99,17 @@ public class KeyAgreeRecipientInformation
 
             keyCipher.init(Cipher.UNWRAP_MODE, wKey);
 
-            AlgorithmIdentifier aid = _encAlg;
+            AlgorithmIdentifier aid = encAlg;
+            if (aid == null)
+            {
+                aid = macAlg;
+            }
+            
             String              alg = aid.getObjectId().getId();
 
             byte[]              encryptedKey = _encryptedKey.getOctets();
-            Key                 sKey = keyCipher.unwrap(
-                                        encryptedKey, alg, Cipher.SECRET_KEY);
 
-            return getContentFromSessionKey(sKey, prov);
+            return keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -134,5 +131,25 @@ public class KeyAgreeRecipientInformation
         {
             throw new CMSException("originator key invalid.", e);
         }
+    }
+    /**
+     * decrypt the content and return it
+     */
+    public CMSTypedStream getContentStream(
+        Key key,
+        String prov)
+        throws CMSException, NoSuchProviderException
+    {
+        return getContentStream(key, CMSUtils.getProvider(prov));
+    }
+
+    public CMSTypedStream getContentStream(
+        Key key,
+        Provider prov)
+        throws CMSException
+    {
+        Key sKey = unwrapKey(key, prov);
+
+        return getContentFromSessionKey(sKey, prov);
     }
 }

@@ -149,7 +149,8 @@ public interface PKCSObjectIdentifiers
     // rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) ct(1)}
     //
     static String id_ct = "1.2.840.113549.1.9.16.1";
-    
+
+    static final DERObjectIdentifier    id_ct_authData          = new DERObjectIdentifier(id_ct + ".2");
     static final DERObjectIdentifier    id_ct_TSTInfo           = new DERObjectIdentifier(id_ct + ".4");
     static final DERObjectIdentifier    id_ct_compressedData    = new DERObjectIdentifier(id_ct + ".9");
     

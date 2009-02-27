@@ -5,6 +5,8 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.Mac;
+
 import java.io.IOException;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
@@ -20,6 +22,7 @@ class CMSEnvelopedHelper
     private static final Map KEYSIZES = new HashMap();
     private static final Map BASE_CIPHER_NAMES = new HashMap();
     private static final Map CIPHER_ALG_NAMES = new HashMap();
+    private static final Map MAC_ALG_NAMES = new HashMap();
 
     static
     {
@@ -37,6 +40,11 @@ class CMSEnvelopedHelper
         CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.AES128_CBC,  "AES/CBC/PKCS5Padding");
         CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.AES192_CBC,  "AES/CBC/PKCS5Padding");
         CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.AES256_CBC,  "AES/CBC/PKCS5Padding");
+
+        MAC_ALG_NAMES.put(CMSEnvelopedGenerator.DES_EDE3_CBC,  "DESEDEMac");
+        MAC_ALG_NAMES.put(CMSEnvelopedGenerator.AES128_CBC,  "AESMac");
+        MAC_ALG_NAMES.put(CMSEnvelopedGenerator.AES192_CBC,  "AESMac");
+        MAC_ALG_NAMES.put(CMSEnvelopedGenerator.AES256_CBC,  "AESMac");
     }
 
     private String getAsymmetricEncryptionAlgName(
@@ -216,6 +224,47 @@ class CMSEnvelopedHelper
                 if (provider != null)
                 {
                     return getSymmetricCipher(encryptionOID, null); // roll back to default
+                }
+                throw e;
+            }
+        }
+    }
+
+    private Mac createMac(
+        String algName,
+        Provider provider)
+        throws NoSuchAlgorithmException, NoSuchPaddingException
+    {
+        if (provider != null)
+        {
+            return Mac.getInstance(algName, provider);
+        }
+        else
+        {
+            return Mac.getInstance(algName);
+        }
+    }
+
+    Mac getMac(String macOID, Provider provider)
+        throws NoSuchAlgorithmException, NoSuchPaddingException
+    {
+        try
+        {
+            return createMac(macOID, provider);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            String alternate = (String)MAC_ALG_NAMES.get(macOID);
+
+            try
+            {
+                return createMac(alternate, provider);
+            }
+            catch (NoSuchAlgorithmException ex)
+            {
+                if (provider != null)
+                {
+                    return getMac(macOID, null); // roll back to default
                 }
                 throw e;
             }
