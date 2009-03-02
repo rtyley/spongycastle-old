@@ -16,6 +16,7 @@ import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.cms.AuthenticatedDataParser;
 import org.bouncycastle.asn1.cms.ContentInfoParser;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.util.Arrays;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -225,7 +226,7 @@ public class CMSAuthenticatedDataParser
             getAuthAttrs();
             mac = authData.getMac().getOctets();
         }
-        return mac.clone();
+        return Arrays.clone(mac);
     }
 
     /**
