@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.cms.AuthenticatedData;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.util.Arrays;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -107,7 +108,7 @@ public class CMSAuthenticatedData
 
     public byte[] getMac()
     {
-        return mac.clone();
+        return Arrays.clone(mac);
     }
 
     private byte[] encodeObj(
