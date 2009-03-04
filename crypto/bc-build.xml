@@ -50,6 +50,31 @@
     <property name="lcrypto.target.classes.dir" value="${lcrypto.target.dir}/classes" />
     <property name="lcrypto.target.docs.dir" value="${lcrypto.target.dir}/docs" />
 
+    <!--
+    <taskdef name="pack200" classname="com.sun.tools.apache.ant.pack200.Pack200Task"
+        classpath="lib/Pack200Task.jar"/>
+    -->
+
+    <macrodef name="packJar">
+        <attribute name="jarbase" />
+        <element name="manifest-element" />
+        <element name="fileset-element" />
+        <sequential>
+            <jar jarfile="@{jarbase}.jar">
+                <manifest-element/>
+                <fileset-element/>
+            </jar>
+			<!--
+            <jar jarfile="@{jarbase}.tmp.jar">
+                <manifest-element/>
+                <fileset-element/>
+            </jar>
+            <pack200 src="@{jarbase}.tmp.jar" destfile="@{jarbase}.jar" repack="true" />
+            <delete file="@{jarbase}.tmp.jar" />
+			-->
+        </sequential>
+    </macrodef>
+
     <macrodef name="compile">
         <attribute name="target" />
         <element name="manifestElements" />
@@ -58,7 +83,10 @@
             <mkdir dir="${build.dir}/@{target}/classes" />
             <mkdir dir="${artifacts.dir}/@{target}" />
 
-            <javac srcdir="${artifacts.dir}/@{target}/src" destdir="${build.dir}/@{target}/classes" debug="${release.debug}">
+            <javac source="${bc.javac.source}" target="${bc.javac.target}"
+                srcdir="${artifacts.dir}/@{target}/src"
+                destdir="${build.dir}/@{target}/classes"
+                debug="${release.debug}">
                 <classpath>
                     <fileset dir="${artifacts.jars.dir}">
                         <include name="**/*.jar" />
@@ -68,14 +96,18 @@
             <copy todir="${build.dir}/@{target}/classes">
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
             </copy>
-            <jar jarfile="${artifacts.jars.dir}/@{target}.jar">
-                <manifest>
-                    <manifestElements/>
-                </manifest>
-                <fileset dir="${build.dir}/@{target}/classes">
-                    <jarFileSet/>
-                </fileset>
-            </jar>
+            <packJar jarbase="${artifacts.jars.dir}/@{target}">
+                <manifest-element>
+                    <manifest>
+                        <manifestElements/>
+                    </manifest>
+                </manifest-element>
+                <fileset-element>
+                    <fileset dir="${build.dir}/@{target}/classes">
+                        <jarFileSet/>
+                    </fileset>
+                </fileset-element>
+            </packJar>
         </sequential>
     </macrodef>
 
@@ -86,7 +118,10 @@
             <mkdir dir="${build.dir}/@{target}/classes" />
             <mkdir dir="${artifacts.dir}/@{target}" />
 
-            <javac srcdir="${artifacts.dir}/@{target}/src" destdir="${build.dir}/@{target}/classes" debug="${release.debug}">
+            <javac source="${bc.javac.source}" target="${bc.javac.target}"
+                srcdir="${artifacts.dir}/@{target}/src"
+                destdir="${build.dir}/@{target}/classes"
+                debug="${release.debug}">
                 <classpath>
                     <fileset dir="${artifacts.jars.dir}">
                         <include name="**/*.jar" />
@@ -101,18 +136,24 @@
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crt" />
                  <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crl" />
             </copy>
-            <jar jarfile="${artifacts.jars.dir}/@{target}.jar">
-                <manifest>
-                    <manifestElements/>
-                </manifest>
-                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.class" />
-                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.pem" />
-                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.crl" />
-                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.crt" />
-                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.eml" />
-                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.message" />
-                <fileset dir="${build.dir}/@{target}/classes" includes="**/*.properties" />
-            </jar>
+            <packJar jarbase="${artifacts.jars.dir}/@{target}">
+                <manifest-element>
+                    <manifest>
+                        <manifestElements/>
+                    </manifest>
+                </manifest-element>
+                <fileset-element>
+                    <fileset dir="${build.dir}/@{target}/classes">
+                        <include name="**/*.class" />
+                        <include name="**/*.pem" />
+                        <include name="**/*.crl" />
+                        <include name="**/*.crt" />
+                        <include name="**/*.eml" />
+                        <include name="**/*.message" />
+                        <include name="**/*.properties" />
+                    </fileset>
+                </fileset-element>
+            </packJar>
         </sequential>
     </macrodef>
 
@@ -173,7 +214,10 @@
              </fileset>
         </copy>
 
-        <javac srcdir="${lcrypto.target.src.dir}" destdir="${lcrypto.target.classes.dir}" debug="${release.debug}">
+        <javac source="${bc.javac.source}" target="${bc.javac.target}"
+            srcdir="${lcrypto.target.src.dir}"
+            destdir="${lcrypto.target.classes.dir}"
+            debug="${release.debug}">
         </javac>
     </target>
 
@@ -227,23 +271,27 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
-        
-        <jar jarfile="${artifacts.jars.dir}/${extprovider}.jar">
-            <manifest>
-                <attribute name="Manifest-Version" value="1.0" />
-                <attribute name="Extension-Name" value="org.bouncycastle.bcproviderext" />
-                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
-                <attribute name="Specification-Version" value="1.1" />
-                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
-                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
-                <attribute name="Implementation-Version" value="${release.name}.0" />
-            </manifest>
-            <fileset dir="${build.dir}/${provider}/classes">
-                <include name="**/*.class"/>
-                <exclude name="**/javax/crypto/**/*.class"/>
-                <include name="**/*.properties"/>
-            </fileset>
-        </jar>
+
+        <packJar jarbase="${artifacts.jars.dir}/${extprovider}">
+            <manifest-element>
+                <manifest>
+                    <attribute name="Manifest-Version" value="1.0" />
+                    <attribute name="Extension-Name" value="org.bouncycastle.bcproviderext" />
+                    <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                    <attribute name="Specification-Version" value="1.1" />
+                    <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                    <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                    <attribute name="Implementation-Version" value="${release.name}.0" />
+                </manifest>
+            </manifest-element>
+            <fileset-element>
+                <fileset dir="${build.dir}/${provider}/classes">
+                    <include name="**/*.class"/>
+                    <exclude name="**/javax/crypto/**/*.class"/>
+                    <include name="**/*.properties"/>
+                </fileset>
+            </fileset-element>
+        </packJar>
 
     </target>
 
@@ -296,22 +344,26 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
-        
-        <jar jarfile="${artifacts.jars.dir}/${extjce}.jar">
-            <manifest>
-                <attribute name="Manifest-Version" value="1.0" />
-                <attribute name="Extension-Name" value="org.bouncycastle.bcjceext" />
-                <attribute name="Specification-Vendor" value="BouncyCastle.org" />
-                <attribute name="Specification-Version" value="1.1" />
-                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
-                <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
-                <attribute name="Implementation-Version" value="${release.name}.0" />
-            </manifest>
-            <fileset dir="${build.dir}/${jce}/classes">
-                <include name="**/*.class"/>
-                <include name="**/*.properties"/>
-            </fileset>
-        </jar>
+
+        <packJar jarbase="${artifacts.jars.dir}/${extjce}">
+            <manifest-element>
+                <manifest>
+                    <attribute name="Manifest-Version" value="1.0" />
+                    <attribute name="Extension-Name" value="org.bouncycastle.bcjceext" />
+                    <attribute name="Specification-Vendor" value="BouncyCastle.org" />
+                    <attribute name="Specification-Version" value="1.1" />
+                    <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                    <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
+                    <attribute name="Implementation-Version" value="${release.name}.0" />
+                </manifest>
+            </manifest-element>
+            <fileset-element>
+                <fileset dir="${build.dir}/${jce}/classes">
+                    <include name="**/*.class"/>
+                    <include name="**/*.properties"/>
+                </fileset>
+            </fileset-element>
+        </packJar>
     </target>
 
     <target name="build-libraries" depends="build-mail, build-tsp, build-pg" />
@@ -351,7 +403,7 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
-        
+
     </target>
 
     <!--
@@ -386,7 +438,7 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
-        
+
     </target>
 
     <!--
@@ -430,7 +482,7 @@
                 <attribute name="Implementation-Version" value="${release.name}.0" />
             </manifestElements>
         </compile>
-        
+
     </target>
 
     <!--
@@ -714,8 +766,8 @@
              <fileset dir="${artifacts.docs.dir}/lcrypto" />
        </copy>
     </target>
-    
-    <!-- 
+
+    <!--
         jar up the source directories
     -->
     <target name="zip-src" depends="zip-src-check, zip-src-jce, zip-src-provider">
@@ -726,19 +778,20 @@
         <zip basedir="${pg.target.src.dir}" destfile="${pg.target.src.zip}" />
         <delete dir="${pg.target.src.dir}" />
     </target>
-    
+
     <target name="zip-src-jce" if="jce.present">
         <zip basedir="${jce.target.src.dir}" destfile="${jce.target.src.zip}" />
         <delete dir="${jce.target.src.dir}" />
     </target>
-	
+
     <target name="zip-src-provider" if="provider.present">
         <zip basedir="${provider.target.src.dir}" destfile="${provider.target.src.zip}"/>
         <delete dir="${provider.target.src.dir}" />
     </target>
-	
+
     <target name="zip-src-check">
-    	<available property="jce.present" file="${jce.target.src.dir}" />
-    	<available property="provider.present" file="${provider.target.src.dir}" />
+        <available property="jce.present" file="${jce.target.src.dir}" />
+        <available property="provider.present" file="${provider.target.src.dir}" />
     </target>
 </project>
+

@@ -2,6 +2,8 @@
 
 <project name="crypto1.4" default="build" basedir=".">
 
+	<property name="bc.javac.source" value="1.4" />
+	<property name="bc.javac.target" value="1.4" />
     <property name="build.dir" value="build" />
     <property name="jdk.name" value="jdk1.4" />
     <property name="src.dir" value="${build.dir}/${jdk.name}" />

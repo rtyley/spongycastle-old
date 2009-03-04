@@ -2,6 +2,8 @@
 
 <project name="crypto1.5" default="build" basedir=".">
 
+	<property name="bc.javac.source" value="1.5" />
+	<property name="bc.javac.target" value="1.5" />
     <property name="build.dir" value="build" />
     <property name="jdk.name" value="jdk1.5" />
     <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
