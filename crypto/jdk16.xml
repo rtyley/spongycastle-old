@@ -2,14 +2,15 @@
 
 <project name="crypto1.5" default="build" basedir=".">
 
-	<property name="bc.javac.source" value="1.6" />
-	<property name="bc.javac.target" value="1.6" />
+    <property name="bc.javac.source" value="1.6" />
+    <property name="bc.javac.target" value="1.6" />
     <property name="build.dir" value="build" />
     <property name="jdk.name" value="jdk1.6" />
     <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
     <property name="src.dir" value="${build.dir}/${jdk.name}" />
     <property name="target.prefix" value="jdk16" />
     <property name="javadoc.args" value="-breakiterator" />
+    <property name="pack200.enabled" value="" />
 
     <target name="init">
         <mkdir dir="${src.dir}" />
@@ -33,7 +34,7 @@
             <fileset dir="test/data" includes="**/*.crt" />
             <fileset dir="test/data" includes="**/*.crl" />
         </copy>
-    	<available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
+        <available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
     </target>
 
     <target name="checkstyle-on" if="checkstyle.on">
