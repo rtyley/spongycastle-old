@@ -2,8 +2,8 @@
 
 <project name="crypto1.4" default="build" basedir=".">
 
-	<property name="bc.javac.source" value="1.4" />
-	<property name="bc.javac.target" value="1.4" />
+    <property name="bc.javac.source" value="1.4" />
+    <property name="bc.javac.target" value="1.4" />
     <property name="build.dir" value="build" />
     <property name="jdk.name" value="jdk1.4" />
     <property name="src.dir" value="${build.dir}/${jdk.name}" />
@@ -51,7 +51,7 @@
             <fileset dir="jdk1.4" includes="**/*.java" />
             <fileset dir="test/jdk1.4" includes="**/*.java" />
         </copy>
-    	<available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
+        <available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
     </target>
 
     <target name="checkstyle-on" if="checkstyle.on">

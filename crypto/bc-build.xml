@@ -50,149 +50,160 @@
     <property name="lcrypto.target.classes.dir" value="${lcrypto.target.dir}/classes" />
     <property name="lcrypto.target.docs.dir" value="${lcrypto.target.dir}/docs" />
 
-    <!--
-    <taskdef name="pack200" classname="com.sun.tools.apache.ant.pack200.Pack200Task"
-        classpath="lib/Pack200Task.jar"/>
-    -->
+    <target name="pack200-on" if="pack200.enabled">
+        <taskdef name="pack200" classname="com.sun.tools.apache.ant.pack200.Pack200Task"
+            classpath="lib/Pack200Task.jar"/>
+        <macrodef name="packJar">
+            <attribute name="jarbase" />
+            <element name="manifest-element" />
+            <element name="fileset-element" />
+            <sequential>
+                <jar jarfile="@{jarbase}.tmp.jar">
+                    <manifest-element/>
+                    <fileset-element/>
+                </jar>
+                <pack200 src="@{jarbase}.tmp.jar" destfile="@{jarbase}.jar" repack="true" />
+                <delete file="@{jarbase}.tmp.jar" />
+            </sequential>
+        </macrodef>
+    </target>
+    <target name="pack200-off" unless="pack200.enabled">
+        <macrodef name="packJar">
+            <attribute name="jarbase" />
+            <element name="manifest-element" />
+            <element name="fileset-element" />
+            <sequential>
+                <jar jarfile="@{jarbase}.jar">
+                    <manifest-element/>
+                    <fileset-element/>
+                </jar>
+            </sequential>
+        </macrodef>
+    </target>
+    <target name="initPackJar" depends="pack200-on, pack200-off" />
 
-    <macrodef name="packJar">
-        <attribute name="jarbase" />
-        <element name="manifest-element" />
-        <element name="fileset-element" />
-        <sequential>
-            <jar jarfile="@{jarbase}.jar">
-                <manifest-element/>
-                <fileset-element/>
-            </jar>
-			<!--
-            <jar jarfile="@{jarbase}.tmp.jar">
-                <manifest-element/>
-                <fileset-element/>
-            </jar>
-            <pack200 src="@{jarbase}.tmp.jar" destfile="@{jarbase}.jar" repack="true" />
-            <delete file="@{jarbase}.tmp.jar" />
-			-->
-        </sequential>
-    </macrodef>
+    <target name="initMacros" depends="initPackJar">
 
-    <macrodef name="compile">
-        <attribute name="target" />
-        <element name="manifestElements" />
-        <element name="jarFileSet" />
-        <sequential>
-            <mkdir dir="${build.dir}/@{target}/classes" />
-            <mkdir dir="${artifacts.dir}/@{target}" />
+        <macrodef name="compile">
+            <attribute name="target" />
+            <element name="manifestElements" />
+            <element name="jarFileSet" />
+            <sequential>
+                <mkdir dir="${build.dir}/@{target}/classes" />
+                <mkdir dir="${artifacts.dir}/@{target}" />
 
-            <javac source="${bc.javac.source}" target="${bc.javac.target}"
-                srcdir="${artifacts.dir}/@{target}/src"
-                destdir="${build.dir}/@{target}/classes"
-                debug="${release.debug}">
+                <javac source="${bc.javac.source}" target="${bc.javac.target}"
+                    srcdir="${artifacts.dir}/@{target}/src"
+                    destdir="${build.dir}/@{target}/classes"
+                    debug="${release.debug}">
+                    <classpath>
+                        <fileset dir="${artifacts.jars.dir}">
+                            <include name="**/*.jar" />
+                        </fileset>
+                    </classpath>
+                </javac>
+                <copy todir="${build.dir}/@{target}/classes">
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
+                </copy>
+                <packJar jarbase="${artifacts.jars.dir}/@{target}">
+                    <manifest-element>
+                        <manifest>
+                            <manifestElements/>
+                        </manifest>
+                    </manifest-element>
+                    <fileset-element>
+                        <fileset dir="${build.dir}/@{target}/classes">
+                            <jarFileSet/>
+                        </fileset>
+                    </fileset-element>
+                </packJar>
+            </sequential>
+        </macrodef>
+
+        <macrodef name="compile-test">
+            <attribute name="target" />
+            <element name="manifestElements" />
+            <sequential>
+                <mkdir dir="${build.dir}/@{target}/classes" />
+                <mkdir dir="${artifacts.dir}/@{target}" />
+
+                <javac source="${bc.javac.source}" target="${bc.javac.target}"
+                    srcdir="${artifacts.dir}/@{target}/src"
+                    destdir="${build.dir}/@{target}/classes"
+                    debug="${release.debug}">
+                    <classpath>
+                        <fileset dir="${artifacts.jars.dir}">
+                            <include name="**/*.jar" />
+                        </fileset>
+                    </classpath>
+                </javac>
+                <copy todir="${build.dir}/@{target}/classes">
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.pem" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.message" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.eml" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crt" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crl" />
+                </copy>
+                <packJar jarbase="${artifacts.jars.dir}/@{target}">
+                    <manifest-element>
+                        <manifest>
+                            <manifestElements/>
+                        </manifest>
+                    </manifest-element>
+                    <fileset-element>
+                        <fileset dir="${build.dir}/@{target}/classes">
+                            <include name="**/*.class" />
+                            <include name="**/*.pem" />
+                            <include name="**/*.crl" />
+                            <include name="**/*.crt" />
+                            <include name="**/*.eml" />
+                            <include name="**/*.message" />
+                            <include name="**/*.properties" />
+                        </fileset>
+                    </fileset-element>
+                </packJar>
+            </sequential>
+        </macrodef>
+
+        <macrodef name="compile-doc">
+            <attribute name="srcDir" />
+            <attribute name="docsDir" />
+            <element name="docElements" />
+            <sequential>
+            <mkdir dir="@{docsDir}" />
+            <javadoc sourcepath="@{srcDir}"
+                     destdir="@{docsDir}"
+                     windowtitle="Bouncy Castle Library ${release.name} API Specification"
+                     header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
+                <docElements/>
+                <arg value="${javadoc.args}" />
                 <classpath>
                     <fileset dir="${artifacts.jars.dir}">
                         <include name="**/*.jar" />
                     </fileset>
+                    <pathelement path="${env.CLASSPATH}" />
                 </classpath>
-            </javac>
-            <copy todir="${build.dir}/@{target}/classes">
-                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
-            </copy>
-            <packJar jarbase="${artifacts.jars.dir}/@{target}">
-                <manifest-element>
-                    <manifest>
-                        <manifestElements/>
-                    </manifest>
-                </manifest-element>
-                <fileset-element>
-                    <fileset dir="${build.dir}/@{target}/classes">
-                        <jarFileSet/>
-                    </fileset>
-                </fileset-element>
-            </packJar>
-        </sequential>
-    </macrodef>
+            </javadoc>
+            </sequential>
+        </macrodef>
 
-    <macrodef name="compile-test">
-        <attribute name="target" />
-        <element name="manifestElements" />
-        <sequential>
-            <mkdir dir="${build.dir}/@{target}/classes" />
-            <mkdir dir="${artifacts.dir}/@{target}" />
+        <macrodef name="copyStandardFiles">
+            <attribute name="toDir" />
+            <sequential>
+                <copy toDir="@{toDir}">
+                     <fileset dir="${basedir}">
+                         <include name="*.html" />
+                     </fileset>
+                </copy>
+            </sequential>
+        </macrodef>
 
-            <javac source="${bc.javac.source}" target="${bc.javac.target}"
-                srcdir="${artifacts.dir}/@{target}/src"
-                destdir="${build.dir}/@{target}/classes"
-                debug="${release.debug}">
-                <classpath>
-                    <fileset dir="${artifacts.jars.dir}">
-                        <include name="**/*.jar" />
-                    </fileset>
-                </classpath>
-            </javac>
-            <copy todir="${build.dir}/@{target}/classes">
-                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.pem" />
-                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.message" />
-                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
-                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.eml" />
-                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crt" />
-                 <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crl" />
-            </copy>
-            <packJar jarbase="${artifacts.jars.dir}/@{target}">
-                <manifest-element>
-                    <manifest>
-                        <manifestElements/>
-                    </manifest>
-                </manifest-element>
-                <fileset-element>
-                    <fileset dir="${build.dir}/@{target}/classes">
-                        <include name="**/*.class" />
-                        <include name="**/*.pem" />
-                        <include name="**/*.crl" />
-                        <include name="**/*.crt" />
-                        <include name="**/*.eml" />
-                        <include name="**/*.message" />
-                        <include name="**/*.properties" />
-                    </fileset>
-                </fileset-element>
-            </packJar>
-        </sequential>
-    </macrodef>
+    </target>
 
-    <macrodef name="compile-doc">
-        <attribute name="srcDir" />
-        <attribute name="docsDir" />
-        <element name="docElements" />
-        <sequential>
-        <mkdir dir="@{docsDir}" />
-        <javadoc sourcepath="@{srcDir}"
-                 destdir="@{docsDir}"
-                 windowtitle="Bouncy Castle Library ${release.name} API Specification"
-                 header="&lt;b&gt;Bouncy Castle Cryptography Library ${release.name}&lt;/b&gt;">
-            <docElements/>
-            <arg value="${javadoc.args}" />
-            <classpath>
-                <fileset dir="${artifacts.jars.dir}">
-                    <include name="**/*.jar" />
-                </fileset>
-                <pathelement path="${env.CLASSPATH}" />
-            </classpath>
-        </javadoc>
-        </sequential>
-    </macrodef>
+    <target name="build" depends="initMacros, build-lw, build-libraries, build-test" />
 
-    <macrodef name="copyStandardFiles">
-        <attribute name="toDir" />
-        <sequential>
-            <copy toDir="@{toDir}">
-                 <fileset dir="${basedir}">
-                     <include name="*.html" />
-                 </fileset>
-            </copy>
-        </sequential>
-    </macrodef>
-
-    <target name="build" depends="build-lw, build-libraries, build-test" />
-
-    <target name="build-lw">
+    <target name="build-lw" depends="initMacros">
         <!--
               Lightweight Libraries
         -->
@@ -224,7 +235,7 @@
     <!--
           Provider
     -->
-    <target name="build-provider">
+    <target name="build-provider" depends="initMacros">
         <property name="provider" value="bcprov-${target.name}" />
         <property name="extprovider" value="bcprov-ext-${target.name}" />
 
@@ -298,7 +309,7 @@
     <!--
           JCE
     -->
-    <target name="build-jce">
+    <target name="build-jce" depends="initMacros">
         <property name="jce" value="jce-${target.name}" />
         <property name="extjce" value="jce-ext-${target.name}" />
 
@@ -366,12 +377,12 @@
         </packJar>
     </target>
 
-    <target name="build-libraries" depends="build-mail, build-tsp, build-pg" />
+    <target name="build-libraries" depends="initMacros, build-mail, build-tsp, build-pg" />
 
     <!--
           Mail
     -->
-    <target name="build-mail">
+    <target name="build-mail" depends="initMacros">
         <mkdir dir="${mail.target.dir}" />
 
         <copyStandardFiles toDir="${mail.target.dir}" />
@@ -409,7 +420,7 @@
     <!--
           TSP
     -->
-    <target name="build-tsp">
+    <target name="build-tsp" depends="initMacros">
         <mkdir dir="${tsp.target.dir}" />
 
         <copyStandardFiles toDir="${tsp.target.dir}" />
@@ -444,7 +455,7 @@
     <!--
           PG
     -->
-    <target name="build-pg">
+    <target name="build-pg" depends="initMacros">
         <mkdir dir="${pg.target.dir}" />
 
         <filter token="RELEASE_NAME" value="${release.name}" />
@@ -488,7 +499,7 @@
     <!--
          Tests
     -->
-    <target name="build-test">
+    <target name="build-test" depends="initMacros">
         <property name="test.target" value="bctest-${target.name}" />
 
         <mkdir dir="${artifacts.jars.dir}" />
@@ -586,7 +597,7 @@
     <!--
           Provider JavaDoc
     -->
-    <target name="javadoc-provider">
+    <target name="javadoc-provider" depends="initMacros">
         <copy todir="${provider.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/jce/**/test/*.java" />
@@ -621,7 +632,7 @@
         </copy>
     </target>
 
-    <target name="javadoc-jce">
+    <target name="javadoc-jce" depends="initMacros">
         <copy todir="${jce.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/jce/**/test/*.java" />
@@ -661,7 +672,7 @@
     <!--
           Mail JavaDoc
     -->
-    <target name="javadoc-mail">
+    <target name="javadoc-mail" depends="initMacros">
         <copy todir="${mail.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/mail/**/test/*.java" />
@@ -692,7 +703,7 @@
     <!--
           TSP JavaDoc
     -->
-    <target name="javadoc-tsp">
+    <target name="javadoc-tsp" depends="initMacros">
         <copy todir="${tsp.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/tsp/**/test/*.java" />
@@ -715,7 +726,7 @@
     <!--
           PG JavaDoc
     -->
-    <target name="javadoc-pg">
+    <target name="javadoc-pg" depends="initMacros">
         <copy todir="${pg.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/openpgp/**/test/*.java" />
@@ -742,7 +753,7 @@
     <!--
           Light Weight JavaDoc
     -->
-    <target name="javadoc-lw">
+    <target name="javadoc-lw" depends="initMacros">
         <copy todir="${lcrypto.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/crypto/**/test/*.java" />
