@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
@@ -2496,7 +2497,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
 
             if (ext != null)
             {
-                AuthorityKeyIdentifier authID = AuthorityKeyIdentifier.getInstance(ASN1Object.fromByteArray(ext));
+                ASN1OctetString oct = (ASN1OctetString)ASN1Object.fromByteArray(ext);
+                AuthorityKeyIdentifier authID = AuthorityKeyIdentifier.getInstance(ASN1Object.fromByteArray(oct.getOctets()));
 
                 certSelectX509.setSerialNumber(authID.getAuthorityCertSerialNumber());
             }
