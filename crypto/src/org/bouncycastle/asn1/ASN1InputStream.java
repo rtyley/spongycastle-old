@@ -7,6 +7,7 @@ import java.io.EOFException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 
 /**
  * a general purpose ASN.1 decoder - note: this class differs from the
@@ -207,6 +208,12 @@ public class ASN1InputStream
 
             IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this);
 
+            if ((tag & APPLICATION) != 0)
+            {
+                ASN1StreamParser sp = new ASN1StreamParser(indIn);
+
+                return new BERApplicationSpecificParser(tagNo, sp).getDERObject();
+            }
             if ((tag & TAGGED) != 0)
             {
                 return new BERTaggedObjectParser(tag, tagNo, indIn).getDERObject();

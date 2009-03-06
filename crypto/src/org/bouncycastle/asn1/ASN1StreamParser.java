@@ -64,6 +64,13 @@ public class ASN1StreamParser
 
             IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(_in);
 
+            if ((tag & DERTags.APPLICATION) != 0)
+            {
+                ASN1StreamParser sp = new ASN1StreamParser(indIn);
+
+                return new BERApplicationSpecificParser(tagNo, sp);
+            }
+
             if ((tag & DERTags.TAGGED) != 0)
             {
                 return new BERTaggedObjectParser(tag, tagNo, indIn);
