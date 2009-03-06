@@ -220,7 +220,7 @@ public class JDKX509CertificateFactory
         }
         catch (Exception e)
         {
-            throw new CertificateException(e);
+            throw new CertificateException(e.toString());
         }
     }
 
