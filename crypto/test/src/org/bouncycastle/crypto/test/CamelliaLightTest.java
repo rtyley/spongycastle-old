@@ -56,7 +56,7 @@ public class CamelliaLightTest
 
     public String getName()
     {
-        return "Camellia";
+        return "CamelliaLight";
     }
 
     public static void main(
