@@ -18,7 +18,8 @@ public class DESedeKeyGenerator
     public void init(
         KeyGenerationParameters param)
     {
-        super.init(param);
+        this.random = param.getRandom();
+        this.strength = (param.getStrength() + 7) / 8;
 
         if (strength == 0 || strength == (168 / 8))
         {
