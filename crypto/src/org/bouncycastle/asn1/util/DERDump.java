@@ -17,7 +17,7 @@ public class DERDump
     public static String dumpAsString(
         DERObject   obj)
     {
-        return _dumpAsString("", obj);
+        return _dumpAsString("", false, obj);
     }
 
     /**
@@ -28,6 +28,6 @@ public class DERDump
     public static String dumpAsString(
         DEREncodable   obj)
     {
-        return _dumpAsString("", obj.getDERObject());
+        return _dumpAsString("", false, obj.getDERObject());
     }
 }
