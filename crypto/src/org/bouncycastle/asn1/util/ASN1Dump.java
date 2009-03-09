@@ -41,6 +41,7 @@ import java.io.IOException;
 public class ASN1Dump
 {
     private static final String  TAB = "    ";
+    private static final int SAMPLE_SIZE = 32;
 
     /**
      * dump a DER object as a formatted string with indentation
@@ -49,6 +50,7 @@ public class ASN1Dump
      */
     static String _dumpAsString(
         String      indent,
+        boolean     verbose,
         DERObject   obj)
     {
         String nl = System.getProperty("line.separator");
@@ -94,11 +96,11 @@ public class ASN1Dump
                 }
                 else if (o instanceof DERObject)
                 {
-                    buf.append(_dumpAsString(tab, (DERObject)o));
+                    buf.append(_dumpAsString(tab, verbose, (DERObject)o));
                 }
                 else
                 {
-                    buf.append(_dumpAsString(tab, ((DEREncodable)o).getDERObject()));
+                    buf.append(_dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject()));
                 }
             }
             return buf.toString();
@@ -138,7 +140,7 @@ public class ASN1Dump
             }
             else
             {
-                buf.append(_dumpAsString(tab, o.getObject()));
+                buf.append(_dumpAsString(tab, verbose, o.getObject()));
             }
 
             return buf.toString();
@@ -165,11 +167,11 @@ public class ASN1Dump
                 }
                 else if (o instanceof DERObject)
                 {
-                    buf.append(_dumpAsString(tab, (DERObject)o));
+                    buf.append(_dumpAsString(tab, verbose, (DERObject)o));
                 }
                 else
                 {
-                    buf.append(_dumpAsString(tab, ((DEREncodable)o).getDERObject()));
+                    buf.append(_dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject()));
                 }
             }
             return buf.toString();
@@ -196,11 +198,11 @@ public class ASN1Dump
                 }
                 else if (o instanceof DERObject)
                 {
-                    buf.append(_dumpAsString(tab, (DERObject)o));
+                    buf.append(_dumpAsString(tab, verbose, (DERObject)o));
                 }
                 else
                 {
-                    buf.append(_dumpAsString(tab, ((DEREncodable)o).getDERObject()));
+                    buf.append(_dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject()));
                 }
             }
             return buf.toString();
@@ -227,11 +229,11 @@ public class ASN1Dump
                 }
                 else if (o instanceof DERObject)
                 {
-                    buf.append(_dumpAsString(tab, (DERObject)o));
+                    buf.append(_dumpAsString(tab, verbose, (DERObject)o));
                 }
                 else
                 {
-                    buf.append(_dumpAsString(tab, ((DEREncodable)o).getDERObject()));
+                    buf.append(_dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject()));
                 }
             }
             return buf.toString();
@@ -250,15 +252,30 @@ public class ASN1Dump
         }
         else if (obj instanceof BERConstructedOctetString)
         {
-            return indent + "BER Constructed Octet String" + "[" + ((ASN1OctetString)obj).getOctets().length + "] " + nl;
+            ASN1OctetString oct = (ASN1OctetString)obj;
+            if (verbose)
+            {
+                return indent + "BER Constructed Octet String" + "[" + oct.getOctets().length + "] " + dumpBinaryDataAsString(indent, oct.getOctets()) + nl;
+            }
+            return indent + "BER Constructed Octet String" + "[" + oct.getOctets().length + "] " + nl;
         }
         else if (obj instanceof DEROctetString)
         {
-            return indent + "DER Octet String" + "[" + ((ASN1OctetString)obj).getOctets().length + "] " + nl;
+            ASN1OctetString oct = (ASN1OctetString)obj;
+            if (verbose)
+            {
+                return indent + "DER Octet String" + "[" + oct.getOctets().length + "] " + dumpBinaryDataAsString(indent, oct.getOctets()) + nl;
+            }
+            return indent + "DER Octet String" + "[" + oct.getOctets().length + "] " + nl;
         }
         else if (obj instanceof DERBitString)
         {
-            return indent + "DER Bit String" + "[" + ((DERBitString)obj).getBytes().length + ", " + ((DERBitString)obj).getPadBits() + "] " + nl;
+            DERBitString bt = (DERBitString)obj;
+            if (verbose)
+            {
+                return indent + "DER Bit String" + "[" + bt.getBytes().length + ", " + bt.getPadBits() + "] "  + dumpBinaryDataAsString(indent, bt.getBytes()) + nl;
+            }
+            return indent + "DER Bit String" + "[" + bt.getBytes().length + ", " + bt.getPadBits() + "] " + nl;
         }
         else if (obj instanceof DERIA5String)
         {
@@ -298,11 +315,11 @@ public class ASN1Dump
         }
         else if (obj instanceof BERApplicationSpecific)
         {
-            return outputApplicationSpecific("BER", indent, obj, nl);
+            return outputApplicationSpecific("BER", indent, verbose, obj, nl);
         }
         else if (obj instanceof DERApplicationSpecific)
         {
-            return outputApplicationSpecific("DER", indent, obj, nl);
+            return outputApplicationSpecific("DER", indent, verbose, obj, nl);
         }
         else
         {
@@ -310,7 +327,7 @@ public class ASN1Dump
         }
     }
 
-    private static String outputApplicationSpecific(String type, String indent, DERObject obj, String nl)
+    private static String outputApplicationSpecific(String type, String indent, boolean verbose, DERObject obj, String nl)
     {
         DERApplicationSpecific app = (DERApplicationSpecific)obj;
         StringBuffer buf = new StringBuffer();
@@ -323,7 +340,7 @@ public class ASN1Dump
                 buf.append(indent + type + " ApplicationSpecific[" + app.getApplicationTag() + "]" + nl);
                 for (Enumeration e = s.getObjects(); e.hasMoreElements();)
                 {
-                    buf.append(_dumpAsString(indent + TAB, (DERObject)e.nextElement()));
+                    buf.append(_dumpAsString(indent + TAB, verbose, (DERObject)e.nextElement()));
                 }
             }
             catch (IOException e)
@@ -337,22 +354,87 @@ public class ASN1Dump
     }
 
     /**
-     * dump out a DER object as a formatted string
+     * dump out a DER object as a formatted string, in non-verbose mode.
      *
      * @param obj the DERObject to be dumped out.
+     * @return  the resulting string.
      */
     public static String dumpAsString(
         Object   obj)
     {
+        return dumpAsString(obj, false);
+    }
+
+    /**
+     * Dump out the object as a string.
+     *
+     * @param obj  the object to be dumped
+     * @param verbose  if true, dump out the contents of octet and bit strings.
+     * @return  the resulting string.
+     */
+    public static String dumpAsString(
+        Object   obj,
+        boolean  verbose)
+    {
         if (obj instanceof DERObject)
         {
-            return _dumpAsString("", (DERObject)obj);
+            return _dumpAsString("", verbose, (DERObject)obj);
         }
         else if (obj instanceof DEREncodable)
         {
-            return _dumpAsString("", ((DEREncodable)obj).getDERObject());
+            return _dumpAsString("", verbose, ((DEREncodable)obj).getDERObject());
         }
 
         return "unknown object type " + obj.toString();
+    }
+
+    private static String dumpBinaryDataAsString(String indent, byte[] bytes)
+    {
+        String nl = System.getProperty("line.separator");
+        StringBuffer buf = new StringBuffer();
+
+        indent += TAB;
+        
+        buf.append(nl);
+        for (int i = 0; i < bytes.length; i += SAMPLE_SIZE)
+        {
+            if (bytes.length - i > SAMPLE_SIZE)
+            {
+                buf.append(indent);
+                buf.append(new String(Hex.encode(bytes, i, SAMPLE_SIZE)));
+                buf.append(TAB);
+                buf.append(calculateAscString(bytes, i, SAMPLE_SIZE));
+                buf.append(nl);
+            }
+            else
+            {
+                buf.append(indent);
+                buf.append(new String(Hex.encode(bytes, i, bytes.length - i)));
+                for (int j = bytes.length - i; j != SAMPLE_SIZE; j++)
+                {
+                    buf.append("  ");
+                }
+                buf.append(TAB);
+                buf.append(calculateAscString(bytes, i, bytes.length - i));
+                buf.append(nl);
+            }
+        }
+        
+        return buf.toString();
+    }
+
+    private static String calculateAscString(byte[] bytes, int off, int len)
+    {
+        StringBuffer buf = new StringBuffer();
+
+        for (int i = off; i != off + len; i++)
+        {
+            if (bytes[i] >= ' ' && bytes[i] <= '~')
+            {
+                buf.append((char)bytes[i]);
+            }
+        }
+
+        return buf.toString();
     }
 }
