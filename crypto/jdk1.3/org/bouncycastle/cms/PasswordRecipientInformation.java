@@ -27,19 +27,26 @@ import java.security.AlgorithmParameters;
 public class PasswordRecipientInformation
     extends RecipientInformation
 {
-    private PasswordRecipientInfo _info;
-    private AlgorithmIdentifier   _encAlg;
+    private PasswordRecipientInfo info;
 
     public PasswordRecipientInformation(
         PasswordRecipientInfo   info,
         AlgorithmIdentifier     encAlg,
         InputStream             data)
     {
-        super(encAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
+        this(info, encAlg, null, data);
+    }
 
-        this._info = info;
-        this._encAlg = encAlg;
-        this._rid = new RecipientId();
+    public PasswordRecipientInformation(
+        PasswordRecipientInfo   info,
+        AlgorithmIdentifier     encAlg,
+        AlgorithmIdentifier     macAlg,
+        InputStream             data)
+    {
+        super(encAlg, macAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
+
+        this.info = info;
+        this.rid = new RecipientId();
     }
 
     /**
@@ -50,9 +57,9 @@ public class PasswordRecipientInformation
      */
     public String getKeyDerivationAlgOID()
     {
-        if (_info.getKeyDerivationAlgorithm() != null)
+        if (info.getKeyDerivationAlgorithm() != null)
         {
-            return _info.getKeyDerivationAlgorithm().getObjectId().getId();
+            return info.getKeyDerivationAlgorithm().getObjectId().getId();
         }
 
         return null;
@@ -67,9 +74,9 @@ public class PasswordRecipientInformation
     {
         try
         {
-            if (_info.getKeyDerivationAlgorithm() != null)
+            if (info.getKeyDerivationAlgorithm() != null)
             {
-                DEREncodable params = _info.getKeyDerivationAlgorithm().getParameters();
+                DEREncodable params = info.getKeyDerivationAlgorithm().getParameters();
                 if (params != null)
                 {
                     return params.getDERObject().getEncoded();
@@ -106,12 +113,12 @@ public class PasswordRecipientInformation
     {
         try
         {
-            if (_info.getKeyDerivationAlgorithm() != null)
+            if (info.getKeyDerivationAlgorithm() != null)
             {
-                DEREncodable params = _info.getKeyDerivationAlgorithm().getParameters();
+                DEREncodable params = info.getKeyDerivationAlgorithm().getParameters();
                 if (params != null)
                 {
-                    AlgorithmParameters algP = AlgorithmParameters.getInstance(_info.getKeyDerivationAlgorithm().getObjectId().toString(), provider.getName());
+                    AlgorithmParameters algP = AlgorithmParameters.getInstance(info.getKeyDerivationAlgorithm().getObjectId().toString(), provider.getName());
 
                     algP.init(params.getDERObject().getEncoded());
 
@@ -148,9 +155,9 @@ public class PasswordRecipientInformation
     {
         try
         {
-            AlgorithmIdentifier kekAlg = AlgorithmIdentifier.getInstance(_info.getKeyEncryptionAlgorithm());
+            AlgorithmIdentifier kekAlg = AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm());
             ASN1Sequence        kekAlgParams = (ASN1Sequence)kekAlg.getParameters();
-            byte[]              encryptedKey = _info.getEncryptedKey().getOctets();
+            byte[]              encryptedKey = info.getEncryptedKey().getOctets();
             String              kekAlgName = DERObjectIdentifier.getInstance(kekAlgParams.getObjectAt(0)).getId();
             Cipher keyCipher = Cipher.getInstance(
                                         CMSEnvelopedHelper.INSTANCE.getRFC3211WrapperName(kekAlgName), prov);
@@ -158,7 +165,12 @@ public class PasswordRecipientInformation
             IvParameterSpec ivSpec = new IvParameterSpec(ASN1OctetString.getInstance(kekAlgParams.getObjectAt(1)).getOctets());
             keyCipher.init(Cipher.UNWRAP_MODE, new SecretKeySpec(((CMSPBEKey)key).getEncoded(kekAlgName), kekAlgName), ivSpec);
 
-            AlgorithmIdentifier aid = _encAlg;
+            AlgorithmIdentifier aid = encAlg;
+            if (aid == null)
+            {
+                aid = macAlg;
+            }
+            
             String              alg = aid.getObjectId().getId();
             Key                 sKey = keyCipher.unwrap(
                                         encryptedKey, alg, Cipher.SECRET_KEY);

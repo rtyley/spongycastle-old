@@ -278,6 +278,8 @@ public class SignerInformation
         Provider        sigProvider)
         throws CMSException, NoSuchAlgorithmException
     {
+        try
+        {
         String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(this.getDigestAlgOID());
         String          signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
         Signature       sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
@@ -438,6 +440,11 @@ public class SignerInformation
         {
             throw new CMSException(
                     "invalid signature format in message: " + e.getMessage(), e);
+        }
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new CMSException("cannot find provider: " + e, e);
         }
     }
 

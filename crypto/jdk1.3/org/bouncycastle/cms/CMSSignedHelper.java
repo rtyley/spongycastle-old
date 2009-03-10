@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -76,6 +77,15 @@ class CMSSignedHelper
         addEntries(X9ObjectIdentifiers.ecdsa_with_SHA384, "SHA384", "ECDSA");
         addEntries(X9ObjectIdentifiers.ecdsa_with_SHA512, "SHA512", "ECDSA");
         addEntries(X9ObjectIdentifiers.id_dsa_with_sha1, "SHA1", "DSA");
+        addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_1, "SHA1", "ECDSA");
+        addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_224, "SHA224", "ECDSA");
+        addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_256, "SHA256", "ECDSA");
+        addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_384, "SHA384", "ECDSA");
+        addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_512, "SHA512", "ECDSA");
+        addEntries(EACObjectIdentifiers.id_TA_RSA_v1_5_SHA_1, "SHA1", "RSA");
+        addEntries(EACObjectIdentifiers.id_TA_RSA_v1_5_SHA_256, "SHA256", "RSA");
+        addEntries(EACObjectIdentifiers.id_TA_RSA_PSS_SHA_1, "SHA1", "RSAandMGF1");
+        addEntries(EACObjectIdentifiers.id_TA_RSA_PSS_SHA_256, "SHA256", "RSAandMGF1");
 
         encryptionAlgs.put(X9ObjectIdentifiers.id_dsa.getId(), "DSA");
         encryptionAlgs.put(PKCSObjectIdentifiers.rsaEncryption.getId(), "RSA");
@@ -159,7 +169,7 @@ class CMSSignedHelper
     MessageDigest getDigestInstance(
         String algorithm, 
         Provider provider)
-        throws NoSuchAlgorithmException
+        throws NoSuchAlgorithmException, NoSuchProviderException
     {
         try
         {
@@ -190,44 +200,30 @@ class CMSSignedHelper
     private MessageDigest createDigestInstance(
         String algorithm,
         Provider provider)
-        throws NoSuchAlgorithmException
+        throws NoSuchAlgorithmException, NoSuchProviderException
     {
-        try
+        if (provider != null)
         {
-            if (provider != null)
-            {
-                return MessageDigest.getInstance(algorithm, provider.getName());
-            }
-            else
-            {
-                return MessageDigest.getInstance(algorithm);
-            }
+            return MessageDigest.getInstance(algorithm, provider.getName());
         }
-        catch (NoSuchProviderException e)
+        else
         {
-            throw new IllegalStateException(e.toString());
+            return MessageDigest.getInstance(algorithm);
         }
     }
 
     Signature getSignatureInstance(
         String algorithm, 
         Provider provider)
-        throws NoSuchAlgorithmException
+        throws NoSuchAlgorithmException, NoSuchProviderException
     {
-        try
+        if (provider != null)
         {
-            if (provider != null)
-            {
-                return Signature.getInstance(algorithm, provider.getName());
-            }
-            else
-            {
-                return Signature.getInstance(algorithm);
-            }
+            return Signature.getInstance(algorithm, provider.getName());
         }
-        catch (NoSuchProviderException e)
+        else
         {
-            throw new IllegalStateException(e.toString());
+            return Signature.getInstance(algorithm);
         }
     }
 
@@ -353,12 +349,16 @@ class CMSSignedHelper
         {
             if (provider != null)
             {
-                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
+                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider.getName());
             }
             else
             {
                 return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls));
             }
+        }
+        catch (NoSuchProviderException ex)
+        {
+            throw new CMSException("can't find provider.", ex);
         }
         catch (InvalidAlgorithmParameterException e)
         {
@@ -384,7 +384,7 @@ class CMSSignedHelper
         }
         catch (NoSuchProviderException ex)
         {
-            throw new CMSException("can't get certificate factory.", ex);
+            throw new CMSException("can't find provider.", ex);
         }
         catch (CertificateException ex)
         {
@@ -435,7 +435,7 @@ class CMSSignedHelper
         }
         catch (NoSuchProviderException ex)
         {
-            throw new CMSException("can't get certificate factory.", ex);
+            throw new CMSException("can't find provider.", ex);
         }
         catch (CertificateException ex)
         {

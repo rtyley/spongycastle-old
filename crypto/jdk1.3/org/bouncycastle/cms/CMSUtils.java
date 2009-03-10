@@ -33,7 +33,7 @@ class CMSUtils
     
     static int getMaximumMemory()
     {
-        return Integer.MAX_VALUE;
+            return Integer.MAX_VALUE;
     }
     
     static ContentInfo readContentInfo(

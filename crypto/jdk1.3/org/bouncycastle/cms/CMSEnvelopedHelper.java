@@ -5,8 +5,11 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.Mac;
+
 import java.io.IOException;
 import java.security.AlgorithmParameters;
+import java.security.AlgorithmParameterGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
@@ -20,6 +23,7 @@ class CMSEnvelopedHelper
     private static final Map KEYSIZES = new HashMap();
     private static final Map BASE_CIPHER_NAMES = new HashMap();
     private static final Map CIPHER_ALG_NAMES = new HashMap();
+    private static final Map MAC_ALG_NAMES = new HashMap();
 
     static
     {
@@ -37,6 +41,11 @@ class CMSEnvelopedHelper
         CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.AES128_CBC,  "AES/CBC/PKCS5Padding");
         CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.AES192_CBC,  "AES/CBC/PKCS5Padding");
         CIPHER_ALG_NAMES.put(CMSEnvelopedGenerator.AES256_CBC,  "AES/CBC/PKCS5Padding");
+
+        MAC_ALG_NAMES.put(CMSEnvelopedGenerator.DES_EDE3_CBC,  "DESEDEMac");
+        MAC_ALG_NAMES.put(CMSEnvelopedGenerator.AES128_CBC,  "AESMac");
+        MAC_ALG_NAMES.put(CMSEnvelopedGenerator.AES192_CBC,  "AESMac");
+        MAC_ALG_NAMES.put(CMSEnvelopedGenerator.AES256_CBC,  "AESMac");
     }
 
     private String getAsymmetricEncryptionAlgName(
@@ -57,11 +66,12 @@ class CMSEnvelopedHelper
     {
         try
         {
-            return createCipher(encryptionOid, provider);
+            // this is reversed as the Sun policy files now allow unlimited strength RSA
+            return createCipher(getAsymmetricEncryptionAlgName(encryptionOid), provider);
         }
         catch (NoSuchAlgorithmException e)
         {
-            return createCipher(getAsymmetricEncryptionAlgName(encryptionOid), provider);
+            return createCipher(encryptionOid, provider);
         }
     }
 
@@ -88,11 +98,19 @@ class CMSEnvelopedHelper
             {
                 // ignore
             }
+            catch (NoSuchProviderException ex)
+            {
+                // ignore
+            }
             if (provider != null)
             {
                 return createSymmetricKeyGenerator(encryptionOID, null);
             }
             throw e;
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new RuntimeException("can't find provider: " + e);
         }
     }
 
@@ -119,10 +137,56 @@ class CMSEnvelopedHelper
             {
                 // ignore
             }
+            catch (NoSuchProviderException ex)
+            {
+                // ignore
+            }
             //
             // can't try with default provider here as parameters must be from the specified provider.
             //
             throw e;
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new RuntimeException("can't find provider: " + e);
+        }
+    }
+
+    AlgorithmParameterGenerator createAlgorithmParameterGenerator(
+        String encryptionOID, 
+        Provider provider)
+        throws NoSuchAlgorithmException
+    {
+        try
+        {
+            return createAlgorithmParamsGenerator(encryptionOID, provider);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            try
+            {
+                String algName = (String)BASE_CIPHER_NAMES.get(encryptionOID);
+                if (algName != null)
+                {
+                    return createAlgorithmParamsGenerator(algName, provider);
+                }
+            }
+            catch (NoSuchAlgorithmException ex)
+            {
+                // ignore
+            }
+            catch (NoSuchProviderException ex)
+            {
+                // ignore
+            }
+            //
+            // can't try with default provider here as parameters must be from the specified provider.
+            //
+            throw e;
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new RuntimeException("can't find provider: " + e);
         }
     }
 
@@ -153,11 +217,11 @@ class CMSEnvelopedHelper
     private Cipher createCipher(
         String algName,
         Provider provider)
-        throws NoSuchAlgorithmException, NoSuchPaddingException
+        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException
     {
         if (provider != null)
         {
-            return Cipher.getInstance(algName, provider);
+            return Cipher.getInstance(algName, provider.getName());
         }
         else
         {
@@ -165,36 +229,44 @@ class CMSEnvelopedHelper
         }
     }
 
+    private AlgorithmParameterGenerator createAlgorithmParamsGenerator(
+        String algName,
+        Provider provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+        if (provider != null)
+        {
+            return AlgorithmParameterGenerator.getInstance(algName, provider.getName());
+        }
+        else
+        {
+            return AlgorithmParameterGenerator.getInstance(algName);
+        }
+    }
+
     private AlgorithmParameters createAlgorithmParams(
         String algName,
         Provider provider)
-        throws NoSuchAlgorithmException
+        throws NoSuchAlgorithmException, NoSuchProviderException
     {
-        try
+        if (provider != null)
         {
-            if (provider != null)
-            {
-                return AlgorithmParameters.getInstance(algName, provider.getName());
-            }
-            else
-            {
-                return AlgorithmParameters.getInstance(algName);
-            }
+            return AlgorithmParameters.getInstance(algName, provider.getName());
         }
-        catch (NoSuchProviderException e)
+        else
         {
-            throw new IllegalStateException(e.toString());
+            return AlgorithmParameters.getInstance(algName);
         }
     }
 
     private KeyGenerator createKeyGenerator(
         String algName,
         Provider provider)
-        throws NoSuchAlgorithmException
+        throws NoSuchAlgorithmException, NoSuchProviderException
     {
         if (provider != null)
         {
-            return KeyGenerator.getInstance(algName, provider);
+            return KeyGenerator.getInstance(algName, provider.getName());
         }
         else
         {
@@ -225,6 +297,63 @@ class CMSEnvelopedHelper
                 }
                 throw e;
             }
+            catch (NoSuchProviderException ex)
+            {
+                throw new RuntimeException("cannot find provider: " + ex);
+            }
+        }
+        catch (NoSuchProviderException ex)
+        {
+            throw new RuntimeException("cannot find provider: " + ex);
+        }
+    }
+
+    private Mac createMac(
+        String algName,
+        Provider provider)
+        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException
+    {
+        if (provider != null)
+        {
+            return Mac.getInstance(algName, provider.getName());
+        }
+        else
+        {
+            return Mac.getInstance(algName);
+        }
+    }
+
+    Mac getMac(String macOID, Provider provider)
+        throws NoSuchAlgorithmException, NoSuchPaddingException
+    {
+        try
+        {
+            return createMac(macOID, provider);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            String alternate = (String)MAC_ALG_NAMES.get(macOID);
+
+            try
+            {
+                return createMac(alternate, provider);
+            }
+            catch (NoSuchAlgorithmException ex)
+            {
+                if (provider != null)
+                {
+                    return getMac(macOID, null); // roll back to default
+                }
+                throw e;
+            }
+            catch (NoSuchProviderException ex)
+            {
+                throw new RuntimeException("cannot find provider: " + ex);
+            }
+        }
+        catch (NoSuchProviderException ex)
+        {
+            throw new RuntimeException("cannot find provider: " + ex);
         }
     }
 

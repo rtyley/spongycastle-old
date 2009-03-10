@@ -195,7 +195,7 @@ public class CMSSignedGenerator
      * Note: this assumes the CertStore will support null in the get
      * methods.
      * @param certStore CertStore containing the public key certificates and CRLs
-     * @throws java.security.cert.CertStoreException  if an issue occurs processing the CertStore
+     * @throws org.bouncycastle.jce.cert.CertStoreException  if an issue occurs processing the CertStore
      * @throws CMSException  if an issue occurse transforming data from the CertStore into the message
      */
     public void addCertificatesAndCRLs(
