@@ -3,7 +3,6 @@ package org.bouncycastle.x509;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
@@ -21,7 +20,6 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -111,11 +109,12 @@ public class X509V3CertificateGenerator
 
     public void setPublicKey(
         PublicKey       key)
+        throws IllegalArgumentException
     {
         try
         {
-            tbsGen.setSubjectPublicKeyInfo(new SubjectPublicKeyInfo((ASN1Sequence)new ASN1InputStream(
-                                new ByteArrayInputStream(key.getEncoded())).readObject()));
+            tbsGen.setSubjectPublicKeyInfo(
+                       SubjectPublicKeyInfo.getInstance(new ASN1InputStream(key.getEncoded()).readObject()));
         }
         catch (Exception e)
         {
@@ -148,6 +147,43 @@ public class X509V3CertificateGenerator
         tbsGen.setSignature(sigAlgId);
     }
 
+    /**
+     * Set the subject unique ID - note: it is very rare that it is correct to do this.
+     */
+    public void setSubjectUniqueID(boolean[] uniqueID)
+    {
+        tbsGen.setSubjectUniqueID(booleanToBitString(uniqueID));
+    }
+
+    /**
+     * Set the issuer unique ID - note: it is very rare that it is correct to do this.
+     */
+    public void setIssuerUniqueID(boolean[] uniqueID)
+    {
+        tbsGen.setIssuerUniqueID(booleanToBitString(uniqueID));
+    }
+
+    private DERBitString booleanToBitString(boolean[] id)
+    {
+        byte[] bytes = new byte[(id.length + 7) / 8];
+
+        for (int i = 0; i != id.length; i++)
+        {
+            bytes[i / 8] |= (id[i]) ? (1 << ((7 - (i % 8)))) : 0;
+        }
+
+        int pad = id.length % 8;
+
+        if (pad == 0)
+        {
+            return new DERBitString(bytes);
+        }
+        else
+        {
+            return new DERBitString(bytes, 8 - pad);
+        }
+    }
+    
     /**
      * add a given extension field for the standard extensions tag (tag 3)
      */

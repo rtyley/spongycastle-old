@@ -460,7 +460,6 @@ public class CMSEnvelopedGenerator
      * @param recipientCert recipient's public key certificate.
      * @param cekWrapAlgorithm OID for key wrapping algorithm to use.
      * @param provider provider to use for the agreement calculation.
-     * @exception NoSuchProviderException if the specified provider cannot be found
      * @exception NoSuchAlgorithmException if the algorithm requested cannot be found
      * @exception InvalidKeyException if the keys are inappropriate for the algorithm specified
      */
@@ -471,9 +470,9 @@ public class CMSEnvelopedGenerator
         X509Certificate  recipientCert,
         String           cekWrapAlgorithm,
         Provider         provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+        throws NoSuchAlgorithmException, InvalidKeyException
     {
-        KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, provider.getName());
+        KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, provider);
 
         agreement.init(senderPrivateKey, rand);
 

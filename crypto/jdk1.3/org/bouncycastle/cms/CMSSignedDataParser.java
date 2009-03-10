@@ -169,6 +169,11 @@ public class CMSSignedDataParser
                 {
                      //  ignore
                 }
+                catch (NoSuchProviderException e)
+                {
+                    // cannot happen
+                }
+
             }
 
             //

@@ -245,6 +245,8 @@ public class CMSSignedDataGenerator
             boolean             isCounterSignature)
             throws IOException, SignatureException, InvalidKeyException, NoSuchAlgorithmException, CertificateEncodingException, CMSException
         {
+            try
+            {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
                   new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
             AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
@@ -332,6 +334,11 @@ public class CMSSignedDataGenerator
 
             return new SignerInfo(identifier, digAlgId,
                         signedAttr, encAlgId, encDigest, unsignedAttr);
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new CMSException("cannot find provider: " + e, e);
+            }
         }
     }
     
