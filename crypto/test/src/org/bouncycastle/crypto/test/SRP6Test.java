@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.agreement.srp.SRP6Client;
 import org.bouncycastle.crypto.agreement.srp.SRP6Server;
 import org.bouncycastle.crypto.agreement.srp.SRP6VerifierGenerator;
@@ -47,7 +46,7 @@ public class SRP6Test extends SimpleTest
         testServerCatchesBadA(N_1024, g_1024);
 
         DHParametersGenerator paramGen = new DHParametersGenerator();
-        paramGen.init(512, 8, random);
+        paramGen.init(576, 25, random);
         DHParameters parameters = paramGen.generateParameters();
 
         BigInteger g = parameters.getG();
@@ -65,7 +64,6 @@ public class SRP6Test extends SimpleTest
     	BigInteger g = g_1024;
     	BigInteger a = fromHex("60975527035CF2AD1989806F0407210BC81EDC04E2762A56AFD529DDDA2D4393");
     	BigInteger b = fromHex("E487CB59D31AC550471E81F00F6928E01DDA08E974A004F49E61F5D105284D20");
-    	Digest digest = new SHA1Digest();
 
     	BigInteger expect_k = fromHex("7556AA045AEF2CDD07ABAF0F665C3E818913186F");
     	BigInteger expect_x = fromHex("94B7555AABE9127CC58CCF4993DB6CF84D16C124");
@@ -91,20 +89,20 @@ public class SRP6Test extends SimpleTest
             + "3499B200210DCC1F10EB33943CD67FC88A2F39A4BE5BEC4EC0A3212D"
             + "C346D7E474B29EDE8A469FFECA686E5A");
 
-    	BigInteger k = SRP6Util.calculateK(digest, N, g);
+    	BigInteger k = SRP6Util.calculateK(new SHA1Digest(), N, g);
     	if (!k.equals(expect_k))
     	{
     		fail("wrong value of 'k'");
     	}
 
-    	BigInteger x = SRP6Util.calculateX(digest, N, s, I, P);
+    	BigInteger x = SRP6Util.calculateX(new SHA1Digest(), N, s, I, P);
     	if (!x.equals(expect_x))
     	{
     		fail("wrong value of 'x'");
     	}
 
     	SRP6VerifierGenerator gen = new SRP6VerifierGenerator();
-    	gen.init(g, N, digest);
+    	gen.init(N, g, new SHA1Digest());
     	BigInteger v = gen.generateVerifier(s, I, P);
     	if (!v.equals(expect_v))
     	{
@@ -119,7 +117,7 @@ public class SRP6Test extends SimpleTest
                 return aVal;
             }
         };
-        client.init(g, N, digest, random);
+        client.init(N, g, new SHA1Digest(), random);
 
     	BigInteger A = client.generateClientCredentials(s, I, P);
     	if (!A.equals(expect_A))
@@ -135,7 +133,7 @@ public class SRP6Test extends SimpleTest
                 return bVal;
             }
         };
-        server.init(g, N, v, digest, random);
+        server.init(N, g, v, new SHA1Digest(), random);
 
     	BigInteger B = server.generateServerCredentials();
     	if (!B.equals(expect_B))
@@ -143,7 +141,7 @@ public class SRP6Test extends SimpleTest
     		fail("wrong value of 'B'");
     	}
 
-        BigInteger u = SRP6Util.calculateU(digest, N, A, B);
+        BigInteger u = SRP6Util.calculateU(new SHA1Digest(), N, A, B);
     	if (!u.equals(expect_u))
     	{
     		fail("wrong value of 'u'");
@@ -170,14 +168,14 @@ public class SRP6Test extends SimpleTest
         random.nextBytes(s);
 
         SRP6VerifierGenerator gen = new SRP6VerifierGenerator();
-        gen.init(g, N, new SHA256Digest());
+        gen.init(N, g, new SHA256Digest());
         BigInteger v = gen.generateVerifier(s, I, P);
 
         SRP6Client client = new SRP6Client();
-        client.init(g, N, new SHA256Digest(), random);
+        client.init(N, g, new SHA256Digest(), random);
 
         SRP6Server server = new SRP6Server();
-        server.init(g, N, v, new SHA256Digest(), random);
+        server.init(N, g, v, new SHA256Digest(), random);
 
         BigInteger A = client.generateClientCredentials(s, I, P);
         BigInteger B = server.generateServerCredentials();
@@ -199,7 +197,7 @@ public class SRP6Test extends SimpleTest
         random.nextBytes(s);
 
         SRP6Client client = new SRP6Client();
-        client.init(g, N, new SHA256Digest(), random);
+        client.init(N, g, new SHA256Digest(), random);
 
         client.generateClientCredentials(s, I, P);
 
@@ -232,11 +230,11 @@ public class SRP6Test extends SimpleTest
         random.nextBytes(s);
 
         SRP6VerifierGenerator gen = new SRP6VerifierGenerator();
-        gen.init(g, N, new SHA256Digest());
+        gen.init(N, g, new SHA256Digest());
         BigInteger v = gen.generateVerifier(s, I, P);
 
         SRP6Server server = new SRP6Server();
-        server.init(g, N, v, new SHA256Digest(), random);
+        server.init(N, g, v, new SHA256Digest(), random);
 
         server.generateServerCredentials();
 

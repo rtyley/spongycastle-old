@@ -13,8 +13,8 @@ import org.bouncycastle.crypto.Digest;
  */
 public class SRP6Server
 {
-    protected BigInteger g;
     protected BigInteger N;
+    protected BigInteger g;
     protected BigInteger v;
 
     protected SecureRandom random;
@@ -34,16 +34,16 @@ public class SRP6Server
 
     /**
      * Initialises the server to accept a new client authentication attempt
-     * @param g The group parameter associated with the client's verifier
      * @param N The safe prime associated with the client's verifier
+     * @param g The group parameter associated with the client's verifier
      * @param v The client's verifier
      * @param digest The digest algorithm associated with the client's verifier
      * @param random For key generation
      */
-    public void init(BigInteger g, BigInteger N, BigInteger v, Digest digest, SecureRandom random)
+    public void init(BigInteger N, BigInteger g, BigInteger v, Digest digest, SecureRandom random)
     {
-        this.g = g;
         this.N = N;
+        this.g = g;
         this.v = v;
 
         this.random = random;
@@ -80,7 +80,7 @@ public class SRP6Server
 
     protected BigInteger selectPrivateValue()
     {
-    	return SRP6Util.generatePrivateValue(g, N, digest, random);    	
+    	return SRP6Util.generatePrivateValue(digest, N, g, random);    	
     }
 
 	private BigInteger calculateS()
