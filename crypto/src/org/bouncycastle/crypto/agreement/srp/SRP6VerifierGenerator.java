@@ -9,9 +9,9 @@ import org.bouncycastle.crypto.Digest;
  */
 public class SRP6VerifierGenerator
 {
-    private BigInteger g;
-    private BigInteger N;
-    private Digest digest;
+    protected BigInteger N;
+    protected BigInteger g;
+    protected Digest digest;
 
     public SRP6VerifierGenerator()
     {
@@ -19,15 +19,15 @@ public class SRP6VerifierGenerator
 
     /**
      * Initialises generator to create new verifiers
-     * @param g The group parameter to use (see DHParametersGenerator)
      * @param N The safe prime to use (see DHParametersGenerator)
+     * @param g The group parameter to use (see DHParametersGenerator)
      * @param digest The digest to use. The same digest type will need to be used later for the actual authentication
      * attempt. Also note that the final session key size is dependent on the chosen digest.
      */
-    public void init(BigInteger g, BigInteger N, Digest digest)
+    public void init(BigInteger N, BigInteger g, Digest digest)
     {
-        this.g = g;
         this.N = N;
+        this.g = g;
         this.digest = digest;
     }
 

@@ -35,7 +35,7 @@ public class SRP6Util
         return new BigInteger(1, output).mod(N);
     }
 
-	public static BigInteger generatePrivateValue(BigInteger g, BigInteger N, Digest digest, SecureRandom random)
+	public static BigInteger generatePrivateValue(Digest digest, BigInteger N, BigInteger g, SecureRandom random)
     {
 		int minBits = Math.min(256, N.bitLength() / 2);
         BigInteger min = BigInteger.ONE.shiftLeft(minBits - 1);
