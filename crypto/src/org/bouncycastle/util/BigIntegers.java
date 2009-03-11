@@ -1,6 +1,7 @@
 package org.bouncycastle.util;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * BigInteger utilities.
@@ -28,5 +29,27 @@ public final class BigIntegers
         }
         
         return bytes;
+    }
+
+    /**
+     * Return a random BigInteger not less than 'min' and not greater than 'max'
+     * 
+     * @param min the least value that may be generated
+     * @param max the greatest value that may be generated
+     * @param random the source of randomness
+     * @return a random BigInteger value in the range [min,max]
+     */
+    public static BigInteger createRandomInRange(
+        BigInteger      min,
+        BigInteger      max,
+        SecureRandom    random)
+    {
+        BigInteger x;
+        do
+        {
+            x = new BigInteger(max.bitLength(), random);
+        }
+        while (x.compareTo(min) < 0 || x.compareTo(max) > 0);
+        return x;
     }
 }
