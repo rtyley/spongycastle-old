@@ -3,6 +3,8 @@ package org.bouncycastle.crypto.generators;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+import org.bouncycastle.util.BigIntegers;
+
 class DHParametersHelper
 {
     private static final BigInteger ONE = BigInteger.valueOf(1);
@@ -47,7 +49,7 @@ class DHParametersHelper
         // Handbook of Applied Cryptography 4.86
         do
         {
-            g = createInRange(TWO, pMinusTwo, random);
+            g = BigIntegers.createRandomInRange(TWO, pMinusTwo, random);
         }
         while (g.modPow(TWO, p).equals(ONE)
             || g.modPow(q, p).equals(ONE));
@@ -64,19 +66,5 @@ class DHParametersHelper
 */
 
         return g;
-    }
-
-    private static BigInteger createInRange(
-        BigInteger      min,
-        BigInteger      max,
-        SecureRandom    random)
-    {
-        BigInteger x;
-        do
-        {
-            x = new BigInteger(max.bitLength(), random);
-        }
-        while (x.compareTo(min) < 0 || x.compareTo(max) > 0);
-        return x;
     }
 }
