@@ -7,29 +7,26 @@ import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 
 /**
- * Implements the client side SRP-6 protocol. Note that this class is stateful, and therefore NOT threadsafe.
+ * Implements the client side SRP-6a protocol. Note that this class is stateful, and therefore NOT threadsafe.
  * This implementation of SRP is based on the optimized message sequence put forth by Thomas Wu in the paper
  * "SRP-6: Improvements and Refinements to the Secure Remote Password Protocol, 2002"
  */
 public class SRP6Client
 {
-    private static final BigInteger K = new BigInteger("3");
+    protected BigInteger g;
+    protected BigInteger N;
 
-    private BigInteger g;
-    private BigInteger p;
+    protected BigInteger a;
+    protected BigInteger A;
 
-    private BigInteger a;
-    private BigInteger A;
+    protected BigInteger B;
 
-    private BigInteger x;
-    private BigInteger u;
+    protected BigInteger x;
+    protected BigInteger u;
+    protected BigInteger S;
 
-    private BigInteger M1;
-
-    private BigInteger S;
-
-    private Digest digest;
-    private SecureRandom random;
+    protected Digest digest;
+    protected SecureRandom random;
 
     public SRP6Client()
     {
@@ -38,14 +35,14 @@ public class SRP6Client
     /**
      * Initialises the client to begin new authentication attempt
      * @param g The group parameter associated with the client's verifier
-     * @param p The safe prime associated with the client's verifier
+     * @param N The safe prime associated with the client's verifier
      * @param digest The digest algorithm associated with the client's verifier
      * @param random For key generation
      */
-    public void init(BigInteger g, BigInteger p, Digest digest, SecureRandom random)
+    public void init(BigInteger g, BigInteger N, Digest digest, SecureRandom random)
     {
         this.g = g;
-        this.p = p;
+        this.N = N;
         this.digest = digest;
         this.random = random;
     }
@@ -55,171 +52,42 @@ public class SRP6Client
      * @param salt The salt used in the client's verifier.
      * @param identity The user's identity (eg. username)
      * @param password The user's password
-     * @return Client's credentials for the server
+     * @return Client's public value to send to server
      */
-    public BigInteger generateClientCredentials(BigInteger salt, byte[] identity, byte[] password)
+    public BigInteger generateClientCredentials(byte[] salt, byte[] identity, byte[] password)
     {
-        calculateX(salt, identity, password);
-
-        //Make sure a > log base g of p, infinitesimal chance of this, but check is trivial
-        BigInteger log = log(g, p);
-
-        while (true)
-        {
-            this.a = new BigInteger(digest.getDigestSize(), random);
-            if (this.a.compareTo(log) > 0)
-            {
-                break;
-            }
-        }
-
-        A = g.modPow(a, p);
+        this.x = SRP6Util.calculateX(digest, N, salt, identity, password);
+        this.a = selectPrivateValue();
+        this.A = g.modPow(a, N);
 
         return A;
     }
 
     /**
      * Generates client's verification message given the server's credentials
-     * @param B The server's credentials
+     * @param serverB The server's credentials
      * @return Client's verification message for the server
      * @throws CryptoException If server's credentials are invalid
      */
-    public BigInteger generateClientVerificationMessage(BigInteger B) throws CryptoException
+    public BigInteger calculateSecret(BigInteger serverB) throws CryptoException
     {
-        //Check that B is != 0
-        if (BigInteger.ZERO.equals(B) || BigInteger.ZERO.equals(p.mod(B)))
-        {
-            throw new CryptoException("Server credentials invalid");
-        }
+        this.B = SRP6Util.validatePublicValue(N, serverB);
+        this.u = SRP6Util.calculateU(digest, N, A, B);
+        this.S = calculateS();
 
-        calculateU(B);
-
-        calculateS(B);
-
-        M1 = calculateM1(B);
-
-        return M1;
+        return S;
     }
 
-    /**
-     * Verifies that the server knows the shared secret and generates a session key
-     * to be used for further communication
-     * @param M2 The server's verification message or null if server authentication is not required
-     * @return A random shared session key
-     * @throws CryptoException If server verification failed
-     */
-    public byte[] verifyServerAndGenerateSessionKey(BigInteger M2) throws CryptoException
+    protected BigInteger selectPrivateValue()
     {
-
-        if (M2 != null)
-        {
-            BigInteger M2expected = calculateExpectedM2();
-
-            if (M2expected.equals(M2))
-            {
-                return generateSessionKey();
-            }
-        }
-        else
-        {
-            return generateSessionKey();
-        }
-
-        throw new CryptoException("Server verification failed");
+    	return SRP6Util.generatePrivateValue(g, N, digest, random);    	
     }
 
-    private byte[] generateSessionKey() {
-        digest.update(S.toByteArray(), 0, S.toByteArray().length);
-        byte[] sessionKey = new byte[digest.getDigestSize()];
-
-        digest.doFinal(sessionKey, 0);
-
-        return sessionKey;
-    }
-
-    private void calculateX(BigInteger salt, byte[] identity, byte[] password)
+    private BigInteger calculateS()
     {
-        byte[] output = new byte[digest.getDigestSize()];
-
-        digest.update(identity, 0, identity.length);
-        digest.update((byte)58);
-        digest.update(password, 0, password.length);
-        digest.doFinal(output, 0);
-
-        digest.update(salt.toByteArray(), 0, salt.toByteArray().length);
-        digest.update(output, 0, output.length);
-        digest.doFinal(output, 0);
-
-        x = new BigInteger(output);
-
-        if (x.compareTo(p) >= 0)
-        {
-            x = x.mod(p.subtract(BigInteger.ONE));
-        }
-    }
-
-    private void calculateU(BigInteger B)
-    {
-        digest.update(A.toByteArray(), 0, A.toByteArray().length);
-        digest.update(B.toByteArray(), 0, B.toByteArray().length);
-
-        byte[] output = new byte[digest.getDigestSize()];
-        digest.doFinal(output, 0);
-
-        u = new BigInteger(output);
-    }
-
-    private void calculateS(BigInteger B)
-    {
-        BigInteger exponent = u.multiply(x).add(a);
-
-        S = g.modPow(x, p);
-        S = S.multiply(K);
-        S = B.subtract(S);
-
-        S = S.modPow(exponent, p);
-    }
-
-    private BigInteger calculateM1(BigInteger B)
-    {
-        digest.update(A.toByteArray(), 0, A.toByteArray().length);
-        digest.update(B.toByteArray(), 0, B.toByteArray().length);
-        digest.update(S.toByteArray(), 0, S.toByteArray().length);
-
-        byte[] output = new byte[digest.getDigestSize()];
-        digest.doFinal(output, 0);
-
-        return new BigInteger(output);
-    }
-
-    private BigInteger calculateExpectedM2()
-    {
-        digest.update(A.toByteArray(), 0, A.toByteArray().length);
-        digest.update(M1.toByteArray(), 0, M1.toByteArray().length);
-        digest.update(S.toByteArray(), 0, S.toByteArray().length);
-
-        byte[] output = new byte[digest.getDigestSize()];
-        digest.doFinal(output, 0);
-
-        return new BigInteger(output);
-    }
-
-    //Gets an upper bound of the log of any number with an arbitrary base
-    private static BigInteger log(BigInteger base, BigInteger number)
-    {
-        int log = 0;
-        BigInteger result = number.abs();
-        base = base.abs();
-        while (true)
-        {
-            result = result.divide(base);
-            log++;
-            if (base.compareTo(result) > 0)
-            {
-                break;
-            }
-        }
-        return new BigInteger(String.valueOf(log + 1));
+        BigInteger k = SRP6Util.calculateK(digest, N, g);
+        BigInteger exp = u.multiply(x).mod(N).add(a).mod(N);
+        BigInteger tmp = g.modPow(x, N).multiply(k).mod(N);
+        return B.subtract(tmp).mod(N).modPow(exp, N);
     }
 }
-
