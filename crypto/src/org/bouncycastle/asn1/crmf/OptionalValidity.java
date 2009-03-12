@@ -25,11 +25,11 @@ public class OptionalValidity
 
             if (tObj.getTagNo() == 0)
             {
-                notBefore = Time.getInstance(tObj, false);
+                notBefore = Time.getInstance(tObj, true);
             }
             else
             {
-                notAfter = Time.getInstance(tObj, false);
+                notAfter = Time.getInstance(tObj, true);
             }
         }
     }
@@ -63,12 +63,12 @@ public class OptionalValidity
 
         if (notBefore != null)
         {
-            v.add(new DERTaggedObject(0, false, notBefore));
+            v.add(new DERTaggedObject(0, true, notBefore));
         }
 
         if (notAfter != null)
         {
-            v.add(new DERTaggedObject(1, false, notAfter));
+            v.add(new DERTaggedObject(1, true, notAfter));
         }
 
         return new DERSequence(v);
