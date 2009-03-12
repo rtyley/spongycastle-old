@@ -61,8 +61,15 @@ public class OptionalValidity
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        v.add(notBefore);
-        v.add(notAfter);
+        if (notBefore != null)
+        {
+            v.add(new DERTaggedObject(0, false, notBefore));
+        }
+
+        if (notAfter != null)
+        {
+            v.add(new DERTaggedObject(1, false, notAfter));
+        }
 
         return new DERSequence(v);
     }
