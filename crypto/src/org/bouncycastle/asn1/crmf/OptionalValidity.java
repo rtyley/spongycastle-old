@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.Time;
 
 import java.util.Enumeration;
@@ -63,12 +64,12 @@ public class OptionalValidity
 
         if (notBefore != null)
         {
-            v.add(new DERTaggedObject(0, true, notBefore));
+            v.add(new DERTaggedObject(true, 0, notBefore));
         }
 
         if (notAfter != null)
         {
-            v.add(new DERTaggedObject(1, true, notAfter));
+            v.add(new DERTaggedObject(true, 1, notAfter));
         }
 
         return new DERSequence(v);
