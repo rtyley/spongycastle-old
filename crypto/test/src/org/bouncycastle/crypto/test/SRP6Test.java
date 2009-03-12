@@ -17,6 +17,8 @@ import org.bouncycastle.util.test.SimpleTest;
 
 public class SRP6Test extends SimpleTest
 {
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
+
     private static BigInteger fromHex(String hex)
     {
         return new BigInteger(1, Hex.decode(hex));
@@ -203,7 +205,7 @@ public class SRP6Test extends SimpleTest
 
         try
         {
-        	client.calculateSecret(BigInteger.ZERO);
+        	client.calculateSecret(ZERO);
         	fail("Client failed to detect invalid value for 'B'");
         }
         catch (CryptoException e)
@@ -240,7 +242,7 @@ public class SRP6Test extends SimpleTest
 
         try
         {
-        	server.calculateSecret(BigInteger.ZERO);
+        	server.calculateSecret(ZERO);
         	fail("Client failed to detect invalid value for 'A'");
         }
         catch (CryptoException e)
