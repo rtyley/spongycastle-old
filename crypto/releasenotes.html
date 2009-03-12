@@ -27,13 +27,23 @@ Release 1.42
 <ul>
 <li>A NullPointer exception which could be result from generating a diffie-hellman key has been fixed.</li>
 <li>CertPath validation could occasionally mistakenly identify a delta CRL. This has been fixed.</li>
-<li>'=' inside a X509Name/X509Principal was not being properly escaped. This has been fixed.
+<li>'=' inside a X509Name/X509Principal was not being properly escaped. This has been fixed.</li>
+<li>ApplicationSpecific ASN.1 tags are now recognised in BER data. The getObject() method now handles processing of arbitrary tags.</li>
+<li>X509CertStoreSelector.getInstance() was not propagating the subjectAlternativeNames attribute. This has been fixed.</li>
+<li>Use of the BC PKCS#12 implementation required the BC provider to be registered explicitly with the JCE. This has been fixed.</li>
+<li>OpenPGP now fully supports use of the Provider object.</li>
+<li>CMS now fully supports use of the Provider object.</li>
+<li>Multiplication by negative powers of two is fixed in BigInteger.</li>
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
 <li>Support for NONEwithECDSA has been added.</li>
 <li>Support for Grainv1 and Grain128 has been added.</li>
 <li>Support for EAC agorithms has been added to CMS/SMIME.</li>
+<li>Support for basic CMS AuthenticatedData to the CMS package.</li>
+<li>Jars are now packaged using pack200 for JDK1.5 and JDK 1.6.</li>
+<li>ASN1Dump now supports a verbose mode for displaying the contents of octet and bit strings.</li>
+<li>Support for the SRP-6a protocol has been added to the lightweight API.</li>
 </ul>
 
 <h3>2.2.1 Version</h3>
