@@ -21,11 +21,11 @@ export PATH
 CLASSPATH=$JAVA_MAIL_HOME/mail.jar:$JAVA_ACTIVATION_HOME/activation.jar:$W3C_HOME/w3c.jar:$XALAN_HOME/serializer.jar:$XALAN_HOME/xalan.jar:$XALAN_HOME/xercesImpl.jar:$XALAN_HOME/xml-apis.jar:$XALAN_HOME/xsltc.jar:$CLASSPATH
 export CLASSPATH
 
-if [ "$1" == "test" ]
+if [ "$1" = "test" ]
 then
     ant -f jdk13.xml test
 else
-if [ "$1" == "provider" ]
+if [ "$1" = "provider" ]
 then
     ant -f jdk13.xml build-provider
     ant -f jdk13.xml zip-src-provider
