@@ -12,6 +12,7 @@ import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
+import java.security.AlgorithmParameterGenerator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -135,6 +136,36 @@ class CMSEnvelopedHelper
         }
     }
 
+    AlgorithmParameterGenerator createAlgorithmParameterGenerator(
+        String encryptionOID,
+        Provider provider)
+        throws NoSuchAlgorithmException
+    {
+        try
+        {
+            return createAlgorithmParamsGenerator(encryptionOID, provider);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            try
+            {
+                String algName = (String)BASE_CIPHER_NAMES.get(encryptionOID);
+                if (algName != null)
+                {
+                    return createAlgorithmParamsGenerator(algName, provider);
+                }
+            }
+            catch (NoSuchAlgorithmException ex)
+            {
+                // ignore
+            }
+            //
+            // can't try with default provider here as parameters must be from the specified provider.
+            //
+            throw e;
+        }
+    }
+
     String getRFC3211WrapperName(String oid)
     {
         String alg = (String)BASE_CIPHER_NAMES.get(oid);
@@ -186,6 +217,21 @@ class CMSEnvelopedHelper
         else
         {
             return AlgorithmParameters.getInstance(algName);
+        }
+    }
+
+    private AlgorithmParameterGenerator createAlgorithmParamsGenerator(
+        String algName,
+        Provider provider)
+        throws NoSuchAlgorithmException
+    {
+        if (provider != null)
+        {
+            return AlgorithmParameterGenerator.getInstance(algName, provider);
+        }
+        else
+        {
+            return AlgorithmParameterGenerator.getInstance(algName);
         }
     }
 

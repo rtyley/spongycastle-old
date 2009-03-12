@@ -46,7 +46,7 @@ public class CMSAuthenticatedGenerator
     protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameterSpec paramSpec, Provider provider)
         throws IOException, NoSuchAlgorithmException, InvalidParameterSpecException
     {
-        AlgorithmParameters params = AlgorithmParameters.getInstance(encryptionOID, provider);
+        AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encryptionOID, provider);
 
         params.init(paramSpec);
 
@@ -87,7 +87,7 @@ public class CMSAuthenticatedGenerator
                 return new RC2ParameterSpec(encKey.getEncoded().length * 8, iv);
             }
 
-            AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, encProvider);
+            AlgorithmParameterGenerator pGen = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameterGenerator(encryptionOID, encProvider);
 
             AlgorithmParameters p = pGen.generateParameters();
 
