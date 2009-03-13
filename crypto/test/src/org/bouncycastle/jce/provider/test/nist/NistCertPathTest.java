@@ -1,32 +1,24 @@
 package org.bouncycastle.jce.provider.test.nist;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
-
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.Security;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXCertPathBuilderResult;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertPathBuilder;
 import java.security.cert.X509CertSelector;
-import java.security.cert.PKIXBuilderParameters;
-import java.security.cert.CertPathBuilderResult;
-import java.security.cert.CertPathBuilderException;
-import java.security.cert.CertPath;
-import java.security.cert.PKIXCertPathBuilderResult;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +27,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
  * NIST CertPath test data for RFC 3280
@@ -205,7 +204,7 @@ public class NistCertPathTest
                 new String[] { "NegativeSerialNumberCACert", "InvalidNegativeSerialNumberTest15EE" }, 
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "NegativeSerialNumberCACRL" },
                 0,
-                "Certificate revocation after Fri Apr 20 00:57:20 EST 2001, reason: keyCompromise");
+                "Certificate revocation after Fri Apr 20 00:57:20", "reason: keyCompromise");
     }
     
     //
@@ -628,6 +627,29 @@ public class NistCertPathTest
         {
             assertEquals(index, e.getIndex());
             assertEquals(message, e.getMessage());
+        }
+    }
+
+    private void doExceptionTest(
+        String      trustAnchor,
+        String[]    certs,
+        String[]    crls,
+        int         index,
+        String      mesStart,
+        String      mesEnd)
+        throws Exception
+    {
+        try
+        {
+            doTest(trustAnchor, certs, crls);
+            
+            fail("path accepted when should be rejected");
+        }
+        catch (CertPathValidatorException e)
+        {
+            assertEquals(index, e.getIndex());
+            assertTrue(e.getMessage().startsWith(mesStart));
+            assertTrue(e.getMessage().endsWith(mesEnd));
         }
     }
     
