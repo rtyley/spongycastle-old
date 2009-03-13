@@ -10,7 +10,6 @@
     <property name="src.dir" value="${build.dir}/${jdk.name}" />
     <property name="target.prefix" value="jdk16" />
     <property name="javadoc.args" value="-breakiterator" />
-    <property name="pack200.enabled" value="" />
 
     <target name="init">
         <mkdir dir="${src.dir}" />
