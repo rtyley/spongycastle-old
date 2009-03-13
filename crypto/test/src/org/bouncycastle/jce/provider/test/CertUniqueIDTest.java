@@ -9,7 +9,7 @@ import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Arrays;
+import org.bouncycastle.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Set;
@@ -156,13 +156,13 @@ public class CertUniqueIDTest
       cert.verify(pubKey);
 
       boolean[] subjectUniqueId = cert.getSubjectUniqueID();
-      if (!Arrays.equals(subjectUniqID, subjectUniqueId))
+      if (!Arrays.areEqual(subjectUniqID, subjectUniqueId))
       {
           fail("Subject unique id is not correct, original: "+arrayToString(subjectUniqID)+", from cert: "+arrayToString(subjectUniqueId));
       }
 
       boolean[] issuerUniqueId = cert.getIssuerUniqueID();
-      if (!Arrays.equals(issuerUniqID, issuerUniqueId))
+      if (!Arrays.areEqual(issuerUniqID, issuerUniqueId))
       {
           fail("Issuer unique id is not correct, original: "+arrayToString(issuerUniqID)+", from cert: "+arrayToString(subjectUniqueId));
       }

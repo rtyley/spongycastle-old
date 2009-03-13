@@ -98,9 +98,15 @@ then
         echo "compiling"
 
         (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip *.java ; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */*.java; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */p*/*.java
-javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */[ade]*/*.java 
-javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */[gim]*/*.java 
-javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */[stu]*/*.java )
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */a*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */d*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */e*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */g*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */i*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */m*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */s*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */t*/*.java 
+javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */u*/*.java )
 
         echo "lightweight regression test"
         java -classpath classes:$JDK11PATH/lib/classes.zip org.bouncycastle.crypto.test.RegressionTest
