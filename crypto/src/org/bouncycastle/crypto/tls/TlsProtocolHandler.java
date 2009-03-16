@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.BigIntegers;
 
 import java.io.ByteArrayInputStream;
@@ -664,17 +665,9 @@ public class TlsProtocolHandler
                                     * Check if the data which was signed is equal to
                                     * the hash we calculated.
                                     */
-                                    if (sigHash.length != hash.length)
+                                    if (!Arrays.areEqual(sigHash, hash))
                                     {
                                         this.failWithError(AL_fatal, AP_bad_certificate);
-                                    }
-
-                                    for (int i = 0; i < sigHash.length; i++)
-                                    {
-                                        if (sigHash[i] != hash[i])
-                                        {
-                                            this.failWithError(AL_fatal, AP_bad_certificate);
-                                        }
                                     }
 
                                     /*
