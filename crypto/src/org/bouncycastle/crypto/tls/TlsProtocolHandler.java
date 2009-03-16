@@ -517,7 +517,7 @@ public class TlsProtocolHandler
                                             * Send the Client Key Exchange message for
                                             * DHE key exchange.
                                             */
-                                            byte[] YcByte = this.Yc.toByteArray();
+                                            byte[] YcByte = BigIntegers.asUnsignedByteArray(this.Yc);
                                             ByteArrayOutputStream DHbos = new ByteArrayOutputStream();
                                             TlsUtils.writeUint8(HP_CLIENT_KEY_EXCHANGE, DHbos);
                                             TlsUtils.writeUint24(YcByte.length + 2, DHbos);
