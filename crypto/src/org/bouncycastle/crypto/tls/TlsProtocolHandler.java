@@ -326,14 +326,12 @@ public class TlsProtocolHandler
                                     switch (this.chosenCipherSuite.getKeyExchangeAlgorithm())
                                     {
                                         case TlsCipherSuite.KE_RSA:
-                                        {
                                             if (!(this.serverPublicKey instanceof RSAKeyParameters))
                                             {
                                                 this.failWithError(AL_fatal, AP_certificate_unknown);
                                             }
                                             validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
                                             break;
-                                        }
                                         case TlsCipherSuite.KE_DHE_RSA:
                                             if (!(this.serverPublicKey instanceof RSAKeyParameters))
                                             {
