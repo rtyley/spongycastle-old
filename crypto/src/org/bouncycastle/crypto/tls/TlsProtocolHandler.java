@@ -148,7 +148,7 @@ public class TlsProtocolHandler
     private SecureRandom random;
 
     /*
-    * The public rsa-key of the server.
+    * The public key of the server.
     */
 
     private AsymmetricKeyParameter serverPublicKey = null;
