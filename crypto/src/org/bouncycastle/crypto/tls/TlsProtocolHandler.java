@@ -1,13 +1,22 @@
 package org.bouncycastle.crypto.tls;
 
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
+import org.bouncycastle.crypto.io.SignerInputStream;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
-import org.bouncycastle.util.Arrays;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.util.BigIntegers;
 
 import java.io.ByteArrayInputStream;
@@ -142,7 +151,7 @@ public class TlsProtocolHandler
     * The public rsa-key of the server.
     */
 
-    private RSAKeyParameters serverRsaKey = null;
+    private AsymmetricKeyParameter serverPublicKey = null;
 
     private TlsInputStream tlsInputStream = null;
     private TlsOuputStream tlsOutputStream = null;
@@ -280,55 +289,86 @@ public class TlsProtocolHandler
                     switch (type)
                     {
                         case HP_CERTIFICATE:
+                        {
                             switch (connection_state)
                             {
                                 case CS_SERVER_HELLO_RECEIVED:
+                                {
                                     /*
                                     * Parse the certificates.
                                     */
                                     Certificate cert = Certificate.parse(is);
                                     assertEmpty(is);
 
+                                    X509CertificateStructure x509Cert = cert.certs[0];
+                                    SubjectPublicKeyInfo keyInfo = x509Cert.getSubjectPublicKeyInfo();
+
+                                    try
+                                    {
+                                        this.serverPublicKey = PublicKeyFactory.createKey(keyInfo);
+                                    }
+                                    catch (RuntimeException e)
+                                    {
+                                        this.failWithError(AL_fatal, AP_unsupported_certificate);
+                                    }
+
+                                    // Sanity check the PublicKeyFactory
+                                    if (this.serverPublicKey.isPrivate())
+                                    {
+                                        this.failWithError(AL_fatal, AP_internal_error);
+                                    }
+
                                     /*
-                                    * Verify them.
-                                    */
+                                     * Perform various checks per RFC2246 7.4.2
+                                     * TODO "Unless otherwise specified, the signing algorithm for the certificate
+                                     * must be the same as the algorithm for the certificate key."
+                                     */
+                                    switch (this.chosenCipherSuite.getKeyExchangeAlgorithm())
+                                    {
+                                        case TlsCipherSuite.KE_RSA:
+                                        {
+                                            if (!(this.serverPublicKey instanceof RSAKeyParameters))
+                                            {
+                                                this.failWithError(AL_fatal, AP_certificate_unknown);
+                                            }
+                                            validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
+                                            break;
+                                        }
+                                        case TlsCipherSuite.KE_DHE_RSA:
+                                            if (!(this.serverPublicKey instanceof RSAKeyParameters))
+                                            {
+                                                this.failWithError(AL_fatal, AP_certificate_unknown);
+                                            }
+                                            validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
+                                            break;
+                                        case TlsCipherSuite.KE_DHE_DSS:
+                                            if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
+                                            {
+                                                this.failWithError(AL_fatal, AP_certificate_unknown);
+                                            }
+                                            break;
+                                        default:
+                                            this.failWithError(AL_fatal, AP_unsupported_certificate);
+                                    }
+
+                                    /*
+                                     * Verify them.
+                                     */
                                     if (!this.verifyer.isValid(cert.getCerts()))
                                     {
                                         this.failWithError(AL_fatal, AP_user_canceled);
                                     }
 
-                                    /*
-                                    * We only support RSA certificates. Lets hope
-                                    * this is one.
-                                    */
-                                    RSAPublicKeyStructure rsaKey = null;
-                                    try
-                                    {
-                                        rsaKey = RSAPublicKeyStructure.getInstance(cert.certs[0].getTBSCertificate().getSubjectPublicKeyInfo().getPublicKey());
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        /*
-                                        * Sorry, we have to fail ;-(
-                                        */
-                                        this.failWithError(AL_fatal, AP_unsupported_certificate);
-                                    }
-
-                                    /*
-                                    * Parse the servers public RSA key.
-                                    */
-                                    this.serverRsaKey = new RSAKeyParameters(
-                                        false,
-                                        rsaKey.getModulus(),
-                                        rsaKey.getPublicExponent());
-
-                                    connection_state = CS_SERVER_CERTIFICATE_RECEIVED;
-                                    read = true;
                                     break;
+                                }
                                 default:
                                     this.failWithError(AL_fatal, AP_unexpected_message);
                             }
+
+                            connection_state = CS_SERVER_CERTIFICATE_RECEIVED;
+                            read = true;
                             break;
+                        }
                         case HP_FINISHED:
                             switch (connection_state)
                             {
@@ -458,11 +498,10 @@ public class TlsProtocolHandler
                                     * on the key exchange we are using in our
                                     * ciphersuite.
                                     */
-                                    short ke = this.chosenCipherSuite.getKeyExchangeAlgorithm();
-
-                                    switch (ke)
+                                    switch (this.chosenCipherSuite.getKeyExchangeAlgorithm())
                                     {
                                         case TlsCipherSuite.KE_RSA:
+                                        {
                                             /*
                                             * We are doing RSA key exchange. We will
                                             * choose a pre master secret and send it
@@ -486,7 +525,7 @@ public class TlsProtocolHandler
                                             */
                                             RSABlindedEngine rsa = new RSABlindedEngine();
                                             PKCS1Encoding encoding = new PKCS1Encoding(rsa);
-                                            encoding.init(true, new ParametersWithRandom(this.serverRsaKey, this.random));
+                                            encoding.init(true, new ParametersWithRandom(this.serverPublicKey, this.random));
                                             byte[] encrypted = null;
                                             try
                                             {
@@ -503,31 +542,22 @@ public class TlsProtocolHandler
                                             /*
                                             * Send the encrypted pms.
                                             */
-                                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                                            TlsUtils.writeUint8(HP_CLIENT_KEY_EXCHANGE, bos);
-                                            TlsUtils.writeUint24(encrypted.length + 2, bos);
-                                            TlsUtils.writeUint16(encrypted.length, bos);
-                                            bos.write(encrypted);
-                                            byte[] message = bos.toByteArray();
-
-                                            rs.writeMessage((short)RL_HANDSHAKE, message, 0, message.length);
+                                            sendClientKeyExchange(encrypted);
                                             break;
+                                        }
+                                        case TlsCipherSuite.KE_DHE_DSS:
                                         case TlsCipherSuite.KE_DHE_RSA:
+                                        {
                                             /*
                                             * Send the Client Key Exchange message for
                                             * DHE key exchange.
                                             */
                                             byte[] YcByte = BigIntegers.asUnsignedByteArray(this.Yc);
-                                            ByteArrayOutputStream DHbos = new ByteArrayOutputStream();
-                                            TlsUtils.writeUint8(HP_CLIENT_KEY_EXCHANGE, DHbos);
-                                            TlsUtils.writeUint24(YcByte.length + 2, DHbos);
-                                            TlsUtils.writeUint16(YcByte.length, DHbos);
-                                            DHbos.write(YcByte);
-                                            byte[] DHmessage = DHbos.toByteArray();
 
-                                            rs.writeMessage((short)RL_HANDSHAKE, DHmessage, 0, DHmessage.length);
+                                            sendClientKeyExchange(YcByte);
 
                                             break;
+                                        }
                                         default:
                                             /*
                                             * Problem during handshake, we don't know
@@ -587,112 +617,43 @@ public class TlsProtocolHandler
                             }
                             break;
                         case HP_SERVER_KEY_EXCHANGE:
+                        {
                             switch (connection_state)
                             {
                                 case CS_SERVER_CERTIFICATE_RECEIVED:
+                                {
                                     /*
-                                    * Check that we are doing DHE key exchange
-                                    */
-                                    if (this.chosenCipherSuite.getKeyExchangeAlgorithm() != TlsCipherSuite.KE_DHE_RSA)
+                                     * Check that we are doing DHE key exchange
+                                     */
+                                    switch (this.chosenCipherSuite.getKeyExchangeAlgorithm())
                                     {
-                                        this.failWithError(AL_fatal, AP_unexpected_message);
+                                        case TlsCipherSuite.KE_DHE_RSA:
+                                        {
+                                            processDHEKeyExchange(is, new TlsRSASigner());
+                                            break;
+                                        }
+                                        case TlsCipherSuite.KE_DHE_DSS:
+                                        {
+                                            processDHEKeyExchange(is, new TlsDSSSigner());
+                                            break;
+                                        }
+                                        default:
+                                            this.failWithError(AL_fatal, AP_unexpected_message);
                                     }
-
-                                    /*
-                                    * Parse the Structure
-                                    */
-                                    int pLength = TlsUtils.readUint16(is);
-                                    byte[] pByte = new byte[pLength];
-                                    TlsUtils.readFully(pByte, is);
-
-                                    int gLength = TlsUtils.readUint16(is);
-                                    byte[] gByte = new byte[gLength];
-                                    TlsUtils.readFully(gByte, is);
-
-                                    int YsLength = TlsUtils.readUint16(is);
-                                    byte[] YsByte = new byte[YsLength];
-                                    TlsUtils.readFully(YsByte, is);
-
-                                    int sigLength = TlsUtils.readUint16(is);
-                                    byte[] sigByte = new byte[sigLength];
-                                    TlsUtils.readFully(sigByte, is);
-
-                                    this.assertEmpty(is);
-
-                                    /*
-                                    * Verify the Signature.
-                                    *
-                                    * First, calculate the hash.
-                                    */
-                                    CombinedHash sigDigest = new CombinedHash();
-                                    ByteArrayOutputStream signedData = new ByteArrayOutputStream();
-                                    TlsUtils.writeUint16(pLength, signedData);
-                                    signedData.write(pByte);
-                                    TlsUtils.writeUint16(gLength, signedData);
-                                    signedData.write(gByte);
-                                    TlsUtils.writeUint16(YsLength, signedData);
-                                    signedData.write(YsByte);
-                                    byte[] signed = signedData.toByteArray();
-
-                                    sigDigest.update(this.clientRandom, 0, this.clientRandom.length);
-                                    sigDigest.update(this.serverRandom, 0, this.serverRandom.length);
-                                    sigDigest.update(signed, 0, signed.length);
-                                    byte[] hash = new byte[sigDigest.getDigestSize()];
-                                    sigDigest.doFinal(hash, 0);
-
-                                    /*
-                                    * Now, do the RSA operation
-                                    */
-                                    RSABlindedEngine rsa = new RSABlindedEngine();
-                                    PKCS1Encoding encoding = new PKCS1Encoding(rsa);
-                                    encoding.init(false, this.serverRsaKey);
-
-                                    /*
-                                    * The data which was signed
-                                    */
-                                    byte[] sigHash = null;
-
-                                    try
-                                    {
-                                        sigHash = encoding.processBlock(sigByte, 0, sigByte.length);
-                                    }
-                                    catch (InvalidCipherTextException e)
-                                    {
-                                        this.failWithError(AL_fatal, AP_bad_certificate);
-                                    }
-
-                                    /*
-                                    * Check if the data which was signed is equal to
-                                    * the hash we calculated.
-                                    */
-                                    if (!Arrays.areEqual(sigHash, hash))
-                                    {
-                                        this.failWithError(AL_fatal, AP_bad_certificate);
-                                    }
-
-                                    /*
-                                    * OK, Signature was correct.
-                                    *
-                                    * Do the DH calculation.
-                                    */
-                                    BigInteger p = new BigInteger(1, pByte);
-                                    BigInteger g = new BigInteger(1, gByte);
-                                    BigInteger Ys = new BigInteger(1, YsByte);
-                                    BigInteger x = new BigInteger(p.bitLength() - 1, this.random);
-                                    Yc = g.modPow(x, p);
-                                    this.pms = BigIntegers.asUnsignedByteArray(Ys.modPow(x, p));
-
-                                    this.connection_state = CS_SERVER_KEY_EXCHANGE_RECEIVED;
-                                    read = true;
                                     break;
+                                }
                                 default:
                                     this.failWithError(AL_fatal, AP_unexpected_message);
                             }
+
+                            this.connection_state = CS_SERVER_KEY_EXCHANGE_RECEIVED;
+                            read = true;
                             break;
+                        }
                         case HP_CERTIFICATE_REQUEST:
+                        {
                             switch (connection_state)
                             {
-
                                 case CS_SERVER_CERTIFICATE_RECEIVED:
                                     /*
                                     * There was no server key exchange message, check
@@ -708,7 +669,7 @@ public class TlsProtocolHandler
                                     */
 
                                 case CS_SERVER_KEY_EXCHANGE_RECEIVED:
-
+                                {
                                     short typesLength = TlsUtils.readUint8(is);
                                     byte[] types = new byte[typesLength];
                                     TlsUtils.readFully(types, is);
@@ -718,14 +679,16 @@ public class TlsProtocolHandler
                                     TlsUtils.readFully(auths, is);
 
                                     assertEmpty(is);
-
-                                    this.connection_state = CS_CERTIFICATE_REQUEST_RECEIVED;
-                                    read = true;
                                     break;
+                                }
                                 default:
                                     this.failWithError(AL_fatal, AP_unexpected_message);
                             }
+
+                            this.connection_state = CS_CERTIFICATE_REQUEST_RECEIVED;
+                            read = true;
                             break;
+                        }
                         case HP_HELLO_REQUEST:
                         case HP_CLIENT_KEY_EXCHANGE:
                         case HP_CERTIFICATE_VERIFY:
@@ -734,9 +697,7 @@ public class TlsProtocolHandler
                             // We do not support this!
                             this.failWithError(AL_fatal, AP_unexpected_message);
                             break;
-
                     }
-
                 }
             }
         }
@@ -803,7 +764,6 @@ public class TlsProtocolHandler
                  */
             }
         }
-
     }
 
     /**
@@ -850,7 +810,82 @@ public class TlsProtocolHandler
 
             }
         }
+    }
 
+    private void processDHEKeyExchange(ByteArrayInputStream is, Signer signer)
+        throws IOException
+    {
+        InputStream sigIn = is;
+        if (signer != null)
+        {
+            signer.init(false, this.serverPublicKey);
+            signer.update(this.clientRandom, 0, this.clientRandom.length);
+            signer.update(this.serverRandom, 0, this.serverRandom.length);
+
+            sigIn = new SignerInputStream(is, signer);
+        }
+
+        /*
+         * Parse the Structure
+         */
+         int pLength = TlsUtils.readUint16(sigIn);
+         byte[] pByte = new byte[pLength];
+         TlsUtils.readFully(pByte, sigIn);
+
+         int gLength = TlsUtils.readUint16(sigIn);
+         byte[] gByte = new byte[gLength];
+         TlsUtils.readFully(gByte, sigIn);
+
+         int YsLength = TlsUtils.readUint16(sigIn);
+         byte[] YsByte = new byte[YsLength];
+         TlsUtils.readFully(YsByte, sigIn);
+
+         if (signer != null)
+         {
+             int sigLength = TlsUtils.readUint16(is);
+             byte[] sigByte = new byte[sigLength];
+             TlsUtils.readFully(sigByte, is);
+
+             /*
+              * Verify the Signature.
+              */
+             if (!signer.verifySignature(sigByte))
+             {
+                 this.failWithError(AL_fatal, AP_bad_certificate);
+             }
+         }
+
+         this.assertEmpty(is);
+
+         /*
+         * Do the DH calculation.
+         */
+         BigInteger p = new BigInteger(1, pByte);
+         BigInteger g = new BigInteger(1, gByte);
+         BigInteger Ys = new BigInteger(1, YsByte);
+         BigInteger x = new BigInteger(p.bitLength() - 1, this.random);
+
+         this.Yc = g.modPow(x, p);
+         this.pms = BigIntegers.asUnsignedByteArray(Ys.modPow(x, p));
+    }
+
+    private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
+        throws IOException
+    {
+        X509Extensions exts = c.getTBSCertificate().getExtensions();
+        if (exts != null)
+        {
+            X509Extension ext = exts.getExtension(X509Extensions.KeyUsage);
+            if (ext != null)
+            {
+                DERBitString ku = KeyUsage.getInstance(ext);
+                int bits = ku.getBytes()[0] & 0xff;
+                if ((bits & keyUsageBits) != keyUsageBits)
+                {
+                    this.failWithError(AL_fatal, AP_certificate_unknown);
+                }
+            }
+        }
     }
 
     private void sendClientCertificate() throws IOException
@@ -863,6 +898,18 @@ public class TlsProtocolHandler
         TlsUtils.writeUint8(HP_CERTIFICATE, bos);
         TlsUtils.writeUint24(3, bos);
         TlsUtils.writeUint24(0, bos);
+        byte[] message = bos.toByteArray();
+
+        rs.writeMessage((short)RL_HANDSHAKE, message, 0, message.length);
+    }
+
+    private void sendClientKeyExchange(byte[] keData) throws IOException
+    {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        TlsUtils.writeUint8(HP_CLIENT_KEY_EXCHANGE, bos);
+        TlsUtils.writeUint24(keData.length + 2, bos);
+        TlsUtils.writeUint16(keData.length, bos);
+        bos.write(keData);
         byte[] message = bos.toByteArray();
 
         rs.writeMessage((short)RL_HANDSHAKE, message, 0, message.length);
@@ -1128,15 +1175,12 @@ public class TlsProtocolHandler
             {
                 throw new IOException(TLS_ERROR_MESSAGE);
             }
-
         }
         else
         {
             throw new IOException(TLS_ERROR_MESSAGE);
         }
-
     }
-
 
     /**
      * Closes this connection.
@@ -1169,5 +1213,4 @@ public class TlsProtocolHandler
     {
         rs.flush();
     }
-
 }
