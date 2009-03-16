@@ -93,7 +93,7 @@ public class GenericSigner
     {
         if (!forSigning)
         {
-            throw new IllegalStateException("RSASigner not initialised for signature generation.");
+            throw new IllegalStateException("GenericSigner not initialised for signature generation.");
         }
 
         byte[] hash = new byte[digest.getDigestSize()];
@@ -111,7 +111,7 @@ public class GenericSigner
     {
         if (forSigning)
         {
-            throw new IllegalStateException("RSASigner not initialised for verification");
+            throw new IllegalStateException("GenericSigner not initialised for verification");
         }
 
         byte[] hash = new byte[digest.getDigestSize()];
