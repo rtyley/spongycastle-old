@@ -508,12 +508,9 @@ public class TlsProtocolHandler
                                             * Prepare pre master secret.
                                             */
                                             pms = new byte[48];
+                                            random.nextBytes(pms);
                                             pms[0] = 3;
                                             pms[1] = 1;
-                                            for (int i = 2; i < 48; i++)
-                                            {
-                                                pms[i] = (byte)random.nextInt();
-                                            }
 
                                             /*
                                             * Encode the pms and send it to the server.
@@ -930,16 +927,13 @@ public class TlsProtocolHandler
         * First, generate some random data.
         */
         this.clientRandom = new byte[32];
+        random.nextBytes(this.clientRandom);
+
         int t = (int)(System.currentTimeMillis() / 1000);
         this.clientRandom[0] = (byte)(t >> 24);
         this.clientRandom[1] = (byte)(t >> 16);
         this.clientRandom[2] = (byte)(t >> 8);
         this.clientRandom[3] = (byte)t;
-
-        for (int i = 4; i < clientRandom.length; i++)
-        {
-            this.clientRandom[i] = (byte)random.nextInt();
-        }
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         TlsUtils.writeVersion(os);
