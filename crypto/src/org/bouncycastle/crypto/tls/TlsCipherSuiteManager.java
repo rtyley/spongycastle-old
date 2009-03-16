@@ -24,16 +24,22 @@ public class TlsCipherSuiteManager
 
     protected static void writeCipherSuites(OutputStream os) throws IOException
     {
-        TlsUtils.writeUint16(2 * 6, os);
+        int[] suites = new int[]
+        {
+            TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+            TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+            TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
 
-        TlsUtils.writeUint16(TLS_DHE_RSA_WITH_AES_256_CBC_SHA, os);
-        TlsUtils.writeUint16(TLS_DHE_RSA_WITH_AES_128_CBC_SHA, os);
-        TlsUtils.writeUint16(TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA, os);
+            TLS_RSA_WITH_AES_256_CBC_SHA,
+            TLS_RSA_WITH_AES_128_CBC_SHA,
+            TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+       };
 
-        TlsUtils.writeUint16(TLS_RSA_WITH_AES_256_CBC_SHA, os);
-        TlsUtils.writeUint16(TLS_RSA_WITH_AES_128_CBC_SHA, os);
-        TlsUtils.writeUint16(TLS_RSA_WITH_3DES_EDE_CBC_SHA, os);
-
+       TlsUtils.writeUint16(2 * suites.length, os);
+       for (int i = 0; i < suites.length; ++i)
+       {
+           TlsUtils.writeUint16(suites[i], os);
+       }
     }
 
     protected static TlsCipherSuite getCipherSuite(int number, TlsProtocolHandler handler) throws IOException
