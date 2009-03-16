@@ -59,6 +59,9 @@ public class RSADigestSigner
         algId = new AlgorithmIdentifier((DERObjectIdentifier)oidMap.get(digest.getAlgorithmName()), DERNull.INSTANCE);
     }
 
+    /**
+     * @deprecated
+     */
     public String getAlgorithmName()
     {
         return digest.getAlgorithmName() + "withRSA";
