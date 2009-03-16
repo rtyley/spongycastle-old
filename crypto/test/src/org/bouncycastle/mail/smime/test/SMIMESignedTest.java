@@ -1054,8 +1054,6 @@ public class SMIMESignedTest
 
         MimeMultipart mm = gen.generate(m, "BC");
 
-        mm.writeTo(new FileOutputStream("/tmp/fred"));
-        
         SMIMESigned s = new SMIMESigned(mm);
 
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
