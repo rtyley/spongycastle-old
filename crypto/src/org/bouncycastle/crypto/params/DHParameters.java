@@ -70,9 +70,16 @@ public class DHParameters
         BigInteger              j,
         DHValidationParameters  validation)
     {
-        if (l != 0 && m > l)
+        if (l != 0)
         {
-            throw new IllegalArgumentException("l value must be greater than m value if provided");
+            if (l >= p.bitLength())
+            {
+                throw new IllegalArgumentException("l value must be less than bitlength(p) if provided");
+            }
+            if (m > l)
+            {
+                throw new IllegalArgumentException("l value must be greater than m value if provided");
+            }
         }
 
         this.g = g;
@@ -120,7 +127,7 @@ public class DHParameters
     }
 
     /**
-     * Return the private value length in bits - if set, zero otherwise (use bitLength(P) - 1).
+     * Return the private value length in bits - if set, zero otherwise
      *
      * @return the private value length in bits, zero otherwise.
      */
