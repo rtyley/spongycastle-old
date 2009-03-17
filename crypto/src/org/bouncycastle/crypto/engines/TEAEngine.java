@@ -13,7 +13,7 @@ public class TEAEngine
 {
     private static final int rounds     = 32,
                              block_size = 8,
-                             key_size   = 16,
+//                             key_size   = 16,
                              delta      = 0x9E3779B9,
                              d_sum      = 0xC6EF3720; // sum on decrypt
     /*
