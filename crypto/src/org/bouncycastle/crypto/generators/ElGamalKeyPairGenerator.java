@@ -32,7 +32,7 @@ public class ElGamalKeyPairGenerator
     {
 		DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
         ElGamalParameters egp = param.getParameters();
-        DHParameters dhp = new DHParameters(egp.getP(), egp.getG(), null, egp.getL());  
+        DHParameters dhp = new DHParameters(egp.getP(), egp.getG(), null, 0, egp.getL());  
 
         BigInteger x = helper.calculatePrivate(dhp, param.getRandom()); 
         BigInteger y = helper.calculatePublic(dhp, x);
