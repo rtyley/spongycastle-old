@@ -8,6 +8,9 @@ import java.security.SecureRandom;
  */
 public final class BigIntegers
 {
+    private static final int MAX_ITERATIONS = 1000;
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
+
     /**
      * Return the passed in value as an unsigned byte array.
      * 
@@ -44,12 +47,32 @@ public final class BigIntegers
         BigInteger      max,
         SecureRandom    random)
     {
-        BigInteger x;
-        do
+    	int cmp = min.compareTo(max);
+        if (cmp >= 0)
         {
-            x = new BigInteger(max.bitLength(), random);
+        	if (cmp > 0)
+        	{
+            	throw new IllegalArgumentException("'min' may not be greater than 'max'");
+        	}
+
+			return min;
         }
-        while (x.compareTo(min) < 0 || x.compareTo(max) > 0);
-        return x;
+
+        if (min.bitLength() > max.bitLength() / 2)
+        {
+            return createRandomInRange(ZERO, max.subtract(min), random).add(min);
+        }
+
+        for (int i = 0; i < MAX_ITERATIONS; ++i)
+        {
+            BigInteger x = new BigInteger(max.bitLength(), random);
+            if (x.compareTo(min) >= 0 && x.compareTo(max) <= 0)
+            {
+                return x;
+            }
+        }
+
+        // fall back to a faster (restricted) method
+        return new BigInteger(max.subtract(min).bitLength() - 1, random).add(min);
     }
 }
