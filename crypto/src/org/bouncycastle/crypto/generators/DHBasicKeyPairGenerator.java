@@ -11,15 +11,14 @@ import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import java.math.BigInteger;
 
 /**
- * a basic Diffie-Helman key pair generator.
+ * a basic Diffie-Hellman key pair generator.
  *
  * This generates keys consistent for use with the basic algorithm for
- * Diffie-Helman.
+ * Diffie-Hellman.
  */
 public class DHBasicKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator
 {
-    private DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
     private DHKeyGenerationParameters param;
 
     public void init(
@@ -30,15 +29,14 @@ public class DHBasicKeyPairGenerator
 
     public AsymmetricCipherKeyPair generateKeyPair()
     {
-        BigInteger      p, x, y;
-        DHParameters    dhParams = param.getParameters();
+        DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
+        DHParameters dhp = param.getParameters();
 
-        p = dhParams.getP();
-        x = helper.calculatePrivate(p, param.getRandom(), dhParams.getL()); 
-        y = helper.calculatePublic(p, dhParams.getG(), x);
+        BigInteger x = helper.calculatePrivate(dhp, param.getRandom()); 
+        BigInteger y = helper.calculatePublic(dhp, x);
 
         return new AsymmetricCipherKeyPair(
-                new DHPublicKeyParameters(y, dhParams),
-                new DHPrivateKeyParameters(x, dhParams));
+            new DHPublicKeyParameters(y, dhp),
+            new DHPrivateKeyParameters(x, dhp));
     }
 }

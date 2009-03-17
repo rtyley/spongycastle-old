@@ -11,7 +11,7 @@ import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import java.math.BigInteger;
 
 /**
- * a Diffie-Helman key pair generator.
+ * a Diffie-Hellman key pair generator.
  *
  * This generates keys consistent for use in the MTI/A0 key agreement protocol
  * as described in "Handbook of Applied Cryptography", Pages 516-519.
@@ -19,8 +19,6 @@ import java.math.BigInteger;
 public class DHKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator
 {
-    private DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
-    
     private DHKeyGenerationParameters param;
 
     public void init(
@@ -31,15 +29,14 @@ public class DHKeyPairGenerator
 
     public AsymmetricCipherKeyPair generateKeyPair()
     {
-        BigInteger      p, x, y;
-        DHParameters    dhParams = param.getParameters();
-        
-        p = dhParams.getP();
-        x = helper.calculatePrivate(p, param.getRandom(), dhParams.getL()); 
-        y = helper.calculatePublic(p, dhParams.getG(), x);
+        DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
+        DHParameters dhp = param.getParameters();
+
+        BigInteger x = helper.calculatePrivate(dhp, param.getRandom()); 
+        BigInteger y = helper.calculatePublic(dhp, x);
 
         return new AsymmetricCipherKeyPair(
-                new DHPublicKeyParameters(y, dhParams),
-                new DHPrivateKeyParameters(x, dhParams));
+            new DHPublicKeyParameters(y, dhp),
+            new DHPrivateKeyParameters(x, dhp));
     }
 }
