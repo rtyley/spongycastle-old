@@ -535,9 +535,8 @@ public class CamelliaLightEngine
         return BLOCK_SIZE;
     }
 
-    public void CamelliaLightEngine()
+    public CamelliaLightEngine()
     {
-        initialized = false;
     }
 
     public String getAlgorithmName()
