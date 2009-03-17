@@ -40,6 +40,7 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 
 /**
  * Factory to create asymmetric public key parameters for asymmetric ciphers
@@ -105,7 +106,11 @@ public class PublicKeyFactory
             DHParameter params = new DHParameter((ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
             DERInteger  derY = (DERInteger)keyInfo.getPublicKey();
             
-            return new DHPublicKeyParameters(derY.getValue(), new DHParameters(params.getP(), params.getG()));
+            BigInteger lVal = params.getL();
+            int l = lVal == null ? 0 : lVal.intValue();
+            DHParameters dhParams = new DHParameters(params.getP(), params.getG(), null, l);
+
+            return new DHPublicKeyParameters(derY.getValue(), dhParams);
         }
         else if (algId.getObjectId().equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
