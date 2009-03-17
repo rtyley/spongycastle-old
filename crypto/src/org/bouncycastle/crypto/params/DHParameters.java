@@ -74,11 +74,11 @@ public class DHParameters
         {
             if (l >= p.bitLength())
             {
-                throw new IllegalArgumentException("l value must be less than bitlength(p) if provided");
+                throw new IllegalArgumentException("when l value specified, it must be less than bitlength(p)");
             }
-            if (m > l)
+            if (l < m)
             {
-                throw new IllegalArgumentException("l value must be greater than m value if provided");
+                throw new IllegalArgumentException("when l value specified, it may not be less than m value");
             }
         }
 
