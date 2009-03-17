@@ -6,12 +6,18 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Signer;
+import org.bouncycastle.crypto.agreement.DHBasicAgreement;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
+import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
 import org.bouncycastle.crypto.io.SignerInputStream;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
+import org.bouncycastle.crypto.params.DHParameters;
+import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
@@ -32,6 +38,8 @@ import java.security.SecureRandom;
  */
 public class TlsProtocolHandler
 {
+    private static final BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger TWO = BigInteger.valueOf(2);
 
     private static final short RL_CHANGE_CIPHER_SPEC = 20;
 
@@ -858,10 +866,45 @@ public class TlsProtocolHandler
          BigInteger p = new BigInteger(1, pByte);
          BigInteger g = new BigInteger(1, gByte);
          BigInteger Ys = new BigInteger(1, YsByte);
-         BigInteger x = new BigInteger(p.bitLength() - 1, this.random);
 
-         this.Yc = g.modPow(x, p);
-         this.pms = BigIntegers.asUnsignedByteArray(Ys.modPow(x, p));
+         /*
+          * Check the DH parameter values
+          */
+         if (!p.isProbablePrime(10))
+         {
+             this.failWithError(AL_fatal, AP_illegal_parameter);
+         }
+         if (g.compareTo(TWO) < 0 || g.compareTo(p.subtract(TWO)) > 0)
+         {
+             this.failWithError(AL_fatal, AP_illegal_parameter);
+         }
+         // TODO For static DH public values, see additional checks in RFC 2631 2.1.5 
+         if (Ys.compareTo(TWO) < 0 || Ys.compareTo(p.subtract(ONE)) > 0)
+         {
+             this.failWithError(AL_fatal, AP_illegal_parameter);
+         }
+
+         /*
+          * Diffie-Hellman basic key agreement
+          */
+         DHParameters dhParams = new DHParameters(p, g);
+
+         // Generate a keypair
+         DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
+         dhGen.init(new DHKeyGenerationParameters(random, dhParams));
+
+         AsymmetricCipherKeyPair dhPair = dhGen.generateKeyPair();
+
+         // Store the public value to send to server
+         this.Yc = ((DHPublicKeyParameters)dhPair.getPublic()).getY();
+
+         // Calculate the shared secret
+         DHBasicAgreement dhAgree = new DHBasicAgreement();
+         dhAgree.init(dhPair.getPrivate());
+
+         BigInteger agreement = dhAgree.calculateAgreement(new DHPublicKeyParameters(Ys, dhParams));
+
+         this.pms = BigIntegers.asUnsignedByteArray(agreement);
     }
 
     private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
