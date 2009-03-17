@@ -36,6 +36,7 @@ import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 
 /**
  * Factory for creating private key objects from PKCS8 PrivateKeyInfo objects.
@@ -106,7 +107,11 @@ public class PrivateKeyFactory
             DHParameter     params = new DHParameter((ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
             DERInteger      derX = (DERInteger)keyInfo.getPrivateKey();
 
-            return new DHPrivateKeyParameters(derX.getValue(), new DHParameters(params.getP(), params.getG()));
+            BigInteger lVal = params.getL();
+            int l = lVal == null ? 0 : lVal.intValue();
+            DHParameters dhParams = new DHParameters(params.getP(), params.getG(), null, l);
+
+            return new DHPrivateKeyParameters(derX.getValue(), dhParams);
         }
         else if (algId.getObjectId().equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
