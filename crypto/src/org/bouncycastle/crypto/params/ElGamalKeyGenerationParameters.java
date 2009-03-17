@@ -13,7 +13,7 @@ public class ElGamalKeyGenerationParameters
         SecureRandom        random,
         ElGamalParameters   params)
     {
-        super(random, params.getP().bitLength());
+        super(random, getStrength(params));
 
         this.params = params;
     }
@@ -21,5 +21,10 @@ public class ElGamalKeyGenerationParameters
     public ElGamalParameters getParameters()
     {
         return params;
+    }
+
+    static int getStrength(ElGamalParameters params)
+    {
+        return params.getL() != 0 ? params.getL() : params.getP().bitLength();
     }
 }

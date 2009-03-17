@@ -3,7 +3,10 @@ package org.bouncycastle.crypto.agreement;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.generators.DHKeyPairGenerator;
+import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
@@ -61,12 +64,13 @@ public class DHAgreement
      */
     public BigInteger calculateMessage()
     {
-        int bits = dhParams.getP().bitLength() - 1;
+        DHKeyPairGenerator dhGen = new DHKeyPairGenerator();
+        dhGen.init(new DHKeyGenerationParameters(random, dhParams));
+        AsymmetricCipherKeyPair dhPair = dhGen.generateKeyPair();
 
-        // TODO Should the generated numbers always have length 'p.bitLength() - 1'?
-        this.privateValue = new BigInteger(bits, random).setBit(bits - 1);
+        this.privateValue = ((DHPrivateKeyParameters)dhPair.getPrivate()).getX();
 
-        return dhParams.getG().modPow(privateValue, dhParams.getP());
+        return ((DHPublicKeyParameters)dhPair.getPublic()).getY();
     }
 
     /**
@@ -83,6 +87,8 @@ public class DHAgreement
             throw new IllegalArgumentException("Diffie-Hellman public key has wrong parameters.");
         }
 
-        return message.modPow(key.getX(), dhParams.getP()).multiply(pub.getY().modPow(privateValue, dhParams.getP())).mod(dhParams.getP());
+        BigInteger p = dhParams.getP();
+
+        return message.modPow(key.getX(), p).multiply(pub.getY().modPow(privateValue, p)).mod(p);
     }
 }
