@@ -9,19 +9,30 @@ public class DHParameters
 {
     private static final int DEFAULT_MINIMUM_LENGTH = 160;
 
-    private BigInteger              g;
-    private BigInteger              p;
-    private BigInteger              q;
-    private BigInteger              j;
-    private int                     m = DEFAULT_MINIMUM_LENGTH;
-    private int                     l;
-    private DHValidationParameters  validation;
+    private final BigInteger              g;
+    private final BigInteger              p;
+    private final BigInteger              q;
+    private final BigInteger              j;
+    private final int                     m;
+    private final int                     l;
+    private final DHValidationParameters  validation;
+
+    private static int getDefaultMParam(
+        int lParam)
+    {
+        if (lParam == 0)
+        {
+            return DEFAULT_MINIMUM_LENGTH;
+        }
+
+        return lParam < DEFAULT_MINIMUM_LENGTH ? lParam : DEFAULT_MINIMUM_LENGTH;
+    }
 
     public DHParameters(
         BigInteger  p,
         BigInteger  g)
     {
-        this(p, g, null, DEFAULT_MINIMUM_LENGTH, 0, null, null);
+        this(p, g, null, 0);
     }
 
     public DHParameters(
@@ -29,7 +40,7 @@ public class DHParameters
         BigInteger  g,
         BigInteger  q)
     {
-        this(p, g, q, DEFAULT_MINIMUM_LENGTH, 0, null, null);
+        this(p, g, q, 0);
     }
 
     public DHParameters(
@@ -38,8 +49,8 @@ public class DHParameters
         BigInteger  q,
         int         l)
     {
-        this(p, g, q, l, l, null, null);
-    }   
+        this(p, g, q, getDefaultMParam(l), l, null, null);
+    }
 
     public DHParameters(
         BigInteger  p,
