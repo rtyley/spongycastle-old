@@ -103,21 +103,17 @@ public class CamelliaLightEngine
         (byte)119, (byte)199, (byte)128, (byte)158
     };
 
-    private static final int rightRotate(int x, int s)
+    private static int rightRotate(int x, int s)
     {
         return (((x) >>> (s)) + ((x) << (32 - s)));
     }
 
-    ;
-
-    private static final int leftRotate(int x, int s)
+    private static int leftRotate(int x, int s)
     {
         return ((x) << (s)) + ((x) >>> (32 - s));
     }
 
-    ;
-
-    private static final void roldq(int rot, int[] ki, int ioff,
+    private static void roldq(int rot, int[] ki, int ioff,
                                     int[] ko, int ooff)
     {
         ko[0 + ooff] = (ki[0 + ioff] << rot) | (ki[1 + ioff] >>> (32 - rot));
@@ -130,7 +126,7 @@ public class CamelliaLightEngine
         ki[3 + ioff] = ko[3 + ooff];
     }
 
-    private static final void decroldq(int rot, int[] ki, int ioff,
+    private static void decroldq(int rot, int[] ki, int ioff,
                                        int[] ko, int ooff)
     {
         ko[2 + ooff] = (ki[0 + ioff] << rot) | (ki[1 + ioff] >>> (32 - rot));
@@ -169,7 +165,7 @@ public class CamelliaLightEngine
         ki[3 + ioff] = ko[1 + ooff];
     }
 
-    private final int bytes2int(byte[] src, int offset)
+    private int bytes2int(byte[] src, int offset)
     {
         int word = 0;
 
@@ -180,7 +176,7 @@ public class CamelliaLightEngine
         return word;
     }
 
-    private final void int2bytes(int word, byte[] dst, int offset)
+    private void int2bytes(int word, byte[] dst, int offset)
     {
         for (int i = 0; i < 4; i++)
         {
@@ -189,27 +185,27 @@ public class CamelliaLightEngine
         }
     }
 
-    private final byte lRot8(byte v, int rot)
+    private byte lRot8(byte v, int rot)
     {
         return (byte)((v << rot) | ((v & 0xff) >>> (8 - rot)));
     }
 
-    private final int sbox2(int x)
+    private int sbox2(int x)
     {
-        return (int)(lRot8(SBOX1[x], 1) & MASK8);
+        return (lRot8(SBOX1[x], 1) & MASK8);
     }
 
-    private final int sbox3(int x)
+    private int sbox3(int x)
     {
-        return (int)(lRot8(SBOX1[x], 7) & MASK8);
+        return (lRot8(SBOX1[x], 7) & MASK8);
     }
 
-    private final int sbox4(int x)
+    private int sbox4(int x)
     {
-        return (int)(SBOX1[((int)lRot8((byte)x, 1) & MASK8)] & MASK8);
+        return (SBOX1[((int)lRot8((byte)x, 1) & MASK8)] & MASK8);
     }
 
-    private final void camelliaF2(int[] s, int[] skey, int keyoff)
+    private void camelliaF2(int[] s, int[] skey, int keyoff)
     {
         int t1, t2, u, v;
 
@@ -231,7 +227,6 @@ public class CamelliaLightEngine
         u = rightRotate(u, 8) ^ v;
         s[2] ^= leftRotate(v, 16) ^ u;
         s[3] ^= leftRotate(u, 8);
-        ;
 
         t1 = s[2] ^ skey[2 + keyoff];
         u = sbox4((t1 & MASK8));
@@ -253,7 +248,7 @@ public class CamelliaLightEngine
         s[1] ^= leftRotate(u, 8);
     }
 
-    private final void camelliaFLs(int[] s, int[] fkey, int keyoff)
+    private void camelliaFLs(int[] s, int[] fkey, int keyoff)
     {
 
         s[1] ^= leftRotate(s[0] & fkey[0 + keyoff], 1);
@@ -263,7 +258,7 @@ public class CamelliaLightEngine
         s[3] ^= leftRotate(fkey[2 + keyoff] & s[2], 1);
     }
 
-    private final void setKey(boolean forEncryption, byte[] key)
+    private void setKey(boolean forEncryption, byte[] key)
     {
         int[] k = new int[8];
         int[] ka = new int[4];
@@ -464,7 +459,7 @@ public class CamelliaLightEngine
         }
     }
 
-    private final int processBlock128(byte[] in, int inOff,
+    private int processBlock128(byte[] in, int inOff,
                                       byte[] out, int outOff)
     {
         for (int i = 0; i < 4; i++)
@@ -498,7 +493,7 @@ public class CamelliaLightEngine
         return BLOCK_SIZE;
     }
 
-    private final int processBlock192or256(byte[] in, int inOff,
+    private int processBlock192or256(byte[] in, int inOff,
                                            byte[] out, int outOff)
     {
         for (int i = 0; i < 4; i++)
