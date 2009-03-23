@@ -129,16 +129,18 @@ public abstract class KeyPairGenerator
             }
             else if (params instanceof ECGenParameterSpec)
             {
+                final String curveName = ((ECGenParameterSpec)params).getName();
+
                 if (this.algorithm.equals("ECGOST3410"))
                 {
-                    ECDomainParameters  ecP = ECGOST3410NamedCurves.getByName(((ECGenParameterSpec)params).getName());
+                    ECDomainParameters  ecP = ECGOST3410NamedCurves.getByName(curveName);
                     if (ecP == null)
                     {
-                        throw new InvalidAlgorithmParameterException("unknown curve name: " + ((ECGenParameterSpec)params).getName());
+                        throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
                     }
 
                     this.ecParams = new ECNamedCurveSpec(
-                                                    ((ECGenParameterSpec)params).getName(),
+                                                    curveName,
                                                     ecP.getCurve(),
                                                     ecP.getG(),
                                                     ecP.getN(),
@@ -147,26 +149,26 @@ public abstract class KeyPairGenerator
                 }
                 else
                 {
-                    X9ECParameters  ecP = X962NamedCurves.getByName(((ECGenParameterSpec)params).getName());
+                    X9ECParameters  ecP = X962NamedCurves.getByName(curveName);
                     if (ecP == null)
                     {
-                        ecP = SECNamedCurves.getByName(((ECGenParameterSpec)params).getName());
+                        ecP = SECNamedCurves.getByName(curveName);
                         if (ecP == null)
                         {
-                            ecP = NISTNamedCurves.getByName(((ECGenParameterSpec)params).getName());
+                            ecP = NISTNamedCurves.getByName(curveName);
                         }
                         if (ecP == null)
                         {
-                            ecP = TeleTrusTNamedCurves.getByName(((ECGenParameterSpec)params).getName());
+                            ecP = TeleTrusTNamedCurves.getByName(curveName);
                         }
                         if (ecP == null)
                         {
-                            throw new InvalidAlgorithmParameterException("unknown curve name: " + ((ECGenParameterSpec)params).getName());
+                            throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
                         }
                     }
 
                     this.ecParams = new ECNamedCurveSpec(
-                            ((ECGenParameterSpec)params).getName(),
+                            curveName,
                             ecP.getCurve(),
                             ecP.getG(),
                             ecP.getN(),
