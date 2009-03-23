@@ -56,9 +56,13 @@ public abstract class KeyPairGenerator
         static {
             ecParameters = new Hashtable();
 
-            ecParameters.put(new Integer(192), new ECGenParameterSpec("prime192v1"));
+            ecParameters.put(new Integer(192), new ECGenParameterSpec("prime192v1")); // a.k.a P-192
             ecParameters.put(new Integer(239), new ECGenParameterSpec("prime239v1"));
-            ecParameters.put(new Integer(256), new ECGenParameterSpec("prime256v1"));
+            ecParameters.put(new Integer(256), new ECGenParameterSpec("prime256v1")); // a.k.a P-256
+
+            ecParameters.put(new Integer(224), new ECGenParameterSpec("P-224"));
+            ecParameters.put(new Integer(384), new ECGenParameterSpec("P-384"));
+            ecParameters.put(new Integer(521), new ECGenParameterSpec("P-521"));
         }
 
         public EC()
