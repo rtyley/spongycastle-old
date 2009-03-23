@@ -669,12 +669,17 @@ public class SignedDataTest
 
         CMSSignedData s = gen.generate(msg, true, "BC");
         SignerInformation origSigner = (SignerInformation)s.getSignerInfos().getSigners().toArray()[0];
-        SignerInformationStore counterSigners = gen.generateCounterSigners(origSigner, "BC");
+        SignerInformationStore counterSigners1 = gen.generateCounterSigners(origSigner, "BC");
+        SignerInformationStore counterSigners2 = gen.generateCounterSigners(origSigner, "BC");
 
-        SignerInformation signer = SignerInformation.addCounterSigners(origSigner, counterSigners);
+        SignerInformation signer1 = SignerInformation.addCounterSigners(origSigner, counterSigners1);
+        SignerInformation signer2 = SignerInformation.addCounterSigners(signer1, counterSigners2);
 
-        SignerInformationStore signers = signer.getCounterSignatures();
-        Iterator it = signers.getSigners().iterator();
+        SignerInformationStore cs = signer2.getCounterSignatures();
+        Collection csSigners = cs.getSigners();
+        assertEquals(2, csSigners.size());
+
+        Iterator it = csSigners.iterator();
         while (it.hasNext())
         {
             SignerInformation   cSigner = (SignerInformation)it.next();

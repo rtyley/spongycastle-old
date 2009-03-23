@@ -230,22 +230,59 @@ public class SignerInformation
      */
     public SignerInformationStore getCounterSignatures()
     {
+        // TODO There are several checks implied by the RFC3852 comments that are missing
+
+        /*
+        The countersignature attribute MUST be an unsigned attribute; it MUST
+        NOT be a signed attribute, an authenticated attribute, an
+        unauthenticated attribute, or an unprotected attribute.
+        */        
         AttributeTable unsignedAttributeTable = getUnsignedAttributes();
         if (unsignedAttributeTable == null)
         {
             return new SignerInformationStore(new ArrayList(0));
         }
-        
+
         List counterSignatures = new ArrayList();
 
-        Attribute counterSignatureAttribute = unsignedAttributeTable.get(CMSAttributes.counterSignature);
-        if (counterSignatureAttribute != null)
+        /*
+        The UnsignedAttributes syntax is defined as a SET OF Attributes.  The
+        UnsignedAttributes in a signerInfo may include multiple instances of
+        the countersignature attribute.
+        */
+        ASN1EncodableVector allCSAttrs = unsignedAttributeTable.getAll(CMSAttributes.counterSignature);
+
+        for (int i = 0; i < allCSAttrs.size(); ++i)
         {
+            Attribute counterSignatureAttribute = (Attribute)allCSAttrs.get(i);            
+
+            /*
+            A countersignature attribute can have multiple attribute values.  The
+            syntax is defined as a SET OF AttributeValue, and there MUST be one
+            or more instances of AttributeValue present.
+            */
             ASN1Set values = counterSignatureAttribute.getAttrValues();
-            counterSignatures = new ArrayList(values.size());
+            if (values.size() < 1)
+            {
+                // TODO Throw an appropriate exception?
+            }
 
             for (Enumeration en = values.getObjects(); en.hasMoreElements();)
             {
+                /*
+                Countersignature values have the same meaning as SignerInfo values
+                for ordinary signatures, except that:
+
+                   1. The signedAttributes field MUST NOT contain a content-type
+                      attribute; there is no content type for countersignatures.
+
+                   2. The signedAttributes field MUST contain a message-digest
+                      attribute if it contains any other attributes.
+
+                   3. The input to the message-digesting process is the contents
+                      octets of the DER encoding of the signatureValue field of the
+                      SignerInfo value with which the attribute is associated.
+                */
                 SignerInfo si = SignerInfo.getInstance(en.nextElement());
 
                 String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(si.getDigestAlgorithm().getObjectId().getId());
