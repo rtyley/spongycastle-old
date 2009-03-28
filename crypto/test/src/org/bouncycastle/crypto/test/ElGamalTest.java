@@ -180,16 +180,16 @@ public class ElGamalTest
 
         e.init(true, new ParametersWithRandom(pu, new SecureRandom()));
 
-        String  message = "This is a test";
+        byte[]  message = Hex.decode("5468697320697320612074657374");
 
-        byte[]  pText = message.getBytes();
+        byte[]  pText = message;
         byte[]  cText = e.processBlock(pText, 0, pText.length);
 
         e.init(false, pv);
 
         pText = e.processBlock(cText, 0, cText.length);
 
-        if (!message.equals(new String(pText)))
+        if (!Arrays.areEqual(message, pText))
         {
             fail("generation test failed");
         }
@@ -218,16 +218,16 @@ public class ElGamalTest
 
         e.init(true, pu);
 
-        String  message = "This is a test";
+        byte[]  message = Hex.decode("5468697320697320612074657374");
 
-        byte[]  pText = message.getBytes();
+        byte[]  pText = message;
         byte[]  cText = e.processBlock(pText, 0, pText.length);
 
         e.init(false, pv);
 
         pText = e.processBlock(cText, 0, cText.length);
 
-        if (message.equals(new String(pText)))
+        if (Arrays.areEqual(message, pText))
         {
             fail("invalid test failed");
         }
