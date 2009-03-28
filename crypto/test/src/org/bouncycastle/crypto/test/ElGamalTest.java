@@ -11,6 +11,8 @@ import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.Arrays;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -69,9 +71,9 @@ public class ElGamalTest
             fail(size + " getOutputBlockSize() on encryption failed.");
         }
 
-        String  message = "This is a test";
+        byte[]  message = Hex.decode("5468697320697320612074657374");
 
-        byte[]  pText = message.getBytes();
+        byte[]  pText = message;
         byte[]  cText = e.processBlock(pText, 0, pText.length);
 
         e.init(false, pv);
@@ -83,7 +85,7 @@ public class ElGamalTest
         
         pText = e.processBlock(cText, 0, cText.length);
 
-        if (!message.equals(new String(pText)))
+        if (!Arrays.areEqual(message, pText))
         {
             fail(size + " bit test failed");
         }
