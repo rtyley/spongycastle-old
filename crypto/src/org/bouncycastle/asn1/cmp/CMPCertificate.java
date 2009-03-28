@@ -14,7 +14,7 @@ public class CMPCertificate
 
     public CMPCertificate(X509CertificateStructure x509v3PKCert)
     {
-        if (x509v3PKCert.getVersion() != 2)
+        if (x509v3PKCert.getVersion() != 3)
         {
             throw new IllegalArgumentException("only version 3 certificates allowed");
         }
