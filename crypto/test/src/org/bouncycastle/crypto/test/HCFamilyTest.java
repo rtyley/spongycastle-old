@@ -24,9 +24,13 @@ public class HCFamilyTest
     private static final byte[] K256B = Hex
         .decode("55000000000000000000000000000000"
             + "00000000000000000000000000000000");
+    private static final byte[] K256FF = Hex
+        .decode("55000000000000000000000000000000"
+            + "000000000000000000000000000000ff");
 
     private static final byte[] IVA = new byte[32];
     private static final byte[] IVB = new byte[]{0x1};
+    private static final byte[] IVFF = new byte[]{(byte)0xff};
 
     private static final byte[] HC256A = Hex
         .decode("8589075b0df3f6d82fc0c5425179b6a6"
@@ -49,9 +53,24 @@ public class HCFamilyTest
             + "5f1d7bda13ae7e36aebc5399733b7f37"
             + "95f34066b601d21f2d8cf830a9c08937");
 
+    private static final byte[] HC256IVFF = Hex
+           .decode("b1b9badd494fa2215bf94b89d6cd5d" +
+               "ae9109d33fbae2ad370641126efb6b" +
+               "d98c8f14298d4bef48fc295c79ac32" +
+               "fd7ea56b0e2a9452d0dc547b0af5d3bfbb598e");
+
+    private static final byte[] HC256KFF = Hex
+              .decode("caa5a85b69580d26e49789c62187" +
+                  "a5e6e99f4eba0aa09c2ed8829091" +
+                  "737b18b0510d415bdc008173feff" +
+                  "92818a7d743befe33a85f21782e2" +
+                  "0034d3b334f178e2");
+
     private static final byte[] K128A = new byte[16];
     private static final byte[] K128B = Hex
         .decode("55000000000000000000000000000000");
+    private static final byte[] K128FF = Hex
+        .decode("550000000000000000000000000000ff");
 
     private static final byte[] HC128A = Hex
         .decode("731500823bfd03a0fb2fd77faa63af0e"
@@ -74,6 +93,17 @@ public class HCFamilyTest
             + "7a699aa01a4dc11763658cccd3e62474"
             + "9cf8236f0131be21c3a51de9d12290de");
 
+    private static final byte[] HC128IVFF = Hex
+        .decode("5ae9112eddabe889ca80ea17b852bd30"
+              + "b07ea9e9e9f474e6c5ffe9c1941d1818" +
+                "7424b9813592d22f2a61a520fdf65a2c" +
+                "978baf1eddae6a9fab905990b85d3f46");
+    private static final byte[] HC128KFF = Hex
+        .decode("88913a1d829941005839260b2a877a3a" +
+                "e2b61b93e0c84c5d7968ce0033f85dc6" +
+                "61f6fefb266b19547e25b4648b30a2d4" +
+                "af05b9689543cab3c6ef021ab3860cdc");
+    
     public String getName()
     {
         return "HC-128 and HC-256";
@@ -87,23 +117,30 @@ public class HCFamilyTest
         HCTest(hc, "HC-256 - C", K256B, IVA, HC256C);
         HCTest2(hc, "HC-256 - D", K256A, IVA, HC256D, 0x10000);
 
+        HCTest(hc, "HC-256 - A FF K", K256FF, IVA, HC256KFF);
+        HCTest(hc, "HC-256 - A FF IV", K256A, IVFF, HC256IVFF);
+
         hc = new HC128Engine();
         HCTest(hc, "HC-128 - A", K128A, IVA, HC128A);
         HCTest(hc, "HC-128 - B", K128A, IVB, HC128B);
         HCTest(hc, "HC-128 - C", K128B, IVA, HC128C);
         HCTest2(hc, "HC-128 - D", K128A, IVA, HC128D, 0x100000);
+
+        HCTest(hc, "HC-256 - A FF K", K128FF, IVA, HC128KFF);
+        HCTest(hc, "HC-128 - A FF IV", K128A, IVFF, HC128IVFF);
     }
 
     private void HCTest(StreamCipher hc, String test, byte[] key, byte[] IV, byte[] expected)
     {
         KeyParameter kp = new KeyParameter(key);
         ParametersWithIV ivp = new ParametersWithIV(kp, IV);
+
         hc.init(true, ivp);
         for (int i = 0; i < 64; i++)
         {
             if (hc.returnByte(MSG[i]) != expected[i])
             {
-                fail(test + " failure");
+                fail(test + " failure at byte " + i);
             }
         }
     }

@@ -123,13 +123,13 @@ public class HC128Engine
 
         for (int i = 0; i < 16; i++)
         {
-            w[i >> 3] |= key[i] << (i & 0x7);
+            w[i >> 3] |= (key[i] & 0xff) << (i & 0x7);
         }
         System.arraycopy(w, 0, w, 4, 4);
 
         for (int i = 0; i < iv.length && i < 16; i++)
         {
-            w[(i >> 3) + 8] |= iv[i] << (i & 0x7);
+            w[(i >> 3) + 8] |= (iv[i] & 0xff) << (i & 0x7);
         }
         System.arraycopy(w, 8, w, 12, 4);
 
