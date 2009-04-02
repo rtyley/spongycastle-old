@@ -332,11 +332,6 @@ public class PSSBlindTest
         //
         // loop test
         //
-        RSABlindingFactorGenerator blindFactorGen = new RSABlindingFactorGenerator();
-        RSABlindingEngine blindingEngine = new RSABlindingEngine();
-        PSSSigner blindSigner = new PSSSigner(blindingEngine, new SHA1Digest(), 20);
-        PSSSigner                 pssEng = new PSSSigner(new RSAEngine(), new SHA1Digest(), 20);
-        
         int failed = 0;
         byte[] data = new byte[DATA_LENGTH];
 
