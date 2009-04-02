@@ -67,7 +67,8 @@ public class HCFamilyTest
 
     private void runTests(StreamCipher hc, String fileName) throws IOException
     {
-        PeekableLineReader r = new PeekableLineReader(new FileReader(getDataHome() + "/" + fileName));
+        Reader resource = new FileReader(getDataHome() + "/" + fileName);
+        PeekableLineReader r = new PeekableLineReader(resource);
         runAllVectors(hc, fileName, r);
     }
 
@@ -84,7 +85,7 @@ public class HCFamilyTest
 
             if (line.startsWith("Set "))
             {
-                runVector(hc, fileName, r, line);
+                runVector(hc, fileName, r, line.replaceAll(":", ""));
             }
         }
     }
