@@ -69,7 +69,13 @@ public class HC256Engine
         if (key.length != 32 && key.length != 16)
         {
             throw new java.lang.IllegalArgumentException(
-                "The key must be 128/256 bit long");
+                "The key must be 128/256 bits long");
+        }
+
+        if (iv.length < 16)
+        {
+            throw new java.lang.IllegalArgumentException(
+                "The IV must be at least 128 bits long");
         }
 
         if (key.length != 32)
@@ -81,7 +87,17 @@ public class HC256Engine
 
             key = k;
         }
-        
+
+        if (iv.length < 32)
+        {
+            byte[] newIV = new byte[32];
+
+            System.arraycopy(iv, 0, newIV, 0, iv.length);
+            System.arraycopy(iv, 0, newIV, iv.length, newIV.length - iv.length);
+
+            iv = newIV;
+        }
+
         cnt = 0;
 
         int[] w = new int[2560];
@@ -91,14 +107,9 @@ public class HC256Engine
             w[i >> 2] |= (key[i] & 0xff) << (8 * (i & 0x3));
         }
 
-        for (int i = 0; i < iv.length && i < 32; i++)
+        for (int i = 0; i < 32; i++)
         {
             w[(i >> 2) + 8] |= (iv[i] & 0xff) << (8 * (i & 0x3));
-        }
-
-        for (int i = 16; i - 16 < iv.length && i < 32; i++)
-        {
-            w[(i >> 2) + 8] |= (iv[i - 16] & 0xff) << (8 * (i & 0x3));
         }
 
         for (int i = 16; i < 2560; i++)
