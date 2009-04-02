@@ -123,13 +123,13 @@ public class HC128Engine
 
         for (int i = 0; i < 16; i++)
         {
-            w[i >> 3] |= (key[i] & 0xff) << (i & 0x7);
+            w[i >> 3] |= (key[i] & 0xff) << (8 * (i & 0x7));
         }
         System.arraycopy(w, 0, w, 4, 4);
 
         for (int i = 0; i < iv.length && i < 16; i++)
         {
-            w[(i >> 3) + 8] |= (iv[i] & 0xff) << (i & 0x7);
+            w[(i >> 3) + 8] |= (iv[i] & 0xff) << (8 * (i & 0x7));
         }
         System.arraycopy(w, 8, w, 12, 4);
 
@@ -205,13 +205,13 @@ public class HC128Engine
         if (idx == 0)
         {
             int step = step();
-            buf[3] = (byte)(step & 0xFF);
-            step >>= 8;
-            buf[2] = (byte)(step & 0xFF);
+            buf[0] = (byte)(step & 0xFF);
             step >>= 8;
             buf[1] = (byte)(step & 0xFF);
             step >>= 8;
-            buf[0] = (byte)(step & 0xFF);
+            buf[2] = (byte)(step & 0xFF);
+            step >>= 8;
+            buf[3] = (byte)(step & 0xFF);
         }
         byte ret = buf[idx];
         idx = idx + 1 & 0x3;
