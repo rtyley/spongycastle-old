@@ -96,6 +96,11 @@ public class HC256Engine
             w[(i >> 2) + 8] |= (iv[i] & 0xff) << (8 * (i & 0x3));
         }
 
+        for (int i = 16; i - 16 < iv.length && i < 32; i++)
+        {
+            w[(i >> 2) + 8] |= (iv[i - 16] & 0xff) << (8 * (i & 0x3));
+        }
+
         for (int i = 16; i < 2560; i++)
         {
             int x = w[i - 2];
