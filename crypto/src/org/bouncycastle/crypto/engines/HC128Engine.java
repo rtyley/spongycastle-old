@@ -11,7 +11,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  * generates keystream from a 128-bit secret key and a 128-bit initialization
  * vector.
  * <p>
- * http://www.ecrypt.eu.org/stream/p3ciphers/hc/hc256_p3.pdf
+ * http://www.ecrypt.eu.org/stream/p3ciphers/hc/hc128_p3.pdf
  * </p><p>
  * It is a third phase candidate in the eStream contest, and is patent-free.
  * No attacks are known as of today (April 2007). See
