@@ -66,10 +66,10 @@ public class HC256Engine
 
     private void init()
     {
-        if (key.length != 32)
+        if (key.length != 32 && key.length != 16)
         {
             throw new java.lang.IllegalArgumentException(
-                "The key must be 256 bit long");
+                "The key must be 128/256 bit long");
         }
 
         if (key.length != 32)
@@ -77,6 +77,7 @@ public class HC256Engine
             byte[] k = new byte[32];
 
             System.arraycopy(key, 0, k, 0, key.length);
+            System.arraycopy(key, 0, k, 16, key.length);
 
             key = k;
         }
