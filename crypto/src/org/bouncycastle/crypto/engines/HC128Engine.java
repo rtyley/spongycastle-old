@@ -114,7 +114,7 @@ public class HC128Engine
         if (key.length != 16)
         {
             throw new java.lang.IllegalArgumentException(
-                "The key must be 128 bit long");
+                "The key must be 128 bits long");
         }
 
         cnt = 0;
