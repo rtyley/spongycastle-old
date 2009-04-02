@@ -49,17 +49,17 @@ public class CipherStreamTest
 
     private static final byte[] HCK256A = new byte[32];
     private static final byte[] HC256A = Hex.decode(
-              "8589075b0df3f6d82fc0c5425179b6a6"
-            + "3465f053f2891f808b24744e18480b72"
-            + "ec2792cdbf4dcfeb7769bf8dfa14aee4"
-            + "7b4c50e8eaf3a9c8f506016c81697e32");
+          "5B078985D8F6F30D42C5C02FA6B67951"
+        + "53F06534801F89F24E74248B720B4818"
+        + "CD9227ECEBCF4DBF8DBF6977E4AE14FA"
+        + "E8504C7BC8A9F3EA6C0106F5327E6981");
 
     private static final byte[] HCK128A = new byte[16];
     private static final byte[] HC128A = Hex.decode(
-              "731500823bfd03a0fb2fd77faa63af0e"
-            + "de122fc6a7dc29b662a685278b75ec68"
-            + "9036db1e8189600500ade078491fbf9a"
-            + "1cdc30136c3d6e2490f664b29cd57102");
+          "82001573A003FD3B7FD72FFB0EAF63AA"
+        + "C62F12DEB629DCA72785A66268EC758B"
+        + "1EDB36900560898178E0AD009ABF1F49"
+        + "1330DC1C246E3D6CB264F6900271D59C");
 
     private static final byte[] GRAIN_V1 = Hex.decode("0123456789abcdef1234");
     private static final byte[] GRAIN_V1_IV = Hex.decode("0123456789abcdef");
