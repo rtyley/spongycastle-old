@@ -87,12 +87,12 @@ public class HC256Engine
 
         for (int i = 0; i < 32; i++)
         {
-            w[i >> 3] |= (key[i] & 0xff) << (8 * (i & 0x7));
+            w[i >> 2] |= (key[i] & 0xff) << (8 * (i & 0x3));
         }
 
         for (int i = 0; i < iv.length && i < 32; i++)
         {
-            w[(i >> 3) + 8] |= (iv[i] & 0xff) << (8 * (i & 0x7));
+            w[(i >> 2) + 8] |= (iv[i] & 0xff) << (8 * (i & 0x3));
         }
 
         for (int i = 16; i < 2560; i++)
