@@ -68,13 +68,13 @@ public class HC256Engine
     {
         if (key.length != 32 && key.length != 16)
         {
-            throw new java.lang.IllegalArgumentException(
+            throw new IllegalArgumentException(
                 "The key must be 128/256 bits long");
         }
 
         if (iv.length < 16)
         {
-            throw new java.lang.IllegalArgumentException(
+            throw new IllegalArgumentException(
                 "The IV must be at least 128 bits long");
         }
 
