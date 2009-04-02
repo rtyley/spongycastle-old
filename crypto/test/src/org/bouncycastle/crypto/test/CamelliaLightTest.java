@@ -4,7 +4,6 @@ import org.bouncycastle.crypto.engines.CamelliaLightEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.util.test.TestResult;
 
 /**
  * Camellia tester - vectors from https://www.cosic.esat.kuleuven.be/nessie/testvectors/ and RFC 3713
