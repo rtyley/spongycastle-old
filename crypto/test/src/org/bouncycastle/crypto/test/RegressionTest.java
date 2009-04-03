@@ -93,6 +93,7 @@ public class RegressionTest
         new EAXTest(),
         new GCMTest(),
         new HCFamilyTest(),
+        new HCFamilyVecTest(),
         new ISAACTest(),
         new NoekeonTest(),
         new VMPCKSA3Test(),
