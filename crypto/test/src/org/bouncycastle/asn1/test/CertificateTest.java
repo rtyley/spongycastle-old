@@ -224,15 +224,11 @@ public class CertificateTest
         byte[]  cert)
         throws Exception
     {
-        ByteArrayInputStream    bIn;
-        ASN1InputStream         aIn;
-        String                  dump = "";
-
-        bIn = new ByteArrayInputStream(cert);
-        aIn = new ASN1InputStream(bIn);
+        ByteArrayInputStream bIn = new ByteArrayInputStream(cert);
+        ASN1InputStream aIn = new ASN1InputStream(bIn);
 
         ASN1Sequence      seq = (ASN1Sequence)aIn.readObject();
-        dump = ASN1Dump.dumpAsString(seq);
+//        String dump = ASN1Dump.dumpAsString(seq);
 
         X509CertificateStructure    obj = new X509CertificateStructure(seq);
         TBSCertificateStructure     tbsCert = obj.getTBSCertificate();

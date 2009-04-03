@@ -1,20 +1,20 @@
 package org.bouncycastle.asn1.test;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import junit.framework.TestCase;
 
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.asn1.ASN1StreamParser;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1SequenceParser;
-import org.bouncycastle.asn1.DERTags;
+import org.bouncycastle.asn1.ASN1StreamParser;
 import org.bouncycastle.asn1.ASN1TaggedObjectParser;
+import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.ContentInfoParser;
 import org.bouncycastle.asn1.cms.EncryptedContentInfoParser;
 import org.bouncycastle.asn1.cms.EnvelopedDataParser;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.io.Streams;
 
 public class ParseTest
     extends TestCase
@@ -303,12 +303,7 @@ public class ParseTest
         EncryptedContentInfoParser ecP = eP.getEncryptedContentInfo();
         
         ASN1OctetStringParser content = (ASN1OctetStringParser)ecP.getEncryptedContent(DERTags.OCTET_STRING);
-        
-        InputStream in = content.getOctetStream();
-        
-        while (in.read() >= 0)
-        {
-            // do nothing
-        }
+
+        Streams.drain(content.getOctetStream());
     }
 }

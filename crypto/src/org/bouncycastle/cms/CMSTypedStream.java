@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.util.io.Streams;
 
 public class CMSTypedStream
 {
@@ -12,8 +13,7 @@ public class CMSTypedStream
     
     private final String      _oid;
     private final InputStream _in;
-    private final int         _bufSize;
-    
+
     public CMSTypedStream(
         InputStream in)
     {
@@ -33,7 +33,6 @@ public class CMSTypedStream
         int         bufSize)
     {
         _oid = oid;
-        _bufSize = bufSize;
         _in = new FullReaderStream(in, bufSize);
     }
 
@@ -50,16 +49,10 @@ public class CMSTypedStream
     public void drain() 
         throws IOException
     {
-        byte[] buf = new byte[_bufSize];
-        
-        while ((_in.read(buf, 0, buf.length) > 0))
-        {
-            // keep going...
-        }
-        
+        Streams.drain(_in);
         _in.close();
     }
-    
+
     private class FullReaderStream
         extends InputStream
     {

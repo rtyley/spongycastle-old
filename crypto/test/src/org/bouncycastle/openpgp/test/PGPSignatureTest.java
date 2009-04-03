@@ -24,6 +24,7 @@ import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.PGPSignatureSubpacketVector;
 import org.bouncycastle.openpgp.PGPV3SignatureGenerator;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.util.test.UncloseableOutputStream;
 
@@ -454,10 +455,7 @@ public class PGPSignatureTest
             if (obj instanceof PGPLiteralData)
             {
                 InputStream in = ((PGPLiteralData)obj).getDataStream();
-                while (in.read() >= 0)
-                {
-                    // do nothing
-                }
+                Streams.drain(in);
             }
         }
         
