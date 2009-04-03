@@ -1,16 +1,16 @@
 package org.bouncycastle.asn1.test;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.ASN1StreamParser;
-import org.bouncycastle.asn1.BERSequenceGenerator;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
@@ -22,7 +22,6 @@ import org.bouncycastle.asn1.cms.EnvelopedData;
 import org.bouncycastle.asn1.cms.EnvelopedDataParser;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.OriginatorInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.util.encoders.Base64;
@@ -30,10 +29,6 @@ import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 
 public class CMSTest
     implements Test
@@ -281,7 +276,7 @@ public class CMSTest
 
             InputStream dataIn = ((ASN1OctetStringParser)eci.getEncryptedContent(DERTags.OCTET_STRING))
                 .getOctetStream();
-            Streams.readAll(dataIn);
+            Streams.drain(dataIn);
             dataIn.close();
 
             // Test data doesn't have unprotected attrs, bug was being thrown by this call
