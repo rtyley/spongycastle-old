@@ -9,6 +9,15 @@ public final class Streams
 {
     private static int BUFFER_SIZE = 512;
 
+    public static void drain(InputStream inStr)
+        throws IOException
+    {
+        byte[] bs = new byte[BUFFER_SIZE];
+        while (inStr.read(bs, 0, bs.length) >= 0)
+        {
+        }
+    }
+
     public static byte[] readAll(InputStream inStr)
         throws IOException
     {
