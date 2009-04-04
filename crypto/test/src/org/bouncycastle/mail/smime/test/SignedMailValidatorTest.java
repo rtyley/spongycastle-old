@@ -173,28 +173,29 @@ public class SignedMailValidatorTest extends TestCase
                 "SignedMailValidator.longValidity",
                 "Warning: The signing certificate has a very long validity period: from Sep 1, 2006 11:00:00 AM GMT until Aug 8, 2106 11:00:00 AM GMT.");
     }
-    
-    public void testCorrputRootStore() throws Exception
-    {
-        String message = "validator.validMail.eml";
-        Set trustanchors = new HashSet();
-        trustanchors.add(getTrustAnchor(TEST_TRUST_ACHOR));
-        trustanchors.add(getTrustAnchor("validator.fakeRoot.crt"));
-        PKIXParameters params = new PKIXParameters(trustanchors);
-        params.setRevocationEnabled(false);
-        
-        SignedMailValidator.ValidationResult result = doTest(message, params);
-        
-        assertTrue(result.isVerifiedSignature());
-        assertFalse(result.isValidSignature());
-        
-        PKIXCertPathReviewer review = result.getCertPathReview();
-        
-        assertFalse(review.isValidCertPath());
-        assertContainsMessage(review.getErrors(-1),
-                "CertPathReviewer.conflictingTrustAnchors",
-                "Warning: corrupt trust root store: There are 2 trusted public keys for the CA \"CN=SignedMailValidatorTest Root, C=CH\" - please ensure with CA which is the correct key.");
-    }
+// TODO: this test needs to be replaced, unfortunately it was working due to a bug in
+// trust anchor extension handling
+//    public void testCorruptRootStore() throws Exception
+//    {
+//        String message = "validator.validMail.eml";
+//        Set trustanchors = new HashSet();
+//        trustanchors.add(getTrustAnchor(TEST_TRUST_ACHOR));
+//        trustanchors.add(getTrustAnchor("validator.fakeRoot.crt"));
+//        PKIXParameters params = new PKIXParameters(trustanchors);
+//        params.setRevocationEnabled(false);
+//
+//        SignedMailValidator.ValidationResult result = doTest(message, params);
+//
+//        assertTrue(result.isVerifiedSignature());
+//        assertFalse(result.isValidSignature());
+//
+//        PKIXCertPathReviewer review = result.getCertPathReview();
+//
+//        assertFalse(review.isValidCertPath());
+//        assertContainsMessage(review.getErrors(-1),
+//                "CertPathReviewer.conflictingTrustAnchors",
+//                "Warning: corrupt trust root store: There are 2 trusted public keys for the CA \"CN=SignedMailValidatorTest Root, C=CH\" - please ensure with CA which is the correct key.");
+//    }
     
     public void testCircular() throws Exception
     {
