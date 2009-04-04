@@ -148,8 +148,8 @@ public class X509AttributeCertStoreSelector
                         Target[] targets = t.getTargets();
                         for (int j=0; j<targets.length; j++)
                         {
-                            if (targetNames.contains(targets[j]
-                                                       .getTargetName()))
+                            if (targetNames.contains(GeneralName.getInstance(targets[j]
+                                                       .getTargetName())))
                             {
                                 found = true;
                                 break;
@@ -171,8 +171,8 @@ public class X509AttributeCertStoreSelector
                         Target[] targets = t.getTargets();
                         for (int j=0; j<targets.length; j++)
                         {
-                            if (targetGroups.contains(targets[j]
-                                                        .getTargetGroup()))
+                            if (targetGroups.contains(GeneralName.getInstance(targets[j]
+                                                        .getTargetGroup())))
                             {
                                 found = true;
                                 break;
