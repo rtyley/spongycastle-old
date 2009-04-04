@@ -341,6 +341,9 @@ public class X509Name
 
     private ASN1Sequence            seq;
 
+    private boolean                 isHashCodeCalculated;
+    private int                     hashCodeValue;
+
     /**
      * Return a X509Name based on the passed in tagged object.
      * 
@@ -912,6 +915,29 @@ public class X509Name
         return true;
     }
 
+    public int hashCode()
+    {
+        if (isHashCodeCalculated)
+        {
+            return hashCodeValue;
+        }
+
+        isHashCodeCalculated = true;
+
+        // this needs to be order independent, like equals
+        for (int i = 0; i != ordering.size(); i += 1)
+        {
+            String value = (String)values.elementAt(i);
+
+            value = canonicalize(value);
+            value = stripInternalSpaces(value);
+
+            hashCodeValue ^= value.hashCode();
+        }
+
+        return hashCodeValue;
+    }
+
     /**
      * test for equality - note: case is ignored.
      */
@@ -980,7 +1006,7 @@ public class X509Name
                 {
                     continue;
                 }
-                
+
                 DERObjectIdentifier oOid = (DERObjectIdentifier)other.ordering.elementAt(j);
 
                 if (oid.equals(oOid))
