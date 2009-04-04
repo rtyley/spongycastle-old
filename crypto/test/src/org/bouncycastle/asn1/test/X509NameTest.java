@@ -192,6 +192,11 @@ public class X509NameTest
             fail("Failed reverse name test");
         }
 
+        if (name1.hashCode() != name2.hashCode())
+        {
+            fail("Failed reverse name test hashCode");
+        }
+
         if (name1.equals(name2, true))
         {
             fail("Failed reverse name test - in Order");
@@ -256,7 +261,6 @@ public class X509NameTest
         }
 
         compositeTest();
-
 
         ByteArrayOutputStream bOut;
         ASN1OutputStream aOut;
@@ -605,6 +609,11 @@ public class X509NameTest
         if (!x509Name.equals(x509Name1))
         {
             fail("equality test failed for " + x509Name + " : " + x509Name1);
+        }
+
+        if (x509Name.hashCode() != x509Name1.hashCode())
+        {
+            fail("hashCodeTest test failed for " + x509Name + " : " + x509Name1);
         }
 
         if (!x509Name.equals(x509Name1, true))
