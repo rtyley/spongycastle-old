@@ -55,7 +55,7 @@ public class SRP6Util
         // Check that val % N != 0
         if (val.equals(ZERO))
         {
-            throw new CryptoException("Server credentials invalid");
+            throw new CryptoException("Invalid public value: 0");
         }
 
         return val;
