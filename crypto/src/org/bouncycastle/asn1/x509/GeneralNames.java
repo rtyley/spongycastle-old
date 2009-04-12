@@ -58,7 +58,11 @@ public class GeneralNames
 
     public GeneralName[] getNames()
     {
-        return (GeneralName[])names.clone();
+        GeneralName[] tmp = new GeneralName[names.length];
+
+        System.arraycopy(names, 0, tmp, 0, names.length);
+
+        return tmp;
     }
 
     /**
