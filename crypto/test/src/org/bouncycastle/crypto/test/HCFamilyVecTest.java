@@ -12,6 +12,7 @@ import org.bouncycastle.crypto.engines.HC256Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -85,9 +86,24 @@ public class HCFamilyVecTest
 
             if (line.startsWith("Set "))
             {
-                runVector(hc, fileName, r, line.replaceAll(":", ""));
+                runVector(hc, fileName, r, dellChar(line, ':'));
             }
         }
+    }
+
+    private String dellChar(String s, char c)
+    {
+        StringBuffer b = new StringBuffer();
+
+        for (int i = 0; i != s.length(); i++)
+        {
+            if (s.charAt(i) != c)
+            {
+                b.append(s.charAt(i));
+            }
+        }
+
+        return b.toString();
     }
 
     private void runVector(StreamCipher hc, String fileName, PeekableLineReader r, String vectorName)
