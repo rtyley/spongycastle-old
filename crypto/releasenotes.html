@@ -29,7 +29,7 @@ Release 1.43
 <li>Two bugs in HC-128 and HC-256 related to sign extension and byte swapping have been fixed. The implementations now pass the latest ecrypt vector tests.</li>
 <li>X509Name.hashCode() is now consistent with equals.</li>
 </ul>
-<h3>2.1.2 Security Advisory</h3>
+<h3>2.1.3 Security Advisory</h3>
 <ul>
 <li>The effect of the sign extension bug was to decrease the key space the HC-128 and HC-256 ciphers were operating in and the byte swapping inverted every 32 bits of the generated stream. If you are using either HC-128 or HC-256 you must upgrade to this release.</li>
 </ul>
