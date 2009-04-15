@@ -38,6 +38,7 @@ src/org/bouncycastle/crypto/params \
 src/org/bouncycastle/crypto/signers \
 src/org/bouncycastle/crypto/prng \
 src/org/bouncycastle/crypto/tls \
+src/org/bouncycastle/crypto/util \
 src/org/bouncycastle/util \
 src/org/bouncycastle/bcpg \
 src/org/bouncycastle/asn1 \
@@ -85,6 +86,7 @@ src/org/bouncycastle/asn1 \
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TypeOfBiometricDataUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/UTCTimeTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AESVectorFileTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/HCFamilyVecTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/RSABlindedTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/examples/DESExample.java
 
@@ -141,6 +143,7 @@ src/org/bouncycastle/asn1 \
     org.bouncycastle.crypto.prng \
     org.bouncycastle.crypto.tls \
     org.bouncycastle.crypto.test \
+    org.bouncycastle.crypto.util \
     org.bouncycastle.crypto.examples \
     org.bouncycastle.util.encoders \
     org.bouncycastle.util.test > /dev/null \
