@@ -2501,7 +2501,11 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 AuthorityKeyIdentifier authID = AuthorityKeyIdentifier.getInstance(ASN1Object.fromByteArray(oct.getOctets()));
 
                 certSelectX509.setSerialNumber(authID.getAuthorityCertSerialNumber());
-                certSelectX509.setSubjectKeyIdentifier(new DEROctetString(authID.getKeyIdentifier()).getEncoded());
+                byte[] keyID = authID.getKeyIdentifier();
+                if (keyID != null)
+                {
+                    certSelectX509.setSubjectKeyIdentifier(new DEROctetString(keyID).getEncoded());
+                }
             }
         }
         catch (IOException ex)
