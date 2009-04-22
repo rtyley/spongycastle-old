@@ -60,11 +60,11 @@ public class CertRepMessage
 
     public CertResponse[] getResponse()
     {
-        CertResponse[] results = new CertResponse[caPubs.size()];
+        CertResponse[] results = new CertResponse[response.size()];
 
         for (int i = 0; i != results.length; i++)
         {
-            results[i] = CertResponse.getInstance(caPubs.getObjectAt(i));
+            results[i] = CertResponse.getInstance(response.getObjectAt(i));
         }
 
         return results;
