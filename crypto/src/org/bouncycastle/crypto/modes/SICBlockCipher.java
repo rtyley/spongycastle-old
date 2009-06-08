@@ -59,6 +59,10 @@ public class SICBlockCipher implements BlockCipher
           reset();
           cipher.init(true, ivParam.getParameters());
         }
+        else
+        {
+            throw new IllegalArgumentException("SIC mode requires ParametersWithIV");
+        }
     }
 
     public String getAlgorithmName()
