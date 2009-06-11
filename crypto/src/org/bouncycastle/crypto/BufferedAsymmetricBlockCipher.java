@@ -162,7 +162,7 @@ public class BufferedAsymmetricBlockCipher
         {
             for (int i = 0; i < buf.length; i++)
             {
-                buf[0] = 0;
+                buf[i] = 0;
             }
         }
 
