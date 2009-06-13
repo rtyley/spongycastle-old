@@ -6,6 +6,7 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle.util.BigIntegers;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -16,7 +17,7 @@ import java.security.SecureRandom;
 public class RSABlindedEngine
     implements AsymmetricBlockCipher
 {
-    private static BigInteger ZERO = BigInteger.valueOf(0);
+    private static BigInteger ONE = BigInteger.valueOf(1);
 
     private RSACoreEngine    core = new RSACoreEngine();
     private RSAKeyParameters key;
@@ -91,44 +92,35 @@ public class RSABlindedEngine
             throw new IllegalStateException("RSA engine not initialised");
         }
 
+        BigInteger input = core.convertInput(in, inOff, inLen);
+
+        BigInteger result;
         if (key instanceof RSAPrivateCrtKeyParameters)
         {
             RSAPrivateCrtKeyParameters k = (RSAPrivateCrtKeyParameters)key;
 
-            if (k.getPublicExponent() != null)   // can't do blinding without a public exponent
+            BigInteger e = k.getPublicExponent();
+            if (e != null)   // can't do blinding without a public exponent
             {
-                BigInteger input = core.convertInput(in, inOff, inLen);
                 BigInteger m = k.getModulus();
-                BigInteger r = calculateR(m);
-                BigInteger result = core.processBlock(r.modPow(k.getPublicExponent(), m).multiply(input).mod(m));
+                BigInteger r = BigIntegers.createRandomInRange(ONE, m.subtract(ONE), random);
 
-                return core.convertOutput(result.multiply(r.modInverse(m)).mod(m));
+                BigInteger blindedInput = r.modPow(e, m).multiply(input).mod(m);
+                BigInteger blindedResult = core.processBlock(blindedInput);
+
+                BigInteger rInv = r.modInverse(m);
+                result = blindedResult.multiply(rInv).mod(m);
             }
-
-            return core.convertOutput(core.processBlock(core.convertInput(in, inOff, inLen)));
+            else
+            {
+                result = core.processBlock(input);
+            }
         }
         else
         {
-            return core.convertOutput(core.processBlock(core.convertInput(in, inOff, inLen)));
-        }
-    }
-
-    /*
-     * calculate a random mess-with-their-heads value.
-     */
-    private BigInteger calculateR(
-        BigInteger m)
-    {
-        int max = m.bitLength() - 1; // must be less than m.bitLength()
-        int min = max / 2;
-        int length = ((random.nextInt() & 0xff) * ((max - min) / 0xff)) + min;
-        BigInteger factor = new BigInteger(length, random);
-
-        while (factor.equals(ZERO))
-        {
-            factor = new BigInteger(length, random);
+            result = core.processBlock(input);
         }
 
-        return factor;
+        return core.convertOutput(result);
     }
 }
