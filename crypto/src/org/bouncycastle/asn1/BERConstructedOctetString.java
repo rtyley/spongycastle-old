@@ -88,33 +88,30 @@ public class BERConstructedOctetString
         return octs.elements();
     }
 
-    private Vector generateOcts()
-    {
-        int     start = 0;
-        int     end = 0;
-        Vector  vec = new Vector();
+    private Vector generateOcts() 
+    { 
+        Vector vec = new Vector(); 
+        for (int i = 0; i < string.length; i += MAX_LENGTH) 
+        { 
+            int end; 
 
-        while ((end + 1) < string.length)
-        {
-            if (string[end] == 0 && string[end + 1] == 0)
-            {
-                byte[]  nStr = new byte[end - start + 1];
+            if (i + MAX_LENGTH > string.length) 
+            { 
+                end = string.length; 
+            } 
+            else 
+            { 
+                end = i + MAX_LENGTH; 
+            } 
 
-                System.arraycopy(string, start, nStr, 0, nStr.length);
+            byte[] nStr = new byte[end - i]; 
 
-                vec.addElement(new DEROctetString(nStr));
-                start = end + 1;
-            }
-            end++;
-        }
+            System.arraycopy(string, i, nStr, 0, nStr.length); 
 
-        byte[]  nStr = new byte[string.length - start];
-
-        System.arraycopy(string, start, nStr, 0, nStr.length);
-
-        vec.addElement(new DEROctetString(nStr));
-
-        return vec;
+            vec.addElement(new DEROctetString(nStr)); 
+         } 
+        
+         return vec; 
     }
 
     public void encode(
@@ -130,34 +127,10 @@ public class BERConstructedOctetString
             //
             // write out the octet array
             //
-            if (octs != null)
+            Enumeration e = getObjects();
+            while (e.hasMoreElements())
             {
-                for (int i = 0; i != octs.size(); i++)
-                {
-                    out.writeObject(octs.elementAt(i));
-                }
-            }
-            else
-            {
-                for (int i = 0; i < string.length; i += MAX_LENGTH)
-                {
-                    int end;
-
-                    if (i + MAX_LENGTH > string.length)
-                    {
-                        end = string.length;
-                    }
-                    else
-                    {
-                        end = i + MAX_LENGTH;
-                    }
-
-                    byte[]  nStr = new byte[end - i];
-
-                    System.arraycopy(string, i, nStr, 0, nStr.length);
-
-                    out.writeObject(new DEROctetString(nStr));
-                }
+                out.writeObject(e.nextElement());
             }
 
             out.write(0x00);
