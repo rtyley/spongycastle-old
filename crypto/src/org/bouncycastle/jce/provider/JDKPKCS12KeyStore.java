@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.BEROutputStream;
 import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -762,8 +763,21 @@ public class JDKPKCS12KeyStore
                                     if (attrSet.size() > 0)
                                     {
                                         attr = (DERObject)attrSet.getObjectAt(0);
-    
-                                        bagAttr.setBagAttribute(aOid, attr);
+
+                                        DEREncodable existing = bagAttr.getBagAttribute(aOid);
+                                        if (existing != null)
+                                        {
+                                            // OK, but the value has to be the same
+                                            if (!existing.getDERObject().equals(attr))
+                                            {
+                                                throw new IOException(
+                                                    "attempt to add existing attribute with different value");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            bagAttr.setBagAttribute(aOid, attr);
+                                        }
                                     }
     
                                     if (aOid.equals(pkcs_9_at_friendlyName))
@@ -847,7 +861,20 @@ public class JDKPKCS12KeyStore
                                 {
                                     attr = (DERObject)attrSet.getObjectAt(0);
 
-                                    bagAttr.setBagAttribute(aOid, attr);
+                                    DEREncodable existing = bagAttr.getBagAttribute(aOid);
+                                    if (existing != null)
+                                    {
+                                        // OK, but the value has to be the same
+                                        if (!existing.getDERObject().equals(attr))
+                                        {
+                                            throw new IOException(
+                                                "attempt to add existing attribute with different value");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        bagAttr.setBagAttribute(aOid, attr);
+                                    }
                                 }
 
                                 if (aOid.equals(pkcs_9_at_friendlyName))
@@ -896,7 +923,20 @@ public class JDKPKCS12KeyStore
                                 {
                                     attr = (DERObject)attrSet.getObjectAt(0);
 
-                                    bagAttr.setBagAttribute(aOid, attr);
+                                    DEREncodable existing = bagAttr.getBagAttribute(aOid);
+                                    if (existing != null)
+                                    {
+                                        // OK, but the value has to be the same
+                                        if (!existing.getDERObject().equals(attr))
+                                        {
+                                            throw new IOException(
+                                                "attempt to add existing attribute with different value");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        bagAttr.setBagAttribute(aOid, attr);
+                                    }
                                 }
 
                                 if (aOid.equals(pkcs_9_at_friendlyName))
@@ -982,7 +1022,21 @@ public class JDKPKCS12KeyStore
                     if (cert instanceof PKCS12BagAttributeCarrier)
                     {
                         bagAttr = (PKCS12BagAttributeCarrier)cert;
-                        bagAttr.setBagAttribute(oid, attr);
+
+                        DEREncodable existing = bagAttr.getBagAttribute(oid);
+                        if (existing != null)
+                        {
+                            // OK, but the value has to be the same
+                            if (!existing.getDERObject().equals(attr))
+                            {
+                                throw new IOException(
+                                    "attempt to add existing attribute with different value");
+                            }
+                        }
+                        else
+                        {
+                            bagAttr.setBagAttribute(oid, attr);
+                        }
                     }
 
                     if (oid.equals(pkcs_9_at_friendlyName))

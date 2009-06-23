@@ -49,9 +49,9 @@ addition of ISO 9796-1 padding.</li>
 version of the collections API available. For further details see
 <a href="http://sourceforge.net/projects/jcf/">http://sourceforge.net/projects/jcf/</a></li>
 <li>Carmen Bastiaans &lt;cbastiaa&#064;microbits.com.au&gt; - fixing the improper
-null pointer problem in the setting of certifcates in the PKCS12 key store.</li>
+null pointer problem in the setting of certificates in the PKCS12 key store.</li>
 <li>Tomas Gustavsson &lt;tomasg&#064;primekey.se&gt; - initial implementation of the AuthorityInformationAccess, SubjectKeyIdentifier, AuthorityKeyIdentifier, CRLNumber, CRLReason, CertificatePolicies, V2TBSCertListGenerator, and X509V2CRLGenerator classes in the ASN.1 library. Additions to GeneralName class, other bug fixes in the X.509 package. Initial implementation of the CertificationRequest classes. getRevocationReason() patch for OCSP. Patch to SemanticsInformation to prevent ClassCastException.</li>
-<li>Eugen Kuleshov &lt;euxx&#064;hotmail.com&gt; - optimisations for Blowfish, assitance with PKCS12/keytool interoperability.
+<li>Eugen Kuleshov &lt;euxx&#064;hotmail.com&gt; - optimisations for Blowfish, assistance with PKCS12/keytool interoperability.
 <li>Megan Woods &lt;meganwoods&#064;sekurafile.com&gt; - initial implementation of
 ECIES.</li>
 <li>Christian Geuer-Pollmann &lt;geuerp&#064;apache.org&gt; -
@@ -272,6 +272,7 @@ CertPath support for implicit DSA parameters and a range of NameConstraints. Add
 <li>Petr Kadlec &lt;mormegil&#064centrum.cz&gt; fix to sign extension key and IV problem in HC-128, HC-256.</li>
 <li>Andreas Antener &lt;antener_a&#064gmx.ch&gt; fix to buffer reset in AsymmetricBufferedBlockCipher.</li>
 <li>Harendra Rawat &lt;hsrawat&#064yahoo.com&gt; fix for BERConstructedOctetString.</li>
+<li>Rolf Lindemann &lt;lindemann&#064trustcenter.de&gt; patch for PKCS12 key store to support more flexible attribute specifications [#BMA-42].</li>
 </ul>
 </body>
 </html>
