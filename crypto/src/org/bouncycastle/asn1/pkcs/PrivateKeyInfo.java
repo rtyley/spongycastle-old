@@ -110,7 +110,7 @@ public class PrivateKeyInfo
     }
 
     /**
-     * write out an RSA private key with it's asscociated information
+     * write out an RSA private key with its associated information
      * as described in PKCS8.
      * <pre>
      *      PrivateKeyInfo ::= SEQUENCE {
