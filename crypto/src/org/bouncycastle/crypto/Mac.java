@@ -50,7 +50,7 @@ public interface Mac
         throws DataLengthException, IllegalStateException;
 
     /**
-     * Compute the final statge of the MAC writing the output to the out
+     * Compute the final stage of the MAC writing the output to the out
      * parameter.
      * <p>
      * doFinal leaves the MAC in the same state it was after the last init.
