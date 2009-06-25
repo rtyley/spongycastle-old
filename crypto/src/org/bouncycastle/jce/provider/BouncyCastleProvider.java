@@ -131,7 +131,7 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameterGenerator.DES", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
         put("AlgorithmParameterGenerator.DESEDE", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
         put("AlgorithmParameterGenerator.1.2.840.113549.3.7", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
-        put("AlgorithmParameterGenerator.1.3.14.3.2.7", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
+        put("AlgorithmParameterGenerator." + OIWObjectIdentifiers.desCBC, "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
         put("AlgorithmParameterGenerator.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
         put("AlgorithmParameterGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
 
@@ -220,7 +220,7 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.DES", "org.bouncycastle.jce.provider.JCEBlockCipher$DES");
         put("Cipher.DESEDE", "org.bouncycastle.jce.provider.JCEBlockCipher$DESede");
         put("Cipher.1.2.840.113549.3.7", "org.bouncycastle.jce.provider.JCEBlockCipher$DESedeCBC");
-        put("Cipher.1.3.14.3.2.7", "org.bouncycastle.jce.provider.JCEBlockCipher$DESCBC");
+        put("Cipher." + OIWObjectIdentifiers.desCBC, "org.bouncycastle.jce.provider.JCEBlockCipher$DESCBC");
         put("Cipher.DESEDEWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
         put("Cipher.1.2.840.113549.1.9.16.3.6", "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
         put("Cipher.SKIPJACK", "org.bouncycastle.jce.provider.JCEBlockCipher$Skipjack");
@@ -344,7 +344,7 @@ public final class BouncyCastleProvider extends Provider
         // key generators.
         //
         put("KeyGenerator.DES", "org.bouncycastle.jce.provider.JCEKeyGenerator$DES");
-        put("Alg.Alias.KeyGenerator.1.3.14.3.2.7", "DES");
+        put("Alg.Alias.KeyGenerator." + OIWObjectIdentifiers.desCBC, "DES");
         put("KeyGenerator.DESEDE", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
         put("KeyGenerator.1.2.840.113549.3.7", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede3");
         put("KeyGenerator.DESEDEWRAP", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
@@ -418,7 +418,7 @@ public final class BouncyCastleProvider extends Provider
         // Algorithm parameters
         //
         put("AlgorithmParameters.DES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("Alg.Alias.AlgorithmParameters.1.3.14.3.2.7", "DES");
+        put("Alg.Alias.AlgorithmParameters." + OIWObjectIdentifiers.desCBC, "DES");
         put("AlgorithmParameters.DESEDE", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.1.2.840.113549.3.7", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
