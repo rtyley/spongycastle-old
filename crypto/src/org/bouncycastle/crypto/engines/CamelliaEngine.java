@@ -225,14 +225,10 @@ public class CamelliaEngine
         return (((x) >>> (s)) + ((x) << (32 - s)));
     }
 
-    ;
-
     private static final int leftRotate(int x, int s)
     {
         return ((x) << (s)) + ((x) >>> (32 - s));
     }
-
-    ;
 
     private static final void roldq(int rot, int[] ki, int ioff,
                                     int[] ko, int ooff)
