@@ -558,7 +558,7 @@ public class CBZip2OutputStream extends OutputStream implements BZip2Constants {
                     code[i] = vec;
                     vec++;
                 }
-            };
+            }
             vec <<= 1;
         }
     }
@@ -758,7 +758,7 @@ public class CBZip2OutputStream extends OutputStream implements BZip2Constants {
                         bc = cost[t];
                         bt = t;
                     }
-                };
+                }
                 totc += bc;
                 fave[bt]++;
                 selector[nSelectors] = (char) bt;
@@ -1102,7 +1102,7 @@ public class CBZip2OutputStream extends OutputStream implements BZip2Constants {
                         ltLo++;
                         unLo++;
                         continue;
-                    };
+                    }
                     if (n >  0) {
                         break;
                     }
@@ -1121,7 +1121,7 @@ public class CBZip2OutputStream extends OutputStream implements BZip2Constants {
                         gtHi--;
                         unHi--;
                         continue;
-                    };
+                    }
                     if (n <  0) {
                         break;
                     }
@@ -1415,7 +1415,7 @@ public class CBZip2OutputStream extends OutputStream implements BZip2Constants {
                 origPtr = i;
                 break;
             }
-        };
+        }
 
         if (origPtr == -1) {
             panic();
@@ -1533,11 +1533,11 @@ public class CBZip2OutputStream extends OutputStream implements BZip2Constants {
             if (i1 > last) {
                 i1 -= last;
                 i1--;
-            };
+            }
             if (i2 > last) {
                 i2 -= last;
                 i2--;
-            };
+            }
 
             k -= 4;
             workDone++;
@@ -1620,7 +1620,7 @@ public class CBZip2OutputStream extends OutputStream implements BZip2Constants {
                 tmp2 = tmp;
                 tmp = yy[j];
                 yy[j] = tmp2;
-            };
+            }
             yy[0] = tmp;
 
             if (j == 0) {
@@ -1640,12 +1640,12 @@ public class CBZip2OutputStream extends OutputStream implements BZip2Constants {
                             wr++;
                             mtfFreq[RUNB]++;
                             break;
-                        };
+                        }
                         if (zPend < 2) {
                             break;
                         }
                         zPend = (zPend - 2) / 2;
-                    };
+                    }
                     zPend = 0;
                 }
                 szptr[wr] = (short) (j + 1);
