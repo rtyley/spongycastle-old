@@ -430,7 +430,7 @@ public class PGPDSAElGamalTest
             
             KeyPair kp = kpg.generateKeyPair();
             
-            PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.ELGAMAL_GENERAL , kp.getPublic(), kp.getPrivate(), new Date(), "BC");
+            PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.ELGAMAL_GENERAL , kp.getPublic(), kp.getPrivate(), new Date());
             
             PGPPublicKey k1 = pgpKp.getPublicKey();
             
@@ -457,7 +457,7 @@ public class PGPDSAElGamalTest
                 kp = keyGen.generateKeyPair();
 
                 PGPKeyPair elGamalKeyPair = new PGPKeyPair(
-                    PublicKeyAlgorithmTags.ELGAMAL_GENERAL, kp, new Date(), "BC");
+                    PublicKeyAlgorithmTags.ELGAMAL_GENERAL, kp, new Date());
 
                 cPk = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.CAST5, random, "BC");
 

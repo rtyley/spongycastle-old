@@ -966,7 +966,7 @@ public class PGPRSATest
         //
         // use of PGPKeyPair
         //
-        PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.RSA_GENERAL , kp.getPublic(), kp.getPrivate(), new Date(), "BC");
+        PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.RSA_GENERAL , kp.getPublic(), kp.getPrivate(), new Date());
         
         PGPPublicKey k1 = pgpKp.getPublicKey();
         

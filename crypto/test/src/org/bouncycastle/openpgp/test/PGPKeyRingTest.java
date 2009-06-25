@@ -1937,8 +1937,8 @@ public class PGPKeyRingTest
         // this is quicker because we are using pregenerated parameters.
         //
         KeyPair                    elgKp = elgKpg.generateKeyPair();
-        PGPKeyPair        dsaKeyPair = new PGPKeyPair(PGPPublicKey.DSA, dsaKp, new Date(), "BC");
-        PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date(), "BC");
+        PGPKeyPair        dsaKeyPair = new PGPKeyPair(PGPPublicKey.DSA, dsaKp, new Date());
+        PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date());
     
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
                 "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
@@ -1998,9 +1998,9 @@ public class PGPKeyRingTest
         // this is quicker because we are using pregenerated parameters.
         //
         KeyPair           rsaKp = rsaKpg.generateKeyPair();
-        PGPKeyPair        rsaKeyPair1 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date(), "BC");
+        PGPKeyPair        rsaKeyPair1 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date());
                           rsaKp = rsaKpg.generateKeyPair();
-        PGPKeyPair        rsaKeyPair2 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date(), "BC");
+        PGPKeyPair        rsaKeyPair2 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date());
 
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, rsaKeyPair1,
                 "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
@@ -2064,8 +2064,8 @@ public class PGPKeyRingTest
         // this is quicker because we are using pregenerated parameters.
         //
         KeyPair                    elgKp = elgKpg.generateKeyPair();
-        PGPKeyPair        dsaKeyPair = new PGPKeyPair(PGPPublicKey.DSA, dsaKp, new Date(), "BC");
-        PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date(), "BC");
+        PGPKeyPair        dsaKeyPair = new PGPKeyPair(PGPPublicKey.DSA, dsaKp, new Date());
+        PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date());
     
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
                 "test", PGPEncryptedData.AES_256, passPhrase, true, null, null, new SecureRandom(), "BC");
