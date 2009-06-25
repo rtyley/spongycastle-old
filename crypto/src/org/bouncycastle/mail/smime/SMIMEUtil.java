@@ -1,31 +1,29 @@
 package org.bouncycastle.mail.smime;
 
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.cms.CMSTypedStream;
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.mail.smime.util.CRLFOutputStream;
-import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
-
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.Part;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.Security;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-import java.security.Provider;
-import java.security.NoSuchProviderException;
-import java.security.Security;
 import java.util.Enumeration;
+
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
+import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 public class SMIMEUtil
 {

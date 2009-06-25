@@ -2,7 +2,6 @@ package org.bouncycastle.cms;
 
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.spec.InvalidParameterSpecException;
 
 import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;

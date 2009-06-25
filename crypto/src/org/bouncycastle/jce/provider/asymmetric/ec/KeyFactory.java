@@ -1,26 +1,15 @@
 package org.bouncycastle.jce.provider.asymmetric.ec;
 
+import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Key;
-import java.security.InvalidKeyException;
-import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
-
-import javax.crypto.spec.DHPrivateKeySpec;
-import javax.crypto.spec.DHPublicKeySpec;
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
 
 import org.bouncycastle.jce.provider.JCEECPrivateKey;
 import org.bouncycastle.jce.provider.JCEECPublicKey;
