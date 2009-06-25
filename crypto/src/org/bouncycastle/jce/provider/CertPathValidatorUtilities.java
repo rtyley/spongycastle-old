@@ -744,13 +744,13 @@ public class CertPathValidatorUtilities
                     // use all purpose parameters
                     X509LDAPCertStoreParameters params = new X509LDAPCertStoreParameters.Builder(
                         url, base).build();
-                    pkixParams.addAddionalStore(X509Store.getInstance(
+                    pkixParams.addAdditionalStore(X509Store.getInstance(
                         "CERTIFICATE/LDAP", params, "BC"));
-                    pkixParams.addAddionalStore(X509Store.getInstance(
+                    pkixParams.addAdditionalStore(X509Store.getInstance(
                         "CRL/LDAP", params, "BC"));
-                    pkixParams.addAddionalStore(X509Store.getInstance(
+                    pkixParams.addAdditionalStore(X509Store.getInstance(
                         "ATTRIBUTECERTIFICATE/LDAP", params, "BC"));
-                    pkixParams.addAddionalStore(X509Store.getInstance(
+                    pkixParams.addAdditionalStore(X509Store.getInstance(
                         "CERTIFICATEPAIR/LDAP", params, "BC"));
                 }
             }
