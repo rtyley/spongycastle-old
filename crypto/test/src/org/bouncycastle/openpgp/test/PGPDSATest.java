@@ -606,7 +606,7 @@ public class PGPDSATest
         
         KeyPair kp = kpg.generateKeyPair();
         
-        PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.DSA , kp.getPublic(), kp.getPrivate(), new Date(), "BC");
+        PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.DSA , kp.getPublic(), kp.getPrivate(), new Date());
         
         PGPPublicKey k1 = pgpKp.getPublicKey();
         
