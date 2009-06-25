@@ -19,7 +19,7 @@ public abstract class CMSPBEKey
     {
         try
         {
-            return algParams.getParameterSpec(PBEParameterSpec.class);
+            return (PBEParameterSpec)algParams.getParameterSpec(PBEParameterSpec.class);
         }
         catch (InvalidParameterSpecException e)
         {
