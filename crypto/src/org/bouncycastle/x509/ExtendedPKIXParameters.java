@@ -266,7 +266,7 @@ public class ExtendedPKIXParameters
     }
 
     /**
-     * Adds a additional Bouncy Castle {@link Store} to find CRLs, certificates,
+     * Adds an additional Bouncy Castle {@link Store} to find CRLs, certificates,
      * attribute certificates or cross certificates.
      * <p>
      * You should not use this method. This method is used for adding additional
@@ -279,12 +279,20 @@ public class ExtendedPKIXParameters
      * @param store The store to add.
      * @see #getStores()
      */
-    public void addAddionalStore(Store store)
+    public void addAdditionalStore(Store store)
     {
         if (store != null)
         {
             additionalStores.add(store);
         }
+    }
+
+    /**
+     * @deprecated
+     */
+    public void addAddionalStore(Store store)
+    {
+        addAdditionalStore(store);      
     }
 
     /**
@@ -295,7 +303,7 @@ public class ExtendedPKIXParameters
      * @return an immutable <code>List</code> of additional Bouncy Castle
      *         <code>Store</code>s. Never <code>null</code>.
      * 
-     * @see #addAddionalStore(Store)
+     * @see #addAdditionalStore(Store)
      */
     public List getAdditionalStores()
     {
