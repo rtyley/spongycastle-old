@@ -1,10 +1,5 @@
 package org.bouncycastle.jce.provider.test;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -28,8 +23,6 @@ import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
-import java.security.cert.PKIXCertPathChecker;
-import java.security.cert.CertPathValidatorException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,7 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
-import java.util.Collection;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class CertPathTest
     extends SimpleTest

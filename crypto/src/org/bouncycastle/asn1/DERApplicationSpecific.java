@@ -1,10 +1,9 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
-
-import java.io.IOException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.bouncycastle.util.Arrays;
 
 /**
  * Base class for an application specific object

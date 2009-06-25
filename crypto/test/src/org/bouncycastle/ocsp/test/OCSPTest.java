@@ -1,7 +1,6 @@
 package org.bouncycastle.ocsp.test;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.Security;

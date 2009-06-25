@@ -1,10 +1,13 @@
 package org.bouncycastle.openpgp;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.SignaturePacket;
-import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.sig.EmbeddedSignature;
 import org.bouncycastle.bcpg.sig.Exportable;
 import org.bouncycastle.bcpg.sig.KeyExpirationTime;
 import org.bouncycastle.bcpg.sig.KeyFlags;
@@ -16,14 +19,6 @@ import org.bouncycastle.bcpg.sig.SignatureCreationTime;
 import org.bouncycastle.bcpg.sig.SignatureExpirationTime;
 import org.bouncycastle.bcpg.sig.SignerUserID;
 import org.bouncycastle.bcpg.sig.TrustSignature;
-import org.bouncycastle.bcpg.sig.EmbeddedSignature;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 
 /**
  * Generator for signature subpackets.

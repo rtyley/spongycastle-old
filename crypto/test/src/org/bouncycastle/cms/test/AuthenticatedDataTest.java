@@ -1,12 +1,12 @@
 package org.bouncycastle.cms.test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.crypto.SecretKey;
 
@@ -14,19 +14,17 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.cms.CMSAuthenticatedData;
 import org.bouncycastle.cms.CMSAuthenticatedDataGenerator;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
-import org.bouncycastle.cms.RecipientInformationStore;
-import org.bouncycastle.cms.RecipientInformation;
-import org.bouncycastle.cms.CMSAuthenticatedData;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.PKCS5Scheme2PBEKey;
-import org.bouncycastle.cms.PasswordRecipientInformation;
-import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.RecipientInformation;
+import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 
 public class AuthenticatedDataTest
     extends TestCase

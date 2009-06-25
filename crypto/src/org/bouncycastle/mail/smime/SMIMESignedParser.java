@@ -1,17 +1,28 @@
 package org.bouncycastle.mail.smime;
 
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSSignedDataParser;
-import org.bouncycastle.cms.CMSTypedStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
-import javax.mail.*;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.Part;
+import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.io.*;
-import java.util.Enumeration;
+
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSSignedDataParser;
+import org.bouncycastle.cms.CMSTypedStream;
 
 /**
  * general class for handling a pkcs7-signature message.
