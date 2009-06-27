@@ -37,7 +37,7 @@ public class TlsCipherSuiteManager
             TLS_RSA_WITH_AES_256_CBC_SHA,
             TLS_RSA_WITH_AES_128_CBC_SHA,
             TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-       };
+        };
 
        TlsUtils.writeUint16(2 * suites.length, os);
        for (int i = 0; i < suites.length; ++i)
@@ -51,31 +51,31 @@ public class TlsCipherSuiteManager
         switch (number)
         {
             case TLS_RSA_WITH_3DES_EDE_CBC_SHA:
-                return new TlsBlockCipherCipherSuite(new CBCBlockCipher(new DESedeEngine()), new CBCBlockCipher(new DESedeEngine()), new SHA1Digest(), new SHA1Digest(), 24, TlsCipherSuite.KE_RSA);
+                return createDESedeCipherSuite(24, TlsCipherSuite.KE_RSA);
 
             case TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
-                return new TlsBlockCipherCipherSuite(new CBCBlockCipher(new DESedeEngine()), new CBCBlockCipher(new DESedeEngine()), new SHA1Digest(), new SHA1Digest(), 24, TlsCipherSuite.KE_DHE_DSS);
+                return createDESedeCipherSuite(24, TlsCipherSuite.KE_DHE_DSS);
 
             case TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
-                return new TlsBlockCipherCipherSuite(new CBCBlockCipher(new DESedeEngine()), new CBCBlockCipher(new DESedeEngine()), new SHA1Digest(), new SHA1Digest(), 24, TlsCipherSuite.KE_DHE_RSA);
+                return createDESedeCipherSuite(24, TlsCipherSuite.KE_DHE_RSA);
 
             case TLS_RSA_WITH_AES_128_CBC_SHA:
-                return new TlsBlockCipherCipherSuite(new CBCBlockCipher(new AESFastEngine()), new CBCBlockCipher(new AESFastEngine()), new SHA1Digest(), new SHA1Digest(), 16, TlsCipherSuite.KE_RSA);
+                return createAESCipherSuite(16, TlsCipherSuite.KE_RSA);
 
             case TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
-                return new TlsBlockCipherCipherSuite(new CBCBlockCipher(new AESFastEngine()), new CBCBlockCipher(new AESFastEngine()), new SHA1Digest(), new SHA1Digest(), 16, TlsCipherSuite.KE_DHE_DSS);
+                return createAESCipherSuite(16, TlsCipherSuite.KE_DHE_DSS);
 
             case TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
-                return new TlsBlockCipherCipherSuite(new CBCBlockCipher(new AESFastEngine()), new CBCBlockCipher(new AESFastEngine()), new SHA1Digest(), new SHA1Digest(), 16, TlsCipherSuite.KE_DHE_RSA);
+                return createAESCipherSuite(16, TlsCipherSuite.KE_DHE_RSA);
 
             case TLS_RSA_WITH_AES_256_CBC_SHA:
-                return new TlsBlockCipherCipherSuite(new CBCBlockCipher(new AESFastEngine()), new CBCBlockCipher(new AESFastEngine()), new SHA1Digest(), new SHA1Digest(), 32, TlsCipherSuite.KE_RSA);
+                return createAESCipherSuite(32, TlsCipherSuite.KE_RSA);
 
             case TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
-                return new TlsBlockCipherCipherSuite(new CBCBlockCipher(new AESFastEngine()), new CBCBlockCipher(new AESFastEngine()), new SHA1Digest(), new SHA1Digest(), 32, TlsCipherSuite.KE_DHE_DSS);
+                return createAESCipherSuite(32, TlsCipherSuite.KE_DHE_DSS);
 
             case TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-                return new TlsBlockCipherCipherSuite(new CBCBlockCipher(new AESFastEngine()), new CBCBlockCipher(new AESFastEngine()), new SHA1Digest(), new SHA1Digest(), 32, TlsCipherSuite.KE_DHE_RSA);
+                return createAESCipherSuite(32, TlsCipherSuite.KE_DHE_RSA);
 
             default:
                 handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_handshake_failure);
@@ -85,5 +85,27 @@ public class TlsCipherSuiteManager
                 */
                 return null;
         }
+    }
+
+    private static TlsCipherSuite createAESCipherSuite(int cipherKeySize, short keyExchange)
+    {
+        return new TlsBlockCipherCipherSuite(createAESCipher(), createAESCipher(),
+            new SHA1Digest(), new SHA1Digest(), cipherKeySize, keyExchange);
+    }
+
+    private static TlsCipherSuite createDESedeCipherSuite(int cipherKeySize, short keyExchange)
+    {
+        return new TlsBlockCipherCipherSuite(createDESedeCipher(), createDESedeCipher(),
+            new SHA1Digest(), new SHA1Digest(), cipherKeySize, keyExchange);
+    }
+
+    private static CBCBlockCipher createAESCipher()
+    {
+        return new CBCBlockCipher(new AESFastEngine());
+    }
+    
+    private static CBCBlockCipher createDESedeCipher()
+    {
+        return new CBCBlockCipher(new DESedeEngine());
     }
 }
