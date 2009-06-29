@@ -148,8 +148,8 @@ public class PEMReader extends BufferedReader
                 }
                 catch (Exception e)
                 {
-                    throw new IOException(
-                        "problem creating RSA private key: " + e.toString());
+                    throw new PEMException(
+                        "problem creating RSA private key: " + e.toString(), e);
                 }
             }
             if (line.indexOf("-----BEGIN DSA PRIVATE KEY") != -1)
@@ -160,8 +160,8 @@ public class PEMReader extends BufferedReader
                 }
                 catch (Exception e)
                 {
-                    throw new IOException(
-                        "problem creating DSA private key: " + e.toString());
+                    throw new PEMException(
+                        "problem creating DSA private key: " + e.toString(), e);
                 }
             }
             if (line.indexOf("-----BEGIN EC PARAMETERS-----") != -1)
@@ -224,7 +224,7 @@ public class PEMReader extends BufferedReader
         }
         catch (Exception e)
         {
-            throw new IOException("problem extracting key: " + e.toString());
+            throw new PEMException("problem extracting key: " + e.toString(), e);
         }
     }
 
@@ -281,7 +281,7 @@ public class PEMReader extends BufferedReader
         }
         catch (Exception e)
         {
-            throw new IOException("problem parsing cert: " + e.toString());
+            throw new PEMException("problem parsing cert: " + e.toString(), e);
         }
     }
 
@@ -306,7 +306,7 @@ public class PEMReader extends BufferedReader
         }
         catch (Exception e)
         {
-            throw new IOException("problem parsing cert: " + e.toString());
+            throw new PEMException("problem parsing cert: " + e.toString(), e);
         }
     }
 
@@ -326,7 +326,7 @@ public class PEMReader extends BufferedReader
         }
         catch (Exception e)
         {
-            throw new IOException("problem parsing cert: " + e.toString());
+            throw new PEMException("problem parsing certrequest: " + e.toString(), e);
         }
     }
 
@@ -394,7 +394,7 @@ public class PEMReader extends BufferedReader
         }
         catch (Exception e)
         {
-            throw new IOException("problem parsing PKCS7 object: " + e.toString());
+            throw new PEMException("problem parsing PKCS7 object: " + e.toString(), e);
         }
     }
 
@@ -536,7 +536,7 @@ public class PEMReader extends BufferedReader
         }
         catch (Exception e)
         {
-            throw new IOException("problem parsing EC private key: " + e);
+            throw new PEMException("problem parsing EC private key: " + e, e);
         }
     }
 }
