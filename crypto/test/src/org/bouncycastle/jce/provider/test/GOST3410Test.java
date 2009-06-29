@@ -9,8 +9,22 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.InvalidKeyException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.X509Certificate;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Date;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
@@ -20,12 +34,14 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class GOST3410Test
     extends SimpleTest
@@ -232,6 +248,44 @@ public class GOST3410Test
         }
     }
 
+    private void keyStoreTest(PrivateKey sKey, PublicKey vKey)
+        throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException, SignatureException, InvalidKeyException, UnrecoverableKeyException
+    {
+        //
+        // keystore test
+        //
+        KeyStore ks = KeyStore.getInstance("JKS");
+
+        ks.load(null, null);
+
+        //
+        // create the certificate - version 3
+        //
+        X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
+
+        certGen.setSerialNumber(BigInteger.valueOf(1));
+        certGen.setIssuerDN(new X509Principal("CN=Test"));
+        certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
+        certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
+        certGen.setSubjectDN(new X509Principal("CN=Test"));
+        certGen.setPublicKey(vKey);
+        certGen.setSignatureAlgorithm("GOST3411withGOST3410");
+
+        X509Certificate cert = certGen.generate(sKey, "BC");
+
+        ks.setKeyEntry("gost",sKey, "gost".toCharArray(), new Certificate[] { cert });
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        ks.store(bOut, "gost".toCharArray());
+
+        ks = KeyStore.getInstance("JKS");
+
+        ks.load(new ByteArrayInputStream(bOut.toByteArray()), "gost".toCharArray());
+
+        PrivateKey gKey = (PrivateKey)ks.getKey("gost", "gost".toCharArray());
+    }
+
     private void parametersTest()
         throws Exception
     {
@@ -280,6 +334,8 @@ public class GOST3410Test
         {
             fail("GOST3410 verification failed");
         }
+
+        keyStoreTest(sKey, vKey);
     }
 
     private BigInteger[] decode(
