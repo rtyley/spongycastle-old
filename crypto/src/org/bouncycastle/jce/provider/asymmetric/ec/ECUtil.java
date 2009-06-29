@@ -217,6 +217,10 @@ public class ECUtil
             {
                 name = TeleTrusTNamedCurves.getName(oid);
             }
+            if (name == null)
+            {
+                name = ECGOST3410NamedCurves.getName(oid);
+            }
         }
 
         return name;
