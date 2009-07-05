@@ -823,6 +823,18 @@ public class JCEBlockCipher extends WrapCipherSpi
     }
 
     /**
+     * Blowfish CBC
+     */
+    static public class BlowfishCBC
+        extends JCEBlockCipher
+    {
+        public BlowfishCBC()
+        {
+            super(new CBCBlockCipher(new BlowfishEngine()), 64);
+        }
+    }
+
+    /**
      * Twofish
      */
     static public class Twofish
