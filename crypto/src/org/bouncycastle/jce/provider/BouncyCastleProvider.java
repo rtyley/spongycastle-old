@@ -225,6 +225,7 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.1.2.840.113549.1.9.16.3.6", "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
         put("Cipher.SKIPJACK", "org.bouncycastle.jce.provider.JCEBlockCipher$Skipjack");
         put("Cipher.BLOWFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Blowfish");
+        put("Cipher.1.3.6.1.4.1.3029.1.2", "org.bouncycastle.jce.provider.JCEBlockCipher$BlowfishCBC");
         put("Cipher.TWOFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Twofish");
         put("Cipher.RC2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2");
         put("Cipher.RC2WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
@@ -350,6 +351,7 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.DESEDEWRAP", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
         put("KeyGenerator.SKIPJACK", "org.bouncycastle.jce.provider.JCEKeyGenerator$Skipjack");
         put("KeyGenerator.BLOWFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Blowfish");
+        put("Alg.Alias.KeyGenerator.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
         put("KeyGenerator.TWOFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Twofish");
         put("KeyGenerator.RC2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
         put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
@@ -426,6 +428,7 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameters.RC5", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.RC6", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.BLOWFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
+        put("Alg.Alias.AlgorithmParameters.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
         put("AlgorithmParameters.TWOFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.SKIPJACK", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.RIJNDAEL", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
