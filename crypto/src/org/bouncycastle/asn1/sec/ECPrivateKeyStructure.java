@@ -12,6 +12,8 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.util.ASN1Dump;
 
 import java.math.BigInteger;
 import java.util.Enumeration;
@@ -47,6 +49,46 @@ public class ECPrivateKeyStructure
 
         v.add(new DERInteger(1));
         v.add(new DEROctetString(bytes));
+
+        seq = new DERSequence(v);
+    }
+
+    public ECPrivateKeyStructure(
+        BigInteger    key,
+        ASN1Encodable parameters)
+    {
+        this(key, null, parameters);
+    }
+
+    public ECPrivateKeyStructure(
+        BigInteger    key,
+        DERBitString  publicKey,
+        ASN1Encodable parameters)
+    {
+        byte[]  bytes = key.toByteArray();
+
+        if (bytes[0] == 0)
+        {
+            byte[]  tmp = new byte[bytes.length - 1];
+
+            System.arraycopy(bytes, 1, tmp, 0, tmp.length);
+            bytes = tmp;
+        }
+
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(new DERInteger(1));
+        v.add(new DEROctetString(bytes));
+
+        if (parameters != null)
+        {
+            v.add(new DERTaggedObject(true, 0, parameters));
+        }
+
+        if (publicKey != null)
+        {
+            v.add(new DERTaggedObject(true, 1, publicKey));
+        }
 
         seq = new DERSequence(v);
     }

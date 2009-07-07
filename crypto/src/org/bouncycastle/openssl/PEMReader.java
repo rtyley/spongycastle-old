@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
@@ -170,7 +171,15 @@ public class PEMReader extends BufferedReader
             }
             if (line.indexOf("-----BEGIN EC PRIVATE KEY-----") != -1)
             {
-                return readECPrivateKey("-----END EC PRIVATE KEY-----");
+                try
+                {
+                    return readKeyPair("ECDSA", "-----END EC PRIVATE KEY-----");
+                }
+                catch (Exception e)
+                {
+                    throw new PEMException(
+                        "problem creating ECDSA private key: " + e.toString(), e);
+                }
             }
         }
 
@@ -483,6 +492,16 @@ public class PEMReader extends BufferedReader
                     exp1.getValue(), exp2.getValue(),
                     crtCoef.getValue());
         }
+        else if (type.equals("ECDSA"))
+        {
+            ECPrivateKeyStructure pKey = new ECPrivateKeyStructure(seq);
+            AlgorithmIdentifier   algId = new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, pKey.getParameters());
+            PrivateKeyInfo        privInfo = new PrivateKeyInfo(algId, pKey.getDERObject());
+            SubjectPublicKeyInfo  pubInfo = new SubjectPublicKeyInfo(algId, pKey.getPublicKey().getBytes());
+
+            privSpec = new PKCS8EncodedKeySpec(privInfo.getEncoded());
+            pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
+        }
         else    // "DSA"
         {
 //            DERInteger              v = (DERInteger)seq.getObjectAt(0);
@@ -513,30 +532,5 @@ public class PEMReader extends BufferedReader
         DERObjectIdentifier oid = (DERObjectIdentifier)ASN1Object.fromByteArray(readBytes(endMarker));
 
         return ECNamedCurveTable.getParameterSpec(oid.getId());
-    }
-
-    private KeyPair readECPrivateKey(String endMarker)
-        throws IOException
-    {
-        try
-        {
-            ECPrivateKeyStructure pKey = new ECPrivateKeyStructure((ASN1Sequence)ASN1Object.fromByteArray(readBytes(endMarker)));
-            AlgorithmIdentifier   algId = new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, pKey.getParameters());
-            PrivateKeyInfo        privInfo = new PrivateKeyInfo(algId, pKey.getDERObject());
-            SubjectPublicKeyInfo  pubInfo = new SubjectPublicKeyInfo(algId, pKey.getPublicKey().getBytes());
-            PKCS8EncodedKeySpec   privSpec = new PKCS8EncodedKeySpec(privInfo.getEncoded());
-            X509EncodedKeySpec    pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
-            KeyFactory            fact = KeyFactory.getInstance("ECDSA", provider);
-
-            return new KeyPair(fact.generatePublic(pubSpec), fact.generatePrivate(privSpec));
-        }
-        catch (ClassCastException e)
-        { 
-            throw new IOException("wrong ASN.1 object found in stream");
-        }
-        catch (Exception e)
-        {
-            throw new PEMException("problem parsing EC private key: " + e, e);
-        }
     }
 }

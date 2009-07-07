@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
@@ -256,6 +257,14 @@ public class PEMWriter
             v.add(new DERInteger(x));
 
             keyData = new DERSequence(v).getEncoded();
+        }
+        else if (obj instanceof PrivateKey && "ECDSA".equals(((PrivateKey)obj).getAlgorithm()))
+        {
+            type = "EC PRIVATE KEY";
+
+            PrivateKeyInfo      privInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(((PrivateKey)obj).getEncoded()));
+
+            keyData = privInfo.getPrivateKey().getEncoded();
         }
 
         if (type == null || keyData == null)

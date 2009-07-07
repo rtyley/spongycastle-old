@@ -5,6 +5,7 @@ import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.util.test.SimpleTest;
+import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -18,6 +19,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 public class WriterTest
     extends SimpleTest
@@ -39,6 +41,12 @@ public class WriterTest
         new BigInteger("7434410770759874867539421675728577177024889699586189000788950934679315164676852047058354758883833299702695428196962057871264685291775577130504050839126673"),
         new BigInteger("1138656671590261728308283492178581223478058193247"),
         new BigInteger("4182906737723181805517018315469082619513954319976782448649747742951189003482834321192692620856488639629011570381138542789803819092529658402611668375788410"));
+
+    private static final PKCS8EncodedKeySpec testEcDsaKeySpec = new PKCS8EncodedKeySpec(
+        Base64.decode("MIG/AgEAMBAGByqGSM49AgEGBSuBBAAiBIGnMIGkAgEBBDCSBU3vo7ieeKs0ABQamy/ynxlde7Ylr8HmyfLaNnMr" +
+            "jAwPp9R+KMUEhB7zxSAXv9KgBwYFK4EEACKhZANiAQQyyolMpg+TyB4o9kPWqafHIOe8o9K1glus+w2sY8OIPQQWGb5i5LdAyi" +
+            "/SscwU24rZM0yiL3BHodp9ccwyhLrFYgXJUOQcCN2dno1GMols5497in5gL5+zn0yMsRtyv5o=")
+    );
 
     private static final char[] testPassword = "bouncy".toCharArray();
 
@@ -95,6 +103,17 @@ public class WriterTest
         PrivateKey testRsaKey = fact.generatePrivate(testRsaKeySpec);
 
         doWriteReadTests(testRsaKey, provider, algorithms);
+
+        fact = KeyFactory.getInstance("ECDSA", provider);
+        PrivateKey testEcDsaKey = fact.generatePrivate(testEcDsaKeySpec);
+
+        doWriteReadTests(testEcDsaKey, provider, algorithms);
+
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        kpGen.initialize(239);
+        
+        doWriteReadTests(kpGen.generateKeyPair().getPrivate(), "BC", algorithms);
     }
 
     private void doWriteReadTests(
