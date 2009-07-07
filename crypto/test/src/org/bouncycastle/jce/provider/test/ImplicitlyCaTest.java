@@ -134,6 +134,11 @@ public class ImplicitlyCaTest
         {
             fail("private equals/hashCode failed");
         }
+
+        // check we can get specs.
+        fact.getKeySpec(vKey, java.security.spec.ECPublicKeySpec.class);
+
+        fact.getKeySpec(sKey, java.security.spec.ECPrivateKeySpec.class);
     }
 
     private void testJDKAPI()

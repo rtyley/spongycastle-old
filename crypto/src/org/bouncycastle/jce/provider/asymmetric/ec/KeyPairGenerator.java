@@ -225,8 +225,9 @@ public abstract class KeyPairGenerator
             {
                 ECParameterSpec p = (ECParameterSpec)ecParams;
 
-                return new KeyPair(new JCEECPublicKey(algorithm, pub, p),
-                                   new JCEECPrivateKey(algorithm, priv, p));
+                JCEECPublicKey pubKey = new JCEECPublicKey(algorithm, pub, p);
+                return new KeyPair(pubKey,
+                                   new JCEECPrivateKey(algorithm, priv, pubKey, p));
             }
             else if (ecParams == null)
             {
@@ -237,7 +238,9 @@ public abstract class KeyPairGenerator
             {
                 java.security.spec.ECParameterSpec p = (java.security.spec.ECParameterSpec)ecParams;
 
-                return new KeyPair(new JCEECPublicKey(algorithm, pub, p), new JCEECPrivateKey(algorithm, priv, p));
+                JCEECPublicKey pubKey = new JCEECPublicKey(algorithm, pub, p);
+                
+                return new KeyPair(pubKey, new JCEECPrivateKey(algorithm, priv, pubKey, p));
             }
         }
     }

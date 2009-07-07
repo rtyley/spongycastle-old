@@ -14,8 +14,10 @@ import java.security.spec.X509EncodedKeySpec;
 import org.bouncycastle.jce.provider.JCEECPrivateKey;
 import org.bouncycastle.jce.provider.JCEECPublicKey;
 import org.bouncycastle.jce.provider.JDKKeyFactory;
+import org.bouncycastle.jce.provider.ProviderUtil;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.jce.spec.ECParameterSpec;
 
 public class KeyFactory
     extends JDKKeyFactory
@@ -60,14 +62,31 @@ public class KeyFactory
        else if (spec.isAssignableFrom(java.security.spec.ECPublicKeySpec.class) && key instanceof ECPublicKey)
        {
            ECPublicKey k = (ECPublicKey)key;
+           if (k.getParams() != null)
+           {
+               return new java.security.spec.ECPublicKeySpec(k.getW(), k.getParams());
+           }
+           else
+           {
+               ECParameterSpec implicitSpec = ProviderUtil.getEcImplicitlyCa();
 
-           return new java.security.spec.ECPublicKeySpec(k.getW(), k.getParams());
+               return new java.security.spec.ECPublicKeySpec(k.getW(), EC5Util.convertSpec(EC5Util.convertCurve(implicitSpec.getCurve(), implicitSpec.getSeed()), implicitSpec));
+           }
        }
        else if (spec.isAssignableFrom(java.security.spec.ECPrivateKeySpec.class) && key instanceof ECPrivateKey)
        {
            ECPrivateKey k = (ECPrivateKey)key;
 
-           return new java.security.spec.ECPrivateKeySpec(k.getS(), k.getParams());
+           if (k.getParams() != null)
+           {
+               return new java.security.spec.ECPrivateKeySpec(k.getS(), k.getParams());
+           }
+           else
+           {
+               ECParameterSpec implicitSpec = ProviderUtil.getEcImplicitlyCa();
+
+               return new java.security.spec.ECPrivateKeySpec(k.getS(), EC5Util.convertSpec(EC5Util.convertCurve(implicitSpec.getCurve(), implicitSpec.getSeed()), implicitSpec)); 
+           }
        }
 
        throw new RuntimeException("not implemented yet " + key + " " + spec);

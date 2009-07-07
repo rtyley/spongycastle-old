@@ -317,9 +317,25 @@ public class JCEECPublicKey
             }
             else
             {
-                params = new GOST3410PublicKeyAlgParameters(
+                if (ecSpec instanceof ECNamedCurveSpec)
+                {
+                    params = new GOST3410PublicKeyAlgParameters(
                                    ECGOST3410NamedCurves.getOID(((ECNamedCurveSpec)ecSpec).getName()),
                                    CryptoProObjectIdentifiers.gostR3411_94_CryptoProParamSet);
+                }
+                else
+                {   // strictly speaking this may not be applicable...
+                    ECCurve curve = EC5Util.convertCurve(ecSpec.getCurve());
+
+                    X9ECParameters ecP = new X9ECParameters(
+                        curve,
+                        EC5Util.convertPoint(curve, ecSpec.getGenerator(), withCompression),
+                        ecSpec.getOrder(),
+                        BigInteger.valueOf(ecSpec.getCofactor()),
+                        ecSpec.getCurve().getSeed());
+
+                    params = new X962Parameters(ecP);
+                }
             }
 
             BigInteger      bX = this.q.getX().toBigInteger();
