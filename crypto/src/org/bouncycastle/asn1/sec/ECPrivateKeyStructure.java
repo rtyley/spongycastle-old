@@ -1,5 +1,8 @@
 package org.bouncycastle.asn1.sec;
 
+import java.math.BigInteger;
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
@@ -13,10 +16,7 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.util.ASN1Dump;
-
-import java.math.BigInteger;
-import java.util.Enumeration;
+import org.bouncycastle.util.BigIntegers;
 
 /**
  * the elliptic curve private key object from SEC 1
@@ -35,15 +35,7 @@ public class ECPrivateKeyStructure
     public ECPrivateKeyStructure(
         BigInteger  key)
     {
-        byte[]  bytes = key.toByteArray();
-
-        if (bytes[0] == 0)
-        {
-            byte[]  tmp = new byte[bytes.length - 1];
-
-            System.arraycopy(bytes, 1, tmp, 0, tmp.length);
-            bytes = tmp;
-        }
+        byte[] bytes = BigIntegers.asUnsignedByteArray(key);
 
         ASN1EncodableVector v = new ASN1EncodableVector();
 
@@ -65,15 +57,7 @@ public class ECPrivateKeyStructure
         DERBitString  publicKey,
         ASN1Encodable parameters)
     {
-        byte[]  bytes = key.toByteArray();
-
-        if (bytes[0] == 0)
-        {
-            byte[]  tmp = new byte[bytes.length - 1];
-
-            System.arraycopy(bytes, 1, tmp, 0, tmp.length);
-            bytes = tmp;
-        }
+        byte[] bytes = BigIntegers.asUnsignedByteArray(key);
 
         ASN1EncodableVector v = new ASN1EncodableVector();
 
