@@ -4,6 +4,7 @@ import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.util.Arrays;
 
 /**
  * implements Cipher-Block-Chaining (CBC) mode on top of a simple cipher.
@@ -136,6 +137,7 @@ public class CBCBlockCipher
     public void reset()
     {
         System.arraycopy(IV, 0, cbcV, 0, IV.length);
+        Arrays.fill(cbcNextV, (byte)0);
 
         cipher.reset();
     }
