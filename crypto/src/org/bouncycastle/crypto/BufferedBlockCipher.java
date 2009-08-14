@@ -127,32 +127,17 @@ public class BufferedBlockCipher
 
     /**
      * return the size of the output buffer required for an update plus a
-     * doFinal with an input of len bytes.
+     * doFinal with an input of 'length' bytes.
      *
-     * @param len the length of the input.
+     * @param length the length of the input.
      * @return the space required to accommodate a call to update and doFinal
-     * with len bytes of input.
+     * with 'length' bytes of input.
      */
     public int getOutputSize(
-        int len)
+        int length)
     {
-        int total       = len + bufOff;
-        int leftOver;
-
-        if (pgpCFB)
-        {
-            leftOver    = total % buf.length - (cipher.getBlockSize() + 2);
-        }
-        else
-        {
-            leftOver    = total % buf.length;
-            if (leftOver == 0)
-            {
-                return total;
-            }
-        }
-
-        return total - leftOver + buf.length;
+        // Note: Can assume partialBlockOkay is true for purposes of this calculation
+        return length + bufOff;
     }
 
     /**
