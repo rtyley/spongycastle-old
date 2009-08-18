@@ -86,7 +86,7 @@ public class SRP6Client
     private BigInteger calculateS()
     {
         BigInteger k = SRP6Util.calculateK(digest, N, g);
-        BigInteger exp = u.multiply(x).mod(N).add(a).mod(N);
+        BigInteger exp = u.multiply(x).add(a);
         BigInteger tmp = g.modPow(x, N).multiply(k).mod(N);
         return B.subtract(tmp).mod(N).modPow(exp, N);
     }
