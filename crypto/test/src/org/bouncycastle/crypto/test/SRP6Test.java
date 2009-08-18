@@ -47,14 +47,9 @@ public class SRP6Test extends SimpleTest
         testClientCatchesBadB(N_1024, g_1024);
         testServerCatchesBadA(N_1024, g_1024);
 
-        DHParametersGenerator paramGen = new DHParametersGenerator();
-        paramGen.init(576, 25, random);
-        DHParameters parameters = paramGen.generateParameters();
-
-        BigInteger g = parameters.getG();
-        BigInteger p = parameters.getP();
-
-        testMutualVerification(p, g);
+        testWithRandomParams(256);
+        testWithRandomParams(384);
+        testWithRandomParams(512);
     }
 
     private void rfc5054AppendixBTestVectors() throws Exception
@@ -162,6 +157,18 @@ public class SRP6Test extends SimpleTest
     	}
     }
 
+    private void testWithRandomParams(int bits) throws CryptoException
+    {
+        DHParametersGenerator paramGen = new DHParametersGenerator();
+        paramGen.init(bits, 25, random);
+        DHParameters parameters = paramGen.generateParameters();
+
+        BigInteger g = parameters.getG();
+        BigInteger p = parameters.getP();
+
+        testMutualVerification(p, g);
+    }
+    
     private void testMutualVerification(BigInteger N, BigInteger g) throws CryptoException
     {
         byte[] I = "username".getBytes();
