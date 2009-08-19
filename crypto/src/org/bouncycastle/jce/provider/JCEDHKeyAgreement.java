@@ -39,11 +39,11 @@ public class JCEDHKeyAgreement
     {
         Integer i64 = new Integer(64);
         Integer i192 = new Integer(192);
-        Integer i448 = new Integer(448);
+        Integer i128 = new Integer(128);
 
         algorithms.put("DES", i64);
         algorithms.put("DESEDE", i192);
-        algorithms.put("BLOWFISH", i448);
+        algorithms.put("BLOWFISH", i128);
     }
 
     private byte[] bigIntToBytes(
