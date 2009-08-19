@@ -16,10 +16,10 @@ public class BasicTlsTest
     extends TestCase
 {
     private static final int PORT_NO = 8003;
-    private static final String CLIENT = "client";
-    private static final char[] CLIENT_PASSWORD = "clientPassword".toCharArray();
-    private static final char[] SERVER_PASSWORD = "serverPassword".toCharArray();
-    private static final char[] TRUST_STORE_PASSWORD = "trustPassword".toCharArray();
+//    private static final String CLIENT = "client";
+//    private static final char[] CLIENT_PASSWORD = "clientPassword".toCharArray();
+//    private static final char[] SERVER_PASSWORD = "serverPassword".toCharArray();
+//    private static final char[] TRUST_STORE_PASSWORD = "trustPassword".toCharArray();
 
     public void testConnection()
         throws Exception
@@ -52,15 +52,15 @@ public class BasicTlsTest
             throw new IOException("unable to connect");
         }
         
-        long time = System.currentTimeMillis();
+//        long time = System.currentTimeMillis();
         TlsProtocolHandler handler = new TlsProtocolHandler(s.getInputStream(), s.getOutputStream());
         handler.connect(verifyer);
-        InputStream is = handler.getTlsInputStream();
-        OutputStream os = handler.getTlsOuputStream();
+        InputStream is = handler.getInputStream();
+        OutputStream os = handler.getOutputStream();
 
         os.write("GET / HTTP/1.1\r\n\r\n".getBytes());
 
-        time = System.currentTimeMillis();
+//        time = System.currentTimeMillis();
         byte[] buf = new byte[4096];
         int read = 0;
         int total = 0;
