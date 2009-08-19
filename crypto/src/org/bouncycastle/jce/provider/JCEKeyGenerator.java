@@ -177,7 +177,7 @@ public class JCEKeyGenerator
     {
         public Blowfish()
         {
-            super("Blowfish", 448, new CipherKeyGenerator());
+            super("Blowfish", 128, new CipherKeyGenerator());
         }
     }
 
