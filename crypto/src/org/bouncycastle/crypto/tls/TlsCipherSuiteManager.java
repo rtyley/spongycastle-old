@@ -24,6 +24,16 @@ public class TlsCipherSuiteManager
     private static final int TLS_DHE_DSS_WITH_AES_256_CBC_SHA = 0x0038;
     private static final int TLS_DHE_RSA_WITH_AES_256_CBC_SHA = 0x0039;
 
+//    private static final int TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA = 0xC01A;    
+//    private static final int TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA = 0xC01B;
+//    private static final int TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA = 0xC01C;
+//    private static final int TLS_SRP_SHA_WITH_AES_128_CBC_SHA = 0xC01D;
+//    private static final int TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA = 0xC01E;
+//    private static final int TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA = 0xC01F;
+//    private static final int TLS_SRP_SHA_WITH_AES_256_CBC_SHA = 0xC020;
+//    private static final int TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA = 0xC021;
+//    private static final int TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA = 0xC022;
+
     protected static void writeCipherSuites(OutputStream os) throws IOException
     {
         int[] suites = new int[]
@@ -37,6 +47,16 @@ public class TlsCipherSuiteManager
             TLS_RSA_WITH_AES_256_CBC_SHA,
             TLS_RSA_WITH_AES_128_CBC_SHA,
             TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+
+//            TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA,
+//            TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA,
+//            TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA,
+//            TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA,
+//            TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA,
+//            TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA,
+//            TLS_SRP_SHA_WITH_AES_256_CBC_SHA,
+//            TLS_SRP_SHA_WITH_AES_128_CBC_SHA,
+//            TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA,
         };
 
        TlsUtils.writeUint16(2 * suites.length, os);
@@ -76,6 +96,33 @@ public class TlsCipherSuiteManager
 
             case TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
                 return createAESCipherSuite(32, TlsCipherSuite.KE_DHE_RSA);
+
+//            case TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
+//                return createDESedeCipherSuite(24, TlsCipherSuite.KE_SRP);
+//
+//            case TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
+//                return createDESedeCipherSuite(24, TlsCipherSuite.KE_SRP_RSA);
+//
+//            case TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
+//                return createDESedeCipherSuite(24, TlsCipherSuite.KE_SRP_DSS);
+//
+//            case TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
+//                return createAESCipherSuite(16, TlsCipherSuite.KE_SRP);
+//
+//            case TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
+//                return createAESCipherSuite(16, TlsCipherSuite.KE_SRP_RSA);
+//
+//            case TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
+//                return createAESCipherSuite(16, TlsCipherSuite.KE_SRP_DSS);
+//
+//            case TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
+//                return createAESCipherSuite(32, TlsCipherSuite.KE_SRP);
+//
+//            case TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
+//                return createAESCipherSuite(32, TlsCipherSuite.KE_SRP_RSA);
+//
+//            case TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
+//                return createAESCipherSuite(32, TlsCipherSuite.KE_SRP_DSS);
 
             default:
                 handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_handshake_failure);
