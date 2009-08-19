@@ -7,9 +7,12 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.agreement.DHBasicAgreement;
+import org.bouncycastle.crypto.agreement.srp.SRP6Client;
+import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
@@ -174,6 +177,8 @@ public class TlsProtocolHandler
 
     private TlsCipherSuite chosenCipherSuite = null;
 
+    private BigInteger SRP_A;
+    private byte[] SRP_identity, SRP_password;
     private BigInteger Yc;
     private byte[] pms;
 
@@ -905,6 +910,77 @@ public class TlsProtocolHandler
          BigInteger agreement = dhAgree.calculateAgreement(new DHPublicKeyParameters(Ys, dhParams));
 
          this.pms = BigIntegers.asUnsignedByteArray(agreement);
+    }
+
+    private void processSRPKeyExchange(ByteArrayInputStream is, Signer signer)
+        throws IOException
+    {
+        InputStream sigIn = is;
+        if (signer != null)
+        {
+            signer.init(false, this.serverPublicKey);
+            signer.update(this.clientRandom, 0, this.clientRandom.length);
+            signer.update(this.serverRandom, 0, this.serverRandom.length);
+    
+            sigIn = new SignerInputStream(is, signer);
+        }
+    
+        /*
+         * Parse the Structure
+         */
+        int NLength = TlsUtils.readUint16(sigIn);
+        byte[] NByte = new byte[NLength];
+        TlsUtils.readFully(NByte, sigIn);
+    
+        int gLength = TlsUtils.readUint16(sigIn);
+        byte[] gByte = new byte[gLength];
+        TlsUtils.readFully(gByte, sigIn);
+    
+        short sLength = TlsUtils.readUint8(sigIn);
+        byte[] sByte = new byte[sLength];
+        TlsUtils.readFully(sByte, sigIn);
+    
+        int BLength = TlsUtils.readUint16(sigIn);
+        byte[] BByte = new byte[BLength];
+        TlsUtils.readFully(BByte, sigIn);
+    
+        if (signer != null)
+        {
+            int sigLength = TlsUtils.readUint16(is);
+            byte[] sigByte = new byte[sigLength];
+            TlsUtils.readFully(sigByte, is);
+    
+            /*
+             * Verify the Signature.
+             */
+            if (!signer.verifySignature(sigByte))
+            {
+                this.failWithError(AL_fatal, AP_bad_certificate);
+            }
+        }
+    
+        this.assertEmpty(is);
+    
+        BigInteger N = new BigInteger(1, NByte);
+        BigInteger g = new BigInteger(1, gByte);
+        byte[] s = sByte;
+        BigInteger B = new BigInteger(1, BByte);
+    
+        SRP6Client srpClient = new SRP6Client();
+        srpClient.init(N, g, new SHA1Digest(), random);
+
+        this.SRP_A = srpClient.generateClientCredentials(s, this.SRP_identity,
+            this.SRP_password);
+    
+        try
+        {
+            BigInteger S = srpClient.calculateSecret(B);
+            this.pms = BigIntegers.asUnsignedByteArray(S);
+        }
+        catch (CryptoException e)
+        {
+            this.failWithError(AL_fatal, AP_illegal_parameter);
+        }
     }
 
     private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
