@@ -346,6 +346,7 @@ public class TlsProtocolHandler
                                             validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
                                             break;
                                         case TlsCipherSuite.KE_DHE_RSA:
+                                        case TlsCipherSuite.KE_SRP_RSA:
                                             if (!(this.serverPublicKey instanceof RSAKeyParameters))
                                             {
                                                 this.failWithError(AL_fatal, AP_certificate_unknown);
@@ -353,6 +354,7 @@ public class TlsProtocolHandler
                                             validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                                             break;
                                         case TlsCipherSuite.KE_DHE_DSS:
+                                        case TlsCipherSuite.KE_SRP_DSS:
                                             if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                                             {
                                                 this.failWithError(AL_fatal, AP_certificate_unknown);
@@ -465,6 +467,20 @@ public class TlsProtocolHandler
                                     {
                                         this.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
                                     }
+
+                                    /*
+                                     * Process any extensions
+                                     */
+                                    // TODO[SRP]
+//                                    if (is.available() > 0)
+//                                    {
+//                                        int extensionsLength = TlsUtils.readUint16(is);
+//                                        byte[] extensions = new byte[extensionsLength];
+//                                        TlsUtils.readFully(extensions, is);
+//
+//                                        // TODO Validate/process
+//                                    }
+
                                     assertEmpty(is);
 
                                     connection_state = CS_SERVER_HELLO_RECEIVED;
@@ -566,6 +582,20 @@ public class TlsProtocolHandler
 
                                             break;
                                         }
+                                        case TlsCipherSuite.KE_SRP:
+                                        case TlsCipherSuite.KE_SRP_RSA:
+                                        case TlsCipherSuite.KE_SRP_DSS:
+                                        {
+                                            /*
+                                             * Send the Client Key Exchange message for
+                                             * SRP key exchange.
+                                             */
+                                            byte[] bytes = BigIntegers.asUnsignedByteArray(this.SRP_A);
+
+                                            sendClientKeyExchange(bytes);
+
+                                            break;
+                                        }
                                         default:
                                             /*
                                             * Problem during handshake, we don't know
@@ -628,6 +658,17 @@ public class TlsProtocolHandler
                         {
                             switch (connection_state)
                             {
+                                case CS_SERVER_HELLO_RECEIVED:
+                                    /*
+                                     * Check that we are doing SRP key exchange
+                                     */
+                                    if (this.chosenCipherSuite.getKeyExchangeAlgorithm() != TlsCipherSuite.KE_SRP)
+                                    {
+                                        this.failWithError(AL_fatal, AP_unexpected_message);
+                                    }
+
+                                    // NB: Fall through to next case label
+
                                 case CS_SERVER_CERTIFICATE_RECEIVED:
                                 {
                                     /*
@@ -643,6 +684,21 @@ public class TlsProtocolHandler
                                         case TlsCipherSuite.KE_DHE_DSS:
                                         {
                                             processDHEKeyExchange(is, new TlsDSSSigner());
+                                            break;
+                                        }
+                                        case TlsCipherSuite.KE_SRP:
+                                        {
+                                            processSRPKeyExchange(is, null);
+                                            break;
+                                        }
+                                        case TlsCipherSuite.KE_SRP_RSA:
+                                        {
+                                            processSRPKeyExchange(is, new TlsRSASigner());
+                                            break;
+                                        }
+                                        case TlsCipherSuite.KE_SRP_DSS:
+                                        {
+                                            processSRPKeyExchange(is, new TlsDSSSigner());
                                             break;
                                         }
                                         default:
@@ -1075,6 +1131,25 @@ public class TlsProtocolHandler
         TlsUtils.writeUint8((short)compressionMethods.length, os);
         os.write(compressionMethods);
 
+        /*
+         * SRP extension
+         */
+        // TODO[SRP]
+//        {
+//            ByteArrayOutputStream ext = new ByteArrayOutputStream();
+//
+//            ByteArrayOutputStream srpData = new ByteArrayOutputStream();
+//            TlsUtils.writeUint8((short)SRP_identity.length, srpData);
+//            srpData.write(SRP_identity);
+//
+//            // TODO 12 should be in an enum somewhere
+//            TlsUtils.writeUint16(12, ext);
+//            TlsUtils.writeUint16(srpData.size(), ext);
+//            ext.write(srpData.toByteArray());
+//
+//            TlsUtils.writeUint16(ext.size(), os);
+//            os.write(ext.toByteArray());
+//        }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HP_CLIENT_HELLO, bos);
@@ -1250,7 +1325,7 @@ public class TlsProtocolHandler
     }
 
     /**
-     * Terminate this connection whith an alert.
+     * Terminate this connection with an alert.
      * <p/>
      * Can be used for normal closure too.
      *
