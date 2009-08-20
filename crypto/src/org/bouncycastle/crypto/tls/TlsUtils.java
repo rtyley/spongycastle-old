@@ -168,6 +168,22 @@ public class TlsUtils
         }
     }
 
+    protected static byte[] readOpaque8(InputStream is) throws IOException
+    {
+        short length = readUint8(is);
+        byte[] value = new byte[length];
+        readFully(value, is);
+        return value;
+    }
+
+    protected static byte[] readOpaque16(InputStream is) throws IOException
+    {
+        int length = readUint16(is);
+        byte[] value = new byte[length];
+        readFully(value, is);
+        return value;
+    }
+
     protected static void checkVersion(byte[] readVersion, TlsProtocolHandler handler) throws IOException
     {
         if ((readVersion[0] != 3) || (readVersion[1] != 1))
