@@ -42,33 +42,31 @@ public class DESedeEngine
             throw new IllegalArgumentException("invalid parameter passed to DESede init - " + params.getClass().getName());
         }
 
-        byte[]      keyMaster = ((KeyParameter)params).getKey();
-        byte[]      key1 = new byte[8], key2 = new byte[8], key3 = new byte[8];
+        byte[] keyMaster = ((KeyParameter)params).getKey();
 
         if (keyMaster.length > 24)
         {
             throw new IllegalArgumentException("key size greater than 24 bytes");
         }
-        
+
         this.forEncryption = encrypting;
+
+        byte[] key1 = new byte[8];
+        System.arraycopy(keyMaster, 0, key1, 0, key1.length);
+        workingKey1 = generateWorkingKey(encrypting, key1);
+
+        byte[] key2 = new byte[8];
+        System.arraycopy(keyMaster, 8, key2, 0, key2.length);
+        workingKey2 = generateWorkingKey(!encrypting, key2);
 
         if (keyMaster.length == 24)
         {
-            System.arraycopy(keyMaster, 0, key1, 0, key1.length);
-            System.arraycopy(keyMaster, 8, key2, 0, key2.length);
+            byte[] key3 = new byte[8];
             System.arraycopy(keyMaster, 16, key3, 0, key3.length);
-
-            workingKey1 = generateWorkingKey(encrypting, key1);
-            workingKey2 = generateWorkingKey(!encrypting, key2);
             workingKey3 = generateWorkingKey(encrypting, key3);
         }
         else    // 16 byte key
         {
-            System.arraycopy(keyMaster, 0, key1, 0, key1.length);
-            System.arraycopy(keyMaster, 8, key2, 0, key2.length);
-
-            workingKey1 = generateWorkingKey(encrypting, key1);
-            workingKey2 = generateWorkingKey(!encrypting, key2);
             workingKey3 = workingKey1;
         }
     }
