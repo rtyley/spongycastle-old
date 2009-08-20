@@ -910,23 +910,13 @@ public class TlsProtocolHandler
         /*
          * Parse the Structure
          */
-         int pLength = TlsUtils.readUint16(sigIn);
-         byte[] pByte = new byte[pLength];
-         TlsUtils.readFully(pByte, sigIn);
+        byte[] pByte = TlsUtils.readOpaque16(sigIn);
+        byte[] gByte = TlsUtils.readOpaque16(sigIn);
+        byte[] YsByte = TlsUtils.readOpaque16(sigIn);
 
-         int gLength = TlsUtils.readUint16(sigIn);
-         byte[] gByte = new byte[gLength];
-         TlsUtils.readFully(gByte, sigIn);
-
-         int YsLength = TlsUtils.readUint16(sigIn);
-         byte[] YsByte = new byte[YsLength];
-         TlsUtils.readFully(YsByte, sigIn);
-
-         if (signer != null)
-         {
-             int sigLength = TlsUtils.readUint16(is);
-             byte[] sigByte = new byte[sigLength];
-             TlsUtils.readFully(sigByte, is);
+        if (signer != null)
+        {
+            byte[] sigByte = TlsUtils.readOpaque16(is);
 
              /*
               * Verify the Signature.
@@ -1002,28 +992,15 @@ public class TlsProtocolHandler
         /*
          * Parse the Structure
          */
-        int NLength = TlsUtils.readUint16(sigIn);
-        byte[] NByte = new byte[NLength];
-        TlsUtils.readFully(NByte, sigIn);
-    
-        int gLength = TlsUtils.readUint16(sigIn);
-        byte[] gByte = new byte[gLength];
-        TlsUtils.readFully(gByte, sigIn);
-    
-        short sLength = TlsUtils.readUint8(sigIn);
-        byte[] sByte = new byte[sLength];
-        TlsUtils.readFully(sByte, sigIn);
-    
-        int BLength = TlsUtils.readUint16(sigIn);
-        byte[] BByte = new byte[BLength];
-        TlsUtils.readFully(BByte, sigIn);
-    
+        byte[] NByte = TlsUtils.readOpaque16(sigIn);
+        byte[] gByte = TlsUtils.readOpaque16(sigIn);
+        byte[] sByte = TlsUtils.readOpaque8(sigIn);
+        byte[] BByte = TlsUtils.readOpaque16(sigIn);
+
         if (signer != null)
         {
-            int sigLength = TlsUtils.readUint16(is);
-            byte[] sigByte = new byte[sigLength];
-            TlsUtils.readFully(sigByte, is);
-    
+            byte[] sigByte = TlsUtils.readOpaque16(is);
+
             /*
              * Verify the Signature.
              */
@@ -1096,8 +1073,7 @@ public class TlsProtocolHandler
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HP_CLIENT_KEY_EXCHANGE, bos);
         TlsUtils.writeUint24(keData.length + 2, bos);
-        TlsUtils.writeUint16(keData.length, bos);
-        bos.write(keData);
+        TlsUtils.writeOpaque16(keData, bos);
         byte[] message = bos.toByteArray();
 
         rs.writeMessage((short)RL_HANDSHAKE, message, 0, message.length);
@@ -1146,8 +1122,7 @@ public class TlsProtocolHandler
         * Compression methods, just the null method.
         */
         byte[] compressionMethods = new byte[]{0x00};
-        TlsUtils.writeUint8((short)compressionMethods.length, os);
-        os.write(compressionMethods);
+        TlsUtils.writeOpaque8(compressionMethods, os);
 
         /*
          * Extensions
@@ -1159,8 +1134,7 @@ public class TlsProtocolHandler
         // TODO[SRP]
 //        {
 //            ByteArrayOutputStream srpData = new ByteArrayOutputStream();
-//            TlsUtils.writeUint8((short)SRP_identity.length, srpData);
-//            srpData.write(SRP_identity);
+//            TlsUtils.writeOpaque8(SRP_identity, srpData);
 //
 //            // TODO[SRP] RFC5054 2.8.1: ExtensionType.srp = 12
 //            clientExtensions.put(Integer.valueOf(12), srpData.toByteArray());
@@ -1179,13 +1153,10 @@ public class TlsProtocolHandler
                 byte[] extValue = (byte[])clientExtensions.get(extType);
 
                 TlsUtils.writeUint16(extType.intValue(), ext);
-                TlsUtils.writeUint16(extValue.length, ext);
-                ext.write(extValue);
+                TlsUtils.writeOpaque16(extValue, ext);
             }
 
-            byte[] extBytes = ext.toByteArray();
-            TlsUtils.writeUint16(extBytes.length, os);
-            os.write(extBytes);
+            TlsUtils.writeOpaque16(ext.toByteArray(), os);
         }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
