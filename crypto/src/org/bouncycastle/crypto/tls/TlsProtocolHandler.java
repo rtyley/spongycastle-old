@@ -449,9 +449,7 @@ public class TlsProtocolHandler
                                     /*
                                     * Currently, we don't support session ids
                                     */
-                                    short sessionIdLength = TlsUtils.readUint8(is);
-                                    byte[] sessionId = new byte[sessionIdLength];
-                                    TlsUtils.readFully(sessionId, is);
+                                    byte[] sessionId = TlsUtils.readOpaque8(is);
 
                                     /*
                                     * Find out which ciphersuite the server has
@@ -752,13 +750,10 @@ public class TlsProtocolHandler
 
                                 case CS_SERVER_KEY_EXCHANGE_RECEIVED:
                                 {
-                                    short typesLength = TlsUtils.readUint8(is);
-                                    byte[] types = new byte[typesLength];
-                                    TlsUtils.readFully(types, is);
+                                    byte[] types = TlsUtils.readOpaque8(is);
+                                    byte[] auths = TlsUtils.readOpaque8(is);
 
-                                    int authsLength = TlsUtils.readUint16(is);
-                                    byte[] auths = new byte[authsLength];
-                                    TlsUtils.readFully(auths, is);
+                                    // TODO Validate/process
 
                                     assertEmpty(is);
                                     break;
