@@ -1,5 +1,15 @@
 package org.bouncycastle.crypto.tls;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -27,17 +37,6 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.util.BigIntegers;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Map;
 
 /**
  * An implementation of all high level protocols in TLS 1.0.
@@ -173,6 +172,7 @@ public class TlsProtocolHandler
     private boolean closed = false;
     private boolean failedWithError = false;
     private boolean appDataReady = false;
+    private boolean extendedClientHello;
 
     private byte[] clientRandom;
     private byte[] serverRandom;
@@ -472,17 +472,22 @@ public class TlsProtocolHandler
                                     }
 
                                     /*
-                                     * Process any extensions
+                                     * RFC4366 2.2
+                                     * The extended server hello message format MAY be sent
+                                     * in place of the server hello message when the client
+                                     * has requested extended functionality via the extended
+                                     * client hello message specified in Section 2.1.
                                      */
-                                    // TODO[SRP]
-//                                    if (is.available() > 0)
-//                                    {
-//                                        int extensionsLength = TlsUtils.readUint16(is);
-//                                        byte[] extensions = new byte[extensionsLength];
-//                                        TlsUtils.readFully(extensions, is);
-//
-//                                        // TODO Validate/process
-//                                    }
+                                    if (extendedClientHello && is.available() > 0)
+                                    {
+                                        // Process extensions from extended server hello
+                                        // TODO[SRP]
+                                        int extensionsLength = TlsUtils.readUint16(is);
+                                        byte[] extensions = new byte[extensionsLength];
+                                        TlsUtils.readFully(extensions, is);
+
+                                        // TODO Validate/process
+                                    }
 
                                     assertEmpty(is);
 
@@ -1151,7 +1156,9 @@ public class TlsProtocolHandler
 //            extensions.put(Integer.valueOf(12), srpData.toByteArray());
 //        }
 
-        if (!extensions.isEmpty())
+        this.extendedClientHello = !extensions.isEmpty();
+
+        if (extendedClientHello)
         {
             ByteArrayOutputStream ext = new ByteArrayOutputStream();
 
