@@ -481,12 +481,22 @@ public class TlsProtocolHandler
                                     if (extendedClientHello && is.available() > 0)
                                     {
                                         // Process extensions from extended server hello
-                                        // TODO[SRP]
-                                        int extensionsLength = TlsUtils.readUint16(is);
-                                        byte[] extensions = new byte[extensionsLength];
-                                        TlsUtils.readFully(extensions, is);
+                                        byte[] extBytes = TlsUtils.readOpaque16(is);
 
-                                        // TODO Validate/process
+                                        // Integer -> byte[]
+                                        Hashtable serverExtensions = new Hashtable();
+
+                                        ByteArrayInputStream ext = new ByteArrayInputStream(extBytes);
+                                        while (ext.available() > 0)
+                                        {
+                                            int extType = TlsUtils.readUint16(ext);
+                                            byte[] extValue = TlsUtils.readOpaque16(ext);
+
+                                            serverExtensions.put(Integer.valueOf(extType), extValue);
+                                        }
+
+                                        // TODO Validate/process serverExtensions (via client?)
+                                        // TODO[SRP]
                                     }
 
                                     assertEmpty(is);
@@ -1144,7 +1154,7 @@ public class TlsProtocolHandler
          */
         // TODO Collect extensions from client
         // Integer -> byte[]
-        Hashtable extensions = new Hashtable();
+        Hashtable clientExtensions = new Hashtable();
 
         // TODO[SRP]
 //        {
@@ -1156,17 +1166,17 @@ public class TlsProtocolHandler
 //            extensions.put(Integer.valueOf(12), srpData.toByteArray());
 //        }
 
-        this.extendedClientHello = !extensions.isEmpty();
+        this.extendedClientHello = !clientExtensions.isEmpty();
 
         if (extendedClientHello)
         {
             ByteArrayOutputStream ext = new ByteArrayOutputStream();
 
-            Enumeration keys = extensions.keys();
+            Enumeration keys = clientExtensions.keys();
             while (keys.hasMoreElements())
             {
                 Integer extType = (Integer)keys.nextElement();
-                byte[] extValue = (byte[])extensions.get(extType);
+                byte[] extValue = (byte[])clientExtensions.get(extType);
 
                 TlsUtils.writeUint16(extType.intValue(), ext);
                 TlsUtils.writeUint16(extValue.length, ext);
