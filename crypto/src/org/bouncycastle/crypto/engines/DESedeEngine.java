@@ -102,17 +102,19 @@ public class DESedeEngine
             throw new DataLengthException("output buffer too short");
         }
 
+        byte[] temp = new byte[BLOCK_SIZE];
+
         if (forEncryption)
         {
-            desFunc(workingKey1, in, inOff, out, outOff);
-            desFunc(workingKey2, out, outOff, out, outOff);
-            desFunc(workingKey3, out, outOff, out, outOff);
+            desFunc(workingKey1, in, inOff, temp, 0);
+            desFunc(workingKey2, temp, 0, temp, 0);
+            desFunc(workingKey3, temp, 0, out, outOff);
         }
         else
         {
-            desFunc(workingKey3, in, inOff, out, outOff);
-            desFunc(workingKey2, out, outOff, out, outOff);
-            desFunc(workingKey1, out, outOff, out, outOff);
+            desFunc(workingKey3, in, inOff, temp, 0);
+            desFunc(workingKey2, temp, 0, temp, 0);
+            desFunc(workingKey1, temp, 0, out, outOff);
         }
 
         return BLOCK_SIZE;
