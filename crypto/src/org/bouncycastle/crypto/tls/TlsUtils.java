@@ -106,6 +106,17 @@ public class TlsUtils
         buf[offset + 7] = (byte)(i);
     }
 
+    protected static void writeOpaque8(byte[] buf, OutputStream os) throws IOException
+    {
+        writeUint8((short)buf.length, os);
+        os.write(buf);
+    }
+
+    protected static void writeOpaque16(byte[] buf, OutputStream os) throws IOException
+    {
+        writeUint16(buf.length, os);
+        os.write(buf);
+    }
 
     protected static short readUint8(InputStream is) throws IOException
     {
