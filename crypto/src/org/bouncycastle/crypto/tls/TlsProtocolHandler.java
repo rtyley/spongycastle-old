@@ -35,6 +35,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * An implementation of all high level protocols in TLS 1.0.
@@ -1132,24 +1135,41 @@ public class TlsProtocolHandler
         os.write(compressionMethods);
 
         /*
-         * SRP extension
+         * Extensions
          */
+        // TODO Collect extensions from client
+        // Integer -> byte[]
+        Hashtable extensions = new Hashtable();
+
         // TODO[SRP]
 //        {
-//            ByteArrayOutputStream ext = new ByteArrayOutputStream();
-//
 //            ByteArrayOutputStream srpData = new ByteArrayOutputStream();
 //            TlsUtils.writeUint8((short)SRP_identity.length, srpData);
 //            srpData.write(SRP_identity);
 //
-//            // TODO 12 should be in an enum somewhere
-//            TlsUtils.writeUint16(12, ext);
-//            TlsUtils.writeUint16(srpData.size(), ext);
-//            ext.write(srpData.toByteArray());
-//
-//            TlsUtils.writeUint16(ext.size(), os);
-//            os.write(ext.toByteArray());
+//            // TODO[SRP] RFC5054 2.8.1: ExtensionType.srp = 12
+//            extensions.put(Integer.valueOf(12), srpData.toByteArray());
 //        }
+
+        if (!extensions.isEmpty())
+        {
+            ByteArrayOutputStream ext = new ByteArrayOutputStream();
+
+            Enumeration keys = extensions.keys();
+            while (keys.hasMoreElements())
+            {
+                Integer extType = (Integer)keys.nextElement();
+                byte[] extValue = (byte[])extensions.get(extType);
+
+                TlsUtils.writeUint16(extType.intValue(), ext);
+                TlsUtils.writeUint16(extValue.length, ext);
+                ext.write(extValue);
+            }
+
+            byte[] extBytes = ext.toByteArray();
+            TlsUtils.writeUint16(extBytes.length, os);
+            os.write(extBytes);
+        }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HP_CLIENT_HELLO, bos);
