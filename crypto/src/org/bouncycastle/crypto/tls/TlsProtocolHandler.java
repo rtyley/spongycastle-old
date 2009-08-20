@@ -1163,7 +1163,7 @@ public class TlsProtocolHandler
 //            srpData.write(SRP_identity);
 //
 //            // TODO[SRP] RFC5054 2.8.1: ExtensionType.srp = 12
-//            extensions.put(Integer.valueOf(12), srpData.toByteArray());
+//            clientExtensions.put(Integer.valueOf(12), srpData.toByteArray());
 //        }
 
         this.extendedClientHello = !clientExtensions.isEmpty();
