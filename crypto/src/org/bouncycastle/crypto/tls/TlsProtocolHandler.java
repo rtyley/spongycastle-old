@@ -100,13 +100,15 @@ public class TlsProtocolHandler
 
     private static final short CS_CLIENT_KEY_EXCHANGE_SEND = 7;
 
-    private static final short CS_CLIENT_CHANGE_CIPHER_SPEC_SEND = 8;
+    private static final short CS_CLIENT_VERIFICATION_SEND = 8;
 
-    private static final short CS_CLIENT_FINISHED_SEND = 9;
+    private static final short CS_CLIENT_CHANGE_CIPHER_SPEC_SEND = 9;
 
-    private static final short CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED = 10;
+    private static final short CS_CLIENT_FINISHED_SEND = 10;
 
-    private static final short CS_DONE = 11;
+    private static final short CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED = 11;
+
+    private static final short CS_DONE = 12;
 
 
     protected static final short AP_close_notify = 0;
