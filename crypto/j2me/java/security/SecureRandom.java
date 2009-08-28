@@ -11,25 +11,29 @@ import org.bouncycastle.crypto.prng.DigestRandomGenerator;
  * An implementation of SecureRandom specifically for the light-weight API, JDK
  * 1.0, and the J2ME. Random generation is based on the traditional SHA1 with
  * counter. Calling setSeed will always increase the entropy of the hash.
+ * <p>
+ * <b>Do not use this class without calling setSeed at least once</b>! There
+ * are some example seed generators in the org.bouncycastle.prng package.
  */
 public class SecureRandom extends java.util.Random
 {
-    private static SecureRandom rand    = new SecureRandom(new DigestRandomGenerator(new SHA1Digest()));
+    // Note: all objects of this class should be deriving their random data from
+    // a single generator appropriate to the digest being used.
+    private static final RandomGenerator sha1Generator = new DigestRandomGenerator(new SHA1Digest());
+    private static final RandomGenerator sha256Generator = new DigestRandomGenerator(new SHA256Digest());
 
     protected RandomGenerator             generator;
 
     // public constructors
     public SecureRandom()
     {
-        super(0);
-        this.generator = new DigestRandomGenerator(new SHA1Digest());
+        this(sha1Generator);
         setSeed(System.currentTimeMillis());
     }
 
     public SecureRandom(byte[] inSeed)
     {
-        super(0);
-        this.generator = new DigestRandomGenerator(new SHA1Digest());
+        this(sha1Generator);
         setSeed(inSeed);
     }
 
@@ -48,11 +52,11 @@ public class SecureRandom extends java.util.Random
     {
         if (algorithm.equals("SHA1PRNG"))
         {
-            return new SecureRandom(new DigestRandomGenerator(new SHA1Digest()));
+            return new SecureRandom(sha1Generator);
         }
         if (algorithm.equals("SHA256PRNG"))
         {
-            return new SecureRandom(new DigestRandomGenerator(new SHA256Digest()));
+            return new SecureRandom(sha256Generator);
         }
         return new SecureRandom();    // follow old behaviour
     }
@@ -66,8 +70,8 @@ public class SecureRandom extends java.util.Random
     {
         byte[] rv = new byte[numBytes];
 
-        rand.setSeed(System.currentTimeMillis());
-        rand.nextBytes(rv);
+        sha1Generator.addSeedMaterial(System.currentTimeMillis());
+        sha1Generator.nextBytes(rv);
 
         return rv;
     }
