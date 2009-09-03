@@ -18,12 +18,7 @@ public class GCMBlockCipher
 {
     private static final int BLOCK_SIZE = 16;
     private static final byte[] ZEROES = new byte[BLOCK_SIZE];
-    private static final byte[] R = new byte[BLOCK_SIZE];
-
-    static
-    {
-        R[0] = (byte)0xe1;
-    }
+    private static final int[] R = new int[]{ 0xe1000000, 0, 0, 0 };
 
     private final BlockCipher   cipher;
 
@@ -34,7 +29,7 @@ public class GCMBlockCipher
     private byte[]              A;
     private KeyParameter        keyParam;
     private byte[]              H;
-    private byte[][][]          M = new byte[16][256][];
+    private int[][][]           M = new int[16][256][];
     private byte[]              initS;
     private byte[]              J0;
 
@@ -376,16 +371,16 @@ public class GCMBlockCipher
         }
     }
 
-    private static void shiftRight(byte[] block)
+    private static void shiftRight(int[] block)
     {
         int i = 0;
         int bit = 0;
         for (;;)
         {
-            int b = block[i] & 0xff;
-            block[i] = (byte)((b >>> 1) | bit);
-            if (++i == 16) break;
-            bit = (b & 0x01) << 7;
+            int b = block[i];
+            block[i] = (b >>> 1) | bit;
+            if (++i == 4) break;
+            bit = (b & 1) << 31;
         }
     }
 
@@ -399,18 +394,28 @@ public class GCMBlockCipher
         }
     }
 
+    private static void xor(int[] block, int[] val)
+    {
+//      assert block.length == 4 && val.length == 4;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            block[i] ^= val[i];
+        }
+    }
+
     private byte[] multiplyH(byte[] x)
     {
 //      assert block.Length == 16;
 
 //      return multiply(x, H);
 
-        byte[] z = new byte[16];
+        int[] z = new int[4];
         for (int i = 0; i != 16; ++i)
         {
             xor(z, M[i][x[i] & 0xff]);
         }
-        return z;
+        return asBytes(z);
     }
 
 //    private static byte[] multiply(byte[] x, byte[] y)
@@ -438,10 +443,12 @@ public class GCMBlockCipher
 //    }
 
     // P is the value with only bit i=1 set
-    private static byte[] multiplyP(byte[] x)
+    private static int[] multiplyP(int[] x)
     {
-        byte[] v = Arrays.clone(x);
-        boolean lsb = (v[15] & 1) == 1;
+        int[] v = new int[4];
+        System.arraycopy(x, 0, v, 0, 4);
+
+        boolean lsb = (v[3] & 1) == 1;
         shiftRight(v);
         if (lsb)
         {
@@ -450,9 +457,9 @@ public class GCMBlockCipher
         return v;
     }
 
-    private static byte[] multiplyP8(byte[] x)
+    private static int[] multiplyP8(int[] x)
     {
-        byte[] z = x;
+        int[] z = x;
         for (int i = 0; i < 8; ++i)
         {
             z = multiplyP(z);
@@ -474,8 +481,8 @@ public class GCMBlockCipher
 
     private void calculateM()
     {
-        M[0][0] = new byte[16];
-        M[0][128] = Arrays.clone(H);
+        M[0][0] = new int[4];
+        M[0][128] = asInts(H);
         for (int j = 64; j >= 1; j >>= 1)
         {
             M[0][j] = multiplyP(M[0][j + j]);
@@ -486,7 +493,9 @@ public class GCMBlockCipher
             {
                 for (int k = 1; k < j; ++k)
                 {
-                    byte[] tmp = Arrays.clone(M[i][j]);
+                    int[] tmp = new int[4];
+                    System.arraycopy(M[i][j], 0, tmp, 0, 4);
+
                     xor(tmp, M[i][k]);
                     M[i][j + k] = tmp;
                 }
@@ -494,7 +503,7 @@ public class GCMBlockCipher
 
             if (++i == 16) return;
 
-            M[i][0] = new byte[16];
+            M[i][0] = new int[4];
             for (int j = 128; j > 0; j >>= 1)
             {
                 M[i][j] = multiplyP8(M[i - 1][j]);
@@ -515,4 +524,34 @@ public class GCMBlockCipher
         bs[off++] = (byte)(n >>>  8);
         bs[off  ] = (byte)(n       );
     }
+
+    private static int BEToInt(byte[] bs, int off)
+    {
+        int n = bs[off++] << 24;
+        n |= (bs[off++] & 0xff) << 16;
+        n |= (bs[off++] & 0xff) << 8;
+        n |= (bs[off++] & 0xff);
+        return n;
+    }
+
+    private static byte[] asBytes(int[] us)
+    {
+        byte[] bs = new byte[16];
+        intToBE(us[0], bs, 0);
+        intToBE(us[1], bs, 4);
+        intToBE(us[2], bs, 8);
+        intToBE(us[3], bs, 12);
+        return bs;
+    }
+
+    private static int[] asInts(byte[] bs)
+    {
+        int[] us = new int[4];
+        us[0] = BEToInt(bs, 0);
+        us[1] = BEToInt(bs, 4);
+        us[2] = BEToInt(bs, 8);
+        us[3] = BEToInt(bs, 12);
+        return us;
+    }
+    
 }
