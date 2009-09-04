@@ -65,12 +65,7 @@ public class GCMBlockCipher
         throws IllegalArgumentException
     {
         this.forEncryption = forEncryption;
-        this.macSize = 16; // TODO Make configurable?
         this.macBlock = null;
-
-        // TODO If macSize limitation is removed, be very careful about bufBlock
-        int bufLength = forEncryption ? BLOCK_SIZE : (BLOCK_SIZE + macSize); 
-        this.bufBlock = new byte[bufLength];
 
         if (params instanceof AEADParameters)
         {
@@ -78,12 +73,14 @@ public class GCMBlockCipher
 
             nonce = param.getNonce();
             A = param.getAssociatedText();
-//            macSize = param.getMacSize() / 8;
-            if (param.getMacSize() != 128)
+
+            int macSizeBits = param.getMacSize();
+            if (macSizeBits < 96 || macSizeBits > 128 || macSizeBits % 8 != 0)
             {
-                // TODO Make configurable?
-                throw new IllegalArgumentException("only 128-bit MAC supported currently");
+                throw new IllegalArgumentException("Invalid value for MAC size: " + macSizeBits);
             }
+
+            macSize = macSizeBits / 8; 
             keyParam = param.getKey();
         }
         else if (params instanceof ParametersWithIV)
@@ -92,12 +89,16 @@ public class GCMBlockCipher
 
             nonce = param.getIV();
             A = null;
+            macSize = 16;
             keyParam = (KeyParameter)param.getParameters();
         }
         else
         {
             throw new IllegalArgumentException("invalid parameters passed to GCM");
         }
+
+        int bufLength = forEncryption ? BLOCK_SIZE : (BLOCK_SIZE + macSize); 
+        this.bufBlock = new byte[bufLength];
 
         if (nonce == null || nonce.length < 1)
         {
@@ -185,7 +186,7 @@ public class GCMBlockCipher
                 gCTRBlock(bufBlock, BLOCK_SIZE, out, outOff + resultLen);
                 if (!forEncryption)
                 {
-                    System.arraycopy(bufBlock, BLOCK_SIZE, bufBlock, 0, BLOCK_SIZE);
+                    System.arraycopy(bufBlock, BLOCK_SIZE, bufBlock, 0, macSize);
                 }
 //              bufOff = 0;
                 bufOff = bufBlock.length - BLOCK_SIZE;
@@ -207,7 +208,7 @@ public class GCMBlockCipher
             gCTRBlock(bufBlock, BLOCK_SIZE, out, outOff);
             if (!forEncryption)
             {
-                System.arraycopy(bufBlock, BLOCK_SIZE, bufBlock, 0, BLOCK_SIZE);
+                System.arraycopy(bufBlock, BLOCK_SIZE, bufBlock, 0, macSize);
             }
 //            bufOff = 0;
             bufOff = bufBlock.length - BLOCK_SIZE;
@@ -254,17 +255,22 @@ public class GCMBlockCipher
 
         int resultLen = extra;
 
+        // We place into macBlock our calculated value for T
+        this.macBlock = new byte[macSize];
+        System.arraycopy(tag, 0, macBlock, 0, macSize);
+
         if (forEncryption)
         {
-            this.macBlock = tag;
-            System.arraycopy(tag, 0, out, outOff + bufOff, tag.length);
-            resultLen += tag.length;
+            // Append T to the message
+            System.arraycopy(macBlock, 0, out, outOff + bufOff, macSize);
+            resultLen += macSize;
         }
         else
         {
-            this.macBlock = new byte[macSize];
-            System.arraycopy(bufBlock, extra, macBlock, 0, macSize);
-            if (!Arrays.areEqual(tag, this.macBlock))
+            // Retrieve the T value from the message and compare to calculated one
+            byte[] msgMac = new byte[macSize];
+            System.arraycopy(bufBlock, extra, msgMac, 0, macSize);
+            if (!Arrays.areEqual(this.macBlock, msgMac))
             {
                 throw new InvalidCipherTextException("mac check in GCM failed");
             }
