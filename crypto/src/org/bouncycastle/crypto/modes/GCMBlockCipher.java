@@ -18,7 +18,6 @@ public class GCMBlockCipher
 {
     private static final int BLOCK_SIZE = 16;
     private static final byte[] ZEROES = new byte[BLOCK_SIZE];
-    private static final int[] R = new int[]{ 0xe1000000, 0, 0, 0 };
 
     private final BlockCipher   cipher;
 
@@ -443,41 +442,25 @@ public class GCMBlockCipher
 //    }
 
     // P is the value with only bit i=1 set
-    private static int[] multiplyP(int[] x)
+    private static void multiplyP(int[] x)
     {
-        int[] v = new int[4];
-        System.arraycopy(x, 0, v, 0, 4);
-
-        boolean lsb = (v[3] & 1) == 1;
-        shiftRight(v);
+        boolean lsb = (x[3] & 1) == 1;
+        shiftRight(x);
         if (lsb)
         {
-            xor(v, R);
+            // R = new int[]{ 0xe1000000, 0, 0, 0 };
+//            xor(v, R);
+            x[0] ^= 0xe1000000;
         }
-        return v;
     }
 
-    private static int[] multiplyP8(int[] x)
+    private static void multiplyP8(int[] x)
     {
-        int[] z = x;
         for (int i = 0; i < 8; ++i)
         {
-            z = multiplyP(z);
+            multiplyP(x);
         }
-        return z;
     }
-    
-//    private byte[] asBlock(BigInteger bi)
-//    {
-//        byte[] b = BigIntegers.asUnsignedByteArray(bi);
-//        if (b.length < 16)
-//        {
-//            byte[] tmp = new byte[16];
-//            System.arraycopy(b, 0, tmp, tmp.length - b.length, b.length);
-//            b = tmp;
-//        }
-//        return b;
-//    }
 
     private void calculateM()
     {
@@ -485,7 +468,11 @@ public class GCMBlockCipher
         M[0][128] = asInts(H);
         for (int j = 64; j >= 1; j >>= 1)
         {
-            M[0][j] = multiplyP(M[0][j + j]);
+            int[] tmp = new int[4];
+            System.arraycopy(M[0][j + j], 0, tmp, 0, 4);
+
+            multiplyP(tmp);
+            M[0][j] = tmp;
         }
         for (int i = 0;;)
         {
@@ -506,7 +493,11 @@ public class GCMBlockCipher
             M[i][0] = new int[4];
             for (int j = 128; j > 0; j >>= 1)
             {
-                M[i][j] = multiplyP8(M[i - 1][j]);
+                int[] tmp = new int[4];
+                System.arraycopy(M[i - 1][j], 0, tmp, 0, 4);
+
+                multiplyP8(tmp);
+                M[i][j] = tmp;
             }
         }
     }
