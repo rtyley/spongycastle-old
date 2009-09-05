@@ -36,7 +36,7 @@ public class X509ExtensionUtil
     {
         byte[] extVal = cert.getExtensionValue(X509Extensions.IssuerAlternativeName.getId());
 
-        return getAlternativeName(extVal);
+        return getAlternativeNames(extVal);
     }
 
     public static Collection getSubjectAlternativeNames(X509Certificate cert)
@@ -44,21 +44,20 @@ public class X509ExtensionUtil
     {        
         byte[] extVal = cert.getExtensionValue(X509Extensions.SubjectAlternativeName.getId());
 
-        return getAlternativeName(extVal);
+        return getAlternativeNames(extVal);
     }
 
-    private static Collection getAlternativeName(byte[] extVal)
+    private static Collection getAlternativeNames(byte[] extVal)
         throws CertificateParsingException
     {
-        Collection temp = new ArrayList();
         if (extVal == null)
         {
             return Collections.EMPTY_LIST;
         }
         try
         {
-            byte[] extnValue = DEROctetString.getInstance(ASN1Object.fromByteArray(extVal)).getOctets();
-            Enumeration it = DERSequence.getInstance(ASN1Object.fromByteArray(extnValue)).getObjects();
+            Collection temp = new ArrayList();
+            Enumeration it = DERSequence.getInstance(fromExtensionValue(extVal)).getObjects();
             while (it.hasMoreElements())
             {
                 GeneralName genName = GeneralName.getInstance(it.nextElement());
@@ -85,17 +84,17 @@ public class X509ExtensionUtil
                 case GeneralName.iPAddress:
                     list.add(DEROctetString.getInstance(genName.getName()).getOctets());
                     break;
-                    default:
-                        throw new IOException("Bad tag number: " + genName.getTagNo());
+                default:
+                    throw new IOException("Bad tag number: " + genName.getTagNo());
                 }
 
                 temp.add(list);
             }
+            return Collections.unmodifiableCollection(temp);
         }
         catch (Exception e)
         {
             throw new CertificateParsingException(e.getMessage());
         }
-        return Collections.unmodifiableCollection(temp);
     }
 }
