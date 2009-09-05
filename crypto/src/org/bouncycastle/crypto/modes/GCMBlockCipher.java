@@ -132,11 +132,11 @@ public class GCMBlockCipher
         }
         else
         {
-            byte[] N = gHASH(nonce);
+            this.J0 = gHASH(nonce);
             byte[] X = new byte[16];
             packLength((long)nonce.length * 8, X, 8);
-            xor(N, X);
-            this.J0 = multiplyH(N);
+            xor(this.J0, X);
+            multiplyH(this.J0);
         }
 
         this.S = Arrays.clone(initS);
@@ -244,8 +244,8 @@ public class GCMBlockCipher
         packLength((long)A.length * 8, X, 0);
         packLength(totalLength * 8, X, 8);
 
-        xor(X, S);
-        S = multiplyH(X);
+        xor(S, X);
+        multiplyH(S);
 
         // TODO Fix this if tagLength becomes configurable
         // T = MSBt(GCTRk(J0,S))
@@ -333,7 +333,7 @@ public class GCMBlockCipher
 
 //        gHASHBlock(hashBytes);
         xor(S, hashBytes);
-        S = multiplyH(S);
+        multiplyH(S);
 
         totalLength += bufCount;
     }
@@ -347,8 +347,8 @@ public class GCMBlockCipher
             byte[] X = new byte[16];
             int num = Math.min(b.length - pos, 16);
             System.arraycopy(b, pos, X, 0, num);
-            xor(X, Y);
-            Y = multiplyH(X);
+            xor(Y, X);
+            multiplyH(Y);
         }
 
         return Y;
@@ -409,7 +409,7 @@ public class GCMBlockCipher
         }
     }
 
-    private byte[] multiplyH(byte[] x)
+    private void multiplyH(byte[] x)
     {
 //      assert block.Length == 16;
 
@@ -418,9 +418,18 @@ public class GCMBlockCipher
         int[] z = new int[4];
         for (int i = 0; i != 16; ++i)
         {
-            xor(z, M[i][x[i] & 0xff]);
+//            xor(z, M[i][x[i] & 0xff]);
+            int[] m = M[i][x[i] & 0xff];
+            z[0] ^= m[0];
+            z[1] ^= m[1];
+            z[2] ^= m[2];
+            z[3] ^= m[3];
         }
-        return asBytes(z);
+//        return asBytes(z);
+        intToBE(z[0], x, 0);
+        intToBE(z[1], x, 4);
+        intToBE(z[2], x, 8);
+        intToBE(z[3], x, 12);
     }
 
 //    private static byte[] multiply(byte[] x, byte[] y)
@@ -531,15 +540,15 @@ public class GCMBlockCipher
         return n;
     }
 
-    private static byte[] asBytes(int[] us)
-    {
-        byte[] bs = new byte[16];
-        intToBE(us[0], bs, 0);
-        intToBE(us[1], bs, 4);
-        intToBE(us[2], bs, 8);
-        intToBE(us[3], bs, 12);
-        return bs;
-    }
+//    private static byte[] asBytes(int[] us)
+//    {
+//        byte[] bs = new byte[16];
+//        intToBE(us[0], bs, 0);
+//        intToBE(us[1], bs, 4);
+//        intToBE(us[2], bs, 8);
+//        intToBE(us[3], bs, 12);
+//        return bs;
+//    }
 
     private static int[] asInts(byte[] bs)
     {
