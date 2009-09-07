@@ -124,7 +124,7 @@ public class RIPEMD128Digest
     /*
      * rotate int x left n bits.
      */
-    private final int RL(
+    private int RL(
         int x,
         int n)
     {
@@ -138,7 +138,7 @@ public class RIPEMD128Digest
     /*
      * F
      */
-    private final int f1(
+    private int f1(
         int x,
         int y,
         int z)
@@ -149,7 +149,7 @@ public class RIPEMD128Digest
     /*
      * G
      */
-    private final int f2(
+    private int f2(
         int x,
         int y,
         int z)
@@ -160,7 +160,7 @@ public class RIPEMD128Digest
     /*
      * H
      */
-    private final int f3(
+    private int f3(
         int x,
         int y,
         int z)
@@ -171,7 +171,7 @@ public class RIPEMD128Digest
     /*
      * I
      */
-    private final int f4(
+    private int f4(
         int x,
         int y,
         int z)
@@ -179,7 +179,7 @@ public class RIPEMD128Digest
         return (x & z) | (y & ~z);
     }
 
-    private final int F1(
+    private int F1(
         int a,
         int b,
         int c,
@@ -190,7 +190,7 @@ public class RIPEMD128Digest
         return RL(a + f1(b, c, d) + x, s);
     }
 
-    private final int F2(
+    private int F2(
         int a,
         int b,
         int c,
@@ -201,7 +201,7 @@ public class RIPEMD128Digest
         return RL(a + f2(b, c, d) + x + 0x5a827999, s);
     }
 
-    private final int F3(
+    private int F3(
         int a,
         int b,
         int c,
@@ -212,7 +212,7 @@ public class RIPEMD128Digest
         return RL(a + f3(b, c, d) + x + 0x6ed9eba1, s);
     }
 
-    private final int F4(
+    private int F4(
         int a,
         int b,
         int c,
@@ -223,7 +223,7 @@ public class RIPEMD128Digest
         return RL(a + f4(b, c, d) + x + 0x8f1bbcdc, s);
     }
 
-    private final int FF1(
+    private int FF1(
         int a,
         int b,
         int c,
@@ -234,7 +234,7 @@ public class RIPEMD128Digest
         return RL(a + f1(b, c, d) + x, s);
     }
 
-    private final int FF2(
+    private int FF2(
         int a,
         int b,
         int c,
@@ -245,7 +245,7 @@ public class RIPEMD128Digest
       return RL(a + f2(b, c, d) + x + 0x6d703ef3, s);
     }
 
-    private final int FF3(
+    private int FF3(
         int a,
         int b,
         int c,
@@ -256,7 +256,7 @@ public class RIPEMD128Digest
       return RL(a + f3(b, c, d) + x + 0x5c4dd124, s);
     }
 
-    private final int FF4(
+    private int FF4(
         int a,
         int b,
         int c,

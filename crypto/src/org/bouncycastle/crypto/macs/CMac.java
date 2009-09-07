@@ -103,7 +103,7 @@ public class CMac implements Mac
         return cipher.getAlgorithmName();
     }
 
-    private final byte[] doubleLu(byte[] in)
+    private byte[] doubleLu(byte[] in)
     {
         int FirstBit = (in[0] & 0xFF) >> 7;
         byte[] ret = new byte[in.length];

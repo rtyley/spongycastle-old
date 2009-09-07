@@ -83,7 +83,7 @@ public class MIDPTest extends MIDlet
 
     }
 
-    private final byte[] performEncrypt(byte[] key, String plainText)
+    private byte[] performEncrypt(byte[] key, String plainText)
     {
         byte[] ptBytes = plainText.getBytes();
 
@@ -109,7 +109,7 @@ public class MIDPTest extends MIDlet
         return rv;
     }
 
-    private final String performDecrypt(byte[] key, byte[] cipherText)
+    private String performDecrypt(byte[] key, byte[] cipherText)
     {
         cipher.init(false, new KeyParameter(key));
 
@@ -133,7 +133,7 @@ public class MIDPTest extends MIDlet
         return 4; // DES
     }
 
-    private final BlockCipher getEngineInstance()
+    private BlockCipher getEngineInstance()
     {
         // returns a block cipher according to the current
         // state of the radio button lists. This is only
