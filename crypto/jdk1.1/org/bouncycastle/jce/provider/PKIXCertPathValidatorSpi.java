@@ -506,7 +506,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         }
     }
 
-    private final Set getQualifierSet(ASN1Sequence qualifiers) 
+    private Set getQualifierSet(ASN1Sequence qualifiers) 
         throws CertPathValidatorException
     {
         Set             pq   = new HashSet();
@@ -1987,7 +1987,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
      * @return a Collection of all found {@link CRL CRL}
      * objects. May be empty but never <code>null</code>.
      */
-    private final Collection findCRLs(
+    private Collection findCRLs(
         X509CRLSelector crlSelect,
         List            crlStores)
         throws AnnotatedException

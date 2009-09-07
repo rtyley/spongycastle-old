@@ -261,7 +261,7 @@ public class NISTCertPathTest
         }
     }
     
-    private final void init()
+    private void init()
     {
         try
         {
@@ -296,7 +296,7 @@ public class NISTCertPathTest
         }
     }
 
-    private final X509Certificate decodeCertificate(String _str)
+    private X509Certificate decodeCertificate(String _str)
             throws GeneralSecurityException
     {
 
@@ -305,7 +305,7 @@ public class NISTCertPathTest
                         .decode(_str)));
     }
 
-    private final X509CRL decodeCRL(String _str)
+    private X509CRL decodeCRL(String _str)
             throws GeneralSecurityException
     {
 
@@ -313,7 +313,7 @@ public class NISTCertPathTest
                 .decode(_str)));
     }
 
-    private final CertStore makeCertStore(String[] _strs)
+    private CertStore makeCertStore(String[] _strs)
             throws GeneralSecurityException
     {
 

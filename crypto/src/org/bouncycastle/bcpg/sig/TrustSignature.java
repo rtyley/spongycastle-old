@@ -9,7 +9,7 @@ import org.bouncycastle.bcpg.SignatureSubpacketTags;
 public class TrustSignature 
     extends SignatureSubpacket
 {    
-    private static final byte[] intToByteArray(
+    private static byte[] intToByteArray(
         int    v1,
         int    v2)
     {

@@ -271,7 +271,7 @@ public class PKIXCertPathBuilderSpi
      * @return a Collection of all found {@link Certificate Certificate}
      * objects. May be empty but never <code>null</code>.
      **/
-    private final Collection findCertificates(
+    private Collection findCertificates(
         CertSelector    certSelect,
         List            certStores) 
         throws CertStoreException
@@ -305,7 +305,7 @@ public class PKIXCertPathBuilderSpi
      * has thrown an exception. This Exception can be obtainted with
      * <code>getCause()</code> method.
      **/
-    private final X509Certificate findIssuer(
+    private X509Certificate findIssuer(
         X509Certificate cert,
         List certStores)
         throws CertPathValidatorException

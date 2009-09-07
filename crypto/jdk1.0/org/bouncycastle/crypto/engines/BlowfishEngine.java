@@ -550,7 +550,7 @@ implements BlockCipher
         return BLOCK_SIZE;
     }
 
-    private final int F(int x)
+    private int F(int x)
     {
         int a,b,c,d;
 
@@ -562,7 +562,7 @@ implements BlockCipher
         return ((S[0][a] + S[1][b]) ^ S[2][c]) + S[3][d];
     }
 
-    private final void BF_Encipher(int xl, int xr, int result[])
+    private void BF_Encipher(int xl, int xr, int result[])
     {
         xl ^= P[0];
 
@@ -580,7 +580,7 @@ implements BlockCipher
         return;
     }
 
-    private final void BF_Decipher(int xl, int xr, int result[])
+    private void BF_Decipher(int xl, int xr, int result[])
     {
         xl ^= P[ROUNDS + 1];
 
@@ -596,7 +596,7 @@ implements BlockCipher
         result[1] = xl;
     }
 
-    private final int BytesTo32bits(byte[] b, int i)
+    private int BytesTo32bits(byte[] b, int i)
     {
         int rv = 0;
 
@@ -608,7 +608,7 @@ implements BlockCipher
         return rv;
     }
 
-    private final void Bits32ToBytes(int in,  byte[] b, int offset)
+    private void Bits32ToBytes(int in,  byte[] b, int offset)
     {
         b[offset + 3] = (byte)in;
         b[offset + 2] = (byte)(in >> 8);
