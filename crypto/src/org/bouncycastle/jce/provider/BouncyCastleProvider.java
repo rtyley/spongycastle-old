@@ -534,7 +534,16 @@ public final class BouncyCastleProvider extends Provider
             Class clazz = null;
             try
             {
-                clazz = this.getClass().getClassLoader().loadClass(packageName + names[i] + "Mappings");
+                ClassLoader loader = this.getClass().getClassLoader();
+
+                if (loader != null)
+                {
+                    clazz = loader.loadClass(packageName + names[i] + "Mappings");
+                }
+                else
+                {
+                    clazz = Class.forName(packageName + names[i] + "Mappings");
+                }
             }
             catch (ClassNotFoundException e)
             {
