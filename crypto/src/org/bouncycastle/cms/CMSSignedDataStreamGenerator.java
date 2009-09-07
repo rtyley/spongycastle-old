@@ -2,7 +2,6 @@ package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -11,7 +10,6 @@ import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERTaggedObject;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
@@ -73,7 +71,6 @@ public class CMSSignedDataStreamGenerator
 
     private class SignerInf
     {
-        private PrivateKey                  _key;
         private X509Certificate             _cert;
         private String                      _digestOID;
         private String                      _encOID;
@@ -84,7 +81,6 @@ public class CMSSignedDataStreamGenerator
         private byte[]                      _subjectKeyID;
 
         SignerInf(
-            PrivateKey                  key,
             X509Certificate             cert,
             String                      digestOID,
             String                      encOID,
@@ -93,7 +89,6 @@ public class CMSSignedDataStreamGenerator
             MessageDigest               digest,
             Signature                   signature)
         {
-            _key = key;
             _cert = cert;
             _digestOID = digestOID;
             _encOID = encOID;
@@ -104,7 +99,6 @@ public class CMSSignedDataStreamGenerator
         }
 
         SignerInf(
-            PrivateKey                  key,
             byte[]                      subjectKeyID,
             String                      digestOID,
             String                      encOID,
@@ -113,7 +107,6 @@ public class CMSSignedDataStreamGenerator
             MessageDigest               digest,
             Signature                   signature)
         {
-            _key = key;
             _subjectKeyID = subjectKeyID;
             _digestOID = digestOID;
             _encOID = encOID;
@@ -123,40 +116,25 @@ public class CMSSignedDataStreamGenerator
             _signature = signature;
         }
 
-        PrivateKey getKey()
-        {
-            return _key;
-        }
-
         X509Certificate getCertificate()
         {
             return _cert;
         }
 
-        String getDigestAlgOID()
+        AlgorithmIdentifier getDigestAlgorithmID()
         {
-            return _digestOID;
+            return new AlgorithmIdentifier(
+                new DERObjectIdentifier(_digestOID), DERNull.INSTANCE);
         }
 
-        byte[] getDigestAlgParams()
-        {
-            return null;
-        }
-
-        String getEncryptionAlgOID()
-        {
-            return _encOID;
-        }
-        
         SignerInfo toSignerInfo(
             DERObjectIdentifier  contentType)
             throws IOException, SignatureException, CertificateEncodingException
         {
-            AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
-                  new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
-            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID(), _signature);
+            AlgorithmIdentifier digAlgId = getDigestAlgorithmID();
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(_encOID, _signature);
 
-            byte[]          hash = _digest.digest();
+            byte[] hash = _digest.digest();
 
             _digests.put(_digestOID, hash.clone());
 
@@ -326,7 +304,7 @@ public class CMSSignedDataStreamGenerator
 
         sig.initSign(key, rand);
 
-        _signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
+        _signerInfs.add(new SignerInf(cert, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _messageDigests.add(dig);
     }
 
@@ -429,7 +407,7 @@ public class CMSSignedDataStreamGenerator
 
         sig.initSign(key, rand);
 
-        _signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
+        _signerInfs.add(new SignerInf(subjectKeyID, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _messageDigests.add(dig);
     }
 
@@ -443,37 +421,6 @@ public class CMSSignedDataStreamGenerator
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
         addSigner(key, subjectKeyID, digestOID, signedAttrGenerator, unsignedAttrGenerator, CMSUtils.getProvider(sigProvider));
-    }
-
-    private DERObject makeObj(
-        byte[]  encoding)
-        throws IOException
-    {
-        if (encoding == null)
-        {
-            return null;
-        }
-
-        ASN1InputStream         aIn = new ASN1InputStream(encoding);
-
-        return aIn.readObject();
-    }
-
-    private AlgorithmIdentifier makeAlgId(
-        String  oid,
-        byte[]  params)
-        throws IOException
-    {
-        if (params != null)
-        {
-            return new AlgorithmIdentifier(
-                            new DERObjectIdentifier(oid), makeObj(params));
-        }
-        else
-        {
-            return new AlgorithmIdentifier(
-                            new DERObjectIdentifier(oid), new DERNull());
-        }
     }
 
     /**
@@ -573,12 +520,8 @@ public class CMSSignedDataStreamGenerator
         //
         for (Iterator it = _signers.iterator(); it.hasNext();)
         {
-            SignerInformation        signer = (SignerInformation)it.next();
-            AlgorithmIdentifier     digAlgId;
-
-            digAlgId = makeAlgId(signer.getDigestAlgOID(), signer.getDigestAlgParams());
-
-            digestAlgs.add(digAlgId);
+            SignerInformation signer = (SignerInformation)it.next();
+            digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
         }
         
         //
@@ -586,12 +529,8 @@ public class CMSSignedDataStreamGenerator
         //
         for (Iterator it = _signerInfs.iterator(); it.hasNext();)
         {
-            SignerInf           signer = (SignerInf)it.next();
-            AlgorithmIdentifier digAlgId;
-
-            digAlgId = makeAlgId(signer.getDigestAlgOID(), signer.getDigestAlgParams());
-
-            digestAlgs.add(digAlgId);
+            SignerInf signer = (SignerInf)it.next();
+            digestAlgs.add(signer.getDigestAlgorithmID());
         }
         
         sigGen.getRawOutputStream().write(new DERSet(digestAlgs).getEncoded());

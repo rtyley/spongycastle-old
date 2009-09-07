@@ -6,14 +6,10 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.x509.NoSuchStoreException;
 import org.bouncycastle.x509.X509Store;
 
@@ -446,20 +442,8 @@ public class CMSSignedData
         Iterator    it = signerInformationStore.getSigners().iterator();
         while (it.hasNext())
         {
-            SignerInformation   signer = (SignerInformation)it.next();
-            AlgorithmIdentifier digAlgId;
-
-            try
-            {
-                digAlgId = makeAlgId(signer.getDigestAlgOID(),
-                                                       signer.getDigestAlgParams());
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("encoding error.", e);
-            }
-
-            digestAlgs.add(digAlgId);
+            SignerInformation signer = (SignerInformation)it.next();
+            digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
             vec.add(signer.toSignerInfo());
         }
 
@@ -565,36 +549,5 @@ public class CMSSignedData
         cms.contentInfo = new ContentInfo(cms.contentInfo.getContentType(), cms.signedData);
         
         return cms;
-    }
-
-    private static DERObject makeObj(
-        byte[]  encoding)
-        throws IOException
-    {
-        if (encoding == null)
-        {
-            return null;
-        }
-
-        ASN1InputStream         aIn = new ASN1InputStream(encoding);
-
-        return aIn.readObject();
-    }
-
-    private static AlgorithmIdentifier makeAlgId(
-        String  oid,
-        byte[]  params)
-        throws IOException
-    {
-        if (params != null)
-        {
-            return new AlgorithmIdentifier(
-                            new DERObjectIdentifier(oid), makeObj(params));
-        }
-        else
-        {
-            return new AlgorithmIdentifier(
-                            new DERObjectIdentifier(oid), new DERNull());
-        }
     }
 }
