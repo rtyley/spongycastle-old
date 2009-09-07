@@ -27,6 +27,9 @@ Release 1.44
 <ul>
 <li>The reset() method in BufferedAsymmetricBlockCipher is now fully clearing the buffer.</li>
 <li>Use ImplicitlyCA with KeyFactory and Sun keyspec no longer causes NullPointerException.</li>
+<li>X509DefaultEntryConverter was not recognising telephone number as a PrintableString field. This has been fixed.</li>
+<li>The SecureRandom in the J2ME was not using a common seed source, which made cross seeeding of SecureRandom's impossible. This has been fixed.</li>
+<li>Use of "private final" in method declarations was causes issues with some MIDP environments. Methods are now just marked as private.</li>
 </ul>
 <h3>2.2.3 Additional Features and Functionality</h3>
 <ul>
