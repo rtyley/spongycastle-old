@@ -153,7 +153,8 @@ public interface PKCSObjectIdentifiers
     static final DERObjectIdentifier    id_ct_authData          = new DERObjectIdentifier(id_ct + ".2");
     static final DERObjectIdentifier    id_ct_TSTInfo           = new DERObjectIdentifier(id_ct + ".4");
     static final DERObjectIdentifier    id_ct_compressedData    = new DERObjectIdentifier(id_ct + ".9");
-    
+    static final DERObjectIdentifier    id_ct_authEnvelopedData = new DERObjectIdentifier(id_ct + ".23");
+
     //
     // id-cti OBJECT IDENTIFIER ::= {iso(1) member-body(2) usa(840)
     // rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) cti(6)}
