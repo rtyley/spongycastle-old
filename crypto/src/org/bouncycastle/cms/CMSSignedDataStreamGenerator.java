@@ -154,7 +154,7 @@ public class CMSSignedDataStreamGenerator
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
                   new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
-            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID(), _signature);
 
             byte[]          hash = _digest.digest();
 
@@ -204,7 +204,6 @@ public class CMSSignedDataStreamGenerator
             {
                 signerIdentifier = new SignerIdentifier(new DEROctetString(_subjectKeyID));
             }
-
 
             return new SignerInfo(signerIdentifier, digAlgId,
                         signedAttr, encAlgId, encDigest, unsignedAttr);

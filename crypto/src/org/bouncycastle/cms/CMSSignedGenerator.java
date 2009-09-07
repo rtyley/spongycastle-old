@@ -22,6 +22,8 @@ import org.bouncycastle.x509.X509Store;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.AlgorithmParameters;
+import java.security.Signature;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.interfaces.DSAPrivateKey;
@@ -148,7 +150,8 @@ public class CMSSignedGenerator
         return encOID;
     }
 
-    protected AlgorithmIdentifier getEncAlgorithmIdentifier(String encOid)
+    protected AlgorithmIdentifier getEncAlgorithmIdentifier(String encOid, Signature sig)
+        throws IOException
     {
         if (NO_PARAMS.contains(encOid))
         {
@@ -157,8 +160,18 @@ public class CMSSignedGenerator
         }
         else
         {
-            return new AlgorithmIdentifier(
-                  new DERObjectIdentifier(encOid), new DERNull());
+            if (encOid.equals(CMSSignedGenerator.ENCRYPTION_RSA_PSS))
+            {
+                AlgorithmParameters sigParams = sig.getParameters();
+
+                return new AlgorithmIdentifier(
+                    new DERObjectIdentifier(encOid), ASN1Object.fromByteArray(sigParams.getEncoded()));
+            }
+            else
+            {
+                return new AlgorithmIdentifier(
+                    new DERObjectIdentifier(encOid), new DERNull());
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package org.bouncycastle.cms.test;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.MessageDigest;
@@ -651,6 +652,30 @@ public class SignedDataTest
         subjectKeyIDTest(_signKP, _signCert, CMSSignedDataGenerator.DIGEST_SHA1);
     }
 
+    public void testSHA1WithRSAPSS()
+        throws Exception
+    {
+        rsaPSSTest("SHA1", CMSSignedDataGenerator.DIGEST_SHA1);
+    }
+
+    public void testSHA224WithRSAPSS()
+        throws Exception
+    {
+        rsaPSSTest("SHA224", CMSSignedDataGenerator.DIGEST_SHA224);
+    }
+
+    public void testSHA256WithRSAPSS()
+        throws Exception
+    {
+        rsaPSSTest("SHA256", CMSSignedDataGenerator.DIGEST_SHA256);
+    }
+
+    public void testSHA384WithRSAPSS()
+        throws Exception
+    {
+        rsaPSSTest("SHA384", CMSSignedDataGenerator.DIGEST_SHA384);
+    }
+
     public void testSHA224WithRSAEncapsulated()
         throws Exception
     {
@@ -796,6 +821,39 @@ public class SignedDataTest
             assertNull(cSigner.getSignedAttributes().get(PKCSObjectIdentifiers.pkcs_9_at_contentType));
             assertEquals(true, cSigner.verify(cert, "BC"));
         }
+    }
+
+    private void rsaPSSTest(String digestName, String digestOID)
+        throws Exception
+    {
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.ENCRYPTION_RSA_PSS, digestOID);
+
+        gen.addCertificatesAndCRLs(certs);
+
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+
+        FileOutputStream fOut = new FileOutputStream("/tmp/fred");
+
+        fOut.write(s.getEncoded());
+
+        fOut.close();
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance(digestName, "BC");
+
+        verifySignatures(s, md.digest("Hello world!".getBytes()));
     }
 
     private void subjectKeyIDTest(
