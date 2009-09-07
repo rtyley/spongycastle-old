@@ -843,11 +843,6 @@ public class SignedDataTest
 
         CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
 
-        FileOutputStream fOut = new FileOutputStream("/tmp/fred");
-
-        fOut.write(s.getEncoded());
-
-        fOut.close();
         //
         // compute expected content digest
         //
