@@ -1235,7 +1235,7 @@ public class CertPathValidatorUtilities
             Set issuers = new HashSet();
             if (cert instanceof X509AttributeCertificate)
             {
-                issuers.add(((X509AttributeCertificate) cert)
+                issuers.add(((X509AttributeCertificate)cert)
                     .getIssuer().getPrincipals()[0]);
             }
             else
@@ -1282,7 +1282,18 @@ public class CertPathValidatorUtilities
         }
         if (crls.isEmpty())
         {
-            throw new AnnotatedException("No CRLs found.");
+            if (cert instanceof X509AttributeCertificate)
+            {
+                X509AttributeCertificate aCert = (X509AttributeCertificate)cert;
+
+                throw new AnnotatedException("No CRLs found for issuer \"" + aCert.getIssuer().getPrincipals()[0] + "\"");
+            }
+            else
+            {
+                X509Certificate xCert = (X509Certificate)cert;
+
+                throw new AnnotatedException("No CRLs found for issuer \"" + xCert.getIssuerX500Principal() + "\"");
+            }
         }
         return crls;
     }
