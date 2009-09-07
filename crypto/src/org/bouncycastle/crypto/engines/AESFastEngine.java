@@ -329,7 +329,7 @@ public class AESFastEngine
      0x5a772d2d, 0x1e110f0f, 0x7bcbb0b0, 0xa8fc5454, 0x6dd6bbbb, 
      0x2c3a1616};
 
-private static final int[] Tinv0 =
+    private static final int[] Tinv0 =
     {
      0x50a7f451, 0x5365417e, 0xc3a4171a, 0x965e273a, 0xcb6bab3b, 
      0xf1459d1f, 0xab58faac, 0x9303e34b, 0x55fa3020, 0xf66d76ad, 
@@ -748,7 +748,7 @@ private static final int[] Tinv0 =
     {
     }
 
-    private final void unpackBlock(
+    private void unpackBlock(
         byte[]      bytes,
         int         off)
     {
@@ -775,7 +775,7 @@ private static final int[] Tinv0 =
         C3 |= bytes[index++] << 24;
     }
 
-    private final void packBlock(
+    private void packBlock(
         byte[]      bytes,
         int         off)
     {
@@ -802,7 +802,7 @@ private static final int[] Tinv0 =
         bytes[index++] = (byte)(C3 >> 24);
     }
 
-    private final void encryptBlock(int[][] KW)
+    private void encryptBlock(int[][] KW)
     {
         int r, r0, r1, r2, r3;
         
@@ -838,7 +838,7 @@ private static final int[] Tinv0 =
 
     }
 
-    private final void decryptBlock(int[][] KW)
+    private void decryptBlock(int[][] KW)
     {
         int r0, r1, r2, r3;
 

@@ -235,7 +235,7 @@ public class DESExample extends Object
         }
     }
 
-    private final void process()
+    private void process()
     {
         /* 
          * Setup the DESede cipher engine, create a PaddedBufferedBlockCipher
@@ -278,7 +278,7 @@ public class DESExample extends Object
      * the cipher text to the buffered output stream created
      * previously.
      */
-    private final void performEncrypt(byte[] key)
+    private void performEncrypt(byte[] key)
     {
         // initialise the cipher with the key bytes, for encryption
         cipher.init(true, new KeyParameter(key));
@@ -353,7 +353,7 @@ public class DESExample extends Object
      * the plain text to the buffered output stream created
      * previously.
      */
-    private final void performDecrypt(byte[] key)
+    private void performDecrypt(byte[] key)
     {    
         // initialise the cipher for decryption
         cipher.init(false, new KeyParameter(key));

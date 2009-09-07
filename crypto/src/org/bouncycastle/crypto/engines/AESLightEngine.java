@@ -315,7 +315,7 @@ public class AESLightEngine
     {
     }
 
-    private final void unpackBlock(
+    private void unpackBlock(
         byte[]      bytes,
         int         off)
     {
@@ -342,7 +342,7 @@ public class AESLightEngine
         C3 |= bytes[index++] << 24;
     }
 
-    private final void packBlock(
+    private void packBlock(
         byte[]      bytes,
         int         off)
     {
@@ -404,7 +404,7 @@ public class AESLightEngine
 
     }
 
-    private final void decryptBlock(int[][] KW)
+    private void decryptBlock(int[][] KW)
     {
         int r, r0, r1, r2, r3;
 

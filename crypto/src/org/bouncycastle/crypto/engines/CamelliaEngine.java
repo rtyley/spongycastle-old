@@ -220,17 +220,17 @@ public class CamelliaEngine
         0xbb00bbbb, 0xe300e3e3, 0x40004040, 0x4f004f4f
     };
 
-    private static final int rightRotate(int x, int s)
+    private static int rightRotate(int x, int s)
     {
         return (((x) >>> (s)) + ((x) << (32 - s)));
     }
 
-    private static final int leftRotate(int x, int s)
+    private static int leftRotate(int x, int s)
     {
         return ((x) << (s)) + ((x) >>> (32 - s));
     }
 
-    private static final void roldq(int rot, int[] ki, int ioff,
+    private static void roldq(int rot, int[] ki, int ioff,
                                     int[] ko, int ooff)
     {
         ko[0 + ooff] = (ki[0 + ioff] << rot) | (ki[1 + ioff] >>> (32 - rot));
@@ -243,7 +243,7 @@ public class CamelliaEngine
         ki[3 + ioff] = ko[3 + ooff];
     }
 
-    private static final void decroldq(int rot, int[] ki, int ioff,
+    private static void decroldq(int rot, int[] ki, int ioff,
                                        int[] ko, int ooff)
     {
         ko[2 + ooff] = (ki[0 + ioff] << rot) | (ki[1 + ioff] >>> (32 - rot));
@@ -256,7 +256,7 @@ public class CamelliaEngine
         ki[3 + ioff] = ko[1 + ooff];
     }
 
-    private static final void roldqo32(int rot, int[] ki, int ioff,
+    private static void roldqo32(int rot, int[] ki, int ioff,
                                        int[] ko, int ooff)
     {
         ko[0 + ooff] = (ki[1 + ioff] << (rot - 32)) | (ki[2 + ioff] >>> (64 - rot));
@@ -269,7 +269,7 @@ public class CamelliaEngine
         ki[3 + ioff] = ko[3 + ooff];
     }
 
-    private static final void decroldqo32(int rot, int[] ki, int ioff,
+    private static void decroldqo32(int rot, int[] ki, int ioff,
                                           int[] ko, int ooff)
     {
         ko[2 + ooff] = (ki[1 + ioff] << (rot - 32)) | (ki[2 + ioff] >>> (64 - rot));
@@ -282,7 +282,7 @@ public class CamelliaEngine
         ki[3 + ioff] = ko[1 + ooff];
     }
 
-    private final int bytes2int(byte[] src, int offset)
+    private int bytes2int(byte[] src, int offset)
     {
         int word = 0;
 
@@ -293,7 +293,7 @@ public class CamelliaEngine
         return word;
     }
 
-    private final void int2bytes(int word, byte[] dst, int offset)
+    private void int2bytes(int word, byte[] dst, int offset)
     {
         for (int i = 0; i < 4; i++)
         {
@@ -302,7 +302,7 @@ public class CamelliaEngine
         }
     }
 
-    private final void camelliaF2(int[] s, int[] skey, int keyoff)
+    private void camelliaF2(int[] s, int[] skey, int keyoff)
     {
         int t1, t2, u, v;
 
@@ -335,7 +335,7 @@ public class CamelliaEngine
         s[1] ^= u ^ v ^ rightRotate(u, 8);
     }
 
-    private final void camelliaFLs(int[] s, int[] fkey, int keyoff)
+    private void camelliaFLs(int[] s, int[] fkey, int keyoff)
     {
 
         s[1] ^= leftRotate(s[0] & fkey[0 + keyoff], 1);
@@ -345,7 +345,7 @@ public class CamelliaEngine
         s[3] ^= leftRotate(fkey[2 + keyoff] & s[2], 1);
     }
 
-    private final void setKey(boolean forEncryption, byte[] key)
+    private void setKey(boolean forEncryption, byte[] key)
     {
         int[] k = new int[8];
         int[] ka = new int[4];
@@ -546,7 +546,7 @@ public class CamelliaEngine
         }
     }
 
-    private final int processBlock128(byte[] in, int inOff,
+    private int processBlock128(byte[] in, int inOff,
                                       byte[] out, int outOff)
     {
         for (int i = 0; i < 4; i++)
@@ -580,7 +580,7 @@ public class CamelliaEngine
         return BLOCK_SIZE;
     }
 
-    private final int processBlock192or256(byte[] in, int inOff,
+    private int processBlock192or256(byte[] in, int inOff,
                                            byte[] out, int outOff)
     {
         for (int i = 0; i < 4; i++)

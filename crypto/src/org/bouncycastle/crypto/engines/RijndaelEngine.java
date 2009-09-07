@@ -620,7 +620,7 @@ public class RijndaelEngine
     {
     }
 
-    private final void unpackBlock(
+    private void unpackBlock(
         byte[]      bytes,
         int         off)
     {
@@ -640,7 +640,7 @@ public class RijndaelEngine
         }
     }
 
-    private final void packBlock(
+    private void packBlock(
         byte[]      bytes,
         int         off)
     {
@@ -655,7 +655,7 @@ public class RijndaelEngine
         }
     }
 
-    private final void encryptBlock(
+    private void encryptBlock(
         long[][] rk)
     {
         int r;
@@ -684,7 +684,7 @@ public class RijndaelEngine
         KeyAddition(rk[ROUNDS]);
     }
 
-    private final void decryptBlock(
+    private void decryptBlock(
         long[][] rk)
     {
         int r;
