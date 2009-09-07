@@ -127,7 +127,12 @@ public class SignerInformation
     {
         return info.getVersion().getValue().intValue();
     }
-    
+
+    public AlgorithmIdentifier getDigestAlgorithmID()
+    {
+        return digestAlgorithm;
+    }
+
     /**
      * return the object identifier for the signature.
      */

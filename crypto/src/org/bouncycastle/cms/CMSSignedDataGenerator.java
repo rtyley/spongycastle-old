@@ -2,12 +2,10 @@ package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
@@ -24,7 +22,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -148,24 +145,6 @@ public class CMSSignedDataGenerator
         private byte[]                      keyIdentifier;
 
         SignerInf(
-            PrivateKey      key,
-            X509Certificate cert,
-            String          digestOID,
-            String          encOID)
-        {
-            this(key, cert, digestOID, encOID, null, null, null);
-        }
-
-        SignerInf(
-            PrivateKey      key,
-            byte[]          keyIdentifier,
-            String          digestOID,
-            String          encOID)
-        {
-            this(key, keyIdentifier, digestOID, encOID, null, null, null);
-        }
-
-        SignerInf(
             PrivateKey                 key,
             X509Certificate            cert,
             String                     digestOID,
@@ -201,40 +180,15 @@ public class CMSSignedDataGenerator
             this.baseSignedTable = baseSigneTable;
         }
 
-        PrivateKey getKey()
-        {
-            return key;
-        }
-
         X509Certificate getCertificate()
         {
             return cert;
         }
 
-        String getDigestAlgOID()
+        AlgorithmIdentifier getDigestAlgorithmID()
         {
-            return digestOID;
+            return new AlgorithmIdentifier(new DERObjectIdentifier(digestOID), new DERNull());
         }
-
-        byte[] getDigestAlgParams()
-        {
-            return null;
-        }
-
-        String getEncryptionAlgOID()
-        {
-            return encOID;
-        }
-
-        CMSAttributeTableGenerator getSignedAttributes()
-        {
-            return sAttr;
-        }
-
-        CMSAttributeTableGenerator getUnsignedAttributes()
-        {
-            return unsAttr;
-        }   
 
         SignerInfo toSignerInfo(
             DERObjectIdentifier contentType,
@@ -245,13 +199,12 @@ public class CMSSignedDataGenerator
             boolean             isCounterSignature)
             throws IOException, SignatureException, InvalidKeyException, NoSuchAlgorithmException, CertificateEncodingException, CMSException
         {
-            AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
-                  new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
+            AlgorithmIdentifier digAlgId = getDigestAlgorithmID();
             String              digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
             String              signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
             Signature           sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
             MessageDigest       dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
-            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID(), sig);
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(encOID, sig);
 
             byte[]      hash = null;
 
@@ -458,38 +411,6 @@ public class CMSSignedDataGenerator
         signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encOID, signedAttrGen, unsignedAttrGen, null));
     }
 
-    private DERObject makeObj(
-        byte[]  encoding)
-        throws IOException
-    {
-        if (encoding == null)
-        {
-            return null;
-        }
-
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(encoding);
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
-
-        return aIn.readObject();
-    }
-
-    private AlgorithmIdentifier makeAlgId(
-        String  oid,
-        byte[]  params)
-        throws IOException
-    {
-        if (params != null)
-        {
-            return new AlgorithmIdentifier(
-                            new DERObjectIdentifier(oid), makeObj(params));
-        }
-        else
-        {
-            return new AlgorithmIdentifier(
-                            new DERObjectIdentifier(oid), new DERNull());
-        }
-    }
-
     /**
      * generate a signed object that for a CMS Signed Data
      * object using the given provider.
@@ -589,22 +510,9 @@ public class CMSSignedDataGenerator
         
         while (it.hasNext())
         {
-            SignerInformation        signer = (SignerInformation)it.next();
-            AlgorithmIdentifier     digAlgId;
-            
-            try
-            {
-                digAlgId = makeAlgId(signer.getDigestAlgOID(),
-                                                       signer.getDigestAlgParams());
-            }
-            catch (IOException e)
-            {
-                throw new CMSException("encoding error.", e);
-            }
-
-           digestAlgs.add(digAlgId);
-
-           signerInfos.add(signer.toSignerInfo());
+            SignerInformation signer = (SignerInformation)it.next();
+            digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
+            signerInfos.add(signer.toSignerInfo());
         }
         
         //
@@ -628,16 +536,11 @@ public class CMSSignedDataGenerator
 
         while (it.hasNext())
         {
-            SignerInf               signer = (SignerInf)it.next();
-            AlgorithmIdentifier     digAlgId;
+            SignerInf signer = (SignerInf)it.next();
 
             try
             {
-                digAlgId = makeAlgId(signer.getDigestAlgOID(),
-                                            signer.getDigestAlgParams());
-
-                digestAlgs.add(digAlgId);
-
+                digestAlgs.add(signer.getDigestAlgorithmID());
                 signerInfos.add(signer.toSignerInfo(contentTypeOID, content, rand, sigProvider, addDefaultAttributes, isCounterSignature));
             }
             catch (IOException e)

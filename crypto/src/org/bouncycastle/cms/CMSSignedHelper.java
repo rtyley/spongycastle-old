@@ -4,6 +4,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
@@ -12,6 +13,7 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.x509.NoSuchStoreException;
@@ -448,6 +450,16 @@ class CMSSignedHelper
                 throw new CMSException("can't re-encode CRL!", ex);
             }
         }
+    }
+
+    AlgorithmIdentifier fixAlgID(AlgorithmIdentifier algId)
+    {
+        if (algId.getParameters() == null)
+        {
+            return new AlgorithmIdentifier(algId.getObjectId(), DERNull.INSTANCE);
+        }
+
+        return algId;
     }
 
     private boolean anyCertHasTypeOther()
