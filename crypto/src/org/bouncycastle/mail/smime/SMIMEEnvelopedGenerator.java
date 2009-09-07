@@ -72,12 +72,20 @@ public class SMIMEEnvelopedGenerator
 
     static
     {
-        MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
+        CommandMap.setDefaultCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
+    }
 
+    private static MailcapCommandMap addCommands(CommandMap cm)
+    {
+        MailcapCommandMap mc = (MailcapCommandMap)cm;
+
+        mc.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
         mc.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
+        mc.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
         mc.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
+        mc.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
 
-        CommandMap.setDefaultCommandMap(mc);
+        return mc;
     }
 
     /**
@@ -387,7 +395,9 @@ public class SMIMEEnvelopedGenerator
                 {
                     encrypted = fact.regenerate(out, _provider);
                 }
-            
+
+                _content.getDataHandler().setCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
+                
                 _content.writeTo(encrypted);
                 
                 encrypted.close();
