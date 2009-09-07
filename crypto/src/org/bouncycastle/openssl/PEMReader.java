@@ -146,6 +146,10 @@ public class PEMReader extends BufferedReader
                 {
                     return readKeyPair("RSA", "-----END RSA PRIVATE KEY");
                 }
+                catch (IOException e)
+                {
+                    throw e;
+                }
                 catch (Exception e)
                 {
                     throw new PEMException(
@@ -157,6 +161,10 @@ public class PEMReader extends BufferedReader
                 try
                 {
                     return readKeyPair("DSA", "-----END DSA PRIVATE KEY");
+                }
+                catch (IOException e)
+                {
+                    throw e;
                 }
                 catch (Exception e)
                 {
@@ -173,6 +181,10 @@ public class PEMReader extends BufferedReader
                 try
                 {
                     return readKeyPair("ECDSA", "-----END EC PRIVATE KEY-----");
+                }
+                catch (IOException e)
+                {
+                    throw e;
                 }
                 catch (Exception e)
                 {
