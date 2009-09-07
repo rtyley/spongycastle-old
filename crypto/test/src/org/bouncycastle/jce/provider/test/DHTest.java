@@ -478,7 +478,7 @@ public class DHTest
 
         key = keyAgreement.generateSecret("Blowfish");
 
-        if (key.getEncoded().length != 56)
+        if (key.getEncoded().length != 16)
         {
             fail("Blowfish length wrong");
         }
