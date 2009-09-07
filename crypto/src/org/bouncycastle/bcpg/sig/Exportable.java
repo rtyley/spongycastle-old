@@ -9,7 +9,7 @@ import org.bouncycastle.bcpg.SignatureSubpacketTags;
 public class Exportable 
     extends SignatureSubpacket
 {    
-    private static final byte[] booleanToByteArray(
+    private static byte[] booleanToByteArray(
         boolean    value)
     {
         byte[]    data = new byte[1];
