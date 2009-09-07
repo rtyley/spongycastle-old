@@ -31,6 +31,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.SignatureSpi;
+import java.security.AlgorithmParameters;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
@@ -220,7 +221,12 @@ public class JDKDigestSignature
     protected Object engineGetParameter(
         String      param)
     {
-        throw new UnsupportedOperationException("engineSetParameter unsupported");
+        return null;
+    }
+
+    protected AlgorithmParameters engineGetParameters()
+    {
+        return null;
     }
 
     private byte[] derEncode(

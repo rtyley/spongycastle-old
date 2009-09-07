@@ -761,6 +761,11 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         catch (CertPathReviewerException cpre)
         {
             addError(cpre.getErrorMessage());
+        } catch (Throwable t) {
+            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
+                    "CertPathReviewer.unknown",
+                    new Object[] {new UntrustedInput(t.getMessage()), new UntrustedInput(t)});
+            addError(msg);
         }
         
         if (trust != null)

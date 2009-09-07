@@ -247,11 +247,11 @@ public class CMSSignedDataGenerator
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
                   new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
-            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
             String              digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
             String              signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
             Signature           sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
             MessageDigest       dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID(), sig);
 
             byte[]      hash = null;
 
@@ -362,9 +362,21 @@ public class CMSSignedDataGenerator
         String          digestOID)
         throws IllegalArgumentException
     {
-        String  encOID = getEncOID(key, digestOID);
+        addSigner(key, cert, getEncOID(key, digestOID), digestOID);
+    }
 
-        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, new DefaultSignedAttributeTableGenerator(), null, null));
+    /**
+     * add a signer - no attributes other than the default ones will be
+     * provided here.
+     */
+    public void addSigner(
+        PrivateKey      key,
+        X509Certificate cert,
+        String          encryptionOID,
+        String          digestOID)
+        throws IllegalArgumentException
+    {
+        signerInfs.add(new SignerInf(key, cert, digestOID, encryptionOID, new DefaultSignedAttributeTableGenerator(), null, null));
     }
 
     /**
