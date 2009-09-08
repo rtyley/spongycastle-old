@@ -35,6 +35,7 @@ Release 1.44
 <ul>
 <li>PEMReader/PEMWriter now support encrypted EC keys.</li>
 <li>BC generated EC private keys now include optional fields required by OpenSSL.</li>
+<li>CMS processing will attempt to recover if there is no AlgorithmParameters object for a provider and use an IvParameterSpec where possible.</li>
 </ul>
 
 <h3>2.1.1 Version</h3>
