@@ -4,9 +4,12 @@ import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.modes.gcm.GCMMultiplier;
+import org.bouncycastle.crypto.modes.gcm.Tables8kGCMMultiplier;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.crypto.util.Pack;
 import org.bouncycastle.util.Arrays;
 
 /**
@@ -20,6 +23,7 @@ public class GCMBlockCipher
     private static final byte[] ZEROES = new byte[BLOCK_SIZE];
 
     private final BlockCipher   cipher;
+    private final GCMMultiplier multiplier;
 
     // These fields are set by init and not modified by processing
     private boolean             forEncryption;
@@ -28,7 +32,6 @@ public class GCMBlockCipher
     private byte[]              A;
     private KeyParameter        keyParam;
     private byte[]              H;
-    private int[][][]           M = new int[16][256][];
     private byte[]              initS;
     private byte[]              J0;
 
@@ -42,13 +45,25 @@ public class GCMBlockCipher
 
     public GCMBlockCipher(BlockCipher c)
     {
+        this(c, null);
+    }
+
+    public GCMBlockCipher(BlockCipher c, GCMMultiplier m)
+    {
         if (c.getBlockSize() != BLOCK_SIZE)
         {
             throw new IllegalArgumentException(
                 "cipher required with a block size of " + BLOCK_SIZE + ".");
         }
 
+        if (m == null)
+        {
+            // TODO Consider a static property specifying default multiplier
+            m = new Tables8kGCMMultiplier();
+        }
+
         this.cipher = c;
+        this.multiplier = m;
     }
 
     public BlockCipher getUnderlyingCipher()
@@ -120,7 +135,7 @@ public class GCMBlockCipher
 
         this.H = new byte[BLOCK_SIZE];
         cipher.processBlock(ZEROES, 0, H, 0);
-        calculateM();
+        multiplier.init(H);
 
         this.initS = gHASH(A);
 
@@ -136,7 +151,7 @@ public class GCMBlockCipher
             byte[] X = new byte[16];
             packLength((long)nonce.length * 8, X, 8);
             xor(this.J0, X);
-            multiplyH(this.J0);
+            multiplier.multiplyH(this.J0);
         }
 
         this.S = Arrays.clone(initS);
@@ -245,7 +260,7 @@ public class GCMBlockCipher
         packLength(totalLength * 8, X, 8);
 
         xor(S, X);
-        multiplyH(S);
+        multiplier.multiplyH(S);
 
         // TODO Fix this if tagLength becomes configurable
         // T = MSBt(GCTRk(J0,S))
@@ -309,7 +324,17 @@ public class GCMBlockCipher
 
     private void gCTRBlock(byte[] buf, int bufCount, byte[] out, int outOff)
     {
-        inc(counter);
+//        inc(counter);
+        for (int i = 15; i >= 12; --i)
+        {
+            byte b = (byte)((counter[i] + 1) & 0xff);
+            counter[i] = b;
+
+            if (b != 0)
+            {
+                break;
+            }
+        }
 
         byte[] tmp = new byte[BLOCK_SIZE];
         cipher.processBlock(counter, 0, tmp, 0);
@@ -333,7 +358,7 @@ public class GCMBlockCipher
 
 //        gHASHBlock(hashBytes);
         xor(S, hashBytes);
-        multiplyH(S);
+        multiplier.multiplyH(S);
 
         totalLength += bufCount;
     }
@@ -348,7 +373,7 @@ public class GCMBlockCipher
             int num = Math.min(b.length - pos, 16);
             System.arraycopy(b, pos, X, 0, num);
             xor(Y, X);
-            multiplyH(Y);
+            multiplier.multiplyH(Y);
         }
 
         return Y;
@@ -357,207 +382,34 @@ public class GCMBlockCipher
 //    private void gHASHBlock(byte[] block)
 //    {
 //        xor(S, block);
-//        S = multiplyH(S);
+//        multiplier.multiplyH(S);
 //    }
 
-    private static void inc(byte[] block)
-    {
-//        assert block.length == 16;
-
-        for (int i = 15; i >= 12; --i)
-        {
-            byte b = (byte)((block[i] + 1) & 0xff);
-            block[i] = b;
-
-            if (b != 0)
-            {
-                break;
-            }
-        }
-    }
-
-    private static void shiftRight(int[] block)
-    {
-        int i = 0;
-        int bit = 0;
-        for (;;)
-        {
-            int b = block[i];
-            block[i] = (b >>> 1) | bit;
-            if (++i == 4) break;
-            bit = (b & 1) << 31;
-        }
-    }
+//    private static void inc(byte[] block)
+//    {
+//        for (int i = 15; i >= 12; --i)
+//        {
+//            byte b = (byte)((block[i] + 1) & 0xff);
+//            block[i] = b;
+//
+//            if (b != 0)
+//            {
+//                break;
+//            }
+//        }
+//    }
 
     private static void xor(byte[] block, byte[] val)
     {
-//      assert block.Length == 16;
-
-        for (int i = 0; i < 16; ++i)
+        for (int i = 15; i >= 0; --i)
         {
             block[i] ^= val[i];
-        }
-    }
-
-    private static void xor(int[] block, int[] val)
-    {
-//      assert block.length == 4 && val.length == 4;
-
-        for (int i = 0; i < 4; ++i)
-        {
-            block[i] ^= val[i];
-        }
-    }
-
-    private void multiplyH(byte[] x)
-    {
-//      assert block.Length == 16;
-
-//      return multiply(x, H);
-
-        int[] z = new int[4];
-        for (int i = 0; i != 16; ++i)
-        {
-//            xor(z, M[i][x[i] & 0xff]);
-            int[] m = M[i][x[i] & 0xff];
-            z[0] ^= m[0];
-            z[1] ^= m[1];
-            z[2] ^= m[2];
-            z[3] ^= m[3];
-        }
-//        return asBytes(z);
-        intToBE(z[0], x, 0);
-        intToBE(z[1], x, 4);
-        intToBE(z[2], x, 8);
-        intToBE(z[3], x, 12);
-    }
-
-//    private static byte[] multiply(byte[] x, byte[] y)
-//    {
-//        BigInteger Y = new BigInteger(1, y);
-//        byte[] z = new byte[16];
-//        byte[] v = Arrays.clone(x);
-//
-//        for (int i = 0; i < 128; ++i)
-//        {
-//            if (Y.testBit(127 - i))
-//            {
-//                xor(z, v);
-//            }
-//
-//            boolean lsb = (v[15] & 1) == 1;
-//            shiftRight(v);
-//            if (lsb)
-//            {
-//                xor(v, R);
-//            }
-//        }
-//
-//        return z;
-//    }
-
-    // P is the value with only bit i=1 set
-    private static void multiplyP(int[] x)
-    {
-        boolean lsb = (x[3] & 1) == 1;
-        shiftRight(x);
-        if (lsb)
-        {
-            // R = new int[]{ 0xe1000000, 0, 0, 0 };
-//            xor(v, R);
-            x[0] ^= 0xe1000000;
-        }
-    }
-
-    private static void multiplyP8(int[] x)
-    {
-        for (int i = 0; i < 8; ++i)
-        {
-            multiplyP(x);
-        }
-    }
-
-    private void calculateM()
-    {
-        M[0][0] = new int[4];
-        M[0][128] = asInts(H);
-        for (int j = 64; j >= 1; j >>= 1)
-        {
-            int[] tmp = new int[4];
-            System.arraycopy(M[0][j + j], 0, tmp, 0, 4);
-
-            multiplyP(tmp);
-            M[0][j] = tmp;
-        }
-        for (int i = 0;;)
-        {
-            for (int j = 2; j < 256; j += j)
-            {
-                for (int k = 1; k < j; ++k)
-                {
-                    int[] tmp = new int[4];
-                    System.arraycopy(M[i][j], 0, tmp, 0, 4);
-
-                    xor(tmp, M[i][k]);
-                    M[i][j + k] = tmp;
-                }
-            }
-
-            if (++i == 16) return;
-
-            M[i][0] = new int[4];
-            for (int j = 128; j > 0; j >>= 1)
-            {
-                int[] tmp = new int[4];
-                System.arraycopy(M[i - 1][j], 0, tmp, 0, 4);
-
-                multiplyP8(tmp);
-                M[i][j] = tmp;
-            }
         }
     }
 
     private static void packLength(long count, byte[] bs, int off)
     {
-        intToBE((int)(count >>> 32), bs, off); 
-        intToBE((int)count, bs, off + 4);
+        Pack.intToBigEndian((int)(count >>> 32), bs, off); 
+        Pack.intToBigEndian((int)count, bs, off + 4);
     }
-
-    private static void intToBE(int n, byte[] bs, int off)
-    {
-        bs[off++] = (byte)(n >>> 24);
-        bs[off++] = (byte)(n >>> 16);
-        bs[off++] = (byte)(n >>>  8);
-        bs[off  ] = (byte)(n       );
-    }
-
-    private static int BEToInt(byte[] bs, int off)
-    {
-        int n = bs[off++] << 24;
-        n |= (bs[off++] & 0xff) << 16;
-        n |= (bs[off++] & 0xff) << 8;
-        n |= (bs[off++] & 0xff);
-        return n;
-    }
-
-//    private static byte[] asBytes(int[] us)
-//    {
-//        byte[] bs = new byte[16];
-//        intToBE(us[0], bs, 0);
-//        intToBE(us[1], bs, 4);
-//        intToBE(us[2], bs, 8);
-//        intToBE(us[3], bs, 12);
-//        return bs;
-//    }
-
-    private static int[] asInts(byte[] bs)
-    {
-        int[] us = new int[4];
-        us[0] = BEToInt(bs, 0);
-        us[1] = BEToInt(bs, 4);
-        us[2] = BEToInt(bs, 8);
-        us[3] = BEToInt(bs, 12);
-        return us;
-    }
-    
 }
