@@ -1526,7 +1526,12 @@ public class RFC3280CertPathUtilities
             }
             catch (AnnotatedException e)
             {
-                throw new ExtCertPathValidatorException(e.getMessage(), e.getCause(), certPath, index);
+                Throwable cause = e;
+                if (null != e.getCause())
+                {
+                    cause = e.getCause();
+                }
+                throw new ExtCertPathValidatorException(e.getMessage(), cause, certPath, index);
             }
         }
 
