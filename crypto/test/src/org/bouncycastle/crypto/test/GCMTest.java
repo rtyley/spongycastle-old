@@ -309,7 +309,8 @@ public class GCMTest
         byte[] IV = Hex.decode(testVector[pos++]);
         byte[] C = Hex.decode(testVector[pos++]);
         byte[] T = Hex.decode(testVector[pos++]);
-
+//        byte[] T = new byte[12];
+//        System.arraycopy(t, 0, T, 0, T.length);
 //        System.out.println(testName);
 
         GCMBlockCipher encCipher = new GCMBlockCipher(new AESFastEngine());
@@ -402,7 +403,7 @@ public class GCMTest
         byte[] A = new byte[aLength];
         srng.nextBytes(A);
 
-        int ivLength = 1 + srng.nextInt() >>> 22;
+        int ivLength = 1 + (srng.nextInt() >>> 22);
         byte[] IV = new byte[ivLength];
         srng.nextBytes(IV);
 
