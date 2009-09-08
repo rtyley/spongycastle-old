@@ -268,7 +268,7 @@ public class OAEPEncoding
 
         for (start = 2 * defHash.length; start != block.length; start++)
         {
-            if (block[start] == 1 || block[start] != 0)
+            if (block[start] != 0)
             {
                 break;
             }
