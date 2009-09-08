@@ -3,6 +3,8 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import org.bouncycastle.util.Arrays;
+
 public class DERInteger
     extends ASN1Object
 {
@@ -111,20 +113,7 @@ public class DERInteger
 
         DERInteger other = (DERInteger)o;
 
-        if (bytes.length != other.bytes.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != bytes.length; i++)
-        {
-            if (bytes[i] != other.bytes[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.areEqual(bytes, other.bytes);
     }
 
     public String toString()

@@ -129,23 +129,7 @@ public abstract class ASN1OctetString
 
         ASN1OctetString  other = (ASN1OctetString)o;
 
-        byte[] b1 = other.string;
-        byte[] b2 = this.string;
-
-        if (b1.length != b2.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != b1.length; i++)
-        {
-            if (b1[i] != b2[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.areEqual(string, other.string);
     }
 
     abstract void encode(DEROutputStream out)
