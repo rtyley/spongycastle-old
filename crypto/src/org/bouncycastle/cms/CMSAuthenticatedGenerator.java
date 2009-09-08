@@ -77,11 +77,6 @@ public class CMSAuthenticatedGenerator
             {
                 byte[] iv = new byte[8];
 
-                //
-                // mix in a bit extra...
-                //
-                rand.setSeed(System.currentTimeMillis());
-
                 rand.nextBytes(iv);
 
                 return new RC2ParameterSpec(encKey.getEncoded().length * 8, iv);

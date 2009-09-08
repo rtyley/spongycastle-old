@@ -525,11 +525,6 @@ public class CMSEnvelopedGenerator
             {
                 byte[]  iv = new byte[8];
 
-                //
-                // mix in a bit extra...
-                //
-                rand.setSeed(System.currentTimeMillis());
-
                 rand.nextBytes(iv);
 
                 try
