@@ -21,6 +21,7 @@ import javax.crypto.spec.IvParameterSpec;
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public abstract class RecipientInformation
@@ -171,11 +172,29 @@ public abstract class RecipientInformation
 
                 if (sParams != null && !(sParams instanceof ASN1Null))
                 {
-                    AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encAlg, cipher.getProvider());
+                    try
+                    {
+                        AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encAlg, cipher.getProvider());
 
-                    params.init(sParams.getEncoded(), "ASN.1");
+                        params.init(sParams.getEncoded(), "ASN.1");
 
-                    cipher.init(Cipher.DECRYPT_MODE, sKey, params);
+                        cipher.init(Cipher.DECRYPT_MODE, sKey, params);
+                    }
+                    catch (NoSuchAlgorithmException e)
+                    {
+                        if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.AES128_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.AES192_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.AES256_CBC))
+                        {
+                            cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(ASN1OctetString.getInstance(sParams).getOctets()));
+                        }
+                        else
+                        {
+                            throw e;
+                        }
+                    }
                 }
                 else
                 {
