@@ -10,6 +10,7 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.util.Arrays;
 
 /**
  * Wrap keys according to RFC 3217 - RC2 mechanism
@@ -377,21 +378,6 @@ public class RC2WrapEngine
         byte[] key,
         byte[] checksum)
     {
-        byte[] calculatedChecksum = calculateCMSKeyChecksum(key);
-
-        if (checksum.length != calculatedChecksum.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != checksum.length; i++)
-        {
-            if (checksum[i] != calculatedChecksum[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.areEqual(calculateCMSKeyChecksum(key), checksum);
     }
 }

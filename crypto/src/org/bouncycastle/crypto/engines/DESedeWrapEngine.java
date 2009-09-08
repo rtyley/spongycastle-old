@@ -11,6 +11,7 @@ import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.util.Arrays;
 
 /**
  * Wrap keys according to
@@ -356,21 +357,6 @@ public class DESedeWrapEngine
         byte[] key,
         byte[] checksum)
     {
-        byte[] calculatedChecksum = calculateCMSKeyChecksum(key);
-
-        if (checksum.length != calculatedChecksum.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != checksum.length; i++)
-        {
-            if (checksum[i] != calculatedChecksum[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.areEqual(calculateCMSKeyChecksum(key), checksum);
     }
 }
