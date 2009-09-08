@@ -3,6 +3,10 @@ package org.bouncycastle.crypto.test;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
+import org.bouncycastle.crypto.modes.gcm.BasicGCMMultiplier;
+import org.bouncycastle.crypto.modes.gcm.GCMMultiplier;
+import org.bouncycastle.crypto.modes.gcm.Tables64kGCMMultiplier;
+import org.bouncycastle.crypto.modes.gcm.Tables8kGCMMultiplier;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
@@ -301,6 +305,15 @@ public class GCMTest
     private void runTestCase(String[] testVector)
         throws InvalidCipherTextException
     {
+        for (int macLength = 12; macLength <= 16; ++macLength)
+        {
+            runTestCase(testVector, macLength);
+        }
+    }
+
+    private void runTestCase(String[] testVector, int macLength)
+        throws InvalidCipherTextException
+    {
         int pos = 0;
         String testName = testVector[pos++];
         byte[] K = Hex.decode(testVector[pos++]);
@@ -308,19 +321,43 @@ public class GCMTest
         byte[] A = Hex.decode(testVector[pos++]);
         byte[] IV = Hex.decode(testVector[pos++]);
         byte[] C = Hex.decode(testVector[pos++]);
-        byte[] T = Hex.decode(testVector[pos++]);
-//        byte[] T = new byte[12];
-//        System.arraycopy(t, 0, T, 0, T.length);
-//        System.out.println(testName);
 
-        GCMBlockCipher encCipher = new GCMBlockCipher(new AESFastEngine());
-        GCMBlockCipher decCipher = new GCMBlockCipher(new AESFastEngine());
+        // For short MAC, take leading bytes
+        byte[] t = Hex.decode(testVector[pos++]);
+        byte[] T = new byte[macLength];
+        System.arraycopy(t, 0, T, 0, T.length);
+
         AEADParameters parameters = new AEADParameters(new KeyParameter(K), T.length * 8, IV, A);
-        encCipher.init(true, parameters);
-        decCipher.init(false, parameters);
 
+        // Default multiplier
+        runTestCase(null, null, parameters, testName, P, C, T);
+
+        runTestCase(new BasicGCMMultiplier(), new BasicGCMMultiplier(), parameters, testName, P, C, T);
+        runTestCase(new Tables8kGCMMultiplier(), new Tables8kGCMMultiplier(), parameters, testName, P, C, T);
+        runTestCase(new Tables64kGCMMultiplier(), new Tables64kGCMMultiplier(), parameters, testName, P, C, T);
+    }
+
+    private void runTestCase(
+        GCMMultiplier   encM,
+        GCMMultiplier   decM,
+        AEADParameters  parameters,
+        String          testName,
+        byte[]          P,
+        byte[]          C,
+        byte[]          T)
+        throws InvalidCipherTextException
+    {
+        GCMBlockCipher encCipher = initCipher(encM, true, parameters);
+        GCMBlockCipher decCipher = initCipher(decM, false, parameters);
         checkTestCase(encCipher, decCipher, testName, P, C, T);
         checkTestCase(encCipher, decCipher, testName + " (reused)", P, C, T);
+    }
+
+    private GCMBlockCipher initCipher(GCMMultiplier m, boolean forEncryption, AEADParameters parameters)
+    {
+        GCMBlockCipher c = new GCMBlockCipher(new AESFastEngine(), m);
+        c.init(forEncryption, parameters);
+        return c;
     }
 
     private void checkTestCase(
@@ -384,11 +421,14 @@ public class GCMTest
         SecureRandom srng = new SecureRandom();
         for (int i = 0; i < 10; ++i)
         {
-            randomTest(srng); 
+            randomTest(srng, null); 
+            randomTest(srng, new BasicGCMMultiplier()); 
+            randomTest(srng, new Tables8kGCMMultiplier()); 
+            randomTest(srng, new Tables64kGCMMultiplier()); 
         }
     }
 
-    private void randomTest(SecureRandom srng)
+    private void randomTest(SecureRandom srng, GCMMultiplier m)
         throws InvalidCipherTextException
     {
         int kLength = 16 + 8 * (Math.abs(srng.nextInt()) % 3);
@@ -407,7 +447,7 @@ public class GCMTest
         byte[] IV = new byte[ivLength];
         srng.nextBytes(IV);
 
-        GCMBlockCipher cipher = new GCMBlockCipher(new AESFastEngine());
+        GCMBlockCipher cipher = new GCMBlockCipher(new AESFastEngine(), m);
         AEADParameters parameters = new AEADParameters(new KeyParameter(K), 16 * 8, IV, A);
         cipher.init(true, parameters);
         byte[] C = new byte[cipher.getOutputSize(P.length)];
