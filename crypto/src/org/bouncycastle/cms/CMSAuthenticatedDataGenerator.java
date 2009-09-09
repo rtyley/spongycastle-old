@@ -69,7 +69,6 @@ public class CMSAuthenticatedDataGenerator
     private CMSAuthenticatedData generate(
         CMSProcessable  content,
         String          macOID,
-        String          dataOID,
         KeyGenerator    keyGen,
         Provider        provider)
         throws NoSuchAlgorithmException, CMSException
@@ -152,8 +151,8 @@ public class CMSAuthenticatedDataGenerator
         }
 
         ContentInfo  eci = new ContentInfo(
-                                 new DERObjectIdentifier(dataOID),
-                                 encContent);
+                PKCSObjectIdentifiers.data,
+                encContent);
 
         ContentInfo contentInfo = new ContentInfo(
                 PKCSObjectIdentifiers.id_ct_authData,
@@ -189,6 +188,6 @@ public class CMSAuthenticatedDataGenerator
 
         keyGen.init(rand);
 
-        return generate(content, encryptionOID, PKCSObjectIdentifiers.data.getId(), keyGen, provider);
+        return generate(content, encryptionOID, keyGen, provider);
     }
 }
