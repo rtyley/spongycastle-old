@@ -33,7 +33,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class KeyTransRecipientInformation
     extends RecipientInformation
 {
-    private KeyTransRecipientInfo _info;
+    private KeyTransRecipientInfo info;
 
     public KeyTransRecipientInformation(
         KeyTransRecipientInfo   info,
@@ -51,7 +51,7 @@ public class KeyTransRecipientInformation
     {
         super(encAlg, macAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
         
-        this._info = info;
+        this.info = info;
         this.rid = new RecipientId();
 
         RecipientIdentifier r = info.getRecipientIdentifier();
@@ -92,7 +92,7 @@ public class KeyTransRecipientInformation
     protected Key unwrapKey(Key key, Provider prov)
         throws CMSException
     {
-        byte[] encryptedKey = _info.getEncryptedKey().getOctets();
+        byte[] encryptedKey = info.getEncryptedKey().getOctets();
         String keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(keyEncAlg.getObjectId());
         String alg;
 
