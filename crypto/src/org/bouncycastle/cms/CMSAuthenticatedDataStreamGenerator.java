@@ -167,19 +167,19 @@ public class CMSAuthenticatedDataStreamGenerator
             cGen.addObject(PKCSObjectIdentifiers.id_ct_authData);
 
             //
-            // Encrypted Data
+            // Authenticated Data
             //
-            BERSequenceGenerator envGen = new BERSequenceGenerator(cGen.getRawOutputStream(), 0, true);
+            BERSequenceGenerator authGen = new BERSequenceGenerator(cGen.getRawOutputStream(), 0, true);
 
-            envGen.addObject(new DERInteger(AuthenticatedData.calculateVersion(null)));
+            authGen.addObject(new DERInteger(AuthenticatedData.calculateVersion(null)));
 
             if (_berEncodeRecipientSet)
             {
-                envGen.getRawOutputStream().write(new BERSet(recipientInfos).getEncoded());
+                authGen.getRawOutputStream().write(new BERSet(recipientInfos).getEncoded());
             }
             else
             {
-                envGen.getRawOutputStream().write(new DERSet(recipientInfos).getEncoded());
+                authGen.getRawOutputStream().write(new DERSet(recipientInfos).getEncoded());
             }
 
             Mac mac = CMSEnvelopedHelper.INSTANCE.getMac(macOID, provider);
@@ -188,9 +188,9 @@ public class CMSAuthenticatedDataStreamGenerator
 
             AlgorithmIdentifier macAlgId = getAlgorithmIdentifier(macOID, params, provider);
 
-            envGen.getRawOutputStream().write(macAlgId.getEncoded());
+            authGen.getRawOutputStream().write(macAlgId.getEncoded());
             
-            BERSequenceGenerator eiGen = new BERSequenceGenerator(envGen.getRawOutputStream());
+            BERSequenceGenerator eiGen = new BERSequenceGenerator(authGen.getRawOutputStream());
 
             eiGen.addObject(PKCSObjectIdentifiers.data);
 
@@ -207,7 +207,7 @@ public class CMSAuthenticatedDataStreamGenerator
                 mOut = new MacOutputStream(octGen.getOctetOutputStream(), mac);
             }
 
-            return new CmsAuthenticatedDataOutputStream(mOut, cGen, envGen, eiGen);
+            return new CmsAuthenticatedDataOutputStream(mOut, cGen, authGen, eiGen);
         }
         catch (InvalidKeyException e)
         {
