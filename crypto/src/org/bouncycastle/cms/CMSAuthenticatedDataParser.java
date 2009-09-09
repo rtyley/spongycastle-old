@@ -96,7 +96,7 @@ public class CMSAuthenticatedDataParser
         this.authData = new AuthenticatedDataParser((ASN1SequenceParser)_contentInfo.getContent(DERTags.SEQUENCE));
 
         // TODO Validate version?
-		//DERInteger version = this._envelopedData.getVersion();
+		//DERInteger version = this.authData.getVersion();
 
         //
         // load the RecipientInfoStore
