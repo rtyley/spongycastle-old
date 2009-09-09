@@ -1032,6 +1032,16 @@ public class SMIMESignedTest
         verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
     }
 
+    public void testExtraNlInPostamble()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("extra-nl.eml");
+
+        SMIMESigned s = new SMIMESigned((MimeMultipart)message.getContent());
+
+        verifySigners(s.getCertificatesAndCRLs("Collection", "BC"), s.getSignerInfos());
+    }
+
     public void testSignAttachmentOnly()
         throws Exception
     {
