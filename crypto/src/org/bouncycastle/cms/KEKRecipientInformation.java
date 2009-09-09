@@ -21,7 +21,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class KEKRecipientInformation
     extends RecipientInformation
 {
-    private KEKRecipientInfo      _info;
+    private KEKRecipientInfo      info;
 
     public KEKRecipientInformation(
         KEKRecipientInfo        info,
@@ -39,7 +39,7 @@ public class KEKRecipientInformation
     {
         super(encAlg, macAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
         
-        this._info = info;
+        this.info = info;
         this.rid = new RecipientId();
         
         KEKIdentifier       kekId = info.getKekid();
@@ -68,7 +68,7 @@ public class KEKRecipientInformation
     {
         try
         {
-            byte[]              encryptedKey = _info.getEncryptedKey().getOctets();
+            byte[]              encryptedKey = info.getEncryptedKey().getOctets();
             Cipher              keyCipher = Cipher.getInstance(keyEncAlg.getObjectId().getId(), prov);
 
             keyCipher.init(Cipher.UNWRAP_MODE, key);
