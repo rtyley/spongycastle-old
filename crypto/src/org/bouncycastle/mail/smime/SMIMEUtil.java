@@ -165,6 +165,53 @@ public class SMIMEUtil
         }
     }
 
+    /**
+     * internal postamble is generally included in signatures, while this is technically wrong,
+     * if we find internal postamble we include it by default.
+     */
+    static void outputPostamble(LineOutputStream lOut, MimeBodyPart part, int count, String boundary)
+        throws MessagingException, IOException
+    {
+        InputStream in;
+
+        try
+        {
+            in = part.getRawInputStream();
+        }
+        catch (MessagingException e)
+        {
+            return;   // no underlying content rely on default generation
+        }
+
+        String line;
+        int boundaries = count + 1;
+
+        while ((line = readLine(in)) != null)
+        {
+            if (line.startsWith(boundary))
+            {
+                boundaries--;
+  
+                if (boundaries == 0)
+                {
+                    break;
+                }
+            }
+        }
+
+        while ((line = readLine(in)) != null)
+        {
+            lOut.writeln(line);
+        }
+        
+        in.close();
+
+        if (boundaries != 0)
+        {
+            throw new MessagingException("all boundaries not found for: " + boundary);
+        }
+    }
+
     static void outputPostamble(LineOutputStream lOut, BodyPart parent, String parentBoundary, BodyPart part)
         throws MessagingException, IOException
     {
@@ -222,7 +269,7 @@ public class SMIMEUtil
             }
         }
 
-        if (ch < 0)
+        if (ch < 0 && b.length() == 0)
         {
             return null;
         }
@@ -277,6 +324,8 @@ public class SMIMEUtil
                 }
 
                 lOut.writeln(boundary + "--");
+     
+                outputPostamble(lOut, mimePart, mp.getCount(), boundary);
 
                 return;
             }
