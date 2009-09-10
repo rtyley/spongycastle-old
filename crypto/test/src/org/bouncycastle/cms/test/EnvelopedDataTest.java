@@ -14,6 +14,7 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSPBEKey;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.KeyTransRecipientInformation;
 import org.bouncycastle.cms.PKCS5Scheme2PBEKey;
@@ -797,9 +798,13 @@ public class EnvelopedDataTest
 
         if (it.hasNext())
         {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
+            PasswordRecipientInformation recipient = (PasswordRecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(new PKCS5Scheme2PBEKey("password".toCharArray(), new byte[20], 5), "BC");
+            CMSPBEKey key = new PKCS5Scheme2PBEKey("password".toCharArray(),
+                recipient.getKeyDerivationAlgParameters("BC"));
+
+            byte[] recData = recipient.getContent(key, "BC");
+
             assertEquals(true, Arrays.equals(data, recData));
         }
         else
