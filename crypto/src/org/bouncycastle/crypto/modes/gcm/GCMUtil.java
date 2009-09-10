@@ -17,7 +17,7 @@ abstract class GCMUtil
     // P is the value with only bit i=1 set
     static void multiplyP(int[] x)
     {
-        boolean lsb = (x[3] & 1) == 1;
+        boolean lsb = (x[3] & 1) != 0;
         shiftRight(x);
         if (lsb)
         {
@@ -58,7 +58,7 @@ abstract class GCMUtil
             int b = block[i];
             block[i] = (b >>> 1) | bit;
             if (++i == 4) break;
-            bit = (b & 1) << 31;
+            bit = b << 31;
         }
     }
 
