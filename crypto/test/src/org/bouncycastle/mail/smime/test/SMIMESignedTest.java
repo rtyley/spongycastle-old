@@ -51,6 +51,10 @@ import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
+import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
@@ -280,6 +284,30 @@ public class SMIMESignedTest
         MimeBodyPart part2 = createTemplate("text/html", "binary");
 
         multipartMixedTest(part1, part2);
+    }
+
+    public void testSHA1WithRSAPSS()
+        throws Exception
+    {
+        rsaPSSTest(SMIMESignedGenerator.DIGEST_SHA1);
+    }
+
+    public void testSHA224WithRSAPSS()
+        throws Exception
+    {
+        rsaPSSTest(SMIMESignedGenerator.DIGEST_SHA224);
+    }
+
+    public void testSHA256WithRSAPSS()
+        throws Exception
+    {
+        rsaPSSTest(SMIMESignedGenerator.DIGEST_SHA256);
+    }
+
+    public void testSHA384WithRSAPSS()
+        throws Exception
+    {
+        rsaPSSTest(SMIMESignedGenerator.DIGEST_SHA384);
     }
 
     public void multipartMixedTest(MimeBodyPart part1, MimeBodyPart part2)
@@ -713,6 +741,20 @@ public class SMIMESignedTest
         assertTrue(attrCerts.getMatches(null).contains(attrCert));
     }
 
+    private void rsaPSSTest(String digestOID)
+        throws Exception
+    {
+        MimeMultipart     smm = generateMultiPartRsaPSS(digestOID, msg, null);
+        SMIMESignedParser s = new SMIMESignedParser(smm);
+        CertStore         certs = s.getCertificatesAndCRLs("Collection", "BC");
+
+        assertEquals(getDigestOid(s.getSignerInfos()), digestOID);
+
+        verifyMessageBytes(msg, s.getContent());
+
+        verifySigners(certs, s.getSignerInfos());
+    }
+
     private MimeBodyPart generateBinaryPart() throws MessagingException
     {
         byte[] content = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 10, 11, 12, 13, 14, 10, 10, 15, 16 };   
@@ -746,6 +788,35 @@ public class SMIMESignedTest
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
     
         gen.addSigner(_signKP.getPrivate(), _signCert, digestOid, new AttributeTable(signedAttrs), null);
+        gen.addCertificatesAndCRLs(certs);
+
+        return gen.generate(msg, "BC");
+    }
+
+    private MimeMultipart generateMultiPartRsaPSS(
+        String digestOid,
+        MimeBodyPart msg,
+        Date         signingTime)
+        throws Exception
+    {
+        List certList = new ArrayList();
+
+        certList.add(_signCert);
+        certList.add(_origCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        ASN1EncodableVector signedAttrs = generateSignedAttributes();
+
+        if (signingTime != null)
+        {
+            signedAttrs.add(new Attribute(CMSAttributes.signingTime, new DERSet(new Time(signingTime))));
+        }
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.ENCRYPTION_RSA_PSS, digestOid, new AttributeTable(signedAttrs), null);
         gen.addCertificatesAndCRLs(certs);
 
         return gen.generate(msg, "BC");

@@ -62,7 +62,6 @@ public class SubjectKeyIdentifier
         ASN1OctetString  keyid)
     {
         this.keyidentifier=keyid.getOctets();
-
     }
 
     /**
@@ -74,13 +73,7 @@ public class SubjectKeyIdentifier
     public SubjectKeyIdentifier(
         SubjectPublicKeyInfo    spki)
     {
-        Digest  digest = new SHA1Digest();
-        byte[]  resBuf = new byte[digest.getDigestSize()];
-
-        byte[] bytes = spki.getPublicKeyData().getBytes();
-        digest.update(bytes, 0, bytes.length);
-        digest.doFinal(resBuf, 0);
-        this.keyidentifier=resBuf;
+        this.keyidentifier = getDigest(spki);
     }
 
     public byte[] getKeyIdentifier()
@@ -91,5 +84,34 @@ public class SubjectKeyIdentifier
     public DERObject toASN1Object()
     {
         return new DEROctetString(keyidentifier);
+    }
+
+    public static SubjectKeyIdentifier createSHA1KeyIdentifier(SubjectPublicKeyInfo keyInfo)
+    {
+        return new SubjectKeyIdentifier(keyInfo);
+    }
+
+    public static SubjectKeyIdentifier createTruncatedSHA1KeyIdentifier(SubjectPublicKeyInfo keyInfo)
+    {
+        byte[] dig = getDigest(keyInfo);
+        byte[] id = new byte[8];
+
+        System.arraycopy(dig, dig.length - 8, id, 0, id.length);
+
+        id[0] &= 0x0f;
+        id[0] |= 0x40;
+        
+        return new SubjectKeyIdentifier(id);
+    }
+
+    private static byte[] getDigest(SubjectPublicKeyInfo spki)
+    {
+        Digest digest = new SHA1Digest();
+        byte[]  resBuf = new byte[digest.getDigestSize()];
+
+        byte[] bytes = spki.getPublicKeyData().getBytes();
+        digest.update(bytes, 0, bytes.length);
+        digest.doFinal(resBuf, 0);
+        return resBuf;
     }
 }
