@@ -2,6 +2,9 @@ package org.bouncycastle.cms.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.MessageDigest;
@@ -1354,6 +1357,52 @@ public class SignedDataTest
         verifySignatures(sp);
     }
 
+    public void testEncapsulatedSamples()
+        throws Exception
+    {
+        testSample("PSSSignDataSHA1Enc.sig");
+        testSample("PSSSignDataSHA256Enc.sig");
+        testSample("PSSSignDataSHA512Enc.sig");
+    }
+    
+    public void testSamples()
+        throws Exception
+    {
+        testSample("PSSSignData.data", "PSSSignDataSHA1.sig");
+        testSample("PSSSignData.data", "PSSSignDataSHA256.sig");
+        testSample("PSSSignData.data", "PSSSignDataSHA512.sig");
+    }
+
+    private void testSample(String sigName)
+        throws Exception
+    {
+        CMSSignedData sig = new CMSSignedData(getInput(sigName));
+        new FileOutputStream("/tmp/fred").write((byte[])sig.getSignedContent().getContent());
+        verifySignatures(sig);
+    }
+
+    private void testSample(String messageName, String sigName)
+        throws Exception
+    {
+        CMSSignedData sig = new CMSSignedData(new CMSProcessableByteArray(getInput(messageName)), getInput(sigName));
+
+        verifySignatures(sig);
+    }
+
+    private byte[] getInput(String name)
+        throws IOException
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        InputStream in = getClass().getResourceAsStream(name);
+
+        int ch;
+        while ((ch = in.read()) >= 0)
+        {
+            bOut.write(ch);
+        }
+
+        return bOut.toByteArray();
+    }
 
     public void testForMultipleCounterSignatures()
         throws Exception
