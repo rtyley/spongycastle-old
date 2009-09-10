@@ -63,6 +63,7 @@ public class RegressionTest
         new DERApplicationSpecificTest(),
         new IssuingDistributionPointUnitTest(),
         new TargetInformationTest(),
+        new SubjectKeyIdentifierTest(),
         new GeneralNameTest()
     };
 
