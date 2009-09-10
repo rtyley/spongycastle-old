@@ -103,23 +103,17 @@ public class AuthenticatedDataStreamTest
     {
         byte[]          data     = "Eric H. Echidna".getBytes();
 
-        CMSAuthenticatedDataStreamGenerator edGen = new CMSAuthenticatedDataStreamGenerator();
+        CMSAuthenticatedDataStreamGenerator adGen = new CMSAuthenticatedDataStreamGenerator();
         ByteArrayOutputStream               bOut = new ByteArrayOutputStream();
 
-        edGen.addKeyTransRecipient(_reciCert);
+        adGen.addKeyTransRecipient(_reciCert);
 
-        OutputStream aOut = edGen.open(bOut, macAlg, "BC");
+        OutputStream aOut = adGen.open(bOut, macAlg, "BC");
 
         aOut.write(data);
 
         aOut.close();
 
-        FileOutputStream fOut = new FileOutputStream("/tmp/x");
-
-        fOut.write(bOut.toByteArray());
-
-        fOut.close();
-        
         CMSAuthenticatedDataParser ad = new CMSAuthenticatedDataParser(bOut.toByteArray());
 
         RecipientInformationStore recipients = ad.getRecipientInfos();
