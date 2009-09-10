@@ -982,13 +982,13 @@ public class BigInteger
 
                     if (shift == 0)
                     {
-                        c = shiftRightOneInPlace(cStart, c);
-                        iCount = shiftRightOneInPlace(iCountStart, iCount);
+                        shiftRightOneInPlace(cStart, c);
+                        shiftRightOneInPlace(iCountStart, iCount);
                     }
                     else
                     {
-                        c = shiftRightInPlace(cStart, c, shift);
-                        iCount = shiftRightInPlace(iCountStart, iCount, shift);
+                        shiftRightInPlace(cStart, c, shift);
+                        shiftRightInPlace(iCountStart, iCount, shift);
                     }
 
                     if (c[cStart] == 0)
@@ -1977,12 +1977,12 @@ public class BigInteger
 
                 if (shift < 2)
                 {
-                    c = shiftRightOneInPlace(cStart, c);
+                    shiftRightOneInPlace(cStart, c);
                     --cBitLength;
                 }
                 else
                 {
-                    c = shiftRightInPlace(cStart, c, shift);
+                    shiftRightInPlace(cStart, c, shift);
                     cBitLength -= shift;
                 }
 
@@ -2160,7 +2160,7 @@ public class BigInteger
     /**
      * do a right shift - this does it in place.
      */
-    private int[] shiftRightInPlace(int start, int[] mag, int n)
+    private static void shiftRightInPlace(int start, int[] mag, int n)
     {
         int nInts = (n >>> 5) + start;
         int nBits = n & 0x1f;
@@ -2195,14 +2195,12 @@ public class BigInteger
 
             mag[nInts] >>>= nBits;
         }
-
-        return mag;
     }
 
     /**
      * do a right shift by one - this does it in place.
      */
-    private int[] shiftRightOneInPlace(int start, int[] mag)
+    private static void shiftRightOneInPlace(int start, int[] mag)
     {
         int magEnd = mag.length - 1;
 
@@ -2217,8 +2215,6 @@ public class BigInteger
         }
 
         mag[start] >>>= 1;
-
-        return mag;
     }
 
     public BigInteger shiftRight(int n)
@@ -2239,10 +2235,10 @@ public class BigInteger
         }
 
         int[] res = new int[this.magnitude.length];
-
         System.arraycopy(this.magnitude, 0, res, 0, res.length);
+        shiftRightInPlace(0, res, n);
 
-        return new BigInteger(this.sign, shiftRightInPlace(0, res, n));
+        return new BigInteger(this.sign, res);
 
         // TODO Port C# version's optimisations...
     }
