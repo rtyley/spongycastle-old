@@ -65,11 +65,11 @@ public class SubjectKeyIdentifier
     }
 
     /**
+     * Calculates the keyidentifier using a SHA1 hash over the BIT STRING
+     * from SubjectPublicKeyInfo as defined in RFC3280.
      *
-     * Calulates the keyidentifier using a SHA1 hash over the BIT STRING
-     * from SubjectPublicKeyInfo as defined in RFC2459.
-     *
-     **/
+     * @param spki the subject public key info.
+     */
     public SubjectKeyIdentifier(
         SubjectPublicKeyInfo    spki)
     {
@@ -86,11 +86,31 @@ public class SubjectKeyIdentifier
         return new DEROctetString(keyidentifier);
     }
 
+    /**
+     * Return a RFC 3280 type 1 key identifier. As in:
+     * <pre>
+     * (1) The keyIdentifier is composed of the 160-bit SHA-1 hash of the
+     * value of the BIT STRING subjectPublicKey (excluding the tag,
+     * length, and number of unused bits).
+     * </pre>
+     * @param keyInfo the key info object containing the subjectPublicKey field.
+     * @return the key identifier.
+     */
     public static SubjectKeyIdentifier createSHA1KeyIdentifier(SubjectPublicKeyInfo keyInfo)
     {
         return new SubjectKeyIdentifier(keyInfo);
     }
 
+    /**
+     * Return a RFC 3280 type 2 key identifier. As in:
+     * <pre>
+     * (2) The keyIdentifier is composed of a four bit type field with
+     * the value 0100 followed by the least significant 60 bits of the
+     * SHA-1 hash of the value of the BIT STRING subjectPublicKey.
+     * </pre>
+     * @param keyInfo the key info object containing the subjectPublicKey field.
+     * @return the key identifier.
+     */
     public static SubjectKeyIdentifier createTruncatedSHA1KeyIdentifier(SubjectPublicKeyInfo keyInfo)
     {
         byte[] dig = getDigest(keyInfo);
