@@ -45,6 +45,7 @@ import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509Store;
@@ -1377,7 +1378,7 @@ public class SignedDataTest
         throws Exception
     {
         CMSSignedData sig = new CMSSignedData(getInput(sigName));
-        new FileOutputStream("/tmp/fred").write((byte[])sig.getSignedContent().getContent());
+
         verifySignatures(sig);
     }
 
@@ -1392,16 +1393,7 @@ public class SignedDataTest
     private byte[] getInput(String name)
         throws IOException
     {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        InputStream in = getClass().getResourceAsStream(name);
-
-        int ch;
-        while ((ch = in.read()) >= 0)
-        {
-            bOut.write(ch);
-        }
-
-        return bOut.toByteArray();
+        return Streams.readAll(getClass().getResourceAsStream(name));
     }
 
     public void testForMultipleCounterSignatures()
