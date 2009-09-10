@@ -18,10 +18,11 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSAuthenticatedData;
 import org.bouncycastle.cms.CMSAuthenticatedDataGenerator;
-import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSPBEKey;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.PKCS5Scheme2PBEKey;
+import org.bouncycastle.cms.PasswordRecipientInformation;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.util.encoders.Hex;
@@ -113,7 +114,7 @@ public class AuthenticatedDataTest
     public void testPasswordAES256()
         throws Exception
     {
-        passwordTest(CMSEnvelopedDataGenerator.AES256_CBC);
+        passwordTest(CMSAuthenticatedDataGenerator.AES256_CBC);
     }
 
     public void testECKeyAgree()
@@ -123,16 +124,16 @@ public class AuthenticatedDataTest
 
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
 
-        adGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
+        adGen.addKeyAgreementRecipient(CMSAuthenticatedDataGenerator.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSAuthenticatedDataGenerator.AES128_WRAP, "BC");
 
         CMSAuthenticatedData ad = adGen.generate(
                               new CMSProcessableByteArray(data),
-                              CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+                              CMSAuthenticatedDataGenerator.DES_EDE3_CBC, "BC");
 
         RecipientInformationStore  recipients = ad.getRecipientInfos();
 
         assertEquals(ad.getMacAlgOID(),
-                                   CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+                CMSAuthenticatedDataGenerator.DES_EDE3_CBC);
 
         Collection  c = recipients.getRecipients();
         Iterator    it = c.iterator();
@@ -156,15 +157,15 @@ public class AuthenticatedDataTest
     {
         byte[]          data     = "Eric H. Echidna".getBytes();
 
-        CMSAuthenticatedDataGenerator edGen = new CMSAuthenticatedDataGenerator();
+        CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
 
-        edGen.addKeyTransRecipient(_reciCert);
+        adGen.addKeyTransRecipient(_reciCert);
 
-        CMSAuthenticatedData adGen = edGen.generate(
+        CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
                                 CMSAuthenticatedDataGenerator.DES_EDE3_CBC, "BC");
 
-        CMSAuthenticatedData ad = new CMSAuthenticatedData(adGen.getEncoded());
+        ad = new CMSAuthenticatedData(ad.getEncoded());
         
         RecipientInformationStore recipients = ad.getRecipientInfos();
 
@@ -194,11 +195,11 @@ public class AuthenticatedDataTest
     {
         byte[]          data     = "Eric H. Echidna".getBytes();
 
-        CMSAuthenticatedDataGenerator edGen = new CMSAuthenticatedDataGenerator();
+        CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
 
-        edGen.addKeyTransRecipient(_reciCert);
+        adGen.addKeyTransRecipient(_reciCert);
 
-        CMSAuthenticatedData ad = edGen.generate(
+        CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
                                 macAlg, "BC");
 
@@ -238,14 +239,14 @@ public class AuthenticatedDataTest
 
         CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
-                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+                                CMSAuthenticatedDataGenerator.DES_EDE3_CBC, "BC");
 
         RecipientInformationStore recipients = ad.getRecipientInfos();
 
         Collection c = recipients.getRecipients();
         Iterator it = c.iterator();
 
-        assertEquals(ad.getMacAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+        assertEquals(ad.getMacAlgOID(), CMSAuthenticatedDataGenerator.DES_EDE3_CBC);
 
         if (it.hasNext())
         {
@@ -287,9 +288,12 @@ public class AuthenticatedDataTest
 
         if (it.hasNext())
         {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
+            PasswordRecipientInformation recipient = (PasswordRecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(new PKCS5Scheme2PBEKey("password".toCharArray(), new byte[20], 5), "BC");
+            CMSPBEKey key = new PKCS5Scheme2PBEKey("password".toCharArray(),
+                recipient.getKeyDerivationAlgParameters("BC"));
+
+            byte[] recData = recipient.getContent(key, "BC");
 
             assertTrue(Arrays.equals(data, recData));
             assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));
