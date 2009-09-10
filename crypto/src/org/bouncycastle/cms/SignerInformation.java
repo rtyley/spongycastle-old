@@ -389,6 +389,10 @@ public class SignerInformation
                 }
                 else
                 {
+                    if (digestCalculator == null)
+                    {
+                        throw new CMSException("data not encapsulated in signature - use detached constructor.");
+                    }
                     resultDigest = digestCalculator.getDigest();
                     
                     // need to decrypt signature and check message bytes
