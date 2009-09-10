@@ -150,6 +150,26 @@ public class SMIMESignedGenerator
     }
 
     /**
+     * add a signer - no attributes other than the default ones will be
+     * provided here.
+     *
+     * @param key key to use to generate the signature
+     * @param cert the public key certificate associated with the signer's key.
+     * @param encryptionOID object ID of the digest ecnryption algorithm to use.
+     * @param digestOID object ID of the digest algorithm to use.
+     * @exception IllegalArgumentException any of the arguments are inappropriate
+     */
+    public void addSigner(
+        PrivateKey      key,
+        X509Certificate cert,
+        String          encryptionOID,
+        String          digestOID)
+        throws IllegalArgumentException
+    {
+        _signers.add(new Signer(key, cert, encryptionOID, digestOID, null, null));
+    }
+
+    /**
      * Add a signer with extra signed/unsigned attributes or overrides
      * for the standard attributes. For example this method can be used to
      * explictly set default attributes such as the signing time.
@@ -170,6 +190,32 @@ public class SMIMESignedGenerator
         throws IllegalArgumentException
     {
         _signers.add(new Signer(key, cert, digestOID, signedAttr, unsignedAttr));
+    }
+
+    /**
+     * Add a signer with extra signed/unsigned attributes or overrides
+     * for the standard attributes and a digest encryption algorithm. For
+     * example this method can be used to explictly set default attributes
+     * such as the signing time.
+     *
+     * @param key key to use to generate the signature
+     * @param cert the public key certificate associated with the signer's key.
+     * @param encryptionOID the digest encryption algorithm OID.
+     * @param digestOID object ID of the digest algorithm to use.
+     * @param signedAttr signed attributes to be included in the signature.
+     * @param unsignedAttr unsigned attribitues to be included.
+     * @exception IllegalArgumentException any of the arguments are inappropriate
+     */
+    public void addSigner(
+        PrivateKey      key,
+        X509Certificate cert,
+        String          encryptionOID,
+        String          digestOID,
+        AttributeTable  signedAttr,
+        AttributeTable  unsignedAttr)
+        throws IllegalArgumentException
+    {
+        _signers.add(new Signer(key, cert, encryptionOID, digestOID, signedAttr, unsignedAttr));
     }
 
     /**
@@ -572,6 +618,7 @@ public class SMIMESignedGenerator
     {
         final PrivateKey      key;
         final X509Certificate cert;
+        final String          encryptionOID;
         final String          digestOID;
         final AttributeTable  signedAttr;
         final AttributeTable  unsignedAttr;
@@ -583,8 +630,20 @@ public class SMIMESignedGenerator
             AttributeTable  signedAttr,
             AttributeTable  unsignedAttr)
         {
+            this(key, cert, null, digestOID, signedAttr, unsignedAttr);
+        }
+
+        Signer(
+            PrivateKey      key,
+            X509Certificate cert,
+            String          encryptionOID,
+            String          digestOID,
+            AttributeTable  signedAttr,
+            AttributeTable  unsignedAttr)
+        {
             this.key = key;
             this.cert = cert;
+            this.encryptionOID = encryptionOID;
             this.digestOID = digestOID;
             this.signedAttr = signedAttr;
             this.unsignedAttr = unsignedAttr;
@@ -593,6 +652,11 @@ public class SMIMESignedGenerator
         public X509Certificate getCert()
         {
             return cert;
+        }
+
+        public String getEncryptionOID()
+        {
+            return encryptionOID;
         }
 
         public String getDigestOID()
@@ -651,8 +715,15 @@ public class SMIMESignedGenerator
             for (Iterator it = _signers.iterator(); it.hasNext();)
             {
                 Signer signer = (Signer)it.next();
-                
-                gen.addSigner(signer.getKey(), signer.getCert(), signer.getDigestOID(), signer.getSignedAttr(), signer.getUnsignedAttr(), _provider);
+
+                if (signer.getEncryptionOID() != null)
+                {
+                    gen.addSigner(signer.getKey(), signer.getCert(), signer.getEncryptionOID(), signer.getDigestOID(), signer.getSignedAttr(), signer.getUnsignedAttr(), _provider);
+                }
+                else
+                {
+                    gen.addSigner(signer.getKey(), signer.getCert(), signer.getDigestOID(), signer.getSignedAttr(), signer.getUnsignedAttr(), _provider);
+                }
             }
 
             gen.addSigners(new SignerInformationStore(_oldSigners));

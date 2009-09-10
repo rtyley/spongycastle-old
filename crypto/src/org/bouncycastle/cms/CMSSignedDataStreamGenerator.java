@@ -235,6 +235,24 @@ public class CMSSignedDataStreamGenerator
     }
 
     /**
+     * add a signer, specifying the digest encryption algorithm - no attributes other than the default ones will be
+     * provided here.
+     * @throws NoSuchProviderException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        X509Certificate cert,
+        String          encryptionOID,
+        String          digestOID,
+        String          sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+        addSigner(key, cert, encryptionOID, digestOID, new DefaultSignedAttributeTableGenerator(), (CMSAttributeTableGenerator)null, sigProvider);
+    }
+
+    /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
      * @throws NoSuchAlgorithmException
@@ -248,6 +266,23 @@ public class CMSSignedDataStreamGenerator
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
        addSigner(key, cert, digestOID, new DefaultSignedAttributeTableGenerator(), (CMSAttributeTableGenerator)null, sigProvider);
+    }
+
+    /**
+     * add a signer, specifying digest encryptionOID - no attributes other than the default ones will be
+     * provided here.
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        X509Certificate cert,
+        String          encryptionOID,
+        String          digestOID,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+       addSigner(key, cert, encryptionOID, digestOID, new DefaultSignedAttributeTableGenerator(), (CMSAttributeTableGenerator)null, sigProvider);
     }
 
     /**
@@ -270,6 +305,27 @@ public class CMSSignedDataStreamGenerator
     }
 
     /**
+     * add a signer with extra signed/unsigned attributes - specifying digest
+     * encryption algorithm.
+     * @throws NoSuchProviderException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        X509Certificate cert,
+        String          encryptionOID,
+        String          digestOID,
+        AttributeTable  signedAttr,
+        AttributeTable  unsignedAttr,
+        String          sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+        addSigner(key, cert, encryptionOID, digestOID,
+            new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), sigProvider);
+    }
+
+    /**
      * add a signer with extra signed/unsigned attributes.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
@@ -287,6 +343,25 @@ public class CMSSignedDataStreamGenerator
             new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), sigProvider);
     }
 
+   /**
+     * add a signer with extra signed/unsigned attributes and the digest encryption algorithm.
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        X509Certificate cert,
+        String          encryptionOID,
+        String          digestOID,
+        AttributeTable  signedAttr,
+        AttributeTable  unsignedAttr,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, InvalidKeyException
+    {
+        addSigner(key, cert, encryptionOID, digestOID,
+            new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), sigProvider);
+    }
+
     public void addSigner(
         PrivateKey                  key,
         X509Certificate             cert,
@@ -296,15 +371,27 @@ public class CMSSignedDataStreamGenerator
         Provider                    sigProvider)
         throws NoSuchAlgorithmException, InvalidKeyException
     {
-        String        encOID = getEncOID(key, digestOID);
+        addSigner(key, cert, getEncOID(key, digestOID), digestOID, signedAttrGenerator, unsignedAttrGenerator, sigProvider);
+    }
+
+    public void addSigner(
+        PrivateKey                  key,
+        X509Certificate             cert,
+        String                      encryptionOID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGenerator,
+        CMSAttributeTableGenerator  unsignedAttrGenerator,
+        Provider                    sigProvider)
+        throws NoSuchAlgorithmException, InvalidKeyException
+    {
         String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
-        String        signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
+        String        signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encryptionOID);
         Signature     sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
         MessageDigest dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);
 
         sig.initSign(key, rand);
 
-        _signerInfs.add(new SignerInf(cert, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
+        _signerInfs.add(new SignerInf(cert, digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _messageDigests.add(dig);
     }
 
@@ -320,7 +407,20 @@ public class CMSSignedDataStreamGenerator
         addSigner(key, cert, digestOID, signedAttrGenerator, unsignedAttrGenerator, CMSUtils.getProvider(sigProvider));
     }
 
-        /**
+    public void addSigner(
+        PrivateKey                  key,
+        X509Certificate             cert,
+        String                      encryptionOID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGenerator,
+        CMSAttributeTableGenerator  unsignedAttrGenerator,
+        String                      sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+        addSigner(key, cert, encryptionOID, digestOID, signedAttrGenerator, unsignedAttrGenerator, CMSUtils.getProvider(sigProvider));
+    }
+
+    /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
      * @throws NoSuchProviderException
@@ -340,6 +440,24 @@ public class CMSSignedDataStreamGenerator
     /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
+     * @throws NoSuchProviderException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          encryptionOID,
+        String          digestOID,
+        String          sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+        addSigner(key, subjectKeyID, encryptionOID, digestOID, new DefaultSignedAttributeTableGenerator(), (CMSAttributeTableGenerator)null, sigProvider);
+    }
+
+    /**
+     * add a signer - no attributes other than the default ones will be
+     * provided here.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      */
@@ -351,6 +469,24 @@ public class CMSSignedDataStreamGenerator
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
        addSigner(key, subjectKeyID, digestOID, new DefaultSignedAttributeTableGenerator(), (CMSAttributeTableGenerator)null, sigProvider);
+    }
+
+    /**
+     * add a signer - no attributes other than the default ones will be
+     * provided here, specifying the digest encryption algorithm.
+     *
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          encryptionOID,
+        String          digestOID,
+        Provider        sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+       addSigner(key, subjectKeyID, encryptionOID, digestOID, new DefaultSignedAttributeTableGenerator(), (CMSAttributeTableGenerator)null, sigProvider);
     }
 
     /**
@@ -399,15 +535,27 @@ public class CMSSignedDataStreamGenerator
         Provider                    sigProvider)
         throws NoSuchAlgorithmException, InvalidKeyException
     {
-        String        encOID = getEncOID(key, digestOID);
+        addSigner(key, subjectKeyID, getEncOID(key, digestOID), digestOID, signedAttrGenerator, unsignedAttrGenerator, sigProvider);
+    }
+
+    public void addSigner(
+        PrivateKey                  key,
+        byte[]                      subjectKeyID,
+        String                      encryptionOID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGenerator,
+        CMSAttributeTableGenerator  unsignedAttrGenerator,
+        Provider                    sigProvider)
+        throws NoSuchAlgorithmException, InvalidKeyException
+    {
         String        digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
-        String        signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
+        String        signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encryptionOID);
         Signature     sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
         MessageDigest dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);
 
         sig.initSign(key, rand);
 
-        _signerInfs.add(new SignerInf(subjectKeyID, digestOID, encOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
+        _signerInfs.add(new SignerInf(subjectKeyID, digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _messageDigests.add(dig);
     }
 
@@ -421,6 +569,19 @@ public class CMSSignedDataStreamGenerator
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
         addSigner(key, subjectKeyID, digestOID, signedAttrGenerator, unsignedAttrGenerator, CMSUtils.getProvider(sigProvider));
+    }
+
+    public void addSigner(
+        PrivateKey                  key,
+        byte[]                      subjectKeyID,
+        String                      encryptionOID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGenerator,
+        CMSAttributeTableGenerator  unsignedAttrGenerator,
+        String                      sigProvider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
+    {
+        addSigner(key, subjectKeyID, encryptionOID, digestOID, signedAttrGenerator, unsignedAttrGenerator, CMSUtils.getProvider(sigProvider));
     }
 
     /**

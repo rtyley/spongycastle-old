@@ -308,6 +308,10 @@ public class CMSSignedDataGenerator
     /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
+     *
+     * @param key signing key to use
+     * @param cert certificate containing corresponding public key
+     * @param digestOID digest algorithm OID
      */
     public void addSigner(
         PrivateKey      key,
@@ -319,8 +323,13 @@ public class CMSSignedDataGenerator
     }
 
     /**
-     * add a signer - no attributes other than the default ones will be
+     * add a signer, specifying the digest encryption algorithm to use - no attributes other than the default ones will be
      * provided here.
+     *
+     * @param key signing key to use
+     * @param cert certificate containing corresponding public key
+     * @param encryptionOID digest encryption algorithm OID
+     * @param digestOID digest algorithm OID
      */
     public void addSigner(
         PrivateKey      key,
@@ -342,13 +351,31 @@ public class CMSSignedDataGenerator
         String          digestOID)
         throws IllegalArgumentException
     {
-        String  encOID = getEncOID(key, digestOID);
+        addSigner(key, subjectKeyID, getEncOID(key, digestOID), digestOID);
+    }
 
-        signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encOID, new DefaultSignedAttributeTableGenerator(), null, null));
+    /**
+     * add a signer, specifying the digest encryption algorithm to use - no attributes other than the default ones will be
+     * provided here.
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          encryptionOID,
+        String          digestOID)
+        throws IllegalArgumentException
+    {
+        signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encryptionOID, new DefaultSignedAttributeTableGenerator(), null, null));
     }
 
     /**
      * add a signer with extra signed/unsigned attributes.
+     *
+     * @param key signing key to use
+     * @param cert certificate containing corresponding public key
+     * @param digestOID digest algorithm OID
+     * @param signedAttr table of attributes to be included in signature
+     * @param unsignedAttr table of attributes to be included as unsigned
      */
     public void addSigner(
         PrivateKey      key,
@@ -358,13 +385,39 @@ public class CMSSignedDataGenerator
         AttributeTable  unsignedAttr)
         throws IllegalArgumentException
     {
-        String  encOID = getEncOID(key, digestOID);
+        addSigner(key, cert, getEncOID(key, digestOID), digestOID, signedAttr, unsignedAttr);
+    }
 
-        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), signedAttr));
+    /**
+     * add a signer, specifying the digest encryption algorithm, with extra signed/unsigned attributes.
+     *
+     * @param key signing key to use
+     * @param cert certificate containing corresponding public key
+     * @param encryptionOID digest encryption algorithm OID
+     * @param digestOID digest algorithm OID
+     * @param signedAttr table of attributes to be included in signature
+     * @param unsignedAttr table of attributes to be included as unsigned
+     */
+    public void addSigner(
+        PrivateKey      key,
+        X509Certificate cert,
+        String          encryptionOID,
+        String          digestOID,
+        AttributeTable  signedAttr,
+        AttributeTable  unsignedAttr)
+        throws IllegalArgumentException
+    {
+        signerInfs.add(new SignerInf(key, cert, digestOID, encryptionOID, new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), signedAttr));
     }
 
     /**
      * add a signer with extra signed/unsigned attributes.
+     *
+     * @param key signing key to use
+     * @param subjectKeyID subjectKeyID of corresponding public key
+     * @param digestOID digest algorithm OID
+     * @param signedAttr table of attributes to be included in signature
+     * @param unsignedAttr table of attributes to be included as unsigned
      */
     public void addSigner(
         PrivateKey      key,
@@ -374,9 +427,29 @@ public class CMSSignedDataGenerator
         AttributeTable  unsignedAttr)
         throws IllegalArgumentException
     {
-        String  encOID = getEncOID(key, digestOID);
+        addSigner(key, subjectKeyID, digestOID, getEncOID(key, digestOID), new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr));
+    }
 
-        signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encOID, new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), signedAttr));
+    /**
+     * add a signer, specifying the digest encryption algorithm, with extra signed/unsigned attributes.
+     *
+     * @param key signing key to use
+     * @param subjectKeyID subjectKeyID of corresponding public key
+     * @param encryptionOID digest encryption algorithm OID
+     * @param digestOID digest algorithm OID
+     * @param signedAttr table of attributes to be included in signature
+     * @param unsignedAttr table of attributes to be included as unsigned
+     */
+    public void addSigner(
+        PrivateKey      key,
+        byte[]          subjectKeyID,
+        String          encryptionOID,
+        String          digestOID,
+        AttributeTable  signedAttr,
+        AttributeTable  unsignedAttr)
+        throws IllegalArgumentException
+    {
+        signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encryptionOID, new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), signedAttr));
     }
 
     /**
@@ -390,9 +463,22 @@ public class CMSSignedDataGenerator
         CMSAttributeTableGenerator  unsignedAttrGen)
         throws IllegalArgumentException
     {
-        String  encOID = getEncOID(key, digestOID);
+        addSigner(key, cert, getEncOID(key, digestOID), digestOID, signedAttrGen, unsignedAttrGen);
+    }
 
-        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGen, unsignedAttrGen, null));
+    /**
+     * add a signer, specifying the digest encryption algorithm, with extra signed/unsigned attributes based on generators.
+     */
+    public void addSigner(
+        PrivateKey                  key,
+        X509Certificate             cert,
+        String                      encryptionOID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGen,
+        CMSAttributeTableGenerator  unsignedAttrGen)
+        throws IllegalArgumentException
+    {
+        signerInfs.add(new SignerInf(key, cert, digestOID, encryptionOID, signedAttrGen, unsignedAttrGen, null));
     }
 
     /**
@@ -406,9 +492,22 @@ public class CMSSignedDataGenerator
         CMSAttributeTableGenerator  unsignedAttrGen)
         throws IllegalArgumentException
     {
-        String  encOID = getEncOID(key, digestOID);
+        addSigner(key, subjectKeyID, digestOID, getEncOID(key, digestOID), signedAttrGen, unsignedAttrGen);
+    }
 
-        signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encOID, signedAttrGen, unsignedAttrGen, null));
+    /**
+     * add a signer, including digest encryption algorithm, with extra signed/unsigned attributes based on generators.
+     */
+    public void addSigner(
+        PrivateKey                  key,
+        byte[]                      subjectKeyID,
+        String                      encryptionOID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGen,
+        CMSAttributeTableGenerator  unsignedAttrGen)
+        throws IllegalArgumentException
+    {
+        signerInfs.add(new SignerInf(key, subjectKeyID, digestOID, encryptionOID, signedAttrGen, unsignedAttrGen, null));
     }
 
     /**
