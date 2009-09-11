@@ -30,7 +30,7 @@ public class ECAlgorithms
     /*
      * "Shamir's Trick", originally due to E. G. Straus
      * (Addition chains of vectors. American Mathematical Monthly,
-     * 71(7):806�808, Aug./Sept. 1964)
+     * 71(7):806-808, Aug./Sept. 1964)
      * <pre>
      * Input: The points P, Q, scalar k = (km?, ... , k1, k0)
      * and scalar l = (lm?, ... , l1, l0).
