@@ -66,7 +66,7 @@ public class JCEECPrivateKey
         this.algorithm = algorithm;
         this.d = spec.getD();
 
-        if (spec.getParams() != null) // can be null if implictlyCa
+        if (spec.getParams() != null) // can be null if implicitlyCA
         {
             ECCurve curve = spec.getParams().getCurve();
             EllipticCurve ellipticCurve;

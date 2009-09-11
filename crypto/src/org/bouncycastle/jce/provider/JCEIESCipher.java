@@ -148,7 +148,7 @@ public class JCEIESCipher extends WrapCipherSpi
     {
         if (!(key instanceof IESKey))
         {
-            throw new InvalidKeyException("must be passed IE key");
+            throw new InvalidKeyException("must be passed IES key");
         }
 
         if (params == null && (opmode == Cipher.ENCRYPT_MODE || opmode == Cipher.WRAP_MODE))
