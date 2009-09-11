@@ -116,6 +116,16 @@ public class JCEBlockCipher extends WrapCipherSpi
         this.ivLength = ivLength / 8;
     }
 
+    protected JCEBlockCipher(
+        BufferedBlockCipher engine,
+        int                 ivLength)
+    {
+        baseEngine = engine.getUnderlyingCipher();
+
+        this.cipher = new BufferedGenericBlockCipher(engine);
+        this.ivLength = ivLength / 8;
+    }
+
     protected int engineGetBlockSize() 
     {
         return baseEngine.getBlockSize();

@@ -1,5 +1,6 @@
 package org.bouncycastle.jce.provider.symmetric;
 
+import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.AESFastEngine;
@@ -49,7 +50,7 @@ public final class AES
     {
         public CFB()
         {
-            super(new CFBBlockCipher(new AESFastEngine(), 128), 128);
+            super(new BufferedBlockCipher(new CFBBlockCipher(new AESFastEngine(), 128)), 128);
         }
     }
 
@@ -58,7 +59,7 @@ public final class AES
     {
         public OFB()
         {
-            super(new OFBBlockCipher(new AESFastEngine(), 128), 128);
+            super(new BufferedBlockCipher(new OFBBlockCipher(new AESFastEngine(), 128)), 128);
         }
     }
 
