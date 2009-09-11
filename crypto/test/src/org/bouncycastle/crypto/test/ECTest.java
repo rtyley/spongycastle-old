@@ -14,6 +14,7 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.ECDSASigner;
+import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.BigIntegers;
@@ -712,6 +713,207 @@ public class ECTest
         }
     }
 
+     private void testECMQVTestVector1()
+     {
+         // Test Vector from GEC-2
+
+         X9ECParameters x9 = SECNamedCurves.getByName("secp160r1");
+         ECDomainParameters p = new ECDomainParameters(
+             x9.getCurve(), x9.getG(), x9.getN(), x9.getH(), x9.getSeed());
+
+         AsymmetricCipherKeyPair U1 = new AsymmetricCipherKeyPair(
+             new ECPublicKeyParameters(
+                 p.getCurve().decodePoint(Hex.decode("0251B4496FECC406ED0E75A24A3C03206251419DC0")), p),
+             new ECPrivateKeyParameters(
+                 new BigInteger("AA374FFC3CE144E6B073307972CB6D57B2A4E982", 16), p));
+
+         AsymmetricCipherKeyPair U2 = new AsymmetricCipherKeyPair(
+             new ECPublicKeyParameters(
+                 p.getCurve().decodePoint(Hex.decode("03D99CE4D8BF52FA20BD21A962C6556B0F71F4CA1F")), p),
+             new ECPrivateKeyParameters(
+                 new BigInteger("149EC7EA3A220A887619B3F9E5B4CA51C7D1779C", 16), p));
+
+         AsymmetricCipherKeyPair V1 = new AsymmetricCipherKeyPair(
+             new ECPublicKeyParameters(
+                 p.getCurve().decodePoint(Hex.decode("0349B41E0E9C0369C2328739D90F63D56707C6E5BC")), p),
+             new ECPrivateKeyParameters(
+                 new BigInteger("45FB58A92A17AD4B15101C66E74F277E2B460866", 16), p));
+
+         AsymmetricCipherKeyPair V2 = new AsymmetricCipherKeyPair(
+             new ECPublicKeyParameters(
+                 p.getCurve().decodePoint(Hex.decode("02706E5D6E1F640C6E9C804E75DBC14521B1E5F3B5")), p),
+             new ECPrivateKeyParameters(
+                 new BigInteger("18C13FCED9EADF884F7C595C8CB565DEFD0CB41E", 16), p));
+
+         ECPoint keyA = calculateMqvAgreement(
+             p,
+             (ECPrivateKeyParameters) U1.getPrivate(),
+             (ECPrivateKeyParameters) U2.getPrivate(),
+             (ECPublicKeyParameters) U2.getPublic(),
+             (ECPublicKeyParameters) V1.getPublic(),
+             (ECPublicKeyParameters) V2.getPublic());
+
+         ECPoint keyB = calculateMqvAgreement(
+             p,
+             (ECPrivateKeyParameters) V1.getPrivate(),
+             (ECPrivateKeyParameters) V2.getPrivate(),
+             (ECPublicKeyParameters) V2.getPublic(),
+             (ECPublicKeyParameters) U1.getPublic(),
+             (ECPublicKeyParameters) U2.getPublic());
+
+         // Note: In the actual algorithm, we would need to ensure !keyA.IsInfinity
+         // and the secret is just the ECFieldElement keyA.X
+
+         if (!keyA.equals(keyB)
+             || !keyA.getX().toBigInteger().equals(
+                 new BigInteger("5A6955CEFDB4E43255FB7FCF718611E4DF8E05AC", 16)))
+         {
+             fail("MQV Test Vector #1 agreement failed");
+         }
+     }
+
+     private void testECMQVTestVector2()
+     {
+         // Test Vector from GEC-2
+
+         X9ECParameters x9 = SECNamedCurves.getByName("sect163k1");
+         ECDomainParameters p = new ECDomainParameters(
+             x9.getCurve(), x9.getG(), x9.getN(), x9.getH(), x9.getSeed());
+
+         AsymmetricCipherKeyPair U1 = new AsymmetricCipherKeyPair(
+             new ECPublicKeyParameters(
+                 p.getCurve().decodePoint(Hex.decode("03037D529FA37E42195F10111127FFB2BB38644806BC")), p),
+             new ECPrivateKeyParameters(
+                 new BigInteger("03A41434AA99C2EF40C8495B2ED9739CB2155A1E0D", 16), p));
+
+         AsymmetricCipherKeyPair U2 = new AsymmetricCipherKeyPair(
+             new ECPublicKeyParameters(
+                 p.getCurve().decodePoint(Hex.decode("02015198E74BC2F1E5C9A62B80248DF0D62B9ADF8429")), p),
+             new ECPrivateKeyParameters(
+                 new BigInteger("032FC4C61A8211E6A7C4B8B0C03CF35F7CF20DBD52", 16), p));
+
+         AsymmetricCipherKeyPair V1 = new AsymmetricCipherKeyPair(
+             new ECPublicKeyParameters(
+                 p.getCurve().decodePoint(Hex.decode("03072783FAAB9549002B4F13140B88132D1C75B3886C")), p),
+             new ECPrivateKeyParameters(
+                 new BigInteger("57E8A78E842BF4ACD5C315AA0569DB1703541D96", 16), p));
+
+         AsymmetricCipherKeyPair V2 = new AsymmetricCipherKeyPair(
+             new ECPublicKeyParameters(
+                 p.getCurve().decodePoint(Hex.decode("03067E3AEA3510D69E8EDD19CB2A703DDC6CF5E56E32")), p),
+             new ECPrivateKeyParameters(
+                 new BigInteger("02BD198B83A667A8D908EA1E6F90FD5C6D695DE94F", 16), p));
+
+         ECPoint keyA = calculateMqvAgreement(
+             p,
+             (ECPrivateKeyParameters) U1.getPrivate(),
+             (ECPrivateKeyParameters) U2.getPrivate(),
+             (ECPublicKeyParameters) U2.getPublic(),
+             (ECPublicKeyParameters) V1.getPublic(),
+             (ECPublicKeyParameters) V2.getPublic());
+
+         ECPoint keyB = calculateMqvAgreement(
+             p,
+             (ECPrivateKeyParameters) V1.getPrivate(),
+             (ECPrivateKeyParameters) V2.getPrivate(),
+             (ECPublicKeyParameters) V2.getPublic(),
+             (ECPublicKeyParameters) U1.getPublic(),
+             (ECPublicKeyParameters) U2.getPublic());
+
+         // Note: In the actual algorithm, we would need to ensure !keyA.IsInfinity
+         // and the secret is just the ECFieldElement keyA.X
+
+         if (!keyA.equals(keyB)
+             || !keyA.getX().toBigInteger().equals(
+                 new BigInteger("038359FFD30C0D5FC1E6154F483B73D43E5CF2B503", 16)))
+         {
+             fail("MQV Test Vector #2 agreement failed");
+         }
+     }
+
+     private void testECMQVRandom()
+     {
+         SecureRandom random = new SecureRandom();
+
+         ECCurve.Fp curve = new ECCurve.Fp(
+             new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
+             new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+             new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+
+         ECDomainParameters parameters = new ECDomainParameters(
+             curve,
+             curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+             new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
+
+         ECKeyPairGenerator pGen = new ECKeyPairGenerator();
+
+         pGen.init(new ECKeyGenerationParameters(parameters, random));
+
+
+         // Pre-established key pairs
+         AsymmetricCipherKeyPair U1 = pGen.generateKeyPair();
+         AsymmetricCipherKeyPair V1 = pGen.generateKeyPair();
+
+         // Ephemeral key pairs
+         AsymmetricCipherKeyPair U2 = pGen.generateKeyPair();
+         AsymmetricCipherKeyPair V2 = pGen.generateKeyPair();
+
+         ECPoint keyA = calculateMqvAgreement(
+             parameters,
+             (ECPrivateKeyParameters) U1.getPrivate(),
+             (ECPrivateKeyParameters) U2.getPrivate(),
+             (ECPublicKeyParameters) U2.getPublic(),
+             (ECPublicKeyParameters) V1.getPublic(),
+             (ECPublicKeyParameters) V2.getPublic());
+
+         ECPoint keyB = calculateMqvAgreement(
+             parameters,
+             (ECPrivateKeyParameters) V1.getPrivate(),
+             (ECPrivateKeyParameters) V2.getPrivate(),
+             (ECPublicKeyParameters) V2.getPublic(),
+             (ECPublicKeyParameters) U1.getPublic(),
+             (ECPublicKeyParameters) U2.getPublic());
+
+         // Note: In the actual algorithm, we would need to ensure !keyA.IsInfinity
+         // and the secret is just the ECFieldElement keyA.X
+
+         if (!keyA.equals(keyB))
+         {
+             fail("MQV Test Vector (random) agreement failed");
+         }
+     }
+
+     // The ECMQV Primitive as described in SEC-1, 3.4
+     private ECPoint calculateMqvAgreement(
+         ECDomainParameters      parameters,
+         ECPrivateKeyParameters  d1U,
+         ECPrivateKeyParameters  d2U,
+         ECPublicKeyParameters   Q2U,
+         ECPublicKeyParameters   Q1V,
+         ECPublicKeyParameters   Q2V)
+     {
+         BigInteger n = parameters.getN();
+         int e = (n.bitLength() + 1) / 2;
+         BigInteger powE = BigInteger.ONE.shiftLeft(e);
+
+         BigInteger x = Q2U.getQ().getX().toBigInteger();
+         BigInteger xBar = x.mod(powE);
+         BigInteger Q2UBar = xBar.setBit(e);
+         BigInteger s = d1U.getD().multiply(Q2UBar).mod(n).add(d2U.getD()).mod(n);
+
+         BigInteger xPrime = Q2V.getQ().getX().toBigInteger();
+         BigInteger xPrimeBar = xPrime.mod(powE);
+         BigInteger Q2VBar = xPrimeBar.setBit(e);
+
+         BigInteger hs = parameters.getH().multiply(s).mod(n);
+
+//         ECPoint p = Q1V.getQ().multiply(Q2VBar).add(Q2V.getQ()).multiply(hs);
+         ECPoint p = ECAlgorithms.sumOfTwoMultiplies(
+             Q1V.getQ(), Q2VBar.multiply(hs).mod(n), Q2V.getQ(), hs);
+
+         return p;
+     }
+    
     public String getName()
     {
         return "EC";
@@ -733,6 +935,10 @@ public class ECTest
         testECDSAP521sha512();
         testECDSASecP224k1sha256();
         testECDSA239bitBinaryAndLargeDigest();
+        
+        testECMQVTestVector1();
+        testECMQVTestVector2();
+        testECMQVRandom();
     }
 
 
