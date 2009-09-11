@@ -321,16 +321,16 @@ public class AESTest
         String[] names = {
                 "AES/ECB/PKCS7Padding",
                 "AES/CBC/PKCS7Padding",
-                "AES/OFB/PKCS7Padding",
-                "AES/CFB/PKCS7Padding",
+                "AES/OFB/NoPadding",
+                "AES/CFB/NoPadding",
                 "AES/ECB/PKCS7Padding",
                 "AES/CBC/PKCS7Padding",
-                "AES/OFB/PKCS7Padding",
-                "AES/CFB/PKCS7Padding",
+                "AES/OFB/NoPadding",
+                "AES/CFB/NoPadding",
                 "AES/ECB/PKCS7Padding",
                 "AES/CBC/PKCS7Padding",
-                "AES/OFB/PKCS7Padding",
-                "AES/CFB/PKCS7Padding"
+                "AES/OFB/NoPadding",
+                "AES/CFB/NoPadding"
         };
 
         oidTest(oids, names, 4);
