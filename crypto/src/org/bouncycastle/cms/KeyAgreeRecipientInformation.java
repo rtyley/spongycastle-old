@@ -136,6 +136,8 @@ public class KeyAgreeRecipientInformation
         String alg = aid.getObjectId().getId();
         byte[] encryptedKey = _encryptedKey.getOctets();
 
+        // TODO Should we try alternate ways of unwrapping?
+        //   (see KeyTransRecipientInformation.getSessionKey)
         Cipher keyCipher = Cipher.getInstance(wrapAlg, prov);
         keyCipher.init(Cipher.UNWRAP_MODE, agreedKey);
         return keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
