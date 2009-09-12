@@ -24,11 +24,8 @@ public class PrincipalUtil
     {
         try
         {
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(
-                cert.getTBSCertificate());
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
-            TBSCertificateStructure tbsCert = new TBSCertificateStructure(
-                                            (ASN1Sequence)aIn.readObject());
+            TBSCertificateStructure tbsCert = TBSCertificateStructure.getInstance(
+                    ASN1Object.fromByteArray(cert.getTBSCertificate()));
 
             return new X509Principal(tbsCert.getIssuer());
         }
@@ -47,12 +44,8 @@ public class PrincipalUtil
     {
         try
         {
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(
-                cert.getTBSCertificate());
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
-            TBSCertificateStructure tbsCert = new TBSCertificateStructure(
-                                            (ASN1Sequence)aIn.readObject());
-
+            TBSCertificateStructure tbsCert = TBSCertificateStructure.getInstance(
+                    ASN1Object.fromByteArray(cert.getTBSCertificate()));
             return new X509Principal(tbsCert.getSubject());
         }
         catch (IOException e)
@@ -70,11 +63,8 @@ public class PrincipalUtil
     {
         try
         {
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(
-                crl.getTBSCertList());
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
-            TBSCertList tbsCertList = new TBSCertList(
-                                            (ASN1Sequence)aIn.readObject());
+            TBSCertList tbsCertList = TBSCertList.getInstance(
+                ASN1Object.fromByteArray(crl.getTBSCertList()));
 
             return new X509Principal(tbsCertList.getIssuer());
         }
