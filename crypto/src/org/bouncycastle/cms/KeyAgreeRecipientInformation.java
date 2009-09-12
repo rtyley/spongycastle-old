@@ -8,24 +8,28 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
 import org.bouncycastle.asn1.cms.OriginatorPublicKey;
 import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
+//import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -58,8 +62,12 @@ public class KeyAgreeRecipientInformation
         try
         {
             ASN1Sequence s = this.info.getRecipientEncryptedKeys();
-            RecipientEncryptedKey id = RecipientEncryptedKey.getInstance(s.getObjectAt(0));
 
+            // TODO Handle the case of more than one encrypted key
+            RecipientEncryptedKey id = RecipientEncryptedKey.getInstance(
+                    s.getObjectAt(0));
+
+            // TODO Add support for RecipientKeyIdentifer option
             IssuerAndSerialNumber iAnds = id.getIdentifier().getIssuerAndSerialNumber();
 
             rid = new RecipientId();
@@ -74,42 +82,80 @@ public class KeyAgreeRecipientInformation
         }
     }
 
-    protected Key unwrapKey(Key key, Provider prov)
+    private PublicKey getSenderPublicKey(Key receiverPrivateKey,
+        OriginatorPublicKey originatorPublicKey, Provider prov)
+        throws GeneralSecurityException, IOException
+    {
+        PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(
+            ASN1Object.fromByteArray(receiverPrivateKey.getEncoded()));
+
+        SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(
+            privInfo.getAlgorithmId(),
+            originatorPublicKey.getPublicKey().getBytes());
+        X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
+        KeyFactory fact = KeyFactory.getInstance(keyEncAlg.getObjectId().getId(), prov);
+        return fact.generatePublic(pubSpec);
+    }
+
+    private SecretKey calculateAgreedSecretKey(String wrapAlg,
+        PublicKey senderPublicKey, Key receiverPrivateKey, Provider prov)
+        throws GeneralSecurityException, IOException
+    {
+        String agreeAlg = keyEncAlg.getObjectId().getId();
+
+        KeyAgreement agreement = KeyAgreement.getInstance(agreeAlg, prov);
+        agreement.init(receiverPrivateKey);
+
+        // TODO ECMQV 1-pass key agreement
+//        if (agreeAlg.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
+//        {
+//            byte[] ukmEncoding = info.getUserKeyingMaterial().getOctets();
+//            MQVuserKeyingMaterial ukm = MQVuserKeyingMaterial.getInstance(
+//                ASN1Object.fromByteArray(ukmEncoding));
+//
+//            PublicKey ephemeralKey = getSenderPublicKey(receiverPrivateKey,
+//                ukm.getEphemeralPublicKey(), prov);
+//
+//            senderPublicKey = new StaticEphemeralPublicKeySpec(senderPublicKey, ephemeralKey);
+//        }
+
+        agreement.doPhase(senderPublicKey, true);
+        return agreement.generateSecret(wrapAlg);
+    }
+
+    private Key unwrapSessionKey(String wrapAlg, SecretKey agreedKey,
+        Provider prov)
+        throws GeneralSecurityException
+    {
+        AlgorithmIdentifier aid = encAlg;
+        if (aid == null)
+        {
+            aid = macAlg;
+        }
+        
+        String alg = aid.getObjectId().getId();
+        byte[] encryptedKey = _encryptedKey.getOctets();
+
+        Cipher keyCipher = Cipher.getInstance(wrapAlg, prov);
+        keyCipher.init(Cipher.UNWRAP_MODE, agreedKey);
+        return keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
+    }
+
+    protected Key getSessionKey(Key receiverPrivateKey, Provider prov)
         throws CMSException
     {
         try
         {
-            OriginatorPublicKey origK = info.getOriginator().getOriginatorKey();
-            PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(key.getEncoded()));
-            SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(privInfo.getAlgorithmId(), origK.getPublicKey().getBytes());
-            X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
-            KeyFactory fact = KeyFactory.getInstance(keyEncAlg.getObjectId().getId(), prov);
-            KeyAgreement agreement = KeyAgreement.getInstance(keyEncAlg.getObjectId().getId(), prov);
-
-            agreement.init(key);
-
-            agreement.doPhase(fact.generatePublic(pubSpec), true);
-
             String wrapAlg = DERObjectIdentifier.getInstance(
-                                   ASN1Sequence.getInstance(keyEncAlg.getParameters()).getObjectAt(0)).getId();
+                ASN1Sequence.getInstance(keyEncAlg.getParameters()).getObjectAt(0)).getId();
 
-            Key wKey = agreement.generateSecret(wrapAlg);
+            PublicKey senderPublicKey = getSenderPublicKey(receiverPrivateKey,
+                info.getOriginator().getOriginatorKey(), prov);
 
-            Cipher keyCipher = Cipher.getInstance(wrapAlg, prov);
+            SecretKey agreedKey = calculateAgreedSecretKey(wrapAlg, senderPublicKey,
+                receiverPrivateKey, prov);
 
-            keyCipher.init(Cipher.UNWRAP_MODE, wKey);
-
-            AlgorithmIdentifier aid = encAlg;
-            if (aid == null)
-            {
-                aid = macAlg;
-            }
-            
-            String              alg = aid.getObjectId().getId();
-
-            byte[]              encryptedKey = _encryptedKey.getOctets();
-
-            return keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
+            return unwrapSessionKey(wrapAlg, agreedKey, prov);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -148,7 +194,7 @@ public class KeyAgreeRecipientInformation
         Provider prov)
         throws CMSException
     {
-        Key sKey = unwrapKey(key, prov);
+        Key sKey = getSessionKey(key, prov);
 
         return getContentFromSessionKey(sKey, prov);
     }
