@@ -89,7 +89,7 @@ public class KeyTransRecipientInformation
         return oid.getId();
     }
 
-    protected Key unwrapKey(Key key, Provider prov)
+    protected Key getSessionKey(Key receiverPrivateKey, Provider prov)
         throws CMSException
     {
         byte[] encryptedKey = info.getEncryptedKey().getOctets();
@@ -113,31 +113,31 @@ public class KeyTransRecipientInformation
 
             try
             {
-                keyCipher.init(Cipher.UNWRAP_MODE, key);
+                keyCipher.init(Cipher.UNWRAP_MODE, receiverPrivateKey);
 
                 sKey = keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
             }
             catch (GeneralSecurityException e)   // some providers do not support UNWRAP
             {
-                keyCipher.init(Cipher.DECRYPT_MODE, key);
+                keyCipher.init(Cipher.DECRYPT_MODE, receiverPrivateKey);
 
                 sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
             catch (IllegalStateException e)   // some providers do not support UNWRAP
             {
-                keyCipher.init(Cipher.DECRYPT_MODE, key);
+                keyCipher.init(Cipher.DECRYPT_MODE, receiverPrivateKey);
 
                 sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
             catch (UnsupportedOperationException e)   // some providers do not support UNWRAP
             {
-                keyCipher.init(Cipher.DECRYPT_MODE, key);
+                keyCipher.init(Cipher.DECRYPT_MODE, receiverPrivateKey);
 
                 sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
             catch (ProviderException e)   // some providers do not support UNWRAP
             {
-                keyCipher.init(Cipher.DECRYPT_MODE, key);
+                keyCipher.init(Cipher.DECRYPT_MODE, receiverPrivateKey);
 
                 sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
@@ -182,7 +182,7 @@ public class KeyTransRecipientInformation
         Provider prov)
         throws CMSException
     {
-        Key sKey = unwrapKey(key, prov);
+        Key sKey = getSessionKey(key, prov);
 
         return getContentFromSessionKey(sKey, prov);
     }
