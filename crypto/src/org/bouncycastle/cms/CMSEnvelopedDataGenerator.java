@@ -125,19 +125,15 @@ public class CMSEnvelopedDataGenerator
             throw new CMSException("exception decoding algorithm parameters.", e);
         }
 
-        Iterator            it = recipientInfs.iterator();
+        Iterator it = recipientInfoGenerators.iterator();
 
         while (it.hasNext())
         {
-            RecipientInf            recipient = (RecipientInf)it.next();
+            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
 
             try
             {
-                recipientInfos.add(recipient.toRecipientInfo(encKey, rand, provider));
-            }
-            catch (IOException e)
-            {
-                throw new CMSException("encoding error.", e);
+                recipientInfos.add(recipient.generate(encKey, rand, provider));
             }
             catch (InvalidKeyException e)
             {

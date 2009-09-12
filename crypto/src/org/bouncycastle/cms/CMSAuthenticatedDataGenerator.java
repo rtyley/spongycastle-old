@@ -21,7 +21,6 @@ import javax.crypto.SecretKey;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AuthenticatedData;
@@ -126,19 +125,15 @@ public class CMSAuthenticatedDataGenerator
            throw new CMSException("exception setting up parameters.", e);
         }
 
-        Iterator            it = recipientInfs.iterator();
+        Iterator it = recipientInfoGenerators.iterator();
 
         while (it.hasNext())
         {
-            RecipientInf            recipient = (RecipientInf)it.next();
+            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
 
             try
             {
-                recipientInfos.add(recipient.toRecipientInfo(encKey, rand, provider));
-            }
-            catch (IOException e)
-            {
-                throw new CMSException("encoding error.", e);
+                recipientInfos.add(recipient.generate(encKey, rand, provider));
             }
             catch (InvalidKeyException e)
             {

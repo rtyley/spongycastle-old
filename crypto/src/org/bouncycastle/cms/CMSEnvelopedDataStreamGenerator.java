@@ -118,20 +118,16 @@ public class CMSEnvelopedDataStreamGenerator
         SecretKey           encKey = keyGen.generateKey();
         AlgorithmParameters params = generateParameters(encryptionOID, encKey, encProvider);
 
-        Iterator            it = recipientInfs.iterator();
+        Iterator it = recipientInfoGenerators.iterator();
         ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
         
         while (it.hasNext())
         {
-            RecipientInf            recipient = (RecipientInf)it.next();
+            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
 
             try
             {
-                recipientInfos.add(recipient.toRecipientInfo(encKey, rand, provider));
-            }
-            catch (IOException e)
-            {
-                throw new CMSException("encoding error.", e);
+                recipientInfos.add(recipient.generate(encKey, rand, provider));
             }
             catch (InvalidKeyException e)
             {
