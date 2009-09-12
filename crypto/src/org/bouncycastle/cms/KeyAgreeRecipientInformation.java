@@ -97,7 +97,7 @@ public class KeyAgreeRecipientInformation
         return fact.generatePublic(pubSpec);
     }
 
-    private SecretKey calculateAgreedSecretKey(String wrapAlg,
+    private SecretKey calculateAgreedWrapKey(String wrapAlg,
         PublicKey senderPublicKey, Key receiverPrivateKey, Provider prov)
         throws GeneralSecurityException, IOException
     {
@@ -154,10 +154,10 @@ public class KeyAgreeRecipientInformation
             PublicKey senderPublicKey = getSenderPublicKey(receiverPrivateKey,
                 info.getOriginator().getOriginatorKey(), prov);
 
-            SecretKey agreedKey = calculateAgreedSecretKey(wrapAlg, senderPublicKey,
-                receiverPrivateKey, prov);
+            SecretKey agreedWrapKey = calculateAgreedWrapKey(wrapAlg,
+                senderPublicKey, receiverPrivateKey, prov);
 
-            return unwrapSessionKey(wrapAlg, agreedKey, prov);
+            return unwrapSessionKey(wrapAlg, agreedWrapKey, prov);
         }
         catch (NoSuchAlgorithmException e)
         {
