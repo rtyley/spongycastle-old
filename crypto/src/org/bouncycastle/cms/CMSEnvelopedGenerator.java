@@ -93,6 +93,7 @@ public class CMSEnvelopedGenerator
     public static final String  SEED_WRAP       = KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap.getId();
 
     public static final String  ECDH_SHA1KDF    = X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme.getId();
+//    public static final String  ECMQV_SHA1KDF   = X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme.getId();
 
     private static final CMSEnvelopedHelper HELPER = CMSEnvelopedHelper.INSTANCE;
 
