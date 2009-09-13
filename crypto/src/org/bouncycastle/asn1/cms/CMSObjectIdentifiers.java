@@ -11,5 +11,7 @@ public interface CMSObjectIdentifiers
     static final DERObjectIdentifier    signedAndEnvelopedData = PKCSObjectIdentifiers.signedAndEnvelopedData;
     static final DERObjectIdentifier    digestedData = PKCSObjectIdentifiers.digestedData;
     static final DERObjectIdentifier    encryptedData = PKCSObjectIdentifiers.encryptedData;
+    static final DERObjectIdentifier    authData = PKCSObjectIdentifiers.id_ct_authData;
     static final DERObjectIdentifier    compressedData = PKCSObjectIdentifiers.id_ct_compressedData;
+    static final DERObjectIdentifier    authEnvelopedData = PKCSObjectIdentifiers.id_ct_authEnvelopedData;
 }
