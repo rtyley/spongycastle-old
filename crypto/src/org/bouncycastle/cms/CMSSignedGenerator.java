@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -24,10 +25,13 @@ import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509Store;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.AlgorithmParameters;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
@@ -47,7 +51,7 @@ public class CMSSignedGenerator
     /**
      * Default type for the signed data.
      */
-    public static final String  DATA = PKCSObjectIdentifiers.data.getId();
+    public static final String  DATA = CMSObjectIdentifiers.data.getId();
     
     public static final String  DIGEST_SHA1 = OIWObjectIdentifiers.idSHA1.getId();
     public static final String  DIGEST_SHA224 = NISTObjectIdentifiers.id_sha224.getId();
@@ -305,5 +309,59 @@ public class CMSSignedGenerator
     static SignerIdentifier getSignerIdentifier(byte[] subjectKeyIdentifier)
     {
         return new SignerIdentifier(new DEROctetString(subjectKeyIdentifier));    
+    }
+
+    static class DigOutputStream extends OutputStream
+    {
+        MessageDigest dig;
+
+        public DigOutputStream(MessageDigest dig)
+        {
+            this.dig = dig;
+        }
+
+        public void write(byte[] b, int off, int len) throws IOException
+        {
+            dig.update(b, off, len);
+        }
+
+        public void write(int b) throws IOException
+        {
+            dig.update((byte) b);
+        }
+    }
+
+    static class SigOutputStream extends OutputStream
+    {
+        private final Signature sig;
+
+        public SigOutputStream(Signature sig)
+        {
+            this.sig = sig;
+        }
+
+        public void write(byte[] b, int off, int len) throws IOException
+        {
+            try
+            {
+                sig.update(b, off, len);
+            }
+            catch (SignatureException e)
+            {
+                throw new IOException("signature problem: " + e);
+            }
+        }
+
+        public void write(int b) throws IOException
+        {
+            try
+            {
+                sig.update((byte) b);
+            }
+            catch (SignatureException e)
+            {
+                throw new IOException("signature problem: " + e);
+            }
+        }
     }
 }
