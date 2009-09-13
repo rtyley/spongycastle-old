@@ -17,10 +17,6 @@ import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 
 public class CMSAuthenticatedGenerator
     extends CMSEnvelopedGenerator
@@ -47,25 +43,9 @@ public class CMSAuthenticatedGenerator
         throws IOException, NoSuchAlgorithmException, InvalidParameterSpecException
     {
         AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encryptionOID, provider);
-
         params.init(paramSpec);
 
-        DEREncodable asn1Params;
-        if (params != null)
-        {
-            ASN1InputStream aIn = new ASN1InputStream(params.getEncoded("ASN.1"));
-
-            asn1Params = aIn.readObject();
-        }
-        else
-        {
-            asn1Params = new DERNull();
-        }
-
-        AlgorithmIdentifier encAlgId = new AlgorithmIdentifier(
-            new DERObjectIdentifier(encryptionOID),
-            asn1Params);
-        return encAlgId;
+        return getAlgorithmIdentifier(encryptionOID, params);
     }
 
     protected AlgorithmParameterSpec generateParameterSpec(String encryptionOID, SecretKey encKey, Provider encProvider)
