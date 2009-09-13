@@ -575,19 +575,11 @@ public class CMSSignedDataGenerator
         //
         // add the SignerInfo objects
         //
-        DERObjectIdentifier  contentTypeOID;
-        boolean              isCounterSignature;
+        boolean isCounterSignature = (signedContentType == null);
 
-        if (signedContentType != null)
-        {
-            contentTypeOID = new DERObjectIdentifier(signedContentType);
-            isCounterSignature = false;
-        }
-        else
-        {
-            contentTypeOID = CMSObjectIdentifiers.data;
-            isCounterSignature = true;
-        }
+        DERObjectIdentifier contentTypeOID = isCounterSignature
+            ?   CMSObjectIdentifiers.data
+            :   new DERObjectIdentifier(signedContentType);
 
         it = signerInfs.iterator();
 
