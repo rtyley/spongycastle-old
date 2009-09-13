@@ -12,10 +12,10 @@ interface RecipientInfoGenerator
 {
     /**
      * Generate a RecipientInfo object for the given key.
-     * @param key
-     * @param random
-     * @param prov
-     * @return
+     * @param key the <code>SecretKey</code> to encrypt
+     * @param random a source of randomness
+     * @param prov the default provider to use
+     * @return a <code>RecipientInfo</code> object for the given key
      * @throws GeneralSecurityException
      */
     RecipientInfo generate(SecretKey key, SecureRandom random,
