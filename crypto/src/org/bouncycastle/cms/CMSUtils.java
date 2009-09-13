@@ -4,6 +4,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
@@ -14,6 +15,7 @@ import org.bouncycastle.util.io.Streams;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.cert.CRLException;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
@@ -142,6 +144,19 @@ class CMSUtils
         }
 
         return new DERSet(v);
+    }
+
+    static OutputStream createBEROctetOutputStream(OutputStream s,
+            int tagNo, boolean isExplicit, int bufferSize) throws IOException
+    {
+        BEROctetStringGenerator octGen = new BEROctetStringGenerator(s, tagNo, isExplicit);
+
+        if (bufferSize != 0)
+        {
+            return octGen.getOctetOutputStream(new byte[bufferSize]);
+        }
+
+        return octGen.getOctetOutputStream();
     }
 
     private static ContentInfo readContentInfo(

@@ -78,9 +78,12 @@ public class CMSCompressedDataStreamGenerator
         
         eiGen.addObject(new DERObjectIdentifier(contentOID));
         
-        BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
+        // TODO Allow specifying a custom bufferSize?
+        OutputStream octetStream = CMSUtils.createBEROctetOutputStream(
+            eiGen.getRawOutputStream(), 0, true, 0);
         
-        return new CmsCompressedOutputStream(new DeflaterOutputStream(octGen.getOctetOutputStream()), sGen, cGen, eiGen);
+        return new CmsCompressedOutputStream(
+            new DeflaterOutputStream(octetStream), sGen, cGen, eiGen);
     }
     
     private class CmsCompressedOutputStream
