@@ -25,7 +25,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AuthenticatedData;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
@@ -160,7 +160,7 @@ public class CMSAuthenticatedDataStreamGenerator
             //
             BERSequenceGenerator cGen = new BERSequenceGenerator(out);
 
-            cGen.addObject(PKCSObjectIdentifiers.id_ct_authData);
+            cGen.addObject(CMSObjectIdentifiers.authenticatedData);
 
             //
             // Authenticated Data
@@ -188,7 +188,7 @@ public class CMSAuthenticatedDataStreamGenerator
             
             BERSequenceGenerator eiGen = new BERSequenceGenerator(authGen.getRawOutputStream());
 
-            eiGen.addObject(PKCSObjectIdentifiers.data);
+            eiGen.addObject(CMSObjectIdentifiers.data);
 
             OutputStream octetStream = CMSUtils.createBEROctetOutputStream(
                     eiGen.getRawOutputStream(), 0, false, _bufferSize);
