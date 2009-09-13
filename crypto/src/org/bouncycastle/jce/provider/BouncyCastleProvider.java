@@ -222,7 +222,7 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JCEBlockCipher$DESedeCBC");
         put("Cipher." + OIWObjectIdentifiers.desCBC, "org.bouncycastle.jce.provider.JCEBlockCipher$DESCBC");
         put("Cipher.DESEDEWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
-        put("Cipher.1.2.840.113549.1.9.16.3.6", "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
+        put("Cipher." + PKCSObjectIdentifiers.id_alg_CMS3DESwrap, "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
         put("Cipher.SKIPJACK", "org.bouncycastle.jce.provider.JCEBlockCipher$Skipjack");
         put("Cipher.BLOWFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Blowfish");
         put("Cipher.1.3.6.1.4.1.3029.1.2", "org.bouncycastle.jce.provider.JCEBlockCipher$BlowfishCBC");
