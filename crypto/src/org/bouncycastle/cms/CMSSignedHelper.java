@@ -461,29 +461,4 @@ class CMSSignedHelper
 
         return algId;
     }
-
-    private boolean anyCertHasTypeOther()
-    {
-        // not supported
-        return false;
-    }
-
-    private boolean anyCertHasV1Attribute()
-    {
-        // obsolete 
-        return false;
-    }
-
-    private boolean anyCertHasV2Attribute()
-    {
-        // TODO
-        return false;
-    }
-
-    private boolean anyCrlHasTypeOther()
-    {
-        // not supported
-        return false;
-    }
-
 }
