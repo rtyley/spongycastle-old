@@ -190,18 +190,10 @@ public class CMSAuthenticatedDataStreamGenerator
 
             eiGen.addObject(PKCSObjectIdentifiers.data);
 
-            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, false);
+            OutputStream octetStream = CMSUtils.createBEROctetOutputStream(
+                    eiGen.getRawOutputStream(), 0, false, _bufferSize);
 
-            MacOutputStream      mOut;
-
-            if (_bufferSize != 0)
-            {
-                mOut = new MacOutputStream(octGen.getOctetOutputStream(new byte[_bufferSize]), mac);
-            }
-            else
-            {
-                mOut = new MacOutputStream(octGen.getOctetOutputStream(), mac);
-            }
+            MacOutputStream mOut = new MacOutputStream(octetStream, mac);
 
             return new CmsAuthenticatedDataOutputStream(mOut, cGen, authGen, eiGen);
         }

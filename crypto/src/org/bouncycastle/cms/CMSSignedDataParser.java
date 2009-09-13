@@ -714,9 +714,9 @@ public class CMSSignedDataParser
         OutputStream          output)
         throws IOException
     {
-        BEROctetStringGenerator octGen = new BEROctetStringGenerator(output, 0, true);
         // TODO Allow specification of a specific fragment size?
-        OutputStream outOctets = octGen.getOctetOutputStream();
+        OutputStream outOctets = CMSUtils.createBEROctetOutputStream(
+            output, 0, true, 0);
         Streams.pipeAll(octs.getOctetStream(), outOctets);
         outOctets.close();
     }

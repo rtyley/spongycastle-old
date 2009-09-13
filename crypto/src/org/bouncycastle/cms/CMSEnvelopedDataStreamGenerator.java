@@ -208,19 +208,11 @@ public class CMSEnvelopedDataStreamGenerator
             AlgorithmIdentifier encAlgId = getAlgorithmIdentifier(encryptionOID, params);
                         
             eiGen.getRawOutputStream().write(encAlgId.getEncoded());
-            
-            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, false);
-            
-            CipherOutputStream      cOut;
-            
-            if (_bufferSize != 0)
-            {
-                cOut = new CipherOutputStream(octGen.getOctetOutputStream(new byte[_bufferSize]), cipher);
-            }
-            else
-            {
-                cOut = new CipherOutputStream(octGen.getOctetOutputStream(), cipher);
-            }
+
+            OutputStream octetStream = CMSUtils.createBEROctetOutputStream(
+                eiGen.getRawOutputStream(), 0, false, _bufferSize);
+
+            CipherOutputStream cOut = new CipherOutputStream(octetStream, cipher);;
 
             return new CmsEnvelopedDataOutputStream(cOut, cGen, envGen, eiGen);
         }
