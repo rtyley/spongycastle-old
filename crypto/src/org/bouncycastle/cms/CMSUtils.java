@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.util.io.Streams;
 
@@ -157,6 +158,20 @@ class CMSUtils
         }
 
         return octGen.getOctetOutputStream();
+    }
+
+    static TBSCertificateStructure getTBSCertificateStructure(
+        X509Certificate cert) throws CertificateEncodingException
+    {
+        try
+        {
+            return TBSCertificateStructure.getInstance(ASN1Object
+                .fromByteArray(cert.getTBSCertificate()));
+        }
+        catch (IOException e)
+        {
+            throw new CertificateEncodingException(e.toString());
+        }
     }
 
     private static ContentInfo readContentInfo(

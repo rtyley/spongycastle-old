@@ -24,6 +24,7 @@ import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 
 class KeyTransRecipientInfoGenerator implements RecipientInfoGenerator
 {
+    // TODO Pass recipId, keyEncAlg instead?
     private TBSCertificateStructure recipientTBSCert;
     private PublicKey recipientPublicKey;
     private ASN1OctetString subjectKeyIdentifier;
@@ -39,14 +40,9 @@ class KeyTransRecipientInfoGenerator implements RecipientInfoGenerator
     {
         try
         {
-            this.recipientTBSCert = TBSCertificateStructure
-                    .getInstance(ASN1Object.fromByteArray(recipientCert
-                            .getTBSCertificate()));
-        } catch (CertificateEncodingException e)
-        {
-            throw new IllegalArgumentException(
-                    "can't extract TBS structure from this cert");
-        } catch (IOException e)
+            this.recipientTBSCert = CMSUtils.getTBSCertificateStructure(recipientCert);
+        }
+        catch (CertificateEncodingException e)
         {
             throw new IllegalArgumentException(
                     "can't extract TBS structure from this cert");
