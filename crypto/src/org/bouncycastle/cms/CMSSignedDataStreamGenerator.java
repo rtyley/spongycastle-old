@@ -20,7 +20,6 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.DigestOutputStream;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -97,6 +96,12 @@ public class CMSSignedDataStreamGenerator
         {
             return new AlgorithmIdentifier(
                 new DERObjectIdentifier(_digestOID), DERNull.INSTANCE);
+        }
+
+        OutputStream wrapContentStream(OutputStream content)
+        {
+            // TODO When no signedAttr, should update signature from content
+            return content;
         }
 
         SignerInfo toSignerInfo(
@@ -691,12 +696,15 @@ public class CMSSignedDataStreamGenerator
             : null;
 
         // Also send the data to 'dataOutputStream' if necessary
-        OutputStream teeStream = getSafeTeeOutputStream(dataOutputStream, encapStream);
+        OutputStream contentStream = getSafeTeeOutputStream(dataOutputStream, encapStream);
 
         // Let all the digests see the data as it is written
-        OutputStream digStream = attachDigestsToOutputStream(_messageDigests, teeStream);
+        OutputStream digStream = attachDigestsToOutputStream(_messageDigests, contentStream);
 
-        return new CmsSignedDataOutputStream(digStream, eContentType, sGen, sigGen, eiGen);
+        // Let all the signers see the data as it is written
+        OutputStream outStream = attachSignersToOutputStream(_signerInfs, digStream);
+
+        return new CmsSignedDataOutputStream(outStream, eContentType, sGen, sigGen, eiGen);
     }
 
     // RFC3852, section 5.1:
@@ -821,7 +829,20 @@ public class CMSSignedDataStreamGenerator
         while (it.hasNext())
         {
             MessageDigest digest = (MessageDigest)it.next();
-            result = new DigestOutputStream(result, digest);
+            result = getSafeTeeOutputStream(result, new DigOutputStream(digest));
+        }
+        return result;
+    }
+
+    private static OutputStream attachSignersToOutputStream(
+        List signers, OutputStream s)
+    {
+        OutputStream result = s;
+        Iterator it = signers.iterator();
+        while (it.hasNext())
+        {
+            SignerInf signer = (SignerInf)it.next();
+            result = signer.wrapContentStream(result);
         }
         return result;
     }
