@@ -118,37 +118,35 @@ public class CMSSignedDataGenerator
                 _digests.put(digestOID, hash.clone());
             }
 
-            AttributeTable signed;
-
-            if (addDefaultAttributes)
-            {
-                Map parameters = getBaseParameters(contentType, digAlgId, hash);
-                signed = (sAttr != null) ? sAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
-            }
-            else
-            {
-                signed = baseSignedTable;
-            }
-
-            if (isCounterSignature)
-            {
-                Hashtable ats = signed.toHashtable();
-
-                ats.remove(CMSAttributes.contentType);
-
-                signed = new AttributeTable(ats);
-            }
-            
-            ASN1Set signedAttr = getAttributeSet(signed);
-
-            //
-            // sig must be composed from the DER encoding.
-            //
+            ASN1Set signedAttr = null;
             byte[] tmp;
-            if (signedAttr != null) 
+            if (sAttr != null)
             {
+                AttributeTable signed;
+                if (addDefaultAttributes)
+                {
+                    Map parameters = getBaseParameters(contentType, digAlgId, hash);
+                    signed = sAttr.getAttributes(Collections.unmodifiableMap(parameters));
+                }
+                else
+                {
+                    signed = baseSignedTable;
+                }
+
+                if (isCounterSignature)
+                {
+                    Hashtable ats = signed.toHashtable();
+
+                    ats.remove(CMSAttributes.contentType);
+
+                    signed = new AttributeTable(ats);
+                }
+
+                signedAttr = getAttributeSet(signed);
+
+                // sig must be composed from the DER encoding.
                 tmp = signedAttr.getEncoded(ASN1Encodable.DER);
-            } 
+            }
             else
             {
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
@@ -157,20 +155,22 @@ public class CMSSignedDataGenerator
             }
 
             sig.initSign(key, random);
-
             sig.update(tmp);
+            byte[] sigBytes = sig.sign();
 
-            ASN1OctetString         encDigest = new DEROctetString(sig.sign());
+            ASN1Set unsignedAttr = null;
+            if (unsAttr != null)
+            {
+                Map parameters = getBaseParameters(contentType, digAlgId, hash);
+                parameters.put(CMSAttributeTableGenerator.SIGNATURE, sigBytes.clone());
 
-            Map parameters = getBaseParameters(contentType, digAlgId, hash);
-            parameters.put(CMSAttributeTableGenerator.SIGNATURE, encDigest.getOctets().clone());
+                AttributeTable unsigned = unsAttr.getAttributes(Collections.unmodifiableMap(parameters));
 
-            AttributeTable unsigned = (unsAttr != null) ? unsAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
-
-            ASN1Set unsignedAttr = getAttributeSet(unsigned);
+                unsignedAttr = getAttributeSet(unsigned);
+            }
 
             return new SignerInfo(signerIdentifier, digAlgId,
-                        signedAttr, encAlgId, encDigest, unsignedAttr);
+                signedAttr, encAlgId, new DEROctetString(sigBytes), unsignedAttr);
         }
     }
     
