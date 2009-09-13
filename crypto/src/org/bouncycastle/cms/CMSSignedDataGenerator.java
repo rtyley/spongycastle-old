@@ -674,8 +674,7 @@ public class CMSSignedDataGenerator
             certrevlist = CMSUtils.createBerSetFromList(_crls);
         }
 
-        ContentInfo    encInfo;
-        
+        ASN1OctetString octs = null;
         if (encapsulate)
         {
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
@@ -689,15 +688,10 @@ public class CMSSignedDataGenerator
                 throw new CMSException("encapsulation error.", e);
             }
 
-            ASN1OctetString  octs = new BERConstructedOctetString(
-                                                    bOut.toByteArray());
+            octs = new BERConstructedOctetString(bOut.toByteArray());
+        }
 
-            encInfo = new ContentInfo(contentTypeOID, octs);
-        }
-        else
-        {
-            encInfo = new ContentInfo(contentTypeOID, null);
-        }
+        ContentInfo encInfo = new ContentInfo(contentTypeOID, octs);
 
         SignedData  sd = new SignedData(
                                  new DERSet(digestAlgs),
