@@ -12,7 +12,6 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -70,17 +69,16 @@ public class CMSSignedDataStreamGenerator
 
     private class SignerInf
     {
-        private X509Certificate             _cert;
+        private SignerIdentifier            _signerIdentifier;
         private String                      _digestOID;
         private String                      _encOID;
         private CMSAttributeTableGenerator  _sAttr;
         private CMSAttributeTableGenerator  _unsAttr;
         private MessageDigest               _digest;
         private Signature                   _signature;
-        private byte[]                      _subjectKeyID;
 
         SignerInf(
-            X509Certificate             cert,
+            SignerIdentifier            signerIdentifier,
             String                      digestOID,
             String                      encOID,
             CMSAttributeTableGenerator  sAttr,
@@ -88,36 +86,13 @@ public class CMSSignedDataStreamGenerator
             MessageDigest               digest,
             Signature                   signature)
         {
-            _cert = cert;
+            _signerIdentifier = signerIdentifier;
             _digestOID = digestOID;
             _encOID = encOID;
             _sAttr = sAttr;
             _unsAttr = unsAttr;
             _digest = digest;
             _signature = signature;
-        }
-
-        SignerInf(
-            byte[]                      subjectKeyID,
-            String                      digestOID,
-            String                      encOID,
-            CMSAttributeTableGenerator  sAttr,
-            CMSAttributeTableGenerator  unsAttr,
-            MessageDigest               digest,
-            Signature                   signature)
-        {
-            _subjectKeyID = subjectKeyID;
-            _digestOID = digestOID;
-            _encOID = encOID;
-            _sAttr = sAttr;
-            _unsAttr = unsAttr;
-            _digest = digest;
-            _signature = signature;
-        }
-
-        X509Certificate getCertificate()
-        {
-            return _cert;
         }
 
         AlgorithmIdentifier getDigestAlgorithmID()
@@ -158,7 +133,7 @@ public class CMSSignedDataStreamGenerator
 
             _signature.update(tmp);
 
-            ASN1OctetString         encDigest = new DEROctetString(_signature.sign());
+            ASN1OctetString encDigest = new DEROctetString(_signature.sign());
 
             parameters = getBaseParameters(contentType, digAlgId, hash);
             parameters.put(CMSAttributeTableGenerator.SIGNATURE, encDigest.getOctets().clone());
@@ -167,25 +142,9 @@ public class CMSSignedDataStreamGenerator
 
             ASN1Set unsignedAttr = getAttributeSet(unsigned);
 
-            X509Certificate         cert = this.getCertificate();
-            SignerIdentifier        signerIdentifier;
-
-            if (cert != null)
-            {
-                TBSCertificateStructure tbs = TBSCertificateStructure.getInstance(ASN1Object.fromByteArray(cert.getTBSCertificate()));
-                IssuerAndSerialNumber   encSid = new IssuerAndSerialNumber(tbs.getIssuer(), tbs.getSerialNumber().getValue());
-
-                signerIdentifier = new SignerIdentifier(encSid);
-            }
-            else
-            {
-                signerIdentifier = new SignerIdentifier(new DEROctetString(_subjectKeyID));
-            }
-
-            return new SignerInfo(signerIdentifier, digAlgId,
+            return new SignerInfo(_signerIdentifier, digAlgId,
                         signedAttr, encAlgId, encDigest, unsignedAttr);
         }
-
     }
 
     /**
@@ -390,7 +349,22 @@ public class CMSSignedDataStreamGenerator
 
         sig.initSign(key, rand);
 
-        _signerInfs.add(new SignerInf(cert, digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
+        TBSCertificateStructure tbs;        
+        try
+        {
+            tbs = CMSUtils.getTBSCertificateStructure(cert);
+        }
+        catch (CertificateEncodingException e)
+        {
+            throw new IllegalArgumentException(
+                "can't extract TBS structure from this cert");
+        }
+
+        IssuerAndSerialNumber encSid = new IssuerAndSerialNumber(tbs
+                .getIssuer(), tbs.getSerialNumber().getValue());
+        SignerIdentifier signerID = new SignerIdentifier(encSid);
+
+        _signerInfs.add(new SignerInf(signerID, digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _messageDigests.add(dig);
     }
 
@@ -554,7 +528,10 @@ public class CMSSignedDataStreamGenerator
 
         sig.initSign(key, rand);
 
-        _signerInfs.add(new SignerInf(subjectKeyID, digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
+        SignerIdentifier signerID = new SignerIdentifier(
+            new DEROctetString(subjectKeyID));
+
+        _signerInfs.add(new SignerInf(signerID, digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _messageDigests.add(dig);
     }
 
