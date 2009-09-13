@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequenceGenerator;
-import org.bouncycastle.asn1.BEROctetStringGenerator;
 
 /**
  * General class for generating a compressed CMS message stream.
