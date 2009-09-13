@@ -118,6 +118,9 @@ public class CMSSignedDataStreamGenerator
             {
                 Map parameters = getBaseParameters(contentType, digAlgId, hash);
                 AttributeTable signed = _sAttr.getAttributes(Collections.unmodifiableMap(parameters));
+
+                // TODO Handle countersignatures (see CMSSignedDataGenerator)
+
                 signedAttr = getAttributeSet(signed);
 
                 // sig must be composed from the DER encoding.
