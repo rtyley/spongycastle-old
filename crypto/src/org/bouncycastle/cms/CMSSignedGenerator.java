@@ -4,9 +4,12 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -14,6 +17,7 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.x509.X509AttributeCertificate;
@@ -26,6 +30,8 @@ import java.security.AlgorithmParameters;
 import java.security.Signature;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
@@ -276,5 +282,28 @@ public class CMSSignedGenerator
     public Map getGeneratedDigests()
     {
         return new HashMap(_digests);
+    }
+
+    static SignerIdentifier getSignerIdentifier(X509Certificate cert)
+    {
+        TBSCertificateStructure tbs;        
+        try
+        {
+            tbs = CMSUtils.getTBSCertificateStructure(cert);
+        }
+        catch (CertificateEncodingException e)
+        {
+            throw new IllegalArgumentException(
+                "can't extract TBS structure from this cert");
+        }
+
+        IssuerAndSerialNumber encSid = new IssuerAndSerialNumber(tbs
+                .getIssuer(), tbs.getSerialNumber().getValue());
+        return new SignerIdentifier(encSid);
+    }
+
+    static SignerIdentifier getSignerIdentifier(byte[] subjectKeyIdentifier)
+    {
+        return new SignerIdentifier(new DEROctetString(subjectKeyIdentifier));    
     }
 }
