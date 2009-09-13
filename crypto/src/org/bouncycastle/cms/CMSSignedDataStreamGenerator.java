@@ -697,47 +697,19 @@ public class CMSSignedDataStreamGenerator
         sigGen.getRawOutputStream().write(new DERSet(digestAlgs).getEncoded());
         
         BERSequenceGenerator eiGen = new BERSequenceGenerator(sigGen.getRawOutputStream());
-        
         eiGen.addObject(new DERObjectIdentifier(signedContentType));
-        
-        OutputStream digStream;
-        
-        if (encapsulate)
-        {
-            BEROctetStringGenerator octGen = new BEROctetStringGenerator(eiGen.getRawOutputStream(), 0, true);
-            
-            if (_bufferSize != 0)
-            {
-                digStream = octGen.getOctetOutputStream(new byte[_bufferSize]);
-            }
-            else
-            {
-                digStream = octGen.getOctetOutputStream();
-            }
 
-            if (dataOutputStream != null)
-            {
-                digStream = new TeeOutputStream(dataOutputStream, digStream);
-            }
-        }
-        else
-        {
-            if (dataOutputStream != null)
-            {
-                digStream = dataOutputStream;
-            }
-            else
-            {
-                digStream = new NullOutputStream();
-            }
-        }
+        // If encapsulating, add the data as an octet string in the sequence
+        OutputStream encapStream = encapsulate
+            ? CMSUtils.createBEROctetOutputStream(eiGen.getRawOutputStream(), 0, true, _bufferSize)
+            : null;
 
+        // Also send the data to 'dataOutputStream' if necessary
+        OutputStream teeStream = getSafeTeeOutputStream(dataOutputStream, encapStream);
 
-        for (Iterator it = _messageDigests.iterator(); it.hasNext();)
-        {
-            digStream = new DigestOutputStream(digStream, (MessageDigest)it.next());
-        }
-        
+        // Let all the digests see the data as it is written
+        OutputStream digStream = attachDigestsToOutputStream(_messageDigests, teeStream);
+
         return new CmsSignedDataOutputStream(digStream, signedContentType, sGen, sigGen, eiGen);
     }
 
@@ -855,8 +827,33 @@ public class CMSSignedDataStreamGenerator
 
         return false;
     }
-    
-    private class NullOutputStream
+
+    private static OutputStream attachDigestsToOutputStream(List digests, OutputStream s)
+    {
+        OutputStream result = s;
+        Iterator it = digests.iterator();
+        while (it.hasNext())
+        {
+            MessageDigest digest = (MessageDigest)it.next();
+            result = new DigestOutputStream(result, digest);
+        }
+        return result;
+    }
+
+    private static OutputStream getSafeOutputStream(OutputStream s)
+    {
+        return s == null ? new NullOutputStream() : s;
+    }
+
+    private static OutputStream getSafeTeeOutputStream(OutputStream s1,
+            OutputStream s2)
+    {
+        return s1 == null ? getSafeOutputStream(s2)
+                : s2 == null ? getSafeOutputStream(s1) : new TeeOutputStream(
+                        s1, s2);
+    }
+
+    private static class NullOutputStream
         extends OutputStream
     {
         public void write(byte[] buf)
@@ -877,7 +874,7 @@ public class CMSSignedDataStreamGenerator
         }
     }
 
-    private class TeeOutputStream
+    private static class TeeOutputStream
         extends OutputStream
     {
         private OutputStream s1;
