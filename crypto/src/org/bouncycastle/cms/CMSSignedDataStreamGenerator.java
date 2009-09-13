@@ -67,13 +67,13 @@ public class CMSSignedDataStreamGenerator
 
     private class SignerInf
     {
-        private SignerIdentifier            _signerIdentifier;
-        private String                      _digestOID;
-        private String                      _encOID;
-        private CMSAttributeTableGenerator  _sAttr;
-        private CMSAttributeTableGenerator  _unsAttr;
-        private MessageDigest               _digest;
-        private Signature                   _signature;
+        private final SignerIdentifier            _signerIdentifier;
+        private final String                      _digestOID;
+        private final String                      _encOID;
+        private final CMSAttributeTableGenerator  _sAttr;
+        private final CMSAttributeTableGenerator  _unsAttr;
+        private final MessageDigest               _digest;
+        private final Signature                   _signature;
 
         SignerInf(
             SignerIdentifier            signerIdentifier,
