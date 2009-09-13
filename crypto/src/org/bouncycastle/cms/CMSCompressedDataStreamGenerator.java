@@ -30,11 +30,24 @@ public class CMSCompressedDataStreamGenerator
 {
     public static final String  ZLIB    = "1.2.840.113549.1.9.16.3.8";
 
+    private int _bufferSize;
+    
     /**
      * base constructor
      */
     public CMSCompressedDataStreamGenerator()
     {
+    }
+
+    /**
+     * Set the underlying string size for encapsulated data
+     *
+     * @param bufferSize length of octet strings to buffer the data.
+     */
+    public void setBufferSize(
+        int bufferSize)
+    {
+        _bufferSize = bufferSize;
     }
 
     public OutputStream open(
@@ -77,10 +90,9 @@ public class CMSCompressedDataStreamGenerator
         BERSequenceGenerator eiGen = new BERSequenceGenerator(cGen.getRawOutputStream());
         
         eiGen.addObject(new DERObjectIdentifier(contentOID));
-        
-        // TODO Allow specifying a custom bufferSize?
+
         OutputStream octetStream = CMSUtils.createBEROctetOutputStream(
-            eiGen.getRawOutputStream(), 0, true, 0);
+            eiGen.getRawOutputStream(), 0, true, _bufferSize);
         
         return new CmsCompressedOutputStream(
             new DeflaterOutputStream(octetStream), sGen, cGen, eiGen);
