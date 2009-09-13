@@ -60,13 +60,13 @@ public class CMSSignedDataGenerator
 
     private class SignerInf
     {
-        private PrivateKey                  key;
-        private SignerIdentifier            signerIdentifier;
-        private String                      digestOID;
-        private String                      encOID;
-        private CMSAttributeTableGenerator  sAttr;
-        private CMSAttributeTableGenerator  unsAttr;
-        private AttributeTable              baseSignedTable;
+        private final PrivateKey                  key;
+        private final SignerIdentifier            signerIdentifier;
+        private final String                      digestOID;
+        private final String                      encOID;
+        private final CMSAttributeTableGenerator  sAttr;
+        private final CMSAttributeTableGenerator  unsAttr;
+        private final AttributeTable              baseSignedTable;
 
         SignerInf(
             PrivateKey                 key,
@@ -75,7 +75,7 @@ public class CMSSignedDataGenerator
             String                     encOID,
             CMSAttributeTableGenerator sAttr,
             CMSAttributeTableGenerator unsAttr,
-            AttributeTable             baseSigneTable)
+            AttributeTable             baseSignedTable)
         {
             this.key = key;
             this.signerIdentifier = signerIdentifier;
@@ -83,7 +83,7 @@ public class CMSSignedDataGenerator
             this.encOID = encOID;
             this.sAttr = sAttr;
             this.unsAttr = unsAttr;
-            this.baseSignedTable = baseSigneTable;
+            this.baseSignedTable = baseSignedTable;
         }
 
         AlgorithmIdentifier getDigestAlgorithmID()
