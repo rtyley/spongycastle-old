@@ -24,8 +24,8 @@ import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AuthenticatedData;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
@@ -146,11 +146,11 @@ public class CMSAuthenticatedDataGenerator
         }
 
         ContentInfo  eci = new ContentInfo(
-                PKCSObjectIdentifiers.data,
+                CMSObjectIdentifiers.data,
                 encContent);
 
         ContentInfo contentInfo = new ContentInfo(
-                PKCSObjectIdentifiers.id_ct_authData,
+                CMSObjectIdentifiers.authenticatedData,
                 new AuthenticatedData(null, new DERSet(recipientInfos), macAlgId, null, eci, null, macResult, null));
 
         return new CMSAuthenticatedData(contentInfo);

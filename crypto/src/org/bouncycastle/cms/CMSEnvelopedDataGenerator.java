@@ -4,10 +4,10 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.EncryptedContentInfo;
 import org.bouncycastle.asn1.cms.EnvelopedData;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 import javax.crypto.Cipher;
@@ -146,12 +146,12 @@ public class CMSEnvelopedDataGenerator
         }
 
         EncryptedContentInfo  eci = new EncryptedContentInfo(
-                                 PKCSObjectIdentifiers.data,
+                                 CMSObjectIdentifiers.data,
                                  encAlgId, 
                                  encContent);
 
         ContentInfo contentInfo = new ContentInfo(
-                PKCSObjectIdentifiers.envelopedData,
+                CMSObjectIdentifiers.envelopedData,
                 new EnvelopedData(null, new DERSet(recipientInfos), eci, null));
 
         return new CMSEnvelopedData(contentInfo);

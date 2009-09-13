@@ -6,7 +6,6 @@ import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 import javax.crypto.Cipher;
@@ -193,7 +192,7 @@ public class CMSEnvelopedDataStreamGenerator
 
             BERSequenceGenerator eiGen = new BERSequenceGenerator(envGen.getRawOutputStream());
             
-            eiGen.addObject(PKCSObjectIdentifiers.data);
+            eiGen.addObject(CMSObjectIdentifiers.data);
 
             //
             // If params are null we try and second guess on them as some providers don't provide
