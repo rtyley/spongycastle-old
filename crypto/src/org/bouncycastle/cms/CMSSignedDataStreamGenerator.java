@@ -14,11 +14,9 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -349,22 +347,7 @@ public class CMSSignedDataStreamGenerator
 
         sig.initSign(key, rand);
 
-        TBSCertificateStructure tbs;        
-        try
-        {
-            tbs = CMSUtils.getTBSCertificateStructure(cert);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new IllegalArgumentException(
-                "can't extract TBS structure from this cert");
-        }
-
-        IssuerAndSerialNumber encSid = new IssuerAndSerialNumber(tbs
-                .getIssuer(), tbs.getSerialNumber().getValue());
-        SignerIdentifier signerID = new SignerIdentifier(encSid);
-
-        _signerInfs.add(new SignerInf(signerID, digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
+        _signerInfs.add(new SignerInf(getSignerIdentifier(cert), digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _messageDigests.add(dig);
     }
 
@@ -528,10 +511,7 @@ public class CMSSignedDataStreamGenerator
 
         sig.initSign(key, rand);
 
-        SignerIdentifier signerID = new SignerIdentifier(
-            new DEROctetString(subjectKeyID));
-
-        _signerInfs.add(new SignerInf(signerID, digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
+        _signerInfs.add(new SignerInf(getSignerIdentifier(subjectKeyID), digestOID, encryptionOID, signedAttrGenerator, unsignedAttrGenerator, dig, sig));
         _messageDigests.add(dig);
     }
 
