@@ -2,7 +2,6 @@ package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequenceGenerator;
@@ -112,41 +111,42 @@ public class CMSSignedDataStreamGenerator
             AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(_encOID, _signature);
 
             byte[] hash = _digest.digest();
-
             _digests.put(_digestOID, hash.clone());
 
-            Map  parameters = getBaseParameters(contentType, digAlgId, hash);
-
-            AttributeTable signed = (_sAttr != null) ? _sAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
-
-            ASN1Set signedAttr = getAttributeSet(signed);
-
-            //
-            // sig must be composed from the DER encoding.
-            //
-            byte[] tmp;
-            if (signedAttr != null) 
+            ASN1Set signedAttr = null;
+            if (_sAttr != null)
             {
-                tmp = signedAttr.getEncoded(ASN1Encodable.DER);
-            } 
+                Map parameters = getBaseParameters(contentType, digAlgId, hash);
+                AttributeTable signed = _sAttr.getAttributes(Collections.unmodifiableMap(parameters));
+                signedAttr = getAttributeSet(signed);
+
+                // sig must be composed from the DER encoding.
+                byte[] signedAttrDEREncoding = signedAttr.getEncoded(ASN1Encodable.DER);
+
+                _signature.update(signedAttrDEREncoding);
+            }
             else
             {
+                // TODO Update Signature directly with content
+                // (see 'wrapContentStream' method)
                 throw new RuntimeException("signatures without signed attributes not implemented.");
             }
 
-            _signature.update(tmp);
+            byte[] sigBytes = _signature.sign();
+ 
+            ASN1Set unsignedAttr = null;
+            if (_unsAttr != null)
+            {
+                Map parameters = getBaseParameters(contentType, digAlgId, hash);
+                parameters.put(CMSAttributeTableGenerator.SIGNATURE, sigBytes.clone());
 
-            ASN1OctetString encDigest = new DEROctetString(_signature.sign());
+                AttributeTable unsigned = _unsAttr.getAttributes(Collections.unmodifiableMap(parameters));
 
-            parameters = getBaseParameters(contentType, digAlgId, hash);
-            parameters.put(CMSAttributeTableGenerator.SIGNATURE, encDigest.getOctets().clone());
-
-            AttributeTable unsigned = (_unsAttr != null) ? _unsAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
-
-            ASN1Set unsignedAttr = getAttributeSet(unsigned);
+                unsignedAttr = getAttributeSet(unsigned);
+            }
 
             return new SignerInfo(_signerIdentifier, digAlgId,
-                        signedAttr, encAlgId, encDigest, unsignedAttr);
+                signedAttr, encAlgId, new DEROctetString(sigBytes), unsignedAttr);
         }
     }
 
