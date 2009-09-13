@@ -592,11 +592,11 @@ public class CMSSignedDataStreamGenerator
      */
     public OutputStream open(
         OutputStream out,
-        String       signedContentType,
+        String       eContentType,
         boolean      encapsulate)
         throws IOException
     {
-        return open(out, signedContentType, encapsulate, null);
+        return open(out, eContentType, encapsulate, null);
     }
 
     /**
@@ -605,17 +605,47 @@ public class CMSSignedDataStreamGenerator
      * of the message will be included in the signature. The content type
      * is set according to the OID represented by the string signedContentType.
      * @param out stream the CMS object is to be written to.
-     * @param signedContentType OID for data to be signed.
+     * @param eContentType OID for data to be signed.
      * @param encapsulate true if data should be encapsulated.
      * @param dataOutputStream output stream to copy the data being signed to.
      */
     public OutputStream open(
         OutputStream out,
-        String       signedContentType,
+        String       eContentType,
         boolean      encapsulate,
         OutputStream dataOutputStream)
         throws IOException
     {
+        // TODO
+//        if (_signerInfs.isEmpty())
+//        {
+//            /* RFC 3852 5.2
+//             * "In the degenerate case where there are no signers, the
+//             * EncapsulatedContentInfo value being "signed" is irrelevant.  In this
+//             * case, the content type within the EncapsulatedContentInfo value being
+//             * "signed" MUST be id-data (as defined in section 4), and the content
+//             * field of the EncapsulatedContentInfo value MUST be omitted."
+//             */
+//            if (encapsulate)
+//            {
+//                throw new IllegalArgumentException("no signers, encapsulate must be false");
+//            }
+//            if (!DATA.equals(eContentType))
+//            {
+//                throw new IllegalArgumentException("no signers, eContentType must be id-data");
+//            }
+//        }
+//
+//        if (!DATA.equals(eContentType))
+//        {
+//            /* RFC 3852 5.3
+//             * [The 'signedAttrs']...
+//             * field is optional, but it MUST be present if the content type of
+//             * the EncapsulatedContentInfo value being signed is not id-data.
+//             */
+//            // TODO signedAttrs must be present for all signers
+//        }
+
         //
         // ContentInfo
         //
@@ -628,7 +658,7 @@ public class CMSSignedDataStreamGenerator
         //
         BERSequenceGenerator sigGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
         
-        sigGen.addObject(calculateVersion(signedContentType));
+        sigGen.addObject(calculateVersion(eContentType));
         
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         
@@ -653,7 +683,7 @@ public class CMSSignedDataStreamGenerator
         sigGen.getRawOutputStream().write(new DERSet(digestAlgs).getEncoded());
         
         BERSequenceGenerator eiGen = new BERSequenceGenerator(sigGen.getRawOutputStream());
-        eiGen.addObject(new DERObjectIdentifier(signedContentType));
+        eiGen.addObject(new DERObjectIdentifier(eContentType));
 
         // If encapsulating, add the data as an octet string in the sequence
         OutputStream encapStream = encapsulate
@@ -666,7 +696,7 @@ public class CMSSignedDataStreamGenerator
         // Let all the digests see the data as it is written
         OutputStream digStream = attachDigestsToOutputStream(_messageDigests, teeStream);
 
-        return new CmsSignedDataOutputStream(digStream, signedContentType, sGen, sigGen, eiGen);
+        return new CmsSignedDataOutputStream(digStream, eContentType, sGen, sigGen, eiGen);
     }
 
     // RFC3852, section 5.1:
