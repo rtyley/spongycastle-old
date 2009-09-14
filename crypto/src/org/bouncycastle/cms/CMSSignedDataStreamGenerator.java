@@ -97,12 +97,6 @@ public class CMSSignedDataStreamGenerator
                 new DERObjectIdentifier(_digestOID), DERNull.INSTANCE);
         }
 
-        OutputStream wrapContentStream(OutputStream content)
-        {
-            // TODO When no signedAttr, should update signature from content
-            return content;
-        }
-
         SignerInfo toSignerInfo(
             DERObjectIdentifier  contentType)
             throws IOException, SignatureException, CertificateEncodingException
@@ -130,8 +124,7 @@ public class CMSSignedDataStreamGenerator
             }
             else
             {
-                // TODO Update Signature directly with content
-                // (see 'wrapContentStream' method)
+                // TODO Use raw signature of the hash value
                 throw new RuntimeException("signatures without signed attributes not implemented.");
             }
 
@@ -704,10 +697,7 @@ public class CMSSignedDataStreamGenerator
         // Let all the digests see the data as it is written
         OutputStream digStream = attachDigestsToOutputStream(_messageDigests, contentStream);
 
-        // Let all the signers see the data as it is written
-        OutputStream outStream = attachSignersToOutputStream(_signerInfs, digStream);
-
-        return new CmsSignedDataOutputStream(outStream, eContentType, sGen, sigGen, eiGen);
+        return new CmsSignedDataOutputStream(digStream, eContentType, sGen, sigGen, eiGen);
     }
 
     // RFC3852, section 5.1:
@@ -833,19 +823,6 @@ public class CMSSignedDataStreamGenerator
         {
             MessageDigest digest = (MessageDigest)it.next();
             result = getSafeTeeOutputStream(result, new DigOutputStream(digest));
-        }
-        return result;
-    }
-
-    private static OutputStream attachSignersToOutputStream(
-        List signers, OutputStream s)
-    {
-        OutputStream result = s;
-        Iterator it = signers.iterator();
-        while (it.hasNext())
-        {
-            SignerInf signer = (SignerInf)it.next();
-            result = signer.wrapContentStream(result);
         }
         return result;
     }
