@@ -8,7 +8,6 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
@@ -373,110 +372,109 @@ public class SignerInformation
 
         try
         {
-            sig.initVerify(key);
-            
-            if (signedAttributes == null)
+            if (digestCalculator != null)
+            {
+                resultDigest = digestCalculator.getDigest();
+            }
+            else
             {
                 if (content != null)
                 {
-                    // TODO Use raw signature of the hash value instead
-                    content.write(new CMSSignedGenerator.SigOutputStream(sig));
                     content.write(new CMSSignedGenerator.DigOutputStream(digest));
-
-                    resultDigest = digest.digest();
                 }
-                else
+                else if (signedAttributes == null)
                 {
-                    if (digestCalculator == null)
-                    {
-                        throw new CMSException("data not encapsulated in signature - use detached constructor.");
-                    }
-                    resultDigest = digestCalculator.getDigest();
-                    
+                    // TODO Get rid of this exception and just treat content==null as empty not missing?
+                    throw new CMSException("data not encapsulated in signature - use detached constructor.");
+                }
+
+                resultDigest = digest.digest();
+            }
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("can't process mime object to create signature.", e);
+        }
+
+        // TODO RFC 3852 11.4 Validate countersignature attribute
+        // TODO Shouldn't be using attribute OID as contentType (should be null)
+        boolean isCounterSignature = contentType.equals(
+            CMSAttributes.counterSignature);
+
+        // RFC 3852 11.1 Check the content-type attribute is correct
+        DERObject validContentType = getSingleValuedSignedAttribute(
+                CMSAttributes.contentType, "content-type");
+        if (validContentType == null)
+        {
+            if (!isCounterSignature && signedAttributes != null)
+            {
+                throw new CMSException("The content-type attribute type MUST be present whenever signed attributes are present in signed-data");
+            }
+        }
+        else
+        {
+            if (isCounterSignature)
+            {
+                throw new CMSException("[For counter signatures,] the signedAttributes field MUST NOT contain a content-type attribute");
+            }
+
+            if (!(validContentType instanceof DERObjectIdentifier))
+            {
+                throw new CMSException("content-type attribute value not of ASN.1 type 'OBJECT IDENTIFIER'");
+            }
+
+            DERObjectIdentifier signedContentType = (DERObjectIdentifier)validContentType;
+
+            if (!signedContentType.equals(contentType))
+            {
+                throw new CMSException("content-type attribute value does not match eContentType");
+            }
+        }
+
+        // RFC 3852 11.2 Check the message-digest attribute is correct
+        DERObject validMessageDigest = getSingleValuedSignedAttribute(
+            CMSAttributes.messageDigest, "message-digest");
+        if (validMessageDigest == null)
+        {
+            if (signedAttributes != null)
+            {
+                throw new CMSException("the message-digest signed attribute type MUST be present when there are any signed attributes present");
+            }
+        }
+        else
+        {
+            if (!(validMessageDigest instanceof ASN1OctetString))
+            {
+                throw new CMSException("message-digest attribute value not of ASN.1 type 'OCTET STRING'");
+            }
+
+            ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;
+
+            if (!MessageDigest.isEqual(resultDigest, signedMessageDigest.getOctets()))
+            {
+                throw new CMSException("message-digest attribute value does not match calculated value");
+            }
+        }
+
+        try
+        {
+            sig.initVerify(key);
+
+            if (signedAttributes == null)
+            {
+                if (digestCalculator != null)
+                {
                     // need to decrypt signature and check message bytes
                     return verifyDigest(resultDigest, key, this.getSignature(), sigProvider);
+                }
+                else if (content != null)
+                {
+                    // TODO Use raw signature of the hash value instead
+                    content.write(new CMSSignedGenerator.SigOutputStream(sig));
                 }
             }
             else
             {
-                byte[]  hash;
-                
-                if (content != null)
-                {
-                    content.write(new CMSSignedGenerator.DigOutputStream(digest));
-
-                    hash = digest.digest();
-                }
-                else if (digestCalculator != null)
-                {
-                    hash = digestCalculator.getDigest();
-                }
-                else
-                {
-                    hash = null;
-                }
-
-                resultDigest = hash;
-
-                // TODO RFC 3852 11.4 Validate countersignature attribute
-                // TODO Shouldn't be using attribute OID as contentType (should be null)
-                boolean isCounterSignature = contentType.equals(
-                    CMSAttributes.counterSignature);
-
-                AttributeTable signedAttrTable = this.getSignedAttributes();
-
-                // Check the content-type attribute is correct
-                DERObject validContentType = getSingleValuedSignedAttribute(
-                    CMSAttributes.contentType, "content-type");
-                if (validContentType == null)
-                {
-                    if (!isCounterSignature && signedAttrTable != null)
-                    {
-                        throw new CMSException("The content-type attribute type MUST be present whenever signed attributes are present in signed-data");
-                    }
-                }
-                else
-                {
-                    if (isCounterSignature)
-                    {
-                        throw new CMSException("[For counter signatures,] the signedAttributes field MUST NOT contain a content-type attribute");
-                    }
-
-                    DERObjectIdentifier typeOID = (DERObjectIdentifier)validContentType;
-
-                    if (!typeOID.equals(contentType))
-                    {
-                        throw new SignatureException("contentType in signed attributes different");
-                    }
-                }
-
-                // Check the message-digest attribute is correct
-                Attribute dig = signedAttrTable.get(CMSAttributes.messageDigest);
-
-                if (dig == null)
-                {
-                    throw new SignatureException("no hash for content found in signed attributes");
-                }
-
-                DERObject hashObj = dig.getAttrValues().getObjectAt(0).getDERObject();
-                
-                if (hashObj instanceof ASN1OctetString)
-                {
-                    byte[]  signedHash = ((ASN1OctetString)hashObj).getOctets();
-    
-                    if (!MessageDigest.isEqual(hash, signedHash))
-                    {
-                        throw new SignatureException("content hash found in signed attributes different");
-                    }
-                }
-                else if (hashObj instanceof DERNull)
-                {
-                    if (hash != null)
-                    {
-                        throw new SignatureException("NULL hash found in signed attributes when one expected");
-                    }
-                }
-
                 sig.update(this.getEncodedSignedAttributes());
             }
 
@@ -484,18 +482,15 @@ public class SignerInformation
         }
         catch (InvalidKeyException e)
         {
-            throw new CMSException(
-                    "key not appropriate to signature in message.", e);
+            throw new CMSException("key not appropriate to signature in message.", e);
         }
         catch (IOException e)
         {
-            throw new CMSException(
-                    "can't process mime object to create signature.", e);
+            throw new CMSException("can't process mime object to create signature.", e);
         }
         catch (SignatureException e)
         {
-            throw new CMSException(
-                    "invalid signature format in message: " + e.getMessage(), e);
+            throw new CMSException("invalid signature format in message: " + e.getMessage(), e);
         }
     }
 
@@ -703,8 +698,6 @@ public class SignerInformation
             case 1:
             {
                 Attribute t = (Attribute)v.get(0);
-//                    assert t != null;
-
                 ASN1Set attrValues = t.getAttrValues();
                 if (attrValues.size() != 1)
                 {
