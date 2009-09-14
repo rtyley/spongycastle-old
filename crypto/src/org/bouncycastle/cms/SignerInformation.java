@@ -380,11 +380,9 @@ public class SignerInformation
                 if (content != null)
                 {
                     // TODO Use raw signature of the hash value instead
-                    content.write(
-                            new CMSSignedDataGenerator.SigOutputStream(sig));
-                    content.write(
-                            new CMSSignedDataGenerator.DigOutputStream(digest));
-    
+                    content.write(new CMSSignedGenerator.SigOutputStream(sig));
+                    content.write(new CMSSignedGenerator.DigOutputStream(digest));
+
                     resultDigest = digest.digest();
                 }
                 else
@@ -405,9 +403,8 @@ public class SignerInformation
                 
                 if (content != null)
                 {
-                    content.write(
-                            new CMSSignedDataGenerator.DigOutputStream(digest));
-    
+                    content.write(new CMSSignedGenerator.DigOutputStream(digest));
+
                     hash = digest.digest();
                 }
                 else if (digestCalculator != null)
