@@ -107,19 +107,15 @@ public class CMSSignedDataGenerator
             MessageDigest       dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
             AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(encOID, sig);
 
-            byte[]      hash = null;
-
             if (content != null)
             {
                 content.write(new DigOutputStream(dig));
-
-                hash = dig.digest();
-
-                _digests.put(digestOID, hash.clone());
             }
 
-            AttributeTable signed;
+            byte[] hash = dig.digest();
+            _digests.put(digestOID, hash.clone());
 
+            AttributeTable signed;
             if (addDefaultAttributes)
             {
                 Map parameters = getBaseParameters(contentType, digAlgId, hash);
@@ -130,23 +126,22 @@ public class CMSSignedDataGenerator
                 signed = baseSignedTable;
             }
 
-            if (isCounterSignature)
-            {
-                Hashtable ats = signed.toHashtable();
-
-                ats.remove(CMSAttributes.contentType);
-
-                signed = new AttributeTable(ats);
-            }
-
-            ASN1Set signedAttr = getAttributeSet(signed);
-
-            //
-            // sig must be composed from the DER encoding.
-            //
+            ASN1Set signedAttr = null;
             byte[] tmp;
-            if (signedAttr != null)
+            if (signed != null)
             {
+                if (isCounterSignature)
+                {
+                    Hashtable tmpSigned = signed.toHashtable();
+                    tmpSigned.remove(CMSAttributes.contentType);
+                    signed = new AttributeTable(tmpSigned);
+                }
+
+                // TODO Validate proposed signed attributes
+
+                signedAttr = getAttributeSet(signed);
+
+                // sig must be composed from the DER encoding.
                 tmp = signedAttr.getEncoded(ASN1Encodable.DER);
             }
             else
@@ -171,6 +166,8 @@ public class CMSSignedDataGenerator
                 parameters.put(CMSAttributeTableGenerator.SIGNATURE, sigBytes.clone());
 
                 AttributeTable unsigned = unsAttr.getAttributes(Collections.unmodifiableMap(parameters));
+
+                // TODO Validate proposed unsigned attributes
 
                 unsignedAttr = getAttributeSet(unsigned);
             }
