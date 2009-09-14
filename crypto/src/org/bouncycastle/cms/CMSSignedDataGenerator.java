@@ -118,33 +118,35 @@ public class CMSSignedDataGenerator
                 _digests.put(digestOID, hash.clone());
             }
 
-            ASN1Set signedAttr = null;
-            byte[] tmp;
-            if (sAttr != null)
+            AttributeTable signed;
+
+            if (addDefaultAttributes)
             {
-                AttributeTable signed;
-                if (addDefaultAttributes)
-                {
-                    Map parameters = getBaseParameters(contentType, digAlgId, hash);
-                    signed = sAttr.getAttributes(Collections.unmodifiableMap(parameters));
-                }
-                else
-                {
-                    signed = baseSignedTable;
-                }
+                Map parameters = getBaseParameters(contentType, digAlgId, hash);
+                signed = (sAttr != null) ? sAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
+            }
+            else
+            {
+                signed = baseSignedTable;
+            }
 
-                if (isCounterSignature)
-                {
-                    Hashtable ats = signed.toHashtable();
+            if (isCounterSignature)
+            {
+                Hashtable ats = signed.toHashtable();
 
-                    ats.remove(CMSAttributes.contentType);
+                ats.remove(CMSAttributes.contentType);
 
-                    signed = new AttributeTable(ats);
-                }
+                signed = new AttributeTable(ats);
+            }
 
-                signedAttr = getAttributeSet(signed);
+            ASN1Set signedAttr = getAttributeSet(signed);
 
-                // sig must be composed from the DER encoding.
+            //
+            // sig must be composed from the DER encoding.
+            //
+            byte[] tmp;
+            if (signedAttr != null)
+            {
                 tmp = signedAttr.getEncoded(ASN1Encodable.DER);
             }
             else
