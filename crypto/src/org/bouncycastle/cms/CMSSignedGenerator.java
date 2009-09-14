@@ -188,15 +188,9 @@ public class CMSSignedGenerator
     protected Map getBaseParameters(DERObjectIdentifier contentType, AlgorithmIdentifier digAlgId, byte[] hash)
     {
         Map param = new HashMap();
-
         param.put(CMSAttributeTableGenerator.CONTENT_TYPE, contentType);
         param.put(CMSAttributeTableGenerator.DIGEST_ALGORITHM_IDENTIFIER, digAlgId);
-
-        if (hash != null)
-        {
-            param.put(CMSAttributeTableGenerator.DIGEST,  hash.clone());
-        }
-
+        param.put(CMSAttributeTableGenerator.DIGEST,  hash.clone());
         return param;
     }
 
