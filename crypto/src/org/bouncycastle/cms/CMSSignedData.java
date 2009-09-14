@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
@@ -191,17 +192,19 @@ public class CMSSignedData
 
             for (int i = 0; i != s.size(); i++)
             {
+                SignerInfo info = SignerInfo.getInstance(s.getObjectAt(i));
+                DERObjectIdentifier contentType = signedData.getEncapContentInfo().getContentType();
+
                 if (hashes == null)
                 {
-                    signerInfos.add(new SignerInformation(SignerInfo.getInstance(s.getObjectAt(i)), signedData.getEncapContentInfo().getContentType(), signedContent, null));
+                    signerInfos.add(new SignerInformation(info, contentType, signedContent, null));
                 }
                 else
                 {
-                    SignerInfo info = SignerInfo.getInstance(s.getObjectAt(i));
 
                     byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getObjectId().getId());
 
-                    signerInfos.add(new SignerInformation(info, signedData.getEncapContentInfo().getContentType(), null, new BaseDigestCalculator(hash)));
+                    signerInfos.add(new SignerInformation(info, contentType, null, new BaseDigestCalculator(hash)));
                 }
             }
 
