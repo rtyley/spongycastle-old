@@ -64,31 +64,27 @@ public class DefaultSignedAttributeTableGenerator
 
         if (!std.containsKey(CMSAttributes.contentType))
         {
+            DERObjectIdentifier contentType = (DERObjectIdentifier)
+                parameters.get(CMSAttributeTableGenerator.CONTENT_TYPE);
             Attribute attr = new Attribute(CMSAttributes.contentType,
-                              new DERSet((DERObjectIdentifier)parameters.get(CMSAttributeTableGenerator.CONTENT_TYPE)));
+                new DERSet(contentType));
             std.put(attr.getAttrType(), attr);
         }
 
         if (!std.containsKey(CMSAttributes.signingTime))
         {
-            Attribute attr = new Attribute(CMSAttributes.signingTime, new DERSet(new Time(new Date())));
+            Date signingTime = new Date();
+            Attribute attr = new Attribute(CMSAttributes.signingTime,
+                new DERSet(new Time(signingTime)));
             std.put(attr.getAttrType(), attr);
         }
 
         if (!std.containsKey(CMSAttributes.messageDigest))
         {
-            byte[] hash = (byte[])parameters.get(CMSAttributeTableGenerator.DIGEST);
-            Attribute attr;
-
-            if (hash != null)
-            {
-                attr = new Attribute(CMSAttributes.messageDigest, new DERSet(new DEROctetString(hash)));
-            }
-            else
-            {
-                attr = new Attribute(CMSAttributes.messageDigest, new DERSet(new DERNull()));
-            }
-
+            byte[] messageDigest = (byte[])parameters.get(
+                CMSAttributeTableGenerator.DIGEST);
+            Attribute attr = new Attribute(CMSAttributes.messageDigest,
+                new DERSet(new DEROctetString(messageDigest)));
             std.put(attr.getAttrType(), attr);
         }
 
