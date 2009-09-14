@@ -151,8 +151,12 @@ public class CMSSignedDataGenerator
             }
             else
             {
+                // TODO Use raw signature of the hash value instead
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-                content.write(bOut);
+                if (content != null)
+                {
+                    content.write(bOut);
+                }
                 tmp = bOut.toByteArray();
             }
 

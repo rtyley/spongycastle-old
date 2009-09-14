@@ -379,6 +379,7 @@ public class SignerInformation
             {
                 if (content != null)
                 {
+                    // TODO Use raw signature of the hash value instead
                     content.write(
                             new CMSSignedDataGenerator.SigOutputStream(sig));
                     content.write(
