@@ -316,7 +316,6 @@ public class SignerInformation
     
     private boolean doVerify(
         PublicKey       key,
-        AttributeTable  signedAttrTable,
         Provider        sigProvider)
         throws CMSException, NoSuchAlgorithmException
     {
@@ -420,20 +419,45 @@ public class SignerInformation
                 }
 
                 resultDigest = hash;
-                
-                Attribute dig = signedAttrTable.get(
-                                CMSAttributes.messageDigest);
-                Attribute type = signedAttrTable.get(
-                                CMSAttributes.contentType);
+
+                // TODO RFC 3852 11.4 Validate countersignature attribute
+                // TODO Shouldn't be using attribute OID as contentType (should be null)
+                boolean isCounterSignature = contentType.equals(
+                    CMSAttributes.counterSignature);
+
+                AttributeTable signedAttrTable = this.getSignedAttributes();
+
+                // Check the content-type attribute is correct
+                DERObject validContentType = getSingleValuedSignedAttribute(
+                    CMSAttributes.contentType, "content-type");
+                if (validContentType == null)
+                {
+                    if (!isCounterSignature && signedAttrTable != null)
+                    {
+                        throw new CMSException("The content-type attribute type MUST be present whenever signed attributes are present in signed-data");
+                    }
+                }
+                else
+                {
+                    if (isCounterSignature)
+                    {
+                        throw new CMSException("[For counter signatures,] the signedAttributes field MUST NOT contain a content-type attribute");
+                    }
+
+                    DERObjectIdentifier typeOID = (DERObjectIdentifier)validContentType;
+
+                    if (!typeOID.equals(contentType))
+                    {
+                        throw new SignatureException("contentType in signed attributes different");
+                    }
+                }
+
+                // Check the message-digest attribute is correct
+                Attribute dig = signedAttrTable.get(CMSAttributes.messageDigest);
 
                 if (dig == null)
                 {
                     throw new SignatureException("no hash for content found in signed attributes");
-                }
-
-                if (type == null && !contentType.equals(CMSAttributes.counterSignature))
-                {
-                    throw new SignatureException("no content type id found in signed attributes");
                 }
 
                 DERObject hashObj = dig.getAttrValues().getObjectAt(0).getDERObject();
@@ -452,16 +476,6 @@ public class SignerInformation
                     if (hash != null)
                     {
                         throw new SignatureException("NULL hash found in signed attributes when one expected");
-                    }
-                }
-
-                if (type != null)
-                {
-                    DERObjectIdentifier  typeOID = (DERObjectIdentifier)type.getAttrValues().getObjectAt(0);
-
-                    if (!typeOID.equals(contentType))
-                    {
-                        throw new SignatureException("contentType in signed attributes different");
                     }
                 }
 
@@ -599,7 +613,7 @@ public class SignerInformation
         String      sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        return doVerify(key, this.getSignedAttributes(), CMSUtils.getProvider(sigProvider));
+        return doVerify(key, CMSUtils.getProvider(sigProvider));
     }
 
     /**
@@ -611,7 +625,7 @@ public class SignerInformation
         Provider    sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        return doVerify(key, this.getSignedAttributes(), sigProvider);
+        return doVerify(key, sigProvider);
     }
 
     /**
@@ -643,37 +657,17 @@ public class SignerInformation
             CertificateExpiredException, CertificateNotYetValidException,
             CMSException
     {
-        AttributeTable attr = this.getSignedAttributes();
+        DERObject validSigningTime = getSingleValuedSignedAttribute(
+            CMSAttributes.signingTime, "signing-time");
 
-        if (attr != null)
+        if (validSigningTime != null)
         {
-            ASN1EncodableVector v = attr.getAll(CMSAttributes.signingTime);
-            switch (v.size())
-            {
-                case 0:
-                    break;
-                case 1:
-                {
-                    Attribute t = (Attribute)v.get(0);
-//                    assert t != null;
+            Time time = Time.getInstance(validSigningTime);
 
-                    ASN1Set attrValues = t.getAttrValues();
-                    if (attrValues.size() != 1)
-                    {
-                        throw new CMSException("A signing-time attribute MUST have a single attribute value");
-                    }
-
-                    Time time = Time.getInstance(attrValues.getObjectAt(0).getDERObject());
-
-                    cert.checkValidity(time.getDate());
-                    break;
-                }
-                default:
-                    throw new CMSException("The SignedAttributes in a signerInfo MUST NOT include multiple instances of the signing-time attribute");
-            }
+            cert.checkValidity(time.getDate());
         }
 
-        return doVerify(cert.getPublicKey(), attr, sigProvider); 
+        return doVerify(cert.getPublicKey(), sigProvider); 
     }
     
     /**
@@ -684,6 +678,49 @@ public class SignerInformation
     public SignerInfo toSignerInfo()
     {
         return info;
+    }
+
+    private DERObject getSingleValuedSignedAttribute(
+        DERObjectIdentifier attrOID, String printableName)
+        throws CMSException
+    {
+        AttributeTable unsignedAttrTable = this.getUnsignedAttributes();
+        if (unsignedAttrTable != null
+            && unsignedAttrTable.getAll(attrOID).size() > 0)
+        {
+            throw new CMSException("The " + printableName
+                + " attribute MUST NOT be an unsigned attribute");
+        }
+
+        AttributeTable signedAttrTable = this.getSignedAttributes();
+        if (signedAttrTable == null)
+        {
+            return null;
+        }
+
+        ASN1EncodableVector v = signedAttrTable.getAll(attrOID);
+        switch (v.size())
+        {
+            case 0:
+                return null;
+            case 1:
+            {
+                Attribute t = (Attribute)v.get(0);
+//                    assert t != null;
+
+                ASN1Set attrValues = t.getAttrValues();
+                if (attrValues.size() != 1)
+                {
+                    throw new CMSException("A " + printableName
+                        + " attribute MUST have a single attribute value");
+                }
+
+                return attrValues.getObjectAt(0).getDERObject();
+            }
+            default:
+                throw new CMSException("The SignedAttributes in a signerInfo MUST NOT include multiple instances of the "
+                    + printableName + " attribute");
+        }
     }
     
     /**
@@ -725,6 +762,8 @@ public class SignerInformation
         SignerInformation        signerInformation,
         SignerInformationStore   counterSigners)
     {
+        // TODO Perform checks from RFC 3852 11.4
+
         SignerInfo          sInfo = signerInformation.info;
         AttributeTable      unsignedAttr = signerInformation.getUnsignedAttributes();
         ASN1EncodableVector v;
