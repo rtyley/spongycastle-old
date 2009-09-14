@@ -606,7 +606,7 @@ public class SignerInformation
     }
 
     /**
-     * verify that the given public key succesfully handles and confirms the
+     * verify that the given public key successfully handles and confirms the
      * signature associated with this signer.
      */
     public boolean verify(
@@ -614,11 +614,11 @@ public class SignerInformation
         String      sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        return doVerify(key, CMSUtils.getProvider(sigProvider));
+        return verify(key, CMSUtils.getProvider(sigProvider));
     }
 
     /**
-     * verify that the given public key succesfully handles and confirms the
+     * verify that the given public key successfully handles and confirms the
      * signature associated with this signer.
      */
     public boolean verify(
@@ -626,6 +626,9 @@ public class SignerInformation
         Provider    sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
+        // Optional, but still need to validate if present
+        getSigningTime();
+
         return doVerify(key, sigProvider);
     }
 
@@ -658,14 +661,10 @@ public class SignerInformation
             CertificateExpiredException, CertificateNotYetValidException,
             CMSException
     {
-        DERObject validSigningTime = getSingleValuedSignedAttribute(
-            CMSAttributes.signingTime, "signing-time");
-
-        if (validSigningTime != null)
+        Time signingTime = getSigningTime();
+        if (signingTime != null)
         {
-            Time time = Time.getInstance(validSigningTime);
-
-            cert.checkValidity(time.getDate());
+            cert.checkValidity(signingTime.getDate());
         }
 
         return doVerify(cert.getPublicKey(), sigProvider); 
@@ -723,7 +722,27 @@ public class SignerInformation
                     + printableName + " attribute");
         }
     }
-    
+
+    private Time getSigningTime() throws CMSException
+    {
+        DERObject validSigningTime = getSingleValuedSignedAttribute(
+            CMSAttributes.signingTime, "signing-time");
+
+        if (validSigningTime == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return Time.getInstance(validSigningTime);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("signing-time attribute value not a valid 'Time' structure");
+        }
+    }
+
     /**
      * Return a signer information object with the passed in unsigned
      * attributes replacing the ones that are current associated with
