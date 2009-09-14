@@ -556,7 +556,6 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             throw new InvalidKeyException(e.getMessage());
         }
     }
