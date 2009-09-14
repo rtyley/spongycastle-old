@@ -91,7 +91,7 @@ public class JCEBlockCipher extends WrapCipherSpi
 
     private int                     ivLength = 0;
 
-    private boolean                 padded = true;
+    private boolean                 padded;
     
     private PBEParameterSpec        pbeSpec = null;
     private String                  pbeAlgorithm = null;
@@ -307,49 +307,51 @@ public class JCEBlockCipher extends WrapCipherSpi
 
         if (paddingName.equals("NOPADDING"))
         {
-            padded = false;
-            
             if (cipher.wrapOnNoPadding())
             {
                 cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(cipher.getUnderlyingCipher()));
             }
         }
-        else if (isAEADModeName(modeName))
-        {
-            throw new NoSuchPaddingException("Only NoPadding can be used with AEAD modes.");
-        }
-        else if (paddingName.equals("PKCS5PADDING") || paddingName.equals("PKCS7PADDING"))
-        {
-            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher());
-        }
-        else if (paddingName.equals("ZEROBYTEPADDING"))
-        {
-            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new ZeroBytePadding());
-        }
-        else if (paddingName.equals("ISO10126PADDING") || paddingName.equals("ISO10126-2PADDING"))
-        {
-            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new ISO10126d2Padding());
-        }
-        else if (paddingName.equals("X9.23PADDING") || paddingName.equals("X923PADDING"))
-        {
-            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new X923Padding());
-        }
-        else if (paddingName.equals("ISO7816-4PADDING") || paddingName.equals("ISO9797-1PADDING"))
-        {
-            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new ISO7816d4Padding());
-        }
-        else if (paddingName.equals("TBCPADDING"))
-        {
-            cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new TBCPadding());
-        }
         else if (paddingName.equals("WITHCTS"))
         {
-            padded = false;
             cipher = new BufferedGenericBlockCipher(new CTSBlockCipher(cipher.getUnderlyingCipher()));
         }
         else
         {
-            throw new NoSuchPaddingException("Padding " + padding + " unknown.");
+            padded = true;
+
+            if (isAEADModeName(modeName))
+            {
+                throw new NoSuchPaddingException("Only NoPadding can be used with AEAD modes.");
+            }
+            else if (paddingName.equals("PKCS5PADDING") || paddingName.equals("PKCS7PADDING"))
+            {
+                cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher());
+            }
+            else if (paddingName.equals("ZEROBYTEPADDING"))
+            {
+                cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new ZeroBytePadding());
+            }
+            else if (paddingName.equals("ISO10126PADDING") || paddingName.equals("ISO10126-2PADDING"))
+            {
+                cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new ISO10126d2Padding());
+            }
+            else if (paddingName.equals("X9.23PADDING") || paddingName.equals("X923PADDING"))
+            {
+                cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new X923Padding());
+            }
+            else if (paddingName.equals("ISO7816-4PADDING") || paddingName.equals("ISO9797-1PADDING"))
+            {
+                cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new ISO7816d4Padding());
+            }
+            else if (paddingName.equals("TBCPADDING"))
+            {
+                cipher = new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(), new TBCPadding());
+            }
+            else
+            {
+                throw new NoSuchPaddingException("Padding " + padding + " unknown.");
+            }
         }
     }
 
@@ -554,6 +556,7 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             throw new InvalidKeyException(e.getMessage());
         }
     }
