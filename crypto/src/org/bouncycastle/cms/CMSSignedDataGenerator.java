@@ -589,13 +589,16 @@ public class CMSSignedDataGenerator
         {
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
 
-            try
+            if (content != null)
             {
-                content.write(bOut);
-            }
-            catch (IOException e)
-            {
-                throw new CMSException("encapsulation error.", e);
+                try
+                {
+                    content.write(bOut);
+                }
+                catch (IOException e)
+                {
+                    throw new CMSException("encapsulation error.", e);
+                }
             }
 
             octs = new BERConstructedOctetString(bOut.toByteArray());
