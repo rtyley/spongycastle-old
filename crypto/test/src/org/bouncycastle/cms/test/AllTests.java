@@ -26,6 +26,7 @@ public class AllTests
         suite.addTest(SignedDataStreamTest.suite());
         suite.addTest(EnvelopedDataStreamTest.suite());
         suite.addTest(MiscDataStreamTest.suite());
+        suite.addTest(Rfc4134Test.suite());
 
         try
         {
