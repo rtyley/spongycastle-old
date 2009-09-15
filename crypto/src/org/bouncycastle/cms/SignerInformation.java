@@ -400,63 +400,92 @@ public class SignerInformation
             throw new CMSException("can't process mime object to create signature.", e);
         }
 
-        // TODO RFC 3852 11.4 Validate countersignature attribute
         // TODO Shouldn't be using attribute OID as contentType (should be null)
         boolean isCounterSignature = contentType.equals(
             CMSAttributes.counterSignature);
 
         // RFC 3852 11.1 Check the content-type attribute is correct
-        DERObject validContentType = getSingleValuedSignedAttribute(
+        {
+            DERObject validContentType = getSingleValuedSignedAttribute(
                 CMSAttributes.contentType, "content-type");
-        if (validContentType == null)
-        {
-            if (!isCounterSignature && signedAttributeSet != null)
+            if (validContentType == null)
             {
-                throw new CMSException("The content-type attribute type MUST be present whenever signed attributes are present in signed-data");
+                if (!isCounterSignature && signedAttributeSet != null)
+                {
+                    throw new CMSException("The content-type attribute type MUST be present whenever signed attributes are present in signed-data");
+                }
             }
-        }
-        else
-        {
-            if (isCounterSignature)
+            else
             {
-                throw new CMSException("[For counter signatures,] the signedAttributes field MUST NOT contain a content-type attribute");
-            }
-
-            if (!(validContentType instanceof DERObjectIdentifier))
-            {
-                throw new CMSException("content-type attribute value not of ASN.1 type 'OBJECT IDENTIFIER'");
-            }
-
-            DERObjectIdentifier signedContentType = (DERObjectIdentifier)validContentType;
-
-            if (!signedContentType.equals(contentType))
-            {
-                throw new CMSException("content-type attribute value does not match eContentType");
+                if (isCounterSignature)
+                {
+                    throw new CMSException("[For counter signatures,] the signedAttributes field MUST NOT contain a content-type attribute");
+                }
+    
+                if (!(validContentType instanceof DERObjectIdentifier))
+                {
+                    throw new CMSException("content-type attribute value not of ASN.1 type 'OBJECT IDENTIFIER'");
+                }
+    
+                DERObjectIdentifier signedContentType = (DERObjectIdentifier)validContentType;
+    
+                if (!signedContentType.equals(contentType))
+                {
+                    throw new CMSException("content-type attribute value does not match eContentType");
+                }
             }
         }
 
         // RFC 3852 11.2 Check the message-digest attribute is correct
-        DERObject validMessageDigest = getSingleValuedSignedAttribute(
-            CMSAttributes.messageDigest, "message-digest");
-        if (validMessageDigest == null)
         {
-            if (signedAttributeSet != null)
+            DERObject validMessageDigest = getSingleValuedSignedAttribute(
+                CMSAttributes.messageDigest, "message-digest");
+            if (validMessageDigest == null)
             {
-                throw new CMSException("the message-digest signed attribute type MUST be present when there are any signed attributes present");
+                if (signedAttributeSet != null)
+                {
+                    throw new CMSException("the message-digest signed attribute type MUST be present when there are any signed attributes present");
+                }
+            }
+            else
+            {
+                if (!(validMessageDigest instanceof ASN1OctetString))
+                {
+                    throw new CMSException("message-digest attribute value not of ASN.1 type 'OCTET STRING'");
+                }
+    
+                ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;
+    
+                if (!MessageDigest.isEqual(resultDigest, signedMessageDigest.getOctets()))
+                {
+                    throw new CMSException("message-digest attribute value does not match calculated value");
+                }
             }
         }
-        else
+
+        // RFC 3852 11.4 Validate countersignature attribute(s)
         {
-            if (!(validMessageDigest instanceof ASN1OctetString))
+            AttributeTable signedAttrTable = this.getSignedAttributes();
+            if (signedAttrTable != null
+                && signedAttrTable.getAll(CMSAttributes.counterSignature).size() > 0)
             {
-                throw new CMSException("message-digest attribute value not of ASN.1 type 'OCTET STRING'");
+                throw new CMSException("A countersignature attribute MUST NOT be a signed attribute");
             }
 
-            ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;
-
-            if (!MessageDigest.isEqual(resultDigest, signedMessageDigest.getOctets()))
+            AttributeTable unsignedAttrTable = this.getUnsignedAttributes();
+            if (unsignedAttrTable != null)
             {
-                throw new CMSException("message-digest attribute value does not match calculated value");
+                ASN1EncodableVector csAttrs = unsignedAttrTable.getAll(CMSAttributes.counterSignature);
+                for (int i = 0; i < csAttrs.size(); ++i)
+                {
+                    Attribute csAttr = (Attribute)csAttrs.get(i);            
+                    if (csAttr.getAttrValues().size() < 1)
+                    {
+                        throw new CMSException("A countersignature attribute MUST contain at least one AttributeValue");
+                    }
+
+                    // Note: We don't recursively validate the countersignature value
+                }
             }
         }
 
