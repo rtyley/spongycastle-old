@@ -38,15 +38,11 @@ import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedDataParser;
-import org.bouncycastle.cms.SignerId;
+import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.Streams;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509CollectionStoreParameters;
-import org.bouncycastle.x509.X509Store;
 
 public class Rfc4134Test
     extends TestCase
@@ -106,7 +102,9 @@ public class Rfc4134Test
 
         verifySignatures(signedData, sha1);
 
-        CMSSignedDataParser parser = new CMSSignedDataParser(data);
+        CMSSignedDataParser parser = new CMSSignedDataParser(
+                new CMSTypedStream(new ByteArrayInputStream(exContent)),
+                data);
 
         verifySignatures(parser);
     }
@@ -152,6 +150,12 @@ public class Rfc4134Test
     private void verifySignatures(CMSSignedDataParser sp)
         throws Exception
     {
+        CMSTypedStream sc = sp.getSignedContent();
+        if (sc != null)
+        {
+            sc.drain();
+        }
+        
         CertStore               certs = sp.getCertificatesAndCRLs("Collection", "BC");
         SignerInformationStore  signers = sp.getSignerInfos();
 
