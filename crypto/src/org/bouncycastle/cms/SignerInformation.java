@@ -51,13 +51,17 @@ public class SignerInformation
     private SignerInfo              info;
     private AlgorithmIdentifier     digestAlgorithm;
     private AlgorithmIdentifier     encryptionAlgorithm;
-    private ASN1Set                 signedAttributes;
-    private ASN1Set                 unsignedAttributes;
+    private final ASN1Set           signedAttributeSet;
+    private final ASN1Set           unsignedAttributeSet;
     private CMSProcessable          content;
     private byte[]                  signature;
     private DERObjectIdentifier     contentType;
     private DigestCalculator        digestCalculator;
     private byte[]                  resultDigest;
+
+    // Derived
+    private AttributeTable          signedAttributeValues;
+    private AttributeTable          unsignedAttributeValues;
 
     SignerInformation(
         SignerInfo          info,
@@ -93,8 +97,8 @@ public class SignerInformation
         }
 
         this.digestAlgorithm = info.getDigestAlgorithm();
-        this.signedAttributes = info.getAuthenticatedAttributes();
-        this.unsignedAttributes = info.getUnauthenticatedAttributes();
+        this.signedAttributeSet = info.getAuthenticatedAttributes();
+        this.unsignedAttributeSet = info.getUnauthenticatedAttributes();
         this.encryptionAlgorithm = info.getDigestEncryptionAlgorithm();
         this.signature = info.getEncryptedDigest().getOctets();
 
@@ -198,12 +202,12 @@ public class SignerInformation
      */
     public AttributeTable getSignedAttributes()
     {
-        if (signedAttributes == null)
+        if (signedAttributeSet != null && signedAttributeValues == null)
         {
-            return null;
+            signedAttributeValues = new AttributeTable(signedAttributeSet);
         }
 
-        return new AttributeTable(signedAttributes);
+        return signedAttributeValues;
     }
 
     /**
@@ -212,12 +216,12 @@ public class SignerInformation
      */
     public AttributeTable getUnsignedAttributes()
     {
-        if (unsignedAttributes == null)
+        if (unsignedAttributeSet != null && unsignedAttributeValues == null)
         {
-            return null;
+            unsignedAttributeValues = new AttributeTable(unsignedAttributeSet);
         }
 
-        return new AttributeTable(unsignedAttributes);
+        return unsignedAttributeValues;
     }
 
     /**
@@ -305,9 +309,9 @@ public class SignerInformation
     public byte[] getEncodedSignedAttributes()
         throws IOException
     {
-        if (signedAttributes != null)
+        if (signedAttributeSet != null)
         {
-            return signedAttributes.getEncoded(ASN1Encodable.DER);
+            return signedAttributeSet.getEncoded(ASN1Encodable.DER);
         }
 
         return null;
@@ -382,7 +386,7 @@ public class SignerInformation
                 {
                     content.write(new CMSSignedGenerator.DigOutputStream(digest));
                 }
-                else if (signedAttributes == null)
+                else if (signedAttributeSet == null)
                 {
                     // TODO Get rid of this exception and just treat content==null as empty not missing?
                     throw new CMSException("data not encapsulated in signature - use detached constructor.");
@@ -406,7 +410,7 @@ public class SignerInformation
                 CMSAttributes.contentType, "content-type");
         if (validContentType == null)
         {
-            if (!isCounterSignature && signedAttributes != null)
+            if (!isCounterSignature && signedAttributeSet != null)
             {
                 throw new CMSException("The content-type attribute type MUST be present whenever signed attributes are present in signed-data");
             }
@@ -436,7 +440,7 @@ public class SignerInformation
             CMSAttributes.messageDigest, "message-digest");
         if (validMessageDigest == null)
         {
-            if (signedAttributes != null)
+            if (signedAttributeSet != null)
             {
                 throw new CMSException("the message-digest signed attribute type MUST be present when there are any signed attributes present");
             }
@@ -460,7 +464,7 @@ public class SignerInformation
         {
             sig.initVerify(key);
 
-            if (signedAttributes == null)
+            if (signedAttributeSet == null)
             {
                 if (digestCalculator != null)
                 {
