@@ -2,41 +2,26 @@ package org.bouncycastle.cms.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.cert.CertStore;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
+import java.security.cert.CertificateFactory;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.cms.SignerInformation;
@@ -107,6 +92,64 @@ public class Rfc4134Test
                 data);
 
         verifySignatures(parser);
+    }
+
+    public void test4_4()
+        throws Exception
+    {
+        byte[] data = getRfc4134Data("4.4.bin");
+        byte[] counterSigCert = getRfc4134Data("AliceRSASignByCarl.cer");
+        CMSSignedData signedData = new CMSSignedData(data);
+
+        verifySignatures(signedData);
+
+        verifySignerInfo4_4(getFirstSignerInfo(signedData.getSignerInfos()), counterSigCert);
+
+        CMSSignedDataParser parser = new CMSSignedDataParser(data);
+
+        verifySignatures(parser);
+
+        verifySignerInfo4_4(getFirstSignerInfo(parser.getSignerInfos()), counterSigCert);
+    }
+
+    private void verifySignerInfo4_4(SignerInformation signerInfo, byte[] counterSigCert)
+        throws Exception
+    {
+        verifyCounterSignature(signerInfo, counterSigCert);
+
+        verifyContentHint(signerInfo);
+    }
+
+    private SignerInformation getFirstSignerInfo(SignerInformationStore store)
+    {
+        return (SignerInformation)store.getSigners().iterator().next();
+    }
+
+    private void verifyCounterSignature(SignerInformation signInfo, byte[] certificate)
+        throws Exception
+    {
+        SignerInformation csi = (SignerInformation)signInfo.getCounterSignatures().getSigners().iterator().next();
+
+        CertificateFactory certFact = CertificateFactory.getInstance("X.509", "BC");
+        X509Certificate    cert = (X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(certificate));
+
+        assertTrue(csi.verify(cert,  "BC"));
+    }
+
+    private void verifyContentHint(SignerInformation signInfo)
+    {
+        AttributeTable attrTable = signInfo.getUnsignedAttributes();
+
+        Attribute attr = attrTable.get(CMSAttributes.contentHint);
+
+        assertEquals(1, attr.getAttrValues().size());
+
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(new DERUTF8String("Content Hints Description Buffer"));
+        v.add(CMSObjectIdentifiers.data);
+        
+        assertTrue(attr.getAttrValues().getObjectAt(0).equals(new DERSequence(v)));
     }
 
     private void verifySignatures(CMSSignedData s, byte[] contentDigest)
