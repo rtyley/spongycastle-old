@@ -44,6 +44,7 @@ import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSEnvelopedDataParser;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -174,17 +175,27 @@ public class Rfc4134Test
     public void test5_1()
         throws Exception
     {
-        CMSEnvelopedData envelopedData = new CMSEnvelopedData(getRfc4134Data("5.1.bin"));
+        byte[] data = getRfc4134Data("5.1.bin");
+        CMSEnvelopedData envelopedData = new CMSEnvelopedData(data);
 
         verifyEnvelopedData(envelopedData, CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+
+        CMSEnvelopedDataParser envelopedParser = new CMSEnvelopedDataParser(data);
+
+        verifyEnvelopedData(envelopedParser, CMSEnvelopedDataGenerator.DES_EDE3_CBC);
     }
 
     public void test5_2()
         throws Exception
     {
-        CMSEnvelopedData envelopedData = new CMSEnvelopedData(getRfc4134Data("5.2.bin"));
+        byte[] data = getRfc4134Data("5.2.bin");
+        CMSEnvelopedData envelopedData = new CMSEnvelopedData(data);
 
         verifyEnvelopedData(envelopedData, CMSEnvelopedDataGenerator.RC2_CBC);
+
+        CMSEnvelopedDataParser envelopedParser = new CMSEnvelopedDataParser(data);
+
+        verifyEnvelopedData(envelopedParser, CMSEnvelopedDataGenerator.RC2_CBC);
     }
 
     private void verifyEnvelopedData(CMSEnvelopedData envelopedData, String symAlgorithmOID)
@@ -214,6 +225,37 @@ public class Rfc4134Test
 
             assertEquals(PKCSObjectIdentifiers.id_alg_CMSRC2wrap.getId(), recInfo.getKeyEncryptionAlgOID());
             
+            verifyRecipient((RecipientInformation)it.next(), privKey);
+        }
+    }
+
+    private void verifyEnvelopedData(CMSEnvelopedDataParser envelopedParser, String symAlgorithmOID)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, CMSException
+    {
+        byte[]              privKeyData = getRfc4134Data("BobPrivRSAEncrypt.pri");
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privKeyData);
+        KeyFactory keyFact = KeyFactory.getInstance("RSA", "BC");
+        PrivateKey privKey = keyFact.generatePrivate(keySpec);
+
+        RecipientInformationStore recipients = envelopedParser.getRecipientInfos();
+
+        assertEquals(envelopedParser.getEncryptionAlgOID(), symAlgorithmOID);
+
+        Collection c = recipients.getRecipients();
+        Iterator it = c.iterator();
+
+        if (c.size() == 1)
+        {
+            verifyRecipient((RecipientInformation)it.next(), privKey);
+        }
+        else
+        {
+            assertEquals(2, c.size());
+
+            RecipientInformation recInfo = (RecipientInformation)it.next();
+
+            assertEquals(PKCSObjectIdentifiers.id_alg_CMSRC2wrap.getId(), recInfo.getKeyEncryptionAlgOID());
+
             verifyRecipient((RecipientInformation)it.next(), privKey);
         }
     }
