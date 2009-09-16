@@ -211,21 +211,16 @@ public class Rfc4134Test
         assertEquals(envelopedData.getEncryptionAlgOID(), symAlgorithmOID);
 
         Collection c = recipients.getRecipients();
+        assertTrue(c.size() >= 1 && c.size() <= 2);
+
         Iterator it = c.iterator();
+        verifyRecipient((RecipientInformation)it.next(), privKey);
 
-        if (c.size() == 1)
+        if (c.size() == 2)
         {
-            verifyRecipient((RecipientInformation)it.next(), privKey);
-        }
-        else
-        {
-            assertEquals(2, c.size());
-
             RecipientInformation recInfo = (RecipientInformation)it.next();
 
             assertEquals(PKCSObjectIdentifiers.id_alg_CMSRC2wrap.getId(), recInfo.getKeyEncryptionAlgOID());
-            
-            verifyRecipient((RecipientInformation)it.next(), privKey);
         }
     }
 
@@ -242,21 +237,16 @@ public class Rfc4134Test
         assertEquals(envelopedParser.getEncryptionAlgOID(), symAlgorithmOID);
 
         Collection c = recipients.getRecipients();
+        assertTrue(c.size() >= 1 && c.size() <= 2);
+
         Iterator it = c.iterator();
+        verifyRecipient((RecipientInformation)it.next(), privKey);
 
-        if (c.size() == 1)
+        if (c.size() == 2)
         {
-            verifyRecipient((RecipientInformation)it.next(), privKey);
-        }
-        else
-        {
-            assertEquals(2, c.size());
-
             RecipientInformation recInfo = (RecipientInformation)it.next();
 
             assertEquals(PKCSObjectIdentifiers.id_alg_CMSRC2wrap.getId(), recInfo.getKeyEncryptionAlgOID());
-
-            verifyRecipient((RecipientInformation)it.next(), privKey);
         }
     }
 
