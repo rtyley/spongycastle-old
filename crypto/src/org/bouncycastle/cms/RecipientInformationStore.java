@@ -10,41 +10,30 @@ import java.util.Map;
 
 public class RecipientInformationStore
 {
-    private Map table = new HashMap();
+    private final ArrayList all; //ArrayList[RecipientInformation]
+    private final Map       table = new HashMap(); // HashMap[RecipientID, ArrayList[RecipientInformation]]
 
     public RecipientInformationStore(
         Collection  recipientInfos)
     {
-        Iterator    it = recipientInfos.iterator();
+        Iterator it = recipientInfos.iterator();
 
         while (it.hasNext())
         {
-            RecipientInformation   recipientInformation = (RecipientInformation)it.next();
-            RecipientId            rid = recipientInformation.getRID();
+            RecipientInformation recipientInformation = (RecipientInformation)it.next();
+            RecipientId rid = recipientInformation.getRID();
 
-            if (table.get(rid) == null)
+            ArrayList list = (ArrayList)table.get(rid);
+            if (list == null)
             {
-                table.put(rid, recipientInformation);
+                list = new ArrayList(1);
+                table.put(rid, list);
             }
-            else
-            {
-                Object o = table.get(rid);
 
-                if (o instanceof List)
-                {
-                    ((List)o).add(recipientInformation);
-                }
-                else
-                {
-                    List l = new ArrayList();
-
-                    l.add(o);
-                    l.add(recipientInformation);
-
-                    table.put(rid, l);
-                }
-            }
+            list.add(recipientInformation);
         }
+
+        this.all = new ArrayList(recipientInfos);
     }
 
     /**
@@ -57,16 +46,9 @@ public class RecipientInformationStore
     public RecipientInformation get(
         RecipientId selector)
     {
-        Object o = table.get(selector);
+        ArrayList list = (ArrayList)table.get(selector);
 
-        if (o instanceof List)
-        {
-            return (RecipientInformation)((List)o).get(0);
-        }
-        else
-        {
-            return (RecipientInformation)o;
-        }
+        return list == null ? null : (RecipientInformation) list.get(0);
     }
 
     /**
@@ -76,24 +58,7 @@ public class RecipientInformationStore
      */
     public int size()
     {
-        Iterator    it = table.values().iterator();
-        int         count = 0;
-
-        while (it.hasNext())
-        {
-            Object o = it.next();
-
-            if (o instanceof List)
-            {
-                count += ((List)o).size();
-            }
-            else
-            {
-                count++;
-            }
-        }
-
-        return count;
+        return all.size();
     }
 
     /**
@@ -103,24 +68,7 @@ public class RecipientInformationStore
      */
     public Collection getRecipients()
     {
-        List        list = new ArrayList(table.size());
-        Iterator    it = table.values().iterator();
-
-        while (it.hasNext())
-        {
-            Object o = it.next();
-
-            if (o instanceof List)
-            {
-                list.addAll((List)o);
-            }
-            else
-            {
-                list.add(o);
-            }
-        }
-
-        return list;
+        return new ArrayList(all);
     }
 
     /**
@@ -132,17 +80,8 @@ public class RecipientInformationStore
     public Collection getRecipients(
         RecipientId selector)
     {
-        Object o = table.get(selector);
+        ArrayList list = (ArrayList)table.get(selector);
 
-        if (o instanceof List)
-        {
-            return new ArrayList((List)o);
-        }
-        else if (o != null)
-        {
-            return Collections.singletonList(o);
-        }
-
-        return new ArrayList();
+        return list == null ? new ArrayList() : new ArrayList(list);
     }
 }
