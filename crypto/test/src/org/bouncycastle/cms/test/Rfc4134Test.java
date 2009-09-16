@@ -112,6 +112,19 @@ public class Rfc4134Test
         verifySignerInfo4_4(getFirstSignerInfo(parser.getSignerInfos()), counterSigCert);
     }
 
+    public void test4_5()
+        throws Exception
+    {
+        byte[] data = getRfc4134Data("4.5.bin");
+        CMSSignedData signedData = new CMSSignedData(data);
+
+        verifySignatures(signedData);
+
+        CMSSignedDataParser parser = new CMSSignedDataParser(data);
+
+        verifySignatures(parser);
+    }
+
     private void verifySignerInfo4_4(SignerInformation signerInfo, byte[] counterSigCert)
         throws Exception
     {
