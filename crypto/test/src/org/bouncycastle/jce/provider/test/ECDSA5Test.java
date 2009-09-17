@@ -1,18 +1,9 @@
 package org.bouncycastle.jce.provider.test;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.jce.ECPointUtil;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.BigIntegers;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.FixedSecureRandom;
-import org.bouncycastle.util.test.SimpleTest;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -25,11 +16,25 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECFieldF2m;
 import java.security.spec.ECFieldFp;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.ECPointUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.BigIntegers;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class ECDSA5Test
     extends SimpleTest
@@ -286,6 +291,44 @@ public class ECDSA5Test
         }
     }
 
+    private void testKeyPairGenerationWithOIDs()
+        throws Exception
+    {
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        kpGen.initialize(new ECGenParameterSpec(X9ObjectIdentifiers.prime192v1.getId()));
+        kpGen.initialize(new ECGenParameterSpec(TeleTrusTObjectIdentifiers.brainpoolP160r1.getId()));
+        kpGen.initialize(new ECGenParameterSpec(SECObjectIdentifiers.secp128r1.getId()));
+
+        try
+        {
+            kpGen.initialize(new ECGenParameterSpec("1.1"));
+
+            fail("non-existant curve OID failed");
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            if (!"unknown curve OID: 1.1".equals(e.getMessage()))
+            {
+                fail("OID message check failed");
+            }
+        }
+
+        try
+        {
+            kpGen.initialize(new ECGenParameterSpec("flibble"));
+
+            fail("non-existant curve name failed");
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            if (!"unknown curve name: flibble".equals(e.getMessage()))
+            {
+                fail("name message check failed");
+            }
+        }
+    }
+
     protected BigInteger[] derDecode(
         byte[]  encoding)
         throws IOException
@@ -314,6 +357,7 @@ public class ECDSA5Test
         testECDSA239bitPrime();
         testECDSA239bitBinary();
         testGeneration();
+        testKeyPairGenerationWithOIDs();
     }
 
     public static void main(
