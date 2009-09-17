@@ -9,6 +9,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Hashtable;
 
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
@@ -21,7 +22,6 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.jce.provider.asymmetric.ec.EC5Util;
 import org.bouncycastle.jce.provider.JCEECPrivateKey;
 import org.bouncycastle.jce.provider.JCEECPublicKey;
 import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
@@ -167,7 +167,32 @@ public abstract class KeyPairGenerator
                         }
                         if (ecP == null)
                         {
-                            throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
+                            // See if it's actually an OID string (SunJSSE ServerHandshaker setupEphemeralECDHKeys bug)
+                            try
+                            {
+                                DERObjectIdentifier oid = new DERObjectIdentifier(curveName);
+                                ecP = X962NamedCurves.getByOID(oid);
+                                if (ecP == null)
+                                {
+                                    ecP = SECNamedCurves.getByOID(oid);
+                                }
+                                if (ecP == null)
+                                {
+                                    ecP = NISTNamedCurves.getByOID(oid);
+                                }
+                                if (ecP == null)
+                                {
+                                    ecP = TeleTrusTNamedCurves.getByOID(oid);
+                                }
+                                if (ecP == null)
+                                {
+                                    throw new InvalidAlgorithmParameterException("unknown curve OID: " + curveName);
+                                }
+                            }
+                            catch (IllegalArgumentException ex)
+                            {
+                                throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
+                            }
                         }
                     }
 
@@ -177,7 +202,7 @@ public abstract class KeyPairGenerator
                             ecP.getG(),
                             ecP.getN(),
                             ecP.getH(),
-                            ecP.getSeed());
+                            null); // ecP.getSeed());   Work-around JDK bug -- it won't look up named curves properly if seed is present 
                 }
 
                 java.security.spec.ECParameterSpec p = (java.security.spec.ECParameterSpec)ecParams;
