@@ -1,9 +1,5 @@
 package org.bouncycastle.jce.provider.asymmetric.ec;
 
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.jce.spec.ECNamedCurveSpec;
-import org.bouncycastle.math.ec.ECCurve;
-
 import java.math.BigInteger;
 import java.security.spec.ECField;
 import java.security.spec.ECFieldF2m;
@@ -12,15 +8,21 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
 
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.jce.spec.ECNamedCurveSpec;
+import org.bouncycastle.math.ec.ECCurve;
+
 public class EC5Util
 {
     public static EllipticCurve convertCurve(
         ECCurve curve, 
         byte[]  seed)
     {
+        // TODO: the Sun EC implementation doesn't currently handle the seed properly
+        // so at the moment it's set to null. Should probably look at making this configurable
         if (curve instanceof ECCurve.Fp)
         {
-            return new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), seed);
+            return new EllipticCurve(new ECFieldFp(((ECCurve.Fp)curve).getQ()), curve.getA().toBigInteger(), curve.getB().toBigInteger(), null);
         }
         else
         {
@@ -31,13 +33,13 @@ public class EC5Util
             {
                 ks = new int[] { curveF2m.getK1() };
                 
-                return new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), seed);
+                return new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), null);
             }
             else
             {
                 ks = new int[] { curveF2m.getK3(), curveF2m.getK2(), curveF2m.getK1() };
                 
-                return new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), seed);
+                return new EllipticCurve(new ECFieldF2m(curveF2m.getM(), ks), curve.getA().toBigInteger(), curve.getB().toBigInteger(), null);
             } 
         }
     }
