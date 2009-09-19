@@ -140,11 +140,6 @@ public interface PKCSObjectIdentifiers
     static final DERObjectIdentifier    sMIMECapabilitiesVersions = new DERObjectIdentifier(pkcs_9 + ".15.3");
 
     //
-    // other SMIME attributes
-    //
-    static final DERObjectIdentifier    id_aa_receiptRequest    = new DERObjectIdentifier(pkcs_9 + ".16.2.1");
-
-    //
     // id-ct OBJECT IDENTIFIER ::= {iso(1) member-body(2) usa(840)
     // rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) ct(1)}
     //
@@ -173,6 +168,8 @@ public interface PKCSObjectIdentifiers
     // rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) attributes(2)}
     //
     static String id_aa = "1.2.840.113549.1.9.16.2";
+
+    static final DERObjectIdentifier id_aa_receiptRequest = new DERObjectIdentifier(id_aa + ".1");
     
     static final DERObjectIdentifier id_aa_contentHint = new DERObjectIdentifier(id_aa + ".4"); // See RFC 2634
     /*
