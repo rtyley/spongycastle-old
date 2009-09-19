@@ -185,6 +185,7 @@ public class JDKPSSSigner
                 throw new InvalidParameterException("no match on MGF digest algorithm: "+ mgfParams.getDigestAlgorithm());
             }
 
+            this.engineParams = null;
             this.paramSpec = newParamSpec;
             this.digest = newDigest;
             this.saltLength = paramSpec.getSaltLength();
