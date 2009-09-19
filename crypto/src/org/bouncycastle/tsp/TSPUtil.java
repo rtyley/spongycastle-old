@@ -1,7 +1,12 @@
 package org.bouncycastle.tsp;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -10,14 +15,19 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.cms.SignerInformation;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TSPUtil
@@ -50,7 +60,64 @@ public class TSPUtil
         digestNames.put(TeleTrusTObjectIdentifiers.ripemd256.getId(), "RIPEMD256");
         digestNames.put(CryptoProObjectIdentifiers.gostR3411.getId(), "GOST3411");
     }
-    
+
+    /**
+     * Fetches the signature time-stamp attributes from a CMS signed-data object.
+     * Checks that the MessageImprint for each time-stamp matches the signature field.
+     * (see RFC 3161 Appendix A).
+     * 
+     * @param signerInfo a SignerInformation to search for time-stamps
+     * @param provider an optional provider to use to create MessageDigest instances
+     * @return
+     * @throws TSPValidationException
+     */
+    public static Collection getSignatureTimestamps(SignerInformation signerInfo, Provider provider)
+        throws TSPValidationException
+    {
+        List timestamps = new ArrayList();
+
+        AttributeTable unsignedAttrs = signerInfo.getUnsignedAttributes();
+        if (unsignedAttrs != null)
+        {
+            ASN1EncodableVector allTSAttrs = unsignedAttrs.getAll(
+                PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
+            for (int i = 0; i < allTSAttrs.size(); ++i)
+            {
+                Attribute tsAttr = (Attribute)allTSAttrs.get(i);            
+                ASN1Set tsAttrValues = tsAttr.getAttrValues();
+                for (int j = 0; j < tsAttrValues.size(); ++j)
+                {
+                    try
+                    {
+                        ContentInfo contentInfo = ContentInfo.getInstance(tsAttrValues.getObjectAt(j).getDERObject());
+                        TimeStampToken timeStampToken = new TimeStampToken(contentInfo);
+                        TimeStampTokenInfo tstInfo = timeStampToken.getTimeStampInfo();
+
+                        MessageDigest digest = createDigestInstance(tstInfo.getMessageImprintAlgOID(), provider);
+                        byte[] expectedDigest = digest.digest(signerInfo.getSignature());
+
+                        if (!MessageDigest.isEqual(expectedDigest, tstInfo.getMessageImprintDigest()))
+                        {
+                            throw new TSPValidationException("Incorrect digest in message imprint");
+                        }
+
+                        timestamps.add(timeStampToken);
+                    }
+                    catch (NoSuchAlgorithmException e)
+                    {
+                        throw new TSPValidationException("Unknown hash algorithm specified in timestamp");
+                    }
+                    catch (Exception e)
+                    {
+                        throw new TSPValidationException("Timestamp could not be parsed");
+                    }
+                }
+            }
+        }
+
+        return timestamps;
+    }
+
     /**
      * Validate the passed in certificate as being of the correct type to be used
      * for time stamping. To be valid it must have an ExtendedKeyUsage extension
@@ -144,5 +211,25 @@ public class TSPUtil
                 throw new TSPException("digest algorithm cannot be found.", ex);
             }
         }
+    }
+
+    static MessageDigest createDigestInstance(String digestAlgOID, Provider provider)
+        throws NoSuchAlgorithmException
+    {
+        String digestName = TSPUtil.getDigestAlgName(digestAlgOID);
+
+        if (provider != null)
+        {
+            try
+            {
+                return MessageDigest.getInstance(digestName, provider);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                // Ignore
+            }
+        }
+
+        return MessageDigest.getInstance(digestName);
     }
 }
