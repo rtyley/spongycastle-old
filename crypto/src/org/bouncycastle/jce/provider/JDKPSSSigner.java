@@ -48,19 +48,19 @@ public class JDKPSSSigner
     
     protected JDKPSSSigner(
         AsymmetricBlockCipher signer,
-        PSSParameterSpec paramSpec)
+        PSSParameterSpec baseParamSpec)
     {
         this.signer = signer;
         
-        if (paramSpec == null)
+        if (baseParamSpec == null)
         {
             originalSpec = null;
             this.paramSpec = PSSParameterSpec.DEFAULT;
         }
         else
         {
-            originalSpec = paramSpec;
-            this.paramSpec = paramSpec;
+            originalSpec = baseParamSpec;
+            this.paramSpec = baseParamSpec;
         }
         
         this.digest = JCEDigestUtil.getDigest(paramSpec.getDigestAlgorithm());
@@ -152,39 +152,41 @@ public class JDKPSSSigner
     {
         if (params instanceof PSSParameterSpec)
         {
-            paramSpec = (PSSParameterSpec)params;
+            PSSParameterSpec newParamSpec = (PSSParameterSpec)params;
             
             if (originalSpec != null)
             {
-                if (!JCEDigestUtil.isSameDigest(originalSpec.getDigestAlgorithm(), paramSpec.getDigestAlgorithm()))
+                if (!JCEDigestUtil.isSameDigest(originalSpec.getDigestAlgorithm(), newParamSpec.getDigestAlgorithm()))
                 {
                     throw new InvalidParameterException("parameter must be using " + originalSpec.getDigestAlgorithm());
                 }
             }
-            if (!paramSpec.getMGFAlgorithm().equalsIgnoreCase("MGF1") && !paramSpec.getMGFAlgorithm().equals(PKCSObjectIdentifiers.id_mgf1.getId()))
+            if (!newParamSpec.getMGFAlgorithm().equalsIgnoreCase("MGF1") && !newParamSpec.getMGFAlgorithm().equals(PKCSObjectIdentifiers.id_mgf1.getId()))
             {
                 throw new InvalidParameterException("unknown mask generation function specified");
             }
             
-            if (!(paramSpec.getMGFParameters() instanceof MGF1ParameterSpec))
+            if (!(newParamSpec.getMGFParameters() instanceof MGF1ParameterSpec))
             {
                 throw new InvalidParameterException("unkown MGF parameters");
             }
             
-            MGF1ParameterSpec   mgfParams = (MGF1ParameterSpec)paramSpec.getMGFParameters();
+            MGF1ParameterSpec   mgfParams = (MGF1ParameterSpec)newParamSpec.getMGFParameters();
             
-            if (!JCEDigestUtil.isSameDigest(mgfParams.getDigestAlgorithm(), paramSpec.getDigestAlgorithm()))
+            if (!JCEDigestUtil.isSameDigest(mgfParams.getDigestAlgorithm(), newParamSpec.getDigestAlgorithm()))
             {
                 throw new InvalidParameterException("digest algorithm for MGF should be the same as for PSS parameters.");
             }
             
-            digest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+            Digest newDigest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
             
-            if (digest == null)
+            if (newDigest == null)
             {
                 throw new InvalidParameterException("no match on MGF digest algorithm: "+ mgfParams.getDigestAlgorithm());
             }
-            
+
+            this.paramSpec = newParamSpec;
+            this.digest = newDigest;
             this.saltLength = paramSpec.getSaltLength();
             this.trailer = getTrailer(paramSpec.getTrailerField());
         }
