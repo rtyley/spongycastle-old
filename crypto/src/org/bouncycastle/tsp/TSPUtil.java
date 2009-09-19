@@ -62,13 +62,13 @@ public class TSPUtil
     }
 
     /**
-     * Fetches the signature time-stamp attributes from a CMS signed-data object.
+     * Fetches the signature time-stamp attributes from a SignerInformation object.
      * Checks that the MessageImprint for each time-stamp matches the signature field.
      * (see RFC 3161 Appendix A).
      * 
      * @param signerInfo a SignerInformation to search for time-stamps
      * @param provider an optional provider to use to create MessageDigest instances
-     * @return
+     * @return a collection of TimeStampToken objects
      * @throws TSPValidationException
      */
     public static Collection getSignatureTimestamps(SignerInformation signerInfo, Provider provider)
