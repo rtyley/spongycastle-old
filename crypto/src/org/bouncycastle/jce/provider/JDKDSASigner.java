@@ -1,5 +1,17 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.SignatureSpi;
+import java.security.interfaces.DSAKey;
+import java.security.spec.AlgorithmParameterSpec;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -19,18 +31,7 @@ import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.DSASigner;
 import org.bouncycastle.jce.interfaces.GOST3410Key;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.SignatureSpi;
-import java.security.interfaces.DSAKey;
-import java.security.spec.AlgorithmParameterSpec;
+import org.bouncycastle.jce.provider.util.NullDigest;
 
 public class JDKDSASigner
     extends SignatureSpi
@@ -290,46 +291,6 @@ public class JDKDSASigner
         public noneDSA()
         {
             super(new NullDigest(), new DSASigner());
-        }
-    }
-    
-    private static class NullDigest
-        implements Digest
-    {
-        private ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        
-        public String getAlgorithmName()
-        {
-            return "NULL";
-        }
-    
-        public int getDigestSize()
-        {
-            return bOut.size();
-        }
-    
-        public void update(byte in)
-        {
-            bOut.write(in);
-        }
-    
-        public void update(byte[] in, int inOff, int len)
-        {
-            bOut.write(in, inOff, len);
-        }
-    
-        public int doFinal(byte[] out, int outOff)
-        {
-            byte[] res = bOut.toByteArray();
-            
-            System.arraycopy(res, 0, out, outOff, res.length);
-            
-            return res.length;
-        }
-    
-        public void reset()
-        {
-            bOut.reset();
         }
     }
 }

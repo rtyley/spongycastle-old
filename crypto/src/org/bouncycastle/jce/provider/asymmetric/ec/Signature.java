@@ -31,6 +31,7 @@ import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.provider.DSABase;
 import org.bouncycastle.jce.provider.DSAEncoder;
 import org.bouncycastle.jce.provider.JDKKeyFactory;
+import org.bouncycastle.jce.provider.util.NullDigest;
 
 public class Signature
     extends DSABase
@@ -335,46 +336,6 @@ public class Signature
             sig[1] = new BigInteger(1, second);
 
             return sig;
-        }
-    }
-
-    private static class NullDigest
-        implements Digest
-    {
-        private ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-
-        public String getAlgorithmName()
-        {
-            return "NULL";
-        }
-
-        public int getDigestSize()
-        {
-            return bOut.size();
-        }
-
-        public void update(byte in)
-        {
-            bOut.write(in);
-        }
-
-        public void update(byte[] in, int inOff, int len)
-        {
-            bOut.write(in, inOff, len);
-        }
-
-        public int doFinal(byte[] out, int outOff)
-        {
-            byte[] res = bOut.toByteArray();
-
-            System.arraycopy(res, 0, out, outOff, res.length);
-
-            return res.length;
-        }
-
-        public void reset()
-        {
-            bOut.reset();
         }
     }
 }
