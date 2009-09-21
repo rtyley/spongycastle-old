@@ -1,23 +1,5 @@
 package org.bouncycastle.jce.provider.test;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.util.BigIntegers;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.FixedSecureRandom;
-import org.bouncycastle.util.test.SimpleTest;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -34,13 +17,34 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
-import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.DSAPublicKey;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.crypto.params.DSAParameters;
+import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
+import org.bouncycastle.crypto.signers.DSASigner;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.BigIntegers;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.FixedSecureRandom;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class DSATest
     extends SimpleTest
@@ -50,7 +54,7 @@ public class DSATest
 
     SecureRandom    random = new FixedSecureRandom(new byte[][] { k1, k2 });
     
-    public void testCompat()
+    private void testCompat()
         throws Exception
     {
         if (Security.getProvider("SUN") == null)
@@ -140,6 +144,57 @@ public class DSATest
         sKey = f.generatePrivate(pkcs8);
 
         checkPrivateKey(k2, sKey);
+    }
+
+    private void testNONEwithDSA()
+        throws Exception
+    {
+        byte[] dummySha1 = Hex.decode("01020304050607080910111213141516");
+        byte[] unevenSha1 = Hex.decode("00020304050607080910111213141516");
+
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("DSA", "BC");
+
+        kpGen.initialize(512);
+
+        KeyPair          kp = kpGen.generateKeyPair();
+
+        Signature        sig = Signature.getInstance("NONEwithDSA", "BC");
+
+        sig.initSign(kp.getPrivate());
+
+        sig.update(dummySha1);
+
+        byte[] sigBytes = sig.sign();
+
+        sig.initVerify(kp.getPublic());
+
+        sig.update(dummySha1);
+
+        sig.verify(sigBytes);
+
+        // reset test
+
+        sig.update(dummySha1);
+
+        if (!sig.verify(sigBytes))
+        {
+            fail("NONEwithDSA failed to reset");
+        }
+
+        // lightweight test
+        DSAPublicKey  key = (DSAPublicKey)kp.getPublic();
+        DSAParameters params = new DSAParameters(key.getParams().getP(), key.getParams().getQ(), key.getParams().getG());
+        DSAPublicKeyParameters keyParams = new DSAPublicKeyParameters(key.getY(), params);
+        DSASigner signer = new DSASigner();
+        ASN1InputStream aIn = new ASN1InputStream(sigBytes);
+        ASN1Sequence derSig = ASN1Sequence.getInstance(ASN1Object.fromByteArray(sigBytes));
+
+        signer.init(false, keyParams);
+
+        if (!signer.verifySignature(dummySha1, DERInteger.getInstance(derSig.getObjectAt(0)).getValue(), DERInteger.getInstance(derSig.getObjectAt(1)).getValue()))
+        {
+            fail("NONEwithDSA not really NONE!");
+        }
     }
 
     private void checkPublic(DSAPublicKey k1, PublicKey vKey)
@@ -690,6 +745,7 @@ public class DSATest
         throws Exception
     {
         testCompat();
+        testNONEwithDSA();
         testECDSA239bitPrime();
         testNONEwithECDSA239bitPrime();
         testECDSA239bitBinary();
