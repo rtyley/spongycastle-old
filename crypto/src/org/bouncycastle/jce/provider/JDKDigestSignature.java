@@ -24,6 +24,7 @@ import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
+import org.bouncycastle.jce.provider.util.NullDigest;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -43,7 +44,16 @@ public class JDKDigestSignature
     private Digest                  digest;
     private AsymmetricBlockCipher   cipher;
     private AlgorithmIdentifier     algId;
-    
+
+    protected JDKDigestSignature(
+        Digest                  digest,
+        AsymmetricBlockCipher   cipher)
+    {
+        this.digest = digest;
+        this.cipher = cipher;
+        this.algId = null;
+    }
+
     protected JDKDigestSignature(
         DERObjectIdentifier     objId,
         Digest                  digest,
@@ -233,6 +243,12 @@ public class JDKDigestSignature
         byte[]  hash)
         throws IOException
     {
+        if (algId == null)
+        {
+            // For raw RSA, the DigestInfo must be prepared externally
+            return hash;
+        }
+
         DigestInfo              dInfo = new DigestInfo(algId, hash);
 
         return dInfo.getEncoded(ASN1Encodable.DER);
@@ -334,6 +350,15 @@ public class JDKDigestSignature
         public RIPEMD256WithRSAEncryption()
         {
             super(TeleTrusTObjectIdentifiers.ripemd256, new RIPEMD256Digest(), new PKCS1Encoding(new RSABlindedEngine()));
+        }
+    }
+
+    static public class noneRSA
+        extends JDKDigestSignature
+    {
+        public noneRSA()
+        {
+            super(new NullDigest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 }
