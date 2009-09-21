@@ -33,8 +33,8 @@ import org.bouncycastle.jce.interfaces.ConfigurableProvider;
  * </code>
  * </pre>
  * Where &lt;n&gt; is the preference you want the provider at (1 being the
- * most prefered).
- * <p>Note: JCE algorithm names should be uppercase only so the case insensitive
+ * most preferred).
+ * <p>Note: JCE algorithm names should be upper-case only so the case insensitive
  * test for getInstance works.
  */
 public final class BouncyCastleProvider extends Provider
@@ -767,8 +767,13 @@ public final class BouncyCastleProvider extends Provider
         put("Signature.SHA384withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA384withRSA");
         put("Signature.SHA512withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA512withRSA");
 
+        put("Signature.RSA", "org.bouncycastle.jce.provider.JDKDigestSignature$noneRSA");
+
         put("Alg.Alias.Signature.RAWDSA", "NONEWITHDSA");
-        
+
+        put("Alg.Alias.Signature.RAWRSA", "RSA");
+        put("Alg.Alias.Signature.NONEWITHRSA", "RSA");
+
         put("Alg.Alias.Signature.SHA1withRSAandMGF1", "SHA1withRSA/PSS");
         put("Alg.Alias.Signature.SHA224withRSAandMGF1", "SHA224withRSA/PSS");
         put("Alg.Alias.Signature.SHA256withRSAandMGF1", "SHA256withRSA/PSS");

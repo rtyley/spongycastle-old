@@ -1,12 +1,17 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.DigestInfo;
+import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -16,16 +21,20 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
+
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.MGF1ParameterSpec;
@@ -89,11 +98,11 @@ public class RSATest
         new BigInteger("0100000000000000000000000000000000bba2d15dbb303c8a21c5ebbcbae52b7125087920dd7cdf358ea119fd66fb064012ec8ce692f0a0b8e8321b041acd40b7", 16),
         new BigInteger("2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac9f0783a49dd5f6c5af651f4c9d0dc9281c96a3f16a85f9572d7cc3f2d0f25a9dbf1149e4cdc32273faadd3fda5dcda7", 16));
 
-    private RSAPublicKeySpec pub2048KeySpec = new RSAPublicKeySpec(
+    static RSAPublicKeySpec pub2048KeySpec = new RSAPublicKeySpec(
             new BigInteger("a7295693155b1813bb84877fb45343556e0568043de5910872a3a518cc11e23e2db74eaf4545068c4e3d258a2718fbacdcc3eafa457695b957e88fbf110aed049a992d9c430232d02f3529c67a3419935ea9b569f85b1bcd37de6b899cd62697e843130ff0529d09c97d813cb15f293751ff56f943fbdabb63971cc7f4f6d5bff1594416b1f5907bde5a84a44f9802ef29b43bda1960f948f8afb8766c1ab80d32eec88ed66d0b65aebe44a6d0b3c5e0ab051aaa1b912fbcc17b8e751ddecc5365b6db6dab0020c3057db4013a51213a5798a3aab67985b0f4d88627a54a0f3f0285fbcb4afdfeb65cb153af66825656d43238b75503231500753f4e421e3c57", 16),
             new BigInteger("10001", 16));
 
-    private RSAPrivateCrtKeySpec priv2048KeySpec = new RSAPrivateCrtKeySpec(
+    static RSAPrivateCrtKeySpec priv2048KeySpec = new RSAPrivateCrtKeySpec(
             new BigInteger("a7295693155b1813bb84877fb45343556e0568043de5910872a3a518cc11e23e2db74eaf4545068c4e3d258a2718fbacdcc3eafa457695b957e88fbf110aed049a992d9c430232d02f3529c67a3419935ea9b569f85b1bcd37de6b899cd62697e843130ff0529d09c97d813cb15f293751ff56f943fbdabb63971cc7f4f6d5bff1594416b1f5907bde5a84a44f9802ef29b43bda1960f948f8afb8766c1ab80d32eec88ed66d0b65aebe44a6d0b3c5e0ab051aaa1b912fbcc17b8e751ddecc5365b6db6dab0020c3057db4013a51213a5798a3aab67985b0f4d88627a54a0f3f0285fbcb4afdfeb65cb153af66825656d43238b75503231500753f4e421e3c57", 16),
             new BigInteger("10001", 16),
             new BigInteger("65dad56ac7df7abb434e4cb5eeadb16093aa6da7f0033aad3815289b04757d32bfee6ade7749c8e4a323b5050a2fb9e2a99e23469e1ed4ba5bab54336af20a5bfccb8b3424cc6923db2ffca5787ed87aa87aa614cd04cedaebc8f623a2d2063017910f436dff18bb06f01758610787f8b258f0a8efd8bd7de30007c47b2a1031696c7d6523bc191d4d918927a7e0b09584ed205bd2ff4fc4382678df82353f7532b3bbb81d69e3f39070aed3fb64fce032a089e8e64955afa5213a6eb241231bd98d702fba725a9b205952fda186412d9e0d9344d2998c455ad8c2bae85ee672751466d5288304032b5b7e02f7e558c7af82c7fbf58eea0bb4ef0f001e6cd0a9", 16),
@@ -550,6 +559,11 @@ public class RSATest
         oaepCompatibilityTest("SHA-256", priv2048Key, pub2048Key);
         oaepCompatibilityTest("SHA-384", priv2048Key, pub2048Key);
         oaepCompatibilityTest("SHA-512", priv2048Key, pub2048Key);
+
+        SecureRandom random = new SecureRandom();
+        rawModeTest("SHA1withRSA", X509ObjectIdentifiers.id_SHA1, priv2048Key, pub2048Key, random);
+        rawModeTest("MD5withRSA", PKCSObjectIdentifiers.md5, priv2048Key, pub2048Key, random);
+        rawModeTest("RIPEMD128withRSA", TeleTrusTObjectIdentifiers.ripemd128, priv2048Key, pub2048Key, random);
     }
 
     private void oaepCompatibilityTest(String digest, PrivateKey privKey, PublicKey pubKey)
@@ -608,7 +622,49 @@ public class RSATest
             fail("data did not decrypt second time");
         }
     }
-    
+
+    private void rawModeTest(String sigName, DERObjectIdentifier digestOID,
+        PrivateKey privKey, PublicKey pubKey, SecureRandom random) throws Exception
+    {
+        byte[] sampleMessage = new byte[1000 + random.nextInt(100)];
+        random.nextBytes(sampleMessage);
+
+        Signature normalSig = Signature.getInstance(sigName, "BC");
+        normalSig.initSign(privKey);
+        normalSig.update(sampleMessage);
+        byte[] normalResult = normalSig.sign();
+
+        MessageDigest digest = MessageDigest.getInstance(digestOID.getId(), "BC");
+        byte[] hash = digest.digest(sampleMessage);
+        byte[] digInfo = derEncode(digestOID, hash);
+
+        Signature rawSig = Signature.getInstance("RSA", "BC");
+        rawSig.initSign(privKey);
+        rawSig.update(digInfo);
+        byte[] rawResult = rawSig.sign();
+
+        if (!Arrays.areEqual(normalResult, rawResult))
+        {
+            fail("raw mode signature differs from normal one");
+        }
+
+        rawSig.initVerify(pubKey);
+        rawSig.update(digInfo);
+
+        if (!rawSig.verify(rawResult))
+        {
+            fail("raw mode signature verification failed");
+        }
+    }
+
+    private byte[] derEncode(DERObjectIdentifier oid, byte[] hash) throws IOException
+    {
+        AlgorithmIdentifier algId = new AlgorithmIdentifier(oid, null);
+        DigestInfo dInfo = new DigestInfo(algId, hash);
+
+        return dInfo.getEncoded(ASN1Encodable.DER);
+    }
+
     public String getName()
     {
         return "RSATest";
