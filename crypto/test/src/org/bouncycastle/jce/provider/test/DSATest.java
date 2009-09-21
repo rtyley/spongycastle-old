@@ -150,7 +150,6 @@ public class DSATest
         throws Exception
     {
         byte[] dummySha1 = Hex.decode("01020304050607080910111213141516");
-        byte[] unevenSha1 = Hex.decode("00020304050607080910111213141516");
 
         KeyPairGenerator kpGen = KeyPairGenerator.getInstance("DSA", "BC");
 
@@ -186,7 +185,6 @@ public class DSATest
         DSAParameters params = new DSAParameters(key.getParams().getP(), key.getParams().getQ(), key.getParams().getG());
         DSAPublicKeyParameters keyParams = new DSAPublicKeyParameters(key.getY(), params);
         DSASigner signer = new DSASigner();
-        ASN1InputStream aIn = new ASN1InputStream(sigBytes);
         ASN1Sequence derSig = ASN1Sequence.getInstance(ASN1Object.fromByteArray(sigBytes));
 
         signer.init(false, keyParams);
@@ -356,7 +354,6 @@ public class DSATest
         KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
         PrivateKey          sKey = f.generatePrivate(priKey);
         PublicKey           vKey = f.generatePublic(pubKey);
-        SecureRandom        k = new SecureRandom();
 
         byte[] message = "abc".getBytes();
         byte[] sig = Hex.decode("3040021e2cb7f36803ebb9c427c58d8265f11fc5084747133078fc279de874fbecb0021e64cb19604be06c57e761b3de5518f71de0f6e0cd2df677cec8a6ffcb690d");
@@ -478,8 +475,8 @@ public class DSATest
     private void testECDSA239bitBinary(String algorithm, DERObjectIdentifier oid)
         throws Exception
     {
-        BigInteger r = new BigInteger("21596333210419611985018340039034612628818151486841789642455876922391552");
-        BigInteger s = new BigInteger("197030374000731686738334997654997227052849804072198819102649413465737174");
+//        BigInteger r = new BigInteger("21596333210419611985018340039034612628818151486841789642455876922391552");
+//        BigInteger s = new BigInteger("197030374000731686738334997654997227052849804072198819102649413465737174");
 
         byte[] kData = BigIntegers.asUnsignedByteArray(new BigInteger("171278725565216523967285789236956265265265235675811949404040041670216363"));
 
