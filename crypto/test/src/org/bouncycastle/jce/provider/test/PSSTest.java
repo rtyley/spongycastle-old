@@ -3,6 +3,7 @@ package org.bouncycastle.jce.provider.test;
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -13,14 +14,17 @@ import java.security.spec.PSSParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.util.test.FixedSecureRandom;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class PSSTest
-    implements Test
+    extends SimpleTest
 {
     private class FixedRandom
         extends SecureRandom
@@ -87,110 +91,158 @@ public class PSSTest
 
     private byte[] sig1c = Hex.decode("9e64cc1062c537b142480bc5af407b55904ead970e20e0f8f6664279c96c6da6b03522160f224a85cc413dfe6bd00621485b665abac6d90ff38c9af06f4ddd6c7c81540439e5795601a1343d9feb465712ff8a5f5150391522fb5a9b8e2225a555f4efaa5e5c0ed7a19b27074c2d9f6dbbd0c893ba02c4a35b115d337bccd7a2");
     
-    public TestResult perform()
+    public void performTest() throws Exception
     {
-        try
+        KeyFactory fact = KeyFactory.getInstance("RSA", "BC");
+
+        PrivateKey  privKey = fact.generatePrivate(privKeySpec);
+        PublicKey   pubKey = fact.generatePublic(pubKeySpec);
+
+        Signature s = Signature.getInstance("SHA1withRSA/PSS", "BC");
+
+        s.initSign(privKey, new FixedRandom(slt1a));
+        s.update(msg1a);
+        byte[] sig = s.sign();
+
+        if (!arrayEquals(sig1a, sig))
         {
-            KeyFactory fact = KeyFactory.getInstance("RSA", "BC");
-
-            PrivateKey  privKey = fact.generatePrivate(privKeySpec);
-            PublicKey   pubKey = fact.generatePublic(pubKeySpec);
-
-            Signature s = Signature.getInstance("SHA1withRSA/PSS", "BC");
-
-            s.initSign(privKey, new FixedRandom(slt1a));
-            s.update(msg1a);
-            byte[] sig = s.sign();
-
-            if (!arrayEquals(sig1a, sig))
-            {
-                return new SimpleTestResult(false, "PSS Sign test expected " + new String(Hex.encode(sig1a)) + " got " + new String(Hex.encode(sig)));
-            }
-
-            s = Signature.getInstance("SHA1withRSAandMGF1", "BC");
-            
-            s.initVerify(pubKey);
-            s.update(msg1a);
-            if (!s.verify(sig1a))
-            {
-                return new SimpleTestResult(false, "SHA1 signature verification failed");
-            }
-
-            s = Signature.getInstance("SHA1withRSAandMGF1", "BC");
-            
-            s.setParameter(PSSParameterSpec.DEFAULT);
-            
-            s.initVerify(pubKey);
-            s.update(msg1a);
-            if (!s.verify(sig1a))
-            {
-                return new SimpleTestResult(false, "SHA1 signature verification with default parameters failed");
-            }
-            
-            AlgorithmParameters pss = s.getParameters();
-            if (!arrayEquals(pss.getEncoded(), new byte[] { 0x30, 0x00 }))
-            {
-                return new SimpleTestResult(false, "failed default encoding test.");
-            }
-            
-            s = Signature.getInstance("SHA256withRSA/PSS", "BC");
-
-            s.initSign(privKey, new FixedRandom(slt1a));
-            s.update(msg1a);
-            sig = s.sign();
-
-            pss = s.getParameters();
-            
-            if (!arrayEquals(sig1b, sig))
-            {
-                return new SimpleTestResult(false, "PSS Sign test expected " + new String(Hex.encode(sig1b)) + " got " + new String(Hex.encode(sig)));
-            }
-
-            s = Signature.getInstance("SHA256withRSAandMGF1", "BC");
-            
-            s.setParameter(pss.getParameterSpec(PSSParameterSpec.class));
-            
-            s.initVerify(pubKey);
-            s.update(msg1a);
-            if (!s.verify(sig1b))
-            {
-                return new SimpleTestResult(false, "SHA256 signature verification failed");
-            }
-
-            //
-            // 512 test -with zero salt length
-            //
-            s = Signature.getInstance("SHA512withRSAandMGF1", "BC");
-            
-            s.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 0, 1));
-            s.initSign(privKey);
-
-            s.update(msg1a);
-            sig = s.sign();
-
-            pss = s.getParameters();
-            
-            if (!arrayEquals(sig1c, sig))
-            {
-                return new SimpleTestResult(false, "PSS Sign test expected " + new String(Hex.encode(sig1c)) + " got " + new String(Hex.encode(sig)));
-            }
-
-            s = Signature.getInstance("SHA512withRSAandMGF1", "BC");
-            
-            s.setParameter(pss.getParameterSpec(PSSParameterSpec.class));
-            
-            s.initVerify(pubKey);
-            s.update(msg1a);
-            if (!s.verify(sig1c))
-            {
-                return new SimpleTestResult(false, "SHA512 signature verification failed");
-            }
-            
-            return new SimpleTestResult(true, getName() + ": Okay");
+           fail("PSS Sign test expected " + new String(Hex.encode(sig1a)) + " got " + new String(Hex.encode(sig)));
         }
-        catch (Exception e)
+
+        s = Signature.getInstance("SHA1withRSAandMGF1", "BC");
+        
+        s.initVerify(pubKey);
+        s.update(msg1a);
+        if (!s.verify(sig1a))
         {
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString(), e);
+            fail("SHA1 signature verification failed");
+        }
+
+        s = Signature.getInstance("SHA1withRSAandMGF1", "BC");
+        
+        s.setParameter(PSSParameterSpec.DEFAULT);
+        
+        s.initVerify(pubKey);
+        s.update(msg1a);
+        if (!s.verify(sig1a))
+        {
+            fail("SHA1 signature verification with default parameters failed");
+        }
+        
+        AlgorithmParameters pss = s.getParameters();
+        if (!arrayEquals(pss.getEncoded(), new byte[] { 0x30, 0x00 }))
+        {
+            fail("failed default encoding test.");
+        }
+        
+        s = Signature.getInstance("SHA256withRSA/PSS", "BC");
+
+        s.initSign(privKey, new FixedRandom(slt1a));
+        s.update(msg1a);
+        sig = s.sign();
+
+        pss = s.getParameters();
+        
+        if (!arrayEquals(sig1b, sig))
+        {
+            fail("PSS Sign test expected " + new String(Hex.encode(sig1b)) + " got " + new String(Hex.encode(sig)));
+        }
+
+        s = Signature.getInstance("SHA256withRSAandMGF1", "BC");
+        
+        s.setParameter(pss.getParameterSpec(PSSParameterSpec.class));
+        
+        s.initVerify(pubKey);
+        s.update(msg1a);
+        if (!s.verify(sig1b))
+        {
+            fail("SHA256 signature verification failed");
+        }
+
+        //
+        // 512 test -with zero salt length
+        //
+        s = Signature.getInstance("SHA512withRSAandMGF1", "BC");
+        
+        s.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 0, 1));
+        s.initSign(privKey);
+
+        s.update(msg1a);
+        sig = s.sign();
+
+        pss = s.getParameters();
+        
+        if (!arrayEquals(sig1c, sig))
+        {
+            fail("PSS Sign test expected " + new String(Hex.encode(sig1c)) + " got " + new String(Hex.encode(sig)));
+        }
+
+        s = Signature.getInstance("SHA512withRSAandMGF1", "BC");
+        
+        s.setParameter(pss.getParameterSpec(PSSParameterSpec.class));
+        
+        s.initVerify(pubKey);
+        s.update(msg1a);
+        if (!s.verify(sig1c))
+        {
+            fail("SHA512 signature verification failed");
+        }
+
+        SecureRandom random = new SecureRandom();
+
+        // Note: PSS minimum key size determined by hash/salt lengths
+        PrivateKey priv2048Key = fact.generatePrivate(RSATest.priv2048KeySpec);
+        PublicKey pub2048Key = fact.generatePublic(RSATest.pub2048KeySpec);
+
+        rawModeTest("SHA1withRSA/PSS", X509ObjectIdentifiers.id_SHA1, priv2048Key, pub2048Key, random);
+        rawModeTest("SHA224withRSA/PSS", NISTObjectIdentifiers.id_sha224, priv2048Key, pub2048Key, random);
+        rawModeTest("SHA256withRSA/PSS", NISTObjectIdentifiers.id_sha256, priv2048Key, pub2048Key, random);
+        rawModeTest("SHA384withRSA/PSS", NISTObjectIdentifiers.id_sha384, priv2048Key, pub2048Key, random);
+        rawModeTest("SHA512withRSA/PSS", NISTObjectIdentifiers.id_sha512, priv2048Key, pub2048Key, random);
+    }
+
+    private void rawModeTest(String sigName, DERObjectIdentifier digestOID,
+            PrivateKey privKey, PublicKey pubKey, SecureRandom random) throws Exception
+    {
+        byte[] sampleMessage = new byte[1000 + random.nextInt(100)];
+        random.nextBytes(sampleMessage);
+
+        Signature normalSig = Signature.getInstance(sigName, "BC");
+
+        PSSParameterSpec spec = (PSSParameterSpec)normalSig.getParameters().getParameterSpec(PSSParameterSpec.class);
+
+        // Make sure we generate the same 'random' salt for both normal and raw signers
+        int saltLen = spec.getSaltLength();
+        byte[] fixedRandomBytes = new byte[saltLen];
+        random.nextBytes(fixedRandomBytes);
+
+        normalSig.initSign(privKey, new FixedSecureRandom(fixedRandomBytes));
+        normalSig.update(sampleMessage);
+        byte[] normalResult = normalSig.sign();
+
+        MessageDigest digest = MessageDigest.getInstance(digestOID.getId(), "BC");
+        byte[] hash = digest.digest(sampleMessage);
+
+        Signature rawSig = Signature.getInstance("RAWRSASSA-PSS", "BC");
+
+        // Need to init the params explicitly to avoid having a 'raw' variety of every PSS algorithm
+        rawSig.setParameter(spec);
+
+        rawSig.initSign(privKey, new FixedSecureRandom(fixedRandomBytes));
+        rawSig.update(hash);
+        byte[] rawResult = rawSig.sign();
+
+        if (!Arrays.areEqual(normalResult, rawResult))
+        {
+            fail("raw mode signature differs from normal one");
+        }
+
+        rawSig.initVerify(pubKey);
+        rawSig.update(hash);
+
+        if (!rawSig.verify(rawResult))
+        {
+            fail("raw mode signature verification failed");
         }
     }
 
@@ -204,9 +256,6 @@ public class PSSTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new PSSTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new PSSTest());
     }
 }

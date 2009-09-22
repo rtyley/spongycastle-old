@@ -23,7 +23,8 @@ public class PSSSigner
 {
     static final public byte   TRAILER_IMPLICIT    = (byte)0xBC;
 
-    private Digest                      digest;
+    private Digest                      contentDigest;
+    private Digest                      mgfDigest;
     private AsymmetricBlockCipher       cipher;
     private SecureRandom                random;
 
@@ -51,14 +52,25 @@ public class PSSSigner
     }
     
     public PSSSigner(
+            AsymmetricBlockCipher   cipher,
+            Digest                  digest,
+            int                     sLen,
+            byte                    trailer)
+    {
+        this(cipher, digest, digest, sLen, trailer);
+    }
+
+    public PSSSigner(
         AsymmetricBlockCipher   cipher,
-        Digest                  digest,
+        Digest                  contentDigest,
+        Digest                  mgfDigest,
         int                     sLen,
         byte                    trailer)
     {
         this.cipher = cipher;
-        this.digest = digest;
-        this.hLen = digest.getDigestSize();
+        this.contentDigest = contentDigest;
+        this.mgfDigest = mgfDigest;
+        this.hLen = mgfDigest.getDigestSize();
         this.sLen = sLen;
         this.salt = new byte[sLen];
         this.mDash = new byte[8 + sLen + hLen];
@@ -102,6 +114,11 @@ public class PSSSigner
         
         emBits = kParam.getModulus().bitLength() - 1;
 
+        if (emBits < (8 * hLen + 8 * sLen + 9))
+        {
+            throw new IllegalArgumentException("key too small for specified hash and salt lengths");
+        }
+
         block = new byte[(emBits + 7) / 8];
 
         reset();
@@ -125,7 +142,7 @@ public class PSSSigner
     public void update(
         byte    b)
     {
-        digest.update(b);
+        contentDigest.update(b);
     }
 
     /**
@@ -136,7 +153,7 @@ public class PSSSigner
         int     off,
         int     len)
     {
-        digest.update(in, off, len);
+        contentDigest.update(in, off, len);
     }
 
     /**
@@ -144,7 +161,7 @@ public class PSSSigner
      */
     public void reset()
     {
-        digest.reset();
+        contentDigest.reset();
     }
 
     /**
@@ -154,12 +171,7 @@ public class PSSSigner
     public byte[] generateSignature()
         throws CryptoException, DataLengthException
     {
-        if (emBits < (8 * hLen + 8 * sLen + 9))
-        {
-            throw new DataLengthException("encoding error");
-        }
-
-        digest.doFinal(mDash, mDash.length - hLen - sLen);
+        contentDigest.doFinal(mDash, mDash.length - hLen - sLen);
 
         if (sLen != 0)
         {
@@ -170,9 +182,9 @@ public class PSSSigner
 
         byte[]  h = new byte[hLen];
 
-        digest.update(mDash, 0, mDash.length);
+        mgfDigest.update(mDash, 0, mDash.length);
 
-        digest.doFinal(h, 0);
+        mgfDigest.doFinal(h, 0);
 
         block[block.length - sLen - 1 - hLen - 1] = 0x01;
         System.arraycopy(salt, 0, block, block.length - sLen - hLen - 1, sLen);
@@ -203,12 +215,7 @@ public class PSSSigner
     public boolean verifySignature(
         byte[]      signature)
     {
-        if (emBits < (8 * hLen + 8 * sLen + 9))
-        {
-            return false;
-        }
-
-        digest.doFinal(mDash, mDash.length - hLen - sLen);
+        contentDigest.doFinal(mDash, mDash.length - hLen - sLen);
 
         try
         {
@@ -252,8 +259,8 @@ public class PSSSigner
 
         System.arraycopy(block, block.length - sLen - hLen - 1, mDash, mDash.length - sLen, sLen);
 
-        digest.update(mDash, 0, mDash.length);
-        digest.doFinal(mDash, mDash.length - hLen);
+        mgfDigest.update(mDash, 0, mDash.length);
+        mgfDigest.doFinal(mDash, mDash.length - hLen);
 
         for (int i = block.length - hLen - 1, j = mDash.length - hLen;
                                                  j != mDash.length; i++, j++)
@@ -299,15 +306,15 @@ public class PSSSigner
         byte[]  C = new byte[4];
         int     counter = 0;
 
-        digest.reset();
+        mgfDigest.reset();
 
         while (counter < (length / hLen))
         {
             ItoOSP(counter, C);
 
-            digest.update(Z, zOff, zLen);
-            digest.update(C, 0, C.length);
-            digest.doFinal(hashBuf, 0);
+            mgfDigest.update(Z, zOff, zLen);
+            mgfDigest.update(C, 0, C.length);
+            mgfDigest.doFinal(hashBuf, 0);
 
             System.arraycopy(hashBuf, 0, mask, counter * hLen, hLen);
             
@@ -318,9 +325,9 @@ public class PSSSigner
         {
             ItoOSP(counter, C);
 
-            digest.update(Z, zOff, zLen);
-            digest.update(C, 0, C.length);
-            digest.doFinal(hashBuf, 0);
+            mgfDigest.update(Z, zOff, zLen);
+            mgfDigest.update(C, 0, C.length);
+            mgfDigest.doFinal(hashBuf, 0);
 
             System.arraycopy(hashBuf, 0, mask, counter * hLen, mask.length - (counter * hLen));
         }

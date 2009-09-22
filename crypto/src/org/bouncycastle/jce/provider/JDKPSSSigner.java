@@ -1,5 +1,14 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.engines.RSABlindedEngine;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.crypto.signers.PSSSigner;
+import org.bouncycastle.jce.provider.util.NullDigest;
+
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -14,14 +23,6 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.engines.RSABlindedEngine;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.signers.PSSSigner;
-
 public class JDKPSSSigner
     extends SignatureSpi
 {
@@ -29,9 +30,11 @@ public class JDKPSSSigner
     private PSSParameterSpec       paramSpec;
     private PSSParameterSpec       originalSpec;
     private AsymmetricBlockCipher  signer;
-    private Digest digest;
+    private Digest contentDigest;
+    private Digest mgfDigest;
     private int saltLength;
     private byte trailer;
+    private boolean isRaw;
 
     private PSSSigner pss;
 
@@ -45,27 +48,47 @@ public class JDKPSSSigner
         
         throw new IllegalArgumentException("unknown trailer field");
     }
-    
-    protected JDKPSSSigner(
-        AsymmetricBlockCipher signer,
-        PSSParameterSpec baseParamSpec)
+
+    private void setupContentDigest()
     {
-        this.signer = signer;
+        if (isRaw)
+        {
+            this.contentDigest = new NullDigest();
+        }
+        else
+        {
+            this.contentDigest = mgfDigest;
+        }
+    }
+
+    protected JDKPSSSigner(
+        PSSParameterSpec paramSpecArg)
+    {
+        this(paramSpecArg, false);
+    }
+
+    protected JDKPSSSigner(
+        PSSParameterSpec baseParamSpec,
+        boolean          isRaw)
+    {
+        this.signer = new RSABlindedEngine();
+        this.originalSpec = baseParamSpec;
         
         if (baseParamSpec == null)
         {
-            originalSpec = null;
             this.paramSpec = PSSParameterSpec.DEFAULT;
         }
         else
         {
-            originalSpec = baseParamSpec;
             this.paramSpec = baseParamSpec;
         }
-        
-        this.digest = JCEDigestUtil.getDigest(paramSpec.getDigestAlgorithm());
+
+        this.mgfDigest = JCEDigestUtil.getDigest(paramSpec.getDigestAlgorithm());
         this.saltLength = paramSpec.getSaltLength();
         this.trailer = getTrailer(paramSpec.getTrailerField());
+        this.isRaw = isRaw;
+
+        setupContentDigest();
     }
     
     protected void engineInitVerify(
@@ -77,8 +100,7 @@ public class JDKPSSSigner
             throw new InvalidKeyException("Supplied key is not a RSAPublicKey instance");
         }
 
-		// Note: trailerField defaults to the only legal value
-        pss = new PSSSigner(signer, digest, saltLength);
+        pss = new PSSSigner(signer, contentDigest, mgfDigest, saltLength, trailer);
         pss.init(false,
             RSAUtil.generatePublicKeyParameter((RSAPublicKey)publicKey));
     }
@@ -93,7 +115,7 @@ public class JDKPSSSigner
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
 
-        pss = new PSSSigner(signer, digest, saltLength, trailer);
+        pss = new PSSSigner(signer, contentDigest, mgfDigest, saltLength, trailer);
         pss.init(true, new ParametersWithRandom(RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey), random));
     }
 
@@ -106,7 +128,7 @@ public class JDKPSSSigner
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
 
-        pss = new PSSSigner(signer, digest, saltLength, trailer);
+        pss = new PSSSigner(signer, contentDigest, mgfDigest, saltLength, trailer);
         pss.init(true, RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey));
     }
 
@@ -187,9 +209,11 @@ public class JDKPSSSigner
 
             this.engineParams = null;
             this.paramSpec = newParamSpec;
-            this.digest = newDigest;
+            this.mgfDigest = newDigest;
             this.saltLength = paramSpec.getSaltLength();
             this.trailer = getTrailer(paramSpec.getTrailerField());
+
+            setupContentDigest();
         }
         else
         {
@@ -234,12 +258,21 @@ public class JDKPSSSigner
         throw new UnsupportedOperationException("engineGetParameter unsupported");
     }
 
+    static public class nonePSS
+        extends JDKPSSSigner
+    {
+        public nonePSS()
+        {
+            super(null, true);
+        }
+    }
+
     static public class PSSwithRSA
         extends JDKPSSSigner
     {
         public PSSwithRSA()
         {
-            super(new RSABlindedEngine(), null);
+            super(null);
         }
     }
     
@@ -248,7 +281,7 @@ public class JDKPSSSigner
     {
         public SHA1withRSA()
         {
-            super(new RSABlindedEngine(), PSSParameterSpec.DEFAULT);
+            super(PSSParameterSpec.DEFAULT);
         }
     }
 
@@ -257,7 +290,7 @@ public class JDKPSSSigner
     {
         public SHA224withRSA()
         {
-            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), 28, 1));
+            super(new PSSParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), 28, 1));
         }
     }
     
@@ -266,7 +299,7 @@ public class JDKPSSSigner
     {
         public SHA256withRSA()
         {
-            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
+            super(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
         }
     }
 
@@ -275,7 +308,7 @@ public class JDKPSSSigner
     {
         public SHA384withRSA()
         {
-            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 48, 1));
+            super(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 48, 1));
         }
     }
 
@@ -284,7 +317,7 @@ public class JDKPSSSigner
     {
         public SHA512withRSA()
         {
-            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
+            super(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
         }
     }
 }

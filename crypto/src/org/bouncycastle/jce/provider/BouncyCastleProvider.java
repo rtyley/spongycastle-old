@@ -179,12 +179,22 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.AlgorithmParameters.PBEWithSHAAnd3KeyTripleDES", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.id_RSAES_OAEP, "OAEP");
         
+        put("Alg.Alias.AlgorithmParameters.RSAPSS", "PSS");
+        put("Alg.Alias.AlgorithmParameters.RSASSA-PSS", "PSS");
         put("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.id_RSASSA_PSS, "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA1withRSA/PSS", "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA224withRSA/PSS", "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA256withRSA/PSS", "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA384withRSA/PSS", "PSS");
+        put("Alg.Alias.AlgorithmParameters.SHA512withRSA/PSS", "PSS");
         put("Alg.Alias.AlgorithmParameters.SHA1WITHRSAANDMGF1", "PSS");
         put("Alg.Alias.AlgorithmParameters.SHA224WITHRSAANDMGF1", "PSS");
         put("Alg.Alias.AlgorithmParameters.SHA256WITHRSAANDMGF1", "PSS");
         put("Alg.Alias.AlgorithmParameters.SHA384WITHRSAANDMGF1", "PSS");
         put("Alg.Alias.AlgorithmParameters.SHA512WITHRSAANDMGF1", "PSS");
+        put("Alg.Alias.AlgorithmParameters.RAWRSAPSS", "PSS");
+        put("Alg.Alias.AlgorithmParameters.NONEWITHRSAPSS", "PSS");
+        put("Alg.Alias.AlgorithmParameters.NONEWITHRSASSA-PSS", "PSS");
         
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITAES-CBC-BC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND192BITAES-CBC-BC", "PKCS12PBE");
@@ -768,11 +778,17 @@ public final class BouncyCastleProvider extends Provider
         put("Signature.SHA512withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA512withRSA");
 
         put("Signature.RSA", "org.bouncycastle.jce.provider.JDKDigestSignature$noneRSA");
+        put("Signature.RAWRSASSA-PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$nonePSS");
 
         put("Alg.Alias.Signature.RAWDSA", "NONEWITHDSA");
 
         put("Alg.Alias.Signature.RAWRSA", "RSA");
         put("Alg.Alias.Signature.NONEWITHRSA", "RSA");
+        put("Alg.Alias.Signature.RAWRSAPSS", "RAWRSASSA-PSS");
+        put("Alg.Alias.Signature.NONEWITHRSAPSS", "RAWRSASSA-PSS");
+        put("Alg.Alias.Signature.NONEWITHRSASSA-PSS", "RAWRSASSA-PSS");
+
+        put("Alg.Alias.Signature.RSAPSS", "RSASSA-PSS");
 
         put("Alg.Alias.Signature.SHA1withRSAandMGF1", "SHA1withRSA/PSS");
         put("Alg.Alias.Signature.SHA224withRSAandMGF1", "SHA224withRSA/PSS");
