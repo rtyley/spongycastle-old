@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -12,11 +11,10 @@ import java.security.SignatureSpi;
 import java.security.interfaces.DSAKey;
 import java.security.spec.AlgorithmParameterSpec;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
@@ -114,16 +112,13 @@ public class JDKDSASigner
             param = DSAUtil.generatePrivateKeyParameter(privateKey);
         }
 
-        digest.reset();
-
         if (random != null)
         {
-            signer.init(true, new ParametersWithRandom(param, random));
+            param = new ParametersWithRandom(param, random);
         }
-        else
-        {
-            signer.init(true, param);
-        }
+
+        digest.reset();
+        signer.init(true, param);
     }
 
     protected void engineUpdate(
@@ -213,31 +208,19 @@ public class JDKDSASigner
         BigInteger  s)
         throws IOException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-        ASN1EncodableVector     v = new ASN1EncodableVector();
-
-        v.add(new DERInteger(r));
-        v.add(new DERInteger(s));
-
-        dOut.writeObject(new DERSequence(v));
-
-        return bOut.toByteArray();
+        DERInteger[] rs = new DERInteger[]{ new DERInteger(r), new DERInteger(s) };
+        return new DERSequence(rs).getEncoded(ASN1Encodable.DER);
     }
 
     private BigInteger[] derDecode(
         byte[]  encoding)
         throws IOException
     {
-        ASN1InputStream         aIn = new ASN1InputStream(encoding);
-        ASN1Sequence            s = (ASN1Sequence)aIn.readObject();
-
-        BigInteger[]            sig = new BigInteger[2];
-
-        sig[0] = ((DERInteger)s.getObjectAt(0)).getValue();
-        sig[1] = ((DERInteger)s.getObjectAt(1)).getValue();
-
-        return sig;
+        ASN1Sequence s = (ASN1Sequence)ASN1Object.fromByteArray(encoding);
+        return new BigInteger[]{
+            ((DERInteger)s.getObjectAt(0)).getValue(),
+            ((DERInteger)s.getObjectAt(1)).getValue()
+        };
     }
 
     static public class stdDSA
