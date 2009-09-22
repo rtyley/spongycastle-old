@@ -659,7 +659,7 @@ public class RSATest
 
     private byte[] derEncode(DERObjectIdentifier oid, byte[] hash) throws IOException
     {
-        AlgorithmIdentifier algId = new AlgorithmIdentifier(oid, null);
+        AlgorithmIdentifier algId = new AlgorithmIdentifier(oid, DERNull.INSTANCE);
         DigestInfo dInfo = new DigestInfo(algId, hash);
 
         return dInfo.getEncoded(ASN1Encodable.DER);
