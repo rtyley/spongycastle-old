@@ -1,58 +1,59 @@
 package org.bouncycastle.cms.test;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.PrivateKey;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Security;
-import java.security.spec.DSAPublicKeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.DSAParams;
 import java.security.cert.CertStore;
-import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPublicKey;
+import java.security.spec.DSAPublicKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERUTF8String;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.CMSEnvelopedDataParser;
+import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.cms.RecipientInformation;
+import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.CMSEnvelopedData;
-import org.bouncycastle.cms.RecipientInformationStore;
-import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
-import org.bouncycastle.cms.RecipientInformation;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSEnvelopedDataParser;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.Streams;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class Rfc4134Test
     extends TestCase
 {
-
+    private static final String TEST_DATA_HOME = "bc.test.data.home";
+    
     private static byte[] exContent = getRfc4134Data("ExContent.bin");
     private static byte[] sha1 = Hex.decode("406aec085279ba6e16022d9e0629c0229687dd48");
 
@@ -406,9 +407,16 @@ public class Rfc4134Test
 
     private static byte[] getRfc4134Data(String name)
     {
+        String dataHome = System.getProperty(TEST_DATA_HOME);
+
+        if (dataHome == null)
+        {
+            throw new IllegalStateException(TEST_DATA_HOME + " property not set");
+        }
+
         try
         {
-            return Streams.readAll(Rfc4134Test.class.getResourceAsStream("/rfc4134/" + name));
+            return Streams.readAll(new FileInputStream(dataHome + "/rfc4134/" + name));
         }
         catch (IOException e)
         {
