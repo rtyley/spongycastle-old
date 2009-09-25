@@ -167,13 +167,7 @@ public class DERBitString
     {
         try
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(obj);
-            dOut.close();
-
-            this.data = bOut.toByteArray();
+            this.data = obj.getDERObject().getEncoded(ASN1Encodable.DER);
             this.padBits = 0;
         }
         catch (IOException e)

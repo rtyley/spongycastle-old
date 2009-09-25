@@ -1,6 +1,8 @@
 package org.bouncycastle.jce;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERBitString;
@@ -8,7 +10,6 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -24,8 +25,6 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.util.Strings;
 
 import javax.security.auth.x500.X500Principal;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
@@ -328,13 +327,10 @@ public class PKCS10CertificationRequest
             this.sigAlgId = new AlgorithmIdentifier(sigOID, null);
         }
 
-        byte[]                  bytes = key.getEncoded();
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(bytes);
-        ASN1InputStream         dIn = new ASN1InputStream(bIn);
-
         try
         {
-            this.reqInfo = new CertificationRequestInfo(subject, new SubjectPublicKeyInfo((ASN1Sequence)dIn.readObject()), attributes);
+            ASN1Sequence seq = (ASN1Sequence)ASN1Object.fromByteArray(key.getEncoded());
+            this.reqInfo = new CertificationRequestInfo(subject, new SubjectPublicKeyInfo(seq), attributes);
         }
         catch (IOException e)
         {
@@ -355,12 +351,7 @@ public class PKCS10CertificationRequest
 
         try
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(reqInfo);
-
-            sig.update(bOut.toByteArray());
+            sig.update(reqInfo.getEncoded(ASN1Encodable.DER));
         }
         catch (Exception e)
         {
@@ -503,12 +494,7 @@ public class PKCS10CertificationRequest
 
         try
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(reqInfo);
-
-            sig.update(bOut.toByteArray());
+            sig.update(reqInfo.getEncoded(ASN1Encodable.DER));
         }
         catch (Exception e)
         {
@@ -523,19 +509,14 @@ public class PKCS10CertificationRequest
      */
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(this);
+            return this.getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {
             throw new RuntimeException(e.toString());
         }
-
-        return bOut.toByteArray();
     }
 
     private void setSignatureParameters(

@@ -28,7 +28,6 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.pkcs.ContentInfo;
@@ -177,21 +176,14 @@ public  class PKIXCertPath
                     throw new CertificateException("input stream does not contain a ASN1 SEQUENCE while reading PkiPath encoded data to load CertPath");
                 }
                 Enumeration e = ((ASN1Sequence)derObject).getObjects();
-                InputStream certInStream;
-                ByteArrayOutputStream outStream;
-                DEROutputStream derOutStream;
                 certificates = new ArrayList();
                 CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
                 while (e.hasMoreElements())
                 {
-                    outStream = new ByteArrayOutputStream();
-                    derOutStream = new DEROutputStream(outStream);
-        
-                    derOutStream.writeObject(e.nextElement());
-                    derOutStream.close();
-    
-                    certInStream = new ByteArrayInputStream(outStream.toByteArray());
-                    certificates.add(0,certFactory.generateCertificate(certInStream));
+                    ASN1Encodable element = (ASN1Encodable)e.nextElement();
+                    byte[] encoded = element.getEncoded(ASN1Encodable.DER);
+                    certificates.add(0, certFactory.generateCertificate(
+                        new ByteArrayInputStream(encoded)));
                 }
             }
             else if (encoding.equalsIgnoreCase("PKCS7") || encoding.equalsIgnoreCase("PEM"))
@@ -367,13 +359,7 @@ public  class PKIXCertPath
     {
         try
         {
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            DEROutputStream       dOut = new DEROutputStream(bOut);
-            
-            dOut.writeObject(obj);
-            dOut.close();
-            
-            return bOut.toByteArray();
+            return obj.getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {

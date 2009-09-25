@@ -19,11 +19,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.ocsp.OCSPRequest;
 import org.bouncycastle.asn1.ocsp.Request;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -395,14 +395,9 @@ public class OCSPReq
 
             if (ext != null)
             {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                DEROutputStream dOut = new DEROutputStream(bOut);
-
                 try
                 {
-                    dOut.writeObject(ext.getValue());
-
-                    return bOut.toByteArray();
+                    return ext.getValue().getEncoded(ASN1Encodable.DER);
                 }
                 catch (Exception e)
                 {

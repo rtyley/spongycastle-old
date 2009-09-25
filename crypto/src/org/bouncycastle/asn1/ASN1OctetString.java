@@ -4,7 +4,6 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.Arrays;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -85,13 +84,7 @@ public abstract class ASN1OctetString
     {
         try
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(obj);
-            dOut.close();
-
-            this.string = bOut.toByteArray();
+            this.string = obj.getDERObject().getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {

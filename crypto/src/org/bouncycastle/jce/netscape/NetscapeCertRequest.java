@@ -230,9 +230,6 @@ public class NetscapeCertRequest
             sig.initSign(priv_key);
         }
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DEROutputStream deros = new DEROutputStream(baos);
-
         ASN1EncodableVector pkac = new ASN1EncodableVector();
 
         pkac.add(getKeySpec());
@@ -240,15 +237,12 @@ public class NetscapeCertRequest
 
         try
         {
-            deros.writeObject(new DERSequence(pkac));
-            deros.close();
+            sig.update(new DERSequence(pkac).getEncoded(ASN1Encodable.DER));
         }
         catch (IOException ioe)
         {
             throw new SignatureException(ioe.getMessage());
         }
-
-        sig.update(baos.toByteArray());
 
         sigBits = sig.sign();
     }

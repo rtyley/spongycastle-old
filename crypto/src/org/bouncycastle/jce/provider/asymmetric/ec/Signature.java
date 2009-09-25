@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider.asymmetric.ec;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -9,11 +8,12 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.interfaces.ECPublicKey;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
@@ -248,25 +248,19 @@ public class Signature
             BigInteger s)
             throws IOException
         {
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            DEROutputStream dOut = new DEROutputStream(bOut);
             ASN1EncodableVector v = new ASN1EncodableVector();
 
             v.add(new DERInteger(r));
             v.add(new DERInteger(s));
 
-            dOut.writeObject(new DERSequence(v));
-
-            return bOut.toByteArray();
+            return new DERSequence(v).getEncoded(ASN1Encodable.DER);
         }
 
         public BigInteger[] decode(
             byte[] encoding)
             throws IOException
         {
-            ASN1InputStream aIn = new ASN1InputStream(encoding);
-            ASN1Sequence s = (ASN1Sequence)aIn.readObject();
-
+            ASN1Sequence s = (ASN1Sequence)ASN1Object.fromByteArray(encoding);
             BigInteger[] sig = new BigInteger[2];
 
             sig[0] = ((DERInteger)s.getObjectAt(0)).getValue();
