@@ -210,7 +210,7 @@ public class DERGeneralizedTime
         {
             if (hasFractionalSeconds())
             {
-                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSS'Z'");
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
             }
             else
             {
@@ -224,7 +224,7 @@ public class DERGeneralizedTime
             d = this.getTime();
             if (hasFractionalSeconds())
             {
-                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSSz");
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSz");
             }
             else
             {
@@ -237,7 +237,7 @@ public class DERGeneralizedTime
         {
             if (hasFractionalSeconds())
             {
-                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSS");
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS");
             }
             else
             {
@@ -245,6 +245,26 @@ public class DERGeneralizedTime
             }
 
             dateF.setTimeZone(new SimpleTimeZone(0, TimeZone.getDefault().getID()));
+        }
+
+        if (hasFractionalSeconds())
+        {
+            // java misinterprets extra digits as being milliseconds...
+            String frac = d.substring(14);
+            int    index;
+            for (index = 1; index < frac.length(); index++)
+            {
+                char ch = frac.charAt(index);
+                if (!('0' <= ch && ch <= '9'))
+                {
+                    break;        
+                }
+            }
+            if (index - 1 > 3)
+            {
+                frac = frac.substring(0, 4) + frac.substring(index);
+                d = d.substring(0, 14) + frac;
+            }
         }
 
         return dateF.parse(d);
