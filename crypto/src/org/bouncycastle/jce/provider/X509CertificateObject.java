@@ -1,5 +1,6 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OutputStream;
@@ -200,14 +201,9 @@ public class X509CertificateObject
     public byte[] getTBSCertificate()
         throws CertificateEncodingException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(c.getTBSCertificate());
-
-            return bOut.toByteArray();
+            return c.getTBSCertificate().getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {
@@ -525,14 +521,9 @@ public class X509CertificateObject
     public byte[] getEncoded()
         throws CertificateEncodingException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(c);
-
-            return bOut.toByteArray();
+            return c.getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {

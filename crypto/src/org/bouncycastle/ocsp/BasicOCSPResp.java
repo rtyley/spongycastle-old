@@ -1,9 +1,9 @@
 package org.bouncycastle.ocsp;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
 import org.bouncycastle.asn1.ocsp.ResponseData;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
@@ -172,14 +172,9 @@ public class BasicOCSPResp
 
             if (ext != null)
             {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                DEROutputStream dOut = new DEROutputStream(bOut);
-
                 try
                 {
-                    dOut.writeObject(ext.getValue());
-
-                    return bOut.toByteArray();
+                    return ext.getValue().getEncoded(ASN1Encodable.DER);
                 }
                 catch (Exception e)
                 {
@@ -315,16 +310,11 @@ public class BasicOCSPResp
         try
         {
             java.security.Signature signature = java.security.Signature.getInstance(
-                                                                           this.getSignatureAlgName(), sigProvider);
+                this.getSignatureAlgName(), sigProvider);
 
             signature.initVerify(key);
 
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(resp.getTbsResponseData());
-
-            signature.update(bOut.toByteArray());
+            signature.update(resp.getTbsResponseData().getEncoded(ASN1Encodable.DER));
 
             return signature.verify(this.getSignature());
         }

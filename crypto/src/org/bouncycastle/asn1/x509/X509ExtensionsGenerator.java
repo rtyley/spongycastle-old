@@ -1,11 +1,10 @@
 package org.bouncycastle.asn1.x509;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -40,19 +39,14 @@ public class X509ExtensionsGenerator
         boolean             critical,
         DEREncodable        value)
     {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        DEROutputStream dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(value);
+            this.addExtension(oid, critical, value.getDERObject().getEncoded(ASN1Encodable.DER));
         }
         catch (IOException e)
         {
             throw new IllegalArgumentException("error encoding value: " + e);
         }
-
-        this.addExtension(oid, critical, bOut.toByteArray());
     }
 
     /**

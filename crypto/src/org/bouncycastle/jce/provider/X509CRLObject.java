@@ -171,14 +171,9 @@ public class X509CRLObject
     public byte[] getEncoded()
         throws CRLException
     {
-        ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-        DEROutputStream            dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(c);
-
-            return bOut.toByteArray();
+            return c.getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {

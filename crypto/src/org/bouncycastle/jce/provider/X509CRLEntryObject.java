@@ -1,5 +1,6 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREnumerated;
@@ -202,14 +203,9 @@ public class X509CRLEntryObject extends X509CRLEntry
     public byte[] getEncoded()
         throws CRLException
     {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        DEROutputStream dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(c);
-
-            return bOut.toByteArray();
+            return c.getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {
