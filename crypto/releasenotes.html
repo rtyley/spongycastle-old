@@ -30,12 +30,14 @@ Release 1.44
 <li>X509DefaultEntryConverter was not recognising telephone number as a PrintableString field. This has been fixed.</li>
 <li>The SecureRandom in the J2ME was not using a common seed source, which made cross seeeding of SecureRandom's impossible. This has been fixed.</li>
 <li>Use of "private final" in method declarations was causing issues with some MIDP environments. Methods are now just marked as private.</li>
-<li>Support for PSS signatures has been added to CMS and S/MIME.</li>
+<li>NONEwithDSA was not resetting correctly on verify() or sign(). This has been fixed.</li>
+<li>Fractional seconds in a GeneralizedTime were resulting in incorrect date conversions if more than 3 decimal places were included due to the Java date parser. Fractional seconds are now truncated to 3 decimal places on conversion.</li>
 </ul>
 <h3>2.2.3 Additional Features and Functionality</h3>
 <ul>
 <li>PEMReader/PEMWriter now support encrypted EC keys.</li>
 <li>BC generated EC private keys now include optional fields required by OpenSSL.</li>
+<li>Support for PSS signatures has been added to CMS and S/MIME.</li>
 <li>CMS processing will attempt to recover if there is no AlgorithmParameters object for a provider and use an IvParameterSpec where possible.</li>
 </ul>
 
