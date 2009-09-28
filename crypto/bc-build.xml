@@ -142,6 +142,8 @@
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.message" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.eml" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.sig" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.data" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crt" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crl" />
                 </copy>
@@ -158,6 +160,8 @@
                             <include name="**/*.crl" />
                             <include name="**/*.crt" />
                             <include name="**/*.eml" />
+                            <include name="**/*.sig" />
+                            <include name="**/*.data" />
                             <include name="**/*.message" />
                             <include name="**/*.properties" />
                         </fileset>
@@ -253,6 +257,8 @@
                  <exclude name="org/bouncycastle/**/test/*.pem" />
                  <exclude name="org/bouncycastle/**/test/*.properties" />
                  <exclude name="org/bouncycastle/**/test/*.crl" />
+                 <exclude name="org/bouncycastle/**/test/*.sig" />
+                 <exclude name="org/bouncycastle/**/test/*.data" />
                  <exclude name="org/bouncycastle/**/test/*.crt" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/mail/**/*.properties" />
@@ -327,6 +333,8 @@
                  <exclude name="org/bouncycastle/**/test/*.crl" />
                  <exclude name="org/bouncycastle/**/test/*.crt" />
                  <exclude name="org/bouncycastle/**/test/*.eml" />
+                 <exclude name="org/bouncycastle/**/test/*.sig" />
+                 <exclude name="org/bouncycastle/**/test/*.data" />
                  <exclude name="org/bouncycastle/**/test/*.properties" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
@@ -516,6 +524,8 @@
              <fileset dir="${src.dir}" includes="**/test/*/*.java" />
              <fileset dir="${src.dir}" includes="**/*.pem" />
              <fileset dir="${src.dir}" includes="**/*.eml" />
+             <fileset dir="${src.dir}" includes="**/*.sig" />
+             <fileset dir="${src.dir}" includes="**/*.data" />
              <fileset dir="${src.dir}" includes="**/*.crt" />
              <fileset dir="${src.dir}" includes="**/*.crl" />
              <fileset dir="${src.dir}" includes="**/*.properties" />
