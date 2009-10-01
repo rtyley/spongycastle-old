@@ -1,5 +1,10 @@
 package org.bouncycastle.ocsp;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERInteger;
@@ -11,11 +16,6 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
-
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
 
 public class CertificateID
 {
@@ -32,6 +32,12 @@ public class CertificateID
     /**
      * create from an issuer certificate and the serial number of the
      * certificate it signed.
+     *
+     * @param hashAlgorithm hash algorithm to use
+     * @param issuerCert issuing certificate
+     * @param number serial number
+     * @param provider provider to use for hashAlgorithm, null if the default one should be used.
+     *
      * @exception OCSPException if any problems occur creating the id fields.
      */
     public CertificateID(
@@ -43,7 +49,17 @@ public class CertificateID
     {
         try
         {
-            MessageDigest       digest = MessageDigest.getInstance(hashAlgorithm, provider);
+            MessageDigest       digest;
+
+            if (provider == null)
+            {
+                digest = MessageDigest.getInstance(hashAlgorithm);
+            }
+            else
+            {
+                digest = MessageDigest.getInstance(hashAlgorithm, provider);
+            }
+
             AlgorithmIdentifier hashAlg = new AlgorithmIdentifier(
                                         new DERObjectIdentifier(hashAlgorithm), new DERNull());
 

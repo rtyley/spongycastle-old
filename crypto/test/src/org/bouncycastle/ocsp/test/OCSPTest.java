@@ -634,6 +634,11 @@ public class OCSPTest
         CertificateID id = new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1));
 
         //
+        // general id value for our test issuer cert and a serial number and the default provider
+        //
+        id = new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1), null);
+
+        //
         // basic request generation
         //
         OCSPReqGenerator gen = new OCSPReqGenerator();
