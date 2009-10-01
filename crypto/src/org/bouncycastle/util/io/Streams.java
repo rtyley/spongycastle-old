@@ -26,6 +26,22 @@ public final class Streams
         return buf.toByteArray();
     }
 
+    public static byte[] readToLimit(InputStream inStr, int limit)
+        throws IOException
+    {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+
+        try
+        {
+            pipeToLimit(inStr, limit, buf);
+        }
+        catch (StreamOverflowException e)
+        {
+            throw new StreamOverflowException(e.getMessage(), buf.toByteArray());
+        }
+        return buf.toByteArray();
+    }
+
     public static int readFully(InputStream inStr, byte[] buf)
         throws IOException
     {
@@ -56,6 +72,35 @@ public final class Streams
         while ((numRead = inStr.read(bs, 0, bs.length)) >= 0)
         {
             outStr.write(bs, 0, numRead);
+        }
+    }
+
+    public static void pipeToLimit(InputStream inStr, int limit, OutputStream outStr)
+        throws IOException, StreamOverflowException
+    {
+        byte[] bs = new byte[BUFFER_SIZE];
+        int numRead;
+        int numToRead = BUFFER_SIZE;
+        int left = limit;
+
+        if (left < numToRead)
+        {
+            numToRead = left;
+        }
+
+        while (left != 0 && (numRead = inStr.read(bs, 0, numToRead)) >= 0)
+        {
+            outStr.write(bs, 0, numRead);
+            left -= numRead;
+            if (left < numToRead)
+            {
+                numToRead = left;
+            }
+        }
+
+        if (left == 0 && inStr.read() >= 0)
+        {
+            throw new StreamOverflowException("Data Overflow");
         }
     }
 }

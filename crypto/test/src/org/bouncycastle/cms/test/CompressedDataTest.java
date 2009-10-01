@@ -5,22 +5,17 @@ import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.bouncycastle.cms.CMSCompressedData;
 import org.bouncycastle.cms.CMSCompressedDataGenerator;
+import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.io.StreamOverflowException;
 
 public class CompressedDataTest
     extends TestCase
 {
-    /*
-     *
-     *  VARIABLES
-     *
-     */
-
-    public boolean DEBUG = true;
+    private static final byte[] TEST_DATA = "Hello world!".getBytes();
 
     /*
      *
@@ -107,14 +102,52 @@ public class CompressedDataTest
     public void testEach()
         throws Exception
     {
-        CMSProcessableByteArray testData = new CMSProcessableByteArray(
-                "Hello world!".getBytes());
+        CMSCompressedData cd = getStdData();
+
+        assertEquals(true, Arrays.equals(TEST_DATA, cd.getContent()));
+    }
+
+    public void testLimitUnder()
+        throws Exception
+    {
+        CMSCompressedData cd = getStdData();
+
+        try
+        {
+            cd.getContent(TEST_DATA.length / 2);
+        }
+        catch (StreamOverflowException e)
+        {
+            byte[] trunc = new byte[6];
+
+            System.arraycopy(TEST_DATA, 0, trunc, 0, trunc.length);
+            assertEquals(true, Arrays.equals(trunc, e.getData()));
+        }
+    }
+
+    public void testLimitOver()
+        throws Exception
+    {
+        CMSCompressedData cd = getStdData();
+
+        assertEquals(true, Arrays.equals(TEST_DATA, cd.getContent(TEST_DATA.length * 2)));
+    }
+
+    public void testLimitEqual()
+        throws Exception
+    {
+        CMSCompressedData cd = getStdData();
+
+        assertEquals(true, Arrays.equals(TEST_DATA, cd.getContent(TEST_DATA.length)));
+    }
+
+    private CMSCompressedData getStdData()
+        throws CMSException
+    {
+        CMSProcessableByteArray testData = new CMSProcessableByteArray(TEST_DATA);
         CMSCompressedDataGenerator gen = new CMSCompressedDataGenerator();
 
-        CMSCompressedData cd = gen.generate(testData,
+        return gen.generate(testData,
                 CMSCompressedDataGenerator.ZLIB);
-
-        assertEquals(true, Arrays.equals((byte[])testData.getContent(), cd
-                .getContent()));
     }
 }
