@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
@@ -39,8 +38,7 @@ public class CMSCompressedData
     }
 
     /**
-     * Return the uncompressed content, throwing an exception if the data size
-     * is greater than the passed in limit.
+     * Return the uncompressed content.
      *
      * @return the uncompressed content
      * @throws CMSException if there is an exception uncompressing the data.
@@ -53,7 +51,7 @@ public class CMSCompressedData
 
         ASN1OctetString bytes = (ASN1OctetString)content.getContent();
 
-        InflaterInputStream     zIn = new InflaterInputStream(new ByteArrayInputStream(bytes.getOctets()));
+        InflaterInputStream     zIn = new InflaterInputStream(bytes.getOctetStream());
 
         try
         {
@@ -75,14 +73,14 @@ public class CMSCompressedData
      * @throws StreamOverflowException if the limit is reached and data is still available.
      */
     public byte[] getContent(int limit)
-        throws CMSException, StreamOverflowException
+        throws CMSException
     {
         CompressedData  comData = CompressedData.getInstance(contentInfo.getContent());
         ContentInfo     content = comData.getEncapContentInfo();
 
         ASN1OctetString bytes = (ASN1OctetString)content.getContent();
 
-        InflaterInputStream     zIn = new InflaterInputStream(new ByteArrayInputStream(bytes.getOctets()));
+        InflaterInputStream     zIn = new InflaterInputStream(bytes.getOctetStream());
 
         try
         {

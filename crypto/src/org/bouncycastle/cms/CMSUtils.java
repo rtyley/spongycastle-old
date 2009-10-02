@@ -28,7 +28,6 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.util.io.StreamOverflowException;
 import org.bouncycastle.util.io.Streams;
 
 class CMSUtils
@@ -207,9 +206,9 @@ class CMSUtils
     public static byte[] streamToByteArray(
         InputStream in,
         int         limit)
-        throws IOException, StreamOverflowException
+        throws IOException
     {
-        return Streams.readToLimit(in, limit);
+        return Streams.readAllLimited(in, limit);
     }
 
     public static Provider getProvider(String providerName)

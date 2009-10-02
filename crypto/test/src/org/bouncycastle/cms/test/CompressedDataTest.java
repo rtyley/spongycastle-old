@@ -116,12 +116,9 @@ public class CompressedDataTest
         {
             cd.getContent(TEST_DATA.length / 2);
         }
-        catch (StreamOverflowException e)
+        catch (CMSException e)
         {
-            byte[] trunc = new byte[6];
-
-            System.arraycopy(TEST_DATA, 0, trunc, 0, trunc.length);
-            assertEquals(true, Arrays.equals(trunc, e.getData()));
+            assertEquals(true, e.getCause() instanceof StreamOverflowException);
         }
     }
 
