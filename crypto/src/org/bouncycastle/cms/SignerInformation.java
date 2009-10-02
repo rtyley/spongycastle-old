@@ -569,16 +569,8 @@ public class SignerInformation
         {
             if (algorithm.equals("RSA"))
             {
-                Cipher c;
-                if (sigProvider != null)
-                {
-                    c = Cipher.getInstance("RSA/ECB/PKCS1Padding", sigProvider);
-                }
-                else
-                {
-                    c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-                }
-                
+                Cipher c = CMSEnvelopedHelper.INSTANCE.getCipherInstance("RSA/ECB/PKCS1Padding", sigProvider);
+
                 c.init(Cipher.DECRYPT_MODE, key);
                 
                 DigestInfo digInfo = derDecode(c.doFinal(signature));
@@ -599,16 +591,8 @@ public class SignerInformation
             }
             else if (algorithm.equals("DSA"))
             {
-                Signature sig;
-                if (sigProvider != null)
-                {
-                    sig = Signature.getInstance("NONEwithDSA", sigProvider);
-                }
-                else
-                {
-                    sig = Signature.getInstance("NONEwithDSA");
-                }
-                
+                Signature sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEwithDSA", sigProvider);
+
                 sig.initVerify(key);
                 
                 sig.update(digest);
