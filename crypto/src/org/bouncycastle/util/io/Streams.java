@@ -26,19 +26,11 @@ public final class Streams
         return buf.toByteArray();
     }
 
-    public static byte[] readToLimit(InputStream inStr, int limit)
+    public static byte[] readAllLimited(InputStream inStr, int limit)
         throws IOException
     {
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
-
-        try
-        {
-            pipeToLimit(inStr, limit, buf);
-        }
-        catch (StreamOverflowException e)
-        {
-            throw new StreamOverflowException(e.getMessage(), buf.toByteArray());
-        }
+        pipeAllLimited(inStr, limit, buf);
         return buf.toByteArray();
     }
 
@@ -75,32 +67,19 @@ public final class Streams
         }
     }
 
-    public static void pipeToLimit(InputStream inStr, int limit, OutputStream outStr)
-        throws IOException, StreamOverflowException
+    public static long pipeAllLimited(InputStream inStr, long limit, OutputStream outStr)
+        throws IOException
     {
+        long total = 0;
         byte[] bs = new byte[BUFFER_SIZE];
         int numRead;
-        int numToRead = BUFFER_SIZE;
-        int left = limit;
-
-        if (left < numToRead)
+        while ((numRead = inStr.read(bs, 0, bs.length)) >= 0)
         {
-            numToRead = left;
-        }
-
-        while (left != 0 && (numRead = inStr.read(bs, 0, numToRead)) >= 0)
-        {
+            total += numRead;
+            if (total > limit)
+                throw new StreamOverflowException("Data Overflow");
             outStr.write(bs, 0, numRead);
-            left -= numRead;
-            if (left < numToRead)
-            {
-                numToRead = left;
-            }
         }
-
-        if (left == 0 && inStr.read() >= 0)
-        {
-            throw new StreamOverflowException("Data Overflow");
-        }
+        return total;
     }
 }
