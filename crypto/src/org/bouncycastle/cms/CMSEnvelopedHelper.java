@@ -67,11 +67,11 @@ class CMSEnvelopedHelper
         try
         {
             // this is reversed as the Sun policy files now allow unlimited strength RSA
-            return createCipher(getAsymmetricEncryptionAlgName(encryptionOid), provider);
+            return getCipherInstance(getAsymmetricEncryptionAlgName(encryptionOid), provider);
         }
         catch (NoSuchAlgorithmException e)
         {
-            return createCipher(encryptionOid, provider);
+            return getCipherInstance(encryptionOid, provider);
         }
     }
 
@@ -190,7 +190,7 @@ class CMSEnvelopedHelper
         return keySize.intValue();
     }
 
-    private Cipher createCipher(
+    Cipher getCipherInstance(
         String algName,
         Provider provider)
         throws NoSuchAlgorithmException, NoSuchPaddingException
@@ -255,7 +255,7 @@ class CMSEnvelopedHelper
     {
         try
         {
-            return createCipher(encryptionOID, provider);
+            return getCipherInstance(encryptionOID, provider);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -263,7 +263,7 @@ class CMSEnvelopedHelper
 
             try
             {
-                return createCipher(alternate, provider);
+                return getCipherInstance(alternate, provider);
             }
             catch (NoSuchAlgorithmException ex)
             {
