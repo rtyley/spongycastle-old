@@ -1,26 +1,5 @@
 package org.bouncycastle.mail.smime;
 
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.mail.smime.util.CRLFOutputStream;
-import org.bouncycastle.x509.X509Store;
-
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.InvalidKeyException;
@@ -39,6 +18,29 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
+import org.bouncycastle.x509.X509Store;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -278,33 +280,43 @@ public class SMIMESignedGenerator
         
         while (it.hasNext())
         {
-            Signer       signer = (Signer)it.next();
-            
-            if (signer.getDigestOID().equals(DIGEST_SHA1))
+            Object       signer = it.next();
+            String       digestOID;
+
+            if (signer instanceof Signer)
+            {
+                digestOID = ((Signer)signer).getDigestOID();
+            }
+            else
+            {
+                digestOID = ((SignerInformation)signer).getDigestAlgOID();
+            }
+
+            if (digestOID.equals(DIGEST_SHA1))
             {
                 micAlgs.add("sha1");
             }
-            else if (signer.getDigestOID().equals(DIGEST_MD5))
+            else if (digestOID.equals(DIGEST_MD5))
             {
                 micAlgs.add("md5");
             }
-            else if (signer.getDigestOID().equals(DIGEST_SHA224))
+            else if (digestOID.equals(DIGEST_SHA224))
             {
                 micAlgs.add("sha224");
             }
-            else if (signer.getDigestOID().equals(DIGEST_SHA256))
+            else if (digestOID.equals(DIGEST_SHA256))
             {
                 micAlgs.add("sha256");
             }
-            else if (signer.getDigestOID().equals(DIGEST_SHA384))
+            else if (digestOID.equals(DIGEST_SHA384))
             {
                 micAlgs.add("sha384");
             }
-            else if (signer.getDigestOID().equals(DIGEST_SHA512))
+            else if (digestOID.equals(DIGEST_SHA512))
             {
                 micAlgs.add("sha512");
             }
-            else if (signer.getDigestOID().equals(DIGEST_GOST3411))
+            else if (digestOID.equals(DIGEST_GOST3411))
             {
                 micAlgs.add("gostr3411-94");
             }
@@ -373,9 +385,13 @@ public class SMIMESignedGenerator
             //
             StringBuffer        header = new StringBuffer(
                     "signed; protocol=\"application/pkcs7-signature\"");
-                    
-            addHashHeader(header, _signers);
-            
+
+            List allSigners = new ArrayList(_signers);
+
+            allSigners.addAll(_oldSigners);
+
+            addHashHeader(header, allSigners);
+
             MimeMultipart   mm = new MimeMultipart(header.toString());
 
             mm.addBodyPart(content);

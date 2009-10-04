@@ -34,7 +34,6 @@ import javax.mail.internet.MimeMultipart;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERSet;
@@ -51,10 +50,6 @@ import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
-import org.bouncycastle.cms.CMSProcessable;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
@@ -411,6 +406,39 @@ public class SMIMESignedTest
         verifyMessageBytes(msg, newS.getContent());
 
         verifySigners(newS.getCertificatesAndCRLs("Collection", "BC"), newS.getSignerInfos());
+    }
+
+    public void testMD5WithRSAAddSignersSHA1()
+        throws Exception
+    {
+        MimeMultipart smm = generateMultiPartRsa(SMIMESignedGenerator.DIGEST_SHA1, msg);
+        SMIMESigned   s = new SMIMESigned(smm);
+
+        List certList = new ArrayList();
+
+        certList.add(_signCert);
+        certList.add(_origCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+
+        gen.addSigner(_signKP.getPrivate(), _signCert, SMIMESignedGenerator.DIGEST_MD5);
+        
+        gen.addSigners(s.getSignerInfos());
+
+        gen.addCertificatesAndCRLs(certs);
+
+        smm = gen.generate(msg, "BC");
+
+        SMIMESigned newS =  new SMIMESigned(gen.generate(msg, "BC"));
+
+        verifyMessageBytes(msg, newS.getContent());
+
+        verifySigners(newS.getCertificatesAndCRLs("Collection", "BC"), newS.getSignerInfos());
+
+        assertEquals("\"md5,sha1\"", getMicAlg(smm));
     }
 
     public void testSHA1WithRSACanonicalization()
