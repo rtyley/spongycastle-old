@@ -1,5 +1,24 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Set;
@@ -17,25 +36,6 @@ import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.Provider;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * General class for generating a pkcs7-signature message stream.
@@ -1042,23 +1042,23 @@ public class CMSSignedDataStreamGenerator
                 }
                 catch (IOException e)
                 {
-                    throw new IOException("encoding error." + e);
+                    throw new CMSStreamException("encoding error.", e);
                 }
                 catch (InvalidKeyException e)
                 {
-                    throw new IOException("key inappropriate for signature.", e);
+                    throw new CMSStreamException("key inappropriate for signature.", e);
                 }
                 catch (SignatureException e)
                 {
-                    throw new IOException("error creating signature." + e);
+                    throw new CMSStreamException("error creating signature.", e);
                 }
                 catch (CertificateEncodingException e)
                 {
-                    throw new IOException("error creating sid." + e);
+                    throw new CMSStreamException("error creating sid.", e);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
-                    throw new IOException("unknown signature algorithm." + e);
+                    throw new CMSStreamException("unknown signature algorithm.", e);
                 }
             }
             
