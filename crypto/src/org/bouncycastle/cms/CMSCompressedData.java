@@ -7,7 +7,6 @@ import java.util.zip.InflaterInputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cms.CompressedData;
 import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.util.io.StreamOverflowException;
 
 /**
  * containing class for an CMS Compressed Data object
@@ -65,12 +64,12 @@ public class CMSCompressedData
 
     /**
      * Return the uncompressed content, throwing an exception if the data size
-     * is greater than the passed in limit.
+     * is greater than the passed in limit. If the content is exceeded getCause()
+     * on the CMSException will contain a StreamOverflowException
      *
      * @param limit maximum number of bytes to read
      * @return the content read
      * @throws CMSException if there is an exception uncompressing the data.
-     * @throws StreamOverflowException if the limit is reached and data is still available.
      */
     public byte[] getContent(int limit)
         throws CMSException
