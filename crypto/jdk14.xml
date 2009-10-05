@@ -43,6 +43,8 @@
             <fileset dir="test/data" includes="**/*.pem" />
             <fileset dir="test/data" includes="**/*.properties" />
             <fileset dir="test/data" includes="**/*.eml" />
+            <fileset dir="test/data" includes="**/*.sig" />
+            <fileset dir="test/data" includes="**/*.data" />
             <fileset dir="test/data" includes="**/*.crt" />
             <fileset dir="test/data" includes="**/*.crl" />
             <fileset dir="test/data" includes="**/*.message" />
