@@ -31,6 +31,8 @@ import javax.mail.Address;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.MessagingException;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -177,12 +179,24 @@ public class SignedMailValidator
 
             // save "from" addresses from message
             Address[] froms = message.getFrom();
-            fromAddresses = new String[froms.length];
+	    InternetAddress sender = null;
+	    try {
+		    if(message.getHeader("Sender") != null) {
+		     sender = new InternetAddress(message.getHeader("Sender")[0]);
+		    }
+	    }
+	    catch (MessagingException ex) {
+		    //ignore garbage in Sender: header
+	    }
+            fromAddresses = new String[froms.length + (sender!=null?1:0)];
             for (int i = 0; i < froms.length; i++)
             {
                 InternetAddress inetAddr = (InternetAddress) froms[i];
                 fromAddresses[i] = inetAddr.getAddress();
             }
+	    if(sender!=null) {
+		    fromAddresses[froms.length] = sender.getAddress();
+	    }
 
             // initialize results
             results = new HashMap();
@@ -557,11 +571,11 @@ public class SignedMailValidator
 
         for (int i = 0; i != a.length; i++)
         {
-            b.append(String.valueOf(a[i]));
-            if (i == a.length - 1)
+            if (i > 0)
             {
                 b.append(", ");
             }
+            b.append(String.valueOf(a[i]));
         }
 
         return b.append(']').toString();
