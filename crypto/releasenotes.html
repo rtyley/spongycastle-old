@@ -26,12 +26,18 @@ Release 1.44
 <h3>2.1.2 Defects Fixed</h3>
 <ul>
 <li>The reset() method in BufferedAsymmetricBlockCipher is now fully clearing the buffer.</li>
-<li>Use ImplicitlyCA with KeyFactory and Sun keyspec no longer causes NullPointerException.</li>
+<li>Use of ImplicitlyCA with KeyFactory and Sun keyspec no longer causes NullPointerException.</li>
 <li>X509DefaultEntryConverter was not recognising telephone number as a PrintableString field. This has been fixed.</li>
 <li>The SecureRandom in the J2ME was not using a common seed source, which made cross seeeding of SecureRandom's impossible. This has been fixed.</li>
-<li>Use of "private final" in method declarations was causing issues with some MIDP environments. Methods are now just marked as private.</li>
+<li>Occassional uses of "private final" on methods were causing issues with some J2ME platforms. The use of "private final" on methods has been removed.</li>
 <li>NONEwithDSA was not resetting correctly on verify() or sign(). This has been fixed.</li>
 <li>Fractional seconds in a GeneralizedTime were resulting in incorrect date conversions if more than 3 decimal places were included due to the Java date parser. Fractional seconds are now truncated to 3 decimal places on conversion.</li>
+<li>The micAlg in S/MIME signed messages was not always including the hash algorithm for previous signers. This has been fixed.</li>
+<li>SignedMailValidator was only including the From header and ignoring the Sender header in validating the email address. This has been fixed.</li>
+<li>The PKCS#12 keystore would throw a NullPointerException if a null password was passed in. This has been fixed.</li>
+<li>CertRepMessage.getResponse() was attempting to return the wrong underlying field in the structure. This has been fixed.</li>
+<li>PKIXCertPathReviewer.getTrustAnchor() could occasionally cause a null pointer exception or an exception due to conflicting trust anchors. This has been fixed.</li>
+<li>Handling of expilicit CommandMap objects with the generation of S/MIME messages has been improved.</li>
 </ul>
 <h3>2.2.3 Additional Features and Functionality</h3>
 <ul>
@@ -39,6 +45,13 @@ Release 1.44
 <li>BC generated EC private keys now include optional fields required by OpenSSL.</li>
 <li>Support for PSS signatures has been added to CMS and S/MIME.</li>
 <li>CMS processing will attempt to recover if there is no AlgorithmParameters object for a provider and use an IvParameterSpec where possible.</li>
+<li>CertificateID always required a provider to be explicitly set. A null provider is now interpreted as a request to use the default provider.</li>
+<li>SubjectKeyIdentifier now supports both methods specified in RFC 3280, section 4.2.1.2 for generating the identifier.</li>
+<li>Performance of GCM mode has been greatly improved (on average 20x).</li>
+<li>The BC provider has been updated to support the JSSE in providing ECDH.</li>
+<li>Support for mac lengths of 96, 104, 112, and 120 bits has been added to existing support for 128 bits in GCMBlockCipher.</li>
+<li>General work has been done on trying to propagate exception causes more effectively.</li>
+<li>Support for loading GOST 34.10-2001 keys has been improved in the provider.</li>
 </ul>
 
 <h3>2.1.1 Version</h3>
