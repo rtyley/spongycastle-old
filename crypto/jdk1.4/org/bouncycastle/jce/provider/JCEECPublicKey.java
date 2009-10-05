@@ -269,11 +269,23 @@ public class JCEECPublicKey
             {
                 params = gostParams;
             }
-            else
+            else if (ecSpec instanceof ECNamedCurveParameterSpec)
             {
                 params = new GOST3410PublicKeyAlgParameters(
                                    ECGOST3410NamedCurves.getOID(((ECNamedCurveParameterSpec)ecSpec).getName()),
                                    CryptoProObjectIdentifiers.gostR3411_94_CryptoProParamSet);
+            }
+            else
+            {
+                ECParameterSpec         p = (ECParameterSpec)ecSpec;
+
+                ECCurve curve = p.getG().getCurve();
+                ECPoint generator = curve.createPoint(p.getG().getX().toBigInteger(), p.getG().getY().toBigInteger(), withCompression);
+
+                X9ECParameters ecP = new X9ECParameters(
+                    p.getCurve(), generator, p.getN(), p.getH(), p.getSeed());
+
+                params = new X962Parameters(ecP);
             }
 
             ECPoint qq = this.getQ();

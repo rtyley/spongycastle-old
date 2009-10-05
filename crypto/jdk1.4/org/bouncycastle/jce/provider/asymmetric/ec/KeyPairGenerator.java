@@ -151,9 +151,9 @@ public abstract class KeyPairGenerator
             else
             {
                 ECParameterSpec p = (ECParameterSpec)ecParams;
-
-                return new KeyPair(new JCEECPublicKey(algorithm, pub, p),
-                                   new JCEECPrivateKey(algorithm, priv, p));
+                JCEECPublicKey pubKey = new JCEECPublicKey(algorithm, pub, p);
+                
+                return new KeyPair(pubKey, new JCEECPrivateKey(algorithm, priv, pubKey, p));
             }
         }
     }
