@@ -44,7 +44,8 @@ public class RespID
     {
         try
         {
-            MessageDigest       digest = MessageDigest.getInstance("SHA1");
+            // TODO Allow specification of a particular provider
+            MessageDigest digest = OCSPUtil.createDigestInstance("SHA1", null);
 
             ASN1InputStream aIn = new ASN1InputStream(key.getEncoded());
             SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(aIn.readObject());

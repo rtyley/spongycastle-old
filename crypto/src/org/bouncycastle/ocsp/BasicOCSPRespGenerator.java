@@ -2,12 +2,11 @@ package org.bouncycastle.ocsp;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
@@ -21,8 +20,7 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -104,20 +102,6 @@ public class BasicOCSPRespGenerator
         {
             return new SingleResponse(certId.toASN1Object(), certStatus, thisUpdate, nextUpdate, extensions);
         }
-    }
-
-    private DERObject makeObj(
-        byte[]  encoding)
-        throws IOException
-    {
-        if (encoding == null)
-        {
-            return null;
-        }
-
-        ASN1InputStream         aIn = new ASN1InputStream(encoding);
-
-        return aIn.readObject();
     }
 
     /**
@@ -255,7 +239,7 @@ public class BasicOCSPRespGenerator
 
         try
         {
-            sig = Signature.getInstance(signatureName, provider);
+            sig = OCSPUtil.createSignatureInstance(signatureName, provider);
             if (random != null)
             {
                 sig.initSign(key, random);
@@ -265,11 +249,12 @@ public class BasicOCSPRespGenerator
                 sig.initSign(key);
             }
         }
-        catch (NoSuchAlgorithmException e)
+        catch (NoSuchProviderException e)
         {
-            throw new OCSPException("exception creating signature: " + e, e);
+            // TODO Why this special case?
+            throw e;
         }
-        catch (InvalidKeyException e)
+        catch (GeneralSecurityException e)
         {
             throw new OCSPException("exception creating signature: " + e, e);
         }
@@ -297,7 +282,7 @@ public class BasicOCSPRespGenerator
                 for (int i = 0; i != chain.length; i++)
                 {
                     v.add(new X509CertificateStructure(
-                            (ASN1Sequence)makeObj(chain[i].getEncoded())));
+                        (ASN1Sequence)ASN1Object.fromByteArray(chain[i].getEncoded())));
                 }
             }
             catch (IOException e)

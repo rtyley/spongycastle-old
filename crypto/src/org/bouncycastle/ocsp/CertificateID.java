@@ -49,16 +49,7 @@ public class CertificateID
     {
         try
         {
-            MessageDigest       digest;
-
-            if (provider == null)
-            {
-                digest = MessageDigest.getInstance(hashAlgorithm);
-            }
-            else
-            {
-                digest = MessageDigest.getInstance(hashAlgorithm, provider);
-            }
+            MessageDigest digest = OCSPUtil.createDigestInstance(hashAlgorithm, provider);
 
             AlgorithmIdentifier hashAlg = new AlgorithmIdentifier(
                                         new DERObjectIdentifier(hashAlgorithm), new DERNull());
