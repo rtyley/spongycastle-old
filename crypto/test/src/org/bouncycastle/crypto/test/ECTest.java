@@ -17,6 +17,7 @@ import org.bouncycastle.crypto.signers.ECDSASigner;
 import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.FixedSecureRandom;
@@ -894,7 +895,7 @@ public class ECTest
      {
          BigInteger n = parameters.getN();
          int e = (n.bitLength() + 1) / 2;
-         BigInteger powE = BigInteger.ONE.shiftLeft(e);
+         BigInteger powE = ECConstants.ONE.shiftLeft(e);
 
          BigInteger x = Q2U.getQ().getX().toBigInteger();
          BigInteger xBar = x.mod(powE);
