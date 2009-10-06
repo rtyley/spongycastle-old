@@ -9,13 +9,14 @@ public class DHParameters
 {
     private static final int DEFAULT_MINIMUM_LENGTH = 160;
 
-    private final BigInteger              g;
-    private final BigInteger              p;
-    private final BigInteger              q;
-    private final BigInteger              j;
-    private final int                     m;
-    private final int                     l;
-    private final DHValidationParameters  validation;
+    // not final due to compiler bug in "simpler" JDKs
+    private BigInteger              g;
+    private BigInteger              p;
+    private BigInteger              q;
+    private BigInteger              j;
+    private int                     m;
+    private int                     l;
+    private DHValidationParameters  validation;
 
     private static int getDefaultMParam(
         int lParam)
