@@ -1,18 +1,8 @@
 package org.bouncycastle.jce.provider.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -27,19 +17,28 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.RC5ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
+import java.security.Key;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 /**
  * basic test class for a block cipher, basically this just exercises the provider, and makes sure we
  * are behaving sensibly, correctness of the implementation is shown in the lightweight test classes.
  */
 public class BlockCipherTest
-    implements Test
+    extends SimpleTest
 {
     static String[] cipherTests1 =
     {
@@ -50,7 +49,7 @@ public class BlockCipherTest
         "SKIPJACK",
         "d4de46d52274dbb029f33b076043f8c40089f906751623de29f33b076043f8c4ac99b90f9396cb04",
         "Blowfish",
-        "25e15516062f0098e13ef22cab30289490a1db7887258a4fe13ef22cab302894b29698bcc4dd576e",
+        "7870ebe7f6a52803eb9396ba6c5198216ce81d76d8d4c74beb9396ba6c5198211212473b05214e9f",
         "Twofish",
         "70336d9c9718a8a2ced1b19deed973a3c58af7ea71a69e7efc4df082dca581c0839e31468661bcfc57a14899ceeb0253",
         "RC2",
@@ -63,8 +62,16 @@ public class BlockCipherTest
         "44c97b67ca8486067f8b6c5b97632f3049e5e52c1d61fdd527dc3da39616540f19a3db39aac1ffd713795cd886cce0c0",
         "IDEA",
         "8c9fd56823ffdc523f6ccf7f614aa6173553e594fc7a21b53f6ccf7f614aa61740c54f7a66e95108",
+        "TEA",
+        "fcf45062104fda7c35712368b56dd4216a6ca998dc297b5435712368b56dd421208027ed2923cd0c",
+        "XTEA",
+        "4b427893d3d6aaded2afafabe25f7b233fb5589faa2b6389d2afafabe25f7b239d12979ac67e1c07",
         "Camellia",
         "3a68b4ad145bc2c76010669d68f2826359887afce763a78d9994143266adfaec8ba7ee562a1688ef9dfd7f897e5c44dc",
+        "SEED",
+        "d53d4ce1f48b9879420949467bfcbfbe2c6a7d4a8770bee0c71211def898d7c5024ce2007dd85accb3f69d906ae2164d",
+        "Noekeon",
+        "7e68ceb33aad9db04af6b878a16dd6c6b4f880d6c89027ba581884c10690bb6b3dbfd6ed5513e2c4f5670c3528023121",
         "DES/CBC/NoPadding",
         "60fa2f8fae5aa2a38e9ac77d0246726beb7511e4515feb12cf99f75cc6e0122a",
         "DESede/CBC/NoPadding",
@@ -72,7 +79,7 @@ public class BlockCipherTest
         "SKIPJACK/CBC/NoPadding",
         "ceebcc2e5e2b847f9ed797b4930b95f115b9e6cf49c457fc2ea0df79ad5c8334",
         "Blowfish/CBC/NoPadding",
-        "f12382107340125cd2f873db67d76b8a3ca0f83662e83bbca5af7f00080bdb49",
+        "80823abbabc109733e7ebf3ce3344d67fc387c306b782086b452f7fbe8e844ce",
         "Twofish/CBC/NoPadding",
         "f819694251a00bdd403928745cd1d8a094de61f49ddf8e7692e9d81a83812943",
         "RC2/CBC/NoPadding",
@@ -96,7 +103,7 @@ public class BlockCipherTest
         "SKIPJACK/CBC/PKCS7Padding",
         "ceebcc2e5e2b847f9ed797b4930b95f115b9e6cf49c457fc2ea0df79ad5c8334df7042de5db89c96",
         "Blowfish/CBC/PKCS7Padding",
-        "f12382107340125cd2f873db67d76b8a3ca0f83662e83bbca5af7f00080bdb497968f18beabcc3aa",
+        "80823abbabc109733e7ebf3ce3344d67fc387c306b782086b452f7fbe8e844cef986562ab1a675e8",
         "Twofish/CBC/PKCS7Padding",
         "f819694251a00bdd403928745cd1d8a094de61f49ddf8e7692e9d81a838129433e5f1343d6cdb0b41838619da1541f04",
         "RC2/CBC/PKCS7Padding",
@@ -138,7 +145,7 @@ public class BlockCipherTest
         "SKIPJACK/CTS/NoPadding",
         "ceebcc2e5e2b847f9ed797b4930b95f12ea0df79ad5c833415b9e6cf49c457fc",
         "Blowfish/CTS/NoPadding",
-        "f12382107340125cd2f873db67d76b8aa5af7f00080bdb493ca0f83662e83bbc",
+        "80823abbabc109733e7ebf3ce3344d67b452f7fbe8e844cefc387c306b782086",
         "Twofish/CTS/NoPadding",
         "94de61f49ddf8e7692e9d81a83812943f819694251a00bdd403928745cd1d8a0",
         "AES/CTS/NoPadding",
@@ -166,7 +173,7 @@ public class BlockCipherTest
         "SKIPJACK/CBC/WithCTS",
         "ceebcc2e5e2b847f9ed797b4930b95f12ea0df79ad5c833415b9e6cf49c457fc",
         "Blowfish/CBC/WithCTS",
-        "f12382107340125cd2f873db67d76b8aa5af7f00080bdb493ca0f83662e83bbc",
+        "80823abbabc109733e7ebf3ce3344d67b452f7fbe8e844cefc387c306b782086",
         "Twofish/CBC/WithCTS",
         "94de61f49ddf8e7692e9d81a83812943f819694251a00bdd403928745cd1d8a0",
         "AES/CBC/WithCTS",
@@ -194,7 +201,7 @@ public class BlockCipherTest
         "SKIPJACK/OFB/NoPadding",
         "71143a124e3a0cde753b60fe9b200e559018b6a0fe0682659f7c13feb9df995c",
         "Blowfish/OFB/NoPadding",
-        "134bcde441a6dd1cde0a0cdfd325e6f2cceabfe2a810f4eeec8ddd51bc2e65ae",
+        "6cd6f7c5d2c655556d7a9e98a1696d1875e9f1b2fc991e28a2d55b56861e80bd",
         "Twofish/OFB/NoPadding",
         "821c54b1b54ae113cf74595eefe10c83b61c9682fc81f92c52f39a3a693f88b8",
         "RC2/OFB/NoPadding",
@@ -210,7 +217,7 @@ public class BlockCipherTest
         "SKIPJACK/OFB8/NoPadding",
         "719ea1b432b3d2c8011e5aa873f95978420022b5e2c9c1a1c1082cd1f4999da2",
         "Blowfish/OFB8/NoPadding",
-        "13a7e65359228380ae522b327734aaabf749f9b555cce4c531f9a31cd659f679",
+        "6ca6078755b263f09787d830b6fda7b7748494634bdc73ab68540cf9f6b7eccf",
         "Twofish/OFB8/NoPadding",
         "825dcec234ad52253d6e064b0d769bc04b1142435933f4a510ffc20d70095a88",
         "RC2/OFB8/NoPadding",
@@ -226,7 +233,7 @@ public class BlockCipherTest
         "SKIPJACK/CFB/NoPadding",
         "71143a124e3a0cde70a69ede4ceb14376b1e6a80bafde0a6330508dfa86a7c41",
         "Blowfish/CFB/NoPadding",
-        "134bcde441a6dd1c0d7522225e94d4a5083a61326ea1f930fc28864296c2bf2c",
+        "6cd6f7c5d2c6555561167fe9b10665102206869339122f1ed89efa4a985397f6",
         "Twofish/CFB/NoPadding",
         "821c54b1b54ae113cf74595eefe10c8308b7a438277de4f40948ac2d172d53d2",
         "RC2/CFB/NoPadding",
@@ -242,7 +249,7 @@ public class BlockCipherTest
         "SKIPJACK/CFB8/NoPadding",
         "719eef3906bef23f7b63599285437d8e34183b165acf3e855b4e160d4f036508",
         "Blowfish/CFB8/NoPadding",
-        "13a7674626f78b0ed58c4e55f9f5d90b97dd7926533ac8840af8c7c1a7ca8dd8",
+        "6ca63aaada9188d2410c07513cc0736b9888770768c25a5befc776beea5bdc4c",
         "Twofish/CFB8/NoPadding",
         "825d12af040721cf5ed4a4798647837ac5eb14d752aace28728aeb37b2010abd",
         "RC2/CFB8/NoPadding",
@@ -315,35 +322,16 @@ public class BlockCipherTest
         return "BlockCipher";
     }
 
-    private boolean equalArray(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public TestResult test(
+    public void test(
         String      algorithm,
         byte[]      input,
         byte[]      output)
     {
-        Key                     key;
+        Key                     key = null;
         KeyGenerator            keyGen;
         SecureRandom            rand;
-        Cipher                  in, out;
+        Cipher                  in = null;
+        Cipher                  out = null;
         CipherInputStream       cIn;
         CipherOutputStream      cOut;
         ByteArrayInputStream    bIn;
@@ -365,13 +353,27 @@ public class BlockCipherTest
                 baseAlgorithm = algorithm;
             }
 
+            if (baseAlgorithm.equals("IDEA") & noIDEA())
+            {
+                return;
+            }
+
             keyGen = KeyGenerator.getInstance(baseAlgorithm, "BC");
+            if (!keyGen.getAlgorithm().equals(baseAlgorithm))
+            {
+                fail("wrong key generator returned!");
+            }
             keyGen.init(rand);
 
             key = keyGen.generateKey();
 
             in = Cipher.getInstance(algorithm, "BC");
             out = Cipher.getInstance(algorithm, "BC");
+
+            if (!in.getAlgorithm().startsWith(baseAlgorithm))
+            {
+                fail("wrong cipher returned!");
+            }
 
             if (algorithm.startsWith("RC2"))
             {
@@ -395,8 +397,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed initialisation - " + e.toString());
+            fail("" + algorithm + " failed initialisation - " + e.toString(), e);
         }
 
         //
@@ -431,7 +432,7 @@ public class BlockCipherTest
                         byte[]  nIv = new byte[iv.length - 1];
 
                         in.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(nIv));
-                        return new SimpleTestResult(false, getName() + ": failed to pick up short IV");
+                        fail("failed to pick up short IV");
                     }
                     catch (InvalidAlgorithmParameterException e)
                     {
@@ -452,7 +453,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed initialisation - " + e.toString());
+            fail("" + algorithm + " failed initialisation - " + e.toString());
         }
 
         //
@@ -473,16 +474,16 @@ public class BlockCipherTest
         }
         catch (IOException e)
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed encryption - " + e.toString());
+            fail("" + algorithm + " failed encryption - " + e.toString());
         }
 
         byte[]    bytes;
 
         bytes = bOut.toByteArray();
 
-        if (!equalArray(bytes, output))
+        if (!areEqual(bytes, output))
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed encryption - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(bytes)));
+            fail("" + algorithm + " failed encryption - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(bytes)));
         }
 
         //
@@ -506,20 +507,32 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed decryption - " + e.toString());
+            fail("" + algorithm + " failed decryption - " + e.toString());
         }
 
-        if (!equalArray(bytes, input))
+        if (!areEqual(bytes, input))
         {
-            return new SimpleTestResult(false, getName() + ": " + algorithm + " failed decryption - expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(bytes)));
+            fail("" + algorithm + " failed decryption - expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(bytes)));
         }
-
-        return new SimpleTestResult(true, getName() + ": " + algorithm + " Okay");
     }
 
-    private TestResult testExceptions()
+    private boolean noIDEA()
     {
-        SecretKeyFactory skF;
+        try
+        {
+            Cipher.getInstance("IDEA", "BC");
+
+            return false;
+        }
+        catch (Exception e)
+        {
+            return true;
+        }
+    }
+
+    private void testExceptions()
+    {
+        SecretKeyFactory skF = null;
         
         try
         {
@@ -527,7 +540,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
         
         KeySpec ks = null;
@@ -538,7 +551,7 @@ public class BlockCipherTest
         {
             skF.getKeySpec(null, null);
             
-            return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
+            fail("failed exception test - no exception thrown");
         }
         catch (InvalidKeySpecException e)
         {
@@ -546,14 +559,14 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+            fail("failed exception test.", e);
         }
         try
         {
             ks = (KeySpec)new DESedeKeySpec(bb);
             skF.getKeySpec(null, ks.getClass());
             
-            return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
+            fail("failed exception test - no exception thrown");
         }
         catch (InvalidKeySpecException e)
         {
@@ -561,7 +574,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+            fail("failed exception test.", e);
         }
         try
         {
@@ -573,7 +586,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+            fail("failed exception test.", e);
         }
         
         try
@@ -583,7 +596,7 @@ public class BlockCipherTest
             {
                 kg.init(Integer.MIN_VALUE, new SecureRandom());
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
+                fail("failed exception test - no exception thrown");
             }
             catch (InvalidParameterException e)
             {
@@ -591,12 +604,12 @@ public class BlockCipherTest
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+                fail("failed exception test.", e);
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -607,7 +620,7 @@ public class BlockCipherTest
             {
                 skF.translateKey(null);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no exception thrown");
+                fail("failed exception test - no exception thrown");
             }
             catch (InvalidKeyException e)
             {
@@ -615,12 +628,12 @@ public class BlockCipherTest
             }
             catch (Exception e)
             {
-                return new SimpleTestResult(false, getName() + ": failed exception test.", e);
+                fail("failed exception test.", e);
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
         
         try
@@ -641,7 +654,7 @@ public class BlockCipherTest
                 // that cannot be determined from the given key
                 cipher.init(Cipher.DECRYPT_MODE, cipherKey, (SecureRandom)null);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no InvalidKeyException thrown");
+                fail("failed exception test - no InvalidKeyException thrown");
             }
             catch (InvalidKeyException e)
             {
@@ -650,7 +663,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -666,7 +679,7 @@ public class BlockCipherTest
                 // key is inappropriate for initializing this cipher
                 cipher.init(Cipher.ENCRYPT_MODE, cipherKey);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no InvalidKeyException thrown");
+                fail("failed exception test - no InvalidKeyException thrown");
             }
             catch (InvalidKeyException e)
             {
@@ -675,7 +688,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -691,7 +704,7 @@ public class BlockCipherTest
                 // key is inappropriate for initializing this cipher
                 cipher.init(Cipher.ENCRYPT_MODE, cipherKey);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no InvalidKeyException thrown");
+                fail("failed exception test - no InvalidKeyException thrown");
             }
             catch (InvalidKeyException e)
             {
@@ -700,7 +713,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
         
 
@@ -724,7 +737,7 @@ public class BlockCipherTest
                 // small to hold the result
                 ecipher.update(new byte[20], 0, 20, cipherText);
                 
-                return new SimpleTestResult(false, getName() + ": failed exception test - no ShortBufferException thrown");
+                fail("failed exception test - no ShortBufferException thrown");
             }
             catch (ShortBufferException e)
             {
@@ -733,7 +746,7 @@ public class BlockCipherTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
         try
@@ -747,40 +760,98 @@ public class BlockCipherTest
             SecretKey key = keyGen.generateKey();
             if (key == null)
             {
-                return new SimpleTestResult(false, getName() + ": key is null!");
+                fail("key is null!");
             }
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName()
-                    + ": unexpected exception.", e);
+            fail("unexpected exception.", e);
         }
 
-        return new SimpleTestResult(true, getName() + ": Okay");
+        try
+        {
+            try
+            {
+                Cipher c = Cipher.getInstance("DES", "BC");
+    
+                Key k = new PublicKey()
+                {
+
+                    public String getAlgorithm()
+                    {
+                        return "STUB";
+                    }
+
+                    public String getFormat()
+                    {
+                        return null;
+                    }
+
+                    public byte[] getEncoded()
+                    {
+                        return null;
+                    }
+                    
+                };
+    
+                c.init(Cipher.ENCRYPT_MODE, k);
+    
+                fail("failed exception test - no InvalidKeyException thrown for public key");
+            }
+            catch (InvalidKeyException e)
+            {
+                // okay
+            }
+            
+            try
+            {
+                Cipher c = Cipher.getInstance("DES", "BC");
+    
+                Key k = new PrivateKey()
+                {
+
+                    public String getAlgorithm()
+                    {
+                        return "STUB";
+                    }
+
+                    public String getFormat()
+                    {
+                        return null;
+                    }
+
+                    public byte[] getEncoded()
+                    {
+                        return null;
+                    }
+                    
+                };
+    
+                c.init(Cipher.DECRYPT_MODE, k);
+    
+                fail("failed exception test - no InvalidKeyException thrown for private key");
+            }
+            catch (InvalidKeyException e)
+            {
+                // okay
+            }
+        }
+        catch (Exception e)
+        {
+            fail("unexpected exception.", e);
+        }
     }
     
-    public TestResult perform()
+    public void performTest()
     {
         for (int i = 0; i != cipherTests1.length; i += 2)
         {
-            TestResult  result;
-
-            result = test(cipherTests1[i], input1, Hex.decode(cipherTests1[i + 1]));
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
+            test(cipherTests1[i], input1, Hex.decode(cipherTests1[i + 1]));
         }
 
         for (int i = 0; i != cipherTests2.length; i += 2)
         {
-            TestResult  result;
-
-            result = test(cipherTests2[i], input2, Hex.decode(cipherTests2[i + 1]));
-            if (!result.isSuccessful())
-            {
-                return result;
-            }
+            test(cipherTests2[i], input2, Hex.decode(cipherTests2[i + 1]));
         }
 
         //
@@ -794,24 +865,17 @@ public class BlockCipherTest
             
             c.doFinal(new byte[4]);
             
-            new SimpleTestResult(false, getName() + ": CTS failed to throw exception");
+            fail("CTS failed to throw exception");
         }
         catch (Exception e)
         {
             if (!(e instanceof IllegalBlockSizeException))
             {
-                return new SimpleTestResult(false, getName() + ": CTS exception test - " + e, e);
+                fail("CTS exception test - " + e, e);
             }
         }
         
-        TestResult res = testExceptions();
-
-        if (!res.isSuccessful())
-        {
-            return res;
-        }
-        
-        return new SimpleTestResult(true, getName() + ": Okay");
+        testExceptions();
     }
 
     public static void main(
@@ -819,9 +883,6 @@ public class BlockCipherTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        Test            test = new BlockCipherTest();
-        TestResult      result = test.perform();
-
-        System.out.println(result.toString());
+        runTest(new BlockCipherTest());
     }
 }
