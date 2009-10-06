@@ -8,7 +8,9 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.Signature;
 import java.security.cert.CertStore;
+import java.security.cert.CertStoreParameters;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CollectionCertStoreParameters;
@@ -183,7 +185,7 @@ public class OCSPReq
 
         try
         {
-            cf = CertificateFactory.getInstance("X.509", provider);
+            cf = OCSPUtil.createX509CertificateFactory(provider);
         }
         catch (CertificateException ex)
         {
@@ -263,8 +265,8 @@ public class OCSPReq
         
         try
         {
-            return CertStore.getInstance(type, 
-                new CollectionCertStoreParameters(this.getCertList(provider)), provider);
+            CertStoreParameters params = new CollectionCertStoreParameters(this.getCertList(provider));
+            return OCSPUtil.createCertStoreInstance(type, params, provider);
         }
         catch (InvalidAlgorithmParameterException e)
         {
@@ -297,7 +299,7 @@ public class OCSPReq
 
         try
         {
-            java.security.Signature signature = java.security.Signature.getInstance(this.getSignatureAlgOID(), sigProvider);
+            Signature signature = OCSPUtil.createSignatureInstance(this.getSignatureAlgOID(), sigProvider);
 
             signature.initVerify(key);
 
@@ -312,6 +314,7 @@ public class OCSPReq
         }
         catch (NoSuchProviderException e)
         {
+            // TODO Why this special case?
             throw e;
         }
         catch (Exception e)

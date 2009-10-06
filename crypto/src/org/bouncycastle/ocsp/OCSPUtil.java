@@ -10,6 +10,15 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.util.Strings;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Signature;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreParameters;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -141,5 +150,49 @@ class OCSPUtil
         }
         
         return l.iterator();
+    }
+
+    static CertStore createCertStoreInstance(String type, CertStoreParameters params, String provider)
+        throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException
+    {
+        if (provider == null)
+        {
+            return CertStore.getInstance(type, params);
+        }
+
+        return CertStore.getInstance(type, params, provider);
+    }
+
+    static MessageDigest createDigestInstance(String digestName, String provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+        if (provider == null)
+        {
+            return MessageDigest.getInstance(digestName);
+        }
+
+        return MessageDigest.getInstance(digestName, provider);
+    }
+
+    static Signature createSignatureInstance(String sigName, String provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+        if (provider == null)
+        {
+            return Signature.getInstance(sigName);
+        }
+
+        return Signature.getInstance(sigName, provider);
+    }
+
+    static CertificateFactory createX509CertificateFactory(String provider)
+        throws CertificateException, NoSuchProviderException
+    {
+        if (provider == null)
+        {
+            return CertificateFactory.getInstance("X.509");
+        }
+
+        return CertificateFactory.getInstance("X.509", provider);
     }
 }
