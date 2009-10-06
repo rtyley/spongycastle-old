@@ -4,6 +4,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
@@ -12,6 +13,7 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.x509.NoSuchStoreException;
@@ -169,8 +171,10 @@ class CMSSignedHelper
     MessageDigest getDigestInstance(
         String algorithm, 
         Provider provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException
+        throws NoSuchAlgorithmException
     {
+        try
+        {
         try
         {
             return createDigestInstance(algorithm, provider);
@@ -194,6 +198,11 @@ class CMSSignedHelper
                 return getDigestInstance(algorithm, null); // try rolling back
             }
             throw e;
+        }
+        }
+        catch (NoSuchProviderException e)
+        {
+            return getDigestInstance(algorithm, null); // try rolling back
         }
     }
 
@@ -349,16 +358,12 @@ class CMSSignedHelper
         {
             if (provider != null)
             {
-                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider.getName());
+                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
             }
             else
             {
                 return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls));
             }
-        }
-        catch (NoSuchProviderException ex)
-        {
-            throw new CMSException("can't find provider.", ex);
         }
         catch (InvalidAlgorithmParameterException e)
         {
@@ -382,13 +387,13 @@ class CMSSignedHelper
                 cf = CertificateFactory.getInstance("X.509");
             }
         }
-        catch (NoSuchProviderException ex)
-        {
-            throw new CMSException("can't find provider.", ex);
-        }
         catch (CertificateException ex)
         {
             throw new CMSException("can't get certificate factory.", ex);
+        }
+        catch (NoSuchProviderException ex)
+        {
+            throw new CMSException("can't get provider for certificate factory.", ex);
         }
         Enumeration e = certSet.getObjects();
 
@@ -433,13 +438,13 @@ class CMSSignedHelper
                 cf = CertificateFactory.getInstance("X.509");
             }
         }
-        catch (NoSuchProviderException ex)
-        {
-            throw new CMSException("can't find provider.", ex);
-        }
         catch (CertificateException ex)
         {
             throw new CMSException("can't get certificate factory.", ex);
+        }
+        catch (NoSuchProviderException ex)
+        {
+            throw new CMSException("can't get certificate factory provider.", ex);
         }
         Enumeration e = certSet.getObjects();
 
@@ -463,28 +468,13 @@ class CMSSignedHelper
         }
     }
 
-    private boolean anyCertHasTypeOther()
+    AlgorithmIdentifier fixAlgID(AlgorithmIdentifier algId)
     {
-        // not supported
-        return false;
-    }
+        if (algId.getParameters() == null)
+        {
+            return new AlgorithmIdentifier(algId.getObjectId(), DERNull.INSTANCE);
+        }
 
-    private boolean anyCertHasV1Attribute()
-    {
-        // obsolete 
-        return false;
+        return algId;
     }
-
-    private boolean anyCertHasV2Attribute()
-    {
-        // TODO
-        return false;
-    }
-
-    private boolean anyCrlHasTypeOther()
-    {
-        // not supported
-        return false;
-    }
-
 }

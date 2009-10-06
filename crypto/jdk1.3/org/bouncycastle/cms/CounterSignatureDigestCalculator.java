@@ -23,15 +23,8 @@ class CounterSignatureDigestCalculator
     public byte[] getDigest()
         throws NoSuchAlgorithmException
     {
-        try
-        {
         MessageDigest digest = CMSSignedHelper.INSTANCE.getDigestInstance(alg, provider);
 
         return digest.digest(data);
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new NoSuchAlgorithmException("cannot find provider: " + e);
-        }
     }
 }

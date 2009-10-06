@@ -1,31 +1,34 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERSet;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.util.io.Streams;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.Security;
 import java.security.cert.CRLException;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.security.Provider;
-import java.security.Security;
-import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.BEROctetStringGenerator;
+import org.bouncycastle.asn1.BERSet;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.util.io.Streams;
 
 class CMSUtils
 {
@@ -33,7 +36,14 @@ class CMSUtils
     
     static int getMaximumMemory()
     {
+        long maxMem = Integer.MAX_VALUE;
+        
+        if (maxMem > Integer.MAX_VALUE)
+        {
             return Integer.MAX_VALUE;
+        }
+        
+        return (int)maxMem;
     }
     
     static ContentInfo readContentInfo(
@@ -137,6 +147,33 @@ class CMSUtils
         return new DERSet(v);
     }
 
+    static OutputStream createBEROctetOutputStream(OutputStream s,
+            int tagNo, boolean isExplicit, int bufferSize) throws IOException
+    {
+        BEROctetStringGenerator octGen = new BEROctetStringGenerator(s, tagNo, isExplicit);
+
+        if (bufferSize != 0)
+        {
+            return octGen.getOctetOutputStream(new byte[bufferSize]);
+        }
+
+        return octGen.getOctetOutputStream();
+    }
+
+    static TBSCertificateStructure getTBSCertificateStructure(
+        X509Certificate cert) throws CertificateEncodingException
+    {
+        try
+        {
+            return TBSCertificateStructure.getInstance(ASN1Object
+                .fromByteArray(cert.getTBSCertificate()));
+        }
+        catch (IOException e)
+        {
+            throw new CertificateEncodingException(e.toString());
+        }
+    }
+
     private static ContentInfo readContentInfo(
         ASN1InputStream in)
         throws CMSException
@@ -164,6 +201,14 @@ class CMSUtils
         throws IOException
     {
         return Streams.readAll(in);
+    }
+
+    public static byte[] streamToByteArray(
+        InputStream in,
+        int         limit)
+        throws IOException
+    {
+        return Streams.readAllLimited(in, limit);
     }
 
     public static Provider getProvider(String providerName)

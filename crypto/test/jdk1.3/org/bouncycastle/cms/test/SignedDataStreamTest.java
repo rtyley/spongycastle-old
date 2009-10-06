@@ -21,7 +21,7 @@ import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.mail.smime.SMIMESignedGenerator;
+import org.bouncycastle.cms.CMSSignedGenerator;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
@@ -151,7 +151,22 @@ public class SignedDataStreamTest
         
         sp.close();
     }
-    
+
+    private void checkSigParseable(byte[] sig)
+        throws Exception
+    {
+        CMSSignedDataParser sp = new CMSSignedDataParser(sig);
+        sp.getVersion();
+        CMSTypedStream sc = sp.getSignedContent();
+        if (sc != null)
+        {
+            sc.drain();
+        }
+        sp.getCertificatesAndCRLs("Collection", "BC");
+        sp.getSignerInfos();
+        sp.close();
+    }
+
     public void testSha1EncapsulatedSignature()
         throws Exception
     {
@@ -290,7 +305,9 @@ public class SignedDataStreamTest
         sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
-        
+
+        checkSigParseable(bOut.toByteArray());
+
         CMSSignedDataParser     sp = new CMSSignedDataParser(
                 new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), bOut.toByteArray());
     
@@ -399,7 +416,9 @@ public class SignedDataStreamTest
         sigOut.write(TEST_MESSAGE.getBytes());
         
         sigOut.close();
-        
+
+        checkSigParseable(bOut.toByteArray());
+
         CMSSignedDataParser     sp = new CMSSignedDataParser(
                 new CMSTypedStream(new ByteArrayInputStream(TEST_MESSAGE.getBytes())), bOut.toByteArray());
     
@@ -447,7 +466,7 @@ public class SignedDataStreamTest
         int unbufferedLength = bOut.toByteArray().length;
         
         //
-        // find buffered length -with buffered output, should be ==
+        // find buffered length with buffered stream - should be equal
         //
         bOut = new ByteArrayOutputStream();
 
@@ -512,7 +531,7 @@ public class SignedDataStreamTest
         int unbufferedLength = bOut.toByteArray().length;
         
         //
-        // find buffered length with less than default of 1000
+        // find buffered length - buffer size less than default
         //
         bOut = new ByteArrayOutputStream();
     
@@ -568,7 +587,7 @@ public class SignedDataStreamTest
         
         verifySignatures(sp);
         
-        byte[] contentDigest = (byte[])gen.getGeneratedDigests().get(SMIMESignedGenerator.DIGEST_SHA1);
+        byte[] contentDigest = (byte[])gen.getGeneratedDigests().get(CMSSignedGenerator.DIGEST_SHA1);
 
         AttributeTable table = ((SignerInformation)sp.getSignerInfos().getSigners().iterator().next()).getSignedAttributes();
         Attribute hash = table.get(CMSAttributes.messageDigest);
@@ -590,6 +609,67 @@ public class SignedDataStreamTest
 
         sigOut.write(TEST_MESSAGE.getBytes());
         
+        sigOut.close();
+
+        CMSSignedData sd = new CMSSignedData(new CMSProcessableByteArray(TEST_MESSAGE.getBytes()), bOut.toByteArray());
+
+        assertEquals(1, sd.getSignerInfos().getSigners().size());
+
+        verifyEncodedData(bOut);
+    }
+
+    public void testSHA1WithRSAEncapsulatedSubjectKeyID()
+        throws Exception
+    {
+        List                  certList = new ArrayList();
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), CMSTestUtil.createSubjectKeyId(_origCert.getPublicKey()).getKeyIdentifier(), CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+
+        gen.addCertificatesAndCRLs(certs);
+
+        OutputStream sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
+        sigOut.close();
+
+        CMSSignedDataParser     sp = new CMSSignedDataParser(bOut.toByteArray());
+
+        sp.getSignedContent().drain();
+
+        verifySignatures(sp);
+
+        byte[] contentDigest = (byte[])gen.getGeneratedDigests().get(CMSSignedGenerator.DIGEST_SHA1);
+
+        AttributeTable table = ((SignerInformation)sp.getSignerInfos().getSigners().iterator().next()).getSignedAttributes();
+        Attribute hash = table.get(CMSAttributes.messageDigest);
+
+        assertTrue(MessageDigest.isEqual(contentDigest, ((ASN1OctetString)hash.getAttrValues().getObjectAt(0)).getOctets()));
+
+        //
+        // try using existing signer
+        //
+        gen = new CMSSignedDataStreamGenerator();
+
+        gen.addSigners(sp.getSignerInfos());
+
+        gen.addCertificatesAndCRLs(sp.getCertificatesAndCRLs("Collection", "BC"));
+
+        bOut.reset();
+
+        sigOut = gen.open(bOut, true);
+
+        sigOut.write(TEST_MESSAGE.getBytes());
+
         sigOut.close();
 
         CMSSignedData sd = new CMSSignedData(new CMSProcessableByteArray(TEST_MESSAGE.getBytes()), bOut.toByteArray());
@@ -751,6 +831,8 @@ public class SignedDataStreamTest
 
         sigOut.close();
 
+        checkSigParseable(bOut.toByteArray());
+
         //
         // create new Signer
         //
@@ -769,6 +851,8 @@ public class SignedDataStreamTest
         sigOut.write(data);
 
         sigOut.close();
+
+        checkSigParseable(bOut.toByteArray());
 
         CMSSignedData sd = new CMSSignedData(bOut.toByteArray());
 
@@ -878,6 +962,8 @@ public class SignedDataStreamTest
         sigOut.write(data);
 
         sigOut.close();
+
+        checkSigParseable(bOut.toByteArray());
 
         //
         // create new certstore with the right certificates
