@@ -31,7 +31,7 @@ Release 1.44
 <li>The SecureRandom in the J2ME was not using a common seed source, which made cross seeeding of SecureRandom's impossible. This has been fixed.</li>
 <li>Occasional uses of "private final" on methods were causing issues with some J2ME platforms. The use of "private final" on methods has been removed.</li>
 <li>NONEwithDSA was not resetting correctly on verify() or sign(). This has been fixed.</li>
-<li>Fractional seconds in a GeneralizedTime were resulting in incorrect date conversions if more than 3 decimal places were included due to the Java date parser. Fractional seconds are now truncated to 3 decimal places on conversion.</li>
+<li>Fractional seconds in a GeneralisedTime were resulting in incorrect date conversions if more than 3 decimal places were included due to the Java date parser. Fractional seconds are now truncated to 3 decimal places on conversion.</li>
 <li>The micAlg in S/MIME signed messages was not always including the hash algorithm for previous signers. This has been fixed.</li>
 <li>SignedMailValidator was only including the From header and ignoring the Sender header in validating the email address. This has been fixed.</li>
 <li>The PKCS#12 keystore would throw a NullPointerException if a null password was passed in. This has been fixed.</li>
