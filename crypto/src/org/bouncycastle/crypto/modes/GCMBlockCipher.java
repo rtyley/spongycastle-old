@@ -22,8 +22,9 @@ public class GCMBlockCipher
     private static final int BLOCK_SIZE = 16;
     private static final byte[] ZEROES = new byte[BLOCK_SIZE];
 
-    private final BlockCipher   cipher;
-    private final GCMMultiplier multiplier;
+    // not final due to a compiler bug 
+    private BlockCipher   cipher;
+    private GCMMultiplier multiplier;
 
     // These fields are set by init and not modified by processing
     private boolean             forEncryption;
