@@ -243,9 +243,7 @@ public class OCSPTest
         // basic request generation
         //
         OCSPReqGenerator gen = new OCSPReqGenerator();
-
-        gen.addRequest(
-            new CertificateID(CertificateID.HASH_SHA1, testCert, BigInteger.valueOf(1)));
+        gen.addRequest(id);
 
         OCSPReq req = gen.generate();
 
