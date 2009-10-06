@@ -2,20 +2,16 @@ package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Generator;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.ASN1StreamParser;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERSetParser;
 import org.bouncycastle.asn1.BERTaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -169,11 +165,6 @@ public class CMSSignedDataParser
                 {
                      //  ignore
                 }
-                catch (NoSuchProviderException e)
-                {
-                    // cannot happen
-                }
-
             }
 
             //
@@ -545,12 +536,8 @@ public class CMSSignedDataParser
 
         for (Iterator it = signerInformationStore.getSigners().iterator(); it.hasNext();)
         {
-            SignerInformation        signer = (SignerInformation)it.next();
-            AlgorithmIdentifier     digAlgId;
-
-            digAlgId = makeAlgId(signer.getDigestAlgOID(), signer.getDigestAlgParams());
-
-            digestAlgs.add(digAlgId);
+            SignerInformation signer = (SignerInformation)it.next();
+            digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
         }
 
         sigGen.getRawOutputStream().write(new DERSet(digestAlgs).getEncoded());
@@ -695,37 +682,6 @@ public class CMSSignedDataParser
         return out;
     }
 
-    private static DERObject makeObj(
-        byte[]  encoding)
-        throws IOException
-    {
-        if (encoding == null)
-        {
-            return null;
-        }
-
-        ASN1InputStream         aIn = new ASN1InputStream(encoding);
-
-        return aIn.readObject();
-    }
-
-    private static AlgorithmIdentifier makeAlgId(
-        String  oid,
-        byte[]  params)
-        throws IOException
-    {
-        if (params != null)
-        {
-            return new AlgorithmIdentifier(
-                            new DERObjectIdentifier(oid), makeObj(params));
-        }
-        else
-        {
-            return new AlgorithmIdentifier(
-                            new DERObjectIdentifier(oid), new DERNull());
-        }
-    }
-
     private static void writeSetToGeneratorTagged(
         ASN1Generator asn1Gen,
         ASN1SetParser asn1SetParser,
@@ -757,9 +713,9 @@ public class CMSSignedDataParser
         OutputStream          output)
         throws IOException
     {
-        BEROctetStringGenerator octGen = new BEROctetStringGenerator(output, 0, true);
         // TODO Allow specification of a specific fragment size?
-        OutputStream outOctets = octGen.getOctetOutputStream();
+        OutputStream outOctets = CMSUtils.createBEROctetOutputStream(
+            output, 0, true, 0);
         Streams.pipeAll(octs.getOctetStream(), outOctets);
         outOctets.close();
     }
