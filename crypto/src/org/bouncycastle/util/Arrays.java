@@ -70,6 +70,14 @@ public final class Arrays
         return true;
     }
 
+    /**
+     * A constant time equals comparison - does not terminate early if
+     * test will fail.
+     *
+     * @param a first array
+     * @param b second array
+     * @return true if arrays equal, false otherwise.
+     */
     public static boolean constantAreEqual(
         byte[]  a,
         byte[]  b)
