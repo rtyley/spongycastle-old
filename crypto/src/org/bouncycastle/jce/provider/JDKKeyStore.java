@@ -7,7 +7,16 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.KeyStoreException;
+import java.security.KeyStoreSpi;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -825,7 +834,7 @@ public class JDKKeyStore
             byte[] oldMac = new byte[hMac.getMacSize()];
             dIn.readFully(oldMac);
 
-            if (!Arrays.areEqual(mac, oldMac))
+            if (!Arrays.constantAreEqual(mac, oldMac))
             {
                 table.clear();
                 throw new IOException("KeyStore integrity check failed.");
@@ -961,7 +970,7 @@ public class JDKKeyStore
             byte[] oldHash = new byte[dig.getDigestSize()];
             Streams.readFully(cIn, oldHash);
 
-            if (!Arrays.areEqual(hash, oldHash))
+            if (!Arrays.constantAreEqual(hash, oldHash))
             {
                 table.clear();
                 throw new IOException("KeyStore integrity check failed.");

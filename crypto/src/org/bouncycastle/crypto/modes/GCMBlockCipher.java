@@ -286,7 +286,7 @@ public class GCMBlockCipher
             // Retrieve the T value from the message and compare to calculated one
             byte[] msgMac = new byte[macSize];
             System.arraycopy(bufBlock, extra, msgMac, 0, macSize);
-            if (!Arrays.areEqual(this.macBlock, msgMac))
+            if (!Arrays.constantAreEqual(this.macBlock, msgMac))
             {
                 throw new InvalidCipherTextException("mac check in GCM failed");
             }

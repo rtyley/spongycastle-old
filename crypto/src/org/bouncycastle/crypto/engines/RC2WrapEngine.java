@@ -378,6 +378,6 @@ public class RC2WrapEngine
         byte[] key,
         byte[] checksum)
     {
-        return Arrays.areEqual(calculateCMSKeyChecksum(key), checksum);
+        return Arrays.constantAreEqual(calculateCMSKeyChecksum(key), checksum);
     }
 }
