@@ -70,6 +70,35 @@ public final class Arrays
         return true;
     }
 
+    public static boolean constantAreEqual(
+        byte[]  a,
+        byte[]  b)
+    {
+        if (a == b)
+        {
+            return true;
+        }
+
+        if (a == null || b == null)
+        {
+            return false;
+        }
+
+        if (a.length != b.length)
+        {
+            return false;
+        }
+
+        boolean retVal = true;
+
+        for (int i = 0; i != a.length; i++)
+        {
+            retVal &= (a[i] == b[i]);
+        }
+
+        return retVal;
+    }
+
     public static boolean areEqual(
         int[]  a,
         int[]  b)

@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.modes;
 
+import java.io.ByteArrayOutputStream;
+
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
@@ -9,8 +11,6 @@ import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Arrays;
-
-import java.io.ByteArrayOutputStream;
 
 /**
  * Implements the Counter with Cipher Block Chaining mode (CCM) detailed in
@@ -243,7 +243,7 @@ public class CCMBlockCipher
             
             calculateMac(out, 0, out.length, calculatedMacBlock);
             
-            if (!Arrays.areEqual(macBlock, calculatedMacBlock))
+            if (!Arrays.constantAreEqual(macBlock, calculatedMacBlock))
             {
                 throw new InvalidCipherTextException("mac check in CCM failed");
             }

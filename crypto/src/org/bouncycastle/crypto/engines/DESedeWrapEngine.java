@@ -357,6 +357,6 @@ public class DESedeWrapEngine
         byte[] key,
         byte[] checksum)
     {
-        return Arrays.areEqual(calculateCMSKeyChecksum(key), checksum);
+        return Arrays.constantAreEqual(calculateCMSKeyChecksum(key), checksum);
     }
 }
