@@ -97,14 +97,14 @@ public final class Arrays
             return false;
         }
 
-        boolean retVal = true;
+        int nonEqual = 0;
 
         for (int i = 0; i != a.length; i++)
         {
-            retVal &= (a[i] == b[i]);
+            nonEqual |= (a[i] ^ b[i]);
         }
 
-        return retVal;
+        return nonEqual == 0;
     }
 
     public static boolean areEqual(
