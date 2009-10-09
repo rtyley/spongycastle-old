@@ -834,7 +834,7 @@ public class JDKKeyStore
             byte[] oldMac = new byte[hMac.getMacSize()];
             dIn.readFully(oldMac);
 
-            if (!Arrays.constantAreEqual(mac, oldMac))
+            if (!Arrays.constantTimeAreEqual(mac, oldMac))
             {
                 table.clear();
                 throw new IOException("KeyStore integrity check failed.");
@@ -970,7 +970,7 @@ public class JDKKeyStore
             byte[] oldHash = new byte[dig.getDigestSize()];
             Streams.readFully(cIn, oldHash);
 
-            if (!Arrays.constantAreEqual(hash, oldHash))
+            if (!Arrays.constantTimeAreEqual(hash, oldHash))
             {
                 table.clear();
                 throw new IOException("KeyStore integrity check failed.");

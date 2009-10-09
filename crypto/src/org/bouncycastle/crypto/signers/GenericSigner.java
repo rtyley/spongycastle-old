@@ -121,7 +121,7 @@ public class GenericSigner
         {
             byte[] sig = engine.processBlock(signature, 0, signature.length);
 
-            return Arrays.constantAreEqual(sig, hash);
+            return Arrays.constantTimeAreEqual(sig, hash);
         }
         catch (Exception e)
         {

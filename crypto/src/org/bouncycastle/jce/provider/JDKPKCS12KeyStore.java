@@ -689,7 +689,7 @@ public class JDKPKCS12KeyStore
                 byte[] res = calculatePbeMac(algId.getObjectId(), salt, itCount, password, false, data);
                 byte[] dig = dInfo.getDigest();
 
-                if (!Arrays.constantAreEqual(res, dig))
+                if (!Arrays.constantTimeAreEqual(res, dig))
                 {
                     if (password.length > 0)
                     {
@@ -699,7 +699,7 @@ public class JDKPKCS12KeyStore
                     // Try with incorrect zero length password
                     res = calculatePbeMac(algId.getObjectId(), salt, itCount, password, true, data);
 
-                    if (!Arrays.constantAreEqual(res, dig))
+                    if (!Arrays.constantTimeAreEqual(res, dig))
                     {
                         throw new IOException("PKCS12 key store mac invalid - wrong password or corrupted file.");
                     }
