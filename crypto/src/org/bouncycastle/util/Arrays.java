@@ -78,7 +78,7 @@ public final class Arrays
      * @param b second array
      * @return true if arrays equal, false otherwise.
      */
-    public static boolean constantAreEqual(
+    public static boolean constantTimeAreEqual(
         byte[]  a,
         byte[]  b)
     {

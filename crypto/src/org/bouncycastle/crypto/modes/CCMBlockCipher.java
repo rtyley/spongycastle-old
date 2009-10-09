@@ -243,7 +243,7 @@ public class CCMBlockCipher
             
             calculateMac(out, 0, out.length, calculatedMacBlock);
             
-            if (!Arrays.constantAreEqual(macBlock, calculatedMacBlock))
+            if (!Arrays.constantTimeAreEqual(macBlock, calculatedMacBlock))
             {
                 throw new InvalidCipherTextException("mac check in CCM failed");
             }
