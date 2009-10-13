@@ -1,5 +1,18 @@
 package org.bouncycastle.tsp;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -16,19 +29,7 @@ import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.cms.SignerInformation;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.bouncycastle.util.Arrays;
 
 public class TSPUtil
 {
@@ -96,7 +97,7 @@ public class TSPUtil
                         MessageDigest digest = createDigestInstance(tstInfo.getMessageImprintAlgOID(), provider);
                         byte[] expectedDigest = digest.digest(signerInfo.getSignature());
 
-                        if (!MessageDigest.isEqual(expectedDigest, tstInfo.getMessageImprintDigest()))
+                        if (!Arrays.constantTimeAreEqual(expectedDigest, tstInfo.getMessageImprintDigest()))
                         {
                             throw new TSPValidationException("Incorrect digest in message imprint");
                         }

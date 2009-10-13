@@ -1,5 +1,25 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.crypto.Cipher;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -21,26 +41,7 @@ import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.Provider;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.crypto.Cipher;
+import org.bouncycastle.util.Arrays;
 
 /**
  * an expanded SignerInfo block from a CMS Signed message
@@ -456,7 +457,7 @@ public class SignerInformation
     
                 ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;
     
-                if (!MessageDigest.isEqual(resultDigest, signedMessageDigest.getOctets()))
+                if (!Arrays.constantTimeAreEqual(resultDigest, signedMessageDigest.getOctets()))
                 {
                     throw new CMSException("message-digest attribute value does not match calculated value");
                 }
@@ -587,7 +588,7 @@ public class SignerInformation
 
                 byte[]  sigHash = digInfo.getDigest();
 
-                return MessageDigest.isEqual(digest, sigHash);
+                return Arrays.constantTimeAreEqual(digest, sigHash);
             }
             else if (algorithm.equals("DSA"))
             {

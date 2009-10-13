@@ -1,40 +1,41 @@
 package org.bouncycastle.tsp;
 
-import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Collection;
-import java.util.Date;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.util.Collection;
+import java.util.Date;
 
-import org.bouncycastle.cms.CMSProcessable;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.SignerId;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.ess.ESSCertID;
+import org.bouncycastle.asn1.ess.ESSCertIDv2;
 import org.bouncycastle.asn1.ess.SigningCertificate;
 import org.bouncycastle.asn1.ess.SigningCertificateV2;
-import org.bouncycastle.asn1.ess.ESSCertIDv2;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.tsp.TSTInfo;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x509.IssuerSerial;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerId;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Arrays;
 
 public class TimeStampToken
 {
@@ -166,7 +167,7 @@ public class TimeStampToken
     {
         try
         {
-            if (!MessageDigest.isEqual(certID.getCertHash(), MessageDigest.getInstance(certID.getHashAlgorithm()).digest(cert.getEncoded())))
+            if (!Arrays.constantTimeAreEqual(certID.getCertHash(), MessageDigest.getInstance(certID.getHashAlgorithm()).digest(cert.getEncoded())))
             {
                 throw new TSPValidationException("certificate hash does not match certID hash.");
             }
