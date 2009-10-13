@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import org.bouncycastle.bcpg.InputStreamPacket;
 import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.bouncycastle.util.Arrays;
 
 public abstract class PGPEncryptedData
     implements SymmetricKeyAlgorithmTags
@@ -142,6 +143,6 @@ public abstract class PGPEncryptedData
             streamDigest[i] = (byte)lookAhead[i + 2];
         }
 
-        return MessageDigest.isEqual(digest, streamDigest);
+        return Arrays.constantTimeAreEqual(digest, streamDigest);
     }
 }
