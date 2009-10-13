@@ -373,5 +373,7 @@ public class PKCS12Example
         FileOutputStream fOut = new FileOutputStream("id.p12");
 
         store.store(fOut, passwd);
+        
+        fOut.close();
     }
 }
