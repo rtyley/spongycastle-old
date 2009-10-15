@@ -37,7 +37,7 @@ class LazyDERConstructionEnumeration
         }
         catch (IOException e)
         {
-            throw new IllegalStateException("malformed DER construction: " + e);
+            throw new ASN1ParsingException("malformed DER construction: " + e, e);
         }
     }
 }

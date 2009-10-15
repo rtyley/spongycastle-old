@@ -38,7 +38,7 @@ public class BEROctetStringParser
         }
         catch (IOException e)
         {
-            throw new IllegalStateException("IOException converting stream to byte array: " + e.getMessage());
+            throw new ASN1ParsingException("IOException converting stream to byte array: " + e.getMessage(), e);
         }
     }
 }

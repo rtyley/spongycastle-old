@@ -87,8 +87,11 @@ public class ASN1StreamParser
                     return new BERSequenceParser(sp);
                 case DERTags.SET:
                     return new BERSetParser(sp);
+                case DERTags.EXTERNAL:{
+                    return new DERExternalParser(sp);
+                }
                 default:
-                    throw new IOException("unknown BER object encountered");
+                    throw new IOException("unknown BER object encountered: 0x" + Integer.toHexString(tagNo));
             }
         }
         else
