@@ -78,7 +78,7 @@ public class DERApplicationSpecific
             }
             catch (IOException e)
             {
-                throw new IllegalStateException("malformed object: " + e);
+                throw new ASN1ParsingException("malformed object: " + e, e);
             }
         }
         this.octets = bOut.toByteArray();
@@ -201,7 +201,7 @@ public class DERApplicationSpecific
             // "c) bits 7 to 1 of the first subsequent octet shall not all be zero."
             if ((b & 0x7f) == 0) // Note: -1 will pass
             {
-                throw new IllegalStateException("corrupted stream - invalid high tag number found");
+                throw new ASN1ParsingException("corrupted stream - invalid high tag number found");
             }
 
             while ((b >= 0) && ((b & 0x80) != 0))

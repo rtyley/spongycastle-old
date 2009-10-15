@@ -229,6 +229,8 @@ public class ASN1InputStream
                     return new BERSequenceParser(sp).getDERObject();
                 case SET:
                     return new BERSetParser(sp).getDERObject();
+                case EXTERNAL:
+                    return new DERExternalParser(sp).getDERObject();
                 default:
                     throw new IOException("unknown BER object encountered");
             }
@@ -298,7 +300,7 @@ public class ASN1InputStream
 
             if (size > 4)
             {
-                throw new IOException("DER length more than 4 bytes");
+                throw new IOException("DER length more than 4 bytes: " + size);
             }
 
             length = 0;

@@ -26,7 +26,7 @@ public class BERSetParser
         }
         catch (IOException e)
         {
-            throw new IllegalStateException(e.getMessage());
+            throw new ASN1ParsingException(e.getMessage(), e);
         }
     }
 }
