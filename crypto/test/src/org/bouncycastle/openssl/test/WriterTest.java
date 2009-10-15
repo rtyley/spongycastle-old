@@ -1,12 +1,5 @@
 package org.bouncycastle.openssl.test;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.openssl.PasswordFinder;
-import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.util.encoders.Base64;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -18,8 +11,15 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.DSAParameterSpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPrivateCrtKeySpec;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.PasswordFinder;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class WriterTest
     extends SimpleTest
@@ -97,23 +97,29 @@ public class WriterTest
         KeyPair dsaKp = dsaKpg.generateKeyPair();
         PrivateKey testDsaKey = dsaKp.getPrivate();
 
+        doWriteReadTest(testDsaKey, provider);
         doWriteReadTests(testDsaKey, provider, algorithms);
 
         KeyFactory fact = KeyFactory.getInstance("RSA", provider);
         PrivateKey testRsaKey = fact.generatePrivate(testRsaKeySpec);
 
+        doWriteReadTest(testRsaKey, provider);
         doWriteReadTests(testRsaKey, provider, algorithms);
 
         fact = KeyFactory.getInstance("ECDSA", provider);
         PrivateKey testEcDsaKey = fact.generatePrivate(testEcDsaKeySpec);
 
+        doWriteReadTest(testEcDsaKey, provider);
         doWriteReadTests(testEcDsaKey, provider, algorithms);
 
         KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
 
         kpGen.initialize(239);
-        
-        doWriteReadTests(kpGen.generateKeyPair().getPrivate(), "BC", algorithms);
+
+        PrivateKey privKey = kpGen.generateKeyPair().getPrivate();
+
+        doWriteReadTest(privKey, provider);
+        doWriteReadTests(privKey, "BC", algorithms);
     }
 
     private void doWriteReadTests(
@@ -125,6 +131,37 @@ public class WriterTest
         for (int i = 0; i < algorithms.length; ++i)
         {
             doWriteReadTest(akp, provider, algorithms[i]);
+        }
+    }
+
+    private void doWriteReadTest(
+        PrivateKey  akp,
+        String      provider)
+        throws IOException
+    {
+        StringWriter sw = new StringWriter();
+        PEMWriter pw = new PEMWriter(sw, provider);
+
+        pw.writeObject(akp);
+        pw.close();
+
+        String data = sw.toString();
+
+        PEMReader pr = new PEMReader(new StringReader(data));
+
+        Object o = pr.readObject();
+
+        if (o == null || !(o instanceof KeyPair))
+        {
+            fail("Didn't find OpenSSL key");
+        }
+
+        KeyPair kp = (KeyPair) o;
+        PrivateKey privKey = kp.getPrivate();
+
+        if (!akp.equals(privKey))
+        {
+            fail("Failed to read back test");
         }
     }
 

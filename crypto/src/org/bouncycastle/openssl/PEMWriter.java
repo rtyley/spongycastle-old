@@ -164,6 +164,12 @@ public class PEMWriter
 
                 encoding = new DERSequence(v).getEncoded();
             }
+            else if (((PrivateKey)o).getAlgorithm().equals("ECDSA"))
+            {
+                type = "EC PRIVATE KEY";
+
+                encoding = info.getPrivateKey().getEncoded();
+            }
             else
             {
                 throw new IOException("Cannot identify private key");
@@ -212,7 +218,6 @@ public class PEMWriter
             writeObject(((KeyPair)obj).getPrivate());
             return;
         }
-
 
         String type = null;
         byte[] keyData = null;
