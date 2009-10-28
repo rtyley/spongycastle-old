@@ -1,12 +1,13 @@
 package org.bouncycastle.openpgp;
 
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.PacketTags;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.util.Strings;
 
 /**
  * Class for producing literal data packets.
@@ -54,11 +55,14 @@ public class PGPLiteralDataGenerator implements StreamGenerator
         throws IOException
     {
         out.write(format);
-        out.write((byte)name.length());
 
-        for (int i = 0; i != name.length(); i++)
+        byte[] encName = Strings.toUTF8ByteArray(name);
+
+        out.write((byte)encName.length);
+
+        for (int i = 0; i != encName.length; i++)
         {
-            out.write(name.charAt(i));
+            out.write(encName[i]);
         }
 
         long    modDate = modificationTime / 1000;
