@@ -274,6 +274,7 @@ public class BasicOCSPRespGenerator
 
         AlgorithmIdentifier sigAlgId = OCSPUtil.getSigAlgID(signingAlgorithm);
 
+        DERSequence chainSeq = null;
         if (chain != null && chain.length > 0)
         {
             ASN1EncodableVector v = new ASN1EncodableVector();
@@ -294,12 +295,10 @@ public class BasicOCSPRespGenerator
                 throw new OCSPException("error encoding certs", e);
             }
 
-            return new BasicOCSPResp(new BasicOCSPResponse(tbsResp, sigAlgId, bitSig, new DERSequence(v)));
+            chainSeq = new DERSequence(v);
         }
-        else
-        {
-            return new BasicOCSPResp(new BasicOCSPResponse(tbsResp, sigAlgId, bitSig, null));
-        }
+
+        return new BasicOCSPResp(new BasicOCSPResponse(tbsResp, sigAlgId, bitSig, chainSeq));
     }
     
     public BasicOCSPResp generate(
