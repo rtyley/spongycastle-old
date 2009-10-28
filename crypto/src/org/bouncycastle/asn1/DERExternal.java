@@ -46,6 +46,37 @@ public class DERExternal
         externalContent = obj.getDERObject();
     }
 
+    /**
+     * Creates a new instance of DERExternal
+     * See X.690 for more informations about the meaning of these parameters
+     * @param directReference The direct reference or <code>null</code> if not set.
+     * @param indirectReference The indirect reference or <code>null</code> if not set.
+     * @param dataValueDescriptor The data value descriptor or <code>null</code> if not set.
+     * @param externalData The external data in its encoded form.
+     */
+    public DERExternal(DERObjectIdentifier directReference, DERInteger indirectReference, ASN1Object dataValueDescriptor, DERTaggedObject externalData)
+    {
+        this(directReference, indirectReference, dataValueDescriptor, externalData.getTagNo(), externalData.getDERObject());
+    }
+
+    /**
+     * Creates a new instance of DERExternal.
+     * See X.690 for more informations about the meaning of these parameters
+     * @param directReference The direct reference or <code>null</code> if not set.
+     * @param indirectReference The indirect reference or <code>null</code> if not set.
+     * @param dataValueDescriptor The data value descriptor or <code>null</code> if not set.
+     * @param encoding The encoding to be used for the external data
+     * @param externalData The external data
+     */
+    public DERExternal(DERObjectIdentifier directReference, DERInteger indirectReference, ASN1Object dataValueDescriptor, int encoding, DERObject externalData)
+    {
+        setDirectReferemce(directReference);
+        setIndirectReference(indirectReference);
+        setDataValueDescriptor(dataValueDescriptor);
+        setEncoding(encoding);
+        setExternalContent(externalData.getDERObject());
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
