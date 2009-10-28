@@ -41,12 +41,14 @@ public class BEROctetStringGenerator
     {
         private byte[] _buf;
         private int    _off;
-    
+        private DEROutputStream _derOut;
+
         BufferedBEROctetStream(
             byte[] buf)
         {
             _buf = buf;
             _off = 0;
+            _derOut = new DEROutputStream(_out);
         }
         
         public void write(
@@ -57,7 +59,7 @@ public class BEROctetStringGenerator
 
             if (_off == _buf.length)
             {
-                _out.write(new DEROctetString(_buf).getEncoded());
+                DEROctetString.encode(_derOut, _buf);
                 _off = 0;
             }
         }
@@ -75,7 +77,7 @@ public class BEROctetStringGenerator
                     break;
                 }
 
-                _out.write(new DEROctetString(_buf).getEncoded());
+                DEROctetString.encode(_derOut, _buf);
                 _off = 0;
 
                 off += numToCopy;
@@ -91,7 +93,7 @@ public class BEROctetStringGenerator
                 byte[] bytes = new byte[_off];
                 System.arraycopy(_buf, 0, bytes, 0, _off);
                 
-                _out.write(new DEROctetString(bytes).getEncoded());
+                DEROctetString.encode(_derOut, bytes);
             }
             
              writeBEREnd();

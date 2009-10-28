@@ -26,4 +26,12 @@ public class DEROctetString
     {
         out.writeEncoded(OCTET_STRING, string);
     }
+
+    static void encode(
+        DEROutputStream derOut,
+        byte[]          bytes)
+        throws IOException
+    {
+        derOut.writeEncoded(DERTags.OCTET_STRING, bytes);
+    }
 }
