@@ -30,7 +30,7 @@ public class InputStreamTest
         }
         catch (IOException e)
         {
-            if (!e.getMessage().equals("DER length more than 4 bytes"))
+            if (!e.getMessage().startsWith("DER length more than 4 bytes"))
             {
                 fail("wrong exception: " + e.getMessage());
             }

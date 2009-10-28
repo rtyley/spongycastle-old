@@ -1,6 +1,8 @@
 package org.bouncycastle.bcpg;
 
-import java.io.*;
+import java.io.IOException;
+
+import org.bouncycastle.util.Strings;
 
 /**
  * generic literal data packet.
@@ -9,7 +11,7 @@ public class LiteralDataPacket
     extends InputStreamPacket
 {
     int     format;
-    char[]  fileName;
+    byte[]  fileName;
     long    modDate;
     
     LiteralDataPacket(
@@ -21,12 +23,12 @@ public class LiteralDataPacket
         format = in.read();    
         int    l = in.read();
         
-        fileName = new char[l];
+        fileName = new byte[l];
         for (int i = 0; i != fileName.length; i++)
         {
-            fileName[i] = (char)in.read();
+            fileName[i] = (byte)in.read();
         }
-        
+
         modDate = ((long)in.read() << 24) | (in.read() << 16) | (in.read() << 8) | in.read();
     }
     
@@ -55,7 +57,7 @@ public class LiteralDataPacket
      */
     public String getFileName()
     {
-        return new String(fileName);
+        return Strings.fromUTF8ByteArray(fileName);
     }
 
     public byte[] getRawFileName()
@@ -64,7 +66,7 @@ public class LiteralDataPacket
 
         for (int i = 0; i != tmp.length; i++)
         {
-            tmp[i] = (byte)fileName[i];
+            tmp[i] = fileName[i];
         }
 
         return tmp;
