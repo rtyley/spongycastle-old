@@ -1,5 +1,23 @@
 package org.bouncycastle.cms;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Signature;
+import java.security.cert.CRLException;
+import java.security.cert.CertStore;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CollectionCertStoreParameters;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -7,8 +25,8 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -20,24 +38,6 @@ import org.bouncycastle.x509.NoSuchStoreException;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509Store;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.Provider;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CollectionCertStoreParameters;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 class CMSSignedHelper
 {
@@ -460,5 +460,15 @@ class CMSSignedHelper
         }
 
         return algId;
+    }
+
+    void setSigningEncryptionAlgorithmMapping(DERObjectIdentifier oid, String algorithmName)
+    {
+        encryptionAlgs.put(oid.getId(), algorithmName);
+    }
+
+    void setSigningDigestAlgorithmMapping(DERObjectIdentifier oid, String algorithmName)
+    {
+        digestAlgs.put(oid.getId(), algorithmName);
     }
 }
