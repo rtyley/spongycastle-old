@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
@@ -22,7 +23,6 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -32,7 +32,9 @@ import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.cms.CMSConfig;
 import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
@@ -42,7 +44,6 @@ import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
@@ -647,6 +648,59 @@ public class SignedDataTest
         //
         MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
         
+        verifySignatures(s, md.digest("Hello world!".getBytes()));
+    }
+
+    public void testSHA1WithRSAViaConfig()
+        throws Exception
+    {
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        CertStore           certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        // set some bogus mappings.
+        CMSConfig.setSigningEncryptionAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption.getId(), "XXXX");
+        CMSConfig.setSigningDigestAlgorithmMapping(OIWObjectIdentifiers.idSHA1.getId(), "YYYY");
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+
+        gen.addCertificatesAndCRLs(certs);
+
+        CMSSignedData s;
+
+        try
+        {
+            // try the bogus mappings
+            s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            if (!e.getMessage().startsWith("no such algorithm: YYYYwithXXXX"))
+            {
+                throw e;
+            }
+        }
+        finally
+        {
+            // reset to the real ones
+            CMSConfig.setSigningEncryptionAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption.getId(), "RSA");
+            CMSConfig.setSigningDigestAlgorithmMapping(OIWObjectIdentifiers.idSHA1.getId(), "SHA1"); 
+        }
+
+        s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+
+        //
+        // compute expected content digest
+        //
+        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+
         verifySignatures(s, md.digest("Hello world!".getBytes()));
     }
 
