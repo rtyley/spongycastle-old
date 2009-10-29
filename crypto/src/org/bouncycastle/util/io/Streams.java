@@ -77,7 +77,9 @@ public final class Streams
         {
             total += numRead;
             if (total > limit)
+            {
                 throw new StreamOverflowException("Data Overflow");
+            }
             outStr.write(bs, 0, numRead);
         }
         return total;

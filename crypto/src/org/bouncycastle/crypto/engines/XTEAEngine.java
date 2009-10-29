@@ -108,7 +108,9 @@ public class XTEAEngine
     {
         int i, j;
         for (i = j = 0; i < 4; i++,j+=4)
+        {
             _S[i] = bytesToInt(key, j);
+        }
             
         for (i = j = 0; i < rounds; i++)
         {

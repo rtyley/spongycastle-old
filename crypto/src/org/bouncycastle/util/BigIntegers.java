@@ -47,15 +47,15 @@ public final class BigIntegers
         BigInteger      max,
         SecureRandom    random)
     {
-    	int cmp = min.compareTo(max);
+        int cmp = min.compareTo(max);
         if (cmp >= 0)
         {
-        	if (cmp > 0)
-        	{
-            	throw new IllegalArgumentException("'min' may not be greater than 'max'");
-        	}
+            if (cmp > 0)
+            {
+                throw new IllegalArgumentException("'min' may not be greater than 'max'");
+            }
 
-			return min;
+            return min;
         }
 
         if (min.bitLength() > max.bitLength() / 2)

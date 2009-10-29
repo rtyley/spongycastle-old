@@ -290,11 +290,13 @@ public class Grain128Engine
         return (byte)(in ^ getKeyStream());
     }
 
-    private byte getKeyStream() {
-		if (index > 3) {
-			oneRound();
-			index = 0;
-		}
-		return out[index++];
-	}
+    private byte getKeyStream()
+    {
+        if (index > 3)
+        {
+            oneRound();
+            index = 0;
+        }
+        return out[index++];
+    }
 }

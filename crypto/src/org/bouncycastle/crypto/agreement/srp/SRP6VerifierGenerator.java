@@ -40,7 +40,7 @@ public class SRP6VerifierGenerator
      */
     public BigInteger generateVerifier(byte[] salt, byte[] identity, byte[] password)
     {
-    	BigInteger x = SRP6Util.calculateX(digest, N, salt, identity, password);
+        BigInteger x = SRP6Util.calculateX(digest, N, salt, identity, password);
 
         return g.modPow(x, N);
     }

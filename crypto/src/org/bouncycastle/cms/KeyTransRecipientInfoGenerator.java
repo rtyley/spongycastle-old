@@ -22,7 +22,8 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 
-class KeyTransRecipientInfoGenerator implements RecipientInfoGenerator
+class KeyTransRecipientInfoGenerator
+    implements RecipientInfoGenerator
 {
     // TODO Pass recipId, keyEncAlg instead?
     private TBSCertificateStructure recipientTBSCert;
@@ -60,7 +61,8 @@ class KeyTransRecipientInfoGenerator implements RecipientInfoGenerator
         {
             info = SubjectPublicKeyInfo.getInstance(ASN1Object
                     .fromByteArray(recipientPublicKey.getEncoded()));
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             throw new IllegalArgumentException(
                     "can't extract key algorithm from this key");
@@ -86,18 +88,21 @@ class KeyTransRecipientInfoGenerator implements RecipientInfoGenerator
             keyCipher.init(Cipher.WRAP_MODE, recipientPublicKey, random);
 
             encKey = new DEROctetString(keyCipher.wrap(key));
-        } catch (GeneralSecurityException e) // some providers do not support
+        }
+        catch (GeneralSecurityException e) // some providers do not support
         // wrap
         {
             keyCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
 
             encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
-        } catch (IllegalStateException e) // some providers do not support wrap
+        }
+        catch (IllegalStateException e) // some providers do not support wrap
         {
             keyCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
 
             encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
-        } catch (UnsupportedOperationException e) // some providers do not
+        }
+        catch (UnsupportedOperationException e) // some providers do not
         // support wrap
         {
             keyCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
@@ -112,7 +117,8 @@ class KeyTransRecipientInfoGenerator implements RecipientInfoGenerator
                     recipientTBSCert.getIssuer(), recipientTBSCert
                             .getSerialNumber().getValue());
             recipId = new RecipientIdentifier(issuerAndSerial);
-        } else
+        }
+        else
         {
             recipId = new RecipientIdentifier(subjectKeyIdentifier);
         }

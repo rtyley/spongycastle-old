@@ -1,38 +1,5 @@
 package org.bouncycastle.mail.smime.validator;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.cms.Attribute;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSAttributes;
-import org.bouncycastle.asn1.cms.Time;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.i18n.ErrorBundle;
-import org.bouncycastle.i18n.filter.TrustedInput;
-import org.bouncycastle.i18n.filter.UntrustedInput;
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.mail.smime.SMIMESigned;
-import org.bouncycastle.x509.CertPathReviewerException;
-import org.bouncycastle.x509.PKIXCertPathReviewer;
-
-import javax.mail.Address;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.MessagingException;
-
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -60,6 +27,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+
+import javax.mail.Address;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.Time;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.i18n.filter.TrustedInput;
+import org.bouncycastle.i18n.filter.UntrustedInput;
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.mail.smime.SMIMESigned;
+import org.bouncycastle.x509.CertPathReviewerException;
+import org.bouncycastle.x509.PKIXCertPathReviewer;
 
 public class SignedMailValidator
 {
@@ -179,24 +179,28 @@ public class SignedMailValidator
 
             // save "from" addresses from message
             Address[] froms = message.getFrom();
-	    InternetAddress sender = null;
-	    try {
-		    if(message.getHeader("Sender") != null) {
-		     sender = new InternetAddress(message.getHeader("Sender")[0]);
-		    }
-	    }
-	    catch (MessagingException ex) {
-		    //ignore garbage in Sender: header
-	    }
-            fromAddresses = new String[froms.length + (sender!=null?1:0)];
-            for (int i = 0; i < froms.length; i++)
+        InternetAddress sender = null;
+        try
+        {
+            if(message.getHeader("Sender") != null)
             {
-                InternetAddress inetAddr = (InternetAddress) froms[i];
-                fromAddresses[i] = inetAddr.getAddress();
+                sender = new InternetAddress(message.getHeader("Sender")[0]);
             }
-	    if(sender!=null) {
-		    fromAddresses[froms.length] = sender.getAddress();
-	    }
+        }
+        catch (MessagingException ex)
+        {
+            //ignore garbage in Sender: header
+        }
+        fromAddresses = new String[froms.length + (sender!=null?1:0)];
+        for (int i = 0; i < froms.length; i++)
+        {
+            InternetAddress inetAddr = (InternetAddress) froms[i];
+            fromAddresses[i] = inetAddr.getAddress();
+        }
+        if(sender!=null)
+        {
+            fromAddresses[froms.length] = sender.getAddress();
+        }
 
             // initialize results
             results = new HashMap();

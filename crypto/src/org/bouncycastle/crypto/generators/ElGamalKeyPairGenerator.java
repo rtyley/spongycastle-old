@@ -30,7 +30,7 @@ public class ElGamalKeyPairGenerator
 
     public AsymmetricCipherKeyPair generateKeyPair()
     {
-		DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
+        DHKeyGeneratorHelper helper = DHKeyGeneratorHelper.INSTANCE;
         ElGamalParameters egp = param.getParameters();
         DHParameters dhp = new DHParameters(egp.getP(), egp.getG(), null, egp.getL());  
 

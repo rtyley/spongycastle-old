@@ -58,7 +58,7 @@ public class SRP6Server
     {
         BigInteger k = SRP6Util.calculateK(digest, N, g);
         this.b = selectPrivateValue();
-    	this.B = k.multiply(v).mod(N).add(g.modPow(b, N)).mod(N);
+        this.B = k.multiply(v).mod(N).add(g.modPow(b, N)).mod(N);
 
         return B;
     }
@@ -80,11 +80,11 @@ public class SRP6Server
 
     protected BigInteger selectPrivateValue()
     {
-    	return SRP6Util.generatePrivateValue(digest, N, g, random);    	
+        return SRP6Util.generatePrivateValue(digest, N, g, random);        
     }
 
-	private BigInteger calculateS()
+    private BigInteger calculateS()
     {
-		return v.modPow(u, N).multiply(A).mod(N).modPow(b, N);
+        return v.modPow(u, N).multiply(A).mod(N).modPow(b, N);
     }
 }
