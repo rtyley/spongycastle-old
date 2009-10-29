@@ -1,8 +1,8 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.Arrays;
-
 import java.io.IOException;
+
+import org.bouncycastle.util.Arrays;
 
 /**
  * We insert one of these when we find a tag we don't recognise.
@@ -68,7 +68,7 @@ public class DERUnknownTag
         DERUnknownTag other = (DERUnknownTag)o;
 
         return isConstructed == other.isConstructed
-        	&& tag == other.tag
+            && tag == other.tag
             && Arrays.areEqual(data, other.data);
     }
     

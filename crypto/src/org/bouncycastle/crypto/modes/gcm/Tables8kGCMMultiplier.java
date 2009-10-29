@@ -38,7 +38,8 @@ public class Tables8kGCMMultiplier implements GCMMultiplier
             M[0][j] = tmp;
         }
 
-        for (int i = 0;;)
+        int i = 0;
+        for (;;)
         {
             for (int j = 2; j < 16; j += j)
             {
@@ -52,7 +53,10 @@ public class Tables8kGCMMultiplier implements GCMMultiplier
                 }
             }
 
-            if (++i == 32) return;
+            if (++i == 32)
+            {
+                return;
+            }
 
             if (i > 1)
             {

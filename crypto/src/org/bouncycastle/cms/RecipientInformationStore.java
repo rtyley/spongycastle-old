@@ -2,7 +2,6 @@ package org.bouncycastle.cms;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.Map;
 
 public class RecipientInformationStore
 {
-    private final ArrayList all; //ArrayList[RecipientInformation]
+    private final List      all; //ArrayList[RecipientInformation]
     private final Map       table = new HashMap(); // HashMap[RecipientID, ArrayList[RecipientInformation]]
 
     public RecipientInformationStore(
@@ -23,7 +22,7 @@ public class RecipientInformationStore
             RecipientInformation recipientInformation = (RecipientInformation)it.next();
             RecipientId rid = recipientInformation.getRID();
 
-            ArrayList list = (ArrayList)table.get(rid);
+            List list = (ArrayList)table.get(rid);
             if (list == null)
             {
                 list = new ArrayList(1);
@@ -46,7 +45,7 @@ public class RecipientInformationStore
     public RecipientInformation get(
         RecipientId selector)
     {
-        ArrayList list = (ArrayList)table.get(selector);
+        List list = (ArrayList)table.get(selector);
 
         return list == null ? null : (RecipientInformation) list.get(0);
     }
@@ -80,7 +79,7 @@ public class RecipientInformationStore
     public Collection getRecipients(
         RecipientId selector)
     {
-        ArrayList list = (ArrayList)table.get(selector);
+        List list = (ArrayList)table.get(selector);
 
         return list == null ? new ArrayList() : new ArrayList(list);
     }

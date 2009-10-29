@@ -89,7 +89,9 @@ public class DSADigestSigner
     public byte[] generateSignature()
     {
         if (!forSigning)
+        {
             throw new IllegalStateException("DSADigestSigner not initialised for signature generation.");
+        }
 
         byte[] hash = new byte[digest.getDigestSize()];
         digest.doFinal(hash, 0);
@@ -103,7 +105,9 @@ public class DSADigestSigner
         byte[] signature)
     {
         if (forSigning)
+        {
             throw new IllegalStateException("DSADigestSigner not initialised for verification");
+        }
 
         byte[] hash = new byte[digest.getDigestSize()];
         digest.doFinal(hash, 0);

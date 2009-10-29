@@ -1,5 +1,15 @@
 package org.bouncycastle.cms;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.AlgorithmParameters;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1SequenceParser;
@@ -16,16 +26,6 @@ import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
 import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.AlgorithmParameters;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Parsing class for an CMS Enveloped Data object from an input stream.
@@ -86,7 +86,7 @@ public class CMSEnvelopedDataParser
         this._envelopedData = new EnvelopedDataParser((ASN1SequenceParser)_contentInfo.getContent(DERTags.SEQUENCE));
 
         // TODO Validate version?
-		//DERInteger version = this._envelopedData.getVersion();
+        //DERInteger version = this._envelopedData.getVersion();
 
         //
         // load the RecipientInfoStore

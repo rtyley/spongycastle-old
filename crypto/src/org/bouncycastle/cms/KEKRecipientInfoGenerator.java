@@ -20,7 +20,8 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-class KEKRecipientInfoGenerator implements RecipientInfoGenerator
+class KEKRecipientInfoGenerator
+    implements RecipientInfoGenerator
 {
     // IssuerAndSerialNumber encSid;
     // AlgorithmIdentifier keyEncAlg;
@@ -68,11 +69,13 @@ class KEKRecipientInfoGenerator implements RecipientInfoGenerator
         {
             return new AlgorithmIdentifier(new DERObjectIdentifier(
                     "1.2.840.113549.1.9.16.3.6"), new DERNull());
-        } else if (algorithm.startsWith("RC2"))
+        }
+        else if (algorithm.startsWith("RC2"))
         {
             return new AlgorithmIdentifier(new DERObjectIdentifier(
                     "1.2.840.113549.1.9.16.3.7"), new DERInteger(58));
-        } else if (algorithm.startsWith("AES"))
+        }
+        else if (algorithm.startsWith("AES"))
         {
             int length = key.getEncoded().length * 8;
             DERObjectIdentifier wrapOid;
@@ -80,24 +83,29 @@ class KEKRecipientInfoGenerator implements RecipientInfoGenerator
             if (length == 128)
             {
                 wrapOid = NISTObjectIdentifiers.id_aes128_wrap;
-            } else if (length == 192)
+            }
+            else if (length == 192)
             {
                 wrapOid = NISTObjectIdentifiers.id_aes192_wrap;
-            } else if (length == 256)
+            }
+            else if (length == 256)
             {
                 wrapOid = NISTObjectIdentifiers.id_aes256_wrap;
-            } else
+            }
+            else
             {
                 throw new IllegalArgumentException("illegal keysize in AES");
             }
 
             return new AlgorithmIdentifier(wrapOid); // parameters absent
-        } else if (algorithm.startsWith("SEED"))
+        }
+        else if (algorithm.startsWith("SEED"))
         {
             // parameters absent
             return new AlgorithmIdentifier(
                     KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap);
-        } else if (algorithm.startsWith("Camellia"))
+        }
+        else if (algorithm.startsWith("Camellia"))
         {
             int length = key.getEncoded().length * 8;
             DERObjectIdentifier wrapOid;
@@ -105,13 +113,16 @@ class KEKRecipientInfoGenerator implements RecipientInfoGenerator
             if (length == 128)
             {
                 wrapOid = NTTObjectIdentifiers.id_camellia128_wrap;
-            } else if (length == 192)
+            }
+            else if (length == 192)
             {
                 wrapOid = NTTObjectIdentifiers.id_camellia192_wrap;
-            } else if (length == 256)
+            }
+            else if (length == 256)
             {
                 wrapOid = NTTObjectIdentifiers.id_camellia256_wrap;
-            } else
+            }
+            else
             {
                 throw new IllegalArgumentException(
                         "illegal keysize in Camellia");
@@ -119,7 +130,8 @@ class KEKRecipientInfoGenerator implements RecipientInfoGenerator
 
             return new AlgorithmIdentifier(wrapOid); // parameters must be
                                                      // absent
-        } else
+        }
+        else
         {
             throw new IllegalArgumentException("unknown algorithm");
         }

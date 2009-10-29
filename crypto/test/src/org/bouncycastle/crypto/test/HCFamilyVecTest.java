@@ -79,7 +79,9 @@ public class HCFamilyVecTest
         {
             String line = r.readLine();
             if (line == null)
+            {
                 break;
+            }
 
             line = line.trim();
 
@@ -147,7 +149,9 @@ public class HCFamilyVecTest
             int end = Integer.parseInt(lead.substring(posB + 2, posC));
 
             if (start % 64 != 0 || (end - start != 63))
+            {
                 throw new IllegalStateException(vectorName + ": " + lead + " not on 64 byte boundaries");
+            }
 
             while (pos < end)
             {

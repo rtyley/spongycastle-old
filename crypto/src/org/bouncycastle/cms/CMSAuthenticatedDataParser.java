@@ -1,23 +1,5 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1OctetStringParser;
-import org.bouncycastle.asn1.ASN1SequenceParser;
-import org.bouncycastle.asn1.ASN1SetParser;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTags;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
-import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.cms.AuthenticatedDataParser;
-import org.bouncycastle.asn1.cms.ContentInfoParser;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.util.Arrays;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +9,24 @@ import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.ASN1SetParser;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTags;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.AuthenticatedDataParser;
+import org.bouncycastle.asn1.cms.ContentInfoParser;
+import org.bouncycastle.asn1.cms.KEKRecipientInfo;
+import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
+import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
+import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
+import org.bouncycastle.asn1.cms.RecipientInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.util.Arrays;
 
 /**
  * Parsing class for an CMS Authenticated Data object from an input stream.
@@ -96,7 +96,7 @@ public class CMSAuthenticatedDataParser
         this.authData = new AuthenticatedDataParser((ASN1SequenceParser)_contentInfo.getContent(DERTags.SEQUENCE));
 
         // TODO Validate version?
-		//DERInteger version = this.authData.getVersion();
+        //DERInteger version = this.authData.getVersion();
 
         //
         // load the RecipientInfoStore

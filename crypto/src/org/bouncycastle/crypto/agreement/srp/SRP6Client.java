@@ -80,7 +80,7 @@ public class SRP6Client
 
     protected BigInteger selectPrivateValue()
     {
-    	return SRP6Util.generatePrivateValue(digest, N, g, random);    	
+        return SRP6Util.generatePrivateValue(digest, N, g, random);        
     }
 
     private BigInteger calculateS()

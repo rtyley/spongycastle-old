@@ -44,7 +44,9 @@ abstract class GCMUtil
             int b = block[i] & 0xff;
             block[i] = (byte) ((b >>> 1) | bit);
             if (++i == 16)
+            {
                 break;
+            }
             bit = (b & 1) << 7;
         }
     }
@@ -57,7 +59,10 @@ abstract class GCMUtil
         {
             int b = block[i];
             block[i] = (b >>> 1) | bit;
-            if (++i == 4) break;
+            if (++i == 4)
+            {
+                break;
+            }
             bit = b << 31;
         }
     }

@@ -2,7 +2,8 @@ package org.bouncycastle.crypto.modes.gcm;
 
 import org.bouncycastle.crypto.util.Pack;
 
-public class Tables64kGCMMultiplier implements GCMMultiplier
+public class Tables64kGCMMultiplier
+    implements GCMMultiplier
 {
     private final int[][][] M = new int[16][256][];
 
@@ -18,7 +19,9 @@ public class Tables64kGCMMultiplier implements GCMMultiplier
             GCMUtil.multiplyP(tmp);
             M[0][j] = tmp;
         }
-        for (int i = 0;;)
+
+        int i = 0;
+        for (;;)
         {
             for (int j = 2; j < 256; j += j)
             {
@@ -32,7 +35,10 @@ public class Tables64kGCMMultiplier implements GCMMultiplier
                 }
             }
 
-            if (++i == 16) return;
+            if (++i == 16)
+            {
+                return;
+            }
 
             M[i][0] = new int[4];
             for (int j = 128; j > 0; j >>= 1)
