@@ -29,6 +29,10 @@ public class SEEDTest
             new KeyParameter(Hex.decode("28DBC3BC49FFD87DCFA509B11D422BE7")),
             "B41E6BE2EBA84A148E2EED84593C5EC7",
             "9B9B7BFCD1813CB95D0B3618F40F5122"),
+        new BlockCipherVectorTest(0, new SEEDEngine(),
+            new KeyParameter(Hex.decode("0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E")),
+            "0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E0E",
+            "8296F2F1B007AB9D533FDEE35A9AD850"),
     };
 
     SEEDTest()
