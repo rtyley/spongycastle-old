@@ -1,6 +1,8 @@
 package org.bouncycastle.jce.provider;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.ECParameterSpec;
@@ -45,7 +47,7 @@ public class JCEECPrivateKey
 
     private DERBitString publicKey;
 
-    private PKCS12BagAttributeCarrier attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    private PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected JCEECPrivateKey()
     {
@@ -185,12 +187,17 @@ public class JCEECPrivateKey
     JCEECPrivateKey(
         PrivateKeyInfo      info)
     {
-        X962Parameters      params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
+        populateFromPrivKeyInfo(info);
+    }
+
+    private void populateFromPrivKeyInfo(PrivateKeyInfo info)
+    {
+        X962Parameters params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
 
         if (params.isNamedCurve())
         {
             DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
-            X9ECParameters      ecP = ECUtil.getNamedCurveByOid(oid);
+            X9ECParameters ecP = ECUtil.getNamedCurveByOid(oid);
 
             if (ecP == null) // GOST Curve
             {
@@ -246,7 +253,7 @@ public class JCEECPrivateKey
         }
         else
         {
-            ECPrivateKeyStructure   ec = new ECPrivateKeyStructure((ASN1Sequence)info.getPrivateKey());
+            ECPrivateKeyStructure ec = new ECPrivateKeyStructure((ASN1Sequence)info.getPrivateKey());
 
             this.d = ec.getKey();
             this.publicKey = ec.getPublicKey();
@@ -426,5 +433,31 @@ public class JCEECPrivateKey
         {   // should never happen
             return null;
         }
+    }
+
+    private void readObject(
+        ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        byte[] enc = (byte[])in.readObject();
+
+        populateFromPrivKeyInfo(PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(enc)));
+
+        this.algorithm = (String)in.readObject();
+        this.withCompression = in.readBoolean();
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
+
+        attrCarrier.readObject(in);
+    }
+
+    private void writeObject(
+        ObjectOutputStream out)
+        throws IOException
+    {
+        out.writeObject(this.getEncoded());
+        out.writeObject(algorithm);
+        out.writeBoolean(withCompression);
+
+        attrCarrier.writeObject(out);
     }
 }

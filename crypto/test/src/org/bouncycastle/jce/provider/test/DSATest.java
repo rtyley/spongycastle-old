@@ -644,7 +644,19 @@ public class DSATest
         {
             fail("ECDSA verification failed");
         }
-        
+
+        //
+        // key decoding test - serialisation test
+        //
+
+        PublicKey eck1 = (PublicKey)serializeDeserialize(vKey);
+
+        checkEquals(eck1, vKey);
+
+        PrivateKey eck2 = (PrivateKey)serializeDeserialize(sKey);
+
+        checkEquals(eck2, sKey);
+
         //
         // ECDSA F2m generation test
         //
@@ -686,8 +698,28 @@ public class DSATest
         {
             fail("ECDSA verification failed");
         }
+
+        //
+        // key decoding test - serialisation test
+        //
+
+        eck1 = (PublicKey)serializeDeserialize(vKey);
+
+        checkEquals(eck1, vKey);
+
+        eck2 = (PrivateKey)serializeDeserialize(sKey);
+
+        checkEquals(eck2, sKey);
     }
 
+    private void checkEquals(Object o1, Object o2)
+    {
+        if (!o1.equals(o2))
+        {
+            fail("comparison test failed");
+        }
+    }
+    
     private void testParameters()
         throws Exception
     {
