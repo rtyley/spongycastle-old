@@ -1,7 +1,10 @@
 package org.bouncycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
@@ -257,6 +260,33 @@ public class ECDSA5Test
         }
 
         testKeyFactory((ECPublicKey)vKey, (ECPrivateKey)sKey);
+        testSerialise((ECPublicKey)vKey, (ECPrivateKey)sKey);
+    }
+
+    private void testSerialise(ECPublicKey ecPublicKey, ECPrivateKey ecPrivateKey)
+        throws Exception
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ObjectOutputStream oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(ecPublicKey);
+        oOut.writeObject(ecPrivateKey);
+        oOut.close();
+
+        ObjectInputStream oIn = new ObjectInputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+        PublicKey pubKey = (PublicKey)oIn.readObject();
+        PrivateKey privKey = (PrivateKey)oIn.readObject();
+
+        if (!ecPublicKey.equals(pubKey))
+        {
+            fail("public key serialisation check failed");
+        }
+
+        if (!ecPrivateKey.equals(privKey))
+        {
+            fail("private key serialisation check failed");
+        }
     }
 
     private void testKeyFactory(ECPublicKey pub, ECPrivateKey priv)

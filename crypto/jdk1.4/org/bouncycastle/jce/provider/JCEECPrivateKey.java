@@ -1,6 +1,8 @@
 package org.bouncycastle.jce.provider;
 
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Enumeration;
@@ -47,7 +49,7 @@ public class JCEECPrivateKey
 
     private DERBitString publicKey;
 
-    private PKCS12BagAttributeCarrier attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    private PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected JCEECPrivateKey()
     {
@@ -121,6 +123,11 @@ public class JCEECPrivateKey
 
     JCEECPrivateKey(
         PrivateKeyInfo      info)
+    {
+        populateFromPrivKeyInfo(info);
+    }
+
+    private void populateFromPrivKeyInfo(PrivateKeyInfo info)
     {
         X962Parameters      params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
 
@@ -281,62 +288,6 @@ public class JCEECPrivateKey
         return d;
     }
 
-/*
-    private void readObject(
-        ObjectInputStream   in)
-        throws IOException, ClassNotFoundException
-    {
-        in.defaultReadObject();
-
-        boolean named = in.readBoolean();
-
-        if (named)
-        {
-            ecSpec = new ECNamedCurveParameterSpec(
-                        in.readUTF(),
-                        (ECCurve)in.readObject(),
-                        (ECPoint)in.readObject(),
-                        (BigInteger)in.readObject(),
-                        (BigInteger)in.readObject(),
-                        (byte[])in.readObject());
-        }
-        else
-        {
-            ecSpec = new ECParameterSpec(
-                        (ECCurve)in.readObject(),
-                        (ECPoint)in.readObject(),
-                        (BigInteger)in.readObject(),
-                        (BigInteger)in.readObject(),
-                        (byte[])in.readObject());
-        }
-    }
-
-    private void writeObject(
-        ObjectOutputStream  out)
-        throws IOException
-    {
-        out.defaultWriteObject();
-
-        if (this.ecSpec instanceof ECNamedCurveParameterSpec)
-        {
-            ECNamedCurveParameterSpec   namedSpec = (ECNamedCurveParameterSpec)ecSpec;
-
-            out.writeBoolean(true);
-            out.writeUTF(namedSpec.getName());
-        }
-        else
-        {
-            out.writeBoolean(false);
-        }
-
-        out.writeObject(ecSpec.getCurve());
-        out.writeObject(ecSpec.getG());
-        out.writeObject(ecSpec.getN());
-        out.writeObject(ecSpec.getH());
-        out.writeObject(ecSpec.getSeed());
-    }
-*/
-
     public void setBagAttribute(
         DERObjectIdentifier oid,
         DEREncodable        attribute)
@@ -399,5 +350,31 @@ public class JCEECPrivateKey
         {   // should never happen
             return null;
         }
+    }
+
+    private void readObject(
+        ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        byte[] enc = (byte[])in.readObject();
+
+        populateFromPrivKeyInfo(PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(enc)));
+
+        this.algorithm = (String)in.readObject();
+        this.withCompression = in.readBoolean();
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
+
+        attrCarrier.readObject(in);
+    }
+
+    private void writeObject(
+        ObjectOutputStream out)
+        throws IOException
+    {
+        out.writeObject(this.getEncoded());
+        out.writeObject(algorithm);
+        out.writeBoolean(withCompression);
+
+        attrCarrier.writeObject(out);
     }
 }

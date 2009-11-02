@@ -2,10 +2,13 @@ package org.bouncycastle.jce.provider;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -139,17 +142,20 @@ public class JCEECPublicKey
     JCEECPublicKey(
         SubjectPublicKeyInfo    info)
     {
+        populateFromPubKeyInfo(info);
+    }
+
+    private void populateFromPubKeyInfo(SubjectPublicKeyInfo info)
+    {
         if (info.getAlgorithmId().getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_2001))
         {
-            DERBitString    bits = info.getPublicKeyData();
+            DERBitString bits = info.getPublicKeyData();
             ASN1OctetString key;
             this.algorithm = "ECGOST3410";
-            
+
             try
             {
-                ASN1InputStream         aIn = new ASN1InputStream(bits.getBytes());
-
-                key = (ASN1OctetString)aIn.readObject();
+                key = (ASN1OctetString)ASN1Object.fromByteArray(bits.getBytes());
             }
             catch (IOException ex)
             {
@@ -160,18 +166,18 @@ public class JCEECPublicKey
             byte[]          x = new byte[32];
             byte[]          y = new byte[32];
 
-            for (int i = 0; i != y.length; i++)
+            for (int i = 0; i != x.length; i++)
             {
                 x[i] = keyEnc[32 - 1 - i];
             }
-            
-            for (int i = 0; i != x.length; i++)
+
+            for (int i = 0; i != y.length; i++)
             {
                 y[i] = keyEnc[64 - 1 - i];
             }
 
             gostParams = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
-            
+
             ECNamedCurveParameterSpec spec = ECGOST3410NamedCurveTable.getParameterSpec(ECGOST3410NamedCurves.getName(gostParams.getPublicKeyParamSet()));
 
             ecSpec = spec;
@@ -187,7 +193,7 @@ public class JCEECPublicKey
             {
                 DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
                 X9ECParameters      ecP = ECUtil.getNamedCurveByOid(oid);
-    
+
                 ecSpec = new ECNamedCurveParameterSpec(
                                             ECUtil.getCurveName(oid),
                                             ecP.getCurve(),
@@ -214,15 +220,15 @@ public class JCEECPublicKey
                                             ecP.getSeed());
                 curve = ((ECParameterSpec)ecSpec).getCurve();
             }
-    
+
             DERBitString    bits = info.getPublicKeyData();
             byte[]          data = bits.getBytes();
             ASN1OctetString key = new DEROctetString(data);
-    
+
             //
             // extra octet string - one of our old certs...
             //
-            if (data[0] == 0x04 && data[1] == data.length - 2 
+            if (data[0] == 0x04 && data[1] == data.length - 2
                 && (data[2] == 0x02 || data[2] == 0x03))
             {
                 int qLength = new X9IntegerConverter().getByteLength(curve);
@@ -231,9 +237,7 @@ public class JCEECPublicKey
                 {
                     try
                     {
-                        ASN1InputStream         aIn = new ASN1InputStream(data);
-
-                        key = (ASN1OctetString)aIn.readObject();
+                        key = (ASN1OctetString)ASN1Object.fromByteArray(data);
                     }
                     catch (IOException ex)
                     {
@@ -241,9 +245,9 @@ public class JCEECPublicKey
                     }
                 }
             }
-    
-            X9ECPoint       derQ = new X9ECPoint(curve, key);
-    
+
+            X9ECPoint derQ = new X9ECPoint(curve, key);
+
             this.q = derQ.getPoint();
         }
     }
@@ -392,61 +396,7 @@ public class JCEECPublicKey
         return buf.toString();
 
     }
-/*
-    private void readObject(
-        ObjectInputStream   in)
-        throws IOException, ClassNotFoundException
-    {
-        in.defaultReadObject();
 
-        boolean named = in.readBoolean();
-
-        if (named)
-        {
-            ecSpec = new ECNamedCurveParameterSpec(
-                        in.readUTF(),
-                        (ECCurve)in.readObject(),
-                        (ECPoint)in.readObject(),
-                        (BigInteger)in.readObject(),
-                        (BigInteger)in.readObject(),
-                        (byte[])in.readObject());
-        }
-        else
-        {
-            ecSpec = new ECParameterSpec(
-                        (ECCurve)in.readObject(),
-                        (ECPoint)in.readObject(),
-                        (BigInteger)in.readObject(),
-                        (BigInteger)in.readObject(),
-                        (byte[])in.readObject());
-        }
-    }
-
-    private void writeObject(
-        ObjectOutputStream  out)
-        throws IOException
-    {
-        out.defaultWriteObject();
-
-        if (this.ecSpec instanceof ECNamedCurveParameterSpec)
-        {
-            ECNamedCurveParameterSpec   namedSpec = (ECNamedCurveParameterSpec)ecSpec;
-
-            out.writeBoolean(true);
-            out.writeUTF(namedSpec.getName());
-        }
-        else
-        {
-            out.writeBoolean(false);
-        }
-
-        out.writeObject(ecSpec.getCurve());
-        out.writeObject(ecSpec.getG());
-        out.writeObject(ecSpec.getN());
-        out.writeObject(ecSpec.getH());
-        out.writeObject(ecSpec.getSeed());
-    }
-*/
     public void setPointFormat(String style)
     {
        withCompression = !("UNCOMPRESSED".equalsIgnoreCase(style));
@@ -477,5 +427,26 @@ public class JCEECPublicKey
     public int hashCode()
     {
         return getQ().hashCode() ^ engineGetSpec().hashCode();
+    }
+
+    private void readObject(
+        ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        byte[] enc = (byte[])in.readObject();
+
+        populateFromPubKeyInfo(SubjectPublicKeyInfo.getInstance(ASN1Object.fromByteArray(enc)));
+
+        this.algorithm = (String)in.readObject();
+        this.withCompression = in.readBoolean();
+    }
+
+    private void writeObject(
+        ObjectOutputStream out)
+        throws IOException
+    {
+        out.writeObject(this.getEncoded());
+        out.writeObject(algorithm);
+        out.writeBoolean(withCompression);
     }
 }
