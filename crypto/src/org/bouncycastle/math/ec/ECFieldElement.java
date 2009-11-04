@@ -114,11 +114,13 @@ public abstract class ECFieldElement
                 throw new RuntimeException("not done yet");
             }
 
+            // note: even though this class implements ECConstants don't be tempted to
+            // remove the explicit declaration, some J2ME environments don't cope.
             // p mod 4 == 3
             if (q.testBit(1))
             {
                 // z = g^(u+1) + p, p = 4u + 3
-                ECFieldElement z = new Fp(q, x.modPow(q.shiftRight(2).add(ONE), q));
+                ECFieldElement z = new Fp(q, x.modPow(q.shiftRight(2).add(ECConstants.ONE), q));
 
                 return z.square().equals(this) ? z : null;
             }
