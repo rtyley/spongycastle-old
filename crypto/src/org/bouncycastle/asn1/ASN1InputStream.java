@@ -144,6 +144,8 @@ public class ASN1InputStream
                     }
                 case SET:
                     return DERFactory.createSet(buildDEREncodableVector(defIn), false);
+                case EXTERNAL:
+                    return new DERExternal(buildDEREncodableVector(defIn));                
                 default:
                     return new DERUnknownTag(true, tagNo, defIn.toByteArray());
             }

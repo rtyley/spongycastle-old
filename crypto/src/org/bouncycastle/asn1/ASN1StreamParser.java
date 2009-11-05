@@ -122,6 +122,8 @@ public class ASN1StreamParser
                         return new DERSequenceParser(new ASN1StreamParser(defIn));
                     case DERTags.SET:
                         return new DERSetParser(new ASN1StreamParser(defIn));
+                    case DERTags.EXTERNAL:
+                        return new DERExternalParser(new ASN1StreamParser(defIn));
                     default:
                         // TODO Add DERUnknownTagParser class?
                         return new DERUnknownTag(true, tagNo, defIn.toByteArray());
