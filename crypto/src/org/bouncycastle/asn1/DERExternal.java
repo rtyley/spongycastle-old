@@ -9,7 +9,7 @@ import java.io.IOException;
 public class DERExternal
     extends ASN1Object
 {
-    private DERObjectIdentifier directReferemce;
+    private DERObjectIdentifier directReference;
     private DERInteger indirectReference;
     private ASN1Object dataValueDescriptor;
     private int encoding;
@@ -21,7 +21,7 @@ public class DERExternal
         DERObject enc = vector.get(offset).getDERObject();
         if (enc instanceof DERObjectIdentifier)
         {
-            directReferemce = (DERObjectIdentifier)enc;
+            directReference = (DERObjectIdentifier)enc;
             offset++;
             enc = vector.get(offset).getDERObject();
         }
@@ -43,7 +43,7 @@ public class DERExternal
         }
         DERTaggedObject obj = (DERTaggedObject)enc;
         setEncoding(obj.getTagNo());
-        externalContent = obj.getDERObject();
+        externalContent = obj.getObject();
     }
 
     /**
@@ -70,7 +70,7 @@ public class DERExternal
      */
     public DERExternal(DERObjectIdentifier directReference, DERInteger indirectReference, ASN1Object dataValueDescriptor, int encoding, DERObject externalData)
     {
-        setDirectReferemce(directReference);
+        setDirectReference(directReference);
         setIndirectReference(indirectReference);
         setDataValueDescriptor(dataValueDescriptor);
         setEncoding(encoding);
@@ -83,9 +83,9 @@ public class DERExternal
     public int hashCode()
     {
         int ret = 0;
-        if (directReferemce != null)
+        if (directReference != null)
         {
-            ret = directReferemce.hashCode();
+            ret = directReference.hashCode();
         }
         if (indirectReference != null)
         {
@@ -106,9 +106,9 @@ public class DERExternal
         throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        if (directReferemce != null)
+        if (directReference != null)
         {
-            baos.write(directReferemce.getDEREncoded());
+            baos.write(directReference.getDEREncoded());
         }
         if (indirectReference != null)
         {
@@ -118,7 +118,7 @@ public class DERExternal
         {
             baos.write(dataValueDescriptor.getDEREncoded());
         }
-        DERTaggedObject obj = new DERTaggedObject(DERTags.EXTERNAL, externalContent);
+        DERTaggedObject obj = new DERTaggedObject(encoding, externalContent);
         baos.write(obj.getDEREncoded());
         out.writeEncoded(DERTags.CONSTRUCTED, DERTags.EXTERNAL, baos.toByteArray());
     }
@@ -137,9 +137,9 @@ public class DERExternal
             return true;
         }
         DERExternal other = (DERExternal)o;
-        if (directReferemce != null)
+        if (directReference != null)
         {
-            if (other.directReferemce == null || !other.directReferemce.equals(directReferemce))  
+            if (other.directReference == null || !other.directReference.equals(directReference))  
             {
                 return false;
             }
@@ -174,9 +174,9 @@ public class DERExternal
      * Returns the direct reference of the external element
      * @return The reference
      */
-    public DERObjectIdentifier getDirectReferemce()
+    public DERObjectIdentifier getDirectReference()
     {
-        return directReferemce;
+        return directReference;
     }
 
     /**
@@ -224,9 +224,9 @@ public class DERExternal
      * Sets the direct reference of the external element
      * @param directReferemce The reference
      */
-    private void setDirectReferemce(DERObjectIdentifier directReferemce)
+    private void setDirectReference(DERObjectIdentifier directReferemce)
     {
-        this.directReferemce = directReferemce;
+        this.directReference = directReferemce;
     }
     
     /**
@@ -242,7 +242,7 @@ public class DERExternal
     {
         if (encoding < 0 || encoding > 2)
         {
-            throw new IllegalArgumentException("invalid encoding value");
+            throw new IllegalArgumentException("invalid encoding value: " + encoding);
         }
         this.encoding = encoding;
     }
