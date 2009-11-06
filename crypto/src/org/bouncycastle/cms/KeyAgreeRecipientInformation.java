@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
+import org.bouncycastle.asn1.cms.OriginatorIdentifierOrKey;
 import org.bouncycastle.asn1.cms.OriginatorPublicKey;
 import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
 //import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
@@ -83,9 +84,17 @@ public class KeyAgreeRecipientInformation
     }
 
     private PublicKey getSenderPublicKey(Key receiverPrivateKey,
-        OriginatorPublicKey originatorPublicKey, Provider prov)
-        throws GeneralSecurityException, IOException
+        OriginatorIdentifierOrKey originator, Provider prov)
+        throws CMSException, GeneralSecurityException, IOException
     {
+        OriginatorPublicKey originatorPublicKey = originator.getOriginatorKey();
+        if (originatorPublicKey == null)
+        {
+            // TODO Support all alternatives for OriginatorIdentifierOrKey
+            // see RFC 3852 6.2.2
+            throw new CMSException("No support for 'originator' as IssuerAndSerialNumber or SubjectKeyIdentifier");
+        }
+
         PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(
             ASN1Object.fromByteArray(receiverPrivateKey.getEncoded()));
 
@@ -152,7 +161,7 @@ public class KeyAgreeRecipientInformation
                 ASN1Sequence.getInstance(keyEncAlg.getParameters()).getObjectAt(0)).getId();
 
             PublicKey senderPublicKey = getSenderPublicKey(receiverPrivateKey,
-                info.getOriginator().getOriginatorKey(), prov);
+                info.getOriginator(), prov);
 
             SecretKey agreedWrapKey = calculateAgreedWrapKey(wrapAlg,
                 senderPublicKey, receiverPrivateKey, prov);
