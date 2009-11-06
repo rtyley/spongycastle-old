@@ -24,8 +24,8 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
  * with the schemes ECKAS-DH1 and DL/ECKAS-DH2. It does not assume the
  * validity of the input public key (see also Section 7.2.1).
  * <p>
- * Note: As stated P1363 compatability mode with ECDH can be preset, and
- * in this case the implementation doesn't have a ECDH compatability mode
+ * Note: As stated P1363 compatibility mode with ECDH can be preset, and
+ * in this case the implementation doesn't have a ECDH compatibility mode
  * (if you want that just use ECDHBasicAgreement and note they both implement
  * BasicAgreement!).
  */
