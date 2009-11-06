@@ -27,11 +27,16 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.ECKeyUtil;
 import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.BigIntegers;
@@ -321,6 +326,45 @@ public class ECDSA5Test
         }
     }
 
+    private void testKeyConversion()
+        throws Exception
+    {
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        kpGen.initialize(new ECGenParameterSpec("prime192v1"));
+
+        KeyPair pair = kpGen.generateKeyPair();
+
+        PublicKey pubKey = ECKeyUtil.publicToExplicitParameters(pair.getPublic(), "BC");
+
+        SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(ASN1Object.fromByteArray(pubKey.getEncoded()));
+        X962Parameters params = X962Parameters.getInstance(info.getAlgorithmId().getParameters());
+
+        if (params.isNamedCurve() || params.isImplicitlyCA())
+        {
+            fail("public key conversion to explicit failed");
+        }
+
+        if (!((ECPublicKey)pair.getPublic()).getW().equals(((ECPublicKey)pubKey).getW()))
+        {
+            fail("public key conversion check failed");
+        }
+
+        PrivateKey privKey = ECKeyUtil.privateToExplicitParameters(pair.getPrivate(), "BC");
+        PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(privKey.getEncoded()));
+        params = X962Parameters.getInstance(privInfo.getAlgorithmId().getParameters());
+
+        if (params.isNamedCurve() || params.isImplicitlyCA())
+        {
+            fail("private key conversion to explicit failed");
+        }
+
+        if (!((ECPrivateKey)pair.getPrivate()).getS().equals(((ECPrivateKey)privKey).getS()))
+        {
+            fail("private key conversion check failed");
+        }
+    }
+
     private void testKeyPairGenerationWithOIDs()
         throws Exception
     {
@@ -383,6 +427,7 @@ public class ECDSA5Test
     public void performTest()
         throws Exception
     {
+        testKeyConversion();
         decodeTest();
         testECDSA239bitPrime();
         testECDSA239bitBinary();
