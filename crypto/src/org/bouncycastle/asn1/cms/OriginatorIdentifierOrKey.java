@@ -6,36 +6,49 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 
 public class OriginatorIdentifierOrKey
     extends ASN1Encodable
 {
     private DEREncodable id;
-    
+
     public OriginatorIdentifierOrKey(
         IssuerAndSerialNumber id)
     {
         this.id = id;
     }
-    
+
+    /**
+     * @deprecated use version taking a SubjectKeyIdentifier
+     */
     public OriginatorIdentifierOrKey(
         ASN1OctetString id)
     {
+        this(new SubjectKeyIdentifier(id));
+    }
+
+    public OriginatorIdentifierOrKey(
+        SubjectKeyIdentifier id)
+    {
         this.id = new DERTaggedObject(false, 0, id);
     }
-    
+
     public OriginatorIdentifierOrKey(
         OriginatorPublicKey id)
     {
         this.id = new DERTaggedObject(false, 1, id);
     }
-    
+
+    /**
+     * @deprecated use more specific version
+     */
     public OriginatorIdentifierOrKey(
         DERObject id)
     {
         this.id = id;
     }
-    
+
     /**
      * return an OriginatorIdentifierOrKey object from a tagged object.
      *
@@ -71,18 +84,48 @@ public class OriginatorIdentifierOrKey
         {
             return (OriginatorIdentifierOrKey)o;
         }
-        
-        if (o instanceof DERObject)
+
+        if (o instanceof IssuerAndSerialNumber)
         {
-            return new OriginatorIdentifierOrKey((DERObject)o);
+            return new OriginatorIdentifierOrKey((IssuerAndSerialNumber)o);
         }
-        
+
+        if (o instanceof SubjectKeyIdentifier)
+        {
+            return new OriginatorIdentifierOrKey((SubjectKeyIdentifier)o);
+        }
+
+        if (o instanceof OriginatorPublicKey)
+        {
+            return new OriginatorIdentifierOrKey((OriginatorPublicKey)o);
+        }
+
         throw new IllegalArgumentException("Invalid OriginatorIdentifierOrKey: " + o.getClass().getName());
-    } 
+    }
 
     public DEREncodable getId()
     {
         return id;
+    }
+
+    public IssuerAndSerialNumber getIssuerAndSerialNumber()
+    {
+        if (id instanceof IssuerAndSerialNumber)
+        {
+            return (IssuerAndSerialNumber)id;
+        }
+
+        return null;
+    }
+
+    public SubjectKeyIdentifier getSubjectKeyIdentifier()
+    {
+        if (id instanceof ASN1TaggedObject && ((ASN1TaggedObject)id).getTagNo() == 0)
+        {
+            return SubjectKeyIdentifier.getInstance((ASN1TaggedObject)id, false);
+        }
+
+        return null;
     }
 
     public OriginatorPublicKey getOriginatorKey()
@@ -94,7 +137,7 @@ public class OriginatorIdentifierOrKey
 
         return null;
     }
-    
+
     /**
      * Produce an object suitable for an ASN1OutputStream.
      * <pre>
