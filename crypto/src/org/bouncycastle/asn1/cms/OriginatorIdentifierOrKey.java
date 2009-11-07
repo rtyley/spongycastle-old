@@ -100,6 +100,12 @@ public class OriginatorIdentifierOrKey
             return new OriginatorIdentifierOrKey((OriginatorPublicKey)o);
         }
 
+        if (o instanceof ASN1TaggedObject)
+        {
+            // TODO Add validation
+            return new OriginatorIdentifierOrKey((ASN1TaggedObject)o);
+        }
+
         throw new IllegalArgumentException("Invalid OriginatorIdentifierOrKey: " + o.getClass().getName());
     }
 
