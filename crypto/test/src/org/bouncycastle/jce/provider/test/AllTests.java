@@ -2,11 +2,12 @@ package org.bouncycastle.jce.provider.test;
 
 import java.security.Security;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.test.rsa3.RSA3CertTest;
 import org.bouncycastle.util.test.SimpleTestResult;
-
-import junit.framework.*;
 
 public class AllTests
     extends TestCase
@@ -21,6 +22,10 @@ public class AllTests
             
             if (!result.isSuccessful())
             {
+                if (result.getException() != null)
+                {
+                    result.getException().printStackTrace();
+                }
                 fail(result.toString());
             }
         }
