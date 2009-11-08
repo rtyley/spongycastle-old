@@ -659,6 +659,40 @@ public class EnvelopedDataTest
         }
     }
 
+    public void testECMQVKeyAgree()
+        throws Exception
+    {
+        byte[] data = Hex.decode("504b492d4320434d5320456e76656c6f706564446174612053616d706c65");
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECMQV_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
+
+        CMSEnvelopedData ed = edGen.generate(
+                              new CMSProcessableByteArray(data),
+                              CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(),
+                                   CMSEnvelopedDataGenerator.AES128_CBC);
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        if (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            byte[] recData = recipient.getContent(_reciEcKP.getPrivate(), "BC");
+            assertEquals(true, Arrays.equals(data, recData));
+        }
+        else
+        {
+            fail("no recipient found");
+        }
+    }
+
     public void testECKeyAgreeVectors()
         throws Exception
     {
