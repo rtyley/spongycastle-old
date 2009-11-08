@@ -325,7 +325,7 @@ public class ASN1Dump
         else if (obj instanceof DEREnumerated)
         {
             DEREnumerated en = (DEREnumerated) obj;
-            buf.append(indent + "DER Enumerated(" + en.getValue() + ")");
+            buf.append(indent + "DER Enumerated(" + en.getValue() + ")" + nl);
         }
         else if (obj instanceof DERExternal)
         {
