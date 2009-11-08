@@ -3,28 +3,29 @@ package org.bouncycastle.crypto.test;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.agreement.ECDHCBasicAgreement;
+import org.bouncycastle.crypto.agreement.ECMQVBasicAgreement;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.params.MQVPrivateParameters;
+import org.bouncycastle.crypto.params.MQVPublicParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.ECDSASigner;
-import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.FixedSecureRandom;
 import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.asn1.nist.NISTNamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
 
 /**
  * ECDSA tests are taken from X9.62.
@@ -746,28 +747,10 @@ public class ECTest
              new ECPrivateKeyParameters(
                  new BigInteger("18C13FCED9EADF884F7C595C8CB565DEFD0CB41E", 16), p));
 
-         ECPoint keyA = calculateMqvAgreement(
-             p,
-             (ECPrivateKeyParameters) U1.getPrivate(),
-             (ECPrivateKeyParameters) U2.getPrivate(),
-             (ECPublicKeyParameters) U2.getPublic(),
-             (ECPublicKeyParameters) V1.getPublic(),
-             (ECPublicKeyParameters) V2.getPublic());
+         BigInteger x = calculateAgreement(U1, U2, V1, V2);
 
-         ECPoint keyB = calculateMqvAgreement(
-             p,
-             (ECPrivateKeyParameters) V1.getPrivate(),
-             (ECPrivateKeyParameters) V2.getPrivate(),
-             (ECPublicKeyParameters) V2.getPublic(),
-             (ECPublicKeyParameters) U1.getPublic(),
-             (ECPublicKeyParameters) U2.getPublic());
-
-         // Note: In the actual algorithm, we would need to ensure !keyA.IsInfinity
-         // and the secret is just the ECFieldElement keyA.X
-
-         if (!keyA.equals(keyB)
-             || !keyA.getX().toBigInteger().equals(
-                 new BigInteger("5A6955CEFDB4E43255FB7FCF718611E4DF8E05AC", 16)))
+         if (x == null
+             || !x.equals(new BigInteger("5A6955CEFDB4E43255FB7FCF718611E4DF8E05AC", 16)))
          {
              fail("MQV Test Vector #1 agreement failed");
          }
@@ -805,28 +788,10 @@ public class ECTest
              new ECPrivateKeyParameters(
                  new BigInteger("02BD198B83A667A8D908EA1E6F90FD5C6D695DE94F", 16), p));
 
-         ECPoint keyA = calculateMqvAgreement(
-             p,
-             (ECPrivateKeyParameters) U1.getPrivate(),
-             (ECPrivateKeyParameters) U2.getPrivate(),
-             (ECPublicKeyParameters) U2.getPublic(),
-             (ECPublicKeyParameters) V1.getPublic(),
-             (ECPublicKeyParameters) V2.getPublic());
+         BigInteger x = calculateAgreement(U1, U2, V1, V2);
 
-         ECPoint keyB = calculateMqvAgreement(
-             p,
-             (ECPrivateKeyParameters) V1.getPrivate(),
-             (ECPrivateKeyParameters) V2.getPrivate(),
-             (ECPublicKeyParameters) V2.getPublic(),
-             (ECPublicKeyParameters) U1.getPublic(),
-             (ECPublicKeyParameters) U2.getPublic());
-
-         // Note: In the actual algorithm, we would need to ensure !keyA.IsInfinity
-         // and the secret is just the ECFieldElement keyA.X
-
-         if (!keyA.equals(keyB)
-             || !keyA.getX().toBigInteger().equals(
-                 new BigInteger("038359FFD30C0D5FC1E6154F483B73D43E5CF2B503", 16)))
+         if (x == null
+             || !x.equals(new BigInteger("038359FFD30C0D5FC1E6154F483B73D43E5CF2B503", 16)))
          {
              fail("MQV Test Vector #2 agreement failed");
          }
@@ -859,62 +824,46 @@ public class ECTest
          AsymmetricCipherKeyPair U2 = pGen.generateKeyPair();
          AsymmetricCipherKeyPair V2 = pGen.generateKeyPair();
 
-         ECPoint keyA = calculateMqvAgreement(
-             parameters,
-             (ECPrivateKeyParameters) U1.getPrivate(),
-             (ECPrivateKeyParameters) U2.getPrivate(),
-             (ECPublicKeyParameters) U2.getPublic(),
-             (ECPublicKeyParameters) V1.getPublic(),
-             (ECPublicKeyParameters) V2.getPublic());
+         BigInteger x = calculateAgreement(U1, U2, V1, V2);
 
-         ECPoint keyB = calculateMqvAgreement(
-             parameters,
-             (ECPrivateKeyParameters) V1.getPrivate(),
-             (ECPrivateKeyParameters) V2.getPrivate(),
-             (ECPublicKeyParameters) V2.getPublic(),
-             (ECPublicKeyParameters) U1.getPublic(),
-             (ECPublicKeyParameters) U2.getPublic());
-
-         // Note: In the actual algorithm, we would need to ensure !keyA.IsInfinity
-         // and the secret is just the ECFieldElement keyA.X
-
-         if (!keyA.equals(keyB))
+         if (x == null)
          {
              fail("MQV Test Vector (random) agreement failed");
          }
      }
 
-     // The ECMQV Primitive as described in SEC-1, 3.4
-     private ECPoint calculateMqvAgreement(
-         ECDomainParameters      parameters,
-         ECPrivateKeyParameters  d1U,
-         ECPrivateKeyParameters  d2U,
-         ECPublicKeyParameters   Q2U,
-         ECPublicKeyParameters   Q1V,
-         ECPublicKeyParameters   Q2V)
+     private static BigInteger calculateAgreement(
+         AsymmetricCipherKeyPair U1,
+         AsymmetricCipherKeyPair U2,
+         AsymmetricCipherKeyPair V1,
+         AsymmetricCipherKeyPair V2)
      {
-         BigInteger n = parameters.getN();
-         int e = (n.bitLength() + 1) / 2;
-         BigInteger powE = ECConstants.ONE.shiftLeft(e);
+         ECMQVBasicAgreement u = new ECMQVBasicAgreement();
+         u.init(new MQVPrivateParameters(
+             (ECPrivateKeyParameters)U1.getPrivate(),
+             (ECPrivateKeyParameters)U2.getPrivate(),
+             (ECPublicKeyParameters)U2.getPublic()));
+         BigInteger ux = u.calculateAgreement(new MQVPublicParameters(
+             (ECPublicKeyParameters)V1.getPublic(),
+             (ECPublicKeyParameters)V2.getPublic()));
 
-         BigInteger x = Q2U.getQ().getX().toBigInteger();
-         BigInteger xBar = x.mod(powE);
-         BigInteger Q2UBar = xBar.setBit(e);
-         BigInteger s = d1U.getD().multiply(Q2UBar).mod(n).add(d2U.getD()).mod(n);
+         ECMQVBasicAgreement v = new ECMQVBasicAgreement();
+         v.init(new MQVPrivateParameters(
+             (ECPrivateKeyParameters)V1.getPrivate(),
+             (ECPrivateKeyParameters)V2.getPrivate(),
+             (ECPublicKeyParameters)V2.getPublic()));
+         BigInteger vx = v.calculateAgreement(new MQVPublicParameters(
+             (ECPublicKeyParameters)U1.getPublic(),
+             (ECPublicKeyParameters)U2.getPublic()));
 
-         BigInteger xPrime = Q2V.getQ().getX().toBigInteger();
-         BigInteger xPrimeBar = xPrime.mod(powE);
-         BigInteger Q2VBar = xPrimeBar.setBit(e);
+         if (ux.equals(vx))
+         {
+             return ux;
+         }
 
-         BigInteger hs = parameters.getH().multiply(s).mod(n);
-
-//         ECPoint p = Q1V.getQ().multiply(Q2VBar).add(Q2V.getQ()).multiply(hs);
-         ECPoint p = ECAlgorithms.sumOfTwoMultiplies(
-             Q1V.getQ(), Q2VBar.multiply(hs).mod(n), Q2V.getQ(), hs);
-
-         return p;
+         return null;
      }
-    
+
     public String getName()
     {
         return "EC";
