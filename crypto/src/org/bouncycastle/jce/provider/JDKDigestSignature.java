@@ -1,5 +1,16 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.SignatureSpi;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.AlgorithmParameterSpec;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -27,17 +38,6 @@ import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.jce.provider.util.NullDigest;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SignatureException;
-import java.security.SignatureSpi;
-import java.security.AlgorithmParameters;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.AlgorithmParameterSpec;
-
 public class JDKDigestSignature
     extends SignatureSpi
 {
@@ -45,20 +45,24 @@ public class JDKDigestSignature
     private AsymmetricBlockCipher   cipher;
     private AlgorithmIdentifier     algId;
 
+    // care - this constructor is actually used by outside organisations
     protected JDKDigestSignature(
-        Digest                  digest)
+        Digest                  digest,
+        AsymmetricBlockCipher   cipher)
     {
         this.digest = digest;
-        this.cipher = new PKCS1Encoding(new RSABlindedEngine());
+        this.cipher = cipher;
         this.algId = null;
     }
 
+    // care - this constructor is actually used by outside organisations
     protected JDKDigestSignature(
         DERObjectIdentifier     objId,
-        Digest                  digest)
+        Digest                  digest,
+        AsymmetricBlockCipher   cipher)
     {
         this.digest = digest;
-        this.cipher = new PKCS1Encoding(new RSABlindedEngine());
+        this.cipher = cipher;
         this.algId = new AlgorithmIdentifier(objId, DERNull.INSTANCE);
     }
 
@@ -257,7 +261,7 @@ public class JDKDigestSignature
     {
         public SHA1WithRSAEncryption()
         {
-            super(X509ObjectIdentifiers.id_SHA1, new SHA1Digest());
+            super(X509ObjectIdentifiers.id_SHA1, new SHA1Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -266,7 +270,7 @@ public class JDKDigestSignature
     {
         public SHA224WithRSAEncryption()
         {
-            super(NISTObjectIdentifiers.id_sha224, new SHA224Digest());
+            super(NISTObjectIdentifiers.id_sha224, new SHA224Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -275,7 +279,7 @@ public class JDKDigestSignature
     {
         public SHA256WithRSAEncryption()
         {
-            super(NISTObjectIdentifiers.id_sha256, new SHA256Digest());
+            super(NISTObjectIdentifiers.id_sha256, new SHA256Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -284,7 +288,7 @@ public class JDKDigestSignature
     {
         public SHA384WithRSAEncryption()
         {
-            super(NISTObjectIdentifiers.id_sha384, new SHA384Digest());
+            super(NISTObjectIdentifiers.id_sha384, new SHA384Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -293,7 +297,7 @@ public class JDKDigestSignature
     {
         public SHA512WithRSAEncryption()
         {
-            super(NISTObjectIdentifiers.id_sha512, new SHA512Digest());
+            super(NISTObjectIdentifiers.id_sha512, new SHA512Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -302,7 +306,7 @@ public class JDKDigestSignature
     {
         public MD2WithRSAEncryption()
         {
-            super(PKCSObjectIdentifiers.md2, new MD2Digest());
+            super(PKCSObjectIdentifiers.md2, new MD2Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -311,7 +315,7 @@ public class JDKDigestSignature
     {
         public MD4WithRSAEncryption()
         {
-            super(PKCSObjectIdentifiers.md4, new MD4Digest());
+            super(PKCSObjectIdentifiers.md4, new MD4Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -320,7 +324,7 @@ public class JDKDigestSignature
     {
         public MD5WithRSAEncryption()
         {
-            super(PKCSObjectIdentifiers.md5, new MD5Digest());
+            super(PKCSObjectIdentifiers.md5, new MD5Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -329,7 +333,7 @@ public class JDKDigestSignature
     {
         public RIPEMD160WithRSAEncryption()
         {
-            super(TeleTrusTObjectIdentifiers.ripemd160, new RIPEMD160Digest());
+            super(TeleTrusTObjectIdentifiers.ripemd160, new RIPEMD160Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -338,7 +342,7 @@ public class JDKDigestSignature
     {
         public RIPEMD128WithRSAEncryption()
         {
-            super(TeleTrusTObjectIdentifiers.ripemd128, new RIPEMD128Digest());
+            super(TeleTrusTObjectIdentifiers.ripemd128, new RIPEMD128Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -347,7 +351,7 @@ public class JDKDigestSignature
     {
         public RIPEMD256WithRSAEncryption()
         {
-            super(TeleTrusTObjectIdentifiers.ripemd256, new RIPEMD256Digest());
+            super(TeleTrusTObjectIdentifiers.ripemd256, new RIPEMD256Digest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
@@ -356,7 +360,7 @@ public class JDKDigestSignature
     {
         public noneRSA()
         {
-            super(new NullDigest());
+            super(new NullDigest(), new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 }

@@ -1,14 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.engines.RSABlindedEngine;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.signers.PSSSigner;
-import org.bouncycastle.jce.provider.util.NullDigest;
-
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -22,6 +13,15 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
+
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.engines.RSABlindedEngine;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.crypto.signers.PSSSigner;
+import org.bouncycastle.jce.provider.util.NullDigest;
 
 public class JDKPSSSigner
     extends SignatureSpi
@@ -61,17 +61,21 @@ public class JDKPSSSigner
         }
     }
 
+    // care - this constructor is actually used by outside organisations
     protected JDKPSSSigner(
+        AsymmetricBlockCipher signer,
         PSSParameterSpec paramSpecArg)
     {
-        this(paramSpecArg, false);
+        this(signer, paramSpecArg, false);
     }
 
+    // care - this constructor is actually used by outside organisations
     protected JDKPSSSigner(
+        AsymmetricBlockCipher signer,
         PSSParameterSpec baseParamSpec,
         boolean          isRaw)
     {
-        this.signer = new RSABlindedEngine();
+        this.signer = signer;
         this.originalSpec = baseParamSpec;
         
         if (baseParamSpec == null)
@@ -263,7 +267,7 @@ public class JDKPSSSigner
     {
         public nonePSS()
         {
-            super(null, true);
+            super(new RSABlindedEngine(), null, true);
         }
     }
 
@@ -272,7 +276,7 @@ public class JDKPSSSigner
     {
         public PSSwithRSA()
         {
-            super(null);
+            super(new RSABlindedEngine(), null);
         }
     }
     
@@ -281,7 +285,7 @@ public class JDKPSSSigner
     {
         public SHA1withRSA()
         {
-            super(PSSParameterSpec.DEFAULT);
+            super(new RSABlindedEngine(), PSSParameterSpec.DEFAULT);
         }
     }
 
@@ -290,7 +294,7 @@ public class JDKPSSSigner
     {
         public SHA224withRSA()
         {
-            super(new PSSParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), 28, 1));
+            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), 28, 1));
         }
     }
     
@@ -299,7 +303,7 @@ public class JDKPSSSigner
     {
         public SHA256withRSA()
         {
-            super(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
+            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
         }
     }
 
@@ -308,7 +312,7 @@ public class JDKPSSSigner
     {
         public SHA384withRSA()
         {
-            super(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 48, 1));
+            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 48, 1));
         }
     }
 
@@ -317,7 +321,7 @@ public class JDKPSSSigner
     {
         public SHA512withRSA()
         {
-            super(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
+            super(new RSABlindedEngine(), new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
         }
     }
 }
