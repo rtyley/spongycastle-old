@@ -196,4 +196,13 @@ public class KeyFactory
             super("ECDHC");
         }
     }
+
+    public static class ECMQV
+        extends KeyFactory
+    {
+        public ECMQV()
+        {
+            super("ECMQV");
+        }
+    }
 }
