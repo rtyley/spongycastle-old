@@ -305,4 +305,13 @@ public abstract class KeyPairGenerator
             super("ECDHC");
         }
     }
+
+    public static class ECMQV
+        extends EC
+    {
+        public ECMQV()
+        {
+            super("ECMQV");
+        }
+    }
 }
