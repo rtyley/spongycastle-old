@@ -103,6 +103,7 @@ public class KeyAgreement
             throw new IllegalStateException(kaAlgorithm + " can only be between two parties.");
         }
 
+        CipherParameters pubKey;        
         if (agreement instanceof ECMQVBasicAgreement)
         {
             if (!(key instanceof MQVPublicKey))
@@ -117,11 +118,9 @@ public class KeyAgreement
             ECPublicKeyParameters ephemKey = (ECPublicKeyParameters)
                 ECUtil.generatePublicKeyParameter(mqvPubKey.getEphemeralKey());
 
-            MQVPublicParameters remoteParams = new MQVPublicParameters(staticKey, ephemKey);
+            pubKey = new MQVPublicParameters(staticKey, ephemKey);
 
             // TODO Validate that all the keys are using the same parameters?
-
-            agreement.init(remoteParams);
         }
         else
         {
@@ -131,12 +130,12 @@ public class KeyAgreement
                     + ECPublicKey.class.getSimpleName() + " for doPhase");
             }
 
-            CipherParameters pubKey = ECUtil.generatePublicKeyParameter((PublicKey)key);
+            pubKey = ECUtil.generatePublicKeyParameter((PublicKey)key);
 
             // TODO Validate that all the keys are using the same parameters?
-    
-            result = agreement.calculateAgreement(pubKey);
         }
+
+        result = agreement.calculateAgreement(pubKey);
 
         return null;
     }
