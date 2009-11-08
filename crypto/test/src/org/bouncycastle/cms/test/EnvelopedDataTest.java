@@ -670,7 +670,7 @@ public class EnvelopedDataTest
         verifyECKeyAgreeVectors(privKey, "2.16.840.1.101.3.4.1.2", ecKeyAgreeMsgAES128);
         verifyECKeyAgreeVectors(privKey, "1.2.840.113549.3.7", ecKeyAgreeMsgDESEDE);
     }
-    /*
+
     public void testECMQVKeyAgreeVectors()
         throws Exception
     {
@@ -680,7 +680,7 @@ public class EnvelopedDataTest
 
         verifyECMQVKeyAgreeVectors(privKey, "2.16.840.1.101.3.4.1.2", ecMQVKeyAgreeMsgAES128);
     }
-    */
+
     public void testPasswordAES256()
         throws Exception
     {
