@@ -9,10 +9,12 @@ import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
 import org.bouncycastle.asn1.cms.OriginatorIdentifierOrKey;
 import org.bouncycastle.asn1.cms.OriginatorPublicKey;
 import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
-//import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
+import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
+import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +24,7 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -95,6 +98,13 @@ public class KeyAgreeRecipientInformation
             throw new CMSException("No support for 'originator' as IssuerAndSerialNumber or SubjectKeyIdentifier");
         }
 
+        return getPublicKeyFromOriginatorPublicKey(receiverPrivateKey, originatorPublicKey, prov);
+    }
+
+    private PublicKey getPublicKeyFromOriginatorPublicKey(Key receiverPrivateKey,
+            OriginatorPublicKey originatorPublicKey, Provider prov)
+            throws CMSException, GeneralSecurityException, IOException
+    {
         PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(
             ASN1Object.fromByteArray(receiverPrivateKey.getEncoded()));
 
@@ -107,27 +117,26 @@ public class KeyAgreeRecipientInformation
     }
 
     private SecretKey calculateAgreedWrapKey(String wrapAlg,
-        PublicKey senderPublicKey, Key receiverPrivateKey, Provider prov)
-        throws GeneralSecurityException, IOException
+        PublicKey senderPublicKey, PrivateKey receiverPrivateKey, Provider prov)
+        throws CMSException, GeneralSecurityException, IOException
     {
         String agreeAlg = keyEncAlg.getObjectId().getId();
 
+        if (agreeAlg.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
+        {
+            byte[] ukmEncoding = info.getUserKeyingMaterial().getOctets();
+            MQVuserKeyingMaterial ukm = MQVuserKeyingMaterial.getInstance(
+                ASN1Object.fromByteArray(ukmEncoding));
+
+            PublicKey ephemeralKey = getPublicKeyFromOriginatorPublicKey(receiverPrivateKey,
+                ukm.getEphemeralPublicKey(), prov);
+
+            senderPublicKey = new MQVPublicKeySpec(senderPublicKey, ephemeralKey);
+            receiverPrivateKey = new MQVPrivateKeySpec(receiverPrivateKey, receiverPrivateKey);
+        }
+
         KeyAgreement agreement = KeyAgreement.getInstance(agreeAlg, prov);
         agreement.init(receiverPrivateKey);
-
-        // TODO ECMQV 1-pass key agreement
-//        if (agreeAlg.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
-//        {
-//            byte[] ukmEncoding = info.getUserKeyingMaterial().getOctets();
-//            MQVuserKeyingMaterial ukm = MQVuserKeyingMaterial.getInstance(
-//                ASN1Object.fromByteArray(ukmEncoding));
-//
-//            PublicKey ephemeralKey = getSenderPublicKey(receiverPrivateKey,
-//                ukm.getEphemeralPublicKey(), prov);
-//
-//            senderPublicKey = new StaticEphemeralPublicKeySpec(senderPublicKey, ephemeralKey);
-//        }
-
         agreement.doPhase(senderPublicKey, true);
         return agreement.generateSecret(wrapAlg);
     }
@@ -164,7 +173,7 @@ public class KeyAgreeRecipientInformation
                 info.getOriginator(), prov);
 
             SecretKey agreedWrapKey = calculateAgreedWrapKey(wrapAlg,
-                senderPublicKey, receiverPrivateKey, prov);
+                senderPublicKey, (PrivateKey)receiverPrivateKey, prov);
 
             return unwrapSessionKey(wrapAlg, agreedWrapKey, prov);
         }
