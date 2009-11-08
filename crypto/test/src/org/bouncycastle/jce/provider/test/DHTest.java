@@ -288,7 +288,9 @@ public class DHTest
         bKeyAgree.doPhase(aKeyPair.getPublic(), true);
 
         SecretKey k1 = aKeyAgree.generateSecret(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId());
-        SecretKey k2 = aKeyAgree.generateSecret(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId());
+        SecretKey k2 = bKeyAgree.generateSecret(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId());
+        
+        // TODO Compare k1 and k2?
     }
 
     private void checkKeySize(int privateValueSize, KeyPair aKeyPair)
