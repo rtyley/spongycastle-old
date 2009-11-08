@@ -1,26 +1,5 @@
 package org.bouncycastle.jce.provider.asymmetric.ec;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x9.X9IntegerConverter;
-import org.bouncycastle.crypto.BasicAgreement;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.DerivationFunction;
-import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
-import org.bouncycastle.crypto.agreement.ECDHCBasicAgreement;
-import org.bouncycastle.crypto.agreement.kdf.DHKDFParameters;
-import org.bouncycastle.crypto.agreement.kdf.ECDHKEKGenerator;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle.jce.interfaces.ECPrivateKey;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
-
-import javax.crypto.KeyAgreementSpi;
-import javax.crypto.SecretKey;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -32,9 +11,39 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Hashtable;
 
+import javax.crypto.KeyAgreementSpi;
+import javax.crypto.SecretKey;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x9.X9IntegerConverter;
+import org.bouncycastle.crypto.BasicAgreement;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.DerivationFunction;
+import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
+import org.bouncycastle.crypto.agreement.ECDHCBasicAgreement;
+import org.bouncycastle.crypto.agreement.ECMQVBasicAgreement;
+import org.bouncycastle.crypto.agreement.kdf.DHKDFParameters;
+import org.bouncycastle.crypto.agreement.kdf.ECDHKEKGenerator;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.params.MQVPrivateParameters;
+import org.bouncycastle.crypto.params.MQVPublicParameters;
+import org.bouncycastle.jce.interfaces.ECPrivateKey;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.interfaces.MQVPrivateKey;
+import org.bouncycastle.jce.interfaces.MQVPublicKey;
+
 /**
  * Diffie-Hellman key agreement using elliptic curve keys, ala IEEE P1363
  * both the simple one, and the simple one with cofactors are supported.
+ *
+ * Also, MQV key agreement per SEC-1
  */
 public class KeyAgreement
     extends KeyAgreementSpi
@@ -57,27 +66,24 @@ public class KeyAgreement
         algorithms.put(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId(), i192);
     }
 
+    private String                 kaAlgorithm;
     private BigInteger             result;
-    private ECPrivateKeyParameters privKey;
+    private ECDomainParameters     parameters;
     private BasicAgreement         agreement;
     private DerivationFunction     kdf;
 
     private byte[] bigIntToBytes(
         BigInteger    r)
     {
-        return converter.integerToBytes(r, converter.getByteLength(privKey.getParameters().getG().getX()));
-    }
-    
-    protected KeyAgreement(
-        BasicAgreement  agreement)
-    {
-        this.agreement = agreement;
+        return converter.integerToBytes(r, converter.getByteLength(parameters.getG().getX()));
     }
 
     protected KeyAgreement(
-        BasicAgreement  agreement,
-        DerivationFunction kdf)
+        String              kaAlgorithm,
+        BasicAgreement      agreement,
+        DerivationFunction  kdf)
     {
+        this.kaAlgorithm = kaAlgorithm;
         this.agreement = agreement;
         this.kdf = kdf;
     }
@@ -87,31 +93,63 @@ public class KeyAgreement
         boolean lastPhase) 
         throws InvalidKeyException, IllegalStateException
     {
-        if (privKey == null)
+        if (parameters == null)
         {
-            throw new IllegalStateException("EC Diffie-Hellman not initialised.");
+            throw new IllegalStateException(kaAlgorithm + " not initialised.");
         }
 
         if (!lastPhase)
         {
-            throw new IllegalStateException("EC Diffie-Hellman can only be between two parties.");
+            throw new IllegalStateException(kaAlgorithm + " can only be between two parties.");
         }
 
-        if (!(key instanceof ECPublicKey))
+        if (agreement instanceof ECMQVBasicAgreement)
         {
-            throw new InvalidKeyException("EC Key Agreement doPhase requires ECPublicKey");
+            if (!(key instanceof MQVPublicKey))
+            {
+                throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
+                    + MQVPublicKey.class.getSimpleName() + " for doPhase");
+            }
+
+            MQVPublicKey mqvPubKey = (MQVPublicKey)key;
+            ECPublicKeyParameters staticKey = (ECPublicKeyParameters)
+                ECUtil.generatePublicKeyParameter(mqvPubKey.getStaticKey());
+            ECPublicKeyParameters ephemKey = (ECPublicKeyParameters)
+                ECUtil.generatePublicKeyParameter(mqvPubKey.getEphemeralKey());
+
+            MQVPublicParameters remoteParams = new MQVPublicParameters(staticKey, ephemKey);
+
+            // TODO Validate that all the keys are using the same parameters?
+
+            agreement.init(remoteParams);
         }
+        else
+        {
+            if (!(key instanceof ECPublicKey))
+            {
+                throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
+                    + ECPublicKey.class.getSimpleName() + " for doPhase");
+            }
 
-        CipherParameters pubKey = ECUtil.generatePublicKeyParameter((PublicKey)key);
+            CipherParameters pubKey = ECUtil.generatePublicKeyParameter((PublicKey)key);
 
-        result = agreement.calculateAgreement(pubKey);
+            // TODO Validate that all the keys are using the same parameters?
+    
+            result = agreement.calculateAgreement(pubKey);
+        }
 
         return null;
     }
 
-    protected byte[] engineGenerateSecret() 
+    protected byte[] engineGenerateSecret()
         throws IllegalStateException
     {
+        if (kdf != null)
+        {
+            throw new UnsupportedOperationException(
+                "KDF can only be used when algorithm is known");
+        }
+
         return bigIntToBytes(result);
     }
 
@@ -120,11 +158,11 @@ public class KeyAgreement
         int     offset) 
         throws IllegalStateException, ShortBufferException
     {
-        byte[]  secret = bigIntToBytes(result);
+        byte[] secret = engineGenerateSecret();
 
         if (sharedSecret.length - offset < secret.length)
         {
-            throw new ShortBufferException("ECKeyAgreement - buffer too short");
+            throw new ShortBufferException(kaAlgorithm + " key agreement: need " + secret.length + " bytes");
         }
 
         System.arraycopy(secret, 0, sharedSecret, offset, secret.length);
@@ -136,6 +174,8 @@ public class KeyAgreement
         String algorithm)
         throws NoSuchAlgorithmException
     {
+        byte[] secret = bigIntToBytes(result);
+
         if (kdf != null)
         {
             if (!algorithms.containsKey(algorithm))
@@ -145,18 +185,19 @@ public class KeyAgreement
             
             int    keySize = ((Integer)algorithms.get(algorithm)).intValue();
 
-            DHKDFParameters params = new DHKDFParameters(new DERObjectIdentifier(algorithm), keySize, bigIntToBytes(result));
+            DHKDFParameters params = new DHKDFParameters(new DERObjectIdentifier(algorithm), keySize, secret);
 
             byte[] keyBytes = new byte[keySize / 8];
-
             kdf.init(params);
-            
             kdf.generateBytes(keyBytes, 0, keyBytes.length);
-
-            return new SecretKeySpec(keyBytes, algorithm);
+            secret = keyBytes;
+        }
+        else
+        {
+            // TODO Should we be ensuring the key is the right length?
         }
 
-        return new SecretKeySpec(bigIntToBytes(result), algorithm);
+        return new SecretKeySpec(secret, algorithm);
     }
 
     protected void engineInit(
@@ -165,14 +206,7 @@ public class KeyAgreement
         SecureRandom            random) 
         throws InvalidKeyException, InvalidAlgorithmParameterException
     {
-        if (!(key instanceof ECPrivateKey))
-        {
-            throw new InvalidKeyException("ECKeyAgreement requires ECPrivateKey for initialisation");
-        }
-
-        privKey = (ECPrivateKeyParameters)ECUtil.generatePrivateKeyParameter((PrivateKey)key);
-
-        agreement.init(privKey);
+        initFromKey(key);
     }
 
     protected void engineInit(
@@ -180,14 +214,53 @@ public class KeyAgreement
         SecureRandom    random) 
         throws InvalidKeyException
     {
-        if (!(key instanceof ECPrivateKey))
+        initFromKey(key);
+    }
+
+    private void initFromKey(Key key)
+        throws InvalidKeyException
+    {
+        if (agreement instanceof ECMQVBasicAgreement)
         {
-            throw new InvalidKeyException("ECKeyAgreement requires ECPrivateKey");
+            if (!(key instanceof MQVPrivateKey))
+            {
+                throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
+                    + MQVPrivateKey.class.getSimpleName() + " for initialisation");
+            }
+
+            MQVPrivateKey mqvPrivKey = (MQVPrivateKey)key;
+            ECPrivateKeyParameters staticPrivKey = (ECPrivateKeyParameters)
+                ECUtil.generatePrivateKeyParameter(mqvPrivKey.getStaticPrivateKey());
+            ECPrivateKeyParameters ephemPrivKey = (ECPrivateKeyParameters)
+                ECUtil.generatePrivateKeyParameter(mqvPrivKey.getEphemeralPrivateKey());
+
+            ECPublicKeyParameters ephemPubKey = null;
+            if (mqvPrivKey.getEphemeralPublicKey() != null)
+            {
+                ephemPubKey = (ECPublicKeyParameters)
+                    ECUtil.generatePublicKeyParameter(mqvPrivKey.getEphemeralPublicKey());
+            }
+
+            MQVPrivateParameters localParams = new MQVPrivateParameters(staticPrivKey, ephemPrivKey, ephemPubKey);
+            this.parameters = staticPrivKey.getParameters();
+
+            // TODO Validate that all the keys are using the same parameters?
+
+            agreement.init(localParams);
         }
+        else
+        {
+            if (!(key instanceof ECPrivateKey))
+            {
+                throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
+                    + ECPrivateKey.class.getSimpleName() + " for initialisation");
+            }
 
-        privKey = (ECPrivateKeyParameters)ECUtil.generatePrivateKeyParameter((PrivateKey)key);
+            ECPrivateKeyParameters privKey = (ECPrivateKeyParameters)ECUtil.generatePrivateKeyParameter((PrivateKey)key);
+            this.parameters = privKey.getParameters();
 
-        agreement.init(privKey);
+            agreement.init(privKey);
+        }
     }
 
     public static class DH
@@ -195,7 +268,7 @@ public class KeyAgreement
     {
         public DH()
         {
-            super(new ECDHBasicAgreement());
+            super("ECDH", new ECDHBasicAgreement(), null);
         }
     }
 
@@ -204,7 +277,16 @@ public class KeyAgreement
     {
         public DHC()
         {
-            super(new ECDHCBasicAgreement());
+            super("ECDHC", new ECDHCBasicAgreement(), null);
+        }
+    }
+
+    public static class MQV
+        extends KeyAgreement
+    {
+        public MQV()
+        {
+            super("ECMQVwithSHA1KDF", new ECMQVBasicAgreement(), null);
         }
     }
 
@@ -213,7 +295,16 @@ public class KeyAgreement
     {
         public DHwithSHA1KDF()
         {
-            super(new ECDHBasicAgreement(), new ECDHKEKGenerator(new SHA1Digest()));
+            super("ECDHwithSHA1KDF", new ECDHBasicAgreement(), new ECDHKEKGenerator(new SHA1Digest()));
+        }
+    }
+
+    public static class MQVwithSHA1KDF
+        extends KeyAgreement
+    {
+        public MQVwithSHA1KDF()
+        {
+            super("ECMQVwithSHA1KDF", new ECMQVBasicAgreement(), new ECDHKEKGenerator(new SHA1Digest()));
         }
     }
 }

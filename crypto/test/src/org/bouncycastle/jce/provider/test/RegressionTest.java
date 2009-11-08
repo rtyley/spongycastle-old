@@ -64,6 +64,7 @@ public class RegressionTest
         new AttrCertSelectorTest(),
         new SerialisationTest(),
         new SigNameTest(),
+        new MQVTest(),
         new CRL5Test()
     };
 
