@@ -257,7 +257,7 @@ public class CMSEnvelopedGenerator
         }
         catch (InvalidAlgorithmParameterException e)
         {
-            throw new InvalidKeyException("can't determine ephemeral key pair parameters from public key: " + e);
+            throw new InvalidKeyException("cannot determine ephemeral key pair parameters from public key: " + e);
         }
         catch (IOException e)
         {
