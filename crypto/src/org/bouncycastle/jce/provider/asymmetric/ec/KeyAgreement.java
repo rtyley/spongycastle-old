@@ -285,7 +285,7 @@ public class KeyAgreement
     {
         public MQV()
         {
-            super("ECMQVwithSHA1KDF", new ECMQVBasicAgreement(), null);
+            super("ECMQV", new ECMQVBasicAgreement(), null);
         }
     }
 
