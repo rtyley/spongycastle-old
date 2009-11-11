@@ -46,7 +46,7 @@ public class KeyAgreeRecipientInformation
     extends RecipientInformation
 {
     private KeyAgreeRecipientInfo info;
-    private ASN1OctetString       _encryptedKey;
+    private ASN1OctetString       encryptedKey;
 
     /**
      * @deprecated
@@ -108,7 +108,7 @@ public class KeyAgreeRecipientInformation
                 rid.setSubjectKeyIdentifier(rKeyID.getSubjectKeyIdentifier().getOctets());
             }
 
-            _encryptedKey = id.getEncryptedKey();
+            encryptedKey = id.getEncryptedKey();
         }
         catch (IOException e)
         {
@@ -198,13 +198,13 @@ public class KeyAgreeRecipientInformation
     {
         AlgorithmIdentifier aid = getActiveAlgID();
         String alg = aid.getObjectId().getId();
-        byte[] encryptedKey = _encryptedKey.getOctets();
+        byte[] encKeyOctets = encryptedKey.getOctets();
 
         // TODO Should we try alternate ways of unwrapping?
         //   (see KeyTransRecipientInformation.getSessionKey)
         Cipher keyCipher = Cipher.getInstance(wrapAlg, prov);
         keyCipher.init(Cipher.UNWRAP_MODE, agreedKey);
-        return keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
+        return keyCipher.unwrap(encKeyOctets, alg, Cipher.SECRET_KEY);
     }
 
     protected Key getSessionKey(Key receiverPrivateKey, Provider prov)
