@@ -110,17 +110,11 @@ public class KeyTransRecipientInformation
     {
         byte[] encryptedKey = info.getEncryptedKey().getOctets();
         String keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(keyEncAlg.getObjectId());
-        String alg;
 
-        if (macAlg != null)
-        {
-            alg = CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(macAlg.getObjectId().getId());
-        }
-        else
-        {
-            alg = CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(encAlg.getObjectId().getId());
-        }
-        
+        // TODO This may need looking at for AuthEnveloped case
+        AlgorithmIdentifier aid = getActiveAlgID();
+        String alg = CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(aid.getObjectId().getId());
+
         Key sKey;
 
         try

@@ -73,6 +73,19 @@ public abstract class RecipientInformation
         this.data = data;
     }
 
+    AlgorithmIdentifier getActiveAlgID()
+    {
+        if (encAlg != null)
+        {
+            return encAlg;
+        }
+        if (macAlg != null)
+        {
+            return macAlg;
+        }
+        return authEncAlg;
+    }
+
     public RecipientId getRID()
     {
         return rid;

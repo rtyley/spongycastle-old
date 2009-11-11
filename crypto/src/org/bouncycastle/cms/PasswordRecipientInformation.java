@@ -181,12 +181,7 @@ public class PasswordRecipientInformation
             IvParameterSpec ivSpec = new IvParameterSpec(ASN1OctetString.getInstance(kekAlgParams.getObjectAt(1)).getOctets());
             keyCipher.init(Cipher.UNWRAP_MODE, new SecretKeySpec(((CMSPBEKey)key).getEncoded(kekAlgName), kekAlgName), ivSpec);
 
-            AlgorithmIdentifier aid = encAlg;
-            if (aid == null)
-            {
-                aid = macAlg;
-            }
-            
+            AlgorithmIdentifier aid = getActiveAlgID();
             String              alg = aid.getObjectId().getId();
             Key                 sKey = keyCipher.unwrap(
                                         encryptedKey, alg, Cipher.SECRET_KEY);
