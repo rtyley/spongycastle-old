@@ -25,18 +25,24 @@ public interface NISTObjectIdentifiers
     static final DERObjectIdentifier    id_aes128_OFB           = new DERObjectIdentifier(aes + ".3"); 
     static final DERObjectIdentifier    id_aes128_CFB           = new DERObjectIdentifier(aes + ".4"); 
     static final DERObjectIdentifier    id_aes128_wrap          = new DERObjectIdentifier(aes + ".5");
+    static final DERObjectIdentifier    id_aes128_GCM           = new DERObjectIdentifier(aes + ".6");
+    static final DERObjectIdentifier    id_aes128_CCM           = new DERObjectIdentifier(aes + ".7");
     
     static final DERObjectIdentifier    id_aes192_ECB           = new DERObjectIdentifier(aes + ".21"); 
     static final DERObjectIdentifier    id_aes192_CBC           = new DERObjectIdentifier(aes + ".22"); 
     static final DERObjectIdentifier    id_aes192_OFB           = new DERObjectIdentifier(aes + ".23"); 
     static final DERObjectIdentifier    id_aes192_CFB           = new DERObjectIdentifier(aes + ".24"); 
     static final DERObjectIdentifier    id_aes192_wrap          = new DERObjectIdentifier(aes + ".25");
+    static final DERObjectIdentifier    id_aes192_GCM           = new DERObjectIdentifier(aes + ".26");
+    static final DERObjectIdentifier    id_aes192_CCM           = new DERObjectIdentifier(aes + ".27");
     
     static final DERObjectIdentifier    id_aes256_ECB           = new DERObjectIdentifier(aes + ".41"); 
     static final DERObjectIdentifier    id_aes256_CBC           = new DERObjectIdentifier(aes + ".42");
     static final DERObjectIdentifier    id_aes256_OFB           = new DERObjectIdentifier(aes + ".43"); 
     static final DERObjectIdentifier    id_aes256_CFB           = new DERObjectIdentifier(aes + ".44"); 
     static final DERObjectIdentifier    id_aes256_wrap          = new DERObjectIdentifier(aes + ".45"); 
+    static final DERObjectIdentifier    id_aes256_GCM           = new DERObjectIdentifier(aes + ".46");
+    static final DERObjectIdentifier    id_aes256_CCM           = new DERObjectIdentifier(aes + ".47");
 
     //
     // signatures
