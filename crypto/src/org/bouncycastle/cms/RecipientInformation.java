@@ -160,7 +160,10 @@ public abstract class RecipientInformation
 
         try
         {
-            if (encAlg != null)   // enc only or enc and mac
+            InputStream content = data;
+
+            // If encrypted, need to wrap in CipherInputStream to decrypt
+            if (encAlg != null)
             {
                 String encAlg = this.encAlg.getObjectId().getId();
 
@@ -210,19 +213,16 @@ public abstract class RecipientInformation
                     }
                 }
 
-                if (macAlg != null)
-                {
-                    return new CMSTypedStream(createMacStream(macAlg, sKey, new CipherInputStream(data, cipher), provider));
-                }
-                else
-                {
-                    return new CMSTypedStream(new CipherInputStream(data, cipher));
-                }
+                content = new CipherInputStream(data, cipher); 
             }
-            else     // mac only
+
+            // If authenticated, need to wrap in MacInputStream to calculate MAC
+            if (macAlg != null)
             {
-                return new CMSTypedStream(createMacStream(macAlg, sKey, data, provider));
+                content = macStream = createMacInputStream(macAlg, sKey, content, provider);
             }
+
+            return new CMSTypedStream(content);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -250,7 +250,7 @@ public abstract class RecipientInformation
         }
     }
 
-    private InputStream createMacStream(AlgorithmIdentifier macAlg, Key sKey, InputStream inStream, Provider provider)
+    private static MacInputStream createMacInputStream(AlgorithmIdentifier macAlg, Key sKey, InputStream inStream, Provider provider)
         throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
     {
         Mac mac = CMSEnvelopedHelper.INSTANCE.getMac(macAlg.getObjectId().getId(), provider);
@@ -269,10 +269,8 @@ public abstract class RecipientInformation
         {
             mac.init(sKey);
         }
-        
-        macStream = new MacInputStream(mac, inStream);
 
-        return macStream;
+        return new MacInputStream(mac, inStream);
     }
 
     public byte[] getContent(
@@ -329,7 +327,7 @@ public abstract class RecipientInformation
         throws CMSException;
 
 
-    private class MacInputStream
+    private static class MacInputStream
         extends InputStream
     {
         private final InputStream inStream;
