@@ -479,9 +479,7 @@ public class PEMReader extends BufferedReader
 
 
         KeySpec                 pubSpec, privSpec;
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(keyBytes);
-        ASN1InputStream         aIn = new ASN1InputStream(bIn);
-        ASN1Sequence            seq = (ASN1Sequence)aIn.readObject();
+        ASN1Sequence            seq = (ASN1Sequence)ASN1Object.fromByteArray(keyBytes);
 
         if (type.equals("RSA"))
         {
