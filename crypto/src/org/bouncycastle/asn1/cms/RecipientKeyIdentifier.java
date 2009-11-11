@@ -51,7 +51,7 @@ public class RecipientKeyIdentifier
             other = OtherKeyAttribute.getInstance(seq.getObjectAt(2));
             break;
         default:
-            throw new IllegalArgumentException("Invalid KEKIdentifier");
+            throw new IllegalArgumentException("Invalid RecipientKeyIdentifier");
         }
     }
 
