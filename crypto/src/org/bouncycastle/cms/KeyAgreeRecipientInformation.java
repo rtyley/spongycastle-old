@@ -5,13 +5,16 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.asn1.cms.KeyAgreeRecipientIdentifier;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
 import org.bouncycastle.asn1.cms.OriginatorIdentifierOrKey;
 import org.bouncycastle.asn1.cms.OriginatorPublicKey;
 import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
+import org.bouncycastle.asn1.cms.RecipientKeyIdentifier;
 import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
 import org.bouncycastle.jce.spec.MQVPublicKeySpec;
@@ -62,6 +65,7 @@ public class KeyAgreeRecipientInformation
         super(encAlg, macAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
 
         this.info = info;
+        this.rid = new RecipientId();
 
         try
         {
@@ -71,12 +75,22 @@ public class KeyAgreeRecipientInformation
             RecipientEncryptedKey id = RecipientEncryptedKey.getInstance(
                     s.getObjectAt(0));
 
-            // TODO Add support for RecipientKeyIdentifer option
-            IssuerAndSerialNumber iAnds = id.getIdentifier().getIssuerAndSerialNumber();
+            KeyAgreeRecipientIdentifier karid = id.getIdentifier();
 
-            rid = new RecipientId();
-            rid.setIssuer(iAnds.getName().getEncoded());
-            rid.setSerialNumber(iAnds.getSerialNumber().getValue());
+            IssuerAndSerialNumber iAndSN = karid.getIssuerAndSerialNumber();
+            if (iAndSN != null)
+            {
+                rid.setIssuer(iAndSN.getName().getEncoded());
+                rid.setSerialNumber(iAndSN.getSerialNumber().getValue());
+            }
+            else
+            {
+                RecipientKeyIdentifier rKeyID = karid.getRKeyID();
+
+                // Note: 'date' and 'other' fieldss of RecipientKeyIdentifier appear to be only informational 
+
+                rid.setSubjectKeyIdentifier(rKeyID.getSubjectKeyIdentifier().getOctets());
+            }
 
             _encryptedKey = id.getEncryptedKey();
         }
@@ -90,15 +104,24 @@ public class KeyAgreeRecipientInformation
         OriginatorIdentifierOrKey originator, Provider prov)
         throws CMSException, GeneralSecurityException, IOException
     {
-        OriginatorPublicKey originatorPublicKey = originator.getOriginatorKey();
-        if (originatorPublicKey == null)
+        IssuerAndSerialNumber iAndSN = originator.getIssuerAndSerialNumber();
+        if (iAndSN != null)
         {
             // TODO Support all alternatives for OriginatorIdentifierOrKey
             // see RFC 3852 6.2.2
-            throw new CMSException("No support for 'originator' as IssuerAndSerialNumber or SubjectKeyIdentifier");
+            throw new CMSException("No support for 'originator' as IssuerAndSerialNumber");
         }
 
-        return getPublicKeyFromOriginatorPublicKey(receiverPrivateKey, originatorPublicKey, prov);
+        SubjectKeyIdentifier ski = originator.getSubjectKeyIdentifier();
+        if (ski != null)
+        {
+            // TODO Support all alternatives for OriginatorIdentifierOrKey
+            // see RFC 3852 6.2.2
+            throw new CMSException("No support for 'originator' as SubjectKeyIdentifier");
+        }
+
+        // Must be OriginatorPublicKey then
+        return getPublicKeyFromOriginatorPublicKey(receiverPrivateKey, originator.getOriginatorKey(), prov);
     }
 
     private PublicKey getPublicKeyFromOriginatorPublicKey(Key receiverPrivateKey,
