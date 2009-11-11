@@ -89,12 +89,7 @@ public class KEKRecipientInformation
 
             keyCipher.init(Cipher.UNWRAP_MODE, key);
 
-            AlgorithmIdentifier aid = encAlg;
-            if (aid == null)
-            {
-                aid = macAlg;
-            }
-            
+            AlgorithmIdentifier aid = getActiveAlgID();
             String              alg = aid.getObjectId().getId();
             Key                 sKey = keyCipher.unwrap(
                                         encryptedKey, alg, Cipher.SECRET_KEY);

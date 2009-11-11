@@ -196,12 +196,7 @@ public class KeyAgreeRecipientInformation
         Provider prov)
         throws GeneralSecurityException
     {
-        AlgorithmIdentifier aid = encAlg;
-        if (aid == null)
-        {
-            aid = macAlg;
-        }
-        
+        AlgorithmIdentifier aid = getActiveAlgID();
         String alg = aid.getObjectId().getId();
         byte[] encryptedKey = _encryptedKey.getOctets();
 
