@@ -104,24 +104,28 @@ public class KeyAgreeRecipientInformation
         OriginatorIdentifierOrKey originator, Provider prov)
         throws CMSException, GeneralSecurityException, IOException
     {
+        OriginatorPublicKey opk = originator.getOriginatorKey();
+        if (opk != null)
+        {
+            return getPublicKeyFromOriginatorPublicKey(receiverPrivateKey, originator.getOriginatorKey(), prov);
+        }
+
+        OriginatorId origID = new OriginatorId();
+
         IssuerAndSerialNumber iAndSN = originator.getIssuerAndSerialNumber();
         if (iAndSN != null)
         {
-            // TODO Support all alternatives for OriginatorIdentifierOrKey
-            // see RFC 3852 6.2.2
-            throw new CMSException("No support for 'originator' as IssuerAndSerialNumber");
+            origID.setIssuer(iAndSN.getName().getEncoded());
+            origID.setSerialNumber(iAndSN.getSerialNumber().getValue());
         }
-
-        SubjectKeyIdentifier ski = originator.getSubjectKeyIdentifier();
-        if (ski != null)
+        else
         {
-            // TODO Support all alternatives for OriginatorIdentifierOrKey
-            // see RFC 3852 6.2.2
-            throw new CMSException("No support for 'originator' as SubjectKeyIdentifier");
+            SubjectKeyIdentifier ski = originator.getSubjectKeyIdentifier();
+
+            origID.setSubjectKeyIdentifier(ski.getKeyIdentifier());
         }
 
-        // Must be OriginatorPublicKey then
-        return getPublicKeyFromOriginatorPublicKey(receiverPrivateKey, originator.getOriginatorKey(), prov);
+        return getPublicKeyFromOriginatorId(origID, prov);
     }
 
     private PublicKey getPublicKeyFromOriginatorPublicKey(Key receiverPrivateKey,
@@ -137,6 +141,14 @@ public class KeyAgreeRecipientInformation
         X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
         KeyFactory fact = KeyFactory.getInstance(keyEncAlg.getObjectId().getId(), prov);
         return fact.generatePublic(pubSpec);
+    }
+
+    private PublicKey getPublicKeyFromOriginatorId(OriginatorId origID, Provider prov)
+            throws CMSException
+    {
+        // TODO Support all alternatives for OriginatorIdentifierOrKey
+        // see RFC 3852 6.2.2
+        throw new CMSException("No support for 'originator' as IssuerAndSerialNumber or SubjectKeyIdentifier");
     }
 
     private SecretKey calculateAgreedWrapKey(String wrapAlg,
