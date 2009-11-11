@@ -7,7 +7,6 @@ import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -20,10 +19,6 @@ import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.EncryptedContentInfoParser;
 import org.bouncycastle.asn1.cms.EnvelopedDataParser;
-import org.bouncycastle.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -110,37 +105,9 @@ public class CMSEnvelopedDataParser
         //
         // prime the recipients
         //
-        List        infos = new ArrayList();
-        Iterator    it = baseInfos.iterator();
-        InputStream dataStream = ((ASN1OctetStringParser)encInfo.getEncryptedContent(DERTags.OCTET_STRING)).getOctetStream();
-        
-        while (it.hasNext())
-        {
-            RecipientInfo   info = (RecipientInfo)it.next();
-            DEREncodable    recipInfo = info.getInfo();    
+        InputStream contentStream = ((ASN1OctetStringParser)encInfo.getEncryptedContent(DERTags.OCTET_STRING)).getOctetStream();
+        List infos = CMSEnvelopedHelper.readRecipientInfos(baseInfos.iterator(), contentStream, _encAlg, null);
 
-            if (recipInfo instanceof KeyTransRecipientInfo)
-            {
-                infos.add(new KeyTransRecipientInformation(
-                            (KeyTransRecipientInfo)recipInfo, _encAlg, dataStream));
-            }
-            else if (recipInfo instanceof KEKRecipientInfo)
-            {
-                infos.add(new KEKRecipientInformation(
-                            (KEKRecipientInfo)recipInfo, _encAlg, dataStream));
-            }
-            else if (recipInfo instanceof KeyAgreeRecipientInfo)
-            {
-                infos.add(new KeyAgreeRecipientInformation(
-                            (KeyAgreeRecipientInfo)recipInfo, _encAlg, dataStream));
-            }
-            else if (recipInfo instanceof PasswordRecipientInfo)
-            {
-                infos.add(new PasswordRecipientInformation(
-                            (PasswordRecipientInfo)recipInfo, _encAlg, dataStream));
-            }
-        }
-        
         _recipientInfoStore = new RecipientInformationStore(infos);
     }
     

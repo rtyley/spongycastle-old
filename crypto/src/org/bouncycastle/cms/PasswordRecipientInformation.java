@@ -29,6 +29,9 @@ public class PasswordRecipientInformation
 {
     private PasswordRecipientInfo info;
 
+    /**
+     * @deprecated
+     */
     public PasswordRecipientInformation(
         PasswordRecipientInfo   info,
         AlgorithmIdentifier     encAlg,

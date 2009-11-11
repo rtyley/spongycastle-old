@@ -23,6 +23,9 @@ public class KEKRecipientInformation
 {
     private KEKRecipientInfo      info;
 
+    /**
+     * @deprecated
+     */
     public KEKRecipientInformation(
         KEKRecipientInfo        info,
         AlgorithmIdentifier     encAlg,

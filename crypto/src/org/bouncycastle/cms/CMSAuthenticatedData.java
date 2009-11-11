@@ -5,22 +5,15 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
-import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.cms.AuthenticatedData;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.util.Arrays;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -69,37 +62,8 @@ public class CMSAuthenticatedData
         //
         // load the RecipientInfoStore
         //
-        ASN1Set     s = authData.getRecipientInfos();
-        List        infos = new ArrayList();
-        byte[]      contentOctets = ASN1OctetString.getInstance(encInfo.getContent()).getOctets();
-
-        for (int i = 0; i != s.size(); i++)
-        {
-            RecipientInfo   info = RecipientInfo.getInstance(s.getObjectAt(i));
-            InputStream     contentStream = new ByteArrayInputStream(contentOctets);
-            Object          type = info.getInfo();
-
-            if (type instanceof KeyTransRecipientInfo)
-            {
-                infos.add(new KeyTransRecipientInformation(
-                    (KeyTransRecipientInfo)type, null, macAlg, contentStream));
-            }
-            else if (type instanceof KEKRecipientInfo)
-            {
-                infos.add(new KEKRecipientInformation(
-                    (KEKRecipientInfo)type, null, macAlg, contentStream));
-            }
-            else if (type instanceof KeyAgreeRecipientInfo)
-            {
-                infos.add(new KeyAgreeRecipientInformation(
-                    (KeyAgreeRecipientInfo)type, null, macAlg, contentStream));
-            }
-            else if (type instanceof PasswordRecipientInfo)
-            {
-                infos.add(new PasswordRecipientInformation(
-                    (PasswordRecipientInfo)type, null, macAlg, contentStream));
-            }
-        }
+        byte[] contentOctets = ASN1OctetString.getInstance(encInfo.getContent()).getOctets();
+        List infos = CMSEnvelopedHelper.readRecipientInfos(authData.getRecipientInfos(), contentOctets, null, macAlg);
 
         this.authAttrs = authData.getAuthAttrs();
         this.recipientInfoStore = new RecipientInformationStore(infos);
