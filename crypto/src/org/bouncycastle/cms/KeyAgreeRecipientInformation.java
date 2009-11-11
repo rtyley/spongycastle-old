@@ -87,7 +87,7 @@ public class KeyAgreeRecipientInformation
             {
                 RecipientKeyIdentifier rKeyID = karid.getRKeyID();
 
-                // Note: 'date' and 'other' fieldss of RecipientKeyIdentifier appear to be only informational 
+                // Note: 'date' and 'other' fields of RecipientKeyIdentifier appear to be only informational 
 
                 rid.setSubjectKeyIdentifier(rKeyID.getSubjectKeyIdentifier().getOctets());
             }
