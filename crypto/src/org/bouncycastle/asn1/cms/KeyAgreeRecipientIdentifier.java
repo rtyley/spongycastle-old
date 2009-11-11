@@ -1,25 +1,19 @@
 package org.bouncycastle.asn1.cms;
 
+import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 
-
 public class KeyAgreeRecipientIdentifier
     extends ASN1Encodable
+    implements ASN1Choice
 {
     private IssuerAndSerialNumber issuerSerial;
     private RecipientKeyIdentifier rKeyID;
-    
-    private KeyAgreeRecipientIdentifier(
-        ASN1Sequence seq)
-    {
-        issuerSerial = IssuerAndSerialNumber.getInstance(seq);
-        rKeyID = null;
-    }
-    
+
     /**
      * return an KeyAgreeRecipientIdentifier object from a tagged object.
      *
@@ -52,7 +46,13 @@ public class KeyAgreeRecipientIdentifier
         
         if (obj instanceof ASN1Sequence)
         {
-            return new KeyAgreeRecipientIdentifier((ASN1Sequence)obj);
+            return new KeyAgreeRecipientIdentifier(IssuerAndSerialNumber.getInstance(obj));
+        }
+        
+        if (obj instanceof ASN1TaggedObject && ((ASN1TaggedObject)obj).getTagNo() == 0)
+        {
+            return new KeyAgreeRecipientIdentifier(RecipientKeyIdentifier.getInstance(
+                (ASN1TaggedObject)obj, false));
         }
         
         throw new IllegalArgumentException("Invalid KeyAgreeRecipientIdentifier: " + obj.getClass().getName());
@@ -63,6 +63,13 @@ public class KeyAgreeRecipientIdentifier
     {
         this.issuerSerial = issuerSerial;
         this.rKeyID = null;
+    }
+
+    public KeyAgreeRecipientIdentifier(
+         RecipientKeyIdentifier rKeyID)
+    {
+        this.issuerSerial = null;
+        this.rKeyID = rKeyID;
     }
 
     public IssuerAndSerialNumber getIssuerAndSerialNumber()
