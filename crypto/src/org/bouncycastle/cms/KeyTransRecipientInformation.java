@@ -35,6 +35,9 @@ public class KeyTransRecipientInformation
 {
     private KeyTransRecipientInfo info;
 
+    /**
+     * @deprecated
+     */
     public KeyTransRecipientInformation(
         KeyTransRecipientInfo   info,
         AlgorithmIdentifier     encAlg,

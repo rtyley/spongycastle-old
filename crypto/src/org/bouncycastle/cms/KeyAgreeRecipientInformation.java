@@ -48,6 +48,9 @@ public class KeyAgreeRecipientInformation
     private KeyAgreeRecipientInfo info;
     private ASN1OctetString       _encryptedKey;
 
+    /**
+     * @deprecated
+     */
     public KeyAgreeRecipientInformation(
         KeyAgreeRecipientInfo info,
         AlgorithmIdentifier   encAlg,
