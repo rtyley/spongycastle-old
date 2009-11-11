@@ -59,7 +59,8 @@ public class CMSEnvelopedData
         // load the RecipientInfoStore
         //
         byte[] contentOctets = encInfo.getEncryptedContent().getOctets();
-        List infos = CMSEnvelopedHelper.readRecipientInfos(envData.getRecipientInfos(), contentOctets, encAlg, null);
+        List infos = CMSEnvelopedHelper.readRecipientInfos(
+            envData.getRecipientInfos(), contentOctets, encAlg, null, null);
 
         this.recipientInfoStore = new RecipientInformationStore(infos);
         this.unprotectedAttributes = envData.getUnprotectedAttrs();

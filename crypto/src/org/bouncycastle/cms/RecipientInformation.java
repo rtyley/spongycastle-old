@@ -29,12 +29,16 @@ public abstract class RecipientInformation
     protected RecipientId rid = new RecipientId();
     protected AlgorithmIdentifier encAlg;
     protected AlgorithmIdentifier macAlg;
+    protected AlgorithmIdentifier authEncAlg;
     protected AlgorithmIdentifier keyEncAlg;
     protected InputStream data;
 
     private MacInputStream macStream;
     private byte[]         resultMac;
 
+    /**
+     * @deprecated
+     */
     protected RecipientInformation(
         AlgorithmIdentifier encAlg,
         AlgorithmIdentifier keyEncAlg,
@@ -43,14 +47,28 @@ public abstract class RecipientInformation
         this(encAlg, null, keyEncAlg, data);
     }
 
+    /**
+     * @deprecated
+     */
     protected RecipientInformation(
         AlgorithmIdentifier encAlg,
         AlgorithmIdentifier macAlg,
         AlgorithmIdentifier keyEncAlg,
         InputStream data)
     {
+        this(encAlg, macAlg, null, keyEncAlg, data);
+    }
+
+    RecipientInformation(
+        AlgorithmIdentifier encAlg,
+        AlgorithmIdentifier macAlg,
+        AlgorithmIdentifier authEncAlg,
+        AlgorithmIdentifier keyEncAlg,
+        InputStream data)
+    {
         this.encAlg = encAlg;
         this.macAlg = macAlg;
+        this.authEncAlg = authEncAlg;
         this.keyEncAlg = keyEncAlg;
         this.data = data;
     }
@@ -166,10 +184,7 @@ public abstract class RecipientInformation
             if (encAlg != null)
             {
                 String encAlg = this.encAlg.getObjectId().getId();
-
-                Cipher cipher;
-
-                cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encAlg, provider);
+                Cipher cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encAlg, provider);
 
                 ASN1Object sParams = (ASN1Object)this.encAlg.getParameters();
 
@@ -220,6 +235,27 @@ public abstract class RecipientInformation
             if (macAlg != null)
             {
                 content = macStream = createMacInputStream(macAlg, sKey, content, provider);
+            }
+
+            if (authEncAlg != null)
+            {
+                // TODO Create AEAD cipher instance to decrypt and calculate tag ( MAC)
+                throw new CMSException("AuthEnveloped data decryption not yet implemented");
+
+//              RFC 5084 ASN.1 Module
+//                -- Parameters for AigorithmIdentifier
+//
+//                CCMParameters ::= SEQUENCE {
+//                  aes-nonce         OCTET STRING (SIZE(7..13)),
+//                  aes-ICVlen        AES-CCM-ICVlen DEFAULT 12 }
+//
+//                AES-CCM-ICVlen ::= INTEGER (4 | 6 | 8 | 10 | 12 | 14 | 16)
+//
+//                GCMParameters ::= SEQUENCE {
+//                  aes-nonce        OCTET STRING, -- recommended size is 12 octets
+//                  aes-ICVlen       AES-GCM-ICVlen DEFAULT 12 }
+//
+//                AES-GCM-ICVlen ::= INTEGER (12 | 13 | 14 | 15 | 16)
             }
 
             return new CMSTypedStream(content);

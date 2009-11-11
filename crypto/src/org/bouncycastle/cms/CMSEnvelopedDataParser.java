@@ -106,7 +106,8 @@ public class CMSEnvelopedDataParser
         // prime the recipients
         //
         InputStream contentStream = ((ASN1OctetStringParser)encInfo.getEncryptedContent(DERTags.OCTET_STRING)).getOctetStream();
-        List infos = CMSEnvelopedHelper.readRecipientInfos(baseInfos.iterator(), contentStream, _encAlg, null);
+        List infos = CMSEnvelopedHelper.readRecipientInfos(
+            baseInfos.iterator(), contentStream, _encAlg, null, null);
 
         _recipientInfoStore = new RecipientInformationStore(infos);
     }

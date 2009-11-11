@@ -370,7 +370,7 @@ class CMSEnvelopedHelper
     }
 
     static List readRecipientInfos(ASN1Set recipientInfos, byte[] contentOctets,
-        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg)
+        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
     {
         List infos = new ArrayList();
         for (int i = 0; i != recipientInfos.size(); i++)
@@ -378,47 +378,47 @@ class CMSEnvelopedHelper
             RecipientInfo info = RecipientInfo.getInstance(recipientInfos.getObjectAt(i));
             InputStream contentStream = new ByteArrayInputStream(contentOctets);
 
-            readRecipientInfo(infos, info, contentStream, encAlg, macAlg);
+            readRecipientInfo(infos, info, contentStream, encAlg, macAlg, authEncAlg);
         }
         return infos;
     }
 
     static List readRecipientInfos(Iterator recipientInfoIter, InputStream contentStream,
-        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg)
+        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
     {
         List infos = new ArrayList();
         while (recipientInfoIter.hasNext())
         {
             RecipientInfo info = (RecipientInfo)recipientInfoIter.next();
 
-            readRecipientInfo(infos, info, contentStream, encAlg, macAlg);
+            readRecipientInfo(infos, info, contentStream, encAlg, macAlg, authEncAlg);
         }
         return infos;
     }
 
     private static void readRecipientInfo(List infos, RecipientInfo info, InputStream contentStream,
-            AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg)
+            AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
     {
         DEREncodable recipInfo = info.getInfo();
         if (recipInfo instanceof KeyTransRecipientInfo)
         {
             infos.add(new KeyTransRecipientInformation(
-                (KeyTransRecipientInfo)recipInfo, encAlg, macAlg, contentStream));
+                (KeyTransRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
         }
         else if (recipInfo instanceof KEKRecipientInfo)
         {
             infos.add(new KEKRecipientInformation(
-                (KEKRecipientInfo)recipInfo, encAlg, macAlg, contentStream));
+                (KEKRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
         }
         else if (recipInfo instanceof KeyAgreeRecipientInfo)
         {
             infos.add(new KeyAgreeRecipientInformation(
-                (KeyAgreeRecipientInfo)recipInfo, encAlg, macAlg, contentStream));
+                (KeyAgreeRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
         }
         else if (recipInfo instanceof PasswordRecipientInfo)
         {
             infos.add(new PasswordRecipientInformation(
-                (PasswordRecipientInfo)recipInfo, encAlg, macAlg, contentStream));
+                (PasswordRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
         }
     }
 }
