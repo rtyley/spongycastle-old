@@ -214,15 +214,23 @@ public class CMSEnvelopedGenerator
         Provider         provider)
         throws NoSuchAlgorithmException, InvalidKeyException
     {
+        OriginatorIdentifierOrKey originator;
         try
         {
-            OriginatorIdentifierOrKey originator = new OriginatorIdentifierOrKey(
-                createOriginatorPublicKey(senderPublicKey));
+            originator = new OriginatorIdentifierOrKey(
+                    createOriginatorPublicKey(senderPublicKey));
+        }
+        catch (IOException e)
+        {
+            throw new InvalidKeyException("cannot extract originator public key: " + e);
+        }
 
-            PublicKey recipientPublicKey = recipientCert.getPublicKey();
-            ASN1OctetString ukm = null;
+        ASN1OctetString ukm = null;
+        PublicKey recipientPublicKey = recipientCert.getPublicKey();
 
-            if (agreementAlgorithm.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
+        if (agreementAlgorithm.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
+        {
+            try
             {
                 ECParameterSpec ecParamSpec = ((ECPublicKey)senderPublicKey).getParams();
 
@@ -239,30 +247,30 @@ public class CMSEnvelopedGenerator
                 senderPrivateKey = new MQVPrivateKeySpec(
                     senderPrivateKey, ephemKP.getPrivate(), ephemKP.getPublic());
             }
-
-            KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, provider);
-            agreement.init(senderPrivateKey, rand);
-            agreement.doPhase(recipientPublicKey, true);
-            SecretKey wrapKey = agreement.generateSecret(cekWrapAlgorithm);
-
-            KeyAgreeRecipientInfoGenerator karig = new KeyAgreeRecipientInfoGenerator();
-            karig.setAlgorithmOID(new DERObjectIdentifier(agreementAlgorithm));
-            karig.setOriginator(originator);
-            karig.setRecipientCert(recipientCert);
-            karig.setUKM(ukm);
-            karig.setWrapKey(wrapKey);
-            karig.setWrapAlgorithmOID(new DERObjectIdentifier(cekWrapAlgorithm));
-
-            recipientInfoGenerators.add(karig);
+            catch (InvalidAlgorithmParameterException e)
+            {
+                throw new InvalidKeyException("cannot determine MQV ephemeral key pair parameters from public key: " + e);
+            }
+            catch (IOException e)
+            {
+                throw new InvalidKeyException("cannot extract MQV ephemeral public key: " + e);
+            }
         }
-        catch (InvalidAlgorithmParameterException e)
-        {
-            throw new InvalidKeyException("cannot determine ephemeral key pair parameters from public key: " + e);
-        }
-        catch (IOException e)
-        {
-            throw new InvalidKeyException("cannot extract originator public key: " + e);
-        }
+
+        KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, provider);
+        agreement.init(senderPrivateKey, rand);
+        agreement.doPhase(recipientPublicKey, true);
+        SecretKey wrapKey = agreement.generateSecret(cekWrapAlgorithm);
+
+        KeyAgreeRecipientInfoGenerator karig = new KeyAgreeRecipientInfoGenerator();
+        karig.setAlgorithmOID(new DERObjectIdentifier(agreementAlgorithm));
+        karig.setOriginator(originator);
+        karig.setRecipientCert(recipientCert);
+        karig.setUKM(ukm);
+        karig.setWrapKey(wrapKey);
+        karig.setWrapAlgorithmOID(new DERObjectIdentifier(cekWrapAlgorithm));
+
+        recipientInfoGenerators.add(karig);
     }
 
     protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
