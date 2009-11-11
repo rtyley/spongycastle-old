@@ -43,17 +43,30 @@ public class KeyTransRecipientInformation
         AlgorithmIdentifier     encAlg,
         InputStream             data)
     {
-        this(info, encAlg, null, data);
+        this(info, encAlg, null, null, data);
     }
-    
+
+    /**
+     * @deprecated
+     */
     public KeyTransRecipientInformation(
         KeyTransRecipientInfo   info,
         AlgorithmIdentifier     encAlg,
         AlgorithmIdentifier     macAlg,
         InputStream             data)
     {
-        super(encAlg, macAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
-        
+        this(info, encAlg, macAlg, null, data);
+    }
+
+    KeyTransRecipientInformation(
+            KeyTransRecipientInfo   info,
+            AlgorithmIdentifier     encAlg,
+            AlgorithmIdentifier     macAlg,
+            AlgorithmIdentifier     authEncAlg,
+            InputStream             data)
+    {
+        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), data);
+
         this.info = info;
         this.rid = new RecipientId();
 

@@ -31,17 +31,30 @@ public class KEKRecipientInformation
         AlgorithmIdentifier     encAlg,
         InputStream             data)
     {
-        this(info, encAlg, null, data);
+        this(info, encAlg, null, null, data);
     }
 
+    /**
+     * @deprecated
+     */
     public KEKRecipientInformation(
         KEKRecipientInfo        info,
         AlgorithmIdentifier     encAlg,
         AlgorithmIdentifier     macAlg,
         InputStream             data)
     {
-        super(encAlg, macAlg, AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm()), data);
-        
+        this(info, encAlg, macAlg, null, data);
+    }
+
+    KEKRecipientInformation(
+        KEKRecipientInfo        info,
+        AlgorithmIdentifier     encAlg,
+        AlgorithmIdentifier     macAlg,
+        AlgorithmIdentifier     authEncAlg,
+        InputStream             data)
+    {
+        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), data);
+
         this.info = info;
         this.rid = new RecipientId();
         

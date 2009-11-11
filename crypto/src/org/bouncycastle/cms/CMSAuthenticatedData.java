@@ -63,7 +63,8 @@ public class CMSAuthenticatedData
         // load the RecipientInfoStore
         //
         byte[] contentOctets = ASN1OctetString.getInstance(encInfo.getContent()).getOctets();
-        List infos = CMSEnvelopedHelper.readRecipientInfos(authData.getRecipientInfos(), contentOctets, null, macAlg);
+        List infos = CMSEnvelopedHelper.readRecipientInfos(
+            authData.getRecipientInfos(), contentOctets, null, macAlg, null);
 
         this.authAttrs = authData.getAuthAttrs();
         this.recipientInfoStore = new RecipientInformationStore(infos);
