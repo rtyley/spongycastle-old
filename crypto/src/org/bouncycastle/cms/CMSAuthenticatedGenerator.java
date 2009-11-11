@@ -74,7 +74,7 @@ public class CMSAuthenticatedGenerator
         }
     }
 
-    protected class MacOutputStream
+    protected static class MacOutputStream
         extends OutputStream
     {
         private final OutputStream out;
