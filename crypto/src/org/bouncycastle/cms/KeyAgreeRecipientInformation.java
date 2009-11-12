@@ -123,7 +123,7 @@ public class KeyAgreeRecipientInformation
         OriginatorPublicKey opk = originator.getOriginatorKey();
         if (opk != null)
         {
-            return getPublicKeyFromOriginatorPublicKey(receiverPrivateKey, originator.getOriginatorKey(), prov);
+            return getPublicKeyFromOriginatorPublicKey(receiverPrivateKey, opk, prov);
         }
 
         OriginatorId origID = new OriginatorId();
