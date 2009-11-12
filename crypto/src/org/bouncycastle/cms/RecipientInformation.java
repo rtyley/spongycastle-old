@@ -241,7 +241,7 @@ public abstract class RecipientInformation
                     }
                 }
 
-                content = new CipherInputStream(data, cipher); 
+                content = new CipherInputStream(content, cipher); 
             }
 
             // If authenticated, need to wrap in MacInputStream to calculate MAC
