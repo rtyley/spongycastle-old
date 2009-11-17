@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.digests;
 
 
 import org.bouncycastle.crypto.digests.GeneralDigest;
+import org.bouncycastle.crypto.util.Pack;
 
 
 /**
@@ -68,24 +69,18 @@ public class SHA256Digest
         byte[]  in,
         int     inOff)
     {
-        X[xOff++] = ((in[inOff] & 0xff) << 24) | ((in[inOff + 1] & 0xff) << 16)
-                    | ((in[inOff + 2] & 0xff) << 8) | ((in[inOff + 3] & 0xff)); 
+        // Note: Inlined for performance
+//        X[xOff] = Pack.bigEndianToInt(in, inOff);
+        int n = in[inOff] << 24;
+        n |= (in[++inOff] & 0xff) << 16;
+        n |= (in[++inOff] & 0xff) << 8;
+        n |= (in[++inOff] & 0xff);
+        X[xOff] = n;
 
-        if (xOff == 16)
+        if (++xOff == 16)
         {
             processBlock();
         }
-    }
-
-    private void unpackWord(
-        int     word,
-        byte[]  out,
-        int     outOff)
-    {
-        out[outOff]     = (byte)(word >>> 24);
-        out[outOff + 1] = (byte)(word >>> 16);
-        out[outOff + 2] = (byte)(word >>> 8);
-        out[outOff + 3] = (byte)word;
     }
 
     protected void processLength(
@@ -106,14 +101,14 @@ public class SHA256Digest
     {
         finish();
 
-        unpackWord(H1, out, outOff);
-        unpackWord(H2, out, outOff + 4);
-        unpackWord(H3, out, outOff + 8);
-        unpackWord(H4, out, outOff + 12);
-        unpackWord(H5, out, outOff + 16);
-        unpackWord(H6, out, outOff + 20);
-        unpackWord(H7, out, outOff + 24);
-        unpackWord(H8, out, outOff + 28);
+        Pack.intToBigEndian(H1, out, outOff);
+        Pack.intToBigEndian(H2, out, outOff + 4);
+        Pack.intToBigEndian(H3, out, outOff + 8);
+        Pack.intToBigEndian(H4, out, outOff + 12);
+        Pack.intToBigEndian(H5, out, outOff + 16);
+        Pack.intToBigEndian(H6, out, outOff + 20);
+        Pack.intToBigEndian(H7, out, outOff + 24);
+        Pack.intToBigEndian(H8, out, outOff + 28);
 
         reset();
 

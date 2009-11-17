@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.digests;
 
+import org.bouncycastle.crypto.util.Pack;
+
 /**
  * implementation of SHA-1 as outlined in "Handbook of Applied Cryptography", pages 346 - 349.
  *
@@ -56,24 +58,18 @@ public class SHA1Digest
         byte[]  in,
         int     inOff)
     {
-        X[xOff++] = (in[inOff] & 0xff) << 24 | (in[inOff + 1] & 0xff) << 16
-                    | (in[inOff + 2] & 0xff) << 8 | in[inOff + 3] & 0xff; 
+        // Note: Inlined for performance
+//        X[xOff] = Pack.bigEndianToInt(in, inOff);
+        int n = in[  inOff] << 24;
+        n |= (in[++inOff] & 0xff) << 16;
+        n |= (in[++inOff] & 0xff) << 8;
+        n |= (in[++inOff] & 0xff);
+        X[xOff] = n;
 
-        if (xOff == 16)
+        if (++xOff == 16)
         {
             processBlock();
         }        
-    }
-
-    private void unpackWord(
-        int     word,
-        byte[]  out,
-        int     outOff)
-    {
-        out[outOff++] = (byte)(word >>> 24);
-        out[outOff++] = (byte)(word >>> 16);
-        out[outOff++] = (byte)(word >>> 8);
-        out[outOff++] = (byte)word;
     }
 
     protected void processLength(
@@ -94,11 +90,11 @@ public class SHA1Digest
     {
         finish();
 
-        unpackWord(H1, out, outOff);
-        unpackWord(H2, out, outOff + 4);
-        unpackWord(H3, out, outOff + 8);
-        unpackWord(H4, out, outOff + 12);
-        unpackWord(H5, out, outOff + 16);
+        Pack.intToBigEndian(H1, out, outOff);
+        Pack.intToBigEndian(H2, out, outOff + 4);
+        Pack.intToBigEndian(H3, out, outOff + 8);
+        Pack.intToBigEndian(H4, out, outOff + 12);
+        Pack.intToBigEndian(H5, out, outOff + 16);
 
         reset();
 
