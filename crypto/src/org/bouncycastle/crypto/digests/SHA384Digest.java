@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.digests;
 
+import org.bouncycastle.crypto.util.Pack;
+
 
 /**
  * FIPS 180-2 implementation of SHA-384.
@@ -50,12 +52,12 @@ public class SHA384Digest
     {
         finish();
 
-        unpackWord(H1, out, outOff);
-        unpackWord(H2, out, outOff + 8);
-        unpackWord(H3, out, outOff + 16);
-        unpackWord(H4, out, outOff + 24);
-        unpackWord(H5, out, outOff + 32);
-        unpackWord(H6, out, outOff + 40);
+        Pack.longToBigEndian(H1, out, outOff);
+        Pack.longToBigEndian(H2, out, outOff + 8);
+        Pack.longToBigEndian(H3, out, outOff + 16);
+        Pack.longToBigEndian(H4, out, outOff + 24);
+        Pack.longToBigEndian(H5, out, outOff + 32);
+        Pack.longToBigEndian(H6, out, outOff + 40);
 
         reset();
 

@@ -1,6 +1,7 @@
 package org.bouncycastle.crypto.digests;
 
 import org.bouncycastle.crypto.ExtendedDigest;
+import org.bouncycastle.crypto.util.Pack;
 
 /**
  * Base class for SHA-384 and SHA-512.
@@ -162,34 +163,12 @@ public abstract class LongDigest
         byte[]  in,
         int     inOff)
     {
-        W[wOff++] = ((long)(in[inOff] & 0xff) << 56)
-                    | ((long)(in[inOff + 1] & 0xff) << 48)
-                    | ((long)(in[inOff + 2] & 0xff) << 40)
-                    | ((long)(in[inOff + 3] & 0xff) << 32)
-                    | ((long)(in[inOff + 4] & 0xff) << 24)
-                    | ((long)(in[inOff + 5] & 0xff) << 16)
-                    | ((long)(in[inOff + 6] & 0xff) << 8)
-                    | ((in[inOff + 7] & 0xff)); 
+        W[wOff] = Pack.bigEndianToLong(in, inOff);
 
-        if (wOff == 16)
+        if (++wOff == 16)
         {
             processBlock();
         }
-    }
-
-    protected void unpackWord(
-        long    word,
-        byte[]  out,
-        int     outOff)
-    {
-        out[outOff]     = (byte)(word >>> 56);
-        out[outOff + 1] = (byte)(word >>> 48);
-        out[outOff + 2] = (byte)(word >>> 40);
-        out[outOff + 3] = (byte)(word >>> 32);
-        out[outOff + 4] = (byte)(word >>> 24);
-        out[outOff + 5] = (byte)(word >>> 16);
-        out[outOff + 6] = (byte)(word >>> 8);
-        out[outOff + 7] = (byte)word;
     }
 
     /**
