@@ -1,7 +1,13 @@
 package org.bouncycastle.asn1.x509;
 
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -12,15 +18,9 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.DERUniversalString;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
-
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.io.IOException;
 
 /**
  * <pre>
@@ -163,6 +163,11 @@ public class X509Name
      * DirectoryString(SIZE(1..30))
      */
     public static final DERObjectIdentifier POSTAL_ADDRESS = new DERObjectIdentifier("2.5.4.16");
+
+    /**
+     * RFC 2256 dmdName
+     */
+    public static final DERObjectIdentifier DMD_NAME = new DERObjectIdentifier("2.5.4.54");
 
     /**
      * id-at-telephoneNumber
