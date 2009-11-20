@@ -143,14 +143,13 @@ public class CBCBlockCipherMac
         }
 
         int blockSize = cipher.getBlockSize();
-        int resultLen = 0;
         int gapLen = blockSize - bufOff;
 
         if (len > gapLen)
         {
             System.arraycopy(in, inOff, buf, bufOff, gapLen);
 
-            resultLen += cipher.processBlock(buf, 0, mac, 0);
+            cipher.processBlock(buf, 0, mac, 0);
 
             bufOff = 0;
             len -= gapLen;
@@ -158,7 +157,7 @@ public class CBCBlockCipherMac
 
             while (len > blockSize)
             {
-                resultLen += cipher.processBlock(in, inOff, mac, 0);
+                cipher.processBlock(in, inOff, mac, 0);
 
                 len -= blockSize;
                 inOff += blockSize;
