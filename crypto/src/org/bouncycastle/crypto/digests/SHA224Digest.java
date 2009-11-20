@@ -167,44 +167,52 @@ public class SHA224Digest
         for(int i = 0; i < 8; i ++)
         {
             // t = 8 * i
-            h += Sum1(e) + Ch(e, f, g) + K[t] + X[t++];
+            h += Sum1(e) + Ch(e, f, g) + K[t] + X[t];
             d += h;
             h += Sum0(a) + Maj(a, b, c);
+            ++t;
 
             // t = 8 * i + 1
-            g += Sum1(d) + Ch(d, e, f) + K[t] + X[t++];
+            g += Sum1(d) + Ch(d, e, f) + K[t] + X[t];
             c += g;
             g += Sum0(h) + Maj(h, a, b);
+            ++t;
 
             // t = 8 * i + 2
-            f += Sum1(c) + Ch(c, d, e) + K[t] + X[t++];
+            f += Sum1(c) + Ch(c, d, e) + K[t] + X[t];
             b += f;
             f += Sum0(g) + Maj(g, h, a);
+            ++t;
 
             // t = 8 * i + 3
-            e += Sum1(b) + Ch(b, c, d) + K[t] + X[t++];
+            e += Sum1(b) + Ch(b, c, d) + K[t] + X[t];
             a += e;
             e += Sum0(f) + Maj(f, g, h);
+            ++t;
 
             // t = 8 * i + 4
-            d += Sum1(a) + Ch(a, b, c) + K[t] + X[t++];
+            d += Sum1(a) + Ch(a, b, c) + K[t] + X[t];
             h += d;
             d += Sum0(e) + Maj(e, f, g);
+            ++t;
 
             // t = 8 * i + 5
-            c += Sum1(h) + Ch(h, a, b) + K[t] + X[t++];
+            c += Sum1(h) + Ch(h, a, b) + K[t] + X[t];
             g += c;
             c += Sum0(d) + Maj(d, e, f);
+            ++t;
 
             // t = 8 * i + 6
-            b += Sum1(g) + Ch(g, h, a) + K[t] + X[t++];
+            b += Sum1(g) + Ch(g, h, a) + K[t] + X[t];
             f += b;
             b += Sum0(c) + Maj(c, d, e);
+            ++t;
 
             // t = 8 * i + 7
-            a += Sum1(f) + Ch(f, g, h) + K[t] + X[t++];
+            a += Sum1(f) + Ch(f, g, h) + K[t] + X[t];
             e += a;
             a += Sum0(b) + Maj(b, c, d);
+            ++t;
         }
 
         H1 += a;
