@@ -8,6 +8,7 @@ import org.bouncycastle.crypto.Wrapper;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.util.Arrays;
 
 /**
  * an implementation of the AES Key Wrapper from the NIST Key Wrap
@@ -166,12 +167,9 @@ public class RFC3394WrapEngine
             }
         }
 
-        for (int i = 0; i != iv.length; i++)
+        if (!Arrays.constantTimeAreEqual(a, iv))
         {
-            if (a[i] != iv[i])
-            {
-                throw new InvalidCipherTextException("checksum failed");
-            }
+            throw new InvalidCipherTextException("checksum failed");
         }
 
         return block;

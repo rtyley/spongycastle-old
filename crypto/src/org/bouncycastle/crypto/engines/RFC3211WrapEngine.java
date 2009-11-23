@@ -158,13 +158,16 @@ public class RFC3211WrapEngine
 
         System.arraycopy(cekBlock, 4, key, 0, cekBlock[0]);
 
+        // Note: Using constant time comparison
+        int nonEqual = 0;
         for (int i = 0; i != 3; i++)
         {
             byte check = (byte)~cekBlock[1 + i];
-            if (check != key[i])
-            {
-                throw new InvalidCipherTextException("wrapped key fails checksum");
-            }
+            nonEqual |= (check ^ key[i]);
+        }
+        if (nonEqual != 0)
+        {
+            throw new InvalidCipherTextException("wrapped key fails checksum");
         }
 
         return key;
