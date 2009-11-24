@@ -155,40 +155,31 @@ public class DESedeWrapEngine
 
       // Encrypt WKCKS in CBC mode using KEK as the key and IV as the
       // initialization vector. Call the results TEMP1.
-      byte TEMP1[] = new byte[WKCKS.length];
 
-      System.arraycopy(WKCKS, 0, TEMP1, 0, WKCKS.length);
+      int blockSize = engine.getBlockSize();
 
-      int noOfBlocks = WKCKS.length / engine.getBlockSize();
-      int extraBytes = WKCKS.length % engine.getBlockSize();
-
-      if (extraBytes != 0) 
+      if (WKCKS.length % blockSize != 0) 
       {
          throw new IllegalStateException("Not multiple of block length");
       }
 
       engine.init(true, paramPlusIV);
 
-      for (int i = 0; i < noOfBlocks; i++) 
-      {
-         int currentBytePos = i * engine.getBlockSize();
+      byte TEMP1[] = new byte[WKCKS.length];
 
-         engine.processBlock(TEMP1, currentBytePos, TEMP1, currentBytePos);
+      for (int currentBytePos = 0; currentBytePos != WKCKS.length; currentBytePos += blockSize) 
+      {
+         engine.processBlock(WKCKS, currentBytePos, TEMP1, currentBytePos);
       }
 
-      // Left TEMP2 = IV || TEMP1.
+      // Let TEMP2 = IV || TEMP1.
       byte[] TEMP2 = new byte[this.iv.length + TEMP1.length];
 
       System.arraycopy(this.iv, 0, TEMP2, 0, this.iv.length);
       System.arraycopy(TEMP1, 0, TEMP2, this.iv.length, TEMP1.length);
 
       // Reverse the order of the octets in TEMP2 and call the result TEMP3.
-      byte[] TEMP3 = new byte[TEMP2.length];
-
-      for (int i = 0; i < TEMP2.length; i++) 
-      {
-         TEMP3[i] = TEMP2[TEMP2.length - (i + 1)];
-      }
+      byte[] TEMP3 = reverse(TEMP2);
 
       // Encrypt TEMP3 in CBC mode using the KEK and an initialization vector
       // of 0x 4a dd a2 2c 79 e8 21 05. The resulting cipher text is the desired
@@ -197,10 +188,8 @@ public class DESedeWrapEngine
 
       this.engine.init(true, param2);
 
-      for (int i = 0; i < noOfBlocks + 1; i++) 
+      for (int currentBytePos = 0; currentBytePos != TEMP3.length; currentBytePos += blockSize) 
       {
-         int currentBytePos = i * engine.getBlockSize();
-
          engine.processBlock(TEMP3, currentBytePos, TEMP3, currentBytePos);
       }
 
@@ -228,11 +217,11 @@ public class DESedeWrapEngine
         {
             throw new InvalidCipherTextException("Null pointer as ciphertext");
         }
-        
-        if (inLen % engine.getBlockSize() != 0)
+
+        final int blockSize = engine.getBlockSize();
+        if (inLen % blockSize != 0)
         {
-            throw new InvalidCipherTextException("Ciphertext not multiple of "
-                    + engine.getBlockSize());
+            throw new InvalidCipherTextException("Ciphertext not multiple of " + blockSize);
         }
 
       /*
@@ -259,22 +248,13 @@ public class DESedeWrapEngine
 
       byte TEMP3[] = new byte[inLen];
 
-      System.arraycopy(in, inOff, TEMP3, 0, inLen);
-
-      for (int i = 0; i < (TEMP3.length / engine.getBlockSize()); i++) 
+      for (int currentBytePos = 0; currentBytePos != inLen; currentBytePos += blockSize) 
       {
-         int currentBytePos = i * engine.getBlockSize();
-
-         engine.processBlock(TEMP3, currentBytePos, TEMP3, currentBytePos);
+         engine.processBlock(in, inOff + currentBytePos, TEMP3, currentBytePos);
       }
 
       // Reverse the order of the octets in TEMP3 and call the result TEMP2.
-      byte[] TEMP2 = new byte[TEMP3.length];
-
-      for (int i = 0; i < TEMP3.length; i++) 
-      {
-         TEMP2[i] = TEMP3[TEMP3.length - (i + 1)];
-      }
+      byte[] TEMP2 = reverse(TEMP3);
 
       // Decompose TEMP2 into IV, the first 8 octets, and TEMP1, the remaining octets.
       this.iv = new byte[8];
@@ -292,13 +272,9 @@ public class DESedeWrapEngine
 
       byte[] WKCKS = new byte[TEMP1.length];
 
-      System.arraycopy(TEMP1, 0, WKCKS, 0, TEMP1.length);
-
-      for (int i = 0; i < (WKCKS.length / engine.getBlockSize()); i++) 
+      for (int currentBytePos = 0; currentBytePos != WKCKS.length; currentBytePos += blockSize) 
       {
-         int currentBytePos = i * engine.getBlockSize();
-
-         engine.processBlock(WKCKS, currentBytePos, WKCKS, currentBytePos);
+         engine.processBlock(TEMP1, currentBytePos, WKCKS, currentBytePos);
       }
 
       // Decompose WKCKS. CKS is the last 8 octets and WK, the wrapped key, are
@@ -358,5 +334,15 @@ public class DESedeWrapEngine
         byte[] checksum)
     {
         return Arrays.constantTimeAreEqual(calculateCMSKeyChecksum(key), checksum);
+    }
+
+    private static byte[] reverse(byte[] bs)
+    {
+        byte[] result = new byte[bs.length];
+        for (int i = 0; i < bs.length; i++) 
+        {
+           result[i] = bs[bs.length - (i + 1)];
+        }
+        return result;
     }
 }
