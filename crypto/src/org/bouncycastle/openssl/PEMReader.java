@@ -223,10 +223,9 @@ public class PEMReader extends BufferedReader
     private PublicKey readRSAPublicKey(String endMarker) 
         throws IOException 
     {
-        ByteArrayInputStream bAIS = new ByteArrayInputStream(readBytes(endMarker));
-        ASN1InputStream ais = new ASN1InputStream(bAIS);
+        ASN1InputStream ais = new ASN1InputStream(readBytes(endMarker));
         Object asnObject = ais.readObject();
-        ASN1Sequence sequence = (ASN1Sequence) asnObject;
+        ASN1Sequence sequence = (ASN1Sequence)asnObject;
         RSAPublicKeyStructure rsaPubStructure = new RSAPublicKeyStructure(sequence);
         RSAPublicKeySpec keySpec = new RSAPublicKeySpec(
                     rsaPubStructure.getModulus(), 
@@ -404,11 +403,9 @@ public class PEMReader extends BufferedReader
             throw new IOException(endMarker + " not found");
         }
 
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(bOut.toByteArray());
-
         try
         {
-            ASN1InputStream aIn = new ASN1InputStream(bIn);
+            ASN1InputStream aIn = new ASN1InputStream(bOut.toByteArray());
 
             return ContentInfo.getInstance(aIn.readObject());
         }
