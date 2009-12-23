@@ -1,14 +1,14 @@
 package org.bouncycastle.crypto.encodings;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.SecureRandom;
+
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
-
-import java.security.SecureRandom;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * this does your basic PKCS 1 v1.5 padding - whether or not you should be using this
@@ -233,7 +233,7 @@ public class PKCS1Encoding
 
         start++;           // data should start at the next byte
 
-        if (start >= block.length || start < HEADER_LENGTH)
+        if (start > block.length || start < HEADER_LENGTH)
         {
             throw new InvalidCipherTextException("no data in block");
         }

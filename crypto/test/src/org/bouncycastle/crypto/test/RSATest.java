@@ -5,6 +5,7 @@ import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
@@ -13,6 +14,7 @@ import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -191,7 +193,47 @@ public class RSATest
             fail("failed OAEP Test");
         }
     }
-    
+
+    private void zeroBlockTest(CipherParameters encParameters, CipherParameters decParameters)
+    {
+        AsymmetricBlockCipher eng = new PKCS1Encoding(new RSAEngine());
+
+        eng.init(true, encParameters);
+
+        if (eng.getOutputBlockSize() != ((PKCS1Encoding)eng).getUnderlyingCipher().getOutputBlockSize())
+        {
+            fail("PKCS1 output block size incorrect");
+        }
+
+        byte[] zero = new byte[0];
+        byte[] data = null;
+
+        try
+        {
+            data = eng.processBlock(zero, 0, zero.length);
+        }
+        catch (Exception e)
+        {
+            fail("failed - exception " + e.toString(), e);
+        }
+
+        eng.init(false, decParameters);
+
+        try
+        {
+            data = eng.processBlock(data, 0, data.length);
+        }
+        catch (Exception e)
+        {
+            fail("failed - exception " + e.toString(), e);
+        }
+
+        if (!Arrays.areEqual(zero, data))
+        {
+            fail("failed PKCS1 zero Test");
+        }
+    }
+
     public void performTest()
     {
         RSAKeyParameters    pubParameters = new RSAKeyParameters(false, mod, pubExp);
@@ -327,6 +369,9 @@ public class RSATest
         {
             fail("failed PKCS1 private/public Test");
         }
+
+        zeroBlockTest(pubParameters, privParameters);
+        zeroBlockTest(privParameters, pubParameters);
 
         //
         // key generation test
