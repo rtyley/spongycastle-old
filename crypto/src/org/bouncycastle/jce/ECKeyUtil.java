@@ -115,8 +115,8 @@ public class ECKeyUtil
             throw e;
         }
         catch (Exception e)
-        {
-            throw new IllegalStateException(e);
+        {               // shouldn't really happen...
+            throw new UnexpectedException(e);
         }
     }
 
@@ -205,8 +205,26 @@ public class ECKeyUtil
             throw e;
         }
         catch (Exception e)
+        {          // shouldn't really happen
+            throw new UnexpectedException(e);
+        }
+    }
+
+    private static class UnexpectedException
+        extends RuntimeException
+    {
+        private Throwable cause;
+
+        UnexpectedException(Throwable cause)
         {
-            throw new IllegalStateException(e);
+            super(cause.toString());
+
+            this.cause = cause;
+        }
+
+        public Throwable getCause()
+        {
+            return cause;
         }
     }
 }
