@@ -211,7 +211,7 @@ public class ASN1InputStream
 
             if ((tag & APPLICATION) != 0)
             {
-                ASN1StreamParser sp = new ASN1StreamParser(indIn);
+                ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
 
                 return new BERApplicationSpecificParser(tagNo, sp).getDERObject();
             }
@@ -220,7 +220,7 @@ public class ASN1InputStream
                 return new BERTaggedObjectParser(tag, tagNo, indIn).getDERObject();
             }
 
-            ASN1StreamParser sp = new ASN1StreamParser(indIn);
+            ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
 
             // TODO There are other tags that may be constructed (e.g. BIT_STRING)
             switch (tagNo)

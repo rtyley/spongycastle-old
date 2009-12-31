@@ -1,14 +1,5 @@
 package org.bouncycastle.openssl.test;
 
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.openssl.PasswordFinder;
-import org.bouncycastle.util.test.SimpleTest;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,6 +17,15 @@ import java.security.Security;
 import java.security.Signature;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
+
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.PasswordFinder;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * basic class for reading test.pem - the password is "secret"
@@ -185,6 +185,26 @@ public class ReaderTest
         doOpenSslRsaTest("rc2_40_cbc");
         doOpenSslDsaTest("rc2_64_cbc");
         doOpenSslRsaTest("rc2_64_cbc");
+
+        // heap space check - a failure by the ASN.1 library to detect an
+        // out of band stream will cause this to run out of memory.
+        try
+        {
+            pGet = new Password("7fd98".toCharArray());
+
+            pemRd = openPEMResource("test.pem", pGet);
+
+            while ((o = pemRd.readObject()) != null)
+            {
+            }
+        }
+        catch (IOException e)
+        {
+            if (!e.getCause().getMessage().equals("corrupted stream - out of bounds length found"))
+            {
+               fail("bounds issue not detected");    
+            }
+        }
     }
 
     private void keyPairTest(
