@@ -109,7 +109,7 @@ public class KeyAgreement
             if (!(key instanceof MQVPublicKey))
             {
                 throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
-                    + MQVPublicKey.class.getSimpleName() + " for doPhase");
+                    + getSimpleName(MQVPublicKey.class) + " for doPhase");
             }
 
             MQVPublicKey mqvPubKey = (MQVPublicKey)key;
@@ -127,7 +127,7 @@ public class KeyAgreement
             if (!(key instanceof ECPublicKey))
             {
                 throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
-                    + ECPublicKey.class.getSimpleName() + " for doPhase");
+                    + getSimpleName(ECPublicKey.class) + " for doPhase");
             }
 
             pubKey = ECUtil.generatePublicKeyParameter((PublicKey)key);
@@ -224,7 +224,7 @@ public class KeyAgreement
             if (!(key instanceof MQVPrivateKey))
             {
                 throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
-                    + MQVPrivateKey.class.getSimpleName() + " for initialisation");
+                    + getSimpleName(MQVPrivateKey.class) + " for initialisation");
             }
 
             MQVPrivateKey mqvPrivKey = (MQVPrivateKey)key;
@@ -252,7 +252,7 @@ public class KeyAgreement
             if (!(key instanceof ECPrivateKey))
             {
                 throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
-                    + ECPrivateKey.class.getSimpleName() + " for initialisation");
+                    + getSimpleName(ECPrivateKey.class) + " for initialisation");
             }
 
             ECPrivateKeyParameters privKey = (ECPrivateKeyParameters)ECUtil.generatePrivateKeyParameter((PrivateKey)key);
@@ -260,6 +260,13 @@ public class KeyAgreement
 
             agreement.init(privKey);
         }
+    }
+
+    private static String getSimpleName(Class clazz)
+    {
+        String fullName = clazz.getName();
+
+        return fullName.substring(fullName.lastIndexOf('.') + 1);
     }
 
     public static class DH

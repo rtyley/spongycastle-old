@@ -34,6 +34,7 @@
                 <exclude name="**/NamedCurveTest.java" />
                 <exclude name="**/X509LDAPCertStoreTest.java" />
                 <exclude name="**/X509StoreTest.java" />
+                <exclude name="**/MQVTest.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />
