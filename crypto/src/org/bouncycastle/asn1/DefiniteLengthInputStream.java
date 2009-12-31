@@ -1,10 +1,10 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.io.Streams;
-
 import java.io.EOFException;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
+import org.bouncycastle.util.io.Streams;
 
 class DefiniteLengthInputStream
         extends LimitedInputStream
@@ -32,6 +32,11 @@ class DefiniteLengthInputStream
         {
             setParentEofDetect(true);
         }
+    }
+
+    int getRemaining()
+    {
+        return _remaining;
     }
 
     public int read()

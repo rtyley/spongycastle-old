@@ -9,10 +9,20 @@ public class ASN1StreamParser
     private final InputStream _in;
     private final int         _limit;
 
+    private static int findLimit(InputStream in)
+    {
+        if (in instanceof DefiniteLengthInputStream)
+        {
+            return ((DefiniteLengthInputStream)in).getRemaining();
+        }
+
+        return Integer.MAX_VALUE;
+    }
+
     public ASN1StreamParser(
         InputStream in)
     {
-        this(in, Integer.MAX_VALUE);
+        this(in, findLimit(in));
     }
 
     public ASN1StreamParser(
@@ -66,7 +76,7 @@ public class ASN1StreamParser
 
             if ((tag & DERTags.APPLICATION) != 0)
             {
-                ASN1StreamParser sp = new ASN1StreamParser(indIn);
+                ASN1StreamParser sp = new ASN1StreamParser(indIn, _limit);
 
                 return new BERApplicationSpecificParser(tagNo, sp);
             }
@@ -76,7 +86,7 @@ public class ASN1StreamParser
                 return new BERTaggedObjectParser(tag, tagNo, indIn);
             }
 
-            ASN1StreamParser sp = new ASN1StreamParser(indIn);
+            ASN1StreamParser sp = new ASN1StreamParser(indIn, _limit);
 
             // TODO There are other tags that may be constructed (e.g. BIT_STRING)
             switch (tagNo)
