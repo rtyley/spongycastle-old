@@ -1,5 +1,5 @@
 package org.bouncycastle.jce.provider.test;
- 
+
 import java.io.ByteArrayInputStream;
 import java.security.PublicKey;
 import java.security.Security;
@@ -7,22 +7,25 @@ import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
+import java.security.cert.CertStoreParameters;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.PolicyNode;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
+import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
-import java.security.cert.PKIXCertPathChecker;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Collection;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -138,6 +141,107 @@ public class CertPathValidatorTest
         + "GkeB/m+FArTwRbwpqhCNTwZywOp0eDosgPjCX1t53BB/m/2EYkRiYdDGsot0"
         + "kQPOVGSjQSQ4+/D+TM8=");
 
+    // circular dependency certificates
+    private static final byte[] circCA = Base64.decode(
+        "MIIDTzCCAjegAwIBAgIDARAAMA0GCSqGSIb3DQEBBQUAMDkxCzAJBgNVBAYT"
+      + "AkZSMRAwDgYDVQQKEwdHSVAtQ1BTMRgwFgYDVQQLEw9HSVAtQ1BTIEFOT05Z"
+      + "TUUwHhcNMDQxMDExMDAwMDAxWhcNMTQxMjMxMjM1OTU5WjA5MQswCQYDVQQG"
+      + "EwJGUjEQMA4GA1UEChMHR0lQLUNQUzEYMBYGA1UECxMPR0lQLUNQUyBBTk9O"
+      + "WU1FMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3WyWDwcM58aU"
+      + "hPX4ueI1mwETt3WdQtMfIdRiCXeBrjCkYCc7nIgCmGbnfTzXSplHRgKColWh"
+      + "q/Z+1rHYayje1gjAEU2+4/r1P2pnBmPgquDuguktCIbDtCcGZu0ylyKeHh37"
+      + "aeIKzkcmRSLRzvGf/eO3RdFksrvaPaSjqCVfGRXVDKK2uftE8rIFJE+bCqow"
+      + "6+WiaAaDDiJaSJPuu5hC1NA5jw0/BFodlCuAvl1GJ8A+TICkYWcSpKS9bkSC"
+      + "0i8xdGbSSk94shA1PdDvRdFMfFys8g4aupBXV8yqqEAUkBYmOtZSJckc3W4y"
+      + "2Gx53y7vY07Xh63mcgtJs2T82WJICwIDAQABo2AwXjAdBgNVHQ4EFgQU8c/P"
+      + "NNJaL0srd9SwHwgtvwPB/3cwDgYDVR0PAQH/BAQDAgIEMBkGA1UdIAQSMBAw"
+      + "DgYMKoF6AUcDBwgAAAABMBIGA1UdEwEB/wQIMAYBAf8CAQEwDQYJKoZIhvcN"
+      + "AQEFBQADggEBAHRjYDPJKlfUzID0YzajZpgR/i2ngJrJqYeaWCmwzBgNUPad"
+      + "uBKSGHmPVg21sfULMSnirnR+e90i/D0EVzLwQzcbjPDD/85rp9QDCeMxqqPe"
+      + "9ZCHGs2BpE/HOQMP0QfQ3/Kpk7SvOH/ZcpIf6+uE6lLBQYAGs5cxvtTGOzZk"
+      + "jCVFG+TrAnF4V5sNkn3maCWiYLmyqcnxtKEFSONy2bYqqudx/dBBlRrDbRfZ"
+      + "9XsCBdiXAHY1hFHldbfDs8rslmkXJi3fJC028HZYB6oiBX/JE7BbMk7bRnUf"
+      + "HSpP7Sjxeso2SY7Yit+hQDVAlqTDGmh6kLt/hQMpsOMry4vgBL6XHKw=");
+
+    private static final byte[] circCRLCA = Base64.decode(
+       "MIIDXDCCAkSgAwIBAgIDASAAMA0GCSqGSIb3DQEBBQUAMDkxCzAJBgNVBAYT"
+     + "AkZSMRAwDgYDVQQKEwdHSVAtQ1BTMRgwFgYDVQQLEw9HSVAtQ1BTIEFOT05Z"
+     + "TUUwHhcNMDQxMDExMDAwMDAxWhcNMTQxMjMxMjM1OTU5WjA5MQswCQYDVQQG"
+     + "EwJGUjEQMA4GA1UEChMHR0lQLUNQUzEYMBYGA1UECxMPR0lQLUNQUyBBTk9O"
+     + "WU1FMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwfEcFK0g7Kfo"
+     + "o5f2IBF7VEd/AG+RVGSds0Yg+u2kNYu4k04HR/+tOdBQtJvyr4W5jrQKsC5X"
+     + "skeFWMyWaFKzAjZDWB52HWp/kiMivGcxnYDuYf5piukSC+d2+vL8YaAphDzV"
+     + "HPnxEKqoM/J66uUussDTqfcL3JC/Bc7kBwn4srrsZOsamMWTQQtEqVQxNN7A"
+     + "ROSRsdiTt3hMOKditc9/NBNmjZWxgc7Twr/SaZ8CfN5wf2wuOl23knWL0QsJ"
+     + "0lSMBSBTzTcfAke4/jIT7d4nVMp3t7dsna8rt56pFK4wpRFGuCt+1P5gi51x"
+     + "xVSdI+JoNXv6zGO4o8YVaRpC5rQeGQIDAQABo20wazAfBgNVHSMEGDAWgBTx"
+     + "z8800lovSyt31LAfCC2/A8H/dzAdBgNVHQ4EFgQUGa3SbBrJx/wa2MQwhWPl"
+     + "dwLw1+IwDgYDVR0PAQH/BAQDAgECMBkGA1UdIAQSMBAwDgYMKoF6AUcDBwgA"
+     + "AAABMA0GCSqGSIb3DQEBBQUAA4IBAQAPDpYe2WPYnXTLsXSIUREBNMLmg+/7"
+     + "4Yhq9uOm5Hb5LVkDuHoEHGfmpXXEvucx5Ehu69hw+F4YSrd9wPjOiG8G6GXi"
+     + "RcrK8nE8XDvvV+E1HpJ7NKN4fSAoSb+0gliiq3aF15bvXP8nfespdd/x1xWQ"
+     + "mpYCx/mJeuqONQv2/D/7hfRKYoDBaAkWGodenPFPVs6FxwnEuH2R+KWCUdA9"
+     + "L04v8JBeL3kZiALkU7+DCCm7A0imUAgeeArbAbfIPu6eDygm+XndZ9qi7o4O"
+     + "AntPxrqbeXFIbDrQ4GV1kpxnW+XpSGDd96SWKe715gxkkDBppR5IKYJwRb6O"
+     + "1TRQIf2F+muQ");
+
+    private static final byte[] circCRL = Base64.decode(
+        "MIIB1DCBvQIBATANBgkqhkiG9w0BAQUFADA5MQswCQYDVQQGEwJGUjEQMA4G"
+      + "A1UEChMHR0lQLUNQUzEYMBYGA1UECxMPR0lQLUNQUyBBTk9OWU1FFw0xMDAx"
+      + "MDcwMzAwMTVaFw0xMDAxMTMwMzAwMTVaMACgTjBMMB8GA1UdIwQYMBaAFBmt"
+      + "0mwaycf8GtjEMIVj5XcC8NfiMAsGA1UdFAQEAgILgzAcBgNVHRIEFTATgRFh"
+      + "Yy1naXBAZ2lwLWNwcy5mcjANBgkqhkiG9w0BAQUFAAOCAQEAtF1DdFl1MQvf"
+      + "vNkbrCPuppNYcHen4+za/ZDepKuwHsH/OpKuaDJc4LndRgd5IwzfpCHkQGzt"
+      + "shK50bakN8oaYJgthKIOIJzR+fn6NMjftfR2a27Hdk2o3eQXRHQ360qMbpSy"
+      + "qPb3WfuBhxO2/DlLChJP+OxZIHtT/rNYgE0tlIv7swYi81Gq+DafzaZ9+A5t"
+      + "I0L2Gp/NUDsp5dF6PllAGiXQzl27qkcu+r50w+u0gul3nobXgbwPcMSYuWUz"
+      + "1lhA+uDn/EUWV4RSiJciCGSS10WCkFh1/YPo++mV15KDB0m+8chscrSu/bAl"
+      + "B19LxL/pCX3qr5iLE9ss3olVImyFZg==");
+
+    private void checkCircProcessing()
+        throws Exception
+    {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+
+        X509Certificate caCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(circCA));
+        X509Certificate crlCaCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(circCRLCA));
+        X509CRL crl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(circCRL));
+
+        List list = new ArrayList();
+
+        list.add(caCert);
+        list.add(crlCaCert);
+        list.add(crl);
+
+        CertStoreParameters ccsp = new CollectionCertStoreParameters(list);
+        CertStore store = CertStore.getInstance("Collection", ccsp);
+
+        Calendar validDate = Calendar.getInstance();
+        validDate.set(2010,0,8,2,21,10);
+
+            //validating path
+        List certchain = new ArrayList();
+
+        certchain.add(crlCaCert);
+        CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
+
+        Set trust = new HashSet();
+        trust.add(new TrustAnchor(caCert, null));
+
+        CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
+        //PKIXParameters param = new PKIXParameters(trust);
+
+        PKIXBuilderParameters param = new PKIXBuilderParameters(trust, null);
+        X509CertSelector certSelector = new X509CertSelector();
+        certSelector.setCertificate(crlCaCert);
+        param.setTargetCertConstraints(certSelector);
+        param.addCertStore(store);
+        param.setRevocationEnabled(true);
+        param.setDate(validDate.getTime());
+
+        PKIXCertPathValidatorResult result = (PKIXCertPathValidatorResult)cpv.validate(cp, param);
+    }
+
     public void performTest()
         throws Exception
     {
@@ -231,13 +335,14 @@ public class CertPathValidatorTest
         }
         catch (Exception e)
         {
-            if (e instanceof CertPathValidatorException 
-                && e.getMessage().startsWith("Could not validate certificate signature."))
+            if (!(e instanceof CertPathValidatorException
+                && e.getMessage().startsWith("Could not validate certificate signature.")))
             {
-                return;
-            }
-            fail("unexpected exception", e);
+                fail("unexpected exception", e);
+            } 
         }
+
+        checkCircProcessing();
     }
 
     public String getName()
