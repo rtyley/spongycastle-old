@@ -219,7 +219,7 @@ public class PKCS1Encoding
 
         start++;           // data should start at the next byte
 
-        if (start >= block.length || start < HEADER_LENGTH)
+        if (start > block.length || start < HEADER_LENGTH)
         {
             throw new InvalidCipherTextException("no data in block");
         }
