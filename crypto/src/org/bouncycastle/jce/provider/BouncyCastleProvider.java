@@ -1,5 +1,7 @@
 package org.bouncycastle.jce.provider;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.Provider;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,7 +43,7 @@ import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.45b";
+    private static String info = "BouncyCastle Security Provider v1.45";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -70,8 +72,20 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.445, info);
+        super(PROVIDER_NAME, 1.45, info);
 
+        AccessController.doPrivileged(new PrivilegedAction()
+        {
+            public Object run()
+            {
+                setup();
+                return null;
+            }
+        });
+    }
+
+    private void setup()
+    {
         loadAlgorithms(SYMMETRIC_CIPHER_PACKAGE, SYMMETRIC_CIPHERS);
         loadAlgorithms(ASYMMETRIC_CIPHER_PACKAGE, ASYMMETRIC_CIPHERS);
 
