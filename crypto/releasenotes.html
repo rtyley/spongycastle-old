@@ -27,10 +27,15 @@ Release 1.45
 <ul>
 <li>OpenPGP now supports UTF-8 in file names for literal data.</li>
 <li>The ASN.1 library was losing track of the stream limit in a couple of places, leading to the potential of an OutOfMemoryError on a badly corrupted stream. This has been fixed.</li>
+<li>The provider now uses a privileged block for initialisation.</li>
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
 <li>Support for EC MQV has been added to the light weight API, provider, and the CMS/SMIME library.</li>
+</ul>
+<h3>2.1.4 Security Advisory</h3>
+<ul>
+<li>This version of the provider has been specifically reviewed to eliminate possible timing attacks on algorithms such as GCM and CCM mode.</li>
 </ul>
 
 <h3>2.2.1 Version</h3>
