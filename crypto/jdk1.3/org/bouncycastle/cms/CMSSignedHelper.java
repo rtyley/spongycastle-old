@@ -477,4 +477,15 @@ class CMSSignedHelper
 
         return algId;
     }
+
+    void setSigningEncryptionAlgorithmMapping(DERObjectIdentifier oid, String algorithmName)
+    {
+        encryptionAlgs.put(oid.getId(), algorithmName);
+    }
+
+    void setSigningDigestAlgorithmMapping(DERObjectIdentifier oid, String algorithmName)
+    {
+        digestAlgs.put(oid.getId(), algorithmName);
+    }
+
 }

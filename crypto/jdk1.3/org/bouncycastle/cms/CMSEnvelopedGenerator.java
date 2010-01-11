@@ -1,6 +1,7 @@
 package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -8,6 +9,7 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.cms.OriginatorIdentifierOrKey;
 import org.bouncycastle.asn1.cms.OriginatorPublicKey;
+import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
@@ -16,6 +18,8 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
+import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 
 import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
@@ -26,6 +30,8 @@ import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -33,6 +39,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.spec.ECParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +81,7 @@ public class CMSEnvelopedGenerator
     public static final String  SEED_WRAP       = KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap.getId();
 
     public static final String  ECDH_SHA1KDF    = X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme.getId();
-//    public static final String  ECMQV_SHA1KDF   = X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme.getId();
+    public static final String  ECMQV_SHA1KDF   = X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme.getId();
 
     final List recipientInfoGenerators = new ArrayList();
     final SecureRandom rand;
@@ -206,35 +214,67 @@ public class CMSEnvelopedGenerator
         Provider         provider)
         throws NoSuchAlgorithmException, InvalidKeyException
     {
-        KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, provider);
-
-        agreement.init(senderPrivateKey, rand);
-
-        agreement.doPhase(recipientCert.getPublicKey(), true);
-
+        OriginatorIdentifierOrKey originator;
         try
         {
-            SubjectPublicKeyInfo oPubKeyInfo = SubjectPublicKeyInfo.getInstance(ASN1Object.fromByteArray(senderPublicKey.getEncoded()));
-            OriginatorIdentifierOrKey originator = new OriginatorIdentifierOrKey(
-                                                       new OriginatorPublicKey(
-                                                            new AlgorithmIdentifier(oPubKeyInfo.getAlgorithmId().getObjectId(), new DERNull()),
-                                                            oPubKeyInfo.getPublicKeyData().getBytes()));
-
-            SecretKey wrapKey = agreement.generateSecret(cekWrapAlgorithm);
-
-            KeyAgreeRecipientInfoGenerator karig = new KeyAgreeRecipientInfoGenerator();
-            karig.setAlgorithmOID(new DERObjectIdentifier(agreementAlgorithm));
-            karig.setOriginator(originator);
-            karig.setRecipientCert(recipientCert);
-            karig.setWrapKey(wrapKey);
-            karig.setWrapAlgorithmOID(new DERObjectIdentifier(cekWrapAlgorithm));
-
-            recipientInfoGenerators.add(karig);
+            originator = new OriginatorIdentifierOrKey(
+                    createOriginatorPublicKey(senderPublicKey));
         }
         catch (IOException e)
         {
             throw new InvalidKeyException("cannot extract originator public key: " + e);
         }
+
+        ASN1OctetString ukm = null;
+        PublicKey recipientPublicKey = recipientCert.getPublicKey();
+
+        if (agreementAlgorithm.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
+        {
+            try
+            {
+                ECParameterSpec ecParamSpec = ((ECPublicKey)senderPublicKey).getParams();
+
+                KeyPairGenerator ephemKPG = KeyPairGenerator.getInstance(agreementAlgorithm, provider.getName());
+                ephemKPG.initialize(ecParamSpec, rand);
+
+                KeyPair ephemKP = ephemKPG.generateKeyPair();
+
+                ukm = new DEROctetString(
+                    new MQVuserKeyingMaterial(
+                        createOriginatorPublicKey(ephemKP.getPublic()), null));
+
+                recipientPublicKey = new MQVPublicKeySpec(recipientPublicKey, recipientPublicKey);
+                senderPrivateKey = new MQVPrivateKeySpec(
+                    senderPrivateKey, ephemKP.getPrivate(), ephemKP.getPublic());
+            }
+            catch (InvalidAlgorithmParameterException e)
+            {
+                throw new InvalidKeyException("cannot determine MQV ephemeral key pair parameters from public key: " + e);
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new InvalidKeyException("cannot extract MQV ephemeral public key: " + e);
+            }
+            catch (IOException e)
+            {
+                throw new InvalidKeyException("cannot extract MQV ephemeral public key: " + e);
+            }
+        }
+
+        KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, provider);
+        agreement.init(senderPrivateKey, rand);
+        agreement.doPhase(recipientPublicKey, true);
+        SecretKey wrapKey = agreement.generateSecret(cekWrapAlgorithm);
+
+        KeyAgreeRecipientInfoGenerator karig = new KeyAgreeRecipientInfoGenerator();
+        karig.setAlgorithmOID(new DERObjectIdentifier(agreementAlgorithm));
+        karig.setOriginator(originator);
+        karig.setRecipientCert(recipientCert);
+        karig.setUKM(ukm);
+        karig.setWrapKey(wrapKey);
+        karig.setWrapAlgorithmOID(new DERObjectIdentifier(cekWrapAlgorithm));
+
+        recipientInfoGenerators.add(karig);
     }
 
     protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
@@ -279,13 +319,23 @@ public class CMSEnvelopedGenerator
 
             return pGen.generateParameters();
         }
+        catch (NoSuchProviderException e)
+        {
+            return null;
+        }
         catch (NoSuchAlgorithmException e)
         {
             return null;
         }
-        catch (NoSuchProviderException e)
-        {
-            throw new CMSException("exception generating the algorithm parameters", e);
-        }
+    }
+
+    private static OriginatorPublicKey createOriginatorPublicKey(PublicKey publicKey)
+        throws IOException
+    {
+        SubjectPublicKeyInfo spki = SubjectPublicKeyInfo.getInstance(
+            ASN1Object.fromByteArray(publicKey.getEncoded()));
+        return new OriginatorPublicKey(
+            new AlgorithmIdentifier(spki.getAlgorithmId().getObjectId(), DERNull.INSTANCE),
+            spki.getPublicKeyData().getBytes());
     }
 }
