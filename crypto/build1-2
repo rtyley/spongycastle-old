@@ -97,8 +97,7 @@ then
         (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java */*/*.java )
 
         echo "lightweight regression test"
-        java -classpath classes org.bouncycastle.crypto.test.RegressionTest
-
+        java -classpath classes -Dbc.test.data.home=/home/dgh/bc/java/crypto/test/data org.bouncycastle.crypto.test.RegressionTest
     )
     (2>&1 find lcrypto-jdk12-$base -name CVS -exec rm -rf \{\} \; ) > /dev/null
 fi
@@ -140,6 +139,7 @@ then
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
     rm -rf src/org/bouncycastle/jce/provider/test/CRL5Test.java
     rm -rf src/org/bouncycastle/jce/provider/test/X509LDAP*.java
+    rm -rf src/org/bouncycastle/jce/provider/test/MQVTest*.java
     rm -rf src/org/bouncycastle/jce/spec/ECNamedCurveSpec.java
     rm -rf src/org/bouncycastle/util/encoders/test/*.java
     rm -rf src/org/bouncycastle/x509/PKIXCertPathReviewer.java
