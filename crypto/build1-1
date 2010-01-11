@@ -109,8 +109,7 @@ javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/li
 javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */u*/*.java )
 
         echo "lightweight regression test"
-        java -classpath classes:$JDK11PATH/lib/classes.zip org.bouncycastle.crypto.test.RegressionTest
-
+        java -classpath classes:$JDK11PATH/lib/classes.zip -Dbc.test.data.home=/home/dgh/bc/java/crypto/test/data org.bouncycastle.crypto.test.RegressionTest
     )
     (2>&1 find lcrypto-jdk11-$base -name CVS -exec rm -rf \{\} \; ) > /dev/null
 fi
@@ -169,7 +168,7 @@ then
     rm -rf src/org/bouncycastle/ocsp
     rm -rf src/org/bouncycastle/bcpg
     rm -rf src/org/bouncycastle/openpgp
-    rm -rf src/org/bouncycastle/sasn1/test
+    rm -rf src/org/bouncycastle/sasn1
     rm -rf src/org/bouncycastle/tsp
     rm -rf src/org/bouncycastle/util/encoders/test
     rm src/org/bouncycastle/util/IPTest.java
@@ -181,6 +180,7 @@ then
     rm -rf src/org/bouncycastle/jce/provider/PKIXNameConstraints*.java
     rm -rf src/org/bouncycastle/jce/provider/test/PKIXNameConstraintsTest.java
     rm -rf src/org/bouncycastle/jce/provider/test/AttrCertSelectorTest.java
+    rm -rf src/org/bouncycastle/jce/provider/test/MQVTest.java
     rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
     rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
     rm -rf src/org/bouncycastle/jce/provider/RFC3280*.java
@@ -291,11 +291,15 @@ then
     (cd src/java/; javac -d ../../classes -classpath ../../classes:../../src:$JDK11PATH/lib/classes.zip */*.java */*/*.java )
     (cd src/javax/crypto; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip *.java */*.java)
 
-    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip *.java */*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip asn1/*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip crypto/*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip *.java [bdefghijklmnopqrstuv]*/*.java)
     (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip asn1/*/*.java)
-    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip crypto/*/*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip crypto/[ade]*/*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip crypto/[gimpstu]*/*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip jce/*/*/*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip jce/*/*/*/*.java)
     (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip jce/*/*.java)
-    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip jce/*/*/*.java jce/*/*/*/*.java)
     (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip util/*/*.java)
     (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip openssl/*/*.java)
     (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src:$JDK11PATH/lib/classes.zip */*/*/*.java)
