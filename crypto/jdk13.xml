@@ -41,6 +41,7 @@
                 <exclude name="**/ValidateSignedMail.java" />
             </fileset>
             <fileset dir="test/src">
+                <exclude name="**/MQVTest.java" />
                 <exclude name="**/ECDSA5Test.java" />
                 <exclude name="**/NamedCurveTest.java" />
                 <exclude name="**/nist/NistCertPathTest.java" />
