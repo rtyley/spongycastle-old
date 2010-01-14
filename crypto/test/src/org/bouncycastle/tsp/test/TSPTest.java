@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import junit.framework.TestCase;
-
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -58,6 +57,7 @@ public class TSPTest
             responseValidationTest(origKP.getPrivate(), origCert, certs);
             incorrectHashTest(origKP.getPrivate(), origCert, certs);
             badAlgorithmTest(origKP.getPrivate(), origCert, certs);
+            timeNotAvailableTest(origKP.getPrivate(), origCert, certs);
             badPolicyTest(origKP.getPrivate(), origCert, certs);
             tokenEncodingTest(origKP.getPrivate(), origCert, certs);
             certReqTest(origKP.getPrivate(), origCert, certs);
@@ -243,7 +243,47 @@ public class TSPTest
             fail("badAlgorithm - wrong failure info returned.");
         }
     }
-    
+
+    private void timeNotAvailableTest(
+        PrivateKey      privateKey,
+        X509Certificate cert,
+        CertStore       certs)
+        throws Exception
+    {
+        TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
+                privateKey, cert, TSPAlgorithms.SHA1, "1.2");
+
+        tsTokenGen.setCertificatesAndCRLs(certs);
+
+        TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
+        TimeStampRequest            request = reqGen.generate("1.2.3.4.5", new byte[20]);
+
+        TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
+
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), null, "BC");
+
+        tsResp = new TimeStampResponse(tsResp.getEncoded());
+
+        TimeStampToken  tsToken = tsResp.getTimeStampToken();
+
+        if (tsToken != null)
+        {
+            fail("timeNotAvailable - token not null.");
+        }
+
+        PKIFailureInfo  failInfo = tsResp.getFailInfo();
+
+        if (failInfo == null)
+        {
+            fail("timeNotAvailable - failInfo set to null.");
+        }
+
+        if (failInfo.intValue() != PKIFailureInfo.timeNotAvailable)
+        {
+            fail("timeNotAvailable - wrong failure info returned.");
+        }
+    }
+
     private void badPolicyTest(
         PrivateKey      privateKey,
         X509Certificate cert,
