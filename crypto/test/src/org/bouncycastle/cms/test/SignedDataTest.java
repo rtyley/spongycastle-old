@@ -982,6 +982,8 @@ public class SignedDataTest
 
         CMSSignedData s = gen.generate(msg, true, "BC");
 
+        assertEquals(3, s.getVersion());
+        
         ByteArrayInputStream bIn = new ByteArrayInputStream(s.getEncoded());
         ASN1InputStream      aIn = new ASN1InputStream(bIn);
 
