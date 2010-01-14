@@ -8,17 +8,18 @@ import java.security.NoSuchProviderException;
 import java.util.Date;
 import java.util.Set;
 
-import org.bouncycastle.asn1.tsp.TimeStampResp;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cmp.PKIStatus;
-import org.bouncycastle.asn1.cmp.PKIStatusInfo;
-import org.bouncycastle.asn1.cmp.PKIFreeText;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.cmp.PKIFailureInfo;
+import org.bouncycastle.asn1.cmp.PKIFreeText;
+import org.bouncycastle.asn1.cmp.PKIStatus;
+import org.bouncycastle.asn1.cmp.PKIStatusInfo;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.tsp.TimeStampResp;
 
 /**
  * Generator for RFC 3161 Time Stamp Responses.
@@ -94,6 +95,20 @@ public class TimeStampResponseGenerator
         return new PKIStatusInfo(new DERSequence(v));
     }
 
+    /**
+     * Return an appropriate TimeStampResponse.
+     * <p>
+     * If genTime is null a timeNotAvailable error response will be returned.
+     *
+     * @param request the request this response is for.
+     * @param serialNumber serial number for the response token.
+     * @param genTime generation time for the response token.
+     * @param provider provider to use for signature calculation.
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchProviderException
+     * @throws TSPException
+     */
     public TimeStampResponse generate(
         TimeStampRequest    request,
         BigInteger          serialNumber,
@@ -105,6 +120,11 @@ public class TimeStampResponseGenerator
         
         try
         {
+            if (genTime == null)
+            {
+                throw new TSPValidationException("The time source is not available.", PKIFailureInfo.timeNotAvailable);
+            }
+
             request.validate(acceptedAlgorithms, acceptedPolicies, acceptedExtensions, provider);
 
             status = PKIStatus.GRANTED;
