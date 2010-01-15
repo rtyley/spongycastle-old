@@ -4,6 +4,7 @@ import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.util.Arrays;
 
 import java.io.IOException;
 
@@ -107,8 +108,27 @@ public class TlsBlockCipherCipherSuite extends TlsCipherSuite
     protected byte[] decodeCiphertext(short type, byte[] ciphertext,
                                       int offset, int len, TlsProtocolHandler handler) throws IOException
     {
+        // TODO TLS 1.1 (RFC 4346) introduces an explicit IV
+
+        int minLength = readMac.getSize() + 1;
         int blocksize = decryptCipher.getBlockSize();
         boolean decrypterror = false;
+
+        /*
+         * ciphertext must be  at least (macsize + 1) bytes long
+         */
+        if (len < minLength)
+        {
+            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_decode_error);
+        }
+
+        /*
+         * ciphertext must be a multiple of blocksize
+         */
+        if (len % blocksize != 0)
+        {
+            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_decryption_failed);
+        }
 
         /*
         * Decrypt all the ciphertext using the blockcipher
@@ -122,28 +142,34 @@ public class TlsBlockCipherCipherSuite extends TlsCipherSuite
         /*
         * Check if padding is correct
         */
-        int paddingsize = ciphertext[offset + len - 1];
-        if (offset + len - 1 - paddingsize < 0)
+        int lastByteOffset = offset + len - 1;
+
+        byte paddingsizebyte = ciphertext[lastByteOffset];
+
+        // Note: interpret as unsigned byte
+        int paddingsize = paddingsizebyte & 0xff;
+
+        int maxPaddingSize = len - minLength;
+        if (paddingsize > maxPaddingSize)
         {
-            /*
-             * This would lead to a negative array index, so this padding
-             * must be incorrect!
-             */
             decrypterror = true;
             paddingsize = 0;
         }
         else
         {
             /*
-             * Now, check all the padding-bytes.
+             * Now, check all the padding-bytes (constant-time comparison).
              */
-            for (int i = 0; i <= paddingsize; i++)
+            byte diff = 0;
+            for (int i = lastByteOffset - paddingsize; i < lastByteOffset; ++i)
             {
-                if (ciphertext[offset + len - 1 - i] != paddingsize)
-                {
-                    /* Wrong padding */
-                    decrypterror = true;
-                }
+                diff |= (ciphertext[i] ^ paddingsizebyte);
+            }
+            if (diff != 0)
+            {
+                /* Wrong padding */
+                decrypterror = true;
+                paddingsize = 0;
             }
         }
 
@@ -153,19 +179,19 @@ public class TlsBlockCipherCipherSuite extends TlsCipherSuite
         * profile he can use to find out if mac verification failed or
         * padding verification failed.
         */
-        int plaintextlength = len - readMac.getSize() - paddingsize - 1;
+        int plaintextlength = len - minLength - paddingsize;
         byte[] calculatedMac = readMac.calculateMac(type, ciphertext, offset,
             plaintextlength);
 
         /*
-        * Check all bytes in the mac.
+        * Check all bytes in the mac (constant-time comparison).
         */
-        for (int i = 0; i < calculatedMac.length; i++)
+        byte[] decryptedMac = new byte[calculatedMac.length];
+        System.arraycopy(ciphertext, offset + plaintextlength, decryptedMac, 0, calculatedMac.length);
+
+        if (!Arrays.constantTimeAreEqual(calculatedMac, decryptedMac))
         {
-            if (ciphertext[offset + plaintextlength + i] != calculatedMac[i])
-            {
-                decrypterror = true;
-            }
+            decrypterror = true;
         }
 
         /*
