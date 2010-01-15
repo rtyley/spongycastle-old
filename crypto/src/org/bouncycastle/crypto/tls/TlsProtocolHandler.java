@@ -753,7 +753,7 @@ public class TlsProtocolHandler
                                 case CS_SERVER_KEY_EXCHANGE_RECEIVED:
                                 {
                                     byte[] types = TlsUtils.readOpaque8(is);
-                                    byte[] auths = TlsUtils.readOpaque8(is);
+                                    byte[] auths = TlsUtils.readOpaque16(is);
 
                                     // TODO Validate/process
 
