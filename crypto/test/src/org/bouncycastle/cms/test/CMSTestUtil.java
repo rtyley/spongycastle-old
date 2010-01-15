@@ -1,5 +1,25 @@
 package org.bouncycastle.cms.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.DSAParameterSpec;
+import java.util.Date;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -17,28 +37,10 @@ import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509StreamParser;
+import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.DSAParameterSpec;
-import java.util.Date;
 
 public class CMSTestUtil
 {
@@ -285,8 +287,54 @@ public class CMSTestUtil
 
         return makeCertificate(_subKP, _subDN, _issKP, _issDN, true);
     }
-    
-    
+
+    public static X509Certificate makeV1Certificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN)
+        throws GeneralSecurityException, IOException
+    {
+
+        PublicKey  subPub  = subKP.getPublic();
+        PrivateKey issPriv = issKP.getPrivate();
+        PublicKey  issPub  = issKP.getPublic();
+
+        X509V1CertificateGenerator v1CertGen = new X509V1CertificateGenerator();
+
+        v1CertGen.reset();
+        v1CertGen.setSerialNumber(allocateSerialNumber());
+        v1CertGen.setIssuerDN(new X509Name(_issDN));
+        v1CertGen.setNotBefore(new Date(System.currentTimeMillis()));
+        v1CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)));
+        v1CertGen.setSubjectDN(new X509Name(_subDN));
+        v1CertGen.setPublicKey(subPub);
+
+        if (issPub instanceof RSAPublicKey)
+        {
+            v1CertGen.setSignatureAlgorithm("SHA1WithRSA");
+        }
+        else if (issPub.getAlgorithm().equals("DSA"))
+        {
+            v1CertGen.setSignatureAlgorithm("SHA1withDSA");
+        }
+        else if (issPub.getAlgorithm().equals("ECDSA"))
+        {
+            v1CertGen.setSignatureAlgorithm("SHA1withECDSA");
+        }
+        else if (issPub.getAlgorithm().equals("ECGOST3410"))
+        {
+            v1CertGen.setSignatureAlgorithm("GOST3411withECGOST3410");
+        }
+        else
+        {
+            v1CertGen.setSignatureAlgorithm("GOST3411WithGOST3410");
+        }
+
+        X509Certificate _cert = v1CertGen.generate(issPriv);
+
+        _cert.checkValidity(new Date());
+        _cert.verify(issPub);
+
+        return _cert;
+    }
+
     public static X509Certificate makeCertificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN, boolean _ca)
         throws GeneralSecurityException, IOException
     {

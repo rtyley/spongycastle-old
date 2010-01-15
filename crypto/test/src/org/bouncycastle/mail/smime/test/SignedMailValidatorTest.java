@@ -1,19 +1,7 @@
 package org.bouncycastle.mail.smime.test;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.i18n.ErrorBundle;
-import org.bouncycastle.mail.smime.validator.SignedMailValidator;
-import org.bouncycastle.x509.PKIXCertPathReviewer;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
-
-import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
 import java.io.InputStream;
+import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.CertPath;
 import java.security.cert.CertStore;
@@ -31,6 +19,27 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
+
+import javax.mail.Address;
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.test.CMSTestUtil;
+import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.mail.smime.SMIMESignedGenerator;
+import org.bouncycastle.mail.smime.validator.SignedMailValidator;
+import org.bouncycastle.x509.PKIXCertPathReviewer;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 public class SignedMailValidatorTest extends TestCase
 {
@@ -173,6 +182,77 @@ public class SignedMailValidatorTest extends TestCase
                 "SignedMailValidator.longValidity",
                 "Warning: The signing certificate has a very long validity period: from Sep 1, 2006 11:00:00 AM GMT until Aug 8, 2106 11:00:00 AM GMT.");
     }
+
+    public void testSelfSignedCert()
+        throws Exception
+    {
+        MimeBodyPart baseMsg = SMIMETestUtil.makeMimeBodyPart("Hello world!\n");
+        String signDN = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+        KeyPair signKP = CMSTestUtil.makeKeyPair();
+        X509Certificate signCert = CMSTestUtil.makeV1Certificate(signKP, signDN, signKP, signDN);
+
+        // check basic path validation
+        Set trustanchors = new HashSet();
+        TrustAnchor ta = new TrustAnchor(signCert, null);
+        trustanchors.add(ta);
+
+        X509Certificate rootCert = ta.getTrustedCert();
+
+        // init cert stores
+        List certStores = new ArrayList();
+        List certList = new ArrayList();
+        certList.add(rootCert);
+        CertStore store = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certList));
+        certStores.add(store);
+
+        // first path
+        CertPath path = SignedMailValidator.createCertPath(rootCert, trustanchors, certStores);
+
+        assertTrue("path size is not 1", path.getCertificates().size() == 1);
+
+        // check message validation
+        certList = new ArrayList();
+
+        certList.add(signCert);
+
+        CertStore certs = CertStore.getInstance("Collection",
+                        new CollectionCertStoreParameters(certList), "BC");
+
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
+
+        gen.addSigner(signKP.getPrivate(), signCert, SMIMESignedGenerator.DIGEST_SHA1);
+        gen.addCertificatesAndCRLs(certs);
+
+        MimeMultipart signedMsg = gen.generate(baseMsg, "BC");
+
+        Properties props = System.getProperties();
+        Session session = Session.getDefaultInstance(props, null);
+
+        // read message
+        MimeMessage msg = new MimeMessage(session);
+
+        Address fromUser = new InternetAddress("\"Eric H. Echidna\"<eric@bouncycastle.org>");
+        Address toUser = new InternetAddress("example@bouncycastle.org");
+         
+        msg.setFrom(fromUser);
+        msg.setRecipient(Message.RecipientType.TO, toUser);
+        msg.setContent(signedMsg, signedMsg.getContentType());
+
+        msg.saveChanges();
+        
+        PKIXParameters params = new PKIXParameters(trustanchors);
+        params.setRevocationEnabled(false);
+        
+        SignedMailValidator validator = new SignedMailValidator(msg, params);
+        SignerInformation signer = (SignerInformation) validator
+                .getSignerInformationStore().getSigners().iterator().next();
+
+        SignedMailValidator.ValidationResult res = validator.getValidationResult(signer);
+
+        assertTrue(res.isVerifiedSignature());
+        assertTrue(res.isValidSignature());
+    }
+
 // TODO: this test needs to be replaced, unfortunately it was working due to a bug in
 // trust anchor extension handling
 //    public void testCorruptRootStore() throws Exception
