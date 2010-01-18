@@ -7,7 +7,7 @@ import java.io.OutputStream;
 /**
  * An implementation of the TLS 1.0 record layer.
  */
-public class RecordStream
+class RecordStream
 {
 
     private TlsProtocolHandler handler;
@@ -19,7 +19,7 @@ public class RecordStream
     protected TlsCipherSuite writeSuite = null;
 
 
-    protected RecordStream(TlsProtocolHandler handler, InputStream is, OutputStream os)
+    RecordStream(TlsProtocolHandler handler, InputStream is, OutputStream os)
     {
         this.handler = handler;
         this.is = is;
@@ -55,7 +55,7 @@ public class RecordStream
             hash1.update(message, offset, len);
             hash2.update(message, offset, len);
         }
-        byte[] ciphertext = writeSuite.encodePlaintext(type, message, offset, len);
+        byte[] ciphertext = writeSuite.encodePlaintext(type, message, offset, len, handler);
         byte[] writeMessage = new byte[ciphertext.length + 5];
         TlsUtils.writeUint8(type, writeMessage, 0);
         TlsUtils.writeUint8((short)3, writeMessage, 1);

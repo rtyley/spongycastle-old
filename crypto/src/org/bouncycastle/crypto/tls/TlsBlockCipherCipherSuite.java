@@ -7,12 +7,13 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Arrays;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 
 /**
  * A generic TLS 1.0 block cipher suite. This can be used for AES or 3DES for
  * example.
  */
-public class TlsBlockCipherCipherSuite extends TlsCipherSuite
+class TlsBlockCipherCipherSuite extends TlsCipherSuite
 {
 
     private BlockCipher encryptCipher;
@@ -81,12 +82,17 @@ public class TlsBlockCipherCipherSuite extends TlsCipherSuite
         cipher.init(forEncryption, parameters_with_iv);
     }
 
-    protected byte[] encodePlaintext(short type, byte[] plaintext, int offset,
-                                     int len)
+    protected byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len,
+        TlsProtocolHandler handler)
     {
         int blocksize = encryptCipher.getBlockSize();
-        int paddingsize = blocksize
-            - ((len + writeMac.getSize() + 1) % blocksize);
+
+        // Add a random number of extra blocks worth of padding
+        int minPaddingSize = blocksize - ((len + writeMac.getSize() + 1) % blocksize);
+        int maxExtraPadBlocks = (255 - minPaddingSize) / blocksize;
+        int actualExtraPadBlocks = chooseExtraPadBlocks(handler.getRandom(), maxExtraPadBlocks);
+        int paddingsize = minPaddingSize + (actualExtraPadBlocks * blocksize);
+
         int totalsize = len + writeMac.getSize() + paddingsize + 1;
         byte[] outbuf = new byte[totalsize];
         System.arraycopy(plaintext, offset, outbuf, 0, len);
@@ -103,6 +109,31 @@ public class TlsBlockCipherCipherSuite extends TlsCipherSuite
         }
         return outbuf;
 
+    }
+
+    private int chooseExtraPadBlocks(SecureRandom r, int max)
+    {
+//        return r.nextInt(max + 1);
+
+        int x = r.nextInt();
+        int n = lowestBitSet(x);
+        return Math.min(n, max);
+    }
+
+    private int lowestBitSet(int x)
+    {
+        if (x == 0)
+        {
+            return 32;
+        }
+
+        int n = 0;
+        while ((x & 1) == 0)
+        {
+            ++n;
+            x >>= 1;
+        }
+        return n;
     }
 
     protected byte[] decodeCiphertext(short type, byte[] ciphertext,
