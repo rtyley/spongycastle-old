@@ -31,6 +31,7 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
+import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
@@ -100,7 +101,7 @@ public class TlsProtocolHandler
 
     private static final short CS_CLIENT_KEY_EXCHANGE_SEND = 7;
 
-    private static final short CS_CLIENT_VERIFICATION_SEND = 8;
+    private static final short CS_CERTIFICATE_VERIFY_SEND = 8;
 
     private static final short CS_CLIENT_CHANGE_CIPHER_SPEC_SEND = 9;
 
@@ -163,10 +164,14 @@ public class TlsProtocolHandler
     private SecureRandom random;
 
     /*
-    * The public key of the server.
-    */
-
+     * The public key of the server.
+     */
     private AsymmetricKeyParameter serverPublicKey = null;
+
+    /*
+     * The private key of the client (if provided)
+     */
+    private AsymmetricKeyParameter clientPrivateKey = null;
 
     private TlsInputStream tlsInputStream = null;
     private TlsOuputStream tlsOutputStream = null;
@@ -188,6 +193,7 @@ public class TlsProtocolHandler
     private byte[] pms;
 
     private CertificateVerifyer verifyer = null;
+    private Certificate clientCert = null;
 
     public TlsProtocolHandler(InputStream is, OutputStream os)
     {
@@ -295,10 +301,8 @@ public class TlsProtocolHandler
                     */
                     if (type != HP_FINISHED)
                     {
-                        rs.hash1.update(beginning, 0, 4);
-                        rs.hash2.update(beginning, 0, 4);
-                        rs.hash1.update(buf, 0, len);
-                        rs.hash2.update(buf, 0, len);
+                        rs.updateHandshakeData(beginning, 0, 4);
+                        rs.updateHandshakeData(buf, 0, len);
                     }
 
                     /*
@@ -629,6 +633,13 @@ public class TlsProtocolHandler
                                     }
 
                                     connection_state = CS_CLIENT_KEY_EXCHANGE_SEND;
+
+                                    if (isCertReq && this.clientPrivateKey != null)
+                                    {
+                                        sendCertificateVerify();
+
+                                        connection_state = CS_CERTIFICATE_VERIFY_SEND;
+                                    }
 
                                     /*
                                     * Now, we send change cipher state
@@ -1057,14 +1068,23 @@ public class TlsProtocolHandler
 
     private void sendClientCertificate() throws IOException
     {
-        /*
-         * just write back the "no client certificate" message
-         * see also gnutls, auth_cert.c:643 (0B 00 00 03 00 00 00)
-         */
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HP_CERTIFICATE, bos);
-        TlsUtils.writeUint24(3, bos);
-        TlsUtils.writeUint24(0, bos);
+
+        if (clientCert == null)
+        {
+            /*
+             * just write back the "no client certificate" message see also
+             * gnutls, auth_cert.c:643 (0B 00 00 03 00 00 00)
+             */
+            TlsUtils.writeUint24(3, bos);
+            TlsUtils.writeUint24(0, bos);
+        }
+        else
+        {
+            // TODO Add client certificate support
+        }
+
         byte[] message = bos.toByteArray();
 
         rs.writeMessage((short)RL_HANDSHAKE, message, 0, message.length);
@@ -1081,6 +1101,31 @@ public class TlsProtocolHandler
         rs.writeMessage((short)RL_HANDSHAKE, message, 0, message.length);
     }
 
+    private void sendCertificateVerify() throws IOException
+    {
+        /*
+         * Send signature of handshake messages so far to prove we are the owner of
+         * the cert See RFC 2246 sections 4.7, 7.4.3 and 7.4.8
+         */
+
+        try
+        {
+            byte[] data = rs.clientSigner.generateSignature();
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            TlsUtils.writeUint8(HP_CERTIFICATE_VERIFY, bos);
+            TlsUtils.writeUint24(data.length + 2, bos);
+            TlsUtils.writeOpaque16(data, bos);
+            byte[] message = bos.toByteArray();
+
+            rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
+        }
+        catch (CryptoException e)
+        {
+            this.failWithError(AL_fatal, AP_handshake_failure);
+        }
+    }
+
     /**
      * Connects to the remote system.
      *
@@ -1090,7 +1135,45 @@ public class TlsProtocolHandler
      */
     public void connect(CertificateVerifyer verifyer) throws IOException
     {
+        this.connect(verifyer, null, null);
+    }
+
+    /**
+     * Connects to the remote system using client authentication
+     * @param verifyer Will be used when a certificate is received to verify
+     *                 that this certificate is accepted by the client.
+     * @param clientCertificate The client's certificate to be provided to the remote system
+     * @param clientPrivateKey The client's private key for the certificate
+     *                 to authenticate to the remote system (RSA or DSA)
+     * @throws IOException If handshake was not successful.
+     */
+    // TODO Make public to enable client certificate support
+    void connect(CertificateVerifyer verifyer, Certificate clientCertificate,
+        AsymmetricKeyParameter clientPrivateKey) throws IOException
+    {
+        if (clientPrivateKey != null)
+        {
+            if (!clientPrivateKey.isPrivate())
+            {
+                throw new IllegalArgumentException("'clientPrivateKey' must be private");
+            }
+            else if (clientPrivateKey instanceof RSAKeyParameters)
+            {
+                rs.clientSigner = new TlsRSASigner();
+            }
+            else if (clientPrivateKey instanceof DSAPrivateKeyParameters)
+            {
+                rs.clientSigner = new TlsDSSSigner();
+            }
+            else
+            {
+                throw new IllegalArgumentException("'clientPrivateKey' type not supported");
+            }
+        }
+
         this.verifyer = verifyer;
+        this.clientCert = clientCertificate;
+        this.clientPrivateKey = clientPrivateKey;
 
         /*
         * Send Client hello
