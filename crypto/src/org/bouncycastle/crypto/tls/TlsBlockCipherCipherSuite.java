@@ -52,7 +52,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         byte[] random = new byte[cr.length + sr.length];
         System.arraycopy(cr, 0, random, sr.length, cr.length);
         System.arraycopy(sr, 0, random, 0, sr.length);
-        TlsUtils.PRF(ms, TlsUtils.toByteArray("key expansion"), random, key_block);
+        TlsUtils.PRF(ms, "key expansion", random, key_block);
 
         int offset = 0;
 

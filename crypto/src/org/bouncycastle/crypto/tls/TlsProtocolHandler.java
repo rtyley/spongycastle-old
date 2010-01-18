@@ -414,7 +414,7 @@ public class TlsProtocolHandler
                                     byte[] checksum = new byte[12];
                                     byte[] md5andsha1 = new byte[16 + 20];
                                     rs.hash2.doFinal(md5andsha1, 0);
-                                    TlsUtils.PRF(this.ms, TlsUtils.toByteArray("server finished"), md5andsha1, checksum);
+                                    TlsUtils.PRF(this.ms, "server finished", md5andsha1, checksum);
 
                                     /*
                                     * Compare both checksums.
@@ -657,7 +657,7 @@ public class TlsProtocolHandler
                                     byte[] random = new byte[clientRandom.length + serverRandom.length];
                                     System.arraycopy(clientRandom, 0, random, 0, clientRandom.length);
                                     System.arraycopy(serverRandom, 0, random, clientRandom.length, serverRandom.length);
-                                    TlsUtils.PRF(pms, TlsUtils.toByteArray("master secret"), random, this.ms);
+                                    TlsUtils.PRF(pms, "master secret", random, this.ms);
 
                                     /*
                                     * Initialize our cipher suite
@@ -671,7 +671,7 @@ public class TlsProtocolHandler
                                     byte[] checksum = new byte[12];
                                     byte[] md5andsha1 = new byte[16 + 20];
                                     rs.hash1.doFinal(md5andsha1, 0);
-                                    TlsUtils.PRF(this.ms, TlsUtils.toByteArray("client finished"), md5andsha1, checksum);
+                                    TlsUtils.PRF(this.ms, "client finished", md5andsha1, checksum);
 
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                                     TlsUtils.writeUint8(HP_FINISHED, bos);
