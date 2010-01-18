@@ -55,7 +55,7 @@ public class Certificate
     }
 
     /**
-     * Private constructure from an cert array.
+     * Private constructor from a cert array.
      *
      * @param certs The certs the chain should contain.
      */
@@ -73,5 +73,4 @@ public class Certificate
         System.arraycopy(certs, 0, result, 0, certs.length);
         return result;
     }
-
 }
