@@ -212,6 +212,11 @@ public class TlsProtocolHandler
         this.rs = new RecordStream(this, is, os);
     }
 
+    SecureRandom getRandom()
+    {
+        return random;
+    }
+
     private short connection_state;
 
     protected void processData(short protocol, byte[] buf, int offset, int len)
