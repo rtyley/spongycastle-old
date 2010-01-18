@@ -5,6 +5,7 @@ import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.io.Streams;
 
 import java.io.EOFException;
@@ -17,19 +18,6 @@ import java.io.OutputStream;
  */
 public class TlsUtils
 {
-    static byte[] toByteArray(String str)
-    {
-        char[] chars = str.toCharArray();
-        byte[] bytes = new byte[chars.length];
-
-        for (int i = 0; i != bytes.length; i++)
-        {
-            bytes[i] = (byte)chars[i];
-        }
-
-        return bytes;
-    }
-
     protected static void writeUint8(short i, OutputStream os) throws IOException
     {
         os.write(i);
@@ -236,8 +224,10 @@ public class TlsUtils
         }
     }
 
-    protected static void PRF(byte[] secret, byte[] label, byte[] seed, byte[] buf)
+    protected static void PRF(byte[] secret, String asciiLabel, byte[] seed, byte[] buf)
     {
+        byte[] label = Strings.toByteArray(asciiLabel);
+
         int s_half = (secret.length + 1) / 2;
         byte[] s1 = new byte[s_half];
         byte[] s2 = new byte[s_half];
