@@ -5,6 +5,7 @@ import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.util.io.Streams;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -166,16 +167,9 @@ public class TlsUtils
 
     protected static void readFully(byte[] buf, InputStream is) throws IOException
     {
-        int read = 0;
-        int i = 0;
-        while (read != buf.length)
+        if (Streams.readFully(is, buf) != buf.length)
         {
-            i = is.read(buf, read, (buf.length - read));
-            if (i == -1)
-            {
-                throw new EOFException();
-            }
-            read += i;
+            throw new EOFException();
         }
     }
 
