@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.bouncycastle.crypto.Signer;
+
 /**
  * An implementation of the TLS 1.0 record layer.
  */
 class RecordStream
 {
-
     private TlsProtocolHandler handler;
     private InputStream is;
     private OutputStream os;
@@ -18,14 +19,15 @@ class RecordStream
     protected TlsCipherSuite readSuite = null;
     protected TlsCipherSuite writeSuite = null;
 
+    Signer clientSigner = null;
 
     RecordStream(TlsProtocolHandler handler, InputStream is, OutputStream os)
     {
         this.handler = handler;
         this.is = is;
         this.os = os;
-        hash1 = new CombinedHash();
-        hash2 = new CombinedHash();
+        this.hash1 = new CombinedHash();
+        this.hash2 = new CombinedHash();
         this.readSuite = new TlsNullCipherSuite();
         this.writeSuite = this.readSuite;
     }
@@ -37,7 +39,6 @@ class RecordStream
         int size = TlsUtils.readUint16(is);
         byte[] buf = decodeAndVerify(type, is, size);
         handler.processData(type, buf, 0, buf.length);
-
     }
 
     protected byte[] decodeAndVerify(short type, InputStream is, int len) throws IOException
@@ -52,8 +53,7 @@ class RecordStream
     {
         if (type == 22) // TlsProtocolHandler.RL_HANDSHAKE
         {
-            hash1.update(message, offset, len);
-            hash2.update(message, offset, len);
+            updateHandshakeData(message, offset, len);
         }
         byte[] ciphertext = writeSuite.encodePlaintext(type, message, offset, len, handler);
         byte[] writeMessage = new byte[ciphertext.length + 5];
@@ -64,6 +64,17 @@ class RecordStream
         System.arraycopy(ciphertext, 0, writeMessage, 5, ciphertext.length);
         os.write(writeMessage);
         os.flush();
+    }
+
+    void updateHandshakeData(byte[] message, int offset, int len)
+    {
+        hash1.update(message, offset, len);
+        hash2.update(message, offset, len);
+
+        if (clientSigner != null)
+        {
+            clientSigner.update(message, offset, len);
+        }
     }
 
     protected void close() throws IOException
@@ -95,5 +106,4 @@ class RecordStream
     {
         os.flush();
     }
-
 }
