@@ -565,11 +565,11 @@ public class SignerInformation
         Provider  sigProvider)
         throws NoSuchAlgorithmException, CMSException
     {
-        String algorithm = CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
-        
+        String encName = CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
+
         try
         {
-            if (algorithm.equals("RSA"))
+            if (encName.equals("RSA"))
             {
                 Cipher c = CMSEnvelopedHelper.INSTANCE.getCipherInstance("RSA/ECB/PKCS1Padding", sigProvider);
 
@@ -591,7 +591,7 @@ public class SignerInformation
 
                 return Arrays.constantTimeAreEqual(digest, sigHash);
             }
-            else if (algorithm.equals("DSA"))
+            else if (encName.equals("DSA"))
             {
                 Signature sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEwithDSA", sigProvider);
 
@@ -603,7 +603,7 @@ public class SignerInformation
             }
             else
             {
-                throw new CMSException("algorithm: " + algorithm + " not supported in base signatures.");
+                throw new CMSException("algorithm: " + encName + " not supported in base signatures.");
             }
         }
         catch (GeneralSecurityException e)
