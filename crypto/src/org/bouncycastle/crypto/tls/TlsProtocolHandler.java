@@ -1082,7 +1082,7 @@ public class TlsProtocolHandler
         }
         else
         {
-            // TODO Add client certificate support
+            clientCert.encode(bos);
         }
 
         byte[] message = bos.toByteArray();
