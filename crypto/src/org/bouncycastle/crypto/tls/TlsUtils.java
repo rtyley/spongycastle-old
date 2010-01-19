@@ -107,6 +107,12 @@ public class TlsUtils
         os.write(buf);
     }
 
+    protected static void writeOpaque24(byte[] buf, OutputStream os) throws IOException
+    {
+        writeUint24(buf.length, os);
+        os.write(buf);
+    }
+
     protected static short readUint8(InputStream is) throws IOException
     {
         int i = is.read();
