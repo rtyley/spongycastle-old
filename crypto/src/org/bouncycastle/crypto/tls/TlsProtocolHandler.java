@@ -1070,21 +1070,7 @@ public class TlsProtocolHandler
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HP_CERTIFICATE, bos);
-
-        if (clientCert == null)
-        {
-            /*
-             * just write back the "no client certificate" message see also
-             * gnutls, auth_cert.c:643 (0B 00 00 03 00 00 00)
-             */
-            TlsUtils.writeUint24(3, bos);
-            TlsUtils.writeUint24(0, bos);
-        }
-        else
-        {
-            clientCert.encode(bos);
-        }
-
+        clientCert.encode(bos);
         byte[] message = bos.toByteArray();
 
         rs.writeMessage((short)RL_HANDSHAKE, message, 0, message.length);
@@ -1151,6 +1137,11 @@ public class TlsProtocolHandler
     void connect(CertificateVerifyer verifyer, Certificate clientCertificate,
         AsymmetricKeyParameter clientPrivateKey) throws IOException
     {
+        if (clientCertificate == null)
+        {
+            clientCertificate = new Certificate(new X509CertificateStructure[0]);
+        }
+
         if (clientPrivateKey != null)
         {
             if (!clientPrivateKey.isPrivate())
