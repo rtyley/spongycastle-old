@@ -1144,7 +1144,11 @@ public class TlsProtocolHandler
 
         if (clientPrivateKey != null)
         {
-            if (!clientPrivateKey.isPrivate())
+            if (clientCertificate.certs.length == 0)
+            {
+                throw new IllegalArgumentException("'clientPrivateKey' specified without certificate");
+            }
+            else if (!clientPrivateKey.isPrivate())
             {
                 throw new IllegalArgumentException("'clientPrivateKey' must be private");
             }
@@ -1159,11 +1163,6 @@ public class TlsProtocolHandler
             else
             {
                 throw new IllegalArgumentException("'clientPrivateKey' type not supported");
-            }
-
-            if (clientCertificate.certs.length == 0)
-            {
-                throw new IllegalArgumentException("'clientPrivateKey' specified without certificate");
             }
         }
 
