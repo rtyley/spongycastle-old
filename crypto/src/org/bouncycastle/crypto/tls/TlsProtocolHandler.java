@@ -1142,7 +1142,14 @@ public class TlsProtocolHandler
             clientCertificate = new Certificate(new X509CertificateStructure[0]);
         }
 
-        if (clientPrivateKey != null)
+        if (clientPrivateKey == null)
+        {
+            if (clientCertificate.certs.length != 0)
+            {
+                throw new IllegalArgumentException("'clientPrivateKey' not specified for certificate");
+            }
+        }
+        else
         {
             if (clientCertificate.certs.length == 0)
             {
