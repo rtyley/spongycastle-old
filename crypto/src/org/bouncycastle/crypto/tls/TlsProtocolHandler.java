@@ -1160,6 +1160,11 @@ public class TlsProtocolHandler
             {
                 throw new IllegalArgumentException("'clientPrivateKey' type not supported");
             }
+
+            if (clientCertificate.certs.length == 0)
+            {
+                throw new IllegalArgumentException("'clientPrivateKey' specified without certificate");
+            }
         }
 
         this.verifyer = verifyer;
