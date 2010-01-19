@@ -1164,6 +1164,8 @@ public class TlsProtocolHandler
             {
                 throw new IllegalArgumentException("'clientPrivateKey' type not supported");
             }
+
+            rs.clientSigner.init(true, clientPrivateKey);
         }
 
         this.verifyer = verifyer;
