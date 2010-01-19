@@ -1,5 +1,6 @@
 package org.bouncycastle.crypto.tls;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
@@ -7,6 +8,7 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Vector;
 
 /**
@@ -55,11 +57,41 @@ public class Certificate
     }
 
     /**
+     * Encodes version of the ClientCertificate message
+     * 
+     * @param os
+     *            stream to write the message to
+     * @throws IOException
+     *             If something goes wrong
+     */
+    protected void encode(OutputStream os) throws IOException
+    {
+        Vector encCerts = new Vector();
+        int totalSize = 0;
+        for (int i = 0; i < this.certs.length; ++i)
+        {
+            byte[] encCert = certs[i].getEncoded(ASN1Encodable.DER);
+            encCerts.addElement(encCert);
+            totalSize += encCert.length + 3;
+        }
+
+        TlsUtils.writeUint24(totalSize + 3, os);
+        TlsUtils.writeUint24(totalSize, os);
+
+        for (int i = 0; i < encCerts.size(); ++i)
+        {
+            byte[] encCert = (byte[]) encCerts.elementAt(i);
+            TlsUtils.writeOpaque24(encCert, os);
+        }
+    }
+
+    /**
      * Private constructor from a cert array.
      *
      * @param certs The certs the chain should contain.
      */
-    private Certificate(X509CertificateStructure[] certs)
+    // TODO Make public to enable client certificate support
+    Certificate(X509CertificateStructure[] certs)
     {
         this.certs = certs;
     }
