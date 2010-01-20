@@ -1288,15 +1288,16 @@ public class TlsProtocolHandler
             /*
              * We need to read some data.
              */
-            if (this.failedWithError)
-            {
-                /*
-                 * Something went terribly wrong, we should throw an IOException
-                 */
-                throw new IOException(TLS_ERROR_MESSAGE);
-            }
             if (this.closed)
             {
+                if (this.failedWithError)
+                {
+                    /*
+                     * Something went terribly wrong, we should throw an IOException
+                     */
+                    throw new IOException(TLS_ERROR_MESSAGE);
+                }
+
                 /*
                  * Connection has been closed, there is no more data to read.
                  */
@@ -1342,12 +1343,13 @@ public class TlsProtocolHandler
      */
     protected void writeData(byte[] buf, int offset, int len) throws IOException
     {
-        if (this.failedWithError)
-        {
-            throw new IOException(TLS_ERROR_MESSAGE);
-        }
         if (this.closed)
         {
+            if (this.failedWithError)
+            {
+                throw new IOException(TLS_ERROR_MESSAGE);
+            }
+
             throw new IOException("Sorry, connection has been closed, you cannot write more data");
         }
 
