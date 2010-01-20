@@ -1039,6 +1039,8 @@ public class TlsProtocolHandler
         try
         {
             BigInteger S = srpClient.calculateSecret(B);
+
+            // TODO Check if this needs to be a fixed size
             this.pms = BigIntegers.asUnsignedByteArray(S);
         }
         catch (CryptoException e)
