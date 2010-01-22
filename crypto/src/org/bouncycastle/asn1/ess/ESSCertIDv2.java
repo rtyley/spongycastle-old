@@ -1,9 +1,15 @@
 package org.bouncycastle.asn1.ess;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.IssuerSerial;
 
 public class ESSCertIDv2
     extends ASN1Encodable
@@ -33,7 +39,7 @@ public class ESSCertIDv2
     public ESSCertIDv2(
         ASN1Sequence seq)
     {
-        if (seq.size() != 2 && seq.size() != 3)
+        if (seq.size() > 3)
         {
             throw new IllegalArgumentException("Bad sequence size: " + seq.size());
         }

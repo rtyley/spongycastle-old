@@ -64,6 +64,7 @@ public class RegressionTest
         new IssuingDistributionPointUnitTest(),
         new TargetInformationTest(),
         new SubjectKeyIdentifierTest(),
+        new ESSCertIDv2UnitTest(),
         new GeneralNameTest()
     };
 
