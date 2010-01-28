@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -23,7 +24,10 @@ import java.util.Hashtable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1StreamParser;
 import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERSequenceParser;
 import org.bouncycastle.asn1.pkcs.ContentInfo;
 import org.bouncycastle.asn1.pkcs.EncryptedData;
 import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
@@ -31,8 +35,10 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.Pfx;
 import org.bouncycastle.asn1.pkcs.SafeBag;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.PKCS12Util;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.JDKPKCS12StoreParameter;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
@@ -535,14 +541,46 @@ public class PKCS12StoreTest
             fail("Modulus doesn't match.");
         }
 
+        //
+        // save test using LoadStoreParameter
+        //
+        bOut = new ByteArrayOutputStream();
+
+        JDKPKCS12StoreParameter storeParam = new JDKPKCS12StoreParameter();
+        storeParam.setOutputStream(bOut);
+        storeParam.setPassword(passwd);
+        storeParam.setUseDEREncoding(true);
+
+        store.store(storeParam);
+
+        byte[] data = bOut.toByteArray();
+
+        stream = new ByteArrayInputStream(data);
+        store.load(stream, passwd);
+
+        key = (PrivateKey)store.getKey(pName, null);
+
+        if (!((RSAPrivateKey)key).getModulus().equals(mod))
+        {
+            fail("Modulus doesn't match.");
+        }
+
+        DEREncodable outer = new ASN1StreamParser(data).readObject();
+        if (!(outer instanceof DERSequenceParser))
+        {
+            fail("Failed DER encoding test.");
+        }
+
+        //
+        // delete test
+        //
         store.deleteEntry(pName);
 
         if (store.getKey(pName, null) != null)
         {
             fail("Failed deletion test.");
         }
-
-        //
+        
         // cert chain test
         //
         store.setCertificateEntry("testCert", ch[2]);
@@ -994,6 +1032,37 @@ public class PKCS12StoreTest
         throws Exception
     {
         testPKCS12Store();
+
+
+        // converter tests
+
+        KeyStore kS = KeyStore.getInstance("PKCS12", "BC");
+
+        byte[] data = PKCS12Util.convertToDefiniteLength(pkcs12);
+        kS.load(new ByteArrayInputStream(data), passwd);     // check MAC
+
+        DEREncodable obj = new ASN1StreamParser(data).readObject();
+        if (!(obj instanceof DERSequenceParser))
+        {
+            fail("Failed DER conversion test.");
+        }
+
+        data = PKCS12Util.convertToDefiniteLength(pkcs12, passwd, "BC");
+        kS.load(new ByteArrayInputStream(data), passwd); //check MAC
+
+        obj = new ASN1StreamParser(data).readObject();
+        if (!(obj instanceof DERSequenceParser))
+        {
+            fail("Failed deep DER conversion test - outer.");
+        }
+
+        Pfx pfx = new Pfx(ASN1Sequence.getInstance(obj.getDERObject()));
+
+        obj = new ASN1StreamParser(ASN1OctetString.getInstance(pfx.getAuthSafe().getContent()).getOctets()).readObject();
+        if (!(obj instanceof DERSequenceParser))
+        {
+            fail("Failed deep DER conversion test - inner.");
+        }
     }
 
     public static void main(
