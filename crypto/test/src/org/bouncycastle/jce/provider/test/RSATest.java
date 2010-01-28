@@ -190,6 +190,31 @@ public class RSATest
         }
 
         //
+        // No Padding - incremental - explicit use of NONE in mode.
+        //
+        c = Cipher.getInstance("RSA/NONE/NoPadding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        c.update(input);
+
+        out = c.doFinal();
+
+        if (!areEqual(out, output[0]))
+        {
+            fail("NoPadding test failed on encrypt expected " + new String(Hex.encode(output[0])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("NoPadding test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+
+        //
         // No Padding - maximum length
         //
         c = Cipher.getInstance("RSA", "BC");
@@ -216,6 +241,29 @@ public class RSATest
         // PKCS1 V 1.5
         //
         c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        out = c.doFinal(input);
+
+        if (!areEqual(out, output[1]))
+        {
+            fail("PKCS1 test failed on encrypt expected " + new String(Hex.encode(output[1])) + " got " + new String(Hex.encode(out)));
+        }
+
+        c.init(Cipher.DECRYPT_MODE, privKey);
+
+        out = c.doFinal(out);
+
+        if (!areEqual(out, input))
+        {
+            fail("PKCS1 test failed on decrypt expected " + new String(Hex.encode(input)) + " got " + new String(Hex.encode(out)));
+        }
+
+        //
+        // PKCS1 V 1.5 - NONE
+        //
+        c = Cipher.getInstance("RSA/NONE/PKCS1Padding", "BC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
