@@ -25,7 +25,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
 
 /**
- * Utility class for reencoding PKCS
+ * Utility class for reencoding PKCS#12 files to definite length.
  */
 public class PKCS12Util
 {
