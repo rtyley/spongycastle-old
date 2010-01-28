@@ -2,34 +2,27 @@ package org.bouncycastle.jce;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.ByteArrayInputStream;
-import java.security.KeyStore;
-import java.security.Security;
 
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
 
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.DigestInfo;
-import org.bouncycastle.asn1.util.ASN1Dump;
-import org.bouncycastle.asn1.pkcs.Pfx;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.ContentInfo;
 import org.bouncycastle.asn1.pkcs.MacData;
-import org.bouncycastle.jce.provider.JCEPBEKey;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.asn1.pkcs.Pfx;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.DigestInfo;
 
 /**
  * Utility class for reencoding PKCS
