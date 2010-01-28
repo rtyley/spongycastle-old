@@ -1478,6 +1478,34 @@ public class SignedDataTest
         testSample("PSSSignData.data", "PSSSignDataSHA512.sig");
     }
 
+    public void testCounterSig()
+        throws Exception
+    {
+        CMSSignedData sig = new CMSSignedData(getInput("counterSig.p7m"));
+
+        SignerInformationStore ss = sig.getSignerInfos();
+        Collection signers = ss.getSigners();
+
+        SignerInformationStore cs = ((SignerInformation)signers.iterator().next()).getCounterSignatures();
+        Collection csSigners = cs.getSigners();
+        assertEquals(1, csSigners.size());
+
+        Iterator it = csSigners.iterator();
+        while (it.hasNext())
+        {
+            SignerInformation   cSigner = (SignerInformation)it.next();
+            Collection          certCollection = sig.getCertificatesAndCRLs("Collection", "BC").getCertificates(cSigner.getSID());
+
+            Iterator        certIt = certCollection.iterator();
+            X509Certificate cert = (X509Certificate)certIt.next();
+
+            assertNull(cSigner.getSignedAttributes().get(PKCSObjectIdentifiers.pkcs_9_at_contentType));
+            assertEquals(true, cSigner.verify(cert, "BC"));
+        }
+        
+        verifySignatures(sig);
+    }
+
     private void testSample(String sigName)
         throws Exception
     {
