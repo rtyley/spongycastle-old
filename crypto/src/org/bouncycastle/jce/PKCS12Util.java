@@ -73,12 +73,9 @@ public class PKCS12Util
         DEROutputStream dOut = new DEROutputStream(bOut);
 
         ASN1InputStream contentIn = new ASN1InputStream(content.getOctets());
-        DERObject obj;
+        DERObject obj = contentIn.readObject();
 
-        while ((obj = contentIn.readObject()) != null)
-        {
-            dOut.writeObject(obj);
-        }
+        dOut.writeObject(obj);
 
         info = new ContentInfo(info.getContentType(), new DEROctetString(bOut.toByteArray()));
 
