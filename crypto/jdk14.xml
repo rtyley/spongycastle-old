@@ -27,6 +27,7 @@
                 <exclude name="**/BCEC*.java" />
                 <exclude name="**/JCEEC5*.java" />
                 <exclude name="**/EC5*.java" />
+                <exclude name="**/JDKPKCS12StoreParameter.java" />
             </fileset>
             <fileset dir="test/src">
                 <exclude name="**/ECDSA5Test.java" />
