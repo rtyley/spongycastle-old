@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Key;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
@@ -16,8 +17,11 @@ import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
+import java.security.KeyStore.LoadStoreParameter;
+import java.security.KeyStore.ProtectionParameter;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -46,6 +50,7 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.pkcs.AuthenticatedSafe;
@@ -1080,7 +1085,48 @@ public class JDKPKCS12KeyStore
         }
     }
 
+    public void engineStore(LoadStoreParameter param) throws IOException,
+            NoSuchAlgorithmException, CertificateException
+    {
+        if (param == null)
+        {
+            throw new IllegalArgumentException("'param' arg cannot be null");
+        }
+
+        if (!(param instanceof JDKPKCS12StoreParameter))
+        {
+            throw new IllegalArgumentException(
+                "No support for 'param' of type " + param.getClass().getName());
+        }
+
+        JDKPKCS12StoreParameter bcParam = (JDKPKCS12StoreParameter)param;
+
+        char[] password;
+        ProtectionParameter protParam = param.getProtectionParameter();
+        if (protParam == null)
+        {
+            password = null;
+        }
+        else if (protParam instanceof KeyStore.PasswordProtection)
+        {
+            password = ((KeyStore.PasswordProtection)protParam).getPassword();
+        }
+        else
+        {
+            throw new IllegalArgumentException(
+                "No support for protection parameter of type " + protParam.getClass().getName());
+        }
+
+        doStore(bcParam.getOutputStream(), password, bcParam.isUseDEREncoding());
+    }
+
     public void engineStore(OutputStream stream, char[] password) 
+        throws IOException
+    {
+        doStore(stream, password, false);
+    }
+
+    private void doStore(OutputStream stream, char[] password, boolean useDEREncoding) 
         throws IOException
     {
         if (password == null)
@@ -1410,9 +1456,17 @@ public class JDKPKCS12KeyStore
         AuthenticatedSafe   auth = new AuthenticatedSafe(info);
 
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        BEROutputStream         berOut = new BEROutputStream(bOut);
+        DEROutputStream asn1Out;
+        if (useDEREncoding)
+        {
+            asn1Out = new DEROutputStream(bOut);
+        }
+        else
+        {
+            asn1Out = new BEROutputStream(bOut);
+        }
 
-        berOut.writeObject(auth);
+        asn1Out.writeObject(auth);
 
         byte[]              pkg = bOut.toByteArray();
 
@@ -1449,9 +1503,16 @@ public class JDKPKCS12KeyStore
         //
         Pfx                 pfx = new Pfx(mainInfo, mData);
 
-        berOut = new BEROutputStream(stream);
+        if (useDEREncoding)
+        {
+            asn1Out = new DEROutputStream(stream);
+        }
+        else
+        {
+            asn1Out = new BEROutputStream(stream);
+        }
 
-        berOut.writeObject(pfx);
+        asn1Out.writeObject(pfx);
     }
 
     private static byte[] calculatePbeMac(
