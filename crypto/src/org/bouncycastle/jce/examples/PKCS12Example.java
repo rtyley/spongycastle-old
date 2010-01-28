@@ -72,7 +72,7 @@ public class PKCS12Example
         v1CertGen.setPublicKey(pubKey);
         v1CertGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
 
-        X509Certificate cert = v1CertGen.generateX509Certificate(privKey);
+        X509Certificate cert = v1CertGen.generate(privKey);
 
         cert.checkValidity(new Date());
 
@@ -147,7 +147,7 @@ public class PKCS12Example
             true,
             new BasicConstraints(0));
 
-        X509Certificate cert = v3CertGen.generateX509Certificate(caPrivKey);
+        X509Certificate cert = v3CertGen.generate(caPrivKey);
 
         cert.checkValidity(new Date());
 
@@ -235,7 +235,7 @@ public class PKCS12Example
             false,
             new AuthorityKeyIdentifierStructure(caPubKey));
 
-        X509Certificate cert = v3CertGen.generateX509Certificate(caPrivKey);
+        X509Certificate cert = v3CertGen.generate(caPrivKey);
 
         cert.checkValidity(new Date());
 
