@@ -535,6 +535,22 @@ public class X509NameTest
         {
             fail("= in string not properly escaped.");
         }
+
+        n = new X509Name("TELEPHONENUMBER=\"+61999999999\"");
+
+        vls = n.getValues(X509Name.TELEPHONE_NUMBER);
+        if (vls.size() != 1 || !vls.elementAt(0).equals("+61999999999"))
+        {
+            fail("telephonenumber escaped + not reduced properly");
+        }
+
+        n = new X509Name("TELEPHONENUMBER=\\+61999999999");
+
+        vls = n.getValues(X509Name.TELEPHONE_NUMBER);
+        if (vls.size() != 1 || !vls.elementAt(0).equals("+61999999999"))
+        {
+            fail("telephonenumber escaped + not reduced properly");
+        }
     }
 
     private boolean compareVectors(Vector a, Vector b)    // for compatibility with early JDKs
