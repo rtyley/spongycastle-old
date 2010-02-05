@@ -30,8 +30,6 @@ import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
 import org.bouncycastle.crypto.engines.RC2Engine;
-import org.bouncycastle.crypto.engines.RijndaelEngine;
-import org.bouncycastle.crypto.engines.SerpentEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
@@ -858,30 +856,6 @@ public class JCEBlockCipher extends WrapCipherSpi
         public AESOFB()
         {
             super(new OFBBlockCipher(new AESFastEngine(), 128), 128);
-        }
-    }
-
-    /**
-     * Rijndael
-     */
-    static public class Rijndael
-        extends JCEBlockCipher
-    {
-        public Rijndael()
-        {
-            super(new RijndaelEngine());
-        }
-    }
-
-    /**
-     * Serpent
-     */
-    static public class Serpent
-        extends JCEBlockCipher
-    {
-        public Serpent()
-        {
-            super(new SerpentEngine());
         }
     }
 

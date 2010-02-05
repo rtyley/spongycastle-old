@@ -181,18 +181,6 @@ public class JCEKeyGenerator
             super("GOST28147", 256, new CipherKeyGenerator());
         }
     }
-    
-    /**
-     * Rijndael
-     */
-    public static class Rijndael
-        extends JCEKeyGenerator
-    {
-        public Rijndael()
-        {
-            super("Rijndael", 192, new CipherKeyGenerator());
-        }
-    }
 
     // HMAC Related secret keys..
   
