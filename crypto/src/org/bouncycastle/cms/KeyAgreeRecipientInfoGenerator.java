@@ -76,7 +76,7 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
         this.wrapKey = wrapKey;
     }
 
-    public RecipientInfo generate(SecretKey key, SecureRandom random,
+    public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
             Provider prov) throws GeneralSecurityException
     {
         ASN1EncodableVector params = new ASN1EncodableVector();
@@ -94,7 +94,7 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
         // TODO Should we try alternate ways of wrapping?
         //   (see KeyTransRecipientInfoGenerator.generate)
         keyCipher.init(Cipher.WRAP_MODE, wrapKey, random);
-        ASN1OctetString encKey = new DEROctetString(keyCipher.wrap(key));
+        ASN1OctetString encKey = new DEROctetString(keyCipher.wrap(contentEncryptionKey));
 
         RecipientEncryptedKey rKey = new RecipientEncryptedKey(
                 new KeyAgreeRecipientIdentifier(issuerSerial),

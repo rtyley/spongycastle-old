@@ -74,40 +74,35 @@ class KeyTransRecipientInfoGenerator
         this.subjectKeyIdentifier = subjectKeyIdentifier;
     }
 
-    public RecipientInfo generate(SecretKey key, SecureRandom random,
+    public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
             Provider prov) throws GeneralSecurityException
     {
         AlgorithmIdentifier keyEncAlg = info.getAlgorithmId();
 
-        ASN1OctetString encKey;
+        byte[] encKeyBytes = null;
 
         Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
                 keyEncAlg.getObjectId().getId(), prov);
         try
         {
             keyCipher.init(Cipher.WRAP_MODE, recipientPublicKey, random);
-
-            encKey = new DEROctetString(keyCipher.wrap(key));
+            encKeyBytes = keyCipher.wrap(contentEncryptionKey);
         }
-        catch (GeneralSecurityException e) // some providers do not support
-        // wrap
+        catch (GeneralSecurityException e)
+        {
+        }
+        catch (IllegalStateException e)
+        {
+        }
+        catch (UnsupportedOperationException e)
+        {
+        }
+
+        // some providers do not support wrap
+        if (encKeyBytes == null)
         {
             keyCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
-
-            encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
-        }
-        catch (IllegalStateException e) // some providers do not support wrap
-        {
-            keyCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
-
-            encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
-        }
-        catch (UnsupportedOperationException e) // some providers do not
-        // support wrap
-        {
-            keyCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
-
-            encKey = new DEROctetString(keyCipher.doFinal(key.getEncoded()));
+            encKeyBytes = keyCipher.doFinal(contentEncryptionKey.getEncoded());
         }
 
         RecipientIdentifier recipId;
@@ -124,6 +119,6 @@ class KeyTransRecipientInfoGenerator
         }
 
         return new RecipientInfo(new KeyTransRecipientInfo(recipId, keyEncAlg,
-                encKey));
+            new DEROctetString(encKeyBytes)));
     }
 }

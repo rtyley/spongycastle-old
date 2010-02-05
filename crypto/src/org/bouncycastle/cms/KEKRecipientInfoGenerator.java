@@ -48,7 +48,7 @@ class KEKRecipientInfoGenerator
         this.secKeyId = kekIdentifier;
     }
 
-    public RecipientInfo generate(SecretKey key, SecureRandom random,
+    public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
             Provider prov) throws GeneralSecurityException
     {
         Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
@@ -56,7 +56,7 @@ class KEKRecipientInfoGenerator
         // TODO Should we try alternate ways of wrapping?
         // (see KeyTransRecipientInfoGenerator.generate)
         keyCipher.init(Cipher.WRAP_MODE, wrapKey, random);
-        ASN1OctetString encKey = new DEROctetString(keyCipher.wrap(key));
+        ASN1OctetString encKey = new DEROctetString(keyCipher.wrap(contentEncryptionKey));
 
         return new RecipientInfo(new KEKRecipientInfo(secKeyId, keyEncAlg, encKey));
     }
