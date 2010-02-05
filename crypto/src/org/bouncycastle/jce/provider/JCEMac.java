@@ -1,5 +1,14 @@
 package org.bouncycastle.jce.provider;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
+
+import javax.crypto.MacSpi;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.digests.MD2Digest;
@@ -16,8 +25,6 @@ import org.bouncycastle.crypto.digests.TigerDigest;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
-import org.bouncycastle.crypto.engines.RC532Engine;
-import org.bouncycastle.crypto.engines.SkipjackEngine;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
 import org.bouncycastle.crypto.macs.GOST28147Mac;
@@ -28,14 +35,6 @@ import org.bouncycastle.crypto.macs.VMPCMac;
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-
-import javax.crypto.MacSpi;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEMac
     extends MacSpi implements PBE
@@ -171,18 +170,6 @@ public class JCEMac
     }
 
     /**
-     * SKIPJACK
-     */
-    public static class Skipjack
-        extends JCEMac
-    {
-        public Skipjack()
-        {
-            super(new CBCBlockCipherMac(new SkipjackEngine()));
-        }
-    }
-
-    /**
      * RC2
      */
     public static class RC2
@@ -191,18 +178,6 @@ public class JCEMac
         public RC2()
         {
             super(new CBCBlockCipherMac(new RC2Engine()));
-        }
-    }
-
-    /**
-     * RC5
-     */
-    public static class RC5
-        extends JCEMac
-    {
-        public RC5()
-        {
-            super(new CBCBlockCipherMac(new RC532Engine()));
         }
     }
 
@@ -254,17 +229,7 @@ public class JCEMac
         }
     }
 
-    /**
-     * SKIPJACK
-     */
-    public static class SkipjackCFB8
-        extends JCEMac
-    {
-        public SkipjackCFB8()
-        {
-            super(new CFBBlockCipherMac(new SkipjackEngine()));
-        }
-    }
+
 
     /**
      * RC2CFB8
@@ -278,19 +243,6 @@ public class JCEMac
         }
     }
 
-    /**
-     * RC5CFB8
-     */
-    public static class RC5CFB8
-        extends JCEMac
-    {
-        public RC5CFB8()
-        {
-            super(new CFBBlockCipherMac(new RC532Engine()));
-        }
-    }
-    
-    
     /**
      * DESede64
      */

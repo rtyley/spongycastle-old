@@ -1,28 +1,38 @@
 package org.bouncycastle.jce.provider;
 
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+import javax.crypto.spec.RC5ParameterSpec;
+
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
-import org.bouncycastle.crypto.engines.BlowfishEngine;
-import org.bouncycastle.crypto.engines.CAST5Engine;
-import org.bouncycastle.crypto.engines.CAST6Engine;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
 import org.bouncycastle.crypto.engines.RC2Engine;
-import org.bouncycastle.crypto.engines.RC532Engine;
-import org.bouncycastle.crypto.engines.RC564Engine;
-import org.bouncycastle.crypto.engines.RC6Engine;
 import org.bouncycastle.crypto.engines.RijndaelEngine;
-import org.bouncycastle.crypto.engines.SEEDEngine;
 import org.bouncycastle.crypto.engines.SerpentEngine;
-import org.bouncycastle.crypto.engines.SkipjackEngine;
-import org.bouncycastle.crypto.engines.TEAEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
-import org.bouncycastle.crypto.engines.XTEAEngine;
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.modes.CCMBlockCipher;
@@ -50,25 +60,6 @@ import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.crypto.params.RC5Parameters;
 import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
 import org.bouncycastle.util.Strings;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEBlockCipher extends WrapCipherSpi
     implements PBE
@@ -809,54 +800,6 @@ public class JCEBlockCipher extends WrapCipherSpi
             super(new CBCBlockCipher(new GOST28147Engine()), 64);
         }
     }
-    
-    /**
-     * SKIPJACK
-     */
-    static public class Skipjack
-        extends JCEBlockCipher
-    {
-        public Skipjack()
-        {
-            super(new SkipjackEngine());
-        }
-    }
-
-    /**
-     * Blowfish
-     */
-    static public class Blowfish
-        extends JCEBlockCipher
-    {
-        public Blowfish()
-        {
-            super(new BlowfishEngine());
-        }
-    }
-
-    /**
-     * Blowfish CBC
-     */
-    static public class BlowfishCBC
-        extends JCEBlockCipher
-    {
-        public BlowfishCBC()
-        {
-            super(new CBCBlockCipher(new BlowfishEngine()), 64);
-        }
-    }
-
-    /**
-     * Twofish
-     */
-    static public class Twofish
-        extends JCEBlockCipher
-    {
-        public Twofish()
-        {
-            super(new TwofishEngine());
-        }
-    }
 
     /**
      * RC2
@@ -879,54 +822,6 @@ public class JCEBlockCipher extends WrapCipherSpi
         public RC2CBC()
         {
             super(new CBCBlockCipher(new RC2Engine()), 64);
-        }
-    }
-
-    /**
-     * RC5
-     */
-    static public class RC5
-        extends JCEBlockCipher
-    {
-        public RC5()
-        {
-            super(new RC532Engine());
-        }
-    }
-
-    /**
-     * RC564
-     */
-    static public class RC564
-        extends JCEBlockCipher
-    {
-        public RC564()
-        {
-            super(new RC564Engine());
-        }
-    }
-
-    /**
-     * RC6
-     */
-    static public class RC6
-        extends JCEBlockCipher
-    {
-        public RC6()
-        {
-            super(new RC6Engine());
-        }
-    }
-
-    /**
-     * AES
-     */
-    static public class AES
-        extends JCEBlockCipher
-    {
-        public AES()
-        {
-            super(new AESFastEngine());
         }
     }
 
@@ -987,80 +882,6 @@ public class JCEBlockCipher extends WrapCipherSpi
         public Serpent()
         {
             super(new SerpentEngine());
-        }
-    }
-
-
-    
-    /**
-     * CAST5
-     */
-    static public class CAST5
-        extends JCEBlockCipher
-    {
-        public CAST5()
-        {
-            super(new CAST5Engine());
-        }
-    }
-
-    /**
-     * CAST5 CBC
-     */
-    static public class CAST5CBC
-        extends JCEBlockCipher
-    {
-        public CAST5CBC()
-        {
-            super(new CBCBlockCipher(new CAST5Engine()), 64);
-        }
-    }
-
-    /**
-     * CAST6
-     */
-    static public class CAST6
-        extends JCEBlockCipher
-    {
-        public CAST6()
-        {
-            super(new CAST6Engine());
-        }
-    }
-
-    /**
-     * TEA
-     */
-    static public class TEA
-        extends JCEBlockCipher
-    {
-        public TEA()
-        {
-            super(new TEAEngine());
-        }
-    }
-
-    /**
-     * XTEA
-     */
-    static public class XTEA
-        extends JCEBlockCipher
-    {
-        public XTEA()
-        {
-            super(new XTEAEngine());
-        }
-    }
-
-    /**
-     * SEED
-     */
-    static public class SEED
-        extends JCEBlockCipher
-    {
-        public SEED()
-        {
-            super(new SEEDEngine());
         }
     }
 
