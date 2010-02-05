@@ -54,7 +54,7 @@ public final class BouncyCastleProvider extends Provider
     private static final String[] SYMMETRIC_CIPHERS =
     {
         "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "Grainv1", "Grain128", "IDEA", "Noekeon", "RC5", "RC6",
-        "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "XTEA"
+        "Salsa20", "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "XTEA"
     };
 
     /*
@@ -262,9 +262,6 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.RC2WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
         put("Cipher.1.2.840.113549.1.9.16.3.7", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
 
-        put("Cipher.SALSA20", "org.bouncycastle.jce.provider.JCEStreamCipher$Salsa20");
-        put("Cipher.HC128", "org.bouncycastle.jce.provider.JCEStreamCipher$HC128");
-        put("Cipher.HC256", "org.bouncycastle.jce.provider.JCEStreamCipher$HC256");
         put("Cipher.VMPC", "org.bouncycastle.jce.provider.JCEStreamCipher$VMPC");
         put("Cipher.VMPC-KSA3", "org.bouncycastle.jce.provider.JCEStreamCipher$VMPCKSA3");
         put("Cipher.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2CBC");
@@ -379,9 +376,6 @@ public final class BouncyCastleProvider extends Provider
 
         put("KeyGenerator.RIJNDAEL", "org.bouncycastle.jce.provider.JCEKeyGenerator$Rijndael");
 
-        put("KeyGenerator.SALSA20", "org.bouncycastle.jce.provider.JCEKeyGenerator$Salsa20");
-        put("KeyGenerator.HC128", "org.bouncycastle.jce.provider.JCEKeyGenerator$HC128");
-        put("KeyGenerator.HC256", "org.bouncycastle.jce.provider.JCEKeyGenerator$HC256");
         put("KeyGenerator.VMPC", "org.bouncycastle.jce.provider.JCEKeyGenerator$VMPC");
         put("KeyGenerator.VMPC-KSA3", "org.bouncycastle.jce.provider.JCEKeyGenerator$VMPCKSA3");
 

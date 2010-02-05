@@ -195,42 +195,6 @@ public class JCEKeyGenerator
     }
 
     /**
-     * Salsa20
-     */
-    public static class Salsa20
-        extends JCEKeyGenerator
-    {
-        public Salsa20()
-        {
-            super("Salsa20", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * HC128
-     */
-    public static class HC128
-        extends JCEKeyGenerator
-    {
-        public HC128()
-        {
-            super("HC128", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * HC256
-     */
-    public static class HC256
-        extends JCEKeyGenerator
-    {
-        public HC256()
-        {
-            super("HC256", 256, new CipherKeyGenerator());
-        }
-    }
-
-    /**
      * VMPC
      */
     public static class VMPC
