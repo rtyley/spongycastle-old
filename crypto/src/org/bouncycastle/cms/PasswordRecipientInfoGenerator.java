@@ -36,7 +36,7 @@ class PasswordRecipientInfoGenerator implements RecipientInfoGenerator
         this.wrapKey = wrapKey;
     }
 
-    public RecipientInfo generate(SecretKey key, SecureRandom random,
+    public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
             Provider prov) throws GeneralSecurityException
     {
         // TODO Consider passing in the wrapAlgorithmOID instead
@@ -45,7 +45,7 @@ class PasswordRecipientInfoGenerator implements RecipientInfoGenerator
         String wrapAlgName = helper.getRFC3211WrapperName(wrapKey.getAlgorithm());
         Cipher keyCipher = helper.createAsymmetricCipher(wrapAlgName, prov);
         keyCipher.init(Cipher.WRAP_MODE, wrapKey, random);
-        ASN1OctetString encKey = new DEROctetString(keyCipher.wrap(key));
+        ASN1OctetString encKey = new DEROctetString(keyCipher.wrap(contentEncryptionKey));
 
         ASN1EncodableVector v = new ASN1EncodableVector();
         v.add(new DERObjectIdentifier(wrapKey.getAlgorithm()));
