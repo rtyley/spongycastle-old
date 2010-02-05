@@ -54,7 +54,7 @@ public final class BouncyCastleProvider extends Provider
     private static final String[] SYMMETRIC_CIPHERS =
     {
         "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "Grainv1", "Grain128", "HC128", "HC256", "IDEA",
-        "Noekeon", "RC5", "RC6", "Salsa20", "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "XTEA"
+        "Noekeon", "RC5", "RC6", "Salsa20", "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "VMPC", "VMPCKSA3", "XTEA"
     };
 
     /*
@@ -262,8 +262,6 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.RC2WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
         put("Cipher.1.2.840.113549.1.9.16.3.7", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
 
-        put("Cipher.VMPC", "org.bouncycastle.jce.provider.JCEStreamCipher$VMPC");
-        put("Cipher.VMPC-KSA3", "org.bouncycastle.jce.provider.JCEStreamCipher$VMPCKSA3");
         put("Cipher.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2CBC");
         put("Cipher.RIJNDAEL", "org.bouncycastle.jce.provider.JCEBlockCipher$Rijndael");
         put("Cipher.DESEDERFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211DESedeWrap");
@@ -375,9 +373,6 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
 
         put("KeyGenerator.RIJNDAEL", "org.bouncycastle.jce.provider.JCEKeyGenerator$Rijndael");
-
-        put("KeyGenerator.VMPC", "org.bouncycastle.jce.provider.JCEKeyGenerator$VMPC");
-        put("KeyGenerator.VMPC-KSA3", "org.bouncycastle.jce.provider.JCEKeyGenerator$VMPCKSA3");
 
         put("KeyGenerator.GOST28147", "org.bouncycastle.jce.provider.JCEKeyGenerator$GOST28147");
         put("Alg.Alias.KeyGenerator.GOST", "GOST28147");
@@ -624,10 +619,6 @@ public final class BouncyCastleProvider extends Provider
 
         put("Mac.GOST28147MAC", "org.bouncycastle.jce.provider.JCEMac$GOST28147");
         put("Alg.Alias.Mac.GOST28147", "GOST28147MAC");
-
-        put("Mac.VMPCMAC", "org.bouncycastle.jce.provider.JCEMac$VMPC");
-        put("Alg.Alias.Mac.VMPC", "VMPCMAC");
-        put("Alg.Alias.Mac.VMPC-MAC", "VMPCMAC");
 
         put("Mac.OLDHMACSHA384", "org.bouncycastle.jce.provider.JCEMac$OldSHA384");
 
