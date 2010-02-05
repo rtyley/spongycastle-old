@@ -1,17 +1,18 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.crypto.CipherKeyGenerator;
-import org.bouncycastle.crypto.KeyGenerationParameters;
-import org.bouncycastle.crypto.generators.DESKeyGenerator;
-import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
-
-import javax.crypto.KeyGeneratorSpi;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+
+import javax.crypto.KeyGeneratorSpi;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.bouncycastle.crypto.CipherKeyGenerator;
+import org.bouncycastle.crypto.KeyGenerationParameters;
+import org.bouncycastle.crypto.generators.DESKeyGenerator;
+import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
 
 public class JCEKeyGenerator
     extends KeyGeneratorSpi
@@ -158,42 +159,6 @@ public class JCEKeyGenerator
     }
 
     /**
-     * SKIPJACK
-     */
-    public static class Skipjack
-        extends JCEKeyGenerator
-    {
-        public Skipjack()
-        {
-            super("SKIPJACK", 80, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * Blowfish
-     */
-    public static class Blowfish
-        extends JCEKeyGenerator
-    {
-        public Blowfish()
-        {
-            super("Blowfish", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * Twofish
-     */
-    public static class Twofish
-        extends JCEKeyGenerator
-    {
-        public Twofish()
-        {
-            super("Twofish", 256, new CipherKeyGenerator());
-        }
-    }
-
-    /**
      * RC2
      */
     public static class RC2
@@ -202,54 +167,6 @@ public class JCEKeyGenerator
         public RC2()
         {
             super("RC2", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * RC4
-     */
-    public static class RC4
-        extends JCEKeyGenerator
-    {
-        public RC4()
-        {
-            super("RC4", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * RC5
-     */
-    public static class RC5
-        extends JCEKeyGenerator
-    {
-        public RC5()
-        {
-            super("RC5", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * RC5
-     */
-    public static class RC564
-        extends JCEKeyGenerator
-    {
-        public RC564()
-        {
-            super("RC5-64", 256, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * RC6
-     */
-    public static class RC6
-        extends JCEKeyGenerator
-    {
-        public RC6()
-        {
-            super("RC6", 256, new CipherKeyGenerator());
         }
     }
 
@@ -274,56 +191,6 @@ public class JCEKeyGenerator
         public Rijndael()
         {
             super("Rijndael", 192, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * Serpent
-     */
-    public static class Serpent
-        extends JCEKeyGenerator
-    {
-        public Serpent()
-        {
-            super("Serpent", 192, new CipherKeyGenerator());
-        }
-    }
-    
-
-
-    /**
-     * CAST6
-     */
-    public static class CAST6
-        extends JCEKeyGenerator
-    {
-        public CAST6()
-        {
-            super("CAST6", 256, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * TEA
-     */
-    public static class TEA
-        extends JCEKeyGenerator
-    {
-        public TEA()
-        {
-            super("TEA", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * XTEA
-     */
-    public static class XTEA
-        extends JCEKeyGenerator
-    {
-        public XTEA()
-        {
-            super("XTEA", 128, new CipherKeyGenerator());
         }
     }
 

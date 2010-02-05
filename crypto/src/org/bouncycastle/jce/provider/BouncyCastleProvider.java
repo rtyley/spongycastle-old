@@ -53,7 +53,8 @@ public final class BouncyCastleProvider extends Provider
     private static final String SYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.symmetric.";
     private static final String[] SYMMETRIC_CIPHERS =
     {
-        "AES", "Camellia", "CAST5", "Grainv1", "Grain128", "IDEA", "Noekeon", "SEED"
+        "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "Grainv1", "Grain128", "IDEA", "Noekeon", "RC5", "RC6",
+        "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "XTEA"
     };
 
     /*
@@ -256,42 +257,26 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher." + OIWObjectIdentifiers.desCBC, "org.bouncycastle.jce.provider.JCEBlockCipher$DESCBC");
         put("Cipher.DESEDEWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
         put("Cipher." + PKCSObjectIdentifiers.id_alg_CMS3DESwrap, "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
-        put("Cipher.SKIPJACK", "org.bouncycastle.jce.provider.JCEBlockCipher$Skipjack");
-        put("Cipher.BLOWFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Blowfish");
-        put("Cipher.1.3.6.1.4.1.3029.1.2", "org.bouncycastle.jce.provider.JCEBlockCipher$BlowfishCBC");
-        put("Cipher.TWOFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Twofish");
+
         put("Cipher.RC2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2");
         put("Cipher.RC2WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
         put("Cipher.1.2.840.113549.1.9.16.3.7", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
-        put("Cipher.ARC4", "org.bouncycastle.jce.provider.JCEStreamCipher$RC4");
-        put("Alg.Alias.Cipher.1.2.840.113549.3.4", "ARC4");
-        put("Alg.Alias.Cipher.ARCFOUR", "ARC4");
-        put("Alg.Alias.Cipher.RC4", "ARC4");
+
         put("Cipher.SALSA20", "org.bouncycastle.jce.provider.JCEStreamCipher$Salsa20");
         put("Cipher.HC128", "org.bouncycastle.jce.provider.JCEStreamCipher$HC128");
         put("Cipher.HC256", "org.bouncycastle.jce.provider.JCEStreamCipher$HC256");
         put("Cipher.VMPC", "org.bouncycastle.jce.provider.JCEStreamCipher$VMPC");
         put("Cipher.VMPC-KSA3", "org.bouncycastle.jce.provider.JCEStreamCipher$VMPCKSA3");
-        put("Cipher.RC5", "org.bouncycastle.jce.provider.JCEBlockCipher$RC5");
         put("Cipher.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2CBC");
-        put("Alg.Alias.Cipher.RC5-32", "RC5");
-        put("Cipher.RC5-64", "org.bouncycastle.jce.provider.JCEBlockCipher$RC564");
-        put("Cipher.RC6", "org.bouncycastle.jce.provider.JCEBlockCipher$RC6");
         put("Cipher.RIJNDAEL", "org.bouncycastle.jce.provider.JCEBlockCipher$Rijndael");
         put("Cipher.DESEDERFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211DESedeWrap");
-        put("Cipher.SERPENT", "org.bouncycastle.jce.provider.JCEBlockCipher$Serpent");
 
-
-        put("Cipher.CAST6", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST6");
         put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES",  "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         
         put("Cipher.GOST28147", "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147");
         put("Alg.Alias.Cipher.GOST", "GOST28147");
         put("Alg.Alias.Cipher.GOST-28147", "GOST28147");
         put("Cipher." + CryptoProObjectIdentifiers.gostR28147_cbc, "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147cbc");
-
-        put("Cipher.TEA", "org.bouncycastle.jce.provider.JCEBlockCipher$TEA");
-        put("Cipher.XTEA", "org.bouncycastle.jce.provider.JCEBlockCipher$XTEA");
 
         put("Cipher.RSA", "org.bouncycastle.jce.provider.JCERSACipher$NoPadding");
         put("Cipher.RSA/RAW", "org.bouncycastle.jce.provider.JCERSACipher$NoPadding");
@@ -389,31 +374,16 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.DESEDE", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
         put("KeyGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede3");
         put("KeyGenerator.DESEDEWRAP", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
-        put("KeyGenerator.SKIPJACK", "org.bouncycastle.jce.provider.JCEKeyGenerator$Skipjack");
-        put("KeyGenerator.BLOWFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Blowfish");
-        put("Alg.Alias.KeyGenerator.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
-        put("KeyGenerator.TWOFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Twofish");
         put("KeyGenerator.RC2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
         put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
-        put("KeyGenerator.RC4", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC4");
-        put("Alg.Alias.KeyGenerator.ARC4", "RC4");
-        put("Alg.Alias.KeyGenerator.1.2.840.113549.3.4", "RC4");
-        put("KeyGenerator.RC5", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC5");
-        put("Alg.Alias.KeyGenerator.RC5-32", "RC5");
-        put("KeyGenerator.RC5-64", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC564");
-        put("KeyGenerator.RC6", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC6");
+
         put("KeyGenerator.RIJNDAEL", "org.bouncycastle.jce.provider.JCEKeyGenerator$Rijndael");
 
-        put("KeyGenerator.SERPENT", "org.bouncycastle.jce.provider.JCEKeyGenerator$Serpent");
         put("KeyGenerator.SALSA20", "org.bouncycastle.jce.provider.JCEKeyGenerator$Salsa20");
         put("KeyGenerator.HC128", "org.bouncycastle.jce.provider.JCEKeyGenerator$HC128");
         put("KeyGenerator.HC256", "org.bouncycastle.jce.provider.JCEKeyGenerator$HC256");
         put("KeyGenerator.VMPC", "org.bouncycastle.jce.provider.JCEKeyGenerator$VMPC");
         put("KeyGenerator.VMPC-KSA3", "org.bouncycastle.jce.provider.JCEKeyGenerator$VMPCKSA3");
-
-        put("KeyGenerator.CAST6", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST6");
-        put("KeyGenerator.TEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$TEA");
-        put("KeyGenerator.XTEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$XTEA");
 
         put("KeyGenerator.GOST28147", "org.bouncycastle.jce.provider.JCEKeyGenerator$GOST28147");
         put("Alg.Alias.KeyGenerator.GOST", "GOST28147");
@@ -465,12 +435,7 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("AlgorithmParameters.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
         put("AlgorithmParameters.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
-        put("AlgorithmParameters.RC5", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("AlgorithmParameters.RC6", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("AlgorithmParameters.BLOWFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("Alg.Alias.AlgorithmParameters.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
-        put("AlgorithmParameters.TWOFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("AlgorithmParameters.SKIPJACK", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
+
         put("AlgorithmParameters.RIJNDAEL", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
 
         
@@ -584,11 +549,11 @@ public final class BouncyCastleProvider extends Provider
 
                 if (loader != null)
                 {
-                    clazz = loader.loadClass(packageName + names[i] + "Mappings");
+                    clazz = loader.loadClass(packageName + names[i] + "$Mappings");
                 }
                 else
                 {
-                    clazz = Class.forName(packageName + names[i] + "Mappings");
+                    clazz = Class.forName(packageName + names[i] + "$Mappings");
                 }
             }
             catch (ClassNotFoundException e)
@@ -605,7 +570,7 @@ public final class BouncyCastleProvider extends Provider
                 catch (Exception e)
                 {   // this should never ever happen!!
                     throw new InternalError("cannot create instance of "
-                        + packageName + names[i] + "Mappings : " + e);
+                        + packageName + names[i] + "$Mappings : " + e);
                 }
             }
         }
@@ -657,20 +622,11 @@ public final class BouncyCastleProvider extends Provider
         put("Mac.ISO9797ALG3WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3with7816d4");
         put("Alg.Alias.Mac.ISO9797ALG3MACWITHISO7816-4PADDING", "ISO9797ALG3WITHISO7816-4PADDING");
 
-        put("Mac.SKIPJACKMAC", "org.bouncycastle.jce.provider.JCEMac$Skipjack");
-        put("Alg.Alias.Mac.SKIPJACK", "SKIPJACKMAC");
-        put("Mac.SKIPJACKMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$SkipjackCFB8");
-        put("Alg.Alias.Mac.SKIPJACK/CFB8", "SKIPJACKMAC/CFB8");
-
         put("Mac.RC2MAC", "org.bouncycastle.jce.provider.JCEMac$RC2");
         put("Alg.Alias.Mac.RC2", "RC2MAC");
         put("Mac.RC2MAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$RC2CFB8");
         put("Alg.Alias.Mac.RC2/CFB8", "RC2MAC/CFB8");
 
-        put("Mac.RC5MAC", "org.bouncycastle.jce.provider.JCEMac$RC5");
-        put("Alg.Alias.Mac.RC5", "RC5MAC");
-        put("Mac.RC5MAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$RC5CFB8");
-        put("Alg.Alias.Mac.RC5/CFB8", "RC5MAC/CFB8");
 
         put("Mac.GOST28147MAC", "org.bouncycastle.jce.provider.JCEMac$GOST28147");
         put("Alg.Alias.Mac.GOST28147", "GOST28147MAC");

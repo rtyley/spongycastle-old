@@ -1,5 +1,15 @@
 package org.bouncycastle.jce.provider.symmetric;
 
+import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidParameterSpecException;
+import java.util.HashMap;
+
+import javax.crypto.spec.IvParameterSpec;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.misc.CAST5CBCParameters;
 import org.bouncycastle.crypto.CipherKeyGenerator;
@@ -9,14 +19,6 @@ import org.bouncycastle.jce.provider.JCEBlockCipher;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
 import org.bouncycastle.jce.provider.JDKAlgorithmParameters;
-
-import javax.crypto.spec.IvParameterSpec;
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
 
 public final class CAST5
 {
@@ -185,6 +187,25 @@ public final class CAST5
         protected String engineToString()
         {
             return "CAST5 Parameters";
+        }
+    }
+
+    public static class Mappings
+        extends HashMap
+    {
+        public Mappings()
+        {
+            put("AlgorithmParameters.CAST5", "org.bouncycastle.jce.provider.symmetric.CAST5$AlgParams");
+            put("Alg.Alias.AlgorithmParameters.1.2.840.113533.7.66.10", "CAST5");
+
+            put("AlgorithmParameterGenerator.CAST5", "org.bouncycastle.jce.provider.symmetric.CAST5$AlgParamGen");
+            put("Alg.Alias.AlgorithmParameterGenerator.1.2.840.113533.7.66.10", "CAST5");
+
+            put("Cipher.CAST5", "org.bouncycastle.jce.provider.symmetric.CAST5$ECB");
+            put("Cipher.1.2.840.113533.7.66.10", "org.bouncycastle.jce.provider.symmetric.CAST5$CBC");
+
+            put("KeyGenerator.CAST5", "org.bouncycastle.jce.provider.symmetric.CAST5$KeyGen");
+            put("Alg.Alias.KeyGenerator.1.2.840.113533.7.66.10", "CAST5");
         }
     }
 }

@@ -1,27 +1,29 @@
 package org.bouncycastle.jce.provider.symmetric;
 
-import org.bouncycastle.crypto.CipherKeyGenerator;
-import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
-import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
-import org.bouncycastle.crypto.engines.IDEAEngine;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.jce.provider.JCEBlockCipher;
-import org.bouncycastle.jce.provider.JCEKeyGenerator;
-import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
-import org.bouncycastle.jce.provider.JDKAlgorithmParameters;
-import org.bouncycastle.jce.provider.JCEMac;
-import org.bouncycastle.jce.provider.JCESecretKeyFactory;
-import org.bouncycastle.asn1.misc.IDEACBCPar;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-
-import javax.crypto.spec.IvParameterSpec;
+import java.io.IOException;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
-import java.io.IOException;
+import java.util.HashMap;
+
+import javax.crypto.spec.IvParameterSpec;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.misc.IDEACBCPar;
+import org.bouncycastle.crypto.CipherKeyGenerator;
+import org.bouncycastle.crypto.engines.IDEAEngine;
+import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
+import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.jce.provider.JCEBlockCipher;
+import org.bouncycastle.jce.provider.JCEKeyGenerator;
+import org.bouncycastle.jce.provider.JCEMac;
+import org.bouncycastle.jce.provider.JCESecretKeyFactory;
+import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
+import org.bouncycastle.jce.provider.JDKAlgorithmParameters;
 
 public final class IDEA
 {
@@ -219,6 +221,31 @@ public final class IDEA
         public CFB8Mac()
         {
             super(new CFBBlockCipherMac(new IDEAEngine()));
+        }
+    }
+
+    public static class Mappings
+        extends HashMap
+    {
+        public Mappings()
+        {
+            put("AlgorithmParameterGenerator.IDEA", "org.bouncycastle.jce.provider.symmetric.IDEA$AlgParamGen");
+            put("AlgorithmParameterGenerator.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.symmetric.IDEA$AlgParamGen");
+            put("AlgorithmParameters.IDEA", "org.bouncycastle.jce.provider.symmetric.IDEA$AlgParams");
+            put("AlgorithmParameters.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.symmetric.IDEA$AlgParams");
+            put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA", "PKCS12PBE");
+            put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA", "PKCS12PBE");
+            put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA-CBC", "PKCS12PBE");
+            put("Cipher.IDEA", "org.bouncycastle.jce.provider.symmetric.IDEA$ECB");
+            put("Cipher.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.symmetric.IDEA$CBC");
+            put("Cipher.PBEWITHSHAANDIDEA-CBC", "org.bouncycastle.jce.provider.symmetric.IDEA$PBEWithSHAAndIDEA");
+            put("KeyGenerator.IDEA", "org.bouncycastle.jce.provider.symmetric.IDEA$KeyGen");
+            put("KeyGenerator.1.3.6.1.4.1.188.7.1.1.2", "org.bouncycastle.jce.provider.symmetric.IDEA$KeyGen");
+            put("SecretKeyFactory.PBEWITHSHAANDIDEA-CBC", "org.bouncycastle.jce.provider.symmetric.IDEA$PBEWithSHAAndIDEAKeyGen");
+            put("Mac.IDEAMAC", "org.bouncycastle.jce.provider.symmetric.IDEA$Mac");
+            put("Alg.Alias.Mac.IDEA", "IDEAMAC");
+            put("Mac.IDEAMAC/CFB8", "org.bouncycastle.jce.provider.symmetric.IDEA$CFB8Mac");
+            put("Alg.Alias.Mac.IDEA/CFB8", "IDEAMAC/CFB8");
         }
     }
 }

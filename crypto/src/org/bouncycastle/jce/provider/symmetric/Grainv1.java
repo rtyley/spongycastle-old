@@ -1,5 +1,7 @@
 package org.bouncycastle.jce.provider.symmetric;
 
+import java.util.HashMap;
+
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.Grainv1Engine;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
@@ -26,6 +28,16 @@ public final class Grainv1
         public KeyGen()
         {
             super("Grainv1", 80, new CipherKeyGenerator());
+        }
+    }
+
+    public static class Mappings
+        extends HashMap
+    {
+        public Mappings()
+        {
+            put("Cipher.Grainv1", "org.bouncycastle.jce.provider.symmetric.Grainv1$Base");
+            put("KeyGenerator.Grainv1", "org.bouncycastle.jce.provider.symmetric.Grainv1$KeyGen");
         }
     }
 }
