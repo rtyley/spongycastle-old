@@ -115,40 +115,35 @@ public class KeyTransRecipientInformation
         AlgorithmIdentifier aid = getActiveAlgID();
         String alg = CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(aid.getObjectId().getId());
 
-        Key sKey;
 
         try
         {
+            Key sKey = null;
+
             Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(keyExchangeAlgorithm, prov);
 
             try
             {
                 keyCipher.init(Cipher.UNWRAP_MODE, receiverPrivateKey);
-
                 sKey = keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
             }
-            catch (GeneralSecurityException e)   // some providers do not support UNWRAP
+            catch (GeneralSecurityException e)
             {
-                keyCipher.init(Cipher.DECRYPT_MODE, receiverPrivateKey);
-
-                sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
-            catch (IllegalStateException e)   // some providers do not support UNWRAP
+            catch (IllegalStateException e)
             {
-                keyCipher.init(Cipher.DECRYPT_MODE, receiverPrivateKey);
-
-                sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
-            catch (UnsupportedOperationException e)   // some providers do not support UNWRAP
+            catch (UnsupportedOperationException e)
             {
-                keyCipher.init(Cipher.DECRYPT_MODE, receiverPrivateKey);
-
-                sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
-            catch (ProviderException e)   // some providers do not support UNWRAP
+            catch (ProviderException e)   
+            {
+            }
+
+            // some providers do not support UNWRAP
+            if (sKey == null)
             {
                 keyCipher.init(Cipher.DECRYPT_MODE, receiverPrivateKey);
-
                 sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
             }
 
