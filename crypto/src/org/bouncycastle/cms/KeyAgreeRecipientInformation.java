@@ -1,5 +1,25 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.List;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -19,25 +39,6 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
 import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
 /**
  * the RecipientInfo class for a recipient who has been sent a message
  * encrypted using key agreement.
@@ -48,31 +49,52 @@ public class KeyAgreeRecipientInformation
     private KeyAgreeRecipientInfo info;
     private ASN1OctetString       encryptedKey;
 
-    /**
-     * @deprecated
-     */
-    public KeyAgreeRecipientInformation(
-        KeyAgreeRecipientInfo info,
-        AlgorithmIdentifier   encAlg,
+    static void readRecipientInfo(List infos, KeyAgreeRecipientInfo info,
+        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg,
         InputStream data)
     {
-        this(info, encAlg, null, null, data);
-    }
+        try
+        {
+            ASN1Sequence s = info.getRecipientEncryptedKeys();
 
-    /**
-     * @deprecated
-     */
-    public KeyAgreeRecipientInformation(
-        KeyAgreeRecipientInfo info,
-        AlgorithmIdentifier   encAlg,
-        AlgorithmIdentifier   macAlg,
-        InputStream data)
-    {
-        this(info, encAlg, macAlg, null, data);
+            for (int i = 0; i < s.size(); ++i)
+            {
+                RecipientEncryptedKey id = RecipientEncryptedKey.getInstance(
+                    s.getObjectAt(i));
+
+                RecipientId rid = new RecipientId();
+
+                KeyAgreeRecipientIdentifier karid = id.getIdentifier();
+                IssuerAndSerialNumber iAndSN = karid.getIssuerAndSerialNumber();
+
+                if (iAndSN != null)
+                {
+                    rid.setIssuer(iAndSN.getName().getEncoded());
+                    rid.setSerialNumber(iAndSN.getSerialNumber().getValue());
+                }
+                else
+                {
+                    RecipientKeyIdentifier rKeyID = karid.getRKeyID();
+
+                    // Note: 'date' and 'other' fields of RecipientKeyIdentifier appear to be only informational 
+
+                    rid.setSubjectKeyIdentifier(rKeyID.getSubjectKeyIdentifier().getOctets());
+                }
+
+                infos.add(new KeyAgreeRecipientInformation(info, rid, id.getEncryptedKey(),
+                    encAlg, macAlg, authEncAlg, data));
+            }
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("invalid rid in KeyAgreeRecipientInformation");
+        }
     }
 
     KeyAgreeRecipientInformation(
         KeyAgreeRecipientInfo info,
+        RecipientId           rid,
+        ASN1OctetString       encryptedKey,
         AlgorithmIdentifier   encAlg,
         AlgorithmIdentifier   macAlg,
         AlgorithmIdentifier   authEncAlg,
@@ -81,39 +103,8 @@ public class KeyAgreeRecipientInformation
         super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), data);
 
         this.info = info;
-        this.rid = new RecipientId();
-
-        try
-        {
-            ASN1Sequence s = this.info.getRecipientEncryptedKeys();
-
-            // TODO Handle the case of more than one encrypted key
-            RecipientEncryptedKey id = RecipientEncryptedKey.getInstance(
-                    s.getObjectAt(0));
-
-            KeyAgreeRecipientIdentifier karid = id.getIdentifier();
-
-            IssuerAndSerialNumber iAndSN = karid.getIssuerAndSerialNumber();
-            if (iAndSN != null)
-            {
-                rid.setIssuer(iAndSN.getName().getEncoded());
-                rid.setSerialNumber(iAndSN.getSerialNumber().getValue());
-            }
-            else
-            {
-                RecipientKeyIdentifier rKeyID = karid.getRKeyID();
-
-                // Note: 'date' and 'other' fields of RecipientKeyIdentifier appear to be only informational 
-
-                rid.setSubjectKeyIdentifier(rKeyID.getSubjectKeyIdentifier().getOctets());
-            }
-
-            encryptedKey = id.getEncryptedKey();
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("invalid rid in KeyAgreeRecipientInformation");
-        }
+        this.rid = rid;
+        this.encryptedKey = encryptedKey;
     }
 
     private PublicKey getSenderPublicKey(Key receiverPrivateKey,

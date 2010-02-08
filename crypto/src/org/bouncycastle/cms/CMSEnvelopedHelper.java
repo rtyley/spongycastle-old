@@ -412,8 +412,8 @@ class CMSEnvelopedHelper
         }
         else if (recipInfo instanceof KeyAgreeRecipientInfo)
         {
-            infos.add(new KeyAgreeRecipientInformation(
-                (KeyAgreeRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
+            KeyAgreeRecipientInformation.readRecipientInfo(infos,
+                (KeyAgreeRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream);
         }
         else if (recipInfo instanceof PasswordRecipientInfo)
         {

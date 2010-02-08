@@ -1,15 +1,29 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECParameterSpec;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -19,20 +33,22 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientIdentifier;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
 import org.bouncycastle.asn1.cms.OriginatorIdentifierOrKey;
+import org.bouncycastle.asn1.cms.OriginatorPublicKey;
 import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
 import org.bouncycastle.asn1.cms.RecipientInfo;
+import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
+import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 
 class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
 {
     private DERObjectIdentifier algorithmOID;
-    private OriginatorIdentifierOrKey originator;
-    // TODO Pass recipId, keyEncAlg instead?
-    private TBSCertificateStructure recipientTBSCert;
-    private ASN1OctetString ukm;
+    private KeyPair senderKeyPair;
+    private ArrayList recipientCerts;
     private DERObjectIdentifier wrapAlgorithmOID;
-    private SecretKey wrapKey;
 
     KeyAgreeRecipientInfoGenerator()
     {
@@ -43,27 +59,14 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
         this.algorithmOID = algorithmOID;
     }
 
-    void setOriginator(OriginatorIdentifierOrKey originator)
+    void setRecipientCerts(Collection recipientCerts)
     {
-        this.originator = originator;
+        this.recipientCerts = new ArrayList(recipientCerts);
     }
 
-    void setRecipientCert(X509Certificate recipientCert)
+    void setSenderKeyPair(KeyPair senderKeyPair)
     {
-        try
-        {
-            this.recipientTBSCert = CMSUtils.getTBSCertificateStructure(recipientCert);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new IllegalArgumentException(
-                    "can't extract TBS structure from this cert");
-        }
-    }
-
-    void setUKM(ASN1OctetString ukm)
-    {
-        this.ukm = ukm;
+        this.senderKeyPair = senderKeyPair;
     }
 
     void setWrapAlgorithmOID(DERObjectIdentifier wrapAlgorithmOID)
@@ -71,36 +74,125 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
         this.wrapAlgorithmOID = wrapAlgorithmOID;
     }
 
-    void setWrapKey(SecretKey wrapKey)
-    {
-        this.wrapKey = wrapKey;
-    }
-
     public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
             Provider prov) throws GeneralSecurityException
     {
+        String agreementAlgorithm = algorithmOID.getId();
+        String cekWrapAlgorithm = wrapAlgorithmOID.getId();
+
+        PublicKey senderPublicKey = senderKeyPair.getPublic();
+        PrivateKey senderPrivateKey = senderKeyPair.getPrivate();
+
+
+        OriginatorIdentifierOrKey originator;
+        try
+        {
+            originator = new OriginatorIdentifierOrKey(
+                    createOriginatorPublicKey(senderPublicKey));
+        }
+        catch (IOException e)
+        {
+            throw new InvalidKeyException("cannot extract originator public key: " + e);
+        }
+
+
+        ASN1OctetString ukm = null;
+        if (agreementAlgorithm.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
+        {
+            try
+            {
+                ECParameterSpec ecParamSpec = ((ECPublicKey)senderPublicKey).getParams();
+
+                KeyPairGenerator ephemKPG = KeyPairGenerator.getInstance(agreementAlgorithm, prov);
+                ephemKPG.initialize(ecParamSpec, random);
+
+                KeyPair ephemKP = ephemKPG.generateKeyPair();
+
+                ukm = new DEROctetString(
+                    new MQVuserKeyingMaterial(
+                        createOriginatorPublicKey(ephemKP.getPublic()), null));
+
+                senderPrivateKey = new MQVPrivateKeySpec(
+                        senderPrivateKey, ephemKP.getPrivate(), ephemKP.getPublic());
+            }
+            catch (InvalidAlgorithmParameterException e)
+            {
+                throw new InvalidKeyException("cannot determine MQV ephemeral key pair parameters from public key: " + e);
+            }
+            catch (IOException e)
+            {
+                throw new InvalidKeyException("cannot extract MQV ephemeral public key: " + e);
+            }
+        }
+
+
         ASN1EncodableVector params = new ASN1EncodableVector();
         params.add(wrapAlgorithmOID);
         params.add(DERNull.INSTANCE);
         AlgorithmIdentifier keyEncAlg = new AlgorithmIdentifier(algorithmOID,
                 new DERSequence(params));
 
-        IssuerAndSerialNumber issuerSerial = new IssuerAndSerialNumber(
-                recipientTBSCert.getIssuer(), recipientTBSCert.getSerialNumber()
-                        .getValue());
 
-        Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
-                wrapAlgorithmOID.getId(), prov);
-        // TODO Should we try alternate ways of wrapping?
-        //   (see KeyTransRecipientInfoGenerator.generate)
-        keyCipher.init(Cipher.WRAP_MODE, wrapKey, random);
-        ASN1OctetString encKey = new DEROctetString(keyCipher.wrap(contentEncryptionKey));
+        ASN1EncodableVector recipientEncryptedKeys = new ASN1EncodableVector();
+        Iterator it = recipientCerts.iterator();
+        while (it.hasNext())
+        {
+            X509Certificate recipientCert = (X509Certificate)it.next();
 
-        RecipientEncryptedKey rKey = new RecipientEncryptedKey(
-                new KeyAgreeRecipientIdentifier(issuerSerial),
-                encKey);
+            TBSCertificateStructure tbsCert;
+            try
+            {
+                tbsCert = CMSUtils.getTBSCertificateStructure(recipientCert);
+            }
+            catch (CertificateEncodingException e)
+            {
+                throw new IllegalArgumentException(
+                        "can't extract TBS structure from certificate");
+            }
+
+            // TODO Should there be a SubjectKeyIdentifier-based alternative?
+            IssuerAndSerialNumber issuerSerial = new IssuerAndSerialNumber(
+                    tbsCert.getIssuer(), tbsCert.getSerialNumber().getValue());
+            KeyAgreeRecipientIdentifier karid = new KeyAgreeRecipientIdentifier(issuerSerial);
+
+            PublicKey recipientPublicKey = recipientCert.getPublicKey();
+
+            if (agreementAlgorithm.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
+            {
+                recipientPublicKey = new MQVPublicKeySpec(recipientPublicKey, recipientPublicKey);
+            }
+
+            // Use key agreement to choose a wrap key for this recipient
+            KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, prov);
+            agreement.init(senderPrivateKey, random);
+            agreement.doPhase(recipientPublicKey, true);
+            SecretKey wrapKey = agreement.generateSecret(cekWrapAlgorithm);
+
+            // Wrap the content encryption key with the agreement key
+            Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
+                    cekWrapAlgorithm, prov);
+            // TODO Should we try alternate ways of wrapping?
+            //   (see KeyTransRecipientInfoGenerator.generate)
+            keyCipher.init(Cipher.WRAP_MODE, wrapKey, random);
+            byte[] encKeyBytes = keyCipher.wrap(contentEncryptionKey);
+
+            ASN1OctetString encKey = new DEROctetString(encKeyBytes);
+
+            recipientEncryptedKeys.add(new RecipientEncryptedKey(karid, encKey));
+        }
 
         return new RecipientInfo(new KeyAgreeRecipientInfo(originator, ukm,
-                keyEncAlg, new DERSequence(rKey)));
+                keyEncAlg, new DERSequence(recipientEncryptedKeys)));
+    }
+
+    // TODO Make this a public helper?
+    private static OriginatorPublicKey createOriginatorPublicKey(PublicKey publicKey)
+        throws IOException
+    {
+        SubjectPublicKeyInfo spki = SubjectPublicKeyInfo.getInstance(
+            ASN1Object.fromByteArray(publicKey.getEncoded()));
+        return new OriginatorPublicKey(
+            new AlgorithmIdentifier(spki.getAlgorithmId().getObjectId(), DERNull.INSTANCE),
+            spki.getPublicKeyData().getBytes());
     }
 }
