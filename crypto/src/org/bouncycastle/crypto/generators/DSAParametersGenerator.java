@@ -178,7 +178,7 @@ public class DSAParametersGenerator
         int seedlen = N;
         byte[] seed = new byte[seedlen / 8];
 
-// 3. n = ⎡L ⁄ outlen⎤ – 1.
+// 3. n = ceiling(L ⁄ outlen) – 1.
         int n = (L - 1) / outlen;
 
 // 4. b = L – 1 – (n ∗ outlen).
@@ -288,7 +288,7 @@ public class DSAParametersGenerator
 //        BigInteger e = p.subtract(ONE).divide(q);
 //        byte[] ggen = Hex.decode("6767656E");
 //
-//        // 7. U = domain_parameter_seed || “ggen” || index || count.
+//        // 7. U = domain_parameter_seed || "ggen" || index || count.
 //        byte[] U = new byte[seed.length + ggen.length + 1 + 2];
 //        System.arraycopy(seed, 0, U, 0, seed.length);
 //        System.arraycopy(ggen, 0, U, seed.length, ggen.length);
