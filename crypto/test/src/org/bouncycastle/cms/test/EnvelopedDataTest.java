@@ -37,6 +37,7 @@ import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -53,12 +54,15 @@ public class EnvelopedDataTest
     private static X509Certificate _origCert;
 
     private static String          _reciDN;
+    private static String          _reciDN2;
     private static KeyPair         _reciKP;
     private static X509Certificate _reciCert;
 
     private static KeyPair         _origEcKP;
     private static KeyPair         _reciEcKP;
     private static X509Certificate _reciEcCert;
+    private static KeyPair         _reciEcKP2;
+    private static X509Certificate _reciEcCert2;
 
     private static boolean         _initialised = false;
 
@@ -169,12 +173,15 @@ public class EnvelopedDataTest
             _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
 
             _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
+            _reciDN2  = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
             _reciKP   = CMSTestUtil.makeKeyPair();
             _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
 
             _origEcKP = CMSTestUtil.makeEcDsaKeyPair();
             _reciEcKP = CMSTestUtil.makeEcDsaKeyPair();
             _reciEcCert = CMSTestUtil.makeCertificate(_reciEcKP, _reciDN, _signKP, _signDN);
+            _reciEcKP2 = CMSTestUtil.makeEcDsaKeyPair();
+            _reciEcCert2 = CMSTestUtil.makeCertificate(_reciEcKP2, _reciDN2, _signKP, _signDN);
         }
     }
     
@@ -632,31 +639,18 @@ public class EnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
+        edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECDH_SHA1KDF,
+            _origEcKP.getPrivate(), _origEcKP.getPublic(),
+            _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
 
         CMSEnvelopedData ed = edGen.generate(
-                              new CMSProcessableByteArray(data),
-                              CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+            new CMSProcessableByteArray(data),
+            CMSEnvelopedDataGenerator.AES128_CBC, "BC");
 
-        RecipientInformationStore  recipients = ed.getRecipientInfos();
+        RecipientInformationStore recipients = ed.getRecipientInfos();
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
 
-        assertEquals(ed.getEncryptionAlgOID(),
-                                   CMSEnvelopedDataGenerator.AES128_CBC);
-
-        Collection  c = recipients.getRecipients();
-        Iterator    it = c.iterator();
-
-        if (it.hasNext())
-        {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
-
-            byte[] recData = recipient.getContent(_reciEcKP.getPrivate(), "BC");
-            assertEquals(true, Arrays.equals(data, recData));
-        }
-        else
-        {
-            fail("no recipient found");
-        }
+        confirmDataReceived(recipients, data, _reciEcKP.getPrivate(), "BC");
     }
 
     public void testECMQVKeyAgree()
@@ -666,26 +660,58 @@ public class EnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECMQV_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
+        edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECMQV_SHA1KDF,
+            _origEcKP.getPrivate(), _origEcKP.getPublic(),
+            _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
 
         CMSEnvelopedData ed = edGen.generate(
-                              new CMSProcessableByteArray(data),
-                              CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+            new CMSProcessableByteArray(data),
+            CMSEnvelopedDataGenerator.AES128_CBC, "BC");
 
-        RecipientInformationStore  recipients = ed.getRecipientInfos();
+        RecipientInformationStore recipients = ed.getRecipientInfos();
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
 
-        assertEquals(ed.getEncryptionAlgOID(),
-                                   CMSEnvelopedDataGenerator.AES128_CBC);
+        confirmDataReceived(recipients, data, _reciEcKP.getPrivate(), "BC");
+    }
 
-        Collection  c = recipients.getRecipients();
-        Iterator    it = c.iterator();
+    public void testECMQVKeyAgreeMultiple()
+        throws Exception
+    {
+        byte[] data = Hex.decode("504b492d4320434d5320456e76656c6f706564446174612053616d706c65");
 
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        ArrayList recipientCerts = new ArrayList();
+        recipientCerts.add(_reciEcCert);
+        recipientCerts.add(_reciEcCert2);
+
+        edGen.addKeyAgreementRecipients(CMSEnvelopedDataGenerator.ECMQV_SHA1KDF,
+            _origEcKP.getPrivate(), _origEcKP.getPublic(),
+            recipientCerts, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
+
+        CMSEnvelopedData ed = edGen.generate(
+            new CMSProcessableByteArray(data),
+            CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+
+        RecipientInformationStore recipients = ed.getRecipientInfos();
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
+
+        confirmDataReceived(recipients, data, _reciEcKP.getPrivate(), "BC");
+        confirmDataReceived(recipients, data, _reciEcKP2.getPrivate(), "BC");
+    }
+
+    private void confirmDataReceived(RecipientInformationStore recipients,
+        byte[] expectedData, PrivateKey reciPrivKey, String provider)
+        throws CMSException, NoSuchProviderException
+    {
+        Collection c = recipients.getRecipients();
+        Iterator it = c.iterator();
         if (it.hasNext())
         {
-            RecipientInformation   recipient = (RecipientInformation)it.next();
+            RecipientInformation recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(_reciEcKP.getPrivate(), "BC");
-            assertEquals(true, Arrays.equals(data, recData));
+            byte[] recData = recipient.getContent(reciPrivKey, provider);
+            assertEquals(true, Arrays.equals(expectedData, recData));
         }
         else
         {
