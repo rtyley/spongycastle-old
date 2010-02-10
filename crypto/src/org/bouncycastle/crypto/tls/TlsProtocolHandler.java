@@ -194,6 +194,7 @@ public class TlsProtocolHandler
 
     private CertificateVerifyer verifyer = null;
     private Certificate clientCert = null;
+    private TlsSigner clientSigner = null;
 
     public TlsProtocolHandler(InputStream is, OutputStream os)
     {
@@ -907,12 +908,14 @@ public class TlsProtocolHandler
         }
     }
 
-    private void processDHEKeyExchange(ByteArrayInputStream is, Signer signer)
+    private void processDHEKeyExchange(ByteArrayInputStream is, TlsSigner tlsSigner)
         throws IOException
     {
         InputStream sigIn = is;
-        if (signer != null)
+        Signer signer = null;
+        if (tlsSigner != null)
         {
+            signer = tlsSigner.createSigner();
             signer.init(false, this.serverPublicKey);
             signer.update(this.clientRandom, 0, this.clientRandom.length);
             signer.update(this.serverRandom, 0, this.serverRandom.length);
@@ -989,12 +992,14 @@ public class TlsProtocolHandler
          this.pms = BigIntegers.asUnsignedByteArray(agreement);
     }
 
-    private void processSRPKeyExchange(ByteArrayInputStream is, Signer signer)
+    private void processSRPKeyExchange(ByteArrayInputStream is, TlsSigner tlsSigner)
         throws IOException
     {
         InputStream sigIn = is;
-        if (signer != null)
+        Signer signer = null;
+        if (tlsSigner != null)
         {
+            signer = tlsSigner.createSigner();
             signer.init(false, this.serverPublicKey);
             signer.update(this.clientRandom, 0, this.clientRandom.length);
             signer.update(this.serverRandom, 0, this.serverRandom.length);
@@ -1098,7 +1103,9 @@ public class TlsProtocolHandler
 
         try
         {
-            byte[] data = rs.clientSigner.generateSignature();
+            byte[] md5andsha1 = new byte[16 + 20];
+            rs.hash3.doFinal(md5andsha1, 0);
+            byte[] data = clientSigner.calculateRawSignature(clientPrivateKey, md5andsha1);
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             TlsUtils.writeUint8(HP_CERTIFICATE_VERIFY, bos);
@@ -1163,18 +1170,16 @@ public class TlsProtocolHandler
             }
             else if (clientPrivateKey instanceof RSAKeyParameters)
             {
-                rs.clientSigner = new TlsRSASigner();
+                clientSigner = new TlsRSASigner();
             }
             else if (clientPrivateKey instanceof DSAPrivateKeyParameters)
             {
-                rs.clientSigner = new TlsDSSSigner();
+                clientSigner = new TlsDSSSigner();
             }
             else
             {
                 throw new IllegalArgumentException("'clientPrivateKey' type not supported");
             }
-
-            rs.clientSigner.init(true, clientPrivateKey);
         }
 
         this.verifyer = verifyer;

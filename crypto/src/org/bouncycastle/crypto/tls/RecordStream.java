@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.bouncycastle.crypto.Signer;
-
 /**
  * An implementation of the TLS 1.0 record layer.
  */
@@ -16,10 +14,9 @@ class RecordStream
     private OutputStream os;
     protected CombinedHash hash1;
     protected CombinedHash hash2;
+    protected CombinedHash hash3;
     protected TlsCipherSuite readSuite = null;
     protected TlsCipherSuite writeSuite = null;
-
-    Signer clientSigner = null;
 
     RecordStream(TlsProtocolHandler handler, InputStream is, OutputStream os)
     {
@@ -28,6 +25,7 @@ class RecordStream
         this.os = os;
         this.hash1 = new CombinedHash();
         this.hash2 = new CombinedHash();
+        this.hash3 = new CombinedHash();
         this.readSuite = new TlsNullCipherSuite();
         this.writeSuite = this.readSuite;
     }
@@ -70,11 +68,7 @@ class RecordStream
     {
         hash1.update(message, offset, len);
         hash2.update(message, offset, len);
-
-        if (clientSigner != null)
-        {
-            clientSigner.update(message, offset, len);
-        }
+        hash3.update(message, offset, len);
     }
 
     protected void close() throws IOException
