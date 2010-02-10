@@ -206,16 +206,51 @@ public class CMSEnvelopedGenerator
         Provider         provider)
         throws NoSuchAlgorithmException, InvalidKeyException
     {
-        addKeyAgreementRecipient(agreementAlgorithm, senderPrivateKey, senderPublicKey,
+        addKeyAgreementRecipients(agreementAlgorithm, senderPrivateKey, senderPublicKey,
             Collections.singletonList(recipientCert), cekWrapAlgorithm, provider);
     }
 
-    // TODO Make public and provide a version that takes 'String provider'
-    private void addKeyAgreementRecipient(
+    /**
+     * Add multiple key agreement based recipients (sharing a single KeyAgreeRecipientInfo structure).
+     *
+     * @param agreementAlgorithm key agreement algorithm to use.
+     * @param senderPrivateKey private key to initialise sender side of agreement with.
+     * @param senderPublicKey sender public key to include with message.
+     * @param recipientCerts recipients' public key certificates.
+     * @param cekWrapAlgorithm OID for key wrapping algorithm to use.
+     * @param provider provider to use for the agreement calculation.
+     * @exception NoSuchAlgorithmException if the algorithm requested cannot be found
+     * @exception InvalidKeyException if the keys are inappropriate for the algorithm specified
+     */
+    public void addKeyAgreementRecipients(
         String           agreementAlgorithm,
         PrivateKey       senderPrivateKey,
         PublicKey        senderPublicKey,
-        Collection       recipientCerts, // TODO Need more abstract type that returns public key and KeyAgreementRecipientIdentifier
+        Collection       recipientCerts,
+        String           cekWrapAlgorithm,
+        String           provider)
+        throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException
+    {
+        addKeyAgreementRecipients(agreementAlgorithm, senderPrivateKey, senderPublicKey, recipientCerts, cekWrapAlgorithm, CMSUtils.getProvider(provider));
+    }
+
+    /**
+     * Add multiple key agreement based recipients (sharing a single KeyAgreeRecipientInfo structure).
+     *
+     * @param agreementAlgorithm key agreement algorithm to use.
+     * @param senderPrivateKey private key to initialise sender side of agreement with.
+     * @param senderPublicKey sender public key to include with message.
+     * @param recipientCerts recipients' public key certificates.
+     * @param cekWrapAlgorithm OID for key wrapping algorithm to use.
+     * @param provider provider to use for the agreement calculation.
+     * @exception NoSuchAlgorithmException if the algorithm requested cannot be found
+     * @exception InvalidKeyException if the keys are inappropriate for the algorithm specified
+     */
+    public void addKeyAgreementRecipients(
+        String           agreementAlgorithm,
+        PrivateKey       senderPrivateKey,
+        PublicKey        senderPublicKey,
+        Collection       recipientCerts,
         String           cekWrapAlgorithm,
         Provider         provider)
         throws NoSuchAlgorithmException, InvalidKeyException
