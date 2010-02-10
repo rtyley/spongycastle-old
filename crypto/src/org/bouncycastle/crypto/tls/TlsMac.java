@@ -53,26 +53,27 @@ public class TlsMac
      */
     protected byte[] calculateMac(short type, byte[] message, int offset, int len)
     {
+        ByteArrayOutputStream bosMac = new ByteArrayOutputStream(13);
         try
         {
-            ByteArrayOutputStream bosMac = new ByteArrayOutputStream();
             TlsUtils.writeUint64(seqNo++, bosMac);
             TlsUtils.writeUint8(type, bosMac);
             TlsUtils.writeVersion(bosMac);
             TlsUtils.writeUint16(len, bosMac);
-            bosMac.write(message, offset, len);
-            byte[] macData = bosMac.toByteArray();
-            mac.update(macData, 0, macData.length);
-            byte[] result = new byte[mac.getMacSize()];
-            mac.doFinal(result, 0);
-            mac.reset();
-            return result;
         }
         catch (IOException e)
         {
             // This should never happen
             throw new IllegalStateException("Internal error during mac calculation");
         }
+
+        byte[] macHeader = bosMac.toByteArray();
+        mac.update(macHeader, 0, macHeader.length);
+        mac.update(message, offset, len);
+
+        byte[] result = new byte[mac.getMacSize()];
+        mac.doFinal(result, 0);
+        return result;
     }
 
 }
