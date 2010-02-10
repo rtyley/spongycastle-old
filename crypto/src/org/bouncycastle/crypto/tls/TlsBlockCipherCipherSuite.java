@@ -15,26 +15,22 @@ import java.security.SecureRandom;
  */
 class TlsBlockCipherCipherSuite extends TlsCipherSuite
 {
+    private TlsProtocolHandler handler;
 
     private BlockCipher encryptCipher;
-
     private BlockCipher decryptCipher;
 
     private Digest writeDigest;
-
     private Digest readDigest;
 
-    private int cipherKeySize;
-
-    private short keyExchange;
-
     private TlsMac writeMac;
-
     private TlsMac readMac;
 
-    protected TlsBlockCipherCipherSuite(BlockCipher encrypt,
-                                        BlockCipher decrypt, Digest writeDigest, Digest readDigest,
-                                        int cipherKeySize, short keyExchange)
+    private int cipherKeySize;
+    private short keyExchange;
+
+    protected TlsBlockCipherCipherSuite(BlockCipher encrypt, BlockCipher decrypt,
+        Digest writeDigest, Digest readDigest, int cipherKeySize, short keyExchange)
     {
         this.encryptCipher = encrypt;
         this.decryptCipher = decrypt;
@@ -44,10 +40,12 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         this.keyExchange = keyExchange;
     }
 
-    protected void init(byte[] ms, byte[] cr, byte[] sr)
+    protected void init(TlsProtocolHandler handler, byte[] ms, byte[] cr, byte[] sr)
     {
-        int prfSize = (2 * cipherKeySize) + (2 * writeDigest.getDigestSize())
-            + (2 * encryptCipher.getBlockSize());
+        this.handler = handler;
+
+        int prfSize = (2 * cipherKeySize) + writeDigest.getDigestSize() + readDigest.getDigestSize()
+            + encryptCipher.getBlockSize() + decryptCipher.getBlockSize();
         byte[] key_block = new byte[prfSize];
         byte[] random = new byte[cr.length + sr.length];
         System.arraycopy(cr, 0, random, sr.length, cr.length);
@@ -69,11 +67,11 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
             offset + (cipherKeySize * 2));
         offset += cipherKeySize;
         this.initCipher(false, decryptCipher, key_block, cipherKeySize, offset,
-            offset + cipherKeySize + decryptCipher.getBlockSize());
+            offset + cipherKeySize + encryptCipher.getBlockSize());
     }
 
     private void initCipher(boolean forEncryption, BlockCipher cipher,
-                            byte[] key_block, int key_size, int key_offset, int iv_offset)
+        byte[] key_block, int key_size, int key_offset, int iv_offset)
     {
         KeyParameter key_parameter = new KeyParameter(key_block, key_offset,
             key_size);
@@ -82,8 +80,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         cipher.init(forEncryption, parameters_with_iv);
     }
 
-    protected byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len,
-        TlsProtocolHandler handler)
+    protected byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len)
     {
         int blocksize = encryptCipher.getBlockSize();
 
@@ -136,8 +133,8 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         return n;
     }
 
-    protected byte[] decodeCiphertext(short type, byte[] ciphertext,
-                                      int offset, int len, TlsProtocolHandler handler) throws IOException
+    protected byte[] decodeCiphertext(short type, byte[] ciphertext, int offset, int len)
+        throws IOException
     {
         // TODO TLS 1.1 (RFC 4346) introduces an explicit IV
 

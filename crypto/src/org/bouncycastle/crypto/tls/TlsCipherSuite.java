@@ -21,11 +21,11 @@ abstract class TlsCipherSuite
     protected static final short KE_SRP_RSA = 11;
     protected static final short KE_SRP_DSS = 12;
 
-    protected abstract void init(byte[] ms, byte[] cr, byte[] sr);
+    protected abstract void init(TlsProtocolHandler handler, byte[] ms, byte[] cr, byte[] sr);
 
-    protected abstract byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len, TlsProtocolHandler handler) throws IOException;
+    protected abstract byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len) throws IOException;
 
-    protected abstract byte[] decodeCiphertext(short type, byte[] plaintext, int offset, int len, TlsProtocolHandler handler) throws IOException;
+    protected abstract byte[] decodeCiphertext(short type, byte[] plaintext, int offset, int len) throws IOException;
 
     protected abstract short getKeyExchangeAlgorithm();
 
