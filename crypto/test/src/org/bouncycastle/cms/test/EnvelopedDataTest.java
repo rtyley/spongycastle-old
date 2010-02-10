@@ -173,7 +173,7 @@ public class EnvelopedDataTest
             _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _signKP, _signDN);
 
             _reciDN   = "CN=Doug, OU=Sales, O=Bouncy Castle, C=AU";
-            _reciDN2  = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
+            _reciDN2  = "CN=Fred, OU=Sales, O=Bouncy Castle, C=AU";
             _reciKP   = CMSTestUtil.makeKeyPair();
             _reciCert = CMSTestUtil.makeCertificate(_reciKP, _reciDN, _signKP, _signDN);
 
