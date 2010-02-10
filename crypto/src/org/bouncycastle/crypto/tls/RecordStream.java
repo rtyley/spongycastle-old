@@ -45,7 +45,7 @@ class RecordStream
     {
         byte[] buf = new byte[len];
         TlsUtils.readFully(buf, is);
-        byte[] result = readSuite.decodeCiphertext(type, buf, 0, buf.length, handler);
+        byte[] result = readSuite.decodeCiphertext(type, buf, 0, buf.length);
         return result;
     }
 
@@ -55,7 +55,7 @@ class RecordStream
         {
             updateHandshakeData(message, offset, len);
         }
-        byte[] ciphertext = writeSuite.encodePlaintext(type, message, offset, len, handler);
+        byte[] ciphertext = writeSuite.encodePlaintext(type, message, offset, len);
         byte[] writeMessage = new byte[ciphertext.length + 5];
         TlsUtils.writeUint8(type, writeMessage, 0);
         TlsUtils.writeUint8((short)3, writeMessage, 1);

@@ -663,7 +663,7 @@ public class TlsProtocolHandler
                                     * Initialize our cipher suite
                                     */
                                     rs.writeSuite = this.chosenCipherSuite;
-                                    rs.writeSuite.init(this.ms, clientRandom, serverRandom);
+                                    rs.writeSuite.init(this, this.ms, clientRandom, serverRandom);
 
                                     /*
                                     * Send our finished message.
