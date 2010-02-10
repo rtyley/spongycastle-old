@@ -18,15 +18,19 @@ import org.bouncycastle.cms.CMSPBEKey;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.KeyTransRecipientInformation;
 import org.bouncycastle.cms.PKCS5Scheme2PBEKey;
+import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.PKCS5Scheme2UTF8PBEKey;
 import org.bouncycastle.cms.PasswordRecipientInformation;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -35,6 +39,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Security;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
@@ -647,10 +652,12 @@ public class EnvelopedDataTest
             new CMSProcessableByteArray(data),
             CMSEnvelopedDataGenerator.AES128_CBC, "BC");
 
-        RecipientInformationStore recipients = ed.getRecipientInfos();
         assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
 
-        confirmDataReceived(recipients, data, _reciEcKP.getPrivate(), "BC");
+        RecipientInformationStore recipients = ed.getRecipientInfos();
+
+        confirmDataReceived(recipients, data, _reciEcCert, _reciEcKP.getPrivate(), "BC");
+        confirmNumberRecipients(recipients, 1);
     }
 
     public void testECMQVKeyAgree()
@@ -668,10 +675,12 @@ public class EnvelopedDataTest
             new CMSProcessableByteArray(data),
             CMSEnvelopedDataGenerator.AES128_CBC, "BC");
 
-        RecipientInformationStore recipients = ed.getRecipientInfos();
         assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
 
-        confirmDataReceived(recipients, data, _reciEcKP.getPrivate(), "BC");
+        RecipientInformationStore recipients = ed.getRecipientInfos();
+
+        confirmDataReceived(recipients, data, _reciEcCert, _reciEcKP.getPrivate(), "BC");
+        confirmNumberRecipients(recipients, 1);
     }
 
     public void testECMQVKeyAgreeMultiple()
@@ -693,30 +702,33 @@ public class EnvelopedDataTest
             new CMSProcessableByteArray(data),
             CMSEnvelopedDataGenerator.AES128_CBC, "BC");
 
-        RecipientInformationStore recipients = ed.getRecipientInfos();
         assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
 
-        confirmDataReceived(recipients, data, _reciEcKP.getPrivate(), "BC");
-        confirmDataReceived(recipients, data, _reciEcKP2.getPrivate(), "BC");
+        RecipientInformationStore recipients = ed.getRecipientInfos();
+
+        confirmDataReceived(recipients, data, _reciEcCert, _reciEcKP.getPrivate(), "BC");
+        confirmDataReceived(recipients, data, _reciEcCert2, _reciEcKP2.getPrivate(), "BC");
+        confirmNumberRecipients(recipients, 2);
     }
 
-    private void confirmDataReceived(RecipientInformationStore recipients,
-        byte[] expectedData, PrivateKey reciPrivKey, String provider)
-        throws CMSException, NoSuchProviderException
+    private static void confirmDataReceived(RecipientInformationStore recipients,
+        byte[] expectedData, X509Certificate reciCert, PrivateKey reciPrivKey, String provider)
+        throws CMSException, NoSuchProviderException, CertificateEncodingException, IOException
     {
-        Collection c = recipients.getRecipients();
-        Iterator it = c.iterator();
-        if (it.hasNext())
-        {
-            RecipientInformation recipient = (RecipientInformation)it.next();
+        RecipientId rid = new RecipientId();
+        rid.setIssuer(PrincipalUtil.getIssuerX509Principal(reciCert).getEncoded());
+        rid.setSerialNumber(reciCert.getSerialNumber());
 
-            byte[] recData = recipient.getContent(reciPrivKey, provider);
-            assertEquals(true, Arrays.equals(expectedData, recData));
-        }
-        else
-        {
-            fail("no recipient found");
-        }
+        RecipientInformation recipient = recipients.get(rid);
+        assertNotNull(recipient);
+
+        byte[] actualData = recipient.getContent(reciPrivKey, provider);
+        assertEquals(true, Arrays.equals(expectedData, actualData));
+    }
+
+    private static void confirmNumberRecipients(RecipientInformationStore recipients, int count)
+    {
+        assertEquals(count, recipients.getRecipients().size());
     }
 
     public void testECKeyAgreeVectors()
