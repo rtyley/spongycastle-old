@@ -10,7 +10,6 @@ import java.security.interfaces.ECPublicKey;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
@@ -18,6 +17,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.NullDigest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.digests.SHA224Digest;
@@ -31,7 +31,6 @@ import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.provider.DSABase;
 import org.bouncycastle.jce.provider.DSAEncoder;
 import org.bouncycastle.jce.provider.JDKKeyFactory;
-import org.bouncycastle.jce.provider.util.NullDigest;
 
 public class Signature
     extends DSABase
