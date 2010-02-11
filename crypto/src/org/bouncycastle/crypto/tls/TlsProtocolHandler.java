@@ -498,8 +498,7 @@ public class TlsProtocolHandler
                                             serverExtensions.put(new Integer(extType), extValue);
                                         }
 
-                                        // TODO Validate/process serverExtensions (via client?)
-                                        // TODO[SRP]
+                                        tlsClient.processServerExtensions(serverExtensions);
                                     }
 
                                     assertEmpty(is);
@@ -1181,20 +1180,10 @@ public class TlsProtocolHandler
         /*
          * Extensions
          */
-        // TODO Collect extensions from client
         // Integer -> byte[]
-        Hashtable clientExtensions = new Hashtable();
+        Hashtable clientExtensions = tlsClient.generateClientExtensions();
 
-        // TODO[SRP]
-//        {
-//            ByteArrayOutputStream srpData = new ByteArrayOutputStream();
-//            TlsUtils.writeOpaque8(SRP_identity, srpData);
-//
-//            // TODO[SRP] RFC5054 2.8.1: ExtensionType.srp = 12
-//            clientExtensions.put(Integer.valueOf(12), srpData.toByteArray());
-//        }
-
-        this.extendedClientHello = !clientExtensions.isEmpty();
+        this.extendedClientHello = clientExtensions != null && !clientExtensions.isEmpty();
 
         if (extendedClientHello)
         {
