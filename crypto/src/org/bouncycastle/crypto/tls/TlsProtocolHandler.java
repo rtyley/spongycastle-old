@@ -31,7 +31,6 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
@@ -168,11 +167,6 @@ public class TlsProtocolHandler
      */
     private AsymmetricKeyParameter serverPublicKey = null;
 
-    /*
-     * The private key of the client (if provided)
-     */
-    private AsymmetricKeyParameter clientPrivateKey = null;
-
     private TlsInputStream tlsInputStream = null;
     private TlsOuputStream tlsOutputStream = null;
 
@@ -192,9 +186,7 @@ public class TlsProtocolHandler
     private BigInteger Yc;
     private byte[] pms;
 
-    private CertificateVerifyer verifyer = null;
-    private Certificate clientCert = null;
-    private TlsSigner clientSigner = null;
+    private TlsClient tlsClient = null;
 
     public TlsProtocolHandler(InputStream is, OutputStream os)
     {
@@ -382,7 +374,8 @@ public class TlsProtocolHandler
                                     /*
                                      * Verify them.
                                      */
-                                    if (!this.verifyer.isValid(cert.getCerts()))
+                                    // TODO Instead of 'get'ting verifyer, delegate verification
+                                    if (!this.tlsClient.getCertificateVerifyer().isValid(cert.getCerts()))
                                     {
                                         this.failWithError(AL_fatal, AP_user_canceled);
                                     }
@@ -545,7 +538,7 @@ public class TlsProtocolHandler
 
                                     if (isCertReq)
                                     {
-                                        sendClientCertificate();
+                                        sendClientCertificate(tlsClient.getCertificate());
                                     }
 
                                     /*
@@ -635,11 +628,18 @@ public class TlsProtocolHandler
 
                                     connection_state = CS_CLIENT_KEY_EXCHANGE_SEND;
 
-                                    if (isCertReq && this.clientPrivateKey != null)
+                                    if (isCertReq)
                                     {
-                                        sendCertificateVerify();
+                                        byte[] md5andsha1 = new byte[16 + 20];
+                                        rs.hash3.doFinal(md5andsha1, 0);
 
-                                        connection_state = CS_CERTIFICATE_VERIFY_SEND;
+                                        byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(md5andsha1);
+                                        if (clientCertificateSignature != null)
+                                        {
+                                            sendCertificateVerify(clientCertificateSignature);
+
+                                            connection_state = CS_CERTIFICATE_VERIFY_SEND;
+                                        }
                                     }
 
                                     /*
@@ -1073,7 +1073,7 @@ public class TlsProtocolHandler
         }
     }
 
-    private void sendClientCertificate() throws IOException
+    private void sendClientCertificate(Certificate clientCert) throws IOException
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HP_CERTIFICATE, bos);
@@ -1094,31 +1094,19 @@ public class TlsProtocolHandler
         rs.writeMessage((short)RL_HANDSHAKE, message, 0, message.length);
     }
 
-    private void sendCertificateVerify() throws IOException
+    private void sendCertificateVerify(byte[] data) throws IOException
     {
         /*
          * Send signature of handshake messages so far to prove we are the owner of
          * the cert See RFC 2246 sections 4.7, 7.4.3 and 7.4.8
          */
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        TlsUtils.writeUint8(HP_CERTIFICATE_VERIFY, bos);
+        TlsUtils.writeUint24(data.length + 2, bos);
+        TlsUtils.writeOpaque16(data, bos);
+        byte[] message = bos.toByteArray();
 
-        try
-        {
-            byte[] md5andsha1 = new byte[16 + 20];
-            rs.hash3.doFinal(md5andsha1, 0);
-            byte[] data = clientSigner.calculateRawSignature(clientPrivateKey, md5andsha1);
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            TlsUtils.writeUint8(HP_CERTIFICATE_VERIFY, bos);
-            TlsUtils.writeUint24(data.length + 2, bos);
-            TlsUtils.writeOpaque16(data, bos);
-            byte[] message = bos.toByteArray();
-
-            rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
-        }
-        catch (CryptoException e)
-        {
-            this.failWithError(AL_fatal, AP_handshake_failure);
-        }
+        rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
     }
 
     /**
@@ -1130,8 +1118,17 @@ public class TlsProtocolHandler
      */
     public void connect(CertificateVerifyer verifyer) throws IOException
     {
-        this.connect(verifyer, null, null);
+        this.connect(new DefaultTlsClient(verifyer));
     }
+
+//    public void connect(CertificateVerifyer verifyer, Certificate clientCertificate,
+//            AsymmetricKeyParameter clientPrivateKey) throws IOException
+//    {
+//        DefaultTlsClient client = new DefaultTlsClient(verifyer);
+//        client.enableClientAuthentication(clientCertificate, clientPrivateKey);
+//
+//        this.connect(client);
+//    }
 
     /**
      * Connects to the remote system using client authentication
@@ -1142,49 +1139,10 @@ public class TlsProtocolHandler
      *                 to authenticate to the remote system (RSA or DSA)
      * @throws IOException If handshake was not successful.
      */
-    // TODO Make public to enable client certificate support
-    void connect(CertificateVerifyer verifyer, Certificate clientCertificate,
-        AsymmetricKeyParameter clientPrivateKey) throws IOException
+    // TODO Make public
+    void connect(TlsClient tlsClient) throws IOException
     {
-        if (clientCertificate == null)
-        {
-            clientCertificate = new Certificate(new X509CertificateStructure[0]);
-        }
-
-        if (clientPrivateKey == null)
-        {
-            if (clientCertificate.certs.length != 0)
-            {
-                throw new IllegalArgumentException("'clientPrivateKey' not specified for certificate");
-            }
-        }
-        else
-        {
-            if (clientCertificate.certs.length == 0)
-            {
-                throw new IllegalArgumentException("'clientPrivateKey' specified without certificate");
-            }
-            else if (!clientPrivateKey.isPrivate())
-            {
-                throw new IllegalArgumentException("'clientPrivateKey' must be private");
-            }
-            else if (clientPrivateKey instanceof RSAKeyParameters)
-            {
-                clientSigner = new TlsRSASigner();
-            }
-            else if (clientPrivateKey instanceof DSAPrivateKeyParameters)
-            {
-                clientSigner = new TlsDSSSigner();
-            }
-            else
-            {
-                throw new IllegalArgumentException("'clientPrivateKey' type not supported");
-            }
-        }
-
-        this.verifyer = verifyer;
-        this.clientCert = clientCertificate;
-        this.clientPrivateKey = clientPrivateKey;
+        this.tlsClient = tlsClient;
 
         /*
         * Send Client hello
@@ -1268,6 +1226,8 @@ public class TlsProtocolHandler
         */
         while (connection_state != CS_DONE)
         {
+            // TODO Should we send fatal alerts in the event of an exception
+            // (see readApplicationData) 
             rs.readData();
         }
 
