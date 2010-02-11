@@ -179,6 +179,7 @@ public class TlsProtocolHandler
     private byte[] serverRandom;
     private byte[] ms;
 
+    private int[] offeredCipherSuites = null;
     private TlsCipherSuite chosenCipherSuite = null;
 
     private BigInteger SRP_A;
@@ -454,15 +455,20 @@ public class TlsProtocolHandler
                                     /*
                                     * Currently, we don't support session ids
                                     */
-                                    byte[] sessionId = TlsUtils.readOpaque8(is);
+//                                    byte[] sessionId =
+                                    TlsUtils.readOpaque8(is);
 
                                     /*
-                                    * Find out which ciphersuite the server has
-                                    * chosen. If we don't support this ciphersuite,
-                                    * the TlsCipherSuiteManager will throw an
-                                    * exception.
+                                    * Find out which ciphersuite the server has chosen and check
+                                    * that it was one of the offered ones.
                                     */
-                                    this.chosenCipherSuite = TlsCipherSuiteManager.getCipherSuite(TlsUtils.readUint16(is), this);
+                                    int selectedCipherSuite = TlsUtils.readUint16(is);
+                                    if (!wasCipherSuiteOffered(selectedCipherSuite))
+                                    {
+                                        this.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
+                                    }
+
+                                    this.chosenCipherSuite = tlsClient.createCipherSuite(selectedCipherSuite, this);
 
                                     /*
                                     * We support only the null compression which
@@ -632,7 +638,7 @@ public class TlsProtocolHandler
                                         byte[] md5andsha1 = new byte[16 + 20];
                                         rs.hash3.doFinal(md5andsha1, 0);
 
-                                        byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(md5andsha1);
+                                        byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(md5andsha1, this);
                                         if (clientCertificateSignature != null)
                                         {
                                             sendCertificateVerify(clientCertificateSignature);
@@ -768,8 +774,10 @@ public class TlsProtocolHandler
 
                                 case CS_SERVER_KEY_EXCHANGE_RECEIVED:
                                 {
-                                    byte[] types = TlsUtils.readOpaque8(is);
-                                    byte[] auths = TlsUtils.readOpaque16(is);
+//                                    byte[] types =
+                                    TlsUtils.readOpaque8(is);
+//                                    byte[] auths =
+                                    TlsUtils.readOpaque16(is);
 
                                     // TODO Validate/process
 
@@ -1169,7 +1177,13 @@ public class TlsProtocolHandler
         /*
         * Cipher suites
         */
-        TlsCipherSuiteManager.writeCipherSuites(os);
+        this.offeredCipherSuites = tlsClient.getCipherSuites();
+
+        TlsUtils.writeUint16(2 * offeredCipherSuites.length, os);
+        for (int i = 0; i < offeredCipherSuites.length; ++i)
+        {
+            TlsUtils.writeUint16(offeredCipherSuites[i], os);
+        }
 
         /*
         * Compression methods, just the null method.
@@ -1453,5 +1467,17 @@ public class TlsProtocolHandler
     protected void flush() throws IOException
     {
         rs.flush();
+    }
+
+    private boolean wasCipherSuiteOffered(int cipherSuite)
+    {
+        for (int i = 0; i < offeredCipherSuites.length; ++i)
+        {
+            if (offeredCipherSuites[i] == cipherSuite)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

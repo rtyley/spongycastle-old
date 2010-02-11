@@ -1,12 +1,19 @@
 package org.bouncycastle.crypto.tls;
 
+import java.io.IOException;
 import java.util.Hashtable;
 
 interface TlsClient
 {
+    TlsCipherSuite createCipherSuite(int cipherSuite, TlsProtocolHandler handler)
+        throws IOException;
+
     CertificateVerifyer getCertificateVerifyer();
 
-    byte[] generateCertificateSignature(byte[] md5andsha1);
+    int[] getCipherSuites();
+
+    byte[] generateCertificateSignature(byte[] md5andsha1, TlsProtocolHandler handler)
+        throws IOException;
 
     Certificate getCertificate();
 
