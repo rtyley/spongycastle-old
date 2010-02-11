@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.tls;
 
+import java.util.Hashtable;
+
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -86,5 +88,24 @@ class DefaultTlsClient implements TlsClient
     public Certificate getCertificate()
     {
         return clientCert;
+    }
+
+    public Hashtable generateClientExtensions()
+    {
+        // TODO[SRP]
+//        Hashtable clientExtensions = new Hashtable();
+//        ByteArrayOutputStream srpData = new ByteArrayOutputStream();
+//        TlsUtils.writeOpaque8(SRP_identity, srpData);
+//
+//        // TODO[SRP] RFC5054 2.8.1: ExtensionType.srp = 12
+//        clientExtensions.put(Integer.valueOf(12), srpData.toByteArray());
+//        return clientExtensions;
+        return null;
+    }
+
+    public void processServerExtensions(Hashtable serverExtensions)
+    {
+        // TODO Validate/process serverExtensions (via client?)
+        // TODO[SRP]
     }
 }
