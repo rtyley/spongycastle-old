@@ -1,13 +1,15 @@
 package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
+import java.io.InputStream;
+
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 
 /**
  * A generic class for ciphersuites in TLS 1.0.
  */
 abstract class TlsCipherSuite
 {
-
     protected static final short KE_RSA = 1;
     protected static final short KE_RSA_EXPORT = 2;
     protected static final short KE_DHE_DSS = 3;
@@ -21,12 +23,20 @@ abstract class TlsCipherSuite
     protected static final short KE_SRP_RSA = 11;
     protected static final short KE_SRP_DSS = 12;
 
-    protected abstract void init(TlsProtocolHandler handler, byte[] ms, byte[] cr, byte[] sr);
+    protected abstract void init(TlsProtocolHandler handler);
 
-    protected abstract byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len) throws IOException;
+    protected abstract TlsCipher createCipher(byte[] ms, byte[] cr, byte[] sr);
 
-    protected abstract byte[] decodeCiphertext(short type, byte[] plaintext, int offset, int len) throws IOException;
+    protected abstract void skipServerCertificate() throws IOException;
+    protected abstract AsymmetricKeyParameter processServerCertificate(Certificate serverCertificate,
+        CertificateVerifyer verifyer) throws IOException;
 
-    protected abstract short getKeyExchangeAlgorithm();
+    protected abstract void processServerKeyExchange(InputStream is, AsymmetricKeyParameter serverPublicKey,
+        byte[] cr, byte[] sr) throws IOException;
+    protected abstract void skipServerKeyExchange(AsymmetricKeyParameter serverPublicKey) throws IOException;
 
+    protected abstract byte[] generateClientKeyExchange(AsymmetricKeyParameter serverPublicKey)
+        throws IOException;
+
+    protected abstract byte[] getPremasterSecret();
 }

@@ -3,31 +3,22 @@ package org.bouncycastle.crypto.tls;
 /**
  * A NULL CipherSuite in java, this should only be used during handshake.
  */
-class TlsNullCipherSuite extends TlsCipherSuite
+class TlsNullCipherSuite implements TlsCipher
 {
-
-    protected void init(TlsProtocolHandler handler, byte[] ms, byte[] cr, byte[] sr)
+    public byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len)
     {
-        throw new TlsRuntimeException("Sorry, init of TLS_NULL_WITH_NULL_NULL is forbidden");
+        return copyData(plaintext, offset, len);
     }
 
-    protected byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len)
+    public byte[] decodeCiphertext(short type, byte[] ciphertext, int offset, int len)
     {
-        byte[] result = new byte[len];
-        System.arraycopy(plaintext, offset, result, 0, len);
-        return result;
+        return copyData(ciphertext, offset, len);
     }
 
-    protected byte[] decodeCiphertext(short type, byte[] plaintext, int offset, int len)
+    private byte[] copyData(byte[] text, int offset, int len)
     {
         byte[] result = new byte[len];
-        System.arraycopy(plaintext, offset, result, 0, len);
+        System.arraycopy(text, offset, result, 0, len);
         return result;
     }
-
-    protected short getKeyExchangeAlgorithm()
-    {
-        return 0;
-    }
-
 }
