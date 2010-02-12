@@ -60,6 +60,8 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
     private int cipherKeySize;
     private short keyExchange;
 
+    private AsymmetricKeyParameter serverPublicKey = null;
+
     private BigInteger SRP_A = null;
     private byte[] SRP_identity = null;
     private byte[] SRP_password = null;
@@ -295,25 +297,23 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
       }
     }
 
-    protected AsymmetricKeyParameter processServerCertificate(Certificate serverCertificate,
+    protected void processServerCertificate(Certificate serverCertificate,
         CertificateVerifyer verifyer) throws IOException
     {
         X509CertificateStructure x509Cert = serverCertificate.certs[0];
         SubjectPublicKeyInfo keyInfo = x509Cert.getSubjectPublicKeyInfo();
 
-        AsymmetricKeyParameter serverPublicKey;
         try
         {
-            serverPublicKey = PublicKeyFactory.createKey(keyInfo);
+            this.serverPublicKey = PublicKeyFactory.createKey(keyInfo);
         }
         catch (RuntimeException e)
         {
             handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unsupported_certificate);
-            return null;
         }
 
         // Sanity check the PublicKeyFactory
-        if (serverPublicKey.isPrivate())
+        if (this.serverPublicKey.isPrivate())
         {
             handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
         }
@@ -326,7 +326,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         switch (this.keyExchange)
         {
             case TlsCipherSuite.KE_RSA:
-                if (!(serverPublicKey instanceof RSAKeyParameters))
+                if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
                     handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
                 }
@@ -334,7 +334,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
                 break;
             case TlsCipherSuite.KE_DHE_RSA:
             case TlsCipherSuite.KE_SRP_RSA:
-                if (!(serverPublicKey instanceof RSAKeyParameters))
+                if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
                     handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
                 }
@@ -342,7 +342,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
                 break;
             case TlsCipherSuite.KE_DHE_DSS:
             case TlsCipherSuite.KE_SRP_DSS:
-                if (!(serverPublicKey instanceof DSAPublicKeyParameters))
+                if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
                     handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
                 }
@@ -359,38 +359,36 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         {
             handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_user_canceled);
         }
-
-        return serverPublicKey;
     }
 
-    protected void processServerKeyExchange(InputStream is, AsymmetricKeyParameter serverPublicKey,
+    protected void processServerKeyExchange(InputStream is,
         byte[] cr, byte[] sr) throws IOException
     {
         switch (this.keyExchange)
         {
             case TlsCipherSuite.KE_DHE_RSA:
             {
-                processDHEKeyExchange(is, new TlsRSASigner(), serverPublicKey, cr, sr);
+                processDHEKeyExchange(is, new TlsRSASigner(), cr, sr);
                 break;
             }
             case TlsCipherSuite.KE_DHE_DSS:
             {
-                processDHEKeyExchange(is, new TlsDSSSigner(), serverPublicKey, cr, sr);
+                processDHEKeyExchange(is, new TlsDSSSigner(), cr, sr);
                 break;
             }
             case TlsCipherSuite.KE_SRP:
             {
-                processSRPKeyExchange(is, null, null, null, null);
+                processSRPKeyExchange(is, null, null, null);
                 break;
             }
             case TlsCipherSuite.KE_SRP_RSA:
             {
-                processSRPKeyExchange(is, new TlsRSASigner(), serverPublicKey, cr, sr);
+                processSRPKeyExchange(is, new TlsRSASigner(), cr, sr);
                 break;
             }
             case TlsCipherSuite.KE_SRP_DSS:
             {
-                processSRPKeyExchange(is, new TlsDSSSigner(), serverPublicKey, cr, sr);
+                processSRPKeyExchange(is, new TlsDSSSigner(), cr, sr);
                 break;
             }
             default:
@@ -398,7 +396,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         }
     }
 
-    protected void skipServerKeyExchange(AsymmetricKeyParameter serverPublicKey) throws IOException
+    protected void skipServerKeyExchange() throws IOException
     {
         /* RFC 2246 7.4.3. Server key exchange message
          * "It is not legal to send the server key exchange message for the
@@ -419,9 +417,9 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
             return;
 
         case KE_RSA_EXPORT:
-            if (serverPublicKey instanceof RSAKeyParameters)
+            if (this.serverPublicKey instanceof RSAKeyParameters)
             {
-                RSAKeyParameters rsaPubKey = (RSAKeyParameters)serverPublicKey;
+                RSAKeyParameters rsaPubKey = (RSAKeyParameters)this.serverPublicKey;
                 if (rsaPubKey.getModulus().bitLength() <= 512)
                 {
                     return;
@@ -433,7 +431,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
-    protected byte[] generateClientKeyExchange(AsymmetricKeyParameter serverPublicKey)
+    protected byte[] generateClientKeyExchange()
         throws IOException
     {
         switch (this.keyExchange)
@@ -460,7 +458,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
                 */
                 RSABlindedEngine rsa = new RSABlindedEngine();
                 PKCS1Encoding encoding = new PKCS1Encoding(rsa);
-                encoding.init(true, new ParametersWithRandom(serverPublicKey, handler.getRandom()));
+                encoding.init(true, new ParametersWithRandom(this.serverPublicKey, handler.getRandom()));
                 byte[] encrypted = null;
                 try
                 {
@@ -519,9 +517,8 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
             }
         }
     }
-    
-    private void processDHEKeyExchange(InputStream is, TlsSigner tlsSigner,
-        AsymmetricKeyParameter serverPublicKey, byte[] cr, byte[] sr)
+
+    private void processDHEKeyExchange(InputStream is, TlsSigner tlsSigner, byte[] cr, byte[] sr)
         throws IOException
     {
         InputStream sigIn = is;
@@ -529,7 +526,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         if (tlsSigner != null)
         {
             signer = tlsSigner.createSigner();
-            signer.init(false, serverPublicKey);
+            signer.init(false, this.serverPublicKey);
             signer.update(cr, 0, cr.length);
             signer.update(sr, 0, sr.length);
 
@@ -603,8 +600,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
          this.pms = BigIntegers.asUnsignedByteArray(agreement);
     }
 
-    private void processSRPKeyExchange(InputStream is, TlsSigner tlsSigner,
-            AsymmetricKeyParameter serverPublicKey, byte[] cr, byte[] sr)
+    private void processSRPKeyExchange(InputStream is, TlsSigner tlsSigner, byte[] cr, byte[] sr)
         throws IOException
     {
         InputStream sigIn = is;
@@ -612,13 +608,13 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         if (tlsSigner != null)
         {
             signer = tlsSigner.createSigner();
-            signer.init(false, serverPublicKey);
+            signer.init(false, this.serverPublicKey);
             signer.update(cr, 0, cr.length);
             signer.update(sr, 0, sr.length);
-    
+
             sigIn = new SignerInputStream(is, signer);
         }
-    
+
         /*
          * Parse the Structure
          */
@@ -630,7 +626,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         if (signer != null)
         {
             byte[] sigByte = TlsUtils.readOpaque16(is);
-    
+
             /*
              * Verify the Signature.
              */
