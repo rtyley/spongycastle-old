@@ -6,12 +6,12 @@ import java.io.OutputStream;
 /**
  * An OutputStream for an TLS connection.
  */
-public class TlsOuputStream extends OutputStream
+class TlsOutputStream extends OutputStream
 {
     private byte[] buf = new byte[1];
     private TlsProtocolHandler handler;
 
-    TlsOuputStream(TlsProtocolHandler handler)
+    TlsOutputStream(TlsProtocolHandler handler)
     {
         this.handler = handler;
     }
@@ -25,12 +25,6 @@ public class TlsOuputStream extends OutputStream
     {
         buf[0] = (byte)arg0;
         this.write(buf, 0, 1);
-    }
-
-    /** @deprecated Use 'close' instead */
-    public void cose() throws IOException
-    {
-        handler.close();
     }
 
     public void close() throws IOException
