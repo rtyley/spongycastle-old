@@ -9,7 +9,6 @@ import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
 
 /**
@@ -132,11 +131,6 @@ public class TlsProtocolHandler
     private RecordStream rs;
 
     private SecureRandom random;
-
-    /*
-     * The public key of the server.
-     */
-    private AsymmetricKeyParameter serverPublicKey = null;
 
     private TlsInputStream tlsInputStream = null;
     private TlsOuputStream tlsOutputStream = null;
@@ -287,7 +281,7 @@ public class TlsProtocolHandler
                                     Certificate serverCertificate = Certificate.parse(is);
                                     assertEmpty(is);
 
-                                    this.serverPublicKey = this.chosenCipherSuite.processServerCertificate(
+                                    this.chosenCipherSuite.processServerCertificate(
                                         serverCertificate, this.tlsClient.getCertificateVerifyer());
 
                                     break;
@@ -432,7 +426,7 @@ public class TlsProtocolHandler
                                 case CS_SERVER_CERTIFICATE_RECEIVED:
 
                                     // There was no server key exchange message; check it's OK
-                                    this.chosenCipherSuite.skipServerKeyExchange(this.serverPublicKey);
+                                    this.chosenCipherSuite.skipServerKeyExchange();
 
                                     // NB: Fall through to next case label
 
@@ -453,8 +447,7 @@ public class TlsProtocolHandler
                                     * on the key exchange we are using in our
                                     * ciphersuite.
                                     */
-                                    sendClientKeyExchange(
-                                        this.chosenCipherSuite.generateClientKeyExchange(this.serverPublicKey));
+                                    sendClientKeyExchange(this.chosenCipherSuite.generateClientKeyExchange());
 
                                     connection_state = CS_CLIENT_KEY_EXCHANGE_SEND;
 
@@ -533,7 +526,7 @@ public class TlsProtocolHandler
 
                                 case CS_SERVER_CERTIFICATE_RECEIVED:
 
-                                    this.chosenCipherSuite.processServerKeyExchange(is, this.serverPublicKey,
+                                    this.chosenCipherSuite.processServerKeyExchange(is,
                                         this.clientRandom, this.serverRandom);
 
                                     assertEmpty(is);
@@ -554,7 +547,7 @@ public class TlsProtocolHandler
                                 case CS_SERVER_CERTIFICATE_RECEIVED:
 
                                     // There was no server key exchange message; check it's OK
-                                    this.chosenCipherSuite.skipServerKeyExchange(this.serverPublicKey);
+                                    this.chosenCipherSuite.skipServerKeyExchange();
 
                                     // NB: Fall through to next case label
 

@@ -3,8 +3,6 @@ package org.bouncycastle.crypto.tls;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-
 /**
  * A generic class for ciphersuites in TLS 1.0.
  */
@@ -28,15 +26,14 @@ abstract class TlsCipherSuite
     protected abstract TlsCipher createCipher(byte[] ms, byte[] cr, byte[] sr);
 
     protected abstract void skipServerCertificate() throws IOException;
-    protected abstract AsymmetricKeyParameter processServerCertificate(Certificate serverCertificate,
+    protected abstract void processServerCertificate(Certificate serverCertificate,
         CertificateVerifyer verifyer) throws IOException;
 
-    protected abstract void processServerKeyExchange(InputStream is, AsymmetricKeyParameter serverPublicKey,
-        byte[] cr, byte[] sr) throws IOException;
-    protected abstract void skipServerKeyExchange(AsymmetricKeyParameter serverPublicKey) throws IOException;
-
-    protected abstract byte[] generateClientKeyExchange(AsymmetricKeyParameter serverPublicKey)
+    protected abstract void processServerKeyExchange(InputStream is, byte[] cr, byte[] sr)
         throws IOException;
+    protected abstract void skipServerKeyExchange() throws IOException;
+
+    protected abstract byte[] generateClientKeyExchange() throws IOException;
 
     protected abstract byte[] getPremasterSecret();
 }
