@@ -279,12 +279,6 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         return n;
     }
 
-
-    protected short getKeyExchangeAlgorithm()
-    {
-        return this.keyExchange;
-    }
-
     protected void skipServerCertificate() throws IOException
     {
       if (this.keyExchange != TlsCipherSuite.KE_SRP)
