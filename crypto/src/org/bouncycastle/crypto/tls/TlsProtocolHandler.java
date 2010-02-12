@@ -133,7 +133,7 @@ public class TlsProtocolHandler
     private SecureRandom random;
 
     private TlsInputStream tlsInputStream = null;
-    private TlsOuputStream tlsOutputStream = null;
+    private TlsOutputStream tlsOutputStream = null;
 
     private boolean closed = false;
     private boolean failedWithError = false;
@@ -848,7 +848,7 @@ public class TlsProtocolHandler
         }
 
         this.tlsInputStream = new TlsInputStream(this);
-        this.tlsOutputStream = new TlsOuputStream(this);
+        this.tlsOutputStream = new TlsOutputStream(this);
     }
 
     /**
@@ -976,12 +976,6 @@ public class TlsProtocolHandler
         }
         while (len > 0);
 
-    }
-
-    /** @deprecated use 'getOutputStream' instead */
-    public TlsOuputStream getTlsOuputStream()
-    {
-        return this.tlsOutputStream;
     }
 
     /**
