@@ -21,17 +21,17 @@ abstract class TlsCipherSuite
     protected static final short KE_SRP_RSA = 11;
     protected static final short KE_SRP_DSS = 12;
 
-    protected abstract TlsCipher createCipher(byte[] ms, byte[] cr, byte[] sr);
-
     protected abstract void skipServerCertificate() throws IOException;
     protected abstract void processServerCertificate(Certificate serverCertificate,
         CertificateVerifyer verifyer) throws IOException;
 
+    protected abstract void skipServerKeyExchange() throws IOException;
     protected abstract void processServerKeyExchange(InputStream is, byte[] cr, byte[] sr)
         throws IOException;
-    protected abstract void skipServerKeyExchange() throws IOException;
 
     protected abstract byte[] generateClientKeyExchange() throws IOException;
 
     protected abstract byte[] getPremasterSecret();
+
+    protected abstract TlsCipher createCipher(byte[] ms, byte[] cr, byte[] sr);
 }
