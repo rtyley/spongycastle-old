@@ -5,15 +5,13 @@ import java.util.Hashtable;
 
 interface TlsClient
 {
-    TlsCipherSuite createCipherSuite(int cipherSuite, TlsProtocolHandler handler)
-        throws IOException;
+    TlsCipherSuite createCipherSuite(int cipherSuite) throws IOException;
 
     CertificateVerifyer getCertificateVerifyer();
 
     int[] getCipherSuites();
 
-    byte[] generateCertificateSignature(byte[] md5andsha1, TlsProtocolHandler handler)
-        throws IOException;
+    byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException;
 
     Certificate getCertificate();
 

@@ -69,20 +69,16 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
     private BigInteger Yc;
     private byte[] pms;
 
-    protected TlsBlockCipherCipherSuite(BlockCipher encrypt, BlockCipher decrypt,
+    protected TlsBlockCipherCipherSuite(TlsProtocolHandler handler, BlockCipher encrypt, BlockCipher decrypt,
         Digest writeDigest, Digest readDigest, int cipherKeySize, short keyExchange)
     {
+        this.handler = handler;
         this.encryptCipher = encrypt;
         this.decryptCipher = decrypt;
         this.writeDigest = writeDigest;
         this.readDigest = readDigest;
         this.cipherKeySize = cipherKeySize;
         this.keyExchange = keyExchange;
-    }
-
-    protected void init(TlsProtocolHandler handler)
-    {
-        this.handler = handler;
     }
 
     protected TlsCipher createCipher(byte[] ms, byte[] cr, byte[] sr)
