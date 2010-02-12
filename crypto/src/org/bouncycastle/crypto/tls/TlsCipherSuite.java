@@ -21,8 +21,6 @@ abstract class TlsCipherSuite
     protected static final short KE_SRP_RSA = 11;
     protected static final short KE_SRP_DSS = 12;
 
-    protected abstract void init(TlsProtocolHandler handler);
-
     protected abstract TlsCipher createCipher(byte[] ms, byte[] cr, byte[] sr);
 
     protected abstract void skipServerCertificate() throws IOException;

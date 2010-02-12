@@ -40,7 +40,8 @@ class DefaultTlsClient implements TlsClient
 //    private static final int TLS_SRP_SHA_WITH_AES_256_CBC_SHA = 0xC020;
 //    private static final int TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA = 0xC021;
 //    private static final int TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA = 0xC022;
-    
+
+    private TlsProtocolHandler handler;
     private CertificateVerifyer verifyer;
 
     // (Optional) details for client-side authentication
@@ -48,8 +49,9 @@ class DefaultTlsClient implements TlsClient
     private AsymmetricKeyParameter clientPrivateKey = null;
     private TlsSigner clientSigner = null;
 
-    DefaultTlsClient(CertificateVerifyer verifyer)
+    DefaultTlsClient(TlsProtocolHandler handler, CertificateVerifyer verifyer)
     {
+        this.handler = handler;
         this.verifyer = verifyer;
     }
 
@@ -91,8 +93,7 @@ class DefaultTlsClient implements TlsClient
         this.clientPrivateKey = clientPrivateKey;
     }
 
-    public TlsCipherSuite createCipherSuite(int cipherSuite, TlsProtocolHandler handler)
-        throws IOException
+    public TlsCipherSuite createCipherSuite(int cipherSuite) throws IOException
     {
         switch (cipherSuite)
         {
@@ -168,7 +169,7 @@ class DefaultTlsClient implements TlsClient
         return verifyer;
     }
 
-    public byte[] generateCertificateSignature(byte[] md5andsha1, TlsProtocolHandler handler)
+    public byte[] generateCertificateSignature(byte[] md5andsha1)
         throws IOException
     {
         if (clientSigner == null)
@@ -236,15 +237,15 @@ class DefaultTlsClient implements TlsClient
         // TODO[SRP]
     }
 
-    private static TlsCipherSuite createAESCipherSuite(int cipherKeySize, short keyExchange)
+    private TlsCipherSuite createAESCipherSuite(int cipherKeySize, short keyExchange)
     {
-        return new TlsBlockCipherCipherSuite(createAESCipher(), createAESCipher(),
+        return new TlsBlockCipherCipherSuite(handler, createAESCipher(), createAESCipher(),
             new SHA1Digest(), new SHA1Digest(), cipherKeySize, keyExchange);
     }
 
-    private static TlsCipherSuite createDESedeCipherSuite(int cipherKeySize, short keyExchange)
+    private TlsCipherSuite createDESedeCipherSuite(int cipherKeySize, short keyExchange)
     {
-        return new TlsBlockCipherCipherSuite(createDESedeCipher(), createDESedeCipher(),
+        return new TlsBlockCipherCipherSuite(handler, createDESedeCipher(), createDESedeCipher(),
             new SHA1Digest(), new SHA1Digest(), cipherKeySize, keyExchange);
     }
 

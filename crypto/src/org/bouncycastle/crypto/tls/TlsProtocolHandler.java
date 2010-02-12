@@ -371,8 +371,7 @@ public class TlsProtocolHandler
                                         this.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
                                     }
 
-                                    this.chosenCipherSuite = tlsClient.createCipherSuite(selectedCipherSuite, this);
-                                    this.chosenCipherSuite.init(this);
+                                    this.chosenCipherSuite = tlsClient.createCipherSuite(selectedCipherSuite);
 
                                     /*
                                     * We support only the null compression which
@@ -456,7 +455,7 @@ public class TlsProtocolHandler
                                         byte[] md5andsha1 = new byte[16 + 20];
                                         rs.hash3.doFinal(md5andsha1, 0);
 
-                                        byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(md5andsha1, this);
+                                        byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(md5andsha1);
                                         if (clientCertificateSignature != null)
                                         {
                                             sendCertificateVerify(clientCertificateSignature);
@@ -739,7 +738,7 @@ public class TlsProtocolHandler
     // TODO Deprecate
     public void connect(CertificateVerifyer verifyer) throws IOException
     {
-        this.connect(new DefaultTlsClient(verifyer));
+        this.connect(new DefaultTlsClient(this, verifyer));
     }
 
 //    public void connect(CertificateVerifyer verifyer, Certificate clientCertificate,
