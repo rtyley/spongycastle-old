@@ -15,8 +15,8 @@ class RecordStream
     protected CombinedHash hash1;
     protected CombinedHash hash2;
     protected CombinedHash hash3;
-    protected TlsCipherSuite readSuite = null;
-    protected TlsCipherSuite writeSuite = null;
+    protected TlsCipher readCipher = null;
+    protected TlsCipher writeCipher = null;
 
     RecordStream(TlsProtocolHandler handler, InputStream is, OutputStream os)
     {
@@ -26,8 +26,8 @@ class RecordStream
         this.hash1 = new CombinedHash();
         this.hash2 = new CombinedHash();
         this.hash3 = new CombinedHash();
-        this.readSuite = new TlsNullCipherSuite();
-        this.writeSuite = this.readSuite;
+        this.readCipher = new TlsNullCipherSuite();
+        this.writeCipher = this.readCipher;
     }
 
     public void readData() throws IOException
@@ -43,8 +43,7 @@ class RecordStream
     {
         byte[] buf = new byte[len];
         TlsUtils.readFully(buf, is);
-        byte[] result = readSuite.decodeCiphertext(type, buf, 0, buf.length);
-        return result;
+        return readCipher.decodeCiphertext(type, buf, 0, buf.length);
     }
 
     protected void writeMessage(short type, byte[] message, int offset, int len) throws IOException
@@ -53,7 +52,7 @@ class RecordStream
         {
             updateHandshakeData(message, offset, len);
         }
-        byte[] ciphertext = writeSuite.encodePlaintext(type, message, offset, len);
+        byte[] ciphertext = writeCipher.encodePlaintext(type, message, offset, len);
         byte[] writeMessage = new byte[ciphertext.length + 5];
         TlsUtils.writeUint8(type, writeMessage, 0);
         TlsUtils.writeUint8((short)3, writeMessage, 1);
