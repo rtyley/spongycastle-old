@@ -246,14 +246,22 @@ public class TlsProtocolHandler
                     handshakeQueue.read(buf, 0, len, 4);
                     handshakeQueue.removeData(len + 4);
 
-                    /*
-                    * If it is not a finished message, update our hashes
-                    * we prepare for the finish message.
-                    */
-                    if (type != HP_FINISHED)
+                    /* RFC 2246 7.4.9.
+                     * "The value handshake_messages includes all handshake
+                     * messages starting at client hello up to, but not including, this
+                     * finished message."
+                     * "Note: [Also,] Hello Request messages are omitted from
+                     * handshake hashes."
+                     */
+                    switch (type)
                     {
+                    case HP_HELLO_REQUEST:
+                    case HP_FINISHED:
+                        break;
+                    default:
                         rs.updateHandshakeData(beginning, 0, 4);
                         rs.updateHandshakeData(buf, 0, len);
+                        break;
                     }
 
                     /*
