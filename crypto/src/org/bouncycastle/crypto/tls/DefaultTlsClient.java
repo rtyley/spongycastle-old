@@ -164,11 +164,6 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    public CertificateVerifyer getCertificateVerifyer()
-    {
-        return verifyer;
-    }
-
     public byte[] generateCertificateSignature(byte[] md5andsha1)
         throws IOException
     {
@@ -239,13 +234,13 @@ class DefaultTlsClient implements TlsClient
 
     private TlsCipherSuite createAESCipherSuite(int cipherKeySize, short keyExchange)
     {
-        return new TlsBlockCipherCipherSuite(handler, createAESCipher(), createAESCipher(),
+        return new TlsBlockCipherCipherSuite(handler, verifyer, createAESCipher(), createAESCipher(),
             new SHA1Digest(), new SHA1Digest(), cipherKeySize, keyExchange);
     }
 
     private TlsCipherSuite createDESedeCipherSuite(int cipherKeySize, short keyExchange)
     {
-        return new TlsBlockCipherCipherSuite(handler, createDESedeCipher(), createDESedeCipher(),
+        return new TlsBlockCipherCipherSuite(handler, verifyer, createDESedeCipher(), createDESedeCipher(),
             new SHA1Digest(), new SHA1Digest(), cipherKeySize, keyExchange);
     }
 

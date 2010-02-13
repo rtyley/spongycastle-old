@@ -7,8 +7,6 @@ interface TlsClient
 {
     TlsCipherSuite createCipherSuite(int cipherSuite) throws IOException;
 
-    CertificateVerifyer getCertificateVerifyer();
-
     int[] getCipherSuites();
 
     byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException;
