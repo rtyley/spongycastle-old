@@ -726,7 +726,7 @@ public class TlsProtocolHandler
     // TODO Deprecate
     public void connect(CertificateVerifyer verifyer) throws IOException
     {
-        this.connect(new DefaultTlsClient(this, verifyer));
+        this.connect(new DefaultTlsClient(verifyer));
     }
 
 //    public void connect(CertificateVerifyer verifyer, Certificate clientCertificate,
@@ -751,6 +751,7 @@ public class TlsProtocolHandler
     void connect(TlsClient tlsClient) throws IOException
     {
         this.tlsClient = tlsClient;
+        this.tlsClient.init(this);
 
         /*
         * Send Client hello
@@ -774,7 +775,7 @@ public class TlsProtocolHandler
         /*
         * Cipher suites
         */
-        this.offeredCipherSuites = tlsClient.getCipherSuites();
+        this.offeredCipherSuites = this.tlsClient.getCipherSuites();
 
         TlsUtils.writeUint16(2 * offeredCipherSuites.length, os);
         for (int i = 0; i < offeredCipherSuites.length; ++i)
@@ -792,7 +793,7 @@ public class TlsProtocolHandler
          * Extensions
          */
         // Integer -> byte[]
-        Hashtable clientExtensions = tlsClient.generateClientExtensions();
+        Hashtable clientExtensions = this.tlsClient.generateClientExtensions();
 
         this.extendedClientHello = clientExtensions != null && !clientExtensions.isEmpty();
 

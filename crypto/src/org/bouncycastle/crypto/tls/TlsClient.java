@@ -6,6 +6,8 @@ import java.util.List;
 
 interface TlsClient
 {
+    void init(TlsProtocolHandler handler);
+
     TlsCipherSuite createCipherSuite(int cipherSuite) throws IOException;
 
     int[] getCipherSuites();
