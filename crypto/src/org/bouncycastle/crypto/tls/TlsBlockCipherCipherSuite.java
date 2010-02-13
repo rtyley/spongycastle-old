@@ -85,24 +85,20 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         this.keyExchange = keyExchange;
     }
 
-    protected TlsCipher createCipher(byte[] ms, byte[] cr, byte[] sr)
+    protected TlsCipher createCipher(SecurityParameters securityParameters)
     {
         int prfSize = (2 * cipherKeySize) + writeDigest.getDigestSize() + readDigest.getDigestSize()
             + encryptCipher.getBlockSize() + decryptCipher.getBlockSize();
-        byte[] key_block = new byte[prfSize];
-        byte[] random = new byte[cr.length + sr.length];
-        System.arraycopy(cr, 0, random, sr.length, cr.length);
-        System.arraycopy(sr, 0, random, 0, sr.length);
-        TlsUtils.PRF(ms, "key expansion", random, key_block);
+
+        byte[] key_block = TlsUtils.PRF(securityParameters.masterSecret, "key expansion",
+            TlsUtils.concat(securityParameters.serverRandom, securityParameters.clientRandom), prfSize);
 
         int offset = 0;
 
         // Init MACs
-        writeMac = new TlsMac(writeDigest, key_block, offset, writeDigest
-            .getDigestSize());
+        writeMac = new TlsMac(writeDigest, key_block, offset, writeDigest.getDigestSize());
         offset += writeDigest.getDigestSize();
-        readMac = new TlsMac(readDigest, key_block, offset, readDigest
-            .getDigestSize());
+        readMac = new TlsMac(readDigest, key_block, offset, readDigest.getDigestSize());
         offset += readDigest.getDigestSize();
 
         // Init Ciphers
@@ -118,8 +114,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
     private void initCipher(boolean forEncryption, BlockCipher cipher,
         byte[] key_block, int key_size, int key_offset, int iv_offset)
     {
-        KeyParameter key_parameter = new KeyParameter(key_block, key_offset,
-            key_size);
+        KeyParameter key_parameter = new KeyParameter(key_block, key_offset, key_size);
         ParametersWithIV parameters_with_iv = new ParametersWithIV(
             key_parameter, key_block, iv_offset, cipher.getBlockSize());
         cipher.init(forEncryption, parameters_with_iv);
@@ -353,34 +348,34 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         }
     }
 
-    protected void processServerKeyExchange(InputStream is,
-        byte[] cr, byte[] sr) throws IOException
+    protected void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
+        throws IOException
     {
         switch (this.keyExchange)
         {
             case TlsCipherSuite.KE_DHE_RSA:
             {
-                processDHEKeyExchange(is, new TlsRSASigner(), cr, sr);
+                processDHEKeyExchange(is, initSigner(new TlsRSASigner(), securityParameters));
                 break;
             }
             case TlsCipherSuite.KE_DHE_DSS:
             {
-                processDHEKeyExchange(is, new TlsDSSSigner(), cr, sr);
+                processDHEKeyExchange(is, initSigner(new TlsDSSSigner(), securityParameters));
                 break;
             }
             case TlsCipherSuite.KE_SRP:
             {
-                processSRPKeyExchange(is, null, null, null);
+                processSRPKeyExchange(is, null);
                 break;
             }
             case TlsCipherSuite.KE_SRP_RSA:
             {
-                processSRPKeyExchange(is, new TlsRSASigner(), cr, sr);
+                processSRPKeyExchange(is, initSigner(new TlsRSASigner(), securityParameters));
                 break;
             }
             case TlsCipherSuite.KE_SRP_DSS:
             {
-                processSRPKeyExchange(is, new TlsDSSSigner(), cr, sr);
+                processSRPKeyExchange(is, initSigner(new TlsDSSSigner(), securityParameters));
                 break;
             }
             default:
@@ -507,18 +502,20 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         }
     }
 
-    private void processDHEKeyExchange(InputStream is, TlsSigner tlsSigner, byte[] cr, byte[] sr)
-        throws IOException
+    private Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
+    {
+        Signer signer = tlsSigner.createSigner();
+        signer.init(false, this.serverPublicKey);
+        signer.update(securityParameters.clientRandom, 0, securityParameters.clientRandom.length);
+        signer.update(securityParameters.serverRandom, 0, securityParameters.serverRandom.length);
+        return signer;
+    }
+
+    private void processDHEKeyExchange(InputStream is, Signer signer) throws IOException
     {
         InputStream sigIn = is;
-        Signer signer = null;
-        if (tlsSigner != null)
+        if (signer != null)
         {
-            signer = tlsSigner.createSigner();
-            signer.init(false, this.serverPublicKey);
-            signer.update(cr, 0, cr.length);
-            signer.update(sr, 0, sr.length);
-
             sigIn = new SignerInputStream(is, signer);
         }
 
@@ -589,18 +586,11 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
          this.pms = BigIntegers.asUnsignedByteArray(agreement);
     }
 
-    private void processSRPKeyExchange(InputStream is, TlsSigner tlsSigner, byte[] cr, byte[] sr)
-        throws IOException
+    private void processSRPKeyExchange(InputStream is, Signer signer) throws IOException
     {
         InputStream sigIn = is;
-        Signer signer = null;
-        if (tlsSigner != null)
+        if (signer != null)
         {
-            signer = tlsSigner.createSigner();
-            signer.init(false, this.serverPublicKey);
-            signer.update(cr, 0, cr.length);
-            signer.update(sr, 0, sr.length);
-
             sigIn = new SignerInputStream(is, signer);
         }
 

@@ -201,6 +201,15 @@ public class TlsUtils
         }
     }
 
+    protected static void writeGMTUnixTime(byte[] buf, int offset)
+    {
+        int t = (int) (System.currentTimeMillis() / 1000L);
+        buf[offset] = (byte) (t >> 24);
+        buf[offset + 1] = (byte) (t >> 16);
+        buf[offset + 2] = (byte) (t >> 8);
+        buf[offset + 3] = (byte) t;
+    }
+
     protected static void writeVersion(OutputStream os) throws IOException
     {
         os.write(3);
@@ -236,7 +245,7 @@ public class TlsUtils
         }
     }
 
-    protected static void PRF(byte[] secret, String asciiLabel, byte[] seed, byte[] buf)
+    protected static byte[] PRF(byte[] secret, String asciiLabel, byte[] seed, int size)
     {
         byte[] label = Strings.toByteArray(asciiLabel);
 
@@ -246,17 +255,24 @@ public class TlsUtils
         System.arraycopy(secret, 0, s1, 0, s_half);
         System.arraycopy(secret, secret.length - s_half, s2, 0, s_half);
 
-        byte[] ls = new byte[label.length + seed.length];
-        System.arraycopy(label, 0, ls, 0, label.length);
-        System.arraycopy(seed, 0, ls, label.length, seed.length);
+        byte[] ls = concat(label, seed);
 
-        byte[] prf = new byte[buf.length];
+        byte[] buf = new byte[size];        
+        byte[] prf = new byte[size];
         hmac_hash(new MD5Digest(), s1, ls, prf);
         hmac_hash(new SHA1Digest(), s2, ls, buf);
-        for (int i = 0; i < buf.length; i++)
+        for (int i = 0; i < size; i++)
         {
             buf[i] ^= prf[i];
         }
+        return buf;
     }
 
+    static byte[] concat(byte[] a, byte[] b)
+    {
+        byte[] c = new byte[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
+    }
 }
