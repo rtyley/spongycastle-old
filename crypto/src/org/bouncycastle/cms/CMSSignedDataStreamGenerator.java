@@ -1024,6 +1024,7 @@ public class CMSSignedDataStreamGenerator
             {
                 SignerInformation        signer = (SignerInformation)it.next();
 
+                // TODO Verify the content type and calculated digest matche the precalculated SignerInfo
                 signerInfos.add(signer.toSignerInfo());
             }
             
