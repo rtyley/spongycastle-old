@@ -207,6 +207,12 @@ public class TlsUtils
         os.write(1);
     }
 
+    protected static void writeVersion(byte[] buf, int offset) throws IOException
+    {
+        buf[offset] = 3;
+        buf[offset + 1] = 1;
+    }
+
     private static void hmac_hash(Digest digest, byte[] secret, byte[] seed, byte[] out)
     {
         HMac mac = new HMac(digest);
