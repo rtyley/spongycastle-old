@@ -364,11 +364,14 @@ public class TlsProtocolHandler
                 this.serverRandom = new byte[32];
                 TlsUtils.readFully(this.serverRandom, is);
 
-                /*
-                 * Currently, we don't support session ids
-                 */
-                // byte[] sessionId =
-                TlsUtils.readOpaque8(is);
+                byte[] sessionId = TlsUtils.readOpaque8(is);
+                if (sessionId.length > 32)
+                {
+                    this.failWithError(TlsProtocolHandler.AL_fatal,
+                            TlsProtocolHandler.AP_illegal_parameter);
+                }
+
+                // TODO Inform the client of the session ID
 
                 /*
                  * Find out which ciphersuite the server has chosen and check
