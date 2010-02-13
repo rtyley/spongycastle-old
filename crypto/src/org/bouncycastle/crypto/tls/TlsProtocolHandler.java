@@ -20,11 +20,8 @@ import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
 public class TlsProtocolHandler
 {
     private static final short RL_CHANGE_CIPHER_SPEC = 20;
-
     private static final short RL_ALERT = 21;
-
     private static final short RL_HANDSHAKE = 22;
-
     private static final short RL_APPLICATION_DATA = 23;
 
     /*
@@ -34,55 +31,32 @@ public class TlsProtocolHandler
      certificate_verify(15), client_key_exchange(16),
      finished(20), (255)
      */
-
     private static final short HP_HELLO_REQUEST = 0;
-
     private static final short HP_CLIENT_HELLO = 1;
-
     private static final short HP_SERVER_HELLO = 2;
-
     private static final short HP_CERTIFICATE = 11;
-
     private static final short HP_SERVER_KEY_EXCHANGE = 12;
-
     private static final short HP_CERTIFICATE_REQUEST = 13;
-
     private static final short HP_SERVER_HELLO_DONE = 14;
-
     private static final short HP_CERTIFICATE_VERIFY = 15;
-
     private static final short HP_CLIENT_KEY_EXCHANGE = 16;
-
     private static final short HP_FINISHED = 20;
 
     /*
     * Our Connection states
     */
-
     private static final short CS_CLIENT_HELLO_SEND = 1;
-
     private static final short CS_SERVER_HELLO_RECEIVED = 2;
-
     private static final short CS_SERVER_CERTIFICATE_RECEIVED = 3;
-
     private static final short CS_SERVER_KEY_EXCHANGE_RECEIVED = 4;
-
     private static final short CS_CERTIFICATE_REQUEST_RECEIVED = 5;
-
     private static final short CS_SERVER_HELLO_DONE_RECEIVED = 6;
-
     private static final short CS_CLIENT_KEY_EXCHANGE_SEND = 7;
-
     private static final short CS_CERTIFICATE_VERIFY_SEND = 8;
-
     private static final short CS_CLIENT_CHANGE_CIPHER_SPEC_SEND = 9;
-
     private static final short CS_CLIENT_FINISHED_SEND = 10;
-
     private static final short CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED = 11;
-
     private static final short CS_DONE = 12;
-
 
     protected static final short AP_close_notify = 0;
     protected static final short AP_unexpected_message = 10;
@@ -118,21 +92,15 @@ public class TlsProtocolHandler
     /*
     * Queues for data from some protocols.
     */
-
     private ByteQueue applicationDataQueue = new ByteQueue();
-
     private ByteQueue changeCipherSpecQueue = new ByteQueue();
-
     private ByteQueue alertQueue = new ByteQueue();
-
     private ByteQueue handshakeQueue = new ByteQueue();
 
     /*
     * The Record Stream we use
     */
-
     private RecordStream rs;
-
     private SecureRandom random;
 
     private TlsInputStream tlsInputStream = null;
