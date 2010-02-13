@@ -6,9 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
 
 /**
@@ -568,14 +571,22 @@ public class TlsProtocolHandler
 
             case CS_SERVER_KEY_EXCHANGE_RECEIVED:
             {
-                // byte[] types =
-                TlsUtils.readOpaque8(is);
-                // byte[] auths =
-                TlsUtils.readOpaque16(is);
-
-                // TODO Validate/process
+                byte[] types = TlsUtils.readOpaque8(is);
+                byte[] authorities = TlsUtils.readOpaque16(is);
 
                 assertEmpty(is);
+
+                ArrayList authorityDNs = new ArrayList();
+
+                ByteArrayInputStream bis = new ByteArrayInputStream(authorities);
+                while (bis.available() > 0)
+                {
+                    byte[] dnBytes = TlsUtils.readOpaque16(bis);
+                    authorityDNs.add(X509Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
+                }
+
+                this.tlsClient.processServerCertificateRequest(types, authorityDNs);
+
                 break;
             }
             default:
