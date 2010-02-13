@@ -42,17 +42,17 @@ class DefaultTlsClient implements TlsClient
 //    private static final int TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA = 0xC021;
 //    private static final int TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA = 0xC022;
 
-    private TlsProtocolHandler handler;
     private CertificateVerifyer verifyer;
+
+    private TlsProtocolHandler handler;
 
     // (Optional) details for client-side authentication
     private Certificate clientCert = new Certificate(new X509CertificateStructure[0]);
     private AsymmetricKeyParameter clientPrivateKey = null;
     private TlsSigner clientSigner = null;
 
-    DefaultTlsClient(TlsProtocolHandler handler, CertificateVerifyer verifyer)
+    DefaultTlsClient(CertificateVerifyer verifyer)
     {
-        this.handler = handler;
         this.verifyer = verifyer;
     }
 
@@ -92,6 +92,11 @@ class DefaultTlsClient implements TlsClient
 
         this.clientCert = clientCertificate;
         this.clientPrivateKey = clientPrivateKey;
+    }
+
+    public void init(TlsProtocolHandler handler)
+    {
+        this.handler = handler;
     }
 
     public TlsCipherSuite createCipherSuite(int cipherSuite) throws IOException
