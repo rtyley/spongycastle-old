@@ -285,8 +285,7 @@ public class TlsProtocolHandler
 
                 assertEmpty(is);
 
-                this.chosenCipherSuite.processServerCertificate(serverCertificate,
-                    this.tlsClient.getCertificateVerifyer());
+                this.chosenCipherSuite.processServerCertificate(serverCertificate);
 
                 break;
             }

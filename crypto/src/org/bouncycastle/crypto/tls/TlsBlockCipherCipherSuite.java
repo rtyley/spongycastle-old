@@ -47,6 +47,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
     private static final BigInteger TWO = BigInteger.valueOf(2);
 
     private TlsProtocolHandler handler;
+    private CertificateVerifyer verifyer;
 
     private BlockCipher encryptCipher;
     private BlockCipher decryptCipher;
@@ -69,10 +70,13 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
     private BigInteger Yc;
     private byte[] pms;
 
-    protected TlsBlockCipherCipherSuite(TlsProtocolHandler handler, BlockCipher encrypt, BlockCipher decrypt,
-        Digest writeDigest, Digest readDigest, int cipherKeySize, short keyExchange)
+    protected TlsBlockCipherCipherSuite(TlsProtocolHandler handler, CertificateVerifyer verifyer,
+        BlockCipher encrypt, BlockCipher decrypt,
+        Digest writeDigest, Digest readDigest,
+        int cipherKeySize, short keyExchange)
     {
         this.handler = handler;
+        this.verifyer = verifyer;
         this.encryptCipher = encrypt;
         this.decryptCipher = decrypt;
         this.writeDigest = writeDigest;
@@ -287,8 +291,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
       }
     }
 
-    protected void processServerCertificate(Certificate serverCertificate,
-        CertificateVerifyer verifyer) throws IOException
+    protected void processServerCertificate(Certificate serverCertificate) throws IOException
     {
         X509CertificateStructure x509Cert = serverCertificate.certs[0];
         SubjectPublicKeyInfo keyInfo = x509Cert.getSubjectPublicKeyInfo();
@@ -344,8 +347,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         /*
          * Verify them.
          */
-        // TODO Instead of 'get'ting verifyer, delegate verification
-        if (!verifyer.isValid(serverCertificate.getCerts()))
+        if (!this.verifyer.isValid(serverCertificate.getCerts()))
         {
             handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_user_canceled);
         }
