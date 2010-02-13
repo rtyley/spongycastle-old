@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.List;
 
 interface TlsClient
 {
@@ -18,4 +19,7 @@ interface TlsClient
 
     // Hashtable is (Integer -> byte[])
     void processServerExtensions(Hashtable serverExtensions);
+
+    // List is (X509Name)
+    void processServerCertificateRequest(byte[] certificateTypes, List certificateAuthorities);
 }

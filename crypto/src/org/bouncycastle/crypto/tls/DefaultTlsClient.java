@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.crypto.CryptoException;
@@ -230,6 +231,11 @@ class DefaultTlsClient implements TlsClient
     {
         // TODO Validate/process serverExtensions (via client?)
         // TODO[SRP]
+    }
+
+    public void processServerCertificateRequest(byte[] certificateTypes, List certificateAuthorities)
+    {
+        // TODO Use provided info to choose a certificate in getCertificate()
     }
 
     private TlsCipherSuite createAESCipherSuite(int cipherKeySize, short keyExchange)
