@@ -12,9 +12,7 @@ class RecordStream
     private TlsProtocolHandler handler;
     private InputStream is;
     private OutputStream os;
-    protected CombinedHash hash1;
-    protected CombinedHash hash2;
-    protected CombinedHash hash3;
+    private CombinedHash hash;
     protected TlsCipher readCipher = null;
     protected TlsCipher writeCipher = null;
 
@@ -23,9 +21,7 @@ class RecordStream
         this.handler = handler;
         this.is = is;
         this.os = os;
-        this.hash1 = new CombinedHash();
-        this.hash2 = new CombinedHash();
-        this.hash3 = new CombinedHash();
+        this.hash = new CombinedHash();
         this.readCipher = new TlsNullCipherSuite();
         this.writeCipher = this.readCipher;
     }
@@ -65,9 +61,12 @@ class RecordStream
 
     void updateHandshakeData(byte[] message, int offset, int len)
     {
-        hash1.update(message, offset, len);
-        hash2.update(message, offset, len);
-        hash3.update(message, offset, len);
+        hash.update(message, offset, len);
+    }
+
+    byte[] getCurrentHash()
+    {
+        return doFinal(new CombinedHash(hash));
     }
 
     protected void close() throws IOException
@@ -98,5 +97,12 @@ class RecordStream
     protected void flush() throws IOException
     {
         os.flush();
+    }
+
+    private static byte[] doFinal(CombinedHash ch)
+    {
+        byte[] bs = new byte[ch.getDigestSize()];
+        ch.doFinal(bs, 0);
+        return bs;
     }
 }

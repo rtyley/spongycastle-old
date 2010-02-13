@@ -25,12 +25,12 @@ abstract class TlsCipherSuite
     protected abstract void processServerCertificate(Certificate serverCertificate) throws IOException;
 
     protected abstract void skipServerKeyExchange() throws IOException;
-    protected abstract void processServerKeyExchange(InputStream is, byte[] cr, byte[] sr)
+    protected abstract void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException;
 
     protected abstract byte[] generateClientKeyExchange() throws IOException;
 
     protected abstract byte[] getPremasterSecret();
 
-    protected abstract TlsCipher createCipher(byte[] ms, byte[] cr, byte[] sr);
+    protected abstract TlsCipher createCipher(SecurityParameters securityParameters);
 }

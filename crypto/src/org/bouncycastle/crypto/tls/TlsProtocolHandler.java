@@ -143,9 +143,7 @@ public class TlsProtocolHandler
     private boolean appDataReady = false;
     private boolean extendedClientHello;
 
-    private byte[] clientRandom;
-    private byte[] serverRandom;
-    private byte[] ms;
+    private SecurityParameters securityParameters = null;
 
     private int[] offeredCipherSuites = null;
     private TlsCipherSuite chosenCipherSuite = null;
@@ -216,7 +214,6 @@ public class TlsProtocolHandler
                 *
                 * RFC2246 defines on page 13, that we should ignore this.
                 */
-
         }
     }
 
@@ -317,15 +314,14 @@ public class TlsProtocolHandler
                  */
                 byte[] receivedChecksum = new byte[12];
                 TlsUtils.readFully(receivedChecksum, is);
+
                 assertEmpty(is);
 
                 /*
                  * Calculate our own checksum.
                  */
-                byte[] checksum = new byte[12];
-                byte[] md5andsha1 = new byte[16 + 20];
-                rs.hash2.doFinal(md5andsha1, 0);
-                TlsUtils.PRF(this.ms, "server finished", md5andsha1, checksum);
+                byte[] checksum = TlsUtils.PRF(securityParameters.masterSecret, "server finished",
+                    rs.getCurrentHash(), 12);
 
                 /*
                  * Compare both checksums.
@@ -364,8 +360,8 @@ public class TlsProtocolHandler
                 /*
                  * Read the server random
                  */
-                this.serverRandom = new byte[32];
-                TlsUtils.readFully(this.serverRandom, is);
+                securityParameters.serverRandom = new byte[32];
+                TlsUtils.readFully(securityParameters.serverRandom, is);
 
                 byte[] sessionId = TlsUtils.readOpaque8(is);
                 if (sessionId.length > 32)
@@ -472,10 +468,8 @@ public class TlsProtocolHandler
 
                 if (isClientCertificateRequested)
                 {
-                    byte[] md5andsha1 = new byte[16 + 20];
-                    rs.hash3.doFinal(md5andsha1, 0);
-
-                    byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(md5andsha1);
+                    byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(
+                        rs.getCurrentHash());
                     if (clientCertificateSignature != null)
                     {
                         sendCertificateVerify(clientCertificateSignature);
@@ -494,31 +488,29 @@ public class TlsProtocolHandler
                 connection_state = CS_CLIENT_CHANGE_CIPHER_SPEC_SEND;
 
                 /*
-                 * Calculate the ms
+                 * Calculate the master_secret
                  */
-                this.ms = new byte[48];
-                byte[] random = new byte[clientRandom.length
-                        + serverRandom.length];
-                System.arraycopy(clientRandom, 0, random, 0,
-                        clientRandom.length);
-                System.arraycopy(serverRandom, 0, random, clientRandom.length,
-                        serverRandom.length);
-                TlsUtils.PRF(this.chosenCipherSuite.getPremasterSecret(),
-                        "master secret", random, this.ms);
+                securityParameters.masterSecret = TlsUtils.PRF(
+                    this.chosenCipherSuite.getPremasterSecret(),
+                    "master secret",
+                    TlsUtils.concat(securityParameters.clientRandom, securityParameters.serverRandom),
+                    48);
+
+                /* TODO: RFC 2246 8.1.
+                 * "The pre_master_secret should be deleted from memory once the
+                 * master_secret has been computed. 
+                 */
 
                 /*
                  * Initialize our cipher suite
                  */
-                rs.writeCipher = this.chosenCipherSuite.createCipher(this.ms,
-                        clientRandom, serverRandom);
+                rs.writeCipher = this.chosenCipherSuite.createCipher(securityParameters);
 
                 /*
                  * Send our finished message.
                  */
-                byte[] checksum = new byte[12];
-                byte[] md5andsha1 = new byte[16 + 20];
-                rs.hash1.doFinal(md5andsha1, 0);
-                TlsUtils.PRF(this.ms, "client finished", md5andsha1, checksum);
+                byte[] checksum = TlsUtils.PRF(securityParameters.masterSecret, "client finished",
+                    rs.getCurrentHash(), 12);
 
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 TlsUtils.writeUint8(HP_FINISHED, bos);
@@ -547,8 +539,7 @@ public class TlsProtocolHandler
 
             case CS_SERVER_CERTIFICATE_RECEIVED:
 
-                this.chosenCipherSuite.processServerKeyExchange(is,
-                        this.clientRandom, this.serverRandom);
+                this.chosenCipherSuite.processServerKeyExchange(is, securityParameters);
 
                 assertEmpty(is);
                 break;
@@ -792,18 +783,14 @@ public class TlsProtocolHandler
         *
         * First, generate some random data.
         */
-        this.clientRandom = new byte[32];
-        random.nextBytes(this.clientRandom);
-
-        int t = (int)(System.currentTimeMillis() / 1000);
-        this.clientRandom[0] = (byte)(t >> 24);
-        this.clientRandom[1] = (byte)(t >> 16);
-        this.clientRandom[2] = (byte)(t >> 8);
-        this.clientRandom[3] = (byte)t;
+        securityParameters = new SecurityParameters();
+        securityParameters.clientRandom = new byte[32];
+        random.nextBytes(securityParameters.clientRandom);
+        TlsUtils.writeGMTUnixTime(securityParameters.clientRandom, 0);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         TlsUtils.writeVersion(os);
-        os.write(this.clientRandom);
+        os.write(securityParameters.clientRandom);
 
         /*
         * Length of Session id
