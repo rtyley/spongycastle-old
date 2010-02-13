@@ -407,22 +407,24 @@ public class TlsProtocolHandler
                  * requested extended functionality via the extended client
                  * hello message specified in Section 2.1.
                  */
-                if (extendedClientHello && is.available() > 0)
+                if (extendedClientHello)
                 {
-                    // Process extensions from extended server hello
-                    byte[] extBytes = TlsUtils.readOpaque16(is);
-
                     // Integer -> byte[]
                     Hashtable serverExtensions = new Hashtable();
 
-                    ByteArrayInputStream ext = new ByteArrayInputStream(
-                            extBytes);
-                    while (ext.available() > 0)
+                    if (is.available() > 0)
                     {
-                        int extType = TlsUtils.readUint16(ext);
-                        byte[] extValue = TlsUtils.readOpaque16(ext);
+                        // Process extensions from extended server hello
+                        byte[] extBytes = TlsUtils.readOpaque16(is);
 
-                        serverExtensions.put(new Integer(extType), extValue);
+                        ByteArrayInputStream ext = new ByteArrayInputStream(extBytes);
+                        while (ext.available() > 0)
+                        {
+                            int extType = TlsUtils.readUint16(ext);
+                            byte[] extValue = TlsUtils.readOpaque16(ext);
+
+                            serverExtensions.put(new Integer(extType), extValue);
+                        }
                     }
 
                     tlsClient.processServerExtensions(serverExtensions);
