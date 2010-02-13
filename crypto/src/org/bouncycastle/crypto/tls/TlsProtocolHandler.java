@@ -986,12 +986,6 @@ public class TlsProtocolHandler
         return this.tlsOutputStream;
     }
 
-    /** @deprecated use 'getInputStream' instead */
-    public TlsInputStream getTlsInputStream()
-    {
-        return this.tlsInputStream;
-    }
-
     /**
      * @return An InputStream which can be used to read data.
      */
