@@ -530,6 +530,8 @@ public class CMSSignedDataGenerator
         {
             SignerInformation signer = (SignerInformation)it.next();
             digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
+
+            // TODO Verify the content type and calculated digest match the precalculated SignerInfo
             signerInfos.add(signer.toSignerInfo());
         }
         
