@@ -439,8 +439,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
                 */
                 pms = new byte[48];
                 handler.getRandom().nextBytes(pms);
-                pms[0] = 3;
-                pms[1] = 1;
+                TlsUtils.writeVersion(pms, 0);
 
                 /*
                 * Encode the pms and send it to the server.
@@ -448,13 +447,12 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
                 * Prepare an PKCS1Encoding with good random
                 * padding.
                 */
-                RSABlindedEngine rsa = new RSABlindedEngine();
-                PKCS1Encoding encoding = new PKCS1Encoding(rsa);
+                PKCS1Encoding encoding = new PKCS1Encoding(new RSABlindedEngine());
                 encoding.init(true, new ParametersWithRandom(this.serverPublicKey, handler.getRandom()));
-                byte[] encrypted = null;
+
                 try
                 {
-                    encrypted = encoding.processBlock(pms, 0, pms.length);
+                    return encoding.processBlock(pms, 0, pms.length);
                 }
                 catch (InvalidCipherTextException e)
                 {
@@ -462,9 +460,8 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
                     * This should never happen, only during decryption.
                     */
                     handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
+                    return null;
                 }
-
-                return encrypted;
             }
 
             case TlsCipherSuite.KE_DHE_DSS:
