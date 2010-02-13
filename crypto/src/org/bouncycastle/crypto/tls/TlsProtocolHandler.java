@@ -118,7 +118,7 @@ public class TlsProtocolHandler
 
     private TlsClient tlsClient = null;
 
-    public TlsProtocolHandler(InputStream is, OutputStream os)
+    private static SecureRandom createSecureRandom()
     {
         /*
          * We use our threaded seed generator to generate a good random
@@ -126,19 +126,25 @@ public class TlsProtocolHandler
          * the constructor with a SecureRandom.
          */
         ThreadedSeedGenerator tsg = new ThreadedSeedGenerator();
-        this.random = new SecureRandom();
+        SecureRandom random = new SecureRandom();
+
         /*
          * Hopefully, 20 bytes in fast mode are good enough.
          */
-        this.random.setSeed(tsg.generateSeed(20, true));
+        random.setSeed(tsg.generateSeed(20, true));
 
-        this.rs = new RecordStream(this, is, os);
+        return random;
+    }
+
+    public TlsProtocolHandler(InputStream is, OutputStream os)
+    {
+        this(is, os, createSecureRandom());
     }
 
     public TlsProtocolHandler(InputStream is, OutputStream os, SecureRandom sr)
     {
-        this.random = sr;
         this.rs = new RecordStream(this, is, os);
+        this.random = sr;
     }
 
     SecureRandom getRandom()
