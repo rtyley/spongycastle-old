@@ -284,20 +284,7 @@ public class CMSSignedGenerator
 
     static SignerIdentifier getSignerIdentifier(X509Certificate cert)
     {
-        TBSCertificateStructure tbs;        
-        try
-        {
-            tbs = CMSUtils.getTBSCertificateStructure(cert);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new IllegalArgumentException(
-                "can't extract TBS structure from this cert");
-        }
-
-        IssuerAndSerialNumber encSid = new IssuerAndSerialNumber(tbs
-                .getIssuer(), tbs.getSerialNumber().getValue());
-        return new SignerIdentifier(encSid);
+        return new SignerIdentifier(CMSUtils.getIssuerAndSerialNumber(cert));
     }
 
     static SignerIdentifier getSignerIdentifier(byte[] subjectKeyIdentifier)
