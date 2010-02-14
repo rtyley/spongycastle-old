@@ -75,7 +75,7 @@ class CMSEnvelopedHelper
     Cipher createAsymmetricCipher(
         String encryptionOid,
         Provider provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException
+        throws NoSuchAlgorithmException, NoSuchPaddingException
     {
         try
         {
@@ -203,7 +203,7 @@ class CMSEnvelopedHelper
         return keySize.intValue();
     }
 
-    Cipher getCipherInstance(
+    private Cipher getCipherInstance(
         String algName,
         Provider provider)
         throws NoSuchAlgorithmException, NoSuchPaddingException
@@ -263,7 +263,7 @@ class CMSEnvelopedHelper
         }
     }
 
-    Cipher getSymmetricCipher(String encryptionOID, Provider provider)
+    Cipher createSymmetricCipher(String encryptionOID, Provider provider)
         throws NoSuchAlgorithmException, NoSuchPaddingException
     {
         try
@@ -282,7 +282,7 @@ class CMSEnvelopedHelper
             {
                 if (provider != null)
                 {
-                    return getSymmetricCipher(encryptionOID, null); // roll back to default
+                    return createSymmetricCipher(encryptionOID, null); // roll back to default
                 }
                 throw e;
             }

@@ -10,7 +10,6 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
@@ -29,7 +28,6 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientIdentifier;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
 import org.bouncycastle.asn1.cms.OriginatorIdentifierOrKey;
@@ -39,24 +37,28 @@ import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
 import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 
 class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
 {
-    private DERObjectIdentifier algorithmOID;
-    private KeyPair senderKeyPair;
+    private DERObjectIdentifier keyAgreementOID;
+    private DERObjectIdentifier keyEncryptionOID;
     private ArrayList recipientCerts;
-    private DERObjectIdentifier wrapAlgorithmOID;
+    private KeyPair senderKeyPair;
 
     KeyAgreeRecipientInfoGenerator()
     {
     }
 
-    void setAlgorithmOID(DERObjectIdentifier algorithmOID)
+    void setKeyAgreementOID(DERObjectIdentifier keyAgreementOID)
     {
-        this.algorithmOID = algorithmOID;
+        this.keyAgreementOID = keyAgreementOID;
+    }
+
+    void setKeyEncryptionOID(DERObjectIdentifier keyEncryptionOID)
+    {
+        this.keyEncryptionOID = keyEncryptionOID;
     }
 
     void setRecipientCerts(Collection recipientCerts)
@@ -69,17 +71,9 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
         this.senderKeyPair = senderKeyPair;
     }
 
-    void setWrapAlgorithmOID(DERObjectIdentifier wrapAlgorithmOID)
-    {
-        this.wrapAlgorithmOID = wrapAlgorithmOID;
-    }
-
     public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
             Provider prov) throws GeneralSecurityException
     {
-        String agreementAlgorithm = algorithmOID.getId();
-        String cekWrapAlgorithm = wrapAlgorithmOID.getId();
-
         PublicKey senderPublicKey = senderKeyPair.getPublic();
         PrivateKey senderPrivateKey = senderKeyPair.getPrivate();
 
@@ -88,7 +82,7 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
         try
         {
             originator = new OriginatorIdentifierOrKey(
-                    createOriginatorPublicKey(senderPublicKey));
+                createOriginatorPublicKey(senderPublicKey));
         }
         catch (IOException e)
         {
@@ -97,13 +91,14 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
 
 
         ASN1OctetString ukm = null;
-        if (agreementAlgorithm.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
+        if (keyAgreementOID.getId().equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
         {
             try
             {
                 ECParameterSpec ecParamSpec = ((ECPublicKey)senderPublicKey).getParams();
 
-                KeyPairGenerator ephemKPG = KeyPairGenerator.getInstance(agreementAlgorithm, prov);
+                KeyPairGenerator ephemKPG = KeyPairGenerator.getInstance(
+                    keyAgreementOID.getId(), prov);
                 ephemKPG.initialize(ecParamSpec, random);
 
                 KeyPair ephemKP = ephemKPG.generateKeyPair();
@@ -113,11 +108,12 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
                         createOriginatorPublicKey(ephemKP.getPublic()), null));
 
                 senderPrivateKey = new MQVPrivateKeySpec(
-                        senderPrivateKey, ephemKP.getPrivate(), ephemKP.getPublic());
+                    senderPrivateKey, ephemKP.getPrivate(), ephemKP.getPublic());
             }
             catch (InvalidAlgorithmParameterException e)
             {
-                throw new InvalidKeyException("cannot determine MQV ephemeral key pair parameters from public key: " + e);
+                throw new InvalidKeyException(
+                    "cannot determine MQV ephemeral key pair parameters from public key: " + e);
             }
             catch (IOException e)
             {
@@ -127,10 +123,10 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
 
 
         ASN1EncodableVector params = new ASN1EncodableVector();
-        params.add(wrapAlgorithmOID);
+        params.add(keyEncryptionOID);
         params.add(DERNull.INSTANCE);
-        AlgorithmIdentifier keyEncAlg = new AlgorithmIdentifier(algorithmOID,
-                new DERSequence(params));
+        AlgorithmIdentifier keyEncAlg = new AlgorithmIdentifier(keyAgreementOID,
+            new DERSequence(params));
 
 
         ASN1EncodableVector recipientEncryptedKeys = new ASN1EncodableVector();
@@ -139,46 +135,32 @@ class KeyAgreeRecipientInfoGenerator implements RecipientInfoGenerator
         {
             X509Certificate recipientCert = (X509Certificate)it.next();
 
-            TBSCertificateStructure tbsCert;
-            try
-            {
-                tbsCert = CMSUtils.getTBSCertificateStructure(recipientCert);
-            }
-            catch (CertificateEncodingException e)
-            {
-                throw new IllegalArgumentException(
-                        "can't extract TBS structure from certificate");
-            }
-
             // TODO Should there be a SubjectKeyIdentifier-based alternative?
-            IssuerAndSerialNumber issuerSerial = new IssuerAndSerialNumber(
-                    tbsCert.getIssuer(), tbsCert.getSerialNumber().getValue());
-            KeyAgreeRecipientIdentifier karid = new KeyAgreeRecipientIdentifier(issuerSerial);
+            KeyAgreeRecipientIdentifier karid = new KeyAgreeRecipientIdentifier(
+                CMSUtils.getIssuerAndSerialNumber(recipientCert));
 
             PublicKey recipientPublicKey = recipientCert.getPublicKey();
 
-            if (agreementAlgorithm.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
+            if (keyAgreementOID.getId().equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
             {
                 recipientPublicKey = new MQVPublicKeySpec(recipientPublicKey, recipientPublicKey);
             }
 
             // Use key agreement to choose a wrap key for this recipient
-            KeyAgreement agreement = KeyAgreement.getInstance(agreementAlgorithm, prov);
-            agreement.init(senderPrivateKey, random);
-            agreement.doPhase(recipientPublicKey, true);
-            SecretKey wrapKey = agreement.generateSecret(cekWrapAlgorithm);
+            KeyAgreement keyAgreement = KeyAgreement.getInstance(keyAgreementOID.getId(), prov);
+            keyAgreement.init(senderPrivateKey, random);
+            keyAgreement.doPhase(recipientPublicKey, true);
+            SecretKey keyEncryptionKey = keyAgreement.generateSecret(keyEncryptionOID.getId());
 
             // Wrap the content encryption key with the agreement key
-            Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
-                    cekWrapAlgorithm, prov);
-            // TODO Should we try alternate ways of wrapping?
-            //   (see KeyTransRecipientInfoGenerator.generate)
-            keyCipher.init(Cipher.WRAP_MODE, wrapKey, random);
-            byte[] encKeyBytes = keyCipher.wrap(contentEncryptionKey);
+            Cipher keyEncryptionCipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(
+                keyEncryptionOID.getId(), prov);
+            keyEncryptionCipher.init(Cipher.WRAP_MODE, keyEncryptionKey, random);
+            byte[] encryptedKeyBytes = keyEncryptionCipher.wrap(contentEncryptionKey);
 
-            ASN1OctetString encKey = new DEROctetString(encKeyBytes);
+            ASN1OctetString encryptedKey = new DEROctetString(encryptedKeyBytes);
 
-            recipientEncryptedKeys.add(new RecipientEncryptedKey(karid, encKey));
+            recipientEncryptedKeys.add(new RecipientEncryptedKey(karid, encryptedKey));
         }
 
         return new RecipientInfo(new KeyAgreeRecipientInfo(originator, ukm,

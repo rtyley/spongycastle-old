@@ -3,9 +3,9 @@ package org.bouncycastle.cms;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Provider;
+import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 import javax.crypto.Cipher;
@@ -39,16 +39,7 @@ class KeyTransRecipientInfoGenerator
 
     void setRecipientCert(X509Certificate recipientCert)
     {
-        try
-        {
-            this.recipientTBSCert = CMSUtils.getTBSCertificateStructure(recipientCert);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new IllegalArgumentException(
-                    "can't extract TBS structure from this cert");
-        }
-
+        this.recipientTBSCert = CMSUtils.getTBSCertificateStructure(recipientCert);
         this.recipientPublicKey = recipientCert.getPublicKey();
         this.info = recipientTBSCert.getSubjectPublicKeyInfo();
     }
@@ -59,8 +50,8 @@ class KeyTransRecipientInfoGenerator
 
         try
         {
-            info = SubjectPublicKeyInfo.getInstance(ASN1Object
-                    .fromByteArray(recipientPublicKey.getEncoded()));
+            info = SubjectPublicKeyInfo.getInstance(
+                ASN1Object.fromByteArray(recipientPublicKey.getEncoded()));
         }
         catch (IOException e)
         {
@@ -77,16 +68,17 @@ class KeyTransRecipientInfoGenerator
     public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
             Provider prov) throws GeneralSecurityException
     {
-        AlgorithmIdentifier keyEncAlg = info.getAlgorithmId();
+        AlgorithmIdentifier keyEncryptionAlgorithm = info.getAlgorithmId();
 
-        byte[] encKeyBytes = null;
+        byte[] encryptedKeyBytes = null;
 
-        Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
-                keyEncAlg.getObjectId().getId(), prov);
+        Cipher keyEncryptionCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
+            keyEncryptionAlgorithm.getObjectId().getId(), prov);
+
         try
         {
-            keyCipher.init(Cipher.WRAP_MODE, recipientPublicKey, random);
-            encKeyBytes = keyCipher.wrap(contentEncryptionKey);
+            keyEncryptionCipher.init(Cipher.WRAP_MODE, recipientPublicKey, random);
+            encryptedKeyBytes = keyEncryptionCipher.wrap(contentEncryptionKey);
         }
         catch (GeneralSecurityException e)
         {
@@ -97,20 +89,22 @@ class KeyTransRecipientInfoGenerator
         catch (UnsupportedOperationException e)
         {
         }
-
-        // some providers do not support wrap
-        if (encKeyBytes == null)
+        catch (ProviderException e)   
         {
-            keyCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
-            encKeyBytes = keyCipher.doFinal(contentEncryptionKey.getEncoded());
+        }
+
+        // some providers do not support WRAP (this appears to be only for asymmetric algorithms) 
+        if (encryptedKeyBytes == null)
+        {
+            keyEncryptionCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
+            encryptedKeyBytes = keyEncryptionCipher.doFinal(contentEncryptionKey.getEncoded());
         }
 
         RecipientIdentifier recipId;
         if (recipientTBSCert != null)
         {
             IssuerAndSerialNumber issuerAndSerial = new IssuerAndSerialNumber(
-                    recipientTBSCert.getIssuer(), recipientTBSCert
-                            .getSerialNumber().getValue());
+                recipientTBSCert.getIssuer(), recipientTBSCert.getSerialNumber().getValue());
             recipId = new RecipientIdentifier(issuerAndSerial);
         }
         else
@@ -118,7 +112,7 @@ class KeyTransRecipientInfoGenerator
             recipId = new RecipientIdentifier(subjectKeyIdentifier);
         }
 
-        return new RecipientInfo(new KeyTransRecipientInfo(recipId, keyEncAlg,
-            new DEROctetString(encKeyBytes)));
+        return new RecipientInfo(new KeyTransRecipientInfo(recipId, keyEncryptionAlgorithm,
+            new DEROctetString(encryptedKeyBytes)));
     }
 }

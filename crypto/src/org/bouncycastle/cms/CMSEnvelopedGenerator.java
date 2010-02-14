@@ -140,9 +140,21 @@ public class CMSEnvelopedGenerator
         SecretKey   key,
         byte[]      keyIdentifier)
     {
+        addKEKRecipient(key, new KEKIdentifier(keyIdentifier, null, null));
+    }
+
+    /**
+     * add a KEK recipient.
+     * @param key the secret key to use for wrapping
+     * @param kekIdentifier a KEKIdentifier structure (identifies the key)
+     */
+    public void addKEKRecipient(
+        SecretKey       key,
+        KEKIdentifier   kekIdentifier)
+    {
         KEKRecipientInfoGenerator kekrig = new KEKRecipientInfoGenerator();
-        kekrig.setKEKIdentifier(new KEKIdentifier(keyIdentifier, null, null));
-        kekrig.setWrapKey(key);
+        kekrig.setKEKIdentifier(kekIdentifier);
+        kekrig.setKeyEncryptionKey(key);
 
         recipientInfoGenerators.add(kekrig);
     }
@@ -154,8 +166,8 @@ public class CMSEnvelopedGenerator
         PBKDF2Params params = new PBKDF2Params(pbeKey.getSalt(), pbeKey.getIterationCount());
 
         PasswordRecipientInfoGenerator prig = new PasswordRecipientInfoGenerator();
-        prig.setDerivationAlg(new AlgorithmIdentifier(PKCSObjectIdentifiers.id_PBKDF2, params));
-        prig.setWrapKey(new SecretKeySpec(pbeKey.getEncoded(kekAlgorithmOid), kekAlgorithmOid));
+        prig.setKeyDerivationAlgorithm(new AlgorithmIdentifier(PKCSObjectIdentifiers.id_PBKDF2, params));
+        prig.setKeyEncryptionKey(new SecretKeySpec(pbeKey.getEncoded(kekAlgorithmOid), kekAlgorithmOid));
 
         recipientInfoGenerators.add(prig);
     }
@@ -261,10 +273,10 @@ public class CMSEnvelopedGenerator
          */
 
         KeyAgreeRecipientInfoGenerator karig = new KeyAgreeRecipientInfoGenerator();
-        karig.setAlgorithmOID(new DERObjectIdentifier(agreementAlgorithm));
+        karig.setKeyAgreementOID(new DERObjectIdentifier(agreementAlgorithm));
+        karig.setKeyEncryptionOID(new DERObjectIdentifier(cekWrapAlgorithm));
         karig.setRecipientCerts(recipientCerts);
         karig.setSenderKeyPair(new KeyPair(senderPublicKey, senderPrivateKey));
-        karig.setWrapAlgorithmOID(new DERObjectIdentifier(cekWrapAlgorithm));
 
         recipientInfoGenerators.add(karig);
     }

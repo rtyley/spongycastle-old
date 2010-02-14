@@ -23,29 +23,6 @@ public class KEKRecipientInformation
 {
     private KEKRecipientInfo      info;
 
-    /**
-     * @deprecated
-     */
-    public KEKRecipientInformation(
-        KEKRecipientInfo        info,
-        AlgorithmIdentifier     encAlg,
-        InputStream             data)
-    {
-        this(info, encAlg, null, null, data);
-    }
-
-    /**
-     * @deprecated
-     */
-    public KEKRecipientInformation(
-        KEKRecipientInfo        info,
-        AlgorithmIdentifier     encAlg,
-        AlgorithmIdentifier     macAlg,
-        InputStream             data)
-    {
-        this(info, encAlg, macAlg, null, data);
-    }
-
     KEKRecipientInformation(
         KEKRecipientInfo        info,
         AlgorithmIdentifier     encAlg,
@@ -84,15 +61,11 @@ public class KEKRecipientInformation
     {
         try
         {
-            byte[]              encryptedKey = info.getEncryptedKey().getOctets();
-            Cipher              keyCipher = Cipher.getInstance(keyEncAlg.getObjectId().getId(), prov);
-
+            Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(
+                keyEncAlg.getObjectId().getId(), prov);
             keyCipher.init(Cipher.UNWRAP_MODE, key);
-
-            AlgorithmIdentifier aid = getActiveAlgID();
-            String              alg = aid.getObjectId().getId();
-            Key                 sKey = keyCipher.unwrap(
-                                        encryptedKey, alg, Cipher.SECRET_KEY);
+            Key sKey = keyCipher.unwrap(info.getEncryptedKey().getOctets(), getContentAlgorithmName(),
+                Cipher.SECRET_KEY);
 
             return getContentFromSessionKey(sKey, prov);
         }
