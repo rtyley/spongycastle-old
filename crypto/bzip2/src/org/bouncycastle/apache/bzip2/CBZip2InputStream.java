@@ -41,13 +41,13 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
         //throw new CCoruptionError();
     }
 
-    private static void badBGLengths() {
-        cadvise();
-    }
-
-    private static void bitStreamEOF() {
-        cadvise();
-    }
+//    private static void badBGLengths() {
+//        cadvise();
+//    }
+//
+//    private static void bitStreamEOF() {
+//        cadvise();
+//    }
 
     private static void compressedStreamEOF() {
         cadvise();
