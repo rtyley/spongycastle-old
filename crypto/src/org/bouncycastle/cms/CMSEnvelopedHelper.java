@@ -77,15 +77,20 @@ class CMSEnvelopedHelper
         Provider provider)
         throws NoSuchAlgorithmException, NoSuchPaddingException
     {
-        try
+        String asymName = getAsymmetricEncryptionAlgName(encryptionOid);
+        if (!asymName.equals(encryptionOid))
         {
-            // this is reversed as the Sun policy files now allow unlimited strength RSA
-            return getCipherInstance(getAsymmetricEncryptionAlgName(encryptionOid), provider);
+            try
+            {
+                // this is reversed as the Sun policy files now allow unlimited strength RSA
+                return getCipherInstance(asymName, provider);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                // Ignore
+            }
         }
-        catch (NoSuchAlgorithmException e)
-        {
-            return getCipherInstance(encryptionOid, provider);
-        }
+        return getCipherInstance(encryptionOid, provider);
     }
 
     KeyGenerator createSymmetricKeyGenerator(
