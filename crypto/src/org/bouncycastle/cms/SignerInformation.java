@@ -571,7 +571,7 @@ public class SignerInformation
         {
             if (encName.equals("RSA"))
             {
-                Cipher c = CMSEnvelopedHelper.INSTANCE.getCipherInstance("RSA/ECB/PKCS1Padding", sigProvider);
+                Cipher c = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher("RSA/ECB/PKCS1Padding", sigProvider);
 
                 c.init(Cipher.DECRYPT_MODE, key);
                 
