@@ -193,8 +193,10 @@ public class TlsProtocolHandler
 
     private void processHandshake() throws IOException
     {
+        boolean read;
         do
         {
+            read = false;
             /*
             * We need the first 4 bytes, they contain type and length of
             * the message.
@@ -242,11 +244,11 @@ public class TlsProtocolHandler
                      * Now, parse the message.
                      */
                     processHandshakeMessage(type, buf);
-                    continue;
+                    read = true;
                 }
             }
         }
-        while (false);
+        while (read);
     }
 
     private void processHandshakeMessage(short type, byte[] buf) throws IOException
