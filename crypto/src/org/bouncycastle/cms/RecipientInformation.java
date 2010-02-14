@@ -36,29 +36,6 @@ public abstract class RecipientInformation
     private MacInputStream macStream;
     private byte[]         resultMac;
 
-    /**
-     * @deprecated
-     */
-    protected RecipientInformation(
-        AlgorithmIdentifier encAlg,
-        AlgorithmIdentifier keyEncAlg,
-        InputStream data)
-    {
-        this(encAlg, null, keyEncAlg, data);
-    }
-
-    /**
-     * @deprecated
-     */
-    protected RecipientInformation(
-        AlgorithmIdentifier encAlg,
-        AlgorithmIdentifier macAlg,
-        AlgorithmIdentifier keyEncAlg,
-        InputStream data)
-    {
-        this(encAlg, macAlg, null, keyEncAlg, data);
-    }
-
     RecipientInformation(
         AlgorithmIdentifier encAlg,
         AlgorithmIdentifier macAlg,
@@ -84,6 +61,12 @@ public abstract class RecipientInformation
             return macAlg;
         }
         return authEncAlg;
+    }
+
+    String getContentAlgorithmName()
+    {
+        AlgorithmIdentifier activeAlgID = getActiveAlgID();
+        return CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(activeAlgID.getObjectId().getId());
     }
 
     public RecipientId getRID()
@@ -197,7 +180,7 @@ public abstract class RecipientInformation
             if (encAlg != null)
             {
                 String encAlg = this.encAlg.getObjectId().getId();
-                Cipher cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encAlg, provider);
+                Cipher cipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(encAlg, provider);
 
                 ASN1Object sParams = (ASN1Object)this.encAlg.getParameters();
 

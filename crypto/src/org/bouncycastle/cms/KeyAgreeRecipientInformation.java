@@ -187,15 +187,9 @@ public class KeyAgreeRecipientInformation
         Provider prov)
         throws GeneralSecurityException
     {
-        AlgorithmIdentifier aid = getActiveAlgID();
-        String alg = aid.getObjectId().getId();
-        byte[] encKeyOctets = encryptedKey.getOctets();
-
-        // TODO Should we try alternate ways of unwrapping?
-        //   (see KeyTransRecipientInformation.getSessionKey)
-        Cipher keyCipher = Cipher.getInstance(wrapAlg, prov);
+        Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(wrapAlg, prov);
         keyCipher.init(Cipher.UNWRAP_MODE, agreedKey);
-        return keyCipher.unwrap(encKeyOctets, alg, Cipher.SECRET_KEY);
+        return keyCipher.unwrap(encryptedKey.getOctets(), getContentAlgorithmName(), Cipher.SECRET_KEY);
     }
 
     protected Key getSessionKey(Key receiverPrivateKey, Provider prov)

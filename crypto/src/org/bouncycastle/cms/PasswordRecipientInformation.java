@@ -29,29 +29,6 @@ public class PasswordRecipientInformation
 {
     private PasswordRecipientInfo info;
 
-    /**
-     * @deprecated
-     */
-    public PasswordRecipientInformation(
-        PasswordRecipientInfo   info,
-        AlgorithmIdentifier     encAlg,
-        InputStream             data)
-    {
-        this(info, encAlg, null, null, data);
-    }
-
-    /**
-     * @deprecated
-     */
-    public PasswordRecipientInformation(
-        PasswordRecipientInfo   info,
-        AlgorithmIdentifier     encAlg,
-        AlgorithmIdentifier     macAlg,
-        InputStream             data)
-    {
-        this(info, encAlg, macAlg, null, data);
-    }
-
     PasswordRecipientInformation(
         PasswordRecipientInfo   info,
         AlgorithmIdentifier     encAlg,
@@ -171,20 +148,18 @@ public class PasswordRecipientInformation
     {
         try
         {
+            CMSEnvelopedHelper  helper = CMSEnvelopedHelper.INSTANCE;
             AlgorithmIdentifier kekAlg = AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm());
             ASN1Sequence        kekAlgParams = (ASN1Sequence)kekAlg.getParameters();
-            byte[]              encryptedKey = info.getEncryptedKey().getOctets();
             String              kekAlgName = DERObjectIdentifier.getInstance(kekAlgParams.getObjectAt(0)).getId();
-            Cipher keyCipher = Cipher.getInstance(
-                                        CMSEnvelopedHelper.INSTANCE.getRFC3211WrapperName(kekAlgName), prov);
+            String              wrapAlgName = helper.getRFC3211WrapperName(kekAlgName);
 
+            Cipher keyCipher = helper.createSymmetricCipher(wrapAlgName, prov);
             IvParameterSpec ivSpec = new IvParameterSpec(ASN1OctetString.getInstance(kekAlgParams.getObjectAt(1)).getOctets());
             keyCipher.init(Cipher.UNWRAP_MODE, new SecretKeySpec(((CMSPBEKey)key).getEncoded(kekAlgName), kekAlgName), ivSpec);
 
-            AlgorithmIdentifier aid = getActiveAlgID();
-            String              alg = aid.getObjectId().getId();
-            Key                 sKey = keyCipher.unwrap(
-                                        encryptedKey, alg, Cipher.SECRET_KEY);
+            Key sKey = keyCipher.unwrap(info.getEncryptedKey().getOctets(), getContentAlgorithmName(),
+                Cipher.SECRET_KEY);
 
             return getContentFromSessionKey(sKey, prov);
         }

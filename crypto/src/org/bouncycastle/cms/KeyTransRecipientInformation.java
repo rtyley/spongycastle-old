@@ -35,29 +35,6 @@ public class KeyTransRecipientInformation
 {
     private KeyTransRecipientInfo info;
 
-    /**
-     * @deprecated
-     */
-    public KeyTransRecipientInformation(
-        KeyTransRecipientInfo   info,
-        AlgorithmIdentifier     encAlg,
-        InputStream             data)
-    {
-        this(info, encAlg, null, null, data);
-    }
-
-    /**
-     * @deprecated
-     */
-    public KeyTransRecipientInformation(
-        KeyTransRecipientInfo   info,
-        AlgorithmIdentifier     encAlg,
-        AlgorithmIdentifier     macAlg,
-        InputStream             data)
-    {
-        this(info, encAlg, macAlg, null, data);
-    }
-
     KeyTransRecipientInformation(
             KeyTransRecipientInfo   info,
             AlgorithmIdentifier     encAlg,
@@ -108,24 +85,23 @@ public class KeyTransRecipientInformation
     protected Key getSessionKey(Key receiverPrivateKey, Provider prov)
         throws CMSException
     {
-        byte[] encryptedKey = info.getEncryptedKey().getOctets();
+        CMSEnvelopedHelper helper = CMSEnvelopedHelper.INSTANCE;
+
         String keyExchangeAlgorithm = getExchangeEncryptionAlgorithmName(keyEncAlg.getObjectId());
-
-        // TODO This may need looking at for AuthEnveloped case
-        AlgorithmIdentifier aid = getActiveAlgID();
-        String alg = CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(aid.getObjectId().getId());
-
 
         try
         {
             Key sKey = null;
 
-            Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(keyExchangeAlgorithm, prov);
+            Cipher keyCipher = helper.createAsymmetricCipher(keyExchangeAlgorithm, prov);
+
+            byte[] encryptedKeyBytes = info.getEncryptedKey().getOctets();
+            String contentAlgorithmName = getContentAlgorithmName();
 
             try
             {
                 keyCipher.init(Cipher.UNWRAP_MODE, receiverPrivateKey);
-                sKey = keyCipher.unwrap(encryptedKey, alg, Cipher.SECRET_KEY);
+                sKey = keyCipher.unwrap(encryptedKeyBytes, contentAlgorithmName, Cipher.SECRET_KEY);
             }
             catch (GeneralSecurityException e)
             {
@@ -140,11 +116,11 @@ public class KeyTransRecipientInformation
             {
             }
 
-            // some providers do not support UNWRAP
+            // some providers do not support UNWRAP (this appears to be only for asymmetric algorithms) 
             if (sKey == null)
             {
                 keyCipher.init(Cipher.DECRYPT_MODE, receiverPrivateKey);
-                sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), alg);
+                sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKeyBytes), contentAlgorithmName);
             }
 
             return sKey;

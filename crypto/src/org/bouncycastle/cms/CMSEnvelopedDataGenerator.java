@@ -79,7 +79,7 @@ public class CMSEnvelopedDataGenerator
 
         try
         {
-            Cipher cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encryptionOID, encProvider);
+            Cipher cipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(encryptionOID, encProvider);
 
             AlgorithmParameters params;
             

@@ -23,42 +23,37 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 class KEKRecipientInfoGenerator
     implements RecipientInfoGenerator
 {
-    // IssuerAndSerialNumber encSid;
-    // AlgorithmIdentifier keyEncAlg;
-    // ASN1OctetString subKeyId;
-
-    private SecretKey wrapKey;
-    private KEKIdentifier secKeyId;
+    private SecretKey keyEncryptionKey;
+    private KEKIdentifier kekIdentifier;
 
     // Derived
-    private AlgorithmIdentifier keyEncAlg;
+    private AlgorithmIdentifier keyEncryptionAlgorithm;
 
     KEKRecipientInfoGenerator()
     {
     }
 
-    void setWrapKey(SecretKey wrapKey)
+    void setKeyEncryptionKey(SecretKey keyEncryptionKey)
     {
-        this.wrapKey = wrapKey;
-        this.keyEncAlg = determineKeyEncAlg(wrapKey);
+        this.keyEncryptionKey = keyEncryptionKey;
+        this.keyEncryptionAlgorithm = determineKeyEncAlg(keyEncryptionKey);
     }
 
     void setKEKIdentifier(KEKIdentifier kekIdentifier)
     {
-        this.secKeyId = kekIdentifier;
+        this.kekIdentifier = kekIdentifier;
     }
 
     public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
             Provider prov) throws GeneralSecurityException
     {
-        Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
-                keyEncAlg.getObjectId().getId(), prov);
-        // TODO Should we try alternate ways of wrapping?
-        // (see KeyTransRecipientInfoGenerator.generate)
-        keyCipher.init(Cipher.WRAP_MODE, wrapKey, random);
-        ASN1OctetString encKey = new DEROctetString(keyCipher.wrap(contentEncryptionKey));
+        Cipher keyEncryptionCipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(
+            keyEncryptionAlgorithm.getObjectId().getId(), prov);
+        keyEncryptionCipher.init(Cipher.WRAP_MODE, keyEncryptionKey, random);
+        byte[] encryptedKeyBytes = keyEncryptionCipher.wrap(contentEncryptionKey);
+        ASN1OctetString encryptedKey = new DEROctetString(encryptedKeyBytes);
 
-        return new RecipientInfo(new KEKRecipientInfo(secKeyId, keyEncAlg, encKey));
+        return new RecipientInfo(new KEKRecipientInfo(kekIdentifier, keyEncryptionAlgorithm, encryptedKey));
     }
 
     private static AlgorithmIdentifier determineKeyEncAlg(SecretKey key)

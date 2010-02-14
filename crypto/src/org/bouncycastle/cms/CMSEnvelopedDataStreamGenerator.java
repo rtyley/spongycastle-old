@@ -186,7 +186,7 @@ public class CMSEnvelopedDataStreamGenerator
                 envGen.getRawOutputStream().write(new DERSet(recipientInfos).getEncoded());
             }
 
-            Cipher cipher = CMSEnvelopedHelper.INSTANCE.getSymmetricCipher(encryptionOID, provider);
+            Cipher cipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(encryptionOID, provider);
             
             cipher.init(Cipher.ENCRYPT_MODE, encKey, params, rand);
 

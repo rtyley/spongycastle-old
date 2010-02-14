@@ -19,21 +19,21 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 class PasswordRecipientInfoGenerator implements RecipientInfoGenerator
 {
-    private AlgorithmIdentifier derivationAlg;
-    private SecretKey wrapKey;
+    private AlgorithmIdentifier keyDerivationAlgorithm;
+    private SecretKey keyEncryptionKey;
 
     PasswordRecipientInfoGenerator()
     {
     }
 
-    void setDerivationAlg(AlgorithmIdentifier derivationAlg)
+    void setKeyDerivationAlgorithm(AlgorithmIdentifier keyDerivationAlgorithm)
     {
-        this.derivationAlg = derivationAlg;
+        this.keyDerivationAlgorithm = keyDerivationAlgorithm;
     }
 
-    void setWrapKey(SecretKey wrapKey)
+    void setKeyEncryptionKey(SecretKey keyEncryptionKey)
     {
-        this.wrapKey = wrapKey;
+        this.keyEncryptionKey = keyEncryptionKey;
     }
 
     public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
@@ -42,19 +42,23 @@ class PasswordRecipientInfoGenerator implements RecipientInfoGenerator
         // TODO Consider passing in the wrapAlgorithmOID instead
 
         CMSEnvelopedHelper helper = CMSEnvelopedHelper.INSTANCE;
-        String wrapAlgName = helper.getRFC3211WrapperName(wrapKey.getAlgorithm());
-        Cipher keyCipher = helper.createAsymmetricCipher(wrapAlgName, prov);
-        keyCipher.init(Cipher.WRAP_MODE, wrapKey, random);
-        ASN1OctetString encKey = new DEROctetString(keyCipher.wrap(contentEncryptionKey));
+        String wrapAlgName = helper.getRFC3211WrapperName(keyEncryptionKey.getAlgorithm());
+        Cipher keyCipher = helper.createSymmetricCipher(wrapAlgName, prov);        
+        keyCipher.init(Cipher.WRAP_MODE, keyEncryptionKey, random);
+        byte[] encryptedKeyBytes = keyCipher.wrap(contentEncryptionKey);
+
+        ASN1OctetString encryptedKey = new DEROctetString(encryptedKeyBytes);
+
 
         ASN1EncodableVector v = new ASN1EncodableVector();
-        v.add(new DERObjectIdentifier(wrapKey.getAlgorithm()));
+        v.add(new DERObjectIdentifier(keyEncryptionKey.getAlgorithm()));
         v.add(new DEROctetString(keyCipher.getIV()));
-        AlgorithmIdentifier keyEncAlg = new AlgorithmIdentifier(
-                PKCSObjectIdentifiers.id_alg_PWRI_KEK, new DERSequence(v));
+        AlgorithmIdentifier keyEncryptionAlgorithm = new AlgorithmIdentifier(
+            PKCSObjectIdentifiers.id_alg_PWRI_KEK, new DERSequence(v));
 
-        return new RecipientInfo(new PasswordRecipientInfo(derivationAlg,
-                keyEncAlg, encKey));
+
+        return new RecipientInfo(new PasswordRecipientInfo(keyDerivationAlgorithm,
+            keyEncryptionAlgorithm, encryptedKey));
     }
 
 }
