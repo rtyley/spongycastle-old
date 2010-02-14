@@ -25,6 +25,7 @@ import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
@@ -161,17 +162,24 @@ class CMSUtils
     }
 
     static TBSCertificateStructure getTBSCertificateStructure(
-        X509Certificate cert) throws CertificateEncodingException
+        X509Certificate cert)
     {
         try
         {
-            return TBSCertificateStructure.getInstance(ASN1Object
-                .fromByteArray(cert.getTBSCertificate()));
+            return TBSCertificateStructure.getInstance(
+                ASN1Object.fromByteArray(cert.getTBSCertificate()));
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new CertificateEncodingException(e.toString());
+            throw new IllegalArgumentException(
+                "can't extract TBS structure from this cert");
         }
+    }
+
+    static IssuerAndSerialNumber getIssuerAndSerialNumber(X509Certificate cert)
+    {
+        TBSCertificateStructure tbsCert = getTBSCertificateStructure(cert);
+        return new IssuerAndSerialNumber(tbsCert.getIssuer(), tbsCert.getSerialNumber().getValue());
     }
 
     private static ContentInfo readContentInfo(
