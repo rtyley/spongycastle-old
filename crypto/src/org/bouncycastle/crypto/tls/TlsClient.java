@@ -19,6 +19,8 @@ interface TlsClient
     // Hashtable is (Integer -> byte[])
     Hashtable generateClientExtensions();
 
+    void notifySessionID(byte[] sessionID);
+
     // Hashtable is (Integer -> byte[])
     void processServerExtensions(Hashtable serverExtensions);
 
