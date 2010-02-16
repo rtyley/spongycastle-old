@@ -457,7 +457,7 @@ public class TlsProtocolHandler
                         /*
                          * Calculate the master_secret
                          */
-                        byte[] pms = this.keyExchange.getPremasterSecret();
+                        byte[] pms = this.keyExchange.generatePremasterSecret();
 
                         securityParameters.masterSecret = TlsUtils.PRF(pms, "master secret",
                             TlsUtils.concat(securityParameters.clientRandom,
@@ -718,7 +718,7 @@ public class TlsProtocolHandler
     }
 
 //    public void connect(CertificateVerifyer verifyer, Certificate clientCertificate,
-//            AsymmetricKeyParameter clientPrivateKey) throws IOException
+//        AsymmetricKeyParameter clientPrivateKey) throws IOException
 //    {
 //        DefaultTlsClient client = new DefaultTlsClient(verifyer);
 //        client.enableClientAuthentication(clientCertificate, clientPrivateKey);

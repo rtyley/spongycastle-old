@@ -47,11 +47,11 @@ class SRPTlsKeyExchange extends TlsKeyExchange
             case KE_SRP:
                 this.tlsSigner = null;
                 break;
-            case KE_SRP_DSS:
-                this.tlsSigner = new TlsDSSSigner();
-                break;
             case KE_SRP_RSA:
                 this.tlsSigner = new TlsRSASigner();
+                break;
+            case KE_SRP_DSS:
+                this.tlsSigner = new TlsDSSSigner();
                 break;
             default:
                 throw new IllegalArgumentException("unsupported key exchange algorithm");
@@ -188,7 +188,7 @@ class SRPTlsKeyExchange extends TlsKeyExchange
             this.SRP_identity, this.SRP_password));
     }
 
-    protected byte[] getPremasterSecret() throws IOException
+    protected byte[] generatePremasterSecret() throws IOException
     {
         try
         {
