@@ -179,27 +179,27 @@ class DefaultTlsClient implements TlsClient
             case TLS_RSA_WITH_3DES_EDE_CBC_SHA:
             case TLS_RSA_WITH_AES_128_CBC_SHA:
             case TLS_RSA_WITH_AES_256_CBC_SHA:
-                return createKeyExchange(TlsKeyExchange.KE_RSA);
+                return createRSAKeyExchange();
 
             case TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA:
             case TLS_DH_DSS_WITH_AES_128_CBC_SHA:
             case TLS_DH_DSS_WITH_AES_256_CBC_SHA:
-                return createKeyExchange(TlsKeyExchange.KE_DH_DSS);
+                return createDHKeyExchange(TlsKeyExchange.KE_DH_DSS);
 
             case TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
             case TLS_DH_RSA_WITH_AES_128_CBC_SHA:
             case TLS_DH_RSA_WITH_AES_256_CBC_SHA:
-                return createKeyExchange(TlsKeyExchange.KE_DH_RSA);
+                return createDHKeyExchange(TlsKeyExchange.KE_DH_RSA);
 
             case TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
             case TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
             case TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
-                return createKeyExchange(TlsKeyExchange.KE_DHE_DSS);
+                return createDHKeyExchange(TlsKeyExchange.KE_DHE_DSS);
 
             case TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
             case TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
             case TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-                return createKeyExchange(TlsKeyExchange.KE_DHE_RSA);
+                return createDHKeyExchange(TlsKeyExchange.KE_DHE_RSA);
 
             case TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
             case TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
@@ -231,6 +231,8 @@ class DefaultTlsClient implements TlsClient
 
     public void processServerCertificateRequest(byte[] certificateTypes, List certificateAuthorities)
     {
+        // TODO There shouldn't be a certificate request for SRP 
+
         // TODO Use provided info to choose a certificate in getCertificate()
     }
 
@@ -304,9 +306,14 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    private TlsKeyExchange createKeyExchange(short keyExchange)
+    private TlsKeyExchange createDHKeyExchange(short keyExchange)
     {
-        return new DefaultTlsKeyExchange(handler, verifyer, keyExchange);
+        return new TlsDHKeyExchange(handler, verifyer, keyExchange);
+    }
+
+    private TlsKeyExchange createRSAKeyExchange()
+    {
+        return new TlsRSAKeyExchange(handler, verifyer);
     }
 
     private TlsKeyExchange createSRPExchange(short keyExchange)

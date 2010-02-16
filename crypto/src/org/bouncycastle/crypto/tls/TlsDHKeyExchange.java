@@ -11,11 +11,8 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.agreement.DHBasicAgreement;
-import org.bouncycastle.crypto.encodings.PKCS1Encoding;
-import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
 import org.bouncycastle.crypto.io.SignerInputStream;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -23,15 +20,14 @@ import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.util.BigIntegers;
 
 /**
- * A generic TLS 1.0 key exchange.
+ * TLS 1.0 DH key exchange.
  */
-class DefaultTlsKeyExchange implements TlsKeyExchange
+class TlsDHKeyExchange implements TlsKeyExchange
 {
     private static final BigInteger ONE = BigInteger.valueOf(1);
     private static final BigInteger TWO = BigInteger.valueOf(2);
@@ -43,19 +39,13 @@ class DefaultTlsKeyExchange implements TlsKeyExchange
 
     private AsymmetricKeyParameter serverPublicKey = null;
 
-    private RSAKeyParameters rsaServerPublicKey = null;
-
     private DHPublicKeyParameters dhAgreeServerPublicKey = null;
     private AsymmetricCipherKeyPair dhAgreeClientKeyPair = null;
 
-    private byte[] pms;
-
-    DefaultTlsKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer,
-        short keyExchange)
+    TlsDHKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
     {
         switch (keyExchange)
         {
-            case TlsKeyExchange.KE_RSA:
             case TlsKeyExchange.KE_DH_RSA:
             case TlsKeyExchange.KE_DH_DSS:
                 this.tlsSigner = null;
@@ -112,15 +102,6 @@ class DefaultTlsKeyExchange implements TlsKeyExchange
 
         switch (this.keyExchange)
         {
-            case TlsKeyExchange.KE_RSA:
-                if (!(this.serverPublicKey instanceof RSAKeyParameters))
-                {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
-                this.rsaServerPublicKey = validateRSAPublicKey((RSAKeyParameters)this.serverPublicKey);
-                break;
             case TlsKeyExchange.KE_DH_DSS:
                 if (!(this.serverPublicKey instanceof DHPublicKeyParameters))
                 {
@@ -172,134 +153,85 @@ class DefaultTlsKeyExchange implements TlsKeyExchange
 
     public void skipServerKeyExchange() throws IOException
     {
-        // RFC 2246 7.4.3.
-        switch (this.keyExchange)
+        if (tlsSigner != null)
         {
-            case KE_RSA:
-            case KE_DH_DSS:
-            case KE_DH_RSA:
-                break;
-
-            default:
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
-                    TlsProtocolHandler.AP_unexpected_message);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_unexpected_message);
         }
     }
 
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
-        switch (this.keyExchange)
+        if (tlsSigner == null)
         {
-            case TlsKeyExchange.KE_DHE_RSA:
-            case TlsKeyExchange.KE_DHE_DSS:
-                processDHServerKeyExchange(is, initSigner(tlsSigner, securityParameters));
-                break;
-
-            default:
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
-                    TlsProtocolHandler.AP_unexpected_message);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_unexpected_message);
         }
+
+        InputStream sigIn = is;
+        Signer signer = null;
+
+        if (tlsSigner != null)
+        {
+            signer = initSigner(tlsSigner, securityParameters);
+            sigIn = new SignerInputStream(is, signer);
+        }
+
+        byte[] pBytes = TlsUtils.readOpaque16(sigIn);
+        byte[] gBytes = TlsUtils.readOpaque16(sigIn);
+        byte[] YsBytes = TlsUtils.readOpaque16(sigIn);
+
+        if (signer != null)
+        {
+            byte[] sigByte = TlsUtils.readOpaque16(is);
+
+            if (!signer.verifySignature(sigByte))
+            {
+                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    TlsProtocolHandler.AP_bad_certificate);
+            }
+        }
+
+        BigInteger p = new BigInteger(1, pBytes);
+        BigInteger g = new BigInteger(1, gBytes);
+        BigInteger Ys = new BigInteger(1, YsBytes);
+
+        this.dhAgreeServerPublicKey = validateDHPublicKey(new DHPublicKeyParameters(Ys,
+            new DHParameters(p, g)));
     }
 
     public byte[] generateClientKeyExchange() throws IOException
     {
-        switch (this.keyExchange)
-        {
-            case TlsKeyExchange.KE_RSA:
-            {
-                /*
-                 * We are doing RSA key exchange. We will choose a pre master secret and
-                 * send it rsa encrypted to the server.
-                 * 
-                 * Prepare pre master secret.
-                 */
-                pms = new byte[48];
-                handler.getRandom().nextBytes(pms);
-                TlsUtils.writeVersion(pms, 0);
+        // TODO RFC 2246 7.4.72
+        /*
+         * If the client certificate already contains a suitable Diffie-Hellman key, then
+         * Yc is implicit and does not need to be sent again. In this case, the Client Key
+         * Exchange message will be sent, but will be empty.
+         */
+//        return new byte[0];
 
-                /*
-                 * Encode the pms and send it to the server.
-                 * 
-                 * Prepare an PKCS1Encoding with good random padding.
-                 */
-                PKCS1Encoding encoding = new PKCS1Encoding(new RSABlindedEngine());
-                encoding.init(true, new ParametersWithRandom(this.rsaServerPublicKey,
-                    handler.getRandom()));
-
-                try
-                {
-                    return encoding.processBlock(pms, 0, pms.length);
-                }
-                catch (InvalidCipherTextException e)
-                {
-                    /*
-                     * This should never happen, only during decryption.
-                     */
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
-                        TlsProtocolHandler.AP_internal_error);
-                    return null; // Unreachable!
-                }
-            }
-
-            case TlsKeyExchange.KE_DH_DSS:
-            case TlsKeyExchange.KE_DH_RSA:
-            case TlsKeyExchange.KE_DHE_DSS:
-            case TlsKeyExchange.KE_DHE_RSA:
-            {
-                // TODO RFC 2246 7.4.72
-                /*
-                 * If the client certificate already contains a suitable Diffie-Hellman
-                 * key, then Yc is implicit and does not need to be sent again. In this
-                 * case, the Client Key Exchange message will be sent, but will be empty.
-                 */
-//                return new byte[0];
-
-                /*
-                 * Generate a keypair (using parameters from server key) and send the
-                 * public value to the server.
-                 */
-                DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
-                dhGen.init(new DHKeyGenerationParameters(handler.getRandom(),
-                    dhAgreeServerPublicKey.getParameters()));
-                this.dhAgreeClientKeyPair = dhGen.generateKeyPair();
-                BigInteger Yc = ((DHPublicKeyParameters)dhAgreeClientKeyPair.getPublic()).getY();
-                return BigIntegers.asUnsignedByteArray(Yc);
-            }
-
-            default:
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
-                    TlsProtocolHandler.AP_unexpected_message);
-                return null; // Unreachable!
-        }
+        /*
+         * Generate a keypair (using parameters from server key) and send the public value
+         * to the server.
+         */
+        DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
+        dhGen.init(new DHKeyGenerationParameters(handler.getRandom(),
+            dhAgreeServerPublicKey.getParameters()));
+        this.dhAgreeClientKeyPair = dhGen.generateKeyPair();
+        BigInteger Yc = ((DHPublicKeyParameters)dhAgreeClientKeyPair.getPublic()).getY();
+        return BigIntegers.asUnsignedByteArray(Yc);
     }
 
     public byte[] generatePremasterSecret() throws IOException
     {
-        switch (this.keyExchange)
-        {
-            case TlsKeyExchange.KE_RSA:
-                byte[] tmp = this.pms;
-                this.pms = null;
-                return tmp;
-
-            case TlsKeyExchange.KE_DHE_DSS:
-            case TlsKeyExchange.KE_DHE_RSA:
-            {
-                /*
-                 * Diffie-Hellman basic key agreement
-                 */
-                DHBasicAgreement dhAgree = new DHBasicAgreement();
-                dhAgree.init(dhAgreeClientKeyPair.getPrivate());
-                BigInteger agreement = dhAgree.calculateAgreement(dhAgreeServerPublicKey);
-                return BigIntegers.asUnsignedByteArray(agreement);
-            }
-
-            default:
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
-                    TlsProtocolHandler.AP_unexpected_message);
-                return null; // Unreachable!
-        }
+        /*
+         * Diffie-Hellman basic key agreement
+         */
+        DHBasicAgreement dhAgree = new DHBasicAgreement();
+        dhAgree.init(dhAgreeClientKeyPair.getPrivate());
+        BigInteger agreement = dhAgree.calculateAgreement(dhAgreeServerPublicKey);
+        return BigIntegers.asUnsignedByteArray(agreement);
     }
 
     private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
@@ -329,66 +261,6 @@ class DefaultTlsKeyExchange implements TlsKeyExchange
         return signer;
     }
 
-    private void processDHServerKeyExchange(InputStream is, Signer signer) throws IOException
-    {
-        InputStream sigIn = is;
-        if (signer != null)
-        {
-            sigIn = new SignerInputStream(is, signer);
-        }
-
-        byte[] pBytes = TlsUtils.readOpaque16(sigIn);
-        byte[] gBytes = TlsUtils.readOpaque16(sigIn);
-        byte[] YsBytes = TlsUtils.readOpaque16(sigIn);
-
-        if (signer != null)
-        {
-            byte[] sigByte = TlsUtils.readOpaque16(is);
-
-            if (!signer.verifySignature(sigByte))
-            {
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
-                    TlsProtocolHandler.AP_bad_certificate);
-            }
-        }
-
-        BigInteger p = new BigInteger(1, pBytes);
-        BigInteger g = new BigInteger(1, gBytes);
-        BigInteger Ys = new BigInteger(1, YsBytes);
-
-        this.dhAgreeServerPublicKey = validateDHPublicKey(new DHPublicKeyParameters(Ys,
-            new DHParameters(p, g)));
-    }
-
-//    private void processRSAServerKeyExchange(InputStream is, Signer signer) throws IOException
-//    {
-//        InputStream sigIn = is;
-//        if (signer != null)
-//        {
-//            sigIn = new SignerInputStream(is, signer);
-//        }
-//
-//        byte[] modulusBytes = TlsUtils.readOpaque16(sigIn);
-//        byte[] exponentBytes = TlsUtils.readOpaque16(sigIn);
-//
-//        if (signer != null)
-//        {
-//            byte[] sigByte = TlsUtils.readOpaque16(is);
-//
-//            if (!signer.verifySignature(sigByte))
-//            {
-//                handler.failWithError(TlsProtocolHandler.AL_fatal,
-//                    TlsProtocolHandler.AP_bad_certificate);
-//            }
-//        }
-//
-//        BigInteger modulus = new BigInteger(1, modulusBytes);
-//        BigInteger exponent = new BigInteger(1, exponentBytes);
-//
-//        this.rsaServerPublicKey = validateRSAPublicKey(new RSAKeyParameters(false, modulus,
-//            exponent));
-//    }
-
     private DHPublicKeyParameters validateDHPublicKey(DHPublicKeyParameters key) throws IOException
     {
         BigInteger Y = key.getY();
@@ -413,20 +285,6 @@ class DefaultTlsKeyExchange implements TlsKeyExchange
         }
 
         // TODO See RFC 2631 for more discussion of Diffie-Hellman validation
-
-        return key;
-    }
-
-    private RSAKeyParameters validateRSAPublicKey(RSAKeyParameters key) throws IOException
-    {
-        // TODO What is the minimum bit length required?
-//        key.getModulus().bitLength();
-
-        if (!key.getExponent().isProbablePrime(2))
-        {
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
-                TlsProtocolHandler.AP_illegal_parameter);
-        }
 
         return key;
     }
