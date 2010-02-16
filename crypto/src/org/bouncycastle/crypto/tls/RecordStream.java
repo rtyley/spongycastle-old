@@ -13,8 +13,8 @@ class RecordStream
     private InputStream is;
     private OutputStream os;
     private CombinedHash hash;
-    protected TlsCipher readCipher = null;
-    protected TlsCipher writeCipher = null;
+    private TlsCipher readCipher = null;
+    private TlsCipher writeCipher = null;
 
     RecordStream(TlsProtocolHandler handler, InputStream is, OutputStream os)
     {
@@ -24,6 +24,16 @@ class RecordStream
         this.hash = new CombinedHash();
         this.readCipher = new TlsNullCipherSuite();
         this.writeCipher = this.readCipher;
+    }
+
+    void clientCipherSpecDecided(TlsCipher tlsCipher)
+    {
+        this.writeCipher = tlsCipher;
+    }
+
+    void serverClientSpecReceived()
+    {
+        this.readCipher = this.writeCipher;
     }
 
     public void readData() throws IOException

@@ -478,7 +478,7 @@ public class TlsProtocolHandler
                 /*
                  * Initialize our cipher suite
                  */
-                rs.writeCipher = this.chosenCipherSuite.createCipher(securityParameters);
+                rs.clientCipherSpecDecided(this.chosenCipherSuite.createCipher(securityParameters));
 
                 /*
                  * Send our finished message.
@@ -658,25 +658,18 @@ public class TlsProtocolHandler
                  */
                 this.failWithError(AL_fatal, AP_unexpected_message);
             }
-            else
-            {
-                /*
-                 * Check if we are in the correct connection state.
-                 */
-                if (this.connection_state == CS_CLIENT_FINISHED_SEND)
-                {
-                    rs.readCipher = rs.writeCipher;
-                    this.connection_state = CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED;
-                }
-                else
-                {
-                    /*
-                     * We are not in the correct connection state.
-                     */
-                    this.failWithError(AL_fatal, AP_handshake_failure);
-                }
 
+            /*
+             * Check if we are in the correct connection state.
+             */
+            if (this.connection_state != CS_CLIENT_FINISHED_SEND)
+            {
+                this.failWithError(AL_fatal, AP_handshake_failure);
             }
+
+            rs.serverClientSpecReceived();
+
+            this.connection_state = CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED;
         }
     }
 
