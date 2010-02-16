@@ -504,8 +504,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
 
     private Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
     {
-        Signer signer = tlsSigner.createSigner();
-        signer.init(false, this.serverPublicKey);
+        Signer signer = tlsSigner.createVerifyer(this.serverPublicKey);
         signer.update(securityParameters.clientRandom, 0, securityParameters.clientRandom.length);
         signer.update(securityParameters.serverRandom, 0, securityParameters.serverRandom.length);
         return signer;
@@ -529,61 +528,61 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         if (signer != null)
         {
             byte[] sigByte = TlsUtils.readOpaque16(is);
-    
-             /*
-              * Verify the Signature.
-              */
-             if (!signer.verifySignature(sigByte))
-             {
-                 handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_bad_certificate);
-             }
-         }
 
-         /*
+            /*
+             * Verify the Signature.
+             */
+            if (!signer.verifySignature(sigByte))
+            {
+                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_bad_certificate);
+            }
+        }
+
+        /*
          * Do the DH calculation.
          */
-         BigInteger p = new BigInteger(1, pByte);
-         BigInteger g = new BigInteger(1, gByte);
-         BigInteger Ys = new BigInteger(1, YsByte);
+        BigInteger p = new BigInteger(1, pByte);
+        BigInteger g = new BigInteger(1, gByte);
+        BigInteger Ys = new BigInteger(1, YsByte);
 
-         /*
-          * Check the DH parameter values
-          */
-         if (!p.isProbablePrime(10))
-         {
-             handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
-         }
-         if (g.compareTo(TWO) < 0 || g.compareTo(p.subtract(TWO)) > 0)
-         {
-             handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
-         }
-         // TODO For static DH public values, see additional checks in RFC 2631 2.1.5 
-         if (Ys.compareTo(TWO) < 0 || Ys.compareTo(p.subtract(ONE)) > 0)
-         {
-             handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
-         }
+        /*
+         * Check the DH parameter values
+         */
+        if (!p.isProbablePrime(10))
+        {
+            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
+        }
+        if (g.compareTo(TWO) < 0 || g.compareTo(p.subtract(TWO)) > 0)
+        {
+            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
+        }
+        // TODO For static DH public values, see additional checks in RFC 2631 2.1.5 
+        if (Ys.compareTo(TWO) < 0 || Ys.compareTo(p.subtract(ONE)) > 0)
+        {
+            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
+        }
 
-         /*
-          * Diffie-Hellman basic key agreement
-          */
-         DHParameters dhParams = new DHParameters(p, g);
+        /*
+         * Diffie-Hellman basic key agreement
+         */
+        DHParameters dhParams = new DHParameters(p, g);
 
-         // Generate a keypair
-         DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
-         dhGen.init(new DHKeyGenerationParameters(handler.getRandom(), dhParams));
+        // Generate a keypair
+        DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
+        dhGen.init(new DHKeyGenerationParameters(handler.getRandom(), dhParams));
 
-         AsymmetricCipherKeyPair dhPair = dhGen.generateKeyPair();
+        AsymmetricCipherKeyPair dhPair = dhGen.generateKeyPair();
 
-         // Store the public value to send to server
-         this.Yc = ((DHPublicKeyParameters)dhPair.getPublic()).getY();
+        // Store the public value to send to server
+        this.Yc = ((DHPublicKeyParameters)dhPair.getPublic()).getY();
 
-         // Calculate the shared secret
-         DHBasicAgreement dhAgree = new DHBasicAgreement();
-         dhAgree.init(dhPair.getPrivate());
+        // Calculate the shared secret
+        DHBasicAgreement dhAgree = new DHBasicAgreement();
+        dhAgree.init(dhPair.getPrivate());
 
-         BigInteger agreement = dhAgree.calculateAgreement(new DHPublicKeyParameters(Ys, dhParams));
+        BigInteger agreement = dhAgree.calculateAgreement(new DHPublicKeyParameters(Ys, dhParams));
 
-         this.pms = BigIntegers.asUnsignedByteArray(agreement);
+        this.pms = BigIntegers.asUnsignedByteArray(agreement);
     }
 
     private void processSRPKeyExchange(InputStream is, Signer signer) throws IOException

@@ -20,8 +20,10 @@ class TlsRSASigner
         return sig.generateSignature();
     }
 
-    public Signer createSigner()
+    public Signer createVerifyer(AsymmetricKeyParameter publicKey)
     {
-        return new GenericSigner(new PKCS1Encoding(new RSABlindedEngine()), new CombinedHash());
+        Signer s = new GenericSigner(new PKCS1Encoding(new RSABlindedEngine()), new CombinedHash());
+        s.init(false, publicKey);
+        return s;
     }
 }
