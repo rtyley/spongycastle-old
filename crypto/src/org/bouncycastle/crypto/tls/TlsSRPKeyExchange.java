@@ -25,7 +25,7 @@ import org.bouncycastle.util.BigIntegers;
 /**
  * A generic TLS 1.0 key exchange.
  */
-class SRPTlsKeyExchange extends TlsKeyExchange
+class TlsSRPKeyExchange implements TlsKeyExchange
 {
     private TlsProtocolHandler handler;
     private CertificateVerifyer verifyer;
@@ -42,7 +42,7 @@ class SRPTlsKeyExchange extends TlsKeyExchange
     BigInteger B = null;
     SRP6Client srpClient = new SRP6Client();
 
-    SRPTlsKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
+    TlsSRPKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
     {
         switch (keyExchange)
         {
@@ -64,7 +64,7 @@ class SRPTlsKeyExchange extends TlsKeyExchange
         this.keyExchange = keyExchange;
     }
 
-    protected void skipServerCertificate() throws IOException
+    public void skipServerCertificate() throws IOException
     {
         if (tlsSigner != null)
         {
@@ -73,7 +73,7 @@ class SRPTlsKeyExchange extends TlsKeyExchange
         }
     }
 
-    protected void processServerCertificate(Certificate serverCertificate) throws IOException
+    public void processServerCertificate(Certificate serverCertificate) throws IOException
     {
         if (tlsSigner == null)
         {
@@ -137,12 +137,12 @@ class SRPTlsKeyExchange extends TlsKeyExchange
         }
     }
 
-    protected void skipServerKeyExchange() throws IOException
+    public void skipServerKeyExchange() throws IOException
     {
         handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
-    protected void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
+    public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
         InputStream sigIn = is;
@@ -194,13 +194,13 @@ class SRPTlsKeyExchange extends TlsKeyExchange
         this.srpClient.init(N, g, new SHA1Digest(), handler.getRandom());
     }
 
-    protected byte[] generateClientKeyExchange() throws IOException
+    public byte[] generateClientKeyExchange() throws IOException
     {
         return BigIntegers.asUnsignedByteArray(srpClient.generateClientCredentials(s,
             this.SRP_identity, this.SRP_password));
     }
 
-    protected byte[] generatePremasterSecret() throws IOException
+    public byte[] generatePremasterSecret() throws IOException
     {
         try
         {

@@ -31,7 +31,7 @@ import org.bouncycastle.util.BigIntegers;
 /**
  * A generic TLS 1.0 key exchange.
  */
-class DefaultTlsKeyExchange extends TlsKeyExchange
+class DefaultTlsKeyExchange implements TlsKeyExchange
 {
     private static final BigInteger ONE = BigInteger.valueOf(1);
     private static final BigInteger TWO = BigInteger.valueOf(2);
@@ -75,12 +75,12 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         this.keyExchange = keyExchange;
     }
 
-    protected void skipServerCertificate() throws IOException
+    public void skipServerCertificate() throws IOException
     {
         handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
-    protected void processServerCertificate(Certificate serverCertificate) throws IOException
+    public void processServerCertificate(Certificate serverCertificate) throws IOException
     {
         X509CertificateStructure x509Cert = serverCertificate.certs[0];
         SubjectPublicKeyInfo keyInfo = x509Cert.getSubjectPublicKeyInfo();
@@ -170,7 +170,7 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         }
     }
 
-    protected void skipServerKeyExchange() throws IOException
+    public void skipServerKeyExchange() throws IOException
     {
         // RFC 2246 7.4.3.
         switch (this.keyExchange)
@@ -186,7 +186,7 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         }
     }
 
-    protected void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
+    public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
         switch (this.keyExchange)
@@ -202,7 +202,7 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         }
     }
 
-    protected byte[] generateClientKeyExchange() throws IOException
+    public byte[] generateClientKeyExchange() throws IOException
     {
         switch (this.keyExchange)
         {
@@ -274,7 +274,7 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         }
     }
 
-    protected byte[] generatePremasterSecret() throws IOException
+    public byte[] generatePremasterSecret() throws IOException
     {
         switch (this.keyExchange)
         {
