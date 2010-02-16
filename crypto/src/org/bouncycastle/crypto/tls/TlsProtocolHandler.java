@@ -682,8 +682,15 @@ public class TlsProtocolHandler
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HP_CLIENT_KEY_EXCHANGE, bos);
-        TlsUtils.writeUint24(keData.length + 2, bos);
-        TlsUtils.writeOpaque16(keData, bos);
+        if (keData == null)
+        {
+            TlsUtils.writeUint24(0, bos);
+        }
+        else
+        {
+            TlsUtils.writeUint24(keData.length + 2, bos);
+            TlsUtils.writeOpaque16(keData, bos);
+        }
         byte[] message = bos.toByteArray();
 
         rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
