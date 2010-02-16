@@ -22,11 +22,14 @@ abstract class TlsKeyExchange
     protected static final short KE_SRP_DSS = 12;
 
     protected abstract void skipServerCertificate() throws IOException;
-    protected abstract void processServerCertificate(Certificate serverCertificate) throws IOException;
+
+    protected abstract void processServerCertificate(Certificate serverCertificate)
+        throws IOException;
 
     protected abstract void skipServerKeyExchange() throws IOException;
-    protected abstract void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
-        throws IOException;
+
+    protected abstract void processServerKeyExchange(InputStream is,
+        SecurityParameters securityParameters) throws IOException;
 
     protected abstract byte[] generateClientKeyExchange() throws IOException;
 

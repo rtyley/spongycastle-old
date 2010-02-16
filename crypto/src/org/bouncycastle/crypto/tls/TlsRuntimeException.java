@@ -1,7 +1,6 @@
 package org.bouncycastle.crypto.tls;
 
-public class TlsRuntimeException
-    extends RuntimeException
+public class TlsRuntimeException extends RuntimeException
 {
     Throwable e;
 

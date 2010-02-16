@@ -1,5 +1,10 @@
 package org.bouncycastle.crypto.tls;
 
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -7,11 +12,6 @@ import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.io.Streams;
-
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Some helper fuctions for MicroTLS.
@@ -183,31 +183,35 @@ public class TlsUtils
         return value;
     }
 
-    protected static void checkVersion(byte[] readVersion, TlsProtocolHandler handler) throws IOException
+    protected static void checkVersion(byte[] readVersion, TlsProtocolHandler handler)
+        throws IOException
     {
         if ((readVersion[0] != 3) || (readVersion[1] != 1))
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_protocol_version);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_protocol_version);
         }
     }
 
-    protected static void checkVersion(InputStream is, TlsProtocolHandler handler) throws IOException
+    protected static void checkVersion(InputStream is, TlsProtocolHandler handler)
+        throws IOException
     {
         int i1 = is.read();
         int i2 = is.read();
         if ((i1 != 3) || (i2 != 1))
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_protocol_version);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_protocol_version);
         }
     }
 
     protected static void writeGMTUnixTime(byte[] buf, int offset)
     {
-        int t = (int) (System.currentTimeMillis() / 1000L);
-        buf[offset] = (byte) (t >> 24);
-        buf[offset + 1] = (byte) (t >> 16);
-        buf[offset + 2] = (byte) (t >> 8);
-        buf[offset + 3] = (byte) t;
+        int t = (int)(System.currentTimeMillis() / 1000L);
+        buf[offset] = (byte)(t >> 24);
+        buf[offset + 1] = (byte)(t >> 16);
+        buf[offset + 2] = (byte)(t >> 8);
+        buf[offset + 3] = (byte)t;
     }
 
     protected static void writeVersion(OutputStream os) throws IOException
@@ -257,7 +261,7 @@ public class TlsUtils
 
         byte[] ls = concat(label, seed);
 
-        byte[] buf = new byte[size];        
+        byte[] buf = new byte[size];
         byte[] prf = new byte[size];
         hmac_hash(new MD5Digest(), s1, ls, prf);
         hmac_hash(new SHA1Digest(), s2, ls, buf);

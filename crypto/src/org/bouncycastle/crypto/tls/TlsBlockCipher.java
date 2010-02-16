@@ -22,42 +22,45 @@ public class TlsBlockCipher implements TlsCipher
     private TlsMac writeMac;
     private TlsMac readMac;
 
-    TlsBlockCipher(TlsProtocolHandler handler, BlockCipher encryptCipher, BlockCipher decryptCipher,
-        Digest writeDigest, Digest readDigest, int cipherKeySize, SecurityParameters securityParameters)
+    TlsBlockCipher(TlsProtocolHandler handler, BlockCipher encryptCipher,
+        BlockCipher decryptCipher, Digest writeDigest, Digest readDigest, int cipherKeySize,
+        SecurityParameters securityParameters)
     {
         this.handler = handler;
         this.encryptCipher = encryptCipher;
         this.decryptCipher = decryptCipher;
 
-        int prfSize = (2 * cipherKeySize) + writeDigest.getDigestSize() + readDigest.getDigestSize()
-        + encryptCipher.getBlockSize() + decryptCipher.getBlockSize();
+        int prfSize = (2 * cipherKeySize) + writeDigest.getDigestSize()
+            + readDigest.getDigestSize() + encryptCipher.getBlockSize()
+            + decryptCipher.getBlockSize();
 
         byte[] key_block = TlsUtils.PRF(securityParameters.masterSecret, "key expansion",
-            TlsUtils.concat(securityParameters.serverRandom, securityParameters.clientRandom), prfSize);
-    
+            TlsUtils.concat(securityParameters.serverRandom, securityParameters.clientRandom),
+            prfSize);
+
         int offset = 0;
-    
+
         // Init MACs
         writeMac = new TlsMac(writeDigest, key_block, offset, writeDigest.getDigestSize());
         offset += writeDigest.getDigestSize();
         readMac = new TlsMac(readDigest, key_block, offset, readDigest.getDigestSize());
         offset += readDigest.getDigestSize();
-    
+
         // Init Ciphers
-        this.initCipher(true, encryptCipher, key_block, cipherKeySize, offset,
-            offset + (cipherKeySize * 2));
+        this.initCipher(true, encryptCipher, key_block, cipherKeySize, offset, offset
+            + (cipherKeySize * 2));
         offset += cipherKeySize;
-        this.initCipher(false, decryptCipher, key_block, cipherKeySize, offset,
-            offset + cipherKeySize + encryptCipher.getBlockSize());
-        
+        this.initCipher(false, decryptCipher, key_block, cipherKeySize, offset, offset
+            + cipherKeySize + encryptCipher.getBlockSize());
+
     }
 
-    private void initCipher(boolean forEncryption, BlockCipher cipher,
-        byte[] key_block, int key_size, int key_offset, int iv_offset)
+    private void initCipher(boolean forEncryption, BlockCipher cipher, byte[] key_block,
+        int key_size, int key_offset, int iv_offset)
     {
         KeyParameter key_parameter = new KeyParameter(key_block, key_offset, key_size);
-        ParametersWithIV parameters_with_iv = new ParametersWithIV(
-            key_parameter, key_block, iv_offset, cipher.getBlockSize());
+        ParametersWithIV parameters_with_iv = new ParametersWithIV(key_parameter, key_block,
+            iv_offset, cipher.getBlockSize());
         cipher.init(forEncryption, parameters_with_iv);
     }
 
@@ -66,13 +69,10 @@ public class TlsBlockCipher implements TlsCipher
         int blocksize = encryptCipher.getBlockSize();
 
         // Add a random number of extra blocks worth of padding
-        int minPaddingSize = blocksize
-                - ((len + writeMac.getSize() + 1) % blocksize);
+        int minPaddingSize = blocksize - ((len + writeMac.getSize() + 1) % blocksize);
         int maxExtraPadBlocks = (255 - minPaddingSize) / blocksize;
-        int actualExtraPadBlocks = chooseExtraPadBlocks(
-                handler.getRandom(), maxExtraPadBlocks);
-        int paddingsize = minPaddingSize
-                + (actualExtraPadBlocks * blocksize);
+        int actualExtraPadBlocks = chooseExtraPadBlocks(handler.getRandom(), maxExtraPadBlocks);
+        int paddingsize = minPaddingSize + (actualExtraPadBlocks * blocksize);
 
         int totalsize = len + writeMac.getSize() + paddingsize + 1;
         byte[] outbuf = new byte[totalsize];
@@ -82,17 +82,17 @@ public class TlsBlockCipher implements TlsCipher
         int paddoffset = len + mac.length;
         for (int i = 0; i <= paddingsize; i++)
         {
-            outbuf[i + paddoffset] = (byte) paddingsize;
+            outbuf[i + paddoffset] = (byte)paddingsize;
         }
         for (int i = 0; i < totalsize; i += blocksize)
         {
             encryptCipher.processBlock(outbuf, i, outbuf, i);
         }
         return outbuf;
-
     }
 
-    public byte[] decodeCiphertext(short type, byte[] ciphertext, int offset, int len) throws IOException
+    public byte[] decodeCiphertext(short type, byte[] ciphertext, int offset, int len)
+        throws IOException
     {
         // TODO TLS 1.1 (RFC 4346) introduces an explicit IV
 
@@ -113,7 +113,8 @@ public class TlsBlockCipher implements TlsCipher
          */
         if (len % blocksize != 0)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_decryption_failed);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_decryption_failed);
         }
 
         /*
@@ -159,10 +160,9 @@ public class TlsBlockCipher implements TlsCipher
         }
 
         /*
-         * We now don't care if padding verification has failed or not, we
-         * will calculate the mac to give an attacker no kind of timing
-         * profile he can use to find out if mac verification failed or
-         * padding verification failed.
+         * We now don't care if padding verification has failed or not, we will calculate
+         * the mac to give an attacker no kind of timing profile he can use to find out if
+         * mac verification failed or padding verification failed.
          */
         int plaintextlength = len - minLength - paddingsize;
         byte[] calculatedMac = readMac.calculateMac(type, ciphertext, offset, plaintextlength);
@@ -171,7 +171,8 @@ public class TlsBlockCipher implements TlsCipher
          * Check all bytes in the mac (constant-time comparison).
          */
         byte[] decryptedMac = new byte[calculatedMac.length];
-        System.arraycopy(ciphertext, offset + plaintextlength, decryptedMac, 0, calculatedMac.length);
+        System.arraycopy(ciphertext, offset + plaintextlength, decryptedMac, 0,
+            calculatedMac.length);
 
         if (!Arrays.constantTimeAreEqual(calculatedMac, decryptedMac))
         {
