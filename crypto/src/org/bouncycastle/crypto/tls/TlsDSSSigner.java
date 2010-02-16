@@ -21,8 +21,10 @@ class TlsDSSSigner
         return sig.generateSignature();
     }
 
-    public Signer createSigner()
+    public Signer createVerifyer(AsymmetricKeyParameter publicKey)
     {
-        return new DSADigestSigner(new DSASigner(), new SHA1Digest());
+        Signer s = new DSADigestSigner(new DSASigner(), new SHA1Digest());
+        s.init(false, publicKey);
+        return s;
     }
 }

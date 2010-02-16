@@ -7,5 +7,5 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 interface TlsSigner
 {
     byte[] calculateRawSignature(AsymmetricKeyParameter privateKey, byte[] md5andsha1) throws CryptoException;
-    Signer createSigner();
+    Signer createVerifyer(AsymmetricKeyParameter publicKey);
 }
