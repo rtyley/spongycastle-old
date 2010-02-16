@@ -11,12 +11,9 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.agreement.DHBasicAgreement;
-import org.bouncycastle.crypto.agreement.srp.SRP6Client;
-import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
@@ -41,21 +38,34 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
 
     private TlsProtocolHandler handler;
     private CertificateVerifyer verifyer;
-
     private short keyExchange;
+    private TlsSigner tlsSigner;
 
     private AsymmetricKeyParameter serverPublicKey = null;
 
-    private BigInteger SRP_A = null;
-    private byte[] SRP_identity = null;
-    private byte[] SRP_password = null;
+    private DHPublicKeyParameters dhServerPublicKey = null;
+    private AsymmetricCipherKeyPair dhClientKeyPair = null;
 
-    private BigInteger Yc;
     private byte[] pms;
 
     DefaultTlsKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer,
         short keyExchange)
     {
+        switch (keyExchange)
+        {
+            case TlsKeyExchange.KE_RSA:
+                this.tlsSigner = null;
+                break;
+            case TlsKeyExchange.KE_DHE_RSA:
+                this.tlsSigner = new TlsRSASigner();
+                break;
+            case TlsKeyExchange.KE_DHE_DSS:
+                this.tlsSigner = new TlsDSSSigner();
+                break;
+            default:
+                throw new IllegalArgumentException("unsupported key exchange algorithm");
+        }
+
         this.handler = handler;
         this.verifyer = verifyer;
         this.keyExchange = keyExchange;
@@ -63,7 +73,7 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
 
     protected void skipServerCertificate() throws IOException
     {
-        if (this.keyExchange != TlsKeyExchange.KE_SRP)
+        if (tlsSigner != null)
         {
             handler.failWithError(TlsProtocolHandler.AL_fatal,
                 TlsProtocolHandler.AP_unexpected_message);
@@ -108,7 +118,6 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
                 validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
                 break;
             case TlsKeyExchange.KE_DHE_RSA:
-            case TlsKeyExchange.KE_SRP_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
                     handler.failWithError(TlsProtocolHandler.AL_fatal,
@@ -117,7 +126,6 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             case TlsKeyExchange.KE_DHE_DSS:
-            case TlsKeyExchange.KE_SRP_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
                     handler.failWithError(TlsProtocolHandler.AL_fatal,
@@ -138,75 +146,34 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         }
     }
 
+    protected void skipServerKeyExchange() throws IOException
+    {
+        if (isServerKeyExchangeExpected())
+        {
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_unexpected_message);
+        }
+    }
+
     protected void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
+        if (!isServerKeyExchangeExpected())
+        {
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_unexpected_message);
+        }
+
         switch (this.keyExchange)
         {
             case TlsKeyExchange.KE_DHE_RSA:
-            {
-                processDHEServerKeyExchange(is, initSigner(new TlsRSASigner(), securityParameters));
-                break;
-            }
             case TlsKeyExchange.KE_DHE_DSS:
-            {
-                processDHEServerKeyExchange(is, initSigner(new TlsDSSSigner(), securityParameters));
+                processDHServerKeyExchange(is, initSigner(tlsSigner, securityParameters));
                 break;
-            }
-            case TlsKeyExchange.KE_SRP:
-            {
-                processSRPServerKeyExchange(is, null);
-                break;
-            }
-            case TlsKeyExchange.KE_SRP_RSA:
-            {
-                processSRPServerKeyExchange(is, initSigner(new TlsRSASigner(), securityParameters));
-                break;
-            }
-            case TlsKeyExchange.KE_SRP_DSS:
-            {
-                processSRPServerKeyExchange(is, initSigner(new TlsDSSSigner(), securityParameters));
-                break;
-            }
             default:
                 handler.failWithError(TlsProtocolHandler.AL_fatal,
                     TlsProtocolHandler.AP_unexpected_message);
         }
-    }
-
-    protected void skipServerKeyExchange() throws IOException
-    {
-        /* RFC 2246 7.4.3. Server key exchange message
-         * "It is not legal to send the server key exchange message for the
-         * following key exchange methods:
-         *
-         * RSA
-         * RSA_EXPORT (when the public key in the server certificate is
-         *   less than or equal to 512 bits in length)
-         * DH_DSS
-         * DH_RSA
-         */
-        switch (this.keyExchange)
-        {
-            case KE_RSA:
-            case KE_DH_DSS:
-            case KE_DH_RSA:
-                // No problem
-                return;
-
-            case KE_RSA_EXPORT:
-                if (this.serverPublicKey instanceof RSAKeyParameters)
-                {
-                    RSAKeyParameters rsaPubKey = (RSAKeyParameters)this.serverPublicKey;
-                    if (rsaPubKey.getModulus().bitLength() <= 512)
-                    {
-                        return;
-                    }
-                }
-                break;
-        }
-
-        handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
     protected byte[] generateClientKeyExchange() throws IOException
@@ -251,27 +218,51 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
 
             case TlsKeyExchange.KE_DHE_DSS:
             case TlsKeyExchange.KE_DHE_RSA:
-                return BigIntegers.asUnsignedByteArray(this.Yc);
-
-            case TlsKeyExchange.KE_SRP:
-            case TlsKeyExchange.KE_SRP_RSA:
-            case TlsKeyExchange.KE_SRP_DSS:
-                return BigIntegers.asUnsignedByteArray(this.SRP_A);
+            {
+                /*
+                 * Generate a keypair and send the public value to the server
+                 */
+                DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
+                dhGen.init(new DHKeyGenerationParameters(handler.getRandom(),
+                    dhServerPublicKey.getParameters()));
+                this.dhClientKeyPair = dhGen.generateKeyPair();
+                BigInteger Yc = ((DHPublicKeyParameters)dhClientKeyPair.getPublic()).getY();
+                return BigIntegers.asUnsignedByteArray(Yc);
+            }
 
             default:
-                /*
-                 * Problem during handshake, we don't know how to handle this key exchange
-                 * method.
-                 */
                 handler.failWithError(TlsProtocolHandler.AL_fatal,
                     TlsProtocolHandler.AP_unexpected_message);
                 return null;
         }
     }
 
-    protected byte[] getPremasterSecret()
+    protected byte[] getPremasterSecret() throws IOException
     {
-        return this.pms;
+        switch (this.keyExchange)
+        {
+            case TlsKeyExchange.KE_RSA:
+                byte[] tmp = this.pms;
+                this.pms = null;
+                return tmp;
+
+            case TlsKeyExchange.KE_DHE_DSS:
+            case TlsKeyExchange.KE_DHE_RSA:
+            {
+                /*
+                 * Diffie-Hellman basic key agreement
+                 */
+                DHBasicAgreement dhAgree = new DHBasicAgreement();
+                dhAgree.init(dhClientKeyPair.getPrivate());
+                BigInteger agreement = dhAgree.calculateAgreement(dhServerPublicKey);
+                return BigIntegers.asUnsignedByteArray(agreement);
+            }
+
+            default:
+                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    TlsProtocolHandler.AP_unexpected_message);
+                return null; // Unreachable!
+        }
     }
 
     private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
@@ -301,7 +292,7 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         return signer;
     }
 
-    private void processDHEServerKeyExchange(InputStream is, Signer signer) throws IOException
+    private void processDHServerKeyExchange(InputStream is, Signer signer) throws IOException
     {
         InputStream sigIn = is;
         if (signer != null)
@@ -357,80 +348,21 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
                 TlsProtocolHandler.AP_illegal_parameter);
         }
 
-        /*
-         * Diffie-Hellman basic key agreement
-         */
-        DHParameters dhParams = new DHParameters(p, g);
-
-        // Generate a keypair
-        DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
-        dhGen.init(new DHKeyGenerationParameters(handler.getRandom(), dhParams));
-
-        AsymmetricCipherKeyPair dhPair = dhGen.generateKeyPair();
-
-        // Store the public value to send to server
-        this.Yc = ((DHPublicKeyParameters)dhPair.getPublic()).getY();
-
-        // Calculate the shared secret
-        DHBasicAgreement dhAgree = new DHBasicAgreement();
-        dhAgree.init(dhPair.getPrivate());
-
-        BigInteger agreement = dhAgree.calculateAgreement(new DHPublicKeyParameters(Ys, dhParams));
-
-        this.pms = BigIntegers.asUnsignedByteArray(agreement);
+        this.dhServerPublicKey = new DHPublicKeyParameters(Ys, new DHParameters(p, g));
     }
 
-    private void processSRPServerKeyExchange(InputStream is, Signer signer) throws IOException
+    private boolean isServerKeyExchangeExpected()
     {
-        InputStream sigIn = is;
-        if (signer != null)
+        // RFC 2246 7.4.3.
+        switch (this.keyExchange)
         {
-            sigIn = new SignerInputStream(is, signer);
-        }
+            case KE_RSA:
+            case KE_DH_DSS:
+            case KE_DH_RSA:
+                return false;
 
-        /*
-         * Parse the Structure
-         */
-        byte[] NByte = TlsUtils.readOpaque16(sigIn);
-        byte[] gByte = TlsUtils.readOpaque16(sigIn);
-        byte[] sByte = TlsUtils.readOpaque8(sigIn);
-        byte[] BByte = TlsUtils.readOpaque16(sigIn);
-
-        if (signer != null)
-        {
-            byte[] sigByte = TlsUtils.readOpaque16(is);
-
-            /*
-             * Verify the Signature.
-             */
-            if (!signer.verifySignature(sigByte))
-            {
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
-                    TlsProtocolHandler.AP_bad_certificate);
-            }
-        }
-
-        BigInteger N = new BigInteger(1, NByte);
-        BigInteger g = new BigInteger(1, gByte);
-        byte[] s = sByte;
-        BigInteger B = new BigInteger(1, BByte);
-
-        SRP6Client srpClient = new SRP6Client();
-        srpClient.init(N, g, new SHA1Digest(), handler.getRandom());
-
-        this.SRP_A = srpClient.generateClientCredentials(s, this.SRP_identity, this.SRP_password);
-
-        try
-        {
-            BigInteger S = srpClient.calculateSecret(B);
-
-            // TODO Check if this needs to be a fixed size
-            this.pms = BigIntegers.asUnsignedByteArray(S);
-        }
-        catch (CryptoException e)
-        {
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
-                TlsProtocolHandler.AP_illegal_parameter);
+            default:
+                return true;
         }
     }
 }
