@@ -26,11 +26,9 @@ public class TlsProtocolHandler
     private static final short RL_APPLICATION_DATA = 23;
 
     /*
-     hello_request(0), client_hello(1), server_hello(2),
-     certificate(11), server_key_exchange (12),
-     certificate_request(13), server_hello_done(14),
-     certificate_verify(15), client_key_exchange(16),
-     finished(20), (255)
+     * hello_request(0), client_hello(1), server_hello(2), certificate(11),
+     * server_key_exchange (12), certificate_request(13), server_hello_done(14),
+     * certificate_verify(15), client_key_exchange(16), finished(20), (255)
      */
     private static final short HP_HELLO_REQUEST = 0;
     private static final short HP_CLIENT_HELLO = 1;
@@ -44,8 +42,8 @@ public class TlsProtocolHandler
     private static final short HP_FINISHED = 20;
 
     /*
-    * Our Connection states
-    */
+     * Our Connection states
+     */
     private static final short CS_CLIENT_HELLO_SEND = 1;
     private static final short CS_SERVER_HELLO_RECEIVED = 2;
     private static final short CS_SERVER_CERTIFICATE_RECEIVED = 3;
@@ -91,16 +89,16 @@ public class TlsProtocolHandler
     private static final String TLS_ERROR_MESSAGE = "Internal TLS error, this could be an attack";
 
     /*
-    * Queues for data from some protocols.
-    */
+     * Queues for data from some protocols.
+     */
     private ByteQueue applicationDataQueue = new ByteQueue();
     private ByteQueue changeCipherSpecQueue = new ByteQueue();
     private ByteQueue alertQueue = new ByteQueue();
     private ByteQueue handshakeQueue = new ByteQueue();
 
     /*
-    * The Record Stream we use
-    */
+     * The Record Stream we use
+     */
     private RecordStream rs;
     private SecureRandom random;
 
@@ -121,9 +119,8 @@ public class TlsProtocolHandler
     private static SecureRandom createSecureRandom()
     {
         /*
-         * We use our threaded seed generator to generate a good random
-         * seed. If the user has a better random seed, he should use
-         * the constructor with a SecureRandom.
+         * We use our threaded seed generator to generate a good random seed. If the user
+         * has a better random seed, he should use the constructor with a SecureRandom.
          */
         ThreadedSeedGenerator tsg = new ThreadedSeedGenerator();
         SecureRandom random = new SecureRandom();
@@ -154,8 +151,7 @@ public class TlsProtocolHandler
 
     private short connection_state;
 
-    protected void processData(short protocol, byte[] buf, int offset, int len)
-        throws IOException
+    protected void processData(short protocol, byte[] buf, int offset, int len) throws IOException
     {
         /*
          * Have a look at the protocol type, and add it to the correct queue.
@@ -184,10 +180,10 @@ public class TlsProtocolHandler
                 break;
             default:
                 /*
-                * Uh, we don't know this protocol.
-                *
-                * RFC2246 defines on page 13, that we should ignore this.
-                */
+                 * Uh, we don't know this protocol.
+                 * 
+                 * RFC2246 defines on page 13, that we should ignore this.
+                 */
         }
     }
 
@@ -198,9 +194,8 @@ public class TlsProtocolHandler
         {
             read = false;
             /*
-            * We need the first 4 bytes, they contain type and length of
-            * the message.
-            */
+             * We need the first 4 bytes, they contain type and length of the message.
+             */
             if (handshakeQueue.size() >= 4)
             {
                 byte[] beginning = new byte[4];
@@ -210,9 +205,8 @@ public class TlsProtocolHandler
                 int len = TlsUtils.readUint24(bis);
 
                 /*
-                * Check if we have enough bytes in the buffer to read
-                * the full message.
-                */
+                 * Check if we have enough bytes in the buffer to read the full message.
+                 */
                 if (handshakeQueue.size() >= (len + 4))
                 {
                     /*
@@ -222,22 +216,21 @@ public class TlsProtocolHandler
                     handshakeQueue.read(buf, 0, len, 4);
                     handshakeQueue.removeData(len + 4);
 
-                    /* RFC 2246 7.4.9.
-                     * "The value handshake_messages includes all handshake
-                     * messages starting at client hello up to, but not including, this
-                     * finished message."
-                     * "Note: [Also,] Hello Request messages are omitted from
-                     * handshake hashes."
+                    /*
+                     * RFC 2246 7.4.9. "The value handshake_messages includes all
+                     * handshake messages starting at client hello up to, but not
+                     * including, this finished message. [..] Note: [Also,] Hello Request
+                     * messages are omitted from handshake hashes."
                      */
                     switch (type)
                     {
-                    case HP_HELLO_REQUEST:
-                    case HP_FINISHED:
-                        break;
-                    default:
-                        rs.updateHandshakeData(beginning, 0, 4);
-                        rs.updateHandshakeData(buf, 0, len);
-                        break;
+                        case HP_HELLO_REQUEST:
+                        case HP_FINISHED:
+                            break;
+                        default:
+                            rs.updateHandshakeData(beginning, 0, 4);
+                            rs.updateHandshakeData(buf, 0, len);
+                            break;
                     }
 
                     /*
@@ -257,320 +250,319 @@ public class TlsProtocolHandler
 
         switch (type)
         {
-        case HP_CERTIFICATE:
-        {
-            switch (connection_state)
+            case HP_CERTIFICATE:
             {
-            case CS_SERVER_HELLO_RECEIVED:
-            {
-                // Parse the Certificate message and send to cipher suite
-
-                Certificate serverCertificate = Certificate.parse(is);
-
-                assertEmpty(is);
-
-                this.keyExchange.processServerCertificate(serverCertificate);
-
-                break;
-            }
-            default:
-                this.failWithError(AL_fatal, AP_unexpected_message);
-            }
-
-            connection_state = CS_SERVER_CERTIFICATE_RECEIVED;
-            break;
-        }
-        case HP_FINISHED:
-            switch (connection_state)
-            {
-            case CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED:
-                /*
-                 * Read the checksum from the finished message, it has always 12
-                 * bytes.
-                 */
-                byte[] serverVerifyData = new byte[12];
-                TlsUtils.readFully(serverVerifyData, is);
-
-                assertEmpty(is);
-
-                /*
-                 * Calculate our own checksum.
-                 */
-                byte[] expectedServerVerifyData = TlsUtils.PRF(securityParameters.masterSecret,
-                    "server finished", rs.getCurrentHash(), 12);
-
-                /*
-                 * Compare both checksums.
-                 */
-                if (!Arrays.constantTimeAreEqual(expectedServerVerifyData, serverVerifyData))
+                switch (connection_state)
                 {
-                    /*
-                     * Wrong checksum in the finished message.
-                     */
-                    this.failWithError(AL_fatal, AP_handshake_failure);
-                }
-
-                connection_state = CS_DONE;
-
-                /*
-                 * We are now ready to receive application data.
-                 */
-                this.appDataReady = true;
-                break;
-            default:
-                this.failWithError(AL_fatal, AP_unexpected_message);
-            }
-            break;
-        case HP_SERVER_HELLO:
-            switch (connection_state)
-            {
-            case CS_CLIENT_HELLO_SEND:
-                /*
-                 * Read the server hello message
-                 */
-                TlsUtils.checkVersion(is, this);
-
-                /*
-                 * Read the server random
-                 */
-                securityParameters.serverRandom = new byte[32];
-                TlsUtils.readFully(securityParameters.serverRandom, is);
-
-                byte[] sessionID = TlsUtils.readOpaque8(is);
-                if (sessionID.length > 32)
-                {
-                    this.failWithError(TlsProtocolHandler.AL_fatal,
-                            TlsProtocolHandler.AP_illegal_parameter);
-                }
-
-                this.tlsClient.notifySessionID(sessionID);
-
-                /*
-                 * Find out which ciphersuite the server has chosen and check
-                 * that it was one of the offered ones.
-                 */
-                int selectedCipherSuite = TlsUtils.readUint16(is);
-                if (!wasCipherSuiteOffered(selectedCipherSuite))
-                {
-                    this.failWithError(TlsProtocolHandler.AL_fatal,
-                            TlsProtocolHandler.AP_illegal_parameter);
-                }
-
-                this.tlsClient.notifySelectedCipherSuite(selectedCipherSuite);
-
-                /*
-                 * We support only the null compression which means no
-                 * compression.
-                 */
-                short compressionMethod = TlsUtils.readUint8(is);
-                if (compressionMethod != 0)
-                {
-                    this.failWithError(TlsProtocolHandler.AL_fatal,
-                            TlsProtocolHandler.AP_illegal_parameter);
-                }
-
-                /*
-                 * RFC4366 2.2 The extended server hello message format MAY be
-                 * sent in place of the server hello message when the client has
-                 * requested extended functionality via the extended client
-                 * hello message specified in Section 2.1.
-                 */
-                if (extendedClientHello)
-                {
-                    // Integer -> byte[]
-                    Hashtable serverExtensions = new Hashtable();
-
-                    if (is.available() > 0)
+                    case CS_SERVER_HELLO_RECEIVED:
                     {
-                        // Process extensions from extended server hello
-                        byte[] extBytes = TlsUtils.readOpaque16(is);
+                        // Parse the Certificate message and send to cipher suite
 
-                        ByteArrayInputStream ext = new ByteArrayInputStream(extBytes);
-                        while (ext.available() > 0)
+                        Certificate serverCertificate = Certificate.parse(is);
+
+                        assertEmpty(is);
+
+                        this.keyExchange.processServerCertificate(serverCertificate);
+
+                        break;
+                    }
+                    default:
+                        this.failWithError(AL_fatal, AP_unexpected_message);
+                }
+
+                connection_state = CS_SERVER_CERTIFICATE_RECEIVED;
+                break;
+            }
+            case HP_FINISHED:
+                switch (connection_state)
+                {
+                    case CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED:
+                        /*
+                         * Read the checksum from the finished message, it has always 12
+                         * bytes.
+                         */
+                        byte[] serverVerifyData = new byte[12];
+                        TlsUtils.readFully(serverVerifyData, is);
+
+                        assertEmpty(is);
+
+                        /*
+                         * Calculate our own checksum.
+                         */
+                        byte[] expectedServerVerifyData = TlsUtils.PRF(
+                            securityParameters.masterSecret, "server finished",
+                            rs.getCurrentHash(), 12);
+
+                        /*
+                         * Compare both checksums.
+                         */
+                        if (!Arrays.constantTimeAreEqual(expectedServerVerifyData, serverVerifyData))
                         {
-                            int extType = TlsUtils.readUint16(ext);
-                            byte[] extValue = TlsUtils.readOpaque16(ext);
-
-                            serverExtensions.put(new Integer(extType), extValue);
+                            /*
+                             * Wrong checksum in the finished message.
+                             */
+                            this.failWithError(AL_fatal, AP_handshake_failure);
                         }
-                    }
 
-                    tlsClient.processServerExtensions(serverExtensions);
+                        connection_state = CS_DONE;
+
+                        /*
+                         * We are now ready to receive application data.
+                         */
+                        this.appDataReady = true;
+                        break;
+                    default:
+                        this.failWithError(AL_fatal, AP_unexpected_message);
                 }
-
-                assertEmpty(is);
-
-                this.keyExchange = tlsClient.createKeyExchange();
-
-                connection_state = CS_SERVER_HELLO_RECEIVED;
                 break;
-            default:
-                this.failWithError(AL_fatal, AP_unexpected_message);
-            }
-            break;
-        case HP_SERVER_HELLO_DONE:
-            switch (connection_state)
-            {
-            case CS_SERVER_CERTIFICATE_RECEIVED:
-
-                // There was no server key exchange message; check it's OK
-                this.keyExchange.skipServerKeyExchange();
-
-                // NB: Fall through to next case label
-
-            case CS_SERVER_KEY_EXCHANGE_RECEIVED:
-            case CS_CERTIFICATE_REQUEST_RECEIVED:
-
-                assertEmpty(is);
-
-                boolean isClientCertificateRequested = (connection_state == CS_CERTIFICATE_REQUEST_RECEIVED);
-
-                connection_state = CS_SERVER_HELLO_DONE_RECEIVED;
-
-                if (isClientCertificateRequested)
+            case HP_SERVER_HELLO:
+                switch (connection_state)
                 {
-                    sendClientCertificate(tlsClient.getCertificate());
+                    case CS_CLIENT_HELLO_SEND:
+                        /*
+                         * Read the server hello message
+                         */
+                        TlsUtils.checkVersion(is, this);
+
+                        /*
+                         * Read the server random
+                         */
+                        securityParameters.serverRandom = new byte[32];
+                        TlsUtils.readFully(securityParameters.serverRandom, is);
+
+                        byte[] sessionID = TlsUtils.readOpaque8(is);
+                        if (sessionID.length > 32)
+                        {
+                            this.failWithError(TlsProtocolHandler.AL_fatal,
+                                TlsProtocolHandler.AP_illegal_parameter);
+                        }
+
+                        this.tlsClient.notifySessionID(sessionID);
+
+                        /*
+                         * Find out which ciphersuite the server has chosen and check that
+                         * it was one of the offered ones.
+                         */
+                        int selectedCipherSuite = TlsUtils.readUint16(is);
+                        if (!wasCipherSuiteOffered(selectedCipherSuite))
+                        {
+                            this.failWithError(TlsProtocolHandler.AL_fatal,
+                                TlsProtocolHandler.AP_illegal_parameter);
+                        }
+
+                        this.tlsClient.notifySelectedCipherSuite(selectedCipherSuite);
+
+                        /*
+                         * We support only the null compression which means no
+                         * compression.
+                         */
+                        short compressionMethod = TlsUtils.readUint8(is);
+                        if (compressionMethod != 0)
+                        {
+                            this.failWithError(TlsProtocolHandler.AL_fatal,
+                                TlsProtocolHandler.AP_illegal_parameter);
+                        }
+
+                        /*
+                         * RFC4366 2.2 The extended server hello message format MAY be
+                         * sent in place of the server hello message when the client has
+                         * requested extended functionality via the extended client hello
+                         * message specified in Section 2.1.
+                         */
+                        if (extendedClientHello)
+                        {
+                            // Integer -> byte[]
+                            Hashtable serverExtensions = new Hashtable();
+
+                            if (is.available() > 0)
+                            {
+                                // Process extensions from extended server hello
+                                byte[] extBytes = TlsUtils.readOpaque16(is);
+
+                                ByteArrayInputStream ext = new ByteArrayInputStream(extBytes);
+                                while (ext.available() > 0)
+                                {
+                                    int extType = TlsUtils.readUint16(ext);
+                                    byte[] extValue = TlsUtils.readOpaque16(ext);
+
+                                    serverExtensions.put(new Integer(extType), extValue);
+                                }
+                            }
+
+                            tlsClient.processServerExtensions(serverExtensions);
+                        }
+
+                        assertEmpty(is);
+
+                        this.keyExchange = tlsClient.createKeyExchange();
+
+                        connection_state = CS_SERVER_HELLO_RECEIVED;
+                        break;
+                    default:
+                        this.failWithError(AL_fatal, AP_unexpected_message);
+                }
+                break;
+            case HP_SERVER_HELLO_DONE:
+                switch (connection_state)
+                {
+                    case CS_SERVER_CERTIFICATE_RECEIVED:
+
+                        // There was no server key exchange message; check it's OK
+                        this.keyExchange.skipServerKeyExchange();
+
+                        // NB: Fall through to next case label
+
+                    case CS_SERVER_KEY_EXCHANGE_RECEIVED:
+                    case CS_CERTIFICATE_REQUEST_RECEIVED:
+
+                        assertEmpty(is);
+
+                        boolean isClientCertificateRequested = (connection_state == CS_CERTIFICATE_REQUEST_RECEIVED);
+
+                        connection_state = CS_SERVER_HELLO_DONE_RECEIVED;
+
+                        if (isClientCertificateRequested)
+                        {
+                            sendClientCertificate(tlsClient.getCertificate());
+                        }
+
+                        /*
+                         * Send the client key exchange message, depending on the key
+                         * exchange we are using in our ciphersuite.
+                         */
+                        sendClientKeyExchange(this.keyExchange.generateClientKeyExchange());
+
+                        connection_state = CS_CLIENT_KEY_EXCHANGE_SEND;
+
+                        if (isClientCertificateRequested)
+                        {
+                            byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(rs.getCurrentHash());
+                            if (clientCertificateSignature != null)
+                            {
+                                sendCertificateVerify(clientCertificateSignature);
+
+                                connection_state = CS_CERTIFICATE_VERIFY_SEND;
+                            }
+                        }
+
+                        /*
+                         * Now, we send change cipher state
+                         */
+                        byte[] cmessage = new byte[1];
+                        cmessage[0] = 1;
+                        rs.writeMessage(RL_CHANGE_CIPHER_SPEC, cmessage, 0, cmessage.length);
+
+                        connection_state = CS_CLIENT_CHANGE_CIPHER_SPEC_SEND;
+
+                        /*
+                         * Calculate the master_secret
+                         */
+                        securityParameters.masterSecret = TlsUtils.PRF(
+                            this.keyExchange.getPremasterSecret(), "master secret",
+                            TlsUtils.concat(securityParameters.clientRandom,
+                                securityParameters.serverRandom), 48);
+
+                        /*
+                         * TODO: RFC 2246 8.1. "The pre_master_secret should be deleted
+                         * from memory once the master_secret has been computed.
+                         */
+
+                        /*
+                         * Initialize our cipher suite
+                         */
+                        rs.clientCipherSpecDecided(tlsClient.createCipher(securityParameters));
+
+                        /*
+                         * Send our finished message.
+                         */
+                        byte[] clientVerifyData = TlsUtils.PRF(securityParameters.masterSecret,
+                            "client finished", rs.getCurrentHash(), 12);
+
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        TlsUtils.writeUint8(HP_FINISHED, bos);
+                        TlsUtils.writeUint24(12, bos);
+                        bos.write(clientVerifyData);
+                        byte[] message = bos.toByteArray();
+
+                        rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
+
+                        this.connection_state = CS_CLIENT_FINISHED_SEND;
+                        break;
+                    default:
+                        this.failWithError(AL_fatal, AP_handshake_failure);
+                }
+                break;
+            case HP_SERVER_KEY_EXCHANGE:
+            {
+                switch (connection_state)
+                {
+                    case CS_SERVER_HELLO_RECEIVED:
+
+                        // There was no server certificate message; check it's OK
+                        this.keyExchange.skipServerCertificate();
+
+                        // NB: Fall through to next case label
+
+                    case CS_SERVER_CERTIFICATE_RECEIVED:
+
+                        this.keyExchange.processServerKeyExchange(is, securityParameters);
+
+                        assertEmpty(is);
+                        break;
+
+                    default:
+                        this.failWithError(AL_fatal, AP_unexpected_message);
                 }
 
-                /*
-                 * Send the client key exchange message, depending on the key
-                 * exchange we are using in our ciphersuite.
-                 */
-                sendClientKeyExchange(this.keyExchange.generateClientKeyExchange());
-
-                connection_state = CS_CLIENT_KEY_EXCHANGE_SEND;
-
-                if (isClientCertificateRequested)
+                this.connection_state = CS_SERVER_KEY_EXCHANGE_RECEIVED;
+                break;
+            }
+            case HP_CERTIFICATE_REQUEST:
+            {
+                switch (connection_state)
                 {
-                    byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(
-                        rs.getCurrentHash());
-                    if (clientCertificateSignature != null)
+                    case CS_SERVER_CERTIFICATE_RECEIVED:
+
+                        // There was no server key exchange message; check it's OK
+                        this.keyExchange.skipServerKeyExchange();
+
+                        // NB: Fall through to next case label
+
+                    case CS_SERVER_KEY_EXCHANGE_RECEIVED:
                     {
-                        sendCertificateVerify(clientCertificateSignature);
+                        byte[] types = TlsUtils.readOpaque8(is);
+                        byte[] authorities = TlsUtils.readOpaque16(is);
 
-                        connection_state = CS_CERTIFICATE_VERIFY_SEND;
+                        assertEmpty(is);
+
+                        ArrayList authorityDNs = new ArrayList();
+
+                        ByteArrayInputStream bis = new ByteArrayInputStream(authorities);
+                        while (bis.available() > 0)
+                        {
+                            byte[] dnBytes = TlsUtils.readOpaque16(bis);
+                            authorityDNs.add(X509Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
+                        }
+
+                        this.tlsClient.processServerCertificateRequest(types, authorityDNs);
+
+                        break;
                     }
+                    default:
+                        this.failWithError(AL_fatal, AP_unexpected_message);
                 }
 
-                /*
-                 * Now, we send change cipher state
-                 */
-                byte[] cmessage = new byte[1];
-                cmessage[0] = 1;
-                rs.writeMessage(RL_CHANGE_CIPHER_SPEC, cmessage, 0, cmessage.length);
-
-                connection_state = CS_CLIENT_CHANGE_CIPHER_SPEC_SEND;
-
-                /*
-                 * Calculate the master_secret
-                 */
-                securityParameters.masterSecret = TlsUtils.PRF(
-                    this.keyExchange.getPremasterSecret(),
-                    "master secret",
-                    TlsUtils.concat(securityParameters.clientRandom, securityParameters.serverRandom),
-                    48);
-
-                /* TODO: RFC 2246 8.1.
-                 * "The pre_master_secret should be deleted from memory once the
-                 * master_secret has been computed. 
-                 */
-
-                /*
-                 * Initialize our cipher suite
-                 */
-                rs.clientCipherSpecDecided(tlsClient.createCipher(securityParameters));
-
-                /*
-                 * Send our finished message.
-                 */
-                byte[] clientVerifyData = TlsUtils.PRF(securityParameters.masterSecret, "client finished",
-                    rs.getCurrentHash(), 12);
-
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                TlsUtils.writeUint8(HP_FINISHED, bos);
-                TlsUtils.writeUint24(12, bos);
-                bos.write(clientVerifyData);
-                byte[] message = bos.toByteArray();
-
-                rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
-
-                this.connection_state = CS_CLIENT_FINISHED_SEND;
+                this.connection_state = CS_CERTIFICATE_REQUEST_RECEIVED;
                 break;
-            default:
-                this.failWithError(AL_fatal, AP_handshake_failure);
             }
-            break;
-        case HP_SERVER_KEY_EXCHANGE:
-        {
-            switch (connection_state)
-            {
-            case CS_SERVER_HELLO_RECEIVED:
-
-                // There was no server certificate message; check it's OK
-                this.keyExchange.skipServerCertificate();
-
-                // NB: Fall through to next case label
-
-            case CS_SERVER_CERTIFICATE_RECEIVED:
-
-                this.keyExchange.processServerKeyExchange(is, securityParameters);
-
-                assertEmpty(is);
-                break;
-
+            case HP_HELLO_REQUEST:
+            case HP_CLIENT_KEY_EXCHANGE:
+            case HP_CERTIFICATE_VERIFY:
+            case HP_CLIENT_HELLO:
             default:
+                // We do not support this!
                 this.failWithError(AL_fatal, AP_unexpected_message);
-            }
-
-            this.connection_state = CS_SERVER_KEY_EXCHANGE_RECEIVED;
-            break;
-        }
-        case HP_CERTIFICATE_REQUEST:
-        {
-            switch (connection_state)
-            {
-            case CS_SERVER_CERTIFICATE_RECEIVED:
-
-                // There was no server key exchange message; check it's OK
-                this.keyExchange.skipServerKeyExchange();
-
-                // NB: Fall through to next case label
-
-            case CS_SERVER_KEY_EXCHANGE_RECEIVED:
-            {
-                byte[] types = TlsUtils.readOpaque8(is);
-                byte[] authorities = TlsUtils.readOpaque16(is);
-
-                assertEmpty(is);
-
-                ArrayList authorityDNs = new ArrayList();
-
-                ByteArrayInputStream bis = new ByteArrayInputStream(authorities);
-                while (bis.available() > 0)
-                {
-                    byte[] dnBytes = TlsUtils.readOpaque16(bis);
-                    authorityDNs.add(X509Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
-                }
-
-                this.tlsClient.processServerCertificateRequest(types, authorityDNs);
-
                 break;
-            }
-            default:
-                this.failWithError(AL_fatal, AP_unexpected_message);
-            }
-
-            this.connection_state = CS_CERTIFICATE_REQUEST_RECEIVED;
-            break;
-        }
-        case HP_HELLO_REQUEST:
-        case HP_CLIENT_KEY_EXCHANGE:
-        case HP_CERTIFICATE_VERIFY:
-        case HP_CLIENT_HELLO:
-        default:
-            // We do not support this!
-            this.failWithError(AL_fatal, AP_unexpected_message);
-            break;
         }
     }
 
@@ -579,8 +571,8 @@ public class TlsProtocolHandler
         /*
          * There is nothing we need to do here.
          * 
-         * This function could be used for callbacks when application
-         * data arrives in the future.
+         * This function could be used for callbacks when application data arrives in the
+         * future.
          */
     }
 
@@ -637,9 +629,9 @@ public class TlsProtocolHandler
 
     /**
      * This method is called, when a change cipher spec message is received.
-     *
-     * @throws IOException If the message has an invalid content or the
-     *                     handshake is not in the correct state.
+     * 
+     * @throws IOException If the message has an invalid content or the handshake is not
+     *             in the correct state.
      */
     private void processChangeCipherSpec() throws IOException
     {
@@ -697,8 +689,8 @@ public class TlsProtocolHandler
     private void sendCertificateVerify(byte[] data) throws IOException
     {
         /*
-         * Send signature of handshake messages so far to prove we are the owner of
-         * the cert See RFC 2246 sections 4.7, 7.4.3 and 7.4.8
+         * Send signature of handshake messages so far to prove we are the owner of the
+         * cert See RFC 2246 sections 4.7, 7.4.3 and 7.4.8
          */
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HP_CERTIFICATE_VERIFY, bos);
@@ -711,9 +703,9 @@ public class TlsProtocolHandler
 
     /**
      * Connects to the remote system.
-     *
-     * @param verifyer Will be used when a certificate is received to verify
-     *                 that this certificate is accepted by the client.
+     * 
+     * @param verifyer Will be used when a certificate is received to verify that this
+     *            certificate is accepted by the client.
      * @throws IOException If handshake was not successful.
      */
     // TODO Deprecate
@@ -733,11 +725,13 @@ public class TlsProtocolHandler
 
     /**
      * Connects to the remote system using client authentication
-     * @param verifyer Will be used when a certificate is received to verify
-     *                 that this certificate is accepted by the client.
-     * @param clientCertificate The client's certificate to be provided to the remote system
-     * @param clientPrivateKey The client's private key for the certificate
-     *                 to authenticate to the remote system (RSA or DSA)
+     * 
+     * @param verifyer Will be used when a certificate is received to verify that this
+     *            certificate is accepted by the client.
+     * @param clientCertificate The client's certificate to be provided to the remote
+     *            system
+     * @param clientPrivateKey The client's private key for the certificate to
+     *            authenticate to the remote system (RSA or DSA)
      * @throws IOException If handshake was not successful.
      */
     // TODO Make public
@@ -747,10 +741,10 @@ public class TlsProtocolHandler
         this.tlsClient.init(this);
 
         /*
-        * Send Client hello
-        *
-        * First, generate some random data.
-        */
+         * Send Client hello
+         * 
+         * First, generate some random data.
+         */
         securityParameters = new SecurityParameters();
         securityParameters.clientRandom = new byte[32];
         random.nextBytes(securityParameters.clientRandom);
@@ -761,13 +755,13 @@ public class TlsProtocolHandler
         os.write(securityParameters.clientRandom);
 
         /*
-        * Length of Session id
-        */
+         * Length of Session id
+         */
         TlsUtils.writeUint8((short)0, os);
 
         /*
-        * Cipher suites
-        */
+         * Cipher suites
+         */
         this.offeredCipherSuites = this.tlsClient.getCipherSuites();
 
         TlsUtils.writeUint16(2 * offeredCipherSuites.length, os);
@@ -777,9 +771,9 @@ public class TlsProtocolHandler
         }
 
         /*
-        * Compression methods, just the null method.
-        */
-        byte[] compressionMethods = new byte[]{0x00};
+         * Compression methods, just the null method.
+         */
+        byte[] compressionMethods = new byte[] { 0x00 };
         TlsUtils.writeOpaque8(compressionMethods, os);
 
         /*
@@ -816,8 +810,8 @@ public class TlsProtocolHandler
         connection_state = CS_CLIENT_HELLO_SEND;
 
         /*
-        * We will now read data, until we have completed the handshake.
-        */
+         * We will now read data, until we have completed the handshake.
+         */
         while (connection_state != CS_DONE)
         {
             // TODO Should we send fatal alerts in the event of an exception
@@ -830,13 +824,13 @@ public class TlsProtocolHandler
     }
 
     /**
-     * Read data from the network. The method will return immediately, if there is
-     * still some data left in the buffer, or block until some application
-     * data has been read from the network.
-     *
-     * @param buf    The buffer where the data will be copied to.
+     * Read data from the network. The method will return immediately, if there is still
+     * some data left in the buffer, or block until some application data has been read
+     * from the network.
+     * 
+     * @param buf The buffer where the data will be copied to.
      * @param offset The position where the data will be placed in the buffer.
-     * @param len    The maximum number of bytes to read.
+     * @param len The maximum number of bytes to read.
      * @return The number of bytes read.
      * @throws IOException If something goes wrong during reading data.
      */
@@ -894,10 +888,10 @@ public class TlsProtocolHandler
      * Send some application data to the remote system.
      * <p/>
      * The method will handle fragmentation internally.
-     *
-     * @param buf    The buffer with the data.
+     * 
+     * @param buf The buffer with the data.
      * @param offset The position in the buffer where the data is placed.
-     * @param len    The length of the data.
+     * @param len The length of the data.
      * @throws IOException If something goes wrong during sending.
      */
     protected void writeData(byte[] buf, int offset, int len) throws IOException
@@ -913,11 +907,10 @@ public class TlsProtocolHandler
         }
 
         /*
-        * Protect against known IV attack!
-        *
-        * DO NOT REMOVE THIS LINE, EXCEPT YOU KNOW EXACTLY WHAT
-        * YOU ARE DOING HERE.
-        */
+         * Protect against known IV attack!
+         * 
+         * DO NOT REMOVE THIS LINE, EXCEPT YOU KNOW EXACTLY WHAT YOU ARE DOING HERE.
+         */
         rs.writeMessage(RL_APPLICATION_DATA, emptybuf, 0, 0);
 
         do
@@ -976,8 +969,8 @@ public class TlsProtocolHandler
      * Terminate this connection with an alert.
      * <p/>
      * Can be used for normal closure too.
-     *
-     * @param alertLevel       The level of the alert, an be AL_fatal or AL_warning.
+     * 
+     * @param alertLevel The level of the alert, an be AL_fatal or AL_warning.
      * @param alertDescription The exact alert message.
      * @throws IOException If alert was fatal.
      */
@@ -1018,7 +1011,7 @@ public class TlsProtocolHandler
 
     /**
      * Closes this connection.
-     *
+     * 
      * @throws IOException If something goes wrong during closing.
      */
     public void close() throws IOException
@@ -1031,7 +1024,7 @@ public class TlsProtocolHandler
 
     /**
      * Make sure the InputStream is now empty. Fail otherwise.
-     *
+     * 
      * @param is The InputStream to check.
      * @throws IOException If is is not empty.
      */

@@ -1,18 +1,18 @@
 package org.bouncycastle.crypto.tls;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+
 /**
- * A representation for a certificate chain as used by an tls server.
+ * A representation for a certificate chain as used by a tls server.
  */
 public class Certificate
 {
@@ -23,7 +23,7 @@ public class Certificate
 
     /**
      * Parse the ServerCertificate message.
-     *
+     * 
      * @param is The stream where to parse from.
      * @return A Certificate object with the certs, the server has sended.
      * @throws IOException If something goes wrong during parsing.
@@ -45,7 +45,8 @@ public class Certificate
             tmp.addElement(X509CertificateStructure.getInstance(o));
             if (bis.available() > 0)
             {
-                throw new IllegalArgumentException("Sorry, there is garbage data left after the certificate");
+                throw new IllegalArgumentException(
+                    "Sorry, there is garbage data left after the certificate");
             }
         }
         certs = new X509CertificateStructure[tmp.size()];
@@ -59,10 +60,8 @@ public class Certificate
     /**
      * Encodes version of the ClientCertificate message
      * 
-     * @param os
-     *            stream to write the message to
-     * @throws IOException
-     *             If something goes wrong
+     * @param os stream to write the message to
+     * @throws IOException If something goes wrong
      */
     protected void encode(OutputStream os) throws IOException
     {
@@ -80,14 +79,14 @@ public class Certificate
 
         for (int i = 0; i < encCerts.size(); ++i)
         {
-            byte[] encCert = (byte[]) encCerts.elementAt(i);
+            byte[] encCert = (byte[])encCerts.elementAt(i);
             TlsUtils.writeOpaque24(encCert, os);
         }
     }
 
     /**
      * Private constructor from a cert array.
-     *
+     * 
      * @param certs The certs the chain should contain.
      */
     // TODO Make public to enable client certificate support

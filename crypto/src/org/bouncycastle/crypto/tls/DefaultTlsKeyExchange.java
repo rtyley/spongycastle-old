@@ -53,7 +53,8 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
     private BigInteger Yc;
     private byte[] pms;
 
-    DefaultTlsKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
+    DefaultTlsKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer,
+        short keyExchange)
     {
         this.handler = handler;
         this.verifyer = verifyer;
@@ -64,7 +65,8 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
     {
         if (this.keyExchange != TlsKeyExchange.KE_SRP)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_unexpected_message);
         }
     }
 
@@ -79,7 +81,8 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         }
         catch (RuntimeException e)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unsupported_certificate);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_unsupported_certificate);
         }
 
         // Sanity check the PublicKeyFactory
@@ -88,17 +91,19 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
             handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
         }
 
+        // TODO 
         /*
-         * Perform various checks per RFC2246 7.4.2
-         * TODO "Unless otherwise specified, the signing algorithm for the certificate
-         * must be the same as the algorithm for the certificate key."
+         * Perform various checks per RFC2246 7.4.2: "Unless otherwise specified, the
+         * signing algorithm for the certificate must be the same as the algorithm for the
+         * certificate key."
          */
         switch (this.keyExchange)
         {
             case TlsKeyExchange.KE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                        TlsProtocolHandler.AP_certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
                 break;
@@ -106,7 +111,8 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
             case TlsKeyExchange.KE_SRP_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                        TlsProtocolHandler.AP_certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
@@ -114,11 +120,13 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
             case TlsKeyExchange.KE_SRP_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                        TlsProtocolHandler.AP_certificate_unknown);
                 }
                 break;
             default:
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unsupported_certificate);
+                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    TlsProtocolHandler.AP_unsupported_certificate);
         }
 
         /*
@@ -161,7 +169,8 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
                 break;
             }
             default:
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    TlsProtocolHandler.AP_unexpected_message);
         }
     }
 
@@ -179,53 +188,51 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
          */
         switch (this.keyExchange)
         {
-        case KE_RSA:
-        case KE_DH_DSS:
-        case KE_DH_RSA:
-            // No problem
-            return;
+            case KE_RSA:
+            case KE_DH_DSS:
+            case KE_DH_RSA:
+                // No problem
+                return;
 
-        case KE_RSA_EXPORT:
-            if (this.serverPublicKey instanceof RSAKeyParameters)
-            {
-                RSAKeyParameters rsaPubKey = (RSAKeyParameters)this.serverPublicKey;
-                if (rsaPubKey.getModulus().bitLength() <= 512)
+            case KE_RSA_EXPORT:
+                if (this.serverPublicKey instanceof RSAKeyParameters)
                 {
-                    return;
+                    RSAKeyParameters rsaPubKey = (RSAKeyParameters)this.serverPublicKey;
+                    if (rsaPubKey.getModulus().bitLength() <= 512)
+                    {
+                        return;
+                    }
                 }
-            }
-            break;
+                break;
         }
 
         handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
-    protected byte[] generateClientKeyExchange()
-        throws IOException
+    protected byte[] generateClientKeyExchange() throws IOException
     {
         switch (this.keyExchange)
         {
             case TlsKeyExchange.KE_RSA:
             {
                 /*
-                * We are doing RSA key exchange. We will
-                * choose a pre master secret and send it
-                * rsa encrypted to the server.
-                *
-                * Prepare pre master secret.
-                */
+                 * We are doing RSA key exchange. We will choose a pre master secret and
+                 * send it rsa encrypted to the server.
+                 * 
+                 * Prepare pre master secret.
+                 */
                 pms = new byte[48];
                 handler.getRandom().nextBytes(pms);
                 TlsUtils.writeVersion(pms, 0);
 
                 /*
-                * Encode the pms and send it to the server.
-                *
-                * Prepare an PKCS1Encoding with good random
-                * padding.
-                */
+                 * Encode the pms and send it to the server.
+                 * 
+                 * Prepare an PKCS1Encoding with good random padding.
+                 */
                 PKCS1Encoding encoding = new PKCS1Encoding(new RSABlindedEngine());
-                encoding.init(true, new ParametersWithRandom(this.serverPublicKey, handler.getRandom()));
+                encoding.init(true, new ParametersWithRandom(this.serverPublicKey,
+                    handler.getRandom()));
 
                 try
                 {
@@ -234,9 +241,10 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
                 catch (InvalidCipherTextException e)
                 {
                     /*
-                    * This should never happen, only during decryption.
-                    */
-                    handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
+                     * This should never happen, only during decryption.
+                     */
+                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                        TlsProtocolHandler.AP_internal_error);
                     return null;
                 }
             }
@@ -252,10 +260,11 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
 
             default:
                 /*
-                * Problem during handshake, we don't know
-                * how to handle this key exchange method.
-                */
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+                 * Problem during handshake, we don't know how to handle this key exchange
+                 * method.
+                 */
+                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    TlsProtocolHandler.AP_unexpected_message);
                 return null;
         }
     }
@@ -265,8 +274,7 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         return this.pms;
     }
 
-    private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
-        throws IOException
+    private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
     {
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
@@ -278,7 +286,8 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
                 int bits = ku.getBytes()[0] & 0xff;
                 if ((bits & keyUsageBits) != keyUsageBits)
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                        TlsProtocolHandler.AP_certificate_unknown);
                 }
             }
         }
@@ -316,7 +325,8 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
              */
             if (!signer.verifySignature(sigByte))
             {
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_bad_certificate);
+                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    TlsProtocolHandler.AP_bad_certificate);
             }
         }
 
@@ -332,16 +342,19 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
          */
         if (!p.isProbablePrime(10))
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_illegal_parameter);
         }
         if (g.compareTo(TWO) < 0 || g.compareTo(p.subtract(TWO)) > 0)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_illegal_parameter);
         }
         // TODO For static DH public values, see additional checks in RFC 2631 2.1.5 
         if (Ys.compareTo(TWO) < 0 || Ys.compareTo(p.subtract(ONE)) > 0)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_illegal_parameter);
         }
 
         /*
@@ -382,7 +395,7 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         byte[] gByte = TlsUtils.readOpaque16(sigIn);
         byte[] sByte = TlsUtils.readOpaque8(sigIn);
         byte[] BByte = TlsUtils.readOpaque16(sigIn);
-    
+
         if (signer != null)
         {
             byte[] sigByte = TlsUtils.readOpaque16(is);
@@ -392,7 +405,8 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
              */
             if (!signer.verifySignature(sigByte))
             {
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_bad_certificate);
+                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    TlsProtocolHandler.AP_bad_certificate);
             }
         }
 
@@ -404,8 +418,7 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         SRP6Client srpClient = new SRP6Client();
         srpClient.init(N, g, new SHA1Digest(), handler.getRandom());
 
-        this.SRP_A = srpClient.generateClientCredentials(s, this.SRP_identity,
-            this.SRP_password);
+        this.SRP_A = srpClient.generateClientCredentials(s, this.SRP_identity, this.SRP_password);
 
         try
         {
@@ -416,7 +429,8 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
         }
         catch (CryptoException e)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_illegal_parameter);
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_illegal_parameter);
         }
     }
 }

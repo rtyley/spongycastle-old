@@ -8,8 +8,7 @@ import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.signers.GenericSigner;
 
-class TlsRSASigner
-    implements TlsSigner
+class TlsRSASigner implements TlsSigner
 {
     public byte[] calculateRawSignature(AsymmetricKeyParameter privateKey, byte[] md5andsha1)
         throws CryptoException

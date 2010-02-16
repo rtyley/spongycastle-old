@@ -18,10 +18,10 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 class DefaultTlsClient implements TlsClient
 {
     // TODO Add runtime support for this check?
-    /* RFC 2246 9.
-     * In the absence of an application profile standard specifying
-     * otherwise, a TLS compliant application MUST implement the cipher
-     * suite TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA.
+    /*
+     * RFC 2246 9. In the absence of an application profile standard specifying otherwise,
+     * a TLS compliant application MUST implement the cipher suite
+     * TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA.
      */
     private static final int TLS_RSA_WITH_3DES_EDE_CBC_SHA = 0x000a;
     private static final int TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA = 0x0013;
@@ -33,7 +33,7 @@ class DefaultTlsClient implements TlsClient
     private static final int TLS_DHE_DSS_WITH_AES_256_CBC_SHA = 0x0038;
     private static final int TLS_DHE_RSA_WITH_AES_256_CBC_SHA = 0x0039;
 
-//    private static final int TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA = 0xC01A;    
+//    private static final int TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA = 0xC01A;
 //    private static final int TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA = 0xC01B;
 //    private static final int TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA = 0xC01C;
 //    private static final int TLS_SRP_SHA_WITH_AES_128_CBC_SHA = 0xC01D;
@@ -105,26 +105,25 @@ class DefaultTlsClient implements TlsClient
     public int[] getCipherSuites()
     {
         return new int[] {
-           TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-           TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-           TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-           TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-           TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
-           TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
-           TLS_RSA_WITH_AES_256_CBC_SHA,
-           TLS_RSA_WITH_AES_128_CBC_SHA,
-           TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-
-//           TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA,
-//           TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA,
-//           TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA,
-//           TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA,
-//           TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA,
-//           TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA,
-//           TLS_SRP_SHA_WITH_AES_256_CBC_SHA,
-//           TLS_SRP_SHA_WITH_AES_128_CBC_SHA,
-//           TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA,
-       };
+            TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+            TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
+            TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+            TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
+            TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
+            TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
+            TLS_RSA_WITH_AES_256_CBC_SHA,
+            TLS_RSA_WITH_AES_128_CBC_SHA,
+            TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+//            TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA,
+//            TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA,
+//            TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA,
+//            TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA,
+//            TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA,
+//            TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA,
+//            TLS_SRP_SHA_WITH_AES_256_CBC_SHA,
+//            TLS_SRP_SHA_WITH_AES_128_CBC_SHA,
+//            TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA,
+        };
     }
 
     public Hashtable generateClientExtensions()
@@ -179,12 +178,12 @@ class DefaultTlsClient implements TlsClient
 //            case TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
 //            case TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
 //                return createKeyExchange(TlsKeyExchange.KE_SRP);
-//
+//    
 //            case TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
 //            case TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
 //            case TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
 //                return createKeyExchange(TlsKeyExchange.KE_SRP_RSA);
-//
+//    
 //            case TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
 //            case TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
 //            case TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
@@ -194,12 +193,9 @@ class DefaultTlsClient implements TlsClient
                 // Note: internal error here; the TlsProtocolHandler verifies that the server-selected
                 // cipher suite was in the list of client-offered cipher suites, so if we now can't
                 // produce an implementation, we shouldn't have offered it!
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
-
-                /*
-                * Unreachable Code, failWithError will always throw an exception!
-                */
-                return null;
+                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    TlsProtocolHandler.AP_internal_error);
+                return null; // Unreachable!
         }
     }
 
@@ -208,8 +204,7 @@ class DefaultTlsClient implements TlsClient
         // TODO Use provided info to choose a certificate in getCertificate()
     }
 
-    public byte[] generateCertificateSignature(byte[] md5andsha1)
-        throws IOException
+    public byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException
     {
         if (clientSigner == null)
         {
@@ -261,15 +256,15 @@ class DefaultTlsClient implements TlsClient
                 return createAESCipher(32, securityParameters);
 
             default:
-                // Note: internal error here; the TlsProtocolHandler verifies that the server-selected
-                // cipher suite was in the list of client-offered cipher suites, so if we now can't
-                // produce an implementation, we shouldn't have offered it!
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
-
                 /*
-                * Unreachable Code, failWithError will always throw an exception!
-                */
-                return null;
+                 * Note: internal error here; the TlsProtocolHandler verifies that the
+                 * server-selected cipher suite was in the list of client-offered cipher
+                 * suites, so if we now can't produce an implementation, we shouldn't have
+                 * offered it!
+                 */
+                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    TlsProtocolHandler.AP_internal_error);
+                return null; // Unreachable!
         }
     }
 
