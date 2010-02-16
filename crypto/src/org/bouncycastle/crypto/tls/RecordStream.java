@@ -22,7 +22,7 @@ class RecordStream
         this.is = is;
         this.os = os;
         this.hash = new CombinedHash();
-        this.readCipher = new TlsNullCipherSuite();
+        this.readCipher = new TlsNullCipher();
         this.writeCipher = this.readCipher;
     }
 
