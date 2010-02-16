@@ -13,6 +13,7 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.agreement.srp.SRP6Client;
+import org.bouncycastle.crypto.agreement.srp.SRP6Util;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.io.SignerInputStream;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -33,12 +34,13 @@ class SRPTlsKeyExchange extends TlsKeyExchange
 
     private AsymmetricKeyParameter serverPublicKey = null;
 
+    // TODO Need a way of providing these
     private byte[] SRP_identity = null;
     private byte[] SRP_password = null;
 
-    SRP6Client srpClient = new SRP6Client();
     private byte[] s = null;
     BigInteger B = null;
+    SRP6Client srpClient = new SRP6Client();
 
     SRPTlsKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
     {
@@ -140,7 +142,7 @@ class SRPTlsKeyExchange extends TlsKeyExchange
         handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
-    public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
+    protected void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
         InputStream sigIn = is;
@@ -152,21 +154,15 @@ class SRPTlsKeyExchange extends TlsKeyExchange
             sigIn = new SignerInputStream(is, signer);
         }
 
-        /*
-         * Parse the Structure
-         */
-        byte[] NByte = TlsUtils.readOpaque16(sigIn);
-        byte[] gByte = TlsUtils.readOpaque16(sigIn);
-        byte[] sByte = TlsUtils.readOpaque8(sigIn);
-        byte[] BByte = TlsUtils.readOpaque16(sigIn);
+        byte[] NBytes = TlsUtils.readOpaque16(sigIn);
+        byte[] gBytes = TlsUtils.readOpaque16(sigIn);
+        byte[] sBytes = TlsUtils.readOpaque8(sigIn);
+        byte[] BBytes = TlsUtils.readOpaque16(sigIn);
 
         if (signer != null)
         {
             byte[] sigByte = TlsUtils.readOpaque16(is);
 
-            /*
-             * Verify the Signature.
-             */
             if (!signer.verifySignature(sigByte))
             {
                 handler.failWithError(TlsProtocolHandler.AL_fatal,
@@ -174,12 +170,28 @@ class SRPTlsKeyExchange extends TlsKeyExchange
             }
         }
 
-        BigInteger N = new BigInteger(1, NByte);
-        BigInteger g = new BigInteger(1, gByte);
+        BigInteger N = new BigInteger(1, NBytes);
+        BigInteger g = new BigInteger(1, gBytes);
+
+        // TODO Validate group parameters (see RFC 5054)
+
+        this.s = sBytes;
+
+        /*
+         * RFC 5054 2.5.3: The client MUST abort the handshake with an "illegal_parameter"
+         * alert if B % N = 0.
+         */
+        try
+        {
+            this.B = SRP6Util.validatePublicValue(N, new BigInteger(1, BBytes));
+        }
+        catch (CryptoException e)
+        {
+            handler.failWithError(TlsProtocolHandler.AL_fatal,
+                TlsProtocolHandler.AP_illegal_parameter);
+        }
 
         this.srpClient.init(N, g, new SHA1Digest(), handler.getRandom());
-        this.s = sByte;
-        this.B = new BigInteger(1, BByte);
     }
 
     protected byte[] generateClientKeyExchange() throws IOException
