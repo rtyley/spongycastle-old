@@ -457,15 +457,18 @@ public class TlsProtocolHandler
                         /*
                          * Calculate the master_secret
                          */
-                        securityParameters.masterSecret = TlsUtils.PRF(
-                            this.keyExchange.getPremasterSecret(), "master secret",
+                        byte[] pms = this.keyExchange.getPremasterSecret();
+
+                        securityParameters.masterSecret = TlsUtils.PRF(pms, "master secret",
                             TlsUtils.concat(securityParameters.clientRandom,
                                 securityParameters.serverRandom), 48);
 
+                        // TODO Is there a way to ensure the data is really overwritten?
                         /*
-                         * TODO: RFC 2246 8.1. "The pre_master_secret should be deleted
-                         * from memory once the master_secret has been computed.
+                         * RFC 2246 8.1. "The pre_master_secret should be deleted from
+                         * memory once the master_secret has been computed."
                          */
+                        Arrays.fill(pms, (byte)0);
 
                         /*
                          * Initialize our cipher suite
