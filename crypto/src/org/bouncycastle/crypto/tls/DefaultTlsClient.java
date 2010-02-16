@@ -24,14 +24,20 @@ class DefaultTlsClient implements TlsClient
      * TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA.
      */
     private static final int TLS_RSA_WITH_3DES_EDE_CBC_SHA = 0x000a;
+    private static final int TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA = 0x000D;
+    private static final int TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA = 0x0010;
     private static final int TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA = 0x0013;
     private static final int TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA = 0x0016;
 
     // RFC 3268
     private static final int TLS_RSA_WITH_AES_128_CBC_SHA = 0x002f;
+    private static final int TLS_DH_DSS_WITH_AES_128_CBC_SHA = 0x0030;
+    private static final int TLS_DH_RSA_WITH_AES_128_CBC_SHA = 0x0031;
     private static final int TLS_DHE_DSS_WITH_AES_128_CBC_SHA = 0x0032;
     private static final int TLS_DHE_RSA_WITH_AES_128_CBC_SHA = 0x0033;
     private static final int TLS_RSA_WITH_AES_256_CBC_SHA = 0x0035;
+    private static final int TLS_DH_DSS_WITH_AES_256_CBC_SHA = 0x0036;
+    private static final int TLS_DH_RSA_WITH_AES_256_CBC_SHA = 0x0037;
     private static final int TLS_DHE_DSS_WITH_AES_256_CBC_SHA = 0x0038;
     private static final int TLS_DHE_RSA_WITH_AES_256_CBC_SHA = 0x0039;
 
@@ -117,6 +123,14 @@ class DefaultTlsClient implements TlsClient
             TLS_RSA_WITH_AES_256_CBC_SHA,
             TLS_RSA_WITH_AES_128_CBC_SHA,
             TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+
+//            TLS_DH_RSA_WITH_AES_256_CBC_SHA,
+//            TLS_DH_DSS_WITH_AES_256_CBC_SHA,
+//            TLS_DH_RSA_WITH_AES_128_CBC_SHA,
+//            TLS_DH_DSS_WITH_AES_128_CBC_SHA,
+//            TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
+//            TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
+
 //            TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA,
 //            TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA,
 //            TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA,
@@ -167,6 +181,16 @@ class DefaultTlsClient implements TlsClient
             case TLS_RSA_WITH_AES_256_CBC_SHA:
                 return createKeyExchange(TlsKeyExchange.KE_RSA);
 
+            case TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA:
+            case TLS_DH_DSS_WITH_AES_128_CBC_SHA:
+            case TLS_DH_DSS_WITH_AES_256_CBC_SHA:
+                return createKeyExchange(TlsKeyExchange.KE_DH_DSS);
+
+            case TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
+            case TLS_DH_RSA_WITH_AES_128_CBC_SHA:
+            case TLS_DH_RSA_WITH_AES_256_CBC_SHA:
+                return createKeyExchange(TlsKeyExchange.KE_DH_RSA);
+
             case TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
             case TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
             case TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
@@ -193,9 +217,12 @@ class DefaultTlsClient implements TlsClient
                 return createSRPExchange(TlsKeyExchange.KE_SRP_DSS);
 
             default:
-                // Note: internal error here; the TlsProtocolHandler verifies that the server-selected
-                // cipher suite was in the list of client-offered cipher suites, so if we now can't
-                // produce an implementation, we shouldn't have offered it!
+                /*
+                 * Note: internal error here; the TlsProtocolHandler verifies that the
+                 * server-selected cipher suite was in the list of client-offered cipher
+                 * suites, so if we now can't produce an implementation, we shouldn't have
+                 * offered it!
+                 */
                 handler.failWithError(TlsProtocolHandler.AL_fatal,
                     TlsProtocolHandler.AP_internal_error);
                 return null; // Unreachable!
@@ -235,27 +262,33 @@ class DefaultTlsClient implements TlsClient
         switch (selectedCipherSuite)
         {
             case TLS_RSA_WITH_3DES_EDE_CBC_SHA:
+            case TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA:
+            case TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
             case TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
             case TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
-//            case TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
-//            case TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
-//            case TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
+            case TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
+            case TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
+            case TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
                 return createDESedeCipher(24, securityParameters);
 
             case TLS_RSA_WITH_AES_128_CBC_SHA:
+            case TLS_DH_DSS_WITH_AES_128_CBC_SHA:
+            case TLS_DH_RSA_WITH_AES_128_CBC_SHA:
             case TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
             case TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
-//            case TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
-//            case TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
-//            case TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
+            case TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
+            case TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
+            case TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
                 return createAESCipher(16, securityParameters);
 
             case TLS_RSA_WITH_AES_256_CBC_SHA:
+            case TLS_DH_DSS_WITH_AES_256_CBC_SHA:
+            case TLS_DH_RSA_WITH_AES_256_CBC_SHA:
             case TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
             case TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-//            case TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
-//            case TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
-//            case TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
+            case TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
+            case TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
+            case TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
                 return createAESCipher(32, securityParameters);
 
             default:
