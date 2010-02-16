@@ -247,6 +247,14 @@ class DefaultTlsKeyExchange extends TlsKeyExchange
             case TlsKeyExchange.KE_DHE_DSS:
             case TlsKeyExchange.KE_DHE_RSA:
             {
+                // TODO RFC 2246 7.4.72
+                /*
+                 * If the client certificate already contains a suitable Diffie-Hellman
+                 * key, then Yc is implicit and does not need to be sent again. In this
+                 * case, the Client Key Exchange message will be sent, but will be empty.
+                 */
+//                return new byte[0];
+
                 /*
                  * Generate a keypair (using parameters from server key) and send the
                  * public value to the server.
