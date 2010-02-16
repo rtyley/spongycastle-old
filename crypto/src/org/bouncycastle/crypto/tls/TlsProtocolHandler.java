@@ -13,6 +13,7 @@ import java.util.Hashtable;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
+import org.bouncycastle.util.Arrays;
 
 /**
  * An implementation of all high level protocols in TLS 1.0.
@@ -288,29 +289,26 @@ public class TlsProtocolHandler
                  * Read the checksum from the finished message, it has always 12
                  * bytes.
                  */
-                byte[] receivedChecksum = new byte[12];
-                TlsUtils.readFully(receivedChecksum, is);
+                byte[] serverVerifyData = new byte[12];
+                TlsUtils.readFully(serverVerifyData, is);
 
                 assertEmpty(is);
 
                 /*
                  * Calculate our own checksum.
                  */
-                byte[] checksum = TlsUtils.PRF(securityParameters.masterSecret, "server finished",
-                    rs.getCurrentHash(), 12);
+                byte[] expectedServerVerifyData = TlsUtils.PRF(securityParameters.masterSecret,
+                    "server finished", rs.getCurrentHash(), 12);
 
                 /*
                  * Compare both checksums.
                  */
-                for (int i = 0; i < receivedChecksum.length; i++)
+                if (!Arrays.constantTimeAreEqual(expectedServerVerifyData, serverVerifyData))
                 {
-                    if (receivedChecksum[i] != checksum[i])
-                    {
-                        /*
-                         * Wrong checksum in the finished message.
-                         */
-                        this.failWithError(AL_fatal, AP_handshake_failure);
-                    }
+                    /*
+                     * Wrong checksum in the finished message.
+                     */
+                    this.failWithError(AL_fatal, AP_handshake_failure);
                 }
 
                 connection_state = CS_DONE;
@@ -485,13 +483,13 @@ public class TlsProtocolHandler
                 /*
                  * Send our finished message.
                  */
-                byte[] checksum = TlsUtils.PRF(securityParameters.masterSecret, "client finished",
+                byte[] clientVerifyData = TlsUtils.PRF(securityParameters.masterSecret, "client finished",
                     rs.getCurrentHash(), 12);
 
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 TlsUtils.writeUint8(HP_FINISHED, bos);
                 TlsUtils.writeUint24(12, bos);
-                bos.write(checksum);
+                bos.write(clientVerifyData);
                 byte[] message = bos.toByteArray();
 
                 rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
