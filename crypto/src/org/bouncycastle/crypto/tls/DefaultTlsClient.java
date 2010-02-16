@@ -232,6 +232,11 @@ class DefaultTlsClient implements TlsClient
         return null;
     }
 
+    public void notifySessionID(byte[] sessionID)
+    {
+        // Currently ignored 
+    }
+
     public void processServerExtensions(Hashtable serverExtensions)
     {
         // TODO Validate/process serverExtensions (via client?)

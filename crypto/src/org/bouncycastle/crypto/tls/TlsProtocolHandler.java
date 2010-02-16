@@ -337,14 +337,14 @@ public class TlsProtocolHandler
                 securityParameters.serverRandom = new byte[32];
                 TlsUtils.readFully(securityParameters.serverRandom, is);
 
-                byte[] sessionId = TlsUtils.readOpaque8(is);
-                if (sessionId.length > 32)
+                byte[] sessionID = TlsUtils.readOpaque8(is);
+                if (sessionID.length > 32)
                 {
                     this.failWithError(TlsProtocolHandler.AL_fatal,
                             TlsProtocolHandler.AP_illegal_parameter);
                 }
 
-                // TODO Inform the client of the session ID
+                tlsClient.notifySessionID(sessionID);
 
                 /*
                  * Find out which ciphersuite the server has chosen and check
