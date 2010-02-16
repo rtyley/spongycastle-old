@@ -114,10 +114,9 @@ public class TlsProtocolHandler
 
     private SecurityParameters securityParameters = null;
 
-    private int[] offeredCipherSuites = null;
-    private TlsCipherSuite chosenCipherSuite = null;
-
     private TlsClient tlsClient = null;
+    private int[] offeredCipherSuites = null;
+    private TlsKeyExchange keyExchange = null;
 
     private static SecureRandom createSecureRandom()
     {
@@ -270,7 +269,7 @@ public class TlsProtocolHandler
 
                 assertEmpty(is);
 
-                this.chosenCipherSuite.processServerCertificate(serverCertificate);
+                this.keyExchange.processServerCertificate(serverCertificate);
 
                 break;
             }
@@ -344,7 +343,7 @@ public class TlsProtocolHandler
                             TlsProtocolHandler.AP_illegal_parameter);
                 }
 
-                tlsClient.notifySessionID(sessionID);
+                this.tlsClient.notifySessionID(sessionID);
 
                 /*
                  * Find out which ciphersuite the server has chosen and check
@@ -357,8 +356,7 @@ public class TlsProtocolHandler
                             TlsProtocolHandler.AP_illegal_parameter);
                 }
 
-                this.chosenCipherSuite = tlsClient
-                        .createCipherSuite(selectedCipherSuite);
+                this.tlsClient.notifySelectedCipherSuite(selectedCipherSuite);
 
                 /*
                  * We support only the null compression which means no
@@ -402,6 +400,8 @@ public class TlsProtocolHandler
 
                 assertEmpty(is);
 
+                this.keyExchange = tlsClient.createKeyExchange();
+
                 connection_state = CS_SERVER_HELLO_RECEIVED;
                 break;
             default:
@@ -414,7 +414,7 @@ public class TlsProtocolHandler
             case CS_SERVER_CERTIFICATE_RECEIVED:
 
                 // There was no server key exchange message; check it's OK
-                this.chosenCipherSuite.skipServerKeyExchange();
+                this.keyExchange.skipServerKeyExchange();
 
                 // NB: Fall through to next case label
 
@@ -436,7 +436,7 @@ public class TlsProtocolHandler
                  * Send the client key exchange message, depending on the key
                  * exchange we are using in our ciphersuite.
                  */
-                sendClientKeyExchange(this.chosenCipherSuite.generateClientKeyExchange());
+                sendClientKeyExchange(this.keyExchange.generateClientKeyExchange());
 
                 connection_state = CS_CLIENT_KEY_EXCHANGE_SEND;
 
@@ -465,7 +465,7 @@ public class TlsProtocolHandler
                  * Calculate the master_secret
                  */
                 securityParameters.masterSecret = TlsUtils.PRF(
-                    this.chosenCipherSuite.getPremasterSecret(),
+                    this.keyExchange.getPremasterSecret(),
                     "master secret",
                     TlsUtils.concat(securityParameters.clientRandom, securityParameters.serverRandom),
                     48);
@@ -478,7 +478,7 @@ public class TlsProtocolHandler
                 /*
                  * Initialize our cipher suite
                  */
-                rs.clientCipherSpecDecided(this.chosenCipherSuite.createCipher(securityParameters));
+                rs.clientCipherSpecDecided(tlsClient.createCipher(securityParameters));
 
                 /*
                  * Send our finished message.
@@ -507,13 +507,13 @@ public class TlsProtocolHandler
             case CS_SERVER_HELLO_RECEIVED:
 
                 // There was no server certificate message; check it's OK
-                this.chosenCipherSuite.skipServerCertificate();
+                this.keyExchange.skipServerCertificate();
 
                 // NB: Fall through to next case label
 
             case CS_SERVER_CERTIFICATE_RECEIVED:
 
-                this.chosenCipherSuite.processServerKeyExchange(is, securityParameters);
+                this.keyExchange.processServerKeyExchange(is, securityParameters);
 
                 assertEmpty(is);
                 break;
@@ -532,7 +532,7 @@ public class TlsProtocolHandler
             case CS_SERVER_CERTIFICATE_RECEIVED:
 
                 // There was no server key exchange message; check it's OK
-                this.chosenCipherSuite.skipServerKeyExchange();
+                this.keyExchange.skipServerKeyExchange();
 
                 // NB: Fall through to next case label
 
