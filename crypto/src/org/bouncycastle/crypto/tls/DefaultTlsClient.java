@@ -311,7 +311,7 @@ class DefaultTlsClient implements TlsClient
 
     private TlsKeyExchange createSRPExchange(short keyExchange)
     {
-        return new SRPTlsKeyExchange(handler, verifyer, keyExchange);
+        return new TlsSRPKeyExchange(handler, verifyer, keyExchange);
     }
 
     private TlsCipher createAESCipher(int cipherKeySize, SecurityParameters securityParameters)
