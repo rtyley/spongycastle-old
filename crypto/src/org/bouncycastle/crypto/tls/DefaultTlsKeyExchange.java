@@ -1,5 +1,9 @@
 package org.bouncycastle.crypto.tls;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -7,9 +11,7 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.agreement.DHBasicAgreement;
@@ -24,24 +26,15 @@ import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
-import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.BigIntegers;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 /**
- * A generic TLS 1.0 block cipher suite. This can be used for AES or 3DES for
- * example.
+ * A generic TLS 1.0 key exchange.
  */
-class TlsBlockCipherCipherSuite extends TlsCipherSuite
+class DefaultTlsKeyExchange extends TlsKeyExchange
 {
     private static final BigInteger ONE = BigInteger.valueOf(1);
     private static final BigInteger TWO = BigInteger.valueOf(2);
@@ -49,16 +42,6 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
     private TlsProtocolHandler handler;
     private CertificateVerifyer verifyer;
 
-    private BlockCipher encryptCipher;
-    private BlockCipher decryptCipher;
-
-    private Digest writeDigest;
-    private Digest readDigest;
-
-    private TlsMac writeMac;
-    private TlsMac readMac;
-
-    private int cipherKeySize;
     private short keyExchange;
 
     private AsymmetricKeyParameter serverPublicKey = null;
@@ -70,220 +53,19 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
     private BigInteger Yc;
     private byte[] pms;
 
-    protected TlsBlockCipherCipherSuite(TlsProtocolHandler handler, CertificateVerifyer verifyer,
-        BlockCipher encrypt, BlockCipher decrypt,
-        Digest writeDigest, Digest readDigest,
-        int cipherKeySize, short keyExchange)
+    DefaultTlsKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
     {
         this.handler = handler;
         this.verifyer = verifyer;
-        this.encryptCipher = encrypt;
-        this.decryptCipher = decrypt;
-        this.writeDigest = writeDigest;
-        this.readDigest = readDigest;
-        this.cipherKeySize = cipherKeySize;
         this.keyExchange = keyExchange;
-    }
-
-    protected TlsCipher createCipher(SecurityParameters securityParameters)
-    {
-        int prfSize = (2 * cipherKeySize) + writeDigest.getDigestSize() + readDigest.getDigestSize()
-            + encryptCipher.getBlockSize() + decryptCipher.getBlockSize();
-
-        byte[] key_block = TlsUtils.PRF(securityParameters.masterSecret, "key expansion",
-            TlsUtils.concat(securityParameters.serverRandom, securityParameters.clientRandom), prfSize);
-
-        int offset = 0;
-
-        // Init MACs
-        writeMac = new TlsMac(writeDigest, key_block, offset, writeDigest.getDigestSize());
-        offset += writeDigest.getDigestSize();
-        readMac = new TlsMac(readDigest, key_block, offset, readDigest.getDigestSize());
-        offset += readDigest.getDigestSize();
-
-        // Init Ciphers
-        this.initCipher(true, encryptCipher, key_block, cipherKeySize, offset,
-            offset + (cipherKeySize * 2));
-        offset += cipherKeySize;
-        this.initCipher(false, decryptCipher, key_block, cipherKeySize, offset,
-            offset + cipherKeySize + encryptCipher.getBlockSize());
-
-        return new TlsCipherImpl();
-    }
-
-    private void initCipher(boolean forEncryption, BlockCipher cipher,
-        byte[] key_block, int key_size, int key_offset, int iv_offset)
-    {
-        KeyParameter key_parameter = new KeyParameter(key_block, key_offset, key_size);
-        ParametersWithIV parameters_with_iv = new ParametersWithIV(
-            key_parameter, key_block, iv_offset, cipher.getBlockSize());
-        cipher.init(forEncryption, parameters_with_iv);
-    }
-
-    private class TlsCipherImpl implements TlsCipher
-    {
-        public byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len)
-        {
-            int blocksize = encryptCipher.getBlockSize();
-
-            // Add a random number of extra blocks worth of padding
-            int minPaddingSize = blocksize
-                    - ((len + writeMac.getSize() + 1) % blocksize);
-            int maxExtraPadBlocks = (255 - minPaddingSize) / blocksize;
-            int actualExtraPadBlocks = chooseExtraPadBlocks(
-                    handler.getRandom(), maxExtraPadBlocks);
-            int paddingsize = minPaddingSize
-                    + (actualExtraPadBlocks * blocksize);
-
-            int totalsize = len + writeMac.getSize() + paddingsize + 1;
-            byte[] outbuf = new byte[totalsize];
-            System.arraycopy(plaintext, offset, outbuf, 0, len);
-            byte[] mac = writeMac.calculateMac(type, plaintext, offset, len);
-            System.arraycopy(mac, 0, outbuf, len, mac.length);
-            int paddoffset = len + mac.length;
-            for (int i = 0; i <= paddingsize; i++)
-            {
-                outbuf[i + paddoffset] = (byte) paddingsize;
-            }
-            for (int i = 0; i < totalsize; i += blocksize)
-            {
-                encryptCipher.processBlock(outbuf, i, outbuf, i);
-            }
-            return outbuf;
-
-        }
-
-        public byte[] decodeCiphertext(short type, byte[] ciphertext, int offset, int len) throws IOException
-        {
-            // TODO TLS 1.1 (RFC 4346) introduces an explicit IV
-
-            int minLength = readMac.getSize() + 1;
-            int blocksize = decryptCipher.getBlockSize();
-            boolean decrypterror = false;
-
-            /*
-             * ciphertext must be at least (macsize + 1) bytes long
-             */
-            if (len < minLength)
-            {
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_decode_error);
-            }
-
-            /*
-             * ciphertext must be a multiple of blocksize
-             */
-            if (len % blocksize != 0)
-            {
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_decryption_failed);
-            }
-
-            /*
-             * Decrypt all the ciphertext using the blockcipher
-             */
-            for (int i = 0; i < len; i += blocksize)
-            {
-                decryptCipher.processBlock(ciphertext, i + offset, ciphertext, i + offset);
-            }
-
-            /*
-             * Check if padding is correct
-             */
-            int lastByteOffset = offset + len - 1;
-
-            byte paddingsizebyte = ciphertext[lastByteOffset];
-
-            // Note: interpret as unsigned byte
-            int paddingsize = paddingsizebyte & 0xff;
-
-            int maxPaddingSize = len - minLength;
-            if (paddingsize > maxPaddingSize)
-            {
-                decrypterror = true;
-                paddingsize = 0;
-            }
-            else
-            {
-                /*
-                 * Now, check all the padding-bytes (constant-time comparison).
-                 */
-                byte diff = 0;
-                for (int i = lastByteOffset - paddingsize; i < lastByteOffset; ++i)
-                {
-                    diff |= (ciphertext[i] ^ paddingsizebyte);
-                }
-                if (diff != 0)
-                {
-                    /* Wrong padding */
-                    decrypterror = true;
-                    paddingsize = 0;
-                }
-            }
-
-            /*
-             * We now don't care if padding verification has failed or not, we
-             * will calculate the mac to give an attacker no kind of timing
-             * profile he can use to find out if mac verification failed or
-             * padding verification failed.
-             */
-            int plaintextlength = len - minLength - paddingsize;
-            byte[] calculatedMac = readMac.calculateMac(type, ciphertext, offset, plaintextlength);
-
-            /*
-             * Check all bytes in the mac (constant-time comparison).
-             */
-            byte[] decryptedMac = new byte[calculatedMac.length];
-            System.arraycopy(ciphertext, offset + plaintextlength, decryptedMac, 0, calculatedMac.length);
-
-            if (!Arrays.constantTimeAreEqual(calculatedMac, decryptedMac))
-            {
-                decrypterror = true;
-            }
-
-            /*
-             * Now, it is safe to fail.
-             */
-            if (decrypterror)
-            {
-                handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_bad_record_mac);
-            }
-
-            byte[] plaintext = new byte[plaintextlength];
-            System.arraycopy(ciphertext, offset, plaintext, 0, plaintextlength);
-            return plaintext;
-        }
-    }
-
-    private int chooseExtraPadBlocks(SecureRandom r, int max)
-    {
-//        return r.nextInt(max + 1);
-
-        int x = r.nextInt();
-        int n = lowestBitSet(x);
-        return Math.min(n, max);
-    }
-
-    private int lowestBitSet(int x)
-    {
-        if (x == 0)
-        {
-            return 32;
-        }
-
-        int n = 0;
-        while ((x & 1) == 0)
-        {
-            ++n;
-            x >>= 1;
-        }
-        return n;
     }
 
     protected void skipServerCertificate() throws IOException
     {
-      if (this.keyExchange != TlsCipherSuite.KE_SRP)
-      {
-          handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
-      }
+        if (this.keyExchange != TlsKeyExchange.KE_SRP)
+        {
+            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+        }
     }
 
     protected void processServerCertificate(Certificate serverCertificate) throws IOException
@@ -313,23 +95,23 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
          */
         switch (this.keyExchange)
         {
-            case TlsCipherSuite.KE_RSA:
+            case TlsKeyExchange.KE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
                     handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
                 break;
-            case TlsCipherSuite.KE_DHE_RSA:
-            case TlsCipherSuite.KE_SRP_RSA:
+            case TlsKeyExchange.KE_DHE_RSA:
+            case TlsKeyExchange.KE_SRP_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
                     handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
-            case TlsCipherSuite.KE_DHE_DSS:
-            case TlsCipherSuite.KE_SRP_DSS:
+            case TlsKeyExchange.KE_DHE_DSS:
+            case TlsKeyExchange.KE_SRP_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
                     handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_certificate_unknown);
@@ -353,29 +135,29 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
     {
         switch (this.keyExchange)
         {
-            case TlsCipherSuite.KE_DHE_RSA:
+            case TlsKeyExchange.KE_DHE_RSA:
             {
-                processDHEKeyExchange(is, initSigner(new TlsRSASigner(), securityParameters));
+                processDHEServerKeyExchange(is, initSigner(new TlsRSASigner(), securityParameters));
                 break;
             }
-            case TlsCipherSuite.KE_DHE_DSS:
+            case TlsKeyExchange.KE_DHE_DSS:
             {
-                processDHEKeyExchange(is, initSigner(new TlsDSSSigner(), securityParameters));
+                processDHEServerKeyExchange(is, initSigner(new TlsDSSSigner(), securityParameters));
                 break;
             }
-            case TlsCipherSuite.KE_SRP:
+            case TlsKeyExchange.KE_SRP:
             {
-                processSRPKeyExchange(is, null);
+                processSRPServerKeyExchange(is, null);
                 break;
             }
-            case TlsCipherSuite.KE_SRP_RSA:
+            case TlsKeyExchange.KE_SRP_RSA:
             {
-                processSRPKeyExchange(is, initSigner(new TlsRSASigner(), securityParameters));
+                processSRPServerKeyExchange(is, initSigner(new TlsRSASigner(), securityParameters));
                 break;
             }
-            case TlsCipherSuite.KE_SRP_DSS:
+            case TlsKeyExchange.KE_SRP_DSS:
             {
-                processSRPKeyExchange(is, initSigner(new TlsDSSSigner(), securityParameters));
+                processSRPServerKeyExchange(is, initSigner(new TlsDSSSigner(), securityParameters));
                 break;
             }
             default:
@@ -423,7 +205,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
     {
         switch (this.keyExchange)
         {
-            case TlsCipherSuite.KE_RSA:
+            case TlsKeyExchange.KE_RSA:
             {
                 /*
                 * We are doing RSA key exchange. We will
@@ -459,13 +241,13 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
                 }
             }
 
-            case TlsCipherSuite.KE_DHE_DSS:
-            case TlsCipherSuite.KE_DHE_RSA:
+            case TlsKeyExchange.KE_DHE_DSS:
+            case TlsKeyExchange.KE_DHE_RSA:
                 return BigIntegers.asUnsignedByteArray(this.Yc);
 
-            case TlsCipherSuite.KE_SRP:
-            case TlsCipherSuite.KE_SRP_RSA:
-            case TlsCipherSuite.KE_SRP_DSS:
+            case TlsKeyExchange.KE_SRP:
+            case TlsKeyExchange.KE_SRP_RSA:
+            case TlsKeyExchange.KE_SRP_DSS:
                 return BigIntegers.asUnsignedByteArray(this.SRP_A);
 
             default:
@@ -510,7 +292,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         return signer;
     }
 
-    private void processDHEKeyExchange(InputStream is, Signer signer) throws IOException
+    private void processDHEServerKeyExchange(InputStream is, Signer signer) throws IOException
     {
         InputStream sigIn = is;
         if (signer != null)
@@ -585,7 +367,7 @@ class TlsBlockCipherCipherSuite extends TlsCipherSuite
         this.pms = BigIntegers.asUnsignedByteArray(agreement);
     }
 
-    private void processSRPKeyExchange(InputStream is, Signer signer) throws IOException
+    private void processSRPServerKeyExchange(InputStream is, Signer signer) throws IOException
     {
         InputStream sigIn = is;
         if (signer != null)

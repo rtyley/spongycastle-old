@@ -8,22 +8,26 @@ interface TlsClient
 {
     void init(TlsProtocolHandler handler);
 
-    TlsCipherSuite createCipherSuite(int cipherSuite) throws IOException;
-
     int[] getCipherSuites();
-
-    byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException;
-
-    Certificate getCertificate();
 
     // Hashtable is (Integer -> byte[])
     Hashtable generateClientExtensions();
 
     void notifySessionID(byte[] sessionID);
 
+    void notifySelectedCipherSuite(int selectedCipherSuite);
+
     // Hashtable is (Integer -> byte[])
     void processServerExtensions(Hashtable serverExtensions);
 
+    TlsKeyExchange createKeyExchange() throws IOException;
+
     // List is (X509Name)
     void processServerCertificateRequest(byte[] certificateTypes, List certificateAuthorities);
+
+    byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException;
+
+    Certificate getCertificate();
+
+    TlsCipher createCipher(SecurityParameters securityParameters) throws IOException;
 }

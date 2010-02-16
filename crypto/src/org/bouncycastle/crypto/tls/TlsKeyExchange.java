@@ -6,7 +6,7 @@ import java.io.InputStream;
 /**
  * A generic class for ciphersuites in TLS 1.0.
  */
-abstract class TlsCipherSuite
+abstract class TlsKeyExchange
 {
     protected static final short KE_RSA = 1;
     protected static final short KE_RSA_EXPORT = 2;
@@ -31,6 +31,4 @@ abstract class TlsCipherSuite
     protected abstract byte[] generateClientKeyExchange() throws IOException;
 
     protected abstract byte[] getPremasterSecret();
-
-    protected abstract TlsCipher createCipher(SecurityParameters securityParameters);
 }
