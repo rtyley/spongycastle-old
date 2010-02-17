@@ -57,6 +57,17 @@ public class TlsProtocolHandler
     private static final short CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED = 11;
     private static final short CS_DONE = 12;
 
+    /*
+     * AlertLevel enum (255)
+     */
+    // RFC 2246
+    protected static final short AL_warning = 1;
+    protected static final short AL_fatal = 2;
+
+    /*
+     * AlertDescription enum (255)
+     */
+    // RFC 2246
     protected static final short AP_close_notify = 0;
     protected static final short AP_unexpected_message = 10;
     protected static final short AP_bad_record_mac = 20;
@@ -81,8 +92,8 @@ public class TlsProtocolHandler
     protected static final short AP_user_canceled = 90;
     protected static final short AP_no_renegotiation = 100;
 
-    protected static final short AL_warning = 1;
-    protected static final short AL_fatal = 2;
+    // RFC 4279
+    protected static final short AP_unknown_psk_identity = 115;
 
     private static final byte[] emptybuf = new byte[0];
 

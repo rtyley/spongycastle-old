@@ -23,14 +23,14 @@ class DefaultTlsClient implements TlsClient
      * a TLS compliant application MUST implement the cipher suite
      * TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA.
      */
-    private static final int TLS_RSA_WITH_3DES_EDE_CBC_SHA = 0x000a;
+    private static final int TLS_RSA_WITH_3DES_EDE_CBC_SHA = 0x000A;
     private static final int TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA = 0x000D;
     private static final int TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA = 0x0010;
     private static final int TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA = 0x0013;
     private static final int TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA = 0x0016;
 
     // RFC 3268
-    private static final int TLS_RSA_WITH_AES_128_CBC_SHA = 0x002f;
+    private static final int TLS_RSA_WITH_AES_128_CBC_SHA = 0x002F;
     private static final int TLS_DH_DSS_WITH_AES_128_CBC_SHA = 0x0030;
     private static final int TLS_DH_RSA_WITH_AES_128_CBC_SHA = 0x0031;
     private static final int TLS_DHE_DSS_WITH_AES_128_CBC_SHA = 0x0032;
@@ -40,6 +40,17 @@ class DefaultTlsClient implements TlsClient
     private static final int TLS_DH_RSA_WITH_AES_256_CBC_SHA = 0x0037;
     private static final int TLS_DHE_DSS_WITH_AES_256_CBC_SHA = 0x0038;
     private static final int TLS_DHE_RSA_WITH_AES_256_CBC_SHA = 0x0039;
+
+    // RFC 4279
+//    private static final int TLS_PSK_WITH_3DES_EDE_CBC_SHA = 0x008B;
+//    private static final int TLS_PSK_WITH_AES_128_CBC_SHA = 0x008C;
+//    private static final int TLS_PSK_WITH_AES_256_CBC_SHA = 0x008D;
+//    private static final int TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA = 0x008F;
+//    private static final int TLS_DHE_PSK_WITH_AES_128_CBC_SHA = 0x0090;
+//    private static final int TLS_DHE_PSK_WITH_AES_256_CBC_SHA = 0x0091;
+//    private static final int TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA = 0x0093;
+//    private static final int TLS_RSA_PSK_WITH_AES_128_CBC_SHA = 0x0094;
+//    private static final int TLS_RSA_PSK_WITH_AES_256_CBC_SHA = 0x0095;
 
     // RFC 5054
     private static final int TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA = 0xC01A;
