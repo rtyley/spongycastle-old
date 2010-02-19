@@ -73,6 +73,8 @@ import org.bouncycastle.x509.X509Store;
 
 public class CertPathValidatorUtilities
 {
+    protected static final PKIXCRLUtil CRL_UTIL = new PKIXCRLUtil();
+
     protected static final String CERTIFICATE_POLICIES = X509Extensions.CertificatePolicies.getId();
     protected static final String BASIC_CONSTRAINTS = X509Extensions.BasicConstraints.getId();
     protected static final String POLICY_MAPPINGS = X509Extensions.PolicyMappings.getId();
@@ -366,69 +368,6 @@ public class CertPathValidatorUtilities
     
     // crl checking
 
-    /**
-     * Return a Collection of all CRLs found in the X509Store's that are
-     * matching the crlSelect criteriums.
-     *
-     * @param crlSelect a {@link X509CRLStoreSelector} object that will be used
-     *            to select the CRLs
-     * @param crlStores a List containing only
-     *            {@link org.bouncycastle.x509.X509Store  X509Store} objects.
-     *            These are used to search for CRLs
-     *
-     * @return a Collection of all found {@link X509CRL X509CRL} objects. May be
-     *         empty but never <code>null</code>.
-     */
-    protected static final Collection findCRLs(X509CRLStoreSelector crlSelect,
-        List crlStores) throws AnnotatedException
-    {
-        Set crls = new HashSet();
-        Iterator iter = crlStores.iterator();
-
-        AnnotatedException lastException = null;
-        boolean foundValidStore = false;
-
-        while (iter.hasNext())
-        {
-            Object obj = iter.next();
-
-            if (obj instanceof X509Store)
-            {
-                X509Store store = (X509Store)obj;
-
-                try
-                {
-                    crls.addAll(store.getMatches(crlSelect));
-                    foundValidStore = true;
-                }
-                catch (StoreException e)
-                {
-                    lastException = new AnnotatedException(
-                        "Exception searching in X.509 CRL store.", e);
-                }
-            }
-            else
-            {
-                CertStore store = (CertStore)obj;
-
-                try
-                {
-                    crls.addAll(store.getCRLs(crlSelect));
-                    foundValidStore = true;
-                }
-                catch (CertStoreException e)
-                {
-                    lastException = new AnnotatedException(
-                        "Exception searching in X.509 CRL store.", e);
-                }
-            }
-        }
-        if (!foundValidStore && lastException != null)
-        {
-            throw lastException;
-        }
-        return crls;
-    }
 
     //
     // policy checking
@@ -1116,15 +1055,6 @@ public class CertPathValidatorUtilities
 
         X509CRLStoreSelector deltaSelect = new X509CRLStoreSelector();
 
-        if (paramsPKIX.getDate() != null)
-        {
-            deltaSelect.setDateAndTime(paramsPKIX.getDate());
-        }
-        else
-        {
-            deltaSelect.setDateAndTime(currentDate);
-        }
-
         // 5.2.4 (a)
         try
         {
@@ -1176,18 +1106,8 @@ public class CertPathValidatorUtilities
         // 5.2.4 (c)
         deltaSelect.setMaxBaseCRLNumber(completeCRLNumber);
 
-        Set temp = new HashSet();
         // find delta CRLs
-        try
-        {
-            temp.addAll(CertPathValidatorUtilities.findCRLs(deltaSelect, paramsPKIX.getAdditionalStores()));
-            temp.addAll(CertPathValidatorUtilities.findCRLs(deltaSelect, paramsPKIX.getStores()));
-            temp.addAll(CertPathValidatorUtilities.findCRLs(deltaSelect, paramsPKIX.getCertStores()));
-        }
-        catch (AnnotatedException e)
-        {
-            throw new AnnotatedException("Could not search for delta CRLs.", e);
-        }
+        Set temp = CRL_UTIL.findCRLs(deltaSelect, paramsPKIX, currentDate);
 
         Set result = new HashSet();
 
@@ -1258,28 +1178,12 @@ public class CertPathValidatorUtilities
             crlselect.setAttrCertificateChecking((X509AttributeCertificate)cert);
         }
 
-        if (paramsPKIX.getDate() != null)
-        {
-            crlselect.setDateAndTime(paramsPKIX.getDate());
-        }
-        else
-        {
-            crlselect.setDateAndTime(currentDate);
-        }
+
 
         crlselect.setCompleteCRLEnabled(true);
 
-        Set crls = new HashSet();
-        try
-        {
-            crls.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getStores()));
-            crls.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getAdditionalStores()));
-            crls.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getCertStores()));
-        }
-        catch (AnnotatedException e)
-        {
-            throw new AnnotatedException("Could not search for CRLs.", e);
-        }
+        Set crls = CRL_UTIL.findCRLs(crlselect, paramsPKIX, currentDate);
+
         if (crls.isEmpty())
         {
             if (cert instanceof X509AttributeCertificate)
