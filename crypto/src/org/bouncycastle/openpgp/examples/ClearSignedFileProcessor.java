@@ -1,5 +1,19 @@
 package org.bouncycastle.openpgp.examples;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
+import java.security.SignatureException;
+import java.util.Iterator;
+
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
@@ -16,20 +30,6 @@ import org.bouncycastle.openpgp.PGPSignatureGenerator;
 import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
-import java.security.SignatureException;
-import java.util.Iterator;
 
 /**
  * A simple utility class that creates clear signed files and verifies them.
@@ -167,8 +167,8 @@ public class ClearSignedFileProcessor
 
         //
         // write out signed section using the local line separator.
-        // note: although we leave it in trailing white space as it is not verifiable.
-        // Some people prefer to remove it.
+        // note: trailing white space needs to be removed from the end of
+        // each line RFC 4880 Section 7.1
         //
         ByteArrayOutputStream lineOut = new ByteArrayOutputStream();
         int                   lookAhead = readInputLine(lineOut, aIn);
@@ -177,7 +177,7 @@ public class ClearSignedFileProcessor
         if (lookAhead != -1 && aIn.isClearText())
         {
             byte[] line = lineOut.toByteArray();
-            out.write(line, 0, getLengthWithoutSeparator(line));
+            out.write(line, 0, getLengthWithoutSeparatorOrTrailingWhitespace(line));
             out.write(lineSep);
 
             while (lookAhead != -1 && aIn.isClearText())
@@ -185,7 +185,7 @@ public class ClearSignedFileProcessor
                 lookAhead = readInputLine(lineOut, lookAhead, aIn);
                 
                 line = lineOut.toByteArray();
-                out.write(line, 0, getLengthWithoutSeparator(line));
+                out.write(line, 0, getLengthWithoutSeparatorOrTrailingWhitespace(line));
                 out.write(lineSep);
             }
         }
@@ -201,7 +201,7 @@ public class ClearSignedFileProcessor
         sig.initVerify(pgpRings.getPublicKey(sig.getKeyID()), "BC");
 
         //
-        // read the input, making sure we ingore the last newline.
+        // read the input, making sure we ignore the last newline.
         //
 
         InputStream sigIn = new BufferedInputStream(new FileInputStream(resultName));
@@ -348,6 +348,8 @@ public class ClearSignedFileProcessor
     private static void processLine(OutputStream aOut, PGPSignatureGenerator sGen, byte[] line)
         throws SignatureException, IOException
     {
+        // note: trailing white space needs to be removed from the end of
+        // each line for signature calculation RFC 4880 Section 7.1
         int length = getLengthWithoutWhiteSpace(line);
         if (length > 0)
         {
@@ -357,11 +359,11 @@ public class ClearSignedFileProcessor
         aOut.write(line, 0, line.length);
     }
 
-    private static int getLengthWithoutSeparator(byte[] line)
+    private static int getLengthWithoutSeparatorOrTrailingWhitespace(byte[] line)
     {
         int    end = line.length - 1;
 
-        while (end >= 0 && isLineEnding(line[end]))
+        while (end >= 0 && isWhiteSpace(line[end]))
         {
             end--;
         }
@@ -388,7 +390,7 @@ public class ClearSignedFileProcessor
 
     private static boolean isWhiteSpace(byte b)
     {
-        return b == '\r' || b == '\n' || b == '\t' || b == ' ';
+        return isLineEnding(b) || b == '\t' || b == ' ';
     }
 
     public static void main(
