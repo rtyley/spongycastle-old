@@ -59,6 +59,7 @@ import org.bouncycastle.x509.X509CertStoreSelector;
 
 public class RFC3280CertPathUtilities
 {
+    private static final PKIXCRLUtil CRL_UTIL = new PKIXCRLUtil();
 
     /**
      * If the complete CRL includes an issuing distribution point (IDP) CRL
@@ -678,19 +679,9 @@ public class RFC3280CertPathUtilities
         X509CRL crl)
         throws AnnotatedException
     {
-        Set completeSet = new HashSet();
         Set deltaSet = new HashSet();
         X509CRLStoreSelector crlselect = new X509CRLStoreSelector();
         crlselect.setCertificateChecking(cert);
-
-        if (paramsPKIX.getDate() != null)
-        {
-            crlselect.setDateAndTime(paramsPKIX.getDate());
-        }
-        else
-        {
-            crlselect.setDateAndTime(currentDate);
-        }
 
         try
         {
@@ -702,18 +693,8 @@ public class RFC3280CertPathUtilities
         }
 
         crlselect.setCompleteCRLEnabled(true);
+        Set completeSet = CRL_UTIL.findCRLs(crlselect, paramsPKIX, currentDate);
 
-        // get complete CRL(s)
-        try
-        {
-            completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getAdditionalStores()));
-            completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getStores()));
-            completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getCertStores()));
-        }
-        catch (AnnotatedException e)
-        {
-            throw new AnnotatedException("Exception obtaining complete CRLs.", e);
-        }
         if (paramsPKIX.isUseDeltasEnabled())
         {
             // get delta CRL(s)
@@ -731,6 +712,8 @@ public class RFC3280CertPathUtilities
                 completeSet,
                 deltaSet};
     }
+
+
 
     /**
      * If use-deltas is set, verify the issuer and scope of the delta CRL.
