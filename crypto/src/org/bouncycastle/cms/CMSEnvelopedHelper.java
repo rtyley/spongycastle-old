@@ -82,14 +82,14 @@ class CMSEnvelopedHelper
             try
             {
                 // this is reversed as the Sun policy files now allow unlimited strength RSA
-                return Cipher.getInstance(encryptionOid, provider);
+                return getCipherInstance(asymName, provider);
             }
             catch (NoSuchAlgorithmException e)
             {
                 // Ignore
             }
         }
-        return Cipher.getInstance(encryptionOid, provider);
+        return getCipherInstance(encryptionOid, provider);
     }
 
     KeyGenerator createSymmetricKeyGenerator(
