@@ -1,5 +1,25 @@
 package org.bouncycastle.cms;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -17,26 +37,6 @@ import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.Provider;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -56,7 +56,7 @@ import java.util.Map;
 public class CMSSignedDataGenerator
     extends CMSSignedGenerator
 {
-    List                        signerInfs = new ArrayList();
+    private List signerInfs = new ArrayList();
 
     private class SignerInf
     {
@@ -227,7 +227,8 @@ public class CMSSignedDataGenerator
         String          digestOID)
         throws IllegalArgumentException
     {
-        signerInfs.add(new SignerInf(key, getSignerIdentifier(cert), digestOID, encryptionOID, new DefaultSignedAttributeTableGenerator(), null, null));
+        doAddSigner(key, getSignerIdentifier(cert), encryptionOID, digestOID,
+            new DefaultSignedAttributeTableGenerator(), null, null);
     }
 
     /**
@@ -254,7 +255,8 @@ public class CMSSignedDataGenerator
         String          digestOID)
         throws IllegalArgumentException
     {
-        signerInfs.add(new SignerInf(key, getSignerIdentifier(subjectKeyID), digestOID, encryptionOID, new DefaultSignedAttributeTableGenerator(), null, null));
+        doAddSigner(key, getSignerIdentifier(subjectKeyID), encryptionOID, digestOID,
+            new DefaultSignedAttributeTableGenerator(), null, null);
     }
 
     /**
@@ -296,7 +298,9 @@ public class CMSSignedDataGenerator
         AttributeTable  unsignedAttr)
         throws IllegalArgumentException
     {
-        signerInfs.add(new SignerInf(key, getSignerIdentifier(cert), digestOID, encryptionOID, new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), signedAttr));
+        doAddSigner(key, getSignerIdentifier(cert), encryptionOID, digestOID,
+          new DefaultSignedAttributeTableGenerator(signedAttr),
+          new SimpleAttributeTableGenerator(unsignedAttr), signedAttr);
     }
 
     /**
@@ -316,7 +320,8 @@ public class CMSSignedDataGenerator
         AttributeTable  unsignedAttr)
         throws IllegalArgumentException
     {
-        addSigner(key, subjectKeyID, digestOID, getEncOID(key, digestOID), new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr));
+        addSigner(key, subjectKeyID, getEncOID(key, digestOID), digestOID, signedAttr,
+            unsignedAttr); 
     }
 
     /**
@@ -338,7 +343,9 @@ public class CMSSignedDataGenerator
         AttributeTable  unsignedAttr)
         throws IllegalArgumentException
     {
-        signerInfs.add(new SignerInf(key, getSignerIdentifier(subjectKeyID), digestOID, encryptionOID, new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), signedAttr));
+        doAddSigner(key, getSignerIdentifier(subjectKeyID), encryptionOID, digestOID,
+            new DefaultSignedAttributeTableGenerator(signedAttr),
+            new SimpleAttributeTableGenerator(unsignedAttr), signedAttr);
     }
 
     /**
@@ -367,7 +374,8 @@ public class CMSSignedDataGenerator
         CMSAttributeTableGenerator  unsignedAttrGen)
         throws IllegalArgumentException
     {
-        signerInfs.add(new SignerInf(key, getSignerIdentifier(cert), digestOID, encryptionOID, signedAttrGen, unsignedAttrGen, null));
+        doAddSigner(key, getSignerIdentifier(cert), encryptionOID, digestOID, signedAttrGen,
+            unsignedAttrGen, null);
     }
 
     /**
@@ -381,7 +389,8 @@ public class CMSSignedDataGenerator
         CMSAttributeTableGenerator  unsignedAttrGen)
         throws IllegalArgumentException
     {
-        addSigner(key, subjectKeyID, digestOID, getEncOID(key, digestOID), signedAttrGen, unsignedAttrGen);
+        addSigner(key, subjectKeyID, getEncOID(key, digestOID), digestOID, signedAttrGen,
+            unsignedAttrGen);
     }
 
     /**
@@ -396,7 +405,22 @@ public class CMSSignedDataGenerator
         CMSAttributeTableGenerator  unsignedAttrGen)
         throws IllegalArgumentException
     {
-        signerInfs.add(new SignerInf(key, getSignerIdentifier(subjectKeyID), digestOID, encryptionOID, signedAttrGen, unsignedAttrGen, null));
+        doAddSigner(key, getSignerIdentifier(subjectKeyID), encryptionOID, digestOID,
+            signedAttrGen, unsignedAttrGen, null);
+    }
+
+    private void doAddSigner(
+        PrivateKey                  key,
+        SignerIdentifier            signerIdentifier,
+        String                      encryptionOID,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGen,
+        CMSAttributeTableGenerator  unsignedAttrGen,
+        AttributeTable              baseSignedTable)
+        throws IllegalArgumentException
+    {
+        signerInfs.add(new SignerInf(key, signerIdentifier, digestOID, encryptionOID,
+            signedAttrGen, unsignedAttrGen, baseSignedTable));
     }
 
     /**
@@ -436,7 +460,8 @@ public class CMSSignedDataGenerator
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        return generate(eContentType, content, encapsulate, CMSUtils.getProvider(sigProvider), true);
+        return generate(eContentType, content, encapsulate, CMSUtils.getProvider(sigProvider),
+            true);
     }
 
     /**
@@ -469,7 +494,8 @@ public class CMSSignedDataGenerator
         boolean                 addDefaultAttributes)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        return generate(eContentType, content, encapsulate, CMSUtils.getProvider(sigProvider), addDefaultAttributes);
+        return generate(eContentType, content, encapsulate, CMSUtils.getProvider(sigProvider),
+            addDefaultAttributes);
     }
 
     /**
@@ -553,7 +579,8 @@ public class CMSSignedDataGenerator
             try
             {
                 digestAlgs.add(signer.getDigestAlgorithmID());
-                signerInfos.add(signer.toSignerInfo(contentTypeOID, content, rand, sigProvider, addDefaultAttributes, isCounterSignature));
+                signerInfos.add(signer.toSignerInfo(contentTypeOID, content, rand, sigProvider,
+                    addDefaultAttributes, isCounterSignature));
             }
             catch (IOException e)
             {
