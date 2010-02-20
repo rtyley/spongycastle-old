@@ -39,8 +39,8 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     private byte[] SRP_password = null;
 
     private byte[] s = null;
-    BigInteger B = null;
-    SRP6Client srpClient = new SRP6Client();
+    private BigInteger B = null;
+    private SRP6Client srpClient = new SRP6Client();
 
     TlsSRPKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
     {
