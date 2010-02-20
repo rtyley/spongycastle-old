@@ -1,5 +1,9 @@
 package org.bouncycastle.crypto.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -34,10 +38,6 @@ import org.bouncycastle.crypto.params.ElGamalParameters;
 import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-
 /**
  * Factory for creating private key objects from PKCS8 PrivateKeyInfo objects.
  */
@@ -50,29 +50,22 @@ public class PrivateKeyFactory
      * @return a suitable private key parameter
      * @throws IOException on an error decoding the key
      */
-    public static AsymmetricKeyParameter createKey(
-        byte[] privateKeyInfoData)
-        throws IOException
+    public static AsymmetricKeyParameter createKey(byte[] privateKeyInfoData) throws IOException
     {
-        return createKey(
-            PrivateKeyInfo.getInstance(
-                ASN1Object.fromByteArray(privateKeyInfoData)));
+        return createKey(PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(privateKeyInfoData)));
     }
 
     /**
-     * Create a private key parameter from a PKCS8 PrivateKeyInfo encoding read from a stream.
+     * Create a private key parameter from a PKCS8 PrivateKeyInfo encoding read from a
+     * stream.
      * 
      * @param inStr the stream to read the PrivateKeyInfo encoding from
      * @return a suitable private key parameter
      * @throws IOException on an error decoding the key
      */
-    public static AsymmetricKeyParameter createKey(
-        InputStream inStr)
-        throws IOException
+    public static AsymmetricKeyParameter createKey(InputStream inStr) throws IOException
     {
-        return createKey(
-            PrivateKeyInfo.getInstance(
-                new ASN1InputStream(inStr).readObject()));
+        return createKey(PrivateKeyInfo.getInstance(new ASN1InputStream(inStr).readObject()));
     }
 
     /**
@@ -82,30 +75,27 @@ public class PrivateKeyFactory
      * @return a suitable private key parameter
      * @throws IOException on an error decoding the key
      */
-    public static AsymmetricKeyParameter createKey(
-        PrivateKeyInfo    keyInfo)
-        throws IOException
+    public static AsymmetricKeyParameter createKey(PrivateKeyInfo keyInfo) throws IOException
     {
-        AlgorithmIdentifier     algId = keyInfo.getAlgorithmId();
-        
+        AlgorithmIdentifier algId = keyInfo.getAlgorithmId();
+
         if (algId.getObjectId().equals(PKCSObjectIdentifiers.rsaEncryption))
         {
-            RSAPrivateKeyStructure  keyStructure = new RSAPrivateKeyStructure((ASN1Sequence)keyInfo.getPrivateKey());
+            RSAPrivateKeyStructure keyStructure = new RSAPrivateKeyStructure(
+                (ASN1Sequence)keyInfo.getPrivateKey());
 
-            return new RSAPrivateCrtKeyParameters(
-                                        keyStructure.getModulus(),
-                                        keyStructure.getPublicExponent(),
-                                        keyStructure.getPrivateExponent(),
-                                        keyStructure.getPrime1(),
-                                        keyStructure.getPrime2(),
-                                        keyStructure.getExponent1(),
-                                        keyStructure.getExponent2(),
-                                        keyStructure.getCoefficient());
+            return new RSAPrivateCrtKeyParameters(keyStructure.getModulus(),
+                keyStructure.getPublicExponent(), keyStructure.getPrivateExponent(),
+                keyStructure.getPrime1(), keyStructure.getPrime2(), keyStructure.getExponent1(),
+                keyStructure.getExponent2(), keyStructure.getCoefficient());
         }
+        // TODO?
+//      else if (algId.getObjectId().equals(X9ObjectIdentifiers.dhpublicnumber))
         else if (algId.getObjectId().equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
-            DHParameter     params = new DHParameter((ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
-            DERInteger      derX = (DERInteger)keyInfo.getPrivateKey();
+            DHParameter params = new DHParameter(
+                (ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
+            DERInteger derX = (DERInteger)keyInfo.getPrivateKey();
 
             BigInteger lVal = params.getL();
             int l = lVal == null ? 0 : lVal.intValue();
@@ -115,10 +105,12 @@ public class PrivateKeyFactory
         }
         else if (algId.getObjectId().equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
-            ElGamalParameter    params = new ElGamalParameter((ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
-            DERInteger          derX = (DERInteger)keyInfo.getPrivateKey();
+            ElGamalParameter params = new ElGamalParameter(
+                (ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
+            DERInteger derX = (DERInteger)keyInfo.getPrivateKey();
 
-            return new ElGamalPrivateKeyParameters(derX.getValue(), new ElGamalParameters(params.getP(), params.getG()));
+            return new ElGamalPrivateKeyParameters(derX.getValue(), new ElGamalParameters(
+                params.getP(), params.getG()));
         }
         else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa))
         {
@@ -136,13 +128,14 @@ public class PrivateKeyFactory
         }
         else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
-            X962Parameters      params = new X962Parameters((DERObject)keyInfo.getAlgorithmId().getParameters());
-            ECDomainParameters  dParams = null;
-            
+            X962Parameters params = new X962Parameters(
+                (DERObject)keyInfo.getAlgorithmId().getParameters());
+            ECDomainParameters dParams = null;
+
             if (params.isNamedCurve())
             {
                 DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
-                X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
+                X9ECParameters ecP = X962NamedCurves.getByOID(oid);
 
                 if (ecP == null)
                 {
@@ -159,26 +152,18 @@ public class PrivateKeyFactory
                     }
                 }
 
-                dParams = new ECDomainParameters(
-                                            ecP.getCurve(),
-                                            ecP.getG(),
-                                            ecP.getN(),
-                                            ecP.getH(),
-                                            ecP.getSeed());
+                dParams = new ECDomainParameters(ecP.getCurve(), ecP.getG(), ecP.getN(),
+                    ecP.getH(), ecP.getSeed());
             }
             else
             {
-                X9ECParameters ecP = new X9ECParameters(
-                            (ASN1Sequence)params.getParameters());
-                dParams = new ECDomainParameters(
-                                            ecP.getCurve(),
-                                            ecP.getG(),
-                                            ecP.getN(),
-                                            ecP.getH(),
-                                            ecP.getSeed());
+                X9ECParameters ecP = new X9ECParameters((ASN1Sequence)params.getParameters());
+                dParams = new ECDomainParameters(ecP.getCurve(), ecP.getG(), ecP.getN(),
+                    ecP.getH(), ecP.getSeed());
             }
 
-            ECPrivateKeyStructure   ec = new ECPrivateKeyStructure((ASN1Sequence)keyInfo.getPrivateKey());
+            ECPrivateKeyStructure ec = new ECPrivateKeyStructure(
+                (ASN1Sequence)keyInfo.getPrivateKey());
 
             return new ECPrivateKeyParameters(ec.getKey(), dParams);
         }
