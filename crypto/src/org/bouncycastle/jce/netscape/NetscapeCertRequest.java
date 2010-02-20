@@ -22,7 +22,6 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
