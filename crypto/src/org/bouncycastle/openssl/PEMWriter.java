@@ -1,6 +1,5 @@
 package org.bouncycastle.openssl;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
@@ -17,6 +16,8 @@ import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
@@ -29,8 +30,9 @@ import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
 
@@ -38,7 +40,7 @@ import org.bouncycastle.x509.X509V2AttributeCertificate;
  * General purpose writer for OpenSSL PEM objects.
  */
 public class PEMWriter
-    extends BufferedWriter
+    extends PemWriter
 {
     private String provider;
 
@@ -61,42 +63,21 @@ public class PEMWriter
         this.provider = provider;
     }
 
-    private void writeHexEncoded(byte[] bytes)
+    private String getHexEncoded(byte[] bytes)
         throws IOException
     {
         bytes = Hex.encode(bytes);
-        
+
+        char[] chars = new char[bytes.length];
+
         for (int i = 0; i != bytes.length; i++)
         {
-            this.write((char)bytes[i]);
+            chars[i] = (char)bytes[i];
         }
+
+        return new String(chars);
     }
 
-    private void writeEncoded(byte[] bytes) 
-        throws IOException
-    {
-        char[]  buf = new char[64];
-        
-        bytes = Base64.encode(bytes);
-        
-        for (int i = 0; i < bytes.length; i += buf.length)
-        {
-            int index = 0;
-            
-            while (index != buf.length)
-            {
-                if ((i + index) >= bytes.length)
-                {
-                    break;
-                }
-                buf[index] = (char)bytes[i + index];
-                index++;
-            }
-            this.write(buf, 0, index);
-            this.newLine();
-        }
-    }
-    
     public void writeObject(
         Object  o) 
         throws IOException
@@ -201,9 +182,7 @@ public class PEMWriter
             throw new IOException("unknown object passed - can't encode.");
         }
 
-        writeHeader(type);
-        writeEncoded(encoding);
-        writeFooter(type);
+        writePemObject(new PemObject(type, encoding));
     }
 
     public void writeObject(
@@ -293,32 +272,11 @@ public class PEMWriter
 
         byte[] encData = PEMUtilities.crypt(true, provider, keyData, password, dekAlgName, iv);
 
+        Map headers = new LinkedHashMap();
 
-        // write the data
-        writeHeader(type);
-        this.write("Proc-Type: 4,ENCRYPTED");
-        this.newLine();
-        this.write("DEK-Info: " + dekAlgName + ",");
-        this.writeHexEncoded(iv);
-        this.newLine();
-        this.newLine();
-        this.writeEncoded(encData);
-        writeFooter(type);
-    }
+        headers.put("Proc-Type", "4,ENCRYPTED");
+        headers.put("DEK-Info", dekAlgName + "," + getHexEncoded(iv));
 
-    private void writeHeader(
-        String type)
-        throws IOException
-    {
-        this.write("-----BEGIN " + type + "-----");
-        this.newLine();
-    }
-
-    private void writeFooter(
-        String type)
-        throws IOException
-    {
-        this.write("-----END " + type + "-----");
-        this.newLine();
+        writePemObject(new PemObject(type, headers, encData));
     }
 }

@@ -15,6 +15,22 @@ public class PBES2Parameters
     private KeyDerivationFunc   func;
     private EncryptionScheme    scheme;
 
+    public static PBES2Parameters getInstance(
+        Object  obj)
+    {
+        if (obj== null || obj instanceof PBES2Parameters)
+        {
+            return (PBES2Parameters)obj;
+        }
+
+        if (obj instanceof ASN1Sequence)
+        {
+            return new PBES2Parameters((ASN1Sequence)obj);
+        }
+
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+    }
+
     public PBES2Parameters(
         ASN1Sequence  obj)
     {
