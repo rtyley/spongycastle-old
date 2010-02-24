@@ -25,7 +25,6 @@ import java.util.StringTokenizer;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -35,6 +34,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.EncryptionScheme;
 import org.bouncycastle.asn1.pkcs.KeyDerivationFunc;
@@ -67,9 +67,19 @@ import org.bouncycastle.x509.X509V2AttributeCertificate;
 public class PEMReader
     extends PemReader
 {
+    private static final Map KEY_SIZES = new HashMap();
+
+    static
+    {
+        KEY_SIZES.put(NISTObjectIdentifiers.id_aes128_CBC.getId(), new Integer(128));
+        KEY_SIZES.put(NISTObjectIdentifiers.id_aes192_CBC.getId(), new Integer(192));
+        KEY_SIZES.put(NISTObjectIdentifiers.id_aes256_CBC.getId(), new Integer(256));
+    }
+
     private final Map parsers = new HashMap();
 
     private final PasswordFinder pFinder;
+
 
     /**
      * Create a new PEMReader
@@ -597,11 +607,6 @@ public class PEMReader
             EncryptionScheme    scheme = params.getEncryptionScheme();
             PBKDF2Params        defParams = (PBKDF2Params)func.getParameters();
 
-            PBEKeySpec pbeSpec = new PBEKeySpec(pFinder.getPassword(),
-                defParams.getSalt(),
-                defParams.getIterationCount().intValue(),
-                256);   // TODO: get from algorithm name
-
             try
             {
                 int     iterationCount = defParams.getIterationCount().intValue();
@@ -613,11 +618,11 @@ public class PEMReader
                     salt,
                     iterationCount);
 
-                // TODO: read key size
-                SecretKey key = new SecretKeySpec(((KeyParameter)generator.generateDerivedParameters(256)).getKey(), scheme.getObjectId().getId());
+                String algorithm = scheme.getObjectId().getId();
+                SecretKey key = new SecretKeySpec(((KeyParameter)generator.generateDerivedParameters(((Integer)KEY_SIZES.get(algorithm)).intValue())).getKey(), algorithm);
 
-                Cipher cipher = Cipher.getInstance(scheme.getObjectId().getId(), provider);
-                AlgorithmParameters algParams = AlgorithmParameters.getInstance(scheme.getObjectId().getId(), provider);
+                Cipher cipher = Cipher.getInstance(algorithm, provider);
+                AlgorithmParameters algParams = AlgorithmParameters.getInstance(algorithm, provider);
 
                 algParams.init(scheme.getParameters().getDERObject().getEncoded());
 
