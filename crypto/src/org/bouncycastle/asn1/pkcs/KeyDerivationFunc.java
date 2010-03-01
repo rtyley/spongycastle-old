@@ -14,7 +14,7 @@ public class KeyDerivationFunc
         super(seq);
     }
     
-    KeyDerivationFunc(
+    public KeyDerivationFunc(
         DERObjectIdentifier id,
         ASN1Encodable       params)
     {

@@ -2,36 +2,53 @@ package org.bouncycastle.asn1.pkcs;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public class EncryptionScheme
     extends AlgorithmIdentifier
-{   
-    DERObject   objectId;
-    DERObject   obj;
+{
+    public EncryptionScheme(
+        DERObjectIdentifier objectId,
+        DEREncodable parameters)
+    {
+        super(objectId, parameters);
+    }
 
     EncryptionScheme(
         ASN1Sequence  seq)
     {   
-        super(seq);
-        
-        objectId = (DERObject)seq.getObjectAt(0);
-        obj = (DERObject)seq.getObjectAt(1);
+        this((DERObjectIdentifier)seq.getObjectAt(0), seq.getObjectAt(1));
+    }
+
+    public static final EncryptionScheme getInstance(Object obj)
+    {
+        if (obj instanceof EncryptionScheme)
+        {
+            return (EncryptionScheme)obj;
+        }
+        else if (obj instanceof ASN1Sequence)
+        {
+            return new EncryptionScheme((ASN1Sequence)obj);
+        }
+
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public DERObject getObject()
     {
-        return obj;
+        return (DERObject)getParameters();
     }
 
     public DERObject getDERObject()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 
-        v.add(objectId);
-        v.add(obj);
+        v.add(getObjectId());
+        v.add(getParameters());
 
         return new DERSequence(v);
     }

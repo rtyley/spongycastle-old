@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
@@ -35,7 +36,7 @@ public class PBES2Parameters
         ASN1Sequence  obj)
     {
         Enumeration e = obj.getObjects();
-        ASN1Sequence  funcSeq = (ASN1Sequence)e.nextElement();
+        ASN1Sequence  funcSeq = ASN1Sequence.getInstance(((DEREncodable)e.nextElement()).getDERObject());
 
         if (funcSeq.getObjectAt(0).equals(id_PBKDF2))
         {
@@ -46,7 +47,7 @@ public class PBES2Parameters
             func = new KeyDerivationFunc(funcSeq);
         }
 
-        scheme = new EncryptionScheme((ASN1Sequence)e.nextElement());
+        scheme = EncryptionScheme.getInstance(e.nextElement());
     }
 
     public KeyDerivationFunc getKeyDerivationFunc()
