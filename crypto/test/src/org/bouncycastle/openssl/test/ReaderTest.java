@@ -218,6 +218,18 @@ public class ReaderTest
         {
             fail("decryption of private key data check failed");
         }
+
+        // general PKCS8 test
+        pGet = new Password("password".toCharArray());
+        pemRd = openPEMResource("pkcs8test.pem", pGet);
+
+        while ((privKey = (RSAPrivateCrtKey)pemRd.readObject()) != null)
+        {
+            if (!privKey.getPublicExponent().equals(new BigInteger("10001", 16)))
+            {
+                fail("decryption of private key data check failed");
+            }
+        }
     }
 
     private void keyPairTest(

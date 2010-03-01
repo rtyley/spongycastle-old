@@ -25,7 +25,9 @@ import java.util.StringTokenizer;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
@@ -34,21 +36,19 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.EncryptionScheme;
 import org.bouncycastle.asn1.pkcs.KeyDerivationFunc;
+import org.bouncycastle.asn1.pkcs.PBEParameter;
 import org.bouncycastle.asn1.pkcs.PBES2Parameters;
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
+import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
-import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.util.encoders.Hex;
@@ -67,15 +67,6 @@ import org.bouncycastle.x509.X509V2AttributeCertificate;
 public class PEMReader
     extends PemReader
 {
-    private static final Map KEY_SIZES = new HashMap();
-
-    static
-    {
-        KEY_SIZES.put(NISTObjectIdentifiers.id_aes128_CBC.getId(), new Integer(128));
-        KEY_SIZES.put(NISTObjectIdentifiers.id_aes192_CBC.getId(), new Integer(192));
-        KEY_SIZES.put(NISTObjectIdentifiers.id_aes256_CBC.getId(), new Integer(256));
-    }
-
     private final Map parsers = new HashMap();
 
     private final PasswordFinder pFinder;
@@ -135,6 +126,7 @@ public class PEMReader
         parsers.put("DSA PRIVATE KEY", new DSAKeyPairParser(provider));
         parsers.put("EC PRIVATE KEY", new ECDSAKeyPairParser(provider));
         parsers.put("ENCRYPTED PRIVATE KEY", new EncryptedPrivateKeyParser(provider));
+        parsers.put("PRIVATE KEY", new PrivateKeyParser(provider));
     }
 
     public Object readObject()
@@ -602,42 +594,133 @@ public class PEMReader
         {
             EncryptedPrivateKeyInfo info = EncryptedPrivateKeyInfo.getInstance(ASN1Object.fromByteArray(obj.getContent()));
             AlgorithmIdentifier algId = info.getEncryptionAlgorithm();
-            PBES2Parameters     params = PBES2Parameters.getInstance(algId.getParameters());
-            KeyDerivationFunc   func = params.getKeyDerivationFunc();
-            EncryptionScheme    scheme = params.getEncryptionScheme();
-            PBKDF2Params        defParams = (PBKDF2Params)func.getParameters();
 
+            if (pFinder == null)
+            {
+                throw new PEMException("no PasswordFinder specified");
+            }
+
+            if (PEMUtilities.isPKCS5Scheme2(algId.getObjectId()))
+            {
+                PBES2Parameters     params = PBES2Parameters.getInstance(algId.getParameters());
+                KeyDerivationFunc   func = params.getKeyDerivationFunc();
+                EncryptionScheme    scheme = params.getEncryptionScheme();
+                PBKDF2Params        defParams = (PBKDF2Params)func.getParameters();
+
+                try
+                {
+                    int     iterationCount = defParams.getIterationCount().intValue();
+                    byte[]  salt = defParams.getSalt();
+
+                    String algorithm = scheme.getObjectId().getId();
+
+                    SecretKey key = PEMUtilities.generateSecretKeyForPKCS5Scheme2(algorithm, pFinder.getPassword(), salt, iterationCount);
+
+                    Cipher cipher = Cipher.getInstance(algorithm, provider);
+                    AlgorithmParameters algParams = AlgorithmParameters.getInstance(algorithm, provider);
+
+                    algParams.init(scheme.getParameters().getDERObject().getEncoded());
+
+                    cipher.init(Cipher.DECRYPT_MODE, key, algParams);
+
+                    PrivateKeyInfo pInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(cipher.doFinal(info.getEncryptedData())));
+                    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pInfo.getEncoded());
+
+                    KeyFactory keyFact = KeyFactory.getInstance(pInfo.getAlgorithmId().getObjectId().getId(), provider);
+
+                    return keyFact.generatePrivate(keySpec);
+                }
+                catch (Exception e)
+                {
+                    throw new PEMException("problem parsing ENCRYPTED PRIVATE KEY: " + e.toString(), e);
+                }
+            }
+            else if (PEMUtilities.isPKCS12(algId.getObjectId()))
+            {
+                PKCS12PBEParams params = PKCS12PBEParams.getInstance(algId.getParameters());
+                String          algorithm = algId.getObjectId().getId();
+                PBEKeySpec pbeSpec = new PBEKeySpec(pFinder.getPassword());
+
+                try
+                {
+                    SecretKeyFactory secKeyFact = SecretKeyFactory.getInstance(algorithm, provider);
+                    PBEParameterSpec defParams = new PBEParameterSpec(params.getIV(), params.getIterations().intValue());
+
+                    Cipher cipher = Cipher.getInstance(algorithm, provider);
+
+                    cipher.init(Cipher.DECRYPT_MODE, secKeyFact.generateSecret(pbeSpec), defParams);
+
+                    PrivateKeyInfo pInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(cipher.doFinal(info.getEncryptedData())));
+                    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pInfo.getEncoded());
+
+                    KeyFactory keyFact = KeyFactory.getInstance(pInfo.getAlgorithmId().getObjectId().getId(), provider);
+
+                    return keyFact.generatePrivate(keySpec);
+                }
+                catch (Exception e)
+                {
+                    throw new PEMException("problem parsing ENCRYPTED PRIVATE KEY: " + e.toString(), e);
+                }
+            }
+            else if (PEMUtilities.isPKCS5Scheme1(algId.getObjectId()))
+            {
+                PBEParameter    params = PBEParameter.getInstance(algId.getParameters());
+                String          algorithm = algId.getObjectId().getId();
+                PBEKeySpec      pbeSpec = new PBEKeySpec(pFinder.getPassword());
+
+                try
+                {
+                    SecretKeyFactory secKeyFact = SecretKeyFactory.getInstance(algorithm, provider);
+                    PBEParameterSpec defParams = new PBEParameterSpec(params.getSalt(), params.getIterationCount().intValue());
+
+                    Cipher cipher = Cipher.getInstance(algorithm, provider);
+
+                    cipher.init(Cipher.DECRYPT_MODE, secKeyFact.generateSecret(pbeSpec), defParams);
+
+                    PrivateKeyInfo pInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(cipher.doFinal(info.getEncryptedData())));
+                    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pInfo.getEncoded());
+
+                    KeyFactory keyFact = KeyFactory.getInstance(pInfo.getAlgorithmId().getObjectId().getId(), provider);
+
+                    return keyFact.generatePrivate(keySpec);
+                }
+                catch (Exception e)
+                {
+                    throw new PEMException("problem parsing ENCRYPTED PRIVATE KEY: " + e.toString(), e);
+                }
+            }
+            else
+            {
+                throw new PEMException("Unknown algorithm: " + algId.getObjectId());
+            }
+        }
+    }
+
+    private class PrivateKeyParser
+        implements PemObjectParser
+    {
+        private String provider;
+
+        public PrivateKeyParser(String provider)
+        {
+            this.provider = provider;
+        }
+
+        public Object parseObject(PemObject obj)
+            throws IOException
+        {
             try
             {
-                int     iterationCount = defParams.getIterationCount().intValue();
-                byte[]  salt = defParams.getSalt();
-                PBEParametersGenerator  generator = new PKCS5S2ParametersGenerator();
+                PrivateKeyInfo info = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(obj.getContent()));
+                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(obj.getContent());
 
-                generator.init(
-                    PBEParametersGenerator.PKCS5PasswordToBytes(pFinder.getPassword()),
-                    salt,
-                    iterationCount);
-
-                String algorithm = scheme.getObjectId().getId();
-                SecretKey key = new SecretKeySpec(((KeyParameter)generator.generateDerivedParameters(((Integer)KEY_SIZES.get(algorithm)).intValue())).getKey(), algorithm);
-
-                Cipher cipher = Cipher.getInstance(algorithm, provider);
-                AlgorithmParameters algParams = AlgorithmParameters.getInstance(algorithm, provider);
-
-                algParams.init(scheme.getParameters().getDERObject().getEncoded());
-
-                cipher.init(Cipher.DECRYPT_MODE, key, algParams);
-
-                PrivateKeyInfo pInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(cipher.doFinal(info.getEncryptedData())));
-                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pInfo.getEncoded());
-
-                KeyFactory keyFact = KeyFactory.getInstance(pInfo.getAlgorithmId().getObjectId().getId(), provider);
+                KeyFactory keyFact = KeyFactory.getInstance(info.getAlgorithmId().getObjectId().getId(), provider);
 
                 return keyFact.generatePrivate(keySpec);
             }
             catch (Exception e)
             {
-                throw new PEMException("problem parsing ENCRYPTED PRIVATE KEY: " + e.toString(), e);   
+                throw new PEMException("problem parsing PRIVATE KEY: " + e.toString(), e);
             }
         }
     }

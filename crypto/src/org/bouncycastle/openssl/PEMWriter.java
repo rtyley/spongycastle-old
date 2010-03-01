@@ -32,6 +32,7 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
@@ -84,7 +85,13 @@ public class PEMWriter
     {
         String  type;
         byte[]  encoding;
-        
+
+        if (o instanceof PemObjectGenerator)
+        {
+            writePemObject(((PemObjectGenerator)o).generate());
+
+            return;
+        }
         if (o instanceof X509Certificate)
         {
             type = "CERTIFICATE";
