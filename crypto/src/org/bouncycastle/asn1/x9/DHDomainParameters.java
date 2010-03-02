@@ -1,4 +1,4 @@
-package org.bouncycastle.asn1.x509;
+package org.bouncycastle.asn1.x9;
 
 import java.util.Enumeration;
 
@@ -11,7 +11,8 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
-public class DHDomainParameters extends ASN1Encodable
+public class DHDomainParameters
+    extends ASN1Encodable
 {
     private DERInteger p, g, q, j;
     private DHValidationParms validationParms;

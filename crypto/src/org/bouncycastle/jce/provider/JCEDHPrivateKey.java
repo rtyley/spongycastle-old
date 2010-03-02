@@ -1,5 +1,15 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.util.Enumeration;
+
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.DHPrivateKeySpec;
+
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
@@ -8,17 +18,10 @@ import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x9.DHDomainParameters;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.DHPrivateKeySpec;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.math.BigInteger;
-import java.util.Enumeration;
 
 public class JCEDHPrivateKey
     implements DHPrivateKey, PKCS12BagAttributeCarrier
@@ -27,7 +30,8 @@ public class JCEDHPrivateKey
     
     BigInteger      x;
 
-    DHParameterSpec dhSpec;
+    private DHParameterSpec dhSpec;
+    private PrivateKeyInfo  info;
 
     private PKCS12BagAttributeCarrier attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
@@ -52,17 +56,35 @@ public class JCEDHPrivateKey
     JCEDHPrivateKey(
         PrivateKeyInfo  info)
     {
-        DHParameter     params = new DHParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
+        ASN1Sequence    seq = ASN1Sequence.getInstance(info.getAlgorithmId().getParameters());
         DERInteger      derX = (DERInteger)info.getPrivateKey();
+        DERObjectIdentifier id = info.getAlgorithmId().getObjectId();
 
+        this.info = info;
         this.x = derX.getValue();
-        if (params.getL() != null)
+
+        if (id.equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
-            this.dhSpec = new DHParameterSpec(params.getP(), params.getG(), params.getL().intValue());
+            DHParameter params = new DHParameter(seq);
+
+            if (params.getL() != null)
+            {
+                this.dhSpec = new DHParameterSpec(params.getP(), params.getG(), params.getL().intValue());
+            }
+            else
+            {
+                this.dhSpec = new DHParameterSpec(params.getP(), params.getG());
+            }
+        }
+        else if (id.equals(X9ObjectIdentifiers.dhpublicnumber))
+        {
+            DHDomainParameters params = DHDomainParameters.getInstance(seq);
+
+            this.dhSpec = new DHParameterSpec(params.getP().getValue(), params.getG().getValue());
         }
         else
         {
-            this.dhSpec = new DHParameterSpec(params.getP(), params.getG());
+            throw new IllegalArgumentException("unknown algorithm type: " + id);
         }
     }
 
@@ -96,6 +118,11 @@ public class JCEDHPrivateKey
      */
     public byte[] getEncoded()
     {
+        if (info != null)
+        {
+            return info.getDEREncoded();
+        }
+        
         PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.dhKeyAgreement, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL()).getDERObject()), new DERInteger(getX()));
 
         return info.getDEREncoded();
