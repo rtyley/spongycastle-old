@@ -553,28 +553,28 @@ public class DHTest
 
         if (!Arrays.areEqual(samplePrivEnc, k.getEncoded()))
         {
-            fail("private key reencode failed");
+            fail("private key re-encode failed");
         }
 
         k = kFact.generatePublic(new X509EncodedKeySpec(samplePubEnc));
 
         if (!Arrays.areEqual(samplePubEnc, k.getEncoded()))
         {
-            fail("public key reencode failed");
+            fail("public key re-encode failed");
         }
 
         k = kFact.generatePublic(new X509EncodedKeySpec(oldPubEnc));
 
         if (!Arrays.areEqual(oldPubEnc, k.getEncoded()))
         {
-            fail("old public key reencode failed");
+            fail("old public key re-encode failed");
         }
 
         k = kFact.generatePublic(new X509EncodedKeySpec(oldFullParams));
 
         if (!Arrays.areEqual(oldFullParams, k.getEncoded()))
         {
-            fail("old full public key reencode failed");
+            fail("old full public key re-encode failed");
         }
     }
 
