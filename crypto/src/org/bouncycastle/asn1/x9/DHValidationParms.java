@@ -1,4 +1,4 @@
-package org.bouncycastle.asn1.x509;
+package org.bouncycastle.asn1.x9;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;

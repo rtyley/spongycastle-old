@@ -1,20 +1,24 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.pkcs.DHParameter;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.crypto.params.DHPublicKeyParameters;
-
-import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.DHPublicKeySpec;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
+
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.DHPublicKeySpec;
+
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.DHParameter;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x9.DHDomainParameters;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 
 public class JCEDHPublicKey
     implements DHPublicKey
@@ -23,7 +27,8 @@ public class JCEDHPublicKey
     
     private BigInteger              y;
     private DHParameterSpec         dhSpec;
-
+    private SubjectPublicKeyInfo    info;
+    
     JCEDHPublicKey(
         DHPublicKeySpec    spec)
     {
@@ -56,9 +61,9 @@ public class JCEDHPublicKey
     JCEDHPublicKey(
         SubjectPublicKeyInfo    info)
     {
-        DHParameter             params = new DHParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
-        DERInteger              derY = null;
+        this.info = info;
 
+        DERInteger              derY;
         try
         {
             derY = (DERInteger)info.getPublicKey();
@@ -69,13 +74,33 @@ public class JCEDHPublicKey
         }
 
         this.y = derY.getValue();
-        if (params.getL() != null)
+
+        ASN1Sequence seq = ASN1Sequence.getInstance(info.getAlgorithmId().getParameters());
+        DERObjectIdentifier id = info.getAlgorithmId().getObjectId();
+
+        // we need the PKCS check to handle older keys marked with the X9 oid.
+        if (id.equals(PKCSObjectIdentifiers.dhKeyAgreement) || isPKCSParam(seq))
         {
-            this.dhSpec = new DHParameterSpec(params.getP(), params.getG(), params.getL().intValue());
+            DHParameter             params = new DHParameter(seq);
+
+            if (params.getL() != null)
+            {
+                this.dhSpec = new DHParameterSpec(params.getP(), params.getG(), params.getL().intValue());
+            }
+            else
+            {
+                this.dhSpec = new DHParameterSpec(params.getP(), params.getG());
+            }
+        }
+        else if (id.equals(X9ObjectIdentifiers.dhpublicnumber))
+        {
+            DHDomainParameters params = DHDomainParameters.getInstance(seq);
+
+            this.dhSpec = new DHParameterSpec(params.getP().getValue(), params.getG().getValue());
         }
         else
         {
-            this.dhSpec = new DHParameterSpec(params.getP(), params.getG());
+            throw new IllegalArgumentException("unknown algorithm type: " + id);
         }
     }
 
@@ -91,7 +116,12 @@ public class JCEDHPublicKey
 
     public byte[] getEncoded()
     {
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.dhpublicnumber, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL()).getDERObject()), new DERInteger(y));
+        if (info != null)
+        {
+            return info.getDEREncoded();
+        }
+
+        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.dhKeyAgreement, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL()).getDERObject()), new DERInteger(y));
 
         return info.getDEREncoded();
     }
@@ -104,6 +134,29 @@ public class JCEDHPublicKey
     public BigInteger getY()
     {
         return y;
+    }
+
+    private boolean isPKCSParam(ASN1Sequence seq)
+    {
+        if (seq.size() == 2)
+        {
+            return true;
+        }
+        
+        if (seq.size() > 3)
+        {
+            return false;
+        }
+
+        DERInteger l = DERInteger.getInstance(seq.getObjectAt(2));
+        DERInteger p = DERInteger.getInstance(seq.getObjectAt(0));
+
+        if (l.getValue().compareTo(BigInteger.valueOf(p.getValue().bitLength())) > 0)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private void readObject(
