@@ -2,6 +2,8 @@ package org.bouncycastle.openssl;
 
 import java.io.IOException;
 import java.security.Key;
+import java.security.Provider;
+import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,10 +87,32 @@ final class PEMUtilities
 
         return new SecretKeySpec(((KeyParameter)generator.generateDerivedParameters(PEMUtilities.getKeySize(algorithm))).getKey(), algorithm);
     }
-    
+
     static byte[] crypt(
         boolean encrypt,
-        String  provider,
+        String provider,
+        byte[]  bytes,
+        char[]  password,
+        String  dekAlgName,
+        byte[]  iv)
+        throws IOException
+    {
+        Provider prov = null;
+        if (provider != null)
+        {
+            prov = Security.getProvider(provider);
+            if (prov == null)
+            {
+                throw new EncryptionException("cannot find provider: " + provider);
+            }
+        }
+
+        return crypt(encrypt, prov, bytes, password, dekAlgName, iv);
+    }
+
+    static byte[] crypt(
+        boolean encrypt,
+        Provider provider,
         byte[]  bytes,
         char[]  password,
         String  dekAlgName,
@@ -100,7 +124,6 @@ final class PEMUtilities
         String                 blockMode = "CBC";
         String                 padding = "PKCS5Padding";
         Key                    sKey;
-
 
         // Figure out block mode and padding.
         if (dekAlgName.endsWith("-CFB"))

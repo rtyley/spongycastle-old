@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 
 public class PemObject
+    implements PemObjectGenerator
 {
     private String type;
     private Map    headers;
@@ -34,5 +35,11 @@ public class PemObject
     public byte[] getContent()
     {
         return content;
+    }
+
+    public PemObject generate()
+        throws PemGenerationException
+    {
+        return this;
     }
 }
