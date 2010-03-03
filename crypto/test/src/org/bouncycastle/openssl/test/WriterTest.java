@@ -1,6 +1,8 @@
 package org.bouncycastle.openssl.test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
@@ -19,6 +21,7 @@ import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.test.SimpleTest;
 
 public class WriterTest
@@ -120,6 +123,14 @@ public class WriterTest
 
         doWriteReadTest(privKey, provider);
         doWriteReadTests(privKey, "BC", algorithms);
+
+        // override test
+        PEMWriter pWrt = new PEMWriter(new OutputStreamWriter(new ByteArrayOutputStream()));
+
+        Object o = new PemObject("FRED", new byte[100]);
+        pWrt.writeObject(o);
+
+        pWrt.close();
     }
 
     private void doWriteReadTests(

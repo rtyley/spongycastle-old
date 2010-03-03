@@ -14,6 +14,11 @@ import org.bouncycastle.util.encoders.Base64;
 public class PemWriter
     extends BufferedWriter
 {
+    private static final int LINE_LENGTH = 64;
+
+    private final int nlLength;
+    private char[]  buf = new char[LINE_LENGTH];
+
     /**
      * Base constructor.
      *
@@ -22,11 +27,57 @@ public class PemWriter
     public PemWriter(Writer out)
     {
         super(out);
+
+        String nl = System.getProperty("line.separator");
+        if (nl != null)
+        {
+            nlLength = nl.length();
+        }
+        else
+        {
+            nlLength = 2;
+        }
     }
 
-    public void writePemObject(PemObject obj)
+    /**
+     * Return the number of bytes or characters required to contain the
+     * passed in object if it is PEM encoded.
+     *
+     * @param obj pem object to be output
+     * @return an estimate of the number of bytes
+     */
+    public int getOutputSize(PemObject obj)
+    {
+        // BEGIN and END boundaries.
+        int size = (2 * (obj.getType().length() + 10 + nlLength)) + 6 + 4;
+
+        if (!obj.getHeaders().isEmpty())
+        {
+            Map headers = obj.getHeaders();
+
+            for (Iterator it = obj.getHeaders().keySet().iterator(); it.hasNext();)
+            {
+                String hdr = (String)it.next();
+
+                size += hdr.length() + ": ".length() + ((String)headers.get(hdr)).length() + nlLength;
+            }
+
+            size += nlLength;
+        }
+
+        // base64 encoding
+        int dataLen = ((obj.getContent().length + 2) / 3) * 4;
+        
+        size += dataLen + (((dataLen + LINE_LENGTH - 1) / LINE_LENGTH) * nlLength);
+
+        return size;
+    }
+    
+    public void writeObject(PemObjectGenerator objGen)
         throws IOException
     {
+        PemObject obj = objGen.generate();
+
         writePreEncapsulationBoundary(obj.getType());
 
         if (!obj.getHeaders().isEmpty())
@@ -53,8 +104,6 @@ public class PemWriter
     private void writeEncoded(byte[] bytes)
         throws IOException
     {
-        char[]  buf = new char[64];
-
         bytes = Base64.encode(bytes);
 
         for (int i = 0; i < bytes.length; i += buf.length)
