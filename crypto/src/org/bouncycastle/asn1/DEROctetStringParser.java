@@ -1,7 +1,7 @@
 package org.bouncycastle.asn1;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class DEROctetStringParser
     implements ASN1OctetStringParser
@@ -19,11 +19,17 @@ public class DEROctetStringParser
         return stream;
     }
 
+    public DERObject getLoadedObject()
+        throws IOException
+    {
+        return new DEROctetString(stream.toByteArray());
+    }
+    
     public DERObject getDERObject()
     {
         try
         {
-            return new DEROctetString(stream.toByteArray());
+            return getLoadedObject();
         }
         catch (IOException e)
         {

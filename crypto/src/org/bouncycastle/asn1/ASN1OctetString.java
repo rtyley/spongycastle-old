@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.Arrays;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.encoders.Hex;
 
 public abstract class ASN1OctetString
     extends ASN1Object
@@ -123,6 +123,11 @@ public abstract class ASN1OctetString
         ASN1OctetString  other = (ASN1OctetString)o;
 
         return Arrays.areEqual(string, other.string);
+    }
+
+    public DERObject getLoadedObject()
+    {
+        return this.getDERObject();
     }
 
     abstract void encode(DEROutputStream out)

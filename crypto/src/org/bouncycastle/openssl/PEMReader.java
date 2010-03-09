@@ -31,7 +31,6 @@ import javax.crypto.spec.PBEParameterSpec;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1ParsingException;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -215,9 +214,27 @@ public class PEMReader
             {
                 return (ASN1Sequence)ASN1Object.fromByteArray(keyBytes);
             }
-            catch (ASN1ParsingException e)
+            catch (IOException e)
             {
-                throw new PEMException(e.getMessage(), e);
+                if (isEncrypted)
+                {
+                    throw new PEMException("exception decoding - please check password and data.", e);
+                }
+                else
+                {
+                    throw new PEMException(e.getMessage(), e);
+                }
+            }
+            catch (ClassCastException e)
+            {
+                if (isEncrypted)
+                {
+                    throw new PEMException("exception decoding - please check password and data.", e);
+                }
+                else
+                {
+                    throw new PEMException(e.getMessage(), e);
+                }
             }
         }
     }
@@ -234,6 +251,11 @@ public class PEMReader
             throws IOException
         {
             ASN1Sequence seq = readKeyPair(obj);
+
+            if (seq.size() != 6)
+            {
+                throw new PEMException("malformed sequence in DSA private key");
+            }
 
             //            DERInteger              v = (DERInteger)seq.getObjectAt(0);
             DERInteger p = (DERInteger)seq.getObjectAt(1);

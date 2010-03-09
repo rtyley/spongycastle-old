@@ -120,6 +120,11 @@ public abstract class ASN1Sequence
                 return obj;
             }
 
+            public DERObject getLoadedObject()
+            {
+                return outer;
+            }
+            
             public DERObject getDERObject()
             {
                 return outer;

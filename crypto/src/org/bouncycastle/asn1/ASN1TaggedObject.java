@@ -200,6 +200,11 @@ public abstract class ASN1TaggedObject
         throw new RuntimeException("implicit tagging not implemented for tag: " + tag);
     }
 
+    public DERObject getLoadedObject()
+    {
+        return this.getDERObject();
+    }
+    
     abstract void encode(DEROutputStream  out)
         throws IOException;
 

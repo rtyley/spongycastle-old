@@ -39,7 +39,10 @@ import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
 
-public class BasicPEMGenerator
+/**
+ * PEM generator for the original set of PEM objects used in Open SSL.
+ */
+public class MiscPEMGenerator
     implements PemObjectGenerator
 {
     private Object obj;
@@ -48,12 +51,12 @@ public class BasicPEMGenerator
     private SecureRandom random;
     private Provider provider;
 
-    public BasicPEMGenerator(Object o)
+    public MiscPEMGenerator(Object o)
     {
         this.obj = o;
     }
 
-    public BasicPEMGenerator(
+    public MiscPEMGenerator(
         Object       obj,
         String       algorithm,
         char[]       password,
@@ -67,7 +70,7 @@ public class BasicPEMGenerator
         this.provider = provider;
     }
 
-    public BasicPEMGenerator(
+    public MiscPEMGenerator(
         Object       obj,
         String       algorithm,
         char[]       password,
@@ -227,7 +230,7 @@ public class BasicPEMGenerator
     {
         if (obj instanceof KeyPair)
         {
-            return new BasicPEMGenerator(((KeyPair)obj).getPrivate()).generate();
+            return new MiscPEMGenerator(((KeyPair)obj).getPrivate()).generate();
         }
 
         String type = null;

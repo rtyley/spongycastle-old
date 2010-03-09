@@ -41,7 +41,7 @@ public class PEMWriter
     {
         try
         {
-            super.writeObject(new BasicPEMGenerator(obj));
+            super.writeObject(new MiscPEMGenerator(obj));
         }
         catch (PemGenerationException e)
         {
@@ -63,7 +63,7 @@ public class PEMWriter
     {
         try
         {
-            super.writeObject(new BasicPEMGenerator(obj, algorithm, password, random, provider));
+            super.writeObject(new MiscPEMGenerator(obj, algorithm, password, random, provider));
         }
         catch (NoSuchProviderException e)
         {

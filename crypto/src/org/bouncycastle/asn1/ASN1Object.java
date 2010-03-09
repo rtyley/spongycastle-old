@@ -17,7 +17,14 @@ public abstract  class ASN1Object
     {
         ASN1InputStream aIn = new ASN1InputStream(data);
 
-        return (ASN1Object)aIn.readObject();
+        try
+        {
+            return (ASN1Object)aIn.readObject();
+        }
+        catch (ClassCastException e)
+        {
+            throw new IOException("cannot recognise object in stream");    
+        }
     }
 
     public final boolean equals(Object o)

@@ -161,6 +161,11 @@ abstract public class ASN1Set
                 return obj;
             }
 
+            public DERObject getLoadedObject()
+            {
+                return outer;
+            }
+
             public DERObject getDERObject()
             {
                 return outer;
