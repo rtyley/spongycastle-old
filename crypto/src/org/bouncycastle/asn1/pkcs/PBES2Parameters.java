@@ -47,7 +47,7 @@ public class PBES2Parameters
             func = new KeyDerivationFunc(funcSeq);
         }
 
-        scheme = EncryptionScheme.getInstance(e.nextElement());
+        scheme = (EncryptionScheme)EncryptionScheme.getInstance(e.nextElement());
     }
 
     public KeyDerivationFunc getKeyDerivationFunc()

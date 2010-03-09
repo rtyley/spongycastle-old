@@ -1,18 +1,21 @@
 package org.bouncycastle.util.io.pem;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class PemObject
     implements PemObjectGenerator
 {
+    private static final Map EMPTY_MAP = Collections.unmodifiableMap(new HashMap());
+
     private String type;
     private Map    headers;
     private byte[] content;
 
     public PemObject(String type, byte[] content)
     {
-        this(type, Collections.emptyMap(), content);
+        this(type, EMPTY_MAP, content);
     }
 
     public PemObject(String type, Map headers, byte[] content)

@@ -208,6 +208,29 @@ public class ReaderTest
             }
         }
 
+        // heap space check - a failure by the ASN.1 library to detect an
+        // out of band stream will cause this to run out of memory.
+
+        int pCount = Integer.parseInt("7fd99", 16);
+        try
+        {
+
+            pGet = new Password(Integer.toString(pCount).toCharArray());
+
+            pemRd = openPEMResource("test.pem", pGet);
+
+            while ((o = pemRd.readObject()) != null)
+            {
+            }
+        }
+        catch (IOException e)
+        {
+            if (!e.getCause().getMessage().equals("corrupted stream - out of bounds length found"))
+            {
+               fail("bounds issue not detected");
+            }
+        }
+
         // encrypted private key test
         pGet = new Password("password".toCharArray());
         pemRd = openPEMResource("enckey.pem", pGet);

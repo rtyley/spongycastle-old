@@ -121,7 +121,7 @@ public class PKCS8Generator
         }
         catch (NoSuchPaddingException e)
         {
-            throw new NoSuchAlgorithmException(algorithm + " found, but padding not available: " + e.getMessage(), e);
+            throw new NoSuchAlgorithmException(algorithm + " found, but padding not available: " + e.getMessage());
         }
         DERObjectIdentifier algOID = new DERObjectIdentifier(algorithm);
 
