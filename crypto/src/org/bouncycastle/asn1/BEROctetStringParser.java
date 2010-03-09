@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.io.Streams;
-
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
+import org.bouncycastle.util.io.Streams;
 
 public class BEROctetStringParser
     implements ASN1OctetStringParser
@@ -30,11 +30,17 @@ public class BEROctetStringParser
         return new ConstructedOctetStream(_parser);
     }
 
+    public DERObject getLoadedObject()
+        throws IOException
+    {
+        return new BERConstructedOctetString(Streams.readAll(getOctetStream()));
+    }
+
     public DERObject getDERObject()
     {
         try
         {
-            return new BERConstructedOctetString(Streams.readAll(getOctetStream()));
+            return getLoadedObject();
         }
         catch (IOException e)
         {

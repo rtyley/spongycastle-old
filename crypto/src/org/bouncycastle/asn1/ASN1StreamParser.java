@@ -9,20 +9,10 @@ public class ASN1StreamParser
     private final InputStream _in;
     private final int         _limit;
 
-    private static int findLimit(InputStream in)
-    {
-        if (in instanceof DefiniteLengthInputStream)
-        {
-            return ((DefiniteLengthInputStream)in).getRemaining();
-        }
-
-        return Integer.MAX_VALUE;
-    }
-
     public ASN1StreamParser(
         InputStream in)
     {
-        this(in, findLimit(in));
+        this(in, ASN1InputStream.findLimit(in));
     }
 
     public ASN1StreamParser(
@@ -147,7 +137,14 @@ public class ASN1StreamParser
                     return new DEROctetStringParser(defIn);
             }
 
-            return ASN1InputStream.createPrimitiveDERObject(tagNo, defIn.toByteArray());
+            try
+            {
+                return ASN1InputStream.createPrimitiveDERObject(tagNo, defIn.toByteArray());
+            }
+            catch (IllegalArgumentException e)
+            {
+                throw new IOException("corrupted stream detected", e);
+            }
         }
     }
 
@@ -166,7 +163,14 @@ public class ASN1StreamParser
         DEREncodable obj;
         while ((obj = readObject()) != null)
         {
-            v.add(obj.getDERObject());
+            if (obj instanceof InMemoryRepresentable)
+            {
+                v.add(((InMemoryRepresentable)obj).getLoadedObject());
+            }
+            else
+            {
+                v.add(obj.getDERObject());
+            }
         }
 
         return v;

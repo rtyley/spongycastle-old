@@ -18,25 +18,32 @@ public class DERExternal
     public DERExternal(ASN1EncodableVector vector)
     {
         int offset = 0;
-        DERObject enc = vector.get(offset).getDERObject();
+
+        DERObject enc = getObjFromVector(vector, offset);
         if (enc instanceof DERObjectIdentifier)
         {
             directReference = (DERObjectIdentifier)enc;
             offset++;
-            enc = vector.get(offset).getDERObject();
+            enc = getObjFromVector(vector, offset);
         }
         if (enc instanceof DERInteger)
         {
             indirectReference = (DERInteger) enc;
             offset++;
-            enc = vector.get(offset).getDERObject();
+            enc = getObjFromVector(vector, offset);
         }
         if (!(enc instanceof DERTaggedObject))
         {
             dataValueDescriptor = (ASN1Object) enc;
             offset++;
-            enc = vector.get(offset).getDERObject();
+            enc = getObjFromVector(vector, offset);
         }
+
+        if (vector.size() != offset + 1)
+        {
+            throw new IllegalArgumentException("input vector too large");
+        }
+
         if (!(enc instanceof DERTaggedObject))
         {
             throw new IllegalArgumentException("No tagged object found in vector. Structure doesn't seem to be of type External");
@@ -46,6 +53,15 @@ public class DERExternal
         externalContent = obj.getObject();
     }
 
+    private DERObject getObjFromVector(ASN1EncodableVector v, int index)
+    {
+        if (v.size() <= index)
+        {
+            throw new IllegalArgumentException("too few objects in input vector");
+        }
+
+        return v.get(index).getDERObject();
+    }
     /**
      * Creates a new instance of DERExternal
      * See X.690 for more informations about the meaning of these parameters

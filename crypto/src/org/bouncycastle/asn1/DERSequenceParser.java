@@ -18,11 +18,17 @@ public class DERSequenceParser
         return _parser.readObject();
     }
 
+    public DERObject getLoadedObject()
+        throws IOException
+    {
+         return new DERSequence(_parser.readVector());
+    }
+
     public DERObject getDERObject()
     {
         try
         {
-            return new DERSequence(_parser.readVector());
+            return getLoadedObject();
         }
         catch (IOException e)
         {

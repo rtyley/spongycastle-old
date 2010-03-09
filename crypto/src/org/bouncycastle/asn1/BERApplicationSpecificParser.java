@@ -20,15 +20,22 @@ public class BERApplicationSpecificParser
         return parser.readObject();
     }
 
+    public DERObject getLoadedObject()
+        throws IOException
+    {
+         return new BERApplicationSpecific(tag, parser.readVector());
+    }
+
     public DERObject getDERObject()
     {
         try
         {
-            return new BERApplicationSpecific(tag, parser.readVector());
+            return getLoadedObject();
         }
         catch (IOException e)
         {
             throw new ASN1ParsingException(e.getMessage(), e);
         }
     }
+
 }

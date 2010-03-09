@@ -18,11 +18,17 @@ public class DERSetParser
         return _parser.readObject();
     }
 
+    public DERObject getLoadedObject()
+        throws IOException
+    {
+        return new DERSet(_parser.readVector(), false);
+    }
+
     public DERObject getDERObject()
     {
         try
         {
-            return new DERSet(_parser.readVector(), false);
+            return getLoadedObject();
         }
         catch (IOException e)
         {

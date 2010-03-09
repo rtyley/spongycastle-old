@@ -21,10 +21,24 @@ public class ASN1InputStream
     private final int limit;
     private final boolean lazyEvaluate;
 
+    static int findLimit(InputStream in)
+    {
+        if (in instanceof DefiniteLengthInputStream)
+        {
+            return ((DefiniteLengthInputStream)in).getRemaining();
+        }
+        else if (in instanceof ByteArrayInputStream)
+        {
+            return ((ByteArrayInputStream)in).available();
+        }
+
+        return Integer.MAX_VALUE;
+    }
+
     public ASN1InputStream(
         InputStream is)
     {
-        this(is, Integer.MAX_VALUE);
+        this(is, findLimit(is));
     }
 
     /**
@@ -120,7 +134,7 @@ public class ASN1InputStream
 
         if ((tag & TAGGED) != 0)
         {
-            return new BERTaggedObjectParser(tag, tagNo, defIn).getDERObject();
+            return new BERTaggedObjectParser(tag, tagNo, defIn).getLoadedObject();
         }
 
         if (isConstructed)
@@ -213,11 +227,11 @@ public class ASN1InputStream
             {
                 ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
 
-                return new BERApplicationSpecificParser(tagNo, sp).getDERObject();
+                return new BERApplicationSpecificParser(tagNo, sp).getLoadedObject();
             }
             if ((tag & TAGGED) != 0)
             {
-                return new BERTaggedObjectParser(tag, tagNo, indIn).getDERObject();
+                return new BERTaggedObjectParser(tag, tagNo, indIn).getLoadedObject();
             }
 
             ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
@@ -226,20 +240,27 @@ public class ASN1InputStream
             switch (tagNo)
             {
                 case OCTET_STRING:
-                    return new BEROctetStringParser(sp).getDERObject();
+                    return new BEROctetStringParser(sp).getLoadedObject();
                 case SEQUENCE:
-                    return new BERSequenceParser(sp).getDERObject();
+                    return new BERSequenceParser(sp).getLoadedObject();
                 case SET:
-                    return new BERSetParser(sp).getDERObject();
+                    return new BERSetParser(sp).getLoadedObject();
                 case EXTERNAL:
-                    return new DERExternalParser(sp).getDERObject();
+                    return new DERExternalParser(sp).getLoadedObject();
                 default:
                     throw new IOException("unknown BER object encountered");
             }
         }
         else
         {
-            return buildObject(tag, tagNo, length);
+            try
+            {
+                return buildObject(tag, tagNo, length);
+            }
+            catch (IllegalArgumentException e)
+            {
+                throw new ASN1IOException("corrupted stream detected", e);
+            }
         }
     }
 
@@ -340,6 +361,10 @@ public class ASN1InputStream
         {
             case BIT_STRING:
             {
+                if (bytes.length < 2)
+                {
+                    throw new IllegalArgumentException("truncated BIT STRING detected");
+                }
                 int padBits = bytes[0];
                 byte[] data = new byte[bytes.length - 1];
                 System.arraycopy(bytes, 1, data, 0, bytes.length - 1);

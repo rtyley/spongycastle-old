@@ -80,7 +80,7 @@ public class TBSCertificateStructure
         //
         if (seq.getObjectAt(0) instanceof DERTaggedObject)
         {
-            version = DERInteger.getInstance(seq.getObjectAt(0));
+            version = DERInteger.getInstance((ASN1TaggedObject)seq.getObjectAt(0), true);
         }
         else
         {

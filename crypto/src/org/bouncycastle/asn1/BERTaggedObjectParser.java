@@ -79,18 +79,13 @@ public class BERTaggedObjectParser
     }
 
     private ASN1EncodableVector rLoadVector(InputStream in)
+        throws IOException
     {
-        try
-        {
-            return new ASN1StreamParser(in).readVector();
-        }
-        catch (IOException e)
-        {
-            throw new ASN1ParsingException(e.getMessage(), e);
-        }
+        return new ASN1StreamParser(in).readVector();
     }
 
-    public DERObject getDERObject()
+    public DERObject getLoadedObject()
+        throws IOException
     {
         if (_indefiniteLength)
         {
@@ -110,14 +105,19 @@ public class BERTaggedObjectParser
                 :   new DERTaggedObject(false, _tagNumber, DERFactory.createSequence(v));
         }
 
+        DefiniteLengthInputStream defIn = (DefiniteLengthInputStream)_contentStream;
+        return new DERTaggedObject(false, _tagNumber, new DEROctetString(defIn.toByteArray()));
+    }
+
+    public DERObject getDERObject()
+    {
         try
         {
-            DefiniteLengthInputStream defIn = (DefiniteLengthInputStream)_contentStream;
-            return new DERTaggedObject(false, _tagNumber, new DEROctetString(defIn.toByteArray()));
+            return this.getLoadedObject();
         }
         catch (IOException e)
         {
-            throw new IllegalStateException(e.getMessage());
+            throw new ASN1ParsingException(e.getMessage());
         }
     }
 }

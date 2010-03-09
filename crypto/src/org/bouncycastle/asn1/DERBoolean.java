@@ -64,6 +64,11 @@ public class DERBoolean
     public DERBoolean(
         byte[]       value)
     {
+        if (value.length != 1)
+        {
+            throw new IllegalArgumentException("byte value should have 1 byte in it");
+        }
+        
         this.value = value[0];
     }
 

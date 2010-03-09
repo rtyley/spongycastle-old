@@ -3,7 +3,7 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 
 public class DERExternalParser
-    implements DEREncodable
+    implements DEREncodable, InMemoryRepresentable
 {
     private ASN1StreamParser _parser;
 
@@ -20,12 +20,25 @@ public class DERExternalParser
     {
         return _parser.readObject();
     }
+
+    public DERObject getLoadedObject()
+        throws IOException
+    {
+        try
+        {
+            return new DERExternal(_parser.readVector());
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new ASN1IOException(e.getMessage(), e);
+        }
+    }
     
     public DERObject getDERObject()
     {
         try 
         {
-            return new DERExternal(_parser.readVector());
+            return getLoadedObject();
         }
         catch (IOException ioe) 
         {
