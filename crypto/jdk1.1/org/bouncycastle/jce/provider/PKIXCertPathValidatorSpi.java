@@ -4,13 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
-import java.security.cert.*;
-
-import org.bouncycastle.jce.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -27,6 +22,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERIA5String;
@@ -1319,7 +1315,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                         permittedSubtreesDN = intersectDN(permittedSubtreesDN, (ASN1Sequence)base.getName());
                                         break;
                                     case 7:
-                                        permittedSubtreesIP = intersectIP(permittedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
+                                        permittedSubtreesIP = intersectIP(permittedSubtreesIP, BERConstructedOctetString.fromSequence(base.getName()).getOctets());
                                         break;
                                 }
                             }
@@ -1346,7 +1342,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                     excludedSubtreesDN = unionDN(excludedSubtreesDN, (ASN1Sequence)base.getName());
                                     break;
                                 case 7:
-                                    excludedSubtreesIP = unionIP(excludedSubtreesIP, ASN1OctetString.getInstance(base.getName()).getOctets());
+                                    excludedSubtreesIP = unionIP(excludedSubtreesIP, BERConstructedOctetString.fromSequence(base.getName()).getOctets());
                                     break;
                                 }
                             }

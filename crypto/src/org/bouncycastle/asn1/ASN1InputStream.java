@@ -361,14 +361,7 @@ public class ASN1InputStream
         {
             case BIT_STRING:
             {
-                if (bytes.length < 2)
-                {
-                    throw new IllegalArgumentException("truncated BIT STRING detected");
-                }
-                int padBits = bytes[0];
-                byte[] data = new byte[bytes.length - 1];
-                System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
-                return new DERBitString(data, padBits);
+                return DERBitString.fromOctetString(bytes);
             }
             case BMP_STRING:
                 return new DERBMPString(bytes);

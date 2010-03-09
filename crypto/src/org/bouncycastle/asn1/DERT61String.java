@@ -24,16 +24,6 @@ public class DERT61String
             return (DERT61String)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DERT61String(((ASN1OctetString)obj).getOctets());
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -50,7 +40,16 @@ public class DERT61String
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERT61String(ASN1OctetString.getInstance(o).getOctets());
+        }
     }
 
     /**

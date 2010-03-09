@@ -24,16 +24,6 @@ public class DERIA5String
             return (DERIA5String)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DERIA5String(((ASN1OctetString)obj).getOctets());
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -50,7 +40,16 @@ public class DERIA5String
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DERIA5String)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERIA5String(((ASN1OctetString)o).getOctets());
+        }
     }
 
     /**

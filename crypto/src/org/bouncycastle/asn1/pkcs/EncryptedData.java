@@ -1,6 +1,16 @@
 package org.bouncycastle.asn1.pkcs;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.BERTaggedObject;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
@@ -86,7 +96,7 @@ public class EncryptedData
         {
             DERTaggedObject o = (DERTaggedObject)data.getObjectAt(2);
 
-            return ASN1OctetString.getInstance(o.getObject());
+            return ASN1OctetString.getInstance(o, false);
         }
 
         return null;

@@ -23,16 +23,6 @@ public class DERBoolean
             return (DERBoolean)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DERBoolean(((ASN1OctetString)obj).getOctets());
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -58,7 +48,16 @@ public class DERBoolean
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DERBoolean)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERBoolean(((ASN1OctetString)o).getOctets());
+        }
     }
     
     public DERBoolean(

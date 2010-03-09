@@ -14,14 +14,7 @@ public class DERGeneralString
         {
             return (DERGeneralString) obj;
         }
-        if (obj instanceof ASN1OctetString) 
-        {
-            return new DERGeneralString(((ASN1OctetString) obj).getOctets());
-        }
-        if (obj instanceof ASN1TaggedObject) 
-        {
-            return getInstance(((ASN1TaggedObject) obj).getObject());
-        }
+
         throw new IllegalArgumentException("illegal object in getInstance: "
                 + obj.getClass().getName());
     }
@@ -30,7 +23,16 @@ public class DERGeneralString
         ASN1TaggedObject obj, 
         boolean explicit) 
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DERGeneralString)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERGeneralString(((ASN1OctetString)o).getOctets());
+        }
     }
 
     public DERGeneralString(byte[] string) 

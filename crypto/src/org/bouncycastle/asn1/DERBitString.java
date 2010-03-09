@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.Arrays;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
+import org.bouncycastle.util.Arrays;
 
 public class DERBitString
     extends ASN1Object
@@ -100,22 +100,6 @@ public class DERBitString
             return (DERBitString)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            byte[]  bytes = ((ASN1OctetString)obj).getOctets();
-            int     padBits = bytes[0];
-            byte[]  data = new byte[bytes.length - 1];
-
-            System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
-
-            return new DERBitString(data, padBits);
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -132,7 +116,16 @@ public class DERBitString
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DERBitString)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return fromOctetString(((ASN1OctetString)o).getOctets());
+        }
     }
     
     protected DERBitString(
@@ -262,5 +255,20 @@ public class DERBitString
     public String toString()
     {
         return getString();
+    }
+
+    static DERBitString fromOctetString(byte[] bytes)
+    {
+        if (bytes.length < 2)
+        {
+            throw new IllegalArgumentException("truncated BIT STRING detected");
+        }
+
+        int padBits = bytes[0];
+        byte[] data = new byte[bytes.length - 1];
+
+        System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
+
+        return new DERBitString(data, padBits);
     }
 }

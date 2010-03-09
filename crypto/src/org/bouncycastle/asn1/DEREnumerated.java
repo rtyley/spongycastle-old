@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.Arrays;
-
 import java.io.IOException;
 import java.math.BigInteger;
+
+import org.bouncycastle.util.Arrays;
 
 public class DEREnumerated
     extends ASN1Object
@@ -23,16 +23,6 @@ public class DEREnumerated
             return (DEREnumerated)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DEREnumerated(((ASN1OctetString)obj).getOctets());
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -49,7 +39,16 @@ public class DEREnumerated
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DEREnumerated)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DEREnumerated(((ASN1OctetString)o).getOctets());
+        }
     }
 
     public DEREnumerated(
