@@ -175,12 +175,10 @@ abstract public class ASN1Set
 
         while (e.hasMoreElements())
         {
-            Object o = e.nextElement();
+            Object o = getNext(e);
             hashCode *= 17;
-            if (o != null)
-            {
-                hashCode ^= o.hashCode();
-            }
+
+            hashCode ^= o.hashCode();
         }
 
         return hashCode;
@@ -206,10 +204,13 @@ abstract public class ASN1Set
 
         while (s1.hasMoreElements())
         {
-            DERObject  o1 = ((DEREncodable)s1.nextElement()).getDERObject();
-            DERObject  o2 = ((DEREncodable)s2.nextElement()).getDERObject();
+            DEREncodable  obj1 = getNext(s1);
+            DEREncodable  obj2 = getNext(s2);
 
-            if (o1 == o2 || (o1 != null && o1.equals(o2)))
+            DERObject  o1 = obj1.getDERObject();
+            DERObject  o2 = obj2.getDERObject();
+
+            if (o1 == o2 || o1.equals(o2))
             {
                 continue;
             }
@@ -218,6 +219,19 @@ abstract public class ASN1Set
         }
 
         return true;
+    }
+
+    private DEREncodable getNext(Enumeration e)
+    {
+        DEREncodable encObj = (DEREncodable)e.nextElement();
+
+        // unfortunately null was allowed as a substitute for DER null
+        if (encObj == null)
+        {
+            return DERNull.INSTANCE;
+        }
+
+        return encObj;
     }
 
     /**

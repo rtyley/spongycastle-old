@@ -1,5 +1,25 @@
 package org.bouncycastle.jce;
 
+import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PSSParameterSpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
+
+import javax.security.auth.x500.X500Principal;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
@@ -23,25 +43,6 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.util.Strings;
-
-import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PSSParameterSpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
 
 /**
  * A class for verifying and creating PKCS10 Certification requests. 
@@ -324,7 +325,7 @@ public class PKCS10CertificationRequest
         }
         else
         {
-            this.sigAlgId = new AlgorithmIdentifier(sigOID, null);
+            this.sigAlgId = new AlgorithmIdentifier(sigOID, DERNull.INSTANCE);
         }
 
         try

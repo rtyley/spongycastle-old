@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
@@ -118,7 +119,14 @@ public class AlgorithmIdentifier
 
         if (parametersDefined)
         {
-            v.add(parameters);
+            if (parameters != null)
+            {
+                v.add(parameters);
+            }
+            else
+            {
+                v.add(DERNull.INSTANCE);
+            }
         }
 
         return new DERSequence(v);

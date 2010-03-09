@@ -1,8 +1,30 @@
 package org.bouncycastle.jce.provider.test;
 
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
+import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Hashtable;
+import java.util.Vector;
+
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
@@ -17,19 +39,7 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.Signature;
-import java.security.spec.RSAPrivateCrtKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.Hashtable;
+import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 
 /**
  **/
@@ -317,6 +327,42 @@ public class PKCS10CertRequestTest
         }
     }
 
+     // previous code found to cause a NullPointerException
+    private void nullPointerTest()
+        throws Exception
+    {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
+        keyGen.initialize(1024, new SecureRandom());
+        KeyPair pair = keyGen.generateKeyPair();
+
+        Vector oids = new Vector();
+        Vector values = new Vector();
+        oids.add(X509Extensions.BasicConstraints);
+        values.add(new X509Extension(true, new DEROctetString(new BasicConstraints(true))));
+        oids.add(X509Extensions.KeyUsage);
+        values.add(new X509Extension(true, new DEROctetString(
+            new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign))));
+        SubjectKeyIdentifier subjectKeyIdentifier = new SubjectKeyIdentifierStructure(pair.getPublic());
+        X509Extension ski = new X509Extension(false, new DEROctetString(subjectKeyIdentifier));
+        oids.add(X509Extensions.SubjectKeyIdentifier);
+        values.add(ski);
+
+        Attribute attribute = new Attribute(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest,
+            new DERSet(new X509Extensions(oids, values)));
+        
+        PKCS10CertificationRequest p1 = new PKCS10CertificationRequest(
+            "SHA1WithRSA", new X509Principal("cn=csr"),
+            pair.getPublic(), new DERSet(attribute), pair.getPrivate(), "BC");
+        PKCS10CertificationRequest p2 = new PKCS10CertificationRequest(
+            "SHA1WithRSA", new X509Principal("cn=csr"),
+            pair.getPublic(), new DERSet(attribute), pair.getPrivate(), "BC");
+
+        if (!p1.equals(p2))
+        {
+            fail("cert request comparison failed");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -399,6 +445,8 @@ public class PKCS10CertRequestTest
         createPSSTest("SHA224withRSAandMGF1");
         createPSSTest("SHA256withRSAandMGF1");
         createPSSTest("SHA384withRSAandMGF1");
+
+        nullPointerTest();
     }
 
     public static void main(

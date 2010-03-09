@@ -24,7 +24,7 @@ public class EncryptionScheme
         this((DERObjectIdentifier)seq.getObjectAt(0), seq.getObjectAt(1));
     }
 
-    public static final EncryptionScheme getInstance(Object obj)
+    public static final AlgorithmIdentifier getInstance(Object obj)
     {
         if (obj instanceof EncryptionScheme)
         {

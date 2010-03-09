@@ -21,7 +21,8 @@ import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.util.test.SimpleTestResult;
 
-public class AllTests
+public class
+    AllTests
     extends TestCase
 {
     public void testOpenSSL()
