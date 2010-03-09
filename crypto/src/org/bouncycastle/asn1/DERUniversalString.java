@@ -26,11 +26,6 @@ public class DERUniversalString
             return (DERUniversalString)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DERUniversalString(((ASN1OctetString)obj).getOctets());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -47,7 +42,16 @@ public class DERUniversalString
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DERUniversalString)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERUniversalString(((ASN1OctetString)o).getOctets());
+        }
     }
 
     /**

@@ -141,4 +141,17 @@ public class BERConstructedOctetString
             super.encode(out);
         }
     }
+
+    public static BERConstructedOctetString fromSequence(ASN1Sequence seq)
+    {
+        Vector      v = new Vector();
+        Enumeration e = seq.getObjects();
+
+        while (e.hasMoreElements())
+        {
+            v.addElement(e.nextElement());
+        }
+
+        return new BERConstructedOctetString(v);
+    }
 }

@@ -1566,7 +1566,7 @@ public class RFC3280CertPathUtilities
                     ASN1TaggedObject constraint = ASN1TaggedObject.getInstance(policyConstraints.nextElement());
                     if (constraint.getTagNo() == 0)
                     {
-                        tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
+                        tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
                         if (tmpInt < explicitPolicy)
                         {
                             return tmpInt;

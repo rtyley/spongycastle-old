@@ -1,8 +1,8 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.Strings;
-
 import java.io.IOException;
+
+import org.bouncycastle.util.Strings;
 
 /**
  * DER UTF8String object.
@@ -26,16 +26,6 @@ public class DERUTF8String
             return (DERUTF8String)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DERUTF8String(((ASN1OctetString)obj).getOctets());
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: "
                 + obj.getClass().getName());
     }
@@ -55,15 +45,31 @@ public class DERUTF8String
         ASN1TaggedObject obj,
         boolean explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DERUTF8String)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERUTF8String(ASN1OctetString.getInstance(o).getOctets());
+        }
     }
 
     /**
      * basic constructor - byte encoded string.
      */
-    DERUTF8String(byte[] string)
+    public DERUTF8String(byte[] string)
     {
-        this.string = Strings.fromUTF8ByteArray(string);
+        try
+        {
+            this.string = Strings.fromUTF8ByteArray(string);
+        }
+        catch (ArrayIndexOutOfBoundsException e)
+        {
+            throw new IllegalArgumentException("UTF8 encoding invalid");
+        }
     }
 
     /**

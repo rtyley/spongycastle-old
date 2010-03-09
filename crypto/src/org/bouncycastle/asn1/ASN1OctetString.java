@@ -3,8 +3,6 @@ package org.bouncycastle.asn1;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
@@ -28,7 +26,16 @@ public abstract class ASN1OctetString
         ASN1TaggedObject    obj,
         boolean             explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof ASN1OctetString)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return BERConstructedOctetString.fromSequence(ASN1Sequence.getInstance(o)); 
+        }
     }
     
     /**
@@ -43,24 +50,6 @@ public abstract class ASN1OctetString
         if (obj == null || obj instanceof ASN1OctetString)
         {
             return (ASN1OctetString)obj;
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
-        if (obj instanceof ASN1Sequence)
-        {
-            Vector      v = new Vector();
-            Enumeration e = ((ASN1Sequence)obj).getObjects();
-
-            while (e.hasMoreElements())
-            {
-                v.addElement(e.nextElement());
-            }
-
-            return new BERConstructedOctetString(v);
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
