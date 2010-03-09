@@ -30,7 +30,7 @@ public class DERExternalParser
         }
         catch (IllegalArgumentException e)
         {
-            throw new ASN1IOException(e.getMessage(), e);
+            throw new ASN1Exception(e.getMessage(), e);
         }
     }
     

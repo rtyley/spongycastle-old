@@ -143,7 +143,7 @@ public class ASN1StreamParser
             }
             catch (IllegalArgumentException e)
             {
-                throw new IOException("corrupted stream detected", e);
+                throw new ASN1Exception("corrupted stream detected", e);
             }
         }
     }

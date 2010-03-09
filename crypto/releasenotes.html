@@ -25,11 +25,14 @@ to conform the algorithms to the JCE framework.
 Release 1.46
 <h3>2.1.2 Defects Fixed</h3>
 <ul>
+<li>An edge condition in ECDSA which could result in an invalid signature has been fixed.</li>
+<li>Exhaustive testing has been performed on the ASN.1 parser, eliminating another potential OutOfMemoryException and several escaping run time exceptions.</li>
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
 <li>A null genTime can be passed to TimeStampResponseGenerator.generate() to generate timeNotAvailable error responses.</li>
 <li>Support has been added for reading and writing of openssl PKCS#8 encrypted keys.</li>
+<li>New streams have been added for supporting general creation of PEM data, and allowing for estimation of output size on generation. Generators have been added for some of the standard OpenSSL objects.</li>
 <li>CRL searching for CertPath validation now supports the optional algorithm given in Section 6.3.3 of RFC 5280, allowing the latest CRL to be used for a set time providing the certificate is unexpired.</li>
 </ul>
 

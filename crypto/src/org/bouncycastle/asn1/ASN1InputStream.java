@@ -259,7 +259,7 @@ public class ASN1InputStream
             }
             catch (IllegalArgumentException e)
             {
-                throw new ASN1IOException("corrupted stream detected", e);
+                throw new ASN1Exception("corrupted stream detected", e);
             }
         }
     }
