@@ -188,48 +188,26 @@ public class ReaderTest
         doOpenSslDsaTest("rc2_64_cbc");
         doOpenSslRsaTest("rc2_64_cbc");
 
-        // heap space check - a failure by the ASN.1 library to detect an
-        // out of band stream will cause this to run out of memory.
-        try
-        {
-            pGet = new Password("7fd98".toCharArray());
+        doDudPasswordTest("7fd98", 0, "corrupted stream - out of bounds length found");
+        doDudPasswordTest("ef677", 1, "corrupted stream - out of bounds length found");
+        doDudPasswordTest("800ce", 2, "cannot recognise object in stream");
+        doDudPasswordTest("b6cd8", 3, "DEF length 81 object truncated by 56");
+        doDudPasswordTest("28ce09", 4, "DEF length 110 object truncated by 28");
+        doDudPasswordTest("2ac3b9", 5, "DER length more than 4 bytes: 11");
+        doDudPasswordTest("2cba96", 6, "DEF length 100 object truncated by 35");
+        doDudPasswordTest("2e3354", 7, "DEF length 42 object truncated by 9");
+        doDudPasswordTest("2f4142", 8, "DER length more than 4 bytes: 14");
+        doDudPasswordTest("2fe9bb", 9, "DER length more than 4 bytes: 65");
+        doDudPasswordTest("3ee7a8", 10, "DER length more than 4 bytes: 57");
+        doDudPasswordTest("41af75", 11, "malformed sequence in DSA private key");
+        doDudPasswordTest("1704a5", 12, "corrupted stream detected");
+        doDudPasswordTest("1c5822", 13, "corrupted stream detected");
+        doDudPasswordTest("5a3d16", 14, "corrupted stream detected");
+        doDudPasswordTest("8d0c97", 15, "corrupted stream detected");
+        doDudPasswordTest("bc0daf", 16, "corrupted stream detected");
+        
 
-            pemRd = openPEMResource("test.pem", pGet);
 
-            while ((o = pemRd.readObject()) != null)
-            {
-            }
-        }
-        catch (IOException e)
-        {
-            if (!e.getCause().getMessage().equals("corrupted stream - out of bounds length found"))
-            {
-               fail("bounds issue not detected");    
-            }
-        }
-
-        // heap space check - a failure by the ASN.1 library to detect an
-        // out of band stream will cause this to run out of memory.
-
-        int pCount = Integer.parseInt("7fd99", 16);
-        try
-        {
-
-            pGet = new Password(Integer.toString(pCount).toCharArray());
-
-            pemRd = openPEMResource("test.pem", pGet);
-
-            while ((o = pemRd.readObject()) != null)
-            {
-            }
-        }
-        catch (IOException e)
-        {
-            if (!e.getCause().getMessage().equals("corrupted stream - out of bounds length found"))
-            {
-               fail("bounds issue not detected");
-            }
-        }
 
         // encrypted private key test
         pGet = new Password("password".toCharArray());
@@ -362,6 +340,38 @@ public class ReaderTest
         if (!expectedPrivKeyClass.isInstance(privKey))
         {
             fail("Returned key not of correct type");
+        }
+    }
+
+    private void doDudPasswordTest(String password, int index, String message)
+    {
+        // illegal state exception check - in this case the wrong password will
+        // cause an underlying class cast exception.
+        try
+        {
+            PasswordFinder pGet = new Password(password.toCharArray());
+
+            PEMReader pemRd = openPEMResource("test.pem", pGet);
+            Object o;
+
+            while ((o = pemRd.readObject()) != null)
+            {
+            }
+
+            fail("issue not detected: " + index);
+        }
+        catch (IOException e)
+        {
+            if (e.getCause() != null && !e.getCause().getMessage().equals(message))
+            {
+               e.printStackTrace();
+               fail("issue " + index + " exception thrown, but wrong message");
+            }
+            else if (e.getCause() == null && !e.getMessage().equals(message))
+            {
+                               e.printStackTrace();
+               fail("issue " + index + " exception thrown, but wrong message");
+            }
         }
     }
 
