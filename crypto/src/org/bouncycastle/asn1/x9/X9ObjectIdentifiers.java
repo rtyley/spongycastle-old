@@ -129,7 +129,8 @@ public interface X9ObjectIdentifiers
     // dhpublicnumber OBJECT IDENTIFIER ::= { iso(1) member-body(2)
     //            us(840) ansi-x942(10046) number-type(2) 1 }
     //
-    static final DERObjectIdentifier dhpublicnumber = new DERObjectIdentifier(ansi_X9_42 + ".2.1");
+    public static final DERObjectIdentifier dhpublicnumber = new DERObjectIdentifier(ansi_X9_42
+        + ".2.1");
 
     public static final DERObjectIdentifier x9_42_schemes = new DERObjectIdentifier(ansi_X9_42
         + ".3");
