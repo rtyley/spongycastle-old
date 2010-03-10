@@ -65,6 +65,7 @@ public class RegressionTest
         new TargetInformationTest(),
         new SubjectKeyIdentifierTest(),
         new ESSCertIDv2UnitTest(),
+        new ParsingTest(),
         new GeneralNameTest()
     };
 
