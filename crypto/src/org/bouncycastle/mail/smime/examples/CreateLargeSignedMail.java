@@ -43,8 +43,8 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 /**
  * a simple example that creates a single signed mail message.
@@ -113,7 +113,7 @@ public class CreateLargeSignedMail
             false,
             createAuthorityKeyId(issPub));
 
-        return v3CertGen.generateX509Certificate(issPriv);
+        return v3CertGen.generate(issPriv);
     }
 
     public static void main(
