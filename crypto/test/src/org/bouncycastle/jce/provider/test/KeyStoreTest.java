@@ -98,7 +98,7 @@ public class KeyStoreTest
 
         try
         {
-            X509Certificate cert = certGen.generateX509Certificate(privKey);
+            X509Certificate cert = certGen.generate(privKey);
 
             cert.checkValidity(new Date());
 
@@ -224,7 +224,7 @@ public class KeyStoreTest
 
         try
         {
-            X509Certificate cert = certGen.generateX509Certificate(privKey);
+            X509Certificate cert = certGen.generate(privKey);
 
             cert.checkValidity(new Date());
 

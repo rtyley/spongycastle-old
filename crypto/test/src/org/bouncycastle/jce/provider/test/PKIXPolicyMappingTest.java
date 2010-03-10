@@ -64,7 +64,7 @@ public class PKIXPolicyMappingTest
         v3CertGen.setSubjectDN(new X509Principal(subject));
         v3CertGen.setPublicKey(pubKey);
         v3CertGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
-        X509Certificate cert = v3CertGen.generateX509Certificate(privKey);
+        X509Certificate cert = v3CertGen.generate(privKey);
         return cert;
     }
     
@@ -92,7 +92,7 @@ public class PKIXPolicyMappingTest
         v3CertGen.addExtension(X509Extensions.CertificatePolicies, true, new DERSequence(policies));
         v3CertGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
         v3CertGen.addExtension(X509Extensions.PolicyMappings, true, new PolicyMappings(policyMap));
-        X509Certificate cert = v3CertGen.generateX509Certificate(caPrivKey);
+        X509Certificate cert = v3CertGen.generate(caPrivKey);
         return cert;
     }
     
@@ -117,7 +117,7 @@ public class PKIXPolicyMappingTest
         v3CertGen.setPublicKey(pubKey);
         v3CertGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
         v3CertGen.addExtension(X509Extensions.CertificatePolicies,true,new DERSequence(policies));
-        X509Certificate cert = v3CertGen.generateX509Certificate(caPrivKey);
+        X509Certificate cert = v3CertGen.generate(caPrivKey);
         return cert;
     }
     
