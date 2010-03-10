@@ -1,21 +1,31 @@
 package org.bouncycastle.x509.examples;
 
-import java.security.cert.*;
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.cert.X509Certificate;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.security.*;
-import java.math.*;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.provider.*;
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.x509.*;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.x509.AttributeCertificateHolder;
+import org.bouncycastle.x509.AttributeCertificateIssuer;
+import org.bouncycastle.x509.X509Attribute;
+import org.bouncycastle.x509.X509V1CertificateGenerator;
+import org.bouncycastle.x509.X509V2AttributeCertificate;
+import org.bouncycastle.x509.X509V2AttributeCertificateGenerator;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 /**
  * A simple example that generates an attribute certificate.
@@ -55,7 +65,7 @@ public class AttrCertExample
         v1CertGen.setPublicKey(pubKey);
         v1CertGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
 
-        X509Certificate cert = v1CertGen.generateX509Certificate(privKey);
+        X509Certificate cert = v1CertGen.generate(privKey);
 
         cert.checkValidity(new Date());
 
@@ -118,7 +128,7 @@ public class AttrCertExample
             false,
             new NetscapeCertType(NetscapeCertType.objectSigning | NetscapeCertType.smime));
 
-        X509Certificate cert = v3CertGen.generateX509Certificate(caPrivKey);
+        X509Certificate cert = v3CertGen.generate(caPrivKey);
 
         cert.checkValidity(new Date());
 
@@ -224,7 +234,7 @@ public class AttrCertExample
 
         //      finally create the AC
         X509V2AttributeCertificate att = (X509V2AttributeCertificate)acGen
-                .generateCertificate(caPrivKey, "BC");
+                .generate(caPrivKey, "BC");
 
         //
         // starting here, we parse the newly generated AC

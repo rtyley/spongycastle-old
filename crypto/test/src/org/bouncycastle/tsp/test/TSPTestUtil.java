@@ -29,8 +29,8 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class TSPTestUtil
 {
@@ -195,7 +195,7 @@ public class TSPTestUtil
                             KeyPurposeId.id_kp_timeStamping)));
         }
 
-        X509Certificate _cert = _v3CertGen.generateX509Certificate(_issPriv);
+        X509Certificate _cert = _v3CertGen.generate(_issPriv);
 
         _cert.checkValidity(new Date());
         _cert.verify(_issPub);

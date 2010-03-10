@@ -1,16 +1,5 @@
 package org.bouncycastle.ocsp.test;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-
-import javax.crypto.KeyGenerator;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -22,6 +11,18 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+
+import javax.crypto.KeyGenerator;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class OCSPTestUtil
 {
@@ -135,7 +136,7 @@ public class OCSPTestUtil
         _v3CertGen.addExtension(X509Extensions.BasicConstraints, false,
                 new BasicConstraints(_ca));
 
-        X509Certificate _cert = _v3CertGen.generateX509Certificate(_issPriv);
+        X509Certificate _cert = _v3CertGen.generate(_issPriv);
 
         _cert.checkValidity(new Date());
         _cert.verify(_issPub);

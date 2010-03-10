@@ -183,7 +183,7 @@ public class ECEncodingTest
      *             on error
      */
     private X509Certificate generateSelfSignedSoftECCert(KeyPair kp,
-            boolean compress) throws InvalidKeyException, SignatureException
+            boolean compress) throws Exception
     {
         X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
         JCEECPrivateKey privECKey = (JCEECPrivateKey)kp.getPrivate();
@@ -201,7 +201,7 @@ public class ECEncodingTest
         certGen.setSubjectDN(new X509Principal("CN=Software emul (EC Cert)"));
         certGen.setPublicKey((PublicKey)pubECKey);
 
-        return certGen.generateX509Certificate((PrivateKey)privECKey);
+        return certGen.generate((PrivateKey)privECKey);
     }
     
     public static void main(
