@@ -16,15 +16,6 @@ public class BEROctetStringParser
         _parser = parser;
     }
 
-    /**
-     * @deprecated will be removed
-     */
-    protected BEROctetStringParser(
-        ASN1ObjectParser parser)
-    {
-        _parser = parser._aIn;
-    }
-
     public InputStream getOctetStream()
     {
         return new ConstructedOctetStream(_parser);
