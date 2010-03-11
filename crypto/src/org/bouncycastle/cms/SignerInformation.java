@@ -616,6 +616,61 @@ public class SignerInformation
         }
     }
 
+//    private boolean verifyDigest(
+//        byte[]    digest, 
+//        PublicKey key,
+//        byte[]    signature,
+//        Provider  sigProvider)
+//        throws NoSuchAlgorithmException, CMSException
+//    {
+//        String encName = CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
+//        String digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(this.getDigestAlgOID());
+//        String signatureName = digestName + "with" + encName;
+//
+//        try
+//        {
+//            byte[] bytesToSign = digest;
+//            Signature sig;
+//
+//            if (encName.equals("RSA"))
+//            {
+//                bytesToSign = RSADigestSigner.encodeDERSig(digestAlgorithm.getObjectId(), digest);
+//                sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEwithRSA", sigProvider);
+//            }
+//            else if (encName.equals("DSA"))
+//            {
+//                sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEwithDSA", sigProvider);
+//            }
+//            else if (encName.equals("RSAandMGF1"))
+//            {
+//                sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEWITHRSAPSS", sigProvider);
+//                try
+//                {
+//                    // Init the params this way to avoid having a 'raw' version of each PSS algorithm
+//                    Signature sig2 = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+//                    PSSParameterSpec spec = (PSSParameterSpec)sig2.getParameters().getParameterSpec(PSSParameterSpec.class);
+//                    sig.setParameter(spec);
+//                }
+//                catch (Exception e)
+//                {
+//                    throw new CMSException("algorithm: " + encName + " could not be configured.");
+//                }
+//            }
+//            else
+//            {
+//                throw new CMSException("algorithm: " + encName + " not supported in base signatures.");
+//            }
+//
+//            sig.initVerify(key);
+//            sig.update(bytesToSign);
+//            return sig.verify(signature);
+//        }
+//        catch (GeneralSecurityException e)
+//        {
+//            throw new CMSException("Exception processing signature: " + e, e);
+//        }
+//    }
+    
     /**
      * verify that the given public key successfully handles and confirms the
      * signature associated with this signer.
