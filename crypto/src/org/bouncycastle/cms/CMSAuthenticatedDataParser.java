@@ -6,12 +6,11 @@ import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
@@ -19,7 +18,6 @@ import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.AuthenticatedDataParser;
 import org.bouncycastle.asn1.cms.ContentInfoParser;
-import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.util.Arrays;
 
@@ -94,33 +92,24 @@ public class CMSAuthenticatedDataParser
         //DERInteger version = this.authData.getVersion();
 
         //
-        // load the RecipientInfoStore
+        // read the recipients
         //
-        ASN1SetParser s = authData.getRecipientInfos();
-        List          baseInfos = new ArrayList();
-
-        DEREncodable entry;
-        while ((entry = s.readObject()) != null)
-        {
-            baseInfos.add(RecipientInfo.getInstance(entry.getDERObject()));
-        }
+        ASN1Set recipientInfos = ASN1Set.getInstance(authData.getRecipientInfos().getDERObject());
 
         this.macAlg = authData.getMacAlgorithm();
 
         //
-        // read the encrypted content info
+        // read the authenticated content info
         //
         ContentInfoParser data = authData.getEnapsulatedContentInfo();
-
+        CMSProcessable processable = new CMSProcessableInputStream(
+            ((ASN1OctetStringParser)data.getContent(DERTags.OCTET_STRING)).getOctetStream());
 
         //
-        // prime the recipients
+        // build the RecipientInformationStore
         //
-        InputStream contentStream = ((ASN1OctetStringParser)data.getContent(DERTags.OCTET_STRING)).getOctetStream();
-        List infos = CMSEnvelopedHelper.readRecipientInfos(
-            baseInfos.iterator(), contentStream, null, macAlg, null);
-
-        _recipientInfoStore = new RecipientInformationStore(infos);
+        this._recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
+            recipientInfos, processable, null, macAlg, null);
     }
 
     /**

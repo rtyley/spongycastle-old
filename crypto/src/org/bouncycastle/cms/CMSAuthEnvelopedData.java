@@ -1,7 +1,6 @@
 package org.bouncycastle.cms;
 
 import java.io.InputStream;
-import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.cms.AuthEnvelopedData;
@@ -43,25 +42,27 @@ class CMSAuthEnvelopedData
         this.originator = authEnvData.getOriginatorInfo();
 
         //
-        // read the encrypted content info
+        // read the recipients
+        //
+        ASN1Set recipientInfos = authEnvData.getRecipientInfos();
+
+        //
+        // read the auth-encrypted content info
         //
         EncryptedContentInfo authEncInfo = authEnvData.getAuthEncryptedContentInfo();
-
         this.authEncAlg = authEncInfo.getContentEncryptionAlgorithm();
+        CMSProcessable processable = new CMSProcessableByteArray(
+            authEncInfo.getEncryptedContent().getOctets());
 
         //
-        // load the RecipientInfoStore
+        // build the RecipientInformationStore
         //
-        byte[] contentOctets = authEncInfo.getEncryptedContent().getOctets();
-        List infos = CMSEnvelopedHelper.readRecipientInfos(
-            authEnvData.getRecipientInfos(), contentOctets, null, null, authEncAlg);
-        this.recipientInfoStore = new RecipientInformationStore(infos);
+        this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
+            recipientInfos, processable, null, null, authEncAlg);
 
         // FIXME These need to be passed to the AEAD cipher as AAD (Additional Authenticated Data)
         this.authAttrs = authEnvData.getAuthAttrs();
-
         this.mac = authEnvData.getMac().getOctets();
-
         this.unauthAttrs = authEnvData.getUnauthAttrs();
     }
 }

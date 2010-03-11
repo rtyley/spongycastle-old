@@ -1,7 +1,6 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -51,7 +50,7 @@ public class KeyAgreeRecipientInformation
 
     static void readRecipientInfo(List infos, KeyAgreeRecipientInfo info,
         AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg,
-        InputStream data)
+        CMSProcessable processable)
     {
         try
         {
@@ -82,7 +81,7 @@ public class KeyAgreeRecipientInformation
                 }
 
                 infos.add(new KeyAgreeRecipientInformation(info, rid, id.getEncryptedKey(),
-                    encAlg, macAlg, authEncAlg, data));
+                    encAlg, macAlg, authEncAlg, processable));
             }
         }
         catch (IOException e)
@@ -92,15 +91,15 @@ public class KeyAgreeRecipientInformation
     }
 
     KeyAgreeRecipientInformation(
-        KeyAgreeRecipientInfo info,
-        RecipientId           rid,
-        ASN1OctetString       encryptedKey,
-        AlgorithmIdentifier   encAlg,
-        AlgorithmIdentifier   macAlg,
-        AlgorithmIdentifier   authEncAlg,
-        InputStream data)
+        KeyAgreeRecipientInfo   info,
+        RecipientId             rid,
+        ASN1OctetString         encryptedKey,
+        AlgorithmIdentifier     encAlg,
+        AlgorithmIdentifier     macAlg,
+        AlgorithmIdentifier     authEncAlg,
+        CMSProcessable          processable)
     {
-        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), data);
+        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), processable);
 
         this.info = info;
         this.rid = rid;

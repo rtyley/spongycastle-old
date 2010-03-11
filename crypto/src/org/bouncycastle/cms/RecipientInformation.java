@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
@@ -20,8 +19,8 @@ import javax.crypto.spec.IvParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public abstract class RecipientInformation
@@ -31,7 +30,7 @@ public abstract class RecipientInformation
     protected AlgorithmIdentifier macAlg;
     protected AlgorithmIdentifier authEncAlg;
     protected AlgorithmIdentifier keyEncAlg;
-    protected InputStream data;
+    protected CMSProcessable processable;
 
     private MacInputStream macStream;
     private byte[]         resultMac;
@@ -41,13 +40,13 @@ public abstract class RecipientInformation
         AlgorithmIdentifier macAlg,
         AlgorithmIdentifier authEncAlg,
         AlgorithmIdentifier keyEncAlg,
-        InputStream data)
+        CMSProcessable processable)
     {
         this.encAlg = encAlg;
         this.macAlg = macAlg;
         this.authEncAlg = authEncAlg;
         this.keyEncAlg = keyEncAlg;
-        this.data = data;
+        this.processable = processable;
     }
 
     AlgorithmIdentifier getActiveAlgID()
@@ -174,7 +173,7 @@ public abstract class RecipientInformation
 
         try
         {
-            InputStream content = data;
+            InputStream content = processable.read();
 
             // If encrypted, need to wrap in CipherInputStream to decrypt
             if (encAlg != null)
@@ -320,11 +319,6 @@ public abstract class RecipientInformation
     {
         try
         {
-            if (data instanceof ByteArrayInputStream)
-            {
-                data.reset();
-            }
-
             return CMSUtils.streamToByteArray(getContentStream(key, provider).getContentStream());
         }
         catch (IOException e)

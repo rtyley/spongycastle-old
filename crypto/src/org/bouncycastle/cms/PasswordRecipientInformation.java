@@ -1,24 +1,24 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.InputStream;
+import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import java.security.AlgorithmParameters;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -34,9 +34,9 @@ public class PasswordRecipientInformation
         AlgorithmIdentifier     encAlg,
         AlgorithmIdentifier     macAlg,
         AlgorithmIdentifier     authEncAlg,
-        InputStream             data)
+        CMSProcessable          processable)
     {
-        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), data);
+        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), processable);
 
         this.info = info;
         this.rid = new RecipientId();

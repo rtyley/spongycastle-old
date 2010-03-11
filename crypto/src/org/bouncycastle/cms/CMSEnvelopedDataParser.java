@@ -6,12 +6,11 @@ import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
@@ -19,7 +18,6 @@ import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.EncryptedContentInfoParser;
 import org.bouncycastle.asn1.cms.EnvelopedDataParser;
-import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
@@ -84,34 +82,25 @@ public class CMSEnvelopedDataParser
         //DERInteger version = this._envelopedData.getVersion();
 
         //
-        // load the RecipientInfoStore
+        // read the recipients
         //
-        ASN1SetParser s = _envelopedData.getRecipientInfos();
-        List          baseInfos = new ArrayList();
-
-        DEREncodable entry;
-        while ((entry = s.readObject()) != null)
-        {
-            baseInfos.add(RecipientInfo.getInstance(entry.getDERObject()));
-        }
+        ASN1Set recipientInfos = ASN1Set.getInstance(_envelopedData.getRecipientInfos().getDERObject());
 
         //
         // read the encrypted content info
         //
         EncryptedContentInfoParser encInfo = _envelopedData.getEncryptedContentInfo();
-        
         this._encAlg = encInfo.getContentEncryptionAlgorithm();
-        
-        //
-        // prime the recipients
-        //
-        InputStream contentStream = ((ASN1OctetStringParser)encInfo.getEncryptedContent(DERTags.OCTET_STRING)).getOctetStream();
-        List infos = CMSEnvelopedHelper.readRecipientInfos(
-            baseInfos.iterator(), contentStream, _encAlg, null, null);
+        CMSProcessable processable = new CMSProcessableInputStream(
+            ((ASN1OctetStringParser)encInfo.getEncryptedContent(DERTags.OCTET_STRING)).getOctetStream());
 
-        _recipientInfoStore = new RecipientInformationStore(infos);
+        //
+        // build the RecipientInformationStore
+        //
+        this._recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
+            recipientInfos, processable, _encAlg, null, null);
     }
-    
+
     /**
      * return the object identifier for the content encryption algorithm.
      */
