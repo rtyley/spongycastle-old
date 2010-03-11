@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -28,9 +27,9 @@ public class KEKRecipientInformation
         AlgorithmIdentifier     encAlg,
         AlgorithmIdentifier     macAlg,
         AlgorithmIdentifier     authEncAlg,
-        InputStream             data)
+        CMSProcessable          processable)
     {
-        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), data);
+        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), processable);
 
         this.info = info;
         this.rid = new RecipientId();

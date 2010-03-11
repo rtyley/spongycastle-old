@@ -1,15 +1,12 @@
 package org.bouncycastle.cms;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -373,56 +370,43 @@ class CMSEnvelopedHelper
         return oid;
     }
 
-    static List readRecipientInfos(ASN1Set recipientInfos, byte[] contentOctets,
+    static RecipientInformationStore buildRecipientInformationStore(
+        ASN1Set recipientInfos, CMSProcessable processable,
         AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
     {
         List infos = new ArrayList();
         for (int i = 0; i != recipientInfos.size(); i++)
         {
             RecipientInfo info = RecipientInfo.getInstance(recipientInfos.getObjectAt(i));
-            InputStream contentStream = new ByteArrayInputStream(contentOctets);
 
-            readRecipientInfo(infos, info, contentStream, encAlg, macAlg, authEncAlg);
+            readRecipientInfo(infos, info, processable, encAlg, macAlg, authEncAlg);
         }
-        return infos;
+        return new RecipientInformationStore(infos);
     }
 
-    static List readRecipientInfos(Iterator recipientInfoIter, InputStream contentStream,
-        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
-    {
-        List infos = new ArrayList();
-        while (recipientInfoIter.hasNext())
-        {
-            RecipientInfo info = (RecipientInfo)recipientInfoIter.next();
-
-            readRecipientInfo(infos, info, contentStream, encAlg, macAlg, authEncAlg);
-        }
-        return infos;
-    }
-
-    private static void readRecipientInfo(List infos, RecipientInfo info, InputStream contentStream,
+    private static void readRecipientInfo(List infos, RecipientInfo info, CMSProcessable processable,
             AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
     {
         DEREncodable recipInfo = info.getInfo();
         if (recipInfo instanceof KeyTransRecipientInfo)
         {
             infos.add(new KeyTransRecipientInformation(
-                (KeyTransRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
+                (KeyTransRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, processable));
         }
         else if (recipInfo instanceof KEKRecipientInfo)
         {
             infos.add(new KEKRecipientInformation(
-                (KEKRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
+                (KEKRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, processable));
         }
         else if (recipInfo instanceof KeyAgreeRecipientInfo)
         {
             KeyAgreeRecipientInformation.readRecipientInfo(infos,
-                (KeyAgreeRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream);
+                (KeyAgreeRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, processable);
         }
         else if (recipInfo instanceof PasswordRecipientInfo)
         {
             infos.add(new PasswordRecipientInformation(
-                (PasswordRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
+                (PasswordRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, processable));
         }
     }
 }

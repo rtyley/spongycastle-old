@@ -1,8 +1,10 @@
 package org.bouncycastle.cms;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -28,6 +30,12 @@ public class CMSProcessableFile
     {
         _file = file;
         _buf = new byte[bufSize];
+    }
+
+    public InputStream read()
+        throws IOException, CMSException
+    {
+        return new BufferedInputStream(new FileInputStream(_file), DEFAULT_BUF_SIZE);
     }
 
     public void write(OutputStream zOut)

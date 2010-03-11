@@ -1,5 +1,11 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.AlgorithmParameters;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -7,13 +13,6 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.EncryptedContentInfo;
 import org.bouncycastle.asn1.cms.EnvelopedData;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.AlgorithmParameters;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.util.List;
 
 /**
  * containing class for an CMS Enveloped Data object
@@ -49,20 +48,23 @@ public class CMSEnvelopedData
         EnvelopedData  envData = EnvelopedData.getInstance(contentInfo.getContent());
 
         //
+        // read the recipients
+        //
+        ASN1Set recipientInfos = envData.getRecipientInfos();
+
+        //
         // read the encrypted content info
         //
         EncryptedContentInfo encInfo = envData.getEncryptedContentInfo();
-
         this.encAlg = encInfo.getContentEncryptionAlgorithm();
+        CMSProcessable processable = new CMSProcessableByteArray(encInfo.getEncryptedContent().getOctets());
 
         //
-        // load the RecipientInfoStore
+        // build the RecipientInformationStore
         //
-        byte[] contentOctets = encInfo.getEncryptedContent().getOctets();
-        List infos = CMSEnvelopedHelper.readRecipientInfos(
-            envData.getRecipientInfos(), contentOctets, encAlg, null, null);
+        this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
+            recipientInfos, processable, encAlg, null, null);
 
-        this.recipientInfoStore = new RecipientInformationStore(infos);
         this.unprotectedAttributes = envData.getUnprotectedAttrs();
     }
 

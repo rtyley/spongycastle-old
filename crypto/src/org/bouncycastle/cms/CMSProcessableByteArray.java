@@ -1,6 +1,8 @@
 package org.bouncycastle.cms;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -15,6 +17,12 @@ public class CMSProcessableByteArray
         byte[]  bytes)
     {
         this.bytes = bytes;
+    }
+
+    public InputStream read()
+        throws IOException, CMSException
+    {
+        return new ByteArrayInputStream(bytes);
     }
 
     public void write(OutputStream zOut)

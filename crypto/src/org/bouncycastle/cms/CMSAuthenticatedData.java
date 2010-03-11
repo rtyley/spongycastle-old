@@ -1,20 +1,19 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.AuthenticatedData;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.util.Arrays;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import java.util.List;
+
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.AuthenticatedData;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.util.Arrays;
 
 /**
  * containing class for an CMS Authenticated Data object
@@ -52,22 +51,27 @@ public class CMSAuthenticatedData
         AuthenticatedData authData = AuthenticatedData.getInstance(contentInfo.getContent());
 
         //
-        // read the encapsulated content info
+        // read the recipients
         //
-        ContentInfo encInfo = authData.getEncapsulatedContentInfo();
+        ASN1Set recipientInfos = authData.getRecipientInfos();
 
         this.macAlg = authData.getMacAlgorithm();
-        this.mac = authData.getMac().getOctets();
 
         //
-        // load the RecipientInfoStore
+        // read the authenticated content info
         //
-        byte[] contentOctets = ASN1OctetString.getInstance(encInfo.getContent()).getOctets();
-        List infos = CMSEnvelopedHelper.readRecipientInfos(
-            authData.getRecipientInfos(), contentOctets, null, macAlg, null);
+        ContentInfo encInfo = authData.getEncapsulatedContentInfo();
+        CMSProcessable processable = new CMSProcessableByteArray(
+            ASN1OctetString.getInstance(encInfo.getContent()).getOctets());
+
+        //
+        // build the RecipientInformationStore
+        //
+        this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
+            recipientInfos, processable, null, macAlg, null);
 
         this.authAttrs = authData.getAuthAttrs();
-        this.recipientInfoStore = new RecipientInformationStore(infos);
+        this.mac = authData.getMac().getOctets();
         this.unauthAttrs = authData.getUnauthAttrs();
     }
 
