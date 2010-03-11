@@ -14,8 +14,7 @@ public class BasicGCMExponentiator implements GCMExponentiator
     public void exponentiateX(long pow, byte[] output)
     {
         // Initial value is little-endian 1
-        byte[] y = new byte[16];
-        y[0] = (byte)0x80;
+        byte[] y = GCMUtil.oneAsBytes();
 
         if (pow > 0)
         {

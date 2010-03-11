@@ -5,6 +5,20 @@ import org.bouncycastle.util.Arrays;
 
 abstract class GCMUtil
 {
+    static byte[] oneAsBytes()
+    {
+        byte[] tmp = new byte[16];
+        tmp[0] = (byte)0x80;
+        return tmp;
+    }
+
+    static int[] oneAsInts()
+    {
+        int[] tmp = new int[4];
+        tmp[0] = 0x80000000;
+        return tmp;
+    }
+
     static int[] asInts(byte[] bs)
     {
         int[] us = new int[4];
