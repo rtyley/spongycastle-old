@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -25,12 +24,12 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -252,8 +251,7 @@ public class X509CertificateObject
         {
             try
             {
-                DERInputStream  dIn = new DERInputStream(new ByteArrayInputStream(bytes));
-                DERBitString    bits = (DERBitString)dIn.readObject();
+                DERBitString    bits = DERBitString.getInstance(ASN1Object.fromByteArray(bytes));
 
                 bytes = bits.getBytes();
                 length = (bytes.length * 8) - bits.getPadBits();
@@ -284,8 +282,7 @@ public class X509CertificateObject
         {
             try
             {
-                DERInputStream  dIn = new DERInputStream(new ByteArrayInputStream(bytes));
-                ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
+                ASN1Sequence    seq = ASN1Sequence.getInstance(ASN1Object.fromByteArray(bytes));
 
                 if (seq.size() == 2)
                 {
@@ -551,8 +548,7 @@ public class X509CertificateObject
                 if (ext.getValue() != null)
                 {
                     byte[]                  octs = ext.getValue().getOctets();
-                    ByteArrayInputStream    bIn = new ByteArrayInputStream(octs);
-                    DERInputStream          dIn = new DERInputStream(bIn);
+                    ASN1InputStream         dIn = new ASN1InputStream(octs);
                     buf.append("                       critical(").append(ext.isCritical()).append(") ");
                     try
                     {

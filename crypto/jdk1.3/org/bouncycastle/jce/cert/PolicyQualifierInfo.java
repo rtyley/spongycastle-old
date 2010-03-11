@@ -4,8 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -100,7 +100,7 @@ public final class PolicyQualifierInfo
         {
             ByteArrayInputStream inStream = new ByteArrayInputStream(
                     this.encoded);
-            DERInputStream derInStream = new DERInputStream(inStream);
+            ASN1InputStream derInStream = new ASN1InputStream(inStream);
             ASN1Sequence obj = (ASN1Sequence)derInStream.readObject();
             id = ((DERObjectIdentifier)obj.getObjectAt(0)).getId();
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -179,7 +179,7 @@ public final class PolicyQualifierInfo
         try
         {
             ByteArrayInputStream inStream = new ByteArrayInputStream(qualifier);
-            DERInputStream derInStream = new DERInputStream(inStream);
+            ASN1InputStream derInStream = new ASN1InputStream(inStream);
             DERObject derObject = derInStream.readObject();
             s
                     .append("  qualifier:\n").append(ASN1Dump.dumpAsString(derObject))
