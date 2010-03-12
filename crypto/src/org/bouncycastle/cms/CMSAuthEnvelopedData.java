@@ -54,13 +54,18 @@ class CMSAuthEnvelopedData
         //
         EncryptedContentInfo authEncInfo = authEnvData.getAuthEncryptedContentInfo();
         this.authEncAlg = authEncInfo.getContentEncryptionAlgorithm();
-        final CMSProcessable processable = new CMSProcessableByteArray(
-            authEncInfo.getEncryptedContent().getOctets());
+//        final CMSProcessable processable = new CMSProcessableByteArray(
+//            authEncInfo.getEncryptedContent().getOctets());
         CMSSecureProcessable secureProcessable = new CMSSecureProcessable()
         {
             public AlgorithmIdentifier getAlgorithm()
             {
                 return CMSAuthEnvelopedData.this.authEncAlg;
+            }
+
+            public Object getCryptoObject()
+            {
+                return null;
             }
 
             public CMSProcessable getProcessable(SecretKey key, Provider provider) throws CMSException
