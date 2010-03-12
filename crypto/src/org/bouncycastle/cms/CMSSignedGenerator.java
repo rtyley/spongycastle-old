@@ -1,13 +1,10 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.AlgorithmParameters;
-import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.SignatureException;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.cert.X509Certificate;
@@ -287,59 +284,5 @@ public class CMSSignedGenerator
     static SignerIdentifier getSignerIdentifier(byte[] subjectKeyIdentifier)
     {
         return new SignerIdentifier(new DEROctetString(subjectKeyIdentifier));    
-    }
-
-    static class DigOutputStream extends OutputStream
-    {
-        MessageDigest dig;
-
-        public DigOutputStream(MessageDigest dig)
-        {
-            this.dig = dig;
-        }
-
-        public void write(byte[] b, int off, int len) throws IOException
-        {
-            dig.update(b, off, len);
-        }
-
-        public void write(int b) throws IOException
-        {
-            dig.update((byte) b);
-        }
-    }
-
-    static class SigOutputStream extends OutputStream
-    {
-        private final Signature sig;
-
-        public SigOutputStream(Signature sig)
-        {
-            this.sig = sig;
-        }
-
-        public void write(byte[] b, int off, int len) throws IOException
-        {
-            try
-            {
-                sig.update(b, off, len);
-            }
-            catch (SignatureException e)
-            {
-                throw new CMSStreamException("signature problem: " + e, e);
-            }
-        }
-
-        public void write(int b) throws IOException
-        {
-            try
-            {
-                sig.update((byte) b);
-            }
-            catch (SignatureException e)
-            {
-                throw new CMSStreamException("signature problem: " + e, e);
-            }
-        }
     }
 }
