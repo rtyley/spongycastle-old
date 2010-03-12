@@ -63,7 +63,7 @@ import org.bouncycastle.asn1.util.ASN1Dump;
  * allows them to be passed around to various pieces of code without worrying
  * about coordinating access.<br />
  * <br />
- * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+ * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
  * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
  * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
  * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
@@ -81,7 +81,7 @@ public final class PolicyQualifierInfo
      * Creates an instance of <code>PolicyQualifierInfo</code> from the
      * encoded bytes. The encoded byte array is copied on construction.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
      * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier} and
      * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream}
@@ -165,7 +165,7 @@ public final class PolicyQualifierInfo
      * Return a printable representation of this
      * <code>PolicyQualifierInfo</code>.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.DERObject DERObject}
      * 
      * @return a <code>String</code> describing the contents of this

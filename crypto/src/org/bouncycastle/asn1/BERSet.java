@@ -26,7 +26,7 @@ public class BERSet
      * @param v - a vector of objects making up the set.
      */
     public BERSet(
-        DEREncodableVector   v)
+        ASN1EncodableVector   v)
     {
         super(v, false);
     }
@@ -35,7 +35,7 @@ public class BERSet
      * @param v - a vector of objects making up the set.
      */
     BERSet(
-        DEREncodableVector   v,
+        ASN1EncodableVector  v,
         boolean              needsSorting)
     {
         super(v, needsSorting);

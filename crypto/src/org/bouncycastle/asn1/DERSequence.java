@@ -27,7 +27,7 @@ public class DERSequence
      * create a sequence containing a vector of objects.
      */
     public DERSequence(
-        DEREncodableVector   v)
+        ASN1EncodableVector   v)
     {
         for (int i = 0; i != v.size(); i++)
         {

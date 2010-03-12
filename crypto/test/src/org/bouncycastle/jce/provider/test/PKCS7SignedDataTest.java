@@ -18,14 +18,14 @@ import java.util.Vector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.jce.PKCS7SignedData;
 import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
+import org.bouncycastle.x509.X509V1CertificateGenerator;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 /**
  **/
@@ -260,10 +260,10 @@ public class PKCS7SignedDataTest
         X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
 
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(ord, attrs));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(ord, attrs));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
 

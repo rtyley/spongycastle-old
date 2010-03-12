@@ -1,7 +1,7 @@
 package org.bouncycastle.asn1.smime;
 
-import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 
 public class SMIMECapabilitiesAttribute
@@ -11,6 +11,6 @@ public class SMIMECapabilitiesAttribute
         SMIMECapabilityVector capabilities)
     {
         super(SMIMEAttributes.smimeCapabilities,
-                new DERSet(new DERSequence(capabilities.toDEREncodableVector())));
+                new DERSet(new DERSequence(capabilities.toASN1EncodableVector())));
     }
 }

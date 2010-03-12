@@ -7,8 +7,8 @@ import java.security.KeyPairGenerator;
 import java.security.Security;
 import java.util.Hashtable;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
@@ -62,7 +62,7 @@ public class PKCS10CertRequestTest
             dOut.close();
 
             ByteArrayInputStream    bIn = new ByteArrayInputStream(bOut.toByteArray());
-            DERInputStream          dIn = new DERInputStream(bIn);
+            ASN1InputStream          dIn = new ASN1InputStream(bIn);
 
             PKCS10CertificationRequest req2 = new PKCS10CertificationRequest(
                                                     (ASN1Sequence)dIn.readObject());

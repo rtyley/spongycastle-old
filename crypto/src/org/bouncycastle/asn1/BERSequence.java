@@ -26,7 +26,7 @@ public class BERSequence
      * create a sequence containing a vector of objects.
      */
     public BERSequence(
-        DEREncodableVector   v)
+        ASN1EncodableVector   v)
     {
         super(v);
     }
