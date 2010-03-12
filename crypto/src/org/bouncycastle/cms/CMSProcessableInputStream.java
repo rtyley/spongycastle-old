@@ -35,9 +35,7 @@ public class CMSProcessableInputStream implements CMSProcessable
 
     public Object getContent()
     {
-        checkSingleUsage();
-
-        return input;
+        return read();
     }
 
     private synchronized void checkSingleUsage()
