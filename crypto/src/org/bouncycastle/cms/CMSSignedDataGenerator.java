@@ -62,13 +62,13 @@ public class CMSSignedDataGenerator
 
     private class SignerInf
     {
-        private final PrivateKey                  key;
-        private final SignerIdentifier            signerIdentifier;
-        private final String                      digestOID;
-        private final String                      encOID;
-        private final CMSAttributeTableGenerator  sAttr;
-        private final CMSAttributeTableGenerator  unsAttr;
-        private final AttributeTable              baseSignedTable;
+        final PrivateKey                  key;
+        final SignerIdentifier            signerIdentifier;
+        final String                      digestOID;
+        final String                      encOID;
+        final CMSAttributeTableGenerator  sAttr;
+        final CMSAttributeTableGenerator  unsAttr;
+        final AttributeTable              baseSignedTable;
 
         SignerInf(
             PrivateKey                 key,
@@ -504,6 +504,7 @@ public class CMSSignedDataGenerator
      */
     public CMSSignedData generate(
         String                  eContentType,
+        // FIXME Avoid accessing more than once to support CMSProcessableInputStream
         CMSProcessable          content,
         boolean                 encapsulate,
         Provider                sigProvider,
@@ -540,6 +541,34 @@ public class CMSSignedDataGenerator
 //            // TODO signedAttrs must be present for all signers
 //        }
 
+//        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator(this.rand);
+//
+//        // Pre-calculated signers
+//        gen.addSigners(_signerStore);
+//
+//        {
+//            Iterator it = signerInfs.iterator();
+//            while (it.hasNext())
+//            {
+//                SignerInf signer = (SignerInf)it.next();
+//                gen.doAddSigner(signer.key, signer.signerIdentifier, signer.encOID, signer.digestOID,
+//                    signer.sAttr, signer.unsAttr, sigProvider, sigProvider);
+//            }
+//        }
+//
+//        
+//        
+//        
+//        
+//        
+//        
+//
+//        _digests = gen._digests;
+
+
+        // -------------------------------------------------------------------------
+
+
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
 
@@ -548,8 +577,7 @@ public class CMSSignedDataGenerator
         //
         // add the precalculated SignerInfo objects.
         //
-        Iterator            it = _signers.iterator();
-        
+        Iterator it = _signerStore.getSigners().iterator();
         while (it.hasNext())
         {
             SignerInformation signer = (SignerInformation)it.next();
