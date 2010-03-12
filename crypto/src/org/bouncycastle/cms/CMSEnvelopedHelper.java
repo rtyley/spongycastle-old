@@ -1,20 +1,30 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 
+import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
@@ -371,42 +381,251 @@ class CMSEnvelopedHelper
     }
 
     static RecipientInformationStore buildRecipientInformationStore(
-        ASN1Set recipientInfos, CMSProcessable processable,
-        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
+        ASN1Set recipientInfos, CMSSecureProcessable secureProcessable)
     {
         List infos = new ArrayList();
         for (int i = 0; i != recipientInfos.size(); i++)
         {
             RecipientInfo info = RecipientInfo.getInstance(recipientInfos.getObjectAt(i));
 
-            readRecipientInfo(infos, info, processable, encAlg, macAlg, authEncAlg);
+            readRecipientInfo(infos, info, secureProcessable);
         }
         return new RecipientInformationStore(infos);
     }
 
-    private static void readRecipientInfo(List infos, RecipientInfo info, CMSProcessable processable,
-            AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
+    private static void readRecipientInfo(
+        List infos, RecipientInfo info, CMSSecureProcessable secureProcessable)
     {
         DEREncodable recipInfo = info.getInfo();
         if (recipInfo instanceof KeyTransRecipientInfo)
         {
             infos.add(new KeyTransRecipientInformation(
-                (KeyTransRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, processable));
+                (KeyTransRecipientInfo)recipInfo, secureProcessable));
         }
         else if (recipInfo instanceof KEKRecipientInfo)
         {
             infos.add(new KEKRecipientInformation(
-                (KEKRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, processable));
+                (KEKRecipientInfo)recipInfo, secureProcessable));
         }
         else if (recipInfo instanceof KeyAgreeRecipientInfo)
         {
             KeyAgreeRecipientInformation.readRecipientInfo(infos,
-                (KeyAgreeRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, processable);
+                (KeyAgreeRecipientInfo)recipInfo, secureProcessable);
         }
         else if (recipInfo instanceof PasswordRecipientInfo)
         {
             infos.add(new PasswordRecipientInformation(
-                (PasswordRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, processable));
+                (PasswordRecipientInfo)recipInfo, secureProcessable));
+        }
+    }
+
+    static class CMSAuthenticatedSecureProcessable implements CMSSecureProcessable
+    {
+        private AlgorithmIdentifier algorithm;
+        private CMSProcessable processable;
+
+        CMSAuthenticatedSecureProcessable(AlgorithmIdentifier algorithm, CMSProcessable processable)
+        {
+            this.algorithm = algorithm;
+            this.processable = processable;
+        }
+
+        public AlgorithmIdentifier getAlgorithm()
+        {
+            return this.algorithm;
+        }
+
+        public CMSProcessable getProcessable(SecretKey sKey, Provider provider)
+            throws CMSException
+        {
+            try
+            {
+                String macAlg = this.algorithm.getObjectId().getId();
+                Mac mac = CMSEnvelopedHelper.INSTANCE.getMac(macAlg, provider);
+
+                ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
+
+                if (sParams != null && !(sParams instanceof ASN1Null))
+                {
+                    AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(
+                        macAlg, provider);
+
+                    params.init(sParams.getEncoded(), "ASN.1");
+
+                    mac.init(sKey, params.getParameterSpec(IvParameterSpec.class));
+                }
+                else
+                {
+                    mac.init(sKey);
+                }
+
+                return new CMSProcessableInputStream(new MacInputStream(processable.read(), mac));
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                throw new CMSException("can't find algorithm.", e);
+            }
+            catch (InvalidKeyException e)
+            {
+                throw new CMSException("key invalid in message.", e);
+            }
+            catch (NoSuchPaddingException e)
+            {
+                throw new CMSException("required padding not supported.", e);
+            }
+            catch (InvalidAlgorithmParameterException e)
+            {
+                throw new CMSException("algorithm parameters invalid.", e);
+            }
+            catch (InvalidParameterSpecException e)
+            {
+                throw new CMSException("MAC algorithm parameter spec invalid.", e);
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("error decoding algorithm parameters.", e);
+            }
+        }
+    }
+
+    static class CMSEnvelopedSecureProcessable implements CMSSecureProcessable
+    {
+        private AlgorithmIdentifier algorithm;
+        private CMSProcessable processable;
+
+        CMSEnvelopedSecureProcessable(AlgorithmIdentifier algorithm, CMSProcessable processable)
+        {
+            this.algorithm = algorithm;
+            this.processable = processable;
+        }
+
+        public AlgorithmIdentifier getAlgorithm()
+        {
+            return this.algorithm;
+        }
+
+        public CMSProcessable getProcessable(SecretKey sKey, Provider provider)
+            throws CMSException
+        {
+            try
+            {
+                String encAlg = this.algorithm.getObjectId().getId();
+                Cipher cipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(encAlg, provider);
+
+                ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
+
+                if (sParams != null && !(sParams instanceof ASN1Null))
+                {
+                    try
+                    {
+                        AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encAlg, cipher.getProvider());
+
+                        params.init(sParams.getEncoded(), "ASN.1");
+
+                        cipher.init(Cipher.DECRYPT_MODE, sKey, params);
+                    }
+                    catch (NoSuchAlgorithmException e)
+                    {
+                        if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.AES128_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.AES192_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.AES256_CBC))
+                        {
+                            cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(ASN1OctetString.getInstance(sParams).getOctets()));
+                        }
+                        else
+                        {
+                            throw e;
+                        }
+                    }
+                }
+                else
+                {
+                    if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                        || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                        || encAlg.equals(CMSEnvelopedDataGenerator.CAST5_CBC))
+                    {
+                        cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(new byte[8]));
+                    }
+                    else
+                    {
+                        cipher.init(Cipher.DECRYPT_MODE, sKey);
+                    }
+                }
+
+                return new CMSProcessableInputStream(new CipherInputStream(processable.read(), cipher));
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                throw new CMSException("can't find algorithm.", e);
+            }
+            catch (InvalidKeyException e)
+            {
+                throw new CMSException("key invalid in message.", e);
+            }
+            catch (NoSuchPaddingException e)
+            {
+                throw new CMSException("required padding not supported.", e);
+            }
+            catch (InvalidAlgorithmParameterException e)
+            {
+                throw new CMSException("algorithm parameters invalid.", e);
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("error decoding algorithm parameters.", e);
+            }
+        }
+    }
+
+    static class MacInputStream
+        extends InputStream
+    {
+        private final InputStream inStream;
+        private final Mac mac;
+
+        MacInputStream(InputStream inStream, Mac mac)
+        {
+            this.inStream = inStream;
+            this.mac = mac;
+        }
+
+        public int read(byte[] buf)
+            throws IOException
+        {
+            return read(buf, 0, buf.length);
+        }
+
+        public int read(byte[] buf, int off, int len)
+            throws IOException
+        {
+            int i = inStream.read(buf, off, len);
+
+            if (i > 0)
+            {
+                mac.update(buf, off, i);
+            }
+
+            return i;
+        }
+
+        public int read()
+            throws IOException
+        {
+            int i = inStream.read();
+
+            if (i > 0)
+            {
+                mac.update((byte)i);
+            }
+
+            return i;
+        }
+
+        public byte[] getMac()
+        {
+            return mac.doFinal();
         }
     }
 }

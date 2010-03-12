@@ -93,12 +93,14 @@ public class CMSEnvelopedDataParser
         this._encAlg = encInfo.getContentEncryptionAlgorithm();
         CMSProcessable processable = new CMSProcessableInputStream(
             ((ASN1OctetStringParser)encInfo.getEncryptedContent(DERTags.OCTET_STRING)).getOctetStream());
+        CMSSecureProcessable secureProcessable = new CMSEnvelopedHelper.CMSEnvelopedSecureProcessable(
+            this._encAlg, processable);
 
         //
         // build the RecipientInformationStore
         //
         this._recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, processable, _encAlg, null, null);
+            recipientInfos, secureProcessable);
     }
 
     /**

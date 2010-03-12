@@ -20,7 +20,6 @@ public class CMSProcessableByteArray
     }
 
     public InputStream read()
-        throws IOException, CMSException
     {
         return new ByteArrayInputStream(bytes);
     }

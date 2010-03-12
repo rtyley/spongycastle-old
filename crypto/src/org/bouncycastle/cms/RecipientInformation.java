@@ -3,23 +3,13 @@ package org.bouncycastle.cms;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import java.security.spec.InvalidParameterSpecException;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.SecretKey;
 
-import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -30,42 +20,23 @@ public abstract class RecipientInformation
     protected AlgorithmIdentifier macAlg;
     protected AlgorithmIdentifier authEncAlg;
     protected AlgorithmIdentifier keyEncAlg;
-    protected CMSProcessable processable;
+    protected CMSSecureProcessable secureProcessable;
 
-    private MacInputStream macStream;
+    private CMSEnvelopedHelper.MacInputStream macStream;
     private byte[]         resultMac;
 
     RecipientInformation(
-        AlgorithmIdentifier encAlg,
-        AlgorithmIdentifier macAlg,
-        AlgorithmIdentifier authEncAlg,
-        AlgorithmIdentifier keyEncAlg,
-        CMSProcessable processable)
+        AlgorithmIdentifier     keyEncAlg,
+        CMSSecureProcessable    processable)
     {
-        this.encAlg = encAlg;
-        this.macAlg = macAlg;
-        this.authEncAlg = authEncAlg;
         this.keyEncAlg = keyEncAlg;
-        this.processable = processable;
-    }
-
-    AlgorithmIdentifier getActiveAlgID()
-    {
-        if (encAlg != null)
-        {
-            return encAlg;
-        }
-        if (macAlg != null)
-        {
-            return macAlg;
-        }
-        return authEncAlg;
+        this.secureProcessable = processable;
     }
 
     String getContentAlgorithmName()
     {
-        AlgorithmIdentifier activeAlgID = getActiveAlgID();
-        return CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(activeAlgID.getObjectId().getId());
+        AlgorithmIdentifier algorithm = secureProcessable.getAlgorithm();
+        return CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(algorithm.getObjectId().getId());
     }
 
     public RecipientId getRID()
@@ -170,138 +141,22 @@ public abstract class RecipientInformation
         Provider provider)
         throws CMSException
     {
+        CMSProcessable processable = secureProcessable.getProcessable((SecretKey)sKey, provider); 
 
         try
         {
-            InputStream content = processable.read();
-
-            // If encrypted, need to wrap in CipherInputStream to decrypt
-            if (encAlg != null)
+            InputStream input = processable.read();
+            if (input instanceof CMSEnvelopedHelper.MacInputStream)
             {
-                String encAlg = this.encAlg.getObjectId().getId();
-                Cipher cipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(encAlg, provider);
-
-                ASN1Object sParams = (ASN1Object)this.encAlg.getParameters();
-
-                if (sParams != null && !(sParams instanceof ASN1Null))
-                {
-                    try
-                    {
-                        AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encAlg, cipher.getProvider());
-
-                        params.init(sParams.getEncoded(), "ASN.1");
-
-                        cipher.init(Cipher.DECRYPT_MODE, sKey, params);
-                    }
-                    catch (NoSuchAlgorithmException e)
-                    {
-                        if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
-                            || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
-                            || encAlg.equals(CMSEnvelopedDataGenerator.AES128_CBC)
-                            || encAlg.equals(CMSEnvelopedDataGenerator.AES192_CBC)
-                            || encAlg.equals(CMSEnvelopedDataGenerator.AES256_CBC))
-                        {
-                            cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(ASN1OctetString.getInstance(sParams).getOctets()));
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                }
-                else
-                {
-                    if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
-                        || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
-                        || encAlg.equals(CMSEnvelopedDataGenerator.CAST5_CBC))
-                    {
-                        cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(new byte[8]));
-                    }
-                    else
-                    {
-                        cipher.init(Cipher.DECRYPT_MODE, sKey);
-                    }
-                }
-
-                content = new CipherInputStream(content, cipher); 
+                this.macStream = (CMSEnvelopedHelper.MacInputStream)input;
             }
 
-            // If authenticated, need to wrap in MacInputStream to calculate MAC
-            if (macAlg != null)
-            {
-                content = macStream = createMacInputStream(macAlg, sKey, content, provider);
-            }
-
-            if (authEncAlg != null)
-            {
-                // TODO Create AEAD cipher instance to decrypt and calculate tag ( MAC)
-                throw new CMSException("AuthEnveloped data decryption not yet implemented");
-
-//              RFC 5084 ASN.1 Module
-//                -- Parameters for AigorithmIdentifier
-//
-//                CCMParameters ::= SEQUENCE {
-//                  aes-nonce         OCTET STRING (SIZE(7..13)),
-//                  aes-ICVlen        AES-CCM-ICVlen DEFAULT 12 }
-//
-//                AES-CCM-ICVlen ::= INTEGER (4 | 6 | 8 | 10 | 12 | 14 | 16)
-//
-//                GCMParameters ::= SEQUENCE {
-//                  aes-nonce        OCTET STRING, -- recommended size is 12 octets
-//                  aes-ICVlen       AES-GCM-ICVlen DEFAULT 12 }
-//
-//                AES-GCM-ICVlen ::= INTEGER (12 | 13 | 14 | 15 | 16)
-            }
-
-            return new CMSTypedStream(content);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find algorithm.", e);
-        }
-        catch (InvalidKeyException e)
-        {
-            throw new CMSException("key invalid in message.", e);
-        }
-        catch (NoSuchPaddingException e)
-        {
-            throw new CMSException("required padding not supported.", e);
-        }
-        catch (InvalidAlgorithmParameterException e)
-        {
-            throw new CMSException("algorithm parameters invalid.", e);
-        }
-        catch (InvalidParameterSpecException e)
-        {
-            throw new CMSException("MAC algorithm parameter spec invalid.", e);
+            return new CMSTypedStream(input);
         }
         catch (IOException e)
         {
-            throw new CMSException("error decoding algorithm parameters.", e);
+            throw new CMSException("error getting .", e);
         }
-    }
-
-    private static MacInputStream createMacInputStream(AlgorithmIdentifier macAlg, Key sKey, InputStream inStream, Provider provider)
-        throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
-    {
-        Mac mac = CMSEnvelopedHelper.INSTANCE.getMac(macAlg.getObjectId().getId(), provider);
-
-        ASN1Object sParams = (ASN1Object)macAlg.getParameters();
-
-        if (sParams != null && !(sParams instanceof ASN1Null))
-        {
-            AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(macAlg.getObjectId().getId(), provider);
-
-            params.init(sParams.getEncoded(), "ASN.1");
-
-            mac.init(sKey, params.getParameterSpec(IvParameterSpec.class));
-        }
-        else
-        {
-            mac.init(sKey);
-        }
-
-        return new MacInputStream(mac, inStream);
     }
 
     public byte[] getContent(
@@ -351,55 +206,4 @@ public abstract class RecipientInformation
 
     public abstract CMSTypedStream getContentStream(Key key, Provider provider)
         throws CMSException;
-
-
-    private static class MacInputStream
-        extends InputStream
-    {
-        private final InputStream inStream;
-        private final Mac mac;
-
-        MacInputStream(Mac mac, InputStream inStream)
-        {
-            this.inStream = inStream;
-            this.mac = mac;
-        }
-
-        public int read(byte[] buf)
-            throws IOException
-        {
-            return read(buf, 0, buf.length);
-        }
-
-        public int read(byte[] buf, int off, int len)
-            throws IOException
-        {
-            int i = inStream.read(buf, off, len);
-
-            if (i > 0)
-            {
-                mac.update(buf, off, i);
-            }
-
-            return i;
-        }
-
-        public int read()
-            throws IOException
-        {
-            int i = inStream.read();
-
-            if (i > 0)
-            {
-                mac.update((byte)i);
-            }
-
-            return i;
-        }
-
-        public byte[] getMac()
-        {
-            return mac.doFinal();
-        }
-    }
 }

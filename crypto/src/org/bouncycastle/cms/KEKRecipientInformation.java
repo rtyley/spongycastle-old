@@ -11,7 +11,6 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -24,17 +23,14 @@ public class KEKRecipientInformation
 
     KEKRecipientInformation(
         KEKRecipientInfo        info,
-        AlgorithmIdentifier     encAlg,
-        AlgorithmIdentifier     macAlg,
-        AlgorithmIdentifier     authEncAlg,
-        CMSProcessable          processable)
+        CMSSecureProcessable    secureProcessable)
     {
-        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), processable);
+        super(info.getKeyEncryptionAlgorithm(), secureProcessable);
 
         this.info = info;
         this.rid = new RecipientId();
         
-        KEKIdentifier       kekId = info.getKekid();
+        KEKIdentifier kekId = info.getKekid();
 
         rid.setKeyIdentifier(kekId.getKeyIdentifier().getOctets());
     }

@@ -31,12 +31,9 @@ public class PasswordRecipientInformation
 
     PasswordRecipientInformation(
         PasswordRecipientInfo   info,
-        AlgorithmIdentifier     encAlg,
-        AlgorithmIdentifier     macAlg,
-        AlgorithmIdentifier     authEncAlg,
-        CMSProcessable          processable)
+        CMSSecureProcessable    secureProcessable)
     {
-        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), processable);
+        super(info.getKeyEncryptionAlgorithm(), secureProcessable);
 
         this.info = info;
         this.rid = new RecipientId();

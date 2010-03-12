@@ -1,6 +1,9 @@
 package org.bouncycastle.cms;
 
 import java.io.InputStream;
+import java.security.Provider;
+
+import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.cms.AuthEnvelopedData;
@@ -51,14 +54,42 @@ class CMSAuthEnvelopedData
         //
         EncryptedContentInfo authEncInfo = authEnvData.getAuthEncryptedContentInfo();
         this.authEncAlg = authEncInfo.getContentEncryptionAlgorithm();
-        CMSProcessable processable = new CMSProcessableByteArray(
+        final CMSProcessable processable = new CMSProcessableByteArray(
             authEncInfo.getEncryptedContent().getOctets());
+        CMSSecureProcessable secureProcessable = new CMSSecureProcessable()
+        {
+            public AlgorithmIdentifier getAlgorithm()
+            {
+                return CMSAuthEnvelopedData.this.authEncAlg;
+            }
+
+            public CMSProcessable getProcessable(SecretKey key, Provider provider) throws CMSException
+            {
+                // TODO Create AEAD cipher instance to decrypt and calculate tag ( MAC)
+                throw new CMSException("AuthEnveloped data decryption not yet implemented");
+
+//              RFC 5084 ASN.1 Module
+//                -- Parameters for AlgorithmIdentifier
+//
+//                CCMParameters ::= SEQUENCE {
+//                  aes-nonce         OCTET STRING (SIZE(7..13)),
+//                  aes-ICVlen        AES-CCM-ICVlen DEFAULT 12 }
+//
+//                AES-CCM-ICVlen ::= INTEGER (4 | 6 | 8 | 10 | 12 | 14 | 16)
+//
+//                GCMParameters ::= SEQUENCE {
+//                  aes-nonce        OCTET STRING, -- recommended size is 12 octets
+//                  aes-ICVlen       AES-GCM-ICVlen DEFAULT 12 }
+//
+//                AES-GCM-ICVlen ::= INTEGER (12 | 13 | 14 | 15 | 16)
+            }            
+        };
 
         //
         // build the RecipientInformationStore
         //
         this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, processable, null, null, authEncAlg);
+            recipientInfos, secureProcessable);
 
         // FIXME These need to be passed to the AEAD cipher as AAD (Additional Authenticated Data)
         this.authAttrs = authEnvData.getAuthAttrs();
