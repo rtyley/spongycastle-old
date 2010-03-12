@@ -31,7 +31,6 @@ public class RegressionTest
         new AttrCertTest(),
         new CertTest(),
         new PKCS10CertRequestTest(),
-        new PKCS7SignedDataTest(),
         new EncryptedPrivateKeyInfoTest(),
         new KeyStoreTest(),
         new PKCS12StoreTest(),

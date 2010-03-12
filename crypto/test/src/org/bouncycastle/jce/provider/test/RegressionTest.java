@@ -1,10 +1,10 @@
 package org.bouncycastle.jce.provider.test;
 
+import java.security.Security;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
-
-import java.security.Security;
 
 public class RegressionTest
 {
@@ -34,7 +34,6 @@ public class RegressionTest
         new AttrCertTest(),
         new CertTest(),
         new PKCS10CertRequestTest(),
-        new PKCS7SignedDataTest(),
         new EncryptedPrivateKeyInfoTest(),
         new KeyStoreTest(),
         new PKCS12StoreTest(),
