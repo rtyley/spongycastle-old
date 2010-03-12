@@ -93,7 +93,7 @@ public class CMSSignedGenerator
 
     protected List _certs = new ArrayList();
     protected List _crls = new ArrayList();
-    protected List _signers = new ArrayList();
+    protected SignerInformationStore _signerStore = new SignerInformationStore(new ArrayList());
     protected Map  _digests = new HashMap();
 
     protected final SecureRandom rand;
@@ -255,14 +255,9 @@ public class CMSSignedGenerator
      * @param signerStore store of signers
      */
     public void addSigners(
-        SignerInformationStore    signerStore)
+        SignerInformationStore signerStore)
     {
-        Iterator    it = signerStore.getSigners().iterator();
-
-        while (it.hasNext())
-        {
-            _signers.add(it.next());
-        }
+        this._signerStore = signerStore;
     }
 
     /**

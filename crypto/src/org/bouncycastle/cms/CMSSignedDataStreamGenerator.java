@@ -66,14 +66,14 @@ public class CMSSignedDataStreamGenerator
 
     private class SignerInf
     {
-        private final PrivateKey                  _key;
         private final SignerIdentifier            _signerIdentifier;
         private final String                      _digestOID;
         private final String                      _encOID;
         private final CMSAttributeTableGenerator  _sAttr;
         private final CMSAttributeTableGenerator  _unsAttr;
         private final MessageDigest               _digest;
-        private final Provider                    _sigProvider;
+        private final String                      _encName;
+        private final Signature                   _sig;
 
         SignerInf(
             PrivateKey                  key,
@@ -84,15 +84,57 @@ public class CMSSignedDataStreamGenerator
             CMSAttributeTableGenerator  unsAttr,
             MessageDigest               digest,
             Provider                    sigProvider)
+            throws NoSuchAlgorithmException, InvalidKeyException
         {
-            _key = key;
             _signerIdentifier = signerIdentifier;
             _digestOID = digestOID;
             _encOID = encOID;
             _sAttr = sAttr;
             _unsAttr = unsAttr;
             _digest = digest;
-            _sigProvider = sigProvider;
+            _encName = CMSSignedHelper.INSTANCE.getEncryptionAlgName(_encOID);
+
+            String digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(_digestOID);
+            String signatureName = digestName + "with" + _encName;
+
+            if (_sAttr != null)
+            {
+                _sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+            }
+            else
+            {
+                // Note: Need to use raw signatures here since we have already calculated the digest
+                if (_encName.equals("RSA"))
+                {
+                    _sig = CMSSignedHelper.INSTANCE.getSignatureInstance("RSA", sigProvider);
+                }
+                else if (_encName.equals("DSA"))
+                {
+                    _sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEwithDSA", sigProvider);
+                }
+                // TODO Add support for raw PSS
+//                else if (_encName("RSAandMGF1"))
+//                {
+//                    sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEWITHRSAPSS", _sigProvider);
+//                    try
+//                    {
+//                        // Init the params this way to avoid having a 'raw' version of each PSS algorithm
+//                        Signature sig2 = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, _sigProvider);
+//                        PSSParameterSpec spec = (PSSParameterSpec)sig2.getParameters().getParameterSpec(PSSParameterSpec.class);
+//                        sig.setParameter(spec);
+//                    }
+//                    catch (Exception e)
+//                    {
+//                        throw new SignatureException("algorithm: " + _encName + " could not be configured.");
+//                    }
+//                }
+                else
+                {
+                    throw new NoSuchAlgorithmException("algorithm: " + _encName + " not supported in base signatures.");
+                }
+            }
+
+            _sig.initSign(key, rand);
         }
 
         AlgorithmIdentifier getDigestAlgorithmID()
@@ -103,19 +145,14 @@ public class CMSSignedDataStreamGenerator
 
         SignerInfo toSignerInfo(
             DERObjectIdentifier  contentType)
-            throws IOException, SignatureException, CertificateEncodingException, InvalidKeyException, NoSuchAlgorithmException
+            throws IOException, SignatureException, CertificateEncodingException, NoSuchAlgorithmException
         {
-            String digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(_digestOID);
-            String encName = CMSSignedHelper.INSTANCE.getEncryptionAlgName(_encOID);
-            String signatureName = digestName + "with" + encName;
-
             AlgorithmIdentifier digAlgId = getDigestAlgorithmID();
 
             byte[] hash = _digest.digest();
             _digests.put(_digestOID, hash.clone());
 
             byte[] bytesToSign = hash;
-            Signature sig;
 
             /* RFC 3852 5.4
              * The result of the message digest calculation process depends on
@@ -138,47 +175,19 @@ public class CMSSignedDataStreamGenerator
 
                 // sig must be composed from the DER encoding.
                 bytesToSign = signedAttr.getEncoded(ASN1Encodable.DER);
-
-                sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, _sigProvider);
             }
             else
             {
                 // Note: Need to use raw signatures here since we have already calculated the digest
-                if (encName.equals("RSA"))
+                if (_encName.equals("RSA"))
                 {
                     DigestInfo dInfo = new DigestInfo(digAlgId, hash);
                     bytesToSign = dInfo.getEncoded(ASN1Encodable.DER);
-                    sig = CMSSignedHelper.INSTANCE.getSignatureInstance("RSA", _sigProvider);
-                }
-                else if (encName.equals("DSA"))
-                {
-                    sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEwithDSA", _sigProvider);
-                }
-                // TODO Add support for raw PSS
-//                else if (encName.equals("RSAandMGF1"))
-//                {
-//                    sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEWITHRSAPSS", _sigProvider);
-//                    try
-//                    {
-//                        // Init the params this way to avoid having a 'raw' version of each PSS algorithm
-//                        Signature sig2 = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, _sigProvider);
-//                        PSSParameterSpec spec = (PSSParameterSpec)sig2.getParameters().getParameterSpec(PSSParameterSpec.class);
-//                        sig.setParameter(spec);
-//                    }
-//                    catch (Exception e)
-//                    {
-//                        throw new SignatureException("algorithm: " + encName + " could not be configured.");
-//                    }
-//                }
-                else
-                {
-                    throw new SignatureException("algorithm: " + encName + " not supported in base signatures.");
                 }
             }
 
-            sig.initSign(_key, rand);
-            sig.update(bytesToSign);
-            byte[] sigBytes = sig.sign();
+            _sig.update(bytesToSign);
+            byte[] sigBytes = _sig.sign();
  
             ASN1Set unsignedAttr = null;
             if (_unsAttr != null)
@@ -191,7 +200,7 @@ public class CMSSignedDataStreamGenerator
                 unsignedAttr = getAttributeSet(unsigned);
             }
 
-            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(_encOID, sig);
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(_encOID, _sig);
 
             return new SignerInfo(_signerIdentifier, digAlgId,
                 signedAttr, encAlgId, new DEROctetString(sigBytes), unsignedAttr);
@@ -766,7 +775,7 @@ public class CMSSignedDataStreamGenerator
         //
         // add the precalculated SignerInfo digest algorithms.
         //
-        for (Iterator it = _signers.iterator(); it.hasNext();)
+        for (Iterator it = _signerStore.getSigners().iterator(); it.hasNext();)
         {
             SignerInformation signer = (SignerInformation)it.next();
             digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
@@ -885,7 +894,7 @@ public class CMSSignedDataStreamGenerator
 
         if (contentOid.equals(DATA))
         {
-            if (checkForVersion3(_signers))
+            if (checkForVersion3(_signerStore))
             {
                 return new DERInteger(3);
             }
@@ -900,9 +909,9 @@ public class CMSSignedDataStreamGenerator
         }
     }
 
-    private boolean checkForVersion3(List signerInfos)
+    private boolean checkForVersion3(SignerInformationStore signerInfos)
     {
-        for (Iterator it = signerInfos.iterator(); it.hasNext();)
+        for (Iterator it = signerInfos.getSigners().iterator(); it.hasNext();)
         {
             SignerInfo s = SignerInfo.getInstance(((SignerInformation)it.next()).toSignerInfo());
 
@@ -1033,7 +1042,7 @@ public class CMSSignedDataStreamGenerator
             // add the precalculated SignerInfo objects.
             //
             ASN1EncodableVector signerInfos = new ASN1EncodableVector();
-            Iterator            it = _signers.iterator();
+            Iterator            it = _signerStore.getSigners().iterator();
             
             while (it.hasNext())
             {
@@ -1059,10 +1068,6 @@ public class CMSSignedDataStreamGenerator
                 catch (IOException e)
                 {
                     throw new CMSStreamException("encoding error.", e);
-                }
-                catch (InvalidKeyException e)
-                {
-                    throw new CMSStreamException("key inappropriate for signature.", e);
                 }
                 catch (SignatureException e)
                 {
