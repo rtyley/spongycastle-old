@@ -4,8 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.PublicKey;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DERObject;
 
 /**
@@ -251,7 +251,7 @@ public class TrustAnchor
     {
         try {
         ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-        DERInputStream derInStream = new DERInputStream( inStream );
+        ASN1InputStream derInStream = new ASN1InputStream( inStream );
         DERObject derObject = derInStream.readObject();
         if (!( derObject instanceof ASN1Sequence ) )
             throw new IllegalArgumentException("nameConstraints parameter decoding error");

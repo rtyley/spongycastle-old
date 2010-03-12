@@ -58,7 +58,11 @@ public class X509NameTest
 
         attrs.put(oid, value);
 
-        X509Name name = new X509Name(attrs);
+        Vector order = new Vector();
+
+        order.addElement(oid);
+        
+        X509Name name = new X509Name(order, attrs);
 
         ASN1Sequence seq = (ASN1Sequence)name.getDERObject();
         ASN1Set set = (ASN1Set)seq.getObjectAt(0);
@@ -73,7 +77,11 @@ public class X509NameTest
 
         attrs.put(oid, value);
 
-        X509Name name = new X509Name(new X509Name(attrs).toString());
+        Vector order = new Vector();
+
+        order.addElement(oid);
+        
+        X509Name name = new X509Name(new X509Name(order, attrs).toString());
 
         ASN1Sequence seq = (ASN1Sequence)name.getDERObject();
         ASN1Set set = (ASN1Set)seq.getObjectAt(0);
@@ -139,7 +147,15 @@ public class X509NameTest
         attrs.put(X509Name.ST, "Victoria");
         attrs.put(X509Name.E, "feedback-crypto@bouncycastle.org");
 
-        X509Name    name1 = new X509Name(attrs);
+        Vector                     order = new Vector();
+
+        order.addElement(X509Name.C);
+        order.addElement(X509Name.O);
+        order.addElement(X509Name.L);
+        order.addElement(X509Name.ST);
+        order.addElement(X509Name.E);
+
+        X509Name    name1 = new X509Name(order, attrs);
 
         if (!name1.equals(name1))
         {
@@ -151,7 +167,7 @@ public class X509NameTest
             fail("Failed same object test - in Order");
         }
 
-        X509Name    name2 = new X509Name(attrs);
+        X509Name    name2 = new X509Name(order, attrs);
 
         if (!name1.equals(name2))
         {

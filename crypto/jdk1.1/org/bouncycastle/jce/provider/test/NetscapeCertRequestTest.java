@@ -6,8 +6,8 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Security;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -46,7 +46,7 @@ public class NetscapeCertRequestTest
         
             byte data [] = Base64.decode (test1);
 
-            DERInputStream    in = new DERInputStream (new ByteArrayInputStream(data));
+            ASN1InputStream    in = new ASN1InputStream (new ByteArrayInputStream(data));
             ASN1Sequence    spkac = (ASN1Sequence)in.readObject ();
             // System.out.println("SPKAC: \n"+DERDump.dumpAsString (spkac));
 
@@ -75,8 +75,8 @@ public class NetscapeCertRequestTest
             deros.close();
 
             
-            DERInputStream    in2 =
-                new DERInputStream (new ByteArrayInputStream(baos.toByteArray()));
+            ASN1InputStream    in2 =
+                new ASN1InputStream (new ByteArrayInputStream(baos.toByteArray()));
             ASN1Sequence    spkac2 = (ASN1Sequence)in2.readObject ();
 
             // System.out.println("SPKAC2: \n"+DERDump.dumpAsString (spkac2));

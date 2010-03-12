@@ -8,13 +8,23 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -25,7 +35,6 @@ import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
-
 import org.bouncycastle.jce.PrincipalUtil;
 
 /**
@@ -65,7 +74,7 @@ import org.bouncycastle.jce.PrincipalUtil;
  * <b>TODO: implement name constraints</b>
  * <b>TODO: implement match check for path to names</b><br />
  * <br />
- * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+ * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
  * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
  * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
  * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
@@ -272,7 +281,7 @@ public class X509CertSelector implements CertSelector
      * Note that the byte array specified here is cloned to protect against
      * subsequent modifications.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.DERObject DERObject},
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
      * {@link org.bouncycastle.asn1.x509.X509Name X509Name}
@@ -294,7 +303,7 @@ public class X509CertSelector implements CertSelector
         else
         {
             ByteArrayInputStream inStream = new ByteArrayInputStream(issuerDN);
-            DERInputStream derInStream = new DERInputStream(inStream);
+            ASN1InputStream derInStream = new ASN1InputStream(inStream);
             DERObject obj = derInStream.readObject();
             if (obj instanceof ASN1Sequence)
             {
@@ -359,7 +368,7 @@ public class X509CertSelector implements CertSelector
      * the ASN.1 notation for this structure, see
      * {@link #setIssuer(byte []) setIssuer(byte [] issuerDN)}.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.DERObject DERObject},
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
      * {@link org.bouncycastle.asn1.x509.X509Name X509Name}
@@ -381,7 +390,7 @@ public class X509CertSelector implements CertSelector
         else
         {
             ByteArrayInputStream inStream = new ByteArrayInputStream(subjectDN);
-            DERInputStream derInStream = new DERInputStream(inStream);
+            ASN1InputStream derInStream = new ASN1InputStream(inStream);
             DERObject obj = derInStream.readObject();
 
             if (obj instanceof ASN1Sequence)
@@ -1850,7 +1859,7 @@ public class X509CertSelector implements CertSelector
      * <b>TODO: implement output for currently unsupported options(name
      * constraints)</b><br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.DERObject DERObject},
      * {@link org.bouncycastle.asn1.x509.KeyPurposeId KeyPurposeId}
      * 
@@ -1883,7 +1892,7 @@ public class X509CertSelector implements CertSelector
             {
                 ByteArrayInputStream inStream = new ByteArrayInputStream(
                         subjectKeyID);
-                DERInputStream derInStream = new DERInputStream(inStream);
+                ASN1InputStream derInStream = new ASN1InputStream(inStream);
                 DERObject derObject = derInStream.readObject();
                 sb.append("  Subject Key Identifier: ")
                        .append(ASN1Dump.dumpAsString(derObject)).append('\n');
@@ -1892,7 +1901,7 @@ public class X509CertSelector implements CertSelector
             {
                 ByteArrayInputStream inStream = new ByteArrayInputStream(
                         authorityKeyID);
-                DERInputStream derInStream = new DERInputStream(inStream);
+                ASN1InputStream derInStream = new ASN1InputStream(inStream);
                 DERObject derObject = derInStream.readObject();
                 sb.append("  Authority Key Identifier: ")
                        .append(ASN1Dump.dumpAsString(derObject)).append('\n');
@@ -1948,7 +1957,7 @@ public class X509CertSelector implements CertSelector
                     obj = (List)iter.next();
                     ByteArrayInputStream inStream = new ByteArrayInputStream(
                             (byte[])obj.get(1));
-                    DERInputStream derInStream = new DERInputStream(inStream);
+                    ASN1InputStream derInStream = new ASN1InputStream(inStream);
                     DERObject derObject = derInStream.readObject();
                     sb.append("  Type: ").append(obj.get(0)).append(" Data: ")
                            .append(ASN1Dump.dumpAsString(derObject)).append('\n');
@@ -1972,7 +1981,7 @@ public class X509CertSelector implements CertSelector
                     obj = (List)iter.next();
                     ByteArrayInputStream inStream = new ByteArrayInputStream(
                             (byte[])obj.get(1));
-                    DERInputStream derInStream = new DERInputStream(inStream);
+                    ASN1InputStream derInStream = new ASN1InputStream(inStream);
                     DERObject derObject = derInStream.readObject();
                     sb.append("  Type: ").append(obj.get(0)).append(" Data: ")
                            .append(ASN1Dump.dumpAsString(derObject)).append('\n');
@@ -1993,7 +2002,7 @@ public class X509CertSelector implements CertSelector
      * <br />
      * <b>TODO: implement missing tests (name constraints and path to names)</b><br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
      * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
      * {@link org.bouncycastle.asn1.DERObject DERObject},
@@ -2068,7 +2077,7 @@ public class X509CertSelector implements CertSelector
             try
             {
                 ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-                DERInputStream derInputStream = new DERInputStream(inStream);
+                ASN1InputStream derInputStream = new ASN1InputStream(inStream);
                 byte[] testData = ((ASN1OctetString)derInputStream.readObject())
                         .getOctets();
                 if (!Arrays.equals(subjectKeyID, testData))
@@ -2093,7 +2102,7 @@ public class X509CertSelector implements CertSelector
             try
             {
                 ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-                DERInputStream derInputStream = new DERInputStream(inStream);
+                ASN1InputStream derInputStream = new ASN1InputStream(inStream);
                 byte[] testData = ((ASN1OctetString)derInputStream.readObject())
                         .getOctets();
                 if (!Arrays.equals(authorityKeyID, testData))
@@ -2130,11 +2139,11 @@ public class X509CertSelector implements CertSelector
                 {
                     ByteArrayInputStream inStream = new ByteArrayInputStream(
                             data);
-                    DERInputStream derInputStream = new DERInputStream(inStream);
+                    ASN1InputStream derInputStream = new ASN1InputStream(inStream);
                     inStream = new ByteArrayInputStream(
                             ((ASN1OctetString)derInputStream.readObject())
                                     .getOctets());
-                    derInputStream = new DERInputStream(inStream);
+                    derInputStream = new ASN1InputStream(inStream);
                     // TODO fix this, Sequence contains tagged objects
                     ASN1Sequence derObject = (ASN1Sequence)derInputStream
                             .readObject();
@@ -2165,7 +2174,7 @@ public class X509CertSelector implements CertSelector
             {
                 ByteArrayInputStream inStream = new ByteArrayInputStream(
                         certX509.getPublicKey().getEncoded());
-                DERInputStream derInputStream = new DERInputStream(inStream);
+                ASN1InputStream derInputStream = new ASN1InputStream(inStream);
                 SubjectPublicKeyInfo publicKeyInfo = new SubjectPublicKeyInfo(
                         (ASN1Sequence)derInputStream.readObject());
                 AlgorithmIdentifier algInfo = publicKeyInfo.getAlgorithmId();
@@ -2220,7 +2229,7 @@ public class X509CertSelector implements CertSelector
                 {
                     ByteArrayInputStream inStream = new ByteArrayInputStream(
                             data);
-                    DERInputStream derInputStream = new DERInputStream(inStream);
+                    ASN1InputStream derInputStream = new ASN1InputStream(inStream);
                     ExtendedKeyUsage extendedKeyUsage = new ExtendedKeyUsage(
                             (ASN1Sequence)derInputStream.readObject());
                     tempIter = keyPurposeSet.iterator();
@@ -2266,11 +2275,11 @@ public class X509CertSelector implements CertSelector
                 {
                     ByteArrayInputStream inStream = new ByteArrayInputStream(
                             data);
-                    DERInputStream derInputStream = new DERInputStream(inStream);
+                    ASN1InputStream derInputStream = new ASN1InputStream(inStream);
                     inStream = new ByteArrayInputStream(
                             ((ASN1OctetString)derInputStream.readObject())
                                     .getOctets());
-                    derInputStream = new DERInputStream(inStream);
+                    derInputStream = new ASN1InputStream(inStream);
                     Enumeration policySequence = ((ASN1Sequence)derInputStream
                             .readObject()).getObjects();
                     ASN1Sequence policyObject;
@@ -2308,11 +2317,11 @@ public class X509CertSelector implements CertSelector
                     return false;
                 }
                 ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-                DERInputStream derInputStream = new DERInputStream(inStream);
+                ASN1InputStream derInputStream = new ASN1InputStream(inStream);
                 inStream = new ByteArrayInputStream(
                         ((ASN1OctetString)derInputStream.readObject())
                                 .getOctets());
-                derInputStream = new DERInputStream(inStream);
+                derInputStream = new ASN1InputStream(inStream);
                 Enumeration altNamesSequence = ((ASN1Sequence)derInputStream
                         .readObject()).getObjects();
                 ASN1TaggedObject altNameObject;

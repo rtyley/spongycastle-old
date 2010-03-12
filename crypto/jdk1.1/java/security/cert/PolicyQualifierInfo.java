@@ -4,8 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -59,7 +59,7 @@ import org.bouncycastle.asn1.util.ASN1Dump;
  * allows them to be passed around to various pieces of code without 
  * worrying about coordinating access.<br />
  * <br />
- * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+ * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
  * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
  * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
  * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
@@ -76,7 +76,7 @@ public final class PolicyQualifierInfo
      * Creates an instance of <code>PolicyQualifierInfo</code> from the
      * encoded bytes. The encoded byte array is copied on construction.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
      * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier} and
      * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream}
@@ -92,7 +92,7 @@ public final class PolicyQualifierInfo
     this.encoded = (byte[])encoded.clone();
     try {
         ByteArrayInputStream inStream = new ByteArrayInputStream(this.encoded);
-        DERInputStream derInStream = new DERInputStream(inStream);
+        ASN1InputStream derInStream = new ASN1InputStream(inStream);
         ASN1Sequence obj = (ASN1Sequence)derInStream.readObject();
         id = ( (DERObjectIdentifier)obj.getObjectAt(0) ).getId();
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -153,7 +153,7 @@ public final class PolicyQualifierInfo
      * Return a printable representation of this 
      * <code>PolicyQualifierInfo</code>.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.DERObject DERObject} and
      * {@link org.bouncycastle.asn1.util.ASN1Dump#dumpAsString dumpAsString}
      *
@@ -167,7 +167,7 @@ public final class PolicyQualifierInfo
     s.append("qualifierID: ").append(id).append('\n');
     try {
         ByteArrayInputStream inStream = new ByteArrayInputStream( qualifier );
-        DERInputStream derInStream = new DERInputStream( inStream );
+        ASN1InputStream derInStream = new ASN1InputStream( inStream );
         DERObject derObject = derInStream.readObject();
         s.append("  qualifier:\n").append(ASN1Dump.dumpAsString(derObject)).append('\n');
     } catch ( IOException ex ) {

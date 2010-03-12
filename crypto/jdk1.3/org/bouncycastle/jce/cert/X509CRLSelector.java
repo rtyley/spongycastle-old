@@ -12,14 +12,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
-
 import org.bouncycastle.jce.PrincipalUtil;
 
 /**
@@ -48,7 +47,7 @@ import org.bouncycastle.jce.PrincipalUtil;
  * locking. Multiple threads each manipulating separate objects need not
  * synchronize.<br />
  * <br />
- * Uses {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+ * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
  * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
  * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
  * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
@@ -235,7 +234,7 @@ public class X509CRLSelector implements CRLSelector
      * subsequent modifications.<br />
      * <br />
      * Uses {@link org.bouncycastle.asn1.x509.X509Name X509Name} for parsing the
-     * name, {@link org.bouncycastle.asn1.DERInputStream DERInputStream},
+     * name, {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.DERObject DERObject} and
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence}
      * 
@@ -254,7 +253,7 @@ public class X509CRLSelector implements CRLSelector
         }
 
         ByteArrayInputStream inStream = new ByteArrayInputStream(name);
-        DERInputStream derInStream = new DERInputStream(inStream);
+        ASN1InputStream derInStream = new ASN1InputStream(inStream);
         DERObject obj = derInStream.readObject();
         if (obj instanceof ASN1Sequence)
         {
@@ -558,11 +557,11 @@ public class X509CRLSelector implements CRLSelector
             try
             {
                 ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-                DERInputStream derInputStream = new DERInputStream(inStream);
+                ASN1InputStream derInputStream = new ASN1InputStream(inStream);
                 inStream = new ByteArrayInputStream(
                         ((ASN1OctetString)derInputStream.readObject())
                                 .getOctets());
-                derInputStream = new DERInputStream(inStream);
+                derInputStream = new ASN1InputStream(inStream);
                 BigInteger crlNumber = ((DERInteger)derInputStream.readObject())
                         .getPositiveValue();
                 if (minCRL != null && minCRL.compareTo(crlNumber) > 0)

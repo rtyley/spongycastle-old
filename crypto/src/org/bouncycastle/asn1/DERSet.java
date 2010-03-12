@@ -30,7 +30,7 @@ public class DERSet
      * @param v - a vector of objects making up the set.
      */
     public DERSet(
-        DEREncodableVector   v)
+        ASN1EncodableVector   v)
     {
         this(v, true);
     }
@@ -53,7 +53,7 @@ public class DERSet
      * @param v - a vector of objects making up the set.
      */
     DERSet(
-        DEREncodableVector   v,
+        ASN1EncodableVector  v,
         boolean              needsSorting)
     {
         for (int i = 0; i != v.size(); i++)

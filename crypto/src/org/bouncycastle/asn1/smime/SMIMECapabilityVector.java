@@ -2,7 +2,6 @@ package org.bouncycastle.asn1.smime;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DEREncodableVector;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
@@ -44,7 +43,7 @@ public class SMIMECapabilityVector
         capabilities.add(new DERSequence(v));
     }
 
-    public DEREncodableVector toDEREncodableVector()
+    public ASN1EncodableVector toASN1EncodableVector()
     {
         return capabilities;
     }

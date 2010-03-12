@@ -16,11 +16,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
@@ -222,8 +222,8 @@ public class NetscapeCertRequest implements DEREncodable
             baos.write (pubkey.getEncoded());
             baos.close ();
 
-            DERInputStream derin =
-                new DERInputStream (new ByteArrayInputStream (baos.toByteArray()));
+            ASN1InputStream derin =
+                new ASN1InputStream (new ByteArrayInputStream (baos.toByteArray()));
             
             obj = derin.readObject();
         } catch (IOException ioe) {

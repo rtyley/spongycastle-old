@@ -6,7 +6,6 @@ import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodableVector;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 
 public class AttributeTable
@@ -20,7 +19,7 @@ public class AttributeTable
     }
 
     public AttributeTable(
-        DEREncodableVector v)
+        ASN1EncodableVector v)
     {
         for (int i = 0; i != v.size(); i++)
         {
