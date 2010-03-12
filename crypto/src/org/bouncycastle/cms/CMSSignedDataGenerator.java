@@ -541,34 +541,6 @@ public class CMSSignedDataGenerator
 //            // TODO signedAttrs must be present for all signers
 //        }
 
-//        CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator(this.rand);
-//
-//        // Pre-calculated signers
-//        gen.addSigners(_signerStore);
-//
-//        {
-//            Iterator it = signerInfs.iterator();
-//            while (it.hasNext())
-//            {
-//                SignerInf signer = (SignerInf)it.next();
-//                gen.doAddSigner(signer.key, signer.signerIdentifier, signer.encOID, signer.digestOID,
-//                    signer.sAttr, signer.unsAttr, sigProvider, sigProvider);
-//            }
-//        }
-//
-//        
-//        
-//        
-//        
-//        
-//        
-//
-//        _digests = gen._digests;
-
-
-        // -------------------------------------------------------------------------
-
-
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
 
