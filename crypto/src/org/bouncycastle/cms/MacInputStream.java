@@ -41,7 +41,7 @@ class MacInputStream
     {
         int i = inStream.read();
 
-        if (i > 0)
+        if (i >= 0)
         {
             mac.update((byte)i);
         }
