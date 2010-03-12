@@ -32,7 +32,6 @@ import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
 import org.bouncycastle.asn1.cms.RecipientKeyIdentifier;
 import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
@@ -49,8 +48,7 @@ public class KeyAgreeRecipientInformation
     private ASN1OctetString       encryptedKey;
 
     static void readRecipientInfo(List infos, KeyAgreeRecipientInfo info,
-        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg,
-        CMSProcessable processable)
+        CMSSecureProcessable secureProcessable)
     {
         try
         {
@@ -81,7 +79,7 @@ public class KeyAgreeRecipientInformation
                 }
 
                 infos.add(new KeyAgreeRecipientInformation(info, rid, id.getEncryptedKey(),
-                    encAlg, macAlg, authEncAlg, processable));
+                    secureProcessable));
             }
         }
         catch (IOException e)
@@ -94,12 +92,9 @@ public class KeyAgreeRecipientInformation
         KeyAgreeRecipientInfo   info,
         RecipientId             rid,
         ASN1OctetString         encryptedKey,
-        AlgorithmIdentifier     encAlg,
-        AlgorithmIdentifier     macAlg,
-        AlgorithmIdentifier     authEncAlg,
-        CMSProcessable          processable)
+        CMSSecureProcessable    secureProcessable)
     {
-        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), processable);
+        super(info.getKeyEncryptionAlgorithm(), secureProcessable);
 
         this.info = info;
         this.rid = rid;

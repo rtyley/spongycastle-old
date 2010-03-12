@@ -63,12 +63,14 @@ public class CMSAuthenticatedData
         ContentInfo encInfo = authData.getEncapsulatedContentInfo();
         CMSProcessable processable = new CMSProcessableByteArray(
             ASN1OctetString.getInstance(encInfo.getContent()).getOctets());
+        CMSSecureProcessable secureProcessable = new CMSEnvelopedHelper.CMSAuthenticatedSecureProcessable(
+            this.macAlg, processable);
 
         //
         // build the RecipientInformationStore
         //
         this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, processable, null, macAlg, null);
+            recipientInfos, secureProcessable);
 
         this.authAttrs = authData.getAuthAttrs();
         this.mac = authData.getMac().getOctets();

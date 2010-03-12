@@ -18,7 +18,6 @@ public class CMSProcessableInputStream implements CMSProcessable
     }
 
     public InputStream read()
-        throws IOException, CMSException
     {
         checkSingleUsage();
 

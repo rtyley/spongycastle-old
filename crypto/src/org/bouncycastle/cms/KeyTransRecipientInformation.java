@@ -21,7 +21,6 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 
 /**
@@ -35,13 +34,10 @@ public class KeyTransRecipientInformation
     private KeyTransRecipientInfo info;
 
     KeyTransRecipientInformation(
-            KeyTransRecipientInfo   info,
-            AlgorithmIdentifier     encAlg,
-            AlgorithmIdentifier     macAlg,
-            AlgorithmIdentifier     authEncAlg,
-            CMSProcessable          processable)
+        KeyTransRecipientInfo   info,
+        CMSSecureProcessable    secureProcessable)
     {
-        super(encAlg, macAlg, authEncAlg, info.getKeyEncryptionAlgorithm(), processable);
+        super(info.getKeyEncryptionAlgorithm(), secureProcessable);
 
         this.info = info;
         this.rid = new RecipientId();
