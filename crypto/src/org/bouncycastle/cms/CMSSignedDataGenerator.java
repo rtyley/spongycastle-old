@@ -1,7 +1,9 @@
 package org.bouncycastle.cms;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -20,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
@@ -28,6 +29,7 @@ import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -126,8 +128,10 @@ public class CMSSignedDataGenerator
                 signed = baseSignedTable;
             }
 
+            sig.initSign(key, random);
+            OutputStream sigStr = new BufferedOutputStream(new SigOutputStream(sig));
+
             ASN1Set signedAttr = null;
-            byte[] tmp;
             if (signed != null)
             {
                 if (isCounterSignature)
@@ -142,21 +146,15 @@ public class CMSSignedDataGenerator
                 signedAttr = getAttributeSet(signed);
 
                 // sig must be composed from the DER encoding.
-                tmp = signedAttr.getEncoded(ASN1Encodable.DER);
+                new DEROutputStream(sigStr).writeObject(signedAttr);
             }
-            else
+            else if (content != null)
             {
                 // TODO Use raw signature of the hash value instead
-                ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-                if (content != null)
-                {
-                    content.write(bOut);
-                }
-                tmp = bOut.toByteArray();
+                content.write(sigStr);
             }
 
-            sig.initSign(key, random);
-            sig.update(tmp);
+            sigStr.close();
             byte[] sigBytes = sig.sign();
 
             ASN1Set unsignedAttr = null;
