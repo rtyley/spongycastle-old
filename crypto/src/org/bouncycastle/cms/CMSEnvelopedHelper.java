@@ -475,7 +475,8 @@ class CMSEnvelopedHelper
 
             try
             {
-                return new CMSProcessableInputStream(new MacInputStream(processable.read(), mac));
+                return new CMSProcessableInputStream(
+                    new TeeInputStream(processable.read(), new MacOutputStream(mac)));
             }
             catch (IOException e)
             {
