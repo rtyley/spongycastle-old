@@ -386,7 +386,7 @@ public class SignerInformation
             {
                 if (content != null)
                 {
-                    content.write(new CMSSignedGenerator.DigOutputStream(digest));
+                    content.write(new DigOutputStream(digest));
                 }
                 else if (signedAttributeSet == null)
                 {
@@ -505,7 +505,7 @@ public class SignerInformation
                 else if (content != null)
                 {
                     // TODO Use raw signature of the hash value instead
-                    content.write(new CMSSignedGenerator.SigOutputStream(sig));
+                    content.write(new SigOutputStream(sig));
                 }
             }
             else

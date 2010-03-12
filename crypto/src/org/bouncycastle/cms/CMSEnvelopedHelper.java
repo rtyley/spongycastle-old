@@ -1,7 +1,6 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -435,55 +434,52 @@ class CMSEnvelopedHelper
             return this.algorithm;
         }
 
-        public CMSProcessable getProcessable(SecretKey sKey, Provider provider)
+        public CMSProcessable getProcessable(final SecretKey sKey, final Provider provider)
             throws CMSException
         {
+            final String macAlg = this.algorithm.getObjectId().getId();
+            final ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
+
+            Mac mac = (Mac)execute(new JCECallback()
+            {
+                public Object doInJCE() throws CMSException, InvalidAlgorithmParameterException,
+                    InvalidKeyException, InvalidParameterSpecException, NoSuchAlgorithmException,
+                    NoSuchPaddingException
+                {
+                    Mac mac = CMSEnvelopedHelper.INSTANCE.getMac(macAlg, provider);
+
+                    if (sParams != null && !(sParams instanceof ASN1Null))
+                    {
+                        AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(
+                            macAlg, provider);
+
+                        try
+                        {
+                            params.init(sParams.getEncoded(), "ASN.1");
+                        }
+                        catch (IOException e)
+                        {
+                            throw new CMSException("error decoding algorithm parameters.", e);
+                        }
+
+                        mac.init(sKey, params.getParameterSpec(IvParameterSpec.class));
+                    }
+                    else
+                    {
+                        mac.init(sKey);
+                    }
+
+                    return mac;
+                }
+            });
+
             try
             {
-                String macAlg = this.algorithm.getObjectId().getId();
-                Mac mac = CMSEnvelopedHelper.INSTANCE.getMac(macAlg, provider);
-
-                ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
-
-                if (sParams != null && !(sParams instanceof ASN1Null))
-                {
-                    AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(
-                        macAlg, provider);
-
-                    params.init(sParams.getEncoded(), "ASN.1");
-
-                    mac.init(sKey, params.getParameterSpec(IvParameterSpec.class));
-                }
-                else
-                {
-                    mac.init(sKey);
-                }
-
                 return new CMSProcessableInputStream(new MacInputStream(processable.read(), mac));
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                throw new CMSException("can't find algorithm.", e);
-            }
-            catch (InvalidKeyException e)
-            {
-                throw new CMSException("key invalid in message.", e);
-            }
-            catch (NoSuchPaddingException e)
-            {
-                throw new CMSException("required padding not supported.", e);
-            }
-            catch (InvalidAlgorithmParameterException e)
-            {
-                throw new CMSException("algorithm parameters invalid.", e);
-            }
-            catch (InvalidParameterSpecException e)
-            {
-                throw new CMSException("MAC algorithm parameter spec invalid.", e);
             }
             catch (IOException e)
             {
-                throw new CMSException("error decoding algorithm parameters.", e);
+                throw new CMSException("error reading content.", e);
             }
         }
     }
@@ -504,128 +500,116 @@ class CMSEnvelopedHelper
             return this.algorithm;
         }
 
-        public CMSProcessable getProcessable(SecretKey sKey, Provider provider)
+        public CMSProcessable getProcessable(final SecretKey sKey, final Provider provider)
             throws CMSException
         {
-            try
+            final String encAlg = this.algorithm.getObjectId().getId();
+            final ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
+
+            Cipher cipher = (Cipher)execute(new JCECallback()
             {
-                String encAlg = this.algorithm.getObjectId().getId();
-                Cipher cipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(encAlg, provider);
-
-                ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
-
-                if (sParams != null && !(sParams instanceof ASN1Null))
+                public Object doInJCE() throws CMSException, InvalidAlgorithmParameterException,
+                    InvalidKeyException, InvalidParameterSpecException, NoSuchAlgorithmException,
+                    NoSuchPaddingException
                 {
-                    try
-                    {
-                        AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encAlg, cipher.getProvider());
+                    Cipher cipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(encAlg, provider);
 
-                        params.init(sParams.getEncoded(), "ASN.1");
+                    if (sParams != null && !(sParams instanceof ASN1Null))
+                    {
+                        try
+                        {
+                            AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(
+                                encAlg, cipher.getProvider());
 
-                        cipher.init(Cipher.DECRYPT_MODE, sKey, params);
-                    }
-                    catch (NoSuchAlgorithmException e)
-                    {
-                        if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
-                            || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
-                            || encAlg.equals(CMSEnvelopedDataGenerator.AES128_CBC)
-                            || encAlg.equals(CMSEnvelopedDataGenerator.AES192_CBC)
-                            || encAlg.equals(CMSEnvelopedDataGenerator.AES256_CBC))
-                        {
-                            cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(ASN1OctetString.getInstance(sParams).getOctets()));
+                            try
+                            {
+                                params.init(sParams.getEncoded(), "ASN.1");
+                            }
+                            catch (IOException e)
+                            {
+                                throw new CMSException("error decoding algorithm parameters.", e);
+                            }
+
+                            cipher.init(Cipher.DECRYPT_MODE, sKey, params);
                         }
-                        else
+                        catch (NoSuchAlgorithmException e)
                         {
-                            throw e;
+                            if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                                || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                                || encAlg.equals(CMSEnvelopedDataGenerator.AES128_CBC)
+                                || encAlg.equals(CMSEnvelopedDataGenerator.AES192_CBC)
+                                || encAlg.equals(CMSEnvelopedDataGenerator.AES256_CBC))
+                            {
+                                cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(
+                                    ASN1OctetString.getInstance(sParams).getOctets()));
+                            }
+                            else
+                            {
+                                throw e;
+                            }
                         }
-                    }
-                }
-                else
-                {
-                    if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
-                        || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
-                        || encAlg.equals(CMSEnvelopedDataGenerator.CAST5_CBC))
-                    {
-                        cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(new byte[8]));
                     }
                     else
                     {
-                        cipher.init(Cipher.DECRYPT_MODE, sKey);
+                        if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.CAST5_CBC))
+                        {
+                            cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(new byte[8]));
+                        }
+                        else
+                        {
+                            cipher.init(Cipher.DECRYPT_MODE, sKey);
+                        }
                     }
-                }
 
+                    return cipher;
+                }
+            });
+
+            try
+            {
                 return new CMSProcessableInputStream(new CipherInputStream(processable.read(), cipher));
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                throw new CMSException("can't find algorithm.", e);
-            }
-            catch (InvalidKeyException e)
-            {
-                throw new CMSException("key invalid in message.", e);
-            }
-            catch (NoSuchPaddingException e)
-            {
-                throw new CMSException("required padding not supported.", e);
-            }
-            catch (InvalidAlgorithmParameterException e)
-            {
-                throw new CMSException("algorithm parameters invalid.", e);
             }
             catch (IOException e)
             {
-                throw new CMSException("error decoding algorithm parameters.", e);
+                throw new CMSException("error reading content.", e);
             }
         }
     }
 
-    static class MacInputStream
-        extends InputStream
+    static Object execute(JCECallback callback) throws CMSException
     {
-        private final InputStream inStream;
-        private final Mac mac;
-
-        MacInputStream(InputStream inStream, Mac mac)
+        try
         {
-            this.inStream = inStream;
-            this.mac = mac;
+            return callback.doInJCE();
         }
-
-        public int read(byte[] buf)
-            throws IOException
+        catch (NoSuchAlgorithmException e)
         {
-            return read(buf, 0, buf.length);
+            throw new CMSException("can't find algorithm.", e);
         }
-
-        public int read(byte[] buf, int off, int len)
-            throws IOException
+        catch (InvalidKeyException e)
         {
-            int i = inStream.read(buf, off, len);
-
-            if (i > 0)
-            {
-                mac.update(buf, off, i);
-            }
-
-            return i;
+            throw new CMSException("key invalid in message.", e);
         }
-
-        public int read()
-            throws IOException
+        catch (NoSuchPaddingException e)
         {
-            int i = inStream.read();
-
-            if (i > 0)
-            {
-                mac.update((byte)i);
-            }
-
-            return i;
+            throw new CMSException("required padding not supported.", e);
         }
-
-        public byte[] getMac()
+        catch (InvalidAlgorithmParameterException e)
         {
-            return mac.doFinal();
+            throw new CMSException("algorithm parameters invalid.", e);
         }
+        catch (InvalidParameterSpecException e)
+        {
+            throw new CMSException("MAC algorithm parameter spec invalid.", e);
+        }
+    }
+
+    static interface JCECallback
+    {
+        Object doInJCE()
+            throws CMSException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidParameterSpecException,
+                NoSuchAlgorithmException, NoSuchPaddingException;
     }
 }

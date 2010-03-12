@@ -22,7 +22,7 @@ public abstract class RecipientInformation
     protected AlgorithmIdentifier keyEncAlg;
     protected CMSSecureProcessable secureProcessable;
 
-    private CMSEnvelopedHelper.MacInputStream macStream;
+    private MacInputStream macStream;
     private byte[]         resultMac;
 
     RecipientInformation(
@@ -146,9 +146,9 @@ public abstract class RecipientInformation
         try
         {
             InputStream input = processable.read();
-            if (input instanceof CMSEnvelopedHelper.MacInputStream)
+            if (input instanceof MacInputStream)
             {
-                this.macStream = (CMSEnvelopedHelper.MacInputStream)input;
+                this.macStream = (MacInputStream)input;
             }
 
             return new CMSTypedStream(input);
