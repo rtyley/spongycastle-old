@@ -8,7 +8,6 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERApplicationSpecific;
 import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.BERConstructedSequence;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.BERTaggedObject;
@@ -16,8 +15,6 @@ import org.bouncycastle.asn1.DERApplicationSpecific;
 import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DERConstructedSequence;
-import org.bouncycastle.asn1.DERConstructedSet;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERExternal;
@@ -63,15 +60,7 @@ public class ASN1Dump
             String          tab = indent + TAB;
 
             buf.append(indent);
-            if (obj instanceof BERConstructedSequence)
-            {
-                buf.append("BER ConstructedSequence");
-            }
-            else if (obj instanceof DERConstructedSequence)
-            {
-                buf.append("DER ConstructedSequence");
-            }
-            else if (obj instanceof BERSequence)
+            if (obj instanceof BERSequence)
             {
                 buf.append("BER Sequence");
             }
@@ -141,35 +130,6 @@ public class ASN1Dump
             else
             {
                 _dumpAsString(tab, verbose, o.getObject(), buf);
-            }
-        }
-        else if (obj instanceof DERConstructedSet)
-        {
-            Enumeration     e = ((ASN1Set)obj).getObjects();
-            String          tab = indent + TAB;
-
-            buf.append(indent);
-            buf.append("ConstructedSet");
-            buf.append(nl);
-
-            while (e.hasMoreElements())
-            {
-                Object  o = e.nextElement();
-
-                if (o == null)
-                {
-                    buf.append(tab);
-                    buf.append("NULL");
-                    buf.append(nl);
-                }
-                else if (o instanceof DERObject)
-                {
-                    _dumpAsString(tab, verbose, (DERObject)o, buf);
-                }
-                else
-                {
-                    _dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject(), buf);
-                }
             }
         }
         else if (obj instanceof BERSet)
