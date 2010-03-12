@@ -2,12 +2,14 @@ package org.bouncycastle.cms;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.AlgorithmParameters;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.DEREncodable;
@@ -22,8 +24,8 @@ public abstract class RecipientInformation
     protected AlgorithmIdentifier keyEncAlg;
     protected CMSSecureProcessable secureProcessable;
 
-    private MacInputStream macStream;
-    private byte[]         resultMac;
+    private Mac     mac;
+    private byte[]  resultMac;
 
     RecipientInformation(
         AlgorithmIdentifier     keyEncAlg,
@@ -146,9 +148,13 @@ public abstract class RecipientInformation
         try
         {
             InputStream input = processable.read();
-            if (input instanceof MacInputStream)
+            if (input instanceof TeeInputStream)
             {
-                this.macStream = (MacInputStream)input;
+                OutputStream teedOutput = ((TeeInputStream)input).output;
+                if (teedOutput instanceof MacOutputStream)
+                {
+                    this.mac = ((MacOutputStream)teedOutput).mac;
+                }
             }
 
             return new CMSTypedStream(input);
@@ -188,11 +194,12 @@ public abstract class RecipientInformation
      *
      * @return  byte array containing the mac.
      */
+    // FIXME Deprecate this method and provide an alternative that supports many passes and generic CMS "results"
     public byte[] getMac()
     {
-        if (macStream != null && resultMac == null)
+        if (mac != null && resultMac == null)
         {
-            resultMac = macStream.getMac();
+            resultMac = mac.doFinal();
         }
 
         return resultMac;

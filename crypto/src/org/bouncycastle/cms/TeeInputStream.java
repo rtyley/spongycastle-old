@@ -7,8 +7,9 @@ import java.io.OutputStream;
 class TeeInputStream
     extends InputStream
 {
-    private InputStream input;
-    private OutputStream output;
+    private final InputStream input;
+    // FIXME Need internal access in RecipientInformation atm
+    final OutputStream output;
 
     TeeInputStream(InputStream input, OutputStream output)
     {
