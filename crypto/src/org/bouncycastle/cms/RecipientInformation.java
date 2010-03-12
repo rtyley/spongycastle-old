@@ -1,8 +1,6 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.AlgorithmParameters;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -18,14 +16,10 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public abstract class RecipientInformation
 {
     protected RecipientId rid = new RecipientId();
-    protected AlgorithmIdentifier encAlg;
-    protected AlgorithmIdentifier macAlg;
-    protected AlgorithmIdentifier authEncAlg;
     protected AlgorithmIdentifier keyEncAlg;
     protected CMSSecureProcessable secureProcessable;
 
-    private Mac     mac;
-    private byte[]  resultMac;
+    private byte[] resultMac;
 
     RecipientInformation(
         AlgorithmIdentifier     keyEncAlg,
@@ -147,17 +141,7 @@ public abstract class RecipientInformation
 
         try
         {
-            InputStream input = processable.read();
-            if (input instanceof TeeInputStream)
-            {
-                OutputStream teedOutput = ((TeeInputStream)input).output;
-                if (teedOutput instanceof MacOutputStream)
-                {
-                    this.mac = ((MacOutputStream)teedOutput).mac;
-                }
-            }
-
-            return new CMSTypedStream(input);
+            return new CMSTypedStream(processable.read());
         }
         catch (IOException e)
         {
@@ -194,12 +178,15 @@ public abstract class RecipientInformation
      *
      * @return  byte array containing the mac.
      */
-    // FIXME Deprecate this method and provide an alternative that supports many passes and generic CMS "results"
     public byte[] getMac()
     {
-        if (mac != null && resultMac == null)
+        if (resultMac == null)
         {
-            resultMac = mac.doFinal();
+            Object cryptoObject = secureProcessable.getCryptoObject();
+            if (cryptoObject instanceof Mac)
+            {
+                resultMac = ((Mac)cryptoObject).doFinal();
+            }
         }
 
         return resultMac;

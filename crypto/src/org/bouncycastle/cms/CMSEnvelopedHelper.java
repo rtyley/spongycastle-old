@@ -421,6 +421,7 @@ class CMSEnvelopedHelper
     static class CMSAuthenticatedSecureProcessable implements CMSSecureProcessable
     {
         private AlgorithmIdentifier algorithm;
+        private Mac mac;
         private CMSProcessable processable;
 
         CMSAuthenticatedSecureProcessable(AlgorithmIdentifier algorithm, CMSProcessable processable)
@@ -434,13 +435,18 @@ class CMSEnvelopedHelper
             return this.algorithm;
         }
 
+        public Object getCryptoObject()
+        {
+            return this.mac;
+        }
+
         public CMSProcessable getProcessable(final SecretKey sKey, final Provider provider)
             throws CMSException
         {
             final String macAlg = this.algorithm.getObjectId().getId();
             final ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
 
-            Mac mac = (Mac)execute(new JCECallback()
+            this.mac = (Mac)execute(new JCECallback()
             {
                 public Object doInJCE() throws CMSException, InvalidAlgorithmParameterException,
                     InvalidKeyException, InvalidParameterSpecException, NoSuchAlgorithmException,
@@ -476,7 +482,7 @@ class CMSEnvelopedHelper
             try
             {
                 return new CMSProcessableInputStream(
-                    new TeeInputStream(processable.read(), new MacOutputStream(mac)));
+                    new TeeInputStream(processable.read(), new MacOutputStream(this.mac)));
             }
             catch (IOException e)
             {
@@ -488,6 +494,7 @@ class CMSEnvelopedHelper
     static class CMSEnvelopedSecureProcessable implements CMSSecureProcessable
     {
         private AlgorithmIdentifier algorithm;
+        private Cipher cipher;
         private CMSProcessable processable;
 
         CMSEnvelopedSecureProcessable(AlgorithmIdentifier algorithm, CMSProcessable processable)
@@ -501,13 +508,18 @@ class CMSEnvelopedHelper
             return this.algorithm;
         }
 
+        public Object getCryptoObject()
+        {
+            return this.cipher;
+        }
+
         public CMSProcessable getProcessable(final SecretKey sKey, final Provider provider)
             throws CMSException
         {
             final String encAlg = this.algorithm.getObjectId().getId();
             final ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
 
-            Cipher cipher = (Cipher)execute(new JCECallback()
+            this.cipher = (Cipher)execute(new JCECallback()
             {
                 public Object doInJCE() throws CMSException, InvalidAlgorithmParameterException,
                     InvalidKeyException, InvalidParameterSpecException, NoSuchAlgorithmException,
