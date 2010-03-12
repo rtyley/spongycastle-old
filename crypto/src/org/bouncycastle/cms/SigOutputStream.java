@@ -9,7 +9,7 @@ class SigOutputStream extends OutputStream
 {
     private final Signature sig;
 
-    public SigOutputStream(Signature sig)
+    SigOutputStream(Signature sig)
     {
         this.sig = sig;
     }

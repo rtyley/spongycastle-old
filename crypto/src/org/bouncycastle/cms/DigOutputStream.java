@@ -6,9 +6,9 @@ import java.security.MessageDigest;
 
 class DigOutputStream extends OutputStream
 {
-    MessageDigest dig;
+    private final MessageDigest dig;
 
-    public DigOutputStream(MessageDigest dig)
+    DigOutputStream(MessageDigest dig)
     {
         this.dig = dig;
     }
