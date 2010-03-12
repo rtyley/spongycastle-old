@@ -6,40 +6,40 @@ import java.io.OutputStream;
 class TeeOutputStream
     extends OutputStream
 {
-    private OutputStream s1;
-    private OutputStream s2;
+    private OutputStream output1;
+    private OutputStream output2;
 
-    TeeOutputStream(OutputStream dataOutputStream, OutputStream digStream)
+    TeeOutputStream(OutputStream output1, OutputStream output2)
     {
-        s1 = dataOutputStream;
-        s2 = digStream;
+        this.output1 = output1;
+        this.output2 = output2;
     }
 
     public void write(byte[] buf)
         throws IOException
     {
-        s1.write(buf);
-        s2.write(buf);
+        this.output1.write(buf);
+        this.output2.write(buf);
     }
 
     public void write(byte[] buf, int off, int len)
         throws IOException
     {
-        s1.write(buf, off, len);
-        s2.write(buf, off, len);
+        this.output1.write(buf, off, len);
+        this.output2.write(buf, off, len);
     }
 
     public void write(int b)
         throws IOException
     {
-        s1.write(b);
-        s2.write(b);
+        this.output1.write(b);
+        this.output2.write(b);
     }
 
     public void close()
         throws IOException
     {
-        s1.close();
-        s2.close();
+        this.output1.close();
+        this.output2.close();
     }
 }
