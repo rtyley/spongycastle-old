@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.bouncycastle.cms;
 
 import java.io.IOException;
