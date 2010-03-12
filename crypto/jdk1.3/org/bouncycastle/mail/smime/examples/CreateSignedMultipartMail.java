@@ -11,9 +11,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 import javax.mail.Address;
@@ -38,10 +38,10 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.X509V3CertificateGenerator;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 /**
  * a simple example that creates a single signed multipart mail message.
