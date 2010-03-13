@@ -824,6 +824,7 @@ public class CMSSignedDataStreamGenerator
         return new CmsSignedDataOutputStream(digStream, eContentType, sGen, sigGen, eiGen);
     }
 
+    // TODO Make public?
     void generate(
         OutputStream    out,
         String          eContentType,
