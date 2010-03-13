@@ -824,6 +824,22 @@ public class CMSSignedDataStreamGenerator
         return new CmsSignedDataOutputStream(digStream, eContentType, sGen, sigGen, eiGen);
     }
 
+    void generate(
+        OutputStream    out,
+        String          eContentType,
+        boolean         encapsulate,
+        OutputStream    dataOutputStream,
+        CMSProcessable  content)
+        throws CMSException, IOException
+    {
+        OutputStream signedOut = open(out, eContentType, encapsulate, dataOutputStream);
+        if (content != null)
+        {
+            content.write(signedOut);
+        }
+        signedOut.close();
+    }
+
     // RFC3852, section 5.1:
     // IF ((certificates is present) AND
     //    (any certificates with a type of other are present)) OR
@@ -1031,35 +1047,59 @@ public class CMSSignedDataStreamGenerator
 
                 _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 1, crls).getEncoded());
             }
-            
+
             //
-            // add the precalculated SignerInfo objects.
+            // collect all the SignerInfo objects
             //
             ASN1EncodableVector signerInfos = new ASN1EncodableVector();
-            Iterator            it = _signerStore.getSigners().iterator();
-            
-            while (it.hasNext())
-            {
-                SignerInformation        signer = (SignerInformation)it.next();
 
-                // TODO Verify the content type and calculated digest matche the precalculated SignerInfo
-                signerInfos.add(signer.toSignerInfo());
+            //
+            // add the generated SignerInfo objects
+            //
+            {
+                Iterator it = _signerInfs.iterator();
+                while (it.hasNext())
+                {
+                    DigestAndSignerInfoGeneratorHolder holder = (DigestAndSignerInfoGeneratorHolder)it.next();
+    
+                    byte[] calculatedDigest = holder.digest.digest();
+                    _digests.put(holder.digestOID, calculatedDigest.clone());
+                    AlgorithmIdentifier digestAlgorithm = holder.getDigestAlgorithm();
+    
+                    signerInfos.add(holder.signerInf.generate(_contentOID, digestAlgorithm, calculatedDigest));
+                }
             }
-            
-            //
-            // add the SignerInfo objects
-            //
-            it = _signerInfs.iterator();
 
-            while (it.hasNext())
+            //
+            // add the precalculated SignerInfo objects
+            //
             {
-                DigestAndSignerInfoGeneratorHolder holder = (DigestAndSignerInfoGeneratorHolder)it.next();
+                Iterator it = _signerStore.getSigners().iterator();
+                while (it.hasNext())
+                {
+                    SignerInformation signer = (SignerInformation)it.next();
 
-                byte[] calculatedDigest = holder.digest.digest();
-                _digests.put(holder.digestOID, calculatedDigest.clone());
-                AlgorithmIdentifier digestAlgorithm = holder.getDigestAlgorithm();
+                    // TODO Verify the content type and calculated digest match the precalculated SignerInfo
+//                    if (!signer.getContentType().equals(_contentOID))
+//                    {
+//                        // TODO The precalculated content type did not match - error?
+//                    }
+//                    
+//                    byte[] calculatedDigest = (byte[])_digests.get(signer.getDigestAlgOID());
+//                    if (calculatedDigest == null)
+//                    {
+//                        // TODO We can't confirm this digest because we didn't calculate it - error?
+//                    }
+//                    else
+//                    {
+//                        if (!Arrays.areEqual(signer.getContentDigest(), calculatedDigest))
+//                        {
+//                            // TODO The precalculated digest did not match - error?
+//                        }
+//                    }
 
-                signerInfos.add(holder.signerInf.generate(_contentOID, digestAlgorithm, calculatedDigest));
+                    signerInfos.add(signer.toSignerInfo());
+                }
             }
             
             _sigGen.getRawOutputStream().write(new DERSet(signerInfos).getEncoded());
