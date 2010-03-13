@@ -67,7 +67,7 @@ public class KeyStoreTest
         // distinguished name table.
         //
         Hashtable                 attrs = new Hashtable();
-        Vector                      order = new Vector();
+        Vector                    order = new Vector();
 
         attrs.put(X509Principal.C, "AU");
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
@@ -196,12 +196,19 @@ public class KeyStoreTest
         // distinguished name table.
         //
         Hashtable                   attrs = new Hashtable();
+        Vector                      order = new Vector();
 
         attrs.put(X509Principal.C, "AU");
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
         attrs.put(X509Principal.EmailAddress, "feedback-crypto@bouncycastle.org");
+
+        order.addElement(X509Principal.C);
+        order.addElement(X509Principal.O);
+        order.addElement(X509Principal.L);
+        order.addElement(X509Principal.ST);
+        order.addElement(X509Principal.EmailAddress);
 
         //
         // extensions
@@ -213,10 +220,10 @@ public class KeyStoreTest
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
 
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(order, attrs));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(order, attrs));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
 
