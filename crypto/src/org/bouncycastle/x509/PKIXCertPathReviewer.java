@@ -1557,14 +1557,14 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                                 switch (constraint.getTagNo())
                                 {
                                 case 0:
-                                    tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
+                                    tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
                                     if (tmpInt < explicitPolicy)
                                     {
                                         explicitPolicy = tmpInt;
                                     }
                                     break;
                                 case 1:
-                                    tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
+                                    tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
                                     if (tmpInt < policyMapping)
                                     {
                                         policyMapping = tmpInt;
@@ -1637,7 +1637,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                         switch (constraint.getTagNo())
                         {
                         case 0:
-                            int tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
+                            int tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
                             if (tmpInt == 0)
                             {
                                 explicitPolicy = 0;
