@@ -1201,14 +1201,6 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Hashtable                   attrs = new Hashtable();
-
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.L, "Melbourne");
-        attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
-
         Vector                      ord = new Vector();
         Vector                      values = new Vector();
 
@@ -1234,10 +1226,10 @@ public class CertTest
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
 
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(ord, values));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(ord, values));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
@@ -1264,10 +1256,10 @@ public class CertTest
         certGen = new X509V3CertificateGenerator();
 
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(ord, values));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(ord, values));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
         certGen.addExtension("2.5.29.15", true,
@@ -1320,7 +1312,7 @@ public class CertTest
         X509V1CertificateGenerator  certGen1 = new X509V1CertificateGenerator();
 
         certGen1.setSerialNumber(BigInteger.valueOf(1));
-        certGen1.setIssuerDN(new X509Principal(ord, attrs));
+        certGen1.setIssuerDN(new X509Principal(ord, values));
         certGen1.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen1.setNotAfter(new Date(System.currentTimeMillis() + 50000));
         certGen1.setSubjectDN(new X509Principal(ord, values));
@@ -1376,13 +1368,20 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Hashtable                   attrs = new Hashtable();
+        Vector                      ord = new Vector();
+        Vector                      values = new Vector();
 
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.L, "Melbourne");
-        attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        ord.addElement(X509Principal.C);
+        ord.addElement(X509Principal.O);
+        ord.addElement(X509Principal.L);
+        ord.addElement(X509Principal.ST);
+        ord.addElement(X509Principal.E);
+
+        values.addElement("AU");
+        values.addElement("The Legion of the Bouncy Castle");
+        values.addElement("Melbourne");
+        values.addElement("Victoria");
+        values.addElement("feedback-crypto@bouncycastle.org");
 
         //
         // extensions
@@ -1394,10 +1393,10 @@ public class CertTest
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
 
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(ord, values));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(ord, values));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("SHA1withDSA");
 
@@ -1427,10 +1426,10 @@ public class CertTest
         X509V1CertificateGenerator  certGen1 = new X509V1CertificateGenerator();
 
         certGen1.setSerialNumber(BigInteger.valueOf(1));
-        certGen1.setIssuerDN(new X509Principal(attrs));
+        certGen1.setIssuerDN(new X509Principal(ord, values));
         certGen1.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen1.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen1.setSubjectDN(new X509Principal(attrs));
+        certGen1.setSubjectDN(new X509Principal(ord, values));
         certGen1.setPublicKey(pubKey);
         certGen1.setSignatureAlgorithm("SHA1withDSA");
 
@@ -1542,16 +1541,16 @@ public class CertTest
             fail("ordered X509Principal test failed - s = " + s + ".");
         }
 
-        p = new X509Principal(attrs);
-        s = p.toString();
-
-        //
-        // we need two of these as the hash code for strings changed...
-        //
-        if (!s.equals("O=The Legion of the Bouncy Castle,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU") && !s.equals("ST=Victoria,L=Melbourne,C=AU,E=feedback-crypto@bouncycastle.org,O=The Legion of the Bouncy Castle"))
-        {
-            fail("unordered X509Principal test failed.");
-        }
+//        p = new X509Principal(attrs);
+//        s = p.toString();
+//
+//        //
+//        // we need two of these as the hash code for strings changed...
+//        //
+//        if (!s.equals("O=The Legion of the Bouncy Castle,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU") && !s.equals("ST=Victoria,L=Melbourne,C=AU,E=feedback-crypto@bouncycastle.org,O=The Legion of the Bouncy Castle"))
+//        {
+//            fail("unordered X509Principal test failed.");
+//        }
 
         //
         // create the certificate - version 3
@@ -2097,12 +2096,19 @@ public class CertTest
         // distinguished name table.
         //
         Hashtable                   attrs = new Hashtable();
+        Vector                      order = new Vector();
 
         attrs.put(X509Principal.C, "AU");
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
         attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+
+        order.addElement(X509Principal.C);
+        order.addElement(X509Principal.O);
+        order.addElement(X509Principal.L);
+        order.addElement(X509Principal.ST);
+        order.addElement(X509Principal.E);
 
         //
         // extensions
@@ -2114,10 +2120,10 @@ public class CertTest
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
 
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(order, attrs));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(order, attrs));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("GOST3411withGOST3410");
 
@@ -2181,14 +2187,6 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Hashtable                   attrs = new Hashtable();
-    
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.L, "Melbourne");
-        attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
-    
         Vector                      ord = new Vector();
         Vector                      values = new Vector();
     
@@ -2210,10 +2208,10 @@ public class CertTest
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
     
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(ord, values));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(ord, values));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
         certGen.addExtension("2.5.29.15", true,
@@ -2231,10 +2229,10 @@ public class CertTest
         certGen = new X509V3CertificateGenerator();
         
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(ord, values));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(ord, values));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
 
@@ -2454,14 +2452,6 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Hashtable                   attrs = new Hashtable();
-
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.L, "Melbourne");
-        attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
-
         Vector                      ord = new Vector();
         Vector                      values = new Vector();
 
@@ -2483,10 +2473,10 @@ public class CertTest
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
 
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(attrs));
+        certGen.setIssuerDN(new X509Principal(ord, values));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X509Principal(attrs));
+        certGen.setSubjectDN(new X509Principal(ord, values));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm(algorithm);
         certGen.addExtension("2.5.29.15", true,

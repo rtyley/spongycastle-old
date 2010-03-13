@@ -2,7 +2,6 @@ package org.bouncycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -20,6 +19,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -34,8 +34,8 @@ import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.Pfx;
 import org.bouncycastle.asn1.pkcs.SafeBag;
-import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.PKCS12Util;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JDKPKCS12StoreParameter;
@@ -453,6 +453,13 @@ public class PKCS12StoreTest
         subjectAttrs.put(X509Principal.ST, "Victoria");
         subjectAttrs.put(X509Principal.EmailAddress, subjectEmail);
 
+        Vector order = new Vector();
+        order.add(X509Principal.C);
+        order.add(X509Principal.O);
+        order.add(X509Principal.L);
+        order.add(X509Principal.ST);
+        order.add(X509Principal.EmailAddress);
+
         //
         // extensions
         //
@@ -463,10 +470,10 @@ public class PKCS12StoreTest
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
 
         certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(new X509Principal(issuerAttrs));
+        certGen.setIssuerDN(new X509Principal(order, issuerAttrs));
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30));
         certGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30)));
-        certGen.setSubjectDN(new X509Principal(subjectAttrs));
+        certGen.setSubjectDN(new X509Principal(order, subjectAttrs));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
 

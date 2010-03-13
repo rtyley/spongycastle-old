@@ -9,7 +9,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Set;
 import java.util.Vector;
 
@@ -69,14 +68,6 @@ public class CertUniqueIDTest
       //
       // distinguished name table.
       //
-      Hashtable                   attrs = new Hashtable();
-
-      attrs.put(X509Principal.C, "AU");
-      attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-      attrs.put(X509Principal.L, "Melbourne");
-      attrs.put(X509Principal.ST, "Victoria");
-      attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
-
       Vector                      ord = new Vector();
       Vector                      values = new Vector();
 
@@ -102,10 +93,10 @@ public class CertUniqueIDTest
       X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
 
       certGen.setSerialNumber(BigInteger.valueOf(1));
-      certGen.setIssuerDN(new X509Principal(attrs));
+      certGen.setIssuerDN(new X509Principal(ord, values));
       certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
       certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-      certGen.setSubjectDN(new X509Principal(attrs));
+      certGen.setSubjectDN(new X509Principal(ord, values));
       certGen.setPublicKey(pubKey);
       certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
@@ -132,10 +123,10 @@ public class CertUniqueIDTest
       certGen = new X509V3CertificateGenerator();
 
       certGen.setSerialNumber(BigInteger.valueOf(1));
-      certGen.setIssuerDN(new X509Principal(attrs));
+      certGen.setIssuerDN(new X509Principal(ord, values));
       certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
       certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-      certGen.setSubjectDN(new X509Principal(attrs));
+      certGen.setSubjectDN(new X509Principal(ord, values));
       certGen.setPublicKey(pubKey);
       certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
 
