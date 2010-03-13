@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -8,8 +10,6 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-
-import java.math.BigInteger;
 
 /**
  * Class for containing a restriction object subtrees in NameConstraints. See
@@ -64,9 +64,27 @@ public class GeneralSubtree
             }
             break;
         case 3:
-            minimum = DERInteger.getInstance(ASN1TaggedObject.getInstance(seq.getObjectAt(1)));
-            maximum = DERInteger.getInstance(ASN1TaggedObject.getInstance(seq.getObjectAt(2)));
+        {
+            {
+                ASN1TaggedObject oMin = ASN1TaggedObject.getInstance(seq.getObjectAt(1));
+                if (oMin.getTagNo() != 0)
+                {
+                    throw new IllegalArgumentException("Bad tag number for 'minimum': " + oMin.getTagNo());
+                }
+                minimum = DERInteger.getInstance(oMin, false);
+            }
+
+            {
+                ASN1TaggedObject oMax = ASN1TaggedObject.getInstance(seq.getObjectAt(2));
+                if (oMax.getTagNo() != 1)
+                {
+                    throw new IllegalArgumentException("Bad tag number for 'maximum': " + oMax.getTagNo());
+                }
+                maximum = DERInteger.getInstance(oMax, false);
+            }
+
             break;
+        }
         default:
             throw new IllegalArgumentException("Bad sequence size: "
                     + seq.size());
