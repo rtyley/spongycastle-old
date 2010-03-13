@@ -107,6 +107,11 @@ public class SignerInformation
         this.digestCalculator = digestCalculator;
     }
 
+    public DERObjectIdentifier getContentType()
+    {
+        return this.contentType;
+    }
+
     private byte[] encodeObj(
         DEREncodable    obj)
         throws IOException
