@@ -1620,7 +1620,7 @@ public class RFC3280CertPathUtilities
                     ASN1TaggedObject constraint = ASN1TaggedObject.getInstance(policyConstraints.nextElement());
                     if (constraint.getTagNo() == 1)
                     {
-                        tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
+                        tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
                         if (tmpInt < policyMapping)
                         {
                             return tmpInt;
@@ -2326,7 +2326,7 @@ public class RFC3280CertPathUtilities
         }
         catch (AnnotatedException e)
         {
-            throw new ExtCertPathValidatorException("Policy constraints could no be decoded.", e, certPath, index);
+            throw new ExtCertPathValidatorException("Policy constraints could not be decoded.", e, certPath, index);
         }
         if (pc != null)
         {
@@ -2340,12 +2340,12 @@ public class RFC3280CertPathUtilities
                     case 0:
                         try
                         {
-                            tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
+                            tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
                         }
                         catch (Exception e)
                         {
                             throw new ExtCertPathValidatorException(
-                                "Policy constraints requireExplicitPolicy field could no be decoded.", e, certPath,
+                                "Policy constraints requireExplicitPolicy field could not be decoded.", e, certPath,
                                 index);
                         }
                         if (tmpInt == 0)
