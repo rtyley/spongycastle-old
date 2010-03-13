@@ -790,7 +790,7 @@ public class CMSSignedDataStreamGenerator
         //
         // add the precalculated SignerInfo digest algorithms.
         //
-        for (Iterator it = _signerStore.getSigners().iterator(); it.hasNext();)
+        for (Iterator it = _signers.iterator(); it.hasNext();)
         {
             SignerInformation signer = (SignerInformation)it.next();
             digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
@@ -925,7 +925,7 @@ public class CMSSignedDataStreamGenerator
 
         if (contentOid.equals(DATA))
         {
-            if (checkForVersion3(_signerStore))
+            if (checkForVersion3(_signers))
             {
                 return new DERInteger(3);
             }
@@ -940,9 +940,9 @@ public class CMSSignedDataStreamGenerator
         }
     }
 
-    private boolean checkForVersion3(SignerInformationStore signerInfos)
+    private boolean checkForVersion3(List signerInfos)
     {
-        for (Iterator it = signerInfos.getSigners().iterator(); it.hasNext();)
+        for (Iterator it = signerInfos.iterator(); it.hasNext();)
         {
             SignerInfo s = SignerInfo.getInstance(((SignerInformation)it.next()).toSignerInfo());
 
@@ -1074,7 +1074,7 @@ public class CMSSignedDataStreamGenerator
             // add the precalculated SignerInfo objects
             //
             {
-                Iterator it = _signerStore.getSigners().iterator();
+                Iterator it = _signers.iterator();
                 while (it.hasNext())
                 {
                     SignerInformation signer = (SignerInformation)it.next();
