@@ -549,7 +549,7 @@ public class CMSSignedDataGenerator
         //
         // add the precalculated SignerInfo objects.
         //
-        Iterator it = _signerStore.getSigners().iterator();
+        Iterator it = _signers.iterator();
         while (it.hasNext())
         {
             SignerInformation signer = (SignerInformation)it.next();
