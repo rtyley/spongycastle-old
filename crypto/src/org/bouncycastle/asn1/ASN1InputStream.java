@@ -321,6 +321,7 @@ public class ASN1InputStream
         {
             int size = length & 0x7f;
 
+            // Note: The invalid long form "0xff" (see X.690 8.1.3.5c) will be caught here
             if (size > 4)
             {
                 throw new IOException("DER length more than 4 bytes: " + size);
@@ -360,9 +361,7 @@ public class ASN1InputStream
         switch (tagNo)
         {
             case BIT_STRING:
-            {
                 return DERBitString.fromOctetString(bytes);
-            }
             case BMP_STRING:
                 return new DERBMPString(bytes);
             case BOOLEAN:
