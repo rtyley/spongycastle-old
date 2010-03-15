@@ -1,15 +1,5 @@
 package org.bouncycastle.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.util.Arrays;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +21,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.util.Arrays;
+
 /**
  * An implementation of a version 2 X.509 Attribute Certificate.
  */
@@ -40,12 +40,29 @@ public class X509V2AttributeCertificate
     private AttributeCertificate    cert;
     private Date                    notBefore;
     private Date                    notAfter;
-    
+
+    private static AttributeCertificate getObject(InputStream in)
+        throws IOException
+    {
+        try
+        {
+            return AttributeCertificate.getInstance(new ASN1InputStream(in).readObject());
+        }
+        catch (IOException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new IOException("exception decoding certificate structure: " + e.toString());
+        }
+    }
+
     public X509V2AttributeCertificate(
         InputStream encIn)
         throws IOException
     {
-        this(AttributeCertificate.getInstance(new ASN1InputStream(encIn).readObject()));
+        this(getObject(encIn));
     }
     
     public X509V2AttributeCertificate(
