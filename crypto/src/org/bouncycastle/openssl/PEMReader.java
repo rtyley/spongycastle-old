@@ -250,35 +250,38 @@ public class PEMReader
         public Object parseObject(PemObject obj)
             throws IOException
         {
-            ASN1Sequence seq = readKeyPair(obj);
-
-            if (seq.size() != 6)
-            {
-                throw new PEMException("malformed sequence in DSA private key");
-            }
-
-            //            DERInteger              v = (DERInteger)seq.getObjectAt(0);
-            DERInteger p = (DERInteger)seq.getObjectAt(1);
-            DERInteger q = (DERInteger)seq.getObjectAt(2);
-            DERInteger g = (DERInteger)seq.getObjectAt(3);
-            DERInteger y = (DERInteger)seq.getObjectAt(4);
-            DERInteger x = (DERInteger)seq.getObjectAt(5);
-
-            DSAPrivateKeySpec privSpec = new DSAPrivateKeySpec(
-                x.getValue(), p.getValue(),
-                q.getValue(), g.getValue());
-            DSAPublicKeySpec pubSpec = new DSAPublicKeySpec(
-                y.getValue(), p.getValue(),
-                q.getValue(), g.getValue());
-
             try
             {
-                KeyFactory fact = KeyFactory.getInstance("DSA", provider);
+                ASN1Sequence seq = readKeyPair(obj);
 
+                if (seq.size() != 6)
+                {
+                    throw new PEMException("malformed sequence in DSA private key");
+                }
+
+                //            DERInteger              v = (DERInteger)seq.getObjectAt(0);
+                DERInteger p = (DERInteger)seq.getObjectAt(1);
+                DERInteger q = (DERInteger)seq.getObjectAt(2);
+                DERInteger g = (DERInteger)seq.getObjectAt(3);
+                DERInteger y = (DERInteger)seq.getObjectAt(4);
+                DERInteger x = (DERInteger)seq.getObjectAt(5);
+
+                DSAPrivateKeySpec privSpec = new DSAPrivateKeySpec(
+                    x.getValue(), p.getValue(),
+                    q.getValue(), g.getValue());
+                DSAPublicKeySpec pubSpec = new DSAPublicKeySpec(
+                    y.getValue(), p.getValue(),
+                    q.getValue(), g.getValue());
+
+                KeyFactory fact = KeyFactory.getInstance("DSA", provider);
 
                 return new KeyPair(
                     fact.generatePublic(pubSpec),
                     fact.generatePrivate(privSpec));
+            }
+            catch (IOException e)
+            {
+                throw e;
             }
             catch (Exception e)
             {
@@ -299,24 +302,29 @@ public class PEMReader
         public Object parseObject(PemObject obj)
             throws IOException
         {
-            ASN1Sequence seq = readKeyPair(obj);
-
-            ECPrivateKeyStructure pKey = new ECPrivateKeyStructure(seq);
-            AlgorithmIdentifier algId = new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, pKey.getParameters());
-            PrivateKeyInfo privInfo = new PrivateKeyInfo(algId, pKey.getDERObject());
-            SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(algId, pKey.getPublicKey().getBytes());
-
-            PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privInfo.getEncoded());
-            X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
-
             try
             {
+                ASN1Sequence seq = readKeyPair(obj);
+
+                ECPrivateKeyStructure pKey = new ECPrivateKeyStructure(seq);
+                AlgorithmIdentifier algId = new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, pKey.getParameters());
+                PrivateKeyInfo privInfo = new PrivateKeyInfo(algId, pKey.getDERObject());
+                SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(algId, pKey.getPublicKey().getBytes());
+
+                PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privInfo.getEncoded());
+                X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
+
+
                 KeyFactory fact = KeyFactory.getInstance("ECDSA", provider);
 
 
                 return new KeyPair(
                     fact.generatePublic(pubSpec),
                     fact.generatePrivate(privSpec));
+            }
+            catch (IOException e)
+            {
+                throw e;
             }
             catch (Exception e)
             {
@@ -337,34 +345,44 @@ public class PEMReader
         public Object parseObject(PemObject obj)
             throws IOException
         {
-            ASN1Sequence seq = readKeyPair(obj);
-
-            //            DERInteger              v = (DERInteger)seq.getObjectAt(0);
-            DERInteger mod = (DERInteger)seq.getObjectAt(1);
-            DERInteger pubExp = (DERInteger)seq.getObjectAt(2);
-            DERInteger privExp = (DERInteger)seq.getObjectAt(3);
-            DERInteger p1 = (DERInteger)seq.getObjectAt(4);
-            DERInteger p2 = (DERInteger)seq.getObjectAt(5);
-            DERInteger exp1 = (DERInteger)seq.getObjectAt(6);
-            DERInteger exp2 = (DERInteger)seq.getObjectAt(7);
-            DERInteger crtCoef = (DERInteger)seq.getObjectAt(8);
-
-            RSAPublicKeySpec pubSpec = new RSAPublicKeySpec(
-                mod.getValue(), pubExp.getValue());
-            RSAPrivateCrtKeySpec privSpec = new RSAPrivateCrtKeySpec(
-                mod.getValue(), pubExp.getValue(), privExp.getValue(),
-                p1.getValue(), p2.getValue(),
-                exp1.getValue(), exp2.getValue(),
-                crtCoef.getValue());
-
             try
             {
+                ASN1Sequence seq = readKeyPair(obj);
+
+                if (seq.size() != 9)
+                {
+                    throw new PEMException("malformed sequence in RSA private key");
+                }
+
+                //            DERInteger              v = (DERInteger)seq.getObjectAt(0);
+                DERInteger mod = (DERInteger)seq.getObjectAt(1);
+                DERInteger pubExp = (DERInteger)seq.getObjectAt(2);
+                DERInteger privExp = (DERInteger)seq.getObjectAt(3);
+                DERInteger p1 = (DERInteger)seq.getObjectAt(4);
+                DERInteger p2 = (DERInteger)seq.getObjectAt(5);
+                DERInteger exp1 = (DERInteger)seq.getObjectAt(6);
+                DERInteger exp2 = (DERInteger)seq.getObjectAt(7);
+                DERInteger crtCoef = (DERInteger)seq.getObjectAt(8);
+
+                RSAPublicKeySpec pubSpec = new RSAPublicKeySpec(
+                    mod.getValue(), pubExp.getValue());
+                RSAPrivateCrtKeySpec privSpec = new RSAPrivateCrtKeySpec(
+                    mod.getValue(), pubExp.getValue(), privExp.getValue(),
+                    p1.getValue(), p2.getValue(),
+                    exp1.getValue(), exp2.getValue(),
+                    crtCoef.getValue());
+
+
                 KeyFactory fact = KeyFactory.getInstance("RSA", provider);
 
 
                 return new KeyPair(
                     fact.generatePublic(pubSpec),
                     fact.generatePrivate(privSpec));
+            }
+            catch (IOException e)
+            {
+                throw e;
             }
             catch (Exception e)
             {
@@ -429,19 +447,24 @@ public class PEMReader
         public Object parseObject(PemObject obj)
             throws IOException
         {
-            ASN1InputStream ais = new ASN1InputStream(obj.getContent());
-            Object asnObject = ais.readObject();
-            ASN1Sequence sequence = (ASN1Sequence)asnObject;
-            RSAPublicKeyStructure rsaPubStructure = new RSAPublicKeyStructure(sequence);
-            RSAPublicKeySpec keySpec = new RSAPublicKeySpec(
-                rsaPubStructure.getModulus(),
-                rsaPubStructure.getPublicExponent());
-
             try
             {
-                KeyFactory keyFact = KeyFactory.getInstance("RSA", provider);
+                ASN1InputStream ais = new ASN1InputStream(obj.getContent());
+                Object asnObject = ais.readObject();
+                ASN1Sequence sequence = (ASN1Sequence)asnObject;
+                RSAPublicKeyStructure rsaPubStructure = new RSAPublicKeyStructure(sequence);
+                RSAPublicKeySpec keySpec = new RSAPublicKeySpec(
+                    rsaPubStructure.getModulus(),
+                    rsaPubStructure.getPublicExponent());
 
-                return keyFact.generatePublic(keySpec);
+
+                    KeyFactory keyFact = KeyFactory.getInstance("RSA", provider);
+
+                    return keyFact.generatePublic(keySpec);
+            }
+            catch (IOException e)
+            {
+                throw e;
             }
             catch (NoSuchProviderException e)
             {
@@ -589,9 +612,27 @@ public class PEMReader
         public Object parseObject(PemObject obj)
             throws IOException
         {
-            DERObjectIdentifier oid = (DERObjectIdentifier)ASN1Object.fromByteArray(obj.getContent());
+            try
+            {
+                DERObjectIdentifier oid = (DERObjectIdentifier)ASN1Object.fromByteArray(obj.getContent());
 
-            return ECNamedCurveTable.getParameterSpec(oid.getId());
+                Object params = ECNamedCurveTable.getParameterSpec(oid.getId());
+
+                if (params == null)
+                {
+                    throw new IOException("object ID not found in EC curve table");
+                }
+
+                return params;
+            }
+            catch (IOException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new PEMException("exception extracting EC named curve: " + e.toString());
+            }
         }
     }
 
@@ -614,25 +655,25 @@ public class PEMReader
         public Object parseObject(PemObject obj)
             throws IOException
         {
-            EncryptedPrivateKeyInfo info = EncryptedPrivateKeyInfo.getInstance(ASN1Object.fromByteArray(obj.getContent()));
-            AlgorithmIdentifier algId = info.getEncryptionAlgorithm();
-
-            if (pFinder == null)
+            try
             {
-                throw new PEMException("no PasswordFinder specified");
-            }
+                EncryptedPrivateKeyInfo info = EncryptedPrivateKeyInfo.getInstance(ASN1Object.fromByteArray(obj.getContent()));
+                AlgorithmIdentifier algId = info.getEncryptionAlgorithm();
 
-            if (PEMUtilities.isPKCS5Scheme2(algId.getObjectId()))
-            {
-                PBES2Parameters     params = PBES2Parameters.getInstance(algId.getParameters());
-                KeyDerivationFunc   func = params.getKeyDerivationFunc();
-                EncryptionScheme    scheme = params.getEncryptionScheme();
-                PBKDF2Params        defParams = (PBKDF2Params)func.getParameters();
-
-                try
+                if (pFinder == null)
                 {
-                    int     iterationCount = defParams.getIterationCount().intValue();
-                    byte[]  salt = defParams.getSalt();
+                    throw new PEMException("no PasswordFinder specified");
+                }
+
+                if (PEMUtilities.isPKCS5Scheme2(algId.getObjectId()))
+                {
+                    PBES2Parameters params = PBES2Parameters.getInstance(algId.getParameters());
+                    KeyDerivationFunc func = params.getKeyDerivationFunc();
+                    EncryptionScheme scheme = params.getEncryptionScheme();
+                    PBKDF2Params defParams = (PBKDF2Params)func.getParameters();
+
+                    int iterationCount = defParams.getIterationCount().intValue();
+                    byte[] salt = defParams.getSalt();
 
                     String algorithm = scheme.getObjectId().getId();
 
@@ -652,19 +693,12 @@ public class PEMReader
 
                     return keyFact.generatePrivate(keySpec);
                 }
-                catch (Exception e)
+                else if (PEMUtilities.isPKCS12(algId.getObjectId()))
                 {
-                    throw new PEMException("problem parsing ENCRYPTED PRIVATE KEY: " + e.toString(), e);
-                }
-            }
-            else if (PEMUtilities.isPKCS12(algId.getObjectId()))
-            {
-                PKCS12PBEParams params = PKCS12PBEParams.getInstance(algId.getParameters());
-                String          algorithm = algId.getObjectId().getId();
-                PBEKeySpec pbeSpec = new PBEKeySpec(pFinder.getPassword());
+                    PKCS12PBEParams params = PKCS12PBEParams.getInstance(algId.getParameters());
+                    String algorithm = algId.getObjectId().getId();
+                    PBEKeySpec pbeSpec = new PBEKeySpec(pFinder.getPassword());
 
-                try
-                {
                     SecretKeyFactory secKeyFact = SecretKeyFactory.getInstance(algorithm, provider);
                     PBEParameterSpec defParams = new PBEParameterSpec(params.getIV(), params.getIterations().intValue());
 
@@ -679,19 +713,12 @@ public class PEMReader
 
                     return keyFact.generatePrivate(keySpec);
                 }
-                catch (Exception e)
+                else if (PEMUtilities.isPKCS5Scheme1(algId.getObjectId()))
                 {
-                    throw new PEMException("problem parsing ENCRYPTED PRIVATE KEY: " + e.toString(), e);
-                }
-            }
-            else if (PEMUtilities.isPKCS5Scheme1(algId.getObjectId()))
-            {
-                PBEParameter    params = PBEParameter.getInstance(algId.getParameters());
-                String          algorithm = algId.getObjectId().getId();
-                PBEKeySpec      pbeSpec = new PBEKeySpec(pFinder.getPassword());
+                    PBEParameter params = PBEParameter.getInstance(algId.getParameters());
+                    String algorithm = algId.getObjectId().getId();
+                    PBEKeySpec pbeSpec = new PBEKeySpec(pFinder.getPassword());
 
-                try
-                {
                     SecretKeyFactory secKeyFact = SecretKeyFactory.getInstance(algorithm, provider);
                     PBEParameterSpec defParams = new PBEParameterSpec(params.getSalt(), params.getIterationCount().intValue());
 
@@ -706,14 +733,18 @@ public class PEMReader
 
                     return keyFact.generatePrivate(keySpec);
                 }
-                catch (Exception e)
+                else
                 {
-                    throw new PEMException("problem parsing ENCRYPTED PRIVATE KEY: " + e.toString(), e);
+                    throw new PEMException("Unknown algorithm: " + algId.getObjectId());
                 }
             }
-            else
+            catch (IOException e)
             {
-                throw new PEMException("Unknown algorithm: " + algId.getObjectId());
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new PEMException("problem parsing ENCRYPTED PRIVATE KEY: " + e.toString(), e);
             }
         }
     }
