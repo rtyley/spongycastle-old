@@ -29,6 +29,42 @@ public class ASN1StreamParser
         this(new ByteArrayInputStream(encoding), encoding.length);
     }
 
+    DEREncodable readImplicit(boolean constructed, int tag)
+    {
+        switch (tag)
+        {
+            case DERTags.SET:
+                if (constructed)
+                {
+                    return new BERSetParser(this);
+                }
+                else
+                {
+                    return new DERSetParser(this);
+                }
+            case DERTags.SEQUENCE:
+                if (constructed)
+                {
+                    return new BERSequenceParser(this);
+                }
+                else
+                {
+                    return new DERSequenceParser(this);
+                }
+            case DERTags.OCTET_STRING:
+                if (constructed)
+                {
+                    return new BEROctetStringParser(this);
+                }
+                else
+                {
+                    return new DEROctetStringParser((DefiniteLengthInputStream)_in);
+                }
+        }
+
+        throw new RuntimeException("implicit tagging not implemented");
+    }
+
     public DEREncodable readObject()
         throws IOException
     {
@@ -73,7 +109,7 @@ public class ASN1StreamParser
 
             if ((tag & DERTags.TAGGED) != 0)
             {
-                return new BERTaggedObjectParser(tag, tagNo, indIn);
+                return new BERTaggedObjectParser(true, tagNo, indIn);
             }
 
             ASN1StreamParser sp = new ASN1StreamParser(indIn, _limit);
@@ -105,7 +141,7 @@ public class ASN1StreamParser
 
             if ((tag & DERTags.TAGGED) != 0)
             {
-                return new BERTaggedObjectParser(tag, tagNo, defIn);
+                return new BERTaggedObjectParser(isConstructed, tagNo, defIn);
             }
 
             if (isConstructed)

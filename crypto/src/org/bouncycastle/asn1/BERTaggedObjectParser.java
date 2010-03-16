@@ -6,18 +6,28 @@ import java.io.InputStream;
 public class BERTaggedObjectParser
     implements ASN1TaggedObjectParser
 {
-    private int _baseTag;
+    private boolean _constructed;
     private int _tagNumber;
     private InputStream _contentStream;
-
     private boolean _indefiniteLength;
 
+    /**
+     * @deprecated
+     */
     protected BERTaggedObjectParser(
         int         baseTag,
         int         tagNumber,
         InputStream contentStream)
     {
-        _baseTag = baseTag;
+        this((baseTag & DERTags.CONSTRUCTED) != 0, tagNumber, contentStream);
+    }
+
+    BERTaggedObjectParser(
+        boolean     constructed,
+        int         tagNumber,
+        InputStream contentStream)
+    {
+        _constructed = constructed;
         _tagNumber = tagNumber;
         _contentStream = contentStream;
         _indefiniteLength = contentStream instanceof IndefiniteLengthInputStream;
@@ -25,14 +35,14 @@ public class BERTaggedObjectParser
 
     public boolean isConstructed()
     {
-        return (_baseTag & DERTags.CONSTRUCTED) != 0;
+        return _constructed;
     }
 
     public int getTagNo()
     {
         return _tagNumber;
     }
-    
+
     public DEREncodable getObjectParser(
         int     tag,
         boolean isExplicit)
@@ -43,39 +53,7 @@ public class BERTaggedObjectParser
             return new ASN1StreamParser(_contentStream).readObject();
         }
 
-        switch (tag)
-        {
-            case DERTags.SET:
-                if (_indefiniteLength)
-                {
-                    return new BERSetParser(new ASN1StreamParser(_contentStream));
-                }
-                else
-                {
-                    return new DERSetParser(new ASN1StreamParser(_contentStream));
-                }
-            case DERTags.SEQUENCE:
-                if (_indefiniteLength)
-                {
-                    return new BERSequenceParser(new ASN1StreamParser(_contentStream));
-                }
-                else
-                {
-                    return new DERSequenceParser(new ASN1StreamParser(_contentStream));
-                }
-            case DERTags.OCTET_STRING:
-                // TODO Is the handling of definite length constructed encodings correct?
-                if (_indefiniteLength || this.isConstructed())
-                {
-                    return new BEROctetStringParser(new ASN1StreamParser(_contentStream));
-                }
-                else
-                {
-                    return new DEROctetStringParser((DefiniteLengthInputStream)_contentStream);
-                }
-        }
-
-        throw new RuntimeException("implicit tagging not implemented");
+        return new ASN1StreamParser(_contentStream).readImplicit(_constructed, tag);
     }
 
     private ASN1EncodableVector rLoadVector(InputStream in)
