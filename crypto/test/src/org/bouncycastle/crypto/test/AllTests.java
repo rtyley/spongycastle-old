@@ -34,6 +34,7 @@ public class AllTests
         TestSuite suite = new TestSuite("Lightweight Crypto Tests");
         
         suite.addTestSuite(AllTests.class);
+        suite.addTestSuite(GCMReorderTest.class);
         
         return suite;
     }
