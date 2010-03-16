@@ -65,6 +65,28 @@ public class ASN1StreamParser
         throw new RuntimeException("implicit tagging not implemented");
     }
 
+    DERObject readTaggedObject(boolean constructed, int tag) throws IOException
+    {
+        if (!constructed)
+        {
+            DefiniteLengthInputStream defIn = (DefiniteLengthInputStream)_in;
+            return new DERTaggedObject(false, tag, new DEROctetString(defIn.toByteArray()));
+        }
+
+        ASN1EncodableVector v = readVector();
+
+        if (_in instanceof IndefiniteLengthInputStream)
+        {
+            return v.size() == 1
+                ?   new BERTaggedObject(true, tag, v.get(0))
+                :   new BERTaggedObject(false, tag, BERFactory.createSequence(v));
+        }
+
+        return v.size() == 1
+            ?   new DERTaggedObject(true, tag, v.get(0))
+            :   new DERTaggedObject(false, tag, DERFactory.createSequence(v));
+    }
+
     public DEREncodable readObject()
         throws IOException
     {

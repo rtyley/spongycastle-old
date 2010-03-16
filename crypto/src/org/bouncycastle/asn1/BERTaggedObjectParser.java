@@ -8,8 +8,7 @@ public class BERTaggedObjectParser
 {
     private boolean _constructed;
     private int _tagNumber;
-    private InputStream _contentStream;
-    private boolean _indefiniteLength;
+    private ASN1StreamParser _parser;
 
     /**
      * @deprecated
@@ -29,8 +28,7 @@ public class BERTaggedObjectParser
     {
         _constructed = constructed;
         _tagNumber = tagNumber;
-        _contentStream = contentStream;
-        _indefiniteLength = contentStream instanceof IndefiniteLengthInputStream;
+        _parser = new ASN1StreamParser(contentStream);
     }
 
     public boolean isConstructed()
@@ -50,41 +48,16 @@ public class BERTaggedObjectParser
     {
         if (isExplicit)
         {
-            return new ASN1StreamParser(_contentStream).readObject();
+            return _parser.readObject();
         }
 
-        return new ASN1StreamParser(_contentStream).readImplicit(_constructed, tag);
-    }
-
-    private ASN1EncodableVector rLoadVector(InputStream in)
-        throws IOException
-    {
-        return new ASN1StreamParser(in).readVector();
+        return _parser.readImplicit(_constructed, tag);
     }
 
     public DERObject getLoadedObject()
         throws IOException
     {
-        if (_indefiniteLength)
-        {
-            ASN1EncodableVector v = rLoadVector(_contentStream);
-
-            return v.size() == 1
-                ?   new BERTaggedObject(true, _tagNumber, v.get(0))
-                :   new BERTaggedObject(false, _tagNumber, BERFactory.createSequence(v));
-        }
-
-        if (this.isConstructed())
-        {
-            ASN1EncodableVector v = rLoadVector(_contentStream);
-
-            return v.size() == 1
-                ?   new DERTaggedObject(true, _tagNumber, v.get(0))
-                :   new DERTaggedObject(false, _tagNumber, DERFactory.createSequence(v));
-        }
-
-        DefiniteLengthInputStream defIn = (DefiniteLengthInputStream)_contentStream;
-        return new DERTaggedObject(false, _tagNumber, new DEROctetString(defIn.toByteArray()));
+        return _parser.readTaggedObject(_constructed, _tagNumber);
     }
 
     public DERObject getDERObject()
