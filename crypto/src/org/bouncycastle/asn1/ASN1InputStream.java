@@ -23,9 +23,9 @@ public class ASN1InputStream
 
     static int findLimit(InputStream in)
     {
-        if (in instanceof DefiniteLengthInputStream)
+        if (in instanceof LimitedInputStream)
         {
-            return ((DefiniteLengthInputStream)in).getRemaining();
+            return ((LimitedInputStream)in).getRemaining();
         }
         else if (in instanceof ByteArrayInputStream)
         {
@@ -221,7 +221,7 @@ public class ASN1InputStream
                 throw new IOException("indefinite length primitive encoding encountered");
             }
 
-            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this);
+            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this, limit);
 
             if ((tag & APPLICATION) != 0)
             {

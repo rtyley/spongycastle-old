@@ -13,10 +13,11 @@ class IndefiniteLengthInputStream
     private boolean _eofOn00 = true;
 
     IndefiniteLengthInputStream(
-        InputStream in)
+        InputStream in,
+        int         limit)
         throws IOException
     {
-        super(in);
+        super(in, limit);
 
         _b1 = in.read();
         _b2 = in.read();

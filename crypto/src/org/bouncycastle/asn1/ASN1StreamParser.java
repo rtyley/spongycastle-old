@@ -62,7 +62,7 @@ public class ASN1StreamParser
                 throw new IOException("indefinite length primitive encoding encountered");
             }
 
-            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(_in);
+            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(_in, _limit);
 
             if ((tag & DERTags.APPLICATION) != 0)
             {
