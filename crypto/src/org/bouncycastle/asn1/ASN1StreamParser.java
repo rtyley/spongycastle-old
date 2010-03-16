@@ -121,20 +121,17 @@ public class ASN1StreamParser
             }
 
             IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(_in, _limit);
+            ASN1StreamParser sp = new ASN1StreamParser(indIn, _limit);
 
             if ((tag & DERTags.APPLICATION) != 0)
             {
-                ASN1StreamParser sp = new ASN1StreamParser(indIn, _limit);
-
                 return new BERApplicationSpecificParser(tagNo, sp);
             }
 
             if ((tag & DERTags.TAGGED) != 0)
             {
-                return new BERTaggedObjectParser(true, tagNo, indIn);
+                return new BERTaggedObjectParser(true, tagNo, sp);
             }
-
-            ASN1StreamParser sp = new ASN1StreamParser(indIn, _limit);
 
             // TODO There are other tags that may be constructed (e.g. BIT_STRING)
             switch (tagNo)
@@ -145,9 +142,8 @@ public class ASN1StreamParser
                     return new BERSequenceParser(sp);
                 case DERTags.SET:
                     return new BERSetParser(sp);
-                case DERTags.EXTERNAL:{
+                case DERTags.EXTERNAL:
                     return new DERExternalParser(sp);
-                }
                 default:
                     throw new IOException("unknown BER object encountered: 0x" + Integer.toHexString(tagNo));
             }
@@ -163,7 +159,7 @@ public class ASN1StreamParser
 
             if ((tag & DERTags.TAGGED) != 0)
             {
-                return new BERTaggedObjectParser(isConstructed, tagNo, defIn);
+                return new BERTaggedObjectParser(isConstructed, tagNo, new ASN1StreamParser(defIn));
             }
 
             if (isConstructed)

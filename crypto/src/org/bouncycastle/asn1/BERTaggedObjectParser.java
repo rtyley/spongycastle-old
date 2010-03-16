@@ -18,17 +18,17 @@ public class BERTaggedObjectParser
         int         tagNumber,
         InputStream contentStream)
     {
-        this((baseTag & DERTags.CONSTRUCTED) != 0, tagNumber, contentStream);
+        this((baseTag & DERTags.CONSTRUCTED) != 0, tagNumber, new ASN1StreamParser(contentStream));
     }
 
     BERTaggedObjectParser(
-        boolean     constructed,
-        int         tagNumber,
-        InputStream contentStream)
+        boolean             constructed,
+        int                 tagNumber,
+        ASN1StreamParser    parser)
     {
         _constructed = constructed;
         _tagNumber = tagNumber;
-        _parser = new ASN1StreamParser(contentStream);
+        _parser = parser;
     }
 
     public boolean isConstructed()

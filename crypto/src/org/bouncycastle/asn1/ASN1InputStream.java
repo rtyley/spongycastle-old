@@ -134,7 +134,7 @@ public class ASN1InputStream
 
         if ((tag & TAGGED) != 0)
         {
-            return new BERTaggedObjectParser(isConstructed, tagNo, defIn).getLoadedObject();
+            return new ASN1StreamParser(defIn).readTaggedObject(isConstructed, tagNo);
         }
 
         if (isConstructed)
@@ -222,20 +222,17 @@ public class ASN1InputStream
             }
 
             IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this, limit);
+            ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
 
             if ((tag & APPLICATION) != 0)
             {
-                ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
-
                 return new BERApplicationSpecificParser(tagNo, sp).getLoadedObject();
             }
 
             if ((tag & TAGGED) != 0)
             {
-                return new BERTaggedObjectParser(true, tagNo, indIn).getLoadedObject();
+                return new BERTaggedObjectParser(true, tagNo, sp).getLoadedObject();
             }
-
-            ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
 
             // TODO There are other tags that may be constructed (e.g. BIT_STRING)
             switch (tagNo)
