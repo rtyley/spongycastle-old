@@ -549,13 +549,7 @@ public class CMSSignedDataParser
 
         eiGen.addObject(encapContentInfo.getContentType());
 
-        ASN1OctetStringParser octs = (ASN1OctetStringParser)
-            encapContentInfo.getContent(DERTags.OCTET_STRING);
-
-        if (octs != null)
-        {
-            pipeOctetString(octs, eiGen.getRawOutputStream());
-        }
+        pipeEncapsulatedOctetString(encapContentInfo, eiGen.getRawOutputStream());
 
         eiGen.close();
 
@@ -622,13 +616,7 @@ public class CMSSignedDataParser
 
         eiGen.addObject(encapContentInfo.getContentType());
 
-        ASN1OctetStringParser octs = (ASN1OctetStringParser)
-            encapContentInfo.getContent(DERTags.OCTET_STRING);
-
-        if (octs != null)
-        {
-            pipeOctetString(octs, eiGen.getRawOutputStream());
-        }
+        pipeEncapsulatedOctetString(encapContentInfo, eiGen.getRawOutputStream());
 
         eiGen.close();
 
@@ -708,6 +696,37 @@ public class CMSSignedDataParser
             :   ASN1Set.getInstance(asn1SetParser.getDERObject());
     }
 
+    private static void pipeEncapsulatedOctetString(ContentInfoParser encapContentInfo,
+        OutputStream rawOutputStream) throws IOException
+    {
+        ASN1OctetStringParser octs = (ASN1OctetStringParser)
+            encapContentInfo.getContent(DERTags.OCTET_STRING);
+
+        if (octs != null)
+        {
+            pipeOctetString(octs, rawOutputStream);
+        }
+
+//        BERTaggedObjectParser contentObject = (BERTaggedObjectParser)encapContentInfo.getContentObject();
+//        if (contentObject != null)
+//        {
+//            // Handle IndefiniteLengthInputStream safely
+//            InputStream input = ASN1StreamParser.getSafeRawInputStream(contentObject.getContentStream(true));
+//
+//            // TODO BerTaggedObjectGenerator?
+//            BEROutputStream berOut = new BEROutputStream(rawOutputStream);
+//            berOut.write(DERTags.CONSTRUCTED | DERTags.TAGGED | 0);
+//            berOut.write(0x80);
+//
+//            pipeRawOctetString(input, rawOutputStream);
+//
+//            berOut.write(0x00);
+//            berOut.write(0x00);
+//
+//            input.close();
+//        }
+    }
+
     private static void pipeOctetString(
         ASN1OctetStringParser octs,
         OutputStream          output)
@@ -719,4 +738,15 @@ public class CMSSignedDataParser
         Streams.pipeAll(octs.getOctetStream(), outOctets);
         outOctets.close();
     }
+
+//    private static void pipeRawOctetString(
+//        InputStream     rawInput,
+//        OutputStream    rawOutput)
+//        throws IOException
+//    {
+//        InputStream tee = new TeeInputStream(rawInput, rawOutput);
+//        ASN1StreamParser sp = new ASN1StreamParser(tee);
+//        ASN1OctetStringParser octs = (ASN1OctetStringParser)sp.readObject();
+//        Streams.drain(octs.getOctetStream());
+//    }
 }
