@@ -134,7 +134,7 @@ public class ASN1InputStream
 
         if ((tag & TAGGED) != 0)
         {
-            return new BERTaggedObjectParser(tag, tagNo, defIn).getLoadedObject();
+            return new BERTaggedObjectParser(isConstructed, tagNo, defIn).getLoadedObject();
         }
 
         if (isConstructed)
@@ -229,9 +229,10 @@ public class ASN1InputStream
 
                 return new BERApplicationSpecificParser(tagNo, sp).getLoadedObject();
             }
+
             if ((tag & TAGGED) != 0)
             {
-                return new BERTaggedObjectParser(tag, tagNo, indIn).getLoadedObject();
+                return new BERTaggedObjectParser(true, tagNo, indIn).getLoadedObject();
             }
 
             ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
