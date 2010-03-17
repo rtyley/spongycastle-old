@@ -48,6 +48,10 @@ public class BERTaggedObjectParser
     {
         if (isExplicit)
         {
+            if (!_constructed)
+            {
+                throw new IOException("Explicit tags must be constructed (see X.690 8.14.2)");
+            }
             return _parser.readObject();
         }
 
