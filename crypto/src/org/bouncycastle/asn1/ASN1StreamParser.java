@@ -51,14 +51,18 @@ public class ASN1StreamParser
 
     DEREncodable readImplicit(boolean constructed, int tag) throws IOException
     {
-        boolean indefiniteLength = _in instanceof IndefiniteLengthInputStream;
+        if (_in instanceof IndefiniteLengthInputStream)
+        {
+            if (!constructed)
+            {
+                throw new IOException("indefinite length primitive encoding encountered");
+            }
+            
+            return readIndef(tag);
+        }
+
         if (constructed)
         {
-            if (indefiniteLength)
-            {
-                return readIndef(tag);
-            }
-
             switch (tag)
             {
                 case DERTags.SET:
@@ -78,14 +82,7 @@ public class ASN1StreamParser
                 case DERTags.SEQUENCE:
                     throw new ASN1Exception("sets must use constructed encoding (see X.690 8.11.1/8.12.1)");
                 case DERTags.OCTET_STRING:
-                    if (indefiniteLength)
-                    {
-                        return new BEROctetStringParser(this);
-                    }
-                    else
-                    {
-                        return new DEROctetStringParser((DefiniteLengthInputStream)_in);
-                    }
+                    return new DEROctetStringParser((DefiniteLengthInputStream)_in);
             }
         }
 
