@@ -29,39 +29,67 @@ public class ASN1StreamParser
         this(new ByteArrayInputStream(encoding), encoding.length);
     }
 
-    DEREncodable readImplicit(boolean constructed, int tag)
+    DEREncodable readIndef(int tagValue) throws IOException
     {
-        switch (tag)
+        // Note: INDEF => CONSTRUCTED
+
+        // TODO There are other tags that may be constructed (e.g. BIT_STRING)
+        switch (tagValue)
         {
-            case DERTags.SET:
-                if (constructed)
-                {
-                    return new BERSetParser(this);
-                }
-                else
-                {
-                    return new DERSetParser(this);
-                }
-            case DERTags.SEQUENCE:
-                if (constructed)
-                {
-                    return new BERSequenceParser(this);
-                }
-                else
-                {
-                    return new DERSequenceParser(this);
-                }
+            case DERTags.EXTERNAL:
+                return new DERExternalParser(this);
             case DERTags.OCTET_STRING:
-                if (constructed)
-                {
+                return new BEROctetStringParser(this);
+            case DERTags.SEQUENCE:
+                return new BERSequenceParser(this);
+            case DERTags.SET:
+                return new BERSetParser(this);
+            default:
+                throw new ASN1Exception("unknown BER object encountered: 0x" + Integer.toHexString(tagValue));
+        }
+    }
+
+    DEREncodable readImplicit(boolean constructed, int tag) throws IOException
+    {
+        boolean indefiniteLength = _in instanceof IndefiniteLengthInputStream;
+        if (constructed)
+        {
+            if (indefiniteLength)
+            {
+                return readIndef(tag);
+            }
+
+            switch (tag)
+            {
+                case DERTags.SET:
+                    return new DERSetParser(this);
+                case DERTags.SEQUENCE:
+                    return new DERSequenceParser(this);
+                case DERTags.OCTET_STRING:
                     return new BEROctetStringParser(this);
-                }
-                else
-                {
-                    return new DEROctetStringParser((DefiniteLengthInputStream)_in);
-                }
+            }
+        }
+        else
+        {
+            switch (tag)
+            {
+                case DERTags.SET:
+                    throw new ASN1Exception("sequences must use constructed encoding (see X.690 8.9.1/8.10.1)");
+                case DERTags.SEQUENCE:
+                    throw new ASN1Exception("sets must use constructed encoding (see X.690 8.11.1/8.12.1)");
+                case DERTags.OCTET_STRING:
+                    if (indefiniteLength)
+                    {
+                        return new BEROctetStringParser(this);
+                    }
+                    else
+                    {
+                        return new DEROctetStringParser((DefiniteLengthInputStream)_in);
+                    }
+            }
         }
 
+        // TODO ASN1Exception
         throw new RuntimeException("implicit tagging not implemented");
     }
 
@@ -69,6 +97,7 @@ public class ASN1StreamParser
     {
         if (!constructed)
         {
+            // Note: !CONSTRUCTED => IMPLICIT
             DefiniteLengthInputStream defIn = (DefiniteLengthInputStream)_in;
             return new DERTaggedObject(false, tag, new DEROctetString(defIn.toByteArray()));
         }
@@ -133,20 +162,7 @@ public class ASN1StreamParser
                 return new BERTaggedObjectParser(true, tagNo, sp);
             }
 
-            // TODO There are other tags that may be constructed (e.g. BIT_STRING)
-            switch (tagNo)
-            {
-                case DERTags.OCTET_STRING:
-                    return new BEROctetStringParser(sp);
-                case DERTags.SEQUENCE:
-                    return new BERSequenceParser(sp);
-                case DERTags.SET:
-                    return new BERSetParser(sp);
-                case DERTags.EXTERNAL:
-                    return new DERExternalParser(sp);
-                default:
-                    throw new IOException("unknown BER object encountered: 0x" + Integer.toHexString(tagNo));
-            }
+            return sp.readIndef(tagNo);
         }
         else
         {
