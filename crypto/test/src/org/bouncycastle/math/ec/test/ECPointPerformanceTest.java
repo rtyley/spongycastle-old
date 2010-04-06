@@ -43,12 +43,19 @@ public class ECPointPerformanceTest extends TestCase
 
     public void testMultiply() throws Exception
     {
+        randMult("sect163k1");
         randMult("sect163r2");
+        randMult("sect233k1");
         randMult("sect233r1");
+        randMult("sect283k1");
         randMult("sect283r1");
+        randMult("sect409k1");
         randMult("sect409r1");
+        randMult("sect571k1");
         randMult("sect571r1");
+        randMult("secp224k1");
         randMult("secp224r1");
+        randMult("secp256k1");
         randMult("secp256r1");
         randMult("secp521r1");
     }
