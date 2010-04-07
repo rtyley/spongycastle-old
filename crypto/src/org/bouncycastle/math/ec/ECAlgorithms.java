@@ -13,16 +13,15 @@ public class ECAlgorithms
             throw new IllegalArgumentException("P and Q must be on same curve");
         }
 
-        // TODO Add special case back in when WTNAF is enabled
-//        // Point multiplication for Koblitz curves (using WTNAF) beats Shamir's trick
-//        if (c instanceof ECCurve.F2m)
-//        {
-//            ECCurve.F2m f2mCurve = (ECCurve.F2m) c;
-//            if (f2mCurve.isKoblitz())
-//            {
-//                return P.multiply(a).add(Q.multiply(b));
-//            }
-//        }
+        // Point multiplication for Koblitz curves (using WTNAF) beats Shamir's trick
+        if (c instanceof ECCurve.F2m)
+        {
+            ECCurve.F2m f2mCurve = (ECCurve.F2m)c;
+            if (f2mCurve.isKoblitz())
+            {
+                return P.multiply(a).add(Q.multiply(b));
+            }
+        }
 
         return implShamirsTrick(P, a, Q, b);
     }
