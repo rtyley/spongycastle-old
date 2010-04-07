@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -8,8 +10,6 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTCTime;
-
-import java.util.Enumeration;
 
 /**
  * PKIX RFC-2459 - TBSCertList object.
@@ -35,7 +35,7 @@ import java.util.Enumeration;
 public class TBSCertList
     extends ASN1Encodable
 {
-    public class CRLEntry
+    public static class CRLEntry
         extends ASN1Encodable
     {
         ASN1Sequence  seq;
