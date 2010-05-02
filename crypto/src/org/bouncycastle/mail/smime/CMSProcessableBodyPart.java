@@ -1,9 +1,6 @@
 package org.bouncycastle.mail.smime;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.mail.BodyPart;
@@ -24,16 +21,6 @@ public class CMSProcessableBodyPart
         BodyPart    bodyPart)
     {
         this.bodyPart = bodyPart;
-    }
-
-    public InputStream read() throws IOException, CMSException
-    {
-        // Note: This 'obvious' implementation appears to not be the same data
-//        bodyPart.getInputStream();
-
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        write(buf);
-        return new ByteArrayInputStream(buf.toByteArray());
     }
 
     public void write(

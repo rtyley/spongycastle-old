@@ -1,14 +1,10 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface CMSProcessable
 {
-    public InputStream read()
-        throws IOException, CMSException;
-
     /**
      * generic routine to copy out the data we want processed - the OutputStream
      * passed in will do the handling on it's own.

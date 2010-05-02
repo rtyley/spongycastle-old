@@ -31,7 +31,7 @@ public class PasswordRecipientInformation
 
     PasswordRecipientInformation(
         PasswordRecipientInfo   info,
-        CMSSecureProcessable    secureProcessable)
+        CMSSecureReadable    secureProcessable)
     {
         super(info.getKeyEncryptionAlgorithm(), secureProcessable);
 

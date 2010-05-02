@@ -35,7 +35,7 @@ public class KeyTransRecipientInformation
 
     KeyTransRecipientInformation(
         KeyTransRecipientInfo   info,
-        CMSSecureProcessable    secureProcessable)
+        CMSSecureReadable    secureProcessable)
     {
         super(info.getKeyEncryptionAlgorithm(), secureProcessable);
 

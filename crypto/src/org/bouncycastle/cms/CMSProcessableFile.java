@@ -11,7 +11,7 @@ import java.io.OutputStream;
  * a holding class for a file of data to be processed.
  */
 public class CMSProcessableFile
-    implements CMSProcessable
+    implements CMSProcessable, CMSReadable
 {
     private static final int DEFAULT_BUF_SIZE = 32 * 1024;
     

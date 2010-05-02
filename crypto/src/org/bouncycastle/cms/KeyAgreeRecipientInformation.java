@@ -48,7 +48,7 @@ public class KeyAgreeRecipientInformation
     private ASN1OctetString       encryptedKey;
 
     static void readRecipientInfo(List infos, KeyAgreeRecipientInfo info,
-        CMSSecureProcessable secureProcessable)
+        CMSSecureReadable secureProcessable)
     {
         try
         {
@@ -92,7 +92,7 @@ public class KeyAgreeRecipientInformation
         KeyAgreeRecipientInfo   info,
         RecipientId             rid,
         ASN1OctetString         encryptedKey,
-        CMSSecureProcessable    secureProcessable)
+        CMSSecureReadable    secureProcessable)
     {
         super(info.getKeyEncryptionAlgorithm(), secureProcessable);
 

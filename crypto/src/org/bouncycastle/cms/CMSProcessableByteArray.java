@@ -9,7 +9,7 @@ import java.io.OutputStream;
  * a holding class for a byte array of data to be processed.
  */
 public class CMSProcessableByteArray
-    implements CMSProcessable
+    implements CMSProcessable, CMSReadable
 {
     private byte[]  bytes;
 

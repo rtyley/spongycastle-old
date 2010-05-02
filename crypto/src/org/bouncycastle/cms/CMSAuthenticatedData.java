@@ -61,10 +61,10 @@ public class CMSAuthenticatedData
         // read the authenticated content info
         //
         ContentInfo encInfo = authData.getEncapsulatedContentInfo();
-        CMSProcessable processable = new CMSProcessableByteArray(
+        CMSReadable readable = new CMSProcessableByteArray(
             ASN1OctetString.getInstance(encInfo.getContent()).getOctets());
-        CMSSecureProcessable secureProcessable = new CMSEnvelopedHelper.CMSAuthenticatedSecureProcessable(
-            this.macAlg, processable);
+        CMSSecureReadable secureProcessable = new CMSEnvelopedHelper.CMSAuthenticatedSecureProcessable(
+            this.macAlg, readable);
 
         //
         // build the RecipientInformationStore
