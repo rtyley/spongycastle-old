@@ -56,7 +56,7 @@ class CMSAuthEnvelopedData
         this.authEncAlg = authEncInfo.getContentEncryptionAlgorithm();
 //        final CMSProcessable processable = new CMSProcessableByteArray(
 //            authEncInfo.getEncryptedContent().getOctets());
-        CMSSecureProcessable secureProcessable = new CMSSecureProcessable()
+        CMSSecureReadable secureProcessable = new CMSSecureReadable()
         {
             public AlgorithmIdentifier getAlgorithm()
             {
@@ -68,7 +68,7 @@ class CMSAuthEnvelopedData
                 return null;
             }
 
-            public CMSProcessable getProcessable(SecretKey key, Provider provider) throws CMSException
+            public CMSReadable getReadable(SecretKey key, Provider provider) throws CMSException
             {
                 // TODO Create AEAD cipher instance to decrypt and calculate tag ( MAC)
                 throw new CMSException("AuthEnveloped data decryption not yet implemented");

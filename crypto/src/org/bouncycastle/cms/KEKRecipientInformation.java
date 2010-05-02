@@ -23,7 +23,7 @@ public class KEKRecipientInformation
 
     KEKRecipientInformation(
         KEKRecipientInfo        info,
-        CMSSecureProcessable    secureProcessable)
+        CMSSecureReadable    secureProcessable)
     {
         super(info.getKeyEncryptionAlgorithm(), secureProcessable);
 

@@ -380,7 +380,7 @@ class CMSEnvelopedHelper
     }
 
     static RecipientInformationStore buildRecipientInformationStore(
-        ASN1Set recipientInfos, CMSSecureProcessable secureProcessable)
+        ASN1Set recipientInfos, CMSSecureReadable secureProcessable)
     {
         List infos = new ArrayList();
         for (int i = 0; i != recipientInfos.size(); i++)
@@ -393,7 +393,7 @@ class CMSEnvelopedHelper
     }
 
     private static void readRecipientInfo(
-        List infos, RecipientInfo info, CMSSecureProcessable secureProcessable)
+        List infos, RecipientInfo info, CMSSecureReadable secureProcessable)
     {
         DEREncodable recipInfo = info.getInfo();
         if (recipInfo instanceof KeyTransRecipientInfo)
@@ -418,16 +418,16 @@ class CMSEnvelopedHelper
         }
     }
 
-    static class CMSAuthenticatedSecureProcessable implements CMSSecureProcessable
+    static class CMSAuthenticatedSecureProcessable implements CMSSecureReadable
     {
         private AlgorithmIdentifier algorithm;
         private Mac mac;
-        private CMSProcessable processable;
+        private CMSReadable readable;
 
-        CMSAuthenticatedSecureProcessable(AlgorithmIdentifier algorithm, CMSProcessable processable)
+        CMSAuthenticatedSecureProcessable(AlgorithmIdentifier algorithm, CMSReadable readable)
         {
             this.algorithm = algorithm;
-            this.processable = processable;
+            this.readable = readable;
         }
 
         public AlgorithmIdentifier getAlgorithm()
@@ -440,7 +440,7 @@ class CMSEnvelopedHelper
             return this.mac;
         }
 
-        public CMSProcessable getProcessable(final SecretKey sKey, final Provider provider)
+        public CMSReadable getReadable(final SecretKey sKey, final Provider provider)
             throws CMSException
         {
             final String macAlg = this.algorithm.getObjectId().getId();
@@ -482,7 +482,7 @@ class CMSEnvelopedHelper
             try
             {
                 return new CMSProcessableInputStream(
-                    new TeeInputStream(processable.read(), new MacOutputStream(this.mac)));
+                    new TeeInputStream(readable.read(), new MacOutputStream(this.mac)));
             }
             catch (IOException e)
             {
@@ -491,16 +491,16 @@ class CMSEnvelopedHelper
         }
     }
 
-    static class CMSEnvelopedSecureProcessable implements CMSSecureProcessable
+    static class CMSEnvelopedSecureProcessable implements CMSSecureReadable
     {
         private AlgorithmIdentifier algorithm;
         private Cipher cipher;
-        private CMSProcessable processable;
+        private CMSReadable readable;
 
-        CMSEnvelopedSecureProcessable(AlgorithmIdentifier algorithm, CMSProcessable processable)
+        CMSEnvelopedSecureProcessable(AlgorithmIdentifier algorithm, CMSReadable readable)
         {
             this.algorithm = algorithm;
-            this.processable = processable;
+            this.readable = readable;
         }
 
         public AlgorithmIdentifier getAlgorithm()
@@ -513,7 +513,7 @@ class CMSEnvelopedHelper
             return this.cipher;
         }
 
-        public CMSProcessable getProcessable(final SecretKey sKey, final Provider provider)
+        public CMSReadable getReadable(final SecretKey sKey, final Provider provider)
             throws CMSException
         {
             final String encAlg = this.algorithm.getObjectId().getId();
@@ -582,7 +582,7 @@ class CMSEnvelopedHelper
 
             try
             {
-                return new CMSProcessableInputStream(new CipherInputStream(processable.read(), cipher));
+                return new CMSProcessableInputStream(new CipherInputStream(readable.read(), cipher));
             }
             catch (IOException e)
             {

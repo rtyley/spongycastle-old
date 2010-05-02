@@ -91,10 +91,10 @@ public class CMSEnvelopedDataParser
         //
         EncryptedContentInfoParser encInfo = _envelopedData.getEncryptedContentInfo();
         this._encAlg = encInfo.getContentEncryptionAlgorithm();
-        CMSProcessable processable = new CMSProcessableInputStream(
+        CMSReadable readable = new CMSProcessableInputStream(
             ((ASN1OctetStringParser)encInfo.getEncryptedContent(DERTags.OCTET_STRING)).getOctetStream());
-        CMSSecureProcessable secureProcessable = new CMSEnvelopedHelper.CMSEnvelopedSecureProcessable(
-            this._encAlg, processable);
+        CMSSecureReadable secureProcessable = new CMSEnvelopedHelper.CMSEnvelopedSecureProcessable(
+            this._encAlg, readable);
 
         //
         // build the RecipientInformationStore

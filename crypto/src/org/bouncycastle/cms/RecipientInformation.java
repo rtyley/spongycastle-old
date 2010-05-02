@@ -17,13 +17,13 @@ public abstract class RecipientInformation
 {
     protected RecipientId rid = new RecipientId();
     protected AlgorithmIdentifier keyEncAlg;
-    protected CMSSecureProcessable secureProcessable;
+    protected CMSSecureReadable secureProcessable;
 
     private byte[] resultMac;
 
     RecipientInformation(
         AlgorithmIdentifier     keyEncAlg,
-        CMSSecureProcessable    processable)
+        CMSSecureReadable    processable)
     {
         this.keyEncAlg = keyEncAlg;
         this.secureProcessable = processable;
@@ -137,11 +137,11 @@ public abstract class RecipientInformation
         Provider provider)
         throws CMSException
     {
-        CMSProcessable processable = secureProcessable.getProcessable((SecretKey)sKey, provider); 
+        CMSReadable readable = secureProcessable.getReadable((SecretKey)sKey, provider); 
 
         try
         {
-            return new CMSTypedStream(processable.read());
+            return new CMSTypedStream(readable.read());
         }
         catch (IOException e)
         {

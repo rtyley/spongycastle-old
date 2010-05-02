@@ -102,10 +102,10 @@ public class CMSAuthenticatedDataParser
         // read the authenticated content info
         //
         ContentInfoParser data = authData.getEnapsulatedContentInfo();
-        CMSProcessable processable = new CMSProcessableInputStream(
+        CMSReadable readable = new CMSProcessableInputStream(
             ((ASN1OctetStringParser)data.getContent(DERTags.OCTET_STRING)).getOctetStream());
-        CMSSecureProcessable secureProcessable = new CMSEnvelopedHelper.CMSAuthenticatedSecureProcessable(
-            this.macAlg, processable);
+        CMSSecureReadable secureProcessable = new CMSEnvelopedHelper.CMSAuthenticatedSecureProcessable(
+            this.macAlg, readable);
 
         //
         // build the RecipientInformationStore
