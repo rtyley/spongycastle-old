@@ -1,7 +1,5 @@
 package org.bouncycastle.asn1.cms;
 
-import java.util.Enumeration;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -37,13 +35,22 @@ public class ContentInfo
     public ContentInfo(
         ASN1Sequence  seq)
     {
-        Enumeration   e = seq.getObjects();
-
-        contentType = (DERObjectIdentifier)e.nextElement();
-
-        if (e.hasMoreElements())
+        if (seq.size() < 1 || seq.size() > 2)
         {
-            content = ((ASN1TaggedObject)e.nextElement()).getObject();
+            throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+        }
+
+        contentType = (DERObjectIdentifier)seq.getObjectAt(0);
+
+        if (seq.size() > 1)
+        {
+            ASN1TaggedObject tagged = (ASN1TaggedObject)seq.getObjectAt(1);
+            if (!tagged.isExplicit() || tagged.getTagNo() != 0)
+            {
+                throw new IllegalArgumentException("Bad tag for 'content'");
+            }
+
+            content = tagged.getObject();
         }
     }
 
