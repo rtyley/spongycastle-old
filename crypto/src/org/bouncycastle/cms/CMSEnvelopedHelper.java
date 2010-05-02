@@ -380,51 +380,51 @@ class CMSEnvelopedHelper
     }
 
     static RecipientInformationStore buildRecipientInformationStore(
-        ASN1Set recipientInfos, CMSSecureReadable secureProcessable)
+        ASN1Set recipientInfos, CMSSecureReadable secureReadable)
     {
         List infos = new ArrayList();
         for (int i = 0; i != recipientInfos.size(); i++)
         {
             RecipientInfo info = RecipientInfo.getInstance(recipientInfos.getObjectAt(i));
 
-            readRecipientInfo(infos, info, secureProcessable);
+            readRecipientInfo(infos, info, secureReadable);
         }
         return new RecipientInformationStore(infos);
     }
 
     private static void readRecipientInfo(
-        List infos, RecipientInfo info, CMSSecureReadable secureProcessable)
+        List infos, RecipientInfo info, CMSSecureReadable secureReadable)
     {
         DEREncodable recipInfo = info.getInfo();
         if (recipInfo instanceof KeyTransRecipientInfo)
         {
             infos.add(new KeyTransRecipientInformation(
-                (KeyTransRecipientInfo)recipInfo, secureProcessable));
+                (KeyTransRecipientInfo)recipInfo, secureReadable));
         }
         else if (recipInfo instanceof KEKRecipientInfo)
         {
             infos.add(new KEKRecipientInformation(
-                (KEKRecipientInfo)recipInfo, secureProcessable));
+                (KEKRecipientInfo)recipInfo, secureReadable));
         }
         else if (recipInfo instanceof KeyAgreeRecipientInfo)
         {
             KeyAgreeRecipientInformation.readRecipientInfo(infos,
-                (KeyAgreeRecipientInfo)recipInfo, secureProcessable);
+                (KeyAgreeRecipientInfo)recipInfo, secureReadable);
         }
         else if (recipInfo instanceof PasswordRecipientInfo)
         {
             infos.add(new PasswordRecipientInformation(
-                (PasswordRecipientInfo)recipInfo, secureProcessable));
+                (PasswordRecipientInfo)recipInfo, secureReadable));
         }
     }
 
-    static class CMSAuthenticatedSecureProcessable implements CMSSecureReadable
+    static class CMSAuthenticatedSecureReadable implements CMSSecureReadable
     {
         private AlgorithmIdentifier algorithm;
         private Mac mac;
         private CMSReadable readable;
 
-        CMSAuthenticatedSecureProcessable(AlgorithmIdentifier algorithm, CMSReadable readable)
+        CMSAuthenticatedSecureReadable(AlgorithmIdentifier algorithm, CMSReadable readable)
         {
             this.algorithm = algorithm;
             this.readable = readable;
@@ -491,13 +491,13 @@ class CMSEnvelopedHelper
         }
     }
 
-    static class CMSEnvelopedSecureProcessable implements CMSSecureReadable
+    static class CMSEnvelopedSecureReadable implements CMSSecureReadable
     {
         private AlgorithmIdentifier algorithm;
         private Cipher cipher;
         private CMSReadable readable;
 
-        CMSEnvelopedSecureProcessable(AlgorithmIdentifier algorithm, CMSReadable readable)
+        CMSEnvelopedSecureReadable(AlgorithmIdentifier algorithm, CMSReadable readable)
         {
             this.algorithm = algorithm;
             this.readable = readable;

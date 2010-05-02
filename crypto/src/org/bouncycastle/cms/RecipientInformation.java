@@ -16,22 +16,22 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public abstract class RecipientInformation
 {
     protected RecipientId rid = new RecipientId();
-    protected AlgorithmIdentifier keyEncAlg;
-    protected CMSSecureReadable secureProcessable;
+    protected AlgorithmIdentifier   keyEncAlg;
+    protected CMSSecureReadable     secureReadable;
 
     private byte[] resultMac;
 
     RecipientInformation(
         AlgorithmIdentifier     keyEncAlg,
-        CMSSecureReadable    processable)
+        CMSSecureReadable       secureReadable)
     {
         this.keyEncAlg = keyEncAlg;
-        this.secureProcessable = processable;
+        this.secureReadable = secureReadable;
     }
 
     String getContentAlgorithmName()
     {
-        AlgorithmIdentifier algorithm = secureProcessable.getAlgorithm();
+        AlgorithmIdentifier algorithm = secureReadable.getAlgorithm();
         return CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(algorithm.getObjectId().getId());
     }
 
@@ -137,7 +137,7 @@ public abstract class RecipientInformation
         Provider provider)
         throws CMSException
     {
-        CMSReadable readable = secureProcessable.getReadable((SecretKey)sKey, provider); 
+        CMSReadable readable = secureReadable.getReadable((SecretKey)sKey, provider); 
 
         try
         {
@@ -182,7 +182,7 @@ public abstract class RecipientInformation
     {
         if (resultMac == null)
         {
-            Object cryptoObject = secureProcessable.getCryptoObject();
+            Object cryptoObject = secureReadable.getCryptoObject();
             if (cryptoObject instanceof Mac)
             {
                 resultMac = ((Mac)cryptoObject).doFinal();

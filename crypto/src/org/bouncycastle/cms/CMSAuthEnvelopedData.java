@@ -56,7 +56,7 @@ class CMSAuthEnvelopedData
         this.authEncAlg = authEncInfo.getContentEncryptionAlgorithm();
 //        final CMSProcessable processable = new CMSProcessableByteArray(
 //            authEncInfo.getEncryptedContent().getOctets());
-        CMSSecureReadable secureProcessable = new CMSSecureReadable()
+        CMSSecureReadable secureReadable = new CMSSecureReadable()
         {
             public AlgorithmIdentifier getAlgorithm()
             {
@@ -94,7 +94,7 @@ class CMSAuthEnvelopedData
         // build the RecipientInformationStore
         //
         this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, secureProcessable);
+            recipientInfos, secureReadable);
 
         // FIXME These need to be passed to the AEAD cipher as AAD (Additional Authenticated Data)
         this.authAttrs = authEnvData.getAuthAttrs();

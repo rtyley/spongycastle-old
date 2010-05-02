@@ -23,9 +23,9 @@ public class KEKRecipientInformation
 
     KEKRecipientInformation(
         KEKRecipientInfo        info,
-        CMSSecureReadable    secureProcessable)
+        CMSSecureReadable       secureReadable)
     {
-        super(info.getKeyEncryptionAlgorithm(), secureProcessable);
+        super(info.getKeyEncryptionAlgorithm(), secureReadable);
 
         this.info = info;
         this.rid = new RecipientId();

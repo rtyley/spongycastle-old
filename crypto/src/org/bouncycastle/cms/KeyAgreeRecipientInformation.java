@@ -48,7 +48,7 @@ public class KeyAgreeRecipientInformation
     private ASN1OctetString       encryptedKey;
 
     static void readRecipientInfo(List infos, KeyAgreeRecipientInfo info,
-        CMSSecureReadable secureProcessable)
+        CMSSecureReadable secureReadable)
     {
         try
         {
@@ -79,7 +79,7 @@ public class KeyAgreeRecipientInformation
                 }
 
                 infos.add(new KeyAgreeRecipientInformation(info, rid, id.getEncryptedKey(),
-                    secureProcessable));
+                    secureReadable));
             }
         }
         catch (IOException e)
@@ -92,9 +92,9 @@ public class KeyAgreeRecipientInformation
         KeyAgreeRecipientInfo   info,
         RecipientId             rid,
         ASN1OctetString         encryptedKey,
-        CMSSecureReadable    secureProcessable)
+        CMSSecureReadable       secureReadable)
     {
-        super(info.getKeyEncryptionAlgorithm(), secureProcessable);
+        super(info.getKeyEncryptionAlgorithm(), secureReadable);
 
         this.info = info;
         this.rid = rid;
