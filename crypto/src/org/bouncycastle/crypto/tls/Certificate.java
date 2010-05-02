@@ -89,8 +89,7 @@ public class Certificate
      * 
      * @param certs The certs the chain should contain.
      */
-    // TODO Make public to enable client certificate support
-    Certificate(X509CertificateStructure[] certs)
+    public Certificate(X509CertificateStructure[] certs)
     {
         this.certs = certs;
     }
