@@ -104,14 +104,14 @@ public class CMSAuthenticatedDataParser
         ContentInfoParser data = authData.getEnapsulatedContentInfo();
         CMSReadable readable = new CMSProcessableInputStream(
             ((ASN1OctetStringParser)data.getContent(DERTags.OCTET_STRING)).getOctetStream());
-        CMSSecureReadable secureProcessable = new CMSEnvelopedHelper.CMSAuthenticatedSecureProcessable(
+        CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSAuthenticatedSecureReadable(
             this.macAlg, readable);
 
         //
         // build the RecipientInformationStore
         //
         this._recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, secureProcessable);
+            recipientInfos, secureReadable);
     }
 
     /**

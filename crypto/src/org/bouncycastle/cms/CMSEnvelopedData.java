@@ -58,14 +58,14 @@ public class CMSEnvelopedData
         EncryptedContentInfo encInfo = envData.getEncryptedContentInfo();
         this.encAlg = encInfo.getContentEncryptionAlgorithm();
         CMSReadable readable = new CMSProcessableByteArray(encInfo.getEncryptedContent().getOctets());
-        CMSSecureReadable secureProcessable = new CMSEnvelopedHelper.CMSEnvelopedSecureProcessable(
+        CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSEnvelopedSecureReadable(
             this.encAlg, readable);
 
         //
         // build the RecipientInformationStore
         //
         this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, secureProcessable);
+            recipientInfos, secureReadable);
 
         this.unprotectedAttributes = envData.getUnprotectedAttrs();
     }
