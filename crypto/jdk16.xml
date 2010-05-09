@@ -32,6 +32,7 @@
             <fileset dir="test/data" includes="**/*.sig" />
             <fileset dir="test/data" includes="**/*.data" />
             <fileset dir="test/data" includes="**/*.pem" />
+            <fileset dir="test/data" includes="**/*.p7m" />
             <fileset dir="test/data" includes="**/*.crt" />
             <fileset dir="test/data" includes="**/*.crl" />
         </copy>
