@@ -79,7 +79,7 @@ public class ReaderTest
             if (o instanceof KeyPair)
             {
                 //pair = (KeyPair)o;
-        
+
                 //System.out.println(pair.getPublic());
                 //System.out.println(pair.getPrivate());
             }
@@ -88,13 +88,13 @@ public class ReaderTest
                 //System.out.println(o.toString());
             }
         }
-        
+
         //
         // pkcs 7 data
         //
         pemRd = openPEMResource("pkcs7.pem", null);
-        ContentInfo d = (ContentInfo)pemRd.readObject();    
-            
+        ContentInfo d = (ContentInfo)pemRd.readObject();
+
         if (!d.getContentType().equals(CMSObjectIdentifiers.envelopedData))
         {
             fail("failed envelopedData check");
@@ -140,30 +140,30 @@ public class ReaderTest
         // writer/parser test
         //
         KeyPairGenerator      kpGen = KeyPairGenerator.getInstance("RSA", "BC");
-        
+
         pair = kpGen.generateKeyPair();
-        
+
         keyPairTest("RSA", pair);
-        
+
         kpGen = KeyPairGenerator.getInstance("DSA", "BC");
         kpGen.initialize(512, new SecureRandom());
         pair = kpGen.generateKeyPair();
-        
+
         keyPairTest("DSA", pair);
-        
+
         //
         // PKCS7
         //
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         PEMWriter             pWrt = new PEMWriter(new OutputStreamWriter(bOut));
-        
+
         pWrt.writeObject(d);
-        
+
         pWrt.close();
-        
+
         pemRd = new PEMReader(new InputStreamReader(new ByteArrayInputStream(bOut.toByteArray())));
-        d = (ContentInfo)pemRd.readObject();    
-        
+        d = (ContentInfo)pemRd.readObject();
+
         if (!d.getContentType().equals(CMSObjectIdentifiers.envelopedData))
         {
             fail("failed envelopedData recode check");
@@ -205,9 +205,7 @@ public class ReaderTest
         doDudPasswordTest("5a3d16", 14, "corrupted stream detected");
         doDudPasswordTest("8d0c97", 15, "corrupted stream detected");
         doDudPasswordTest("bc0daf", 16, "corrupted stream detected");
-        
-
-
+        doDudPasswordTest("aaf9c4d",17, "corrupted stream - out of bounds length found");
 
         // encrypted private key test
         pGet = new Password("password".toCharArray());
