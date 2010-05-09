@@ -139,6 +139,7 @@
                 </javac>
                 <copy todir="${build.dir}/@{target}/classes">
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.pem" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.p7m" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.message" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.properties" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.eml" />
@@ -157,6 +158,7 @@
                         <fileset dir="${build.dir}/@{target}/classes">
                             <include name="**/*.class" />
                             <include name="**/*.pem" />
+                            <include name="**/*.p7m" />
                             <include name="**/*.crl" />
                             <include name="**/*.crt" />
                             <include name="**/*.eml" />
@@ -255,6 +257,7 @@
                  <exclude name="org/bouncycastle/**/test/*.java" />
                  <exclude name="org/bouncycastle/**/test/*/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
+                 <exclude name="org/bouncycastle/**/test/*.p7m" />
                  <exclude name="org/bouncycastle/**/test/*.properties" />
                  <exclude name="org/bouncycastle/**/test/*.crl" />
                  <exclude name="org/bouncycastle/**/test/*.sig" />
@@ -286,6 +289,7 @@
                 <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
+                <attribute name="Trusted-Library" value="true" />
             </manifestElements>
         </compile>
 
@@ -299,6 +303,7 @@
                     <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
                     <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                     <attribute name="Implementation-Version" value="${release.name}.0" />
+                    <attribute name="Trusted-Library" value="true" />
                 </manifest>
             </manifest-element>
             <fileset-element>
@@ -330,6 +335,7 @@
                  <exclude name="org/bouncycastle/**/test/*.java" />
                  <exclude name="org/bouncycastle/**/test/*/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
+                 <exclude name="org/bouncycastle/**/test/*.p7m" />
                  <exclude name="org/bouncycastle/**/test/*.crl" />
                  <exclude name="org/bouncycastle/**/test/*.crt" />
                  <exclude name="org/bouncycastle/**/test/*.eml" />
@@ -361,6 +367,7 @@
                 <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
+                <attribute name="Trusted-Library" value="true" />
             </manifestElements>
         </compile>
 
@@ -374,6 +381,7 @@
                     <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
                     <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                     <attribute name="Implementation-Version" value="${release.name}.0" />
+                    <attribute name="Trusted-Library" value="true" />
                 </manifest>
             </manifest-element>
             <fileset-element>
@@ -420,6 +428,7 @@
                 <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
+                <attribute name="Trusted-Library" value="true" />
             </manifestElements>
         </compile>
 
@@ -455,6 +464,7 @@
                 <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
+                <attribute name="Trusted-Library" value="true" />
             </manifestElements>
         </compile>
 
@@ -499,6 +509,7 @@
                 <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
+                <attribute name="Trusted-Library" value="true" />
             </manifestElements>
         </compile>
 
@@ -523,6 +534,7 @@
              <fileset dir="${src.dir}" includes="**/test/*.java" />
              <fileset dir="${src.dir}" includes="**/test/*/*.java" />
              <fileset dir="${src.dir}" includes="**/*.pem" />
+             <fileset dir="${src.dir}" includes="**/*.p7m" />
              <fileset dir="${src.dir}" includes="**/*.eml" />
              <fileset dir="${src.dir}" includes="**/*.sig" />
              <fileset dir="${src.dir}" includes="**/*.data" />
@@ -541,6 +553,7 @@
                 <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
+                <attribute name="Trusted-Library" value="true" />
             </manifestElements>
         </compile-test>
     </target>
