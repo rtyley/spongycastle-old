@@ -23,7 +23,6 @@ import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.digests.TigerDigest;
 import org.bouncycastle.crypto.engines.DESEngine;
-import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
@@ -157,18 +156,6 @@ public class JCEMac
     }
 
     /**
-     * DESede
-     */
-    public static class DESede
-        extends JCEMac
-    {
-        public DESede()
-        {
-            super(new CBCBlockCipherMac(new DESedeEngine()));
-        }
-    }
-
-    /**
      * RC2
      */
     public static class RC2
@@ -207,20 +194,6 @@ public class JCEMac
     }
 
     /**
-     * DESede
-     */
-    public static class DESedeCFB8
-        extends JCEMac
-    {
-        public DESedeCFB8()
-        {
-            super(new CFBBlockCipherMac(new DESedeEngine()));
-        }
-    }
-
-
-
-    /**
      * RC2CFB8
      */
     public static class RC2CFB8
@@ -229,30 +202,6 @@ public class JCEMac
         public RC2CFB8()
         {
             super(new CFBBlockCipherMac(new RC2Engine()));
-        }
-    }
-
-    /**
-     * DESede64
-     */
-    public static class DESede64
-        extends JCEMac
-    {
-        public DESede64()
-        {
-            super(new CBCBlockCipherMac(new DESedeEngine(), 64));
-        }
-    }
-
-    /**
-     * DESede64with7816-4Padding
-     */
-    public static class DESede64with7816d4
-        extends JCEMac
-    {
-        public DESede64with7816d4()
-        {
-            super(new CBCBlockCipherMac(new DESedeEngine(), 64, new ISO7816d4Padding()));
         }
     }
 

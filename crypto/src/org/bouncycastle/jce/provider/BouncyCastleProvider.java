@@ -53,7 +53,7 @@ public final class BouncyCastleProvider extends Provider
     private static final String SYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.symmetric.";
     private static final String[] SYMMETRIC_CIPHERS =
     {
-        "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "Grainv1", "Grain128", "HC128", "HC256", "IDEA",
+        "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "DESede", "Grainv1", "Grain128", "HC128", "HC256", "IDEA",
         "Noekeon", "RC5", "RC6", "Rijndael", "Salsa20", "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "VMPC", "VMPCKSA3", "XTEA"
     };
 
@@ -252,19 +252,14 @@ public final class BouncyCastleProvider extends Provider
         // cipher engines
         //
         put("Cipher.DES", "org.bouncycastle.jce.provider.JCEBlockCipher$DES");
-        put("Cipher.DESEDE", "org.bouncycastle.jce.provider.JCEBlockCipher$DESede");
-        put("Cipher." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JCEBlockCipher$DESedeCBC");
         put("Cipher." + OIWObjectIdentifiers.desCBC, "org.bouncycastle.jce.provider.JCEBlockCipher$DESCBC");
-        put("Cipher.DESEDEWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
-        put("Cipher." + PKCSObjectIdentifiers.id_alg_CMS3DESwrap, "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
 
         put("Cipher.RC2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2");
         put("Cipher.RC2WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
         put("Cipher.1.2.840.113549.1.9.16.3.7", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
 
         put("Cipher.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2CBC");
-        put("Cipher.DESEDERFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211DESedeWrap");
-
+        
         put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES",  "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         
         put("Cipher.GOST28147", "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147");
@@ -372,9 +367,7 @@ public final class BouncyCastleProvider extends Provider
         //
         put("KeyGenerator.DES", "org.bouncycastle.jce.provider.JCEKeyGenerator$DES");
         put("Alg.Alias.KeyGenerator." + OIWObjectIdentifiers.desCBC, "DES");
-        put("KeyGenerator.DESEDE", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
-        put("KeyGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede3");
-        put("KeyGenerator.DESEDEWRAP", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
+
         put("KeyGenerator.RC2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
         put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
 
@@ -433,7 +426,6 @@ public final class BouncyCastleProvider extends Provider
         // secret key factories.
         //
         put("SecretKeyFactory.DES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$DES");
-        put("SecretKeyFactory.DESEDE", "org.bouncycastle.jce.provider.JCESecretKeyFactory$DESede");
         put("SecretKeyFactory.PBEWITHMD2ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndDES");
 
         put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
@@ -599,21 +591,8 @@ public final class BouncyCastleProvider extends Provider
         put("Mac.DESMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESCFB8");
         put("Alg.Alias.Mac.DES/CFB8", "DESMAC/CFB8");
 
-        put("Mac.DESEDEMAC", "org.bouncycastle.jce.provider.JCEMac$DESede");
-        put("Alg.Alias.Mac.DESEDE", "DESEDEMAC");
-        put("Mac.DESEDEMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESedeCFB8");
-        put("Alg.Alias.Mac.DESEDE/CFB8", "DESEDEMAC/CFB8");
-        
         put("Mac.DESWITHISO9797", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
         put("Alg.Alias.Mac.DESISO9797MAC", "DESWITHISO9797");
-        
-        put("Mac.DESEDEMAC64", "org.bouncycastle.jce.provider.JCEMac$DESede64");
-        put("Alg.Alias.Mac.DESEDE64", "DESEDEMAC64");
-
-        put("Mac.DESEDEMAC64WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.JCEMac$DESede64with7816d4");
-        put("Alg.Alias.Mac.DESEDE64WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
-        put("Alg.Alias.Mac.DESEDEISO9797ALG1MACWITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
-        put("Alg.Alias.Mac.DESEDEISO9797ALG1WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
 
         put("Mac.ISO9797ALG3MAC", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
         put("Alg.Alias.Mac.ISO9797ALG3", "ISO9797ALG3MAC");

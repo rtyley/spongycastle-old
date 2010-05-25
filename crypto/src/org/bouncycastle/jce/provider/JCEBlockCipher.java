@@ -755,30 +755,6 @@ public class JCEBlockCipher extends WrapCipherSpi
     }
 
     /**
-     * DESede
-     */
-    static public class DESede
-        extends JCEBlockCipher
-    {
-        public DESede()
-        {
-            super(new DESedeEngine());
-        }
-    }
-
-    /**
-     * DESedeCBC
-     */
-    static public class DESedeCBC
-        extends JCEBlockCipher
-    {
-        public DESedeCBC()
-        {
-            super(new CBCBlockCipher(new DESedeEngine()), 64);
-        }
-    }
-
-    /**
      *  GOST28147
      */
     static public class GOST28147
