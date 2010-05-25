@@ -12,7 +12,6 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.generators.DESKeyGenerator;
-import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
 
 public class JCEKeyGenerator
     extends KeyGeneratorSpi
@@ -91,70 +90,6 @@ public class JCEKeyGenerator
         public DES()
         {
             super("DES", 64, new DESKeyGenerator());
-        }
-    }
-
-    /**
-     * DESede - the default for this is to generate a key in 
-     * a-b-a format that's 24 bytes long but has 16 bytes of
-     * key material (the first 8 bytes is repeated as the last
-     * 8 bytes). If you give it a size, you'll get just what you
-     * asked for.
-     */
-    public static class DESede
-        extends JCEKeyGenerator
-    {
-        private boolean     keySizeSet = false;
-
-        public DESede()
-        {
-            super("DESede", 192, new DESedeKeyGenerator());
-        }
-
-        protected void engineInit(
-            int             keySize,
-            SecureRandom    random)
-        {
-            super.engineInit(keySize, random);
-            keySizeSet = true;
-        }
-
-        protected SecretKey engineGenerateKey()
-        {
-            if (uninitialised)
-            {
-                engine.init(new KeyGenerationParameters(new SecureRandom(), defaultKeySize));
-                uninitialised = false;
-            }
-
-            //
-            // if no key size has been defined generate a 24 byte key in
-            // the a-b-a format
-            //
-            if (!keySizeSet)
-            {
-                byte[]     k = engine.generateKey();
-
-                System.arraycopy(k, 0, k, 16, 8);
-
-                return (SecretKey)(new SecretKeySpec(k, algName));
-            }
-            else
-            {
-                return (SecretKey)(new SecretKeySpec(engine.generateKey(), algName));
-            }
-        }
-    }
-    
-    /**
-     * generate a desEDE key in the a-b-c format.
-     */
-    public static class DESede3
-        extends JCEKeyGenerator
-    {
-        public DESede3()
-        {
-            super("DESede3", 192, new DESedeKeyGenerator());
         }
     }
 

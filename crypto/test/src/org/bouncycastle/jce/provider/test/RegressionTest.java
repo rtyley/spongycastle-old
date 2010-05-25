@@ -64,6 +64,7 @@ public class RegressionTest
         new SerialisationTest(),
         new SigNameTest(),
         new MQVTest(),
+        new CMacTest(),
         new CRL5Test()
     };
 

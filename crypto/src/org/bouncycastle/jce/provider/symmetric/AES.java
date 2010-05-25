@@ -15,11 +15,13 @@ import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.AESWrapEngine;
 import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
+import org.bouncycastle.crypto.macs.CMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 import org.bouncycastle.jce.provider.JCEBlockCipher;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
+import org.bouncycastle.jce.provider.JCEMac;
 import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
 import org.bouncycastle.jce.provider.JDKAlgorithmParameters;
 import org.bouncycastle.jce.provider.WrapCipherSpi;
@@ -63,6 +65,15 @@ public final class AES
         public OFB()
         {
             super(new BufferedBlockCipher(new OFBBlockCipher(new AESFastEngine(), 128)), 128);
+        }
+    }
+
+    public static class AESCMAC
+        extends JCEMac
+    {
+        public AESCMAC()
+        {
+            super(new CMac(new AESEngine()));
         }
     }
 
@@ -244,6 +255,8 @@ public final class AES
             put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_wrap, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen128");
             put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_wrap, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen192");
             put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_wrap, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen256");
+
+            put("Mac.AESCMAC", "org.bouncycastle.jce.provider.symmetric.AES$AESCMAC");
         }
     }
 }
