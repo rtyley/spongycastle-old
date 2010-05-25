@@ -259,10 +259,10 @@
                  <exclude name="org/bouncycastle/**/test/*.pem" />
                  <exclude name="org/bouncycastle/**/test/*.p7m" />
                  <exclude name="org/bouncycastle/**/test/*.properties" />
-                 <exclude name="org/bouncycastle/**/test/*.crl" />
                  <exclude name="org/bouncycastle/**/test/*.sig" />
                  <exclude name="org/bouncycastle/**/test/*.data" />
                  <exclude name="org/bouncycastle/**/test/*.crt" />
+                 <exclude name="**/*.crl" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/mail/**/*.properties" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
@@ -336,7 +336,7 @@
                  <exclude name="org/bouncycastle/**/test/*/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
                  <exclude name="org/bouncycastle/**/test/*.p7m" />
-                 <exclude name="org/bouncycastle/**/test/*.crl" />
+                 <exclude name="**/*.crl" />
                  <exclude name="org/bouncycastle/**/test/*.crt" />
                  <exclude name="org/bouncycastle/**/test/*.eml" />
                  <exclude name="org/bouncycastle/**/test/*.sig" />
