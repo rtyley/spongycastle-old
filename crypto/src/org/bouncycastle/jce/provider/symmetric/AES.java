@@ -11,7 +11,6 @@ import javax.crypto.spec.IvParameterSpec;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherKeyGenerator;
-import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.AESWrapEngine;
 import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
@@ -73,7 +72,7 @@ public final class AES
     {
         public AESCMAC()
         {
-            super(new CMac(new AESEngine()));
+            super(new CMac(new AESFastEngine()));
         }
     }
 
@@ -91,7 +90,7 @@ public final class AES
     {
         public RFC3211Wrap()
         {
-            super(new RFC3211WrapEngine(new AESEngine()), 16);
+            super(new RFC3211WrapEngine(new AESFastEngine()), 16);
         }
     }
 
