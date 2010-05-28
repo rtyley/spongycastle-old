@@ -2223,12 +2223,13 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     {
                         reason = crlReasons[reasonCode.getValue().intValue()];
                     }
-                    else
-                    {
-                        reason = crlReasons[7];
-                    }
                 }
-                
+
+                if (reason == null)
+                {
+                    reason = crlReasons[7]; // unknown
+                }
+
                 // i18n reason
                 LocaleString ls = new LocaleString(RESOURCE_NAME, reason);
                 
