@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="CAVP Test" default="test" basedir=".">
+
+        <property name="classes.dir" value="classes"/>
+        <property name="lib.dir" value="lib"/>
+        <property name="src.dir" value="src"/>
+        <property name="reports.dir" value="reports"/>
+        <property name="reports.xml.dir" value="reports/xml"/>
+        <property name="reports.html.dir" value="reports/html"/>
+
+	<path id="libpath">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="init">
+		<mkdir dir="${classes.dir}" />
+		<mkdir dir="${reports.dir}" />
+		<mkdir dir="${reports.xml.dir}" />
+		<mkdir dir="${reports.html.dir}" />
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" debug="true">
+			<classpath refid="libpath" />
+		</javac>
+	</target>
+
+	<target name="test" depends="init,compile">
+		<junit fork="yes" dir="${basedir}" failureProperty="test.failed">
+			<classpath refid="libpath" />
+			<classpath>
+                            <pathelement location="classes" />
+                        </classpath>
+
+			<formatter type="xml" />
+			<test name="${testcase}" todir="${reports.xml.dir}" if="testcase" />
+			<batchtest todir="${reports.xml.dir}" unless="testcase">
+				<fileset dir="${src.dir}">
+					<include name="**/ProviderTest.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<junitreport todir="${reports.xml.dir}">
+			<fileset dir="${reports.xml.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${reports.html.dir}" />
+		</junitreport>
+	</target>
+
+	<target name="clean" description="Remove all files created by the build/test process.">
+		<delete dir="${classes.dir}" />
+		<delete dir="${reports.dir}" />
+	</target>
+
+</project>
