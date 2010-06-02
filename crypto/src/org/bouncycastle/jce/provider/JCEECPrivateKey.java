@@ -288,7 +288,10 @@ public class JCEECPrivateKey
         if (ecSpec instanceof ECNamedCurveSpec)
         {
             DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
-            
+            if (curveOid == null)  // guess it's the OID
+            {
+                curveOid = new DERObjectIdentifier(((ECNamedCurveSpec)ecSpec).getName());
+            }
             params = new X962Parameters(curveOid);
         }
         else if (ecSpec == null)
