@@ -133,6 +133,11 @@ public abstract class ECPoint
      */
     public ECPoint multiply(BigInteger k)
     {
+        if (k.signum() < 0)
+        {
+            throw new IllegalArgumentException("The multiplicator cannot be negative");
+        }
+
         if (this.isInfinity())
         {
             return this;
@@ -364,15 +369,6 @@ public abstract class ECPoint
             }
             
             this.withCompression = withCompression;
-        }
-
-        /**
-         * @deprecated use ECCurve.getInfinity()
-         * Constructor for point at infinity
-         */
-        public F2m(ECCurve curve)
-        {
-            super(curve, null, null);
         }
 
         /* (non-Javadoc)
