@@ -9,9 +9,9 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.Provider;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -551,7 +551,7 @@ public class PGPUtil
     {
         if (!in.markSupported())
         {
-            in = new BufferedInputStream(in);
+            in = new BufferedInputStreamExt(in);
         }
         
         in.mark(READ_AHEAD);
@@ -638,5 +638,23 @@ public class PGPUtil
         }
 
         return prov;
+    }
+    
+    static class BufferedInputStreamExt extends BufferedInputStream
+    {
+        BufferedInputStreamExt(InputStream input)
+        {
+            super(input);
+        }
+
+        public synchronized int available() throws IOException
+        {
+            int result = super.available();
+            if (result < 0)
+            {
+                result = Integer.MAX_VALUE;
+            }
+            return result;
+        }
     }
 }
