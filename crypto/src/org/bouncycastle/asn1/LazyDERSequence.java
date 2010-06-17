@@ -29,7 +29,7 @@ public class LazyDERSequence
         parsed = true;
     }
 
-    public DEREncodable getObjectAt(int index)
+    public synchronized DEREncodable getObjectAt(int index)
     {
         if (!parsed)
         {
@@ -39,7 +39,7 @@ public class LazyDERSequence
         return super.getObjectAt(index);
     }
 
-    public Enumeration getObjects()
+    public synchronized Enumeration getObjects()
     {
         if (parsed)
         {
