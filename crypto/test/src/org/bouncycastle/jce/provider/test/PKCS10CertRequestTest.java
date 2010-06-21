@@ -28,10 +28,12 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
+import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -143,26 +145,13 @@ public class PKCS10CertRequestTest
     /*
      * we generate a self signed certificate for the sake of testing - SHA224withECDSA
      */
-    private void createECRequest(String algorithm, DERObjectIdentifier algOid)
+    private void createECRequest(String algorithm, DERObjectIdentifier algOid, DERObjectIdentifier curveOid)
         throws Exception
     {
-        ECCurve.Fp curve = new ECCurve.Fp(
-            new BigInteger("6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151"), // q (or p)
-            new BigInteger("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC", 16),   // a
-            new BigInteger("0051953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00", 16));  // b
+        ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec(curveOid.getId());
+        KeyPairGenerator ecGen = KeyPairGenerator.getInstance("ECDSA", "BC");
 
-        ECParameterSpec spec = new ECParameterSpec(
-            curve,
-            curve.decodePoint(Hex.decode("02C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66")), // G
-            new BigInteger("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA51868783BF2F966B7FCC0148F709A5D03BB5C9B8899C47AEBB6FB71E91386409", 16)); // n
-
-        ECPrivateKeySpec privKeySpec = new ECPrivateKeySpec(
-            new BigInteger("5769183828869504557786041598510887460263120754767955773309066354712783118202294874205844512909370791582896372147797293913785865682804434049019366394746072023"), // d
-            spec);
-
-        ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(
-            curve.decodePoint(Hex.decode("026BFDD2C9278B63C92D6624F151C9D7A822CC75BD983B17D25D74C26740380022D3D8FAF304781E416175EADF4ED6E2B47142D2454A7AC7801DD803CF44A4D1F0AC")), // Q
-            spec);
+        ecGen.initialize(spec);
 
         //
         // set up the keys
@@ -170,10 +159,10 @@ public class PKCS10CertRequestTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory     fact = KeyFactory.getInstance("ECDSA", "BC");
+        KeyPair pair = ecGen.generateKeyPair();
 
-        privKey = fact.generatePrivate(privKeySpec);
-        pubKey = fact.generatePublic(pubKeySpec);
+        privKey = pair.getPrivate();
+        pubKey = pair.getPublic();
 
         PKCS10CertificationRequest req = new PKCS10CertificationRequest(
                         algorithm, new X509Name("CN=XXX"), pubKey, null, privKey);
@@ -222,6 +211,91 @@ public class PKCS10CertRequestTest
         
         sig.update(req.getCertificationRequestInfo().getEncoded());
         
+        if (!sig.verify(req.getSignature().getBytes()))
+        {
+            fail("signature not mapped correctly.");
+        }
+    }
+
+    private void createECRequest(String algorithm, DERObjectIdentifier algOid)
+        throws Exception
+    {
+        ECCurve.Fp curve = new ECCurve.Fp(
+            new BigInteger("6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151"), // q (or p)
+            new BigInteger("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC", 16),   // a
+            new BigInteger("0051953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00", 16));  // b
+
+        ECParameterSpec spec = new ECParameterSpec(
+            curve,
+            curve.decodePoint(Hex.decode("02C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66")), // G
+            new BigInteger("01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA51868783BF2F966B7FCC0148F709A5D03BB5C9B8899C47AEBB6FB71E91386409", 16)); // n
+
+        ECPrivateKeySpec privKeySpec = new ECPrivateKeySpec(
+            new BigInteger("5769183828869504557786041598510887460263120754767955773309066354712783118202294874205844512909370791582896372147797293913785865682804434049019366394746072023"), // d
+            spec);
+
+        ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(
+            curve.decodePoint(Hex.decode("026BFDD2C9278B63C92D6624F151C9D7A822CC75BD983B17D25D74C26740380022D3D8FAF304781E416175EADF4ED6E2B47142D2454A7AC7801DD803CF44A4D1F0AC")), // Q
+            spec);
+
+        //
+        // set up the keys
+        //
+        PrivateKey          privKey;
+        PublicKey           pubKey;
+
+        KeyFactory     fact = KeyFactory.getInstance("ECDSA", "BC");
+
+        privKey = fact.generatePrivate(privKeySpec);
+        pubKey = fact.generatePublic(pubKeySpec);
+
+        PKCS10CertificationRequest req = new PKCS10CertificationRequest(
+                        algorithm, new X509Name("CN=XXX"), pubKey, null, privKey);
+        if (!req.verify())
+        {
+            fail("Failed verify check EC.");
+        }
+
+        req = new PKCS10CertificationRequest(req.getEncoded());
+        if (!req.verify())
+        {
+            fail("Failed verify check EC encoded.");
+        }
+
+        //
+        // try with point compression turned off
+        //
+        ((ECPointEncoder)pubKey).setPointFormat("UNCOMPRESSED");
+
+        req = new PKCS10CertificationRequest(
+                        algorithm, new X509Name("CN=XXX"), pubKey, null, privKey);
+        if (!req.verify())
+        {
+            fail("Failed verify check EC uncompressed.");
+        }
+
+        req = new PKCS10CertificationRequest(req.getEncoded());
+        if (!req.verify())
+        {
+            fail("Failed verify check EC uncompressed encoded.");
+        }
+
+        if (!req.getSignatureAlgorithm().getObjectId().equals(algOid))
+        {
+            fail("ECDSA oid incorrect.");
+        }
+
+        if (req.getSignatureAlgorithm().getParameters() != null)
+        {
+            fail("ECDSA parameters incorrect.");
+        }
+
+        Signature sig = Signature.getInstance(algorithm, "BC");
+
+        sig.initVerify(pubKey);
+
+        sig.update(req.getCertificationRequestInfo().getEncoded());
+
         if (!sig.verify(req.getSignature().getBytes()))
         {
             fail("signature not mapped correctly.");
@@ -416,7 +490,7 @@ public class PKCS10CertRequestTest
         {
             fail("Failed verify check gost3410EC_ExA.");
         }
-        
+
         // elliptic curve openSSL
         KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
 
@@ -446,6 +520,8 @@ public class PKCS10CertRequestTest
         createECRequest("SHA256withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
         createECRequest("SHA384withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
         createECRequest("SHA512withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
+
+        createECRequest("SHA1withECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1, new DERObjectIdentifier("1.3.132.0.34"));
 
         createECGOSTRequest();
 
