@@ -20,6 +20,10 @@ import org.bouncycastle.util.Arrays;
  */
 public class TlsProtocolHandler
 {
+//    private static final int EXT_RenegotiationInfo = 0xFF01;
+
+    private static final int TLS_EMPTY_RENEGOTIATION_INFO_SCSV = 0x00FF;
+
     private static final short RL_CHANGE_CIPHER_SPEC = 20;
     private static final short RL_ALERT = 21;
     private static final short RL_HANDSHAKE = 22;
@@ -127,6 +131,8 @@ public class TlsProtocolHandler
     private int[] offeredCipherSuites = null;
     private TlsKeyExchange keyExchange = null;
 
+    private short connection_state = 0;
+
     private static SecureRandom createSecureRandom()
     {
         /*
@@ -159,8 +165,6 @@ public class TlsProtocolHandler
     {
         return random;
     }
-
-    private short connection_state;
 
     protected void processData(short protocol, byte[] buf, int offset, int len) throws IOException
     {
@@ -400,6 +404,8 @@ public class TlsProtocolHandler
                                 }
                             }
 
+                            // TODO[RFC 5746] If renegotiation_info was sent in client hello, check here
+
                             tlsClient.processServerExtensions(serverExtensions);
                         }
 
@@ -569,6 +575,19 @@ public class TlsProtocolHandler
                 break;
             }
             case HP_HELLO_REQUEST:
+                /*
+                 * RFC 2246 7.4.1.1 Hello request
+                 * "This message will be ignored by the client if the client is currently
+                 * negotiating a session. This message may be ignored by the client if it
+                 * does not wish to renegotiate a session, or the client may, if it wishes,
+                 * respond with a no_renegotiation alert."
+                 */
+                if (connection_state == CS_DONE)
+                {
+                    // Renegotiation not supported yet
+                    sendAlert(AL_warning, AP_no_renegotiation);
+                }
+                break;
             case HP_CLIENT_KEY_EXCHANGE:
             case HP_CERTIFICATE_VERIFY:
             case HP_CLIENT_HELLO:
@@ -757,6 +776,15 @@ public class TlsProtocolHandler
     // TODO Make public
     void connect(TlsClient tlsClient) throws IOException
     {
+        if (tlsClient == null)
+        {
+            throw new IllegalArgumentException("'tlsClient' cannot be null");
+        }
+        if (this.tlsClient != null)
+        {
+            throw new IllegalStateException("connect can only be called once");
+        }
+
         this.tlsClient = tlsClient;
         this.tlsClient.init(this);
 
@@ -784,11 +812,16 @@ public class TlsProtocolHandler
          */
         this.offeredCipherSuites = this.tlsClient.getCipherSuites();
 
-        TlsUtils.writeUint16(2 * offeredCipherSuites.length, os);
+        // Note: 1 extra slot for TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+        TlsUtils.writeUint16(2 * (offeredCipherSuites.length + 1), os);
         for (int i = 0; i < offeredCipherSuites.length; ++i)
         {
             TlsUtils.writeUint16(offeredCipherSuites[i], os);
         }
+
+        // RFC 5746 3.3
+        // Note: If renegotiation added, remove this (and extra slot above)
+        TlsUtils.writeUint16(TLS_EMPTY_RENEGOTIATION_INFO_SCSV, os);
 
         /*
          * Compression methods, just the null method.
@@ -801,6 +834,17 @@ public class TlsProtocolHandler
          */
         // Integer -> byte[]
         Hashtable clientExtensions = this.tlsClient.generateClientExtensions();
+
+        // RFC 5746 3.4
+        // Note: If renegotiation is implemented, need to use this instead of TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+//      {
+//          if (clientExtensions == null)
+//          {
+//              clientExtensions = new Hashtable();
+//          }
+//
+//          clientExtensions.put(EXT_RenegotiationInfo, createRenegotiationInfo(emptybuf));
+//      }
 
         this.extendedClientHello = clientExtensions != null && !clientExtensions.isEmpty();
 
@@ -1004,9 +1048,6 @@ public class TlsProtocolHandler
             /*
              * Prepare the message
              */
-            byte[] error = new byte[2];
-            error[0] = (byte)alertLevel;
-            error[1] = (byte)alertDescription;
             this.closed = true;
 
             if (alertLevel == AL_fatal)
@@ -1016,7 +1057,7 @@ public class TlsProtocolHandler
                  */
                 this.failedWithError = true;
             }
-            rs.writeMessage(RL_ALERT, error, 0, 2);
+            sendAlert(alertLevel, alertDescription);
             rs.close();
             if (alertLevel == AL_fatal)
             {
@@ -1027,6 +1068,15 @@ public class TlsProtocolHandler
         {
             throw new IOException(TLS_ERROR_MESSAGE);
         }
+    }
+
+    private void sendAlert(short alertLevel, short alertDescription) throws IOException
+    {
+        byte[] error = new byte[2];
+        error[0] = (byte)alertLevel;
+        error[1] = (byte)alertDescription;
+        
+        rs.writeMessage(RL_ALERT, error, 0, 2);
     }
 
     /**
@@ -1072,4 +1122,11 @@ public class TlsProtocolHandler
         }
         return false;
     }
+
+//    private byte[] CreateRenegotiationInfo(byte[] renegotiated_connection) throws IOException
+//    {
+//        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+//        TlsUtils.writeOpaque8(renegotiated_connection, buf);
+//        return buf.toByteArray();
+//    }
 }
