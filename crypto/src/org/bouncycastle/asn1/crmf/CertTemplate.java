@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.crmf;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -13,8 +15,6 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
-
-import java.util.Enumeration;
 
 public class CertTemplate
     extends ASN1Encodable
@@ -88,6 +88,116 @@ public class CertTemplate
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    /**
+     * Creates a new, empty CertTemplate.
+     */
+    public CertTemplate()
+    {
+    }
+
+    public int getVersion()
+    {
+        return version.getValue().intValue();
+    }
+
+    /** Sets the X.509 version. Note: for X509v3, use 2 here. */
+    public void setVersion(int ver)
+    {
+        version = new DERInteger(ver);
+    }
+
+    public DERInteger getSerialNumber()
+    {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(DERInteger ser)
+    {
+        serialNumber = ser;
+    }
+
+    public AlgorithmIdentifier getSigningAlg()
+    {
+        return signingAlg;
+    }
+
+    public void setSigningAlg(AlgorithmIdentifier aid)
+    {
+        signingAlg = aid;
+    }
+
+    public X509Name getIssuer()
+    {
+        return issuer;
+    }
+
+    public void setIssuer(X509Name name)
+    {
+        issuer = name;
+    }
+
+    public OptionalValidity getValidity()
+    {
+        return validity;
+    }
+
+    public void setValidity(OptionalValidity v)
+    {
+        validity = v;
+    }
+
+    public X509Name getSubject()
+    {
+        return subject;
+    }
+
+    public void setSubject(X509Name name)
+    {
+        subject = name;
+    }
+
+    public SubjectPublicKeyInfo getPublicKey()
+    {
+        return publicKey;
+    }
+
+    public void setPublicKey(SubjectPublicKeyInfo spki)
+    {
+        publicKey = spki;
+    }
+
+    public DERBitString getIssuerUID()
+    {
+        return issuerUID;
+    }
+
+    /** Sets the issuer unique ID (deprecated in X.509v3) */
+    public void setIssuerUID(DERBitString uid)
+    {
+        issuerUID = uid;
+    }
+
+    public DERBitString getSubjectUID()
+    {
+        return subjectUID;
+    }
+
+    /** Sets the subject unique ID (deprecated in X.509v3) */
+    public void setSubjectUID(DERBitString uid)
+    {
+        subjectUID = uid;
+    }
+
+    public X509Extensions getExtensions()
+    {
+        return extensions;
+    }
+
+    public void setExtensions(X509Extensions extens)
+    {
+        extensions = extens;
     }
 
     /**

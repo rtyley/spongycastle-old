@@ -81,6 +81,21 @@ public class InfoTypeAndValue
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public InfoTypeAndValue(
+        String oid,
+        ASN1Encodable optionalValue)
+    {
+        this(new DERObjectIdentifier(oid), optionalValue);
+    }
+
+    public InfoTypeAndValue(
+        DERObjectIdentifier infoType,
+        ASN1Encodable optionalValue)
+    {
+        this.infoType = infoType;
+        this.infoValue = optionalValue;
+    }
+
     public DERObjectIdentifier getInfoType()
     {
         return infoType;

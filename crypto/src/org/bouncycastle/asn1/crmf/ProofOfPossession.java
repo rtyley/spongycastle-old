@@ -3,14 +3,19 @@ package org.bouncycastle.asn1.crmf;
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERNull;
 
 public class ProofOfPossession
     extends ASN1Encodable
     implements ASN1Choice
 {
+    public static final int TYPE_RA_VERIFIED = 0;
+    public static final int TYPE_SIGNING_KEY = 1;
+    public static final int TYPE_KEY_ENCIPHERMENT = 2;
+    public static final int TYPE_KEY_AGREEMENT = 3;
+
     private int tagNo;
     private ASN1Encodable obj;
 
@@ -47,6 +52,26 @@ public class ProofOfPossession
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    /** Creates a ProofOfPossession with type raVerified. */
+    public ProofOfPossession() {
+        tagNo = TYPE_RA_VERIFIED;
+    }
+
+    /** Creates a ProofOfPossession for a signing key. */
+    public ProofOfPossession(POPOSigningKey poposk) {
+        tagNo = TYPE_SIGNING_KEY;
+        obj = poposk;
+    }
+
+    /**
+     * Creates a ProofOfPossession for key encipherment or agreement.
+     * @param type one of TYPE_KEY_ENCIPHERMENT or TYPE_KEY_AGREEMENT
+     */
+    public ProofOfPossession(int type, POPOPrivKey privkey) {
+        tagNo = type;
+        obj = privkey;
     }
 
     public int getType()

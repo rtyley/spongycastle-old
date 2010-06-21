@@ -1,8 +1,10 @@
 package org.bouncycastle.asn1.crmf;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSequence;
 
 public class CertReqMessages
     extends ASN1Encodable
@@ -27,6 +29,16 @@ public class CertReqMessages
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    public CertReqMessages(
+        CertReqMsg[] msgs)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+        for (int i = 0; i < msgs.length; i++) {
+            v.add(msgs[i]);
+        }
+        content = new DERSequence(v);
     }
 
     public CertReqMsg[] toCertReqMsgArray()

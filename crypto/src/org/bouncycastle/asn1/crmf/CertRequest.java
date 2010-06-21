@@ -39,6 +39,24 @@ public class CertRequest
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public CertRequest(
+        int certReqId,
+        CertTemplate certTemplate,
+        Controls controls)
+    {
+        this(new DERInteger(certReqId), certTemplate, controls);
+    }
+
+    public CertRequest(
+        DERInteger certReqId,
+        CertTemplate certTemplate,
+        Controls controls)
+    {
+        this.certReqId = certReqId;
+        this.certTemplate = certTemplate;
+        this.controls = controls;
+    }
+
     public DERInteger getCertReqId()
     {
         return certReqId;

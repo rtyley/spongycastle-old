@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public class POPOSigningKey
@@ -20,9 +21,16 @@ public class POPOSigningKey
     {
         int index = 0;
 
-        if (seq.getObjectAt(0) instanceof ASN1TaggedObject)
+        if (seq.getObjectAt(index) instanceof ASN1TaggedObject)
         {
-            poposkInput = POPOSigningKeyInput.getInstance(seq.getObjectAt(index++));
+            ASN1TaggedObject tagObj
+                = (ASN1TaggedObject) seq.getObjectAt(index++);
+            if (tagObj.getTagNo() != 0)
+            {
+                throw new IllegalArgumentException(
+                    "Unknown POPOSigningKeyInput tag: " + tagObj.getTagNo());
+            }
+            poposkInput = POPOSigningKeyInput.getInstance(tagObj.getObject());
         }
         algorithmIdentifier = AlgorithmIdentifier.getInstance(seq.getObjectAt(index++));
         signature = DERBitString.getInstance(seq.getObjectAt(index));
@@ -46,6 +54,36 @@ public class POPOSigningKey
     public static POPOSigningKey getInstance(ASN1TaggedObject obj, boolean explicit)
     {
         return getInstance(ASN1Sequence.getInstance(obj, explicit));
+    }
+
+    /**
+     * Creates a new Proof of Possession object for a signing key.
+     * @param poposkIn the POPOSigningKeyInput structure, or null if the
+     *     CertTemplate includes both subject and publicKey values.
+     * @param aid the AlgorithmIdentifier used to sign the proof of possession.
+     * @param signature a signature over the DER-encoded value of poposkIn,
+     *     or the DER-encoded value of certReq if poposkIn is null.
+     */
+    public POPOSigningKey(
+        POPOSigningKeyInput poposkIn,
+        AlgorithmIdentifier aid,
+        DERBitString signature)
+    {
+        this.poposkInput = poposkIn;
+        this.algorithmIdentifier = aid;
+        this.signature = signature;
+    }
+
+    public POPOSigningKeyInput getPoposkInput() {
+        return poposkInput;
+    }
+
+    public AlgorithmIdentifier getAlgorithmIdentifier() {
+        return algorithmIdentifier;
+    }
+
+    public DERBitString getSignature() {
+        return signature;
     }
 
     /**
@@ -73,7 +111,7 @@ public class POPOSigningKey
 
         if (poposkInput != null)
         {
-            v.add(poposkInput);
+            v.add(new DERTaggedObject(false, 0, poposkInput));
         }
 
         v.add(algorithmIdentifier);

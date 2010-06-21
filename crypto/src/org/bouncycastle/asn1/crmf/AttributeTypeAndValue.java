@@ -34,6 +34,21 @@ public class AttributeTypeAndValue
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public AttributeTypeAndValue(
+        String oid,
+        ASN1Encodable value)
+    {
+        this(new DERObjectIdentifier(oid), value);
+    }
+
+    public AttributeTypeAndValue(
+        DERObjectIdentifier type,
+        ASN1Encodable value)
+    {
+        this.type = type;
+        this.value = value;
+    }
+
     public DERObjectIdentifier getType()
     {
         return type;

@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.cmp;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -8,8 +10,6 @@ import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-
-import java.util.Enumeration;
 
 public class PKIMessage
     extends ASN1Encodable
@@ -56,6 +56,32 @@ public class PKIMessage
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    /**
+     * Creates a new PKIMessage.
+     *
+     * @param header message header
+     * @param body message body
+     * @param protection message protection (may be null)
+     * @param extraCerts extra certificates (may be null)
+     */
+    public PKIMessage(
+        PKIHeader header,
+        PKIBody body,
+        DERBitString protection,
+        CMPCertificate[] extraCerts)
+    {
+        this.header = header;
+        this.body = body;
+        this.protection = protection;
+        if (extraCerts != null) {
+            ASN1EncodableVector v = new ASN1EncodableVector();
+            for (int i = 0; i < extraCerts.length; i++) {
+                v.add(extraCerts[i]);
+            }
+            this.extraCerts = new DERSequence(v);
+        }
+    }
+
     public PKIHeader getHeader()
     {
         return header;
@@ -64,6 +90,26 @@ public class PKIMessage
     public PKIBody getBody()
     {
         return body;
+    }
+
+    public DERBitString getProtection()
+    {
+        return protection;
+    }
+
+    public CMPCertificate[] getExtraCerts()
+    {
+        if (extraCerts == null) {
+            return null;
+        }
+
+        CMPCertificate[] results = new CMPCertificate[extraCerts.size()];
+
+        for (int i = 0; i < results.length; i++)
+        {
+            results[i] = CMPCertificate.getInstance(extraCerts.getObjectAt(i));
+        }
+        return results;
     }
 
     /**
