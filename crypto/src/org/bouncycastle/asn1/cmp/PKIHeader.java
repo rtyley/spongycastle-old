@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.cmp;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -8,12 +10,11 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
-
-import java.util.Enumeration;
 
 public class PKIHeader
     extends ASN1Encodable
@@ -93,9 +94,37 @@ public class PKIHeader
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public PKIHeader(
+        int pvno,
+        GeneralName sender,
+        GeneralName recipient)
+    {
+        this(new DERInteger(pvno), sender, recipient);
+    }
+
+    public PKIHeader(
+        DERInteger pvno,
+        GeneralName sender,
+        GeneralName recipient)
+    {
+        this.pvno = pvno;
+        this.sender = sender;
+        this.recipient = recipient;
+    }
+
     public DERInteger getPvno()
     {
         return pvno;
+    }
+
+    public void setPvno(int version)
+    {
+        setPvno(new DERInteger(version));
+    }
+
+    public void setPvno(DERInteger version)
+    {
+        pvno = version;
     }
 
     public GeneralName getSender()
@@ -103,9 +132,161 @@ public class PKIHeader
         return sender;
     }
 
+    public void setSender(GeneralName name)
+    {
+        sender = name;
+    }
+
     public GeneralName getRecipient()
     {
         return recipient;
+    }
+
+    public void setRecipient(GeneralName name)
+    {
+        recipient = name;
+    }
+
+    public DERGeneralizedTime getMessageTime()
+    {
+        return messageTime;
+    }
+
+    public void setMessageTime(DERGeneralizedTime time)
+    {
+        messageTime = time;
+    }
+
+    public AlgorithmIdentifier getProtectionAlg()
+    {
+        return protectionAlg;
+    }
+
+    public void setProtectionAlg(AlgorithmIdentifier aid)
+    {
+        protectionAlg = aid;
+    }
+
+    public ASN1OctetString getSenderKID()
+    {   
+        return senderKID;
+    }
+
+    public void setSenderKID(byte[] kid)
+    {
+        setSenderKID(new DEROctetString(kid));
+    }
+
+    public void setSenderKID(ASN1OctetString kid)
+    {
+        senderKID = kid;
+    }
+
+    public ASN1OctetString getRecipKID()
+    {   
+        return recipKID;
+    }
+
+    public void setRecipKID(byte[] kid)
+    {
+        setRecipKID(new DEROctetString(kid));
+    }
+
+    public void setRecipKID(DEROctetString kid)
+    {
+        recipKID = kid;
+    }
+
+    public ASN1OctetString getTransactionID()
+    {   
+        return transactionID;
+    }
+
+    public void setTransactionID(byte[] tid)
+    {
+        setTransactionID(new DEROctetString(tid));
+    }
+
+    public void setTransactionID(DEROctetString tid)
+    {
+        transactionID = tid;
+    }
+
+    public ASN1OctetString getSenderNonce()
+    {   
+        return senderNonce;
+    }
+
+    public void setSenderNonce(byte[] nonce)
+    {
+        setSenderNonce(new DEROctetString(nonce));
+    }
+
+    public void setSenderNonce(DEROctetString nonce)
+    {
+        senderNonce = nonce;
+    }
+
+    public ASN1OctetString getRecipNonce()
+    {   
+        return recipNonce;
+    }
+
+    public void setRecipNonce(byte[] nonce)
+    {
+        setRecipNonce(new DEROctetString(nonce));
+    }
+
+    public void setRecipNonce(DEROctetString nonce)
+    {
+        recipNonce = nonce;
+    }
+
+    public PKIFreeText getFreeText()
+    {   
+        return freeText;
+    }
+
+    public void setFreeText(PKIFreeText text)
+    {
+        freeText = text;
+    }
+
+    public InfoTypeAndValue[] getGeneralInfo()
+    {
+        if (generalInfo == null) {
+            return null;
+        }
+        InfoTypeAndValue[] results = new InfoTypeAndValue[generalInfo.size()];
+        for (int i = 0; i < results.length; i++) {
+            results[i]
+                = InfoTypeAndValue.getInstance(generalInfo.getObjectAt(i));
+        }
+        return results;
+    }
+
+    public void setGeneralInfo(InfoTypeAndValue[] gen)
+    {
+        setGeneralInfo(makeGeneralInfoSeq(gen));
+    }
+
+    public void setGeneralInfo(ASN1Sequence seqOfInfoTypeAndValue)
+    {
+        generalInfo = seqOfInfoTypeAndValue;
+    }
+
+    private static ASN1Sequence makeGeneralInfoSeq(
+        InfoTypeAndValue[] generalInfo)
+    {
+        ASN1Sequence genInfoSeq = null;
+        if (generalInfo != null) {
+            ASN1EncodableVector v = new ASN1EncodableVector();
+            for (int i = 0; i < generalInfo.length; i++) {
+                v.add(generalInfo[i]);
+            }
+            genInfoSeq = new DERSequence(v);
+        }
+        return genInfoSeq;
     }
 
     /**

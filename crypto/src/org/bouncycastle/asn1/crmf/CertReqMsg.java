@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.crmf;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
-
-import java.util.Enumeration;
 
 public class CertReqMsg
     extends ASN1Encodable
@@ -49,6 +49,29 @@ public class CertReqMsg
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    /**
+     * Creates a new CertReqMsg.
+     * @param certReq CertRequest
+     * @param pop may be null
+     * @param regInfo may be null
+     */
+    public CertReqMsg(
+        CertRequest certReq,
+        ProofOfPossession pop,
+        AttributeTypeAndValue[] regInfo)
+    {
+        this.certReq = certReq;
+        this.pop = pop;
+
+        if (regInfo != null) {
+            ASN1EncodableVector v = new ASN1EncodableVector();
+            for (int i = 0; i < regInfo.length; i++) {
+                v.add(regInfo[i]);
+            }
+            this.regInfo = new DERSequence(v);
+        }
     }
 
     public CertRequest getCertReq()

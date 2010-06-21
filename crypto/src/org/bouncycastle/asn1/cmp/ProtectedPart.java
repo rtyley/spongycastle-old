@@ -33,6 +33,12 @@ public class ProtectedPart
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public ProtectedPart(PKIHeader header, PKIBody body)
+    {
+        this.header = header;
+        this.body = body;
+    }
+
     public PKIHeader getHeader()
     {
         return header;

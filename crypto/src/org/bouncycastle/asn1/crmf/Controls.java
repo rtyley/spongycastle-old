@@ -1,8 +1,10 @@
 package org.bouncycastle.asn1.crmf;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSequence;
 
 public class Controls
     extends ASN1Encodable
@@ -27,6 +29,15 @@ public class Controls
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    public Controls(AttributeTypeAndValue[] atvs)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+        for (int i = 0; i < atvs.length; i++) {
+            v.add(atvs[i]);
+        }
+        content = new DERSequence(v);
     }
 
     public AttributeTypeAndValue[] toAttributeTypeAndValueArray()

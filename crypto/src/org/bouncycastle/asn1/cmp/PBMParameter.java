@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -38,6 +39,33 @@ public class PBMParameter
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    public PBMParameter(
+        byte[] salt,
+        AlgorithmIdentifier owf,
+        int iterationCount,
+        AlgorithmIdentifier mac)
+    {
+        this(new DEROctetString(salt), owf,
+             new DERInteger(iterationCount), mac);
+    }
+
+    public PBMParameter(
+        ASN1OctetString salt,
+        AlgorithmIdentifier owf,
+        DERInteger iterationCount,
+        AlgorithmIdentifier mac)
+    {
+        this.salt = salt;
+        this.owf = owf;
+        this.iterationCount = iterationCount;
+        this.mac = mac;
+    }
+
+    public ASN1OctetString getSalt()
+    {
+        return salt;
     }
 
     public AlgorithmIdentifier getOwf()

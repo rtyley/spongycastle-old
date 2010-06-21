@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.cmp;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
@@ -55,6 +56,26 @@ public class PKIFreeText
         DERUTF8String p)
     {
         strings = new DERSequence(p);
+    }
+
+    public PKIFreeText(
+        DERUTF8String[] strs)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+        for (int i = 0; i < strs.length; i++) {
+            v.add(strs[i]);
+        }
+        strings = new DERSequence(v);
+    }
+
+    public PKIFreeText(
+        String[] strs)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+        for (int i = 0; i < strs.length; i++) {
+            v.add(new DERUTF8String(strs[i]));
+        }
+        strings = new DERSequence(v);
     }
 
     /**

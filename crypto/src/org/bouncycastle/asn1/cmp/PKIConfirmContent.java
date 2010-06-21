@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.cmp;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 
 public class PKIConfirmContent
@@ -27,6 +28,11 @@ public class PKIConfirmContent
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    public PKIConfirmContent()
+    {
+        val = DERNull.INSTANCE;
     }
 
     /**
