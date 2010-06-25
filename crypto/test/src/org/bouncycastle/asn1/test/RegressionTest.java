@@ -37,6 +37,7 @@ public class RegressionTest
         new EncryptedPrivateKeyInfoTest(),
         new DataGroupHashUnitTest(),
         new LDSSecurityObjectUnitTest(),
+        new CscaMasterListTest(),
         new AttributeTableUnitTest(),
         new ReasonFlagsTest(),
         new NetscapeCertTypeTest(),
