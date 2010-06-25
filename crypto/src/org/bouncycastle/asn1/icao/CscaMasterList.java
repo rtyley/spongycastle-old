@@ -71,7 +71,7 @@ public class CscaMasterList
     public CscaMasterList(
         X509CertificateStructure[] certStructs)
     {
-        certList = certStructs.clone();
+        certList = copyCertList(certStructs);
     }
 
     public int getVersion() {
@@ -80,7 +80,19 @@ public class CscaMasterList
 
     public X509CertificateStructure[] getCertStructs()
     {
-        return certList.clone();
+        return copyCertList(certList);
+    }
+
+    private X509CertificateStructure[] copyCertList(X509CertificateStructure[] orig)
+    {
+        X509CertificateStructure[] certs = new X509CertificateStructure[orig.length];
+
+        for (int i = 0; i != certs.length; i++)
+        {
+            certs[i] = orig[i];
+        }
+
+        return certs;
     }
 
     public DERObject toASN1Object() 
