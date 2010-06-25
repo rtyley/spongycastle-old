@@ -1,11 +1,7 @@
 package org.bouncycastle.asn1.icao;
 
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERInteger;
@@ -13,7 +9,6 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.jce.provider.X509CertificateObject;
 
 /**
  * The CscaMasterList object. This object can be wrapped in a
@@ -79,23 +74,6 @@ public class CscaMasterList
         certList = certStructs.clone();
     }
 
-    public CscaMasterList(
-        X509Certificate[] certs)
-    {
-        certList = new X509CertificateStructure[certs.length];
-        for (int i = 0; i < certList.length; i++) {
-            try {
-                certList[i]
-                    = X509CertificateStructure.getInstance(
-                        ASN1Object.fromByteArray(certs[i].getEncoded()));
-            }
-            catch (Exception e) {
-                throw new IllegalArgumentException(
-                    "Failed to parse encoded certificate", e);
-            }
-        }
-    }
-
     public int getVersion() {
         return version.getValue().intValue();
     }
@@ -103,14 +81,6 @@ public class CscaMasterList
     public X509CertificateStructure[] getCertStructs()
     {
         return certList.clone();
-    }
-
-    public X509Certificate[] getCerts() throws CertificateParsingException {
-        X509Certificate[] certs = new X509Certificate[certList.length];
-        for (int i = 0; i < certs.length; i++) {
-            certs[i] = new X509CertificateObject(certList[i]);
-        }
-        return certs;
     }
 
     public DERObject toASN1Object() 

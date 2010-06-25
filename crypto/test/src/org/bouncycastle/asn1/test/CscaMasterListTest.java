@@ -27,27 +27,18 @@ public class CscaMasterListTest
             fail("Cert structure parsing failed: incorrect length");
         }
 
-        parsedList.getCerts();
-
         byte[] output = parsedList.getEncoded();
         if (!Arrays.equals(input, output)) {
             fail("Encoding failed after parse");
         }
-
-        CscaMasterList newList = new CscaMasterList(parsedList.getCerts());
-        output = parsedList.getEncoded();
-        if (!Arrays.equals(input, output)) {
-            fail("Encoding failed after generate");
-        }
     }
 
     private byte[] getInput(String name)
-    throws IOException
+        throws IOException
     {
         return Streams.readAll(getClass().getResourceAsStream(name));
     }
 
-    
     public static void main(
         String[]    args)
     {
