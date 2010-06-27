@@ -1,9 +1,13 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.asn1.x509.KeyUsage;
 
 public class BitStringTest
     implements Test
@@ -39,7 +43,17 @@ public class BitStringTest
         {
             return new SimpleTestResult(false, getName() + ": failed decipherOnly");
         }
-        
+
+        // test for zero length bit string
+        try
+        {
+            ASN1Object.fromByteArray(new DERBitString(new byte[0], 0).getEncoded());
+        }
+        catch (IOException e)
+        {
+            return new SimpleTestResult(false, getName() + ": " + e);
+        }
+
         return new SimpleTestResult(true, getName() + ": Okay");
     }
 
