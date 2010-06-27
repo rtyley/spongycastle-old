@@ -259,7 +259,7 @@ public class DERBitString
 
     static DERBitString fromOctetString(byte[] bytes)
     {
-        if (bytes.length < 2)
+        if (bytes.length < 1)
         {
             throw new IllegalArgumentException("truncated BIT STRING detected");
         }
@@ -267,7 +267,10 @@ public class DERBitString
         int padBits = bytes[0];
         byte[] data = new byte[bytes.length - 1];
 
-        System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
+        if (data.length != 0)
+        {
+            System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
+        }
 
         return new DERBitString(data, padBits);
     }
