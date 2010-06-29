@@ -1,9 +1,6 @@
 package org.bouncycastle.asn1.x509;
 
-import java.io.IOException;
-
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
@@ -44,25 +41,9 @@ public class X509CertificateStructure
         {
             return (X509CertificateStructure)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new X509CertificateStructure((ASN1Sequence)obj);
-        }
-        else if (obj instanceof byte[])
-        {
-            try
-            {
-                return new X509CertificateStructure(ASN1Sequence.getInstance(ASN1Object.fromByteArray((byte[])obj)));
-            }
-            catch (IOException e)
-            {
-                throw new IllegalArgumentException("failed to construct public key from byte[]: " + e.getMessage());
-            }
-        }
-
-        if (obj != null)
-        {
-            throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+            return new X509CertificateStructure(ASN1Sequence.getInstance(obj));
         }
 
         throw new IllegalArgumentException("null object in factory");
