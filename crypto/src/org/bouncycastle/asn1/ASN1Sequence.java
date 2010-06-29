@@ -22,6 +22,17 @@ public abstract class ASN1Sequence
         {
             return (ASN1Sequence)obj;
         }
+        else if (obj instanceof byte[])
+        {
+            try
+            {
+                return ASN1Sequence.getInstance(ASN1Object.fromByteArray((byte[])obj));
+            }
+            catch (IOException e)
+            {
+                throw new IllegalArgumentException("failed to construct sequence from byte[]: " + e.getMessage());
+            }
+        }
 
         throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }

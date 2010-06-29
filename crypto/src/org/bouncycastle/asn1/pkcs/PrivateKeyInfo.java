@@ -1,5 +1,9 @@
 package org.bouncycastle.asn1.pkcs;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -13,10 +17,6 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Enumeration;
 
 public class PrivateKeyInfo
     extends ASN1Encodable
@@ -39,12 +39,12 @@ public class PrivateKeyInfo
         {
             return (PrivateKeyInfo)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new PrivateKeyInfo((ASN1Sequence)obj);
+            return new PrivateKeyInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        throw new IllegalArgumentException("null object in factory");
     }
         
     public PrivateKeyInfo(
