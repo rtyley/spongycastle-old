@@ -208,20 +208,19 @@ public class JCESecretKeyFactory
                 {
                     param = Util.makePBEMacParameters(pbeSpec, scheme, digest, keySize);
                 }
-                
+
+                KeyParameter kParam;
                 if (param instanceof ParametersWithIV)
                 {
-                    KeyParameter    kParam = (KeyParameter)((ParametersWithIV)param).getParameters();
-
-                    DESParameters.setOddParity(kParam.getKey());
+                    kParam = (KeyParameter)((ParametersWithIV)param).getParameters();
                 }
                 else
                 {
-                    KeyParameter    kParam = (KeyParameter)param;
-
-                    DESParameters.setOddParity(kParam.getKey());
+                    kParam = (KeyParameter)param;
                 }
-                
+
+                DESParameters.setOddParity(kParam.getKey());
+
                 return new JCEPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);
             }
             
@@ -303,7 +302,7 @@ public class JCESecretKeyFactory
     * PBEWithSHA1AndDES
     */
    static public class PBEWithSHA1AndDES
-       extends PBEKeyFactory
+       extends DESPBEKeyFactory
    {
        public PBEWithSHA1AndDES()
        {
@@ -327,7 +326,7 @@ public class JCESecretKeyFactory
     * PBEWithSHAAnd3-KeyTripleDES-CBC
     */
    static public class PBEWithSHAAndDES3Key
-       extends PBEKeyFactory
+       extends DESPBEKeyFactory
    {
        public PBEWithSHAAndDES3Key()
        {
@@ -339,7 +338,7 @@ public class JCESecretKeyFactory
     * PBEWithSHAAnd2-KeyTripleDES-CBC
     */
    static public class PBEWithSHAAndDES2Key
-       extends PBEKeyFactory
+       extends DESPBEKeyFactory
    {
        public PBEWithSHAAndDES2Key()
        {
