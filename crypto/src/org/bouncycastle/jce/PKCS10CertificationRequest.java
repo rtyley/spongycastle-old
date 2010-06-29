@@ -302,7 +302,14 @@ public class PKCS10CertificationRequest
 
         if (sigOID == null)
         {
-            throw new IllegalArgumentException("Unknown signature type requested");
+            try
+            {
+                sigOID = new DERObjectIdentifier(algorithmName);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("Unknown signature type requested");
+            }
         }
 
         if (subject == null)
