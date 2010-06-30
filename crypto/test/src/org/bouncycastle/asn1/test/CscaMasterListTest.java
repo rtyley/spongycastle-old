@@ -19,11 +19,11 @@ public class CscaMasterListTest
     public void performTest() 
         throws Exception
     {
-        byte[] input = getInput("australia-ml-content.data");
+        byte[] input = getInput("masterlist-content.data");
         CscaMasterList parsedList
             = CscaMasterList.getInstance(ASN1Object.fromByteArray(input));
 
-        if (parsedList.getCertStructs().length != 5) {
+        if (parsedList.getCertStructs().length != 3) {
             fail("Cert structure parsing failed: incorrect length");
         }
 
