@@ -59,7 +59,7 @@ public class JcaUtils
         }
         catch (InvalidKeySpecException e)
         {
-            throw new InvalidKeyException("error decoding public key", e);
+            throw new ExtInvalidKeyException("error decoding public key", e);
         }
     }
 
@@ -106,7 +106,25 @@ public class JcaUtils
         }
         catch (InvalidKeySpecException e)
         {
-            throw new InvalidKeyException("error decoding public key", e);
+            throw new ExtInvalidKeyException("error decoding public key", e);
+        }
+    }
+
+    private static class ExtInvalidKeyException
+        extends InvalidKeyException
+    {
+        private Throwable cause;
+
+        ExtInvalidKeyException(String msg, Throwable throwable)
+        {
+            super(msg);
+
+            this.cause = cause;
+        }
+
+        public Throwable getCause()
+        {
+            return cause;
         }
     }
 }
