@@ -1,5 +1,23 @@
 package org.bouncycastle.cms;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.util.Iterator;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.BERConstructedOctetString;
@@ -9,23 +27,6 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.EncryptedContentInfo;
 import org.bouncycastle.asn1.cms.EnvelopedData;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.Provider;
-import java.util.Iterator;
 
 /**
  * General class for generating a CMS enveloped-data message.
@@ -145,10 +146,22 @@ public class CMSEnvelopedDataGenerator
             }
         }
 
-        EncryptedContentInfo  eci = new EncryptedContentInfo(
-                                 CMSObjectIdentifiers.data,
-                                 encAlgId, 
-                                 encContent);
+        EncryptedContentInfo  eci;
+
+        if (content instanceof CMSTypedProcessable)
+        {
+            eci = new EncryptedContentInfo(
+                        ((CMSTypedProcessable)content).getContentType(),
+                        encAlgId,
+                        encContent);
+        }
+        else
+        {
+            eci = new EncryptedContentInfo(
+                        CMSObjectIdentifiers.data,
+                        encAlgId,
+                        encContent);
+        }
 
         ContentInfo contentInfo = new ContentInfo(
                 CMSObjectIdentifiers.envelopedData,

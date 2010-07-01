@@ -10,8 +10,13 @@ public class EncryptedKey
     extends ASN1Encodable
     implements ASN1Choice
 {
-    private EnvelopedData envData;
-    
+    private EnvelopedData envelopedData;
+
+    public EncryptedKey(EnvelopedData envelopedData)
+    {
+        this.envelopedData = envelopedData;
+    }
+
     /**
      * <pre>
      *    EncryptedKey ::= CHOICE {
@@ -23,6 +28,6 @@ public class EncryptedKey
      */
     public DERObject toASN1Object()
     {
-        return new DERTaggedObject(false, 0, envData);
+        return new DERTaggedObject(false, 0, envelopedData);
     }
 }

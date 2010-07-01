@@ -7,16 +7,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+
 /**
  * a holding class for a file of data to be processed.
  */
 public class CMSProcessableFile
-    implements CMSProcessable, CMSReadable
+    implements CMSTypedProcessable, CMSReadable
 {
     private static final int DEFAULT_BUF_SIZE = 32 * 1024;
-    
-    private final File   _file;
-    private final byte[] _buf;
+
+    private final ASN1ObjectIdentifier type;
+    private final File file;
+    private final byte[] buf;
 
     public CMSProcessableFile(
         File file)
@@ -28,25 +32,34 @@ public class CMSProcessableFile
         File file,
         int  bufSize)
     {
-        _file = file;
-        _buf = new byte[bufSize];
+        this(new ASN1ObjectIdentifier(CMSObjectIdentifiers.data.getId()), file, bufSize);
+    }
+
+    public CMSProcessableFile(
+        ASN1ObjectIdentifier type,
+        File file,
+        int  bufSize)
+    {
+        this.type = type;
+        this.file = file;
+        buf = new byte[bufSize];
     }
 
     public InputStream read()
         throws IOException, CMSException
     {
-        return new BufferedInputStream(new FileInputStream(_file), DEFAULT_BUF_SIZE);
+        return new BufferedInputStream(new FileInputStream(file), DEFAULT_BUF_SIZE);
     }
 
     public void write(OutputStream zOut)
         throws IOException, CMSException
     {
-        FileInputStream     fIn = new FileInputStream(_file);
+        FileInputStream     fIn = new FileInputStream(file);
         int                 len;
         
-        while ((len = fIn.read(_buf, 0, _buf.length)) > 0)
+        while ((len = fIn.read(buf, 0, buf.length)) > 0)
         {
-            zOut.write(_buf, 0, len);
+            zOut.write(buf, 0, len);
         }
         
         fIn.close();
@@ -57,6 +70,11 @@ public class CMSProcessableFile
      */
     public Object getContent()
     {
-        return _file;
+        return file;
+    }
+
+    public ASN1ObjectIdentifier getContentType()
+    {
+        return type;
     }
 }

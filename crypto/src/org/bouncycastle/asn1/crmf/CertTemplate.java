@@ -3,14 +3,11 @@ package org.bouncycastle.asn1.crmf;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -19,6 +16,8 @@ import org.bouncycastle.asn1.x509.X509Name;
 public class CertTemplate
     extends ASN1Encodable
 {
+    private ASN1Sequence seq;
+
     private DERInteger version;
     private DERInteger serialNumber;
     private AlgorithmIdentifier signingAlg;
@@ -32,6 +31,8 @@ public class CertTemplate
 
     private CertTemplate(ASN1Sequence seq)
     {
+        this.seq = seq;
+
         Enumeration en = seq.getObjects();
         while (en.hasMoreElements())
         {
@@ -81,20 +82,12 @@ public class CertTemplate
         {
             return (CertTemplate)o;
         }
-
-        if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new CertTemplate((ASN1Sequence)o);
+            return new CertTemplate(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
-    }
-
-    /**
-     * Creates a new, empty CertTemplate.
-     */
-    public CertTemplate()
-    {
+        throw new IllegalArgumentException("null object in factory");
     }
 
     public int getVersion()
@@ -102,20 +95,9 @@ public class CertTemplate
         return version.getValue().intValue();
     }
 
-    /** Sets the X.509 version. Note: for X509v3, use 2 here. */
-    public void setVersion(int ver)
-    {
-        version = new DERInteger(ver);
-    }
-
     public DERInteger getSerialNumber()
     {
         return serialNumber;
-    }
-
-    public void setSerialNumber(DERInteger ser)
-    {
-        serialNumber = ser;
     }
 
     public AlgorithmIdentifier getSigningAlg()
@@ -123,19 +105,9 @@ public class CertTemplate
         return signingAlg;
     }
 
-    public void setSigningAlg(AlgorithmIdentifier aid)
-    {
-        signingAlg = aid;
-    }
-
     public X509Name getIssuer()
     {
         return issuer;
-    }
-
-    public void setIssuer(X509Name name)
-    {
-        issuer = name;
     }
 
     public OptionalValidity getValidity()
@@ -143,19 +115,9 @@ public class CertTemplate
         return validity;
     }
 
-    public void setValidity(OptionalValidity v)
-    {
-        validity = v;
-    }
-
     public X509Name getSubject()
     {
         return subject;
-    }
-
-    public void setSubject(X509Name name)
-    {
-        subject = name;
     }
 
     public SubjectPublicKeyInfo getPublicKey()
@@ -173,31 +135,14 @@ public class CertTemplate
         return issuerUID;
     }
 
-    /** Sets the issuer unique ID (deprecated in X.509v3) */
-    public void setIssuerUID(DERBitString uid)
-    {
-        issuerUID = uid;
-    }
-
     public DERBitString getSubjectUID()
     {
         return subjectUID;
     }
 
-    /** Sets the subject unique ID (deprecated in X.509v3) */
-    public void setSubjectUID(DERBitString uid)
-    {
-        subjectUID = uid;
-    }
-
     public X509Extensions getExtensions()
     {
         return extensions;
-    }
-
-    public void setExtensions(X509Extensions extens)
-    {
-        extensions = extens;
     }
 
     /**
@@ -218,27 +163,6 @@ public class CertTemplate
      */
     public DERObject toASN1Object()
     {
-        ASN1EncodableVector v = new ASN1EncodableVector();
-
-        addOptional(v, 0, false, version);
-        addOptional(v, 1, false, serialNumber);
-        addOptional(v, 2, false, signingAlg);
-        addOptional(v, 3, true, issuer); // CHOICE
-        addOptional(v, 4, false, validity);
-        addOptional(v, 5, true, subject); // CHOICE
-        addOptional(v, 6, false, publicKey);
-        addOptional(v, 7, false, issuerUID);
-        addOptional(v, 8, false, subjectUID);
-        addOptional(v, 9, false, extensions);
-
-        return new DERSequence(v);
-    }
-
-    private void addOptional(ASN1EncodableVector v, int tagNo, boolean isExplicit, ASN1Encodable obj)
-    {
-        if (obj != null)
-        {
-            v.add(new DERTaggedObject(isExplicit, tagNo, obj));
-        }
+        return seq;
     }
 }
