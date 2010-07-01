@@ -659,7 +659,14 @@ public class CMSSignedDataGenerator
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        return this.generate(DATA, content, encapsulate, sigProvider);
+        if (content instanceof CMSTypedProcessable)
+        {
+            return this.generate(((CMSTypedProcessable)content).getContentType().getId(), content, encapsulate, sigProvider);
+        }
+        else
+        {
+            return this.generate(DATA, content, encapsulate, sigProvider);
+        }
     }
 
     /**
@@ -674,7 +681,14 @@ public class CMSSignedDataGenerator
         Provider        sigProvider)
         throws NoSuchAlgorithmException, CMSException
     {
-        return this.generate(DATA, content, encapsulate, sigProvider);
+        if (content instanceof CMSTypedProcessable)
+        {
+            return this.generate(((CMSTypedProcessable)content).getContentType().getId(), content, encapsulate, sigProvider);
+        }
+        else
+        {
+            return this.generate(DATA, content, encapsulate, sigProvider);
+        }
     }
 
     /**

@@ -42,13 +42,12 @@ public class CertReqMsg
         {
             return (CertReqMsg)o;
         }
-
-        if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new CertReqMsg((ASN1Sequence)o);
+            return new CertReqMsg(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        throw new IllegalArgumentException("null object in factory");
     }
 
     /**

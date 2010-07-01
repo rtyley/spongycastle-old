@@ -30,13 +30,12 @@ public class CertRequest
         {
             return (CertRequest)o;
         }
-
-        if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new CertRequest((ASN1Sequence)o);
+            return new CertRequest(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        throw new IllegalArgumentException("null object in factory");
     }
 
     public CertRequest(

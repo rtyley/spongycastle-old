@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1.crmf;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 
 public interface CRMFObjectIdentifiers
 {
@@ -15,4 +16,6 @@ public interface CRMFObjectIdentifiers
     static final ASN1ObjectIdentifier id_regCtrl_authenticator = id_regCtrl.branch("2");
     static final ASN1ObjectIdentifier id_regCtrl_pkiPublicationInfo = id_regCtrl.branch("3");
     static final ASN1ObjectIdentifier id_regCtrl_pkiArchiveOptions = id_regCtrl.branch("4");
+
+    static final ASN1ObjectIdentifier id_ct_encKeyWithID = new ASN1ObjectIdentifier(PKCSObjectIdentifiers.id_ct + ".21");
 }

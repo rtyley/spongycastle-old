@@ -370,12 +370,12 @@ public class X509Name
         {
             return (X509Name)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new X509Name((ASN1Sequence)obj);
+            return new X509Name(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        throw new IllegalArgumentException("null object in factory");
     }
 
     /**
