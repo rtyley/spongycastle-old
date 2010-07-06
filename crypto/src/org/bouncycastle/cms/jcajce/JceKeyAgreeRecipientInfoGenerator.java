@@ -47,10 +47,10 @@ public class JceKeyAgreeRecipientInfoGenerator
     private PrivateKey senderPrivateKey;
 
     private EnvelopedDataHelper helper = new DefaultEnvelopedDataHelper();
-    private SecureRandom random = new SecureRandom();
+    private SecureRandom random;
     private KeyPair ephemeralKP;
 
-    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, List recipientCerts)
+    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, List recipientCerts, SecureRandom random)
         throws CMSException
     {
         super(keyAgreementOID, SubjectPublicKeyInfo.getInstance(senderPublicKey.getEncoded()), keyEncryptionOID);
@@ -58,21 +58,8 @@ public class JceKeyAgreeRecipientInfoGenerator
         this.senderPublicKey = senderPublicKey;
         this.senderPrivateKey = senderPrivateKey;
         this.recipientCerts = recipientCerts;
-    }
+        this.random = random;
 
-    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, X509Certificate recipientCert)
-        throws CMSException
-    {
-        super(keyAgreementOID, SubjectPublicKeyInfo.getInstance(senderPublicKey.getEncoded()), keyEncryptionOID);
-
-        this.senderPublicKey = senderPublicKey;
-        this.senderPrivateKey = senderPrivateKey;
-        this.recipientCerts = Collections.singletonList(recipientCert);
-    }
-
-    private void init(ASN1ObjectIdentifier keyAgreementOID, PublicKey senderPublicKey)
-        throws CMSException
-    {
         if (keyAgreementOID.getId().equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
         {
             try
@@ -93,6 +80,24 @@ public class JceKeyAgreeRecipientInfoGenerator
         }
     }
 
+    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, X509Certificate recipientCert, SecureRandom random)
+        throws CMSException
+    {
+        this(keyAgreementOID, senderPrivateKey, senderPublicKey, keyEncryptionOID,  Collections.singletonList(recipientCert), random);
+    }
+
+    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, List recipientCerts)
+        throws CMSException
+    {
+         this(keyAgreementOID, senderPrivateKey, senderPublicKey, keyEncryptionOID, recipientCerts, new SecureRandom());
+    }
+
+    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, X509Certificate recipientCert)
+        throws CMSException
+    {
+        this(keyAgreementOID, senderPrivateKey, senderPublicKey, keyEncryptionOID, recipientCert, new SecureRandom());
+    }
+
     public JceKeyAgreeRecipientInfoGenerator setProvider(Provider provider)
     {
         this.helper = new ProviderEnvelopedDataHelper(provider);
@@ -107,13 +112,6 @@ public class JceKeyAgreeRecipientInfoGenerator
         return this;
     }
 
-    public JceKeyAgreeRecipientInfoGenerator setSecureRandom(SecureRandom random)
-    {
-        this.random = random;
-
-        return this;
-    }
-
     public ASN1Sequence generateRecipientEncryptedKeys(AlgorithmIdentifier keyAgreeAlgorithm, AlgorithmIdentifier keyEncryptionAlgorithm, byte[] contentEncryptionKey)
         throws CMSException
     {
@@ -122,9 +120,7 @@ public class JceKeyAgreeRecipientInfoGenerator
         ASN1ObjectIdentifier keyAgreementOID = keyAgreeAlgorithm.getAlgorithm();
 
         if (keyAgreementOID.getId().equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
-        {
-            init(keyAgreementOID, senderPublicKey);
-            
+        {           
             senderPrivateKey = new MQVPrivateKeySpec(
                 senderPrivateKey, ephemeralKP.getPrivate(), ephemeralKP.getPublic());
         }
