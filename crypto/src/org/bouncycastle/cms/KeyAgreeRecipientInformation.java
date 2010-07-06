@@ -22,7 +22,6 @@ import javax.crypto.SecretKey;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientIdentifier;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
@@ -32,6 +31,7 @@ import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
 import org.bouncycastle.asn1.cms.RecipientKeyIdentifier;
 import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
@@ -191,8 +191,8 @@ public class KeyAgreeRecipientInformation
     {
         try
         {
-            String wrapAlg = DERObjectIdentifier.getInstance(
-                ASN1Sequence.getInstance(keyEncAlg.getParameters()).getObjectAt(0)).getId();
+            String wrapAlg = 
+                AlgorithmIdentifier.getInstance(keyEncAlg.getParameters()).getAlgorithm().getId();
 
             PublicKey senderPublicKey = getSenderPublicKey(receiverPrivateKey,
                 info.getOriginator(), prov);

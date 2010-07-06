@@ -17,8 +17,11 @@ import javax.security.auth.x500.X500Principal;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.crmf.CertificateRequestMessage;
 import org.bouncycastle.crmf.CertificateRequestMessageBuilder;
 import org.bouncycastle.crmf.PKIArchiveControlBuilder;
@@ -77,8 +80,8 @@ public class PKIArchiveControlTest
                     .setPublicKey(kp.getPublic());
 
         certReqBuild.addControl(new PKIArchiveControlBuilder(kp.getPrivate(), new X500Principal("CN=test"))
-                                      .addKeyTransRecipient(cert)
-                                      .build(CMSEnvelopedDataGenerator.AES128_CBC, "BC"));
+                                      .addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(cert))
+                                      .build(new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(CMSEnvelopedDataGenerator.AES128_CBC)).setProvider("BC").build()));
 
         CertificateRequestMessage certReqMsg = certReqBuild.build();
 

@@ -1,9 +1,9 @@
 package org.bouncycastle.cms.test;
 
+import javax.crypto.Cipher;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import javax.crypto.Cipher;
 
 public class AllTests 
 {
@@ -21,10 +21,13 @@ public class AllTests
         suite.addTest(CompressedDataTest.suite());
         suite.addTest(SignedDataTest.suite());
         suite.addTest(EnvelopedDataTest.suite());
+        suite.addTest(NewEnvelopedDataTest.suite());
 
         suite.addTest(CompressedDataStreamTest.suite());
         suite.addTest(SignedDataStreamTest.suite());
         suite.addTest(EnvelopedDataStreamTest.suite());
+        suite.addTest(NewEnvelopedDataStreamTest.suite());
+
         suite.addTest(MiscDataStreamTest.suite());
         suite.addTest(Rfc4134Test.suite());
 

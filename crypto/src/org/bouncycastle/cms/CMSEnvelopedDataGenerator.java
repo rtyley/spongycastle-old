@@ -2,6 +2,7 @@ package org.bouncycastle.cms;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -126,11 +127,11 @@ public class CMSEnvelopedDataGenerator
             throw new CMSException("exception decoding algorithm parameters.", e);
         }
 
-        Iterator it = recipientInfoGenerators.iterator();
+        Iterator it = oldRecipientInfoGenerators.iterator();
 
         while (it.hasNext())
         {
-            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
+            IntRecipientInfoGenerator recipient = (IntRecipientInfoGenerator)it.next();
 
             try
             {
@@ -146,12 +147,21 @@ public class CMSEnvelopedDataGenerator
             }
         }
 
+        it = recipientInfoGenerators.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
+
+            recipientInfos.add(recipient.generate(encKey.getEncoded()));
+        }
+
         EncryptedContentInfo  eci;
 
-        if (content instanceof CMSTypedProcessable)
+        if (content instanceof CMSTypedData)
         {
             eci = new EncryptedContentInfo(
-                        ((CMSTypedProcessable)content).getContentType(),
+                        ((CMSTypedData)content).getContentType(),
                         encAlgId,
                         encContent);
         }
@@ -169,7 +179,63 @@ public class CMSEnvelopedDataGenerator
 
         return new CMSEnvelopedData(contentInfo);
     }
-    
+
+    private CMSEnvelopedData doGenerate(
+        CMSTypedData content,
+        CMSContentEncryptor contentEncryptor)
+        throws CMSException
+    {
+        if (!oldRecipientInfoGenerators.isEmpty())
+        {
+            throw new IllegalStateException("can only use addRecipientGenerator() with this method");
+        }
+
+        ASN1EncodableVector     recipientInfos = new ASN1EncodableVector();
+        AlgorithmIdentifier     encAlgId;
+        ASN1OctetString         encContent;
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        try
+        {
+            OutputStream cOut = contentEncryptor.getEncryptingOutputStream(bOut);
+
+            content.write(cOut);
+
+            cOut.close();
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("");
+        }
+
+        byte[] encryptedContent = bOut.toByteArray();
+
+        encAlgId = contentEncryptor.getAlgorithmIdentifier();
+
+        encContent = new BERConstructedOctetString(encryptedContent);
+
+        byte[] encKey = contentEncryptor.getEncodedKey();
+
+        for (Iterator it = recipientInfoGenerators.iterator(); it.hasNext();)
+        {
+            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
+
+            recipientInfos.add(recipient.generate(encKey));
+        }
+
+        EncryptedContentInfo  eci = new EncryptedContentInfo(
+                        content.getContentType(),
+                        encAlgId,
+                        encContent);
+
+        ContentInfo contentInfo = new ContentInfo(
+                CMSObjectIdentifiers.envelopedData,
+                new EnvelopedData(null, new DERSet(recipientInfos), eci, null));
+
+        return new CMSEnvelopedData(contentInfo);
+    }
+
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
@@ -230,5 +296,17 @@ public class CMSEnvelopedDataGenerator
         keyGen.init(keySize, rand);
 
         return generate(content, encryptionOID, keyGen, provider);
+    }
+
+    /**
+     * generate an enveloped object that contains an CMS Enveloped Data
+     * object using the given provider.
+     */
+    public CMSEnvelopedData generate(
+        CMSTypedData content,
+        CMSContentEncryptor  contentEncryptor)
+        throws CMSException
+    {
+        return doGenerate(content, contentEncryptor);
     }
 }

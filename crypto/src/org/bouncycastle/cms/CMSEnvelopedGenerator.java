@@ -75,7 +75,9 @@ public class CMSEnvelopedGenerator
     public static final String  ECDH_SHA1KDF    = X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme.getId();
     public static final String  ECMQV_SHA1KDF   = X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme.getId();
 
+    final List oldRecipientInfoGenerators = new ArrayList();
     final List recipientInfoGenerators = new ArrayList();
+
     final SecureRandom rand;
 
     /**
@@ -99,6 +101,7 @@ public class CMSEnvelopedGenerator
     /**
      * add a recipient.
      *
+     * @deprecated use the addRecipientGenerator and JceKeyTransRecipientInfoGenerator
      * @param cert recipient's public key certificate
      * @exception IllegalArgumentException if there is a problem with the certificate
      */
@@ -106,15 +109,16 @@ public class CMSEnvelopedGenerator
         X509Certificate cert)
         throws IllegalArgumentException
     {
-        KeyTransRecipientInfoGenerator ktrig = new KeyTransRecipientInfoGenerator();
+        KeyTransIntRecipientInfoGenerator ktrig = new KeyTransIntRecipientInfoGenerator();
         ktrig.setRecipientCert(cert);
 
-        recipientInfoGenerators.add(ktrig);
+        oldRecipientInfoGenerators.add(ktrig);
     }
 
     /**
      * add a recipient
      *
+     * @deprecated use the addRecipientGenerator and JceKeyTransRecipientInfoGenerator
      * @param key the public key used by the recipient
      * @param subKeyId the identifier for the recipient's public key
      * @exception IllegalArgumentException if there is a problem with the key
@@ -124,15 +128,17 @@ public class CMSEnvelopedGenerator
         byte[]      subKeyId)
         throws IllegalArgumentException
     {
-        KeyTransRecipientInfoGenerator ktrig = new KeyTransRecipientInfoGenerator();
+        KeyTransIntRecipientInfoGenerator ktrig = new KeyTransIntRecipientInfoGenerator();
         ktrig.setRecipientPublicKey(key);
         ktrig.setSubjectKeyIdentifier(new DEROctetString(subKeyId));
 
-        recipientInfoGenerators.add(ktrig);
+        oldRecipientInfoGenerators.add(ktrig);
     }
 
     /**
      * add a KEK recipient.
+     *
+     * @deprecated use the addRecipientGenerator and JceKEKRecipientInfoGenerator
      * @param key the secret key to use for wrapping
      * @param keyIdentifier the byte string that identifies the key
      */
@@ -145,6 +151,8 @@ public class CMSEnvelopedGenerator
 
     /**
      * add a KEK recipient.
+     *
+     * @deprecated use the addRecipientGenerator and JceKEKRecipientInfoGenerator
      * @param key the secret key to use for wrapping
      * @param kekIdentifier a KEKIdentifier structure (identifies the key)
      */
@@ -152,11 +160,11 @@ public class CMSEnvelopedGenerator
         SecretKey       key,
         KEKIdentifier   kekIdentifier)
     {
-        KEKRecipientInfoGenerator kekrig = new KEKRecipientInfoGenerator();
+        KEKIntRecipientInfoGenerator kekrig = new KEKIntRecipientInfoGenerator();
         kekrig.setKEKIdentifier(kekIdentifier);
         kekrig.setKeyEncryptionKey(key);
 
-        recipientInfoGenerators.add(kekrig);
+        oldRecipientInfoGenerators.add(kekrig);
     }
 
     public void addPasswordRecipient(
@@ -165,16 +173,17 @@ public class CMSEnvelopedGenerator
     {
         PBKDF2Params params = new PBKDF2Params(pbeKey.getSalt(), pbeKey.getIterationCount());
 
-        PasswordRecipientInfoGenerator prig = new PasswordRecipientInfoGenerator();
+        PasswordIntRecipientInfoGenerator prig = new PasswordIntRecipientInfoGenerator();
         prig.setKeyDerivationAlgorithm(new AlgorithmIdentifier(PKCSObjectIdentifiers.id_PBKDF2, params));
         prig.setKeyEncryptionKey(new SecretKeySpec(pbeKey.getEncoded(kekAlgorithmOid), kekAlgorithmOid));
 
-        recipientInfoGenerators.add(prig);
+        oldRecipientInfoGenerators.add(prig);
     }
 
     /**
      * Add a key agreement based recipient.
      *
+     * @deprecated use the addRecipientGenerator and JceKeyAgreeRecipientInfoGenerator
      * @param agreementAlgorithm key agreement algorithm to use.
      * @param senderPrivateKey private key to initialise sender side of agreement with.
      * @param senderPublicKey sender public key to include with message.
@@ -200,6 +209,7 @@ public class CMSEnvelopedGenerator
     /**
      * Add a key agreement based recipient.
      *
+     * @deprecated use the addRecipientGenerator and JceKeyAgreeRecipientInfoGenerator
      * @param agreementAlgorithm key agreement algorithm to use.
      * @param senderPrivateKey private key to initialise sender side of agreement with.
      * @param senderPublicKey sender public key to include with message.
@@ -225,6 +235,7 @@ public class CMSEnvelopedGenerator
     /**
      * Add multiple key agreement based recipients (sharing a single KeyAgreeRecipientInfo structure).
      *
+     * @deprecated use the addRecipientGenerator and JceKeyAgreeRecipientInfoGenerator
      * @param agreementAlgorithm key agreement algorithm to use.
      * @param senderPrivateKey private key to initialise sender side of agreement with.
      * @param senderPublicKey sender public key to include with message.
@@ -249,6 +260,7 @@ public class CMSEnvelopedGenerator
     /**
      * Add multiple key agreement based recipients (sharing a single KeyAgreeRecipientInfo structure).
      *
+     * @deprecated use the addRecipientGenerator and JceKeyAgreeRecipientInfoGenerator
      * @param agreementAlgorithm key agreement algorithm to use.
      * @param senderPrivateKey private key to initialise sender side of agreement with.
      * @param senderPublicKey sender public key to include with message.
@@ -272,13 +284,23 @@ public class CMSEnvelopedGenerator
          * assert the keyAgreement bit."
          */
 
-        KeyAgreeRecipientInfoGenerator karig = new KeyAgreeRecipientInfoGenerator();
+        KeyAgreeIntRecipientInfoGenerator karig = new KeyAgreeIntRecipientInfoGenerator();
         karig.setKeyAgreementOID(new DERObjectIdentifier(agreementAlgorithm));
         karig.setKeyEncryptionOID(new DERObjectIdentifier(cekWrapAlgorithm));
         karig.setRecipientCerts(recipientCerts);
         karig.setSenderKeyPair(new KeyPair(senderPublicKey, senderPrivateKey));
 
-        recipientInfoGenerators.add(karig);
+        oldRecipientInfoGenerators.add(karig);
+    }
+
+    /**
+     * Add a generator to produce the recipient info required.
+     * 
+     * @param recipientGenerator a generator of a recipient info object.
+     */
+    public void addRecipientGenerator(RecipientInfoGenerator recipientGenerator)
+    {
+        recipientInfoGenerators.add(recipientGenerator);
     }
 
     protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException

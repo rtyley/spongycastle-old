@@ -1,134 +1,32 @@
 package org.bouncycastle.cms;
 
-import java.security.GeneralSecurityException;
-import java.security.Provider;
-import java.security.SecureRandom;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-class KEKRecipientInfoGenerator
+public abstract class KEKRecipientInfoGenerator
     implements RecipientInfoGenerator
 {
-    private SecretKey keyEncryptionKey;
-    private KEKIdentifier kekIdentifier;
+    private final KEKIdentifier kekIdentifier;
+    private final AlgorithmIdentifier keyEncryptionAlgorithm;
 
-    // Derived
-    private AlgorithmIdentifier keyEncryptionAlgorithm;
-
-    KEKRecipientInfoGenerator()
-    {
-    }
-
-    void setKeyEncryptionKey(SecretKey keyEncryptionKey)
-    {
-        this.keyEncryptionKey = keyEncryptionKey;
-        this.keyEncryptionAlgorithm = determineKeyEncAlg(keyEncryptionKey);
-    }
-
-    void setKEKIdentifier(KEKIdentifier kekIdentifier)
+    protected KEKRecipientInfoGenerator(KEKIdentifier kekIdentifier, AlgorithmIdentifier keyEncryptionAlgorithm)
     {
         this.kekIdentifier = kekIdentifier;
+        this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
     }
 
-    public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
-            Provider prov) throws GeneralSecurityException
+    public final RecipientInfo generate(byte[] contentEncryptionKey)
+        throws CMSException
     {
-        Cipher keyEncryptionCipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(
-            keyEncryptionAlgorithm.getObjectId().getId(), prov);
-        keyEncryptionCipher.init(Cipher.WRAP_MODE, keyEncryptionKey, random);
-        byte[] encryptedKeyBytes = keyEncryptionCipher.wrap(contentEncryptionKey);
-        ASN1OctetString encryptedKey = new DEROctetString(encryptedKeyBytes);
+        ASN1OctetString encryptedKey = new DEROctetString(generateEncryptedBytes(keyEncryptionAlgorithm, contentEncryptionKey));
 
         return new RecipientInfo(new KEKRecipientInfo(kekIdentifier, keyEncryptionAlgorithm, encryptedKey));
     }
 
-    private static AlgorithmIdentifier determineKeyEncAlg(SecretKey key)
-    {
-        String algorithm = key.getAlgorithm();
-
-        if (algorithm.startsWith("DES"))
-        {
-            return new AlgorithmIdentifier(new DERObjectIdentifier(
-                    "1.2.840.113549.1.9.16.3.6"), new DERNull());
-        }
-        else if (algorithm.startsWith("RC2"))
-        {
-            return new AlgorithmIdentifier(new DERObjectIdentifier(
-                    "1.2.840.113549.1.9.16.3.7"), new DERInteger(58));
-        }
-        else if (algorithm.startsWith("AES"))
-        {
-            int length = key.getEncoded().length * 8;
-            DERObjectIdentifier wrapOid;
-
-            if (length == 128)
-            {
-                wrapOid = NISTObjectIdentifiers.id_aes128_wrap;
-            }
-            else if (length == 192)
-            {
-                wrapOid = NISTObjectIdentifiers.id_aes192_wrap;
-            }
-            else if (length == 256)
-            {
-                wrapOid = NISTObjectIdentifiers.id_aes256_wrap;
-            }
-            else
-            {
-                throw new IllegalArgumentException("illegal keysize in AES");
-            }
-
-            return new AlgorithmIdentifier(wrapOid); // parameters absent
-        }
-        else if (algorithm.startsWith("SEED"))
-        {
-            // parameters absent
-            return new AlgorithmIdentifier(
-                    KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap);
-        }
-        else if (algorithm.startsWith("Camellia"))
-        {
-            int length = key.getEncoded().length * 8;
-            DERObjectIdentifier wrapOid;
-
-            if (length == 128)
-            {
-                wrapOid = NTTObjectIdentifiers.id_camellia128_wrap;
-            }
-            else if (length == 192)
-            {
-                wrapOid = NTTObjectIdentifiers.id_camellia192_wrap;
-            }
-            else if (length == 256)
-            {
-                wrapOid = NTTObjectIdentifiers.id_camellia256_wrap;
-            }
-            else
-            {
-                throw new IllegalArgumentException(
-                        "illegal keysize in Camellia");
-            }
-
-            return new AlgorithmIdentifier(wrapOid); // parameters must be
-                                                     // absent
-        }
-        else
-        {
-            throw new IllegalArgumentException("unknown algorithm");
-        }
-    }
+    public abstract byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, byte[] contentEncryptionKey)
+        throws CMSException;
 }

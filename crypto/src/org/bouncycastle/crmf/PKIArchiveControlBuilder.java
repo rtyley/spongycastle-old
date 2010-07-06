@@ -1,13 +1,8 @@
 package org.bouncycastle.crmf;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.cert.X509Certificate;
 
-import javax.crypto.SecretKey;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.cms.EnvelopedData;
@@ -18,10 +13,12 @@ import org.bouncycastle.asn1.crmf.PKIArchiveOptions;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cms.CMSContentEncryptor;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.RecipientInfoGenerator;
 
 public class PKIArchiveControlBuilder
 {
@@ -49,38 +46,18 @@ public class PKIArchiveControlBuilder
         this.envGen = new CMSEnvelopedDataGenerator();
     }
 
-    public PKIArchiveControlBuilder addKEKRecipent(SecretKey secretKey, byte[] keyIdentifier)
+    public PKIArchiveControlBuilder addRecipientGenerator(RecipientInfoGenerator recipientGen)
     {
-        envGen.addKEKRecipient(secretKey, keyIdentifier);
+        envGen.addRecipientGenerator(recipientGen);
 
         return this;
     }
 
-    public PKIArchiveControlBuilder addKeyTransRecipient(X509Certificate cert)
+    public PKIArchiveControl build(CMSContentEncryptor contentEncryptor)
+        throws CMSException
     {
-        envGen.addKeyTransRecipient(cert);
+        CMSEnvelopedData envContent = envGen.generate(keyContent, contentEncryptor);
 
-        return this;
-    }
-
-    public PKIArchiveControl build(String encAlgorithm, String prov)
-        throws CMSException, NoSuchAlgorithmException, NoSuchProviderException
-    {
-        CMSEnvelopedData envContent = envGen.generate(keyContent, encAlgorithm, prov);
-
-        return createControl(envContent);
-    }
-
-    public PKIArchiveControl build(String encAlgorithm, Provider prov)
-        throws CMSException, NoSuchAlgorithmException
-    {
-        CMSEnvelopedData envContent = envGen.generate(keyContent, encAlgorithm, prov);
-
-        return createControl(envContent);
-    }
-
-    private PKIArchiveControl createControl(CMSEnvelopedData envContent)
-    {
         EnvelopedData envD = EnvelopedData.getInstance(envContent.getContentInfo().getContent());
 
         return new PKIArchiveControl(new PKIArchiveOptions(new EncryptedKey(envD)));

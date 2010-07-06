@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Use CMSTypedProcessable instead of this. See CMSProcessableFile/ByteArray for defaults.
+ * Use CMSTypedData instead of this. See CMSProcessableFile/ByteArray for defaults.
  */
 public interface CMSProcessable
 {

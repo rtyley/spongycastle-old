@@ -1,18 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.Provider;
-import java.security.ProviderException;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
@@ -22,97 +9,52 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 
-class KeyTransRecipientInfoGenerator
+public abstract class KeyTransRecipientInfoGenerator
     implements RecipientInfoGenerator
 {
-    // TODO Pass recipId, keyEncAlg instead?
-    private TBSCertificateStructure recipientTBSCert;
-    private PublicKey recipientPublicKey;
-    private ASN1OctetString subjectKeyIdentifier;
-
     // Derived fields
-    private SubjectPublicKeyInfo info;
+    protected final SubjectPublicKeyInfo keyInfo;
 
-    KeyTransRecipientInfoGenerator()
+    private IssuerAndSerialNumber issuerAndSerial;
+    private byte[] subjectKeyIdentifier;
+
+    private KeyTransRecipientInfoGenerator(SubjectPublicKeyInfo keyInfo, IssuerAndSerialNumber issuerAndSerial)
     {
+        this.keyInfo = keyInfo;
+        this.issuerAndSerial = issuerAndSerial;
     }
 
-    void setRecipientCert(X509Certificate recipientCert)
+    protected KeyTransRecipientInfoGenerator(TBSCertificateStructure tbsCert)
     {
-        this.recipientTBSCert = CMSUtils.getTBSCertificateStructure(recipientCert);
-        this.recipientPublicKey = recipientCert.getPublicKey();
-        this.info = recipientTBSCert.getSubjectPublicKeyInfo();
+        this(tbsCert.getSubjectPublicKeyInfo(), new IssuerAndSerialNumber(tbsCert.getIssuer(), tbsCert.getSerialNumber()));
     }
 
-    void setRecipientPublicKey(PublicKey recipientPublicKey)
-    {
-        this.recipientPublicKey = recipientPublicKey;
-
-        try
-        {
-            info = SubjectPublicKeyInfo.getInstance(
-                ASN1Object.fromByteArray(recipientPublicKey.getEncoded()));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException(
-                    "can't extract key algorithm from this key");
-        }
-    }
-
-    void setSubjectKeyIdentifier(ASN1OctetString subjectKeyIdentifier)
+    protected KeyTransRecipientInfoGenerator(SubjectPublicKeyInfo keyInfo, byte[] subjectKeyIdentifier)
     {
         this.subjectKeyIdentifier = subjectKeyIdentifier;
+        this.keyInfo = keyInfo;
     }
 
-    public RecipientInfo generate(SecretKey contentEncryptionKey, SecureRandom random,
-            Provider prov) throws GeneralSecurityException
+    public final RecipientInfo generate(byte[] contentEncryptionKey)
+        throws CMSException
     {
-        AlgorithmIdentifier keyEncryptionAlgorithm = info.getAlgorithmId();
 
-        byte[] encryptedKeyBytes = null;
-
-        Cipher keyEncryptionCipher = CMSEnvelopedHelper.INSTANCE.createAsymmetricCipher(
-            keyEncryptionAlgorithm.getObjectId().getId(), prov);
-
-        try
-        {
-            keyEncryptionCipher.init(Cipher.WRAP_MODE, recipientPublicKey, random);
-            encryptedKeyBytes = keyEncryptionCipher.wrap(contentEncryptionKey);
-        }
-        catch (GeneralSecurityException e)
-        {
-        }
-        catch (IllegalStateException e)
-        {
-        }
-        catch (UnsupportedOperationException e)
-        {
-        }
-        catch (ProviderException e)   
-        {
-        }
-
-        // some providers do not support WRAP (this appears to be only for asymmetric algorithms) 
-        if (encryptedKeyBytes == null)
-        {
-            keyEncryptionCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
-            encryptedKeyBytes = keyEncryptionCipher.doFinal(contentEncryptionKey.getEncoded());
-        }
+        byte[] encryptedKeyBytes = generateEncryptedBytes(keyInfo.getAlgorithmId(), contentEncryptionKey);
 
         RecipientIdentifier recipId;
-        if (recipientTBSCert != null)
+        if (issuerAndSerial != null)
         {
-            IssuerAndSerialNumber issuerAndSerial = new IssuerAndSerialNumber(
-                recipientTBSCert.getIssuer(), recipientTBSCert.getSerialNumber().getValue());
             recipId = new RecipientIdentifier(issuerAndSerial);
         }
         else
         {
-            recipId = new RecipientIdentifier(subjectKeyIdentifier);
+            recipId = new RecipientIdentifier(new DEROctetString(subjectKeyIdentifier));
         }
 
-        return new RecipientInfo(new KeyTransRecipientInfo(recipId, keyEncryptionAlgorithm,
+        return new RecipientInfo(new KeyTransRecipientInfo(recipId, keyInfo.getAlgorithmId(),
             new DEROctetString(encryptedKeyBytes)));
     }
+
+    public abstract byte[] generateEncryptedBytes(AlgorithmIdentifier algorithm, byte[] contentEncryptionKey)
+        throws CMSException;
 }

@@ -125,11 +125,11 @@ public class CMSAuthenticatedDataGenerator
            throw new CMSException("exception setting up parameters.", e);
         }
 
-        Iterator it = recipientInfoGenerators.iterator();
+        Iterator it = oldRecipientInfoGenerators.iterator();
 
         while (it.hasNext())
         {
-            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
+            IntRecipientInfoGenerator recipient = (IntRecipientInfoGenerator)it.next();
 
             try
             {

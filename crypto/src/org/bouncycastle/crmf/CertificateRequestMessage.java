@@ -11,7 +11,7 @@ import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jcajce.JcaUtils;
+import org.bouncycastle.jcajce.PublicKeyUtils;
 
 public class CertificateRequestMessage
 {
@@ -41,7 +41,7 @@ public class CertificateRequestMessage
 
         if (subjectPublicKeyInfo != null)
         {
-            return JcaUtils.toPublicKey(subjectPublicKeyInfo);
+            return PublicKeyUtils.toPublicKey(subjectPublicKeyInfo);
         }
 
         return null;
@@ -54,7 +54,7 @@ public class CertificateRequestMessage
 
         if (subjectPublicKeyInfo != null)
         {
-            return JcaUtils.toPublicKey(subjectPublicKeyInfo, provider);
+            return PublicKeyUtils.toPublicKey(subjectPublicKeyInfo, provider);
         }
 
         return null;
@@ -67,7 +67,7 @@ public class CertificateRequestMessage
 
         if (subjectPublicKeyInfo != null)
         {
-            return JcaUtils.toPublicKey(subjectPublicKeyInfo, provider);
+            return PublicKeyUtils.toPublicKey(subjectPublicKeyInfo, provider);
         }
 
         return null;
