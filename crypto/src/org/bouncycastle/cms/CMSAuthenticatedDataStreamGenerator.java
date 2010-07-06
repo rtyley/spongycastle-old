@@ -108,12 +108,12 @@ public class CMSAuthenticatedDataStreamGenerator
         SecretKey           encKey = keyGen.generateKey();
         AlgorithmParameterSpec params = generateParameterSpec(macOID, encKey, encProvider);
 
-        Iterator it = recipientInfoGenerators.iterator();
+        Iterator it = oldRecipientInfoGenerators.iterator();
         ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
 
         while (it.hasNext())
         {
-            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
+            IntRecipientInfoGenerator recipient = (IntRecipientInfoGenerator)it.next();
 
             try
             {

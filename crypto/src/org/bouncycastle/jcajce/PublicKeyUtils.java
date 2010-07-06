@@ -17,7 +17,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
-public class JcaUtils
+public class PublicKeyUtils
 {
     //
     // key types
@@ -30,6 +30,11 @@ public class JcaUtils
         keyAlgorithms.put(X9ObjectIdentifiers.id_dsa, "DSA");
     }
 
+    public static SubjectPublicKeyInfo toSubjectPublicKeyInfo(PublicKey publicKey)
+    {
+        return SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
+    }
+    
     public static PublicKey toPublicKey(SubjectPublicKeyInfo subjectPublicKeyInfo)
         throws NoSuchAlgorithmException, InvalidKeyException
     {
@@ -40,14 +45,14 @@ public class JcaUtils
         {
             try
             {
-                return KeyFactory.getInstance(keyAlg.getObjectId().getId()).generatePublic(xspec);
+                return KeyFactory.getInstance(keyAlg.getAlgorithm().getId()).generatePublic(xspec);
             }
             catch (NoSuchAlgorithmException e)
             {
                 //
                 // try an alternate
                 //
-                if (keyAlgorithms.get(keyAlg.getObjectId()) != null)
+                if (keyAlgorithms.get(keyAlg.getAlgorithm()) != null)
                 {
                     String  keyAlgorithm = (String)keyAlgorithms.get(keyAlg.getObjectId());
 

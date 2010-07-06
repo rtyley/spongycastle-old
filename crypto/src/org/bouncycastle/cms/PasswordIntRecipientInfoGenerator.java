@@ -17,12 +17,13 @@ import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-class PasswordRecipientInfoGenerator implements RecipientInfoGenerator
+class PasswordIntRecipientInfoGenerator
+    implements IntRecipientInfoGenerator
 {
     private AlgorithmIdentifier keyDerivationAlgorithm;
     private SecretKey keyEncryptionKey;
 
-    PasswordRecipientInfoGenerator()
+    PasswordIntRecipientInfoGenerator()
     {
     }
 

@@ -129,6 +129,8 @@ public class KeyAgreeRecipientInfo
      *     keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
      *     recipientEncryptedKeys RecipientEncryptedKeys 
      * }
+     *
+     * UserKeyingMaterial ::= OCTET STRING
      * </pre>
      */
     public DERObject toASN1Object()

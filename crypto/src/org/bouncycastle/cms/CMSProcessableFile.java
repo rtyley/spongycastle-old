@@ -14,7 +14,7 @@ import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
  * a holding class for a file of data to be processed.
  */
 public class CMSProcessableFile
-    implements CMSTypedProcessable, CMSReadable
+    implements CMSTypedData, CMSReadable
 {
     private static final int DEFAULT_BUF_SIZE = 32 * 1024;
 

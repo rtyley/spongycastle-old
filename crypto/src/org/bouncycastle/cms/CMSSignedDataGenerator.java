@@ -659,9 +659,9 @@ public class CMSSignedDataGenerator
         String          sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        if (content instanceof CMSTypedProcessable)
+        if (content instanceof CMSTypedData)
         {
-            return this.generate(((CMSTypedProcessable)content).getContentType().getId(), content, encapsulate, sigProvider);
+            return this.generate(((CMSTypedData)content).getContentType().getId(), content, encapsulate, sigProvider);
         }
         else
         {
@@ -681,9 +681,9 @@ public class CMSSignedDataGenerator
         Provider        sigProvider)
         throws NoSuchAlgorithmException, CMSException
     {
-        if (content instanceof CMSTypedProcessable)
+        if (content instanceof CMSTypedData)
         {
-            return this.generate(((CMSTypedProcessable)content).getContentType().getId(), content, encapsulate, sigProvider);
+            return this.generate(((CMSTypedData)content).getContentType().getId(), content, encapsulate, sigProvider);
         }
         else
         {

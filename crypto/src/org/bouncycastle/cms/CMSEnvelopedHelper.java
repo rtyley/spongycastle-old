@@ -6,6 +6,7 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ class CMSEnvelopedHelper
         MAC_ALG_NAMES.put(CMSEnvelopedGenerator.AES256_CBC,  "AESMac");
     }
 
-    private String getAsymmetricEncryptionAlgName(
+    String getAsymmetricEncryptionAlgName(
         String encryptionAlgOID)
     {
         if (PKCSObjectIdentifiers.rsaEncryption.getId().equals(encryptionAlgOID))
@@ -76,7 +77,28 @@ class CMSEnvelopedHelper
         
         return encryptionAlgOID;    
     }
-    
+
+    Cipher createAsymmetricCipher(
+        String encryptionOid,
+        String provName)
+        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException
+    {
+        String asymName = getAsymmetricEncryptionAlgName(encryptionOid);
+        if (!asymName.equals(encryptionOid))
+        {
+            try
+            {
+                // this is reversed as the Sun policy files now allow unlimited strength RSA
+                return Cipher.getInstance(asymName, provName);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                // Ignore
+            }
+        }
+        return Cipher.getInstance(encryptionOid, provName);
+    }
+
     Cipher createAsymmetricCipher(
         String encryptionOid,
         Provider provider)

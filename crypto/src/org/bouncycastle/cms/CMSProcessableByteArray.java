@@ -12,7 +12,7 @@ import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
  * a holding class for a byte array of data to be processed.
  */
 public class CMSProcessableByteArray
-    implements CMSProcessable, CMSReadable
+    implements CMSTypedData, CMSReadable
 {
     private final ASN1ObjectIdentifier type;
     private final byte[]  bytes;
