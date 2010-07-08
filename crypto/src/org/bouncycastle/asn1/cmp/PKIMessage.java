@@ -81,6 +81,13 @@ public class PKIMessage
         }
     }
 
+    public PKIMessage(
+        PKIHeader header,
+        PKIBody   body)
+    {
+        this(header, body, null, null);
+    }
+
     public PKIHeader getHeader()
     {
         return header;
