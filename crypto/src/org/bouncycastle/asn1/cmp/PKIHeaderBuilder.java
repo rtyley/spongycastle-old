@@ -1,22 +1,18 @@
 package org.bouncycastle.asn1.cmp;
 
-import java.util.Enumeration;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
 
-public class PKIHeader
-    extends ASN1Encodable
+public class PKIHeaderBuilder
 {
     private DERInteger pvno;
     private GeneralName sender;
@@ -31,69 +27,7 @@ public class PKIHeader
     private PKIFreeText     freeText;
     private ASN1Sequence    generalInfo;
 
-    private PKIHeader(ASN1Sequence seq)
-    {
-        Enumeration en = seq.getObjects();
-
-        pvno = DERInteger.getInstance(en.nextElement());
-        sender = GeneralName.getInstance(en.nextElement());
-        recipient = GeneralName.getInstance(en.nextElement());
-
-        while (en.hasMoreElements())
-        {
-            ASN1TaggedObject tObj = (ASN1TaggedObject)en.nextElement();
-
-            switch (tObj.getTagNo())
-            {
-            case 0:
-                messageTime = DERGeneralizedTime.getInstance(tObj, true);
-                break;
-            case 1:
-                protectionAlg = AlgorithmIdentifier.getInstance(tObj, true);
-                break;
-            case 2:
-                senderKID = ASN1OctetString.getInstance(tObj, true);
-                break;
-            case 3:
-                recipKID = ASN1OctetString.getInstance(tObj, true);
-                break;
-            case 4:
-                transactionID = ASN1OctetString.getInstance(tObj, true);
-                break;
-            case 5:
-                senderNonce = ASN1OctetString.getInstance(tObj, true);
-                break;
-            case 6:
-                recipNonce = ASN1OctetString.getInstance(tObj, true);
-                break;
-            case 7:
-                freeText = PKIFreeText.getInstance(tObj, true);
-                break;
-            case 8:
-                generalInfo = ASN1Sequence.getInstance(tObj, true);
-                break;
-            default:
-                throw new IllegalArgumentException("unknown tag number: " + tObj.getTagNo());
-            }
-        }
-    }
-
-    public static PKIHeader getInstance(Object o)
-    {
-        if (o instanceof PKIHeader)
-        {
-            return (PKIHeader)o;
-        }
-
-        if (o instanceof ASN1Sequence)
-        {
-            return new PKIHeader((ASN1Sequence)o);
-        }
-
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
-    }
-
-    public PKIHeader(
+    public PKIHeaderBuilder(
         int pvno,
         GeneralName sender,
         GeneralName recipient)
@@ -101,7 +35,7 @@ public class PKIHeader
         this(new DERInteger(pvno), sender, recipient);
     }
 
-    public PKIHeader(
+    public PKIHeaderBuilder(
         DERInteger pvno,
         GeneralName sender,
         GeneralName recipient)
@@ -111,72 +45,125 @@ public class PKIHeader
         this.recipient = recipient;
     }
 
-    public DERInteger getPvno()
+    public PKIHeaderBuilder setSender(GeneralName name)
     {
-        return pvno;
+        sender = name;
+
+        return this;
     }
 
-    public GeneralName getSender()
+    public PKIHeaderBuilder setRecipient(GeneralName name)
     {
-        return sender;
+        recipient = name;
+
+        return this;
     }
 
-    public GeneralName getRecipient()
+    public PKIHeaderBuilder setMessageTime(DERGeneralizedTime time)
     {
-        return recipient;
+        messageTime = time;
+
+        return this;
     }
 
-    public DERGeneralizedTime getMessageTime()
+    public PKIHeaderBuilder setProtectionAlg(AlgorithmIdentifier aid)
     {
-        return messageTime;
+        protectionAlg = aid;
+
+        return this;
     }
 
-    public AlgorithmIdentifier getProtectionAlg()
+    public PKIHeaderBuilder setSenderKID(byte[] kid)
     {
-        return protectionAlg;
+        return setSenderKID(new DEROctetString(kid));
     }
 
-    public ASN1OctetString getSenderKID()
-    {   
-        return senderKID;
-    }
-
-    public ASN1OctetString getRecipKID()
-    {   
-        return recipKID;
-    }
-
-    public ASN1OctetString getTransactionID()
-    {   
-        return transactionID;
-    }
-
-    public ASN1OctetString getSenderNonce()
-    {   
-        return senderNonce;
-    }
-
-    public ASN1OctetString getRecipNonce()
-    {   
-        return recipNonce;
-    }
-
-    public PKIFreeText getFreeText()
-    {   
-        return freeText;
-    }
-
-    public InfoTypeAndValue[] getGeneralInfo()
+    public PKIHeaderBuilder setSenderKID(ASN1OctetString kid)
     {
-        if (generalInfo == null) {
-            return null;
+        senderKID = kid;
+
+        return this;
+    }
+
+    public PKIHeaderBuilder setRecipKID(byte[] kid)
+    {
+        return setRecipKID(new DEROctetString(kid));
+    }
+
+    public PKIHeaderBuilder setRecipKID(DEROctetString kid)
+    {
+        recipKID = kid;
+
+        return this;
+    }
+
+    public PKIHeaderBuilder setTransactionID(byte[] tid)
+    {
+        return setTransactionID(new DEROctetString(tid));
+    }
+
+    public PKIHeaderBuilder setTransactionID(ASN1OctetString tid)
+    {
+        transactionID = tid;
+
+        return this;
+    }
+
+    public PKIHeaderBuilder setSenderNonce(byte[] nonce)
+    {
+        return setSenderNonce(new DEROctetString(nonce));
+    }
+
+    public PKIHeaderBuilder setSenderNonce(ASN1OctetString nonce)
+    {
+        senderNonce = nonce;
+
+        return this;
+    }
+
+    public PKIHeaderBuilder setRecipNonce(byte[] nonce)
+    {
+        return setRecipNonce(new DEROctetString(nonce));
+    }
+
+    public PKIHeaderBuilder setRecipNonce(ASN1OctetString nonce)
+    {
+        recipNonce = nonce;
+
+        return this;
+    }
+
+    public PKIHeaderBuilder setFreeText(PKIFreeText text)
+    {
+        freeText = text;
+
+        return this;
+    }
+
+    public PKIHeaderBuilder setGeneralInfo(InfoTypeAndValue[] gen)
+    {
+        return setGeneralInfo(makeGeneralInfoSeq(gen));
+    }
+
+    public PKIHeaderBuilder setGeneralInfo(ASN1Sequence seqOfInfoTypeAndValue)
+    {
+        generalInfo = seqOfInfoTypeAndValue;
+
+        return this;
+    }
+
+    private static ASN1Sequence makeGeneralInfoSeq(
+        InfoTypeAndValue[] generalInfo)
+    {
+        ASN1Sequence genInfoSeq = null;
+        if (generalInfo != null) {
+            ASN1EncodableVector v = new ASN1EncodableVector();
+            for (int i = 0; i < generalInfo.length; i++) {
+                v.add(generalInfo[i]);
+            }
+            genInfoSeq = new DERSequence(v);
         }
-        InfoTypeAndValue[] results = new InfoTypeAndValue[generalInfo.size()];
-        for (int i = 0; i < results.length; i++) {
-            results[i]
-                = InfoTypeAndValue.getInstance(generalInfo.getObjectAt(i));
-        }
-        return results;
+        return genInfoSeq;
     }
 
     /**
@@ -217,7 +204,7 @@ public class PKIHeader
      * </pre>
      * @return a basic ASN.1 object representation.
      */
-    public DERObject toASN1Object()
+    public PKIHeader build()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
@@ -234,7 +221,7 @@ public class PKIHeader
         addOptional(v, 7, freeText);
         addOptional(v, 8, generalInfo);
 
-        return new DERSequence(v);
+        return PKIHeader.getInstance(new DERSequence(v));
     }
 
     private void addOptional(ASN1EncodableVector v, int tagNo, ASN1Encodable obj)
