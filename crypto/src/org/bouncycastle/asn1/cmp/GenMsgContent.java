@@ -31,6 +31,11 @@ public class GenMsgContent
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public GenMsgContent(InfoTypeAndValue itv)
+    {
+        content = new DERSequence(itv);
+    }
+
     public GenMsgContent(InfoTypeAndValue[] itv)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();

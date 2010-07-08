@@ -18,6 +18,9 @@ import org.bouncycastle.asn1.x509.GeneralName;
 public class PKIHeader
     extends ASN1Encodable
 {
+    public static final int CMP_1999 = 1;
+    public static final int CMP_2000 = 2;
+
     private DERInteger pvno;
     private GeneralName sender;
     private GeneralName recipient;
@@ -101,7 +104,7 @@ public class PKIHeader
         this(new DERInteger(pvno), sender, recipient);
     }
 
-    public PKIHeader(
+    private PKIHeader(
         DERInteger pvno,
         GeneralName sender,
         GeneralName recipient)

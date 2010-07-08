@@ -35,7 +35,7 @@ public class PKIHeaderBuilder
         this(new DERInteger(pvno), sender, recipient);
     }
 
-    public PKIHeaderBuilder(
+    private PKIHeaderBuilder(
         DERInteger pvno,
         GeneralName sender,
         GeneralName recipient)
