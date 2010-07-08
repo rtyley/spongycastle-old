@@ -47,13 +47,12 @@ public class PKIMessage
         {
             return (PKIMessage)o;
         }
-
-        if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new PKIMessage((ASN1Sequence)o);
+            return new PKIMessage(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        throw new IllegalArgumentException("null object in factory");
     }
 
     /**
