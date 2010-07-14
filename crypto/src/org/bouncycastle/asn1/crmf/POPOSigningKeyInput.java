@@ -21,15 +21,18 @@ public class POPOSigningKeyInput
     {
         ASN1Encodable authInfo = (ASN1Encodable)seq.getObjectAt(0);
 
-        if (authInfo instanceof ASN1TaggedObject) {
-            ASN1TaggedObject tagObj = (ASN1TaggedObject) authInfo;
-            if (tagObj.getTagNo() != 0) {
+        if (authInfo instanceof ASN1TaggedObject)
+        {
+            ASN1TaggedObject tagObj = (ASN1TaggedObject)authInfo;
+            if (tagObj.getTagNo() != 0)
+            {
                 throw new IllegalArgumentException(
                     "Unknown authInfo tag: " + tagObj.getTagNo());
             }
             sender = GeneralName.getInstance(tagObj.getObject());
         }
-        else {
+        else
+        {
             publicKeyMAC = PKMACValue.getInstance(authInfo);
         }
 
@@ -106,10 +109,12 @@ public class POPOSigningKeyInput
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        if (sender != null) {
+        if (sender != null)
+        {
             v.add(new DERTaggedObject(false, 0, sender));
         }
-        else {
+        else
+        {
             v.add(publicKeyMAC);
         }
 

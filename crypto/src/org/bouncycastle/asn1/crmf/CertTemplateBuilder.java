@@ -97,7 +97,17 @@ public class CertTemplateBuilder
         return this;
     }
 
-        /**
+    public SubjectPublicKeyInfo getPublicKey()
+    {
+        return publicKey;
+    }
+
+    public X509Name getSubject()
+    {
+        return subject;
+    }
+
+    /**
      * <pre>
      *  CertTemplate ::= SEQUENCE {
      *      version      [0] Version               OPTIONAL,

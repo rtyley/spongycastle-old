@@ -6,8 +6,8 @@ import java.security.SecureRandom;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cms.CMSContentEncryptor;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.operator.ContentEncryptor;
 
 public class JceCMSContentEncryptorBuilder
 {
@@ -49,12 +49,12 @@ public class JceCMSContentEncryptorBuilder
         return this;
     }
 
-    public CMSContentEncryptor build()
+    public ContentEncryptor build()
         throws CMSException
     {
         helper.initForEncryption(encryptionOID, keySize, random);
 
-        return new CMSContentEncryptor()
+        return new ContentEncryptor()
         {
             public AlgorithmIdentifier getAlgorithmIdentifier()
             {
@@ -62,7 +62,6 @@ public class JceCMSContentEncryptorBuilder
             }
 
             public OutputStream getEncryptingOutputStream(OutputStream dOut)
-                throws CMSException
             {
                 return helper.getCipherOutputStream(dOut);
             }

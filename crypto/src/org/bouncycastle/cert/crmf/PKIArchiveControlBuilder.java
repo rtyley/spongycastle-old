@@ -1,9 +1,6 @@
-package org.bouncycastle.crmf;
+package org.bouncycastle.cert.crmf;
 
 import java.io.IOException;
-import java.security.PrivateKey;
-
-import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.cms.EnvelopedData;
 import org.bouncycastle.asn1.crmf.CRMFObjectIdentifiers;
@@ -12,27 +9,21 @@ import org.bouncycastle.asn1.crmf.EncryptedKey;
 import org.bouncycastle.asn1.crmf.PKIArchiveOptions;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.cms.CMSContentEncryptor;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.RecipientInfoGenerator;
+import org.bouncycastle.operator.ContentEncryptor;
 
 public class PKIArchiveControlBuilder
 {
     private CMSEnvelopedDataGenerator envGen;
     private CMSProcessableByteArray keyContent;
 
-    public PKIArchiveControlBuilder(PrivateKey privateKey, X500Principal name)
+    public PKIArchiveControlBuilder(PrivateKeyInfo privateKeyInfo, GeneralName generalName)
     {
-        this(privateKey, new GeneralName(X509Name.getInstance(name.getEncoded())));
-    }
-
-    public PKIArchiveControlBuilder(PrivateKey privateKey, GeneralName generalName)
-    {
-        EncKeyWithID encKeyWithID = new EncKeyWithID(PrivateKeyInfo.getInstance(privateKey.getEncoded()), generalName);
+        EncKeyWithID encKeyWithID = new EncKeyWithID(privateKeyInfo, generalName);
 
         try
         {
@@ -53,7 +44,7 @@ public class PKIArchiveControlBuilder
         return this;
     }
 
-    public PKIArchiveControl build(CMSContentEncryptor contentEncryptor)
+    public PKIArchiveControl build(ContentEncryptor contentEncryptor)
         throws CMSException
     {
         CMSEnvelopedData envContent = envGen.generate(keyContent, contentEncryptor);

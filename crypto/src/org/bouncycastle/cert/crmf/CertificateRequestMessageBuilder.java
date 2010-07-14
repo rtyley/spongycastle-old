@@ -1,12 +1,9 @@
-package org.bouncycastle.crmf;
+package org.bouncycastle.cert.crmf;
 
 import java.math.BigInteger;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -16,9 +13,11 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.crmf.AttributeTypeAndValue;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.crmf.CertTemplateBuilder;
+import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.operator.ContentSigner;
 
 public class CertificateRequestMessageBuilder
 {
@@ -27,7 +26,8 @@ public class CertificateRequestMessageBuilder
     private X509ExtensionsGenerator extGenerator;
     private CertTemplateBuilder templateBuilder;
     private List controls;
-    
+    private ContentSigner popSigner;
+
     public CertificateRequestMessageBuilder(BigInteger certReqId)
     {
         this.certReqId = certReqId;
@@ -35,16 +35,6 @@ public class CertificateRequestMessageBuilder
         this.extGenerator = new X509ExtensionsGenerator();
         this.templateBuilder = new CertTemplateBuilder();
         this.controls = new ArrayList();
-    }
-
-    public CertificateRequestMessageBuilder setSubject(X500Principal subject)
-    {
-        if (subject != null)
-        {
-            templateBuilder.setSubject(X509Name.getInstance(subject.getEncoded()));
-        }
-
-        return this;
     }
 
     public CertificateRequestMessageBuilder setPublicKey(SubjectPublicKeyInfo publicKey)
@@ -57,9 +47,14 @@ public class CertificateRequestMessageBuilder
         return this;
     }
 
-    public CertificateRequestMessageBuilder setPublicKey(PublicKey publicKey)
+    public CertificateRequestMessageBuilder setSubject(X509Name subject)
     {
-        return setPublicKey(SubjectPublicKeyInfo.getInstance(publicKey.getEncoded()));
+        if (subject != null)
+        {
+            templateBuilder.setSubject(subject);
+        }
+
+        return this;
     }
 
     public CertificateRequestMessageBuilder addExtension(
@@ -85,7 +80,14 @@ public class CertificateRequestMessageBuilder
     public CertificateRequestMessageBuilder addControl(Control control)
     {
         controls.add(control);
-        
+
+        return this;
+    }
+
+    public CertificateRequestMessageBuilder setProofOfPossessionSigningKeySigner(ContentSigner popSigner)
+    {
+        this.popSigner = popSigner;
+
         return this;
     }
 
@@ -101,6 +103,24 @@ public class CertificateRequestMessageBuilder
         }
 
         v.add(templateBuilder.build());
+
+        if (popSigner != null)
+        {
+            ProofOfPossessionSigningKeyBuilder builder = new ProofOfPossessionSigningKeyBuilder(templateBuilder.getPublicKey());
+
+            X509Name name = templateBuilder.getSubject();
+
+            if (name != null)
+            {
+                builder.setSender(new GeneralName(name));
+            }
+            else
+            {
+                builder.setMacBuilder(null);
+            }
+
+            builder.build(popSigner);
+        }
 
         if (!controls.isEmpty())
         {
