@@ -1,5 +1,23 @@
 package org.bouncycastle.openpgp.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.security.AlgorithmParameterGenerator;
+import java.security.AlgorithmParameters;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Date;
+import java.util.Iterator;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.DHParameterSpec;
+
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
@@ -28,23 +46,6 @@ import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.util.test.UncloseableOutputStream;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.DHParameterSpec;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigInteger;
-import java.security.AlgorithmParameterGenerator;
-import java.security.AlgorithmParameters;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.util.Date;
-import java.util.Iterator;
 
 public class PGPDSAElGamalTest
     extends SimpleTest
@@ -236,7 +237,7 @@ public class PGPDSAElGamalTest
             //
             
             //
-            // find a key sutiable for encryption
+            // find a key suitable for encryption
             //
             long            pgpKeyID = 0;
             PublicKey    pKey = null;
@@ -497,6 +498,35 @@ public class PGPDSAElGamalTest
                 if (!areEqual(text, decText))
                 {
                     fail("decrypted message incorrect");
+                }
+            }
+
+            // check sub key encoding
+
+            it = pgpPub.getPublicKeys();
+            while (it.hasNext())
+            {
+                PGPPublicKey    pgpKey = (PGPPublicKey)it.next();
+
+                if (!pgpKey.isMasterKey())
+                {
+                    byte[] kEnc = pgpKey.getEncoded();
+
+                    PGPObjectFactory objF = new PGPObjectFactory(kEnc);
+
+                    PGPPublicKey k = (PGPPublicKey)objF.nextObject();
+
+                    pKey = k.getKey("BC");
+                    pgpKeyID = k.getKeyID();
+                    if (k.getBitStrength() != 1024)
+                    {
+                        fail("failed - key strength reported incorrectly.");
+                    }
+       
+                    if (objF.nextObject() != null)
+                    {
+                        fail("failed - stream not fully parsed.");
+                    }
                 }
             }
            

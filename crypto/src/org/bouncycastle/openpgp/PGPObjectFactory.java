@@ -1,13 +1,13 @@
 package org.bouncycastle.openpgp;
 
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.PacketTags;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.PacketTags;
 
 /**
  * General class for reading a PGP object stream.
@@ -75,6 +75,8 @@ public class PGPObjectFactory
             }
         case PacketTags.PUBLIC_KEY:
             return new PGPPublicKeyRing(in);
+        case PacketTags.PUBLIC_SUBKEY:
+            return PGPPublicKeyRing.readSubkey(in);
         case PacketTags.COMPRESSED_DATA:
             return new PGPCompressedData(in);
         case PacketTags.LITERAL_DATA:

@@ -1,4 +1,4 @@
-package org.bouncycastle.crmf.test;
+package org.bouncycastle.cert.crmf.test;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -19,12 +19,12 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.crmf.jcajce.JcaCertificateRequestMessage;
+import org.bouncycastle.cert.crmf.jcajce.JcaCertificateRequestMessageBuilder;
+import org.bouncycastle.cert.crmf.jcajce.JcaPKIArchiveControlBuilder;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.bouncycastle.crmf.CertificateRequestMessage;
-import org.bouncycastle.crmf.CertificateRequestMessageBuilder;
-import org.bouncycastle.crmf.PKIArchiveControlBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 
@@ -74,16 +74,16 @@ public class PKIArchiveControlTest
         KeyPair kp = kGen.generateKeyPair();
         X509Certificate cert = makeV1Certificate(kp, "CN=Test", kp, "CN=Test");
 
-        CertificateRequestMessageBuilder certReqBuild = new CertificateRequestMessageBuilder(BigInteger.ONE);
+        JcaCertificateRequestMessageBuilder certReqBuild = new JcaCertificateRequestMessageBuilder(BigInteger.ONE);
 
         certReqBuild.setSubject(new X500Principal("CN=Test"))
                     .setPublicKey(kp.getPublic());
 
-        certReqBuild.addControl(new PKIArchiveControlBuilder(kp.getPrivate(), new X500Principal("CN=test"))
+        certReqBuild.addControl(new JcaPKIArchiveControlBuilder(kp.getPrivate(), new X500Principal("CN=test"))
                                       .addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(cert))
                                       .build(new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(CMSEnvelopedDataGenerator.AES128_CBC)).setProvider("BC").build()));
 
-        CertificateRequestMessage certReqMsg = certReqBuild.build();
+        JcaCertificateRequestMessage certReqMsg = new JcaCertificateRequestMessage(certReqBuild.build());
 
         assertEquals(new X500Principal("CN=Test"), certReqMsg.getSubject());
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());

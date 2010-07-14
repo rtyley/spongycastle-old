@@ -1,15 +1,15 @@
-package org.bouncycastle.cms;
+package org.bouncycastle.util.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-class TeeOutputStream
+public class TeeOutputStream
     extends OutputStream
 {
     private OutputStream output1;
     private OutputStream output2;
 
-    TeeOutputStream(OutputStream output1, OutputStream output2)
+    public TeeOutputStream(OutputStream output1, OutputStream output2)
     {
         this.output1 = output1;
         this.output2 = output2;
@@ -34,6 +34,13 @@ class TeeOutputStream
     {
         this.output1.write(b);
         this.output2.write(b);
+    }
+
+    public void flush()
+        throws IOException
+    {
+        this.output1.flush();
+        this.output2.flush();
     }
 
     public void close()

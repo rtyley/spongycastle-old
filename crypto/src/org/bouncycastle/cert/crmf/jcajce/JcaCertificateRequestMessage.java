@@ -1,4 +1,4 @@
-package org.bouncycastle.crmf;
+package org.bouncycastle.cert.crmf.jcajce;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -8,23 +8,23 @@ import java.security.PublicKey;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.crmf.CertificateRequestMessage;
 import org.bouncycastle.jcajce.PublicKeyUtils;
 
-public class CertificateRequestMessage
+public class JcaCertificateRequestMessage
 {
-    private final CertReqMsg certReqMsg;
+    private final CertificateRequestMessage certReqMsg;
 
-    public CertificateRequestMessage(CertReqMsg certReqMsg)
+    public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg)
     {
         this.certReqMsg = certReqMsg;
     }
 
     public X500Principal getSubject()
     {
-        X509Name subject = this.certReqMsg.getCertReq().getCertTemplate().getSubject();
+        X509Name subject = this.certReqMsg.getSubject();
 
         if (subject != null)
         {
@@ -37,7 +37,7 @@ public class CertificateRequestMessage
     public PublicKey getPublicKey()
         throws InvalidKeyException, NoSuchAlgorithmException
     {
-        SubjectPublicKeyInfo subjectPublicKeyInfo = this.certReqMsg.getCertReq().getCertTemplate().getPublicKey();
+        SubjectPublicKeyInfo subjectPublicKeyInfo = this.certReqMsg.getPublicKey();
 
         if (subjectPublicKeyInfo != null)
         {
@@ -50,7 +50,7 @@ public class CertificateRequestMessage
     public PublicKey getPublicKey(Provider provider)
         throws InvalidKeyException, NoSuchAlgorithmException
     {
-        SubjectPublicKeyInfo subjectPublicKeyInfo = this.certReqMsg.getCertReq().getCertTemplate().getPublicKey();
+        SubjectPublicKeyInfo subjectPublicKeyInfo = this.certReqMsg.getPublicKey();
 
         if (subjectPublicKeyInfo != null)
         {
@@ -63,7 +63,7 @@ public class CertificateRequestMessage
     public PublicKey getPublicKey(String provider)
         throws InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException
     {
-        SubjectPublicKeyInfo subjectPublicKeyInfo = this.certReqMsg.getCertReq().getCertTemplate().getPublicKey();
+        SubjectPublicKeyInfo subjectPublicKeyInfo = this.certReqMsg.getPublicKey();
 
         if (subjectPublicKeyInfo != null)
         {

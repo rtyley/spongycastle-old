@@ -1,10 +1,5 @@
 package org.bouncycastle.openpgp;
 
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.PacketTags;
-import org.bouncycastle.bcpg.PublicKeyPacket;
-import org.bouncycastle.bcpg.TrustPacket;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +9,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.bcpg.PublicKeyPacket;
+import org.bouncycastle.bcpg.TrustPacket;
 
 /**
  * Class to hold a single master public key and its subkeys.
@@ -75,13 +75,7 @@ public class PGPPublicKeyRing
         // Read subkeys
         while (pIn.nextPacketTag() == PacketTags.PUBLIC_SUBKEY)
         {
-            PublicKeyPacket pk = (PublicKeyPacket)pIn.readPacket();
-            TrustPacket     kTrust = readOptionalTrustPacket(pIn);
-
-            // PGP 8 actually leaves out the signature.
-            List sigList = readSignaturesAndTrust(pIn);
-
-            keys.add(new PGPPublicKey(pk, kTrust, sigList));
+            keys.add(readSubkey(pIn));
         }
     }
 
@@ -235,5 +229,17 @@ public class PGPPublicKeyRing
         }
         
         return new PGPPublicKeyRing(keys);
+    }
+
+    static PGPPublicKey readSubkey(BCPGInputStream in)
+        throws IOException
+    {
+        PublicKeyPacket pk = (PublicKeyPacket)in.readPacket();
+        TrustPacket     kTrust = readOptionalTrustPacket(in);
+
+        // PGP 8 actually leaves out the signature.
+        List sigList = readSignaturesAndTrust(in);
+
+        return new PGPPublicKey(pk, kTrust, sigList);
     }
 }
