@@ -14,6 +14,7 @@ import org.bouncycastle.crypto.engines.CamelliaEngine;
 import org.bouncycastle.crypto.engines.CamelliaWrapEngine;
 import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JCEBlockCipher;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
@@ -129,7 +130,7 @@ public final class Camellia
 
             try
             {
-                params = AlgorithmParameters.getInstance("Camellia", "BC");
+                params = AlgorithmParameters.getInstance("Camellia", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)

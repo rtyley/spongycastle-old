@@ -101,7 +101,7 @@ public class JCEStreamCipher
             {
                 try
                 {
-                    AlgorithmParameters engineParams = AlgorithmParameters.getInstance(pbeAlgorithm, "BC");
+                    AlgorithmParameters engineParams = AlgorithmParameters.getInstance(pbeAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(pbeSpec);
                     
                     return engineParams;

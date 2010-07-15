@@ -1,5 +1,18 @@
 package org.bouncycastle.jce.provider;
 
+import java.security.AlgorithmParameterGeneratorSpi;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.DSAParameterSpec;
+
+import javax.crypto.spec.DHGenParameterSpec;
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+
 import org.bouncycastle.crypto.generators.DHParametersGenerator;
 import org.bouncycastle.crypto.generators.DSAParametersGenerator;
 import org.bouncycastle.crypto.generators.ElGamalParametersGenerator;
@@ -10,18 +23,6 @@ import org.bouncycastle.crypto.params.ElGamalParameters;
 import org.bouncycastle.crypto.params.GOST3410Parameters;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
-
-import javax.crypto.spec.DHGenParameterSpec;
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import java.security.AlgorithmParameterGeneratorSpi;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidParameterException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
 
 public abstract class JDKAlgorithmParameterGenerator
     extends AlgorithmParameterGeneratorSpi
@@ -77,7 +78,7 @@ public abstract class JDKAlgorithmParameterGenerator
 
             try
             {
-                params = AlgorithmParameters.getInstance("DH", "BC");
+                params = AlgorithmParameters.getInstance("DH", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new DHParameterSpec(p.getP(), p.getG(), l));
             }
             catch (Exception e)
@@ -132,7 +133,7 @@ public abstract class JDKAlgorithmParameterGenerator
 
             try
             {
-                params = AlgorithmParameters.getInstance("DSA", "BC");
+                params = AlgorithmParameters.getInstance("DSA", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new DSAParameterSpec(p.getP(), p.getQ(), p.getG()));
             }
             catch (Exception e)
@@ -174,7 +175,7 @@ public abstract class JDKAlgorithmParameterGenerator
             
             try
             {
-                params = AlgorithmParameters.getInstance("GOST3410", "BC");
+                params = AlgorithmParameters.getInstance("GOST3410", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new GOST3410ParameterSpec(new GOST3410PublicKeyParameterSetSpec(p.getP(), p.getQ(), p.getA())));
             }
             catch (Exception e)
@@ -226,7 +227,7 @@ public abstract class JDKAlgorithmParameterGenerator
 
             try
             {
-                params = AlgorithmParameters.getInstance("ElGamal", "BC");
+                params = AlgorithmParameters.getInstance("ElGamal", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new DHParameterSpec(p.getP(), p.getG(), l));
             }
             catch (Exception e)
@@ -264,7 +265,7 @@ public abstract class JDKAlgorithmParameterGenerator
 
             try
             {
-                params = AlgorithmParameters.getInstance("DES", "BC");
+                params = AlgorithmParameters.getInstance("DES", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)
@@ -312,7 +313,7 @@ public abstract class JDKAlgorithmParameterGenerator
 
                 try
                 {
-                    params = AlgorithmParameters.getInstance("RC2", "BC");
+                    params = AlgorithmParameters.getInstance("RC2", BouncyCastleProvider.PROVIDER_NAME);
                     params.init(new IvParameterSpec(iv));
                 }
                 catch (Exception e)
@@ -324,7 +325,7 @@ public abstract class JDKAlgorithmParameterGenerator
             {
                 try
                 {
-                    params = AlgorithmParameters.getInstance("RC2", "BC");
+                    params = AlgorithmParameters.getInstance("RC2", BouncyCastleProvider.PROVIDER_NAME);
                     params.init(spec);
                 }
                 catch (Exception e)

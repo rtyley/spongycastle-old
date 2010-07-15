@@ -10,6 +10,7 @@ import javax.crypto.spec.IvParameterSpec;
 
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.NoekeonEngine;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JCEBlockCipher;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
@@ -65,7 +66,7 @@ public final class Noekeon
 
             try
             {
-                params = AlgorithmParameters.getInstance("Noekeon", "BC");
+                params = AlgorithmParameters.getInstance("Noekeon", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)

@@ -18,6 +18,7 @@ import org.bouncycastle.crypto.macs.CMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JCEBlockCipher;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JCEMac;
@@ -161,7 +162,7 @@ public final class AES
 
             try
             {
-                params = AlgorithmParameters.getInstance("AES", "BC");
+                params = AlgorithmParameters.getInstance("AES", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)

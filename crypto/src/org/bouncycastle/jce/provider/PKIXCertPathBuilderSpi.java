@@ -1,10 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.jce.exception.ExtCertPathBuilderException;
-import org.bouncycastle.util.Selector;
-import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
-import org.bouncycastle.x509.X509CertStoreSelector;
-
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilderException;
@@ -23,6 +18,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+
+import org.bouncycastle.jce.exception.ExtCertPathBuilderException;
+import org.bouncycastle.util.Selector;
+import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
+import org.bouncycastle.x509.X509CertStoreSelector;
 
 /**
  * Implements the PKIX CertPathBuilding algorithm for BouncyCastle.
@@ -160,8 +160,8 @@ public class PKIXCertPathBuilderSpi
 
         try
         {
-            cFact = CertificateFactory.getInstance("X.509", "BC");
-            validator = CertPathValidator.getInstance("PKIX", "BC");
+            cFact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
+            validator = CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (Exception e)
         {

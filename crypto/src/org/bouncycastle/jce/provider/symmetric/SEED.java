@@ -13,6 +13,7 @@ import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.SEEDEngine;
 import org.bouncycastle.crypto.engines.SEEDWrapEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JCEBlockCipher;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
@@ -87,7 +88,7 @@ public final class SEED
 
             try
             {
-                params = AlgorithmParameters.getInstance("SEED", "BC");
+                params = AlgorithmParameters.getInstance("SEED", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)

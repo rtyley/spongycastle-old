@@ -177,7 +177,7 @@ public  class PKIXCertPath
                 }
                 Enumeration e = ((ASN1Sequence)derObject).getObjects();
                 certificates = new ArrayList();
-                CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
+                CertificateFactory certFactory = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
                 while (e.hasMoreElements())
                 {
                     ASN1Encodable element = (ASN1Encodable)e.nextElement();
@@ -190,7 +190,7 @@ public  class PKIXCertPath
             {
                 inStream = new BufferedInputStream(inStream);
                 certificates = new ArrayList();
-                CertificateFactory certFactory= CertificateFactory.getInstance("X.509", "BC");
+                CertificateFactory certFactory= CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
                 Certificate cert;
                 while ((cert = certFactory.generateCertificate(inStream)) != null)
                 {

@@ -1,22 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.x509.CRLDistPoint;
-import org.bouncycastle.asn1.x509.CRLReason;
-import org.bouncycastle.asn1.x509.DistributionPoint;
-import org.bouncycastle.asn1.x509.DistributionPointName;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.TargetInformation;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
-import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
-import org.bouncycastle.x509.ExtendedPKIXParameters;
-import org.bouncycastle.x509.PKIXAttrCertChecker;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509CertStoreSelector;
-
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -42,6 +25,23 @@ import java.util.List;
 import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.x509.CRLDistPoint;
+import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.DistributionPoint;
+import org.bouncycastle.asn1.x509.DistributionPointName;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.TargetInformation;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
+import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
+import org.bouncycastle.x509.ExtendedPKIXParameters;
+import org.bouncycastle.x509.PKIXAttrCertChecker;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CertStoreSelector;
 
 class RFC3281CertPathUtilities
 {
@@ -370,7 +370,7 @@ class RFC3281CertPathUtilities
         CertPathValidator validator = null;
         try
         {
-            validator = CertPathValidator.getInstance("PKIX", "BC");
+            validator = CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (NoSuchProviderException e)
         {
@@ -504,7 +504,7 @@ class RFC3281CertPathUtilities
             CertPathBuilder builder = null;
             try
             {
-                builder = CertPathBuilder.getInstance("PKIX", "BC");
+                builder = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
             }
             catch (NoSuchProviderException e)
             {

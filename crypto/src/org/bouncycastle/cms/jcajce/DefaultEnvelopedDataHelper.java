@@ -9,7 +9,7 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
-public class DefaultEnvelopedDataHelper
+class DefaultEnvelopedDataHelper
     extends EnvelopedDataHelper
 {
     protected Cipher createCipher(

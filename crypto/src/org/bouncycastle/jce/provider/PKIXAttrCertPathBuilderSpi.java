@@ -1,12 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.jce.exception.ExtCertPathBuilderException;
-import org.bouncycastle.util.Selector;
-import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
-import org.bouncycastle.x509.X509AttributeCertStoreSelector;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509CertStoreSelector;
-
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.Principal;
@@ -30,6 +23,13 @@ import java.util.List;
 import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
+
+import org.bouncycastle.jce.exception.ExtCertPathBuilderException;
+import org.bouncycastle.util.Selector;
+import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
+import org.bouncycastle.x509.X509AttributeCertStoreSelector;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CertStoreSelector;
 
 public class PKIXAttrCertPathBuilderSpi
     extends CertPathBuilderSpi
@@ -195,8 +195,8 @@ public class PKIXAttrCertPathBuilderSpi
 
         try
         {
-            cFact = CertificateFactory.getInstance("X.509", "BC");
-            validator = CertPathValidator.getInstance("RFC3281", "BC");
+            cFact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
+            validator = CertPathValidator.getInstance("RFC3281", BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (Exception e)
         {

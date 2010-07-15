@@ -52,6 +52,7 @@ import org.bouncycastle.util.io.Streams;
 public class Rfc4134Test
     extends TestCase
 {
+    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;    
     private static final String TEST_DATA_HOME = "bc.test.data.home";
     
     private static byte[] exContent = getRfc4134Data("ExContent.bin");
@@ -204,7 +205,7 @@ public class Rfc4134Test
     {
         byte[]              privKeyData = getRfc4134Data("BobPrivRSAEncrypt.pri");
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privKeyData);
-        KeyFactory keyFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory keyFact = KeyFactory.getInstance("RSA", BC);
         PrivateKey privKey = keyFact.generatePrivate(keySpec);
 
         RecipientInformationStore recipients = envelopedData.getRecipientInfos();
@@ -230,7 +231,7 @@ public class Rfc4134Test
     {
         byte[]              privKeyData = getRfc4134Data("BobPrivRSAEncrypt.pri");
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privKeyData);
-        KeyFactory keyFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory keyFact = KeyFactory.getInstance("RSA", BC);
         PrivateKey privKey = keyFact.generatePrivate(keySpec);
 
         RecipientInformationStore recipients = envelopedParser.getRecipientInfos();
@@ -256,7 +257,7 @@ public class Rfc4134Test
     {
         assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-        byte[] recData = recipient.getContent(privKey, "BC");
+        byte[] recData = recipient.getContent(privKey, BC);
 
         assertEquals(true, Arrays.equals(exContent, recData));
     }
@@ -279,10 +280,10 @@ public class Rfc4134Test
     {
         SignerInformation csi = (SignerInformation)signInfo.getCounterSignatures().getSigners().iterator().next();
 
-        CertificateFactory certFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory certFact = CertificateFactory.getInstance("X.509", BC);
         X509Certificate    cert = (X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(certificate));
 
-        assertTrue(csi.verify(cert,  "BC"));
+        assertTrue(csi.verify(cert, BC));
     }
 
     private void verifyContentHint(SignerInformation signInfo)
@@ -304,7 +305,7 @@ public class Rfc4134Test
     private void verifySignatures(CMSSignedData s, byte[] contentDigest)
         throws Exception
     {
-        CertStore               certStore = s.getCertificatesAndCRLs("Collection", "BC");
+        CertStore               certStore = s.getCertificatesAndCRLs("Collection", BC);
         SignerInformationStore  signers = s.getSignerInfos();
 
         Collection              c = signers.getSigners();
@@ -329,8 +330,8 @@ public class Rfc4134Test
         Collection certColl = certStore.getCertificates(null);
         Collection crlColl = certStore.getCRLs(null);
 
-        assertEquals(certColl.size(), s.getCertificates("Collection", "BC").getMatches(null).size());
-        assertEquals(crlColl.size(), s.getCRLs("Collection", "BC").getMatches(null).size());
+        assertEquals(certColl.size(), s.getCertificates("Collection", BC).getMatches(null).size());
+        assertEquals(crlColl.size(), s.getCRLs("Collection", BC).getMatches(null).size());
     }
 
     private void verifySignatures(CMSSignedData s)
@@ -348,7 +349,7 @@ public class Rfc4134Test
             sc.drain();
         }
         
-        CertStore               certs = sp.getCertificatesAndCRLs("Collection", "BC");
+        CertStore               certs = sp.getCertificatesAndCRLs("Collection", BC);
         SignerInformationStore  signers = sp.getSignerInfos();
 
         Collection              c = signers.getSigners();
@@ -375,23 +376,23 @@ public class Rfc4134Test
 
             if (key.getParams() == null)
             {
-                assertEquals(true, signer.verify(getInheritedKey(key), "BC"));
+                assertEquals(true, signer.verify(getInheritedKey(key), BC));
             }
             else
             {
-                assertEquals(true, signer.verify(cert, "BC"));
+                assertEquals(true, signer.verify(cert, BC));
             }
         }
         else
         {
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BC));
         }
     }
 
     private PublicKey getInheritedKey(DSAPublicKey key)
         throws Exception
     {
-        CertificateFactory certFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory certFact = CertificateFactory.getInstance("X.509", BC);
 
         X509Certificate cert = (X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(getRfc4134Data("CarlDSSSelf.cer")));
 
@@ -400,7 +401,7 @@ public class Rfc4134Test
         DSAPublicKeySpec dsaPubKeySpec = new DSAPublicKeySpec(
                         key.getY(), dsaParams.getP(), dsaParams.getQ(), dsaParams.getG());
 
-        KeyFactory keyFactory = KeyFactory.getInstance("DSA", "BC");
+        KeyFactory keyFactory = KeyFactory.getInstance("DSA", BC);
 
         return keyFactory.generatePublic(dsaPubKeySpec);
     }

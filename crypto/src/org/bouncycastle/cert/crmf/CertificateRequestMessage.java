@@ -1,11 +1,12 @@
 package org.bouncycastle.cert.crmf;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
 import org.bouncycastle.asn1.crmf.CertReqMsg;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.crmf.CertTemplate;
+import org.bouncycastle.asn1.crmf.PKMACValue;
+import org.bouncycastle.asn1.crmf.POPOSigningKey;
+import org.bouncycastle.asn1.crmf.ProofOfPossession;
+import org.bouncycastle.operator.ContentVerifier;
+import org.bouncycastle.operator.OperatorCreationException;
 
 public class CertificateRequestMessage
 {
@@ -16,14 +17,105 @@ public class CertificateRequestMessage
         this.certReqMsg = certReqMsg;
     }
 
-    public X509Name getSubject()
+    public CertReqMsg getCertReqMsg()
     {
-        return this.certReqMsg.getCertReq().getCertTemplate().getSubject();
+        return certReqMsg;
     }
 
-    public SubjectPublicKeyInfo getPublicKey()
-        throws InvalidKeyException, NoSuchAlgorithmException
+    public CertTemplate getCertTemplate()
     {
-        return this.certReqMsg.getCertReq().getCertTemplate().getPublicKey();
+        return this.certReqMsg.getCertReq().getCertTemplate();
     }
+
+    public boolean hasProofOfPossession()
+    {
+        return this.certReqMsg.getPop() != null;
+    }
+
+    public int getProofOfPossessionType()
+    {
+        return this.certReqMsg.getPop().getType();
+    }
+
+    public boolean hasSigningKeyProofOfPossessionWithPKMAC()
+    {
+        ProofOfPossession pop = certReqMsg.getPop();
+
+        if (pop.getType() == ProofOfPossession.TYPE_SIGNING_KEY)
+        {
+            POPOSigningKey popoSign = POPOSigningKey.getInstance(pop.getObject());
+
+            return popoSign.getPoposkInput().getPublicKeyMAC() != null;
+        }
+
+        return false;
+    }
+
+    public boolean verifySigningKeyPOP(ContentVerifier verifier)
+        throws IllegalStateException
+    {
+        ProofOfPossession pop = certReqMsg.getPop();
+
+        if (pop.getType() == ProofOfPossession.TYPE_SIGNING_KEY)
+        {
+            POPOSigningKey popoSign = POPOSigningKey.getInstance(pop.getObject());
+
+            if (popoSign.getPoposkInput().getPublicKeyMAC() != null)
+            {
+                throw new IllegalStateException("verification requires password check");
+            }
+
+            return verifySignature(verifier, popoSign);
+        }
+        else
+        {
+            throw new IllegalStateException("not Signing Key type of proof of possession");
+        }
+    }
+
+    public boolean verifySigningKeyPOP(ContentVerifier verifier, PKMACValueVerifier macVerifier, char[] password)
+        throws CRMFException, IllegalStateException
+    {
+        ProofOfPossession pop = certReqMsg.getPop();
+
+        if (pop.getType() == ProofOfPossession.TYPE_SIGNING_KEY)
+        {
+            POPOSigningKey popoSign = POPOSigningKey.getInstance(pop.getObject());
+
+            if (popoSign.getPoposkInput().getSender() != null)
+            {
+                throw new IllegalStateException("no PKMAC present in proof of possession");
+            }
+
+            PKMACValue pkMAC = popoSign.getPoposkInput().getPublicKeyMAC();
+
+            if (macVerifier.verify(pkMAC, password, this.getCertTemplate().getPublicKey()))
+            {
+                return verifySignature(verifier, popoSign);
+            }
+
+            return false;
+        }
+        else
+        {
+            throw new IllegalStateException("not Signing Key type of proof of possession");
+        }
+    }
+
+    private boolean verifySignature(ContentVerifier verifier, POPOSigningKey popoSign)
+    {
+        try
+        {
+            verifier.setup(popoSign.getAlgorithmIdentifier());
+        }
+        catch (OperatorCreationException e)
+        {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+        CRMFUtil.derEncodeToStream(popoSign.getPoposkInput(), verifier.getVerifierOutputStream());
+
+        return verifier.verify(popoSign.getSignature().getBytes());
+    }
+
 }

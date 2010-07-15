@@ -25,7 +25,7 @@ public class CertReqMsg
         {
             Object o = en.nextElement();
 
-            if (o instanceof ASN1TaggedObject)
+            if (o instanceof ASN1TaggedObject || o instanceof ProofOfPossession)
             {
                 pop = ProofOfPossession.getInstance(o);
             }

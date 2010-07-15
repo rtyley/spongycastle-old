@@ -224,7 +224,7 @@ public class X509CertificateObject
      */
     public String getSigAlgName()
     {
-        Provider    prov = Security.getProvider("BC");
+        Provider    prov = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
 
         if (prov != null)
         {
@@ -708,7 +708,7 @@ public class X509CertificateObject
         
         try
         {
-            signature = Signature.getInstance(sigName, "BC");
+            signature = Signature.getInstance(sigName, BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (Exception e)
         {

@@ -3,8 +3,8 @@ package org.bouncycastle.operator.jcajce;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 
-class DefaultContentSignerHelper
-    extends ContentSignerHelper
+class DefaultOperatorHelper
+    extends OperatorHelper
 {
     protected Signature createSignature(
         String algorithm)

@@ -4,12 +4,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Signature;
 
-class ProviderContentSignerHelper
-    extends ContentSignerHelper
+class ProviderOperatorHelper
+    extends OperatorHelper
 {
     private Provider provider;
 
-    ProviderContentSignerHelper(Provider provider)
+    ProviderOperatorHelper(Provider provider)
     {
         this.provider = provider;
     }

@@ -14,6 +14,7 @@ import org.bouncycastle.crypto.engines.RC564Engine;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JCEBlockCipher;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JCEMac;
@@ -106,7 +107,7 @@ public final class RC5
 
             try
             {
-                params = AlgorithmParameters.getInstance("RC5", "BC");
+                params = AlgorithmParameters.getInstance("RC5", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)

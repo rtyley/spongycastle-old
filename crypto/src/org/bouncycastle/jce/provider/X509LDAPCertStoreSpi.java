@@ -1,18 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.x509.CertificatePair;
-import org.bouncycastle.jce.X509LDAPCertStoreParameters;
-
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -33,6 +20,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import javax.security.auth.x500.X500Principal;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.x509.CertificatePair;
+import org.bouncycastle.jce.X509LDAPCertStoreParameters;
 
 /**
  * 
@@ -159,7 +160,7 @@ public class X509LDAPCertStoreSpi
         try
         {
             CertificateFactory cf = CertificateFactory.getInstance("X.509",
-                "BC");
+                BouncyCastleProvider.PROVIDER_NAME);
             while (it.hasNext())
             {
                 byte[] bytes = (byte[])it.next();
@@ -375,7 +376,7 @@ public class X509LDAPCertStoreSpi
         try
         {
             CertificateFactory cf = CertificateFactory.getInstance("X.509",
-                "BC");
+                BouncyCastleProvider.PROVIDER_NAME);
             while (it.hasNext())
             {
                 CRL crl = cf.generateCRL(new ByteArrayInputStream((byte[])it
