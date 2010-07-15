@@ -95,7 +95,7 @@ public class AllTests
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
     }
 
-    public void testProofOfPossesionWithoutSubject()
+    public void testProofOfPossessionWithoutSubject()
         throws Exception
     {
         KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
