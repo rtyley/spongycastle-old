@@ -46,7 +46,6 @@ class ProviderEnvelopedDataHelper
         return KeyGenerator.getInstance(algorithm, provider);
     }
 
-    @Override
     protected KeyPairGenerator createKeyPairGenerator(String algorithm)
         throws GeneralSecurityException
     {
