@@ -1,7 +1,6 @@
 package org.bouncycastle.cms.test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
@@ -12,17 +11,19 @@ import java.util.Iterator;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSAuthenticatedDataGenerator;
 import org.bouncycastle.cms.CMSAuthenticatedDataParser;
 import org.bouncycastle.cms.CMSAuthenticatedDataStreamGenerator;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class AuthenticatedDataStreamTest
     extends TestCase
 {
+    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
+
     private static String          _signDN;
     private static KeyPair _signKP;
     private static X509Certificate _signCert;
@@ -42,7 +43,7 @@ public class AuthenticatedDataStreamTest
     private static boolean         _initialised = false;
 
     public boolean DEBUG = true;
-
+   
     private static void init()
         throws Exception
     {
@@ -108,7 +109,7 @@ public class AuthenticatedDataStreamTest
 
         adGen.addKeyTransRecipient(_reciCert);
 
-        OutputStream aOut = adGen.open(bOut, macAlg, "BC");
+        OutputStream aOut = adGen.open(bOut, macAlg, BC);
 
         aOut.write(data);
 
@@ -132,7 +133,7 @@ public class AuthenticatedDataStreamTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), BC);
 
             assertTrue(Arrays.equals(data, recData));
             assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));

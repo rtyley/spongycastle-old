@@ -388,7 +388,7 @@ public abstract class WrapCipherSpi extends CipherSpi
         {
             try
             {
-                KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, "BC");
+                KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
 
                 if (wrappedKeyType == Cipher.PUBLIC_KEY)
                 {

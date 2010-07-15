@@ -492,7 +492,7 @@ public class RFC3280CertPathUtilities
             }
             try
             {
-                CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
+                CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
                 selector = new X509CertStoreSelector();
                 selector.setCertificate(signingCert);
                 ExtendedPKIXParameters temp = (ExtendedPKIXParameters)paramsPKIX.clone();

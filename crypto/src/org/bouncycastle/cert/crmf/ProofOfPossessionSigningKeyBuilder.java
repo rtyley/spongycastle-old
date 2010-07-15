@@ -1,9 +1,6 @@
 package org.bouncycastle.cert.crmf;
 
-import java.io.IOException;
-
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.crmf.PKMACValue;
 import org.bouncycastle.asn1.crmf.POPOSigningKey;
 import org.bouncycastle.asn1.crmf.POPOSigningKeyInput;
@@ -38,12 +35,10 @@ public class ProofOfPossessionSigningKeyBuilder
 
     public POPOSigningKey build(ContentSigner signer)
     {
-        if (name != null || publicKeyMAC != null)
+        if (name != null && publicKeyMAC != null)
         {
             throw new IllegalStateException("name and publicKeyMAC cannot both be set.");
         }
-
-        DEROutputStream dOut = new DEROutputStream(signer.getSigningOutputStream());
 
         POPOSigningKeyInput popo;
 
@@ -56,16 +51,7 @@ public class ProofOfPossessionSigningKeyBuilder
             popo = new POPOSigningKeyInput(publicKeyMAC, pubKeyInfo);
         }
 
-        try
-        {
-            dOut.writeObject(popo);
-
-            dOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new CRMFRuntimeException("unable to encode proof of possession: " + e.getMessage(), e);
-        }
+        CRMFUtil.derEncodeToStream(popo, signer.getSignerOutputStream());
 
         return new POPOSigningKey(popo, signer.getAlgorithmIdentifier(), new DERBitString(signer.getSignature()));
     }

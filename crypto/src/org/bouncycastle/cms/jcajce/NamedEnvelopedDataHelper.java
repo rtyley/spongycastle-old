@@ -10,7 +10,7 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
-public class NamedEnvelopedDataHelper
+class NamedEnvelopedDataHelper
     extends EnvelopedDataHelper
 {
     private final String providerName;

@@ -33,12 +33,15 @@ import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
 public class NewEnvelopedDataStreamTest
     extends TestCase
 {
+    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
+
     private static final int BUFFER_SIZE = 4000;
     private static String          _signDN;
     private static KeyPair         _signKP;
@@ -57,7 +60,7 @@ public class NewEnvelopedDataStreamTest
     private static X509Certificate _reciEcCert;
 
     private static boolean         _initialised = false;
-
+    
     public NewEnvelopedDataStreamTest()
     {
     }
@@ -133,7 +136,7 @@ public class NewEnvelopedDataStreamTest
         Iterator    it = c.iterator();
 
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyData);
-        KeyFactory          keyFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory          keyFact = KeyFactory.getInstance("RSA", BC);
         Key                 priKey = keyFact.generatePrivate(keySpec);
         byte[]              data = Hex.decode("57616c6c6157616c6c6157617368696e67746f6e");
 
@@ -143,7 +146,7 @@ public class NewEnvelopedDataStreamTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-            CMSTypedStream recData = recipient.getContentStream(priKey, "BC");
+            CMSTypedStream recData = recipient.getContentStream(priKey, BC);
 
             assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }
@@ -169,7 +172,7 @@ public class NewEnvelopedDataStreamTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), "BC");
+            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), BC);
 
             assertEquals(true, Arrays.equals(expectedData, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }
@@ -195,7 +198,7 @@ public class NewEnvelopedDataStreamTest
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
         OutputStream out = edGen.open(
-                                bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider("BC").build());
+                                bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
 
         for (int i = 0; i != 2000; i++)
         {
@@ -217,7 +220,7 @@ public class NewEnvelopedDataStreamTest
 
         bOut = new ByteArrayOutputStream();
 
-        out = edGen.open(bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider("BC").build());
+        out = edGen.open(bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
 
         BufferedOutputStream bfOut = new BufferedOutputStream(out, 300);
 
@@ -253,7 +256,7 @@ public class NewEnvelopedDataStreamTest
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
         OutputStream out = edGen.open(
-                                bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider("BC").build());
+                                bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
 
         for (int i = 0; i != 2000; i++)
         {
@@ -277,7 +280,7 @@ public class NewEnvelopedDataStreamTest
 
         bOut = new ByteArrayOutputStream();
 
-        out = edGen.open(bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+        out = edGen.open(bOut, CMSEnvelopedDataGenerator.AES128_CBC, BC);
 
         for (int i = 0; i != 2000; i++)
         {
@@ -308,7 +311,7 @@ public class NewEnvelopedDataStreamTest
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
         OutputStream out = edGen.open(
-                                bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+                                bOut, CMSEnvelopedDataGenerator.AES128_CBC, BC);
 
         for (int i = 0; i != 2000; i++)
         {
@@ -350,7 +353,7 @@ public class NewEnvelopedDataStreamTest
 
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 
-        OutputStream out = edGen.open(bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+        OutputStream out = edGen.open(bOut, CMSEnvelopedDataGenerator.AES128_CBC, BC);
 
         for (int i = 0; i != data.length; i++)
         {
@@ -370,7 +373,7 @@ public class NewEnvelopedDataStreamTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), "BC");
+            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), BC);
 
             InputStream           dataStream = recData.getContentStream();
             ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
@@ -409,7 +412,7 @@ public class NewEnvelopedDataStreamTest
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
         OutputStream out = edGen.open(
-                                bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+                                bOut, CMSEnvelopedDataGenerator.AES128_CBC, BC);
 
         out.write(data);
 
@@ -430,7 +433,7 @@ public class NewEnvelopedDataStreamTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), "BC");
+            CMSTypedStream recData = recipient.getContentStream(_reciKP.getPrivate(), BC);
 
             assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }
@@ -506,7 +509,7 @@ public class NewEnvelopedDataStreamTest
 
         OutputStream out = edGen.open(
                                 bOut,
-                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, BC);
         out.write(data);
 
         out.close();
@@ -526,7 +529,7 @@ public class NewEnvelopedDataStreamTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), "2.16.840.1.101.3.4.1.25");
 
-            CMSTypedStream recData = recipient.getContentStream(kek, "BC");
+            CMSTypedStream recData = recipient.getContentStream(kek, BC);
 
             assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }
@@ -553,7 +556,7 @@ public class NewEnvelopedDataStreamTest
 
         OutputStream out = edGen.open(
                                 bOut,
-                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, BC);
         out.write(data);
 
         out.close();
@@ -572,7 +575,7 @@ public class NewEnvelopedDataStreamTest
 
         assertEquals(recipient.getKeyEncryptionAlgOID(), "2.16.840.1.101.3.4.1.25");
 
-        CMSTypedStream recData = recipient.getContentStream(kek2, "BC");
+        CMSTypedStream recData = recipient.getContentStream(kek2, BC);
 
         assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
 
@@ -586,13 +589,13 @@ public class NewEnvelopedDataStreamTest
 
         CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
 
-        edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
+        edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, BC);
 
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
         OutputStream out = edGen.open(
                                 bOut,
-                                CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+                                CMSEnvelopedDataGenerator.AES128_CBC, BC);
         out.write(data);
 
         out.close();
@@ -610,7 +613,7 @@ public class NewEnvelopedDataStreamTest
 
         RecipientInformation       recipient = recipients.get(recSel);
 
-        CMSTypedStream recData = recipient.getContentStream(_reciEcKP.getPrivate(), "BC");
+        CMSTypedStream recData = recipient.getContentStream(_reciEcKP.getPrivate(), BC);
 
         assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
 

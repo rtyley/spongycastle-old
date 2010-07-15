@@ -15,6 +15,7 @@ import org.bouncycastle.asn1.misc.CAST5CBCParameters;
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.CAST5Engine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JCEBlockCipher;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
@@ -79,7 +80,7 @@ public final class CAST5
 
             try
             {
-                params = AlgorithmParameters.getInstance("CAST5", "BC");
+                params = AlgorithmParameters.getInstance("CAST5", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)

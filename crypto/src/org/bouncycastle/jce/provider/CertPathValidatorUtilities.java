@@ -684,13 +684,13 @@ public class CertPathValidatorUtilities
                     X509LDAPCertStoreParameters params = new X509LDAPCertStoreParameters.Builder(
                         url, base).build();
                     pkixParams.addAdditionalStore(X509Store.getInstance(
-                        "CERTIFICATE/LDAP", params, "BC"));
+                        "CERTIFICATE/LDAP", params, BouncyCastleProvider.PROVIDER_NAME));
                     pkixParams.addAdditionalStore(X509Store.getInstance(
-                        "CRL/LDAP", params, "BC"));
+                        "CRL/LDAP", params, BouncyCastleProvider.PROVIDER_NAME));
                     pkixParams.addAdditionalStore(X509Store.getInstance(
-                        "ATTRIBUTECERTIFICATE/LDAP", params, "BC"));
+                        "ATTRIBUTECERTIFICATE/LDAP", params, BouncyCastleProvider.PROVIDER_NAME));
                     pkixParams.addAdditionalStore(X509Store.getInstance(
-                        "CERTIFICATEPAIR/LDAP", params, "BC"));
+                        "CERTIFICATEPAIR/LDAP", params, BouncyCastleProvider.PROVIDER_NAME));
                 }
             }
             catch (Exception e)
@@ -1320,7 +1320,7 @@ public class CertPathValidatorUtilities
                 dsaPubKey.getY(), dsaParams.getP(), dsaParams.getQ(), dsaParams.getG());
             try
             {
-                KeyFactory keyFactory = KeyFactory.getInstance("DSA", "BC");
+                KeyFactory keyFactory = KeyFactory.getInstance("DSA", BouncyCastleProvider.PROVIDER_NAME);
                 return keyFactory.generatePublic(dsaPubKeySpec);
             }
             catch (Exception exception)

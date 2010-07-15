@@ -233,7 +233,7 @@ public class JDKPSSSigner
             {
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance("PSS", "BC");
+                    engineParams = AlgorithmParameters.getInstance("PSS", BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(paramSpec);
                 }
                 catch (Exception e)

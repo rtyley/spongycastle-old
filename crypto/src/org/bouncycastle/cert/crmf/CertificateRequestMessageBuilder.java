@@ -12,7 +12,9 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.crmf.AttributeTypeAndValue;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
+import org.bouncycastle.asn1.crmf.CertRequest;
 import org.bouncycastle.asn1.crmf.CertTemplateBuilder;
+import org.bouncycastle.asn1.crmf.ProofOfPossession;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
@@ -27,6 +29,8 @@ public class CertificateRequestMessageBuilder
     private CertTemplateBuilder templateBuilder;
     private List controls;
     private ContentSigner popSigner;
+    private PKMACValueGenerator pkmacGenerator;
+    private char[] password;
 
     public CertificateRequestMessageBuilder(BigInteger certReqId)
     {
@@ -91,7 +95,16 @@ public class CertificateRequestMessageBuilder
         return this;
     }
 
+    public CertificateRequestMessageBuilder setPKMACValueGeneration(PKMACValueGenerator pkmacGenerator, char[] password)
+    {
+        this.pkmacGenerator = pkmacGenerator;
+        this.password = password;
+
+        return this;
+    }
+
     public CertificateRequestMessage build()
+        throws CRMFException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
@@ -103,24 +116,6 @@ public class CertificateRequestMessageBuilder
         }
 
         v.add(templateBuilder.build());
-
-        if (popSigner != null)
-        {
-            ProofOfPossessionSigningKeyBuilder builder = new ProofOfPossessionSigningKeyBuilder(templateBuilder.getPublicKey());
-
-            X509Name name = templateBuilder.getSubject();
-
-            if (name != null)
-            {
-                builder.setSender(new GeneralName(name));
-            }
-            else
-            {
-                builder.setMacBuilder(null);
-            }
-
-            builder.build(popSigner);
-        }
 
         if (!controls.isEmpty())
         {
@@ -136,6 +131,31 @@ public class CertificateRequestMessageBuilder
             v.add(new DERSequence(controlV));
         }
 
-        return new CertificateRequestMessage(CertReqMsg.getInstance(new DERSequence(new DERSequence(v))));
+        CertRequest request = CertRequest.getInstance(new DERSequence(v));
+
+        v = new ASN1EncodableVector();
+
+        v.add(request);
+
+        if (popSigner != null)
+        {
+            SubjectPublicKeyInfo pubKeyInfo = request.getCertTemplate().getPublicKey();
+            ProofOfPossessionSigningKeyBuilder builder = new ProofOfPossessionSigningKeyBuilder(pubKeyInfo);
+
+            X509Name name = request.getCertTemplate().getSubject();
+
+            if (name != null)
+            {
+                builder.setSender(new GeneralName(name));
+            }
+            else
+            {
+                builder.setMacBuilder(pkmacGenerator.generate(password, pubKeyInfo));
+            }
+
+            v.add(new ProofOfPossession(builder.build(popSigner)));
+        }
+
+        return new CertificateRequestMessage(CertReqMsg.getInstance(new DERSequence(v)));
     }
 }

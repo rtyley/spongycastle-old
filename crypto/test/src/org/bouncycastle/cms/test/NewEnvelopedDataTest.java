@@ -49,12 +49,15 @@ import org.bouncycastle.cms.jcajce.JceKEKRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
 public class NewEnvelopedDataTest
     extends TestCase
 {
+    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
+    
     private static String          _signDN;
     private static KeyPair         _signKP;
     private static X509Certificate _signCert;
@@ -217,11 +220,11 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider("BC"));
+        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
-                                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+                                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
@@ -240,7 +243,7 @@ public class NewEnvelopedDataTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), BC);
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -253,11 +256,11 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider("BC"));
+        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
-                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier("1.2.840.113549.3.4")).setProvider("BC").build());
+                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier("1.2.840.113549.3.4")).setProvider(BC).build());
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
@@ -273,7 +276,7 @@ public class NewEnvelopedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), BC);
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -290,7 +293,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
-                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier("1.2.840.113549.3.4"), 128).setProvider("BC").build());
+                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier("1.2.840.113549.3.4"), 128).setProvider(BC).build());
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
@@ -303,7 +306,7 @@ public class NewEnvelopedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), BC);
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -324,7 +327,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
-                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier("1.3.14.3.2.7")).setProvider("BC").build());
+                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier("1.3.14.3.2.7")).setProvider(BC).build());
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
@@ -337,7 +340,7 @@ public class NewEnvelopedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), BC);
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -358,7 +361,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedData ed = edGen.generate(
                               new CMSProcessableByteArray(data),
-                              new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider("BC").build());
+                              new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
@@ -372,7 +375,7 @@ public class NewEnvelopedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), BC);
             assertEquals(true, Arrays.equals(data, recData));
         }
         else
@@ -440,7 +443,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
-                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(generatorOID)).setProvider("BC").build());
+                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(generatorOID)).setProvider(BC).build());
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
@@ -470,7 +473,7 @@ public class NewEnvelopedDataTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), "BC");
+            byte[] recData = recipient.getContent(_reciKP.getPrivate(), BC);
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -497,7 +500,7 @@ public class NewEnvelopedDataTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), NISTObjectIdentifiers.id_aes128_wrap.getId());
 
-            byte[] recData = recipient.getContent(kek, "BC");
+            byte[] recData = recipient.getContent(kek, BC);
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -572,7 +575,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
-                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, "BC");
+                                CMSEnvelopedDataGenerator.DES_EDE3_CBC, BC);
 
         RecipientInformationStore recipients = ed.getRecipientInfos();
 
@@ -587,7 +590,7 @@ public class NewEnvelopedDataTest
 
             assertEquals(algOid.getId(), recipient.getKeyEncryptionAlgOID());
 
-            byte[] recData = recipient.getContent(kek, "BC");
+            byte[] recData = recipient.getContent(kek, BC);
 
             assertTrue(Arrays.equals(data, recData));
         }
@@ -606,17 +609,17 @@ public class NewEnvelopedDataTest
 
         edGen.addRecipientGenerator(new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECDH_SHA1KDF,
             _origEcKP.getPrivate(), _origEcKP.getPublic(),
-             CMSAlgorithm.AES128_WRAP, _reciEcCert).setProvider("BC"));
+             CMSAlgorithm.AES128_WRAP, _reciEcCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
             new CMSProcessableByteArray(data),
-            CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+            CMSEnvelopedDataGenerator.AES128_CBC, BC);
 
         assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
 
         RecipientInformationStore recipients = ed.getRecipientInfos();
 
-        confirmDataReceived(recipients, data, _reciEcCert, _reciEcKP.getPrivate(), "BC");
+        confirmDataReceived(recipients, data, _reciEcCert, _reciEcKP.getPrivate(), BC);
         confirmNumberRecipients(recipients, 1);
     }
 
@@ -629,17 +632,17 @@ public class NewEnvelopedDataTest
 
         edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECMQV_SHA1KDF,
             _origEcKP.getPrivate(), _origEcKP.getPublic(),
-            _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, "BC");
+            _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, BC);
 
         CMSEnvelopedData ed = edGen.generate(
             new CMSProcessableByteArray(data),
-            CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+            CMSEnvelopedDataGenerator.AES128_CBC, BC);
 
         assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
 
         RecipientInformationStore recipients = ed.getRecipientInfos();
 
-        confirmDataReceived(recipients, data, _reciEcCert, _reciEcKP.getPrivate(), "BC");
+        confirmDataReceived(recipients, data, _reciEcCert, _reciEcKP.getPrivate(), BC);
         confirmNumberRecipients(recipients, 1);
     }
 
@@ -656,18 +659,18 @@ public class NewEnvelopedDataTest
 
         edGen.addRecipientGenerator(new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECMQV_SHA1KDF,
             _origEcKP.getPrivate(), _origEcKP.getPublic(),
-            CMSAlgorithm.AES128_WRAP, recipientCerts).setProvider("BC"));
+            CMSAlgorithm.AES128_WRAP, recipientCerts).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
             new CMSProcessableByteArray(data),
-            CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+            CMSEnvelopedDataGenerator.AES128_CBC, BC);
 
         assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
 
         RecipientInformationStore recipients = ed.getRecipientInfos();
 
-        confirmDataReceived(recipients, data, _reciEcCert, _reciEcKP.getPrivate(), "BC");
-        confirmDataReceived(recipients, data, _reciEcCert2, _reciEcKP2.getPrivate(), "BC");
+        confirmDataReceived(recipients, data, _reciEcCert, _reciEcKP.getPrivate(), BC);
+        confirmDataReceived(recipients, data, _reciEcCert2, _reciEcKP2.getPrivate(), BC);
         confirmNumberRecipients(recipients, 2);
     }
 
@@ -695,7 +698,7 @@ public class NewEnvelopedDataTest
         throws Exception
     {
         PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(ecKeyAgreeKey);
-        KeyFactory          fact = KeyFactory.getInstance("ECDH", "BC");
+        KeyFactory          fact = KeyFactory.getInstance("ECDH", BC);
         PrivateKey          privKey = fact.generatePrivate(privSpec);
 
         verifyECKeyAgreeVectors(privKey, "2.16.840.1.101.3.4.1.42", ecKeyAgreeMsgAES256);
@@ -707,7 +710,7 @@ public class NewEnvelopedDataTest
         throws Exception
     {
         PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(ecKeyAgreeKey);
-        KeyFactory          fact = KeyFactory.getInstance("ECDH", "BC");
+        KeyFactory          fact = KeyFactory.getInstance("ECDH", BC);
         PrivateKey          privKey = fact.generatePrivate(privSpec);
 
         verifyECMQVKeyAgreeVectors(privKey, "2.16.840.1.101.3.4.1.2", ecMQVKeyAgreeMsgAES128);
@@ -732,7 +735,7 @@ public class NewEnvelopedDataTest
     {
         byte[] data = Hex.decode("5468697320697320736f6d652073616d706c6520636f6e74656e742e");
 
-        KeyFactory kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory kFact = KeyFactory.getInstance("RSA", BC);
         Key key = kFact.generatePrivate(new PKCS8EncodedKeySpec(bobPrivRsaEncrypt));
 
         CMSEnvelopedData ed = new CMSEnvelopedData(rfc4134ex5_1);
@@ -748,7 +751,7 @@ public class NewEnvelopedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(key, "BC");
+            byte[] recData = recipient.getContent(key, BC);
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -763,7 +766,7 @@ public class NewEnvelopedDataTest
     {
         byte[] data = Hex.decode("5468697320697320736f6d652073616d706c6520636f6e74656e742e");
 
-        KeyFactory kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory kFact = KeyFactory.getInstance("RSA", BC);
         Key key = kFact.generatePrivate(new PKCS8EncodedKeySpec(bobPrivRsaEncrypt));
 
         CMSEnvelopedData ed = new CMSEnvelopedData(rfc4134ex5_2);
@@ -784,7 +787,7 @@ public class NewEnvelopedDataTest
 
                 if (recipient instanceof KeyTransRecipientInformation)
                 {
-                    recData = recipient.getContent(key, "BC");
+                    recData = recipient.getContent(key, BC);
 
                     assertEquals(true, Arrays.equals(data, recData));
                 }
@@ -818,7 +821,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedData ed = edGen.generate(
                               new CMSProcessableByteArray(data),
-                              CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+                              CMSEnvelopedDataGenerator.AES128_CBC, BC);
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
@@ -833,9 +836,9 @@ public class NewEnvelopedDataTest
             PasswordRecipientInformation recipient = (PasswordRecipientInformation)it.next();
 
             CMSPBEKey key = new PKCS5Scheme2PBEKey("password".toCharArray(),
-                recipient.getKeyDerivationAlgParameters("BC"));
+                recipient.getKeyDerivationAlgParameters(BC));
 
-            byte[] recData = recipient.getContent(key, "BC");
+            byte[] recData = recipient.getContent(key, BC);
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -851,7 +854,7 @@ public class NewEnvelopedDataTest
 
         RecipientInformation   recipient = (RecipientInformation)it.next();
 
-        byte[] recData = recipient.getContent(new PKCS5Scheme2PBEKey("password".toCharArray(), ((PasswordRecipientInformation)recipient).getKeyDerivationAlgParameters("BC")), "BC");
+        byte[] recData = recipient.getContent(new PKCS5Scheme2PBEKey("password".toCharArray(), ((PasswordRecipientInformation)recipient).getKeyDerivationAlgParameters(BC)), BC);
         assertEquals(true, Arrays.equals(data, recData));
     }
 
@@ -866,7 +869,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedData ed = edGen.generate(
                               new CMSProcessableByteArray(data),
-                              CMSEnvelopedDataGenerator.AES128_CBC, "BC");
+                              CMSEnvelopedDataGenerator.AES128_CBC, BC);
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
@@ -880,7 +883,7 @@ public class NewEnvelopedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), new byte[20], 5), "BC");
+            byte[] recData = recipient.getContent(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), new byte[20], 5), BC);
             assertEquals(true, Arrays.equals(data, recData));
         }
         else
@@ -895,7 +898,7 @@ public class NewEnvelopedDataTest
 
         RecipientInformation   recipient = (RecipientInformation)it.next();
 
-        byte[] recData = recipient.getContent(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), ((PasswordRecipientInformation)recipient).getKeyDerivationAlgParameters("BC")), "BC");
+        byte[] recData = recipient.getContent(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), ((PasswordRecipientInformation)recipient).getKeyDerivationAlgParameters(BC)), BC);
         assertEquals(true, Arrays.equals(data, recData));
     }
 
@@ -919,7 +922,7 @@ public class NewEnvelopedDataTest
 
             assertEquals("1.3.133.16.840.63.0.2", recipient.getKeyEncryptionAlgOID());
 
-            byte[] recData = recipient.getContent(privKey, "BC");
+            byte[] recData = recipient.getContent(privKey, BC);
 
             assertTrue(Arrays.equals(data, recData));
         }
@@ -949,7 +952,7 @@ public class NewEnvelopedDataTest
 
             assertEquals("1.3.133.16.840.63.0.16", recipient.getKeyEncryptionAlgOID());
 
-            byte[] recData = recipient.getContent(privKey, "BC");
+            byte[] recData = recipient.getContent(privKey, BC);
 
             assertTrue(Arrays.equals(data, recData));
         }

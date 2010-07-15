@@ -126,7 +126,7 @@ public class BrokenJCEBlockCipher
 
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance(name, "BC");
+                    engineParams = AlgorithmParameters.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(ivParam.getIV());
                 }
                 catch (Exception e)
@@ -514,7 +514,7 @@ public class BrokenJCEBlockCipher
         {
             try
             {
-                KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, "BC");
+                KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
 
                 if (wrappedKeyType == Cipher.PUBLIC_KEY)
                 {

@@ -13,9 +13,9 @@ public interface ContentSigner
      * a signature. Use org.bouncycastle.util.io.TeeOutputStream if you want to accumulate
      * the data on the fly as well.
      *
-     * @return on OutputStream
+     * @return an OutputStream
      */
-    OutputStream getSigningOutputStream();
+    OutputStream getSignerOutputStream();
 
     /**
      * Returns a signature based on the current data written to the stream, since the

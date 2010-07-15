@@ -11,7 +11,7 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
-public class ProviderEnvelopedDataHelper
+class ProviderEnvelopedDataHelper
     extends EnvelopedDataHelper
 {
     private final Provider provider;

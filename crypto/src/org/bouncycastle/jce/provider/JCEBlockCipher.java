@@ -145,7 +145,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             {
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance(pbeAlgorithm, "BC");
+                    engineParams = AlgorithmParameters.getInstance(pbeAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(pbeSpec);
                 }
                 catch (Exception e)
@@ -164,7 +164,7 @@ public class JCEBlockCipher extends WrapCipherSpi
 
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance(name, "BC");
+                    engineParams = AlgorithmParameters.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(ivParam.getIV());
                 }
                 catch (Exception e)

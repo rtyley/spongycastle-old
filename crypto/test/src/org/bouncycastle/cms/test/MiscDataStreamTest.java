@@ -17,17 +17,19 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.bouncycastle.cms.CMSCompressedDataStreamGenerator;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class MiscDataStreamTest
     extends TestCase
 {
+    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
+
     private static final String TEST_MESSAGE = "Hello World!";
     private static String          _signDN;
     private static KeyPair         _signKP;
@@ -48,7 +50,7 @@ public class MiscDataStreamTest
     private static X509CRL         _origCrl;
 
     private static boolean         _initialised = false;
-
+    
     public MiscDataStreamTest(String name)
     {
         super(name);
@@ -84,7 +86,7 @@ public class MiscDataStreamTest
     private void verifySignatures(CMSSignedDataParser sp, byte[] contentDigest)
         throws Exception
     {
-        CertStore               certStore = sp.getCertificatesAndCRLs("Collection", "BC");
+        CertStore               certStore = sp.getCertificatesAndCRLs("Collection", BC);
         SignerInformationStore  signers = sp.getSignerInfos();
 
         Collection              c = signers.getSigners();
@@ -98,7 +100,7 @@ public class MiscDataStreamTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BC));
 
             if (contentDigest != null)
             {
@@ -109,8 +111,8 @@ public class MiscDataStreamTest
         Collection certColl = certStore.getCertificates(null);
         Collection crlColl = certStore.getCRLs(null);
 
-        assertEquals(certColl.size(), sp.getCertificates("Collection", "BC").getMatches(null).size());
-        assertEquals(crlColl.size(), sp.getCRLs("Collection", "BC").getMatches(null).size());
+        assertEquals(certColl.size(), sp.getCertificates("Collection", BC).getMatches(null).size());
+        assertEquals(crlColl.size(), sp.getCRLs("Collection", BC).getMatches(null).size());
     }
 
     private void verifySignatures(CMSSignedDataParser sp)
@@ -142,7 +144,7 @@ public class MiscDataStreamTest
         {
             sc.drain();
         }
-        sp.getCertificatesAndCRLs("Collection", "BC");
+        sp.getCertificatesAndCRLs("Collection", BC);
         sp.getSignerInfos();
         sp.close();
     }
@@ -160,11 +162,11 @@ public class MiscDataStreamTest
         certList.add(_origCrl);
 
         CertStore           certsAndCrls = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+                        new CollectionCertStoreParameters(certList), BC);
 
         CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
 
-        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
+        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataStreamGenerator.DIGEST_SHA1, BC);
 
         gen.addCertificatesAndCRLs(certsAndCrls);
 
@@ -199,7 +201,7 @@ public class MiscDataStreamTest
         //
         // compute expected content digest
         //
-        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+        MessageDigest md = MessageDigest.getInstance("SHA1", BC);
 
         verifySignatures(sp, md.digest(cDataOut.toByteArray()));
     }

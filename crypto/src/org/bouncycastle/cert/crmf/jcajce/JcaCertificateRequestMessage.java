@@ -1,30 +1,45 @@
 package org.bouncycastle.cert.crmf.jcajce;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.PublicKey;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.crmf.CRMFException;
 import org.bouncycastle.cert.crmf.CertificateRequestMessage;
-import org.bouncycastle.jcajce.PublicKeyUtils;
 
 public class JcaCertificateRequestMessage
+    extends CertificateRequestMessage
 {
-    private final CertificateRequestMessage certReqMsg;
+    private final CRMFHelper helper;
+
+    private JcaCertificateRequestMessage(CertReqMsg msg, CRMFHelper helper)
+    {
+        super(msg);
+        this.helper = helper;
+    }
 
     public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg)
     {
-        this.certReqMsg = certReqMsg;
+        this(certReqMsg.getCertReqMsg(), new DefaultCRMFHelper());
     }
 
-    public X500Principal getSubject()
+    public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg, String providerName)
     {
-        X509Name subject = this.certReqMsg.getSubject();
+        this(certReqMsg.getCertReqMsg(), new NamedCRMFHelper(providerName));
+    }
+
+    public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg, Provider provider)
+    {
+        this(certReqMsg.getCertReqMsg(), new ProviderCRMFHelper(provider));
+    }
+
+    public X500Principal getSubjectX500Principal()
+    {
+        X509Name subject = this.getCertTemplate().getSubject();
 
         if (subject != null)
         {
@@ -35,39 +50,13 @@ public class JcaCertificateRequestMessage
     }
 
     public PublicKey getPublicKey()
-        throws InvalidKeyException, NoSuchAlgorithmException
+        throws CRMFException
     {
-        SubjectPublicKeyInfo subjectPublicKeyInfo = this.certReqMsg.getPublicKey();
+        SubjectPublicKeyInfo subjectPublicKeyInfo = getCertTemplate().getPublicKey();
 
         if (subjectPublicKeyInfo != null)
         {
-            return PublicKeyUtils.toPublicKey(subjectPublicKeyInfo);
-        }
-
-        return null;
-    }
-   
-    public PublicKey getPublicKey(Provider provider)
-        throws InvalidKeyException, NoSuchAlgorithmException
-    {
-        SubjectPublicKeyInfo subjectPublicKeyInfo = this.certReqMsg.getPublicKey();
-
-        if (subjectPublicKeyInfo != null)
-        {
-            return PublicKeyUtils.toPublicKey(subjectPublicKeyInfo, provider);
-        }
-
-        return null;
-    }
-
-    public PublicKey getPublicKey(String provider)
-        throws InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException
-    {
-        SubjectPublicKeyInfo subjectPublicKeyInfo = this.certReqMsg.getPublicKey();
-
-        if (subjectPublicKeyInfo != null)
-        {
-            return PublicKeyUtils.toPublicKey(subjectPublicKeyInfo, provider);
+            return helper.toPublicKey(subjectPublicKeyInfo);
         }
 
         return null;

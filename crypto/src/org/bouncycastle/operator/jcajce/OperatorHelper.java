@@ -26,7 +26,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
-abstract class ContentSignerHelper
+abstract class OperatorHelper
 {
     private static final Map oids = new HashMap();
 

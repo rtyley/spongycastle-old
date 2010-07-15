@@ -3,101 +3,85 @@ package org.bouncycastle.operator.jcajce;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
 import java.security.Provider;
-import java.security.SecureRandom;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OperatorStreamException;
 import org.bouncycastle.operator.RuntimeOperatorException;
-import org.bouncycastle.operator.SignerProperties;
-import org.bouncycastle.operator.SignerPropertiesGenerator;
 
-public class JcaContentSignerBuilder
+public class JcaContentVerifierBuilder
 {
     private OperatorHelper helper = new DefaultOperatorHelper();
-    private SecureRandom random;
-    private String signatureAlgorithm;
-    private SignerProperties signatureProperties;
 
-    public JcaContentSignerBuilder(String signatureAlgorithm)
+    public JcaContentVerifierBuilder()
     {
-        this.signatureAlgorithm = signatureAlgorithm;
-        this.signatureProperties = SignerPropertiesGenerator.generate(signatureAlgorithm);
     }
 
-    public JcaContentSignerBuilder setProvider(Provider provider)
+    public JcaContentVerifierBuilder setProvider(Provider provider)
     {
         this.helper = new ProviderOperatorHelper(provider);
 
         return this;
     }
 
-    public JcaContentSignerBuilder setProvider(String providerName)
+    public JcaContentVerifierBuilder setProvider(String providerName)
     {
         this.helper = new NamedOperatorHelper(providerName);
 
         return this;
     }
 
-    public JcaContentSignerBuilder setSecureRandom(SecureRandom random)
-    {
-        this.random = random;
-
-        return this;
-    }
-
-    public ContentSigner build(PrivateKey privateKey)
+    public ContentVerifier build(final PublicKey publicKey)
         throws OperatorCreationException
     {
-        try
+        return new ContentVerifier()
         {
-            final Signature sig = helper.createSignature(signatureProperties.getSignatureAlgorithmIdentifier());
+            private SignatureOutputStream stream;
 
-            if (random != null)
+            public void setup(AlgorithmIdentifier algorithm)
+                throws OperatorCreationException
             {
-                sig.initSign(privateKey, random);
+                try
+                {
+                    Signature sig = helper.createSignature(algorithm);
+
+                    sig.initVerify(publicKey);
+
+                    stream = new SignatureOutputStream(sig);
+                }
+                catch (GeneralSecurityException e)
+                {
+                    throw new OperatorCreationException("exception on setup: " + e, e);
+                }
             }
-            else
+
+            public OutputStream getVerifierOutputStream()
             {
-                sig.initSign(privateKey);
+                if (stream == null)
+                {
+                    throw new IllegalStateException("verifier not initialised");
+                }
+
+                return stream;
             }
 
-            return new ContentSigner()
+            public boolean verify(byte[] expected)
             {
-                private SignatureOutputStream stream = new SignatureOutputStream(sig);
-
-                public AlgorithmIdentifier getAlgorithmIdentifier()
+                try
                 {
-                    return signatureProperties.getSignatureAlgorithmIdentifier();
+                    return stream.verify(expected);
                 }
-
-                public OutputStream getSignerOutputStream()
+                catch (SignatureException e)
                 {
-                    return stream;
+                    throw new RuntimeOperatorException("exception obtaining signature: " + e.getMessage(), e);
                 }
-
-                public byte[] getSignature()
-                {
-                    try
-                    {
-                        return stream.getSignature();
-                    }
-                    catch (SignatureException e)
-                    {
-                        throw new RuntimeOperatorException("exception obtaining signature: " + e.getMessage(), e);
-                    }
-                }
-            };
-        }
-        catch (GeneralSecurityException e)
-        {
-            throw new OperatorCreationException("cannot create signer: " + e.getMessage(), e);
-        }
+            }
+        };
     }
 
     private class SignatureOutputStream
@@ -149,10 +133,10 @@ public class JcaContentSignerBuilder
             }
         }
 
-        byte[] getSignature()
+        boolean verify(byte[] expected)
             throws SignatureException
         {
-            return sig.sign();
+            return sig.verify(expected);
         }
     }
 }

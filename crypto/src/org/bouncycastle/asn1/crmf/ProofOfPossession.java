@@ -55,12 +55,14 @@ public class ProofOfPossession
     }
 
     /** Creates a ProofOfPossession with type raVerified. */
-    public ProofOfPossession() {
+    public ProofOfPossession()
+    {
         tagNo = TYPE_RA_VERIFIED;
     }
 
     /** Creates a ProofOfPossession for a signing key. */
-    public ProofOfPossession(POPOSigningKey poposk) {
+    public ProofOfPossession(POPOSigningKey poposk)
+    {
         tagNo = TYPE_SIGNING_KEY;
         obj = poposk;
     }
@@ -69,7 +71,8 @@ public class ProofOfPossession
      * Creates a ProofOfPossession for key encipherment or agreement.
      * @param type one of TYPE_KEY_ENCIPHERMENT or TYPE_KEY_AGREEMENT
      */
-    public ProofOfPossession(int type, POPOPrivKey privkey) {
+    public ProofOfPossession(int type, POPOPrivKey privkey)
+    {
         tagNo = type;
         obj = privkey;
     }
