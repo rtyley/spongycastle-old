@@ -55,6 +55,6 @@ public abstract class KeyTransRecipientInfoGenerator
             new DEROctetString(encryptedKeyBytes)));
     }
 
-    public abstract byte[] generateEncryptedBytes(AlgorithmIdentifier algorithm, byte[] contentEncryptionKey)
+    protected abstract byte[] generateEncryptedBytes(AlgorithmIdentifier algorithm, byte[] contentEncryptionKey)
         throws CMSException;
 }

@@ -199,7 +199,7 @@ public class CMSEnvelopedDataGenerator
 
         try
         {
-            OutputStream cOut = contentEncryptor.getEncryptingOutputStream(bOut);
+            OutputStream cOut = contentEncryptor.getOutputStream(bOut);
 
             content.write(cOut);
 

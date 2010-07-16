@@ -92,6 +92,28 @@ abstract class EnvelopedDataHelper
         }
     }
 
+    Cipher createRFC3211Wrapper(ASN1ObjectIdentifier algorithm)
+        throws CMSException
+    {
+        String cipherName = (String)BASE_CIPHER_NAMES.get(algorithm);
+
+        if (cipherName == null)
+        {
+            throw new CMSException("no name for " + algorithm);
+        }
+
+        cipherName += "RFC3211Wrap";
+
+        try
+        {
+             return createCipher(cipherName);
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new CMSException("cannot create cipher: " + e.getMessage(), e);
+        }
+    }
+
     KeyAgreement createKeyAgreement(ASN1ObjectIdentifier algorithm)
         throws CMSException
     {
