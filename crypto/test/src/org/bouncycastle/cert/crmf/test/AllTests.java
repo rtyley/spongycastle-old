@@ -86,7 +86,7 @@ public class AllTests
                     .setPublicKey(kp.getPublic());
 
         certReqBuild.addControl(new JcaPKIArchiveControlBuilder(kp.getPrivate(), new X500Principal("CN=test"))
-                                      .addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(cert))
+                                      .addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC))
                                       .build(new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(CMSEnvelopedDataGenerator.AES128_CBC)).setProvider(BC).build()));
 
         JcaCertificateRequestMessage certReqMsg = new JcaCertificateRequestMessage(certReqBuild.build());
@@ -112,7 +112,7 @@ public class AllTests
                     .setProofOfPossessionSigningKeySigner(new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(kp.getPrivate()));
 
         certReqBuild.addControl(new JcaPKIArchiveControlBuilder(kp.getPrivate(), new X500Principal("CN=test"))
-                                      .addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(cert))
+                                      .addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC))
                                       .build(new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(CMSEnvelopedDataGenerator.AES128_CBC)).setProvider(BC).build()));
 
         JcaCertificateRequestMessage certReqMsg = new JcaCertificateRequestMessage(certReqBuild.build());
