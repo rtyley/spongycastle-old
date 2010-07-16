@@ -289,7 +289,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert));
+        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -323,7 +323,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert));
+        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -357,7 +357,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert));
+        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
                               new CMSProcessableByteArray(data),
@@ -439,7 +439,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert));
+        edGen.addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
