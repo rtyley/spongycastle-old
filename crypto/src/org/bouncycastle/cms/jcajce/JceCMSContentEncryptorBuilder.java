@@ -61,7 +61,7 @@ public class JceCMSContentEncryptorBuilder
                 return helper.getAlgorithmIdentifier();
             }
 
-            public OutputStream getEncryptingOutputStream(OutputStream dOut)
+            public OutputStream getOutputStream(OutputStream dOut)
             {
                 return helper.getCipherOutputStream(dOut);
             }

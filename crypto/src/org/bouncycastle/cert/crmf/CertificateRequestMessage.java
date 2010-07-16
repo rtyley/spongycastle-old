@@ -113,7 +113,7 @@ public class CertificateRequestMessage
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
-        CRMFUtil.derEncodeToStream(popoSign.getPoposkInput(), verifier.getVerifierOutputStream());
+        CRMFUtil.derEncodeToStream(popoSign.getPoposkInput(), verifier.getOutputStream());
 
         return verifier.verify(popoSign.getSignature().getBytes());
     }

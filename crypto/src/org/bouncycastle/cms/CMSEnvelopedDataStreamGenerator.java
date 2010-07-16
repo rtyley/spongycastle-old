@@ -203,7 +203,7 @@ public class CMSEnvelopedDataStreamGenerator
         OutputStream octetStream = CMSUtils.createBEROctetOutputStream(
             eiGen.getRawOutputStream(), 0, false, _bufferSize);
 
-        OutputStream cOut = encryptor.getEncryptingOutputStream(octetStream);
+        OutputStream cOut = encryptor.getOutputStream(octetStream);
 
         return new CmsEnvelopedDataOutputStream(cOut, cGen, envGen, eiGen);
     }

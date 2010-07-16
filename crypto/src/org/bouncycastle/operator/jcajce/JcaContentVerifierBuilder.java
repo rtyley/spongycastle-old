@@ -60,7 +60,7 @@ public class JcaContentVerifierBuilder
                 }
             }
 
-            public OutputStream getVerifierOutputStream()
+            public OutputStream getOutputStream()
             {
                 if (stream == null)
                 {

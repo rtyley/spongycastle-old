@@ -59,7 +59,7 @@ public class JceKEKRecipientInfoGenerator
         return this;
     }
 
-    public byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, byte[] contentEncryptionKey)
+    protected byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, byte[] contentEncryptionKey)
         throws CMSException
     {
         SecretKeySpec contentEncryptionKeySpec = new SecretKeySpec(contentEncryptionKey, "WRAP");

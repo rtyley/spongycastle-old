@@ -51,7 +51,7 @@ public class ProofOfPossessionSigningKeyBuilder
             popo = new POPOSigningKeyInput(publicKeyMAC, pubKeyInfo);
         }
 
-        CRMFUtil.derEncodeToStream(popo, signer.getSignerOutputStream());
+        CRMFUtil.derEncodeToStream(popo, signer.getOutputStream());
 
         return new POPOSigningKey(popo, signer.getAlgorithmIdentifier(), new DERBitString(signer.getSignature()));
     }

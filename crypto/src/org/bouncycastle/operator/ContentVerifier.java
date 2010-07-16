@@ -16,7 +16,7 @@ public interface ContentVerifier
      *
      * @return an OutputStream
      */
-    OutputStream getVerifierOutputStream();
+    OutputStream getOutputStream();
 
     /**
      * @param expected expected value of the signature on the data.

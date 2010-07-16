@@ -76,7 +76,7 @@ public class JcaContentSignerBuilder
                     return signatureProperties.getSignatureAlgorithmIdentifier();
                 }
 
-                public OutputStream getSignerOutputStream()
+                public OutputStream getOutputStream()
                 {
                     return stream;
                 }

@@ -8,7 +8,7 @@ public interface ContentEncryptor
 {
     AlgorithmIdentifier getAlgorithmIdentifier();
 
-    OutputStream getEncryptingOutputStream(OutputStream dataOut);
+    OutputStream getOutputStream(OutputStream dataOut);
 
     byte[] getEncodedKey();
 }
