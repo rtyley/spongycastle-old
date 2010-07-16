@@ -630,9 +630,9 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addKeyAgreementRecipient(CMSEnvelopedDataGenerator.ECMQV_SHA1KDF,
+        edGen.addRecipientGenerator(new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECMQV_SHA1KDF,
             _origEcKP.getPrivate(), _origEcKP.getPublic(),
-            _reciEcCert, CMSEnvelopedDataGenerator.AES128_WRAP, BC);
+            CMSAlgorithm.AES128_WRAP, _reciEcCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
             new CMSProcessableByteArray(data),
