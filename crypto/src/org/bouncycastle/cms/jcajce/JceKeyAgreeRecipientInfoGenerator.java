@@ -33,6 +33,7 @@ import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
 import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KeyAgreeRecipientInfoGenerator;
@@ -50,7 +51,7 @@ public class JceKeyAgreeRecipientInfoGenerator
     private SecureRandom random;
     private KeyPair ephemeralKP;
 
-    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, List recipientCerts, SecureRandom random)
+    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, List recipientCerts)
         throws CMSException
     {
         super(keyAgreementOID, SubjectPublicKeyInfo.getInstance(senderPublicKey.getEncoded()), keyEncryptionOID);
@@ -58,44 +59,12 @@ public class JceKeyAgreeRecipientInfoGenerator
         this.senderPublicKey = senderPublicKey;
         this.senderPrivateKey = senderPrivateKey;
         this.recipientCerts = recipientCerts;
-        this.random = random;
-
-        if (keyAgreementOID.getId().equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
-        {
-            try
-            {
-                ECParameterSpec ecParamSpec = ((ECPublicKey)senderPublicKey).getParams();
-
-                KeyPairGenerator ephemKPG = helper.createKeyPairGenerator(keyAgreementOID);
-
-                ephemKPG.initialize(ecParamSpec, random);
-
-                ephemeralKP = ephemKPG.generateKeyPair();
-            }
-            catch (InvalidAlgorithmParameterException e)
-            {
-                throw new CMSException(
-                    "cannot determine MQV ephemeral key pair parameters from public key: " + e);
-            }
-        }
-    }
-
-    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, X509Certificate recipientCert, SecureRandom random)
-        throws CMSException
-    {
-        this(keyAgreementOID, senderPrivateKey, senderPublicKey, keyEncryptionOID,  Collections.singletonList(recipientCert), random);
-    }
-
-    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, List recipientCerts)
-        throws CMSException
-    {
-         this(keyAgreementOID, senderPrivateKey, senderPublicKey, keyEncryptionOID, recipientCerts, new SecureRandom());
     }
 
     public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, X509Certificate recipientCert)
         throws CMSException
     {
-        this(keyAgreementOID, senderPrivateKey, senderPublicKey, keyEncryptionOID, recipientCert, new SecureRandom());
+        this(keyAgreementOID, senderPrivateKey, senderPublicKey, keyEncryptionOID,  Collections.singletonList(recipientCert));
     }
 
     public JceKeyAgreeRecipientInfoGenerator setProvider(Provider provider)
@@ -112,9 +81,18 @@ public class JceKeyAgreeRecipientInfoGenerator
         return this;
     }
 
+    public JceKeyAgreeRecipientInfoGenerator setRandom(SecureRandom random)
+    {
+        this.random = random;
+
+        return this;
+    }
+
     public ASN1Sequence generateRecipientEncryptedKeys(AlgorithmIdentifier keyAgreeAlgorithm, AlgorithmIdentifier keyEncryptionAlgorithm, byte[] contentEncryptionKey)
         throws CMSException
     {
+        init(keyAgreeAlgorithm.getAlgorithm());
+
         PrivateKey senderPrivateKey = this.senderPrivateKey;
 
         ASN1ObjectIdentifier keyAgreementOID = keyAgreeAlgorithm.getAlgorithm();
@@ -178,8 +156,11 @@ public class JceKeyAgreeRecipientInfoGenerator
         return new DERSequence(recipientEncryptedKeys);
     }
 
-    protected ASN1Encodable getUserKeyingMaterial()
+    protected ASN1Encodable getUserKeyingMaterial(AlgorithmIdentifier keyAgreeAlg)
+        throws CMSException
     {
+        init(keyAgreeAlg.getAlgorithm());
+
         if (ephemeralKP != null)
         {
             return new MQVuserKeyingMaterial(
@@ -187,5 +168,36 @@ public class JceKeyAgreeRecipientInfoGenerator
         }
 
         return null;
+    }
+
+    private void init(ASN1ObjectIdentifier keyAgreementOID)
+        throws CMSException
+    {
+        if (random == null)
+        {
+            random = new SecureRandom();
+        }
+
+        if (keyAgreementOID.equals(CMSAlgorithm.ECMQV_SHA1KDF))
+        {
+            if (ephemeralKP == null)
+            {
+                try
+                {
+                    ECParameterSpec ecParamSpec = ((ECPublicKey)senderPublicKey).getParams();
+
+                    KeyPairGenerator ephemKPG = helper.createKeyPairGenerator(keyAgreementOID);
+
+                    ephemKPG.initialize(ecParamSpec, random);
+
+                    ephemeralKP = ephemKPG.generateKeyPair();
+                }
+                catch (InvalidAlgorithmParameterException e)
+                {
+                    throw new CMSException(
+                        "cannot determine MQV ephemeral key pair parameters from public key: " + e);
+                }
+            }
+        }
     }
 }

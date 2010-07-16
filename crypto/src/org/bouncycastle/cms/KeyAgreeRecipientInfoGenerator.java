@@ -40,11 +40,11 @@ public abstract class KeyAgreeRecipientInfoGenerator
         AlgorithmIdentifier keyAgreeAlg = new AlgorithmIdentifier(keyAgreementOID, keyEncAlg);
 
         ASN1Sequence recipients = generateRecipientEncryptedKeys(keyAgreeAlg, keyEncAlg, contentEncryptionKey);
-        ASN1Encodable userKeyingMaterial = getUserKeyingMaterial();
+        ASN1Encodable userKeyingMaterial = getUserKeyingMaterial(keyAgreeAlg);
 
         if (userKeyingMaterial != null)
         {
-            return new RecipientInfo(new KeyAgreeRecipientInfo(originator, new DEROctetString(getUserKeyingMaterial()),
+            return new RecipientInfo(new KeyAgreeRecipientInfo(originator, new DEROctetString(userKeyingMaterial),
                 keyAgreeAlg, recipients));
         }
         else
@@ -64,6 +64,7 @@ public abstract class KeyAgreeRecipientInfoGenerator
     protected abstract ASN1Sequence generateRecipientEncryptedKeys(AlgorithmIdentifier keyAgreeAlgorithm, AlgorithmIdentifier keyEncAlgorithm, byte[] contentEncryptionKey)
         throws CMSException;
 
-    protected abstract ASN1Encodable getUserKeyingMaterial();
+    protected abstract ASN1Encodable getUserKeyingMaterial(AlgorithmIdentifier keyAgreeAlgorithm)
+        throws CMSException;
 
 }
