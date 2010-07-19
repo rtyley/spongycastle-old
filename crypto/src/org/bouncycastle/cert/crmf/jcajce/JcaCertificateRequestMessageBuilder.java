@@ -17,6 +17,16 @@ public class JcaCertificateRequestMessageBuilder
         super(certReqId);
     }
 
+    public JcaCertificateRequestMessageBuilder setIssuer(X500Principal issuer)
+    {
+        if (issuer != null)
+        {
+            setIssuer(X509Name.getInstance(issuer.getEncoded()));
+        }
+
+        return this;
+    }
+
     public JcaCertificateRequestMessageBuilder setSubject(X500Principal subject)
     {
         if (subject != null)
