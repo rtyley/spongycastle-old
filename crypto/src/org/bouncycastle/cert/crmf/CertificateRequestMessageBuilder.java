@@ -51,6 +51,16 @@ public class CertificateRequestMessageBuilder
         return this;
     }
 
+    public CertificateRequestMessageBuilder setIssuer(X509Name issuer)
+    {
+        if (issuer != null)
+        {
+            templateBuilder.setIssuer(issuer);
+        }
+
+        return this;
+    }
+
     public CertificateRequestMessageBuilder setSubject(X509Name subject)
     {
         if (subject != null)

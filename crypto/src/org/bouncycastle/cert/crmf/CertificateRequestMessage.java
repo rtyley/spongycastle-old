@@ -12,7 +12,12 @@ public class CertificateRequestMessage
 {
     private final CertReqMsg certReqMsg;
 
-    public CertificateRequestMessage(CertReqMsg certReqMsg)
+    public CertificateRequestMessage(byte[] certReqMsg)
+    {
+        this(CertReqMsg.getInstance(certReqMsg));
+    }
+
+    protected CertificateRequestMessage(CertReqMsg certReqMsg)
     {
         this.certReqMsg = certReqMsg;
     }
