@@ -1,5 +1,7 @@
 package org.bouncycastle.cert.crmf;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.crmf.CertTemplate;
 import org.bouncycastle.asn1.crmf.PKMACValue;
@@ -123,4 +125,9 @@ public class CertificateRequestMessage
         return verifier.verify(popoSign.getSignature().getBytes());
     }
 
+    public byte[] getEncoded()
+        throws IOException
+    {
+        return certReqMsg.getEncoded();
+    }
 }
