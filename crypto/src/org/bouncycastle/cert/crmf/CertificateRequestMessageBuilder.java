@@ -106,7 +106,7 @@ public class CertificateRequestMessageBuilder
         return this;
     }
 
-    public CertificateRequestMessageBuilder setPKMACValueGeneration(PKMACValueGenerator pkmacGenerator, char[] password)
+    public CertificateRequestMessageBuilder setAuthInfoPKMAC(PKMACValueGenerator pkmacGenerator, char[] password)
     {
         this.pkmacGenerator = pkmacGenerator;
         this.password = password;
@@ -114,7 +114,7 @@ public class CertificateRequestMessageBuilder
         return this;
     }
 
-    public CertificateRequestMessageBuilder setSender(GeneralName sender)
+    public CertificateRequestMessageBuilder setAuthInfoSender(GeneralName sender)
     {
         this.sender = sender;
 
