@@ -95,7 +95,7 @@ public class AllTests
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
     }
 
-    public void testProofOfPossessionWithoutSubject()
+    public void testProofOfPossessionWithoutSender()
         throws Exception
     {
         KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
@@ -129,6 +129,46 @@ public class AllTests
         }
 
         assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierBuilder().setProvider(BC).build(kp.getPublic()), new PKMACValueVerifier(new JcaPKMACValuesCalculator().setProvider(BC)), "fred".toCharArray())); 
+
+        assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
+    }
+
+    public void testProofOfPossessionWithSender()
+        throws Exception
+    {
+        KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
+
+        kGen.initialize(512);
+
+        KeyPair kp = kGen.generateKeyPair();
+        X509Certificate cert = makeV1Certificate(kp, "CN=Test", kp, "CN=Test");
+
+        JcaCertificateRequestMessageBuilder certReqBuild = new JcaCertificateRequestMessageBuilder(BigInteger.ONE);
+
+        certReqBuild.setPublicKey(kp.getPublic())
+                    .setSender(new X500Principal("CN=Test"))
+                    .setProofOfPossessionSigningKeySigner(new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(kp.getPrivate()));
+
+        certReqBuild.addControl(new JcaPKIArchiveControlBuilder(kp.getPrivate(), new X500Principal("CN=test"))
+                                      .addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC))
+                                      .build(new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(CMSEnvelopedDataGenerator.AES128_CBC)).setProvider(BC).build()));
+
+        JcaCertificateRequestMessage certReqMsg = new JcaCertificateRequestMessage(certReqBuild.build());
+
+        // check that internal check on popo signing is working okay
+        try
+        {
+            certReqMsg.verifySigningKeyPOP(new JcaContentVerifierBuilder().setProvider(BC).build(kp.getPublic()), new PKMACValueVerifier(new JcaPKMACValuesCalculator().setProvider(BC)), "fred".toCharArray());
+
+            fail("IllegalStateException not thrown");
+        }
+        catch (IllegalStateException e)
+        {
+            // ignore
+        }
+
+
+        assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierBuilder().setProvider(BC).build(kp.getPublic())));
 
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
     }
