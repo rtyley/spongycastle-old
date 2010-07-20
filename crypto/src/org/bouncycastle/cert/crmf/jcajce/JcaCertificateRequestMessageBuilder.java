@@ -38,11 +38,11 @@ public class JcaCertificateRequestMessageBuilder
         return this;
     }
 
-    public JcaCertificateRequestMessageBuilder setSender(X500Principal sender)
+    public JcaCertificateRequestMessageBuilder setAuthInfoSender(X500Principal sender)
     {
         if (sender != null)
         {
-            setSender(new GeneralName(X509Name.getInstance(sender.getEncoded())));
+            setAuthInfoSender(new GeneralName(X509Name.getInstance(sender.getEncoded())));
         }
 
         return this;
