@@ -31,6 +31,7 @@ public class CertificateRequestMessageBuilder
     private ContentSigner popSigner;
     private PKMACValueGenerator pkmacGenerator;
     private char[] password;
+    private GeneralName sender;
 
     public CertificateRequestMessageBuilder(BigInteger certReqId)
     {
@@ -113,6 +114,13 @@ public class CertificateRequestMessageBuilder
         return this;
     }
 
+    public CertificateRequestMessageBuilder setSender(GeneralName sender)
+    {
+        this.sender = sender;
+
+        return this;
+    }
+
     public CertificateRequestMessage build()
         throws CRMFException
     {
@@ -152,11 +160,9 @@ public class CertificateRequestMessageBuilder
             SubjectPublicKeyInfo pubKeyInfo = request.getCertTemplate().getPublicKey();
             ProofOfPossessionSigningKeyBuilder builder = new ProofOfPossessionSigningKeyBuilder(pubKeyInfo);
 
-            X509Name name = request.getCertTemplate().getSubject();
-
-            if (name != null)
+            if (sender != null)
             {
-                builder.setSender(new GeneralName(name));
+                builder.setSender(sender);
             }
             else
             {
