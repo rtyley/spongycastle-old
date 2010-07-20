@@ -399,6 +399,7 @@ public class JCEECPublicKey
         {
             byte[] tmp = new byte[32];
             System.arraycopy(val, 0, tmp, tmp.length - val.length, val.length);
+            val = tmp;
         }
 
         for (int i = 0; i != 32; i++)
