@@ -2,7 +2,7 @@ package org.bouncycastle.jce.provider.test;
 
 public class PEMData
 {
-    static String CERTIFICATE_1 = 
+    public static String CERTIFICATE_1 =
        "-----BEGIN X509 CERTIFICATE-----\r"
      + "MIIDXjCCAsegAwIBAgIBBzANBgkqhkiG9w0BAQQFADCBtzELMAkGA1UEBhMCQVUx\r"
      + "ETAPBgNVBAgTCFZpY3RvcmlhMRgwFgYDVQQHEw9Tb3V0aCBNZWxib3VybmUxGjAY\r"
@@ -25,7 +25,7 @@ public class PEMData
      + "5/8=\r"
      + "-----END X509 CERTIFICATE-----\r";
 
-    static String CERTIFICATE_2 = 
+    public static String CERTIFICATE_2 =
        "-----BEGIN CERTIFICATE-----\n"
      + "MIIDXjCCAsegAwIBAgIBBzANBgkqhkiG9w0BAQQFADCBtzELMAkGA1UEBhMCQVUx\n"
      + "ETAPBgNVBAgTCFZpY3RvcmlhMRgwFgYDVQQHEw9Tb3V0aCBNZWxib3VybmUxGjAY\n"
@@ -48,7 +48,7 @@ public class PEMData
      + "5/8=\n"
      + "-----END CERTIFICATE-----\n";
 
-    static String CRL_1 =
+    public static String CRL_1 =
        "-----BEGIN X509 CRL-----\r\n"
      + "MIICjTCCAfowDQYJKoZIhvcNAQECBQAwXzELMAkGA1UEBhMCVVMxIDAeBgNVBAoT\r\n"
      + "F1JTQSBEYXRhIFNlY3VyaXR5LCBJbmMuMS4wLAYDVQQLEyVTZWN1cmUgU2VydmVy\r\n"
@@ -66,7 +66,7 @@ public class PEMData
      + "JaAL3iTJHJD55kK2D/VoyY1djlsPuNh6AEgdVwFAyp0v\r\n"
      + "-----END X509 CRL-----\r\n";
 
-    static String CRL_2 =
+    public static String CRL_2 =
        "-----BEGIN CRL-----\r\n"
      + "MIICjTCCAfowDQYJKoZIhvcNAQECBQAwXzELMAkGA1UEBhMCVVMxIDAeBgNVBAoT\r\n"
      + "F1JTQSBEYXRhIFNlY3VyaXR5LCBJbmMuMS4wLAYDVQQLEyVTZWN1cmUgU2VydmVy\r\n"
