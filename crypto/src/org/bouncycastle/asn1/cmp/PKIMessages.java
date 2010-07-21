@@ -1,8 +1,10 @@
 package org.bouncycastle.asn1.cmp;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSequence;
 
 public class PKIMessages
     extends ASN1Encodable
@@ -27,6 +29,21 @@ public class PKIMessages
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    public PKIMessages(PKIMessage msg)
+    {
+        content = new DERSequence(msg);
+    }
+
+    public PKIMessages(PKIMessage[] msgs)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+        for (int i = 0; i < msgs.length; i++)
+        {
+            v.add(msgs[i]);
+        }
+        content = new DERSequence(v);
     }
 
     public PKIMessage[] toPKIMessageArray()

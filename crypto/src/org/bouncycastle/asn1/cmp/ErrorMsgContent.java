@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.cmp;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -7,12 +9,10 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
-import java.util.Enumeration;
-
 public class ErrorMsgContent
     extends ASN1Encodable
 {
-    private PKIStatusInfo pKIStatusInfo;
+    private PKIStatusInfo pkiStatusInfo;
     private DERInteger errorCode;
     private PKIFreeText errorDetails;
 
@@ -20,7 +20,7 @@ public class ErrorMsgContent
     {
         Enumeration en = seq.getObjects();
 
-        pKIStatusInfo = PKIStatusInfo.getInstance(en.nextElement());
+        pkiStatusInfo = PKIStatusInfo.getInstance(en.nextElement());
 
         while (en.hasMoreElements())
         {
@@ -52,9 +52,29 @@ public class ErrorMsgContent
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public ErrorMsgContent(PKIStatusInfo pkiStatusInfo)
+    {
+        this(pkiStatusInfo, null, null);
+    }
+
+    public ErrorMsgContent(
+        PKIStatusInfo pkiStatusInfo,
+        DERInteger errorCode,
+        PKIFreeText errorDetails)
+    {
+        if (pkiStatusInfo == null)
+        {
+            throw new IllegalArgumentException("'pkiStatusInfo' cannot be null");
+        }
+
+        this.pkiStatusInfo = pkiStatusInfo;
+        this.errorCode = errorCode;
+        this.errorDetails = errorDetails;
+    }
+
     public PKIStatusInfo getPKIStatusInfo()
     {
-        return pKIStatusInfo;
+        return pkiStatusInfo;
     }
 
     public DERInteger getErrorCode()
@@ -83,7 +103,7 @@ public class ErrorMsgContent
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        v.add(pKIStatusInfo);
+        v.add(pkiStatusInfo);
         addOptional(v, errorCode);
         addOptional(v, errorDetails);
 
