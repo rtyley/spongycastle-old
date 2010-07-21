@@ -39,7 +39,8 @@ public class GenMsgContent
     public GenMsgContent(InfoTypeAndValue[] itv)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
-        for (int i = 0; i < itv.length; i++) {
+        for (int i = 0; i < itv.length; i++)
+        {
             v.add(itv[i]);
         }
         content = new DERSequence(v);
