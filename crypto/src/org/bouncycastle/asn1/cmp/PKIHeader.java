@@ -14,10 +14,16 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.X509Name;
 
 public class PKIHeader
     extends ASN1Encodable
 {
+    /**
+     * Value for a "null" recipient or sender.
+     */
+    public static final GeneralName NULL_NAME = new GeneralName(new X509Name(new DERSequence()));
+
     public static final int CMP_1999 = 1;
     public static final int CMP_2000 = 2;
 
