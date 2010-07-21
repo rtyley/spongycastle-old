@@ -83,6 +83,14 @@ public class PKIMessage
 
     public PKIMessage(
         PKIHeader header,
+        PKIBody body,
+        DERBitString protection)
+    {
+        this(header, body, protection, null);
+    }
+
+    public PKIMessage(
+        PKIHeader header,
         PKIBody   body)
     {
         this(header, body, null, null);
@@ -105,7 +113,8 @@ public class PKIMessage
 
     public CMPCertificate[] getExtraCerts()
     {
-        if (extraCerts == null) {
+        if (extraCerts == null)
+        {
             return null;
         }
 

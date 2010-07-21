@@ -221,6 +221,16 @@ public class PKIHeaderBuilder
         addOptional(v, 7, freeText);
         addOptional(v, 8, generalInfo);
 
+        messageTime = null;
+        protectionAlg = null;
+        senderKID = null;
+        recipKID = null;
+        transactionID = null;
+        senderNonce = null;
+        recipNonce = null;
+        freeText = null;
+        generalInfo = null;
+        
         return PKIHeader.getInstance(new DERSequence(v));
     }
 
