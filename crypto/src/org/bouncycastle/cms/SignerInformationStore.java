@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class SignerInformationStore
 {
+    private ArrayList all;
     private Map table = new HashMap();
 
     public SignerInformationStore(
@@ -44,6 +45,8 @@ public class SignerInformationStore
                     table.put(sid, l);
                 }
             }
+
+            this.all = new ArrayList(signerInfos);
         }
     }
 
@@ -76,24 +79,7 @@ public class SignerInformationStore
      */
     public int size()
     {
-        Iterator    it = table.values().iterator();
-        int         count = 0;
-        
-        while (it.hasNext())
-        {
-            Object o = it.next();
-            
-            if (o instanceof List)
-            {
-                count += ((List)o).size();
-            }
-            else
-            {
-                count++;
-            }
-        }
-        
-        return count;
+        return all.size();
     }
 
     /**
@@ -103,26 +89,9 @@ public class SignerInformationStore
      */
     public Collection getSigners()
     {
-        List        list = new ArrayList(table.size());
-        Iterator    it = table.values().iterator();
-        
-        while (it.hasNext())
-        {
-            Object o = it.next();
-            
-            if (o instanceof List)
-            {
-                list.addAll((List)o);
-            }
-            else
-            {
-                list.add(o);
-            }
-        }
-        
-        return list;
+        return new ArrayList(all);
     }
-    
+
     /**
      * Return possible empty collection with signers matching the passed in SignerId
      * 
