@@ -32,6 +32,12 @@ public class CertReqMessages
     }
 
     public CertReqMessages(
+        CertReqMsg msg)
+    {
+        content = new DERSequence(msg);
+    }
+
+    public CertReqMessages(
         CertReqMsg[] msgs)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
