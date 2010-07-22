@@ -80,7 +80,7 @@ public class X509v3CertificateBuilder
         boolean critical,
         X509CertificateHolder certHolder)
     {
-        X509CertificateStructure cert = certHolder.getASN1Structure();
+        X509CertificateStructure cert = certHolder.toASN1Structure();
 
         X509Extension extension = cert.getTBSCertificate().getExtensions().getExtension(oid);
 

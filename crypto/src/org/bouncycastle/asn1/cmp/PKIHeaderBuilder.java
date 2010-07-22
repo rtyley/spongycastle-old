@@ -45,20 +45,6 @@ public class PKIHeaderBuilder
         this.recipient = recipient;
     }
 
-    public PKIHeaderBuilder setSender(GeneralName name)
-    {
-        sender = name;
-
-        return this;
-    }
-
-    public PKIHeaderBuilder setRecipient(GeneralName name)
-    {
-        recipient = name;
-
-        return this;
-    }
-
     public PKIHeaderBuilder setMessageTime(DERGeneralizedTime time)
     {
         messageTime = time;
