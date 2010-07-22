@@ -3,9 +3,9 @@ package org.bouncycastle.asn1.cmp;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 public class CertRepMessage
@@ -39,6 +39,33 @@ public class CertRepMessage
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    public CertRepMessage(CMPCertificate[] caPubs, CertResponse[] response)
+    {
+        if (response == null)
+        {
+            throw new IllegalArgumentException("'response' cannot be null");
+        }
+
+        if (caPubs != null)
+        {
+            ASN1EncodableVector v = new ASN1EncodableVector();
+            for (int i = 0; i < caPubs.length; i++)
+            {
+                v.add(caPubs[i]);
+            }
+            this.caPubs = new DERSequence(v);
+        }
+
+        {
+            ASN1EncodableVector v = new ASN1EncodableVector();
+            for (int i = 0; i < response.length; i++)
+            {
+                v.add(response[i]);
+            }
+            this.response = new DERSequence(v);
+        }
     }
 
     public CMPCertificate[] getCaPubs()
