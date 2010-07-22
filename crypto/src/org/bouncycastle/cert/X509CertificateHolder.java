@@ -1,8 +1,11 @@
 package org.bouncycastle.cert;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
+import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.operator.ContentVerifier;
 
 public class X509CertificateHolder
 {
@@ -19,8 +22,36 @@ public class X509CertificateHolder
         return x509Certificate.getEncoded();
     }
 
-    public X509CertificateStructure getASN1Structure()
+    public X509CertificateStructure toASN1Structure()
     {
         return x509Certificate;
+    }
+
+    public boolean isSignatureValid(ContentVerifier verifier)
+        throws CertException
+    {
+        TBSCertificateStructure tbsCert = x509Certificate.getTBSCertificate();
+
+        if (!tbsCert.getSignature().equals(x509Certificate.getSignatureAlgorithm()))
+        {
+            throw new CertException("signature invalid - algorithm identifier mismatch");
+        }
+
+        try
+        {
+            verifier.setup(tbsCert.getSignature());
+
+            OutputStream sOut = verifier.getOutputStream();
+
+            sOut.write(tbsCert.getDEREncoded());
+
+            sOut.close();
+        }
+        catch (Exception e)
+        {
+            throw new CertException("unable to process signature: " + e.getMessage(), e);
+        }
+
+        return verifier.verify(x509Certificate.getSignature().getBytes());
     }
 }

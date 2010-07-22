@@ -1,11 +1,18 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import java.io.OutputStream;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 interface SignerInfoGenerator
 {
-    SignerInfo generate(DERObjectIdentifier contentType, AlgorithmIdentifier digestAlgorithm,
-        byte[] calculatedDigest) throws CMSStreamException;
+    /**
+     * Return the stream that will either calculate a digest
+     * attribute or the signature stored in the signer info.
+     */
+    OutputStream getCalculatingOutputStream();
+
+    SignerInfo generate(ASN1ObjectIdentifier contentType)
+        throws CMSStreamException;
 }
