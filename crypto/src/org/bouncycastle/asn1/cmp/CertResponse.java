@@ -59,6 +59,33 @@ public class CertResponse
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public CertResponse(
+        DERInteger certReqId,
+        PKIStatusInfo status)
+    {
+        this(certReqId, status, null, null);
+    }
+
+    public CertResponse(
+        DERInteger certReqId,
+        PKIStatusInfo status,
+        CertifiedKeyPair certifiedKeyPair,
+        ASN1OctetString rspInfo)
+    {
+        if (certReqId == null)
+        {
+            throw new IllegalArgumentException("'certReqId' cannot be null");
+        }
+        if (status == null)
+        {
+            throw new IllegalArgumentException("'status' cannot be null");
+        }
+        this.certReqId = certReqId;
+        this.status = status;
+        this.certifiedKeyPair = certifiedKeyPair;
+        this.rspInfo = rspInfo;
+    }
+
     public DERInteger getCertReqId()
     {
         return certReqId;
