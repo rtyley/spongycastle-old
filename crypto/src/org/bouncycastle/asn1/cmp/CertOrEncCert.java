@@ -45,6 +45,26 @@ public class CertOrEncCert
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public CertOrEncCert(CMPCertificate certificate)
+    {
+        if (certificate == null)
+        {
+            throw new IllegalArgumentException("'certificate' cannot be null");
+        }
+
+        this.certificate = certificate;
+    }
+
+    public CertOrEncCert(EncryptedValue encryptedCert)
+    {
+        if (encryptedCert == null)
+        {
+            throw new IllegalArgumentException("'encryptedCert' cannot be null");
+        }
+
+        this.encryptedCert = encryptedCert;
+    }
+
     public CMPCertificate getCertificate()
     {
         return certificate;
