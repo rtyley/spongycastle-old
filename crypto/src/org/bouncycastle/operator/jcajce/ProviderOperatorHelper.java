@@ -1,5 +1,6 @@
 package org.bouncycastle.operator.jcajce;
 
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Signature;
@@ -19,5 +20,12 @@ class ProviderOperatorHelper
         throws NoSuchAlgorithmException
     {
         return Signature.getInstance(algorithm, provider);
+    }
+
+    protected MessageDigest createDigest(
+        String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return MessageDigest.getInstance(algorithm, provider);
     }
 }

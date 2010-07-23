@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.crmf.PKMACValue;
 import org.bouncycastle.asn1.crmf.POPOSigningKey;
 import org.bouncycastle.asn1.crmf.ProofOfPossession;
 import org.bouncycastle.operator.ContentVerifier;
+import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 
 public class CertificateRequestMessage
@@ -24,7 +25,7 @@ public class CertificateRequestMessage
         this.certReqMsg = certReqMsg;
     }
 
-    public CertReqMsg getCertReqMsg()
+    public CertReqMsg toASN1Structure()
     {
         return certReqMsg;
     }
@@ -58,8 +59,8 @@ public class CertificateRequestMessage
         return false;
     }
 
-    public boolean verifySigningKeyPOP(ContentVerifier verifier)
-        throws IllegalStateException
+    public boolean verifySigningKeyPOP(ContentVerifierProvider verifierProvider)
+        throws CRMFException, IllegalStateException
     {
         ProofOfPossession pop = certReqMsg.getPopo();
 
@@ -72,7 +73,7 @@ public class CertificateRequestMessage
                 throw new IllegalStateException("verification requires password check");
             }
 
-            return verifySignature(verifier, popoSign);
+            return verifySignature(verifierProvider, popoSign);
         }
         else
         {
@@ -80,7 +81,7 @@ public class CertificateRequestMessage
         }
     }
 
-    public boolean verifySigningKeyPOP(ContentVerifier verifier, PKMACValueVerifier macVerifier, char[] password)
+    public boolean verifySigningKeyPOP(ContentVerifierProvider verifierProvider, PKMACValueVerifier macVerifier, char[] password)
         throws CRMFException, IllegalStateException
     {
         ProofOfPossession pop = certReqMsg.getPopo();
@@ -98,7 +99,7 @@ public class CertificateRequestMessage
 
             if (macVerifier.verify(pkMAC, password, this.getCertTemplate().getPublicKey()))
             {
-                return verifySignature(verifier, popoSign);
+                return verifySignature(verifierProvider, popoSign);
             }
 
             return false;
@@ -109,15 +110,18 @@ public class CertificateRequestMessage
         }
     }
 
-    private boolean verifySignature(ContentVerifier verifier, POPOSigningKey popoSign)
+    private boolean verifySignature(ContentVerifierProvider verifierProvider, POPOSigningKey popoSign)
+        throws CRMFException
     {
+        ContentVerifier verifier;
+
         try
         {
-            verifier.setup(popoSign.getAlgorithmIdentifier());
+            verifier = verifierProvider.get(popoSign.getAlgorithmIdentifier());
         }
         catch (OperatorCreationException e)
         {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            throw new CRMFException("unable to create verifier: " + e.getMessage(), e);
         }
 
         CRMFUtil.derEncodeToStream(popoSign.getPoposkInput(), verifier.getOutputStream());

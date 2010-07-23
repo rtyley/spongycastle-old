@@ -10,40 +10,41 @@ import java.security.SignatureException;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.operator.ContentVerifier;
+import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OperatorStreamException;
 import org.bouncycastle.operator.RuntimeOperatorException;
 
-public class JcaContentVerifierBuilder
+public class JcaContentVerifierProviderBuilder
 {
     private OperatorHelper helper = new DefaultOperatorHelper();
 
-    public JcaContentVerifierBuilder()
+    public JcaContentVerifierProviderBuilder()
     {
     }
 
-    public JcaContentVerifierBuilder setProvider(Provider provider)
+    public JcaContentVerifierProviderBuilder setProvider(Provider provider)
     {
         this.helper = new ProviderOperatorHelper(provider);
 
         return this;
     }
 
-    public JcaContentVerifierBuilder setProvider(String providerName)
+    public JcaContentVerifierProviderBuilder setProvider(String providerName)
     {
         this.helper = new NamedOperatorHelper(providerName);
 
         return this;
     }
 
-    public ContentVerifier build(final PublicKey publicKey)
+    public ContentVerifierProvider build(final PublicKey publicKey)
         throws OperatorCreationException
     {
-        return new ContentVerifier()
+        return new ContentVerifierProvider()
         {
             private SignatureOutputStream stream;
 
-            public void setup(AlgorithmIdentifier algorithm)
+            public ContentVerifier get(AlgorithmIdentifier algorithm)
                 throws OperatorCreationException
             {
                 try
@@ -58,28 +59,31 @@ public class JcaContentVerifierBuilder
                 {
                     throw new OperatorCreationException("exception on setup: " + e, e);
                 }
-            }
 
-            public OutputStream getOutputStream()
-            {
-                if (stream == null)
+                return new ContentVerifier()
                 {
-                    throw new IllegalStateException("verifier not initialised");
-                }
+                    public OutputStream getOutputStream()
+                    {
+                        if (stream == null)
+                        {
+                            throw new IllegalStateException("verifier not initialised");
+                        }
 
-                return stream;
-            }
+                        return stream;
+                    }
 
-            public boolean verify(byte[] expected)
-            {
-                try
-                {
-                    return stream.verify(expected);
-                }
-                catch (SignatureException e)
-                {
-                    throw new RuntimeOperatorException("exception obtaining signature: " + e.getMessage(), e);
-                }
+                    public boolean verify(byte[] expected)
+                    {
+                        try
+                        {
+                            return stream.verify(expected);
+                        }
+                        catch (SignatureException e)
+                        {
+                            throw new RuntimeOperatorException("exception obtaining signature: " + e.getMessage(), e);
+                        }
+                    }
+                };
             }
         };
     }

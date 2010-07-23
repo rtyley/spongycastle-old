@@ -15,6 +15,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.cmp.CertConfirmContent;
 import org.bouncycastle.asn1.cmp.CertRepMessage;
 import org.bouncycastle.asn1.cmp.PKIBody;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -22,16 +23,20 @@ import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.cmp.CertificateConfirmationContent;
+import org.bouncycastle.cert.cmp.CertificateConfirmationContentBuilder;
+import org.bouncycastle.cert.cmp.CertificateStatus;
 import org.bouncycastle.cert.cmp.ProtectedPKIMessage;
 import org.bouncycastle.cert.cmp.ProtectedPKIMessageBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.ContentVerifier;
+import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentDigesterProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierBuilder;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 
 public class AllTests
     extends TestCase
@@ -90,12 +95,51 @@ public class AllTests
                                                   .build(signer);
 
         X509Certificate jcaCert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(message.getCertificates()[0]);
-        ContentVerifier verifier = new JcaContentVerifierBuilder().setProvider(BC).build(jcaCert.getPublicKey());
+        ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder().setProvider(BC).build(jcaCert.getPublicKey());
 
-        assertTrue(message.verify(verifier));
+        assertTrue(message.verify(verifierProvider));
 
         assertEquals(sender, message.getHeader().getSender());
         assertEquals(recipient, message.getHeader().getRecipient());
+    }
+
+    public void testConfirmationMessage()
+        throws Exception
+    {
+        KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
+
+        kGen.initialize(512);
+
+        KeyPair kp = kGen.generateKeyPair();
+        X509CertificateHolder cert = makeV3Certificate(kp, "CN=Test", kp, "CN=Test");
+
+        GeneralName sender = new GeneralName(new X509Name("CN=Sender"));
+        GeneralName recipient = new GeneralName(new X509Name("CN=Recip"));
+
+        CertificateConfirmationContent content = new CertificateConfirmationContentBuilder()
+                             .addAcceptedCertificate(cert, BigInteger.valueOf(1))
+                             .build(new JcaContentDigesterProviderBuilder().build());
+
+        ContentSigner signer = new JcaContentSignerBuilder("MD5WithRSAEncryption").setProvider(BC).build(kp.getPrivate());
+        ProtectedPKIMessage message = new ProtectedPKIMessageBuilder(sender, recipient)
+                                                  .setBody(new PKIBody(PKIBody.TYPE_CERT_CONFIRM, content.toASN1Structure()))
+                                                  .addCMPCertificate(cert)
+                                                  .build(signer);
+
+        X509Certificate jcaCert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(message.getCertificates()[0]);
+        ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder().setProvider(BC).build(jcaCert.getPublicKey());
+
+        assertTrue(message.verify(verifierProvider));
+
+        assertEquals(sender, message.getHeader().getSender());
+        assertEquals(recipient, message.getHeader().getRecipient());
+
+        content = new CertificateConfirmationContent(CertConfirmContent.getInstance(message.getBody().getContent()));
+
+        CertificateStatus[] statusList = content.getStatusMessages();
+
+        assertEquals(1, statusList.length);
+        assertTrue(statusList[0].verify(cert, new JcaContentDigesterProviderBuilder().build()));
     }
 
     private static X509CertificateHolder makeV3Certificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN)
@@ -118,7 +162,7 @@ public class AllTests
 
         X509CertificateHolder certHolder = v1CertGen.build(signer);
 
-        ContentVerifier verifier = new JcaContentVerifierBuilder().setProvider(BC).build(issPub);
+        ContentVerifierProvider verifier = new JcaContentVerifierProviderBuilder().setProvider(BC).build(issPub);
 
         assertTrue(certHolder.isSignatureValid(verifier));
 

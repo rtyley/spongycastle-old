@@ -2,6 +2,7 @@ package org.bouncycastle.operator.jcajce;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -87,6 +88,35 @@ abstract class OperatorHelper
         {
             throw new IllegalArgumentException("cannot convert public key: " + e.getMessage(), e);
         }
+    }
+
+    MessageDigest createDigest(AlgorithmIdentifier digAlgId)
+        throws GeneralSecurityException
+    {
+        MessageDigest dig;
+
+        try
+        {
+            dig = createDigest(getSignatureName(digAlgId));
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            //
+            // try an alternate
+            //
+            if (oids.get(digAlgId.getAlgorithm()) != null)
+            {
+                String  digestAlgorithm = (String)oids.get(digAlgId.getAlgorithm());
+
+                dig = createDigest(digestAlgorithm);
+            }
+            else
+            {
+                throw e;
+            }
+        }
+
+        return dig;
     }
 
     Signature createSignature(AlgorithmIdentifier sigAlgId)
@@ -186,4 +216,7 @@ abstract class OperatorHelper
 
     protected abstract Signature createSignature(String algorithm)
         throws GeneralSecurityException;
+
+    protected abstract MessageDigest createDigest(String algorithm)
+            throws GeneralSecurityException;
 }

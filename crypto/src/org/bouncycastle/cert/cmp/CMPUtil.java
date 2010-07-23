@@ -1,4 +1,4 @@
-package org.bouncycastle.cert.crmf;
+package org.bouncycastle.cert.cmp;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DEROutputStream;
 
-class CRMFUtil
+class CMPUtil
 {
     static void derEncodeToStream(ASN1Encodable obj, OutputStream stream)
     {
@@ -20,7 +20,7 @@ class CRMFUtil
         }
         catch (IOException e)
         {
-            throw new CRMFRuntimeException("unable to DER encode object: " + e.getMessage(), e);
+            throw new CMPRuntimeException("unable to DER encode object: " + e.getMessage(), e);
         }
     }
 }
