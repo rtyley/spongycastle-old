@@ -13,7 +13,7 @@ public class CertReqMsg
     extends ASN1Encodable
 {
     private CertRequest certReq;
-    private ProofOfPossession pop;
+    private ProofOfPossession popo;
     private ASN1Sequence regInfo;
 
     private CertReqMsg(ASN1Sequence seq)
@@ -27,7 +27,7 @@ public class CertReqMsg
 
             if (o instanceof ASN1TaggedObject || o instanceof ProofOfPossession)
             {
-                pop = ProofOfPossession.getInstance(o);
+                popo = ProofOfPossession.getInstance(o);
             }
             else
             {
@@ -53,23 +53,25 @@ public class CertReqMsg
     /**
      * Creates a new CertReqMsg.
      * @param certReq CertRequest
-     * @param pop may be null
+     * @param popo may be null
      * @param regInfo may be null
      */
     public CertReqMsg(
         CertRequest certReq,
-        ProofOfPossession pop,
+        ProofOfPossession popo,
         AttributeTypeAndValue[] regInfo)
     {
-        this.certReq = certReq;
-        this.pop = pop;
+        if (certReq == null)
+        {
+            throw new IllegalArgumentException("'certReq' cannot be null");
+        }
 
-        if (regInfo != null) {
-            ASN1EncodableVector v = new ASN1EncodableVector();
-            for (int i = 0; i < regInfo.length; i++) {
-                v.add(regInfo[i]);
-            }
-            this.regInfo = new DERSequence(v);
+        this.certReq = certReq;
+        this.popo = popo;
+
+        if (regInfo != null)
+        {
+            this.regInfo = new DERSequence(regInfo);
         }
     }
 
@@ -78,9 +80,17 @@ public class CertReqMsg
         return certReq;
     }
 
+    /**
+     * @deprecated use getPopo
+     */
     public ProofOfPossession getPop()
     {
-        return pop;
+        return popo;
+    }
+
+    public ProofOfPossession getPopo()
+    {
+        return popo;
     }
 
     public AttributeTypeAndValue[] getRegInfo()
@@ -116,7 +126,7 @@ public class CertReqMsg
 
         v.add(certReq);
 
-        addOptional(v, pop);
+        addOptional(v, popo);
         addOptional(v, regInfo);
 
         return new DERSequence(v);

@@ -36,17 +36,17 @@ public class CertificateRequestMessage
 
     public boolean hasProofOfPossession()
     {
-        return this.certReqMsg.getPop() != null;
+        return this.certReqMsg.getPopo() != null;
     }
 
     public int getProofOfPossessionType()
     {
-        return this.certReqMsg.getPop().getType();
+        return this.certReqMsg.getPopo().getType();
     }
 
     public boolean hasSigningKeyProofOfPossessionWithPKMAC()
     {
-        ProofOfPossession pop = certReqMsg.getPop();
+        ProofOfPossession pop = certReqMsg.getPopo();
 
         if (pop.getType() == ProofOfPossession.TYPE_SIGNING_KEY)
         {
@@ -61,7 +61,7 @@ public class CertificateRequestMessage
     public boolean verifySigningKeyPOP(ContentVerifier verifier)
         throws IllegalStateException
     {
-        ProofOfPossession pop = certReqMsg.getPop();
+        ProofOfPossession pop = certReqMsg.getPopo();
 
         if (pop.getType() == ProofOfPossession.TYPE_SIGNING_KEY)
         {
@@ -83,7 +83,7 @@ public class CertificateRequestMessage
     public boolean verifySigningKeyPOP(ContentVerifier verifier, PKMACValueVerifier macVerifier, char[] password)
         throws CRMFException, IllegalStateException
     {
-        ProofOfPossession pop = certReqMsg.getPop();
+        ProofOfPossession pop = certReqMsg.getPopo();
 
         if (pop.getType() == ProofOfPossession.TYPE_SIGNING_KEY)
         {
