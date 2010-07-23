@@ -58,6 +58,28 @@ public class CertifiedKeyPair
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public CertifiedKeyPair(
+        CertOrEncCert certOrEncCert)
+    {
+        this(certOrEncCert, null, null);
+    }
+
+    public CertifiedKeyPair(
+        CertOrEncCert certOrEncCert,
+        EncryptedValue privateKey,
+        PKIPublicationInfo  publicationInfo
+        )
+    {
+        if (certOrEncCert == null)
+        {
+            throw new IllegalArgumentException("'certOrEncCert' cannot be null");
+        }
+
+        this.certOrEncCert = certOrEncCert;
+        this.privateKey = privateKey;
+        this.publicationInfo = publicationInfo;
+    }
+
     public CertOrEncCert getCertOrEncCert()
     {
         return certOrEncCert;
