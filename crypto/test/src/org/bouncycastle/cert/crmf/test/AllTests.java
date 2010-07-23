@@ -30,7 +30,7 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierBuilder;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 
 public class AllTests
@@ -120,7 +120,7 @@ public class AllTests
         // check that internal check on popo signing is working okay
         try
         {
-            certReqMsg.verifySigningKeyPOP(new JcaContentVerifierBuilder().setProvider(BC).build(kp.getPublic()));
+            certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()));
             fail("IllegalStateException not thrown");
         }
         catch (IllegalStateException e)
@@ -128,7 +128,7 @@ public class AllTests
             // ignore
         }
 
-        assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierBuilder().setProvider(BC).build(kp.getPublic()), new PKMACValueVerifier(new JcaPKMACValuesCalculator().setProvider(BC)), "fred".toCharArray())); 
+        assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACValueVerifier(new JcaPKMACValuesCalculator().setProvider(BC)), "fred".toCharArray()));
 
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
     }
@@ -158,7 +158,7 @@ public class AllTests
         // check that internal check on popo signing is working okay
         try
         {
-            certReqMsg.verifySigningKeyPOP(new JcaContentVerifierBuilder().setProvider(BC).build(kp.getPublic()), new PKMACValueVerifier(new JcaPKMACValuesCalculator().setProvider(BC)), "fred".toCharArray());
+            certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACValueVerifier(new JcaPKMACValuesCalculator().setProvider(BC)), "fred".toCharArray());
 
             fail("IllegalStateException not thrown");
         }
@@ -168,7 +168,7 @@ public class AllTests
         }
 
 
-        assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierBuilder().setProvider(BC).build(kp.getPublic())));
+        assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic())));
 
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
     }

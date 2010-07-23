@@ -12,6 +12,11 @@ public class CMPException
         this.cause = cause;
     }
 
+    public CMPException(String msg)
+    {
+        super(msg);
+    }
+
     public Throwable getCause()
     {
         return cause;

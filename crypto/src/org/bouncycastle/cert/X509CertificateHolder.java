@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.operator.ContentVerifier;
+import org.bouncycastle.operator.ContentVerifierProvider;
 
 public class X509CertificateHolder
 {
@@ -39,7 +40,7 @@ public class X509CertificateHolder
         return x509Certificate;
     }
 
-    public boolean isSignatureValid(ContentVerifier verifier)
+    public boolean isSignatureValid(ContentVerifierProvider verifierProvider)
         throws CertException
     {
         TBSCertificateStructure tbsCert = x509Certificate.getTBSCertificate();
@@ -49,9 +50,11 @@ public class X509CertificateHolder
             throw new CertException("signature invalid - algorithm identifier mismatch");
         }
 
+        ContentVerifier verifier;
+
         try
         {
-            verifier.setup(tbsCert.getSignature());
+            verifier = verifierProvider.get((tbsCert.getSignature()));
 
             OutputStream sOut = verifier.getOutputStream();
 

@@ -24,17 +24,17 @@ public class JcaCertificateRequestMessage
 
     public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg)
     {
-        this(certReqMsg.getCertReqMsg(), new DefaultCRMFHelper());
+        this(certReqMsg.toASN1Structure(), new DefaultCRMFHelper());
     }
 
     public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg, String providerName)
     {
-        this(certReqMsg.getCertReqMsg(), new NamedCRMFHelper(providerName));
+        this(certReqMsg.toASN1Structure(), new NamedCRMFHelper(providerName));
     }
 
     public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg, Provider provider)
     {
-        this(certReqMsg.getCertReqMsg(), new ProviderCRMFHelper(provider));
+        this(certReqMsg.toASN1Structure(), new ProviderCRMFHelper(provider));
     }
 
     public X500Principal getSubjectX500Principal()

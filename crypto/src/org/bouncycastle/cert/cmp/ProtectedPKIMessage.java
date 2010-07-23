@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.cmp.PKIHeader;
 import org.bouncycastle.asn1.cmp.PKIMessage;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.ContentVerifier;
+import org.bouncycastle.operator.ContentVerifierProvider;
 
 public class ProtectedPKIMessage
 {
@@ -54,12 +55,13 @@ public class ProtectedPKIMessage
         return res;
     }
 
-    public boolean verify(ContentVerifier verifier)
+    public boolean verify(ContentVerifierProvider verifierProvider)
         throws CMPException
     {
+        ContentVerifier verifier;
         try
         {
-            verifier.setup(pkiMessage.getHeader().getProtectionAlg());
+            verifier = verifierProvider.get(pkiMessage.getHeader().getProtectionAlg());
 
             return verifySignature(pkiMessage.getProtection().getBytes(), verifier);
         }

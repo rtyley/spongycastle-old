@@ -1,11 +1,14 @@
 package org.bouncycastle.asn1.cmp;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 
 public class CertStatus
@@ -26,6 +29,19 @@ public class CertStatus
         }
     }
 
+    public CertStatus(byte[] certHash, BigInteger certReqId)
+    {
+        this.certHash = new DEROctetString(certHash);
+        this.certReqId = new DERInteger(certReqId);
+    }
+
+    public CertStatus(byte[] certHash, BigInteger certReqId, PKIStatusInfo statusInfo)
+    {
+        this.certHash = new DEROctetString(certHash);
+        this.certReqId = new DERInteger(certReqId);
+        this.statusInfo = statusInfo;
+    }
+
     public static CertStatus getInstance(Object o)
     {
         if (o instanceof CertStatus)
@@ -39,6 +55,11 @@ public class CertStatus
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    public ASN1OctetString getCertHash()
+    {
+        return certHash;
     }
 
     public DERInteger getCertReqId()
