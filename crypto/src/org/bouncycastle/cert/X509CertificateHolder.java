@@ -3,6 +3,8 @@ package org.bouncycastle.cert;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.operator.ContentVerifier;
@@ -20,6 +22,16 @@ public class X509CertificateHolder
         throws IOException
     {
         return x509Certificate.getEncoded();
+    }
+
+    public IssuerAndSerialNumber getIssuerAndSerialNumber()
+    {
+        return new IssuerAndSerialNumber(x509Certificate.getIssuer(), x509Certificate.getSerialNumber());
+    }
+
+    public SubjectPublicKeyInfo getSubjectPublicKeyInfo()
+    {
+        return x509Certificate.getSubjectPublicKeyInfo();
     }
 
     public X509CertificateStructure toASN1Structure()
