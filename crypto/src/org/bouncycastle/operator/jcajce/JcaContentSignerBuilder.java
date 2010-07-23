@@ -14,20 +14,19 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OperatorStreamException;
 import org.bouncycastle.operator.RuntimeOperatorException;
-import org.bouncycastle.operator.SignerProperties;
-import org.bouncycastle.operator.SignerPropertiesGenerator;
+import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
 
 public class JcaContentSignerBuilder
 {
     private OperatorHelper helper = new DefaultOperatorHelper();
     private SecureRandom random;
     private String signatureAlgorithm;
-    private SignerProperties signatureProperties;
+    private AlgorithmIdentifier sigAlgId;
 
     public JcaContentSignerBuilder(String signatureAlgorithm)
     {
         this.signatureAlgorithm = signatureAlgorithm;
-        this.signatureProperties = SignerPropertiesGenerator.generate(signatureAlgorithm);
+        this.sigAlgId = SignerAlgorithmIdentifierGenerator.generate(signatureAlgorithm);
     }
 
     public JcaContentSignerBuilder setProvider(Provider provider)
@@ -56,7 +55,7 @@ public class JcaContentSignerBuilder
     {
         try
         {
-            final Signature sig = helper.createSignature(signatureProperties.getSignatureAlgorithmIdentifier());
+            final Signature sig = helper.createSignature(sigAlgId);
 
             if (random != null)
             {
@@ -73,7 +72,7 @@ public class JcaContentSignerBuilder
 
                 public AlgorithmIdentifier getAlgorithmIdentifier()
                 {
-                    return signatureProperties.getSignatureAlgorithmIdentifier();
+                    return sigAlgId;
                 }
 
                 public OutputStream getOutputStream()

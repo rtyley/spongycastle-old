@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.cms.RecipientIdentifier;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.cert.X509CertificateHolder;
 
 public abstract class KeyTransRecipientInfoGenerator
     implements RecipientInfoGenerator
@@ -24,12 +24,12 @@ public abstract class KeyTransRecipientInfoGenerator
         this.issuerAndSerial = issuerAndSerial;
     }
 
-    protected KeyTransRecipientInfoGenerator(TBSCertificateStructure tbsCert)
+    protected KeyTransRecipientInfoGenerator(X509CertificateHolder certHolder)
     {
-        this(tbsCert.getSubjectPublicKeyInfo(), new IssuerAndSerialNumber(tbsCert.getIssuer(), tbsCert.getSerialNumber()));
+        this(certHolder.getSubjectPublicKeyInfo(), certHolder.getIssuerAndSerialNumber());
     }
 
-    protected KeyTransRecipientInfoGenerator(SubjectPublicKeyInfo keyInfo, byte[] subjectKeyIdentifier)
+    protected KeyTransRecipientInfoGenerator(byte[] subjectKeyIdentifier, SubjectPublicKeyInfo keyInfo)
     {
         this.subjectKeyIdentifier = subjectKeyIdentifier;
         this.keyInfo = keyInfo;

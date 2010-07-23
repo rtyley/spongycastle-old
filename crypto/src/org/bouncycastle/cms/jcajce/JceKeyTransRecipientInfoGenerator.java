@@ -13,6 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KeyTransRecipientInfoGenerator;
 
@@ -27,14 +28,14 @@ public class JceKeyTransRecipientInfoGenerator
     public JceKeyTransRecipientInfoGenerator(X509Certificate recipientCert)
         throws CertificateEncodingException
     {
-        super(CMSUtils.getTBSCertificateStructure(recipientCert));
+        super(new JcaX509CertificateHolder(recipientCert));
 
         this.recipientPublicKey = recipientCert.getPublicKey();
     }
 
     public JceKeyTransRecipientInfoGenerator(byte[] subjectKeyIdentifier, PublicKey recipientPublicKey)
     {
-        super(SubjectPublicKeyInfo.getInstance(recipientPublicKey.getEncoded()), subjectKeyIdentifier);
+        super(subjectKeyIdentifier, SubjectPublicKeyInfo.getInstance(recipientPublicKey.getEncoded()));
 
         this.recipientPublicKey = recipientPublicKey;
     }
