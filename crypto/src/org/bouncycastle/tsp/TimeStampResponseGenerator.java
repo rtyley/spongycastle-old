@@ -177,4 +177,39 @@ public class TimeStampResponseGenerator
             super(getBytes(failInfoValue), getPadBits(failInfoValue));
         }
     }
+
+    /**
+     * Generate a TimeStampResponse with chosen status and FailInfoField.
+     * 
+     * @param status the PKIStatus to set.
+     * @param failInfoField the FailInfoField to set.
+     * @param statusString an optional string describing the failure.
+     * @return a TimeStampResponse with a failInfoField and optional statusString
+     * @throws TSPException in case the response could not be created
+     */
+    public TimeStampResponse generateFailResponse(int status, int failInfoField, String statusString)
+        throws TSPException
+    {
+        this.status = status;
+
+        this.setFailInfoField(failInfoField);
+
+        if (statusString != null)
+        {
+            this.addStatusString(statusString);
+        }
+
+        PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
+
+        TimeStampResp resp = new TimeStampResp(pkiStatusInfo, null);
+
+        try
+        {
+            return new TimeStampResponse(resp);
+        }
+        catch (IOException e)
+        {
+            throw new TSPException("created badly formatted response!");
+        }
+    }
 }
