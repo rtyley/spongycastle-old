@@ -230,7 +230,7 @@ public class MiscPEMGenerator
     {
         if (obj instanceof KeyPair)
         {
-            return new MiscPEMGenerator(((KeyPair)obj).getPrivate()).generate();
+            return createPemObject(((KeyPair)obj).getPrivate(), algorithm, password, random);
         }
 
         String type = null;
