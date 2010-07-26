@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider.asymmetric.ec;
 
-import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;
 import java.security.KeyPair;
@@ -8,27 +7,18 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Hashtable;
 
-import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
-import org.bouncycastle.asn1.nist.NISTNamedCurves;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
-import org.bouncycastle.asn1.x9.X962NamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.JCEECPrivateKey;
 import org.bouncycastle.jce.provider.JCEECPublicKey;
 import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
 import org.bouncycastle.jce.provider.ProviderUtil;
 import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.ECNamedCurveTable;
-
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECPoint;
 
 public abstract class KeyPairGenerator
     extends JDKKeyPairGenerator
@@ -191,6 +181,15 @@ public abstract class KeyPairGenerator
         public ECDHC()
         {
             super("ECDHC");
+        }
+    }
+
+    public static class ECMQV
+        extends EC
+    {
+        public ECMQV()
+        {
+            super("ECMQV");
         }
     }
 }
