@@ -266,7 +266,8 @@
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/mail/**/*.properties" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
-                 <exclude name="org/bouncycastle/crmf/**/*.java" />
+                 <exclude name="org/bouncycastle/cert/**/*.java" />
+                 <exclude name="org/bouncycastle/operator/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
                  <exclude name="org/bouncycastle/tsp/**/*.java" />
                  <exclude name="org/bouncycastle/openpgp/**/*.java" />
@@ -345,7 +346,8 @@
                  <exclude name="org/bouncycastle/**/test/*.properties" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
-                 <exclude name="org/bouncycastle/crmf/**/*.java" />
+                 <exclude name="org/bouncycastle/cert/**/*.java" />
+                 <exclude name="org/bouncycastle/operator/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
                  <exclude name="org/bouncycastle/tsp/**/*.java" />
                  <exclude name="org/bouncycastle/openpgp/**/*.java" />
@@ -410,8 +412,8 @@
                  <include name="org/bouncycastle/mail/**/*.java" />
                  <include name="org/bouncycastle/mail/**/*.properties" />
                  <include name="org/bouncycastle/cms/**/*.java" />
-                 <include name="org/bouncycastle/crmf/**/*.java" />
-                 <include name="org/bouncycastle/sasn1/**/*.java" />
+                 <include name="org/bouncycastle/cert/**/*.java" />
+                 <include name="org/bouncycastle/operator/**/*.java" />
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
                  <exclude name="**/test/*.java" />
@@ -703,10 +705,12 @@
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/mail/**/test/*.java" />
                  <include name="org/bouncycastle/cms/**/test/*.java" />
-                 <include name="org/bouncycastle/sasn1/**/test/*.java" />
+                 <include name="org/bouncycastle/cert/**/test/*.java" />
+                 <include name="org/bouncycastle/operator/**/test/*.java" />
                  <include name="org/bouncycastle/mail/**/*.html" />
                  <include name="org/bouncycastle/cms/**/*.html" />
-                 <include name="org/bouncycastle/sasn1/**/*.html" />
+                 <include name="org/bouncycastle/cert/**/*.html" />
+                 <include name="org/bouncycastle/operator/**/*.html" />
              </fileset>
         </copy>
 
@@ -714,10 +718,11 @@
             <docElements>
                 <package name="org.bouncycastle.cms.*" />
                 <package name="org.bouncycastle.mail.*" />
-                <package name="org.bouncycastle.sasn1.*" />
+                <package name="org.bouncycastle.cert.*" />
+                <package name="org.bouncycastle.operator.*" />
                 <group title="CMS Packages" packages="org.bouncycastle.cms*" />
                 <group title="S/MIME Packages" packages="org.bouncycastle.mail.smime*" />
-                <group title="Streaming ASN.1 Packages" packages="org.bouncycastle.sasn1*" />
+                <group title="Certificate Packages" packages="org.bouncycastle.cert*" />
             </docElements>
         </compile-doc>
 

@@ -36,6 +36,7 @@
                 <exclude name="**/X509LDAPCertStoreTest.java" />
                 <exclude name="**/X509StoreTest.java" />
                 <exclude name="**/MQVTest.java" />
+                <exclude name="**/pem/AllTests.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />
@@ -46,6 +47,7 @@
             <fileset dir="test/data" includes="**/*.properties" />
             <fileset dir="test/data" includes="**/*.eml" />
             <fileset dir="test/data" includes="**/*.sig" />
+            <fileset dir="test/data" includes="**/*.p7m" />
             <fileset dir="test/data" includes="**/*.data" />
             <fileset dir="test/data" includes="**/*.crt" />
             <fileset dir="test/data" includes="**/*.crl" />
