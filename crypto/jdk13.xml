@@ -39,6 +39,7 @@
                 <exclude name="**/CertPathValidatorUtilities.java" />
                 <exclude name="**/validator/*.java" />
                 <exclude name="**/ValidateSignedMail.java" />
+                <exclude name="**/JDKPKCS12StoreParameter.java" />
             </fileset>
             <fileset dir="test/src">
                 <exclude name="**/MQVTest.java" />

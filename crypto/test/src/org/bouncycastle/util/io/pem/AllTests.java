@@ -19,23 +19,24 @@ public class AllTests
     {
         for (int i = 1; i != 60; i++)
         {
-            lengthTest("CERTIFICATE", Collections.emptyMap(), new byte[i]);
+            lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[i]);
         }
 
-        lengthTest("CERTIFICATE", Collections.emptyMap(), new byte[100]);
-        lengthTest("CERTIFICATE", Collections.emptyMap(), new byte[101]);
-        lengthTest("CERTIFICATE", Collections.emptyMap(), new byte[102]);
-        lengthTest("CERTIFICATE", Collections.emptyMap(), new byte[103]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[100]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[101]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[102]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[103]);
 
-        lengthTest("CERTIFICATE", Collections.emptyMap(), new byte[1000]);
-        lengthTest("CERTIFICATE", Collections.emptyMap(), new byte[1001]);
-        lengthTest("CERTIFICATE", Collections.emptyMap(), new byte[1002]);
-        lengthTest("CERTIFICATE", Collections.emptyMap(), new byte[1003]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[1000]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[1001]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[1002]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[1003]);
 
         Map headers = new LinkedHashMap();
 
         headers.put("Proc-Type", "4,ENCRYPTED");
         headers.put("DEK-Info", "DES3,0001020304050607");
+
         lengthTest("RSA PRIVATE KEY", headers, new byte[103]);
     }
 
