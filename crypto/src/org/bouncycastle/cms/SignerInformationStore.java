@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class SignerInformationStore
 {
-    private ArrayList all;
+    private ArrayList all = new ArrayList();
     private Map table = new HashMap();
 
     public SignerInformationStore(
