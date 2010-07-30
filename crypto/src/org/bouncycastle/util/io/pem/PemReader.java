@@ -3,8 +3,8 @@ package org.bouncycastle.util.io.pem;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bouncycastle.util.encoders.Base64;
 
@@ -45,7 +45,7 @@ public class PemReader
         String          line;
         String          endMarker = END + type;
         StringBuffer    buf = new StringBuffer();
-        Map             headers = new HashMap();
+        List            headers = new ArrayList();
 
         while ((line = readLine()) != null)
         {
@@ -55,7 +55,7 @@ public class PemReader
                 String hdr = line.substring(0, index);
                 String value = line.substring(index + 1).trim();
 
-                headers.put(hdr, value);
+                headers.add(new PemHeader(hdr, value));
 
                 continue;
             }

@@ -1,27 +1,40 @@
 package org.bouncycastle.util.io.pem;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class PemObject
     implements PemObjectGenerator
 {
-    private static final Map EMPTY_MAP = Collections.unmodifiableMap(new HashMap());
+    private static final List EMPTY_LIST = Collections.unmodifiableList(new ArrayList());
 
     private String type;
-    private Map    headers;
+    private List   headers;
     private byte[] content;
 
+    /**
+     * Generic constructor for object without headers.
+     *
+     * @param type pem object type.
+     * @param content the binary content of the object.
+     */
     public PemObject(String type, byte[] content)
     {
-        this(type, EMPTY_MAP, content);
+        this(type, EMPTY_LIST, content);
     }
 
-    public PemObject(String type, Map headers, byte[] content)
+    /**
+     * Generic constructor for object with headers.
+     *
+     * @param type pem object type.
+     * @param headers a list of PemHeader objects.
+     * @param content the binary content of the object.
+     */
+    public PemObject(String type, List headers, byte[] content)
     {
         this.type = type;
-        this.headers = Collections.unmodifiableMap(headers);
+        this.headers = Collections.unmodifiableList(headers);
         this.content = content;
     }
 
@@ -30,7 +43,7 @@ public class PemObject
         return type;
     }
 
-    public Map getHeaders()
+    public List getHeaders()
     {
         return headers;
     }

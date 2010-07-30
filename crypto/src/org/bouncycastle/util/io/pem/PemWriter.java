@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.bouncycastle.util.encoders.Base64;
 
@@ -53,13 +52,11 @@ public class PemWriter
 
         if (!obj.getHeaders().isEmpty())
         {
-            Map headers = obj.getHeaders();
-
-            for (Iterator it = obj.getHeaders().keySet().iterator(); it.hasNext();)
+            for (Iterator it = obj.getHeaders().iterator(); it.hasNext();)
             {
-                String hdr = (String)it.next();
+                PemHeader hdr = (PemHeader)it.next();
 
-                size += hdr.length() + ": ".length() + ((String)headers.get(hdr)).length() + nlLength;
+                size += hdr.getName().length() + ": ".length() + hdr.getValue().length() + nlLength;
             }
 
             size += nlLength;
@@ -82,15 +79,13 @@ public class PemWriter
 
         if (!obj.getHeaders().isEmpty())
         {
-            Map headers = obj.getHeaders();
-
-            for (Iterator it = obj.getHeaders().keySet().iterator(); it.hasNext();)
+            for (Iterator it = obj.getHeaders().iterator(); it.hasNext();)
             {
-                String hdr = (String)it.next();
+                PemHeader hdr = (PemHeader)it.next();
 
-                this.write(hdr);
+                this.write(hdr.getName());
                 this.write(": ");
-                this.write((String)headers.get(hdr));
+                this.write(hdr.getValue());
                 this.newLine();
             }
 

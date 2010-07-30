@@ -3,9 +3,9 @@ package org.bouncycastle.util.io.pem;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -19,28 +19,28 @@ public class AllTests
     {
         for (int i = 1; i != 60; i++)
         {
-            lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[i]);
+            lengthTest("CERTIFICATE", Collections.EMPTY_LIST, new byte[i]);
         }
 
-        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[100]);
-        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[101]);
-        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[102]);
-        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[103]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_LIST, new byte[100]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_LIST, new byte[101]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_LIST, new byte[102]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_LIST, new byte[103]);
 
-        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[1000]);
-        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[1001]);
-        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[1002]);
-        lengthTest("CERTIFICATE", Collections.EMPTY_MAP, new byte[1003]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_LIST, new byte[1000]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_LIST, new byte[1001]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_LIST, new byte[1002]);
+        lengthTest("CERTIFICATE", Collections.EMPTY_LIST, new byte[1003]);
 
-        Map headers = new LinkedHashMap();
+        List headers = new ArrayList();
 
-        headers.put("Proc-Type", "4,ENCRYPTED");
-        headers.put("DEK-Info", "DES3,0001020304050607");
+        headers.add(new PemHeader("Proc-Type", "4,ENCRYPTED"));
+        headers.add(new PemHeader("DEK-Info", "DES3,0001020304050607"));
 
         lengthTest("RSA PRIVATE KEY", headers, new byte[103]);
     }
 
-    private void lengthTest(String type, Map headers, byte[] data)
+    private void lengthTest(String type, List headers, byte[] data)
         throws IOException
     {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
