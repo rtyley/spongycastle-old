@@ -67,6 +67,27 @@ public class EncryptedValue
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public EncryptedValue(
+        AlgorithmIdentifier intendedAlg,
+        AlgorithmIdentifier symmAlg,
+        DERBitString encSymmKey,
+        AlgorithmIdentifier keyAlg,
+        ASN1OctetString valueHint,
+        DERBitString encValue)
+    {
+        if (encValue == null)
+        {
+            throw new IllegalArgumentException("'encValue' cannot be null");
+        }
+
+        this.intendedAlg = intendedAlg;
+        this.symmAlg = symmAlg;
+        this.encSymmKey = encSymmKey;
+        this.keyAlg = keyAlg;
+        this.valueHint = valueHint;
+        this.encValue = encValue;
+    }
+
     /**
      * <pre>
      * EncryptedValue ::= SEQUENCE {
