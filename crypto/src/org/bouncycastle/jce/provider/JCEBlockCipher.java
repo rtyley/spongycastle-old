@@ -800,42 +800,6 @@ public class JCEBlockCipher extends WrapCipherSpi
     }
 
     /**
-     * AESCBC
-     */
-    static public class AESCBC
-        extends JCEBlockCipher
-    {
-        public AESCBC()
-        {
-            super(new CBCBlockCipher(new AESFastEngine()), 128);
-        }
-    }
-
-    /**
-     * AESCFB
-     */
-    static public class AESCFB
-        extends JCEBlockCipher
-    {
-        public AESCFB()
-        {
-            super(new CFBBlockCipher(new AESFastEngine(), 128), 128);
-        }
-    }
-
-    /**
-     * AESOFB
-     */
-    static public class AESOFB
-        extends JCEBlockCipher
-    {
-        public AESOFB()
-        {
-            super(new OFBBlockCipher(new AESFastEngine(), 128), 128);
-        }
-    }
-
-    /**
      * PBEWithMD5AndDES
      */
     static public class PBEWithMD5AndDES
