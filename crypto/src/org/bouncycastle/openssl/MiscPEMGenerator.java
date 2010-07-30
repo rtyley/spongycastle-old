@@ -18,8 +18,8 @@ import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
@@ -34,6 +34,7 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.pem.PemGenerationException;
+import org.bouncycastle.util.io.pem.PemHeader;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.x509.X509AttributeCertificate;
@@ -306,10 +307,10 @@ public class MiscPEMGenerator
 
         byte[] encData = PEMUtilities.crypt(true, provider, keyData, password, dekAlgName, iv);
 
-        Map headers = new LinkedHashMap();
+        List headers = new ArrayList(2);
 
-        headers.put("Proc-Type", "4,ENCRYPTED");
-        headers.put("DEK-Info", dekAlgName + "," + getHexEncoded(iv));
+        headers.add(new PemHeader("Proc-Type", "4,ENCRYPTED"));
+        headers.add(new PemHeader("DEK-Info", dekAlgName + "," + getHexEncoded(iv)));
 
         return new PemObject(type, headers, encData);
     }
