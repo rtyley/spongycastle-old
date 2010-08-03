@@ -48,6 +48,7 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKEKRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -817,7 +818,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addPasswordRecipient(new PKCS5Scheme2PBEKey("password".toCharArray(), new byte[20], 5), algorithm);
+        edGen.addRecipientGenerator(new JcePasswordRecipientInfoGenerator(new ASN1ObjectIdentifier(algorithm), "password".toCharArray()).setProvider(BC).setSaltAndIterationCount(new byte[20], 5));
 
         CMSEnvelopedData ed = edGen.generate(
                               new CMSProcessableByteArray(data),
@@ -865,7 +866,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addPasswordRecipient(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), new byte[20], 5), algorithm);
+        edGen.addRecipientGenerator(new JcePasswordRecipientInfoGenerator(new ASN1ObjectIdentifier(algorithm), "abc\u5639\u563b".toCharArray()).setProvider(BC).setSaltAndIterationCount(new byte[20], 5));
 
         CMSEnvelopedData ed = edGen.generate(
                               new CMSProcessableByteArray(data),

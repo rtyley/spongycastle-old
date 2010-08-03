@@ -167,6 +167,11 @@ public class CMSEnvelopedGenerator
         oldRecipientInfoGenerators.add(kekrig);
     }
 
+    /**
+     * @deprecated use addRecipientGenerator and JcePasswordRecipientInfoGenerator
+     * @param pbeKey PBE key
+     * @param kekAlgorithmOid key encryption algorithm to use.
+     */
     public void addPasswordRecipient(
         CMSPBEKey pbeKey,
         String    kekAlgorithmOid)
