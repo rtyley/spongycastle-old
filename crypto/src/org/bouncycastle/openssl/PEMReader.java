@@ -20,6 +20,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -51,6 +52,7 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.io.pem.PemHeader;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemObjectParser;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -168,19 +170,19 @@ public class PEMReader
         {
             boolean isEncrypted = false;
             String dekInfo = null;
-            Map headers = obj.getHeaders();
+            List headers = obj.getHeaders();
 
-            for (Iterator it = headers.keySet().iterator(); it.hasNext();)
+            for (Iterator it = headers.iterator(); it.hasNext();)
             {
-                String hdr = (String)it.next();
+                PemHeader hdr = (PemHeader)it.next();
 
-                if (hdr.equals("Proc-Type") && headers.get(hdr).equals("4,ENCRYPTED"))
+                if (hdr.getName().equals("Proc-Type") && hdr.getValue().equals("4,ENCRYPTED"))
                 {
                     isEncrypted = true;
                 }
-                else if (hdr.equals("DEK-Info"))
+                else if (hdr.getName().equals("DEK-Info"))
                 {
-                    dekInfo = (String)headers.get(hdr);
+                    dekInfo = hdr.getValue();
                 }
             }
 

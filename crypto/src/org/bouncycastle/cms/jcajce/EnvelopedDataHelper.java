@@ -32,18 +32,12 @@ import org.bouncycastle.cms.CMSException;
 
 abstract class EnvelopedDataHelper
 {
-    protected static final Map KEYSIZES = new HashMap();
     protected static final Map BASE_CIPHER_NAMES = new HashMap();
     protected static final Map CIPHER_ALG_NAMES = new HashMap();
     protected static final Map MAC_ALG_NAMES = new HashMap();
 
     static
     {
-        KEYSIZES.put(CMSAlgorithm.DES_EDE3_CBC,  new Integer(192));
-        KEYSIZES.put(CMSAlgorithm.AES128_CBC,  new Integer(128));
-        KEYSIZES.put(CMSAlgorithm.AES192_CBC,  new Integer(192));
-        KEYSIZES.put(CMSAlgorithm.AES256_CBC,  new Integer(256));
-
         BASE_CIPHER_NAMES.put(CMSAlgorithm.DES_EDE3_CBC,  "DESEDE");
         BASE_CIPHER_NAMES.put(CMSAlgorithm.AES128_CBC,  "AES");
         BASE_CIPHER_NAMES.put(CMSAlgorithm.AES192_CBC,  "AES");
