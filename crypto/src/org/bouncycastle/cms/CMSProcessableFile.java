@@ -45,7 +45,7 @@ public class CMSProcessableFile
         buf = new byte[bufSize];
     }
 
-    public InputStream read()
+    public InputStream getInputStream()
         throws IOException, CMSException
     {
         return new BufferedInputStream(new FileInputStream(file), DEFAULT_BUF_SIZE);

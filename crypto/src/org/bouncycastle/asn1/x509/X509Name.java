@@ -428,6 +428,24 @@ public class X509Name
     }
 
     /**
+     * constructor from a table of attributes.
+     * <p>
+     * it's is assumed the table contains OID/String pairs, and the contents
+     * of the table are copied into an internal table as part of the
+     * construction process.
+     * <p>
+     * <b>Note:</b> if the name you are trying to generate should be
+     * following a specific ordering, you should use the constructor
+     * with the ordering specified below.
+     * @deprecated use an ordered constructor! The hashtable ordering is rarely correct
+     */
+    public X509Name(
+        Hashtable  attributes)
+    {
+        this(null, attributes);
+    }
+
+    /**
      * Constructor from a table of attributes with ordering.
      * <p>
      * it's is assumed the table contains OID/String pairs, and the contents

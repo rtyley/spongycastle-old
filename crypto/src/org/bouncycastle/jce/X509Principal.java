@@ -57,6 +57,17 @@ public class X509Principal
     }
 
     /**
+     * constructor from a table of attributes.
+     * <p>
+     * it's is assumed the table contains OID/String pairs.
+     */
+    public X509Principal(
+        Hashtable  attributes)
+    {
+        super(attributes);
+    }
+
+    /**
      * constructor from a table of attributes and a vector giving the
      * specific ordering required for encoding or conversion to a string.
      * <p>

@@ -1,5 +1,27 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
+import java.security.AlgorithmParameterGenerator;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.crypto.KeyAgreement;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.RC2ParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEREncodable;
@@ -18,31 +40,10 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
-import org.bouncycastle.jce.spec.MQVPublicKeySpec;
-
-import javax.crypto.KeyAgreement;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
-import java.security.AlgorithmParameterGenerator;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Provider;
-import java.security.cert.X509Certificate;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.spec.ECParameterSpec;
-import java.util.ArrayList;
-import java.util.List;
+import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
+import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 
 /**
  * General class for generating a CMS enveloped-data message.
@@ -161,7 +162,7 @@ public class CMSEnvelopedGenerator
     {
         PBKDF2Params params = new PBKDF2Params(pbeKey.getSalt(), pbeKey.getIterationCount());
 
-        PasswordRecipientInfoGenerator prig = new PasswordRecipientInfoGenerator();
+        PasswordRecipientInfoGenerator prig = new PasswordRecipientInfoGenerator(new AlgorithmIdentifier(PKCSObjectIdentifiers.id_PBKDF2, new PBKDF2Params(salt, iterationCount)));
         prig.setDerivationAlg(new AlgorithmIdentifier(PKCSObjectIdentifiers.id_PBKDF2, params));
         prig.setWrapKey(new SecretKeySpec(pbeKey.getEncoded(kekAlgorithmOid), kekAlgorithmOid));
 

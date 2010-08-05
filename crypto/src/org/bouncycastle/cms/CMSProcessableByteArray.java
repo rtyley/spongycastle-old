@@ -31,7 +31,7 @@ public class CMSProcessableByteArray
         this.bytes = bytes;
     }
 
-    public InputStream read()
+    public InputStream getInputStream()
     {
         return new ByteArrayInputStream(bytes);
     }

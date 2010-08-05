@@ -7,8 +7,8 @@ import java.security.MessageDigest;
 import java.security.Provider;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.operator.ContentDigester;
-import org.bouncycastle.operator.ContentDigesterProvider;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.DigesterCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 
 public class JcaContentDigesterProviderBuilder
@@ -33,14 +33,14 @@ public class JcaContentDigesterProviderBuilder
         return this;
     }
 
-    public ContentDigesterProvider build()
+    public DigesterCalculatorProvider build()
         throws OperatorCreationException
     {
-        return new ContentDigesterProvider()
+        return new DigesterCalculatorProvider()
         {
             private DigestOutputStream stream;
 
-            public ContentDigester get(final AlgorithmIdentifier algorithm)
+            public DigestCalculator get(final AlgorithmIdentifier algorithm)
                 throws OperatorCreationException
             {
                 try
@@ -54,7 +54,7 @@ public class JcaContentDigesterProviderBuilder
                     throw new OperatorCreationException("exception on setup: " + e, e);
                 }
 
-                return new ContentDigester()
+                return new DigestCalculator()
                 {
                     public AlgorithmIdentifier getAlgorithmIdentifier()
                     {

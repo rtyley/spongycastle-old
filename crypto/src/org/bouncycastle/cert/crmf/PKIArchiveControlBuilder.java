@@ -14,7 +14,7 @@ import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.RecipientInfoGenerator;
-import org.bouncycastle.operator.ContentEncryptor;
+import org.bouncycastle.operator.OutputEncryptor;
 
 public class PKIArchiveControlBuilder
 {
@@ -39,12 +39,12 @@ public class PKIArchiveControlBuilder
 
     public PKIArchiveControlBuilder addRecipientGenerator(RecipientInfoGenerator recipientGen)
     {
-        envGen.addRecipientGenerator(recipientGen);
+        envGen.addRecipientInfoGenerator(recipientGen);
 
         return this;
     }
 
-    public PKIArchiveControl build(ContentEncryptor contentEncryptor)
+    public PKIArchiveControl build(OutputEncryptor contentEncryptor)
         throws CMSException
     {
         CMSEnvelopedData envContent = envGen.generate(keyContent, contentEncryptor);

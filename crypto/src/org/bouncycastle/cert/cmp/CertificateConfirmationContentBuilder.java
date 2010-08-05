@@ -10,10 +10,10 @@ import org.bouncycastle.asn1.cmp.CertConfirmContent;
 import org.bouncycastle.asn1.cmp.CertStatus;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.operator.ContentDigester;
-import org.bouncycastle.operator.ContentDigesterProvider;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.DigesterCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 
 public class CertificateConfirmationContentBuilder
@@ -40,7 +40,7 @@ public class CertificateConfirmationContentBuilder
         return this;
     }
 
-    public CertificateConfirmationContent build(ContentDigesterProvider digesterProvider)
+    public CertificateConfirmationContent build(DigesterCalculatorProvider digesterProvider)
         throws CMPException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
@@ -56,7 +56,7 @@ public class CertificateConfirmationContentBuilder
                 throw new CMPException("cannot find algorithm for digest from signature");
             }
 
-            ContentDigester digester;
+            DigestCalculator digester;
 
             try
             {

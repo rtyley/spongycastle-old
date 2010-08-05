@@ -2,8 +2,8 @@ package org.bouncycastle.operator;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-public interface ContentDigesterProvider
+public interface DigesterCalculatorProvider
 {
-    ContentDigester get(AlgorithmIdentifier digestAlgorithmIdentifier)
+    DigestCalculator get(AlgorithmIdentifier digestAlgorithmIdentifier)
         throws OperatorCreationException;
 }

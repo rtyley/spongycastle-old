@@ -26,7 +26,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.operator.ContentEncryptor;
+import org.bouncycastle.operator.OutputEncryptor;
 
 /**
  * General class for generating a CMS enveloped-data message stream.
@@ -155,7 +155,7 @@ public class CMSEnvelopedDataStreamGenerator
     private OutputStream doOpen(
         ASN1ObjectIdentifier dataType,
         OutputStream         out,
-        ContentEncryptor encryptor)
+        OutputEncryptor encryptor)
         throws CMSException, IOException
     {
         ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
@@ -365,7 +365,7 @@ public class CMSEnvelopedDataStreamGenerator
      */
     public OutputStream open(
         OutputStream    out,
-        ContentEncryptor encryptor)
+        OutputEncryptor encryptor)
         throws CMSException, IOException
     {
         return doOpen(new ASN1ObjectIdentifier(CMSObjectIdentifiers.data.getId()), out, encryptor);
@@ -379,7 +379,7 @@ public class CMSEnvelopedDataStreamGenerator
     public OutputStream open(
         ASN1ObjectIdentifier dataType,
         OutputStream         out,
-        ContentEncryptor encryptor)
+        OutputEncryptor encryptor)
         throws CMSException, IOException
     {
         return doOpen(dataType, out, encryptor);

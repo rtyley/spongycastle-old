@@ -86,7 +86,7 @@ abstract class OperatorHelper
         }
         catch (IOException e)
         {
-            throw new IllegalArgumentException("cannot convert public key: " + e.getMessage(), e);
+            throw new OpArgumentException("cannot convert public key: " + e.getMessage(), e);
         }
     }
 
@@ -219,4 +219,22 @@ abstract class OperatorHelper
 
     protected abstract MessageDigest createDigest(String algorithm)
             throws GeneralSecurityException;
+
+    private static class OpArgumentException
+        extends IllegalArgumentException
+    {
+        private Throwable cause;
+
+        public OpArgumentException(String msg, Throwable cause)
+        {
+            super(msg);
+
+            this.cause = cause;
+        }
+
+        public Throwable getCause()
+        {
+            return cause;
+        }
+    }
 }

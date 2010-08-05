@@ -1,12 +1,14 @@
 package org.bouncycastle.cms.jcajce;
 
 import java.security.AlgorithmParameterGenerator;
+import java.security.AlgorithmParameters;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 
 class DefaultEnvelopedDataHelper
@@ -19,6 +21,12 @@ class DefaultEnvelopedDataHelper
         return Cipher.getInstance(algorithm);
     }
 
+    protected Mac createMac(String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return Mac.getInstance(algorithm);
+    }
+
     protected KeyAgreement createKeyAgreement(String algorithm)
         throws NoSuchAlgorithmException
     {
@@ -29,6 +37,12 @@ class DefaultEnvelopedDataHelper
         throws NoSuchAlgorithmException
     {
         return AlgorithmParameterGenerator.getInstance(algorithm);
+    }
+
+    protected AlgorithmParameters createAlgorithmParameters(String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return AlgorithmParameters.getInstance(algorithm);
     }
 
     protected KeyGenerator createKeyGenerator(String algorithm)

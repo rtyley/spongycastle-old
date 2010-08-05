@@ -1,5 +1,7 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.Provider;
 
 import javax.crypto.SecretKey;
@@ -12,4 +14,6 @@ interface CMSSecureReadable
     Object getCryptoObject();
     CMSReadable getReadable(SecretKey key, Provider provider)
         throws CMSException;
+    InputStream getInputStream()
+            throws IOException, CMSException;
 }
