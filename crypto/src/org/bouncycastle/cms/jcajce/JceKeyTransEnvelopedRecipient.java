@@ -15,8 +15,6 @@ import org.bouncycastle.operator.InputDecryptor;
 public class JceKeyTransEnvelopedRecipient
     extends JceKeyTransRecipient
 {
-    private EnvelopedDataHelper helper = new DefaultEnvelopedDataHelper();
-
     public JceKeyTransEnvelopedRecipient(PrivateKey recipientKey)
     {
         super(recipientKey);

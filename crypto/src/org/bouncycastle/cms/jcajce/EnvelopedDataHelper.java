@@ -149,14 +149,14 @@ abstract class EnvelopedDataHelper
     {
         try
         {
-            String cipherName = (String)BASE_CIPHER_NAMES.get(algorithm);
+            String agreementName = (String)BASE_CIPHER_NAMES.get(algorithm);
 
-            if (cipherName != null)
+            if (agreementName != null)
             {
                 try
                 {
                     // this is reversed as the Sun policy files now allow unlimited strength RSA
-                    return createKeyAgreement(cipherName);
+                    return createKeyAgreement(agreementName);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
