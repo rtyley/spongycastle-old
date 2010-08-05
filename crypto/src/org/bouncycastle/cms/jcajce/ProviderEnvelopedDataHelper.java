@@ -3,6 +3,7 @@ package org.bouncycastle.cms.jcajce;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
@@ -58,6 +59,12 @@ class ProviderEnvelopedDataHelper
         throws NoSuchAlgorithmException
     {
         return KeyGenerator.getInstance(algorithm, provider);
+    }
+
+    protected KeyFactory createKeyFactory(String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return KeyFactory.getInstance(algorithm, provider);
     }
 
     protected KeyPairGenerator createKeyPairGenerator(String algorithm)
