@@ -8,6 +8,7 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -530,6 +531,33 @@ abstract class EnvelopedDataHelper
         }
     }
 
+    public KeyFactory createKeyFactory(ASN1ObjectIdentifier algorithm)
+        throws CMSException
+    {
+        try
+        {
+            String cipherName = (String)BASE_CIPHER_NAMES.get(algorithm);
+
+            if (cipherName != null)
+            {
+                try
+                {
+                    // this is reversed as the Sun policy files now allow unlimited strength RSA
+                    return createKeyFactory(cipherName);
+                }
+                catch (NoSuchAlgorithmException e)
+                {
+                    // Ignore
+                }
+            }
+            return createKeyFactory(algorithm.getId());
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new CMSException("cannot create key factory: " + e.getMessage(), e);
+        }
+    }
+
     static interface JCECallback
     {
         Object doInJCE()
@@ -554,6 +582,9 @@ abstract class EnvelopedDataHelper
 
     protected abstract KeyGenerator createKeyGenerator(String algorithm)
         throws GeneralSecurityException;
+
+    protected abstract KeyFactory createKeyFactory(String algorithm)
+         throws NoSuchAlgorithmException, NoSuchProviderException;;
 
     protected abstract KeyPairGenerator createKeyPairGenerator(String algorithm)
         throws GeneralSecurityException;

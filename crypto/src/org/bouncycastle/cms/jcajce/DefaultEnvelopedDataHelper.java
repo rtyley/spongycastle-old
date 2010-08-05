@@ -2,6 +2,7 @@ package org.bouncycastle.cms.jcajce;
 
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
+import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
@@ -49,6 +50,12 @@ class DefaultEnvelopedDataHelper
         throws NoSuchAlgorithmException
     {
         return KeyGenerator.getInstance(algorithm);
+    }
+
+    protected KeyFactory createKeyFactory(String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return KeyFactory.getInstance(algorithm);
     }
 
     protected KeyPairGenerator createKeyPairGenerator(String algorithm)
