@@ -5,6 +5,6 @@ import java.io.InputStream;
 
 interface CMSReadable
 {
-    public InputStream read()
+    public InputStream getInputStream()
         throws IOException, CMSException;
 }

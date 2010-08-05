@@ -1,5 +1,6 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.Provider;
 
@@ -87,7 +88,13 @@ class CMSAuthEnvelopedData
 //                  aes-ICVlen       AES-GCM-ICVlen DEFAULT 12 }
 //
 //                AES-GCM-ICVlen ::= INTEGER (12 | 13 | 14 | 15 | 16)
-            }            
+            }
+
+            public InputStream getInputStream()
+                throws IOException, CMSException
+            {
+                return null;
+            }
         };
 
         //

@@ -6,9 +6,13 @@ import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidParameterSpecException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,11 +20,16 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
 
+import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -79,6 +88,33 @@ abstract class EnvelopedDataHelper
                 }
             }
             return createCipher(algorithm.getId());
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new CMSException("cannot create cipher: " + e.getMessage(), e);
+        }
+    }
+
+    Mac createMac(ASN1ObjectIdentifier algorithm)
+        throws CMSException
+    {
+        try
+        {
+            String macName = (String)MAC_ALG_NAMES.get(algorithm);
+
+            if (macName != null)
+            {
+                try
+                {
+                    // this is reversed as the Sun policy files now allow unlimited strength RSA
+                    return createMac(macName);
+                }
+                catch (NoSuchAlgorithmException e)
+                {
+                    // Ignore
+                }
+            }
+            return createMac(algorithm.getId());
         }
         catch (GeneralSecurityException e)
         {
@@ -154,6 +190,140 @@ abstract class EnvelopedDataHelper
         }
         return createAlgorithmParameterGenerator(algorithm.getId());
     }
+
+    Cipher createContentCipher(final Key sKey, final AlgorithmIdentifier encryptionAlgID)
+        throws CMSException
+    {
+        return (Cipher)execute(new JCECallback()
+        {
+            public Object doInJCE()
+                throws CMSException, InvalidAlgorithmParameterException,
+                InvalidKeyException, InvalidParameterSpecException, NoSuchAlgorithmException,
+                NoSuchPaddingException, NoSuchProviderException
+            {
+                Cipher cipher = createCipher(encryptionAlgID.getAlgorithm());
+                ASN1Object sParams = (ASN1Object)encryptionAlgID.getParameters();
+                String encAlg = encryptionAlgID.getAlgorithm().getId();
+
+                if (sParams != null && !(sParams instanceof ASN1Null))
+                {
+                    try
+                    {
+                        AlgorithmParameters params = createAlgorithmParameters(encryptionAlgID.getAlgorithm());
+
+                        try
+                        {
+                            params.init(sParams.getEncoded(), "ASN.1");
+                        }
+                        catch (IOException e)
+                        {
+                            throw new CMSException("error decoding algorithm parameters.", e);
+                        }
+
+                        cipher.init(Cipher.DECRYPT_MODE, sKey, params);
+                    }
+                    catch (NoSuchAlgorithmException e)
+                    {
+                        if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.AES128_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.AES192_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.AES256_CBC))
+                        {
+                            cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(
+                                ASN1OctetString.getInstance(sParams).getOctets()));
+                        }
+                        else
+                        {
+                            throw e;
+                        }
+                    }
+                }
+                else
+                {
+                    if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                        || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                        || encAlg.equals(CMSEnvelopedDataGenerator.CAST5_CBC))
+                    {
+                        cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(new byte[8]));
+                    }
+                    else
+                    {
+                        cipher.init(Cipher.DECRYPT_MODE, sKey);
+                    }
+                }
+
+                return cipher;
+            }
+        });
+    }
+
+    Mac createContentMac(final Key sKey, final AlgorithmIdentifier macAlgId)
+        throws CMSException
+    {
+        return (Mac)execute(new JCECallback()
+        {
+            public Object doInJCE()
+                throws CMSException, InvalidAlgorithmParameterException,
+                InvalidKeyException, InvalidParameterSpecException, NoSuchAlgorithmException,
+                NoSuchPaddingException, NoSuchProviderException
+            {
+                Mac mac = createMac(macAlgId.getAlgorithm());
+                ASN1Object sParams = (ASN1Object)macAlgId.getParameters();
+                String macAlg = macAlgId.getAlgorithm().getId();
+
+                if (sParams != null && !(sParams instanceof ASN1Null))
+                {
+                    try
+                    {
+                        AlgorithmParameters params = createAlgorithmParameters(macAlgId.getAlgorithm());
+
+                        try
+                        {
+                            params.init(sParams.getEncoded(), "ASN.1");
+                        }
+                        catch (IOException e)
+                        {
+                            throw new CMSException("error decoding algorithm parameters.", e);
+                        }
+
+                        mac.init(sKey, params.getParameterSpec(IvParameterSpec.class));
+                    }
+                    catch (NoSuchAlgorithmException e)
+                    {
+                        throw e;
+                    }
+                }
+                else
+                {
+                    mac.init(sKey);
+                }
+
+                return mac;
+            }
+        });
+    }
+
+    AlgorithmParameters createAlgorithmParameters(ASN1ObjectIdentifier algorithm)
+        throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+        String algorithmName = (String)BASE_CIPHER_NAMES.get(algorithm);
+
+        if (algorithmName != null)
+        {
+            try
+            {
+                // this is reversed as the Sun policy files now allow unlimited strength RSA
+                return createAlgorithmParameters(algorithmName);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                // Ignore
+            }
+        }
+        return createAlgorithmParameters(algorithm.getId());
+    }
+
 
     KeyPairGenerator createKeyPairGenerator(DERObjectIdentifier algorithm)
         throws CMSException
@@ -328,14 +498,59 @@ abstract class EnvelopedDataHelper
         return encKey.getEncoded();
     }
 
+    static Object execute(JCECallback callback) throws CMSException
+    {
+        try
+        {
+            return callback.doInJCE();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new CMSException("can't find algorithm.", e);
+        }
+        catch (InvalidKeyException e)
+        {
+            throw new CMSException("key invalid in message.", e);
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new CMSException("can't find provider.", e);
+        }
+        catch (NoSuchPaddingException e)
+        {
+            throw new CMSException("required padding not supported.", e);
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            throw new CMSException("algorithm parameters invalid.", e);
+        }
+        catch (InvalidParameterSpecException e)
+        {
+            throw new CMSException("MAC algorithm parameter spec invalid.", e);
+        }
+    }
+
+    static interface JCECallback
+    {
+        Object doInJCE()
+            throws CMSException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidParameterSpecException,
+            NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException;
+    }
+
     protected abstract Cipher createCipher(String algorithm)
-        throws GeneralSecurityException;
+        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException;
+
+    protected abstract Mac createMac(String algorithm)
+        throws NoSuchAlgorithmException, NoSuchProviderException;
 
     protected abstract KeyAgreement createKeyAgreement(String algorithm)
         throws GeneralSecurityException;
 
     protected abstract AlgorithmParameterGenerator createAlgorithmParameterGenerator(String algorithm)
         throws GeneralSecurityException;
+
+    protected abstract AlgorithmParameters createAlgorithmParameters(String algorithm)
+        throws NoSuchAlgorithmException, NoSuchProviderException;
 
     protected abstract KeyGenerator createKeyGenerator(String algorithm)
         throws GeneralSecurityException;

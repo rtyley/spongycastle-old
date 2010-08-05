@@ -45,11 +45,47 @@ public class JcaX509CertificateConverter
         }
         catch (IOException e)
         {
-            throw new CertificateParsingException("exception parsing certificate: " + e.getMessage(), e);
+            throw new ExCertificateParsingException("exception parsing certificate: " + e.getMessage(), e);
         }
         catch (NoSuchProviderException e)
         {
-            throw new CertificateException("cannot find required provider:" + e.getMessage(), e);
+            throw new ExCertificateException("cannot find required provider:" + e.getMessage(), e);
+        }
+    }
+
+    private class ExCertificateParsingException
+        extends CertificateParsingException
+    {
+        private Throwable cause;
+
+        public ExCertificateParsingException(String msg, Throwable cause)
+        {
+            super(msg);
+
+            this.cause = cause;
+        }
+
+        public Throwable getCause()
+        {
+            return cause;
+        }
+    }
+    
+    private class ExCertificateException
+        extends CertificateException
+    {
+        private Throwable cause;
+
+        public ExCertificateException(String msg, Throwable cause)
+        {
+            super(msg);
+
+            this.cause = cause;
+        }
+
+        public Throwable getCause()
+        {
+            return cause;
         }
     }
 }

@@ -1,14 +1,12 @@
 package org.bouncycastle.operator;
 
-import java.io.OutputStream;
+import java.io.InputStream;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-public interface ContentEncryptor
+public interface InputDecryptor
 {
     AlgorithmIdentifier getAlgorithmIdentifier();
 
-    OutputStream getOutputStream(OutputStream dataOut);
-
-    byte[] getEncodedKey();
+    InputStream getInputStream(InputStream encIn);
 }

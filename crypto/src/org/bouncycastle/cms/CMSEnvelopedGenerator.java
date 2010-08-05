@@ -303,7 +303,7 @@ public class CMSEnvelopedGenerator
      * 
      * @param recipientGenerator a generator of a recipient info object.
      */
-    public void addRecipientGenerator(RecipientInfoGenerator recipientGenerator)
+    public void addRecipientInfoGenerator(RecipientInfoGenerator recipientGenerator)
     {
         recipientInfoGenerators.add(recipientGenerator);
     }

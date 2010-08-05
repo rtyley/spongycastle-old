@@ -1,6 +1,7 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -462,6 +463,12 @@ class CMSEnvelopedHelper
             return this.mac;
         }
 
+        public InputStream getInputStream()
+            throws IOException, CMSException
+        {
+            return readable.getInputStream();
+        }
+
         public CMSReadable getReadable(final SecretKey sKey, final Provider provider)
             throws CMSException
         {
@@ -504,7 +511,7 @@ class CMSEnvelopedHelper
             try
             {
                 return new CMSProcessableInputStream(
-                    new TeeInputStream(readable.read(), new MacOutputStream(this.mac)));
+                    new TeeInputStream(readable.getInputStream(), new MacOutputStream(this.mac)));
             }
             catch (IOException e)
             {
@@ -529,7 +536,11 @@ class CMSEnvelopedHelper
         {
             return this.algorithm;
         }
-
+        public InputStream getInputStream()
+            throws IOException, CMSException
+        {
+            return readable.getInputStream();
+        }
         public Object getCryptoObject()
         {
             return this.cipher;
@@ -604,7 +615,7 @@ class CMSEnvelopedHelper
 
             try
             {
-                return new CMSProcessableInputStream(new CipherInputStream(readable.read(), cipher));
+                return new CMSProcessableInputStream(new CipherInputStream(readable.getInputStream(), cipher));
             }
             catch (IOException e)
             {

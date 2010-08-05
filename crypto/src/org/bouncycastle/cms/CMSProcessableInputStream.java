@@ -17,7 +17,7 @@ public class CMSProcessableInputStream implements CMSProcessable, CMSReadable
         this.input = input;
     }
 
-    public InputStream read()
+    public InputStream getInputStream()
     {
         checkSingleUsage();
 
@@ -35,7 +35,7 @@ public class CMSProcessableInputStream implements CMSProcessable, CMSReadable
 
     public Object getContent()
     {
-        return read();
+        return getInputStream();
     }
 
     private synchronized void checkSingleUsage()

@@ -12,6 +12,7 @@ import java.security.ProviderException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -31,6 +32,9 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 public class KeyTransRecipientInformation
     extends RecipientInformation
 {
+    private byte[] resultMac;
+    private RecipientOperator operator;
+
     private KeyTransRecipientInfo info;
 
     KeyTransRecipientInformation(
@@ -161,5 +165,43 @@ public class KeyTransRecipientInformation
         Key sKey = getSessionKey(key, prov);
 
         return getContentFromSessionKey(sKey, prov);
+    }
+
+    /**
+     * Return the MAC calculated for the content stream. Note: this call is only meaningful once all
+     * the content has been read.
+     *
+     * @return  byte array containing the mac.
+     */
+    public byte[] getMac()
+    {
+        if (resultMac == null)
+        {
+            if (operator != null)
+            {
+                if (operator.isMacBased())
+                {
+                    return operator.getMac();
+                }
+            }
+            else
+            {
+                Object cryptoObject = secureReadable.getCryptoObject();
+                if (cryptoObject instanceof Mac)
+                {
+                    resultMac = ((Mac)cryptoObject).doFinal();
+                }
+            }
+        }
+
+        return resultMac;
+    }
+
+    public CMSTypedStream getContentStream(Recipient recipient)
+        throws CMSException, IOException
+    {
+        operator = ((KeyTransRecipient)recipient).getRecipientOperator(keyEncAlg, secureReadable.getAlgorithm(), info.getEncryptedKey().getOctets());
+
+        return new CMSTypedStream(operator.getInputStream(secureReadable.getInputStream()));
     }
 }

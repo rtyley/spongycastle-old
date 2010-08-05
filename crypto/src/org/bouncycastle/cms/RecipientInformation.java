@@ -141,7 +141,7 @@ public abstract class RecipientInformation
 
         try
         {
-            return new CMSTypedStream(readable.read());
+            return new CMSTypedStream(readable.getInputStream());
         }
         catch (IOException e)
         {
@@ -165,6 +165,20 @@ public abstract class RecipientInformation
         try
         {
             return CMSUtils.streamToByteArray(getContentStream(key, provider).getContentStream());
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("unable to parse internal stream: " + e);
+        }
+    }
+
+    public byte[] getContent(
+        Recipient recipient)
+        throws CMSException
+    {
+        try
+        {
+            return CMSUtils.streamToByteArray(getContentStream(recipient).getContentStream());
         }
         catch (IOException e)
         {
@@ -200,4 +214,11 @@ public abstract class RecipientInformation
 
     public abstract CMSTypedStream getContentStream(Key key, Provider provider)
         throws CMSException;
+
+
+    public CMSTypedStream getContentStream(Recipient recipient)
+        throws CMSException, IOException
+    {
+       return null;
+    }
 }

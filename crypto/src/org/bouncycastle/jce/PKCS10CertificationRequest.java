@@ -425,7 +425,7 @@ public class PKCS10CertificationRequest
             }
         }
         catch (InvalidKeySpecException e)
-        {
+        {                            e.printStackTrace();
             throw new InvalidKeyException("error decoding public key");
         }
     }

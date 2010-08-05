@@ -3,9 +3,9 @@ package org.bouncycastle.cert.cmp;
 import org.bouncycastle.asn1.cmp.CertStatus;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.operator.ContentDigester;
-import org.bouncycastle.operator.ContentDigesterProvider;
 import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.DigesterCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Arrays;
 
@@ -20,7 +20,7 @@ public class CertificateStatus
         this.certStatus = certStatus;
     }
 
-    public boolean verify(X509CertificateHolder certHolder, ContentDigesterProvider digesterProvider)
+    public boolean verify(X509CertificateHolder certHolder, DigesterCalculatorProvider digesterProvider)
         throws CMPException
     {
         AlgorithmIdentifier digAlg = digestAlgFinder.find(certHolder.toASN1Structure().getSignatureAlgorithm());
@@ -29,7 +29,7 @@ public class CertificateStatus
             throw new CMPException("cannot find algorithm for digest from signature");
         }
 
-        ContentDigester digester;
+        DigestCalculator digester;
 
         try
         {
