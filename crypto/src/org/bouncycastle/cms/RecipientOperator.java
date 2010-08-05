@@ -46,6 +46,7 @@ public class RecipientOperator
     {
         return ((MacCalculator)operator).getMac();
     }
+
     private class WrappingStream extends InputStream
     {
         private OutputStream output;
@@ -57,7 +58,6 @@ public class RecipientOperator
             this.input = input;
         }
 
-        @Override
         public int read()
             throws IOException
         {
