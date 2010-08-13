@@ -23,12 +23,13 @@ public class GOST3411DigestTest
         "73b70a39497de53a6e08c67b6d4db853540f03e9389299d9b0156ef7e85d0f61"
     };
 
+//  If S-box = D-Test (see: digest/GOST3411Digest.java; function:E(byte[] in, byte[] key); string: CipherParameters  param = new GOST28147Parameters(key,"D-Test");)
 //    private static final String[] digests =
 //    {
-//        "ce85b99cc46752fffee35cab9a7b0278abb4c2d2055cff685af4912c49490f8d"; //If S-box = D-Test (see: digest/GOST3411Digest.java; function:E(byte[] in, byte[] key); string: CipherParameters  param = new GOST28147Parameters(key,"D-Test");)
-//        "b1c466d37519b82e8319819ff32595e047a28cb6f83eff1c6916a815a637fffa"; //If S-box = D-Test (see: digest/GOST3411Digest.java; function:E(byte[] in, byte[] key); string: CipherParameters  param = new GOST28147Parameters(key,"D-Test");)
-//        "471aba57a60a770d3a76130635c1fbea4ef14de51f78b4ae57dd893b62f55208"; //If S-box = D-Test (see: digest/GOST3411Digest.java; function:E(byte[] in, byte[] key); string: CipherParameters  param = new GOST28147Parameters(key,"D-Test");)
-//        "95c1af627c356496d80274330b2cff6a10c67b5f597087202f94d06d2338cf8e"; //If S-box = D-Test (see: digest/GOST3411Digest.java; function:E(byte[] in, byte[] key); string: CipherParameters  param = new GOST28147Parameters(key,"D-Test");)
+//        "ce85b99cc46752fffee35cab9a7b0278abb4c2d2055cff685af4912c49490f8d",
+//        "b1c466d37519b82e8319819ff32595e047a28cb6f83eff1c6916a815a637fffa",
+//        "471aba57a60a770d3a76130635c1fbea4ef14de51f78b4ae57dd893b62f55208",
+//        "95c1af627c356496d80274330b2cff6a10c67b5f597087202f94d06d2338cf8e"
 //    };
     
     // 1 million 'a'
