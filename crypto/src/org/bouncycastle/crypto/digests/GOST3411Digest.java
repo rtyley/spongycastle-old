@@ -5,6 +5,7 @@ import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithSBox;
+import org.bouncycastle.util.Arrays;
 
 /**
  * implementation of GOST R 34.11-94
@@ -23,14 +24,28 @@ public class GOST3411Digest
     private long byteCount;
     
     private BlockCipher cipher = new GOST28147Engine();
+    private byte[] sBox;
 
     /**
      * Standard constructor
      */
     public GOST3411Digest()
     {
-        cipher.init(true, new ParametersWithSBox(null, GOST28147Engine.getSBox("D-A")));
-        
+        sBox = GOST28147Engine.getSBox("D-A");
+        cipher.init(true, new ParametersWithSBox(null, sBox));
+
+        reset();
+    }
+
+    /**
+     * Constructor to allow use of a particular sbox with GOST28147
+     * @see GOST28147Engine#getSBox(String)
+     */
+    public GOST3411Digest(byte[] sBoxParam)
+    {
+        sBox = Arrays.clone(sBoxParam);
+        cipher.init(true, new ParametersWithSBox(null, sBox));
+
         reset();
     }
 
@@ -40,8 +55,9 @@ public class GOST3411Digest
      */
     public GOST3411Digest(GOST3411Digest t)
     {
-        cipher.init(true, new ParametersWithSBox(null, GOST28147Engine.getSBox("D-A")));
-        
+        this.sBox = t.sBox;
+        cipher.init(true, new ParametersWithSBox(null, sBox));
+
         reset();
 
         System.arraycopy(t.H, 0, this.H, 0, t.H.length);
