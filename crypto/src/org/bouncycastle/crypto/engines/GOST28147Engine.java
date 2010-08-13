@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithSBox;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Strings;
 
 /**
@@ -19,9 +20,11 @@ public class GOST28147Engine
     private int[]               workingKey = null;
     private boolean forEncryption;
 
+    private byte[] S = Sbox_Default;
+
     // these are the S-boxes given in Applied Cryptography 2nd Ed., p. 333
     // This is default S-box!
-    private byte S[] = {
+    private static byte Sbox_Default[] = {
         0x4,0xA,0x9,0x2,0xD,0x8,0x0,0xE,0x6,0xB,0x1,0xC,0x7,0xF,0x5,0x3,
         0xE,0xB,0x4,0xC,0x6,0xD,0xF,0xA,0x2,0x3,0x8,0x1,0x0,0x7,0x5,0x9,
         0x5,0x8,0x1,0xD,0xA,0x3,0x4,0x2,0xE,0xF,0xC,0x7,0x6,0x0,0x9,0xB,
@@ -122,13 +125,19 @@ public class GOST28147Engine
     
     static
     {
-        sBoxes.put("E-TEST", ESbox_Test);
-        sBoxes.put("E-A", ESbox_A);
-        sBoxes.put("E-B", ESbox_B);
-        sBoxes.put("E-C", ESbox_C);
-        sBoxes.put("E-D", ESbox_D);
-        sBoxes.put("D-TEST", DSbox_Test);
-        sBoxes.put("D-A", DSbox_A);
+        addSBox("Default", Sbox_Default);
+        addSBox("E-TEST", ESbox_Test);
+        addSBox("E-A", ESbox_A);
+        addSBox("E-B", ESbox_B);
+        addSBox("E-C", ESbox_C);
+        addSBox("E-D", ESbox_D);
+        addSBox("D-TEST", DSbox_Test);
+        addSBox("D-A", DSbox_A);
+    }
+
+    private static void addSBox(String sBoxName, byte[] sBox)
+    {
+        sBoxes.put(Strings.toUpperCase(sBoxName), sBox);        
     }
     
     /**
@@ -157,8 +166,13 @@ public class GOST28147Engine
             //
             // Set the S-Box
             //
-            System.arraycopy(param.getSBox(), 0, this.S, 0, param.getSBox().length);
-            
+            byte[] sBox = param.getSBox();
+            if (sBox.length != Sbox_Default.length)
+            {
+                throw new IllegalArgumentException("invalid S-box passed to GOST28147 init");
+            }
+            this.S = Arrays.clone(sBox);
+
             //
             // set key if there is one
             //
@@ -173,7 +187,7 @@ public class GOST28147Engine
             workingKey = generateWorkingKey(forEncryption,
                                   ((KeyParameter)params).getKey());
         }
-        else
+        else if (params != null)
         {
            throw new IllegalArgumentException("invalid parameter passed to GOST28147 init - " + params.getClass().getName());
         }
@@ -342,22 +356,16 @@ public class GOST28147Engine
      * @return byte array representing the S-Box
      */
     public static byte[] getSBox(
-        String  sBoxName)
+        String sBoxName)
     {
-        byte[] namedSBox = (byte[])sBoxes.get(Strings.toUpperCase(sBoxName));
-        
-        if (namedSBox != null)
-        {
-            byte[] sBox = new byte[namedSBox.length];
-            
-            System.arraycopy(namedSBox, 0, sBox, 0, sBox.length);
-        
-            return sBox;
-        }
-        else
+        byte[] sBox = (byte[])sBoxes.get(Strings.toUpperCase(sBoxName));
+
+        if (sBox == null)
         {
             throw new IllegalArgumentException("Unknown S-Box - possible types: "
-              + "\"E-Test\", \"E-A\", \"E-B\", \"E-C\", \"E-D\", \"D-Test\", \"D-A\".");
+                + "\"Default\", \"E-Test\", \"E-A\", \"E-B\", \"E-C\", \"E-D\", \"D-Test\", \"D-A\".");
         }
+
+        return Arrays.clone(sBox);
     }
 }
