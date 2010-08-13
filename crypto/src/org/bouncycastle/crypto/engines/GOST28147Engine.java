@@ -37,8 +37,8 @@ public class GOST28147Engine
     
     /*
      * class content S-box parameters for encrypting
-     * getting from, see: http://www.ietf.org/internet-drafts/draft-popov-cryptopro-cpalgs-01.txt
-     *                    http://www.ietf.org/internet-drafts/draft-popov-cryptopro-cpalgs-02.txt
+     * getting from, see: http://tools.ietf.org/id/draft-popov-cryptopro-cpalgs-01.txt
+     *                    http://tools.ietf.org/id/draft-popov-cryptopro-cpalgs-02.txt
      */
     private static byte[] ESbox_Test = {
          0x4,0x2,0xF,0x5,0x9,0x1,0x0,0x8,0xE,0x3,0xB,0xC,0xD,0x7,0xA,0x6,
