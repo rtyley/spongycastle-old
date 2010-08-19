@@ -1,24 +1,71 @@
 package org.bouncycastle.asn1.crmf;
 
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Choice;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.cms.EnvelopedData;
 
 public class POPOPrivKey
     extends ASN1Encodable
     implements ASN1Choice
 {
-    private DERObject obj;
+    public static final int thisMessage = 0;
+    public static final int subsequentMessage = 1;
+    public static final int dhMAC = 2;
+    public static final int agreeMAC = 3;
+    public static final int encryptedKey = 4;
 
-    private POPOPrivKey(DERObject obj)
+    private int tagNo;
+    private ASN1Encodable obj;
+
+    private POPOPrivKey(ASN1TaggedObject obj)
     {
-        this.obj = obj;
+        this.tagNo = obj.getTagNo();
+
+        switch (tagNo)
+        {
+        case thisMessage:
+            this.obj = DERBitString.getInstance(obj, false);
+            break;
+        case subsequentMessage:
+            this.obj = SubsequentMessage.valueOf(DERInteger.getInstance(obj, false).getValue().intValue());
+            break;
+        case dhMAC:
+            this.obj = DERBitString.getInstance(obj, false);
+            break;
+        case agreeMAC:
+            this.obj = PKMACValue.getInstance(obj, false);
+            break;
+        case encryptedKey:
+            this.obj = EnvelopedData.getInstance(obj, false);
+            break;
+        }
+        this.obj = obj.getObject();
     }
 
-    public static ASN1Encodable getInstance(ASN1TaggedObject tagged, boolean explicit)
+    public static POPOPrivKey getInstance(ASN1TaggedObject tagged, boolean isExplicit)
     {
-        return new POPOPrivKey(tagged.getObject()); // must be explictly tagged as choice
+        return new POPOPrivKey(ASN1TaggedObject.getInstance(tagged.getObject()));
+    }
+
+    public POPOPrivKey(SubsequentMessage msg)
+    {
+        this.tagNo = subsequentMessage;
+        this.obj = msg;
+    }
+
+    public int getType()
+    {
+        return tagNo;
+    }
+
+    public ASN1Encodable getValue()
+    {
+        return obj;
     }
 
     /**
@@ -36,6 +83,6 @@ public class POPOPrivKey
      */
     public DERObject toASN1Object()
     {
-        return obj;
+        return new DERTaggedObject(false, tagNo, obj);
     }
 }
