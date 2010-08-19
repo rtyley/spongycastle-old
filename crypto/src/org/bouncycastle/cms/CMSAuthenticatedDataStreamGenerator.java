@@ -129,6 +129,13 @@ public class CMSAuthenticatedDataStreamGenerator
             }
         }
 
+        for (it = recipientInfoGenerators.iterator(); it.hasNext();)
+        {
+            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
+
+            recipientInfos.add(recipient.generate(encKey.getEncoded()));
+        }
+
         return open(out, macOID, encKey, params, recipientInfos, encProvider);
     }
 
