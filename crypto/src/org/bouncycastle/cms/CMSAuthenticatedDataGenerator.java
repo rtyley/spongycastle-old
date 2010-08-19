@@ -145,6 +145,13 @@ public class CMSAuthenticatedDataGenerator
             }
         }
 
+        for (it = recipientInfoGenerators.iterator(); it.hasNext();)
+        {
+            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
+
+            recipientInfos.add(recipient.generate(encKey.getEncoded()));
+        }
+
         ContentInfo  eci = new ContentInfo(
                 CMSObjectIdentifiers.data,
                 encContent);

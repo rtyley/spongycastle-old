@@ -17,12 +17,15 @@ public class AllTests
         throws Exception
     {   
         TestSuite suite = new TestSuite("CMS tests");
-        
+
+        suite.addTest(AuthenticatedDataTest.suite());
+        suite.addTest(AuthenticatedDataStreamTest.suite());
         suite.addTest(CompressedDataTest.suite());
         suite.addTest(SignedDataTest.suite());
         suite.addTest(EnvelopedDataTest.suite());
         suite.addTest(NewEnvelopedDataTest.suite());
-
+        suite.addTest(NewAuthenticatedDataTest.suite());
+        suite.addTest(NewAuthenticatedDataStreamTest.suite());
         suite.addTest(CompressedDataStreamTest.suite());
         suite.addTest(SignedDataStreamTest.suite());
         suite.addTest(EnvelopedDataStreamTest.suite());
