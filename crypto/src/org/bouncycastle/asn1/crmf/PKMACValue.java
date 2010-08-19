@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.crmf;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
@@ -38,6 +39,11 @@ public class PKMACValue
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+    }
+
+    public static PKMACValue getInstance(ASN1TaggedObject obj, boolean isExplicit)
+    {
+        return getInstance(ASN1Sequence.getInstance(obj, isExplicit));
     }
 
     /**

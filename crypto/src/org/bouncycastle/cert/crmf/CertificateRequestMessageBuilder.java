@@ -14,7 +14,9 @@ import org.bouncycastle.asn1.crmf.AttributeTypeAndValue;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.crmf.CertRequest;
 import org.bouncycastle.asn1.crmf.CertTemplateBuilder;
+import org.bouncycastle.asn1.crmf.POPOPrivKey;
 import org.bouncycastle.asn1.crmf.ProofOfPossession;
+import org.bouncycastle.asn1.crmf.SubsequentMessage;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
@@ -32,6 +34,7 @@ public class CertificateRequestMessageBuilder
     private PKMACValueGenerator pkmacGenerator;
     private char[] password;
     private GeneralName sender;
+    private POPOPrivKey popoPrivKey;
 
     public CertificateRequestMessageBuilder(BigInteger certReqId)
     {
@@ -106,6 +109,13 @@ public class CertificateRequestMessageBuilder
         return this;
     }
 
+    public CertificateRequestMessageBuilder setProofOfPossessionSubsequentMessage(SubsequentMessage msg)
+    {
+        this.popoPrivKey = new POPOPrivKey(msg);
+
+        return this;
+    }
+
     public CertificateRequestMessageBuilder setAuthInfoPKMAC(PKMACValueGenerator pkmacGenerator, char[] password)
     {
         this.pkmacGenerator = pkmacGenerator;
@@ -170,6 +180,10 @@ public class CertificateRequestMessageBuilder
             }
 
             v.add(new ProofOfPossession(builder.build(popSigner)));
+        }
+        if (popoPrivKey != null)
+        {
+            v.add(new ProofOfPossession(ProofOfPossession.TYPE_KEY_ENCIPHERMENT, popoPrivKey));
         }
 
         return new CertificateRequestMessage(CertReqMsg.getInstance(new DERSequence(v)));
