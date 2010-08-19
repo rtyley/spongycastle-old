@@ -1,8 +1,6 @@
 package org.bouncycastle.cms;
 
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -21,25 +19,6 @@ import org.bouncycastle.crypto.params.KeyParameter;
 public abstract class PasswordRecipientInfoGenerator
     implements RecipientInfoGenerator
 {
-    public static final int PKCS5_SCHEME2 = 0;
-    public static final int PKCS5_SCHEME2_UTF8 = 1;
-
-    private static Map KEYSIZES = new HashMap();
-    private static Map BLOCKSIZES = new HashMap();
-
-    static
-    {
-        BLOCKSIZES.put(CMSAlgorithm.DES_EDE3_CBC,  new Integer(8));
-        BLOCKSIZES.put(CMSAlgorithm.AES128_CBC,  new Integer(16));
-        BLOCKSIZES.put(CMSAlgorithm.AES192_CBC,  new Integer(16));
-        BLOCKSIZES.put(CMSAlgorithm.AES256_CBC,  new Integer(16));
-
-        KEYSIZES.put(CMSAlgorithm.DES_EDE3_CBC,  new Integer(192));
-        KEYSIZES.put(CMSAlgorithm.AES128_CBC,  new Integer(128));
-        KEYSIZES.put(CMSAlgorithm.AES192_CBC,  new Integer(192));
-        KEYSIZES.put(CMSAlgorithm.AES256_CBC,  new Integer(256));
-    }
-
     private char[] password;
     private AlgorithmIdentifier keyDerivationAlgorithm;
     private ASN1ObjectIdentifier kekAlgorithm;
@@ -50,13 +29,13 @@ public abstract class PasswordRecipientInfoGenerator
 
     protected PasswordRecipientInfoGenerator(ASN1ObjectIdentifier kekAlgorithm, char[] password)
     {
-        this(kekAlgorithm, password, getKeySize(kekAlgorithm), ((Integer)BLOCKSIZES.get(kekAlgorithm)).intValue());
+        this(kekAlgorithm, password, getKeySize(kekAlgorithm), ((Integer)PasswordRecipientInformation.BLOCKSIZES.get(kekAlgorithm)).intValue());
     }
 
     protected PasswordRecipientInfoGenerator(ASN1ObjectIdentifier kekAlgorithm, char[] password, int keySize, int blockSize)
     {
         this.password = password;
-        this.schemeID = PKCS5_SCHEME2_UTF8;
+        this.schemeID = PasswordRecipient.PKCS5_SCHEME2_UTF8;
         this.kekAlgorithm = kekAlgorithm;
         this.keySize = keySize;
         this.blockSize = blockSize;
@@ -64,7 +43,7 @@ public abstract class PasswordRecipientInfoGenerator
 
     private static int getKeySize(ASN1ObjectIdentifier kekAlgorithm)
     {
-        Integer size = (Integer)KEYSIZES.get(kekAlgorithm);
+        Integer size = (Integer)PasswordRecipientInformation.KEYSIZES.get(kekAlgorithm);
 
         if (size == null)
         {
@@ -119,7 +98,7 @@ public abstract class PasswordRecipientInfoGenerator
         PBKDF2Params params = PBKDF2Params.getInstance(keyDerivationAlgorithm.getParameters());
         byte[] derivedKey;
 
-        if (schemeID == PKCS5_SCHEME2)
+        if (schemeID == PasswordRecipient.PKCS5_SCHEME2)
         {
             PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator();
 

@@ -69,6 +69,18 @@ abstract class EnvelopedDataHelper
     private AlgorithmIdentifier algorithmIdentifier;
     private Cipher              cipher;
 
+    String getBaseCipherName(ASN1ObjectIdentifier algorithm)
+    {
+        String name = (String)BASE_CIPHER_NAMES.get(algorithm);
+
+        if (name == null)
+        {
+            return algorithm.getId();
+        }
+
+        return name;
+    }
+    
     Cipher createCipher(ASN1ObjectIdentifier algorithm)
         throws CMSException
     {

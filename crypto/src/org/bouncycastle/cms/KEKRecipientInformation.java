@@ -8,7 +8,6 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 
 import javax.crypto.Cipher;
-import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 
 import org.bouncycastle.asn1.cms.KEKIdentifier;
@@ -21,8 +20,6 @@ import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 public class KEKRecipientInformation
     extends RecipientInformation
 {
-        private byte[] resultMac;
-    private RecipientOperator operator;
     private KEKRecipientInfo      info;
 
     KEKRecipientInformation(
@@ -80,36 +77,6 @@ public class KEKRecipientInformation
         {
             throw new CMSException("required padding not supported.", e);
         }
-    }
-
-    /**
-     * Return the MAC calculated for the content stream. Note: this call is only meaningful once all
-     * the content has been read.
-     *
-     * @return  byte array containing the mac.
-     */
-    public byte[] getMac()
-    {
-        if (resultMac == null)
-        {
-            if (operator != null)
-            {
-                if (operator.isMacBased())
-                {
-                    return operator.getMac();
-                }
-            }
-            else
-            {
-                Object cryptoObject = secureReadable.getCryptoObject();
-                if (cryptoObject instanceof Mac)
-                {
-                    resultMac = ((Mac)cryptoObject).doFinal();
-                }
-            }
-        }
-
-        return resultMac;
     }
 
     public CMSTypedStream getContentStream(Recipient recipient)

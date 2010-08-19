@@ -101,14 +101,14 @@ public class KeyAgreeRecipientInformation
         this.encryptedKey = encryptedKey;
     }
 
-    private PublicKey getSenderPublicKey(Key receiverPrivateKey,
-        OriginatorIdentifierOrKey originator, Provider prov)
-        throws CMSException, GeneralSecurityException, IOException
+    private SubjectPublicKeyInfo getSenderPublicKeyInfo(AlgorithmIdentifier recKeyAlgId,
+        OriginatorIdentifierOrKey originator)
+        throws CMSException, IOException
     {
         OriginatorPublicKey opk = originator.getOriginatorKey();
         if (opk != null)
         {
-            return getPublicKeyFromOriginatorPublicKey(receiverPrivateKey, opk, prov);
+            return getPublicKeyInfoFromOriginatorPublicKey(recKeyAlgId, opk);
         }
 
         OriginatorId origID = new OriginatorId();
@@ -126,25 +126,20 @@ public class KeyAgreeRecipientInformation
             origID.setSubjectKeyIdentifier(ski.getKeyIdentifier());
         }
 
-        return getPublicKeyFromOriginatorId(origID, prov);
+        return getPublicKeyInfoFromOriginatorId(origID);
     }
 
-    private PublicKey getPublicKeyFromOriginatorPublicKey(Key receiverPrivateKey,
-            OriginatorPublicKey originatorPublicKey, Provider prov)
-            throws CMSException, GeneralSecurityException, IOException
+    private SubjectPublicKeyInfo getPublicKeyInfoFromOriginatorPublicKey(AlgorithmIdentifier recKeyAlgId,
+            OriginatorPublicKey originatorPublicKey)
     {
-        PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(
-            ASN1Object.fromByteArray(receiverPrivateKey.getEncoded()));
-
         SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(
-            privInfo.getAlgorithmId(),
+            recKeyAlgId,
             originatorPublicKey.getPublicKey().getBytes());
-        X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
-        KeyFactory fact = KeyFactory.getInstance(keyEncAlg.getObjectId().getId(), prov);
-        return fact.generatePublic(pubSpec);
+
+        return pubInfo;
     }
 
-    private PublicKey getPublicKeyFromOriginatorId(OriginatorId origID, Provider prov)
+    private SubjectPublicKeyInfo getPublicKeyInfoFromOriginatorId(OriginatorId origID)
             throws CMSException
     {
         // TODO Support all alternatives for OriginatorIdentifierOrKey
@@ -152,11 +147,33 @@ public class KeyAgreeRecipientInformation
         throw new CMSException("No support for 'originator' as IssuerAndSerialNumber or SubjectKeyIdentifier");
     }
 
+    private PublicKey getSenderPublicKey(Key receiverPrivateKey,
+        OriginatorIdentifierOrKey originator, Provider prov)
+        throws CMSException, GeneralSecurityException, IOException
+    {
+        SubjectPublicKeyInfo pubInfo = getSenderPublicKeyInfo(PrivateKeyInfo.getInstance(receiverPrivateKey.getEncoded()).getAlgorithmId(), originator);
+
+        X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
+        KeyFactory fact = KeyFactory.getInstance(keyEncAlg.getAlgorithm().getId(), prov);
+        return fact.generatePublic(pubSpec);
+    }
+
+    private PublicKey getPublicKeyFromOriginatorPublicKey(Key receiverPrivateKey,
+            OriginatorPublicKey originatorPublicKey, Provider prov)
+            throws CMSException, GeneralSecurityException, IOException
+    {
+        SubjectPublicKeyInfo pubInfo = getPublicKeyInfoFromOriginatorPublicKey(PrivateKeyInfo.getInstance(receiverPrivateKey.getEncoded()).getAlgorithmId(), originatorPublicKey);
+
+        X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
+        KeyFactory fact = KeyFactory.getInstance(keyEncAlg.getAlgorithm().getId(), prov);
+        return fact.generatePublic(pubSpec);
+    }
+
     private SecretKey calculateAgreedWrapKey(String wrapAlg,
         PublicKey senderPublicKey, PrivateKey receiverPrivateKey, Provider prov)
         throws CMSException, GeneralSecurityException, IOException
     {
-        String agreeAlg = keyEncAlg.getObjectId().getId();
+        String agreeAlg = keyEncAlg.getAlgorithm().getId();
 
         if (agreeAlg.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
         {
@@ -223,8 +240,10 @@ public class KeyAgreeRecipientInformation
             throw new CMSException("originator key invalid.", e);
         }
     }
+
     /**
      * decrypt the content and return it
+     * @deprecated use getContentStream(Recipient) method
      */
     public CMSTypedStream getContentStream(
         Key key,
@@ -234,6 +253,10 @@ public class KeyAgreeRecipientInformation
         return getContentStream(key, CMSUtils.getProvider(prov));
     }
 
+    /**
+     * decrypt the content and return it
+     * @deprecated use getContentStream(Recipient) method
+     */
     public CMSTypedStream getContentStream(
         Key key,
         Provider prov)
@@ -242,5 +265,17 @@ public class KeyAgreeRecipientInformation
         Key sKey = getSessionKey(key, prov);
 
         return getContentFromSessionKey(sKey, prov);
+    }
+
+    public CMSTypedStream getContentStream(Recipient recipient)
+        throws CMSException, IOException
+    {
+        KeyAgreeRecipient agreeRecipient = (KeyAgreeRecipient)recipient;
+        AlgorithmIdentifier    recKeyAlgId = agreeRecipient.getPrivateKeyAlgorithmIdentifier();
+
+        operator = ((KeyAgreeRecipient)recipient).getRecipientOperator(keyEncAlg, secureReadable.getAlgorithm(), getSenderPublicKeyInfo(recKeyAlgId,
+                info.getOriginator()), info.getUserKeyingMaterial(), encryptedKey.getOctets());
+
+        return new CMSTypedStream(operator.getInputStream(secureReadable.getInputStream()));
     }
 }
