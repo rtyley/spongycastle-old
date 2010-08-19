@@ -1,5 +1,6 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -7,6 +8,8 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -18,7 +21,11 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
+import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.crypto.PBEParametersGenerator;
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.bouncycastle.crypto.params.KeyParameter;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -27,6 +34,22 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class PasswordRecipientInformation
     extends RecipientInformation
 {
+    static Map KEYSIZES = new HashMap();
+    static Map BLOCKSIZES = new HashMap();
+
+    static
+    {
+        BLOCKSIZES.put(CMSAlgorithm.DES_EDE3_CBC,  new Integer(8));
+        BLOCKSIZES.put(CMSAlgorithm.AES128_CBC,  new Integer(16));
+        BLOCKSIZES.put(CMSAlgorithm.AES192_CBC,  new Integer(16));
+        BLOCKSIZES.put(CMSAlgorithm.AES256_CBC,  new Integer(16));
+
+        KEYSIZES.put(CMSAlgorithm.DES_EDE3_CBC,  new Integer(192));
+        KEYSIZES.put(CMSAlgorithm.AES128_CBC,  new Integer(128));
+        KEYSIZES.put(CMSAlgorithm.AES192_CBC,  new Integer(192));
+        KEYSIZES.put(CMSAlgorithm.AES256_CBC,  new Integer(256));
+    }
+
     private PasswordRecipientInfo info;
 
     PasswordRecipientInformation(
@@ -176,5 +199,39 @@ public class PasswordRecipientInformation
         {
             throw new CMSException("invalid iv.", e);
         }
+    }
+
+    public CMSTypedStream getContentStream(Recipient recipient)
+        throws CMSException, IOException
+    {
+        PasswordRecipient pbeRecipient = (PasswordRecipient)recipient;
+        AlgorithmIdentifier kekAlg = AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm());
+        ASN1Sequence        kekAlgParams = (ASN1Sequence)kekAlg.getParameters();
+        DERObjectIdentifier kekAlgName = DERObjectIdentifier.getInstance(kekAlgParams.getObjectAt(0));
+        PBKDF2Params        params = PBKDF2Params.getInstance(info.getKeyDerivationAlgorithm().getParameters());
+
+        byte[]              derivedKey;
+        int keySize = ((Integer)KEYSIZES.get(kekAlgName)).intValue();
+
+        if (pbeRecipient.getPasswordConversionScheme() == PasswordRecipient.PKCS5_SCHEME2)
+        {
+            PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator();
+
+            gen.init(PBEParametersGenerator.PKCS5PasswordToBytes(pbeRecipient.getPassword()), params.getSalt(), params.getIterationCount().intValue());
+
+            derivedKey = ((KeyParameter)gen.generateDerivedParameters(keySize)).getKey();
+        }
+        else
+        {
+            PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator();
+
+            gen.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(pbeRecipient.getPassword()), params.getSalt(), params.getIterationCount().intValue());
+
+            derivedKey = ((KeyParameter)gen.generateDerivedParameters(keySize)).getKey();
+        }
+        
+        operator = pbeRecipient.getRecipientOperator(AlgorithmIdentifier.getInstance(kekAlg.getParameters()), secureReadable.getAlgorithm(), derivedKey, info.getEncryptedKey().getOctets());
+
+        return new CMSTypedStream(operator.getInputStream(secureReadable.getInputStream()));
     }
 }

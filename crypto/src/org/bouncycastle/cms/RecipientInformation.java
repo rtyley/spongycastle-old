@@ -18,6 +18,7 @@ public abstract class RecipientInformation
     protected RecipientId rid = new RecipientId();
     protected AlgorithmIdentifier   keyEncAlg;
     protected CMSSecureReadable     secureReadable;
+    protected RecipientOperator     operator;
 
     private byte[] resultMac;
 
@@ -186,6 +187,7 @@ public abstract class RecipientInformation
         }
     }
 
+
     /**
      * Return the MAC calculated for the content stream. Note: this call is only meaningful once all
      * the content has been read.
@@ -196,29 +198,44 @@ public abstract class RecipientInformation
     {
         if (resultMac == null)
         {
-            Object cryptoObject = secureReadable.getCryptoObject();
-            if (cryptoObject instanceof Mac)
+            if (operator != null)
             {
-                resultMac = ((Mac)cryptoObject).doFinal();
+                if (operator.isMacBased())
+                {
+                    resultMac = operator.getMac();
+                }
+            }
+            else
+            {
+                Object cryptoObject = secureReadable.getCryptoObject();
+                if (cryptoObject instanceof Mac)
+                {
+                    resultMac = ((Mac)cryptoObject).doFinal();
+                }
             }
         }
 
         return resultMac;
     }
 
+    /**
+     * decrypt the content and return it
+     * @deprecated use getContentStream(Recipient) method
+     */
     public CMSTypedStream getContentStream(Key key, String provider)
         throws CMSException, NoSuchProviderException
     {
         return getContentStream(key, CMSUtils.getProvider(provider));
     }
 
+    /**
+     * decrypt the content and return it
+     * @deprecated use getContentStream(Recipient) method
+     */
     public abstract CMSTypedStream getContentStream(Key key, Provider provider)
         throws CMSException;
 
 
-    public CMSTypedStream getContentStream(Recipient recipient)
-        throws CMSException, IOException
-    {
-       return null;
-    }
+    public abstract CMSTypedStream getContentStream(Recipient recipient)
+        throws CMSException, IOException;
 }

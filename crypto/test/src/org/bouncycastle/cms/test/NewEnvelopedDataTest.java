@@ -35,12 +35,10 @@ import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSPBEKey;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.KeyTransRecipient;
 import org.bouncycastle.cms.KeyTransRecipientInformation;
-import org.bouncycastle.cms.PKCS5Scheme2PBEKey;
-import org.bouncycastle.cms.PKCS5Scheme2UTF8PBEKey;
+import org.bouncycastle.cms.PasswordRecipient;
 import org.bouncycastle.cms.PasswordRecipientInformation;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
@@ -48,9 +46,11 @@ import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKEKEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKEKRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.JceKeyAgreeEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.JcePasswordEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -310,7 +310,7 @@ public class NewEnvelopedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent((KeyTransRecipient)new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC));
+            byte[] recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC));
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -344,7 +344,7 @@ public class NewEnvelopedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent((KeyTransRecipient)new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC));
+            byte[] recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC));
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -504,7 +504,7 @@ public class NewEnvelopedDataTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), NISTObjectIdentifiers.id_aes128_wrap.getId());
 
-            byte[] recData = recipient.getContent(kek, BC);
+            byte[] recData = recipient.getContent(new JceKEKEnvelopedRecipient(kek).setProvider(BC));
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -689,7 +689,7 @@ public class NewEnvelopedDataTest
         RecipientInformation recipient = recipients.get(rid);
         assertNotNull(recipient);
 
-        byte[] actualData = recipient.getContent(reciPrivKey, provider);
+        byte[] actualData = recipient.getContent(new JceKeyAgreeEnvelopedRecipient(reciPrivKey).setProvider(provider));
         assertEquals(true, Arrays.equals(expectedData, actualData));
     }
 
@@ -820,7 +820,7 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientInfoGenerator(new JcePasswordRecipientInfoGenerator(new ASN1ObjectIdentifier(algorithm), "password".toCharArray()).setProvider(BC).setSaltAndIterationCount(new byte[20], 5));
+        edGen.addRecipientInfoGenerator(new JcePasswordRecipientInfoGenerator(new ASN1ObjectIdentifier(algorithm), "password".toCharArray()).setProvider(BC).setPasswordConversionScheme(PasswordRecipient.PKCS5_SCHEME2).setSaltAndIterationCount(new byte[20], 5));
 
         CMSEnvelopedData ed = edGen.generate(
                               new CMSProcessableByteArray(data),
@@ -838,10 +838,7 @@ public class NewEnvelopedDataTest
         {
             PasswordRecipientInformation recipient = (PasswordRecipientInformation)it.next();
 
-            CMSPBEKey key = new PKCS5Scheme2PBEKey("password".toCharArray(),
-                recipient.getKeyDerivationAlgParameters(BC));
-
-            byte[] recData = recipient.getContent(key, BC);
+            byte[] recData = recipient.getContent(new JcePasswordEnvelopedRecipient("password".toCharArray()).setPasswordConversionScheme(PasswordRecipient.PKCS5_SCHEME2).setProvider(BC));
 
             assertEquals(true, Arrays.equals(data, recData));
         }
@@ -857,7 +854,7 @@ public class NewEnvelopedDataTest
 
         RecipientInformation   recipient = (RecipientInformation)it.next();
 
-        byte[] recData = recipient.getContent(new PKCS5Scheme2PBEKey("password".toCharArray(), ((PasswordRecipientInformation)recipient).getKeyDerivationAlgParameters(BC)), BC);
+        byte[] recData = recipient.getContent(new JcePasswordEnvelopedRecipient("password".toCharArray()).setPasswordConversionScheme(PasswordRecipient.PKCS5_SCHEME2).setProvider(BC));
         assertEquals(true, Arrays.equals(data, recData));
     }
 
@@ -886,7 +883,7 @@ public class NewEnvelopedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), new byte[20], 5), BC);
+            byte[] recData = recipient.getContent(new JcePasswordEnvelopedRecipient("abc\u5639\u563b".toCharArray()).setProvider(BC));
             assertEquals(true, Arrays.equals(data, recData));
         }
         else
@@ -901,7 +898,7 @@ public class NewEnvelopedDataTest
 
         RecipientInformation   recipient = (RecipientInformation)it.next();
 
-        byte[] recData = recipient.getContent(new PKCS5Scheme2UTF8PBEKey("abc\u5639\u563b".toCharArray(), ((PasswordRecipientInformation)recipient).getKeyDerivationAlgParameters(BC)), BC);
+        byte[] recData = recipient.getContent(new JcePasswordEnvelopedRecipient("abc\u5639\u563b".toCharArray()).setProvider(BC));
         assertEquals(true, Arrays.equals(data, recData));
     }
 

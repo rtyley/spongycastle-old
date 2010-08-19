@@ -13,21 +13,26 @@ import javax.crypto.SecretKey;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSAuthenticatedData;
 import org.bouncycastle.cms.CMSAuthenticatedDataGenerator;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSPBEKey;
 import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.PKCS5Scheme2PBEKey;
+import org.bouncycastle.cms.PasswordRecipient;
 import org.bouncycastle.cms.PasswordRecipientInformation;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceKEKAuthenticatedRecipient;
 import org.bouncycastle.cms.jcajce.JceKEKRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.JceKeyAgreeAuthenticatedRecipient;
+import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyTransAuthenticatedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.JcePasswordAuthenticatedRecipient;
+import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -130,7 +135,7 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
 
-        adGen.addKeyAgreementRecipient(CMSAuthenticatedDataGenerator.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), _reciEcCert, CMSAuthenticatedDataGenerator.AES128_WRAP, BC);
+        adGen.addRecipientInfoGenerator(new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), CMSAlgorithm.AES128_WRAP, _reciEcCert).setProvider(BC));
 
         CMSAuthenticatedData ad = adGen.generate(
                               new CMSProcessableByteArray(data),
@@ -148,7 +153,7 @@ public class NewAuthenticatedDataTest
         {
             RecipientInformation   recipient = (RecipientInformation)it.next();
 
-            byte[] recData = recipient.getContent(_reciEcKP.getPrivate(), BC);
+            byte[] recData = recipient.getContent(new JceKeyAgreeAuthenticatedRecipient(_reciEcKP.getPrivate()).setProvider(BC));
             assertTrue(Arrays.equals(data, recData));
             assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));
         }
@@ -165,7 +170,7 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
 
-        adGen.addKeyTransRecipient(_reciCert);
+        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -189,7 +194,7 @@ public class NewAuthenticatedDataTest
 
             assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
 
-            byte[] recData = recipient.getContent(_reciKP.getPrivate(), BC);
+            byte[] recData = recipient.getContent(new JceKeyTransAuthenticatedRecipient(_reciKP.getPrivate()).setProvider(BC));
 
             assertTrue(Arrays.equals(data, recData));
             assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));
@@ -278,7 +283,7 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
 
-        adGen.addPasswordRecipient(new PKCS5Scheme2PBEKey("password".toCharArray(), new byte[20], 5), algorithm);
+        adGen.addRecipientInfoGenerator(new JcePasswordRecipientInfoGenerator(new ASN1ObjectIdentifier(algorithm), "password".toCharArray()).setProvider(BC).setSaltAndIterationCount(new byte[20], 5));
 
         CMSAuthenticatedData ad = adGen.generate(
                               new CMSProcessableByteArray(data),
@@ -296,10 +301,9 @@ public class NewAuthenticatedDataTest
         {
             PasswordRecipientInformation recipient = (PasswordRecipientInformation)it.next();
 
-            CMSPBEKey key = new PKCS5Scheme2PBEKey("password".toCharArray(),
-                recipient.getKeyDerivationAlgParameters(BC));
+            PasswordRecipient pbeRep = new JcePasswordAuthenticatedRecipient("password".toCharArray()).setProvider(BC);
 
-            byte[] recData = recipient.getContent(key, BC);
+            byte[] recData = recipient.getContent(pbeRep);
 
             assertTrue(Arrays.equals(data, recData));
             assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));

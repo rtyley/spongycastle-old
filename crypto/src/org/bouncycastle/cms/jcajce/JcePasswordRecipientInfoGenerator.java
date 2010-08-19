@@ -2,7 +2,6 @@ package org.bouncycastle.cms.jcajce;
 
 import java.security.GeneralSecurityException;
 import java.security.Provider;
-import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -18,7 +17,6 @@ public class JcePasswordRecipientInfoGenerator
     extends PasswordRecipientInfoGenerator
 {
     private EnvelopedDataHelper helper = new DefaultEnvelopedDataHelper();
-    private SecureRandom random;
 
     public JcePasswordRecipientInfoGenerator(ASN1ObjectIdentifier kekAlgorithm, char[] password)
     {
