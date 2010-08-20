@@ -5,7 +5,6 @@ import java.security.PublicKey;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.crmf.CRMFException;
@@ -14,27 +13,25 @@ import org.bouncycastle.cert.crmf.CertificateRequestMessage;
 public class JcaCertificateRequestMessage
     extends CertificateRequestMessage
 {
-    private final CRMFHelper helper;
-
-    private JcaCertificateRequestMessage(CertReqMsg msg, CRMFHelper helper)
-    {
-        super(msg);
-        this.helper = helper;
-    }
+    private CRMFHelper helper = new DefaultCRMFHelper();
 
     public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg)
     {
-        this(certReqMsg.toASN1Structure(), new DefaultCRMFHelper());
+        super(certReqMsg.toASN1Structure());
     }
 
-    public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg, String providerName)
+    public JcaCertificateRequestMessage setProvider(String providerName)
     {
-        this(certReqMsg.toASN1Structure(), new NamedCRMFHelper(providerName));
+        this.helper = new NamedCRMFHelper(providerName);
+
+        return this;
     }
 
-    public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg, Provider provider)
+    public JcaCertificateRequestMessage setProvider(Provider provider)
     {
-        this(certReqMsg.toASN1Structure(), new ProviderCRMFHelper(provider));
+        this.helper = new ProviderCRMFHelper(provider);
+
+        return this;
     }
 
     public X500Principal getSubjectX500Principal()
