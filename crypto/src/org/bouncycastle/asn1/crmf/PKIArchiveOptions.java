@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.crmf;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 
@@ -10,12 +11,18 @@ public class PKIArchiveOptions
     implements ASN1Choice
 {
     private EncryptedKey encKey;
+    private boolean archiveRemGenPrivKey;
 
     public PKIArchiveOptions(EncryptedKey encKey)
     {
         this.encKey = encKey;
     }
-    
+
+    public PKIArchiveOptions(boolean archiveRemGenPrivKey)
+    {
+        this.archiveRemGenPrivKey = archiveRemGenPrivKey;
+    }
+
     /**
      * <pre>
      *  PKIArchiveOptions ::= CHOICE {
@@ -31,6 +38,11 @@ public class PKIArchiveOptions
      */
     public DERObject toASN1Object()
     {
-        return new DERTaggedObject(true, 0, encKey);
+        if (encKey != null)
+        {
+            return new DERTaggedObject(true, 0, encKey);  // choice
+        }
+
+        return new DERTaggedObject(false, 2, new DERBoolean(archiveRemGenPrivKey));
     }
 }
