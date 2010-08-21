@@ -193,7 +193,7 @@ public class NewEnvelopedDataStreamTest
         //
         CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert));
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
@@ -216,7 +216,7 @@ public class NewEnvelopedDataStreamTest
         //
         edGen = new CMSEnvelopedDataStreamGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert));
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         bOut = new ByteArrayOutputStream();
 
@@ -251,7 +251,7 @@ public class NewEnvelopedDataStreamTest
         //
         CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert));
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
@@ -276,7 +276,7 @@ public class NewEnvelopedDataStreamTest
 
         edGen.setBufferSize(300);
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert));
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         bOut = new ByteArrayOutputStream();
 
