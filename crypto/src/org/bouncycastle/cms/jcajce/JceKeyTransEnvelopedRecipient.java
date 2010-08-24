@@ -34,9 +34,9 @@ public class JceKeyTransEnvelopedRecipient
                 return contentEncryptionAlgorithm;
             }
 
-            public InputStream getInputStream(InputStream dataOut)
+            public InputStream getInputStream(InputStream dataIn)
             {
-                return new CipherInputStream(dataOut, dataCipher);
+                return new CipherInputStream(dataIn, dataCipher);
             }
         });
     }
