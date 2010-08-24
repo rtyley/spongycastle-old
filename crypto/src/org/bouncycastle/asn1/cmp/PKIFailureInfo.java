@@ -18,24 +18,34 @@ import org.bouncycastle.asn1.DERBitString;
  * incorrectData        (7), -- the requester's data is incorrect (for notary services)
  * missingTimeStamp     (8), -- when the timestamp is missing but should be there (by policy)
  * badPOP               (9)  -- the proof-of-possession failed
+ * certRevoked         (10),
+ * certConfirmed       (11),
+ * wrongIntegrity      (12),
+ * badRecipientNonce   (13), 
  * timeNotAvailable    (14),
  *   -- the TSA's time source is not available
  * unacceptedPolicy    (15),
  *   -- the requested TSA policy is not supported by the TSA
  * unacceptedExtension (16),
  *   -- the requested extension is not supported by the TSA
- *  addInfoNotAvailable (17)
- *    -- the additional information requested could not be understood
- *    -- or is not available
- *  systemFailure       (25)
- *    -- the request cannot be handled due to system failure 
+ * addInfoNotAvailable (17)
+ *   -- the additional information requested could not be understood
+ *   -- or is not available
+ * badSenderNonce      (18),
+ * badCertTemplate     (19),
+ * signerNotTrusted    (20),
+ * transactionIdInUse  (21),
+ * unsupportedVersion  (22),
+ * notAuthorized       (23),
+ * systemUnavail       (24),    
+ * systemFailure       (25),
+ *   -- the request cannot be handled due to system failure
+ * duplicateCertReq    (26) 
  * </pre>
  */
 public class PKIFailureInfo
     extends DERBitString
 {
-
-
     public static final int badAlg               = (1 << 7); // unrecognized or unsupported Algorithm Identifier
     public static final int badMessageCheck      = (1 << 6); // integrity check failed (e.g., signature did not verify)
     public static final int badRequest           = (1 << 5);
@@ -46,12 +56,24 @@ public class PKIFailureInfo
     public static final int incorrectData        = 1;        // the requester's data is incorrect (for notary services)
     public static final int missingTimeStamp     = (1 << 15); // when the timestamp is missing but should be there (by policy)
     public static final int badPOP               = (1 << 14); // the proof-of-possession failed
+    public static final int certRevoked          = (1 << 13);
+    public static final int certConfirmed        = (1 << 12);
+    public static final int wrongIntegrity       = (1 << 11);
+    public static final int badRecipientNonce    = (1 << 10);
     public static final int timeNotAvailable     = (1 << 9); // the TSA's time source is not available
     public static final int unacceptedPolicy     = (1 << 8); // the requested TSA policy is not supported by the TSA
     public static final int unacceptedExtension  = (1 << 23); //the requested extension is not supported by the TSA
     public static final int addInfoNotAvailable  = (1 << 22); //the additional information requested could not be understood or is not available
+    public static final int badSenderNonce       = (1 << 21);
+    public static final int badCertTemplate      = (1 << 20);
+    public static final int signerNotTrusted     = (1 << 19);
+    public static final int transactionIdInUse   = (1 << 18);
+    public static final int unsupportedVersion   = (1 << 17);
+    public static final int notAuthorized        = (1 << 16);
+    public static final int systemUnavail        = (1 << 31);
     public static final int systemFailure        = (1 << 30); //the request cannot be handled due to system failure
-    
+    public static final int duplicateCertReq     = (1 << 29);
+
     /** @deprecated use lower case version */
     public static final int BAD_ALG                   = badAlg; // unrecognized or unsupported Algorithm Identifier
     /** @deprecated use lower case version */
