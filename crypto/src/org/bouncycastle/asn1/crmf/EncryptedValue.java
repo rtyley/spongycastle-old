@@ -88,6 +88,36 @@ public class EncryptedValue
         this.encValue = encValue;
     }
 
+    public AlgorithmIdentifier getIntendedAlg()
+    {
+        return intendedAlg;
+    }
+
+    public AlgorithmIdentifier getSymmAlg()
+    {
+        return symmAlg;
+    }
+
+    public DERBitString getEncSymmKey()
+    {
+        return encSymmKey;
+    }
+
+    public AlgorithmIdentifier getKeyAlg()
+    {
+        return keyAlg;
+    }
+
+    public ASN1OctetString getValueHint()
+    {
+        return valueHint;
+    }
+
+    public DERBitString getEncValue()
+    {
+        return encValue;
+    }
+
     /**
      * <pre>
      * EncryptedValue ::= SEQUENCE {
