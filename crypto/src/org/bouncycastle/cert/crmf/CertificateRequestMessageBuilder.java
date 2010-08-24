@@ -176,7 +176,7 @@ public class CertificateRequestMessageBuilder
             }
             else
             {
-                builder.setMacBuilder(pkmacGenerator.generate(password, pubKeyInfo));
+                builder.setPublicKeyMac(pkmacGenerator, password);
             }
 
             v.add(new ProofOfPossession(builder.build(popSigner)));
