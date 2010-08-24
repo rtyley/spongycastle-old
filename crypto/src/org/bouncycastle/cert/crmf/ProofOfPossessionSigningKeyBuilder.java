@@ -26,9 +26,10 @@ public class ProofOfPossessionSigningKeyBuilder
         return this;
     }
 
-    public ProofOfPossessionSigningKeyBuilder setMacBuilder(PKMACValue publicKeyMAC)
+    public ProofOfPossessionSigningKeyBuilder setPublicKeyMac(PKMACValueGenerator generator, char[] password)
+        throws CRMFException
     {
-        this.publicKeyMAC = publicKeyMAC;
+        this.publicKeyMAC = generator.generate(password, pubKeyInfo);
 
         return this;
     }
