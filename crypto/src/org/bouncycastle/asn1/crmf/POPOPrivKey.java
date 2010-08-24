@@ -43,8 +43,9 @@ public class POPOPrivKey
         case encryptedKey:
             this.obj = EnvelopedData.getInstance(obj, false);
             break;
+        default:
+            throw new IllegalArgumentException("unknown tag in POPOPrivKey");
         }
-        this.obj = obj.getObject();
     }
 
     public static POPOPrivKey getInstance(ASN1TaggedObject tagged, boolean isExplicit)
