@@ -58,13 +58,12 @@ public class EncryptedValue
         {
             return (EncryptedValue)o;
         }
-
-        if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new EncryptedValue((ASN1Sequence)o);
+            return new EncryptedValue(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        throw new IllegalArgumentException("null object in factory");
     }
 
     public EncryptedValue(

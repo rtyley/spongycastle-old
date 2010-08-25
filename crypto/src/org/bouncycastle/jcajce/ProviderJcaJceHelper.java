@@ -1,12 +1,13 @@
-package org.bouncycastle.cms.jcajce;
+package org.bouncycastle.jcajce;
 
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import java.security.Signature;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -14,62 +15,74 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 
-class ProviderEnvelopedDataHelper
-    extends EnvelopedDataHelper
+public class ProviderJcaJceHelper
+    implements JcaJceHelper
 {
     private final Provider provider;
 
-    public ProviderEnvelopedDataHelper(Provider provider)
+    public ProviderJcaJceHelper(Provider provider)
     {
         this.provider = provider;
     }
 
-    protected Cipher createCipher(
+    public Cipher createCipher(
         String algorithm)
         throws NoSuchAlgorithmException, NoSuchPaddingException
     {
         return Cipher.getInstance(algorithm, provider);
     }
 
-    protected Mac createMac(String algorithm)
+    public Mac createMac(String algorithm)
         throws NoSuchAlgorithmException
     {
         return Mac.getInstance(algorithm, provider);
     }
 
-    protected KeyAgreement createKeyAgreement(String algorithm)
+    public KeyAgreement createKeyAgreement(String algorithm)
         throws NoSuchAlgorithmException
     {
         return KeyAgreement.getInstance(algorithm, provider);
     }
 
-    protected AlgorithmParameterGenerator createAlgorithmParameterGenerator(String algorithm)
+    public AlgorithmParameterGenerator createAlgorithmParameterGenerator(String algorithm)
         throws NoSuchAlgorithmException
     {
         return AlgorithmParameterGenerator.getInstance(algorithm, provider);
     }
 
-    protected AlgorithmParameters createAlgorithmParameters(String algorithm)
+    public AlgorithmParameters createAlgorithmParameters(String algorithm)
         throws NoSuchAlgorithmException
     {
         return AlgorithmParameters.getInstance(algorithm, provider);
     }
 
-    protected KeyGenerator createKeyGenerator(String algorithm)
+    public KeyGenerator createKeyGenerator(String algorithm)
         throws NoSuchAlgorithmException
     {
         return KeyGenerator.getInstance(algorithm, provider);
     }
 
-    protected KeyFactory createKeyFactory(String algorithm)
+    public KeyFactory createKeyFactory(String algorithm)
         throws NoSuchAlgorithmException
     {
         return KeyFactory.getInstance(algorithm, provider);
     }
 
-    protected KeyPairGenerator createKeyPairGenerator(String algorithm)
-        throws GeneralSecurityException
+    public KeyPairGenerator createKeyPairGenerator(String algorithm)
+        throws NoSuchAlgorithmException
     {
         return KeyPairGenerator.getInstance(algorithm, provider);
+    }
+
+    public MessageDigest createDigest(String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return MessageDigest.getInstance(algorithm, provider);
+    }
+
+    public Signature createSignature(String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return Signature.getInstance(algorithm, provider);
     }
 }

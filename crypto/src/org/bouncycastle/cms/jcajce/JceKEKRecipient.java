@@ -10,12 +10,15 @@ import javax.crypto.Cipher;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KEKRecipient;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 
 public abstract class JceKEKRecipient
     implements KEKRecipient
 {
     private Key recipientKey;
-    protected EnvelopedDataHelper helper = new DefaultEnvelopedDataHelper();
+    protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
 
     public JceKEKRecipient(Key recipientKey)
     {
@@ -24,14 +27,14 @@ public abstract class JceKEKRecipient
 
     public JceKEKRecipient setProvider(Provider provider)
     {
-        this.helper = new ProviderEnvelopedDataHelper(provider);
+        this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JceKEKRecipient setProvider(String providerName)
     {
-        this.helper = new NamedEnvelopedDataHelper(providerName);
+        this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }

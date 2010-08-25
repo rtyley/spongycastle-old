@@ -18,19 +18,30 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.crmf.EncryptedValue;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.crmf.EncryptedValueBuilder;
+import org.bouncycastle.cert.crmf.EncryptedValueParser;
 import org.bouncycastle.cert.crmf.PKMACValueGenerator;
 import org.bouncycastle.cert.crmf.PKMACValueVerifier;
+import org.bouncycastle.cert.crmf.ValueDecryptorGenerator;
 import org.bouncycastle.cert.crmf.jcajce.JcaCertificateRequestMessage;
 import org.bouncycastle.cert.crmf.jcajce.JcaCertificateRequestMessageBuilder;
+import org.bouncycastle.cert.crmf.jcajce.JcaEncryptedValueBuilder;
 import org.bouncycastle.cert.crmf.jcajce.JcaPKIArchiveControlBuilder;
 import org.bouncycastle.cert.crmf.jcajce.JcaPKMACValuesCalculator;
+import org.bouncycastle.cert.crmf.jcajce.JceAsymmetricValueDecryptorGenerator;
+import org.bouncycastle.cert.crmf.jcajce.JceCRMFEncryptorBuilder;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.operator.jcajce.JceAsymmetricKeyWrapper;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 
 public class AllTests
@@ -171,6 +182,37 @@ public class AllTests
         assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic())));
 
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
+    }
+
+    public void testEncryptedValue()
+        throws Exception
+    {
+        KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
+
+        kGen.initialize(512);
+
+        KeyPair kp = kGen.generateKeyPair();
+        X509Certificate cert = makeV1Certificate(kp, "CN=Test", kp, "CN=Test");
+
+        EncryptedValueBuilder build = new JcaEncryptedValueBuilder(cert, new JceAsymmetricKeyWrapper(cert.getPublicKey()).setProvider(BC), new JceCRMFEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
+        EncryptedValue value = build.build();
+        ValueDecryptorGenerator decGen = new JceAsymmetricValueDecryptorGenerator(kp.getPrivate()).setProvider(BC);
+
+        // try direct
+        encryptedValueParserTest(value, decGen, cert);
+
+        // try indirect
+        encryptedValueParserTest(EncryptedValue.getInstance(value.getEncoded()), decGen, cert);
+    }
+
+    private void encryptedValueParserTest(EncryptedValue value, ValueDecryptorGenerator decGen, X509Certificate cert)
+        throws Exception
+    {
+        EncryptedValueParser  parser = new EncryptedValueParser(value);
+
+        X509CertificateHolder holder = parser.readCertificateHolder(decGen);
+
+        assertTrue(Arrays.areEqual(cert.getEncoded(), holder.getEncoded()));
     }
 
     private static X509Certificate makeV1Certificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN)

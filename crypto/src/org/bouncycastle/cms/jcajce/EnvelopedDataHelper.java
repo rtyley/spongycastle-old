@@ -1,7 +1,6 @@
 package org.bouncycastle.cms.jcajce;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
@@ -18,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -39,8 +37,9 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.jcajce.JcaJceHelper;
 
-abstract class EnvelopedDataHelper
+class EnvelopedDataHelper
 {
     protected static final Map BASE_CIPHER_NAMES = new HashMap();
     protected static final Map CIPHER_ALG_NAMES = new HashMap();
@@ -65,9 +64,12 @@ abstract class EnvelopedDataHelper
         MAC_ALG_NAMES.put(CMSAlgorithm.AES256_CBC,  "AESMac");
     }
 
-    private SecretKey           encKey;
-    private AlgorithmIdentifier algorithmIdentifier;
-    private Cipher              cipher;
+    private JcaJceHelper        helper;
+
+    EnvelopedDataHelper(JcaJceHelper helper)
+    {
+        this.helper = helper;
+    }
 
     String getBaseCipherName(ASN1ObjectIdentifier algorithm)
     {
@@ -93,14 +95,14 @@ abstract class EnvelopedDataHelper
                 try
                 {
                     // this is reversed as the Sun policy files now allow unlimited strength RSA
-                    return createCipher(cipherName);
+                    return helper.createCipher(cipherName);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
                     // Ignore
                 }
             }
-            return createCipher(algorithm.getId());
+            return helper.createCipher(algorithm.getId());
         }
         catch (GeneralSecurityException e)
         {
@@ -120,18 +122,18 @@ abstract class EnvelopedDataHelper
                 try
                 {
                     // this is reversed as the Sun policy files now allow unlimited strength RSA
-                    return createMac(macName);
+                    return helper.createMac(macName);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
                     // Ignore
                 }
             }
-            return createMac(algorithm.getId());
+            return helper.createMac(algorithm.getId());
         }
         catch (GeneralSecurityException e)
         {
-            throw new CMSException("cannot create cipher: " + e.getMessage(), e);
+            throw new CMSException("cannot create mac: " + e.getMessage(), e);
         }
     }
 
@@ -149,7 +151,7 @@ abstract class EnvelopedDataHelper
 
         try
         {
-             return createCipher(cipherName);
+             return helper.createCipher(cipherName);
         }
         catch (GeneralSecurityException e)
         {
@@ -169,14 +171,14 @@ abstract class EnvelopedDataHelper
                 try
                 {
                     // this is reversed as the Sun policy files now allow unlimited strength RSA
-                    return createKeyAgreement(agreementName);
+                    return helper.createKeyAgreement(agreementName);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
                     // Ignore
                 }
             }
-            return createKeyAgreement(algorithm.getId());
+            return helper.createKeyAgreement(algorithm.getId());
         }
         catch (GeneralSecurityException e)
         {
@@ -194,14 +196,14 @@ abstract class EnvelopedDataHelper
             try
             {
                 // this is reversed as the Sun policy files now allow unlimited strength RSA
-                return createAlgorithmParameterGenerator(algorithmName);
+                return helper.createAlgorithmParameterGenerator(algorithmName);
             }
             catch (NoSuchAlgorithmException e)
             {
                 // Ignore
             }
         }
-        return createAlgorithmParameterGenerator(algorithm.getId());
+        return helper.createAlgorithmParameterGenerator(algorithm.getId());
     }
 
     Cipher createContentCipher(final Key sKey, final AlgorithmIdentifier encryptionAlgID)
@@ -327,14 +329,14 @@ abstract class EnvelopedDataHelper
             try
             {
                 // this is reversed as the Sun policy files now allow unlimited strength RSA
-                return createAlgorithmParameters(algorithmName);
+                return helper.createAlgorithmParameters(algorithmName);
             }
             catch (NoSuchAlgorithmException e)
             {
                 // Ignore
             }
         }
-        return createAlgorithmParameters(algorithm.getId());
+        return helper.createAlgorithmParameters(algorithm.getId());
     }
 
 
@@ -350,14 +352,14 @@ abstract class EnvelopedDataHelper
                 try
                 {
                     // this is reversed as the Sun policy files now allow unlimited strength RSA
-                    return createKeyPairGenerator(cipherName);
+                    return helper.createKeyPairGenerator(cipherName);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
                     // Ignore
                 }
             }
-            return createKeyPairGenerator(algorithm.getId());
+            return helper.createKeyPairGenerator(algorithm.getId());
         }
         catch (GeneralSecurityException e)
         {
@@ -377,14 +379,14 @@ abstract class EnvelopedDataHelper
                 try
                 {
                     // this is reversed as the Sun policy files now allow unlimited strength RSA
-                    return createKeyGenerator(cipherName);
+                    return helper.createKeyGenerator(cipherName);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
                     // Ignore
                 }
             }
-            return createKeyGenerator(algorithm.getId());
+            return helper.createKeyGenerator(algorithm.getId());
         }
         catch (GeneralSecurityException e)
         {
@@ -452,65 +454,6 @@ abstract class EnvelopedDataHelper
             asn1Params);
     }
 
-    public void initForEncryption(ASN1ObjectIdentifier encryptionOID, int keySize, SecureRandom random)
-        throws CMSException
-    {
-        KeyGenerator keyGen = createKeyGenerator(encryptionOID);
-
-        if (random == null)
-        {
-            random = new SecureRandom();
-        }
-
-        if (keySize < 0)
-        {
-            keyGen.init(random);
-        }
-        else
-        {
-            keyGen.init(keySize, random);
-        }
-
-        cipher = createCipher(encryptionOID);
-        encKey = keyGen.generateKey();
-        AlgorithmParameters params = generateParameters(encryptionOID, encKey, random);
-
-        try
-        {
-            cipher.init(Cipher.ENCRYPT_MODE, encKey, params, random);
-        }
-        catch (GeneralSecurityException e)
-        {
-            throw new CMSException("unable to initialize cipher: " + e.getMessage(), e);
-        }
-
-        //
-        // If params are null we try and second guess on them as some providers don't provide
-        // algorithm parameter generation explicity but instead generate them under the hood.
-        //
-        if (params == null)
-        {
-            params = cipher.getParameters();
-        }
-
-        algorithmIdentifier = getAlgorithmIdentifier(encryptionOID, params);
-    }
-
-    public AlgorithmIdentifier getAlgorithmIdentifier()
-    {
-        return algorithmIdentifier;
-    }
-
-    public CipherOutputStream getCipherOutputStream(OutputStream dOut)
-    {
-        return new CipherOutputStream(dOut, cipher);
-    }
-
-    public byte[] getEncKey()
-    {
-        return encKey.getEncoded();
-    }
-
     static Object execute(JCECallback callback) throws CMSException
     {
         try
@@ -555,14 +498,14 @@ abstract class EnvelopedDataHelper
                 try
                 {
                     // this is reversed as the Sun policy files now allow unlimited strength RSA
-                    return createKeyFactory(cipherName);
+                    return helper.createKeyFactory(cipherName);
                 }
                 catch (NoSuchAlgorithmException e)
                 {
                     // Ignore
                 }
             }
-            return createKeyFactory(algorithm.getId());
+            return helper.createKeyFactory(algorithm.getId());
         }
         catch (GeneralSecurityException e)
         {
@@ -576,28 +519,4 @@ abstract class EnvelopedDataHelper
             throws CMSException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidParameterSpecException,
             NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException;
     }
-
-    protected abstract Cipher createCipher(String algorithm)
-        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException;
-
-    protected abstract Mac createMac(String algorithm)
-        throws NoSuchAlgorithmException, NoSuchProviderException;
-
-    protected abstract KeyAgreement createKeyAgreement(String algorithm)
-        throws GeneralSecurityException;
-
-    protected abstract AlgorithmParameterGenerator createAlgorithmParameterGenerator(String algorithm)
-        throws GeneralSecurityException;
-
-    protected abstract AlgorithmParameters createAlgorithmParameters(String algorithm)
-        throws NoSuchAlgorithmException, NoSuchProviderException;
-
-    protected abstract KeyGenerator createKeyGenerator(String algorithm)
-        throws GeneralSecurityException;
-
-    protected abstract KeyFactory createKeyFactory(String algorithm)
-         throws NoSuchAlgorithmException, NoSuchProviderException;;
-
-    protected abstract KeyPairGenerator createKeyPairGenerator(String algorithm)
-        throws GeneralSecurityException;
 }

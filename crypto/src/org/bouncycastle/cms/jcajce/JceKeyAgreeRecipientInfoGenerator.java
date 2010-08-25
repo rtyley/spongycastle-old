@@ -37,6 +37,9 @@ import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KeyAgreeRecipientInfoGenerator;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
 import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 
@@ -47,7 +50,7 @@ public class JceKeyAgreeRecipientInfoGenerator
     private PublicKey senderPublicKey;
     private PrivateKey senderPrivateKey;
 
-    private EnvelopedDataHelper helper = new DefaultEnvelopedDataHelper();
+    private EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
     private SecureRandom random;
     private KeyPair ephemeralKP;
 
@@ -69,14 +72,14 @@ public class JceKeyAgreeRecipientInfoGenerator
 
     public JceKeyAgreeRecipientInfoGenerator setProvider(Provider provider)
     {
-        this.helper = new ProviderEnvelopedDataHelper(provider);
+        this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JceKeyAgreeRecipientInfoGenerator setProvider(String providerName)
     {
-        this.helper = new NamedEnvelopedDataHelper(providerName);
+        this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }
