@@ -12,11 +12,14 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.PasswordRecipientInfoGenerator;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 
 public class JcePasswordRecipientInfoGenerator
     extends PasswordRecipientInfoGenerator
 {
-    private EnvelopedDataHelper helper = new DefaultEnvelopedDataHelper();
+    private EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
 
     public JcePasswordRecipientInfoGenerator(ASN1ObjectIdentifier kekAlgorithm, char[] password)
     {
@@ -25,14 +28,14 @@ public class JcePasswordRecipientInfoGenerator
 
     public JcePasswordRecipientInfoGenerator setProvider(Provider provider)
     {
-        this.helper = new ProviderEnvelopedDataHelper(provider);
+        this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JcePasswordRecipientInfoGenerator setProvider(String providerName)
     {
-        this.helper = new NamedEnvelopedDataHelper(providerName);
+        this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }

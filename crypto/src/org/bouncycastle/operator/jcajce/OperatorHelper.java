@@ -9,9 +9,11 @@ import java.security.Signature;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.Cipher;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
@@ -26,10 +28,13 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jcajce.JcaJceHelper;
+import org.bouncycastle.operator.OperatorCreationException;
 
-abstract class OperatorHelper
+class OperatorHelper
 {
     private static final Map oids = new HashMap();
+    private static final Map asymmetricWrapperAlgNames = new HashMap();
 
     static
     {
@@ -56,6 +61,15 @@ abstract class OperatorHelper
         oids.put(OIWObjectIdentifiers.dsaWithSHA1, "SHA1WITHDSA");
         oids.put(NISTObjectIdentifiers.dsa_with_sha224, "SHA224WITHDSA");
         oids.put(NISTObjectIdentifiers.dsa_with_sha256, "SHA256WITHDSA");
+
+        asymmetricWrapperAlgNames.put(new ASN1ObjectIdentifier(PKCSObjectIdentifiers.rsaEncryption.getId()), "RSA/ECB/PKCS1Padding");
+    }
+
+    private JcaJceHelper helper;
+
+    OperatorHelper(JcaJceHelper helper)
+    {
+        this.helper = helper;
     }
 
     static X509Name convertName(
@@ -90,6 +104,33 @@ abstract class OperatorHelper
         }
     }
 
+    Cipher createAsymmetricWrapper(ASN1ObjectIdentifier algorithm)
+        throws OperatorCreationException
+    {
+        try
+        {
+            String cipherName = (String)asymmetricWrapperAlgNames.get(algorithm);
+
+            if (cipherName != null)
+            {
+                try
+                {
+                    // this is reversed as the Sun policy files now allow unlimited strength RSA
+                    return helper.createCipher(cipherName);
+                }
+                catch (NoSuchAlgorithmException e)
+                {
+                    // Ignore
+                }
+            }
+            return helper.createCipher(algorithm.getId());
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
+        }
+    }
+
     MessageDigest createDigest(AlgorithmIdentifier digAlgId)
         throws GeneralSecurityException
     {
@@ -97,7 +138,7 @@ abstract class OperatorHelper
 
         try
         {
-            dig = createDigest(getSignatureName(digAlgId));
+            dig = helper.createDigest(getSignatureName(digAlgId));
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -108,7 +149,7 @@ abstract class OperatorHelper
             {
                 String  digestAlgorithm = (String)oids.get(digAlgId.getAlgorithm());
 
-                dig = createDigest(digestAlgorithm);
+                dig = helper.createDigest(digestAlgorithm);
             }
             else
             {
@@ -126,7 +167,7 @@ abstract class OperatorHelper
 
         try
         {
-            sig = createSignature(getSignatureName(sigAlgId));
+            sig = helper.createSignature(getSignatureName(sigAlgId));
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -137,7 +178,7 @@ abstract class OperatorHelper
             {
                 String  signatureAlgorithm = (String)oids.get(sigAlgId.getAlgorithm());
 
-                sig = createSignature(signatureAlgorithm);
+                sig = helper.createSignature(signatureAlgorithm);
             }
             else
             {
@@ -213,12 +254,6 @@ abstract class OperatorHelper
             return digestAlgOID.getId();
         }
     }
-
-    protected abstract Signature createSignature(String algorithm)
-        throws GeneralSecurityException;
-
-    protected abstract MessageDigest createDigest(String algorithm)
-            throws GeneralSecurityException;
 
     private static class OpArgumentException
         extends IllegalArgumentException

@@ -10,6 +10,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.crmf.CRMFException;
 import org.bouncycastle.cert.crmf.PKMACValuesCalculator;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 
 public class JcaPKMACValuesCalculator
     implements PKMACValuesCalculator
@@ -20,19 +23,19 @@ public class JcaPKMACValuesCalculator
 
     public JcaPKMACValuesCalculator()
     {
-        this.helper = new DefaultCRMFHelper();
+        this.helper = new CRMFHelper(new DefaultJcaJceHelper());
     }
 
     public JcaPKMACValuesCalculator setProvider(Provider provider)
     {
-        this.helper = new ProviderCRMFHelper(provider);
+        this.helper = new CRMFHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JcaPKMACValuesCalculator setProvider(String providerName)
     {
-        this.helper = new NamedCRMFHelper(providerName);
+        this.helper = new CRMFHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }

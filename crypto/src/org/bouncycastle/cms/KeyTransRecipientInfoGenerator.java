@@ -5,41 +5,48 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientIdentifier;
 import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.operator.AsymmetricKeyWrapper;
+import org.bouncycastle.operator.OperatorException;
 
 public abstract class KeyTransRecipientInfoGenerator
     implements RecipientInfoGenerator
 {
     // Derived fields
-    protected final SubjectPublicKeyInfo keyInfo;
+    protected final AsymmetricKeyWrapper wrapper;
 
     private IssuerAndSerialNumber issuerAndSerial;
     private byte[] subjectKeyIdentifier;
 
-    private KeyTransRecipientInfoGenerator(SubjectPublicKeyInfo keyInfo, IssuerAndSerialNumber issuerAndSerial)
+    private KeyTransRecipientInfoGenerator(IssuerAndSerialNumber issuerAndSerial, AsymmetricKeyWrapper wrapper)
     {
-        this.keyInfo = keyInfo;
         this.issuerAndSerial = issuerAndSerial;
+        this.wrapper = wrapper;
     }
 
-    protected KeyTransRecipientInfoGenerator(X509CertificateHolder certHolder)
+    protected KeyTransRecipientInfoGenerator(X509CertificateHolder certHolder, AsymmetricKeyWrapper wrapper)
     {
-        this(certHolder.getSubjectPublicKeyInfo(), certHolder.getIssuerAndSerialNumber());
+        this(certHolder.getIssuerAndSerialNumber(), wrapper);
     }
 
-    protected KeyTransRecipientInfoGenerator(byte[] subjectKeyIdentifier, SubjectPublicKeyInfo keyInfo)
+    protected KeyTransRecipientInfoGenerator(byte[] subjectKeyIdentifier, AsymmetricKeyWrapper wrapper)
     {
         this.subjectKeyIdentifier = subjectKeyIdentifier;
-        this.keyInfo = keyInfo;
+        this.wrapper = wrapper;
     }
 
     public final RecipientInfo generate(byte[] contentEncryptionKey)
         throws CMSException
     {
-
-        byte[] encryptedKeyBytes = generateEncryptedBytes(keyInfo.getAlgorithmId(), contentEncryptionKey);
+        byte[] encryptedKeyBytes;
+        try
+        {
+            encryptedKeyBytes = wrapper.generateWrappedKey(contentEncryptionKey);
+        }
+        catch (OperatorException e)
+        {
+            throw new CMSException("exception wrapping content key: " + e.getMessage(), e);
+        }
 
         RecipientIdentifier recipId;
         if (issuerAndSerial != null)
@@ -51,10 +58,7 @@ public abstract class KeyTransRecipientInfoGenerator
             recipId = new RecipientIdentifier(new DEROctetString(subjectKeyIdentifier));
         }
 
-        return new RecipientInfo(new KeyTransRecipientInfo(recipId, keyInfo.getAlgorithmId(),
+        return new RecipientInfo(new KeyTransRecipientInfo(recipId, wrapper.getAlgorithmIdentifier(),
             new DEROctetString(encryptedKeyBytes)));
     }
-
-    protected abstract byte[] generateEncryptedBytes(AlgorithmIdentifier algorithm, byte[] contentEncryptionKey)
-        throws CMSException;
 }

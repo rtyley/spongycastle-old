@@ -1,4 +1,4 @@
-package org.bouncycastle.cms.jcajce;
+package org.bouncycastle.cert.crmf.jcajce;
 
 import java.io.OutputStream;
 import java.security.AlgorithmParameters;
@@ -13,46 +13,46 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cert.crmf.CRMFException;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.OutputEncryptor;
 
-public class JceCMSContentEncryptorBuilder
+public class JceCRMFEncryptorBuilder
 {
     private final ASN1ObjectIdentifier encryptionOID;
     private final int                  keySize;
 
-    private EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
+    private CRMFHelper helper = new CRMFHelper(new DefaultJcaJceHelper());
     private SecureRandom random;
 
-    public JceCMSContentEncryptorBuilder(ASN1ObjectIdentifier encryptionOID)
+    public JceCRMFEncryptorBuilder(ASN1ObjectIdentifier encryptionOID)
     {
         this(encryptionOID, -1);
     }
 
-    public JceCMSContentEncryptorBuilder(ASN1ObjectIdentifier encryptionOID, int keySize)
+    public JceCRMFEncryptorBuilder(ASN1ObjectIdentifier encryptionOID, int keySize)
     {
         this.encryptionOID = encryptionOID;
         this.keySize = keySize;
     }
 
-    public JceCMSContentEncryptorBuilder setProvider(Provider provider)
+    public JceCRMFEncryptorBuilder setProvider(Provider provider)
     {
-        this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.helper = new CRMFHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
-    public JceCMSContentEncryptorBuilder setProvider(String providerName)
+    public JceCRMFEncryptorBuilder setProvider(String providerName)
     {
-        this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.helper = new CRMFHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }
 
-    public JceCMSContentEncryptorBuilder setSecureRandom(SecureRandom random)
+    public JceCRMFEncryptorBuilder setSecureRandom(SecureRandom random)
     {
         this.random = random;
 
@@ -60,20 +60,20 @@ public class JceCMSContentEncryptorBuilder
     }
 
     public OutputEncryptor build()
-        throws CMSException
+        throws CRMFException
     {
-        return new CMSOutputEncryptor(encryptionOID, keySize, random);
+        return new CRMFOutputEncryptor(encryptionOID, keySize, random);
     }
 
-    private class CMSOutputEncryptor
+    private class CRMFOutputEncryptor
         implements OutputEncryptor
     {
         private SecretKey encKey;
         private AlgorithmIdentifier algorithmIdentifier;
-        private Cipher              cipher;
+        private Cipher cipher;
 
-        CMSOutputEncryptor(ASN1ObjectIdentifier encryptionOID, int keySize, SecureRandom random)
-            throws CMSException
+        CRMFOutputEncryptor(ASN1ObjectIdentifier encryptionOID, int keySize, SecureRandom random)
+            throws CRMFException
         {
             KeyGenerator keyGen = helper.createKeyGenerator(encryptionOID);
 
@@ -101,7 +101,7 @@ public class JceCMSContentEncryptorBuilder
             }
             catch (GeneralSecurityException e)
             {
-                throw new CMSException("unable to initialize cipher: " + e.getMessage(), e);
+                throw new CRMFException("unable to initialize cipher: " + e.getMessage(), e);
             }
 
             //

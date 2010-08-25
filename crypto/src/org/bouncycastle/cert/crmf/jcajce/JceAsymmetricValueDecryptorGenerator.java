@@ -1,5 +1,6 @@
-package org.bouncycastle.cms.jcajce;
+package org.bouncycastle.cert.crmf.jcajce;
 
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -9,43 +10,45 @@ import java.security.ProviderException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.KeyTransRecipient;
+import org.bouncycastle.cert.crmf.CRMFException;
+import org.bouncycastle.cert.crmf.ValueDecryptorGenerator;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.operator.InputDecryptor;
 
-public abstract class JceKeyTransRecipient
-    implements KeyTransRecipient
+public class JceAsymmetricValueDecryptorGenerator
+    implements ValueDecryptorGenerator
 {
     private PrivateKey recipientKey;
-    protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
+    private CRMFHelper helper = new CRMFHelper(new DefaultJcaJceHelper());
 
-    public JceKeyTransRecipient(PrivateKey recipientKey)
+    public JceAsymmetricValueDecryptorGenerator(PrivateKey recipientKey)
     {
         this.recipientKey = recipientKey;
     }
 
-    public JceKeyTransRecipient setProvider(Provider provider)
+    public JceAsymmetricValueDecryptorGenerator setProvider(Provider provider)
     {
-        this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.helper = new CRMFHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
-    public JceKeyTransRecipient setProvider(String providerName)
+    public JceAsymmetricValueDecryptorGenerator setProvider(String providerName)
     {
-        this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.helper = new CRMFHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }
 
-    protected Key extractSecretKey(AlgorithmIdentifier keyEncryptionAlgorithm, AlgorithmIdentifier contentEncryptionAlgorithm, byte[] encryptedContentEncryptionKey)
-        throws CMSException
+    private Key extractSecretKey(AlgorithmIdentifier keyEncryptionAlgorithm, AlgorithmIdentifier contentEncryptionAlgorithm, byte[] encryptedContentEncryptionKey)
+        throws CRMFException
     {
         try
         {
@@ -82,15 +85,36 @@ public abstract class JceKeyTransRecipient
         }
         catch (InvalidKeyException e)
         {
-            throw new CMSException("key invalid in message.", e);
+            throw new CRMFException("key invalid in message.", e);
         }
         catch (IllegalBlockSizeException e)
         {
-            throw new CMSException("illegal blocksize in message.", e);
+            throw new CRMFException("illegal blocksize in message.", e);
         }
         catch (BadPaddingException e)
         {
-            throw new CMSException("bad padding in message.", e);
+            throw new CRMFException("bad padding in message.", e);
         }
+    }
+
+    public InputDecryptor getValueDecryptor(AlgorithmIdentifier keyEncryptionAlgorithm, final AlgorithmIdentifier contentEncryptionAlgorithm, byte[] encryptedContentEncryptionKey)
+        throws CRMFException
+    {
+        Key secretKey = extractSecretKey(keyEncryptionAlgorithm, contentEncryptionAlgorithm, encryptedContentEncryptionKey);
+
+        final Cipher dataCipher = helper.createContentCipher(secretKey, contentEncryptionAlgorithm);
+
+        return new InputDecryptor()
+        {
+            public AlgorithmIdentifier getAlgorithmIdentifier()
+            {
+                return contentEncryptionAlgorithm;
+            }
+
+            public InputStream getInputStream(InputStream dataIn)
+            {
+                return new CipherInputStream(dataIn, dataCipher);
+            }
+        };
     }
 }

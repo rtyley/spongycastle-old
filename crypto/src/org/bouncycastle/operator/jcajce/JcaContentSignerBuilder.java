@@ -10,6 +10,9 @@ import java.security.Signature;
 import java.security.SignatureException;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OperatorStreamException;
@@ -18,7 +21,7 @@ import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
 
 public class JcaContentSignerBuilder
 {
-    private OperatorHelper helper = new DefaultOperatorHelper();
+    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
     private SecureRandom random;
     private String signatureAlgorithm;
     private AlgorithmIdentifier sigAlgId;
@@ -31,14 +34,14 @@ public class JcaContentSignerBuilder
 
     public JcaContentSignerBuilder setProvider(Provider provider)
     {
-        this.helper = new ProviderOperatorHelper(provider);
+        this.helper = new OperatorHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JcaContentSignerBuilder setProvider(String providerName)
     {
-        this.helper = new NamedOperatorHelper(providerName);
+        this.helper = new OperatorHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }

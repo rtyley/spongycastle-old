@@ -1,104 +1,47 @@
 package org.bouncycastle.cms.jcajce;
 
-import java.security.GeneralSecurityException;
 import java.security.Provider;
-import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KeyTransRecipientInfoGenerator;
+import org.bouncycastle.operator.jcajce.JceAsymmetricKeyWrapper;
 
 public class JceKeyTransRecipientInfoGenerator
     extends KeyTransRecipientInfoGenerator
 {
-    private final PublicKey      recipientPublicKey;
-
-    private EnvelopedDataHelper helper = new DefaultEnvelopedDataHelper();
-    private SecureRandom random;
-
     public JceKeyTransRecipientInfoGenerator(X509Certificate recipientCert)
         throws CertificateEncodingException
     {
-        super(new JcaX509CertificateHolder(recipientCert));
-
-        this.recipientPublicKey = recipientCert.getPublicKey();
+        super(new JcaX509CertificateHolder(recipientCert), new JceAsymmetricKeyWrapper(recipientCert));
     }
 
     public JceKeyTransRecipientInfoGenerator(byte[] subjectKeyIdentifier, PublicKey recipientPublicKey)
     {
-        super(subjectKeyIdentifier, SubjectPublicKeyInfo.getInstance(recipientPublicKey.getEncoded()));
-
-        this.recipientPublicKey = recipientPublicKey;
+        super(subjectKeyIdentifier, new JceAsymmetricKeyWrapper(recipientPublicKey));
     }
 
     public JceKeyTransRecipientInfoGenerator setProvider(Provider provider)
     {
-        this.helper = new ProviderEnvelopedDataHelper(provider);
+        ((JceAsymmetricKeyWrapper)wrapper).setProvider(provider);
 
         return this;
     }
 
     public JceKeyTransRecipientInfoGenerator setProvider(String providerName)
     {
-        this.helper = new NamedEnvelopedDataHelper(providerName);
+        ((JceAsymmetricKeyWrapper)wrapper).setProvider(providerName);
 
         return this;
     }
 
     public JceKeyTransRecipientInfoGenerator setSecureRandom(SecureRandom random)
     {
-        this.random = random;
+        ((JceAsymmetricKeyWrapper)wrapper).setSecureRandom(random);
 
         return this;
-    }
-
-    protected byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, byte[] contentEncryptionKey)
-        throws CMSException
-    {
-        Cipher keyEncryptionCipher = helper.createCipher(keyEncryptionAlgorithm.getAlgorithm());
-        byte[] encryptedKeyBytes = null;
-
-        try
-        {
-            keyEncryptionCipher.init(Cipher.WRAP_MODE, recipientPublicKey, random);
-            encryptedKeyBytes = keyEncryptionCipher.wrap(new SecretKeySpec(contentEncryptionKey, "WRAP"));
-        }
-        catch (GeneralSecurityException e)
-        {
-        }
-        catch (IllegalStateException e)
-        {
-        }
-        catch (UnsupportedOperationException e)
-        {
-        }
-        catch (ProviderException e)
-        {
-        }
-
-        // some providers do not support WRAP (this appears to be only for asymmetric algorithms)
-        if (encryptedKeyBytes == null)
-        {
-            try
-            {
-                keyEncryptionCipher.init(Cipher.ENCRYPT_MODE, recipientPublicKey, random);
-                encryptedKeyBytes = keyEncryptionCipher.doFinal(contentEncryptionKey);
-            }
-            catch (GeneralSecurityException e)
-            {
-                throw new CMSException("unable to encrypt contents key", e);
-            }
-        }
-
-        return encryptedKeyBytes;
     }
 }

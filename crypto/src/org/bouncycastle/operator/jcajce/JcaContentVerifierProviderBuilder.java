@@ -9,6 +9,9 @@ import java.security.Signature;
 import java.security.SignatureException;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -17,7 +20,7 @@ import org.bouncycastle.operator.RuntimeOperatorException;
 
 public class JcaContentVerifierProviderBuilder
 {
-    private OperatorHelper helper = new DefaultOperatorHelper();
+    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
 
     public JcaContentVerifierProviderBuilder()
     {
@@ -25,14 +28,14 @@ public class JcaContentVerifierProviderBuilder
 
     public JcaContentVerifierProviderBuilder setProvider(Provider provider)
     {
-        this.helper = new ProviderOperatorHelper(provider);
+        this.helper = new OperatorHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JcaContentVerifierProviderBuilder setProvider(String providerName)
     {
-        this.helper = new NamedOperatorHelper(providerName);
+        this.helper = new OperatorHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }

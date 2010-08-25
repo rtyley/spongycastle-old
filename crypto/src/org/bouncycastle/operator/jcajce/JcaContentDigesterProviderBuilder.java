@@ -7,13 +7,16 @@ import java.security.MessageDigest;
 import java.security.Provider;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.DigesterCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 
 public class JcaContentDigesterProviderBuilder
 {
-    private OperatorHelper helper = new DefaultOperatorHelper();
+    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
 
     public JcaContentDigesterProviderBuilder()
     {
@@ -21,14 +24,14 @@ public class JcaContentDigesterProviderBuilder
 
     public JcaContentDigesterProviderBuilder setProvider(Provider provider)
     {
-        this.helper = new ProviderOperatorHelper(provider);
+        this.helper = new OperatorHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JcaContentDigesterProviderBuilder setProvider(String providerName)
     {
-        this.helper = new NamedOperatorHelper(providerName);
+        this.helper = new OperatorHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }
@@ -63,11 +66,6 @@ public class JcaContentDigesterProviderBuilder
                     
                     public OutputStream getOutputStream()
                     {
-                        if (stream == null)
-                        {
-                            throw new IllegalStateException("verifier not initialised");
-                        }
-
                         return stream;
                     }
 
