@@ -48,11 +48,13 @@ public class CertificateRequestMessage
             return null;
         }
 
-        for (AttributeTypeAndValue tAndV : this.certReqMsg.getCertReq().getControls().toAttributeTypeAndValueArray())
+        AttributeTypeAndValue[] tAndVs = controls.toAttributeTypeAndValueArray();
+
+        for (int i = 0; i != tAndVs.length; i++)
         {
-            if (tAndV.getType().equals(CRMFObjectIdentifiers.id_regCtrl_pkiArchiveOptions))
+            if (tAndVs[i].getType().equals(CRMFObjectIdentifiers.id_regCtrl_pkiArchiveOptions))
             {
-                return new PKIArchiveControl(PKIArchiveOptions.getInstance(tAndV.getValue()));
+                return new PKIArchiveControl(PKIArchiveOptions.getInstance(tAndVs[i].getValue()));
             }
         }
 
