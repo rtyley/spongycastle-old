@@ -126,7 +126,7 @@ public class AllTests
 
         assertNotNull(recipientInformation);
 
-        EncKeyWithID encKeyWithID = EncKeyWithID.getInstance(recipientInformation.getContent(new JceKeyTransEnvelopedRecipient(kp.getPrivate())));
+        EncKeyWithID encKeyWithID = EncKeyWithID.getInstance(recipientInformation.getContent(new JceKeyTransEnvelopedRecipient(kp.getPrivate()).setProvider(BC)));
 
         assertTrue(encKeyWithID.hasIdentifier());
         assertFalse(encKeyWithID.isIdentifierUTF8String());
