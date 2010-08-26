@@ -2,8 +2,12 @@ package org.bouncycastle.cert.crmf;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.crmf.AttributeTypeAndValue;
+import org.bouncycastle.asn1.crmf.CRMFObjectIdentifiers;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.crmf.CertTemplate;
+import org.bouncycastle.asn1.crmf.Controls;
+import org.bouncycastle.asn1.crmf.PKIArchiveOptions;
 import org.bouncycastle.asn1.crmf.PKMACValue;
 import org.bouncycastle.asn1.crmf.POPOSigningKey;
 import org.bouncycastle.asn1.crmf.ProofOfPossession;
@@ -14,6 +18,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 public class CertificateRequestMessage
 {
     private final CertReqMsg certReqMsg;
+    private final Controls controls;
 
     public CertificateRequestMessage(byte[] certReqMsg)
     {
@@ -23,6 +28,7 @@ public class CertificateRequestMessage
     protected CertificateRequestMessage(CertReqMsg certReqMsg)
     {
         this.certReqMsg = certReqMsg;
+        this.controls = certReqMsg.getCertReq().getControls();
     }
 
     public CertReqMsg toASN1Structure()
@@ -35,6 +41,24 @@ public class CertificateRequestMessage
         return this.certReqMsg.getCertReq().getCertTemplate();
     }
 
+    public PKIArchiveControl getPKIArchiveControl()
+    {
+        if (controls == null)
+        {
+            return null;
+        }
+
+        for (AttributeTypeAndValue tAndV : this.certReqMsg.getCertReq().getControls().toAttributeTypeAndValueArray())
+        {
+            if (tAndV.getType().equals(CRMFObjectIdentifiers.id_regCtrl_pkiArchiveOptions))
+            {
+                return new PKIArchiveControl(PKIArchiveOptions.getInstance(tAndV.getValue()));
+            }
+        }
+
+        return null;
+    }
+    
     public boolean hasProofOfPossession()
     {
         return this.certReqMsg.getPopo() != null;

@@ -41,7 +41,6 @@ public class CMSEnvelopedData
 
     public CMSEnvelopedData(
         ContentInfo contentInfo)
-        throws CMSException
     {
         this.contentInfo = contentInfo;
 
