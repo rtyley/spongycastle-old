@@ -25,7 +25,7 @@ public class CertificateRequestMessage
         this(CertReqMsg.getInstance(certReqMsg));
     }
 
-    protected CertificateRequestMessage(CertReqMsg certReqMsg)
+    public CertificateRequestMessage(CertReqMsg certReqMsg)
     {
         this.certReqMsg = certReqMsg;
         this.controls = certReqMsg.getCertReq().getControls();
