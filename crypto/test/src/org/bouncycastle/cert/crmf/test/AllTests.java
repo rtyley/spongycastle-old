@@ -18,11 +18,14 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.crmf.EncKeyWithID;
 import org.bouncycastle.asn1.crmf.EncryptedValue;
+import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.crmf.EncryptedValueBuilder;
 import org.bouncycastle.cert.crmf.EncryptedValueParser;
+import org.bouncycastle.cert.crmf.PKIArchiveControl;
 import org.bouncycastle.cert.crmf.PKMACValueGenerator;
 import org.bouncycastle.cert.crmf.PKMACValueVerifier;
 import org.bouncycastle.cert.crmf.ValueDecryptorGenerator;
@@ -35,7 +38,11 @@ import org.bouncycastle.cert.crmf.jcajce.JceAsymmetricValueDecryptorGenerator;
 import org.bouncycastle.cert.crmf.jcajce.JceCRMFEncryptorBuilder;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.RecipientId;
+import org.bouncycastle.cms.RecipientInformation;
+import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -81,7 +88,7 @@ public class AllTests
 
     }
 
-    public void testBasicMessage()
+    public void testBasicMessageWithArchiveControl()
         throws Exception
     {
         KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
@@ -96,7 +103,7 @@ public class AllTests
         certReqBuild.setSubject(new X500Principal("CN=Test"))
                     .setPublicKey(kp.getPublic());
 
-        certReqBuild.addControl(new JcaPKIArchiveControlBuilder(kp.getPrivate(), new X500Principal("CN=test"))
+        certReqBuild.addControl(new JcaPKIArchiveControlBuilder(kp.getPrivate(), new X500Principal("CN=Test"))
                                       .addRecipientGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC))
                                       .build(new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(CMSEnvelopedDataGenerator.AES128_CBC)).setProvider(BC).build()));
 
@@ -104,6 +111,28 @@ public class AllTests
 
         assertEquals(new X500Principal("CN=Test"), certReqMsg.getSubjectX500Principal());
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
+
+        assertEquals(PKIArchiveControl.encryptedPrivKey, certReqMsg.getPKIArchiveControl().getArchiveType());
+        assertTrue(certReqMsg.getPKIArchiveControl().isEnvelopedData());
+
+        RecipientInformationStore recips = certReqMsg.getPKIArchiveControl().getEnvelopedData().getRecipientInfos();
+
+        RecipientId recipientId = new RecipientId();
+
+        recipientId.setIssuer(cert.getIssuerX500Principal());
+        recipientId.setSerialNumber(cert.getSerialNumber());
+
+        RecipientInformation recipientInformation = recips.get(recipientId);
+
+        assertNotNull(recipientInformation);
+
+        EncKeyWithID encKeyWithID = EncKeyWithID.getInstance(recipientInformation.getContent(new JceKeyTransEnvelopedRecipient(kp.getPrivate())));
+
+        assertTrue(encKeyWithID.hasIdentifier());
+        assertFalse(encKeyWithID.isIdentifierUTF8String());
+
+        assertEquals(new GeneralName(X509Name.getInstance(new X500Principal("CN=Test").getEncoded())), encKeyWithID.getIdentifier());
+        assertTrue(Arrays.areEqual(kp.getPrivate().getEncoded(), encKeyWithID.getPrivateKey().getEncoded()));
     }
 
     public void testProofOfPossessionWithoutSender()
