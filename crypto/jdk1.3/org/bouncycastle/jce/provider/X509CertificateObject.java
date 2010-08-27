@@ -1,29 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
-import org.bouncycastle.asn1.misc.NetscapeCertType;
-import org.bouncycastle.asn1.misc.NetscapeRevocationURL;
-import org.bouncycastle.asn1.misc.VerisignCzagExtension;
-import org.bouncycastle.asn1.util.ASN1Dump;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -52,6 +28,29 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
+import org.bouncycastle.asn1.misc.NetscapeCertType;
+import org.bouncycastle.asn1.misc.NetscapeRevocationURL;
+import org.bouncycastle.asn1.misc.VerisignCzagExtension;
+import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.encoders.Hex;
 
 public class X509CertificateObject
     extends X509Certificate
@@ -535,7 +534,13 @@ public class X509CertificateObject
     {
         try
         {
-            return Arrays.hashCode(this.getEncoded());
+            int hashCode = 0;
+            byte[] certData = this.getEncoded();
+            for (int i = 1; i < certData.length; i++)
+            {
+                 hashCode += certData[i] * i;
+            }
+            return hashCode;
         }
         catch (CertificateEncodingException e)
         {
