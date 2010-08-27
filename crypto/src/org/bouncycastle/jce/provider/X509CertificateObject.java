@@ -576,7 +576,13 @@ public class X509CertificateObject
     {
         try
         {
-            return Arrays.hashCode(this.getEncoded());
+            int hashCode = 0;
+            byte[] certData = this.getEncoded();
+            for (int i = 1; i < certData.length; i++)
+            {
+                 hashCode += certData[i] * i;
+            }
+            return hashCode;
         }
         catch (CertificateEncodingException e)
         {
