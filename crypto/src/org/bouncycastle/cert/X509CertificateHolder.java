@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.util.Arrays;
 
 public class X509CertificateHolder
 {
@@ -68,5 +69,45 @@ public class X509CertificateHolder
         }
 
         return verifier.verify(x509Certificate.getSignature().getBytes());
+    }
+
+    public boolean equals(
+        Object o)
+    {
+        if (o == this)
+        {
+            return true;
+        }
+
+        if (!(o instanceof X509CertificateHolder))
+        {
+            return false;
+        }
+
+        X509CertificateHolder other = (X509CertificateHolder)o;
+
+        try
+        {
+            byte[] b1 = this.getEncoded();
+            byte[] b2 = other.getEncoded();
+
+            return Arrays.areEqual(b1, b2);
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+    }
+
+    public int hashCode()
+    {
+        try
+        {
+            return Arrays.hashCode(this.getEncoded());
+        }
+        catch (IOException e)
+        {
+            return 0;
+        }
     }
 }
