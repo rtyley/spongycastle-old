@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.cms.OriginatorPublicKey;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.operator.GenericKey;
 
 public abstract class KeyAgreeRecipientInfoGenerator
     implements RecipientInfoGenerator
@@ -27,7 +28,7 @@ public abstract class KeyAgreeRecipientInfoGenerator
         this.keyEncryptionOID = keyEncryptionOID;
     }
 
-    public RecipientInfo generate(byte[] contentEncryptionKey)
+    public RecipientInfo generate(GenericKey contentEncryptionKey)
         throws CMSException
     {
         OriginatorIdentifierOrKey originator = new OriginatorIdentifierOrKey(
@@ -61,7 +62,7 @@ public abstract class KeyAgreeRecipientInfoGenerator
             originatorKeyInfo.getPublicKeyData().getBytes());
     }
 
-    protected abstract ASN1Sequence generateRecipientEncryptedKeys(AlgorithmIdentifier keyAgreeAlgorithm, AlgorithmIdentifier keyEncAlgorithm, byte[] contentEncryptionKey)
+    protected abstract ASN1Sequence generateRecipientEncryptedKeys(AlgorithmIdentifier keyAgreeAlgorithm, AlgorithmIdentifier keyEncAlgorithm, GenericKey contentEncryptionKey)
         throws CMSException;
 
     protected abstract ASN1Encodable getUserKeyingMaterial(AlgorithmIdentifier keyAgreeAlgorithm)

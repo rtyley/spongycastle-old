@@ -15,6 +15,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.operator.GenericKey;
 
 public abstract class PasswordRecipientInfoGenerator
     implements RecipientInfoGenerator
@@ -74,7 +75,7 @@ public abstract class PasswordRecipientInfoGenerator
         return this;
     }
 
-    public RecipientInfo generate(byte[] contentEncryptionKey)
+    public RecipientInfo generate(GenericKey contentEncryptionKey)
         throws CMSException
     {
         byte[] iv = new byte[blockSize];     /// TODO: set IV size properly!
@@ -132,6 +133,6 @@ public abstract class PasswordRecipientInfoGenerator
             keyEncryptionAlgorithm, encryptedKey));
     }
 
-    protected abstract byte[] generateEncryptedBytes(AlgorithmIdentifier algorithm, byte[] derivedKey, byte[] contentEncryptionKey)
+    protected abstract byte[] generateEncryptedBytes(AlgorithmIdentifier algorithm, byte[] derivedKey, GenericKey contentEncryptionKey)
         throws CMSException;
 }

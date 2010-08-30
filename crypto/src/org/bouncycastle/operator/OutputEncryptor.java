@@ -10,5 +10,5 @@ public interface OutputEncryptor
 
     OutputStream getOutputStream(OutputStream encOut);
 
-    byte[] getEncodedKey();
+    GenericKey getKey();
 }

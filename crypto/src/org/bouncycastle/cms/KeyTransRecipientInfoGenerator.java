@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.cms.RecipientIdentifier;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.AsymmetricKeyWrapper;
+import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OperatorException;
 
 public abstract class KeyTransRecipientInfoGenerator
@@ -35,7 +36,7 @@ public abstract class KeyTransRecipientInfoGenerator
         this.wrapper = wrapper;
     }
 
-    public final RecipientInfo generate(byte[] contentEncryptionKey)
+    public final RecipientInfo generate(GenericKey contentEncryptionKey)
         throws CMSException
     {
         byte[] encryptedKeyBytes;
