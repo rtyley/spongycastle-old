@@ -50,8 +50,8 @@ public class EncryptedValueBuilder
 
         try
         {
-            wrapper.generateWrappedKey(encryptor.getEncodedKey());
-            encSymmKey = new DERBitString(wrapper.generateWrappedKey(encryptor.getEncodedKey()));
+            wrapper.generateWrappedKey(encryptor.getKey());
+            encSymmKey = new DERBitString(wrapper.generateWrappedKey(encryptor.getKey()));
         }
         catch (OperatorException e)
         {

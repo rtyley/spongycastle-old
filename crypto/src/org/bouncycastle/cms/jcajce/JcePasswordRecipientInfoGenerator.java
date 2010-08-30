@@ -1,6 +1,7 @@
 package org.bouncycastle.cms.jcajce;
 
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.Provider;
 
 import javax.crypto.Cipher;
@@ -15,6 +16,7 @@ import org.bouncycastle.cms.PasswordRecipientInfoGenerator;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.operator.GenericKey;
 
 public class JcePasswordRecipientInfoGenerator
     extends PasswordRecipientInfoGenerator
@@ -40,10 +42,10 @@ public class JcePasswordRecipientInfoGenerator
         return this;
     }
 
-    public byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, byte[] derivedKey, byte[] contentEncryptionKey)
+    public byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, byte[] derivedKey, GenericKey contentEncryptionKey)
         throws CMSException
     {
-        SecretKeySpec contentEncryptionKeySpec = new SecretKeySpec(contentEncryptionKey, "WRAP");
+        Key contentEncryptionKeySpec = CMSUtils.getJceKey(contentEncryptionKey);
         Cipher keyEncryptionCipher = helper.createRFC3211Wrapper(keyEncryptionAlgorithm.getAlgorithm());
 
         try

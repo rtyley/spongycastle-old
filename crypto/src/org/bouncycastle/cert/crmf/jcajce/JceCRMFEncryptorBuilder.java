@@ -17,6 +17,7 @@ import org.bouncycastle.cert.crmf.CRMFException;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OutputEncryptor;
 
 public class JceCRMFEncryptorBuilder
@@ -126,9 +127,9 @@ public class JceCRMFEncryptorBuilder
             return new CipherOutputStream(dOut, cipher);
         }
 
-        public byte[] getEncodedKey()
+        public GenericKey getKey()
         {
-            return encKey.getEncoded();
+            return new GenericKey(encKey);
         }
     }
 }

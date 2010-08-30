@@ -26,6 +26,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OutputEncryptor;
 
 /**
@@ -146,7 +147,7 @@ public class CMSEnvelopedDataStreamGenerator
         {
             RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
 
-            recipientInfos.add(recipient.generate(encKey.getEncoded()));
+            recipientInfos.add(recipient.generate(new GenericKey(encKey)));
         }
 
         return open(out, encryptionOID, encKey, params, recipientInfos, encProvider);
@@ -159,7 +160,7 @@ public class CMSEnvelopedDataStreamGenerator
         throws CMSException, IOException
     {
         ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
-        byte[] encKey = encryptor.getEncodedKey();
+        GenericKey encKey = encryptor.getKey();
         Iterator it = recipientInfoGenerators.iterator();
 
         while (it.hasNext())

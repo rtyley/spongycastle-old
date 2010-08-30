@@ -8,13 +8,13 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.AsymmetricKeyWrapper;
+import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OperatorException;
 
 public class JceAsymmetricKeyWrapper
@@ -57,7 +57,7 @@ public class JceAsymmetricKeyWrapper
         return this;
     }
 
-    public byte[] generateWrappedKey(byte[] encryptionKey)
+    public byte[] generateWrappedKey(GenericKey encryptionKey)
         throws OperatorException
     {
         Cipher keyEncryptionCipher = helper.createAsymmetricWrapper(getAlgorithmIdentifier().getAlgorithm());
@@ -66,7 +66,7 @@ public class JceAsymmetricKeyWrapper
         try
         {
             keyEncryptionCipher.init(Cipher.WRAP_MODE, publicKey, random);
-            encryptedKeyBytes = keyEncryptionCipher.wrap(new SecretKeySpec(encryptionKey, "WRAP"));
+            encryptedKeyBytes = keyEncryptionCipher.wrap(OperatorUtils.getJceKey(encryptionKey));
         }
         catch (GeneralSecurityException e)
         {
@@ -87,7 +87,7 @@ public class JceAsymmetricKeyWrapper
             try
             {
                 keyEncryptionCipher.init(Cipher.ENCRYPT_MODE, publicKey, random);
-                encryptedKeyBytes = keyEncryptionCipher.doFinal(encryptionKey);
+                encryptedKeyBytes = keyEncryptionCipher.doFinal(OperatorUtils.getJceKey(encryptionKey).getEncoded());
             }
             catch (GeneralSecurityException e)
             {

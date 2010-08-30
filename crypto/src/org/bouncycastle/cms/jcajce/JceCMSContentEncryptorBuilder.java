@@ -17,6 +17,7 @@ import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OutputEncryptor;
 
 public class JceCMSContentEncryptorBuilder
@@ -126,9 +127,9 @@ public class JceCMSContentEncryptorBuilder
             return new CipherOutputStream(dOut, cipher);
         }
 
-        public byte[] getEncodedKey()
+        public GenericKey getKey()
         {
-            return encKey.getEncoded();
+            return new GenericKey(encKey);
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -41,6 +42,10 @@ import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
+import org.bouncycastle.operator.ContentVerifier;
+import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
 import org.bouncycastle.util.Arrays;
 
 /**
@@ -534,6 +539,166 @@ public class SignerInformation
         }
     }
 
+    private boolean doVerify(
+        ContentVerifier verifier)
+        throws CMSException
+    {
+        String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(this.getDigestAlgOID());
+        String          encName = CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
+        
+        try
+        {
+            MessageDigest   digest = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, null);
+
+            if (digestCalculator != null)
+            {
+                resultDigest = digestCalculator.getDigest();
+            }
+            else
+            {
+                if (content != null)
+                {
+                    content.write(new DigOutputStream(digest));
+                }
+                else if (signedAttributeSet == null)
+                {
+                    // TODO Get rid of this exception and just treat content==null as empty not missing?
+                    throw new CMSException("data not encapsulated in signature - use detached constructor.");
+                }
+
+                resultDigest = digest.digest();
+            }
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("can't process mime object to create signature.", e);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new CMSException("can't find algorithm: " + e.getMessage(), e);
+        }
+
+        // TODO Shouldn't be using attribute OID as contentType (should be null)
+        boolean isCounterSignature = contentType.equals(CMSAttributes.counterSignature);
+
+        // RFC 3852 11.1 Check the content-type attribute is correct
+        {
+            DERObject validContentType = getSingleValuedSignedAttribute(
+                CMSAttributes.contentType, "content-type");
+            if (validContentType == null)
+            {
+                if (!isCounterSignature && signedAttributeSet != null)
+                {
+                    throw new CMSException("The content-type attribute type MUST be present whenever signed attributes are present in signed-data");
+                }
+            }
+            else
+            {
+                if (isCounterSignature)
+                {
+                    throw new CMSException("[For counter signatures,] the signedAttributes field MUST NOT contain a content-type attribute");
+                }
+
+                if (!(validContentType instanceof DERObjectIdentifier))
+                {
+                    throw new CMSException("content-type attribute value not of ASN.1 type 'OBJECT IDENTIFIER'");
+                }
+
+                DERObjectIdentifier signedContentType = (DERObjectIdentifier)validContentType;
+
+                if (!signedContentType.equals(contentType))
+                {
+                    throw new CMSException("content-type attribute value does not match eContentType");
+                }
+            }
+        }
+
+        // RFC 3852 11.2 Check the message-digest attribute is correct
+        {
+            DERObject validMessageDigest = getSingleValuedSignedAttribute(
+                CMSAttributes.messageDigest, "message-digest");
+            if (validMessageDigest == null)
+            {
+                if (signedAttributeSet != null)
+                {
+                    throw new CMSException("the message-digest signed attribute type MUST be present when there are any signed attributes present");
+                }
+            }
+            else
+            {
+                if (!(validMessageDigest instanceof ASN1OctetString))
+                {
+                    throw new CMSException("message-digest attribute value not of ASN.1 type 'OCTET STRING'");
+                }
+
+                ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;
+
+                if (!Arrays.constantTimeAreEqual(resultDigest, signedMessageDigest.getOctets()))
+                {
+                    throw new CMSException("message-digest attribute value does not match calculated value");
+                }
+            }
+        }
+
+        // RFC 3852 11.4 Validate countersignature attribute(s)
+        {
+            AttributeTable signedAttrTable = this.getSignedAttributes();
+            if (signedAttrTable != null
+                && signedAttrTable.getAll(CMSAttributes.counterSignature).size() > 0)
+            {
+                throw new CMSException("A countersignature attribute MUST NOT be a signed attribute");
+            }
+
+            AttributeTable unsignedAttrTable = this.getUnsignedAttributes();
+            if (unsignedAttrTable != null)
+            {
+                ASN1EncodableVector csAttrs = unsignedAttrTable.getAll(CMSAttributes.counterSignature);
+                for (int i = 0; i < csAttrs.size(); ++i)
+                {
+                    Attribute csAttr = (Attribute)csAttrs.get(i);
+                    if (csAttr.getAttrValues().size() < 1)
+                    {
+                        throw new CMSException("A countersignature attribute MUST contain at least one AttributeValue");
+                    }
+
+                    // Note: We don't recursively validate the countersignature value
+                }
+            }
+        }
+
+        try
+        {
+            OutputStream sigOut = verifier.getOutputStream();
+
+            if (signedAttributeSet == null)
+            {
+                if (digestCalculator != null)
+                {
+                    return false;
+                    // need to decrypt signature and check message bytes
+                    //return verifyDigest(resultDigest, key, this.getSignature(), sigProvider);
+                }
+                else if (content != null)
+                {
+                    // TODO Use raw signature of the hash value instead
+                    content.write(sigOut);
+                }
+            }
+            else
+            {
+                sigOut.write(this.getEncodedSignedAttributes());
+            }
+
+            sigOut.close();
+
+            return verifier.verify(this.getSignature());
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("can't process mime object to create signature.", e);
+        }
+    }
+
     private boolean isNull(
         DEREncodable    o)
     {
@@ -740,7 +905,28 @@ public class SignerInformation
 
         return doVerify(cert.getPublicKey(), sigProvider); 
     }
-    
+
+    /**
+     * verify that the given signer can successfully verify the signature on
+     * this SignerInformation object.
+     */
+    public boolean verify(ContentVerifierProvider verifierProvider)
+        throws CMSException
+    {
+        String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(this.getDigestAlgOID());
+        String          encName = CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
+        String          signatureName = digestName + "with" + encName;
+
+        try
+        {
+            return doVerify(verifierProvider.get(SignerAlgorithmIdentifierGenerator.generate(signatureName)));
+        }
+        catch (OperatorCreationException e)
+        {
+            throw new CMSException("cannot create verifier: " + e.getMessage(), e);
+        }
+    }
+
     /**
      * Return the base ASN.1 CMS structure that this object contains.
      * 

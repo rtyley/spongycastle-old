@@ -27,6 +27,7 @@ import org.bouncycastle.asn1.cms.AuthenticatedData;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.operator.GenericKey;
 
 /**
  * General class for generating a CMS authenticated-data message.
@@ -149,7 +150,7 @@ public class CMSAuthenticatedDataGenerator
         {
             RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
 
-            recipientInfos.add(recipient.generate(encKey.getEncoded()));
+            recipientInfos.add(recipient.generate(new GenericKey(encKey)));
         }
 
         ContentInfo  eci = new ContentInfo(

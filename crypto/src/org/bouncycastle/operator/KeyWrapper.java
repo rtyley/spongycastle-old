@@ -6,6 +6,6 @@ public interface KeyWrapper
 {
     AlgorithmIdentifier getAlgorithmIdentifier();
 
-    byte[] generateWrappedKey(byte[] encryptionKey)
+    byte[] generateWrappedKey(GenericKey encryptionKey)
         throws OperatorException;
 }

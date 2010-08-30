@@ -1,12 +1,12 @@
 package org.bouncycastle.cms.jcajce;
 
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
@@ -21,6 +21,7 @@ import org.bouncycastle.cms.KEKRecipientInfoGenerator;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.operator.GenericKey;
 
 public class JceKEKRecipientInfoGenerator
     extends KEKRecipientInfoGenerator
@@ -62,10 +63,10 @@ public class JceKEKRecipientInfoGenerator
         return this;
     }
 
-    protected byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, byte[] contentEncryptionKey)
+    protected byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, GenericKey contentEncryptionKey)
         throws CMSException
     {
-        SecretKeySpec contentEncryptionKeySpec = new SecretKeySpec(contentEncryptionKey, "WRAP");
+        Key contentEncryptionKeySpec = CMSUtils.getJceKey(contentEncryptionKey);
 
         Cipher keyEncryptionCipher = helper.createCipher(keyEncryptionAlgorithm.getAlgorithm());
 

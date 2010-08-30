@@ -540,19 +540,19 @@ public class X509CertificateObject
         {
             return true;
         }
-        
+
         if (!(o instanceof Certificate))
         {
             return false;
         }
 
         Certificate other = (Certificate)o;
-        
+
         try
         {
             byte[] b1 = this.getEncoded();
             byte[] b2 = other.getEncoded();
-            
+
             return Arrays.areEqual(b1, b2);
         }
         catch (CertificateEncodingException e)
