@@ -119,7 +119,7 @@ public class AllTests
 
         RecipientId recipientId = new RecipientId();
 
-        recipientId.setIssuer(cert.getIssuerX500Principal());
+        recipientId.setIssuer(cert.getIssuerX500Principal().getEncoded());
         recipientId.setSerialNumber(cert.getSerialNumber());
 
         RecipientInformation recipientInformation = recips.get(recipientId);
