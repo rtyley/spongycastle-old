@@ -107,7 +107,7 @@ public class CertificateRequestMessage
         }
     }
 
-    public boolean verifySigningKeyPOP(ContentVerifierProvider verifierProvider, PKMACValueVerifier macVerifier, char[] password)
+    public boolean verifySigningKeyPOP(ContentVerifierProvider verifierProvider, PKMACBuilder macBuilder, char[] password)
         throws CRMFException, IllegalStateException
     {
         ProofOfPossession pop = certReqMsg.getPopo();
@@ -122,6 +122,7 @@ public class CertificateRequestMessage
             }
 
             PKMACValue pkMAC = popoSign.getPoposkInput().getPublicKeyMAC();
+            PKMACValueVerifier macVerifier = new PKMACValueVerifier(macBuilder);
 
             if (macVerifier.verify(pkMAC, password, this.getCertTemplate().getPublicKey()))
             {

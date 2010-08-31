@@ -31,7 +31,7 @@ public class CertificateRequestMessageBuilder
     private CertTemplateBuilder templateBuilder;
     private List controls;
     private ContentSigner popSigner;
-    private PKMACValueGenerator pkmacGenerator;
+    private PKMACBuilder pkmacBuilder;
     private char[] password;
     private GeneralName sender;
     private POPOPrivKey popoPrivKey;
@@ -116,9 +116,9 @@ public class CertificateRequestMessageBuilder
         return this;
     }
 
-    public CertificateRequestMessageBuilder setAuthInfoPKMAC(PKMACValueGenerator pkmacGenerator, char[] password)
+    public CertificateRequestMessageBuilder setAuthInfoPKMAC(PKMACBuilder pkmacBuilder, char[] password)
     {
-        this.pkmacGenerator = pkmacGenerator;
+        this.pkmacBuilder = pkmacBuilder;
         this.password = password;
 
         return this;
@@ -176,6 +176,8 @@ public class CertificateRequestMessageBuilder
             }
             else
             {
+                PKMACValueGenerator pkmacGenerator = new PKMACValueGenerator(pkmacBuilder);
+
                 builder.setPublicKeyMac(pkmacGenerator, password);
             }
 

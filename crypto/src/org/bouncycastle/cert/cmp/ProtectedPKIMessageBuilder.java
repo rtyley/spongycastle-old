@@ -20,6 +20,7 @@ import org.bouncycastle.asn1.cmp.PKIMessage;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.MacCalculator;
 
 public class ProtectedPKIMessageBuilder
 {
@@ -117,6 +118,25 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
+    public ProtectedPKIMessage build(MacCalculator macCalculator)
+        throws CMPException
+    {
+        hdrBuilder.setProtectionAlg(macCalculator.getAlgorithmIdentifier());
+
+        PKIHeader header = hdrBuilder.build();
+
+        try
+        {
+            DERBitString protection = new DERBitString(calculateMac(macCalculator, header, body));
+
+            return finaliseMessage(header, protection);
+        }
+        catch (IOException e)
+        {
+            throw new CMPException("unable to encode signature input: " + e.getMessage(), e);
+        }
+    }
+
     public ProtectedPKIMessage build(ContentSigner signer)
         throws CMPException
     {
@@ -128,25 +148,30 @@ public class ProtectedPKIMessageBuilder
         {
             DERBitString protection = new DERBitString(calculateSignature(signer, header, body));
 
-            if (!extraCerts.isEmpty())
-            {
-                CMPCertificate[] cmpCerts = new CMPCertificate[extraCerts.size()];
-
-                for (int i = 0; i != cmpCerts.length; i++)
-                {
-                    cmpCerts[i] = new CMPCertificate(((X509CertificateHolder)extraCerts.get(i)).toASN1Structure());
-                }
-
-                return new ProtectedPKIMessage(new PKIMessage(header, body, protection, cmpCerts));
-            }
-            else
-            {
-                return new ProtectedPKIMessage(new PKIMessage(header, body, protection));
-            }
+            return finaliseMessage(header, protection);
         }
         catch (IOException e)
         {
             throw new CMPException("unable to encode signature input: " + e.getMessage(), e);
+        }
+    }
+
+    private ProtectedPKIMessage finaliseMessage(PKIHeader header, DERBitString protection)
+    {
+        if (!extraCerts.isEmpty())
+        {
+            CMPCertificate[] cmpCerts = new CMPCertificate[extraCerts.size()];
+
+            for (int i = 0; i != cmpCerts.length; i++)
+            {
+                cmpCerts[i] = new CMPCertificate(((X509CertificateHolder)extraCerts.get(i)).toASN1Structure());
+            }
+
+            return new ProtectedPKIMessage(new PKIMessage(header, body, protection, cmpCerts));
+        }
+        else
+        {
+            return new ProtectedPKIMessage(new PKIMessage(header, body, protection));
         }
     }
 
@@ -165,5 +190,22 @@ public class ProtectedPKIMessageBuilder
         sOut.close();
 
         return signer.getSignature();
+    }
+
+    private byte[] calculateMac(MacCalculator macCalculator, PKIHeader header, PKIBody body)
+        throws IOException
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(header);
+        v.add(body);
+
+        OutputStream sOut = macCalculator.getOutputStream();
+
+        sOut.write(new DERSequence(v).getDEREncoded());
+
+        sOut.close();
+
+        return macCalculator.getMac();
     }
 }

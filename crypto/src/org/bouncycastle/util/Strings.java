@@ -199,6 +199,18 @@ public final class Strings
         return string;
     }
 
+    public static byte[] toByteArray(char[] chars)
+    {
+        byte[] bytes = new byte[chars.length];
+
+        for (int i = 0; i != bytes.length; i++)
+        {
+            bytes[i] = (byte)chars[i];
+        }
+
+        return bytes;
+    }
+
     public static byte[] toByteArray(String string)
     {
         byte[] bytes = new byte[string.length()];
