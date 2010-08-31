@@ -1,5 +1,6 @@
 package org.bouncycastle.cert.cmp.test;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -14,10 +15,12 @@ import java.util.Date;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cmp.CertConfirmContent;
 import org.bouncycastle.asn1.cmp.CertRepMessage;
 import org.bouncycastle.asn1.cmp.PKIBody;
+import org.bouncycastle.asn1.cmp.PKIMessage;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.CertException;
@@ -28,6 +31,8 @@ import org.bouncycastle.cert.cmp.CertificateConfirmationContentBuilder;
 import org.bouncycastle.cert.cmp.CertificateStatus;
 import org.bouncycastle.cert.cmp.ProtectedPKIMessage;
 import org.bouncycastle.cert.cmp.ProtectedPKIMessageBuilder;
+import org.bouncycastle.cert.crmf.PKMACBuilder;
+import org.bouncycastle.cert.crmf.jcajce.JcePKMACValuesCalculator;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -37,12 +42,14 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentDigesterProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.util.io.Streams;
 
 public class AllTests
     extends TestCase
 {
     private static final byte[] TEST_DATA = "Hello world!".getBytes();
     private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
+    private static final String TEST_DATA_HOME = "bc.test.data.home";
 
     /*
      *
@@ -103,6 +110,32 @@ public class AllTests
         assertEquals(recipient, message.getHeader().getRecipient());
     }
 
+    public void testMacProtectedMessage()
+        throws Exception
+    {
+        KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
+
+        kGen.initialize(512);
+
+        KeyPair kp = kGen.generateKeyPair();
+        X509CertificateHolder cert = makeV3Certificate(kp, "CN=Test", kp, "CN=Test");
+
+        GeneralName sender = new GeneralName(new X509Name("CN=Sender"));
+        GeneralName recipient = new GeneralName(new X509Name("CN=Recip"));
+
+        ProtectedPKIMessage message = new ProtectedPKIMessageBuilder(sender, recipient)
+                                                  .setBody(new PKIBody(PKIBody.TYPE_INIT_REP, CertRepMessage.getInstance(new DERSequence(new DERSequence()))))
+                                                  .addCMPCertificate(cert)
+                                                  .build(new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)).build("secret".toCharArray()));
+
+        PKMACBuilder pkMacBuilder = new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC));
+
+        assertTrue(message.verify(pkMacBuilder, "secret".toCharArray()));
+
+        assertEquals(sender, message.getHeader().getSender());
+        assertEquals(recipient, message.getHeader().getRecipient());
+    }
+
     public void testConfirmationMessage()
         throws Exception
     {
@@ -142,6 +175,15 @@ public class AllTests
         assertTrue(statusList[0].verify(cert, new JcaContentDigesterProviderBuilder().build()));
     }
 
+    public void testSampleCr()
+        throws Exception
+    {
+        PKIMessage msg = loadMessage("sample_cr.der");
+        ProtectedPKIMessage procMsg = new ProtectedPKIMessage(msg);
+
+        assertTrue(procMsg.verify(new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)), "TopSecret1234".toCharArray()));
+    }
+
     private static X509CertificateHolder makeV3Certificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN)
         throws GeneralSecurityException, IOException, OperatorCreationException, CertException
     {
@@ -167,5 +209,24 @@ public class AllTests
         assertTrue(certHolder.isSignatureValid(verifier));
 
         return certHolder;
+    }
+
+    private static PKIMessage loadMessage(String name)
+    {
+        String dataHome = System.getProperty(TEST_DATA_HOME);
+
+        if (dataHome == null)
+        {
+            throw new IllegalStateException(TEST_DATA_HOME + " property not set");
+        }
+
+        try
+        {
+            return PKIMessage.getInstance(ASN1Object.fromByteArray(Streams.readAll(new FileInputStream(dataHome + "/cmp/" + name))));
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e.toString());
+        }
     }
 }

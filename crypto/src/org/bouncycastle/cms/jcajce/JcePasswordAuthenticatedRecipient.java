@@ -1,6 +1,5 @@
 package org.bouncycastle.cms.jcajce;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.security.Key;
 
@@ -9,6 +8,7 @@ import javax.crypto.Mac;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.RecipientOperator;
+import org.bouncycastle.jcajce.io.MacOutputStream;
 import org.bouncycastle.operator.MacCalculator;
 
 public class JcePasswordAuthenticatedRecipient
@@ -43,37 +43,5 @@ public class JcePasswordAuthenticatedRecipient
                 return dataMac.doFinal();
             }
         });
-    }
-
-    private class MacOutputStream
-        extends OutputStream
-    {
-        protected Mac mac;
-
-        public MacOutputStream(
-            Mac          mac)
-        {
-            this.mac = mac;
-        }
-
-        public void write(int b)
-            throws IOException
-        {
-            mac.update((byte)b);
-        }
-
-        public void write(
-            byte[] b,
-            int off,
-            int len)
-            throws IOException
-        {
-            mac.update(b, off, len);
-        }
-
-        public Mac getMac()
-        {
-            return mac;
-        }
     }
 }

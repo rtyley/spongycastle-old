@@ -1,62 +1,41 @@
 package org.bouncycastle.cert.crmf;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import org.bouncycastle.asn1.cmp.PBMParameter;
 import org.bouncycastle.asn1.crmf.PKMACValue;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.operator.MacCalculator;
 import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.Strings;
 
-public class PKMACValueVerifier
+class PKMACValueVerifier
 {
-    private final PKMACValuesCalculator calculator;
+    private final PKMACBuilder builder;
 
-    public PKMACValueVerifier(PKMACValuesCalculator calculator)
+    public PKMACValueVerifier(PKMACBuilder builder)
     {
-        this.calculator = calculator;
+        this.builder = builder;
     }
 
     public boolean verify(PKMACValue value, char[] password, SubjectPublicKeyInfo keyInfo)
         throws CRMFException
     {
-        // From RFC 4211
-        //
-        //   1.  Generate a random salt value S
-        //
-        //   2.  Append the salt to the pw.  K = pw || salt.
-        //
-        //   3.  Hash the value of K.  K = HASH(K)
-        //
-        //   4.  If Iter is greater than zero.  Iter = Iter - 1.  Goto step 3.
-        //
-        //   5.  Compute an HMAC as documented in [HMAC].
-        //
-        //       MAC = HASH( K XOR opad, HASH( K XOR ipad, data) )
-        //
-        //       Where opad and ipad are defined in [HMAC].
+        MacCalculator calculator = builder.build(PBMParameter.getInstance(value.getAlgId().getParameters()), password);
 
-        PBMParameter param = PBMParameter.getInstance(value.getAlgId().getParameters());
+        OutputStream macOut = calculator.getOutputStream();
 
-        byte[] salt = param.getSalt().getOctets();
-
-        byte[] pw = Strings.toUTF8ByteArray(password);
-
-        byte[] K = new byte[pw.length + salt.length];
-
-        System.arraycopy(pw, 0, K, 0, pw.length);
-        System.arraycopy(salt, 0, K, pw.length, salt.length);
-
-        calculator.setup(param.getOwf(), param.getMac());
-
-        int iter = param.getIterationCount().getValue().intValue();
-        do
+        try
         {
-            K = calculator.calculateDigest(K);
+            macOut.write(keyInfo.getDEREncoded());
+
+            macOut.close();
         }
-        while (iter-- > 0);
+        catch (IOException e)
+        {
+            throw new CRMFException("exception encoding mac input: " + e.getMessage(), e);
+        }
 
-        byte[] MAC = calculator.calculateMac(K, keyInfo.getDEREncoded());
-
-        return Arrays.areEqual(MAC, value.getValue().getBytes());
+        return Arrays.areEqual(calculator.getMac(), value.getValue().getBytes());
     }
-
 }

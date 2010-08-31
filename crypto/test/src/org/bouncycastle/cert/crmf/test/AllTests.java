@@ -26,16 +26,15 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.crmf.EncryptedValueBuilder;
 import org.bouncycastle.cert.crmf.EncryptedValueParser;
 import org.bouncycastle.cert.crmf.PKIArchiveControl;
-import org.bouncycastle.cert.crmf.PKMACValueGenerator;
-import org.bouncycastle.cert.crmf.PKMACValueVerifier;
+import org.bouncycastle.cert.crmf.PKMACBuilder;
 import org.bouncycastle.cert.crmf.ValueDecryptorGenerator;
 import org.bouncycastle.cert.crmf.jcajce.JcaCertificateRequestMessage;
 import org.bouncycastle.cert.crmf.jcajce.JcaCertificateRequestMessageBuilder;
 import org.bouncycastle.cert.crmf.jcajce.JcaEncryptedValueBuilder;
 import org.bouncycastle.cert.crmf.jcajce.JcaPKIArchiveControlBuilder;
-import org.bouncycastle.cert.crmf.jcajce.JcaPKMACValuesCalculator;
 import org.bouncycastle.cert.crmf.jcajce.JceAsymmetricValueDecryptorGenerator;
 import org.bouncycastle.cert.crmf.jcajce.JceCRMFEncryptorBuilder;
+import org.bouncycastle.cert.crmf.jcajce.JcePKMACValuesCalculator;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.RecipientId;
@@ -148,7 +147,7 @@ public class AllTests
         JcaCertificateRequestMessageBuilder certReqBuild = new JcaCertificateRequestMessageBuilder(BigInteger.ONE);
 
         certReqBuild.setPublicKey(kp.getPublic())
-                    .setAuthInfoPKMAC(new PKMACValueGenerator(new JcaPKMACValuesCalculator()), "fred".toCharArray())
+                    .setAuthInfoPKMAC(new PKMACBuilder(new JcePKMACValuesCalculator()), "fred".toCharArray())
                     .setProofOfPossessionSigningKeySigner(new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(kp.getPrivate()));
 
         certReqBuild.addControl(new JcaPKIArchiveControlBuilder(kp.getPrivate(), new X500Principal("CN=test"))
@@ -168,7 +167,7 @@ public class AllTests
             // ignore
         }
 
-        assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACValueVerifier(new JcaPKMACValuesCalculator().setProvider(BC)), "fred".toCharArray()));
+        assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)), "fred".toCharArray()));
 
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
     }
@@ -198,7 +197,7 @@ public class AllTests
         // check that internal check on popo signing is working okay
         try
         {
-            certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACValueVerifier(new JcaPKMACValuesCalculator().setProvider(BC)), "fred".toCharArray());
+            certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)), "fred".toCharArray());
 
             fail("IllegalStateException not thrown");
         }

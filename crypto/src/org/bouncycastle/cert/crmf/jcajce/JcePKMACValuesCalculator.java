@@ -14,26 +14,26 @@ import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 
-public class JcaPKMACValuesCalculator
+public class JcePKMACValuesCalculator
     implements PKMACValuesCalculator
 {
     private MessageDigest digest;
     private Mac           mac;
     private CRMFHelper    helper;
 
-    public JcaPKMACValuesCalculator()
+    public JcePKMACValuesCalculator()
     {
         this.helper = new CRMFHelper(new DefaultJcaJceHelper());
     }
 
-    public JcaPKMACValuesCalculator setProvider(Provider provider)
+    public JcePKMACValuesCalculator setProvider(Provider provider)
     {
         this.helper = new CRMFHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
-    public JcaPKMACValuesCalculator setProvider(String providerName)
+    public JcePKMACValuesCalculator setProvider(String providerName)
     {
         this.helper = new CRMFHelper(new NamedJcaJceHelper(providerName));
 
@@ -57,7 +57,7 @@ public class JcaPKMACValuesCalculator
     {
         try
         {
-            mac.init(new SecretKeySpec(pwd, "HMacSHA1"));
+            mac.init(new SecretKeySpec(pwd, mac.getAlgorithm()));
 
             return mac.doFinal(data);
         }
