@@ -12,6 +12,11 @@ public class AuthenticatorControl
 
     private final DERUTF8String token;
 
+    public AuthenticatorControl(DERUTF8String token)
+    {
+        this.token = token;
+    }
+
     public AuthenticatorControl(String token)
     {
         this.token = new DERUTF8String(token);

@@ -84,9 +84,11 @@ public class ProtectedPKIMessage
             throw new CMPException("protection algorithm not mac based");
         }
 
+
         try
         {
-            MacCalculator calculator = pkMacBuilder.build(PBMParameter.getInstance(pkiMessage.getHeader().getProtectionAlg().getParameters()), password);
+            pkMacBuilder.setParameters(PBMParameter.getInstance(pkiMessage.getHeader().getProtectionAlg().getParameters()));
+            MacCalculator calculator = pkMacBuilder.build(password);
 
             OutputStream macOut = calculator.getOutputStream();
 

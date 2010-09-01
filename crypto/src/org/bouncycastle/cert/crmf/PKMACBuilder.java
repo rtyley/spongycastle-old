@@ -22,19 +22,28 @@ public class PKMACBuilder
     private int saltLength = 20;
     private SecureRandom random;
     private PKMACValuesCalculator calculator;
+    private PBMParameter parameters;
+    private int maxIterations;
 
     public PKMACBuilder(PKMACValuesCalculator calculator)
     {
         this(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1), 1000, new AlgorithmIdentifier(IANAObjectIdentifiers.hmacSHA1, DERNull.INSTANCE), calculator);
     }
 
+    /**
+     * Create a PKMAC builder enforcing a ceiling on the maximum iteration count.
+     *
+     * @param calculator     supporting calculator
+     * @param maxIterations  max allowable value for iteration count.
+     */
+    public PKMACBuilder(PKMACValuesCalculator calculator, int maxIterations)
+    {
+        this.maxIterations = maxIterations;
+        this.calculator = calculator;
+    }
+
     private PKMACBuilder(AlgorithmIdentifier hashAlgorithm, int iterationCount, AlgorithmIdentifier macAlgorithm, PKMACValuesCalculator calculator)
     {
-        if (iterationCount < 100)
-        {
-            throw new IllegalArgumentException("iteration count must be at least 100");
-        }
-
         this.owf = hashAlgorithm;
         this.iterationCount = iterationCount;
         this.mac = macAlgorithm;
@@ -61,6 +70,12 @@ public class PKMACBuilder
 
     public PKMACBuilder setIterationCount(int iterationCount)
     {
+        if (iterationCount < 100)
+        {
+            throw new IllegalArgumentException("iteration count must be at least 100");
+        }
+        checkIterationCountCeiling(iterationCount);
+
         this.iterationCount = iterationCount;
 
         return this;
@@ -73,15 +88,46 @@ public class PKMACBuilder
         return this;
     }
 
-    public MacCalculator build(PBMParameter parameters, char[] password)
-        throws CRMFException
+    public PKMACBuilder setParameters(PBMParameter parameters)
     {
-        calculator.setup(parameters.getOwf(), parameters.getMac());
+        checkIterationCountCeiling(parameters.getIterationCount().getValue().intValue());
 
-        return genCalculator(parameters.getSalt().getOctets(), parameters.getIterationCount().getValue().intValue(), password);
+        this.parameters = parameters;
+
+        return this;
     }
 
     public MacCalculator build(char[] password)
+        throws CRMFException
+    {
+        if (parameters != null)
+        {
+            return genCalculator(parameters, password);
+        }
+        else
+        {
+            byte[] salt = new byte[saltLength];
+
+            if (random == null)
+            {
+                this.random = new SecureRandom();
+            }
+
+            random.nextBytes(salt);
+
+            return genCalculator(new PBMParameter(salt, owf, iterationCount, mac), password);
+        }
+    }
+
+    private void checkIterationCountCeiling(int iterationCount)
+    {
+        if (maxIterations > 0 && iterationCount > maxIterations)
+        {
+            throw new IllegalArgumentException("iteration count exceeds limit (" + iterationCount + " > " + maxIterations + ")");
+        }
+    }
+
+    private MacCalculator genCalculator(final PBMParameter params, char[] password)
         throws CRMFException
     {
         // From RFC 4211
@@ -92,38 +138,23 @@ public class PKMACBuilder
         //
         //   3.  Hash the value of K.  K = HASH(K)
         //
-        //   4.  If Iter is greater than zero.  Iter = Iter - 1.  Goto step 3.
+        //   4.  Iter = Iter - 1.  If Iter is greater than zero.  Goto step 3.
         //
         //   5.  Compute an HMAC as documented in [HMAC].
         //
         //       MAC = HASH( K XOR opad, HASH( K XOR ipad, data) )
         //
         //       Where opad and ipad are defined in [HMAC].
-
-        final byte[] salt = new byte[saltLength];
-
-        if (random == null)
-        {
-            this.random = new SecureRandom();
-        }
-
-        random.nextBytes(salt);
-
-        calculator.setup(owf, mac);
-
-        return genCalculator(salt, iterationCount, password);
-    }
-
-    private MacCalculator genCalculator(final byte[] salt, int itCount, char[] password)
-        throws CRMFException
-    {
         byte[] pw = Strings.toUTF8ByteArray(password);
+        byte[] salt = params.getSalt().getOctets();
         byte[] K = new byte[pw.length + salt.length];
 
         System.arraycopy(pw, 0, K, 0, pw.length);
         System.arraycopy(salt, 0, K, pw.length, salt.length);
 
-        int iter = itCount;
+        calculator.setup(params.getOwf(), params.getMac());
+
+        int iter = params.getIterationCount().getValue().intValue();
         do
         {
             K = calculator.calculateDigest(K);
@@ -138,7 +169,7 @@ public class PKMACBuilder
 
             public AlgorithmIdentifier getAlgorithmIdentifier()
             {
-                return new AlgorithmIdentifier(CMPObjectIdentifiers.passwordBasedMac, new PBMParameter(salt, owf, iterationCount, mac));
+                return new AlgorithmIdentifier(CMPObjectIdentifiers.passwordBasedMac, params);
             }
 
             public OutputStream getOutputStream()

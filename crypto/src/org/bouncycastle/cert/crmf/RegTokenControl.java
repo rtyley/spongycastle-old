@@ -12,6 +12,11 @@ public class RegTokenControl
 
     private final DERUTF8String token;
 
+    public RegTokenControl(DERUTF8String token)
+    {
+        this.token = token;
+    }
+
     public RegTokenControl(String token)
     {
         this.token = new DERUTF8String(token);
