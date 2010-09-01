@@ -2,6 +2,8 @@ package org.bouncycastle.cert.crmf;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.crmf.AttributeTypeAndValue;
 import org.bouncycastle.asn1.crmf.CRMFObjectIdentifiers;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
@@ -41,7 +43,7 @@ public class CertificateRequestMessage
         return this.certReqMsg.getCertReq().getCertTemplate();
     }
 
-    public PKIArchiveControl getPKIArchiveControl()
+    public Control getControl(ASN1ObjectIdentifier type)
     {
         if (controls == null)
         {
@@ -49,12 +51,30 @@ public class CertificateRequestMessage
         }
 
         AttributeTypeAndValue[] tAndVs = controls.toAttributeTypeAndValueArray();
+        AttributeTypeAndValue found = null;
 
         for (int i = 0; i != tAndVs.length; i++)
         {
-            if (tAndVs[i].getType().equals(CRMFObjectIdentifiers.id_regCtrl_pkiArchiveOptions))
+            if (tAndVs[i].getType().equals(type))
             {
-                return new PKIArchiveControl(PKIArchiveOptions.getInstance(tAndVs[i].getValue()));
+                found = tAndVs[i];
+                break;
+            }
+        }
+
+        if (found != null)
+        {
+            if (found.getType().equals(CRMFObjectIdentifiers.id_regCtrl_pkiArchiveOptions))
+            {
+                return new PKIArchiveControl(PKIArchiveOptions.getInstance(found.getValue()));
+            }
+            if (found.getType().equals(CRMFObjectIdentifiers.id_regCtrl_regToken))
+            {
+                return new RegTokenControl(DERUTF8String.getInstance(found.getValue()));
+            }
+            if (found.getType().equals(CRMFObjectIdentifiers.id_regCtrl_authenticator))
+            {
+                return new AuthenticatorControl(DERUTF8String.getInstance(found.getValue()));
             }
         }
 

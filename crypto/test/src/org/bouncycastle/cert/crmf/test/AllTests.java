@@ -18,6 +18,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.crmf.CRMFObjectIdentifiers;
 import org.bouncycastle.asn1.crmf.EncKeyWithID;
 import org.bouncycastle.asn1.crmf.EncryptedValue;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -111,10 +112,13 @@ public class AllTests
         assertEquals(new X500Principal("CN=Test"), certReqMsg.getSubjectX500Principal());
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
 
-        assertEquals(PKIArchiveControl.encryptedPrivKey, certReqMsg.getPKIArchiveControl().getArchiveType());
-        assertTrue(certReqMsg.getPKIArchiveControl().isEnvelopedData());
+        PKIArchiveControl archiveControl = (PKIArchiveControl)certReqMsg.getControl(CRMFObjectIdentifiers.id_regCtrl_pkiArchiveOptions);
 
-        RecipientInformationStore recips = certReqMsg.getPKIArchiveControl().getEnvelopedData().getRecipientInfos();
+        assertEquals(PKIArchiveControl.encryptedPrivKey, archiveControl.getArchiveType());
+
+        assertTrue(archiveControl.isEnvelopedData());
+
+        RecipientInformationStore recips = archiveControl.getEnvelopedData().getRecipientInfos();
 
         RecipientId recipientId = new RecipientId();
 

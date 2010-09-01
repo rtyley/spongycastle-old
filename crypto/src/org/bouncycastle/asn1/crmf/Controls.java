@@ -31,6 +31,11 @@ public class Controls
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public Controls(AttributeTypeAndValue atv)
+    {
+        content = new DERSequence(atv);
+    }
+
     public Controls(AttributeTypeAndValue[] atvs)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();

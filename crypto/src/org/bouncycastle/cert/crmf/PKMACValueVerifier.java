@@ -21,7 +21,8 @@ class PKMACValueVerifier
     public boolean verify(PKMACValue value, char[] password, SubjectPublicKeyInfo keyInfo)
         throws CRMFException
     {
-        MacCalculator calculator = builder.build(PBMParameter.getInstance(value.getAlgId().getParameters()), password);
+        builder.setParameters(PBMParameter.getInstance(value.getAlgId().getParameters()));
+        MacCalculator calculator = builder.build(password);
 
         OutputStream macOut = calculator.getOutputStream();
 
