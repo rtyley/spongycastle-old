@@ -43,24 +43,19 @@ public class CertificateRequestMessage
         return this.certReqMsg.getCertReq().getCertTemplate();
     }
 
+    public boolean hasControls()
+    {
+        return controls != null;
+    }
+
+    public boolean hasControl(ASN1ObjectIdentifier type)
+    {
+        return findControl(type) != null;
+    }
+
     public Control getControl(ASN1ObjectIdentifier type)
     {
-        if (controls == null)
-        {
-            return null;
-        }
-
-        AttributeTypeAndValue[] tAndVs = controls.toAttributeTypeAndValueArray();
-        AttributeTypeAndValue found = null;
-
-        for (int i = 0; i != tAndVs.length; i++)
-        {
-            if (tAndVs[i].getType().equals(type))
-            {
-                found = tAndVs[i];
-                break;
-            }
-        }
+        AttributeTypeAndValue found = findControl(type);
 
         if (found != null)
         {
@@ -80,7 +75,29 @@ public class CertificateRequestMessage
 
         return null;
     }
-    
+
+    private AttributeTypeAndValue findControl(ASN1ObjectIdentifier type)
+    {
+        if (controls == null)
+        {
+            return null;
+        }
+
+        AttributeTypeAndValue[] tAndVs = controls.toAttributeTypeAndValueArray();
+        AttributeTypeAndValue found = null;
+
+        for (int i = 0; i != tAndVs.length; i++)
+        {
+            if (tAndVs[i].getType().equals(type))
+            {
+                found = tAndVs[i];
+                break;
+            }
+        }
+
+        return found;
+    }
+
     public boolean hasProofOfPossession()
     {
         return this.certReqMsg.getPopo() != null;
