@@ -1,19 +1,5 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.SignedData;
-import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.x509.NoSuchStoreException;
-import org.bouncycastle.x509.X509Store;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
@@ -22,9 +8,31 @@ import java.security.Provider;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.SignedData;
+import org.bouncycastle.asn1.cms.SignerInfo;
+import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.util.CollectionStore;
+import org.bouncycastle.util.Store;
+import org.bouncycastle.x509.NoSuchStoreException;
+import org.bouncycastle.x509.X509Store;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -379,6 +387,54 @@ public class CMSSignedData
         return certStore;
     }
 
+    public Store getCertificateStore()
+    {
+        ASN1Set certSet = signedData.getCertificates();
+
+        if (certSet != null)
+        {
+            List    certList = new ArrayList(certSet.size());
+
+            for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
+            {
+                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+
+                if (obj instanceof ASN1Sequence)
+                {
+                    certList.add(new X509CertificateHolder(X509CertificateStructure.getInstance(obj)));
+                }
+            }
+
+            return new CollectionStore(certList);
+        }
+
+        return new CollectionStore(new ArrayList());
+    }
+
+    public Store getCRLStore()
+    {
+        ASN1Set crlSet = signedData.getCRLs();
+
+        if (crlSet != null)
+        {
+            List    crlList = new ArrayList(crlSet.size());
+
+            for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
+            {
+                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+
+                if (obj instanceof ASN1Sequence)
+                {
+                    crlList.add(CertificateList.getInstance(obj));
+                }
+            }
+
+            return new CollectionStore(crlList);
+        }
+
+        return new CollectionStore(new ArrayList());
+    }
+    
     /**
      * Return the a string representation of the OID associated with the
      * encapsulated content info structure carried in the signed data.

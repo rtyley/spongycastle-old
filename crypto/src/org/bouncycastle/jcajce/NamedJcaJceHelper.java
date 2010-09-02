@@ -8,6 +8,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -84,5 +86,11 @@ public class NamedJcaJceHelper
         throws NoSuchAlgorithmException, NoSuchProviderException
     {
         return Signature.getInstance(algorithm, providerName);
+    }
+
+    public CertificateFactory createCertificateFactory(String algorithm)
+        throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException
+    {
+        return CertificateFactory.getInstance(algorithm, providerName);
     }
 }

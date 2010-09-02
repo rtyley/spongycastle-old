@@ -1,6 +1,9 @@
 package org.bouncycastle.cert.cmp;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.cmp.CertStatus;
+import org.bouncycastle.asn1.cmp.PKIStatusInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
@@ -20,7 +23,17 @@ public class CertificateStatus
         this.certStatus = certStatus;
     }
 
-    public boolean verify(X509CertificateHolder certHolder, DigesterCalculatorProvider digesterProvider)
+    public PKIStatusInfo getStatusInfo()
+    {
+        return certStatus.getStatusInfo();
+    }
+
+    public BigInteger getCertRequestID()
+    {
+        return certStatus.getCertReqId().getValue();
+    }
+
+    public boolean isVerified(X509CertificateHolder certHolder, DigesterCalculatorProvider digesterProvider)
         throws CMPException
     {
         AlgorithmIdentifier digAlg = digestAlgFinder.find(certHolder.toASN1Structure().getSignatureAlgorithm());

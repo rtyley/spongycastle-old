@@ -172,7 +172,7 @@ public class AllTests
         CertificateStatus[] statusList = content.getStatusMessages();
 
         assertEquals(1, statusList.length);
-        assertTrue(statusList[0].verify(cert, new JcaContentDigesterProviderBuilder().build()));
+        assertTrue(statusList[0].isVerified(cert, new JcaContentDigesterProviderBuilder().setProvider(BC).build()));
     }
 
     public void testSampleCr()

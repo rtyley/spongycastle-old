@@ -1,11 +1,16 @@
 package org.bouncycastle.operator.jcajce;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +33,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jcajce.JcaJceHelper;
 import org.bouncycastle.operator.OperatorCreationException;
 
@@ -252,6 +258,30 @@ class OperatorHelper
         else
         {
             return digestAlgOID.getId();
+        }
+    }
+
+    public X509Certificate convertCertificate(X509CertificateHolder certHolder)
+        throws CertificateException
+    {
+
+        try
+        {
+            CertificateFactory certFact = helper.createCertificateFactory("X.509");
+
+            return (X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(certHolder.getEncoded()));
+        }
+        catch (IOException e)
+        {
+            throw new CertificateException("cannot get encoded form of certificate");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new CertificateException("cannot create certificate factory: " + e.getMessage(), e);
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new CertificateException("cannot find factory provider: " + e.getMessage(), e);
         }
     }
 
