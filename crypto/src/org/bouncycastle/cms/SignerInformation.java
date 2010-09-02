@@ -44,6 +44,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.DatedContentVerifier;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
 import org.bouncycastle.util.Arrays;
@@ -545,7 +546,21 @@ public class SignerInformation
     {
         String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(this.getDigestAlgOID());
         String          encName = CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
-        
+
+        if (verifier instanceof DatedContentVerifier)
+        {
+            Time signingTime = getSigningTime();
+            if (signingTime != null)
+            {
+                DatedContentVerifier dcv = (DatedContentVerifier)verifier;
+
+                if (!dcv.isValid(signingTime.getDate()))
+                {
+                    throw new CMSException("verifier not valid at signingTime");   
+                }
+            }
+        }
+
         try
         {
             MessageDigest   digest = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, null);
@@ -844,6 +859,7 @@ public class SignerInformation
     /**
      * verify that the given public key successfully handles and confirms the
      * signature associated with this signer.
+     * @deprecated use verify(ContentVerifierProvider)
      */
     public boolean verify(
         PublicKey   key,
@@ -855,7 +871,8 @@ public class SignerInformation
 
     /**
      * verify that the given public key successfully handles and confirms the
-     * signature associated with this signer.
+     * signature associated with this signer
+     * @deprecated use verify(ContentVerifierProvider)
      */
     public boolean verify(
         PublicKey   key,
@@ -873,6 +890,7 @@ public class SignerInformation
      * the signature associated with this signer and, if a signingTime
      * attribute is available, that the certificate was valid at the time the
      * signature was generated.
+     * @deprecated use verify(ContentVerifierProvider)
      */
     public boolean verify(
         X509Certificate cert,
@@ -889,6 +907,7 @@ public class SignerInformation
      * the signature associated with this signer and, if a signingTime
      * attribute is available, that the certificate was valid at the time the
      * signature was generated.
+     * @deprecated use verify(ContentVerifierProvider)
      */
     public boolean verify(
         X509Certificate cert,

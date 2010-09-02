@@ -29,6 +29,8 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.util.Store;
 import org.bouncycastle.util.io.Streams;
 
 class CMSUtils
@@ -91,6 +93,28 @@ class CMSUtils
         catch (CertificateEncodingException e)
         {
             throw new CMSException("error encoding certs", e);
+        }
+    }
+
+    static List getCertificatesFromStore(Store certStore)
+        throws CMSException
+    {
+        List certs = new ArrayList();
+
+        try
+        {
+            for (Iterator it = certStore.getMatches(null).iterator(); it.hasNext();)
+            {
+                X509CertificateHolder c = (X509CertificateHolder)it.next();
+
+                certs.add(c.toASN1Structure());
+            }
+
+            return certs;
+        }
+        catch (ClassCastException e)
+        {
+            throw new CMSException("error processing certs", e);
         }
     }
 

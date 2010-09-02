@@ -37,6 +37,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
+import org.bouncycastle.util.Store;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509Store;
 
@@ -208,6 +209,7 @@ public class CMSSignedGenerator
      * @param certStore CertStore containing the public key certificates and CRLs
      * @throws java.security.cert.CertStoreException  if an issue occurs processing the CertStore
      * @throws CMSException  if an issue occurse transforming data from the CertStore into the message
+     * @deprecated use addCertificates and addCRLs
      */
     public void addCertificatesAndCRLs(
         CertStore certStore)
@@ -215,6 +217,13 @@ public class CMSSignedGenerator
     {
         _certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
         _crls.addAll(CMSUtils.getCRLsFromStore(certStore));
+    }
+
+    public void addCertificates(
+        Store certStore)
+        throws CMSException
+    {
+        _certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
     }
 
     /**

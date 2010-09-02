@@ -24,5 +24,5 @@ public interface DatedContentVerifier
      * @param date
      * @return
      */
-    boolean checkValidity(Date date);
+    boolean isValid(Date date);
 }

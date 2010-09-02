@@ -3,10 +3,12 @@ package org.bouncycastle.cert;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.util.Arrays;
@@ -14,6 +16,11 @@ import org.bouncycastle.util.Arrays;
 public class X509CertificateHolder
 {
     private X509CertificateStructure x509Certificate;
+
+    public X509CertificateHolder(byte[] certEncoding)
+    {
+        this.x509Certificate = X509CertificateStructure.getInstance(certEncoding);
+    }
 
     public X509CertificateHolder(X509CertificateStructure x509Certificate)
     {
@@ -24,6 +31,12 @@ public class X509CertificateHolder
         throws IOException
     {
         return x509Certificate.getEncoded();
+    }
+
+    // TODO: need to think about this a bit more...
+    public X509Extension getExtension(ASN1ObjectIdentifier oid)
+    {
+        return x509Certificate.getTBSCertificate().getExtensions().getExtension(oid);
     }
 
     public IssuerAndSerialNumber getIssuerAndSerialNumber()
