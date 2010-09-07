@@ -79,6 +79,7 @@ public class TlsProtocolHandler
     protected static final short AP_record_overflow = 22;
     protected static final short AP_decompression_failure = 30;
     protected static final short AP_handshake_failure = 40;
+    /* 41 is not defined, for historical reasons */
     protected static final short AP_bad_certificate = 42;
     protected static final short AP_unsupported_certificate = 43;
     protected static final short AP_certificate_revoked = 44;
@@ -95,6 +96,13 @@ public class TlsProtocolHandler
     protected static final short AP_internal_error = 80;
     protected static final short AP_user_canceled = 90;
     protected static final short AP_no_renegotiation = 100;
+
+    // RFC 3546
+    protected static final short AP_unsupported_extension = 110;
+    protected static final short AP_certificate_unobtainable = 111;
+    protected static final short AP_unrecognized_name = 112;
+    protected static final short AP_bad_certificate_status_response = 113;
+    protected static final short AP_bad_certificate_hash_value = 114;
 
     // RFC 4279
     protected static final short AP_unknown_psk_identity = 115;
@@ -123,7 +131,7 @@ public class TlsProtocolHandler
     private boolean closed = false;
     private boolean failedWithError = false;
     private boolean appDataReady = false;
-    private boolean extendedClientHello;
+    private Hashtable clientExtensions;
 
     private SecurityParameters securityParameters = null;
 
@@ -379,12 +387,25 @@ public class TlsProtocolHandler
                         }
 
                         /*
-                         * RFC4366 2.2 The extended server hello message format MAY be
+                         * RFC3546 2.2 The extended server hello message format MAY be
                          * sent in place of the server hello message when the client has
                          * requested extended functionality via the extended client hello
                          * message specified in Section 2.1.
+                         * ...
+                         * Note that the extended server hello message is only sent in response
+                         * to an extended client hello message.  This prevents the possibility
+                         * that the extended server hello message could "break" existing TLS 1.0
+                         * clients.
                          */
-                        if (extendedClientHello)
+
+                        /*
+                         * TODO RFC 3546 2.3 
+                         * If [...] the older session is resumed, then the server MUST ignore
+                         * extensions appearing in the client hello, and send a server hello
+                         * containing no extensions.
+                         */
+
+                        if (clientExtensions != null && !clientExtensions.isEmpty())
                         {
                             // Integer -> byte[]
                             Hashtable serverExtensions = new Hashtable();
@@ -397,10 +418,35 @@ public class TlsProtocolHandler
                                 ByteArrayInputStream ext = new ByteArrayInputStream(extBytes);
                                 while (ext.available() > 0)
                                 {
-                                    int extType = TlsUtils.readUint16(ext);
+                                    Integer extType = new Integer(TlsUtils.readUint16(ext));
                                     byte[] extValue = TlsUtils.readOpaque16(ext);
 
-                                    serverExtensions.put(new Integer(extType), extValue);
+                                    if (!clientExtensions.containsKey(extType))
+                                    {
+                                        /*
+                                         * RFC 3546 2.3 
+                                         * Note that for all extension types (including those defined in
+                                         * future), the extension type MUST NOT appear in the extended server
+                                         * hello unless the same extension type appeared in the corresponding
+                                         * client hello.  Thus clients MUST abort the handshake if they receive
+                                         * an extension type in the extended server hello that they did not
+                                         * request in the associated (extended) client hello.
+                                         */
+                                        this.failWithError(AL_fatal, AP_unsupported_extension);
+                                    }
+                                    if (serverExtensions.containsKey(extType))
+                                    {
+                                        /*
+                                         * RFC 3546 2.3 
+                                         * Also note that when multiple extensions of different types are
+                                         * present in the extended client hello or the extended server hello,
+                                         * the extensions may appear in any order.  There MUST NOT be more than
+                                         * one extension of the same type.
+                                         */
+                                        this.failWithError(AL_fatal, AP_illegal_parameter);
+                                    }
+
+                                    serverExtensions.put(extType, extValue);
                                 }
                             }
 
@@ -833,7 +879,7 @@ public class TlsProtocolHandler
          * Extensions
          */
         // Integer -> byte[]
-        Hashtable clientExtensions = this.tlsClient.generateClientExtensions();
+        this.clientExtensions = this.tlsClient.generateClientExtensions();
 
         // RFC 5746 3.4
         // Note: If renegotiation is implemented, need to use this instead of TLS_EMPTY_RENEGOTIATION_INFO_SCSV
@@ -846,9 +892,7 @@ public class TlsProtocolHandler
 //          clientExtensions.put(EXT_RenegotiationInfo, createRenegotiationInfo(emptybuf));
 //      }
 
-        this.extendedClientHello = clientExtensions != null && !clientExtensions.isEmpty();
-
-        if (extendedClientHello)
+        if (clientExtensions != null && !clientExtensions.isEmpty())
         {
             ByteArrayOutputStream ext = new ByteArrayOutputStream();
 
@@ -1123,7 +1167,7 @@ public class TlsProtocolHandler
         return false;
     }
 
-//    private byte[] CreateRenegotiationInfo(byte[] renegotiated_connection) throws IOException
+//    private static byte[] createRenegotiationInfo(byte[] renegotiated_connection) throws IOException
 //    {
 //        ByteArrayOutputStream buf = new ByteArrayOutputStream();
 //        TlsUtils.writeOpaque8(renegotiated_connection, buf);
