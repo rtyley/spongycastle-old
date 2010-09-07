@@ -156,6 +156,13 @@ class DefaultTlsClient implements TlsClient
 
     public Hashtable generateClientExtensions()
     {
+        // RFC 3546
+//        enum {
+//            server_name(0), max_fragment_length(1),
+//            client_certificate_url(2), trusted_ca_keys(3),
+//            truncated_hmac(4), status_request(5), (65535)
+//        } ExtensionType;
+
         // TODO[SRP]
 //        Hashtable clientExtensions = new Hashtable();
 //        ByteArrayOutputStream srpData = new ByteArrayOutputStream();
