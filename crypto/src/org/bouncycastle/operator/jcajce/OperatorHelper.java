@@ -302,11 +302,11 @@ class OperatorHelper
         }
         catch (NoSuchAlgorithmException e)
         {
-            throw new CertificateException("cannot create certificate factory: " + e.getMessage(), e);
+            throw new OpCertificateException("cannot create certificate factory: " + e.getMessage(), e);
         }
         catch (NoSuchProviderException e)
         {
-            throw new CertificateException("cannot find factory provider: " + e.getMessage(), e);
+            throw new OpCertificateException("cannot find factory provider: " + e.getMessage(), e);
         }
     }
 
@@ -316,6 +316,24 @@ class OperatorHelper
         private Throwable cause;
 
         public OpArgumentException(String msg, Throwable cause)
+        {
+            super(msg);
+
+            this.cause = cause;
+        }
+
+        public Throwable getCause()
+        {
+            return cause;
+        }
+    }
+
+    private static class OpCertificateException
+        extends CertificateException
+    {
+        private Throwable cause;
+
+        public OpCertificateException(String msg, Throwable cause)
         {
             super(msg);
 
