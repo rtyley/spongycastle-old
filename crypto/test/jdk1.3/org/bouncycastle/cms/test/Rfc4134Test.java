@@ -10,7 +10,6 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
-import org.bouncycastle.jce.cert.CertStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAParams;
@@ -45,6 +44,7 @@ import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.Streams;
@@ -329,7 +329,7 @@ public class Rfc4134Test
         Collection certColl = certStore.getCertificates(null);
         Collection crlColl = certStore.getCRLs(null);
 
-        assertEquals(certColl.size(), s.getCertificates("Collection", "BC").getMatches(null).size());
+        assertEquals(certColl.size(), s.getCertificateStore("Collection", "BC").getMatches(null).size());
         assertEquals(crlColl.size(), s.getCRLs("Collection", "BC").getMatches(null).size());
     }
 

@@ -3,7 +3,7 @@ package org.bouncycastle.cms;
 import org.bouncycastle.util.Arrays;
 
 class BaseDigestCalculator
-    implements DigestCalculator
+    implements IntDigestCalculator
 {
     private final byte[] digest;
 

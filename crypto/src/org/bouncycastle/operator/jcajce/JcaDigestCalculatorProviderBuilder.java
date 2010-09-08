@@ -11,35 +11,35 @@ import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.DigesterCalculatorProvider;
+import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 
-public class JcaContentDigesterProviderBuilder
+public class JcaDigestCalculatorProviderBuilder
 {
     private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
 
-    public JcaContentDigesterProviderBuilder()
+    public JcaDigestCalculatorProviderBuilder()
     {
     }
 
-    public JcaContentDigesterProviderBuilder setProvider(Provider provider)
+    public JcaDigestCalculatorProviderBuilder setProvider(Provider provider)
     {
         this.helper = new OperatorHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
-    public JcaContentDigesterProviderBuilder setProvider(String providerName)
+    public JcaDigestCalculatorProviderBuilder setProvider(String providerName)
     {
         this.helper = new OperatorHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }
 
-    public DigesterCalculatorProvider build()
+    public DigestCalculatorProvider build()
         throws OperatorCreationException
     {
-        return new DigesterCalculatorProvider()
+        return new DigestCalculatorProvider()
         {
             private DigestOutputStream stream;
 

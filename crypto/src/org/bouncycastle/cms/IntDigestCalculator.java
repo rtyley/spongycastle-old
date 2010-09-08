@@ -2,7 +2,7 @@ package org.bouncycastle.cms;
 
 import java.security.NoSuchAlgorithmException;
 
-interface DigestCalculator
+interface IntDigestCalculator
 {
     byte[] getDigest()
         throws NoSuchAlgorithmException;

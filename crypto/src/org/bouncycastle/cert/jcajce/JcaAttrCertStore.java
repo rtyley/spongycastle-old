@@ -1,16 +1,16 @@
 package org.bouncycastle.cert.jcajce;
 
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.util.CollectionStore;
+import org.bouncycastle.x509.X509AttributeCertificate;
 
-public class JcaCertStore
+public class JcaAttrCertStore
     extends CollectionStore
 {
     /**
@@ -18,14 +18,14 @@ public class JcaCertStore
      *
      * @param collection - initial contents for the store, this is copied.
      */
-    public JcaCertStore(Collection collection)
-        throws CertificateEncodingException
+    public JcaAttrCertStore(Collection collection)
+        throws IOException
     {
         super(convertCerts(collection));
     }
 
     private static Collection convertCerts(Collection collection)
-        throws CertificateEncodingException
+        throws IOException
     {
         List list = new ArrayList(collection.size());
 
@@ -33,15 +33,15 @@ public class JcaCertStore
         {
             Object o = it.next();
 
-            if (o instanceof X509Certificate)
+            if (o instanceof X509AttributeCertificate)
             {
-                X509Certificate cert = (X509Certificate)o;
+                X509AttributeCertificate cert = (X509AttributeCertificate)o;
 
-                list.add(new X509CertificateHolder(cert.getEncoded()));
+                list.add(new JcaX509AttributeCertificateHolder(cert));
             }
             else
             {
-                list.add((X509CertificateHolder)o);
+                list.add((X509AttributeCertificateHolder)o);
             }
         }
 

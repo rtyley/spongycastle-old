@@ -29,6 +29,7 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.io.Streams;
@@ -145,6 +146,28 @@ class CMSUtils
         catch (CRLException e)
         {
             throw new CMSException("error encoding crls", e);
+        }
+    }
+
+    static List getCRLsFromStore(Store crlStore)
+        throws CMSException
+    {
+        List certs = new ArrayList();
+
+        try
+        {
+            for (Iterator it = crlStore.getMatches(null).iterator(); it.hasNext();)
+            {
+                X509CRLHolder c = (X509CRLHolder)it.next();
+
+                certs.add(c.toASN1Structure());
+            }
+
+            return certs;
+        }
+        catch (ClassCastException e)
+        {
+            throw new CMSException("error processing certs", e);
         }
     }
 

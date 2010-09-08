@@ -195,6 +195,26 @@ class OperatorHelper
         return sig;
     }
 
+    public Signature createRawSignature(AlgorithmIdentifier algorithm)
+    {
+        Signature   sig;
+
+        try
+        {
+            String algName = getSignatureName(algorithm);
+    
+            algName = "NONE" + algName.substring(algName.indexOf("WITH"));
+
+            sig = helper.createSignature(algName);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+
+        return sig;
+    }
+
     private static String getSignatureName(
         AlgorithmIdentifier sigAlgId)
     {
@@ -207,6 +227,11 @@ class OperatorHelper
                 RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
                 return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "withRSAandMGF1";
             }
+        }
+
+        if (oids.containsKey(sigAlgId.getAlgorithm()))
+        {
+            return (String)oids.get(sigAlgId.getAlgorithm());
         }
 
         return sigAlgId.getAlgorithm().getId();

@@ -46,6 +46,7 @@ import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.DatedContentVerifier;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.RawContentVerifier;
 import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
 import org.bouncycastle.util.Arrays;
 
@@ -63,7 +64,7 @@ public class SignerInformation
     private CMSProcessable          content;
     private byte[]                  signature;
     private DERObjectIdentifier     contentType;
-    private DigestCalculator        digestCalculator;
+    private IntDigestCalculator digestCalculator;
     private byte[]                  resultDigest;
 
     // Derived
@@ -74,7 +75,7 @@ public class SignerInformation
         SignerInfo          info,
         DERObjectIdentifier contentType,
         CMSProcessable      content,
-        DigestCalculator digestCalculator)
+        IntDigestCalculator digestCalculator)
     {
         this.info = info;
         this.sid = new SignerId();
@@ -689,9 +690,21 @@ public class SignerInformation
             {
                 if (digestCalculator != null)
                 {
-                    return false;
-                    // need to decrypt signature and check message bytes
-                    //return verifyDigest(resultDigest, key, this.getSignature(), sigProvider);
+                    if (verifier instanceof RawContentVerifier)
+                    {           
+                        RawContentVerifier rawVerifier = (RawContentVerifier)verifier;
+
+                        if (encName.equals("RSA"))
+                        {
+                            DigestInfo digInfo = new DigestInfo(digestAlgorithm, resultDigest);
+
+                            return rawVerifier.verify(digInfo.getDEREncoded(), this.getSignature());
+                        }
+
+                        return rawVerifier.verify(resultDigest, this.getSignature());
+                    }
+
+                    throw new CMSException("verifier unable to process raw signature");
                 }
                 else if (content != null)
                 {

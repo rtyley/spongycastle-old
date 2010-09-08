@@ -36,6 +36,7 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.x509.X509AttributeCertificate;
@@ -95,6 +96,7 @@ public class CMSSignedGenerator
     protected List _certs = new ArrayList();
     protected List _crls = new ArrayList();
     protected List _signers = new ArrayList();
+    protected List signerGens = new ArrayList();
     protected Map  _digests = new HashMap();
 
     protected final SecureRandom rand;
@@ -226,12 +228,39 @@ public class CMSSignedGenerator
         _certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
     }
 
+    public void addCRLs(
+        Store crlStore)
+        throws CMSException
+    {
+        _crls.addAll(CMSUtils.getCRLsFromStore(crlStore));
+    }
+
+    public void addAttributeCertificates(
+        Store attrStore)
+        throws CMSException
+    {
+        try
+        {
+            for (Iterator it = attrStore.getMatches(null).iterator(); it.hasNext();)
+            {
+                X509AttributeCertificateHolder attrCert = (X509AttributeCertificateHolder)it.next();
+
+                _certs.add(new DERTaggedObject(false, 2, attrCert.toASN1Structure()));
+            }
+        }
+        catch (ClassCastException e)
+        {
+            throw new CMSException("error processing attribute certs", e);
+        }
+    }
+
     /**
      * Add the attribute certificates contained in the passed in store to the
      * generator.
      *
      * @param store a store of Version 2 attribute certificates
      * @throws CMSException if an error occurse processing the store.
+     * @deprecated use basic Store method
      */
     public void addAttributeCertificates(
         X509Store store)
@@ -272,6 +301,11 @@ public class CMSSignedGenerator
         {
             _signers.add(it.next());
         }
+    }
+
+    public void addSignerInfoGenerator(SignerInfoGenerator infoGen)
+    {
+         signerGens.add(infoGen);
     }
 
     /**
