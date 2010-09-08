@@ -270,7 +270,7 @@ public class SignerInfoGenerator
     {
         if (calculatedDigest != null)
         {
-            return calculatedDigest.clone();
+            return (byte[])calculatedDigest.clone();
         }
 
         return null;
