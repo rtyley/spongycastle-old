@@ -141,8 +141,8 @@ public class NewSignedDataStreamTest
             }
         }
 
-        assertEquals(certStore.getMatches(null).size(), sp.getCertificateStore("Collection", BC).getMatches(null).size());
-        assertEquals(crlStore.getMatches(null).size(), sp.getCRLStore("Collection", BC).getMatches(null).size());
+        assertEquals(certStore.getMatches(null).size(), sp.getCertificates("Collection", BC).getMatches(null).size());
+        assertEquals(crlStore.getMatches(null).size(), sp.getCRLs("Collection", BC).getMatches(null).size());
     }
     
     private void verifySignatures(CMSSignedDataParser sp) 
