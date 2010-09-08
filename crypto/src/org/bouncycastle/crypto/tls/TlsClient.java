@@ -17,6 +17,8 @@ interface TlsClient
 
     void notifySelectedCipherSuite(int selectedCipherSuite);
 
+    void notifySecureRenegotiation(boolean secureNegotiation) throws IOException;
+
     // Hashtable is (Integer -> byte[])
     void processServerExtensions(Hashtable serverExtensions);
 
