@@ -279,12 +279,12 @@ public class CMSSignedData
      * @exception CMSException if a general exception prevents creation of the X509Store
      * @deprecated use base Store returning method
      */
-    public X509Store getCertificateStore(
+    public X509Store getCertificates(
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
     {
-        return getCertificateStore(type, CMSUtils.getProvider(provider));
+        return getCertificates(type, CMSUtils.getProvider(provider));
     }
 
     /**
@@ -298,7 +298,7 @@ public class CMSSignedData
      * @exception CMSException if a general exception prevents creation of the X509Store
      * @deprecated use base Store returning method
      */
-    public X509Store getCertificateStore(
+    public X509Store getCertificates(
         String type,
         Provider provider)
         throws NoSuchStoreException, CMSException
