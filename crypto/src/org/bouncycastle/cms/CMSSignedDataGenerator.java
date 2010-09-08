@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
@@ -39,6 +40,7 @@ import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.util.io.TeeOutputStream;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -199,6 +201,7 @@ public class CMSSignedDataGenerator
      * @param key signing key to use
      * @param cert certificate containing corresponding public key
      * @param digestOID digest algorithm OID
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -217,6 +220,7 @@ public class CMSSignedDataGenerator
      * @param cert certificate containing corresponding public key
      * @param encryptionOID digest encryption algorithm OID
      * @param digestOID digest algorithm OID
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -232,6 +236,7 @@ public class CMSSignedDataGenerator
     /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -245,6 +250,7 @@ public class CMSSignedDataGenerator
     /**
      * add a signer, specifying the digest encryption algorithm to use - no attributes other than the default ones will be
      * provided here.
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -265,6 +271,7 @@ public class CMSSignedDataGenerator
      * @param digestOID digest algorithm OID
      * @param signedAttr table of attributes to be included in signature
      * @param unsignedAttr table of attributes to be included as unsigned
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -286,6 +293,7 @@ public class CMSSignedDataGenerator
      * @param digestOID digest algorithm OID
      * @param signedAttr table of attributes to be included in signature
      * @param unsignedAttr table of attributes to be included as unsigned
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -309,6 +317,7 @@ public class CMSSignedDataGenerator
      * @param digestOID digest algorithm OID
      * @param signedAttr table of attributes to be included in signature
      * @param unsignedAttr table of attributes to be included as unsigned
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -331,6 +340,7 @@ public class CMSSignedDataGenerator
      * @param digestOID digest algorithm OID
      * @param signedAttr table of attributes to be included in signature
      * @param unsignedAttr table of attributes to be included as unsigned
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -348,6 +358,7 @@ public class CMSSignedDataGenerator
 
     /**
      * add a signer with extra signed/unsigned attributes based on generators.
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey                  key,
@@ -362,6 +373,7 @@ public class CMSSignedDataGenerator
 
     /**
      * add a signer, specifying the digest encryption algorithm, with extra signed/unsigned attributes based on generators.
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey                  key,
@@ -378,6 +390,7 @@ public class CMSSignedDataGenerator
 
     /**
      * add a signer with extra signed/unsigned attributes based on generators.
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey                  key,
@@ -393,6 +406,7 @@ public class CMSSignedDataGenerator
 
     /**
      * add a signer, including digest encryption algorithm, with extra signed/unsigned attributes based on generators.
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey                  key,
@@ -467,6 +481,7 @@ public class CMSSignedDataGenerator
      * object using the given provider - if encapsulate is true a copy
      * of the message will be included in the signature. The content type
      * is set according to the OID represented by the string signedContentType.
+     * @deprecated use generate(CMSTypedData, boolean)
      */
     public CMSSignedData generate(
         String          eContentType,
@@ -483,6 +498,7 @@ public class CMSSignedDataGenerator
      * addDefaultAttributes indicates whether or not a default set of signed attributes
      * need to be added automatically. If the argument is set to false, no
      * attributes will get added at all.
+     * @deprecated use generate(CMSTypedData, boolean)
      */
     public CMSSignedData generate(
         String                  eContentType,
@@ -500,7 +516,7 @@ public class CMSSignedDataGenerator
      * Similar method to the other generate methods. The additional argument
      * addDefaultAttributes indicates whether or not a default set of signed attributes
      * need to be added automatically. If the argument is set to false, no
-     * attributes will get added at all. 
+     * attributes will get added at all.
      */
     public CMSSignedData generate(
         String                  eContentType,
@@ -549,8 +565,7 @@ public class CMSSignedDataGenerator
         //
         // add the precalculated SignerInfo objects.
         //
-        Iterator it = _signers.iterator();
-        while (it.hasNext())
+        for (Iterator it = _signers.iterator(); it.hasNext();)
         {
             SignerInformation signer = (SignerInformation)it.next();
             digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
@@ -568,9 +583,33 @@ public class CMSSignedDataGenerator
             ?   CMSObjectIdentifiers.data
             :   new DERObjectIdentifier(eContentType);
 
-        it = signerInfs.iterator();
+        for (Iterator it = signerGens.iterator(); it.hasNext();)
+        {
+            SignerInfoGenerator sGen = (SignerInfoGenerator)it.next();
 
-        while (it.hasNext())
+            if (content != null)
+            {
+                OutputStream cOut = sGen.getCalculatingOutputStream();
+
+                try
+                {
+                    content.write(cOut);
+
+                    cOut.close();
+                }
+                catch (IOException e)
+                {
+                    throw new CMSException("data processing exception: " + e.getMessage(), e);
+                }
+            }
+            
+            SignerInfo inf = sGen.generate(isCounterSignature, new ASN1ObjectIdentifier(contentTypeOID.getId()));
+
+            digestAlgs.add(inf.getDigestAlgorithm());
+            signerInfos.add(inf);
+        }
+
+        for (Iterator it = signerInfs.iterator(); it.hasNext();)
         {
             SignerInf signer = (SignerInf)it.next();
 
@@ -652,6 +691,7 @@ public class CMSSignedDataGenerator
      * object using the given provider - if encapsulate is true a copy
      * of the message will be included in the signature with the
      * default content type "data".
+     * @deprecated use generate(CMSTypedData, boolean)
      */
     public CMSSignedData generate(
         CMSProcessable  content,
@@ -674,6 +714,7 @@ public class CMSSignedDataGenerator
      * object using the given provider - if encapsulate is true a copy
      * of the message will be included in the signature with the
      * default content type "data".
+     * @deprecated use generate(CMSTypedData, boolean)
      */
     public CMSSignedData generate(
         CMSProcessable  content,
@@ -691,6 +732,178 @@ public class CMSSignedDataGenerator
         }
     }
 
+    public CMSSignedData generate(
+        CMSTypedData content)
+        throws CMSException
+    {
+        return generate(content, false);
+    }
+
+    public CMSSignedData generate(
+        CMSTypedData content,
+        boolean encapsulate)
+        throws CMSException
+    {
+        if (!signerInfs.isEmpty())
+        {
+            throw new IllegalStateException("this method can only be used with SignerInfoGenerator");
+        }
+
+                // TODO
+//        if (signerInfs.isEmpty())
+//        {
+//            /* RFC 3852 5.2
+//             * "In the degenerate case where there are no signers, the
+//             * EncapsulatedContentInfo value being "signed" is irrelevant.  In this
+//             * case, the content type within the EncapsulatedContentInfo value being
+//             * "signed" MUST be id-data (as defined in section 4), and the content
+//             * field of the EncapsulatedContentInfo value MUST be omitted."
+//             */
+//            if (encapsulate)
+//            {
+//                throw new IllegalArgumentException("no signers, encapsulate must be false");
+//            }
+//            if (!DATA.equals(eContentType))
+//            {
+//                throw new IllegalArgumentException("no signers, eContentType must be id-data");
+//            }
+//        }
+//
+//        if (!DATA.equals(eContentType))
+//        {
+//            /* RFC 3852 5.3
+//             * [The 'signedAttrs']...
+//             * field is optional, but it MUST be present if the content type of
+//             * the EncapsulatedContentInfo value being signed is not id-data.
+//             */
+//            // TODO signedAttrs must be present for all signers
+//        }
+
+        ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
+        ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
+
+        _digests.clear();  // clear the current preserved digest state
+
+        //
+        // add the precalculated SignerInfo objects.
+        //
+        for (Iterator it = _signers.iterator(); it.hasNext();)
+        {
+            SignerInformation signer = (SignerInformation)it.next();
+            digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
+
+            // TODO Verify the content type and calculated digest match the precalculated SignerInfo
+            signerInfos.add(signer.toSignerInfo());
+        }
+
+        //
+        // add the SignerInfo objects
+        //
+        boolean isCounterSignature = (content.getContentType() == null);
+
+        ASN1ObjectIdentifier contentTypeOID = isCounterSignature
+            ?   CMSObjectIdentifiers.data
+            :   content.getContentType();
+
+        ASN1OctetString octs = null;
+
+        if (encapsulate)
+        {
+            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+
+            if (content != null)
+            {
+                try
+                {
+                    content.write(bOut);
+                }
+                catch (IOException e)
+                {
+                    throw new CMSException("encapsulation error.", e);
+                }
+            }
+
+            octs = new BERConstructedOctetString(bOut.toByteArray());
+        }
+        if (content != null)
+        {
+            OutputStream cOut = null;
+            ByteArrayOutputStream bOut = null;
+
+            if (encapsulate)
+            {
+                cOut = bOut = new ByteArrayOutputStream();
+            }
+
+            for (Iterator it = signerGens.iterator(); it.hasNext();)
+            {
+                SignerInfoGenerator sGen = (SignerInfoGenerator)it.next();
+
+                if (cOut == null)
+                {
+                    cOut = sGen.getCalculatingOutputStream();
+                }
+                else
+                {
+                    cOut = new TeeOutputStream(cOut, sGen.getCalculatingOutputStream());
+                }
+            }
+
+            try
+            {
+                content.write(cOut);
+
+                cOut.close();
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("data processing exception: " + e.getMessage(), e);
+            }
+
+            if (encapsulate)
+            {
+                octs = new BERConstructedOctetString(bOut.toByteArray());
+            }
+        }
+
+        for (Iterator it = signerGens.iterator(); it.hasNext();)
+        {
+            SignerInfoGenerator sGen = (SignerInfoGenerator)it.next();
+            SignerInfo inf = sGen.generate(isCounterSignature, new ASN1ObjectIdentifier(contentTypeOID.getId()));
+
+            digestAlgs.add(inf.getDigestAlgorithm());
+            signerInfos.add(inf);
+        }
+
+        ASN1Set certificates = null;
+
+        if (_certs.size() != 0)
+        {
+            certificates = CMSUtils.createBerSetFromList(_certs);
+        }
+
+        ASN1Set certrevlist = null;
+
+        if (_crls.size() != 0)
+        {
+            certrevlist = CMSUtils.createBerSetFromList(_crls);
+        }
+
+        ContentInfo encInfo = new ContentInfo(contentTypeOID, octs);
+
+        SignedData  sd = new SignedData(
+                                 new DERSet(digestAlgs),
+                                 encInfo,
+                                 certificates,
+                                 certrevlist,
+                                 new DERSet(signerInfos));
+
+        ContentInfo contentInfo = new ContentInfo(
+            CMSObjectIdentifiers.signedData, sd);
+
+        return new CMSSignedData(content, contentInfo);
+    }
+
     /**
      * generate a set of one or more SignerInformation objects representing counter signatures on
      * the passed in SignerInformation object.
@@ -698,6 +911,7 @@ public class CMSSignedDataGenerator
      * @param signer the signer to be countersigned
      * @param sigProvider the provider to be used for counter signing.
      * @return a store containing the signers.
+     * @deprecated use generateCounterSigners(SignerInformation)
      */
     public SignerInformationStore generateCounterSigners(SignerInformation signer, Provider sigProvider)
         throws NoSuchAlgorithmException, CMSException
@@ -712,11 +926,25 @@ public class CMSSignedDataGenerator
      * @param signer the signer to be countersigned
      * @param sigProvider the provider to be used for counter signing.
      * @return a store containing the signers.
+     * @deprecated use generateCounterSigners(SignerInformation)
      */
     public SignerInformationStore generateCounterSigners(SignerInformation signer, String sigProvider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
         return this.generate(null, new CMSProcessableByteArray(signer.getSignature()), false, CMSUtils.getProvider(sigProvider)).getSignerInfos();
+    }
+
+    /**
+     * generate a set of one or more SignerInformation objects representing counter signatures on
+     * the passed in SignerInformation object.
+     *
+     * @param signer the signer to be countersigned
+     * @return a store containing the signers.
+     */
+    public SignerInformationStore generateCounterSigners(SignerInformation signer)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    {
+        return this.generate(new CMSProcessableByteArray(null, signer.getSignature()), false).getSignerInfos();
     }
 }
 

@@ -1,30 +1,5 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Generator;
-import org.bouncycastle.asn1.ASN1OctetStringParser;
-import org.bouncycastle.asn1.ASN1SequenceParser;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.ASN1SetParser;
-import org.bouncycastle.asn1.ASN1StreamParser;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.BERSequenceGenerator;
-import org.bouncycastle.asn1.BERSetParser;
-import org.bouncycastle.asn1.BERTaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERTags;
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.ContentInfoParser;
-import org.bouncycastle.asn1.cms.SignedDataParser;
-import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.util.io.Streams;
-import org.bouncycastle.x509.NoSuchStoreException;
-import org.bouncycastle.x509.X509Store;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,10 +12,46 @@ import java.security.Provider;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Generator;
+import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1SetParser;
+import org.bouncycastle.asn1.ASN1StreamParser;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.BERSetParser;
+import org.bouncycastle.asn1.BERTaggedObject;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERTags;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.cms.ContentInfoParser;
+import org.bouncycastle.asn1.cms.SignedDataParser;
+import org.bouncycastle.asn1.cms.SignerInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
+import org.bouncycastle.cert.X509CRLHolder;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.util.CollectionStore;
+import org.bouncycastle.util.Store;
+import org.bouncycastle.util.io.Streams;
+import org.bouncycastle.x509.NoSuchStoreException;
+import org.bouncycastle.x509.X509Store;
 
 /**
  * Parsing class for an CMS Signed Data object from an input stream.
@@ -325,13 +336,14 @@ public class CMSSignedDataParser
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use getCertificates
      */
-    public X509Store getCertificates(
+    public X509Store getCertificateStore(
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
     {
-        return getCertificates(type, CMSUtils.getProvider(provider));
+        return getCertificateStore(type, CMSUtils.getProvider(provider));
     }
 
     /**
@@ -343,8 +355,9 @@ public class CMSSignedDataParser
      * @return a store of public key certificates
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use getCertificates
      */
-    public X509Store getCertificates(
+    public X509Store getCertificateStore(
         String type,
         Provider provider)
         throws NoSuchStoreException, CMSException
@@ -370,12 +383,12 @@ public class CMSSignedDataParser
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
      */
-    public X509Store getCRLs(
+    public X509Store getCRLStore(
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
     {
-        return getCRLs(type, CMSUtils.getProvider(provider));
+        return getCRLStore(type, CMSUtils.getProvider(provider));
     }
 
     /**
@@ -388,7 +401,7 @@ public class CMSSignedDataParser
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
      */
-    public X509Store getCRLs(
+    public X509Store getCRLStore(
         String type,
         Provider provider)
         throws NoSuchStoreException, CMSException
@@ -432,14 +445,95 @@ public class CMSSignedDataParser
         Provider  provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
-        if (_certStore == null)
-        {
-            populateCertCrlSets();
+        populateCertCrlSets();
 
-            _certStore = HELPER.createCertStore(type, provider, _certSet, _crlSet);
+        return HELPER.createCertStore(type, provider, _certSet, _crlSet);
+    }
+
+    public Store getCertificates()
+        throws CMSException
+    {
+        populateCertCrlSets();
+
+        ASN1Set certSet = _certSet;
+
+        if (certSet != null)
+        {
+            List    certList = new ArrayList(certSet.size());
+
+            for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
+            {
+                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+
+                if (obj instanceof ASN1Sequence)
+                {
+                    certList.add(new X509CertificateHolder(X509CertificateStructure.getInstance(obj)));
+                }
+            }
+
+            return new CollectionStore(certList);
         }
 
-        return _certStore;
+        return new CollectionStore(new ArrayList());
+    }
+
+    public Store getCRLs()
+        throws CMSException
+    {
+        populateCertCrlSets();
+
+        ASN1Set crlSet = _crlSet;
+
+        if (crlSet != null)
+        {
+            List    crlList = new ArrayList(crlSet.size());
+
+            for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
+            {
+                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+
+                if (obj instanceof ASN1Sequence)
+                {
+                    crlList.add(new X509CRLHolder(CertificateList.getInstance(obj)));
+                }
+            }
+
+            return new CollectionStore(crlList);
+        }
+
+        return new CollectionStore(new ArrayList());
+    }
+
+    public Store getAttributeCertificates()
+        throws CMSException
+    {
+        populateCertCrlSets();
+
+        ASN1Set certSet = _certSet;
+
+        if (certSet != null)
+        {
+            List    certList = new ArrayList(certSet.size());
+
+            for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
+            {
+                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+
+                if (obj instanceof ASN1TaggedObject)
+                {
+                    ASN1TaggedObject tagged = (ASN1TaggedObject)obj;
+
+                    if (tagged.getTagNo() == 2)
+                    {
+                        certList.add(new X509AttributeCertificateHolder(AttributeCertificate.getInstance(ASN1Sequence.getInstance(tagged, false))));
+                    }
+                }
+            }
+
+            return new CollectionStore(certList);
+        }
+
+        return new CollectionStore(new ArrayList());
     }
 
     private void populateCertCrlSets()

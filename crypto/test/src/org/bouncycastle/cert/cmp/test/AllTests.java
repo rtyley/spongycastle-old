@@ -39,9 +39,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentDigesterProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.io.Streams;
 
 public class AllTests
@@ -151,7 +151,7 @@ public class AllTests
 
         CertificateConfirmationContent content = new CertificateConfirmationContentBuilder()
                              .addAcceptedCertificate(cert, BigInteger.valueOf(1))
-                             .build(new JcaContentDigesterProviderBuilder().build());
+                             .build(new JcaDigestCalculatorProviderBuilder().build());
 
         ContentSigner signer = new JcaContentSignerBuilder("MD5WithRSAEncryption").setProvider(BC).build(kp.getPrivate());
         ProtectedPKIMessage message = new ProtectedPKIMessageBuilder(sender, recipient)
@@ -172,7 +172,7 @@ public class AllTests
         CertificateStatus[] statusList = content.getStatusMessages();
 
         assertEquals(1, statusList.length);
-        assertTrue(statusList[0].isVerified(cert, new JcaContentDigesterProviderBuilder().setProvider(BC).build()));
+        assertTrue(statusList[0].isVerified(cert, new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()));
     }
 
     public void testSampleCr()

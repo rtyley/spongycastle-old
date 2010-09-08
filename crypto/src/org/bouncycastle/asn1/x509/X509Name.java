@@ -378,6 +378,10 @@ public class X509Name
         throw new IllegalArgumentException("null object in factory");
     }
 
+    protected X509Name()
+    {
+        // constructure use by new X500 Name class
+    }
     /**
      * Constructor from ASN1Sequence
      *

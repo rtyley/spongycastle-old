@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.DigesterCalculatorProvider;
+import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Arrays;
 
@@ -33,7 +33,7 @@ public class CertificateStatus
         return certStatus.getCertReqId().getValue();
     }
 
-    public boolean isVerified(X509CertificateHolder certHolder, DigesterCalculatorProvider digesterProvider)
+    public boolean isVerified(X509CertificateHolder certHolder, DigestCalculatorProvider digesterProvider)
         throws CMPException
     {
         AlgorithmIdentifier digAlg = digestAlgFinder.find(certHolder.toASN1Structure().getSignatureAlgorithm());

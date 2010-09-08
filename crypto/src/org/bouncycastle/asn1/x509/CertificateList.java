@@ -1,6 +1,8 @@
 
 package org.bouncycastle.asn1.x509;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -8,8 +10,6 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
-
-import java.util.Enumeration;
 
 /**
  * PKIX RFC-2459
@@ -45,12 +45,12 @@ public class CertificateList
         {
             return (CertificateList)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new CertificateList((ASN1Sequence)obj);
+            return new CertificateList(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        throw new IllegalArgumentException("null object in factory");
     }
 
     public CertificateList(

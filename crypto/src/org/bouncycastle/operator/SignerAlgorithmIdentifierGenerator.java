@@ -76,7 +76,7 @@ public class SignerAlgorithmIdentifierGenerator
         algorithms.put("GOST3411WITHECGOST3410", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
         algorithms.put("GOST3411WITHECGOST3410-2001", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
         algorithms.put("GOST3411WITHGOST3410-2001", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
-
+               
         //
         // According to RFC 3279, the ASN.1 encoding SHALL (id-dsa-with-sha1) or MUST (ecdsa-with-SHA*) omit the parameters field.
         // The parameters field SHALL be NULL for RSA based signature algorithms.
@@ -154,7 +154,7 @@ public class SignerAlgorithmIdentifierGenerator
         DERObjectIdentifier sigOID = (DERObjectIdentifier)algorithms.get(algorithmName);
         if (sigOID == null)
         {
-            throw new IllegalArgumentException("Unknown signature type requested");
+            throw new IllegalArgumentException("Unknown signature type requested: " + algorithmName);
         }
 
         if (noParams.contains(sigOID))

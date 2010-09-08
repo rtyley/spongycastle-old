@@ -330,7 +330,7 @@ public class Rfc4134Test
         Collection certColl = certStore.getCertificates(null);
         Collection crlColl = certStore.getCRLs(null);
 
-        assertEquals(certColl.size(), s.getCertificates("Collection", BC).getMatches(null).size());
+        assertEquals(certColl.size(), s.getCertificateStore("Collection", BC).getMatches(null).size());
         assertEquals(crlColl.size(), s.getCRLs("Collection", BC).getMatches(null).size());
     }
 

@@ -21,6 +21,7 @@ import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.DatedContentVerifier;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OperatorStreamException;
+import org.bouncycastle.operator.RawContentVerifier;
 import org.bouncycastle.operator.RuntimeOperatorException;
 
 public class JcaContentVerifierProviderBuilder
@@ -74,45 +75,16 @@ public class JcaContentVerifierProviderBuilder
                     throw new OperatorCreationException("exception on setup: " + e, e);
                 }
 
-                return new DatedContentVerifier()
+                Signature rawSig = createRawSig(algorithm, certificate.getPublicKey());
+
+                if (rawSig != null)
                 {
-                    public OutputStream getOutputStream()
-                    {
-                        if (stream == null)
-                        {
-                            throw new IllegalStateException("verifier not initialised");
-                        }
-
-                        return stream;
-                    }
-
-                    public boolean verify(byte[] expected)
-                    {
-                        try
-                        {
-                            return stream.verify(expected);
-                        }
-                        catch (SignatureException e)
-                        {
-                            throw new RuntimeOperatorException("exception obtaining signature: " + e.getMessage(), e);
-                        }
-                    }
-
-                    public Date getNotBefore()
-                    {
-                        return certificate.getNotBefore();
-                    }
-
-                    public Date getNotAfter()
-                    {
-                        return certificate.getNotAfter();
-                    }
-
-                    public boolean isValid(Date date)
-                    {
-                        return !date.before(getNotBefore()) && !date.after(getNotAfter()); 
-                    }
-                };
+                    return new DatedRawSigVerifier(stream, certificate, rawSig);
+                }
+                else
+                {
+                    return new DatedSigVerifier(stream, certificate);
+                }
             }
         };
     }
@@ -122,50 +94,172 @@ public class JcaContentVerifierProviderBuilder
     {
         return new ContentVerifierProvider()
         {
-            private SignatureOutputStream stream;
-
             public ContentVerifier get(AlgorithmIdentifier algorithm)
                 throws OperatorCreationException
             {
-                try
+                SignatureOutputStream stream = createSignatureStream(algorithm, publicKey);
+
+                Signature rawSig = createRawSig(algorithm, publicKey);
+
+                if (rawSig != null)
                 {
-                    Signature sig = helper.createSignature(algorithm);
-
-                    sig.initVerify(publicKey);
-
-                    stream = new SignatureOutputStream(sig);
+                    return new RawSigVerifier(stream, rawSig);
                 }
-                catch (GeneralSecurityException e)
+                else
                 {
-                    throw new OperatorCreationException("exception on setup: " + e, e);
+                    return new SigVerifier(stream);
                 }
-
-                return new ContentVerifier()
-                {
-                    public OutputStream getOutputStream()
-                    {
-                        if (stream == null)
-                        {
-                            throw new IllegalStateException("verifier not initialised");
-                        }
-
-                        return stream;
-                    }
-
-                    public boolean verify(byte[] expected)
-                    {
-                        try
-                        {
-                            return stream.verify(expected);
-                        }
-                        catch (SignatureException e)
-                        {
-                            throw new RuntimeOperatorException("exception obtaining signature: " + e.getMessage(), e);
-                        }
-                    }
-                };
             }
         };
+    }
+
+    private SignatureOutputStream createSignatureStream(AlgorithmIdentifier algorithm, PublicKey publicKey)
+        throws OperatorCreationException
+    {
+        try
+        {
+            Signature sig = helper.createSignature(algorithm);
+
+            sig.initVerify(publicKey);
+
+            return new SignatureOutputStream(sig);
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new OperatorCreationException("exception on setup: " + e, e);
+        }
+    }
+
+    private Signature createRawSig(AlgorithmIdentifier algorithm, PublicKey publicKey)
+    {
+        Signature rawSig;
+        try
+        {
+            rawSig = helper.createRawSignature(algorithm);
+
+            rawSig.initVerify(publicKey);
+        }
+        catch (Exception e)
+        {
+            rawSig = null;
+        }
+        return rawSig;
+    }
+
+    private class SigVerifier
+        implements ContentVerifier
+    {
+        private SignatureOutputStream stream;
+
+        SigVerifier(SignatureOutputStream stream)
+        {
+            this.stream = stream;
+        }
+
+        public OutputStream getOutputStream()
+        {
+            if (stream == null)
+            {
+                throw new IllegalStateException("verifier not initialised");
+            }
+
+            return stream;
+        }
+
+        public boolean verify(byte[] expected)
+        {
+            try
+            {
+                return stream.verify(expected);
+            }
+            catch (SignatureException e)
+            {
+                throw new RuntimeOperatorException("exception obtaining signature: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    private class DatedSigVerifier
+        extends SigVerifier
+        implements DatedContentVerifier
+    {
+        private X509Certificate certificate;
+
+        DatedSigVerifier(SignatureOutputStream stream, X509Certificate certificate)
+        {
+            super(stream);
+            this.certificate = certificate;
+        }
+
+        public Date getNotBefore()
+        {
+            return certificate.getNotBefore();
+        }
+
+        public Date getNotAfter()
+        {
+            return certificate.getNotAfter();
+        }
+
+        public boolean isValid(Date date)
+        {
+            return !date.before(getNotBefore()) && !date.after(getNotAfter());
+        }
+    }
+
+    private class RawSigVerifier
+        extends SigVerifier
+        implements RawContentVerifier
+    {
+        private Signature rawSignature;
+
+        RawSigVerifier(SignatureOutputStream stream, Signature rawSignature)
+        {
+            super(stream);
+            this.rawSignature = rawSignature;
+        }
+
+        public boolean verify(byte[] digest, byte[] expected)
+        {
+            try
+            {
+                rawSignature.update(digest);
+
+                return rawSignature.verify(expected);
+            }
+            catch (SignatureException e)
+            {
+                throw new RuntimeOperatorException("exception obtaining raw signature: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    private class DatedRawSigVerifier
+        extends RawSigVerifier
+        implements DatedContentVerifier
+    {
+        private X509Certificate certificate;
+
+        DatedRawSigVerifier(SignatureOutputStream stream, X509Certificate certificate, Signature rawSignature)
+        {
+            super(stream, rawSignature);
+            this.certificate = certificate;
+        }
+
+        public Date getNotBefore()
+        {
+            return certificate.getNotBefore();
+        }
+
+        public Date getNotAfter()
+        {
+            return certificate.getNotAfter();
+        }
+
+        public boolean isValid(Date date)
+        {
+            return !date.before(getNotBefore()) && !date.after(getNotAfter());
+        }
     }
 
     private class SignatureOutputStream

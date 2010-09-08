@@ -13,7 +13,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.DigesterCalculatorProvider;
+import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 
 public class CertificateConfirmationContentBuilder
@@ -40,7 +40,7 @@ public class CertificateConfirmationContentBuilder
         return this;
     }
 
-    public CertificateConfirmationContent build(DigesterCalculatorProvider digesterProvider)
+    public CertificateConfirmationContent build(DigestCalculatorProvider digesterProvider)
         throws CMPException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();

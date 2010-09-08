@@ -6,7 +6,7 @@ import java.security.Provider;
 
 
 class CounterSignatureDigestCalculator
-    implements DigestCalculator
+    implements IntDigestCalculator
 {
     private final String alg;
     private final Provider provider;

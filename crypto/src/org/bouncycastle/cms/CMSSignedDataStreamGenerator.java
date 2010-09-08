@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequenceGenerator;
@@ -222,8 +223,6 @@ public class CMSSignedDataStreamGenerator
         }
     }
 
-    
-
     /**
      * base constructor
      */
@@ -257,7 +256,8 @@ public class CMSSignedDataStreamGenerator
      * provided here.
      * @throws NoSuchProviderException 
      * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException 
+     * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -274,6 +274,7 @@ public class CMSSignedDataStreamGenerator
      * provided here.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -292,6 +293,7 @@ public class CMSSignedDataStreamGenerator
      * @throws NoSuchProviderException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -309,6 +311,7 @@ public class CMSSignedDataStreamGenerator
      * provided here.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -326,7 +329,8 @@ public class CMSSignedDataStreamGenerator
      * add a signer with extra signed/unsigned attributes.
      * @throws NoSuchProviderException 
      * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException 
+     * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -345,6 +349,7 @@ public class CMSSignedDataStreamGenerator
      * add a signer with extra signed/unsigned attributes.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -365,6 +370,7 @@ public class CMSSignedDataStreamGenerator
      * @throws NoSuchProviderException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -384,6 +390,7 @@ public class CMSSignedDataStreamGenerator
      * add a signer with extra signed/unsigned attributes and the digest encryption algorithm.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -400,6 +407,9 @@ public class CMSSignedDataStreamGenerator
             new SimpleAttributeTableGenerator(unsignedAttr), sigProvider);
     }
 
+    /**
+     * @deprecated use addSignedInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         X509Certificate             cert,
@@ -413,6 +423,9 @@ public class CMSSignedDataStreamGenerator
             CMSUtils.getProvider(sigProvider));
     }
 
+    /**
+     * @deprecated use addSignedInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         X509Certificate             cert,
@@ -426,6 +439,9 @@ public class CMSSignedDataStreamGenerator
             unsignedAttrGenerator, sigProvider);
     }
 
+    /**
+     * @deprecated use addSignedInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         X509Certificate             cert,
@@ -440,6 +456,9 @@ public class CMSSignedDataStreamGenerator
             CMSUtils.getProvider(sigProvider));
     }
 
+    /**
+     * @deprecated use addSignedInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         X509Certificate             cert,
@@ -460,6 +479,7 @@ public class CMSSignedDataStreamGenerator
      * @throws NoSuchProviderException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -476,6 +496,7 @@ public class CMSSignedDataStreamGenerator
      * provided here.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -494,6 +515,7 @@ public class CMSSignedDataStreamGenerator
      * @throws NoSuchProviderException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignedInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -512,6 +534,7 @@ public class CMSSignedDataStreamGenerator
      *
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -531,6 +554,7 @@ public class CMSSignedDataStreamGenerator
      * @throws NoSuchProviderException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -549,6 +573,7 @@ public class CMSSignedDataStreamGenerator
      * add a signer with extra signed/unsigned attributes.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @deprecated use addSignerInfoGenerator
      */
     public void addSigner(
         PrivateKey      key,
@@ -564,6 +589,9 @@ public class CMSSignedDataStreamGenerator
             new SimpleAttributeTableGenerator(unsignedAttr), sigProvider);
     }
 
+    /**
+     * @deprecated use addSignerInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         byte[]                      subjectKeyID,
@@ -577,6 +605,9 @@ public class CMSSignedDataStreamGenerator
             CMSUtils.getProvider(sigProvider));
     }
 
+    /**
+     * @deprecated use addSignerInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         byte[]                      subjectKeyID,
@@ -590,6 +621,9 @@ public class CMSSignedDataStreamGenerator
             unsignedAttrGenerator, sigProvider);
     }
 
+    /**
+     * @deprecated use addSignerInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         byte[]                      subjectKeyID,
@@ -604,6 +638,9 @@ public class CMSSignedDataStreamGenerator
             unsignedAttrGenerator, CMSUtils.getProvider(sigProvider));
     }
 
+    /**
+     * @deprecated use addSignerInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         byte[]                      subjectKeyID,
@@ -618,6 +655,9 @@ public class CMSSignedDataStreamGenerator
             signedAttrGenerator, unsignedAttrGenerator, sigProvider, sigProvider);
     }
 
+    /**
+     * @deprecated use addSignerInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         X509Certificate             cert,
@@ -633,6 +673,9 @@ public class CMSSignedDataStreamGenerator
             signedAttrGenerator, unsignedAttrGenerator, sigProvider, digProvider);
     }
 
+    /**
+     * @deprecated use addSignerInfoGenerator
+     */
     public void addSigner(
         PrivateKey                  key,
         byte[]                      subjectKeyID,
@@ -808,7 +851,14 @@ public class CMSSignedDataStreamGenerator
             DigestAndSignerInfoGeneratorHolder holder = (DigestAndSignerInfoGeneratorHolder)it.next();
             digestAlgs.add(holder.getDigestAlgorithm());
         }
-        
+
+        for (Iterator it = signerGens.iterator(); it.hasNext();)
+        {
+            SignerInfoGenerator signerGen = (SignerInfoGenerator)it.next();
+
+            digestAlgs.add(signerGen.getDigestAlgorithm());
+        }
+
         sigGen.getRawOutputStream().write(new DERSet(digestAlgs).getEncoded());
         
         BERSequenceGenerator eiGen = new BERSequenceGenerator(sigGen.getRawOutputStream());
@@ -825,6 +875,13 @@ public class CMSSignedDataStreamGenerator
         // Let all the digests see the data as it is written
         OutputStream digStream = attachDigestsToOutputStream(_messageDigests, contentStream);
 
+        for (Iterator it = signerGens.iterator(); it.hasNext();)
+        {
+            SignerInfoGenerator signerGen = (SignerInfoGenerator)it.next();
+
+            digStream = new TeeOutputStream(digStream, signerGen.getCalculatingOutputStream());
+        }
+        
         return new CmsSignedDataOutputStream(digStream, eContentType, sGen, sigGen, eiGen);
     }
 
@@ -989,7 +1046,7 @@ public class CMSSignedDataStreamGenerator
         extends OutputStream
     {
         private OutputStream         _out;
-        private DERObjectIdentifier  _contentOID;
+        private ASN1ObjectIdentifier _contentOID;
         private BERSequenceGenerator _sGen;
         private BERSequenceGenerator _sigGen;
         private BERSequenceGenerator _eiGen;
@@ -1002,7 +1059,7 @@ public class CMSSignedDataStreamGenerator
             BERSequenceGenerator eiGen)
         {
             _out = out;
-            _contentOID = new DERObjectIdentifier(contentOID);
+            _contentOID = new ASN1ObjectIdentifier(contentOID);
             _sGen = sGen;
             _sigGen = sigGen;
             _eiGen = eiGen;
@@ -1072,6 +1129,25 @@ public class CMSSignedDataStreamGenerator
                     AlgorithmIdentifier digestAlgorithm = holder.getDigestAlgorithm();
     
                     signerInfos.add(holder.signerInf.generate(_contentOID, digestAlgorithm, calculatedDigest));
+                }
+            }
+
+            for (Iterator it = signerGens.iterator(); it.hasNext();)
+            {
+                SignerInfoGenerator sigGen = (SignerInfoGenerator)it.next();
+
+
+                try
+                {
+                    signerInfos.add(sigGen.generate(false, _contentOID));
+
+                    byte[] calculatedDigest = sigGen.getCalculatedDigest();
+
+                    _digests.put(sigGen.getDigestAlgorithm().getAlgorithm().getId(), calculatedDigest);
+                }
+                catch (CMSException e)
+                {
+                    throw new CMSStreamException("exception generating signers: " + e.getMessage(), e);
                 }
             }
 
