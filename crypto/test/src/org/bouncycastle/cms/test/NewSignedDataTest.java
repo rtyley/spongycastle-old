@@ -481,7 +481,7 @@ public class NewSignedDataTest
         Collection certColl = certStore.getMatches(null);
         Collection crlColl = crlStore.getMatches(null);
 
-        assertEquals(certColl.size(), s.getCertificateStore("Collection", BC).getMatches(null).size());
+        assertEquals(certColl.size(), s.getCertificates("Collection", BC).getMatches(null).size());
         assertEquals(crlColl.size(), s.getCRLs("Collection", BC).getMatches(null).size());
     }
 

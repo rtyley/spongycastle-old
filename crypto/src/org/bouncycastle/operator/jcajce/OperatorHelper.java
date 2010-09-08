@@ -298,7 +298,7 @@ class OperatorHelper
         }
         catch (IOException e)
         {
-            throw new CertificateException("cannot get encoded form of certificate");
+            throw new OpCertificateException("cannot get encoded form of certificate: " + e.getMessage(), e);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -310,6 +310,7 @@ class OperatorHelper
         }
     }
 
+    // TODO: put somewhere public so cause easily accessed
     private static class OpArgumentException
         extends IllegalArgumentException
     {
@@ -328,6 +329,7 @@ class OperatorHelper
         }
     }
 
+    // TODO: put somewhere public so cause easily accessed
     private static class OpCertificateException
         extends CertificateException
     {
