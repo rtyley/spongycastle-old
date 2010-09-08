@@ -336,14 +336,14 @@ public class CMSSignedDataParser
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
-     * @deprecated use getCertificates
+     * @deprecated use getCertificates()
      */
-    public X509Store getCertificateStore(
+    public X509Store getCertificates(
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
     {
-        return getCertificateStore(type, CMSUtils.getProvider(provider));
+        return getCertificates(type, CMSUtils.getProvider(provider));
     }
 
     /**
@@ -355,9 +355,9 @@ public class CMSSignedDataParser
      * @return a store of public key certificates
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
-     * @deprecated use getCertificates
+     * @deprecated use getCertificates()
      */
-    public X509Store getCertificateStore(
+    public X509Store getCertificates(
         String type,
         Provider provider)
         throws NoSuchStoreException, CMSException
@@ -382,13 +382,14 @@ public class CMSSignedDataParser
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use getCRLs()
      */
-    public X509Store getCRLStore(
+    public X509Store getCRLs(
         String type,
         String provider)
         throws NoSuchStoreException, NoSuchProviderException, CMSException
     {
-        return getCRLStore(type, CMSUtils.getProvider(provider));
+        return getCRLs(type, CMSUtils.getProvider(provider));
     }
 
     /**
@@ -400,8 +401,9 @@ public class CMSSignedDataParser
      * @return a store of CRLs
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use getCRLs()
      */
-    public X509Store getCRLStore(
+    public X509Store getCRLs(
         String type,
         Provider provider)
         throws NoSuchStoreException, CMSException
