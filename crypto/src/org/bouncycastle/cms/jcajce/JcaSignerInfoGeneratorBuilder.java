@@ -11,6 +11,7 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.CMSAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
@@ -19,20 +20,31 @@ public class JcaSignerInfoGeneratorBuilder
 {
     private JcaContentSignerBuilder contentSignerBuilder;
     private JcaDigestCalculatorProviderBuilder digestBuilder;
+    private DigestCalculatorProvider digestProvider;
     private boolean directSignature;
     private CMSAttributeTableGenerator signedGen;
     private CMSAttributeTableGenerator unsignedGen;
 
     public JcaSignerInfoGeneratorBuilder(String signatureAlgorithm)
     {
-        contentSignerBuilder = new JcaContentSignerBuilder(signatureAlgorithm);
-        digestBuilder = new JcaDigestCalculatorProviderBuilder();
+        this.contentSignerBuilder = new JcaContentSignerBuilder(signatureAlgorithm);
+        this.digestBuilder = new JcaDigestCalculatorProviderBuilder();
+    }
+
+    public JcaSignerInfoGeneratorBuilder(String signatureAlgorithm, DigestCalculatorProvider digestProvider)
+    {
+        this.contentSignerBuilder = new JcaContentSignerBuilder(signatureAlgorithm);
+        this.digestProvider = digestProvider;
     }
 
     public JcaSignerInfoGeneratorBuilder setProvider(Provider provider)
     {
         contentSignerBuilder.setProvider(provider);
-        digestBuilder.setProvider(provider);
+
+        if (digestBuilder != null)
+        {
+            digestBuilder.setProvider(provider);
+        }
 
         return this;
     }
@@ -40,7 +52,11 @@ public class JcaSignerInfoGeneratorBuilder
     public JcaSignerInfoGeneratorBuilder setProvider(String providerName)
     {
         contentSignerBuilder.setProvider(providerName);
-        digestBuilder.setProvider(providerName);
+
+        if (digestBuilder != null)
+        {
+            digestBuilder.setProvider(providerName);
+        }
 
         return this;
     }
@@ -95,16 +111,23 @@ public class JcaSignerInfoGeneratorBuilder
     private SignerInfoGenerator createGenerator(ContentSigner contentSigner, SignerIdentifier sigId)
         throws OperatorCreationException
     {
+        DigestCalculatorProvider digProvider = digestProvider;
+
+        if (digProvider == null)
+        {
+            digProvider = digestBuilder.build();
+        }
+
         if (directSignature)
         {
-            return new SignerInfoGenerator(sigId, contentSigner, digestBuilder.build(), true);
+            return new SignerInfoGenerator(sigId, contentSigner, digProvider, true);
         }
 
         if (signedGen != null || unsignedGen != null)
         {
-            return new SignerInfoGenerator(sigId, contentSigner, digestBuilder.build(), signedGen, unsignedGen);
+            return new SignerInfoGenerator(sigId, contentSigner, digProvider, signedGen, unsignedGen);
         }
         
-        return new SignerInfoGenerator(sigId, contentSigner, digestBuilder.build());
+        return new SignerInfoGenerator(sigId, contentSigner, digProvider);
     }
 }
