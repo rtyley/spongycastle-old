@@ -82,10 +82,10 @@ public class InfoTypeAndValue
     }
 
     public InfoTypeAndValue(
-        String oid,
-        ASN1Encodable optionalValue)
+        DERObjectIdentifier infoType)
     {
-        this(new DERObjectIdentifier(oid), optionalValue);
+        this.infoType = infoType;
+        this.infoValue = null;
     }
 
     public InfoTypeAndValue(
