@@ -126,9 +126,14 @@ public class PKIHeaderBuilder
         return this;
     }
 
-    public PKIHeaderBuilder setGeneralInfo(InfoTypeAndValue[] gen)
+    public PKIHeaderBuilder setGeneralInfo(InfoTypeAndValue genInfo)
     {
-        return setGeneralInfo(makeGeneralInfoSeq(gen));
+        return setGeneralInfo(makeGeneralInfoSeq(genInfo));
+    }
+
+    public PKIHeaderBuilder setGeneralInfo(InfoTypeAndValue[] genInfos)
+    {
+        return setGeneralInfo(makeGeneralInfoSeq(genInfos));
     }
 
     public PKIHeaderBuilder setGeneralInfo(ASN1Sequence seqOfInfoTypeAndValue)
@@ -139,13 +144,21 @@ public class PKIHeaderBuilder
     }
 
     private static ASN1Sequence makeGeneralInfoSeq(
-        InfoTypeAndValue[] generalInfo)
+        InfoTypeAndValue generalInfo)
+    {
+        return new DERSequence(generalInfo);
+    }
+
+    private static ASN1Sequence makeGeneralInfoSeq(
+        InfoTypeAndValue[] generalInfos)
     {
         ASN1Sequence genInfoSeq = null;
-        if (generalInfo != null) {
+        if (generalInfos != null)
+        {
             ASN1EncodableVector v = new ASN1EncodableVector();
-            for (int i = 0; i < generalInfo.length; i++) {
-                v.add(generalInfo[i]);
+            for (int i = 0; i < generalInfos.length; i++)
+            {
+                v.add(generalInfos[i]);
             }
             genInfoSeq = new DERSequence(v);
         }
