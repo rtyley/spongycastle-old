@@ -12,22 +12,54 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.KeyWrapper;
 import org.bouncycastle.operator.OperatorException;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.util.Strings;
 
 public class EncryptedValueBuilder
 {
-    private X509CertificateHolder holder;
     private KeyWrapper wrapper;
     private OutputEncryptor encryptor;
+    private EncryptedValuePadder padder;
 
-    public EncryptedValueBuilder(X509CertificateHolder holder, KeyWrapper wrapper, OutputEncryptor encryptor)
+    public EncryptedValueBuilder(KeyWrapper wrapper, OutputEncryptor encryptor)
     {
-        this.holder = holder;
+        this(wrapper, encryptor, null);
+    }
+
+    /**
+     * Generate fixed length blocks masked using a seed of length seedLength.
+     *
+     * @param wrapper
+     * @param encryptor
+     * @param padder
+     */
+    public EncryptedValueBuilder(KeyWrapper wrapper, OutputEncryptor encryptor, EncryptedValuePadder padder)
+    {
         this.wrapper = wrapper;
         this.encryptor = encryptor;
+        this.padder = padder;
     }
-    
-    public EncryptedValue build()
+
+    public EncryptedValue build(char[] revocationPassphrase)
         throws CRMFException
+    {
+        return encryptData(padData(Strings.toUTF8ByteArray(revocationPassphrase)));
+    }
+
+    public EncryptedValue build(X509CertificateHolder holder)
+        throws CRMFException
+    {
+        try
+        {
+            return encryptData(padData(holder.getEncoded()));
+        }
+        catch (IOException e)
+        {
+            throw new CRMFException("cannot encode certificate: " + e.getMessage(), e);
+        }
+    }
+
+    private EncryptedValue encryptData(byte[] data)
+       throws CRMFException
     {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 
@@ -35,7 +67,7 @@ public class EncryptedValueBuilder
 
         try
         {
-            eOut.write(holder.getEncoded());
+            eOut.write(data);
 
             eOut.close();
         }
@@ -63,5 +95,15 @@ public class EncryptedValueBuilder
         DERBitString encValue = new DERBitString(bOut.toByteArray());
 
         return new EncryptedValue(intendedAlg, symmAlg, encSymmKey, keyAlg, valueHint, encValue);
+    }
+
+    private byte[] padData(byte[] data)
+    {
+        if (padder != null)
+        {
+            return padder.getPaddedData(data);
+        }
+
+        return data;
     }
 }

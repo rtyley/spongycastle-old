@@ -7,6 +7,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -25,7 +26,9 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.crmf.EncryptedValueBuilder;
+import org.bouncycastle.cert.crmf.EncryptedValuePadder;
 import org.bouncycastle.cert.crmf.EncryptedValueParser;
+import org.bouncycastle.cert.crmf.FixedLengthMGF1Padder;
 import org.bouncycastle.cert.crmf.PKIArchiveControl;
 import org.bouncycastle.cert.crmf.PKMACBuilder;
 import org.bouncycastle.cert.crmf.ValueDecryptorGenerator;
@@ -56,6 +59,7 @@ public class AllTests
 {
     private static final byte[] TEST_DATA = "Hello world!".getBytes();
     private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
+    private static final String PASSPHRASE = "hello world";
 
     /*
      *
@@ -226,8 +230,8 @@ public class AllTests
         KeyPair kp = kGen.generateKeyPair();
         X509Certificate cert = makeV1Certificate(kp, "CN=Test", kp, "CN=Test");
 
-        EncryptedValueBuilder build = new JcaEncryptedValueBuilder(cert, new JceAsymmetricKeyWrapper(cert.getPublicKey()).setProvider(BC), new JceCRMFEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
-        EncryptedValue value = build.build();
+        JcaEncryptedValueBuilder build = new JcaEncryptedValueBuilder(new JceAsymmetricKeyWrapper(cert.getPublicKey()).setProvider(BC), new JceCRMFEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
+        EncryptedValue value = build.build(cert);
         ValueDecryptorGenerator decGen = new JceAsymmetricValueDecryptorGenerator(kp.getPrivate()).setProvider(BC);
 
         // try direct
@@ -245,6 +249,59 @@ public class AllTests
         X509CertificateHolder holder = parser.readCertificateHolder(decGen);
 
         assertTrue(Arrays.areEqual(cert.getEncoded(), holder.getEncoded()));
+    }
+
+    public void testEncryptedValuePassphrase()
+        throws Exception
+    {
+        char[] passphrase = PASSPHRASE.toCharArray();
+        KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
+
+        kGen.initialize(512);
+
+        KeyPair kp = kGen.generateKeyPair();
+        X509Certificate cert = makeV1Certificate(kp, "CN=Test", kp, "CN=Test");
+
+        EncryptedValueBuilder build = new EncryptedValueBuilder(new JceAsymmetricKeyWrapper(cert.getPublicKey()).setProvider(BC), new JceCRMFEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
+        EncryptedValue value = build.build(passphrase);
+        ValueDecryptorGenerator decGen = new JceAsymmetricValueDecryptorGenerator(kp.getPrivate()).setProvider(BC);
+
+        // try direct
+        encryptedValuePassphraseParserTest(value, null, decGen, cert);
+
+        // try indirect
+        encryptedValuePassphraseParserTest(EncryptedValue.getInstance(value.getEncoded()), null, decGen, cert);
+    }
+
+    public void testEncryptedValuePassphraseWithPadding()
+        throws Exception
+    {
+        char[] passphrase = PASSPHRASE.toCharArray();
+        KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
+
+        kGen.initialize(512);
+
+        KeyPair kp = kGen.generateKeyPair();
+        X509Certificate cert = makeV1Certificate(kp, "CN=Test", kp, "CN=Test");
+
+        FixedLengthMGF1Padder mgf1Padder = new FixedLengthMGF1Padder(200, new SecureRandom());
+        EncryptedValueBuilder build = new EncryptedValueBuilder(new JceAsymmetricKeyWrapper(cert.getPublicKey()).setProvider(BC), new JceCRMFEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build(), mgf1Padder);
+        EncryptedValue value = build.build(passphrase);
+        ValueDecryptorGenerator decGen = new JceAsymmetricValueDecryptorGenerator(kp.getPrivate()).setProvider(BC);
+
+        // try direct
+        encryptedValuePassphraseParserTest(value, mgf1Padder, decGen, cert);
+
+        // try indirect
+        encryptedValuePassphraseParserTest(EncryptedValue.getInstance(value.getEncoded()), mgf1Padder, decGen, cert);
+    }
+
+    private void encryptedValuePassphraseParserTest(EncryptedValue value, EncryptedValuePadder padder, ValueDecryptorGenerator decGen, X509Certificate cert)
+        throws Exception
+    {
+        EncryptedValueParser  parser = new EncryptedValueParser(value, padder);
+
+        assertTrue(Arrays.areEqual(PASSPHRASE.toCharArray(), parser.readRevocationPassphrase(decGen)));
     }
 
     private static X509Certificate makeV1Certificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN)

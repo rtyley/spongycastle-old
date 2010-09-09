@@ -58,9 +58,16 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
-    public ProtectedPKIMessageBuilder setGeneralInfo(InfoTypeAndValue[] genInfo)
+    public ProtectedPKIMessageBuilder setGeneralInfo(InfoTypeAndValue genInfo)
     {
         hdrBuilder.setGeneralInfo(genInfo);
+
+        return this;
+    }
+
+    public ProtectedPKIMessageBuilder setGeneralInfo(InfoTypeAndValue[] genInfos)
+    {
+        hdrBuilder.setGeneralInfo(genInfos);
 
         return this;
     }
