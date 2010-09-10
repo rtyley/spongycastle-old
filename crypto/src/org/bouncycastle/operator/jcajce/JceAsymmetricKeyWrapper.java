@@ -26,7 +26,7 @@ public class JceAsymmetricKeyWrapper
 
     public JceAsymmetricKeyWrapper(PublicKey publicKey)
     {
-        super(SubjectPublicKeyInfo.getInstance(publicKey.getEncoded()));
+        super(SubjectPublicKeyInfo.getInstance(publicKey.getEncoded()).getAlgorithmId());
 
         this.publicKey = publicKey;
     }
