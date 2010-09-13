@@ -301,7 +301,7 @@ public class AllTests
     {
         EncryptedValueParser  parser = new EncryptedValueParser(value, padder);
 
-        assertTrue(Arrays.areEqual(PASSPHRASE.toCharArray(), parser.readRevocationPassphrase(decGen)));
+        assertTrue(Arrays.areEqual(PASSPHRASE.toCharArray(), parser.readPassphrase(decGen)));
     }
 
     private static X509Certificate makeV1Certificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN)
