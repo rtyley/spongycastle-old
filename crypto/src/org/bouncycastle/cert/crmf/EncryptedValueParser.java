@@ -66,7 +66,7 @@ public class EncryptedValueParser
         return new X509CertificateHolder(X509CertificateStructure.getInstance(decryptValue(decGen)));
     }
 
-    public char[] readRevocationPassphrase(ValueDecryptorGenerator decGen)
+    public char[] readPassphrase(ValueDecryptorGenerator decGen)
         throws CRMFException
     {
         return Strings.fromUTF8ByteArray(decryptValue(decGen)).toCharArray();
