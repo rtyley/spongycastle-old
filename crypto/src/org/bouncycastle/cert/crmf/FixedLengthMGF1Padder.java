@@ -14,6 +14,11 @@ public class FixedLengthMGF1Padder
     private SecureRandom random;
     private Digest dig = new SHA1Digest();
 
+    public FixedLengthMGF1Padder(int length)
+    {
+        this(length, null);
+    }
+
     public FixedLengthMGF1Padder(int length, SecureRandom random)
     {
         this.length = length;
@@ -25,6 +30,11 @@ public class FixedLengthMGF1Padder
         byte[] bytes = new byte[length];
         byte[] seed = new byte[dig.getDigestSize()];
         byte[] mask = new byte[length - dig.getDigestSize()];
+
+        if (random == null)
+        {
+            random = new SecureRandom();
+        }
 
         random.nextBytes(seed);
 
@@ -56,8 +66,6 @@ public class FixedLengthMGF1Padder
     {
         byte[] seed = new byte[dig.getDigestSize()];
         byte[] mask = new byte[length - dig.getDigestSize()];
-
-        random.nextBytes(seed);
 
         System.arraycopy(paddedData, 0, seed, 0, seed.length);
 
