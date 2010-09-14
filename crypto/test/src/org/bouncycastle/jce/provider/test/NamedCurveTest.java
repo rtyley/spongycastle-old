@@ -54,11 +54,6 @@ public class NamedCurveTest
     {
         ECGenParameterSpec     ecSpec = new ECGenParameterSpec(name);
 
-        if (ecSpec == null)
-        {
-            fail("no curve for " + name + " found.");
-        }
-
         KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDH", "BC");
 
         g.initialize(ecSpec, new SecureRandom());
@@ -142,11 +137,6 @@ public class NamedCurveTest
         throws Exception
     {
         ECGenParameterSpec     ecSpec = new ECGenParameterSpec(name);
- 
-        if (ecSpec == null)
-        {
-            fail("no curve for " + name + " found.");
-        }
 
         KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDSA", "BC");
 
@@ -222,11 +212,6 @@ public class NamedCurveTest
         throws Exception
     {
         ECGenParameterSpec     ecSpec = new ECGenParameterSpec(name);
-
-        if (ecSpec == null)
-        {
-            fail("no curve for " + name + " found.");
-        }
 
         KeyPairGenerator    g = KeyPairGenerator.getInstance("ECGOST3410", "BC");
 
