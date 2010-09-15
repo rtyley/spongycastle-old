@@ -1,7 +1,7 @@
 package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.Dictionary;
 import java.util.List;
 
 interface TlsClient
@@ -10,8 +10,8 @@ interface TlsClient
 
     int[] getCipherSuites();
 
-    // Hashtable is (Integer -> byte[])
-    Hashtable generateClientExtensions();
+    // Dictionary is (Integer -> byte[])
+    Dictionary generateClientExtensions();
 
     void notifySessionID(byte[] sessionID);
 
@@ -19,8 +19,8 @@ interface TlsClient
 
     void notifySecureRenegotiation(boolean secureNegotiation) throws IOException;
 
-    // Hashtable is (Integer -> byte[])
-    void processServerExtensions(Hashtable serverExtensions);
+    // Dictionary is (Integer -> byte[])
+    void processServerExtensions(Dictionary serverExtensions);
 
     TlsKeyExchange createKeyExchange() throws IOException;
 

@@ -1,7 +1,7 @@
 package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.Dictionary;
 import java.util.List;
 
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
@@ -154,7 +154,7 @@ class DefaultTlsClient implements TlsClient
         };
     }
 
-    public Hashtable generateClientExtensions()
+    public Dictionary generateClientExtensions()
     {
         // RFC 3546
 //        enum {
@@ -200,7 +200,7 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    public void processServerExtensions(Hashtable serverExtensions)
+    public void processServerExtensions(Dictionary serverExtensions)
     {
         // TODO Validate/process serverExtensions (via client?)
         // TODO[SRP]

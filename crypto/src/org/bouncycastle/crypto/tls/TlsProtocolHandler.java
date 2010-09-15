@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -131,7 +132,7 @@ public class TlsProtocolHandler
     private boolean closed = false;
     private boolean failedWithError = false;
     private boolean appDataReady = false;
-    private Hashtable clientExtensions;
+    private Dictionary clientExtensions;
 
     private SecurityParameters securityParameters = null;
 
@@ -432,7 +433,7 @@ public class TlsProtocolHandler
                                  */
 
                                 if (!extType.equals(EXT_RenegotiationInfo)
-                                    && !clientExtensions.containsKey(extType))
+                                    && clientExtensions.get(extType) == null)
                                 {
                                     /*
                                      * RFC 3546 2.3
@@ -910,7 +911,7 @@ public class TlsProtocolHandler
              * RECOMMENDED.
              */
             boolean noRenegExt = clientExtensions == null
-                ||  !clientExtensions.containsKey(EXT_RenegotiationInfo);
+                ||  clientExtensions.get(EXT_RenegotiationInfo) == null;
 
             int count = offeredCipherSuites.length;
             if (noRenegExt)
