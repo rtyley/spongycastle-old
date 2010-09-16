@@ -12,6 +12,11 @@ public class OperatorException
         this.cause = cause;
     }
 
+    public OperatorException(String msg)
+    {
+        super(msg);
+    }
+
     public Throwable getCause()
     {
         return cause;

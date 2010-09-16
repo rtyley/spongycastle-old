@@ -50,6 +50,7 @@ import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.operator.lw.LwContentVerifierProviderBuilder;
 import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
@@ -452,6 +453,32 @@ public class NewSignedDataTest
         }
     }
 
+    private void verifyRSASignatures(CMSSignedData s, byte[] contentDigest)
+        throws Exception
+    {
+        Store                   certStore = s.getCertificates();
+        SignerInformationStore  signers = s.getSignerInfos();
+
+        Collection              c = signers.getSigners();
+        Iterator                it = c.iterator();
+
+        while (it.hasNext())
+        {
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certStore.getMatches(signer.getSID());
+
+            Iterator        certIt = certCollection.iterator();
+            X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
+
+            assertEquals(true, signer.verify(new LwContentVerifierProviderBuilder().build(cert)));
+
+            if (contentDigest != null)
+            {
+                assertTrue(MessageDigest.isEqual(contentDigest, signer.getContentDigest()));
+            }
+        }
+    }
+
     private void verifySignatures(CMSSignedData s, byte[] contentDigest) 
         throws Exception
     {
@@ -505,9 +532,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate(), _origCert));
 
-        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_MD5);
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("MD5withRSA").setProvider(BC).build(_origKP.getPrivate(), _origCert));
 
         gen.addCertificates(certs);
 
@@ -749,6 +776,7 @@ public class NewSignedDataTest
         //
 
         verifySignatures(s, md.digest("Hello world!".getBytes()));
+        verifyRSASignatures(s, md.digest("Hello world!".getBytes()));
     }
 
     public void testSHA1WithRSAEncapsulated()
