@@ -79,7 +79,7 @@ public class PrivateKeyFactory
     {
         AlgorithmIdentifier algId = keyInfo.getAlgorithmId();
 
-        if (algId.getObjectId().equals(PKCSObjectIdentifiers.rsaEncryption))
+        if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.rsaEncryption))
         {
             RSAPrivateKeyStructure keyStructure = new RSAPrivateKeyStructure(
                 (ASN1Sequence)keyInfo.getPrivateKey());

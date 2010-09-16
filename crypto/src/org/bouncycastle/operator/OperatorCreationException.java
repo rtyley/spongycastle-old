@@ -7,4 +7,9 @@ public class OperatorCreationException
     {
         super(msg, cause);
     }
+
+    public OperatorCreationException(String msg)
+    {
+        super(msg);
+    }
 }
