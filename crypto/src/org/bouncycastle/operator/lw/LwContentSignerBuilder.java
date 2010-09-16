@@ -4,10 +4,10 @@ import java.io.OutputStream;
 import java.security.SecureRandom;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.Signer;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.operator.ContentSigner;
@@ -38,7 +38,7 @@ public class LwContentSignerBuilder
         return this;
     }
 
-    public ContentSigner build(CipherParameters privateKey)
+    public ContentSigner build(AsymmetricKeyParameter privateKey)
         throws OperatorCreationException
     {
         final Signer sig = createSignature(sigAlgId);
