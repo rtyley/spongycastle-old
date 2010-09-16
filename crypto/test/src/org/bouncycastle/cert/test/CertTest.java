@@ -76,9 +76,9 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.bc.BcContentSignerBuilder;
+import org.bouncycastle.operator.bc.BcContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.lw.LwContentSignerBuilder;
-import org.bouncycastle.operator.lw.LwContentVerifierProviderBuilder;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -1371,7 +1371,7 @@ public class CertTest
         //
         // create the certificate - version 3 - without extensions
         //
-        sigGen = new LwContentSignerBuilder("SHA256WithRSAEncryption").build(lwPrivKey);
+        sigGen = new BcContentSignerBuilder("SHA256WithRSAEncryption").build(lwPrivKey);
         SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKeyStructure(lwPubKey.getModulus(), lwPubKey.getExponent()));
         certGen = new X509v3CertificateBuilder(new X509Principal(ord, values), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000), new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values), pubInfo);
 
@@ -1383,7 +1383,7 @@ public class CertTest
 
         cert.verify(pubKey);
 
-        if (!certHolder.isSignatureValid(new LwContentVerifierProviderBuilder().build(lwPubKey)))
+        if (!certHolder.isSignatureValid(new BcContentVerifierProviderBuilder().build(lwPubKey)))
         {
             fail("lw sig verification failed");
         }

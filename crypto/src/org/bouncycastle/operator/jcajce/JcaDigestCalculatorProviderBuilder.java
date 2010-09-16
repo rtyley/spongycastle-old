@@ -41,11 +41,11 @@ public class JcaDigestCalculatorProviderBuilder
     {
         return new DigestCalculatorProvider()
         {
-            private DigestOutputStream stream;
-
             public DigestCalculator get(final AlgorithmIdentifier algorithm)
                 throws OperatorCreationException
             {
+                final DigestOutputStream stream;
+
                 try
                 {
                     MessageDigest dig = helper.createDigest(algorithm);

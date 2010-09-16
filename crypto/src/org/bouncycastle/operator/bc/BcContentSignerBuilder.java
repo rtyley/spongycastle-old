@@ -1,4 +1,4 @@
-package org.bouncycastle.operator.lw;
+package org.bouncycastle.operator.bc;
 
 import java.io.OutputStream;
 import java.security.SecureRandom;
@@ -17,21 +17,21 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.RuntimeOperatorException;
 import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
 
-public class LwContentSignerBuilder
+public class BcContentSignerBuilder
 {
     private SecureRandom random;
     private String signatureAlgorithm;
     private AlgorithmIdentifier sigAlgId;
     private DigestAlgorithmIdentifierFinder digestAlgorithmFinder;
 
-    public LwContentSignerBuilder(String signatureAlgorithm)
+    public BcContentSignerBuilder(String signatureAlgorithm)
     {
         this.signatureAlgorithm = signatureAlgorithm;
         this.sigAlgId = SignerAlgorithmIdentifierGenerator.generate(signatureAlgorithm);
         this.digestAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
     }
 
-    public LwContentSignerBuilder setSecureRandom(SecureRandom random)
+    public BcContentSignerBuilder setSecureRandom(SecureRandom random)
     {
         this.random = random;
 
@@ -54,7 +54,7 @@ public class LwContentSignerBuilder
 
         return new ContentSigner()
         {
-            private LwSignerOutputStream stream = new LwSignerOutputStream(sig);
+            private BcSignerOutputStream stream = new BcSignerOutputStream(sig);
 
             public AlgorithmIdentifier getAlgorithmIdentifier()
             {
@@ -84,7 +84,7 @@ public class LwContentSignerBuilder
         throws OperatorCreationException
     {
         AlgorithmIdentifier digAlg = digestAlgorithmFinder.find(sigAlgId);
-        Digest              dig = LwUtil.createDigest(digAlg);
+        Digest              dig = BcUtil.createDigest(digAlg);
 
         return new RSADigestSigner(dig);
     }

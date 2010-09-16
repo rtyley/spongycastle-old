@@ -1,4 +1,4 @@
-package org.bouncycastle.operator.lw;
+package org.bouncycastle.operator.bc;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,11 +19,11 @@ import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.RawContentVerifier;
 
-public class LwContentVerifierProviderBuilder
+public class BcContentVerifierProviderBuilder
 {
     private DigestAlgorithmIdentifierFinder digestAlgorithmFinder;
 
-    public LwContentVerifierProviderBuilder()
+    public BcContentVerifierProviderBuilder()
     {
         digestAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
     }
@@ -33,7 +33,7 @@ public class LwContentVerifierProviderBuilder
     {
         return new ContentVerifierProvider()
         {
-            private LwSignerOutputStream stream;
+            private BcSignerOutputStream stream;
 
             public ContentVerifier get(AlgorithmIdentifier algorithm)
                 throws OperatorCreationException
@@ -46,7 +46,7 @@ public class LwContentVerifierProviderBuilder
 
                     sig.init(false, publicKey);
 
-                    stream = new LwSignerOutputStream(sig);
+                    stream = new BcSignerOutputStream(sig);
 
                     Signer rawSig = createRawSig(algorithm, publicKey);
 
@@ -78,7 +78,7 @@ public class LwContentVerifierProviderBuilder
             public ContentVerifier get(AlgorithmIdentifier algorithm)
                 throws OperatorCreationException
             {
-                LwSignerOutputStream stream = createSignatureStream(algorithm, publicKey);
+                BcSignerOutputStream stream = createSignatureStream(algorithm, publicKey);
 
                 Signer rawSig = createRawSig(algorithm, publicKey);
 
@@ -94,14 +94,14 @@ public class LwContentVerifierProviderBuilder
         };
     }
 
-    private LwSignerOutputStream createSignatureStream(AlgorithmIdentifier algorithm, AsymmetricKeyParameter publicKey)
+    private BcSignerOutputStream createSignatureStream(AlgorithmIdentifier algorithm, AsymmetricKeyParameter publicKey)
         throws OperatorCreationException
     {
         Signer sig = createSignature(algorithm);
 
         sig.init(false, publicKey);
 
-        return new LwSignerOutputStream(sig);
+        return new BcSignerOutputStream(sig);
     }
 
     private Signer createRawSig(AlgorithmIdentifier algorithm, AsymmetricKeyParameter publicKey)
@@ -124,7 +124,7 @@ public class LwContentVerifierProviderBuilder
         throws OperatorCreationException
     {
         AlgorithmIdentifier digAlg = digestAlgorithmFinder.find(sigAlgId);
-        Digest dig = LwUtil.createDigest(digAlg);
+        Digest dig = BcUtil.createDigest(digAlg);
 
         return new RSADigestSigner(dig);
     }
@@ -132,9 +132,9 @@ public class LwContentVerifierProviderBuilder
     private class SigVerifier
         implements ContentVerifier
     {
-        private LwSignerOutputStream stream;
+        private BcSignerOutputStream stream;
 
-        SigVerifier(LwSignerOutputStream stream)
+        SigVerifier(BcSignerOutputStream stream)
         {
             this.stream = stream;
         }
@@ -161,7 +161,7 @@ public class LwContentVerifierProviderBuilder
     {
         private X509CertificateHolder certificate;
 
-        DatedSigVerifier(LwSignerOutputStream stream, X509CertificateHolder certificate)
+        DatedSigVerifier(BcSignerOutputStream stream, X509CertificateHolder certificate)
         {
             super(stream);
             this.certificate = certificate;
@@ -189,7 +189,7 @@ public class LwContentVerifierProviderBuilder
     {
         private Signer rawSignature;
 
-        RawSigVerifier(LwSignerOutputStream stream, Signer rawSignature)
+        RawSigVerifier(BcSignerOutputStream stream, Signer rawSignature)
         {
             super(stream);
             this.rawSignature = rawSignature;
@@ -209,7 +209,7 @@ public class LwContentVerifierProviderBuilder
     {
         private X509CertificateHolder certificate;
 
-        DatedRawSigVerifier(LwSignerOutputStream stream, X509CertificateHolder certificate, Signer rawSignature)
+        DatedRawSigVerifier(BcSignerOutputStream stream, X509CertificateHolder certificate, Signer rawSignature)
         {
             super(stream, rawSignature);
             this.certificate = certificate;
