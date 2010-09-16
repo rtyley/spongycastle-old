@@ -44,13 +44,23 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSTypedData;
+import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerId;
+import org.bouncycastle.cms.SignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.bc.BcContentSignerBuilder;
+import org.bouncycastle.operator.bc.BcContentVerifierProviderBuilder;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
-import org.bouncycastle.operator.lw.LwContentVerifierProviderBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
@@ -470,7 +480,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
-            assertEquals(true, signer.verify(new LwContentVerifierProviderBuilder().build(cert)));
+            assertEquals(true, signer.verify(new BcContentVerifierProviderBuilder().build(cert)));
 
             if (contentDigest != null)
             {
@@ -532,9 +542,13 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate(), _origCert));
+        DigestCalculatorProvider digProvider = new JcaDigestCalculatorProviderBuilder().setProvider(BC).build();
+        JcaSignerInfoGeneratorBuilder signerInfoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(digProvider);
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
+        ContentSigner md5Signer = new JcaContentSignerBuilder("MD5withRSA").setProvider(BC).build(_origKP.getPrivate());
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("MD5withRSA").setProvider(BC).build(_origKP.getPrivate(), _origCert));
+        gen.addSignerInfoGenerator(signerInfoGeneratorBuilder.build(sha1Signer, _origCert));
+        gen.addSignerInfoGenerator(signerInfoGeneratorBuilder.build(md5Signer, _origCert));
 
         gen.addCertificates(certs);
 
@@ -670,8 +684,9 @@ public class NewSignedDataTest
         Store           certs = new JcaCertStore(certList);
     
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-    
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").build(_origKP.getPrivate(), _origCert));
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha1Signer, _origCert));
     
         gen.addCertificates(certs);
     
@@ -702,7 +717,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").build(_origKP.getPrivate(), _origCert));
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha1Signer, _origCert));
 
         gen.addCertificates(certs);
 
@@ -764,6 +781,53 @@ public class NewSignedDataTest
 
         gen.addCertificates(certs);
 
+
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, null, false, BC);
+
+        //
+        // the signature is detached, so need to add msg before passing on
+        //
+        s = new CMSSignedData(msg, s.getEncoded());
+        //
+        // compute expected content digest
+        //
+
+        verifySignatures(s, md.digest("Hello world!".getBytes()));
+        verifyRSASignatures(s, md.digest("Hello world!".getBytes()));
+    }
+
+    public void testLwSHA1WithRSAAndAttributeTable()
+        throws Exception
+    {
+        MessageDigest       md = MessageDigest.getInstance("SHA1", BC);
+        List                certList = new ArrayList();
+        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        Store           certs = new JcaCertStore(certList);
+
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        Attribute attr = new Attribute(CMSAttributes.messageDigest,
+                                       new DERSet(
+                                            new DEROctetString(
+                                                md.digest("Hello world!".getBytes()))));
+
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(attr);
+
+        AsymmetricKeyParameter privKey = PrivateKeyFactory.createKey(_origKP.getPrivate().getEncoded());
+        BcContentSignerBuilder contentSignerBuilder = new BcContentSignerBuilder("SHA1withRSA");
+
+        gen.addSignerInfoGenerator(
+            new SignerInfoGeneratorBuilder(new BcDigestCalculatorProvider())
+                .setSignedAttributeGenerator(new DefaultSignedAttributeTableGenerator(new AttributeTable(v)))
+                .build(contentSignerBuilder.build(privKey), new JcaX509CertificateHolder(_origCert)));
+
+        gen.addCertificates(certs);
 
         CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, null, false, BC);
 
@@ -933,7 +997,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").build(_signKP.getPrivate(), _signCert));
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_signKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha1Signer, _signCert));
 
         gen.addCertificates(certStore);
         gen.addCRLs(crlStore);
@@ -977,7 +1043,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(signatureAlgorithmName).setDirectSignature(true).build(_origKP.getPrivate(), _origCert));
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithmName).setProvider(BC).build(_origKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).setDirectSignature(true).build(contentSigner, _origCert));
 
         gen.addCertificates(certs);
 
@@ -1012,7 +1080,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(signatureAlgorithm).setProvider(BC).build(signaturePair.getPrivate(), CMSTestUtil.createSubjectKeyId(signatureCert.getPublicKey()).getKeyIdentifier()));
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(BC).build(signaturePair.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(contentSigner, CMSTestUtil.createSubjectKeyId(signatureCert.getPublicKey()).getKeyIdentifier()));
 
         gen.addCertificates(certStore);
         gen.addCRLs(crlStore);
@@ -1108,8 +1178,10 @@ public class NewSignedDataTest
         Store           crlStore = new JcaCRLStore(crlList);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-    
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(signatureAlgorithm).setProvider(BC).build(signaturePair.getPrivate(), signatureCert));
+
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(BC).build(signaturePair.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(contentSigner, signatureCert));
 
         gen.addCertificates(certs);
     
@@ -1246,7 +1318,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate(), _origCert));
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha1Signer, _origCert));
 
         gen.addCertificates(certs);
 
@@ -1329,7 +1403,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate(), _origCert));
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha1Signer, _origCert));
 
         gen.addCertificates(certs);
 
@@ -1364,8 +1440,9 @@ public class NewSignedDataTest
         Store           certs = new JcaCertStore(certList);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").build(_origKP.getPrivate(), _origCert));
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha1Signer, _origCert));
 
         gen.addCertificates(certs);
 
@@ -1403,7 +1480,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").build(_origKP.getPrivate(), _origCert));
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha1Signer, _origCert));
 
         gen.addCertificates(certs);
 
@@ -1431,7 +1510,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").build(_origKP.getPrivate(), _origCert));
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha1Signer, _origCert));
 
         gen.addCertificates(certs);
 
@@ -1458,7 +1539,9 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA1withRSA").build(_origKP.getPrivate(), _origCert));
+        ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha1Signer, _origCert));
 
         gen.addCertificates(certs);
 
@@ -1469,7 +1552,9 @@ public class NewSignedDataTest
         //
         gen = new CMSSignedDataGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder("SHA224withRSA").build(_origKP.getPrivate(), _origCert));
+        ContentSigner sha224Signer = new JcaContentSignerBuilder("SHA224withRSA").setProvider(BC).build(_origKP.getPrivate());
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).build(sha224Signer, _origCert));
 
         gen.addCertificates(certs);
 

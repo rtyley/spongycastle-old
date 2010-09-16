@@ -1,4 +1,4 @@
-package org.bouncycastle.operator.lw;
+package org.bouncycastle.operator.bc;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -6,12 +6,12 @@ import java.io.OutputStream;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Signer;
 
-public class LwSignerOutputStream
+public class BcSignerOutputStream
     extends OutputStream
 {
     private Signer sig;
 
-    LwSignerOutputStream(Signer sig)
+    BcSignerOutputStream(Signer sig)
     {
         this.sig = sig;
     }
