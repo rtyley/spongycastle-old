@@ -49,6 +49,7 @@ public class ECDHKEKGenerator
     public int generateBytes(byte[] out, int outOff, int len)
         throws DataLengthException, IllegalArgumentException
     {
+        // TODO Create an ASN.1 class for this (RFC3278)
         // ECC-CMS-SharedInfo
         ASN1EncodableVector v = new ASN1EncodableVector();
 
