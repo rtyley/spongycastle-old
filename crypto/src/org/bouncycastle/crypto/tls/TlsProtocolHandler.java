@@ -6,10 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -132,7 +131,7 @@ public class TlsProtocolHandler
     private boolean closed = false;
     private boolean failedWithError = false;
     private boolean appDataReady = false;
-    private Dictionary clientExtensions;
+    private Hashtable clientExtensions;
 
     private SecurityParameters securityParameters = null;
 
@@ -640,7 +639,7 @@ public class TlsProtocolHandler
 
                         assertEmpty(is);
 
-                        ArrayList authorityDNs = new ArrayList();
+                        Vector authorityDNs = new Vector();
 
                         ByteArrayInputStream bis = new ByteArrayInputStream(authorities);
                         while (bis.available() > 0)

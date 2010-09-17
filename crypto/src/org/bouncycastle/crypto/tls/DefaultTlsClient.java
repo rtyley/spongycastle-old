@@ -1,8 +1,8 @@
 package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
-import java.util.Dictionary;
-import java.util.List;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.crypto.BlockCipher;
@@ -154,7 +154,7 @@ class DefaultTlsClient implements TlsClient
         };
     }
 
-    public Dictionary generateClientExtensions()
+    public Hashtable generateClientExtensions()
     {
         // RFC 3546
 //        enum {
@@ -200,7 +200,7 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    public void processServerExtensions(Dictionary serverExtensions)
+    public void processServerExtensions(Hashtable serverExtensions)
     {
         // TODO Validate/process serverExtensions (via client?)
         // TODO[SRP]
@@ -263,7 +263,7 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    public void processServerCertificateRequest(byte[] certificateTypes, List certificateAuthorities)
+    public void processServerCertificateRequest(byte[] certificateTypes, Vector certificateAuthorities)
     {
         // TODO There shouldn't be a certificate request for SRP 
 
