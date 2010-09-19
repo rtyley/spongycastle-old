@@ -21,6 +21,11 @@ interface TlsKeyExchange
     static final short KE_SRP = 10;
     static final short KE_SRP_DSS = 11;
     static final short KE_SRP_RSA = 12;
+    static final short KE_ECDH_ECDSA = 13;
+    static final short KE_ECDHE_ECDSA = 14;
+    static final short KE_ECDH_RSA = 15;
+    static final short KE_ECDHE_RSA = 16;
+    static final short KE_ECDH_anon = 17;
 
     void skipServerCertificate() throws IOException;
 
