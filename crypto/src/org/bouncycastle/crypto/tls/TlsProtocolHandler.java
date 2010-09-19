@@ -326,7 +326,7 @@ public class TlsProtocolHandler
                          * compression.
                          */
                         short compressionMethod = TlsUtils.readUint8(is);
-                        if (compressionMethod != 0)
+                        if (compressionMethod != CompressionMethod.NULL)
                         {
                             this.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
                         }
@@ -881,7 +881,7 @@ public class TlsProtocolHandler
         /*
          * Compression methods, just the null method.
          */
-        byte[] compressionMethods = new byte[] { 0x00 };
+        byte[] compressionMethods = new byte[] { CompressionMethod.NULL };
         TlsUtils.writeOpaque8(compressionMethods, os);
 
         // Extensions
