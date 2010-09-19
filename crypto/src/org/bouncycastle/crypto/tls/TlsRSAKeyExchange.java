@@ -40,7 +40,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
     }
 
     public void processServerCertificate(Certificate serverCertificate) throws IOException
@@ -54,13 +54,13 @@ class TlsRSAKeyExchange implements TlsKeyExchange
         }
         catch (RuntimeException e)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unsupported_certificate);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
         }
 
         // Sanity check the PublicKeyFactory
         if (this.serverPublicKey.isPrivate())
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
         }
 
         // TODO 
@@ -74,7 +74,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 
         if (!(this.serverPublicKey instanceof RSAKeyParameters))
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_certificate_unknown);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
         }
         validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
         this.rsaServerPublicKey = validateRSAPublicKey((RSAKeyParameters)this.serverPublicKey);
@@ -84,7 +84,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
          */
         if (!this.verifyer.isValid(serverCertificate.getCerts()))
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_user_canceled);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.user_canceled);
         }
     }
 
@@ -96,7 +96,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
@@ -122,7 +122,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
             /*
              * This should never happen, only during decryption.
              */
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
         }
     }
 
@@ -145,8 +145,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
                 int bits = ku.getBytes()[0] & 0xff;
                 if ((bits & keyUsageBits) != keyUsageBits)
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
             }
         }
@@ -188,8 +187,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 
         if (!key.getExponent().isProbablePrime(2))
         {
-            handler.failWithError(AlertLevel.fatal,
-                TlsProtocolHandler.AP_illegal_parameter);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
         }
 
         return key;

@@ -72,7 +72,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
     }
 
     public void processServerCertificate(Certificate serverCertificate) throws IOException
@@ -86,13 +86,13 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         }
         catch (RuntimeException e)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unsupported_certificate);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
         }
 
         // Sanity check the PublicKeyFactory
         if (this.serverPublicKey.isPrivate())
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
         }
 
         // TODO 
@@ -109,8 +109,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
             case KE_ECDH_ECDSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
                 // TODO The algorithm used to sign the certificate should be DSS.
 //                x509Cert.getSignatureAlgorithm();
@@ -118,8 +117,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
             case KE_ECDHE_ECDSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
                 // TODO The algorithm used to sign the certificate should be RSA.
 //              x509Cert.getSignatureAlgorithm();
@@ -127,16 +125,14 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
             case KE_ECDH_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             case KE_ECDHE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
                 break;
 
@@ -144,8 +140,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 // todo 
                 break;
             default:
-                handler.failWithError(AlertLevel.fatal,
-                    TlsProtocolHandler.AP_unsupported_certificate);
+                handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
         }
 
         /*
@@ -153,7 +148,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
          */
         if (!this.verifyer.isValid(serverCertificate.getCerts()))
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_user_canceled);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.user_canceled);
         }
     }
 
@@ -195,8 +190,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 int bits = ku.getBytes()[0] & 0xff;
                 if ((bits & keyUsageBits) != keyUsageBits)
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
             }
         }

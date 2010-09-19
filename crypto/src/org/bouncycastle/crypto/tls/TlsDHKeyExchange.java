@@ -68,7 +68,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
     }
 
     public void processServerCertificate(Certificate serverCertificate) throws IOException
@@ -82,13 +82,13 @@ class TlsDHKeyExchange implements TlsKeyExchange
         }
         catch (RuntimeException e)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unsupported_certificate);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
         }
 
         // Sanity check the PublicKeyFactory
         if (this.serverPublicKey.isPrivate())
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
         }
 
         // TODO 
@@ -105,8 +105,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
             case TlsKeyExchange.KE_DH_DSS:
                 if (!(this.serverPublicKey instanceof DHPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
                 // TODO The algorithm used to sign the certificate should be DSS.
 //                x509Cert.getSignatureAlgorithm();
@@ -115,8 +114,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
             case TlsKeyExchange.KE_DH_RSA:
                 if (!(this.serverPublicKey instanceof DHPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
                 // TODO The algorithm used to sign the certificate should be RSA.
 //              x509Cert.getSignatureAlgorithm();
@@ -125,21 +123,18 @@ class TlsDHKeyExchange implements TlsKeyExchange
             case TlsKeyExchange.KE_DHE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             case TlsKeyExchange.KE_DHE_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
                 break;
             default:
-                handler.failWithError(AlertLevel.fatal,
-                    TlsProtocolHandler.AP_unsupported_certificate);
+                handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
         }
 
         /*
@@ -147,7 +142,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
          */
         if (!this.verifyer.isValid(serverCertificate.getCerts()))
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_user_canceled);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.user_canceled);
         }
     }
 
@@ -155,7 +150,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
     {
         if (tlsSigner != null)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
         }
     }
 
@@ -164,7 +159,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
     {
         if (tlsSigner == null)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
         }
 
         InputStream sigIn = is;
@@ -186,7 +181,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
             if (!signer.verifySignature(sigByte))
             {
-                handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_bad_certificate);
+                handler.failWithError(AlertLevel.fatal, AlertDescription.bad_certificate);
             }
         }
 
@@ -245,8 +240,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
                 int bits = ku.getBytes()[0] & 0xff;
                 if ((bits & keyUsageBits) != keyUsageBits)
                 {
-                    handler.failWithError(AlertLevel.fatal,
-                        TlsProtocolHandler.AP_certificate_unknown);
+                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
             }
         }
@@ -269,15 +263,15 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
         if (!p.isProbablePrime(2))
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_illegal_parameter);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
         }
         if (g.compareTo(TWO) < 0 || g.compareTo(p.subtract(TWO)) > 0)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_illegal_parameter);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
         }
         if (Y.compareTo(TWO) < 0 || Y.compareTo(p.subtract(ONE)) > 0)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_illegal_parameter);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
         }
 
         // TODO See RFC 2631 for more discussion of Diffie-Hellman validation

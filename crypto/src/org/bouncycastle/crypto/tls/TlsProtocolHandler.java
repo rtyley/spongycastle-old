@@ -59,45 +59,6 @@ public class TlsProtocolHandler
     private static final short CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED = 11;
     private static final short CS_DONE = 12;
 
-    /*
-     * AlertDescription enum (255)
-     */
-    // RFC 2246
-    protected static final short AP_close_notify = 0;
-    protected static final short AP_unexpected_message = 10;
-    protected static final short AP_bad_record_mac = 20;
-    protected static final short AP_decryption_failed = 21;
-    protected static final short AP_record_overflow = 22;
-    protected static final short AP_decompression_failure = 30;
-    protected static final short AP_handshake_failure = 40;
-    /* 41 is not defined, for historical reasons */
-    protected static final short AP_bad_certificate = 42;
-    protected static final short AP_unsupported_certificate = 43;
-    protected static final short AP_certificate_revoked = 44;
-    protected static final short AP_certificate_expired = 45;
-    protected static final short AP_certificate_unknown = 46;
-    protected static final short AP_illegal_parameter = 47;
-    protected static final short AP_unknown_ca = 48;
-    protected static final short AP_access_denied = 49;
-    protected static final short AP_decode_error = 50;
-    protected static final short AP_decrypt_error = 51;
-    protected static final short AP_export_restriction = 60;
-    protected static final short AP_protocol_version = 70;
-    protected static final short AP_insufficient_security = 71;
-    protected static final short AP_internal_error = 80;
-    protected static final short AP_user_canceled = 90;
-    protected static final short AP_no_renegotiation = 100;
-
-    // RFC 3546
-    protected static final short AP_unsupported_extension = 110;
-    protected static final short AP_certificate_unobtainable = 111;
-    protected static final short AP_unrecognized_name = 112;
-    protected static final short AP_bad_certificate_status_response = 113;
-    protected static final short AP_bad_certificate_hash_value = 114;
-
-    // RFC 4279
-    protected static final short AP_unknown_psk_identity = 115;
-
     private static final byte[] emptybuf = new byte[0];
 
     private static final String TLS_ERROR_MESSAGE = "Internal TLS error, this could be an attack";
@@ -187,7 +148,7 @@ public class TlsProtocolHandler
             case RL_APPLICATION_DATA:
                 if (!appDataReady)
                 {
-                    this.failWithError(AlertLevel.fatal, AP_unexpected_message);
+                    this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
                 }
                 applicationDataQueue.addData(buf, offset, len);
                 processApplicationData();
@@ -281,7 +242,7 @@ public class TlsProtocolHandler
                         break;
                     }
                     default:
-                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
                 }
 
                 connection_state = CS_SERVER_CERTIFICATE_RECEIVED;
@@ -315,7 +276,7 @@ public class TlsProtocolHandler
                             /*
                              * Wrong checksum in the finished message.
                              */
-                            this.failWithError(AlertLevel.fatal, AP_handshake_failure);
+                            this.failWithError(AlertLevel.fatal, AlertDescription.handshake_failure);
                         }
 
                         connection_state = CS_DONE;
@@ -326,7 +287,7 @@ public class TlsProtocolHandler
                         this.appDataReady = true;
                         break;
                     default:
-                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
                 }
                 break;
             case HP_SERVER_HELLO:
@@ -347,8 +308,7 @@ public class TlsProtocolHandler
                         byte[] sessionID = TlsUtils.readOpaque8(is);
                         if (sessionID.length > 32)
                         {
-                            this.failWithError(AlertLevel.fatal,
-                                TlsProtocolHandler.AP_illegal_parameter);
+                            this.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
                         }
 
                         this.tlsClient.notifySessionID(sessionID);
@@ -361,8 +321,7 @@ public class TlsProtocolHandler
                         if (!arrayContains(offeredCipherSuites, selectedCipherSuite)
                             || selectedCipherSuite == CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
                         {
-                            this.failWithError(AlertLevel.fatal,
-                                TlsProtocolHandler.AP_illegal_parameter);
+                            this.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
                         }
 
                         this.tlsClient.notifySelectedCipherSuite(selectedCipherSuite);
@@ -374,8 +333,7 @@ public class TlsProtocolHandler
                         short compressionMethod = TlsUtils.readUint8(is);
                         if (compressionMethod != 0)
                         {
-                            this.failWithError(AlertLevel.fatal,
-                                TlsProtocolHandler.AP_illegal_parameter);
+                            this.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
                         }
 
                         /*
@@ -434,7 +392,8 @@ public class TlsProtocolHandler
                                      * the extended server hello that they did not request
                                      * in the associated (extended) client hello.
                                      */
-                                    this.failWithError(AlertLevel.fatal, AP_unsupported_extension);
+                                    this.failWithError(AlertLevel.fatal,
+                                        AlertDescription.unsupported_extension);
                                 }
 
                                 if (serverExtensions.containsKey(extType))
@@ -446,7 +405,8 @@ public class TlsProtocolHandler
                                      * the extensions may appear in any order. There MUST
                                      * NOT be more than one extension of the same type.
                                      */
-                                    this.failWithError(AlertLevel.fatal, AP_illegal_parameter);
+                                    this.failWithError(AlertLevel.fatal,
+                                        AlertDescription.illegal_parameter);
                                 }
 
                                 serverExtensions.put(extType, extValue);
@@ -476,7 +436,8 @@ public class TlsProtocolHandler
                                 if (!Arrays.constantTimeAreEqual(renegExtValue,
                                     createRenegotiationInfo(emptybuf)))
                                 {
-                                    this.failWithError(AlertLevel.fatal, AP_handshake_failure);
+                                    this.failWithError(AlertLevel.fatal,
+                                        AlertDescription.handshake_failure);
                                 }
                             }
 
@@ -493,7 +454,7 @@ public class TlsProtocolHandler
                         connection_state = CS_SERVER_HELLO_RECEIVED;
                         break;
                     default:
-                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
                 }
                 break;
             case HP_SERVER_HELLO_DONE:
@@ -585,7 +546,7 @@ public class TlsProtocolHandler
                         this.connection_state = CS_CLIENT_FINISHED_SEND;
                         break;
                     default:
-                        this.failWithError(AlertLevel.fatal, AP_handshake_failure);
+                        this.failWithError(AlertLevel.fatal, AlertDescription.handshake_failure);
                 }
                 break;
             case HP_SERVER_KEY_EXCHANGE:
@@ -607,7 +568,7 @@ public class TlsProtocolHandler
                         break;
 
                     default:
-                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
                 }
 
                 this.connection_state = CS_SERVER_KEY_EXCHANGE_RECEIVED;
@@ -652,7 +613,7 @@ public class TlsProtocolHandler
                         break;
                     }
                     default:
-                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
                 }
 
                 this.connection_state = CS_CERTIFICATE_REQUEST_RECEIVED;
@@ -669,7 +630,7 @@ public class TlsProtocolHandler
                 if (connection_state == CS_DONE)
                 {
                     // Renegotiation not supported yet
-                    sendAlert(AlertLevel.warning, AP_no_renegotiation);
+                    sendAlert(AlertLevel.warning, AlertDescription.no_renegotiation);
                 }
                 break;
             case HP_CLIENT_KEY_EXCHANGE:
@@ -677,7 +638,7 @@ public class TlsProtocolHandler
             case HP_CLIENT_HELLO:
             default:
                 // We do not support this!
-                this.failWithError(AlertLevel.fatal, AP_unexpected_message);
+                this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
                 break;
         }
     }
@@ -729,12 +690,12 @@ public class TlsProtocolHandler
                 /*
                  * This is just a warning.
                  */
-                if (description == AP_close_notify)
+                if (description == AlertDescription.close_notify)
                 {
                     /*
                      * Close notify
                      */
-                    this.failWithError(AlertLevel.warning, AP_close_notify);
+                    this.failWithError(AlertLevel.warning, AlertDescription.close_notify);
                 }
                 /*
                  * If it is just a warning, we continue.
@@ -764,7 +725,7 @@ public class TlsProtocolHandler
                 /*
                  * This should never happen.
                  */
-                this.failWithError(AlertLevel.fatal, AP_unexpected_message);
+                this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
             }
 
             /*
@@ -772,7 +733,7 @@ public class TlsProtocolHandler
              */
             if (this.connection_state != CS_CLIENT_FINISHED_SEND)
             {
-                this.failWithError(AlertLevel.fatal, AP_handshake_failure);
+                this.failWithError(AlertLevel.fatal, AlertDescription.handshake_failure);
             }
 
             rs.serverClientSpecReceived();
@@ -1006,7 +967,7 @@ public class TlsProtocolHandler
             {
                 if (!this.closed)
                 {
-                    this.failWithError(AlertLevel.fatal, AP_internal_error);
+                    this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
                 }
                 throw e;
             }
@@ -1014,7 +975,7 @@ public class TlsProtocolHandler
             {
                 if (!this.closed)
                 {
-                    this.failWithError(AlertLevel.fatal, AP_internal_error);
+                    this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
                 }
                 throw e;
             }
@@ -1069,7 +1030,7 @@ public class TlsProtocolHandler
             {
                 if (!closed)
                 {
-                    this.failWithError(AlertLevel.fatal, AP_internal_error);
+                    this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
                 }
                 throw e;
             }
@@ -1077,7 +1038,7 @@ public class TlsProtocolHandler
             {
                 if (!closed)
                 {
-                    this.failWithError(AlertLevel.fatal, AP_internal_error);
+                    this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
                 }
                 throw e;
             }
@@ -1179,7 +1140,7 @@ public class TlsProtocolHandler
     {
         if (is.available() > 0)
         {
-            this.failWithError(AlertLevel.fatal, AP_decode_error);
+            this.failWithError(AlertLevel.fatal, AlertDescription.decode_error);
         }
     }
 

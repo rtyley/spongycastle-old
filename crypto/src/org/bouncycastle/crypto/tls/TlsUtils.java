@@ -204,8 +204,7 @@ public class TlsUtils
     {
         if ((readVersion[0] != 3) || (readVersion[1] != 1))
         {
-            handler.failWithError(AlertLevel.fatal,
-                TlsProtocolHandler.AP_protocol_version);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.protocol_version);
         }
     }
 
@@ -216,8 +215,7 @@ public class TlsUtils
         int i2 = is.read();
         if ((i1 != 3) || (i2 != 1))
         {
-            handler.failWithError(AlertLevel.fatal,
-                TlsProtocolHandler.AP_protocol_version);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.protocol_version);
         }
     }
 
