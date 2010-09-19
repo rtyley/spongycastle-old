@@ -23,22 +23,6 @@ public class TlsProtocolHandler
     private static final Integer EXT_RenegotiationInfo = Integer.valueOf(ExtensionType.renegotiation_info);
 
     /*
-     * hello_request(0), client_hello(1), server_hello(2), certificate(11),
-     * server_key_exchange (12), certificate_request(13), server_hello_done(14),
-     * certificate_verify(15), client_key_exchange(16), finished(20), (255)
-     */
-    private static final short HP_HELLO_REQUEST = 0;
-    private static final short HP_CLIENT_HELLO = 1;
-    private static final short HP_SERVER_HELLO = 2;
-    private static final short HP_CERTIFICATE = 11;
-    private static final short HP_SERVER_KEY_EXCHANGE = 12;
-    private static final short HP_CERTIFICATE_REQUEST = 13;
-    private static final short HP_SERVER_HELLO_DONE = 14;
-    private static final short HP_CERTIFICATE_VERIFY = 15;
-    private static final short HP_CLIENT_KEY_EXCHANGE = 16;
-    private static final short HP_FINISHED = 20;
-
-    /*
      * Our Connection states
      */
     private static final short CS_CLIENT_HELLO_SEND = 1;
@@ -194,8 +178,8 @@ public class TlsProtocolHandler
                      */
                     switch (type)
                     {
-                        case HP_HELLO_REQUEST:
-                        case HP_FINISHED:
+                        case HandshakeType.hello_request:
+                        case HandshakeType.finished:
                             break;
                         default:
                             rs.updateHandshakeData(beginning, 0, 4);
@@ -220,7 +204,7 @@ public class TlsProtocolHandler
 
         switch (type)
         {
-            case HP_CERTIFICATE:
+            case HandshakeType.certificate:
             {
                 switch (connection_state)
                 {
@@ -243,7 +227,7 @@ public class TlsProtocolHandler
                 connection_state = CS_SERVER_CERTIFICATE_RECEIVED;
                 break;
             }
-            case HP_FINISHED:
+            case HandshakeType.finished:
                 switch (connection_state)
                 {
                     case CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED:
@@ -285,7 +269,7 @@ public class TlsProtocolHandler
                         this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
                 }
                 break;
-            case HP_SERVER_HELLO:
+            case HandshakeType.server_hello:
                 switch (connection_state)
                 {
                     case CS_CLIENT_HELLO_SEND:
@@ -452,7 +436,7 @@ public class TlsProtocolHandler
                         this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
                 }
                 break;
-            case HP_SERVER_HELLO_DONE:
+            case HandshakeType.server_hello_done:
                 switch (connection_state)
                 {
                     case CS_SERVER_CERTIFICATE_RECEIVED:
@@ -533,7 +517,7 @@ public class TlsProtocolHandler
                             "client finished", rs.getCurrentHash(), 12);
 
                         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        TlsUtils.writeUint8(HP_FINISHED, bos);
+                        TlsUtils.writeUint8(HandshakeType.finished, bos);
                         TlsUtils.writeOpaque24(clientVerifyData, bos);
                         byte[] message = bos.toByteArray();
 
@@ -545,7 +529,7 @@ public class TlsProtocolHandler
                         this.failWithError(AlertLevel.fatal, AlertDescription.handshake_failure);
                 }
                 break;
-            case HP_SERVER_KEY_EXCHANGE:
+            case HandshakeType.server_key_exchange:
             {
                 switch (connection_state)
                 {
@@ -570,7 +554,7 @@ public class TlsProtocolHandler
                 this.connection_state = CS_SERVER_KEY_EXCHANGE_RECEIVED;
                 break;
             }
-            case HP_CERTIFICATE_REQUEST:
+            case HandshakeType.certificate_request:
             {
                 switch (connection_state)
                 {
@@ -615,7 +599,7 @@ public class TlsProtocolHandler
                 this.connection_state = CS_CERTIFICATE_REQUEST_RECEIVED;
                 break;
             }
-            case HP_HELLO_REQUEST:
+            case HandshakeType.hello_request:
                 /*
                  * RFC 2246 7.4.1.1 Hello request This message will be ignored by the
                  * client if the client is currently negotiating a session. This message
@@ -629,9 +613,9 @@ public class TlsProtocolHandler
                     sendAlert(AlertLevel.warning, AlertDescription.no_renegotiation);
                 }
                 break;
-            case HP_CLIENT_KEY_EXCHANGE:
-            case HP_CERTIFICATE_VERIFY:
-            case HP_CLIENT_HELLO:
+            case HandshakeType.client_key_exchange:
+            case HandshakeType.certificate_verify:
+            case HandshakeType.client_hello:
             default:
                 // We do not support this!
                 this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
@@ -741,7 +725,7 @@ public class TlsProtocolHandler
     private void sendClientCertificate(Certificate clientCert) throws IOException
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        TlsUtils.writeUint8(HP_CERTIFICATE, bos);
+        TlsUtils.writeUint8(HandshakeType.certificate, bos);
         clientCert.encode(bos);
         byte[] message = bos.toByteArray();
 
@@ -751,7 +735,7 @@ public class TlsProtocolHandler
     private void sendClientKeyExchange() throws IOException
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        TlsUtils.writeUint8(HP_CLIENT_KEY_EXCHANGE, bos);
+        TlsUtils.writeUint8(HandshakeType.client_key_exchange, bos);
         this.keyExchange.generateClientKeyExchange(bos);
         byte[] message = bos.toByteArray();
 
@@ -765,7 +749,7 @@ public class TlsProtocolHandler
          * cert See RFC 2246 sections 4.7, 7.4.3 and 7.4.8
          */
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        TlsUtils.writeUint8(HP_CERTIFICATE_VERIFY, bos);
+        TlsUtils.writeUint8(HandshakeType.certificate_verify, bos);
         TlsUtils.writeUint24(data.length + 2, bos);
         TlsUtils.writeOpaque16(data, bos);
         byte[] message = bos.toByteArray();
@@ -900,7 +884,7 @@ public class TlsProtocolHandler
         }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        TlsUtils.writeUint8(HP_CLIENT_HELLO, bos);
+        TlsUtils.writeUint8(HandshakeType.client_hello, bos);
         TlsUtils.writeUint24(os.size(), bos);
         bos.write(os.toByteArray());
         byte[] message = bos.toByteArray();
