@@ -120,6 +120,11 @@ class DefaultTlsClient implements TlsClient
         return null;
     }
 
+    public short[] getCompressionMethods()
+    {
+        return new short[] { CompressionMethod.NULL };
+    }
+
     public void notifySessionID(byte[] sessionID)
     {
         // Currently ignored 
@@ -128,6 +133,11 @@ class DefaultTlsClient implements TlsClient
     public void notifySelectedCipherSuite(int selectedCipherSuite)
     {
         this.selectedCipherSuite = selectedCipherSuite;
+    }
+
+    public void notifySelectedCompressionMethod(short selectedCompressionMethod)
+    {
+        // TODO Store and use
     }
 
     public void notifySecureRenegotiation(boolean secureRenegotiation) throws IOException

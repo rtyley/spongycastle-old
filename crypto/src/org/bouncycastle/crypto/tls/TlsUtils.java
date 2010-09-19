@@ -113,7 +113,7 @@ public class TlsUtils
         os.write(buf);
     }
 
-    protected static void writeUint8Array(byte[] uints, OutputStream os) throws IOException
+    protected static void writeUint8Array(short[] uints, OutputStream os) throws IOException
     {
         for (int i = 0; i < uints.length; ++i)
         {
@@ -121,7 +121,7 @@ public class TlsUtils
         }
     }
 
-    protected static void writeUint16Array(short[] uints, OutputStream os) throws IOException
+    protected static void writeUint16Array(int[] uints, OutputStream os) throws IOException
     {
         for (int i = 0; i < uints.length; ++i)
         {
