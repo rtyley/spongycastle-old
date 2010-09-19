@@ -165,6 +165,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 
     byte[] externalizeKey(ECPublicKeyParameters keyParameters) throws IOException
     {
+        // TODO Potentially would like to be able to get the compressed encoding
         ECPoint ecPoint = keyParameters.getQ();
         return ecPoint.getEncoded();
     }
