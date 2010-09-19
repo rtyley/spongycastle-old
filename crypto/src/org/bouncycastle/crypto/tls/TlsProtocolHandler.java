@@ -637,6 +637,12 @@ public class TlsProtocolHandler
 
                         assertEmpty(is);
 
+                        short[] certificateTypes = new short[types.length];
+                        for (int i = 0; i < types.length; ++i)
+                        {
+                            certificateTypes[i] = (short)(types[i] & 0xff);
+                        }
+
                         Vector authorityDNs = new Vector();
 
                         ByteArrayInputStream bis = new ByteArrayInputStream(authorities);
@@ -646,7 +652,7 @@ public class TlsProtocolHandler
                             authorityDNs.add(X509Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
                         }
 
-                        this.tlsClient.processServerCertificateRequest(types, authorityDNs);
+                        this.tlsClient.processServerCertificateRequest(certificateTypes, authorityDNs);
 
                         break;
                     }
