@@ -60,13 +60,6 @@ public class TlsProtocolHandler
     private static final short CS_DONE = 12;
 
     /*
-     * AlertLevel enum (255)
-     */
-    // RFC 2246
-    protected static final short AL_warning = 1;
-    protected static final short AL_fatal = 2;
-
-    /*
      * AlertDescription enum (255)
      */
     // RFC 2246
@@ -194,7 +187,7 @@ public class TlsProtocolHandler
             case RL_APPLICATION_DATA:
                 if (!appDataReady)
                 {
-                    this.failWithError(AL_fatal, AP_unexpected_message);
+                    this.failWithError(AlertLevel.fatal, AP_unexpected_message);
                 }
                 applicationDataQueue.addData(buf, offset, len);
                 processApplicationData();
@@ -238,10 +231,10 @@ public class TlsProtocolHandler
                     handshakeQueue.removeData(len + 4);
 
                     /*
-                     * RFC 2246 7.4.9. The value handshake_messages includes all
-                     * handshake messages starting at client hello up to, but not
-                     * including, this finished message. [..] Note: [Also,] Hello Request
-                     * messages are omitted from handshake hashes.
+                     * RFC 2246 7.4.9. The value handshake_messages includes all handshake
+                     * messages starting at client hello up to, but not including, this
+                     * finished message. [..] Note: [Also,] Hello Request messages are
+                     * omitted from handshake hashes.
                      */
                     switch (type)
                     {
@@ -288,7 +281,7 @@ public class TlsProtocolHandler
                         break;
                     }
                     default:
-                        this.failWithError(AL_fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
                 }
 
                 connection_state = CS_SERVER_CERTIFICATE_RECEIVED;
@@ -322,7 +315,7 @@ public class TlsProtocolHandler
                             /*
                              * Wrong checksum in the finished message.
                              */
-                            this.failWithError(AL_fatal, AP_handshake_failure);
+                            this.failWithError(AlertLevel.fatal, AP_handshake_failure);
                         }
 
                         connection_state = CS_DONE;
@@ -333,7 +326,7 @@ public class TlsProtocolHandler
                         this.appDataReady = true;
                         break;
                     default:
-                        this.failWithError(AL_fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
                 }
                 break;
             case HP_SERVER_HELLO:
@@ -354,7 +347,7 @@ public class TlsProtocolHandler
                         byte[] sessionID = TlsUtils.readOpaque8(is);
                         if (sessionID.length > 32)
                         {
-                            this.failWithError(TlsProtocolHandler.AL_fatal,
+                            this.failWithError(AlertLevel.fatal,
                                 TlsProtocolHandler.AP_illegal_parameter);
                         }
 
@@ -368,7 +361,7 @@ public class TlsProtocolHandler
                         if (!arrayContains(offeredCipherSuites, selectedCipherSuite)
                             || selectedCipherSuite == CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
                         {
-                            this.failWithError(TlsProtocolHandler.AL_fatal,
+                            this.failWithError(AlertLevel.fatal,
                                 TlsProtocolHandler.AP_illegal_parameter);
                         }
 
@@ -381,7 +374,7 @@ public class TlsProtocolHandler
                         short compressionMethod = TlsUtils.readUint8(is);
                         if (compressionMethod != 0)
                         {
-                            this.failWithError(TlsProtocolHandler.AL_fatal,
+                            this.failWithError(AlertLevel.fatal,
                                 TlsProtocolHandler.AP_illegal_parameter);
                         }
 
@@ -389,19 +382,17 @@ public class TlsProtocolHandler
                          * RFC3546 2.2 The extended server hello message format MAY be
                          * sent in place of the server hello message when the client has
                          * requested extended functionality via the extended client hello
-                         * message specified in Section 2.1.
-                         * ...
-                         * Note that the extended server hello message is only sent in response
-                         * to an extended client hello message.  This prevents the possibility
-                         * that the extended server hello message could "break" existing TLS 1.0
+                         * message specified in Section 2.1. ... Note that the extended
+                         * server hello message is only sent in response to an extended
+                         * client hello message. This prevents the possibility that the
+                         * extended server hello message could "break" existing TLS 1.0
                          * clients.
                          */
 
                         /*
-                         * TODO RFC 3546 2.3 
-                         * If [...] the older session is resumed, then the server MUST ignore
-                         * extensions appearing in the client hello, and send a server hello
-                         * containing no extensions.
+                         * TODO RFC 3546 2.3 If [...] the older session is resumed, then
+                         * the server MUST ignore extensions appearing in the client
+                         * hello, and send a server hello containing no extensions.
                          */
 
                         // Integer -> byte[]
@@ -419,41 +410,43 @@ public class TlsProtocolHandler
                                 byte[] extValue = TlsUtils.readOpaque16(ext);
 
                                 /*
-                                 * RFC 5746
-                                 * Note that sending a "renegotiation_info" extension in response to a
-                                 * ClientHello containing only the SCSV is an explicit exception to the
-                                 * prohibition in RFC 5246, Section 7.4.1.4, on the server sending
-                                 * unsolicited extensions and is only allowed because the client is
-                                 * signaling its willingness to receive the extension via the
-                                 * TLS_EMPTY_RENEGOTIATION_INFO_SCSV SCSV.  TLS implementations MUST
-                                 * continue to comply with Section 7.4.1.4 for all other extensions.
+                                 * RFC 5746 Note that sending a "renegotiation_info"
+                                 * extension in response to a ClientHello containing only
+                                 * the SCSV is an explicit exception to the prohibition in
+                                 * RFC 5246, Section 7.4.1.4, on the server sending
+                                 * unsolicited extensions and is only allowed because the
+                                 * client is signaling its willingness to receive the
+                                 * extension via the TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+                                 * SCSV. TLS implementations MUST continue to comply with
+                                 * Section 7.4.1.4 for all other extensions.
                                  */
 
                                 if (!extType.equals(EXT_RenegotiationInfo)
                                     && clientExtensions.get(extType) == null)
                                 {
                                     /*
-                                     * RFC 3546 2.3
-                                     * Note that for all extension types (including those defined in
-                                     * future), the extension type MUST NOT appear in the extended server
-                                     * hello unless the same extension type appeared in the corresponding
-                                     * client hello.  Thus clients MUST abort the handshake if they receive
-                                     * an extension type in the extended server hello that they did not
-                                     * request in the associated (extended) client hello.
+                                     * RFC 3546 2.3 Note that for all extension types
+                                     * (including those defined in future), the extension
+                                     * type MUST NOT appear in the extended server hello
+                                     * unless the same extension type appeared in the
+                                     * corresponding client hello. Thus clients MUST abort
+                                     * the handshake if they receive an extension type in
+                                     * the extended server hello that they did not request
+                                     * in the associated (extended) client hello.
                                      */
-                                    this.failWithError(AL_fatal, AP_unsupported_extension);
+                                    this.failWithError(AlertLevel.fatal, AP_unsupported_extension);
                                 }
 
                                 if (serverExtensions.containsKey(extType))
                                 {
                                     /*
-                                     * RFC 3546 2.3 
-                                     * Also note that when multiple extensions of different types are
-                                     * present in the extended client hello or the extended server hello,
-                                     * the extensions may appear in any order.  There MUST NOT be more than
-                                     * one extension of the same type.
+                                     * RFC 3546 2.3 Also note that when multiple
+                                     * extensions of different types are present in the
+                                     * extended client hello or the extended server hello,
+                                     * the extensions may appear in any order. There MUST
+                                     * NOT be more than one extension of the same type.
                                      */
-                                    this.failWithError(AL_fatal, AP_illegal_parameter);
+                                    this.failWithError(AlertLevel.fatal, AP_illegal_parameter);
                                 }
 
                                 serverExtensions.put(extType, extValue);
@@ -463,26 +456,27 @@ public class TlsProtocolHandler
                         assertEmpty(is);
 
                         /*
-                         * RFC 5746 3.4. When a ServerHello is received, the client MUST check if it
-                         * includes the "renegotiation_info" extension:
+                         * RFC 5746 3.4. When a ServerHello is received, the client MUST
+                         * check if it includes the "renegotiation_info" extension:
                          */
                         {
                             boolean secure_negotiation = serverExtensions.containsKey(EXT_RenegotiationInfo);
 
                             /*
-                             * If the extension is present, set the secure_renegotiation flag
-                             * to TRUE.  The client MUST then verify that the length of the
-                             * "renegotiated_connection" field is zero, and if it is not, MUST
-                             * abort the handshake (by sending a fatal handshake_failure
-                             * alert).                                
+                             * If the extension is present, set the secure_renegotiation
+                             * flag to TRUE. The client MUST then verify that the length
+                             * of the "renegotiated_connection" field is zero, and if it
+                             * is not, MUST abort the handshake (by sending a fatal
+                             * handshake_failure alert).
                              */
                             if (secure_negotiation)
                             {
                                 byte[] renegExtValue = (byte[])serverExtensions.get(EXT_RenegotiationInfo);
 
-                                if (!Arrays.constantTimeAreEqual(renegExtValue, createRenegotiationInfo(emptybuf)))
+                                if (!Arrays.constantTimeAreEqual(renegExtValue,
+                                    createRenegotiationInfo(emptybuf)))
                                 {
-                                    this.failWithError(AL_fatal, AP_handshake_failure);
+                                    this.failWithError(AlertLevel.fatal, AP_handshake_failure);
                                 }
                             }
 
@@ -499,7 +493,7 @@ public class TlsProtocolHandler
                         connection_state = CS_SERVER_HELLO_RECEIVED;
                         break;
                     default:
-                        this.failWithError(AL_fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
                 }
                 break;
             case HP_SERVER_HELLO_DONE:
@@ -591,7 +585,7 @@ public class TlsProtocolHandler
                         this.connection_state = CS_CLIENT_FINISHED_SEND;
                         break;
                     default:
-                        this.failWithError(AL_fatal, AP_handshake_failure);
+                        this.failWithError(AlertLevel.fatal, AP_handshake_failure);
                 }
                 break;
             case HP_SERVER_KEY_EXCHANGE:
@@ -613,7 +607,7 @@ public class TlsProtocolHandler
                         break;
 
                     default:
-                        this.failWithError(AL_fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
                 }
 
                 this.connection_state = CS_SERVER_KEY_EXCHANGE_RECEIVED;
@@ -652,12 +646,13 @@ public class TlsProtocolHandler
                             authorityDNs.add(X509Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
                         }
 
-                        this.tlsClient.processServerCertificateRequest(certificateTypes, authorityDNs);
+                        this.tlsClient.processServerCertificateRequest(certificateTypes,
+                            authorityDNs);
 
                         break;
                     }
                     default:
-                        this.failWithError(AL_fatal, AP_unexpected_message);
+                        this.failWithError(AlertLevel.fatal, AP_unexpected_message);
                 }
 
                 this.connection_state = CS_CERTIFICATE_REQUEST_RECEIVED;
@@ -665,16 +660,16 @@ public class TlsProtocolHandler
             }
             case HP_HELLO_REQUEST:
                 /*
-                 * RFC 2246 7.4.1.1 Hello request
-                 * This message will be ignored by the client if the client is currently
-                 * negotiating a session. This message may be ignored by the client if it
-                 * does not wish to renegotiate a session, or the client may, if it wishes,
-                 * respond with a no_renegotiation alert.
+                 * RFC 2246 7.4.1.1 Hello request This message will be ignored by the
+                 * client if the client is currently negotiating a session. This message
+                 * may be ignored by the client if it does not wish to renegotiate a
+                 * session, or the client may, if it wishes, respond with a
+                 * no_renegotiation alert.
                  */
                 if (connection_state == CS_DONE)
                 {
                     // Renegotiation not supported yet
-                    sendAlert(AL_warning, AP_no_renegotiation);
+                    sendAlert(AlertLevel.warning, AP_no_renegotiation);
                 }
                 break;
             case HP_CLIENT_KEY_EXCHANGE:
@@ -682,7 +677,7 @@ public class TlsProtocolHandler
             case HP_CLIENT_HELLO:
             default:
                 // We do not support this!
-                this.failWithError(AL_fatal, AP_unexpected_message);
+                this.failWithError(AlertLevel.fatal, AP_unexpected_message);
                 break;
         }
     }
@@ -709,7 +704,7 @@ public class TlsProtocolHandler
             alertQueue.removeData(2);
             short level = tmp[0];
             short description = tmp[1];
-            if (level == AL_fatal)
+            if (level == AlertLevel.fatal)
             {
                 /*
                  * This is a fatal error.
@@ -739,7 +734,7 @@ public class TlsProtocolHandler
                     /*
                      * Close notify
                      */
-                    this.failWithError(AL_warning, AP_close_notify);
+                    this.failWithError(AlertLevel.warning, AP_close_notify);
                 }
                 /*
                  * If it is just a warning, we continue.
@@ -769,7 +764,7 @@ public class TlsProtocolHandler
                 /*
                  * This should never happen.
                  */
-                this.failWithError(AL_fatal, AP_unexpected_message);
+                this.failWithError(AlertLevel.fatal, AP_unexpected_message);
             }
 
             /*
@@ -777,7 +772,7 @@ public class TlsProtocolHandler
              */
             if (this.connection_state != CS_CLIENT_FINISHED_SEND)
             {
-                this.failWithError(AL_fatal, AP_handshake_failure);
+                this.failWithError(AlertLevel.fatal, AP_handshake_failure);
             }
 
             rs.serverClientSpecReceived();
@@ -899,14 +894,12 @@ public class TlsProtocolHandler
         // Cipher Suites (and SCSV)
         {
             /*
-             * RFC 5746 3.4.
-             * The client MUST include either an empty "renegotiation_info"
-             * extension, or the TLS_EMPTY_RENEGOTIATION_INFO_SCSV signaling
-             * cipher suite value in the ClientHello.  Including both is NOT
-             * RECOMMENDED.
+             * RFC 5746 3.4. The client MUST include either an empty "renegotiation_info"
+             * extension, or the TLS_EMPTY_RENEGOTIATION_INFO_SCSV signaling cipher suite
+             * value in the ClientHello. Including both is NOT RECOMMENDED.
              */
             boolean noRenegExt = clientExtensions == null
-                ||  clientExtensions.get(EXT_RenegotiationInfo) == null;
+                || clientExtensions.get(EXT_RenegotiationInfo) == null;
 
             int count = offeredCipherSuites.length;
             if (noRenegExt)
@@ -1013,7 +1006,7 @@ public class TlsProtocolHandler
             {
                 if (!this.closed)
                 {
-                    this.failWithError(AL_fatal, AP_internal_error);
+                    this.failWithError(AlertLevel.fatal, AP_internal_error);
                 }
                 throw e;
             }
@@ -1021,7 +1014,7 @@ public class TlsProtocolHandler
             {
                 if (!this.closed)
                 {
-                    this.failWithError(AL_fatal, AP_internal_error);
+                    this.failWithError(AlertLevel.fatal, AP_internal_error);
                 }
                 throw e;
             }
@@ -1076,7 +1069,7 @@ public class TlsProtocolHandler
             {
                 if (!closed)
                 {
-                    this.failWithError(AL_fatal, AP_internal_error);
+                    this.failWithError(AlertLevel.fatal, AP_internal_error);
                 }
                 throw e;
             }
@@ -1084,7 +1077,7 @@ public class TlsProtocolHandler
             {
                 if (!closed)
                 {
-                    this.failWithError(AL_fatal, AP_internal_error);
+                    this.failWithError(AlertLevel.fatal, AP_internal_error);
                 }
                 throw e;
             }
@@ -1118,7 +1111,7 @@ public class TlsProtocolHandler
      * <p/>
      * Can be used for normal closure too.
      * 
-     * @param alertLevel The level of the alert, an be AL_fatal or AL_warning.
+     * @param alertLevel The level of the alert, an be AlertLevel.fatal or AL_warning.
      * @param alertDescription The exact alert message.
      * @throws IOException If alert was fatal.
      */
@@ -1134,7 +1127,7 @@ public class TlsProtocolHandler
              */
             this.closed = true;
 
-            if (alertLevel == AL_fatal)
+            if (alertLevel == AlertLevel.fatal)
             {
                 /*
                  * This is a fatal message.
@@ -1143,7 +1136,7 @@ public class TlsProtocolHandler
             }
             sendAlert(alertLevel, alertDescription);
             rs.close();
-            if (alertLevel == AL_fatal)
+            if (alertLevel == AlertLevel.fatal)
             {
                 throw new IOException(TLS_ERROR_MESSAGE);
             }
@@ -1159,7 +1152,7 @@ public class TlsProtocolHandler
         byte[] error = new byte[2];
         error[0] = (byte)alertLevel;
         error[1] = (byte)alertDescription;
-        
+
         rs.writeMessage(RL_ALERT, error, 0, 2);
     }
 
@@ -1186,7 +1179,7 @@ public class TlsProtocolHandler
     {
         if (is.available() > 0)
         {
-            this.failWithError(AL_fatal, AP_decode_error);
+            this.failWithError(AlertLevel.fatal, AP_decode_error);
         }
     }
 
@@ -1207,7 +1200,8 @@ public class TlsProtocolHandler
         return false;
     }
 
-    private static byte[] createRenegotiationInfo(byte[] renegotiated_connection) throws IOException
+    private static byte[] createRenegotiationInfo(byte[] renegotiated_connection)
+        throws IOException
     {
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         TlsUtils.writeOpaque8(renegotiated_connection, buf);

@@ -140,7 +140,7 @@ class DefaultTlsClient implements TlsClient
              * some clients may want to terminate the handshake instead of continuing; see
              * Section 4.1 for discussion.
              */
-//            handler.failWithError(TlsProtocolHandler.AL_fatal,
+//            handler.failWithError(AlertLevel.fatal,
 //                TlsProtocolHandler.AP_handshake_failure);
         }
     }
@@ -202,8 +202,7 @@ class DefaultTlsClient implements TlsClient
                  * suites, so if we now can't produce an implementation, we shouldn't have
                  * offered it!
                  */
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
-                    TlsProtocolHandler.AP_internal_error);
+                handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
                 return null; // Unreachable!
         }
     }
@@ -229,7 +228,7 @@ class DefaultTlsClient implements TlsClient
         }
         catch (CryptoException e)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
+            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
             return null;
         }
     }
@@ -280,8 +279,7 @@ class DefaultTlsClient implements TlsClient
                  * suites, so if we now can't produce an implementation, we shouldn't have
                  * offered it!
                  */
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
-                    TlsProtocolHandler.AP_internal_error);
+                handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
                 return null; // Unreachable!
         }
     }
