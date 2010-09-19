@@ -105,7 +105,7 @@ public class TlsBlockCipher implements TlsCipher
          */
         if (len < minLength)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_decode_error);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.decode_error);
         }
 
         /*
@@ -113,7 +113,7 @@ public class TlsBlockCipher implements TlsCipher
          */
         if (len % blocksize != 0)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_decryption_failed);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.decryption_failed);
         }
 
         /*
@@ -183,7 +183,7 @@ public class TlsBlockCipher implements TlsCipher
          */
         if (decrypterror)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_bad_record_mac);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.bad_record_mac);
         }
 
         byte[] plaintext = new byte[plaintextlength];

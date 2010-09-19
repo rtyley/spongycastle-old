@@ -202,7 +202,7 @@ class DefaultTlsClient implements TlsClient
                  * suites, so if we now can't produce an implementation, we shouldn't have
                  * offered it!
                  */
-                handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
+                handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
                 return null; // Unreachable!
         }
     }
@@ -228,7 +228,7 @@ class DefaultTlsClient implements TlsClient
         }
         catch (CryptoException e)
         {
-            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
+            handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
             return null;
         }
     }
@@ -279,7 +279,7 @@ class DefaultTlsClient implements TlsClient
                  * suites, so if we now can't produce an implementation, we shouldn't have
                  * offered it!
                  */
-                handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
+                handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
                 return null; // Unreachable!
         }
     }
