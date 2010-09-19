@@ -532,7 +532,7 @@ public class TlsProtocolHandler
                          * Send the client key exchange message, depending on the key
                          * exchange we are using in our ciphersuite.
                          */
-                        sendClientKeyExchange(this.keyExchange.generateClientKeyExchange());
+                        sendClientKeyExchange();
 
                         connection_state = CS_CLIENT_KEY_EXCHANGE_SEND;
 
@@ -792,19 +792,11 @@ public class TlsProtocolHandler
         rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
     }
 
-    private void sendClientKeyExchange(byte[] keData) throws IOException
+    private void sendClientKeyExchange() throws IOException
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HP_CLIENT_KEY_EXCHANGE, bos);
-        if (keData == null)
-        {
-            TlsUtils.writeUint24(0, bos);
-        }
-        else
-        {
-            TlsUtils.writeUint24(keData.length + 2, bos);
-            TlsUtils.writeOpaque16(keData, bos);
-        }
+        this.keyExchange.generateClientKeyExchange(bos);
         byte[] message = bos.toByteArray();
 
         rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
