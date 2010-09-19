@@ -22,8 +22,6 @@ public class TlsProtocolHandler
 {
     private static final Integer EXT_RenegotiationInfo = Integer.valueOf(ExtensionType.renegotiation_info);
 
-    private static final int TLS_EMPTY_RENEGOTIATION_INFO_SCSV = 0x00FF;
-
     private static final short RL_CHANGE_CIPHER_SPEC = 20;
     private static final short RL_ALERT = 21;
     private static final short RL_HANDSHAKE = 22;
@@ -368,7 +366,7 @@ public class TlsProtocolHandler
                          */
                         int selectedCipherSuite = TlsUtils.readUint16(is);
                         if (!arrayContains(offeredCipherSuites, selectedCipherSuite)
-                            || selectedCipherSuite == TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
+                            || selectedCipherSuite == CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
                         {
                             this.failWithError(TlsProtocolHandler.AL_fatal,
                                 TlsProtocolHandler.AP_illegal_parameter);
@@ -920,7 +918,7 @@ public class TlsProtocolHandler
 
             if (noRenegExt)
             {
-                TlsUtils.writeUint16(TLS_EMPTY_RENEGOTIATION_INFO_SCSV, os);
+                TlsUtils.writeUint16(CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV, os);
             }
         }
 

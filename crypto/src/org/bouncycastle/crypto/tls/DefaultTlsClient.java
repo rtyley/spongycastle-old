@@ -17,52 +17,6 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 
 class DefaultTlsClient implements TlsClient
 {
-    // TODO Add runtime support for this check?
-    /*
-     * RFC 2246 9. In the absence of an application profile standard specifying otherwise,
-     * a TLS compliant application MUST implement the cipher suite
-     * TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA.
-     */
-    private static final int TLS_RSA_WITH_3DES_EDE_CBC_SHA = 0x000A;
-    private static final int TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA = 0x000D;
-    private static final int TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA = 0x0010;
-    private static final int TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA = 0x0013;
-    private static final int TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA = 0x0016;
-
-    // RFC 3268
-    private static final int TLS_RSA_WITH_AES_128_CBC_SHA = 0x002F;
-    private static final int TLS_DH_DSS_WITH_AES_128_CBC_SHA = 0x0030;
-    private static final int TLS_DH_RSA_WITH_AES_128_CBC_SHA = 0x0031;
-    private static final int TLS_DHE_DSS_WITH_AES_128_CBC_SHA = 0x0032;
-    private static final int TLS_DHE_RSA_WITH_AES_128_CBC_SHA = 0x0033;
-    private static final int TLS_RSA_WITH_AES_256_CBC_SHA = 0x0035;
-    private static final int TLS_DH_DSS_WITH_AES_256_CBC_SHA = 0x0036;
-    private static final int TLS_DH_RSA_WITH_AES_256_CBC_SHA = 0x0037;
-    private static final int TLS_DHE_DSS_WITH_AES_256_CBC_SHA = 0x0038;
-    private static final int TLS_DHE_RSA_WITH_AES_256_CBC_SHA = 0x0039;
-
-    // RFC 4279
-//    private static final int TLS_PSK_WITH_3DES_EDE_CBC_SHA = 0x008B;
-//    private static final int TLS_PSK_WITH_AES_128_CBC_SHA = 0x008C;
-//    private static final int TLS_PSK_WITH_AES_256_CBC_SHA = 0x008D;
-//    private static final int TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA = 0x008F;
-//    private static final int TLS_DHE_PSK_WITH_AES_128_CBC_SHA = 0x0090;
-//    private static final int TLS_DHE_PSK_WITH_AES_256_CBC_SHA = 0x0091;
-//    private static final int TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA = 0x0093;
-//    private static final int TLS_RSA_PSK_WITH_AES_128_CBC_SHA = 0x0094;
-//    private static final int TLS_RSA_PSK_WITH_AES_256_CBC_SHA = 0x0095;
-
-    // RFC 5054
-    private static final int TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA = 0xC01A;
-    private static final int TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA = 0xC01B;
-    private static final int TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA = 0xC01C;
-    private static final int TLS_SRP_SHA_WITH_AES_128_CBC_SHA = 0xC01D;
-    private static final int TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA = 0xC01E;
-    private static final int TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA = 0xC01F;
-    private static final int TLS_SRP_SHA_WITH_AES_256_CBC_SHA = 0xC020;
-    private static final int TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA = 0xC021;
-    private static final int TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA = 0xC022;
-
     private CertificateVerifyer verifyer;
 
     private TlsProtocolHandler handler;
@@ -125,32 +79,32 @@ class DefaultTlsClient implements TlsClient
     public int[] getCipherSuites()
     {
         return new int[] {
-            TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-            TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-            TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-            TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-            TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
-            TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
-            TLS_RSA_WITH_AES_256_CBC_SHA,
-            TLS_RSA_WITH_AES_128_CBC_SHA,
-            TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+            CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+            CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
+            CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+            CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
+            CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
+            CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
+            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+            CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
 
-//            TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-//            TLS_DH_DSS_WITH_AES_256_CBC_SHA,
-//            TLS_DH_RSA_WITH_AES_128_CBC_SHA,
-//            TLS_DH_DSS_WITH_AES_128_CBC_SHA,
-//            TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
-//            TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
+//            CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
+//            CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
+//            CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
+//            CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
+//            CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
+//            CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
 
-//            TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA,
-//            TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA,
-//            TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA,
-//            TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA,
-//            TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA,
-//            TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA,
-//            TLS_SRP_SHA_WITH_AES_256_CBC_SHA,
-//            TLS_SRP_SHA_WITH_AES_128_CBC_SHA,
-//            TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA,
+//            CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA,
+//            CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA,
+//            CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA,
+//            CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA,
+//            CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA,
+//            CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA,
+//            CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA,
+//            CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA,
+//            CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA,
         };
     }
 
@@ -181,11 +135,10 @@ class DefaultTlsClient implements TlsClient
         if (!secureRenegotiation)
         {
             /*
-             * RFC 5746 3.4.
-             * If the extension is not present, the server does not support
-             * secure renegotiation; set secure_renegotiation flag to FALSE.
-             * In this case, some clients may want to terminate the handshake
-             * instead of continuing; see Section 4.1 for discussion.
+             * RFC 5746 3.4. If the extension is not present, the server does not support
+             * secure renegotiation; set secure_renegotiation flag to FALSE. In this case,
+             * some clients may want to terminate the handshake instead of continuing; see
+             * Section 4.1 for discussion.
              */
 //            handler.failWithError(TlsProtocolHandler.AL_fatal,
 //                TlsProtocolHandler.AP_handshake_failure);
@@ -202,44 +155,44 @@ class DefaultTlsClient implements TlsClient
     {
         switch (selectedCipherSuite)
         {
-            case TLS_RSA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_RSA_WITH_AES_128_CBC_SHA:
-            case TLS_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA:
                 return createRSAKeyExchange();
 
-            case TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA:
-            case TLS_DH_DSS_WITH_AES_128_CBC_SHA:
-            case TLS_DH_DSS_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA:
                 return createDHKeyExchange(TlsKeyExchange.KE_DH_DSS);
 
-            case TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_DH_RSA_WITH_AES_128_CBC_SHA:
-            case TLS_DH_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA:
                 return createDHKeyExchange(TlsKeyExchange.KE_DH_RSA);
 
-            case TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
-            case TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
-            case TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
                 return createDHKeyExchange(TlsKeyExchange.KE_DHE_DSS);
 
-            case TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
-            case TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
                 return createDHKeyExchange(TlsKeyExchange.KE_DHE_RSA);
 
-            case TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
-            case TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
                 return createSRPExchange(TlsKeyExchange.KE_SRP);
 
-            case TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
-            case TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
                 return createSRPExchange(TlsKeyExchange.KE_SRP_RSA);
 
-            case TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
-            case TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
-            case TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
                 return createSRPExchange(TlsKeyExchange.KE_SRP_DSS);
 
             default:
@@ -255,7 +208,8 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    public void processServerCertificateRequest(byte[] certificateTypes, Vector certificateAuthorities)
+    public void processServerCertificateRequest(byte[] certificateTypes,
+        Vector certificateAuthorities)
     {
         // TODO There shouldn't be a certificate request for SRP 
 
@@ -289,34 +243,34 @@ class DefaultTlsClient implements TlsClient
     {
         switch (selectedCipherSuite)
         {
-            case TLS_RSA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA:
-            case TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
-            case TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
-            case TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
                 return createDESedeCipher(24, securityParameters);
 
-            case TLS_RSA_WITH_AES_128_CBC_SHA:
-            case TLS_DH_DSS_WITH_AES_128_CBC_SHA:
-            case TLS_DH_RSA_WITH_AES_128_CBC_SHA:
-            case TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
-            case TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
-            case TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
-            case TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
-            case TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
                 return createAESCipher(16, securityParameters);
 
-            case TLS_RSA_WITH_AES_256_CBC_SHA:
-            case TLS_DH_DSS_WITH_AES_256_CBC_SHA:
-            case TLS_DH_RSA_WITH_AES_256_CBC_SHA:
-            case TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
-            case TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-            case TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
-            case TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
-            case TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
                 return createAESCipher(32, securityParameters);
 
             default:
