@@ -190,6 +190,31 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
                 return createDHKeyExchange(TlsKeyExchange.KE_DHE_RSA);
 
+            case CipherSuite.TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA:
+                return createECDHKeyExchange(TlsKeyExchange.KE_ECDH_ECDSA);
+
+            case CipherSuite.TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:
+                return createECDHEKeyExchange(TlsKeyExchange.KE_ECDHE_ECDSA);
+
+            case CipherSuite.TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA:
+                return createECDHKeyExchange(TlsKeyExchange.KE_ECDH_RSA);
+
+            case CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
+                return createECDHEKeyExchange(TlsKeyExchange.KE_ECDHE_RSA);
+
+            case CipherSuite.TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDH_anon_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDH_anon_WITH_AES_256_CBC_SHA:
+                return createECDHKeyExchange(TlsKeyExchange.KE_ECDH_anon);
+
             case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
@@ -257,6 +282,11 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:
+            case CipherSuite.TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
@@ -267,6 +297,11 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
+            case CipherSuite.TLS_ECDH_anon_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
@@ -277,6 +312,11 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
+            case CipherSuite.TLS_ECDH_anon_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
@@ -297,6 +337,16 @@ class DefaultTlsClient implements TlsClient
     private TlsKeyExchange createDHKeyExchange(short keyExchange)
     {
         return new TlsDHKeyExchange(handler, verifyer, keyExchange);
+    }
+
+    private TlsKeyExchange createECDHKeyExchange(short keyExchange)
+    {
+        return new TlsECDHKeyExchange(handler, verifyer, keyExchange, clientCert, clientPrivateKey);
+    }
+
+    private TlsKeyExchange createECDHEKeyExchange(short keyExchange)
+    {
+        return new TlsECDHEKeyExchange(handler, verifyer, keyExchange, clientCert, clientPrivateKey);
     }
 
     private TlsKeyExchange createRSAKeyExchange()
