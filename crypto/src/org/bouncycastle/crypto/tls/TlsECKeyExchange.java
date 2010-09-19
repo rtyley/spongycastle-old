@@ -36,14 +36,14 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 
     protected AsymmetricKeyParameter serverPublicKey;
 
-    protected  AsymmetricCipherKeyPair clientEphemeralKeyPair;
+    protected AsymmetricCipherKeyPair clientEphemeralKeyPair;
     protected ECPublicKeyParameters serverEphemeralPublicKey;
-    
+
     protected Certificate clientCert;
     protected AsymmetricKeyParameter clientPrivateKey = null;
 
     TlsECKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange,
-        // TODO Replace with an interface e.g. TlsClientAuth
+    // TODO Replace with an interface e.g. TlsClientAuth
         Certificate clientCert, AsymmetricKeyParameter clientPrivateKey)
     {
         switch (keyExchange)
@@ -53,7 +53,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 this.tlsSigner = new TlsRSASigner();
                 break;
             case KE_ECDH_ECDSA:
-            case KE_ECDHE_ECDSA: 
+            case KE_ECDHE_ECDSA:
                 this.tlsSigner = new TlsECDSASigner();
                 break;
             case KE_ECDH_anon:
@@ -72,7 +72,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
     public void processServerCertificate(Certificate serverCertificate) throws IOException
@@ -86,14 +86,13 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         }
         catch (RuntimeException e)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
-                TlsProtocolHandler.AP_unsupported_certificate);
+            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unsupported_certificate);
         }
 
         // Sanity check the PublicKeyFactory
         if (this.serverPublicKey.isPrivate())
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
+            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
         }
 
         // TODO 
@@ -106,11 +105,11 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         // TODO Should the 'instanceof' tests be replaces with stricter checks on keyInfo.getAlgorithmId()?
 
         switch (this.keyExchange)
-        {    
+        {
             case KE_ECDH_ECDSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    handler.failWithError(AlertLevel.fatal,
                         TlsProtocolHandler.AP_certificate_unknown);
                 }
                 // TODO The algorithm used to sign the certificate should be DSS.
@@ -119,7 +118,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
             case KE_ECDHE_ECDSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    handler.failWithError(AlertLevel.fatal,
                         TlsProtocolHandler.AP_certificate_unknown);
                 }
                 // TODO The algorithm used to sign the certificate should be RSA.
@@ -128,7 +127,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
             case KE_ECDH_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    handler.failWithError(AlertLevel.fatal,
                         TlsProtocolHandler.AP_certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
@@ -136,7 +135,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
             case KE_ECDHE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    handler.failWithError(AlertLevel.fatal,
                         TlsProtocolHandler.AP_certificate_unknown);
                 }
                 break;
@@ -145,7 +144,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 // todo 
                 break;
             default:
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                handler.failWithError(AlertLevel.fatal,
                     TlsProtocolHandler.AP_unsupported_certificate);
         }
 
@@ -154,7 +153,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
          */
         if (!this.verifyer.isValid(serverCertificate.getCerts()))
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_user_canceled);
+            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_user_canceled);
         }
     }
 
@@ -171,8 +170,8 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 
     byte[] externalizeKey(ECPublicKeyParameters keyParameters) throws IOException
     {
-          ECPoint ecPoint = keyParameters.getQ();
-          return ecPoint.getEncoded();
+        ECPoint ecPoint = keyParameters.getQ();
+        return ecPoint.getEncoded();
     }
 
     byte[] calculateECDHEPreMasterSecret(ECPublicKeyParameters publicKey,
@@ -196,7 +195,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 int bits = ku.getBytes()[0] & 0xff;
                 if ((bits & keyUsageBits) != keyUsageBits)
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    handler.failWithError(AlertLevel.fatal,
                         TlsProtocolHandler.AP_certificate_unknown);
                 }
             }

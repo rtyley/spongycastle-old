@@ -17,7 +17,7 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
     boolean usingFixedAuthentication;
 
     TlsECDHKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange,
-        // TODO Replace with an interface e.g. TlsClientAuth
+    // TODO Replace with an interface e.g. TlsClientAuth
         Certificate clientCert, AsymmetricKeyParameter clientPrivateKey)
     {
         super(handler, verifyer, keyExchange, clientCert, clientPrivateKey);
@@ -25,7 +25,7 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
     public void skipServerKeyExchange() throws IOException
@@ -36,7 +36,7 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
-        handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException

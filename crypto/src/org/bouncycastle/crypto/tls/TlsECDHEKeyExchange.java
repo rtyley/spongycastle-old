@@ -28,12 +28,12 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
     public void skipServerKeyExchange() throws IOException
     {
-        handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
@@ -41,8 +41,7 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
     {
         if (tlsSigner == null)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
-                TlsProtocolHandler.AP_unexpected_message);
+            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
         }
 
         InputStream sigIn = is;
@@ -69,8 +68,7 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
 
                 if (!signer.verifySignature(sigByte))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
-                        TlsProtocolHandler.AP_bad_certificate);
+                    handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_bad_certificate);
                 }
             }
             serverEphemeralPublicKey = parsePublicKey(ephemeralKey, namedCurve);
@@ -81,8 +79,7 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
         {
             // TODO Add support for explicit curve parameters
 
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
-                TlsProtocolHandler.AP_handshake_failure);
+            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_handshake_failure);
         }
     }
 

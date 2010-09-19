@@ -69,7 +69,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     {
         if (tlsSigner != null)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
+            handler.failWithError(AlertLevel.fatal,
                 TlsProtocolHandler.AP_unexpected_message);
         }
     }
@@ -78,7 +78,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     {
         if (tlsSigner == null)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
+            handler.failWithError(AlertLevel.fatal,
                 TlsProtocolHandler.AP_unexpected_message);
         }
 
@@ -91,14 +91,14 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
         catch (RuntimeException e)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
+            handler.failWithError(AlertLevel.fatal,
                 TlsProtocolHandler.AP_unsupported_certificate);
         }
 
         // Sanity check the PublicKeyFactory
         if (this.serverPublicKey.isPrivate())
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
+            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_internal_error);
         }
 
         // TODO 
@@ -112,7 +112,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
             case TlsKeyExchange.KE_SRP_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    handler.failWithError(AlertLevel.fatal,
                         TlsProtocolHandler.AP_certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
@@ -120,12 +120,12 @@ class TlsSRPKeyExchange implements TlsKeyExchange
             case TlsKeyExchange.KE_SRP_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    handler.failWithError(AlertLevel.fatal,
                         TlsProtocolHandler.AP_certificate_unknown);
                 }
                 break;
             default:
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                handler.failWithError(AlertLevel.fatal,
                     TlsProtocolHandler.AP_unsupported_certificate);
         }
 
@@ -134,13 +134,13 @@ class TlsSRPKeyExchange implements TlsKeyExchange
          */
         if (!this.verifyer.isValid(serverCertificate.getCerts()))
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_user_canceled);
+            handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_user_canceled);
         }
     }
 
     public void skipServerKeyExchange() throws IOException
     {
-        handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
+        handler.failWithError(AlertLevel.fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
@@ -166,7 +166,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
 
             if (!signer.verifySignature(sigByte))
             {
-                handler.failWithError(TlsProtocolHandler.AL_fatal,
+                handler.failWithError(AlertLevel.fatal,
                     TlsProtocolHandler.AP_bad_certificate);
             }
         }
@@ -175,7 +175,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         BigInteger g = new BigInteger(1, gBytes);
 
         // TODO Validate group parameters (see RFC 5054)
-//        handler.failWithError(TlsProtocolHandler.AL_fatal,
+//        handler.failWithError(AlertLevel.fatal,
 //            TlsProtocolHandler.AP_insufficient_security);
 
         this.s = sBytes;
@@ -190,7 +190,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
         catch (CryptoException e)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
+            handler.failWithError(AlertLevel.fatal,
                 TlsProtocolHandler.AP_illegal_parameter);
         }
 
@@ -214,7 +214,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
         catch (CryptoException e)
         {
-            handler.failWithError(TlsProtocolHandler.AL_fatal,
+            handler.failWithError(AlertLevel.fatal,
                 TlsProtocolHandler.AP_illegal_parameter);
             return null; // Unreachable!
         }
@@ -232,7 +232,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
                 int bits = ku.getBytes()[0] & 0xff;
                 if ((bits & keyUsageBits) != keyUsageBits)
                 {
-                    handler.failWithError(TlsProtocolHandler.AL_fatal,
+                    handler.failWithError(AlertLevel.fatal,
                         TlsProtocolHandler.AP_certificate_unknown);
                 }
             }
