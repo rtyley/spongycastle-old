@@ -68,6 +68,7 @@ public class TlsProtocolHandler
 
     private TlsClient tlsClient = null;
     private int[] offeredCipherSuites = null;
+    private short[] offeredCompressionMethods = null;
     private TlsKeyExchange keyExchange = null;
 
     private short connection_state = 0;
@@ -293,7 +294,7 @@ public class TlsProtocolHandler
                         this.tlsClient.notifySessionID(sessionID);
 
                         /*
-                         * Find out which ciphersuite the server has chosen and check that
+                         * Find out which CipherSuite the server has chosen and check that
                          * it was one of the offered ones.
                          */
                         int selectedCipherSuite = TlsUtils.readUint16(is);
@@ -306,14 +307,16 @@ public class TlsProtocolHandler
                         this.tlsClient.notifySelectedCipherSuite(selectedCipherSuite);
 
                         /*
-                         * We support only the null compression which means no
-                         * compression.
+                         * Find out which CompressionMethod the server has chosen and check that
+                         * it was one of the offered ones.
                          */
-                        short compressionMethod = TlsUtils.readUint8(is);
-                        if (compressionMethod != CompressionMethod.NULL)
+                        short selectedCompressionMethod = TlsUtils.readUint8(is);
+                        if (!arrayContains(offeredCompressionMethods, selectedCompressionMethod))
                         {
                             this.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
                         }
+
+                        this.tlsClient.notifySelectedCompressionMethod(selectedCompressionMethod);
 
                         /*
                          * RFC3546 2.2 The extended server hello message format MAY be
@@ -850,11 +853,7 @@ public class TlsProtocolHandler
             }
 
             TlsUtils.writeUint16(2 * count, os);
-
-            for (int i = 0; i < offeredCipherSuites.length; ++i)
-            {
-                TlsUtils.writeUint16(offeredCipherSuites[i], os);
-            }
+            TlsUtils.writeUint16Array(offeredCipherSuites, os);
 
             if (noRenegExt)
             {
@@ -865,8 +864,10 @@ public class TlsProtocolHandler
         /*
          * Compression methods, just the null method.
          */
-        byte[] compressionMethods = new byte[] { CompressionMethod.NULL };
-        TlsUtils.writeOpaque8(compressionMethods, os);
+        this.offeredCompressionMethods = this.tlsClient.getCompressionMethods();
+
+        TlsUtils.writeUint8((short)offeredCompressionMethods.length, os);
+        TlsUtils.writeUint8Array(offeredCompressionMethods, os);
 
         // Extensions
         if (clientExtensions != null)
@@ -1127,6 +1128,18 @@ public class TlsProtocolHandler
     protected void flush() throws IOException
     {
         rs.flush();
+    }
+
+    private static boolean arrayContains(short[] a, short n)
+    {
+        for (int i = 0; i < a.length; ++i)
+        {
+            if (a[i] == n)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean arrayContains(int[] a, int n)

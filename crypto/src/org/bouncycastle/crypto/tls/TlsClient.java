@@ -10,12 +10,16 @@ interface TlsClient
 
     int[] getCipherSuites();
 
+    short[] getCompressionMethods();
+
     // Hashtable is (Integer -> byte[])
     Hashtable generateClientExtensions();
 
     void notifySessionID(byte[] sessionID);
 
     void notifySelectedCipherSuite(int selectedCipherSuite);
+
+    void notifySelectedCompressionMethod(short selectedCompressionMethod);
 
     void notifySecureRenegotiation(boolean secureNegotiation) throws IOException;
 
