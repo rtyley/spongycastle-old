@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * A generic interface for key exchange implementations in TLS 1.0.
@@ -30,7 +31,7 @@ interface TlsKeyExchange
     void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException;
 
-    byte[] generateClientKeyExchange() throws IOException;
+    void generateClientKeyExchange(OutputStream os) throws IOException;
 
     byte[] generatePremasterSecret() throws IOException;
 }

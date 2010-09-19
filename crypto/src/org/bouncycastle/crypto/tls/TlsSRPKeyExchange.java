@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.DERBitString;
@@ -196,10 +197,12 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         this.srpClient.init(N, g, new SHA1Digest(), handler.getRandom());
     }
 
-    public byte[] generateClientKeyExchange() throws IOException
+    public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        return BigIntegers.asUnsignedByteArray(srpClient.generateClientCredentials(s,
+        byte[] keData = BigIntegers.asUnsignedByteArray(srpClient.generateClientCredentials(s,
             this.SRP_identity, this.SRP_password));
+        TlsUtils.writeUint24(keData.length + 2, os);
+        TlsUtils.writeOpaque16(keData, os);
     }
 
     public byte[] generatePremasterSecret() throws IOException

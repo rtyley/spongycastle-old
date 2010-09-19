@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.DERBitString;
@@ -201,7 +202,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
             new DHParameters(p, g)));
     }
 
-    public byte[] generateClientKeyExchange() throws IOException
+    public void generateClientKeyExchange(OutputStream os) throws IOException
     {
         // TODO RFC 2246 7.4.72
         /*
@@ -209,7 +210,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
          * Yc is implicit and does not need to be sent again. In this case, the Client Key
          * Exchange message will be sent, but will be empty.
          */
-//        return new byte[0];
+//        return;
 
         /*
          * Generate a keypair (using parameters from server key) and send the public value
@@ -220,7 +221,9 @@ class TlsDHKeyExchange implements TlsKeyExchange
             dhAgreeServerPublicKey.getParameters()));
         this.dhAgreeClientKeyPair = dhGen.generateKeyPair();
         BigInteger Yc = ((DHPublicKeyParameters)dhAgreeClientKeyPair.getPublic()).getY();
-        return BigIntegers.asUnsignedByteArray(Yc);
+        byte[] keData = BigIntegers.asUnsignedByteArray(Yc);
+        TlsUtils.writeUint24(keData.length + 2, os);
+        TlsUtils.writeOpaque16(keData, os);
     }
 
     public byte[] generatePremasterSecret() throws IOException

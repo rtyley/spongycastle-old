@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.x509.KeyUsage;
@@ -100,7 +101,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
         handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_unexpected_message);
     }
 
-    public byte[] generateClientKeyExchange() throws IOException
+    public void generateClientKeyExchange(OutputStream os) throws IOException
     {
         /*
          * Choose a PremasterSecret and send it encrypted to the server
@@ -114,7 +115,9 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 
         try
         {
-            return encoding.processBlock(premasterSecret, 0, premasterSecret.length);
+            byte[] keData = encoding.processBlock(premasterSecret, 0, premasterSecret.length);
+            TlsUtils.writeUint24(keData.length + 2, os);
+            TlsUtils.writeOpaque16(keData, os);
         }
         catch (InvalidCipherTextException e)
         {
@@ -122,7 +125,6 @@ class TlsRSAKeyExchange implements TlsKeyExchange
              * This should never happen, only during decryption.
              */
             handler.failWithError(TlsProtocolHandler.AL_fatal, TlsProtocolHandler.AP_internal_error);
-            return null; // Unreachable!
         }
     }
 
