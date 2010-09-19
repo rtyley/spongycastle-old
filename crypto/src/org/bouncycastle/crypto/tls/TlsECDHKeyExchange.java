@@ -69,7 +69,7 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
     }
 
     // TODO
-//    public void processServerCertificateRequest(byte[] certificateTypes,
+//    public void processServerCertificateRequest(short[] certificateTypes,
 //        Vector certificateAuthorities)
 //    {
 //        usingFixedAuthentication = false;
@@ -95,12 +95,12 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
 //        return !usingFixedAuthentication;
 //    }
 //
-//    private boolean ecdsaFixedOfferedByServer(byte[] certificateTypes)
+//    private boolean ecdsaFixedOfferedByServer(short[] certificateTypes)
 //    {
 //        boolean fixedAuthenticationOfferedByServer = false;
 //        for (int i = 0; i < certificateTypes.length; i++)
 //        {
-//            if (certificateTypes[i] == ClientCertificateTypes.ECDSA_FIXED_ECDH)
+//            if (certificateTypes[i] == ClientCertificateType.ecdsa_fixed_ecdh)
 //            {
 //                fixedAuthenticationOfferedByServer = true;
 //                break;
