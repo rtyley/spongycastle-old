@@ -210,7 +210,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
          * Yc is implicit and does not need to be sent again. In this case, the Client Key
          * Exchange message will be sent, but will be empty.
          */
-//        return;
+//        TlsUtils.writeUint24(0, os);
 
         /*
          * Generate a keypair (using parameters from server key) and send the public value
