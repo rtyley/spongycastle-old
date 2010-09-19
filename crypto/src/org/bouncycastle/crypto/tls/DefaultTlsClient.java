@@ -208,7 +208,7 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    public void processServerCertificateRequest(byte[] certificateTypes,
+    public void processServerCertificateRequest(short[] certificateTypes,
         Vector certificateAuthorities)
     {
         // TODO There shouldn't be a certificate request for SRP 
