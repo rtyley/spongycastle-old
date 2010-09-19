@@ -22,11 +22,6 @@ public class TlsProtocolHandler
 {
     private static final Integer EXT_RenegotiationInfo = Integer.valueOf(ExtensionType.renegotiation_info);
 
-    private static final short RL_CHANGE_CIPHER_SPEC = 20;
-    private static final short RL_ALERT = 21;
-    private static final short RL_HANDSHAKE = 22;
-    private static final short RL_APPLICATION_DATA = 23;
-
     /*
      * hello_request(0), client_hello(1), server_hello(2), certificate(11),
      * server_key_exchange (12), certificate_request(13), server_hello_done(14),
@@ -133,19 +128,19 @@ public class TlsProtocolHandler
          */
         switch (protocol)
         {
-            case RL_CHANGE_CIPHER_SPEC:
+            case ContentType.change_cipher_spec:
                 changeCipherSpecQueue.addData(buf, offset, len);
                 processChangeCipherSpec();
                 break;
-            case RL_ALERT:
+            case ContentType.alert:
                 alertQueue.addData(buf, offset, len);
                 processAlert();
                 break;
-            case RL_HANDSHAKE:
+            case ContentType.handshake:
                 handshakeQueue.addData(buf, offset, len);
                 processHandshake();
                 break;
-            case RL_APPLICATION_DATA:
+            case ContentType.application_data:
                 if (!appDataReady)
                 {
                     this.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
@@ -505,7 +500,8 @@ public class TlsProtocolHandler
                          */
                         byte[] cmessage = new byte[1];
                         cmessage[0] = 1;
-                        rs.writeMessage(RL_CHANGE_CIPHER_SPEC, cmessage, 0, cmessage.length);
+                        rs.writeMessage(ContentType.change_cipher_spec, cmessage, 0,
+                            cmessage.length);
 
                         connection_state = CS_CLIENT_CHANGE_CIPHER_SPEC_SEND;
 
@@ -541,7 +537,7 @@ public class TlsProtocolHandler
                         TlsUtils.writeOpaque24(clientVerifyData, bos);
                         byte[] message = bos.toByteArray();
 
-                        rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
+                        rs.writeMessage(ContentType.handshake, message, 0, message.length);
 
                         this.connection_state = CS_CLIENT_FINISHED_SEND;
                         break;
@@ -749,7 +745,7 @@ public class TlsProtocolHandler
         clientCert.encode(bos);
         byte[] message = bos.toByteArray();
 
-        rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
+        rs.writeMessage(ContentType.handshake, message, 0, message.length);
     }
 
     private void sendClientKeyExchange() throws IOException
@@ -759,7 +755,7 @@ public class TlsProtocolHandler
         this.keyExchange.generateClientKeyExchange(bos);
         byte[] message = bos.toByteArray();
 
-        rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
+        rs.writeMessage(ContentType.handshake, message, 0, message.length);
     }
 
     private void sendCertificateVerify(byte[] data) throws IOException
@@ -774,7 +770,7 @@ public class TlsProtocolHandler
         TlsUtils.writeOpaque16(data, bos);
         byte[] message = bos.toByteArray();
 
-        rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
+        rs.writeMessage(ContentType.handshake, message, 0, message.length);
     }
 
     /**
@@ -908,7 +904,7 @@ public class TlsProtocolHandler
         TlsUtils.writeUint24(os.size(), bos);
         bos.write(os.toByteArray());
         byte[] message = bos.toByteArray();
-        rs.writeMessage(RL_HANDSHAKE, message, 0, message.length);
+        rs.writeMessage(ContentType.handshake, message, 0, message.length);
         connection_state = CS_CLIENT_HELLO_SEND;
 
         /*
@@ -1013,7 +1009,7 @@ public class TlsProtocolHandler
          * 
          * DO NOT REMOVE THIS LINE, EXCEPT YOU KNOW EXACTLY WHAT YOU ARE DOING HERE.
          */
-        rs.writeMessage(RL_APPLICATION_DATA, emptybuf, 0, 0);
+        rs.writeMessage(ContentType.application_data, emptybuf, 0, 0);
 
         do
         {
@@ -1024,7 +1020,7 @@ public class TlsProtocolHandler
 
             try
             {
-                rs.writeMessage(RL_APPLICATION_DATA, buf, offset, toWrite);
+                rs.writeMessage(ContentType.application_data, buf, offset, toWrite);
             }
             catch (IOException e)
             {
@@ -1114,7 +1110,7 @@ public class TlsProtocolHandler
         error[0] = (byte)alertLevel;
         error[1] = (byte)alertDescription;
 
-        rs.writeMessage(RL_ALERT, error, 0, 2);
+        rs.writeMessage(ContentType.alert, error, 0, 2);
     }
 
     /**
