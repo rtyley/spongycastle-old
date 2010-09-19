@@ -20,7 +20,7 @@ import org.bouncycastle.util.Arrays;
  */
 public class TlsProtocolHandler
 {
-    private static final Integer EXT_RenegotiationInfo = Integer.valueOf(0xFF01);
+    private static final Integer EXT_RenegotiationInfo = Integer.valueOf(ExtensionType.renegotiation_info);
 
     private static final int TLS_EMPTY_RENEGOTIATION_INFO_SCSV = 0x00FF;
 

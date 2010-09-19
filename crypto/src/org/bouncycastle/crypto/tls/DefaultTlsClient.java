@@ -156,20 +156,12 @@ class DefaultTlsClient implements TlsClient
 
     public Hashtable generateClientExtensions()
     {
-        // RFC 3546
-//        enum {
-//            server_name(0), max_fragment_length(1),
-//            client_certificate_url(2), trusted_ca_keys(3),
-//            truncated_hmac(4), status_request(5), (65535)
-//        } ExtensionType;
-
         // TODO[SRP]
 //        Hashtable clientExtensions = new Hashtable();
 //        ByteArrayOutputStream srpData = new ByteArrayOutputStream();
 //        TlsUtils.writeOpaque8(SRP_identity, srpData);
 //
-//        // TODO[SRP] RFC5054 2.8.1: ExtensionType.srp = 12
-//        clientExtensions.put(Integer.valueOf(12), srpData.toByteArray());
+//        clientExtensions.put(Integer.valueOf(ExtensionType.srp), srpData.toByteArray());
 //        return clientExtensions;
         return null;
     }
