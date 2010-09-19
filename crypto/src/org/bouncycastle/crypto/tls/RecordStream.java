@@ -54,7 +54,7 @@ class RecordStream
 
     protected void writeMessage(short type, byte[] message, int offset, int len) throws IOException
     {
-        if (type == 22) // TlsProtocolHandler.RL_HANDSHAKE
+        if (type == ContentType.handshake)
         {
             updateHandshakeData(message, offset, len);
         }
