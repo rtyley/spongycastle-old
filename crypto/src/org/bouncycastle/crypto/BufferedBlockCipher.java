@@ -266,16 +266,17 @@ public class BufferedBlockCipher
             throw new DataLengthException("output buffer too short for doFinal()");
         }
 
-        if (bufOff != 0 && partialBlockOkay)
+        if (bufOff != 0)
         {
+            if (!partialBlockOkay)
+            {
+                throw new DataLengthException("data not block size aligned");
+            }
+
             cipher.processBlock(buf, 0, buf, 0);
             resultLen = bufOff;
             bufOff = 0;
             System.arraycopy(buf, 0, out, outOff, resultLen);
-        }
-        else if (bufOff != 0)
-        {
-            throw new DataLengthException("data not block size aligned");
         }
 
         reset();
