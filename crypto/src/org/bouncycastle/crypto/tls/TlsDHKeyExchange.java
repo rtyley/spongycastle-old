@@ -105,6 +105,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
                 {
                     handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
+                validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
                 // TODO The algorithm used to sign the certificate should be DSS.
 //                x509Cert.getSignatureAlgorithm();
                 this.dhAgreeServerPublicKey = validateDHPublicKey((DHPublicKeyParameters)this.serverPublicKey);
@@ -114,6 +115,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
                 {
                     handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
+                validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
                 // TODO The algorithm used to sign the certificate should be RSA.
 //              x509Cert.getSignatureAlgorithm();
                 this.dhAgreeServerPublicKey = validateDHPublicKey((DHPublicKeyParameters)this.serverPublicKey);
@@ -130,6 +132,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
                 {
                     handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
+                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             default:
                 handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
