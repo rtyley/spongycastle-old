@@ -48,14 +48,14 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
     {
         switch (keyExchange)
         {
-            case KE_ECDH_RSA:
             case KE_ECDHE_RSA:
                 this.tlsSigner = new TlsRSASigner();
                 break;
-            case KE_ECDH_ECDSA:
             case KE_ECDHE_ECDSA:
                 this.tlsSigner = new TlsECDSASigner();
                 break;
+            case KE_ECDH_RSA:
+            case KE_ECDH_ECDSA:
             case KE_ECDH_anon:
                 this.tlsSigner = null;
                 break;
