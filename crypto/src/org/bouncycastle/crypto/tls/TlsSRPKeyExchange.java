@@ -118,6 +118,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
                 {
                     handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
+                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             default:
                 handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
