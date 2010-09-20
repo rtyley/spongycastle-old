@@ -56,7 +56,6 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 break;
             case KE_ECDH_RSA:
             case KE_ECDH_ECDSA:
-            case KE_ECDH_anon:
                 this.tlsSigner = null;
                 break;
             default:
@@ -137,10 +136,6 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                     handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
-                break;
-
-            case KE_ECDH_anon:
-                // todo 
                 break;
             default:
                 handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
