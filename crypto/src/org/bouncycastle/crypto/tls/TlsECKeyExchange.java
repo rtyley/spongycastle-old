@@ -111,7 +111,8 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 {
                     handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
-                // TODO The algorithm used to sign the certificate should be DSS.
+                validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
+                // TODO The algorithm used to sign the certificate should be ECDSA.
 //                x509Cert.getSignatureAlgorithm();
                 break;
             case KE_ECDHE_ECDSA:
@@ -119,21 +120,23 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 {
                     handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
-                // TODO The algorithm used to sign the certificate should be RSA.
-//              x509Cert.getSignatureAlgorithm();
+                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             case KE_ECDH_RSA:
-                if (!(this.serverPublicKey instanceof RSAKeyParameters))
+                if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
                     handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
-                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
+                validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
+                // TODO The algorithm used to sign the certificate should be RSA.
+//              x509Cert.getSignatureAlgorithm();
                 break;
             case KE_ECDHE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
                     handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
                 }
+                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
 
             case KE_ECDH_anon:
