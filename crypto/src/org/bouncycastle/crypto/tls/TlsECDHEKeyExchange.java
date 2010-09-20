@@ -37,19 +37,8 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
-        if (tlsSigner == null)
-        {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
-        }
-
-        InputStream sigIn = is;
-        Signer signer = null;
-
-        if (tlsSigner != null)
-        {
-            signer = initSigner(tlsSigner, securityParameters);
-            sigIn = new SignerInputStream(is, signer);
-        }
+        Signer signer = initSigner(tlsSigner, securityParameters);
+        InputStream sigIn = new SignerInputStream(is, signer);
 
         short curveType = TlsUtils.readUint8(sigIn);
         ECDomainParameters curve_params;
@@ -73,14 +62,10 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
 
         byte[] publicBytes = TlsUtils.readOpaque8(sigIn);
 
-        if (signer != null)
+        byte[] sigByte = TlsUtils.readOpaque16(is);
+        if (!signer.verifySignature(sigByte))
         {
-            byte[] sigByte = TlsUtils.readOpaque16(is);
-
-            if (!signer.verifySignature(sigByte))
-            {
-                handler.failWithError(AlertLevel.fatal, AlertDescription.bad_certificate);
-            }
+            handler.failWithError(AlertLevel.fatal, AlertDescription.bad_certificate);
         }
 
         // TODO Check curve_params not null
