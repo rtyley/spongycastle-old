@@ -183,12 +183,12 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
-                return createDHKeyExchange(TlsKeyExchange.KE_DHE_DSS);
+                return createDHEKeyExchange(TlsKeyExchange.KE_DHE_DSS);
 
             case CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-                return createDHKeyExchange(TlsKeyExchange.KE_DHE_RSA);
+                return createDHEKeyExchange(TlsKeyExchange.KE_DHE_RSA);
 
             case CipherSuite.TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA:
@@ -337,6 +337,11 @@ class DefaultTlsClient implements TlsClient
     private TlsKeyExchange createDHKeyExchange(short keyExchange)
     {
         return new TlsDHKeyExchange(handler, verifyer, keyExchange);
+    }
+
+    private TlsKeyExchange createDHEKeyExchange(short keyExchange)
+    {
+        return new TlsDHEKeyExchange(handler, verifyer, keyExchange);
     }
 
     private TlsKeyExchange createECDHKeyExchange(short keyExchange)

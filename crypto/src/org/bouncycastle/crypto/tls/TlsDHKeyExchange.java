@@ -12,10 +12,8 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.agreement.DHBasicAgreement;
 import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
-import org.bouncycastle.crypto.io.SignerInputStream;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
@@ -30,18 +28,18 @@ import org.bouncycastle.util.BigIntegers;
  */
 class TlsDHKeyExchange implements TlsKeyExchange
 {
-    private static final BigInteger ONE = BigInteger.valueOf(1);
-    private static final BigInteger TWO = BigInteger.valueOf(2);
+    protected static final BigInteger ONE = BigInteger.valueOf(1);
+    protected static final BigInteger TWO = BigInteger.valueOf(2);
 
-    private TlsProtocolHandler handler;
-    private CertificateVerifyer verifyer;
-    private short keyExchange;
-    private TlsSigner tlsSigner;
+    protected TlsProtocolHandler handler;
+    protected CertificateVerifyer verifyer;
+    protected short keyExchange;
+    protected TlsSigner tlsSigner;
 
-    private AsymmetricKeyParameter serverPublicKey = null;
+    protected AsymmetricKeyParameter serverPublicKey = null;
 
-    private DHPublicKeyParameters dhAgreeServerPublicKey = null;
-    private AsymmetricCipherKeyPair dhAgreeClientKeyPair = null;
+    protected DHPublicKeyParameters dhAgreeServerPublicKey = null;
+    protected AsymmetricCipherKeyPair dhAgreeClientKeyPair = null;
 
     TlsDHKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
     {
@@ -148,49 +146,13 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
     public void skipServerKeyExchange() throws IOException
     {
-        if (tlsSigner != null)
-        {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
-        }
+        // OK
     }
 
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
-        if (tlsSigner == null)
-        {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
-        }
-
-        InputStream sigIn = is;
-        Signer signer = null;
-
-        if (tlsSigner != null)
-        {
-            signer = initSigner(tlsSigner, securityParameters);
-            sigIn = new SignerInputStream(is, signer);
-        }
-
-        byte[] pBytes = TlsUtils.readOpaque16(sigIn);
-        byte[] gBytes = TlsUtils.readOpaque16(sigIn);
-        byte[] YsBytes = TlsUtils.readOpaque16(sigIn);
-
-        if (signer != null)
-        {
-            byte[] sigByte = TlsUtils.readOpaque16(is);
-
-            if (!signer.verifySignature(sigByte))
-            {
-                handler.failWithError(AlertLevel.fatal, AlertDescription.bad_certificate);
-            }
-        }
-
-        BigInteger p = new BigInteger(1, pBytes);
-        BigInteger g = new BigInteger(1, gBytes);
-        BigInteger Ys = new BigInteger(1, YsBytes);
-
-        this.dhAgreeServerPublicKey = validateDHPublicKey(new DHPublicKeyParameters(Ys,
-            new DHParameters(p, g)));
+        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
@@ -246,15 +208,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
         }
     }
 
-    private Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
-    {
-        Signer signer = tlsSigner.createVerifyer(this.serverPublicKey);
-        signer.update(securityParameters.clientRandom, 0, securityParameters.clientRandom.length);
-        signer.update(securityParameters.serverRandom, 0, securityParameters.serverRandom.length);
-        return signer;
-    }
-
-    private DHPublicKeyParameters validateDHPublicKey(DHPublicKeyParameters key) throws IOException
+    protected DHPublicKeyParameters validateDHPublicKey(DHPublicKeyParameters key) throws IOException
     {
         BigInteger Y = key.getY();
         DHParameters params = key.getParameters();
