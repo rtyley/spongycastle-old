@@ -210,11 +210,6 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
                 return createECDHEKeyExchange(TlsKeyExchange.KE_ECDHE_RSA);
 
-            case CipherSuite.TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA:
-            case CipherSuite.TLS_ECDH_anon_WITH_AES_128_CBC_SHA:
-            case CipherSuite.TLS_ECDH_anon_WITH_AES_256_CBC_SHA:
-                return createECDHKeyExchange(TlsKeyExchange.KE_ECDH_anon);
-
             case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
