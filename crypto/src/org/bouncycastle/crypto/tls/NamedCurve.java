@@ -84,7 +84,7 @@ public class NamedCurve
         }
 
         // Lazily created the first time a particular curve is accessed
-        X9ECParameters ecP = SECNamedCurves.getByName(curveNames[namedCurve]);
+        X9ECParameters ecP = SECNamedCurves.getByName(curveNames[index]);
 
         // It's a bit inefficient to do this conversion every time
         return new ECDomainParameters(ecP.getCurve(), ecP.getG(), ecP.getN(), ecP.getH(),
