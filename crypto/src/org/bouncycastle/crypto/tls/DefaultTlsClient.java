@@ -150,8 +150,7 @@ class DefaultTlsClient implements TlsClient
              * some clients may want to terminate the handshake instead of continuing; see
              * Section 4.1 for discussion.
              */
-//            handler.failWithError(AlertLevel.fatal,
-//                TlsProtocolHandler.AP_handshake_failure);
+//            handler.failWithError(AlertLevel.fatal, AlertDescription.handshake_failure);
         }
     }
 

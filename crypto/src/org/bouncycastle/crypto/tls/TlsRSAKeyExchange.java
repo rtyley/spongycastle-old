@@ -168,8 +168,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 //
 //            if (!signer.verifySignature(sigByte))
 //            {
-//                handler.failWithError(AlertLevel.fatal,
-//                    TlsProtocolHandler.AP_bad_certificate);
+//                handler.failWithError(AlertLevel.fatal, AlertDescription.bad_certificate);
 //            }
 //        }
 //

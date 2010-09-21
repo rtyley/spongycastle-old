@@ -169,8 +169,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         BigInteger g = new BigInteger(1, gBytes);
 
         // TODO Validate group parameters (see RFC 5054)
-//        handler.failWithError(AlertLevel.fatal,
-//            TlsProtocolHandler.AP_insufficient_security);
+//        handler.failWithError(AlertLevel.fatal, AlertDescription.insufficient_security);
 
         this.s = sBytes;
 
