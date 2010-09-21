@@ -1107,7 +1107,7 @@ public class TlsProtocolHandler
     {
         if (!closed)
         {
-            this.failWithError((short)1, (short)0);
+            this.failWithError(AlertLevel.warning, AlertDescription.close_notify);
         }
     }
 
