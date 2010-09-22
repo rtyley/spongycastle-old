@@ -861,9 +861,7 @@ public class TlsProtocolHandler
             }
         }
 
-        /*
-         * Compression methods, just the null method.
-         */
+        // Compression methods
         this.offeredCompressionMethods = this.tlsClient.getCompressionMethods();
 
         TlsUtils.writeUint8((short)offeredCompressionMethods.length, os);
