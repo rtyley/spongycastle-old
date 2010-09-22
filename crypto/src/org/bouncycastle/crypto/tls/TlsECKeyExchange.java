@@ -11,7 +11,6 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -150,7 +149,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         }
     }
 
-    AsymmetricCipherKeyPair generateECKeyPair(ECDomainParameters parameters)
+    protected AsymmetricCipherKeyPair generateECKeyPair(ECDomainParameters parameters)
     {
         ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
         ECKeyGenerationParameters keyGenerationParameters = new ECKeyGenerationParameters(
@@ -161,14 +160,14 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         return keyPair;
     }
 
-    byte[] externalizeKey(ECPublicKeyParameters keyParameters) throws IOException
+    protected byte[] externalizeKey(ECPublicKeyParameters keyParameters) throws IOException
     {
         // TODO Potentially would like to be able to get the compressed encoding
         ECPoint ecPoint = keyParameters.getQ();
         return ecPoint.getEncoded();
     }
 
-    byte[] calculateECDHEPreMasterSecret(ECPublicKeyParameters publicKey,
+    protected byte[] calculateECDHEPreMasterSecret(ECPublicKeyParameters publicKey,
         CipherParameters privateKey)
     {
         ECDHBasicAgreement basicAgreement = new ECDHBasicAgreement();
@@ -177,7 +176,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         return BigIntegers.asUnsignedByteArray(agreement);
     }
 
-    void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
+    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
     {
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
@@ -193,13 +192,5 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 }
             }
         }
-    }
-
-    Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
-    {
-        Signer signer = tlsSigner.createVerifyer(this.serverPublicKey);
-        signer.update(securityParameters.clientRandom, 0, securityParameters.clientRandom.length);
-        signer.update(securityParameters.serverRandom, 0, securityParameters.serverRandom.length);
-        return signer;
     }
 }

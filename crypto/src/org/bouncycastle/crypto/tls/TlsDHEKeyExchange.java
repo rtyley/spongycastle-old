@@ -45,7 +45,7 @@ class TlsDHEKeyExchange extends TlsDHKeyExchange
             new DHParameters(p, g)));
     }
 
-    private Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
+    protected Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
     {
         Signer signer = tlsSigner.createVerifyer(this.serverPublicKey);
         signer.update(securityParameters.clientRandom, 0, securityParameters.clientRandom.length);

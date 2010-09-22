@@ -15,7 +15,7 @@ class TlsNullCipher implements TlsCipher
         return copyData(ciphertext, offset, len);
     }
 
-    private byte[] copyData(byte[] text, int offset, int len)
+    protected byte[] copyData(byte[] text, int offset, int len)
     {
         byte[] result = new byte[len];
         System.arraycopy(text, offset, result, 0, len);

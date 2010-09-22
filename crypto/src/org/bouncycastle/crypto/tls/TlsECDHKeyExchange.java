@@ -95,7 +95,7 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
 //        return !usingFixedAuthentication;
 //    }
 //
-//    private boolean ecdsaFixedOfferedByServer(short[] certificateTypes)
+//    protected boolean ecdsaFixedOfferedByServer(short[] certificateTypes)
 //    {
 //        boolean fixedAuthenticationOfferedByServer = false;
 //        for (int i = 0; i < certificateTypes.length; i++)

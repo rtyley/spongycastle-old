@@ -28,20 +28,20 @@ import org.bouncycastle.util.BigIntegers;
  */
 class TlsSRPKeyExchange implements TlsKeyExchange
 {
-    private TlsProtocolHandler handler;
-    private CertificateVerifyer verifyer;
-    private short keyExchange;
-    private TlsSigner tlsSigner;
+    protected TlsProtocolHandler handler;
+    protected CertificateVerifyer verifyer;
+    protected short keyExchange;
+    protected TlsSigner tlsSigner;
 
-    private AsymmetricKeyParameter serverPublicKey = null;
+    protected AsymmetricKeyParameter serverPublicKey = null;
 
     // TODO Need a way of providing these
-    private byte[] SRP_identity = null;
-    private byte[] SRP_password = null;
+    protected byte[] SRP_identity = null;
+    protected byte[] SRP_password = null;
 
-    private byte[] s = null;
-    private BigInteger B = null;
-    private SRP6Client srpClient = new SRP6Client();
+    protected byte[] s = null;
+    protected BigInteger B = null;
+    protected SRP6Client srpClient = new SRP6Client();
 
     TlsSRPKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
     {
@@ -211,7 +211,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
     }
 
-    private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
+    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
     {
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
@@ -229,7 +229,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
     }
 
-    private Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
+    protected Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
     {
         Signer signer = tlsSigner.createVerifyer(this.serverPublicKey);
         signer.update(securityParameters.clientRandom, 0, securityParameters.clientRandom.length);
