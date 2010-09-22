@@ -570,16 +570,16 @@ public class TlsProtocolHandler
 
                     case CS_SERVER_KEY_EXCHANGE_RECEIVED:
                     {
-                        byte[] types = TlsUtils.readOpaque8(is);
+                        int numTypes = TlsUtils.readUint8(is);
+                        short[] certificateTypes = new short[numTypes];
+                        for (int i = 0; i < numTypes; ++i)
+                        {
+                            certificateTypes[i] = TlsUtils.readUint8(is);
+                        }
+
                         byte[] authorities = TlsUtils.readOpaque16(is);
 
                         assertEmpty(is);
-
-                        short[] certificateTypes = new short[types.length];
-                        for (int i = 0; i < types.length; ++i)
-                        {
-                            certificateTypes[i] = (short)(types[i] & 0xff);
-                        }
 
                         Vector authorityDNs = new Vector();
 
