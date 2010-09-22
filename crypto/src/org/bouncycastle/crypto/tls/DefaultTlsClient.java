@@ -7,6 +7,7 @@ import java.util.Vector;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
@@ -212,17 +213,17 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
-                return createSRPExchange(TlsKeyExchange.KE_SRP);
+                return createSRPKeyExchange(TlsKeyExchange.KE_SRP);
 
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
-                return createSRPExchange(TlsKeyExchange.KE_SRP_RSA);
+                return createSRPKeyExchange(TlsKeyExchange.KE_SRP_RSA);
 
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
-                return createSRPExchange(TlsKeyExchange.KE_SRP_DSS);
+                return createSRPKeyExchange(TlsKeyExchange.KE_SRP_DSS);
 
             default:
                 /*
@@ -328,55 +329,60 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    private TlsKeyExchange createDHKeyExchange(short keyExchange)
+    protected TlsKeyExchange createDHKeyExchange(short keyExchange)
     {
         return new TlsDHKeyExchange(handler, verifyer, keyExchange);
     }
 
-    private TlsKeyExchange createDHEKeyExchange(short keyExchange)
+    protected TlsKeyExchange createDHEKeyExchange(short keyExchange)
     {
         return new TlsDHEKeyExchange(handler, verifyer, keyExchange);
     }
 
-    private TlsKeyExchange createECDHKeyExchange(short keyExchange)
+    protected TlsKeyExchange createECDHKeyExchange(short keyExchange)
     {
         return new TlsECDHKeyExchange(handler, verifyer, keyExchange, clientCert, clientPrivateKey);
     }
 
-    private TlsKeyExchange createECDHEKeyExchange(short keyExchange)
+    protected TlsKeyExchange createECDHEKeyExchange(short keyExchange)
     {
         return new TlsECDHEKeyExchange(handler, verifyer, keyExchange, clientCert, clientPrivateKey);
     }
 
-    private TlsKeyExchange createRSAKeyExchange()
+    protected TlsKeyExchange createRSAKeyExchange()
     {
         return new TlsRSAKeyExchange(handler, verifyer);
     }
 
-    private TlsKeyExchange createSRPExchange(short keyExchange)
+    protected TlsKeyExchange createSRPKeyExchange(short keyExchange)
     {
         return new TlsSRPKeyExchange(handler, verifyer, keyExchange);
     }
 
-    private TlsCipher createAESCipher(int cipherKeySize, SecurityParameters securityParameters)
+    protected TlsCipher createAESCipher(int cipherKeySize, SecurityParameters securityParameters)
     {
         return new TlsBlockCipher(handler, createAESBlockCipher(), createAESBlockCipher(),
-            new SHA1Digest(), new SHA1Digest(), cipherKeySize, securityParameters);
+            createSHA1Digest(), createSHA1Digest(), cipherKeySize, securityParameters);
     }
 
-    private TlsCipher createDESedeCipher(int cipherKeySize, SecurityParameters securityParameters)
+    protected TlsCipher createDESedeCipher(int cipherKeySize, SecurityParameters securityParameters)
     {
         return new TlsBlockCipher(handler, createDESedeBlockCipher(), createDESedeBlockCipher(),
-            new SHA1Digest(), new SHA1Digest(), cipherKeySize, securityParameters);
+            createSHA1Digest(), createSHA1Digest(), cipherKeySize, securityParameters);
     }
 
-    private static BlockCipher createAESBlockCipher()
+    protected BlockCipher createAESBlockCipher()
     {
         return new CBCBlockCipher(new AESFastEngine());
     }
 
-    private static BlockCipher createDESedeBlockCipher()
+    protected BlockCipher createDESedeBlockCipher()
     {
         return new CBCBlockCipher(new DESedeEngine());
+    }
+    
+    protected Digest createSHA1Digest()
+    {
+        return new SHA1Digest();
     }
 }

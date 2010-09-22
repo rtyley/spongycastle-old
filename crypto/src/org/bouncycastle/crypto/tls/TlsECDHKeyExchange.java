@@ -14,7 +14,7 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
  */
 class TlsECDHKeyExchange extends TlsECKeyExchange
 {
-    boolean usingFixedAuthentication;
+    protected boolean usingFixedAuthentication;
 
     TlsECDHKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange,
     // TODO Replace with an interface e.g. TlsClientAuth
