@@ -5,6 +5,7 @@ import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithSBox;
+import org.bouncycastle.crypto.util.Pack;
 import org.bouncycastle.util.Arrays;
 
 /**
@@ -237,7 +238,7 @@ public class GOST3411Digest
 
     private void finish()
     {
-        LongToBytes(byteCount * 8, L, 0); // get length into L (byteCount * 8 = bitCount)
+        Pack.longToLittleEndian(byteCount * 8, L, 0); // get length into L (byteCount * 8 = bitCount)
 
         while (xBufOff != 0)
         {
@@ -320,18 +321,6 @@ public class GOST3411Digest
 
             carry = sum >>> 8;
         }
-    }
-
-    private void LongToBytes(long r, byte[] out, int outOff)
-    {
-        out[outOff + 7] = (byte)(r >> 56);
-        out[outOff + 6] = (byte)(r >> 48);
-        out[outOff + 5] = (byte)(r >> 40);
-        out[outOff + 4] = (byte)(r >> 32);
-        out[outOff + 3] = (byte)(r >> 24);
-        out[outOff + 2] = (byte)(r >> 16);
-        out[outOff + 1] = (byte)(r >> 8);
-        out[outOff] = (byte)r;
     }
 
     private void cpyBytesToShort(byte[] S, short[] wS)
