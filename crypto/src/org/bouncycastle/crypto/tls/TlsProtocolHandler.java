@@ -465,7 +465,7 @@ public class TlsProtocolHandler
 
                         /*
                          * Send the client key exchange message, depending on the key
-                         * exchange we are using in our ciphersuite.
+                         * exchange we are using in our CipherSuite.
                          */
                         sendClientKeyExchange();
 
