@@ -23,14 +23,14 @@ import org.bouncycastle.crypto.util.PublicKeyFactory;
  */
 class TlsRSAKeyExchange implements TlsKeyExchange
 {
-    private TlsProtocolHandler handler;
-    private CertificateVerifyer verifyer;
+    protected TlsProtocolHandler handler;
+    protected CertificateVerifyer verifyer;
 
-    private AsymmetricKeyParameter serverPublicKey = null;
+    protected AsymmetricKeyParameter serverPublicKey = null;
 
-    private RSAKeyParameters rsaServerPublicKey = null;
+    protected RSAKeyParameters rsaServerPublicKey = null;
 
-    private byte[] premasterSecret;
+    protected byte[] premasterSecret;
 
     TlsRSAKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer)
     {
@@ -133,7 +133,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
         return tmp;
     }
 
-    private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
+    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
     {
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
@@ -151,7 +151,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
         }
     }
 
-//    private void processRSAServerKeyExchange(InputStream is, Signer signer) throws IOException
+//    protected void processRSAServerKeyExchange(InputStream is, Signer signer) throws IOException
 //    {
 //        InputStream sigIn = is;
 //        if (signer != null)
@@ -179,7 +179,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 //            exponent));
 //    }
 
-    private RSAKeyParameters validateRSAPublicKey(RSAKeyParameters key) throws IOException
+    protected RSAKeyParameters validateRSAPublicKey(RSAKeyParameters key) throws IOException
     {
         // TODO What is the minimum bit length required?
 //        key.getModulus().bitLength();

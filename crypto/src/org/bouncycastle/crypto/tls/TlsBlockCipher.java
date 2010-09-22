@@ -55,7 +55,7 @@ public class TlsBlockCipher implements TlsCipher
 
     }
 
-    private void initCipher(boolean forEncryption, BlockCipher cipher, byte[] key_block,
+    protected void initCipher(boolean forEncryption, BlockCipher cipher, byte[] key_block,
         int key_size, int key_offset, int iv_offset)
     {
         KeyParameter key_parameter = new KeyParameter(key_block, key_offset, key_size);
@@ -191,7 +191,7 @@ public class TlsBlockCipher implements TlsCipher
         return plaintext;
     }
 
-    private int chooseExtraPadBlocks(SecureRandom r, int max)
+    protected int chooseExtraPadBlocks(SecureRandom r, int max)
     {
 //        return r.nextInt(max + 1);
 
@@ -200,7 +200,7 @@ public class TlsBlockCipher implements TlsCipher
         return Math.min(n, max);
     }
 
-    private int lowestBitSet(int x)
+    protected int lowestBitSet(int x)
     {
         if (x == 0)
         {

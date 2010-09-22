@@ -193,7 +193,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
         return BigIntegers.asUnsignedByteArray(agreement);
     }
 
-    private void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
+    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
     {
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)

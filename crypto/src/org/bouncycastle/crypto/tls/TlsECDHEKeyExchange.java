@@ -89,6 +89,14 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
             clientEphemeralKeyPair.getPrivate());
     }
 
+    protected Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
+    {
+        Signer signer = tlsSigner.createVerifyer(this.serverPublicKey);
+        signer.update(securityParameters.clientRandom, 0, securityParameters.clientRandom.length);
+        signer.update(securityParameters.serverRandom, 0, securityParameters.serverRandom.length);
+        return signer;
+    }
+
 //    public void processServerCertificateRequest(byte[] certificateTypes,
 //        Vector certificateAuthorities)
 //    {
