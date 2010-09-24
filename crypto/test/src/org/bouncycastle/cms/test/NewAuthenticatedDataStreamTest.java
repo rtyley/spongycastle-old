@@ -20,6 +20,8 @@ import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceKeyTransAuthenticatedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.AsymmetricKeyWrapper;
+import org.bouncycastle.operator.jcajce.JceAsymmetricKeyWrapper;
 
 public class NewAuthenticatedDataStreamTest
     extends TestCase
@@ -109,8 +111,10 @@ public class NewAuthenticatedDataStreamTest
         CMSAuthenticatedDataStreamGenerator adGen = new CMSAuthenticatedDataStreamGenerator();
         ByteArrayOutputStream               bOut = new ByteArrayOutputStream();
 
-        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
 
+        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
+        
         OutputStream aOut = adGen.open(bOut, macAlg, BC);
 
         aOut.write(data);

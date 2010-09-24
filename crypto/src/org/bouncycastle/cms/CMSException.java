@@ -6,16 +6,16 @@ public class CMSException
     Exception   e;
 
     public CMSException(
-        String name)
+        String msg)
     {
-        super(name);
+        super(msg);
     }
 
     public CMSException(
-        String name,
+        String msg,
         Exception e)
     {
-        super(name);
+        super(msg);
 
         this.e = e;
     }

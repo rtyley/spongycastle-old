@@ -38,6 +38,16 @@ public class RevDetails
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public RevDetails(CertTemplate certDetails)
+    {
+        this.certDetails = certDetails;
+    }
+
+    public RevDetails(CertTemplate certDetails, X509Extensions crlEntryDetails)
+    {
+        this.crlEntryDetails = crlEntryDetails;
+    }
+
     public CertTemplate getCertDetails()
     {
         return certDetails;

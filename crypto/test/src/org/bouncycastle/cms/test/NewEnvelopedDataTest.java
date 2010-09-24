@@ -25,12 +25,14 @@ import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
@@ -52,8 +54,12 @@ import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcePasswordEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.AsymmetricKeyWrapper;
+import org.bouncycastle.operator.bc.BcAsymmetricKeyWrapper;
+import org.bouncycastle.operator.jcajce.JceAsymmetricKeyWrapper;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -224,7 +230,9 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -260,7 +268,9 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -293,7 +303,45 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier("1.2.840.113549.3.4"), 128).setProvider(BC).build());
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), "1.2.840.113549.3.4");
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        if (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            byte[] recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC));
+
+            assertEquals(true, Arrays.equals(data, recData));
+        }
+        else
+        {
+            fail("no recipient found");
+        }
+    }
+
+    public void testKeyTransLight128RC4()
+        throws Exception
+    {
+        byte[]          data     = "WallaWallaBouncyCastle".getBytes();
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        AsymmetricKeyWrapper wrapper = new BcAsymmetricKeyWrapper(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), PublicKeyFactory.createKey(_reciCert.getPublicKey().getEncoded()));
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -327,7 +375,9 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -361,7 +411,9 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         CMSEnvelopedData ed = edGen.generate(
                               new CMSProcessableByteArray(data),
@@ -443,7 +495,9 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
