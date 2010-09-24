@@ -34,6 +34,8 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.AsymmetricKeyWrapper;
+import org.bouncycastle.operator.jcajce.JceAsymmetricKeyWrapper;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -193,7 +195,9 @@ public class NewEnvelopedDataStreamTest
         //
         CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
@@ -216,7 +220,9 @@ public class NewEnvelopedDataStreamTest
         //
         edGen = new CMSEnvelopedDataStreamGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         bOut = new ByteArrayOutputStream();
 
@@ -251,7 +257,9 @@ public class NewEnvelopedDataStreamTest
         //
         CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
@@ -276,7 +284,9 @@ public class NewEnvelopedDataStreamTest
 
         edGen.setBufferSize(300);
 
-        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper reciWrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, reciWrapper));
 
         bOut = new ByteArrayOutputStream();
 

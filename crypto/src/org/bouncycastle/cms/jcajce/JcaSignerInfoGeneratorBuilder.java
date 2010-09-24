@@ -19,7 +19,7 @@ public class JcaSignerInfoGeneratorBuilder
         super(digestProvider);
     }
 
-        /**
+    /**
      * If the passed in flag is true, the signer signature will be based on the data, not
      * a collection of signed attributes, and no signed attributes will be included.
      *

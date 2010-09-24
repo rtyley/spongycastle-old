@@ -472,7 +472,7 @@ public class SignerInformation
     
                 if (!Arrays.constantTimeAreEqual(resultDigest, signedMessageDigest.getOctets()))
                 {
-                    throw new CMSException("message-digest attribute value does not match calculated value");
+                    throw new CMSSignerDigestMismatchException("message-digest attribute value does not match calculated value");
                 }
             }
         }
@@ -651,7 +651,7 @@ public class SignerInformation
 
                 if (!Arrays.constantTimeAreEqual(resultDigest, signedMessageDigest.getOctets()))
                 {
-                    throw new CMSException("message-digest attribute value does not match calculated value");
+                    throw new CMSSignerDigestMismatchException("message-digest attribute value does not match calculated value");
                 }
             }
         }

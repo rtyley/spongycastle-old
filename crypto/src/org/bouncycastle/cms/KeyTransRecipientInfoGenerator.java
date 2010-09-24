@@ -5,7 +5,6 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientIdentifier;
 import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.AsymmetricKeyWrapper;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OperatorException;
@@ -19,15 +18,10 @@ public abstract class KeyTransRecipientInfoGenerator
     private IssuerAndSerialNumber issuerAndSerial;
     private byte[] subjectKeyIdentifier;
 
-    private KeyTransRecipientInfoGenerator(IssuerAndSerialNumber issuerAndSerial, AsymmetricKeyWrapper wrapper)
+    protected KeyTransRecipientInfoGenerator(IssuerAndSerialNumber issuerAndSerial, AsymmetricKeyWrapper wrapper)
     {
         this.issuerAndSerial = issuerAndSerial;
         this.wrapper = wrapper;
-    }
-
-    protected KeyTransRecipientInfoGenerator(X509CertificateHolder certHolder, AsymmetricKeyWrapper wrapper)
-    {
-        this(certHolder.getIssuerAndSerialNumber(), wrapper);
     }
 
     protected KeyTransRecipientInfoGenerator(byte[] subjectKeyIdentifier, AsymmetricKeyWrapper wrapper)

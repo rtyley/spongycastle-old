@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.cmp;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -9,8 +11,6 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.crmf.CertId;
 import org.bouncycastle.asn1.x509.CertificateList;
-
-import java.util.Enumeration;
 
 public class RevRepContent
     extends ASN1Encodable
@@ -54,51 +54,51 @@ public class RevRepContent
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
-     public PKIStatusInfo[] getStatus()
-     {
-         PKIStatusInfo[] results = new PKIStatusInfo[status.size()];
+    public PKIStatusInfo[] getStatus()
+    {
+        PKIStatusInfo[] results = new PKIStatusInfo[status.size()];
 
-         for (int i = 0; i != results.length; i++)
-         {
-             results[i] = PKIStatusInfo.getInstance(status.getObjectAt(i));
-         }
+        for (int i = 0; i != results.length; i++)
+        {
+            results[i] = PKIStatusInfo.getInstance(status.getObjectAt(i));
+        }
 
-         return results;
-     }
+        return results;
+    }
 
-     public CertId[] getRevCerts()
-     {
-         if (revCerts == null)
-         {
-             return null;
-         }
+    public CertId[] getRevCerts()
+    {
+        if (revCerts == null)
+        {
+            return null;
+        }
 
-         CertId[] results = new CertId[revCerts.size()];
+        CertId[] results = new CertId[revCerts.size()];
 
-         for (int i = 0; i != results.length; i++)
-         {
-             results[i] = CertId.getInstance(revCerts.getObjectAt(i));
-         }
+        for (int i = 0; i != results.length; i++)
+        {
+            results[i] = CertId.getInstance(revCerts.getObjectAt(i));
+        }
 
-         return results;
-     }
+        return results;
+    }
 
-     public CertificateList[] getCrls()
-     {
-         if (crls == null)
-         {
-             return null;
-         }
+    public CertificateList[] getCrls()
+    {
+        if (crls == null)
+        {
+            return null;
+        }
 
-         CertificateList[] results = new CertificateList[crls.size()];
+        CertificateList[] results = new CertificateList[crls.size()];
 
-         for (int i = 0; i != results.length; i++)
-         {
-             results[i] = CertificateList.getInstance(crls.getObjectAt(i));
-         }
+        for (int i = 0; i != results.length; i++)
+        {
+            results[i] = CertificateList.getInstance(crls.getObjectAt(i));
+        }
 
-         return results;
-     }
+        return results;
+    }
 
     /**
      * <pre>

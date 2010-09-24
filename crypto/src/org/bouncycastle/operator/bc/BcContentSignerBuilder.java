@@ -5,11 +5,9 @@ import java.security.SecureRandom;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
@@ -17,7 +15,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.RuntimeOperatorException;
 import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
 
-public class BcContentSignerBuilder
+public abstract class BcContentSignerBuilder
 {
     private SecureRandom random;
     private String signatureAlgorithm;
@@ -41,7 +39,7 @@ public class BcContentSignerBuilder
     public ContentSigner build(AsymmetricKeyParameter privateKey)
         throws OperatorCreationException
     {
-        final Signer sig = createSignature(sigAlgId);
+        final Signer sig = createSignature(sigAlgId, digestAlgorithmFinder.find(sigAlgId));
 
         if (random != null)
         {
@@ -80,12 +78,6 @@ public class BcContentSignerBuilder
         };
     }
 
-    private Signer createSignature(AlgorithmIdentifier sigAlgId)
-        throws OperatorCreationException
-    {
-        AlgorithmIdentifier digAlg = digestAlgorithmFinder.find(sigAlgId);
-        Digest              dig = BcUtil.createDigest(digAlg);
-
-        return new RSADigestSigner(dig);
-    }
+    protected abstract Signer createSignature(AlgorithmIdentifier sigAlgId, AlgorithmIdentifier algorithmIdentifier)
+        throws OperatorCreationException;
 }

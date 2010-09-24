@@ -34,6 +34,8 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcePasswordAuthenticatedRecipient;
 import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.AsymmetricKeyWrapper;
+import org.bouncycastle.operator.jcajce.JceAsymmetricKeyWrapper;
 import org.bouncycastle.util.encoders.Hex;
 
 public class NewAuthenticatedDataTest
@@ -170,7 +172,9 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
 
-        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
+
+        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
 
         CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -208,8 +212,10 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
 
-        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(_reciCert).setProvider(BC);
 
+        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert, wrapper));
+        
         CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
                                 macAlg, BC);
