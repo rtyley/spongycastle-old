@@ -10,7 +10,7 @@ import org.bouncycastle.asn1.x509.X509Name;
 
 public class RevocationDetailsBuilder
 {
-    private CertTemplateBuilder templateBuilder;
+    private CertTemplateBuilder templateBuilder = new CertTemplateBuilder();
     
     public RevocationDetailsBuilder setPublicKey(SubjectPublicKeyInfo publicKey)
     {
