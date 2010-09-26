@@ -638,7 +638,8 @@ public class CMSSignedData
      * CMSSignedData object with the new one passed in.
      *
      * @param signedData the signed data object to be used as a base.
-     * @param certificates the new certificates and CRLs to be used.
+     * @param certificates the new certificates to be used.
+     * @param attrCerts the new attribute certificates to be used.
      * @param crls the new CRLs to be used.
      * @return a new signed data object.
      * @exception CMSException if there is an error processing the CertStore
@@ -646,6 +647,7 @@ public class CMSSignedData
     public static CMSSignedData replaceCertificatesAndCRLs(
         CMSSignedData   signedData,
         Store           certificates,
+        Store           attrCerts,
         Store           crls)
         throws CMSException
     {
@@ -660,9 +662,20 @@ public class CMSSignedData
         ASN1Set certSet = null;
         ASN1Set crlSet = null;
 
-        if (certificates != null)
+        if (certificates != null || attrCerts != null)
         {
-            ASN1Set set = CMSUtils.createBerSetFromList(CMSUtils.getCertificatesFromStore(certificates));
+            List certs = new ArrayList();
+
+            if (certificates != null)
+            {
+                certs.addAll(CMSUtils.getCertificatesFromStore(certificates));
+            }
+            if (attrCerts != null)
+            {
+                certs.addAll(CMSUtils.getAttributeCertificatesFromStore(attrCerts));   
+            }
+
+            ASN1Set set = CMSUtils.createBerSetFromList(certs);
 
             if (set.size() != 0)
             {

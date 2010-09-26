@@ -1046,7 +1046,11 @@ public class NewSignedDataTest
 
         ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithmName).setProvider(BC).build(_origKP.getPrivate());
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).setDirectSignature(true).build(contentSigner, _origCert));
+        JcaSignerInfoGeneratorBuilder siBuilder = new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build());
+
+        siBuilder.setDirectSignature(true);
+
+        gen.addSignerInfoGenerator(siBuilder.build(contentSigner, _origCert));
 
         gen.addCertificates(certs);
 
@@ -1386,7 +1390,7 @@ public class NewSignedDataTest
         //
         // replace certs
         //
-        sd = CMSSignedData.replaceCertificatesAndCRLs(sd, certs, null);
+        sd = CMSSignedData.replaceCertificatesAndCRLs(sd, certs, null, null);
 
         verifySignatures(sd);
     }
@@ -1424,7 +1428,7 @@ public class NewSignedDataTest
         //
         // replace certs
         //
-        sd = CMSSignedData.replaceCertificatesAndCRLs(sd, certs, null);
+        sd = CMSSignedData.replaceCertificatesAndCRLs(sd, certs, null, null);
 
         verifySignatures(sd);
     }
@@ -1462,7 +1466,7 @@ public class NewSignedDataTest
         //
         // replace certs
         //
-        sd = CMSSignedData.replaceCertificatesAndCRLs(sd, certs, null);
+        sd = CMSSignedData.replaceCertificatesAndCRLs(sd, certs, null, null);
 
         verifySignatures(sd);
     }

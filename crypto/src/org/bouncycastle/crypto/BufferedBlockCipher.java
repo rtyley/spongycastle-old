@@ -259,29 +259,34 @@ public class BufferedBlockCipher
         int     outOff)
         throws DataLengthException, IllegalStateException, InvalidCipherTextException
     {
-        int resultLen = 0;
-
-        if (outOff + bufOff > out.length)
+        try
         {
-            throw new DataLengthException("output buffer too short for doFinal()");
-        }
+            int resultLen = 0;
 
-        if (bufOff != 0)
-        {
-            if (!partialBlockOkay)
+            if (outOff + bufOff > out.length)
             {
-                throw new DataLengthException("data not block size aligned");
+                throw new DataLengthException("output buffer too short for doFinal()");
             }
 
-            cipher.processBlock(buf, 0, buf, 0);
-            resultLen = bufOff;
-            bufOff = 0;
-            System.arraycopy(buf, 0, out, outOff, resultLen);
+            if (bufOff != 0)
+            {
+                if (!partialBlockOkay)
+                {
+                    throw new DataLengthException("data not block size aligned");
+                }
+
+                cipher.processBlock(buf, 0, buf, 0);
+                resultLen = bufOff;
+                bufOff = 0;
+                System.arraycopy(buf, 0, out, outOff, resultLen);
+            }
+
+            return resultLen;
         }
-
-        reset();
-
-        return resultLen;
+        finally
+        {
+            reset();
+        }
     }
 
     /**

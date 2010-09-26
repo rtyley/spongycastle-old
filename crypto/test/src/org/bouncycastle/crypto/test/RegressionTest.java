@@ -103,6 +103,7 @@ public class RegressionTest
         new Grain128Test(),
         //new NaccacheSternTest(),
         new SRP6Test(),
+        new ResetTest(),
         new NullTest()
     };
 
