@@ -50,7 +50,7 @@ public class BlockCipherVectorTest
 
         int len1 = cipher.processBytes(input, 0, input.length, out, 0);
 
-            cipher.doFinal(out, len1);
+        cipher.doFinal(out, len1);
 
         if (!areEqual(out, output))
         {

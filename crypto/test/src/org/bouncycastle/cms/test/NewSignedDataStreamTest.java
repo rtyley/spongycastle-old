@@ -277,7 +277,11 @@ public class NewSignedDataStreamTest
 
         ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).setDirectSignature(true).build(sha1Signer, _origCert));
+        JcaSignerInfoGeneratorBuilder siBuilder = new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build());
+
+        siBuilder.setDirectSignature(true);
+
+        gen.addSignerInfoGenerator(siBuilder.build(sha1Signer, _origCert));
     
         gen.addCertificates(certs);
     
@@ -788,7 +792,11 @@ public class NewSignedDataStreamTest
         };
         ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate());
 
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()).setSignedAttributeGenerator(signedGen).setUnsignedAttributeGenerator(unsignedGen).build(sha1Signer, _origCert));
+        JcaSignerInfoGeneratorBuilder siBuilder = new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build());
+
+        siBuilder.setSignedAttributeGenerator(signedGen).setUnsignedAttributeGenerator(unsignedGen);
+
+        gen.addSignerInfoGenerator(siBuilder.build(sha1Signer, _origCert));
 
         gen.addCertificatesAndCRLs(certs);
 

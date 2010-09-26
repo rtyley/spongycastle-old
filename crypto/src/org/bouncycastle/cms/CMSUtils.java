@@ -24,11 +24,13 @@ import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.util.Store;
@@ -109,6 +111,28 @@ class CMSUtils
                 X509CertificateHolder c = (X509CertificateHolder)it.next();
 
                 certs.add(c.toASN1Structure());
+            }
+
+            return certs;
+        }
+        catch (ClassCastException e)
+        {
+            throw new CMSException("error processing certs", e);
+        }
+    }
+
+    static List getAttributeCertificatesFromStore(Store attrStore)
+        throws CMSException
+    {
+        List certs = new ArrayList();
+
+        try
+        {
+            for (Iterator it = attrStore.getMatches(null).iterator(); it.hasNext();)
+            {
+                X509AttributeCertificateHolder attrCert = (X509AttributeCertificateHolder)it.next();
+
+                certs.add(new DERTaggedObject(false, 2, attrCert.toASN1Structure()));
             }
 
             return certs;

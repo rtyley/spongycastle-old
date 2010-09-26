@@ -36,7 +36,6 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.x509.X509AttributeCertificate;
@@ -239,19 +238,7 @@ public class CMSSignedGenerator
         Store attrStore)
         throws CMSException
     {
-        try
-        {
-            for (Iterator it = attrStore.getMatches(null).iterator(); it.hasNext();)
-            {
-                X509AttributeCertificateHolder attrCert = (X509AttributeCertificateHolder)it.next();
-
-                _certs.add(new DERTaggedObject(false, 2, attrCert.toASN1Structure()));
-            }
-        }
-        catch (ClassCastException e)
-        {
-            throw new CMSException("error processing attribute certs", e);
-        }
+        _certs.addAll(CMSUtils.getAttributeCertificatesFromStore(attrStore));
     }
 
     /**

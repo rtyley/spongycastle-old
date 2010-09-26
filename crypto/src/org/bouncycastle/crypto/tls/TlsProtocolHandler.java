@@ -20,7 +20,7 @@ import org.bouncycastle.util.Arrays;
  */
 public class TlsProtocolHandler
 {
-    private static final Integer EXT_RenegotiationInfo = Integer.valueOf(ExtensionType.renegotiation_info);
+    private static final Integer EXT_RenegotiationInfo = new Integer(ExtensionType.renegotiation_info);
 
     /*
      * Our Connection states
@@ -785,12 +785,7 @@ public class TlsProtocolHandler
     /**
      * Connects to the remote system using client authentication
      * 
-     * @param verifyer Will be used when a certificate is received to verify that this
-     *            certificate is accepted by the client.
-     * @param clientCertificate The client's certificate to be provided to the remote
-     *            system
-     * @param clientPrivateKey The client's private key for the certificate to
-     *            authenticate to the remote system (RSA or DSA)
+     * @param tlsClient
      * @throws IOException If handshake was not successful.
      */
     // TODO Make public
