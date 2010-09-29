@@ -336,12 +336,7 @@ public class BasicOCSPResp
     public byte[] getEncoded()
         throws IOException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-        aOut.writeObject(resp);
-
-        return bOut.toByteArray();
+    	return resp.getEncoded();
     }
     
     public boolean equals(Object o)
