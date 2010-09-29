@@ -75,6 +75,11 @@ public class PKIStatusInfo
         this.status = new DERInteger(status);
     }
 
+    public PKIStatusInfo(PKIStatus status)
+    {
+        this.status = DERInteger.getInstance(status.toASN1Object());
+    }
+
     /**
      * @param status
      * @param statusString
@@ -84,6 +89,14 @@ public class PKIStatusInfo
         PKIFreeText statusString)
     {
         this.status = new DERInteger(status);
+        this.statusString = statusString;
+    }
+
+    public PKIStatusInfo(
+        PKIStatus   status,
+        PKIFreeText statusString)
+    {
+        this.status = DERInteger.getInstance(status.toASN1Object());
         this.statusString = statusString;
     }
 

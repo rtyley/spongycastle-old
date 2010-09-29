@@ -24,6 +24,11 @@ public class ProtectedPKIMessage
 
     public ProtectedPKIMessage(PKIMessage pkiMessage)
     {
+        if (pkiMessage.getHeader().getProtectionAlg() == null)
+        {
+            throw new IllegalArgumentException("PKIMessage not protected");
+        }
+        
         this.pkiMessage = pkiMessage;
     }
 
@@ -40,6 +45,11 @@ public class ProtectedPKIMessage
     public PKIMessage toPKIMessage()
     {
         return pkiMessage;
+    }
+
+    public boolean hasPasswordBasedMacProtection()
+    {
+        return pkiMessage.getHeader().getProtectionAlg().getAlgorithm().equals(CMPObjectIdentifiers.passwordBasedMac);
     }
 
     public X509CertificateHolder[] getCertificates()
@@ -83,7 +93,6 @@ public class ProtectedPKIMessage
         {
             throw new CMPException("protection algorithm not mac based");
         }
-
 
         try
         {
