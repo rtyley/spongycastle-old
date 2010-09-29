@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.cmp;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
@@ -50,6 +52,11 @@ public class PKIStatus
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
+    public BigInteger getValue()
+    {
+        return value.getValue();
+    }
+    
     public DERObject toASN1Object()
     {
         return value;
