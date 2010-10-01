@@ -6,7 +6,7 @@ import java.io.OutputStream;
 
 import org.bouncycastle.util.io.Streams;
 
-public class CMSProcessableInputStream implements CMSProcessable, CMSReadable
+class CMSProcessableInputStream implements CMSProcessable, CMSReadable
 {
     private InputStream input;
     private boolean used = false;
