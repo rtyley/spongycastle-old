@@ -54,6 +54,7 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.bc.BcContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcContentVerifierProviderBuilder;
@@ -821,7 +822,7 @@ public class NewSignedDataTest
         v.add(attr);
 
         AsymmetricKeyParameter privKey = PrivateKeyFactory.createKey(_origKP.getPrivate().getEncoded());
-        BcContentSignerBuilder contentSignerBuilder = new BcRSAContentSignerBuilder("SHA1withRSA");
+        BcContentSignerBuilder contentSignerBuilder = new BcRSAContentSignerBuilder(new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA"));
 
         gen.addSignerInfoGenerator(
             new SignerInfoGeneratorBuilder(new BcDigestCalculatorProvider())

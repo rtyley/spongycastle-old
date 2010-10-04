@@ -18,7 +18,7 @@ public class X509v1CertificateBuilder
 {
     private V1TBSCertificateGenerator   tbsGen;
 
-    protected X509v1CertificateBuilder(X509Name issuer, BigInteger serial, Date notBefore, Date notAfter, X509Name subject, SubjectPublicKeyInfo publicKeyInfo)
+    public X509v1CertificateBuilder(X509Name issuer, BigInteger serial, Date notBefore, Date notAfter, X509Name subject, SubjectPublicKeyInfo publicKeyInfo)
     {
         tbsGen = new V1TBSCertificateGenerator();
         tbsGen.setSerialNumber(new DERInteger(serial));

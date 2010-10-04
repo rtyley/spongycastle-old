@@ -32,6 +32,8 @@ import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.x509.NoSuchStoreException;
@@ -198,6 +200,7 @@ public class CMSSignedData
         {
             ASN1Set         s = signedData.getSignerInfos();
             List            signerInfos = new ArrayList();
+            SignatureAlgorithmIdentifierFinder sigAlgFinder = new DefaultSignatureAlgorithmIdentifierFinder();
 
             for (int i = 0; i != s.size(); i++)
             {
@@ -206,14 +209,14 @@ public class CMSSignedData
 
                 if (hashes == null)
                 {
-                    signerInfos.add(new SignerInformation(info, contentType, signedContent, null));
+                    signerInfos.add(new SignerInformation(info, contentType, signedContent, null, sigAlgFinder));
                 }
                 else
                 {
 
-                    byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getObjectId().getId());
+                    byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm().getId());
 
-                    signerInfos.add(new SignerInformation(info, contentType, null, new BaseDigestCalculator(hash)));
+                    signerInfos.add(new SignerInformation(info, contentType, null, new BaseDigestCalculator(hash), sigAlgFinder));
                 }
             }
 

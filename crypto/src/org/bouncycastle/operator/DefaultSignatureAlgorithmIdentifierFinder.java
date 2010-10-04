@@ -19,7 +19,8 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.util.Strings;
 
-public class SignerAlgorithmIdentifierGenerator
+public class DefaultSignatureAlgorithmIdentifierFinder
+    implements SignatureAlgorithmIdentifierFinder
 {
     private static Map algorithms = new HashMap();
     private static Set noParams = new HashSet();
@@ -144,7 +145,7 @@ public class SignerAlgorithmIdentifierGenerator
         digestOids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001, CryptoProObjectIdentifiers.gostR3411);
     }
 
-    public static AlgorithmIdentifier generate(String signatureAlgorithm)
+    private static AlgorithmIdentifier generate(String signatureAlgorithm)
     {
         AlgorithmIdentifier sigAlgId;
         AlgorithmIdentifier encAlgId;
@@ -198,5 +199,10 @@ public class SignerAlgorithmIdentifierGenerator
             new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, hashAlgId),
             new DERInteger(saltSize),
             new DERInteger(1));
+    }
+
+    public AlgorithmIdentifier find(String sigAlgName)
+    {
+        return generate(sigAlgName);
     }
 }

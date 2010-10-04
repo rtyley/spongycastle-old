@@ -47,6 +47,8 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.io.Streams;
@@ -260,15 +262,16 @@ public class CMSSignedDataParser
             {
                 ASN1SetParser     s = _signedData.getSignerInfos();
                 DEREncodable      o;
+                SignatureAlgorithmIdentifierFinder sigAlgFinder = new DefaultSignatureAlgorithmIdentifierFinder();
                 
                 while ((o = s.readObject()) != null)
                 {
                     SignerInfo info = SignerInfo.getInstance(o.getDERObject());
-                    String     digestName = HELPER.getDigestAlgName(info.getDigestAlgorithm().getObjectId().getId());
+                    String     digestName = HELPER.getDigestAlgName(info.getDigestAlgorithm().getAlgorithm().getId());
                     
                     byte[] hash = (byte[])hashes.get(digestName);
                     
-                    signerInfos.add(new SignerInformation(info, _signedContentType, null, new BaseDigestCalculator(hash)));
+                    signerInfos.add(new SignerInformation(info, _signedContentType, null, new BaseDigestCalculator(hash), sigAlgFinder));
                 }
             }
             catch (IOException e)

@@ -45,9 +45,10 @@ import org.bouncycastle.asn1.x509.DigestInfo;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.DatedContentVerifier;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.RawContentVerifier;
-import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
+import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.util.Arrays;
 
 /**
@@ -66,6 +67,7 @@ public class SignerInformation
     private DERObjectIdentifier     contentType;
     private IntDigestCalculator digestCalculator;
     private byte[]                  resultDigest;
+    private SignatureAlgorithmIdentifierFinder sigAlgFinder;
 
     // Derived
     private AttributeTable          signedAttributeValues;
@@ -75,11 +77,13 @@ public class SignerInformation
         SignerInfo          info,
         DERObjectIdentifier contentType,
         CMSProcessable      content,
-        IntDigestCalculator digestCalculator)
+        IntDigestCalculator digestCalculator,
+        SignatureAlgorithmIdentifierFinder sigAlgFinder)
     {
         this.info = info;
         this.sid = new SignerId();
         this.contentType = contentType;
+        this.sigAlgFinder = sigAlgFinder;
 
         try
         {
@@ -308,7 +312,7 @@ public class SignerInformation
 
                 String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(si.getDigestAlgorithm().getObjectId().getId());
                 
-                counterSignatures.add(new SignerInformation(si, CMSAttributes.counterSignature, null, new CounterSignatureDigestCalculator(digestName, null, getSignature())));
+                counterSignatures.add(new SignerInformation(si, CMSAttributes.counterSignature, null, new CounterSignatureDigestCalculator(digestName, null, getSignature()), new DefaultSignatureAlgorithmIdentifierFinder()));
             }
         }
 
@@ -951,7 +955,7 @@ public class SignerInformation
 
         try
         {
-            return doVerify(verifierProvider.get(SignerAlgorithmIdentifierGenerator.generate(signatureName)));
+            return doVerify(verifierProvider.get(sigAlgFinder.find(signatureName)));
         }
         catch (OperatorCreationException e)
         {
@@ -1054,7 +1058,7 @@ public class SignerInformation
         return new SignerInformation(
                 new SignerInfo(sInfo.getSID(), sInfo.getDigestAlgorithm(),
                     sInfo.getAuthenticatedAttributes(), sInfo.getDigestEncryptionAlgorithm(), sInfo.getEncryptedDigest(), unsignedAttr),
-                    signerInformation.contentType, signerInformation.content, null);
+                    signerInformation.contentType, signerInformation.content, null, new DefaultSignatureAlgorithmIdentifierFinder());
     }
 
     /**
@@ -1096,6 +1100,6 @@ public class SignerInformation
         return new SignerInformation(
                 new SignerInfo(sInfo.getSID(), sInfo.getDigestAlgorithm(),
                     sInfo.getAuthenticatedAttributes(), sInfo.getDigestEncryptionAlgorithm(), sInfo.getEncryptedDigest(), new DERSet(v)),
-                    signerInformation.contentType, signerInformation.content, null);
+                    signerInformation.contentType, signerInformation.content, null, new DefaultSignatureAlgorithmIdentifierFinder());
     }
 }

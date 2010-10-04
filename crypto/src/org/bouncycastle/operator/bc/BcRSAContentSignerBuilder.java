@@ -9,9 +9,9 @@ import org.bouncycastle.operator.OperatorCreationException;
 public class BcRSAContentSignerBuilder
     extends BcContentSignerBuilder
 {
-    public BcRSAContentSignerBuilder(String signatureAlgorithm)
+    public BcRSAContentSignerBuilder(AlgorithmIdentifier sigAlgId)
     {
-        super(signatureAlgorithm);
+        super(sigAlgId);
     }
 
     protected Signer createSignature(AlgorithmIdentifier sigAlgId, AlgorithmIdentifier digAlgId)
