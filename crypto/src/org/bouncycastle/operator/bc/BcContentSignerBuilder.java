@@ -13,19 +13,16 @@ import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.RuntimeOperatorException;
-import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
 
 public abstract class BcContentSignerBuilder
 {
     private SecureRandom random;
-    private String signatureAlgorithm;
     private AlgorithmIdentifier sigAlgId;
     private DigestAlgorithmIdentifierFinder digestAlgorithmFinder;
 
-    public BcContentSignerBuilder(String signatureAlgorithm)
+    public BcContentSignerBuilder(AlgorithmIdentifier sigAlgId)
     {
-        this.signatureAlgorithm = signatureAlgorithm;
-        this.sigAlgId = SignerAlgorithmIdentifierGenerator.generate(signatureAlgorithm);
+        this.sigAlgId = sigAlgId;
         this.digestAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
     }
 

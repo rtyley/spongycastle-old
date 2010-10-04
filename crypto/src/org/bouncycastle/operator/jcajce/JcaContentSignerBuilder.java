@@ -14,10 +14,10 @@ import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OperatorStreamException;
 import org.bouncycastle.operator.RuntimeOperatorException;
-import org.bouncycastle.operator.SignerAlgorithmIdentifierGenerator;
 
 public class JcaContentSignerBuilder
 {
@@ -29,7 +29,7 @@ public class JcaContentSignerBuilder
     public JcaContentSignerBuilder(String signatureAlgorithm)
     {
         this.signatureAlgorithm = signatureAlgorithm;
-        this.sigAlgId = SignerAlgorithmIdentifierGenerator.generate(signatureAlgorithm);
+        this.sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(signatureAlgorithm);
     }
 
     public JcaContentSignerBuilder setProvider(Provider provider)
