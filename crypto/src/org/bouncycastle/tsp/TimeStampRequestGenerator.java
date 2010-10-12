@@ -5,17 +5,18 @@ import java.math.BigInteger;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.tsp.MessageImprint;
-import org.bouncycastle.asn1.tsp.TimeStampReq;
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.tsp.MessageImprint;
+import org.bouncycastle.asn1.tsp.TimeStampReq;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
 
 /**
  * Generator for RFC 3161 Time Stamp Request objects.
@@ -48,6 +49,7 @@ public class TimeStampRequestGenerator
     /**
      * add a given extension field for the standard extensions tag (tag 3)
      * @throws IOException
+     * @deprecated use method taking ASN1ObjectIdentifier
      */
     public void addExtension(
         String          OID,
@@ -62,6 +64,7 @@ public class TimeStampRequestGenerator
      * add a given extension field for the standard extensions tag
      * The value parameter becomes the contents of the octet string associated
      * with the extension.
+     * @deprecated use method taking ASN1ObjectIdentifier
      */
     public void addExtension(
         String          OID,
@@ -69,6 +72,33 @@ public class TimeStampRequestGenerator
         byte[]          value)
     {
         DERObjectIdentifier oid = new DERObjectIdentifier(OID);
+        extensions.put(oid, new X509Extension(critical, new DEROctetString(value)));
+        extOrdering.addElement(oid);
+    }
+
+    /**
+     * add a given extension field for the standard extensions tag (tag 3)
+     * @throws IOException
+     */
+    public void addExtension(
+        ASN1ObjectIdentifier oid,
+        boolean              critical,
+        ASN1Encodable        value)
+        throws IOException
+    {
+        this.addExtension(oid, critical, value.getEncoded());
+    }
+
+    /**
+     * add a given extension field for the standard extensions tag
+     * The value parameter becomes the contents of the octet string associated
+     * with the extension.
+     */
+    public void addExtension(
+        ASN1ObjectIdentifier oid,
+        boolean              critical,
+        byte[]               value)
+    {
         extensions.put(oid, new X509Extension(critical, new DEROctetString(value)));
         extOrdering.addElement(oid);
     }
@@ -112,5 +142,10 @@ public class TimeStampRequestGenerator
             return new TimeStampRequest(new TimeStampReq(messageImprint,
                     reqPolicy, null, certReq, ext));
         }
+    }
+
+    public TimeStampRequest generate(ASN1ObjectIdentifier digestAlgorithm, byte[] digest, BigInteger nonce)
+    {
+        return generate(digestAlgorithm.getId(), digest, nonce);
     }
 }

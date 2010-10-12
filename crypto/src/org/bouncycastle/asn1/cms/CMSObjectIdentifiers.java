@@ -14,4 +14,5 @@ public interface CMSObjectIdentifiers
     static final ASN1ObjectIdentifier    authenticatedData = PKCSObjectIdentifiers.id_ct_authData;
     static final ASN1ObjectIdentifier    compressedData = PKCSObjectIdentifiers.id_ct_compressedData;
     static final ASN1ObjectIdentifier    authEnvelopedData = PKCSObjectIdentifiers.id_ct_authEnvelopedData;
+    static final ASN1ObjectIdentifier    timestampedData = PKCSObjectIdentifiers.id_ct_timestampedData;
 }

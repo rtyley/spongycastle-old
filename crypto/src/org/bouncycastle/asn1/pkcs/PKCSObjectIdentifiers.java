@@ -149,6 +149,7 @@ public interface PKCSObjectIdentifiers
     static final ASN1ObjectIdentifier    id_ct_TSTInfo           = new ASN1ObjectIdentifier(id_ct + ".4");
     static final ASN1ObjectIdentifier    id_ct_compressedData    = new ASN1ObjectIdentifier(id_ct + ".9");
     static final ASN1ObjectIdentifier    id_ct_authEnvelopedData = new ASN1ObjectIdentifier(id_ct + ".23");
+    static final ASN1ObjectIdentifier    id_ct_timestampedData   = new ASN1ObjectIdentifier(id_ct + ".31");
 
     //
     // id-cti OBJECT IDENTIFIER ::= {iso(1) member-body(2) usa(840)
