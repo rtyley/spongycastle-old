@@ -123,13 +123,27 @@ public class CertificateID
         return id.getDERObject().hashCode();
     }
 
+    /**
+     * Create a new CertificateID for a new serial number derived from a previous one
+     * calculated for the same CA certificate.
+     *
+     * @param original the previously calculated CertificateID for the CA.
+     * @param newSerialNumber the serial number for the new certificate of interest.
+     *
+     * @return a new CertificateID for newSerialNumber
+     */
+    public static CertificateID deriveCertificateID(CertificateID original, BigInteger newSerialNumber)
+    {
+        return new CertificateID(new CertID(original.id.getHashAlgorithm(), original.id.getIssuerNameHash(), original.id.getIssuerKeyHash(), new DERInteger(newSerialNumber)));
+    }
+
     private static CertID createCertID(AlgorithmIdentifier hashAlg, X509Certificate issuerCert,
         DERInteger serialNumber, String provider)
         throws OCSPException
     {
         try
         {
-            MessageDigest digest = OCSPUtil.createDigestInstance(hashAlg.getObjectId().getId(),
+            MessageDigest digest = OCSPUtil.createDigestInstance(hashAlg.getAlgorithm() .getId(),
                 provider);
 
             X509Principal issuerName = PrincipalUtil.getSubjectX509Principal(issuerCert);
