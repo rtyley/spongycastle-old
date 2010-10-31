@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,7 +16,6 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -70,7 +68,7 @@ public class SignerInfoGenerator
         DigestCalculatorProvider digesterProvider)
         throws OperatorCreationException
     {
-        this(signerIdentifier, signer, digesterProvider, new DefaultSignedAttributeTableGenerator(), null);
+        this(signerIdentifier, signer, digesterProvider, false);
     }
 
     public SignerInfoGenerator(
@@ -102,6 +100,18 @@ public class SignerInfoGenerator
             this.sAttrGen = new DefaultSignedAttributeTableGenerator();
             this.unsAttrGen = null;
         }
+    }
+
+    public SignerInfoGenerator(
+        SignerInfoGenerator original,
+        CMSAttributeTableGenerator sAttrGen,
+        CMSAttributeTableGenerator unsAttrGen)
+    {
+        this.signerIdentifier = original.signerIdentifier;
+        this.signer = original.signer;
+        this.digester = original.digester;
+        this.sAttrGen = sAttrGen;
+        this.unsAttrGen = unsAttrGen;
     }
 
     public SignerInfoGenerator(
@@ -154,7 +164,7 @@ public class SignerInfoGenerator
         }
     }
 
-    public SignerInfo generate(boolean isCounterSignature, ASN1ObjectIdentifier contentType)
+    public SignerInfo generate(ASN1ObjectIdentifier contentType)
         throws CMSException
     {
         try
@@ -177,13 +187,6 @@ public class SignerInfoGenerator
                 calculatedDigest = digester.getDigest();
                 Map parameters = getBaseParameters(contentType, digester.getAlgorithmIdentifier(), calculatedDigest);
                 AttributeTable signed = sAttrGen.getAttributes(Collections.unmodifiableMap(parameters));
-
-                if (isCounterSignature)
-                {
-                    Hashtable tmpSigned = signed.toHashtable();
-                    tmpSigned.remove(CMSAttributes.contentType);
-                    signed = new AttributeTable(tmpSigned);
-                }
 
                 signedAttr = getAttributeSet(signed);
 
@@ -254,7 +257,7 @@ public class SignerInfoGenerator
         return param;
     }
 
-    protected AlgorithmIdentifier getSignatureAlgorithm(AlgorithmIdentifier sigAlgID)
+    private AlgorithmIdentifier getSignatureAlgorithm(AlgorithmIdentifier sigAlgID)
         throws IOException
     {
         // RFC3370 section 3.2
@@ -274,5 +277,15 @@ public class SignerInfoGenerator
         }
 
         return null;
+    }
+
+    public CMSAttributeTableGenerator getSignedAttributeTableGenerator()
+    {
+        return sAttrGen;
+    }
+
+    public CMSAttributeTableGenerator getUnsignedAttributeTableGenerator()
+    {
+        return unsAttrGen;
     }
 }

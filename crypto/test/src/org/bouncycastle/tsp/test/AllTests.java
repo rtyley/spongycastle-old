@@ -2,11 +2,10 @@ package org.bouncycastle.tsp.test;
 
 import java.security.Security;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class AllTests
     extends TestCase
@@ -24,7 +23,8 @@ public class AllTests
         
         suite.addTestSuite(ParseTest.class);
         suite.addTestSuite(TSPTest.class);
-        
+        suite.addTestSuite(NewTSPTest.class);
+
         return suite;
     }
 }

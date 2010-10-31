@@ -1,11 +1,33 @@
 package org.bouncycastle.tsp;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.cert.CRLException;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -17,25 +39,26 @@ import org.bouncycastle.asn1.tsp.MessageImprint;
 import org.bouncycastle.asn1.tsp.TSTInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CRLHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cms.CMSAttributeTableGenerationException;
+import org.bouncycastle.cms.CMSAttributeTableGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.Hashtable;
+import org.bouncycastle.cms.CMSSignedGenerator;
+import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
+import org.bouncycastle.cms.SignerInfoGenerator;
+import org.bouncycastle.cms.SimpleAttributeTableGenerator;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.bouncycastle.util.CollectionStore;
+import org.bouncycastle.util.Store;
 
 public class TimeStampTokenGenerator
 {
@@ -57,9 +80,55 @@ public class TimeStampTokenGenerator
     AttributeTable  signedAttr;
     AttributeTable  unsignedAttr;
     CertStore       certsAndCrls;
-    
+
+    private List certs = new ArrayList();
+    private List crls = new ArrayList();
+    private List attrCerts = new ArrayList();
+    private SignerInfoGenerator signerInfoGen;
+
+    /**
+     *
+     */
+    public TimeStampTokenGenerator(
+        final SignerInfoGenerator     signerInfoGen,
+        X509CertificateHolder   signerCertificate,
+        ASN1ObjectIdentifier    tsaPolicy)
+        throws IllegalArgumentException, TSPException
+    {
+        this.signerInfoGen = signerInfoGen;
+        this.tsaPolicyOID = tsaPolicy.getId();
+
+        TSPUtil.validateCertificate(signerCertificate);
+
+        try
+        {
+            final ESSCertID essCertid = new ESSCertID(MessageDigest.getInstance("SHA-1").digest(signerCertificate.getEncoded()));
+
+            this.signerInfoGen = new SignerInfoGenerator(signerInfoGen, new CMSAttributeTableGenerator()
+            {
+                public AttributeTable getAttributes(Map parameters)
+                    throws CMSAttributeTableGenerationException
+                {
+                    AttributeTable table = signerInfoGen.getSignedAttributeTableGenerator().getAttributes(parameters);
+
+                    return table.add(PKCSObjectIdentifiers.id_aa_signingCertificate, new SigningCertificate(essCertid));
+                }
+            }, signerInfoGen.getUnsignedAttributeTableGenerator());
+
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new TSPException("Can't find a SHA-1 implementation.", e);
+        }
+        catch (IOException e)
+        {
+            throw new TSPException("Exception processing certificate.", e);
+        }
+    }
+
     /**
      * basic creation - only the default attributes will be included here.
+     * @deprecated use SignerInfoGenerator constructor
      */
     public TimeStampTokenGenerator(
         PrivateKey      key,
@@ -73,6 +142,7 @@ public class TimeStampTokenGenerator
 
     /**
      * create with a signer with extra signed/unsigned attributes.
+     * @deprecated use SignerInfoGenerator constructor
      */
     public TimeStampTokenGenerator(
         PrivateKey      key,
@@ -88,8 +158,6 @@ public class TimeStampTokenGenerator
         this.digestOID = digestOID;
         this.tsaPolicyOID = tsaPolicyOID;
         this.unsignedAttr = unsignedAttr;
-        
-        TSPUtil.validateCertificate(cert);
 
         //
         // add the essCertid
@@ -104,7 +172,10 @@ public class TimeStampTokenGenerator
         {
             signedAttrs = new Hashtable();
         }
-        
+
+
+        TSPUtil.validateCertificate(cert);
+
         try
         {
             ESSCertID essCertid = new ESSCertID(MessageDigest.getInstance("SHA-1").digest(cert.getEncoded()));
@@ -124,11 +195,74 @@ public class TimeStampTokenGenerator
         
         this.signedAttr = new AttributeTable(signedAttrs);
     }
-    
+
+    /**
+     * @deprecated use addCertificates and addCRLs
+     * @param certificates
+     * @throws CertStoreException
+     * @throws TSPException
+     */
     public void setCertificatesAndCRLs(CertStore certificates)
             throws CertStoreException, TSPException
     {
-        this.certsAndCrls = certificates;
+        Collection c1 = certificates.getCertificates(null);
+
+        for (Iterator it = c1.iterator(); it.hasNext();)
+        {
+            try
+            {
+                certs.add(new JcaX509CertificateHolder((X509Certificate)it.next()));
+            }
+            catch (CertificateEncodingException e)
+            {
+                throw new TSPException("cannot encode certificate: " + e.getMessage(), e);
+            }
+        }
+
+        c1 = certificates.getCRLs(null);
+
+        for (Iterator it = c1.iterator(); it.hasNext();)
+        {
+            try
+            {
+                crls.add(new JcaX509CRLHolder((X509CRL)it.next()));
+            }
+            catch (CRLException e)
+            {
+                throw new TSPException("cannot encode CRL: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Add the store of X509 Certificates to the generator.
+     *
+     * @param certStore  a Store containing X509CertificateHolder objects
+     */
+    public void addCertificates(
+        Store certStore)
+    {
+        certs.addAll(certStore.getMatches(null));
+    }
+
+    /**
+     *
+     * @param crlStore a Store containing X509CRLHolder objects.
+     */
+    public void addCRLs(
+        Store crlStore)
+    {
+        crls.addAll(crlStore.getMatches(null));
+    }
+
+    /**
+     *
+     * @param attrStore a Store containing X509AttributeCertificate objects.
+     */
+    public void addAttributeCertificates(
+        Store attrStore)
+    {
+        attrCerts.addAll(attrStore.getMatches(null));
     }
 
     public void setAccuracySeconds(int accuracySeconds)
@@ -165,7 +299,42 @@ public class TimeStampTokenGenerator
         String              provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, TSPException
     {
-        DERObjectIdentifier digestAlgOID = new DERObjectIdentifier(request.getMessageImprintAlgOID());
+        if (signerInfoGen == null)
+        {
+            try
+            {
+                JcaSignerInfoGeneratorBuilder sigBuilder = new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(provider).build());
+
+                sigBuilder.setSignedAttributeGenerator(new DefaultSignedAttributeTableGenerator(signedAttr))
+                    .setUnsignedAttributeGenerator(new SimpleAttributeTableGenerator(unsignedAttr));
+
+                signerInfoGen = sigBuilder.build(new JcaContentSignerBuilder(getSigAlgorithm(key, digestOID)).setProvider(provider).build(key), cert);
+            }
+            catch (OperatorCreationException e)
+            {
+                throw new TSPException("Error generating signing operator", e);
+            }
+            catch (CertificateEncodingException e)
+            {
+                throw new TSPException("Error encoding certificate", e);
+            }
+        }
+
+        return generate(request, serialNumber, genTime);
+    }
+
+    public TimeStampToken generate(
+        TimeStampRequest    request,
+        BigInteger          serialNumber,
+        Date                genTime)
+        throws TSPException
+    {
+        if (signerInfoGen == null)
+        {
+            throw new IllegalStateException("can only use this method with SignerInfoGenerator constructor");
+        }
+
+        ASN1ObjectIdentifier digestAlgOID = new ASN1ObjectIdentifier(request.getMessageImprintAlgOID());
 
         AlgorithmIdentifier algID = new AlgorithmIdentifier(digestAlgOID, new DERNull());
         MessageImprint      messageImprint = new MessageImprint(algID, request.getMessageImprintDigest());
@@ -199,48 +368,46 @@ public class TimeStampTokenGenerator
         {
             derOrdering = new DERBoolean(ordering);
         }
-        
+
         DERInteger  nonce = null;
         if (request.getNonce() != null)
         {
             nonce = new DERInteger(request.getNonce());
         }
 
-        DERObjectIdentifier tsaPolicy = new DERObjectIdentifier(tsaPolicyOID);
+        ASN1ObjectIdentifier tsaPolicy = new ASN1ObjectIdentifier(tsaPolicyOID);
         if (request.getReqPolicy() != null)
         {
-            tsaPolicy = new DERObjectIdentifier(request.getReqPolicy());
+            tsaPolicy = new ASN1ObjectIdentifier(request.getReqPolicy());
         }
-        
+
         TSTInfo tstInfo = new TSTInfo(tsaPolicy,
                 messageImprint, new DERInteger(serialNumber),
                 new DERGeneralizedTime(genTime), accuracy, derOrdering,
                 nonce, tsa, request.getExtensions());
-        
+
         try
         {
             CMSSignedDataGenerator  signedDataGenerator = new CMSSignedDataGenerator();
-            
-            byte[] derEncodedTSTInfo = tstInfo.getEncoded(ASN1Encodable.DER);
 
-            // TODO Check for certsAndCrls != null here?
-
-            CertStore genCertStore;
             if (request.getCertReq())
             {
-                genCertStore = certsAndCrls;
+                // TODO: do we need to check certs non-empty?
+                signedDataGenerator.addCertificates(new CollectionStore(certs));
+                signedDataGenerator.addCRLs(new CollectionStore(crls));
+                signedDataGenerator.addAttributeCertificates(new CollectionStore(attrCerts));
             }
             else
             {
-                genCertStore = CertStore.getInstance("Collection",
-                    new CollectionCertStoreParameters(certsAndCrls.getCRLs(null)));
+                signedDataGenerator.addCRLs(new CollectionStore(crls));
             }
 
-            signedDataGenerator.addCertificatesAndCRLs(genCertStore);
-            signedDataGenerator.addSigner(key, cert, digestOID, signedAttr, unsignedAttr);
+            signedDataGenerator.addSignerInfoGenerator(signerInfoGen);
 
-            CMSSignedData signedData = signedDataGenerator.generate(PKCSObjectIdentifiers.id_ct_TSTInfo.getId(), new CMSProcessableByteArray(derEncodedTSTInfo), true, provider);
-            
+            byte[] derEncodedTSTInfo = tstInfo.getEncoded(ASN1Encodable.DER);
+
+            CMSSignedData signedData = signedDataGenerator.generate(new CMSProcessableByteArray(PKCSObjectIdentifiers.id_ct_TSTInfo, derEncodedTSTInfo), true);
+
             return new TimeStampToken(signedData);
         }
         catch (CMSException cmsEx)
@@ -251,13 +418,35 @@ public class TimeStampTokenGenerator
         {
             throw new TSPException("Exception encoding info", e);
         }
-        catch (CertStoreException e)
+    }
+
+    private String getSigAlgorithm(
+        PrivateKey key,
+        String     digestOID)
+    {
+        String enc = null;
+
+        if (key instanceof RSAPrivateKey || "RSA".equalsIgnoreCase(key.getAlgorithm()))
         {
-            throw new TSPException("Exception handling CertStore", e);
+            enc = "RSA";
         }
-        catch (InvalidAlgorithmParameterException e)
+        else if (key instanceof DSAPrivateKey || "DSA".equalsIgnoreCase(key.getAlgorithm()))
         {
-            throw new TSPException("Exception handling CertStore CRLs", e);
+            enc = "DSA";
         }
+        else if ("ECDSA".equalsIgnoreCase(key.getAlgorithm()) || "EC".equalsIgnoreCase(key.getAlgorithm()))
+        {
+            enc = "ECDSA";
+        }
+        else if (key instanceof GOST3410PrivateKey || "GOST3410".equalsIgnoreCase(key.getAlgorithm()))
+        {
+            enc = "GOST3410";
+        }
+        else if ("ECGOST3410".equalsIgnoreCase(key.getAlgorithm()))
+        {
+            enc = CMSSignedGenerator.ENCRYPTION_ECGOST3410;
+        }
+
+        return TSPUtil.getDigestAlgName(digestOID) + "with" + enc;
     }
 }

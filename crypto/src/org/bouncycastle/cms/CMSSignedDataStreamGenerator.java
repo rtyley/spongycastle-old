@@ -1139,7 +1139,7 @@ public class CMSSignedDataStreamGenerator
 
                 try
                 {
-                    signerInfos.add(sigGen.generate(false, _contentOID));
+                    signerInfos.add(sigGen.generate(_contentOID));
 
                     byte[] calculatedDigest = sigGen.getCalculatedDigest();
 

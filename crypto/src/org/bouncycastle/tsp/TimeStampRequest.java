@@ -1,11 +1,5 @@
 package org.bouncycastle.tsp;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cmp.PKIFailureInfo;
-import org.bouncycastle.asn1.tsp.TimeStampReq;
-import org.bouncycastle.asn1.x509.X509Extensions;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +9,12 @@ import java.security.cert.X509Extension;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cmp.PKIFailureInfo;
+import org.bouncycastle.asn1.tsp.TimeStampReq;
+import org.bouncycastle.asn1.x509.X509Extensions;
 
 /**
  * Base class for an RFC 3161 Time Stamp Request.
@@ -155,8 +155,45 @@ public class TimeStampRequest
             }
         }
         
-        int digestLength = TSPUtil.getDigestLength(this.getMessageImprintAlgOID(), provider);
+        int digestLength = TSPUtil.getDigestLength(this.getMessageImprintAlgOID());
         
+        if (digestLength != this.getMessageImprintDigest().length)
+        {
+            throw new TSPValidationException("imprint digest the wrong length.", PKIFailureInfo.badDataFormat);
+        }
+    }
+
+    public void validate(
+        Set     algorithms,
+        Set     policies,
+        Set     extensions)
+        throws TSPException
+    {
+        if (!algorithms.contains(this.getMessageImprintAlgOID()))
+        {
+            throw new TSPValidationException("request contains unknown algorithm.", PKIFailureInfo.badAlg);
+        }
+
+        if (policies != null && this.getReqPolicy() != null && !policies.contains(this.getReqPolicy()))
+        {
+            throw new TSPValidationException("request contains unknown policy.", PKIFailureInfo.unacceptedPolicy);
+        }
+
+        if (this.getExtensions() != null && extensions != null)
+        {
+            Enumeration en = this.getExtensions().oids();
+            while(en.hasMoreElements())
+            {
+                String  oid = ((DERObjectIdentifier)en.nextElement()).getId();
+                if (!extensions.contains(oid))
+                {
+                    throw new TSPValidationException("request contains unknown extension.", PKIFailureInfo.unacceptedExtension);
+                }
+            }
+        }
+
+        int digestLength = TSPUtil.getDigestLength(this.getMessageImprintAlgOID());
+
         if (digestLength != this.getMessageImprintDigest().length)
         {
             throw new TSPValidationException("imprint digest the wrong length.", PKIFailureInfo.badDataFormat);
