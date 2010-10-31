@@ -104,6 +104,7 @@ public class TimeStampResponseGenerator
      * @param serialNumber serial number for the response token.
      * @param genTime generation time for the response token.
      * @param provider provider to use for signature calculation.
+     * @deprecated use method that does not require provider
      * @return
      * @throws NoSuchAlgorithmException
      * @throws NoSuchProviderException
@@ -155,6 +156,78 @@ public class TimeStampResponseGenerator
             this.setFailInfoField(e.getFailureCode());
             this.addStatusString(e.getMessage());
             
+            PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
+
+            resp = new TimeStampResp(pkiStatusInfo, null);
+        }
+
+        try
+        {
+            return new TimeStampResponse(resp);
+        }
+        catch (IOException e)
+        {
+            throw new TSPException("created badly formatted response!");
+        }
+    }
+
+    /**
+     * Return an appropriate TimeStampResponse.
+     * <p>
+     * If genTime is null a timeNotAvailable error response will be returned.
+     *
+     * @param request the request this response is for.
+     * @param serialNumber serial number for the response token.
+     * @param genTime generation time for the response token.
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws TSPException
+     */
+    public TimeStampResponse generate(
+        TimeStampRequest    request,
+        BigInteger          serialNumber,
+        Date                genTime)
+        throws TSPException
+    {
+        TimeStampResp resp;
+
+        try
+        {
+            if (genTime == null)
+            {
+                throw new TSPValidationException("The time source is not available.", PKIFailureInfo.timeNotAvailable);
+            }
+
+            request.validate(acceptedAlgorithms, acceptedPolicies, acceptedExtensions);
+
+            status = PKIStatus.GRANTED;
+            this.addStatusString("Operation Okay");
+
+            PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
+
+            ContentInfo tstTokenContentInfo = null;
+            try
+            {
+                ByteArrayInputStream    bIn = new ByteArrayInputStream(tokenGenerator.generate(request, serialNumber, genTime).toCMSSignedData().getEncoded());
+                ASN1InputStream         aIn = new ASN1InputStream(bIn);
+
+                tstTokenContentInfo = ContentInfo.getInstance(aIn.readObject());
+            }
+            catch (java.io.IOException ioEx)
+            {
+                throw new TSPException(
+                        "Timestamp token received cannot be converted to ContentInfo", ioEx);
+            }
+
+            resp = new TimeStampResp(pkiStatusInfo, tstTokenContentInfo);
+        }
+        catch (TSPValidationException e)
+        {
+            status = PKIStatus.REJECTION;
+
+            this.setFailInfoField(e.getFailureCode());
+            this.addStatusString(e.getMessage());
+
             PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
 
             resp = new TimeStampResp(pkiStatusInfo, null);

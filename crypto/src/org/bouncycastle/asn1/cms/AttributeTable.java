@@ -4,9 +4,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSet;
 
 public class AttributeTable
 {
@@ -71,7 +74,7 @@ public class AttributeTable
             attributes.put(oid, v);
         }
     }
-    
+
     /**
      * Return the first attribute matching the OBJECT IDENTIFIER oid.
      * 
@@ -168,5 +171,30 @@ public class AttributeTable
         }
         
         return out;
+    }
+
+    /**
+     * Return a new table with the passed in attribute added.
+     *
+     * @param attrType
+     * @param attrValue
+     * @return
+     */
+    public AttributeTable add(ASN1ObjectIdentifier attrType, ASN1Encodable attrValue)
+    {
+        AttributeTable newTable = new AttributeTable(attributes);
+
+        newTable.addAttribute(attrType, new Attribute(attrType, new DERSet(attrValue)));
+
+        return newTable;
+    }
+
+    public AttributeTable remove(ASN1ObjectIdentifier attrType)
+    {
+        AttributeTable newTable = new AttributeTable(attributes);
+
+        newTable.attributes.remove(attrType);
+
+        return newTable;
     }
 }

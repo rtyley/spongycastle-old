@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -27,7 +26,9 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.util.Arrays;
 
@@ -169,7 +170,43 @@ public class TSPUtil
             throw new TSPValidationException("cannot process ExtendedKeyUsage extension");
         }
     }
-    
+
+    /**
+     * Validate the passed in certificate as being of the correct type to be used
+     * for time stamping. To be valid it must have an ExtendedKeyUsage extension
+     * which has a key purpose identifier of id-kp-timeStamping.
+     *
+     * @param cert the certificate of interest.
+     * @throws TSPValidationException if the certicate fails on one of the check points.
+     */
+    public static void validateCertificate(
+        X509CertificateHolder cert)
+        throws TSPValidationException
+    {
+        if (cert.toASN1Structure().getVersion() != 3)
+        {
+            throw new IllegalArgumentException("Certificate must have an ExtendedKeyUsage extension.");
+        }
+
+        X509Extension  ext = cert.getExtension(X509Extension.extendedKeyUsage);
+        if (ext == null)
+        {
+            throw new TSPValidationException("Certificate must have an ExtendedKeyUsage extension.");
+        }
+
+        if (!ext.isCritical())
+        {
+            throw new TSPValidationException("Certificate must have an ExtendedKeyUsage extension marked as critical.");
+        }
+
+        ExtendedKeyUsage    extKey = ExtendedKeyUsage.getInstance(X509Extension.convertValueToObject(ext));
+
+        if (!extKey.hasKeyPurposeId(KeyPurposeId.id_kp_timeStamping) || extKey.size() != 1)
+        {
+            throw new TSPValidationException("ExtendedKeyUsage not solely time stamping.");
+        }
+    }
+
     /*
      * Return the digest algorithm using one of the standard JCA string
      * representations rather than the algorithm identifier (if possible).
@@ -188,34 +225,17 @@ public class TSPUtil
     }
 
     static int getDigestLength(
-        String digestAlgOID,
-        String provider)
-        throws NoSuchProviderException, TSPException
+        String digestAlgOID)
+        throws TSPException
     {
-        String digestName = TSPUtil.getDigestAlgName(digestAlgOID);
+        Integer length = (Integer)digestLengths.get(digestAlgOID);
 
-        try
+        if (length != null)
         {
-            Integer length = (Integer)digestLengths.get(digestAlgOID);
+            return length.intValue();
+        }
 
-            if (length != null)
-            {
-                return length.intValue();
-            }
-            
-            return MessageDigest.getInstance(digestName, provider).getDigestLength();
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            try
-            {
-                return MessageDigest.getInstance(digestName).getDigestLength();
-            }
-            catch (NoSuchAlgorithmException ex)
-            {
-                throw new TSPException("digest algorithm cannot be found.", ex);
-            }
-        }
+        throw new TSPException("digest algorithm cannot be found.");
     }
 
     static MessageDigest createDigestInstance(String digestAlgOID, Provider provider)

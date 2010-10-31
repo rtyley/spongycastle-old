@@ -602,8 +602,24 @@ public class CMSSignedDataGenerator
                     throw new CMSException("data processing exception: " + e.getMessage(), e);
                 }
             }
-            
-            SignerInfo inf = sGen.generate(isCounterSignature, new ASN1ObjectIdentifier(contentTypeOID.getId()));
+
+            if (isCounterSignature)
+            {
+                final CMSAttributeTableGenerator signedGen = sGen.getSignedAttributeTableGenerator();
+
+                sGen = new SignerInfoGenerator(sGen, new CMSAttributeTableGenerator()
+                {
+                    public AttributeTable getAttributes(Map parameters)
+                        throws CMSAttributeTableGenerationException
+                    {
+                        AttributeTable table = signedGen.getAttributes(parameters);
+
+                        return table.remove(CMSAttributes.contentType);
+                    }
+                }, sGen.getUnsignedAttributeTableGenerator());
+            }
+
+            SignerInfo inf = sGen.generate(new ASN1ObjectIdentifier(contentTypeOID.getId()));
 
             digestAlgs.add(inf.getDigestAlgorithm());
             signerInfos.add(inf);
@@ -869,7 +885,24 @@ public class CMSSignedDataGenerator
         for (Iterator it = signerGens.iterator(); it.hasNext();)
         {
             SignerInfoGenerator sGen = (SignerInfoGenerator)it.next();
-            SignerInfo inf = sGen.generate(isCounterSignature, new ASN1ObjectIdentifier(contentTypeOID.getId()));
+
+            if (isCounterSignature)
+            {
+                final CMSAttributeTableGenerator signedGen = sGen.getSignedAttributeTableGenerator();
+
+                sGen = new SignerInfoGenerator(sGen, new CMSAttributeTableGenerator()
+                {
+                    public AttributeTable getAttributes(Map parameters)
+                        throws CMSAttributeTableGenerationException
+                    {
+                        AttributeTable table = signedGen.getAttributes(parameters);
+
+                        return table.remove(CMSAttributes.contentType);
+                    }
+                }, sGen.getUnsignedAttributeTableGenerator());
+            }
+
+            SignerInfo inf = sGen.generate(new ASN1ObjectIdentifier(contentTypeOID.getId()));
 
             digestAlgs.add(inf.getDigestAlgorithm());
             signerInfos.add(inf);
