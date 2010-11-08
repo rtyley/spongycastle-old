@@ -160,7 +160,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        // TODO RFC 2246 7.4.72
+        // TODO RFC 2246 7.4.7.2
         /*
          * If the client certificate already contains a suitable Diffie-Hellman key, then
          * Yc is implicit and does not need to be sent again. In this case, the Client Key
