@@ -82,7 +82,7 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
 
     public byte[] generatePremasterSecret() throws IOException
     {
-        return calculateECDHEPreMasterSecret(serverEphemeralPublicKey,
+        return calculateECDHBasicAgreement(serverEphemeralPublicKey,
             clientEphemeralKeyPair.getPrivate());
     }
 

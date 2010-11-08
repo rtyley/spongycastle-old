@@ -62,7 +62,7 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
             privateKey = clientEphemeralKeyPair.getPrivate();
         }
 
-        return calculateECDHEPreMasterSecret((ECPublicKeyParameters)serverPublicKey, privateKey);
+        return calculateECDHBasicAgreement((ECPublicKeyParameters)serverPublicKey, privateKey);
     }
 
     // TODO
