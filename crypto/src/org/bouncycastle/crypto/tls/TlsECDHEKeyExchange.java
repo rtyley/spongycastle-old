@@ -77,15 +77,12 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        clientEphemeralKeyPair = generateECKeyPair(serverEphemeralPublicKey.getParameters());
-        byte[] keData = externalizeKey((ECPublicKeyParameters)clientEphemeralKeyPair.getPublic());
-        TlsUtils.writeUint24(keData.length + 1, os);
-        TlsUtils.writeOpaque8(keData, os);
+        generateEphemeralClientKeyExchange(serverEphemeralPublicKey, os);
     }
 
     public byte[] generatePremasterSecret() throws IOException
     {
-        return calculateECDHEPreMasterSecret((ECPublicKeyParameters)serverEphemeralPublicKey,
+        return calculateECDHEPreMasterSecret(serverEphemeralPublicKey,
             clientEphemeralKeyPair.getPrivate());
     }
 

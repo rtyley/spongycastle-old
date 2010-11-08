@@ -1,6 +1,7 @@
 package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.DERBitString;
@@ -149,22 +150,12 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         }
     }
 
-    protected AsymmetricCipherKeyPair generateECKeyPair(ECDomainParameters parameters)
+    protected void generateEphemeralClientKeyExchange(ECPublicKeyParameters otherPublicKey, OutputStream os) throws IOException
     {
-        ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
-        ECKeyGenerationParameters keyGenerationParameters = new ECKeyGenerationParameters(
-            parameters, handler.getRandom());
-
-        keyPairGenerator.init(keyGenerationParameters);
-        AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
-        return keyPair;
-    }
-
-    protected byte[] externalizeKey(ECPublicKeyParameters keyParameters) throws IOException
-    {
-        // TODO Potentially would like to be able to get the compressed encoding
-        ECPoint ecPoint = keyParameters.getQ();
-        return ecPoint.getEncoded();
+        clientEphemeralKeyPair = generateECKeyPair(otherPublicKey.getParameters());
+        byte[] keData = externalizeKey((ECPublicKeyParameters)clientEphemeralKeyPair.getPublic());
+        TlsUtils.writeUint24(keData.length + 1, os);
+        TlsUtils.writeOpaque8(keData, os);
     }
 
     protected byte[] calculateECDHEPreMasterSecret(ECPublicKeyParameters publicKey,
@@ -192,5 +183,23 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 }
             }
         }
+    }
+
+    private byte[] externalizeKey(ECPublicKeyParameters keyParameters) throws IOException
+    {
+        // TODO Potentially would like to be able to get the compressed encoding
+        ECPoint ecPoint = keyParameters.getQ();
+        return ecPoint.getEncoded();
+    }
+
+    private AsymmetricCipherKeyPair generateECKeyPair(ECDomainParameters parameters)
+    {
+        ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
+        ECKeyGenerationParameters keyGenerationParameters = new ECKeyGenerationParameters(
+            parameters, handler.getRandom());
+
+        keyPairGenerator.init(keyGenerationParameters);
+        AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
+        return keyPair;
     }
 }
