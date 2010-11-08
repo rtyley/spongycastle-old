@@ -73,10 +73,10 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
 //        boolean fixedAuthenticationOfferedByServer = ecdsaFixedOfferedByServer(certificateTypes);
 //        if (fixedAuthenticationOfferedByServer && clientPrivateKey != null
 //            && serverPublicKey != null && serverPublicKey instanceof ECPublicKeyParameters
-//            && clientPrivateKey instanceof ECKeyParameters)
+//            && clientPrivateKey instanceof ECPrivateKeyParameters)
 //        {
 //            ECPublicKeyParameters ecPublicKeyParameters = (ECPublicKeyParameters)serverPublicKey;
-//            ECKeyParameters ecClientPrivateKey = (ECKeyParameters)clientPrivateKey;
+//            ECPrivateKeyParameters ecClientPrivateKey = (ECPrivateKeyParameters)clientPrivateKey;
 //
 //            // TODO Probably the domain parameters need to all be the same?
 //            if (ecPublicKeyParameters.getParameters().getCurve().equals(
