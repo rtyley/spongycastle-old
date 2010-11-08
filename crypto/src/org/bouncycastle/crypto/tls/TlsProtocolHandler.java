@@ -72,6 +72,7 @@ public class TlsProtocolHandler
     private TlsKeyExchange keyExchange = null;
 
     private short connection_state = 0;
+    private boolean anonymous_server = true;
 
     private static SecureRandom createSecureRandom()
     {
@@ -217,6 +218,7 @@ public class TlsProtocolHandler
 
                         assertEmpty(is);
 
+                        this.anonymous_server = false;
                         this.keyExchange.processServerCertificate(serverCertificate);
 
                         break;
@@ -539,6 +541,7 @@ public class TlsProtocolHandler
                     case CS_SERVER_HELLO_RECEIVED:
 
                         // There was no server certificate message; check it's OK
+                        this.anonymous_server = true;
                         this.keyExchange.skipServerCertificate();
 
                         // NB: Fall through to next case label
@@ -570,6 +573,15 @@ public class TlsProtocolHandler
 
                     case CS_SERVER_KEY_EXCHANGE_RECEIVED:
                     {
+                    	if (this.anonymous_server)
+                    	{
+                            /*
+                             * RFC 2246 7.4.4. It is a fatal handshake_failure alert
+                             * for an anonymous server to request client identification.
+                             */
+                    		this.failWithError(AlertLevel.fatal, AlertDescription.handshake_failure);
+                    	}
+
                         int numTypes = TlsUtils.readUint8(is);
                         short[] certificateTypes = new short[numTypes];
                         for (int i = 0; i < numTypes; ++i)
