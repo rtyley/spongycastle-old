@@ -6,7 +6,6 @@ import java.io.OutputStream;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.ECKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 
 /**
@@ -47,24 +46,22 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
         }
         else
         {
-            clientEphemeralKeyPair = generateECKeyPair(((ECKeyParameters)serverPublicKey).getParameters());
-            byte[] keData = externalizeKey((ECPublicKeyParameters)clientEphemeralKeyPair.getPublic());
-            TlsUtils.writeUint24(keData.length + 1, os);
-            TlsUtils.writeOpaque8(keData, os);
+            generateEphemeralClientKeyExchange((ECPublicKeyParameters)serverPublicKey, os);
         }
     }
 
     public byte[] generatePremasterSecret() throws IOException
     {
-        CipherParameters privateKey = null;
+        CipherParameters privateKey;
         if (usingFixedAuthentication)
         {
-            privateKey = this.clientPrivateKey;
+            privateKey = clientPrivateKey;
         }
         else
         {
             privateKey = clientEphemeralKeyPair.getPrivate();
         }
+
         return calculateECDHEPreMasterSecret((ECPublicKeyParameters)serverPublicKey, privateKey);
     }
 
