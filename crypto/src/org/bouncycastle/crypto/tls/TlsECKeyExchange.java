@@ -158,7 +158,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         TlsUtils.writeOpaque8(keData, os);
     }
 
-    protected byte[] calculateECDHEPreMasterSecret(ECPublicKeyParameters publicKey,
+    protected byte[] calculateECDHBasicAgreement(ECPublicKeyParameters publicKey,
         CipherParameters privateKey)
     {
         ECDHBasicAgreement basicAgreement = new ECDHBasicAgreement();
