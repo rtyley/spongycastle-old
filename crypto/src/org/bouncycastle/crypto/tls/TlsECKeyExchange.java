@@ -20,7 +20,6 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
-import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.BigIntegers;
 
 /**
@@ -196,9 +195,15 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 
     private byte[] externalizeKey(ECPublicKeyParameters keyParameters) throws IOException
     {
-        // TODO Potentially would like to be able to get the compressed encoding
-        ECPoint ecPoint = keyParameters.getQ();
-        return ecPoint.getEncoded();
+        // TODO Add support for compressed encoding and SPF extension
+
+        /*
+         * RFC 4492 5.7. ...an elliptic curve point in uncompressed or compressed format.
+         * Here, the format MUST conform to what the server has requested through a
+         * Supported Point Formats Extension if this extension was used, and MUST be
+         * uncompressed if this extension was not used.
+         */
+        return keyParameters.getQ().getEncoded();
     }
 
     private AsymmetricCipherKeyPair generateECKeyPair(ECDomainParameters parameters)
