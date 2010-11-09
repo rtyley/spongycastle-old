@@ -31,9 +31,9 @@ interface TlsClient
     // Vector is (X509Name)
     void processServerCertificateRequest(short[] certificateTypes, Vector certificateAuthorities);
 
-    byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException;
-
     Certificate getCertificate();
+
+    byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException;
 
     TlsCipher createCipher(SecurityParameters securityParameters) throws IOException;
 }
