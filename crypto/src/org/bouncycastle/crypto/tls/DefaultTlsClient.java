@@ -244,6 +244,11 @@ class DefaultTlsClient implements TlsClient
         // TODO Use provided info to choose a certificate in getCertificate()
     }
 
+    public Certificate getCertificate()
+    {
+        return clientCert;
+    }
+
     public byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException
     {
         if (clientSigner == null)
@@ -259,11 +264,6 @@ class DefaultTlsClient implements TlsClient
         {
             throw new TlsFatalAlert(AlertDescription.internal_error);
         }
-    }
-
-    public Certificate getCertificate()
-    {
-        return clientCert;
     }
 
     public TlsCipher createCipher(SecurityParameters securityParameters) throws IOException
