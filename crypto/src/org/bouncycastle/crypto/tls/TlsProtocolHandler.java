@@ -894,7 +894,9 @@ public class TlsProtocolHandler
         TlsUtils.writeUint24(os.size(), bos);
         bos.write(os.toByteArray());
         byte[] message = bos.toByteArray();
-        rs.writeMessage(ContentType.handshake, message, 0, message.length);
+
+        safeWriteMessage(ContentType.handshake, message, 0, message.length);
+
         connection_state = CS_CLIENT_HELLO_SEND;
 
         /*
@@ -902,9 +904,7 @@ public class TlsProtocolHandler
          */
         while (connection_state != CS_DONE)
         {
-            // TODO Should we send fatal alerts in the event of an exception
-            // (see readApplicationData) 
-            rs.readData();
+            safeReadData();
         }
 
         this.tlsInputStream = new TlsInputStream(this);
@@ -945,31 +945,76 @@ public class TlsProtocolHandler
                 return -1;
             }
 
-            try
-            {
-                rs.readData();
-            }
-            catch (IOException e)
-            {
-                if (!this.closed)
-                {
-                    this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
-                }
-                throw e;
-            }
-            catch (RuntimeException e)
-            {
-                if (!this.closed)
-                {
-                    this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
-                }
-                throw e;
-            }
+            safeReadData();
         }
         len = Math.min(len, applicationDataQueue.size());
         applicationDataQueue.read(buf, offset, len, 0);
         applicationDataQueue.removeData(len);
         return len;
+    }
+
+    private void safeReadData() throws IOException
+    {
+        try
+        {
+            rs.readData();
+        }
+        catch (TlsFatalAlert e)
+        {
+            if (!this.closed)
+            {
+                this.failWithError(AlertLevel.fatal, e.getAlertDescription());
+            }
+            throw e;
+        }
+        catch (IOException e)
+        {
+            if (!this.closed)
+            {
+                this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
+            }
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            if (!this.closed)
+            {
+                this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
+            }
+            throw e;
+        }
+    }
+
+    private void safeWriteMessage(short type, byte[] buf, int offset, int len) throws IOException
+    {
+        try
+        {
+            rs.writeMessage(type, buf, offset, len);
+        }
+        catch (TlsFatalAlert e)
+        {
+            if (!this.closed)
+            {
+                this.failWithError(AlertLevel.fatal, e.getAlertDescription());
+            }
+            throw e;
+        }
+        catch (IOException e)
+        {
+            if (!closed)
+            {
+                this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
+            }
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            if (!closed)
+            {
+                this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
+            }
+            throw e;
+        }
     }
 
     /**
@@ -999,7 +1044,7 @@ public class TlsProtocolHandler
          * 
          * DO NOT REMOVE THIS LINE, EXCEPT YOU KNOW EXACTLY WHAT YOU ARE DOING HERE.
          */
-        rs.writeMessage(ContentType.application_data, emptybuf, 0, 0);
+        safeWriteMessage(ContentType.application_data, emptybuf, 0, 0);
 
         do
         {
@@ -1008,27 +1053,7 @@ public class TlsProtocolHandler
              */
             int toWrite = Math.min(len, 1 << 14);
 
-            try
-            {
-                rs.writeMessage(ContentType.application_data, buf, offset, toWrite);
-            }
-            catch (IOException e)
-            {
-                if (!closed)
-                {
-                    this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
-                }
-                throw e;
-            }
-            catch (RuntimeException e)
-            {
-                if (!closed)
-                {
-                    this.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
-                }
-                throw e;
-            }
-
+            safeWriteMessage(ContentType.application_data, buf, offset, toWrite);
 
             offset += toWrite;
             len -= toWrite;
@@ -1062,7 +1087,7 @@ public class TlsProtocolHandler
      * @param alertDescription The exact alert message.
      * @throws IOException If alert was fatal.
      */
-    protected void failWithError(short alertLevel, short alertDescription) throws IOException
+    private void failWithError(short alertLevel, short alertDescription) throws IOException
     {
         /*
          * Check if the connection is still open.
@@ -1126,7 +1151,7 @@ public class TlsProtocolHandler
     {
         if (is.available() > 0)
         {
-            this.failWithError(AlertLevel.fatal, AlertDescription.decode_error);
+            throw new TlsFatalAlert(AlertDescription.decode_error);
         }
     }
 

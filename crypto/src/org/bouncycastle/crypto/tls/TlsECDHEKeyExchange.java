@@ -26,12 +26,12 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
     public void skipServerKeyExchange() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
@@ -56,8 +56,7 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
         {
             // TODO Add support for explicit curve parameters (read from sigIn)
 
-            handler.failWithError(AlertLevel.fatal, AlertDescription.handshake_failure);
-            return;
+            throw new TlsFatalAlert(AlertDescription.handshake_failure);
         }
 
         byte[] publicBytes = TlsUtils.readOpaque8(sigIn);
@@ -65,7 +64,7 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
         byte[] sigByte = TlsUtils.readOpaque16(is);
         if (!signer.verifySignature(sigByte))
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.bad_certificate);
+            throw new TlsFatalAlert(AlertDescription.bad_certificate);
         }
 
         // TODO Check curve_params not null

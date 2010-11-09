@@ -71,7 +71,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
     public void processServerCertificate(Certificate serverCertificate) throws IOException
@@ -85,13 +85,13 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         }
         catch (RuntimeException e)
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
+            throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
 
         // Sanity check the PublicKeyFactory
         if (this.serverPublicKey.isPrivate())
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
+            throw new TlsFatalAlert(AlertDescription.internal_error);
         }
 
         // TODO 
@@ -108,7 +108,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
             case KE_ECDH_ECDSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
                 // TODO The algorithm used to sign the certificate should be ECDSA.
@@ -117,14 +117,14 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
             case KE_ECDHE_ECDSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             case KE_ECDH_RSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
                 // TODO The algorithm used to sign the certificate should be RSA.
@@ -133,12 +133,12 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
             case KE_ECDHE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             default:
-                handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
+                throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
 
         /*
@@ -146,7 +146,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
          */
         if (!this.verifyer.isValid(serverCertificate.getCerts()))
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.user_canceled);
+            throw new TlsFatalAlert(AlertDescription.user_canceled);
         }
     }
 
@@ -179,7 +179,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 int bits = ku.getBytes()[0] & 0xff;
                 if ((bits & keyUsageBits) != keyUsageBits)
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
             }
         }

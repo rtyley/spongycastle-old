@@ -69,7 +69,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     {
         if (tlsSigner != null)
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+            throw new TlsFatalAlert(AlertDescription.unexpected_message);
         }
     }
 
@@ -77,7 +77,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     {
         if (tlsSigner == null)
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+            throw new TlsFatalAlert(AlertDescription.unexpected_message);
         }
 
         X509CertificateStructure x509Cert = serverCertificate.certs[0];
@@ -89,13 +89,13 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
         catch (RuntimeException e)
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
+            throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
 
         // Sanity check the PublicKeyFactory
         if (this.serverPublicKey.isPrivate())
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
+            throw new TlsFatalAlert(AlertDescription.internal_error);
         }
 
         // TODO 
@@ -109,19 +109,19 @@ class TlsSRPKeyExchange implements TlsKeyExchange
             case TlsKeyExchange.KE_SRP_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             case TlsKeyExchange.KE_SRP_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             default:
-                handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
+                throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
 
         /*
@@ -129,13 +129,13 @@ class TlsSRPKeyExchange implements TlsKeyExchange
          */
         if (!this.verifyer.isValid(serverCertificate.getCerts()))
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.user_canceled);
+            throw new TlsFatalAlert(AlertDescription.user_canceled);
         }
     }
 
     public void skipServerKeyExchange() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
@@ -161,7 +161,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
 
             if (!signer.verifySignature(sigByte))
             {
-                handler.failWithError(AlertLevel.fatal, AlertDescription.bad_certificate);
+                throw new TlsFatalAlert(AlertDescription.bad_certificate);
             }
         }
 
@@ -183,7 +183,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
         catch (CryptoException e)
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
+            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
         }
 
         this.srpClient.init(N, g, new SHA1Digest(), handler.getRandom());
@@ -206,8 +206,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
         catch (CryptoException e)
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
-            return null; // Unreachable!
+            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
         }
     }
 
@@ -223,7 +222,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
                 int bits = ku.getBytes()[0] & 0xff;
                 if ((bits & keyUsageBits) != keyUsageBits)
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
             }
         }
