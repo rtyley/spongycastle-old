@@ -150,6 +150,15 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         }
     }
 
+    protected boolean areOnSameCurve(ECDomainParameters a, ECDomainParameters b)
+    {
+        // TODO Move to ECDomainParameters.equals() or other utility method?
+        return a.getCurve().equals(b.getCurve())
+            && a.getG().equals(b.getG())
+            && a.getN().equals(b.getN())
+            && a.getH().equals(b.getH());
+    }
+
     protected void generateEphemeralClientKeyExchange(ECPublicKeyParameters otherPublicKey, OutputStream os) throws IOException
     {
         clientEphemeralKeyPair = generateECKeyPair(otherPublicKey.getParameters());

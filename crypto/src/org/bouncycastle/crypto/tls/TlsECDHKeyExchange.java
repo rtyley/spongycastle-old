@@ -75,21 +75,19 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
 //            && serverPublicKey != null && serverPublicKey instanceof ECPublicKeyParameters
 //            && clientPrivateKey instanceof ECPrivateKeyParameters)
 //        {
-//            ECPublicKeyParameters ecPublicKeyParameters = (ECPublicKeyParameters)serverPublicKey;
+//            ECPublicKeyParameters ecServerPublicKey = (ECPublicKeyParameters)serverPublicKey;
 //            ECPrivateKeyParameters ecClientPrivateKey = (ECPrivateKeyParameters)clientPrivateKey;
 //
-//            // TODO Probably the domain parameters need to all be the same?
-//            if (ecPublicKeyParameters.getParameters().getCurve().equals(
-//                ecClientPrivateKey.getParameters().getCurve()))
-//            {
-//                usingFixedAuthentication = true;
-//            }
+//            usingFixedAuthentication = areOnSameCurve(ecServerPublicKey.getParameters(),
+//                ecClientPrivateKey.getParameters());
+//
 //            // TODO RSA_fixed_ECDH
 //        }
 //    }
 //
 //    public boolean sendCertificateVerify()
 //    {
+//        // TODO Check we are even using client auth
 //        return !usingFixedAuthentication;
 //    }
 //
