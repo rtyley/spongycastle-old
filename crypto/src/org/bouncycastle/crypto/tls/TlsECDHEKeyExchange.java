@@ -6,7 +6,6 @@ import java.io.OutputStream;
 
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.io.SignerInputStream;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.math.ec.ECPoint;
@@ -17,11 +16,9 @@ import org.bouncycastle.math.ec.ECPoint;
 class TlsECDHEKeyExchange extends TlsECKeyExchange
 {
     TlsECDHEKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer,
-        short keyExchange,
-        // TODO Replace with an interface e.g. TlsClientAuth
-        Certificate clientCert, AsymmetricKeyParameter clientPrivateKey)
+        short keyExchange)
     {
-        super(handler, verifyer, keyExchange, clientCert, clientPrivateKey);
+        super(handler, verifyer, keyExchange);
     }
 
     public void skipServerCertificate() throws IOException
@@ -71,18 +68,17 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
 
         ECPoint Q = curve_params.getCurve().decodePoint(publicBytes);
 
-        serverEphemeralPublicKey = new ECPublicKeyParameters(Q, curve_params);
+        this.ecAgreeServerPublicKey = validateECPublicKey(new ECPublicKeyParameters(Q, curve_params));
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        generateEphemeralClientKeyExchange(serverEphemeralPublicKey, os);
+        generateEphemeralClientKeyExchange(ecAgreeServerPublicKey.getParameters(), os);
     }
 
     public byte[] generatePremasterSecret() throws IOException
     {
-        return calculateECDHBasicAgreement(serverEphemeralPublicKey,
-            clientEphemeralKeyPair.getPrivate());
+        return calculateECDHBasicAgreement(ecAgreeServerPublicKey, ecAgreeClientPrivateKey);
     }
 
     protected Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)

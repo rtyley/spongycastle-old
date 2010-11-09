@@ -48,7 +48,7 @@ class TlsDHEKeyExchange extends TlsDHKeyExchange
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        generateEphemeralClientKeyExchange(dhAgreeServerPublicKey, os);
+        generateEphemeralClientKeyExchange(dhAgreeServerPublicKey.getParameters(), os);
     }
 
     protected Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
