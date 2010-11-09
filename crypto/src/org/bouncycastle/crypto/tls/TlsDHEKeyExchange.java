@@ -18,7 +18,7 @@ class TlsDHEKeyExchange extends TlsDHKeyExchange
 
     public void skipServerKeyExchange() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
@@ -34,7 +34,7 @@ class TlsDHEKeyExchange extends TlsDHKeyExchange
         byte[] sigByte = TlsUtils.readOpaque16(is);
         if (!signer.verifySignature(sigByte))
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.bad_certificate);
+            throw new TlsFatalAlert(AlertDescription.bad_certificate);
         }
 
         BigInteger p = new BigInteger(1, pBytes);

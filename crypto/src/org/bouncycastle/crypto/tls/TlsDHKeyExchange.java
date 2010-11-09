@@ -66,7 +66,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
     public void processServerCertificate(Certificate serverCertificate) throws IOException
@@ -80,13 +80,13 @@ class TlsDHKeyExchange implements TlsKeyExchange
         }
         catch (RuntimeException e)
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
+            throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
 
         // Sanity check the PublicKeyFactory
         if (this.serverPublicKey.isPrivate())
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.internal_error);
+            throw new TlsFatalAlert(AlertDescription.internal_error);
         }
 
         // TODO 
@@ -103,7 +103,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
             case TlsKeyExchange.KE_DH_DSS:
                 if (!(this.serverPublicKey instanceof DHPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
                 // TODO The algorithm used to sign the certificate should be DSS.
@@ -113,7 +113,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
             case TlsKeyExchange.KE_DH_RSA:
                 if (!(this.serverPublicKey instanceof DHPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
                 // TODO The algorithm used to sign the certificate should be RSA.
@@ -123,19 +123,19 @@ class TlsDHKeyExchange implements TlsKeyExchange
             case TlsKeyExchange.KE_DHE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             case TlsKeyExchange.KE_DHE_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
             default:
-                handler.failWithError(AlertLevel.fatal, AlertDescription.unsupported_certificate);
+                throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
 
         /*
@@ -143,7 +143,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
          */
         if (!this.verifyer.isValid(serverCertificate.getCerts()))
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.user_canceled);
+            throw new TlsFatalAlert(AlertDescription.user_canceled);
         }
     }
 
@@ -155,7 +155,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
@@ -205,7 +205,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
                 int bits = ku.getBytes()[0] & 0xff;
                 if ((bits & keyUsageBits) != keyUsageBits)
                 {
-                    handler.failWithError(AlertLevel.fatal, AlertDescription.certificate_unknown);
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
             }
         }
@@ -220,15 +220,15 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
         if (!p.isProbablePrime(2))
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
+            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
         }
         if (g.compareTo(TWO) < 0 || g.compareTo(p.subtract(TWO)) > 0)
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
+            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
         }
         if (Y.compareTo(TWO) < 0 || Y.compareTo(p.subtract(ONE)) > 0)
         {
-            handler.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
+            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
         }
 
         // TODO See RFC 2631 for more discussion of Diffie-Hellman validation

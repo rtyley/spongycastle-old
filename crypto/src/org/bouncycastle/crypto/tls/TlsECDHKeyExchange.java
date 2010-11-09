@@ -24,7 +24,7 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
 
     public void skipServerCertificate() throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
     public void skipServerKeyExchange() throws IOException
@@ -35,7 +35,7 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
     public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
         throws IOException
     {
-        handler.failWithError(AlertLevel.fatal, AlertDescription.unexpected_message);
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
