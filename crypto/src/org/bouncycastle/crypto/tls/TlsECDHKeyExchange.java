@@ -4,22 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-
 /**
  * ECDH key exchange (see RFC 4492)
  */
 class TlsECDHKeyExchange extends TlsECKeyExchange
 {
-    protected boolean usingFixedAuthentication;
-
-    TlsECDHKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange,
-    // TODO Replace with an interface e.g. TlsClientAuth
-        Certificate clientCert, AsymmetricKeyParameter clientPrivateKey)
+    TlsECDHKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
     {
-        super(handler, verifyer, keyExchange, clientCert, clientPrivateKey);
+        super(handler, verifyer, keyExchange);
     }
 
     public void skipServerCertificate() throws IOException
@@ -40,36 +32,25 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        if (usingFixedAuthentication)
+        if (ecAgreeClientPrivateKey != null)
         {
             TlsUtils.writeUint24(0, os);
         }
         else
         {
-            generateEphemeralClientKeyExchange((ECPublicKeyParameters)serverPublicKey, os);
+            generateEphemeralClientKeyExchange(ecAgreeServerPublicKey.getParameters(), os);
         }
     }
 
     public byte[] generatePremasterSecret() throws IOException
     {
-        CipherParameters privateKey;
-        if (usingFixedAuthentication)
-        {
-            privateKey = clientPrivateKey;
-        }
-        else
-        {
-            privateKey = clientEphemeralKeyPair.getPrivate();
-        }
-
-        return calculateECDHBasicAgreement((ECPublicKeyParameters)serverPublicKey, privateKey);
+        return calculateECDHBasicAgreement(ecAgreeServerPublicKey, ecAgreeClientPrivateKey);
     }
 
     // TODO
 //    public void processServerCertificateRequest(short[] certificateTypes,
 //        Vector certificateAuthorities)
 //    {
-//        usingFixedAuthentication = false;
 //        boolean fixedAuthenticationOfferedByServer = ecdsaFixedOfferedByServer(certificateTypes);
 //        if (fixedAuthenticationOfferedByServer && clientPrivateKey != null
 //            && serverPublicKey != null && serverPublicKey instanceof ECPublicKeyParameters
@@ -78,8 +59,10 @@ class TlsECDHKeyExchange extends TlsECKeyExchange
 //            ECPublicKeyParameters ecServerPublicKey = (ECPublicKeyParameters)serverPublicKey;
 //            ECPrivateKeyParameters ecClientPrivateKey = (ECPrivateKeyParameters)clientPrivateKey;
 //
-//            usingFixedAuthentication = areOnSameCurve(ecServerPublicKey.getParameters(),
-//                ecClientPrivateKey.getParameters());
+//            if (areOnSameCurve(ecServerPublicKey.getParameters(), ecClientPrivateKey.getParameters()))
+//            {
+//                ecAgreeClientPrivateKey = ecClientPrivateKey;
+//            }
 //
 //            // TODO RSA_fixed_ECDH
 //        }

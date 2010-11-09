@@ -17,6 +17,7 @@ import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
+import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
@@ -39,7 +40,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
     protected AsymmetricKeyParameter serverPublicKey = null;
 
     protected DHPublicKeyParameters dhAgreeServerPublicKey = null;
-    protected AsymmetricCipherKeyPair dhAgreeClientKeyPair = null;
+    protected DHPrivateKeyParameters dhAgreeClientPrivateKey = null;
 
     TlsDHKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
     {
@@ -170,25 +171,19 @@ class TlsDHKeyExchange implements TlsKeyExchange
          * Diffie-Hellman key, then Yc is implicit and does not need to be sent again. In
          * this case, the Client Key Exchange message will be sent, but will be empty.
          */
-        if (dhAgreeClientKeyPair != null)
+        if (dhAgreeClientPrivateKey != null)
         {
             TlsUtils.writeUint24(0, os);
         }
         else
         {
-            generateEphemeralClientKeyExchange(dhAgreeServerPublicKey, os);
+            generateEphemeralClientKeyExchange(dhAgreeServerPublicKey.getParameters(), os);
         }
     }
 
     public byte[] generatePremasterSecret() throws IOException
     {
-        /*
-         * Diffie-Hellman basic key agreement
-         */
-        DHBasicAgreement dhAgree = new DHBasicAgreement();
-        dhAgree.init(dhAgreeClientKeyPair.getPrivate());
-        BigInteger agreement = dhAgree.calculateAgreement(dhAgreeServerPublicKey);
-        return BigIntegers.asUnsignedByteArray(agreement);
+        return calculateDHBasicAgreement(dhAgreeServerPublicKey, dhAgreeClientPrivateKey);
     }
 
     protected boolean areCompatibleParameters(DHParameters a, DHParameters b)
@@ -197,12 +192,26 @@ class TlsDHKeyExchange implements TlsKeyExchange
             && a.getG().equals(b.getG());
     }
 
-    protected void generateEphemeralClientKeyExchange(DHPublicKeyParameters otherPublicKey, OutputStream os) throws IOException
+    protected byte[] calculateDHBasicAgreement(DHPublicKeyParameters publicKey,
+        DHPrivateKeyParameters privateKey)
+    {
+        DHBasicAgreement dhAgree = new DHBasicAgreement();
+        dhAgree.init(dhAgreeClientPrivateKey);
+        BigInteger agreement = dhAgree.calculateAgreement(dhAgreeServerPublicKey);
+        return BigIntegers.asUnsignedByteArray(agreement);
+    }
+
+    protected AsymmetricCipherKeyPair generateDHKeyPair(DHParameters dhParams)
     {
         DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
-        dhGen.init(new DHKeyGenerationParameters(handler.getRandom(),
-            otherPublicKey.getParameters()));
-        this.dhAgreeClientKeyPair = dhGen.generateKeyPair();
+        dhGen.init(new DHKeyGenerationParameters(handler.getRandom(), dhParams));
+        return dhGen.generateKeyPair();
+    }
+
+    protected void generateEphemeralClientKeyExchange(DHParameters dhParams, OutputStream os) throws IOException
+    {
+        AsymmetricCipherKeyPair dhAgreeClientKeyPair = generateDHKeyPair(dhParams);
+        this.dhAgreeClientPrivateKey = (DHPrivateKeyParameters)dhAgreeClientKeyPair.getPrivate();
 
         BigInteger Yc = ((DHPublicKeyParameters)dhAgreeClientKeyPair.getPublic()).getY();
         byte[] keData = BigIntegers.asUnsignedByteArray(Yc);

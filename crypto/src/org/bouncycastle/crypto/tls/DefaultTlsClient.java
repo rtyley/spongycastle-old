@@ -335,12 +335,12 @@ class DefaultTlsClient implements TlsClient
 
     protected TlsKeyExchange createECDHKeyExchange(short keyExchange)
     {
-        return new TlsECDHKeyExchange(handler, verifyer, keyExchange, clientCert, clientPrivateKey);
+        return new TlsECDHKeyExchange(handler, verifyer, keyExchange);
     }
 
     protected TlsKeyExchange createECDHEKeyExchange(short keyExchange)
     {
-        return new TlsECDHEKeyExchange(handler, verifyer, keyExchange, clientCert, clientPrivateKey);
+        return new TlsECDHEKeyExchange(handler, verifyer, keyExchange);
     }
 
     protected TlsKeyExchange createRSAKeyExchange()
