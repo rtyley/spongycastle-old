@@ -126,6 +126,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
+                // TODO Validate RSA public key
                 break;
             case TlsKeyExchange.KE_DHE_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
@@ -133,6 +134,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
+                // TODO Validate DSA public key
                 break;
             default:
                 throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
@@ -172,14 +174,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
          * Generate a keypair (using parameters from server key) and send the public value
          * to the server.
          */
-        DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
-        dhGen.init(new DHKeyGenerationParameters(handler.getRandom(),
-            dhAgreeServerPublicKey.getParameters()));
-        this.dhAgreeClientKeyPair = dhGen.generateKeyPair();
-        BigInteger Yc = ((DHPublicKeyParameters)dhAgreeClientKeyPair.getPublic()).getY();
-        byte[] keData = BigIntegers.asUnsignedByteArray(Yc);
-        TlsUtils.writeUint24(keData.length + 2, os);
-        TlsUtils.writeOpaque16(keData, os);
+        generateEphemeralClientKeyExchange(dhAgreeServerPublicKey, os);
     }
 
     public byte[] generatePremasterSecret() throws IOException
@@ -191,6 +186,19 @@ class TlsDHKeyExchange implements TlsKeyExchange
         dhAgree.init(dhAgreeClientKeyPair.getPrivate());
         BigInteger agreement = dhAgree.calculateAgreement(dhAgreeServerPublicKey);
         return BigIntegers.asUnsignedByteArray(agreement);
+    }
+
+    protected void generateEphemeralClientKeyExchange(DHPublicKeyParameters otherPublicKey, OutputStream os) throws IOException
+    {
+        DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
+        dhGen.init(new DHKeyGenerationParameters(handler.getRandom(),
+            otherPublicKey.getParameters()));
+        this.dhAgreeClientKeyPair = dhGen.generateKeyPair();
+
+        BigInteger Yc = ((DHPublicKeyParameters)dhAgreeClientKeyPair.getPublic()).getY();
+        byte[] keData = BigIntegers.asUnsignedByteArray(Yc);
+        TlsUtils.writeUint24(keData.length + 2, os);
+        TlsUtils.writeOpaque16(keData, os);
     }
 
     protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
