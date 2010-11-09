@@ -162,19 +162,22 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        // TODO RFC 2246 7.4.7.2
-        /*
-         * If the client certificate already contains a suitable Diffie-Hellman key, then
-         * Yc is implicit and does not need to be sent again. In this case, the Client Key
-         * Exchange message will be sent, but will be empty.
-         */
-//        TlsUtils.writeUint24(0, os);
+        // TODO 'dhAgreeClientKeyPair' should be set during client auth if a *_fixed_dh
+        // client cert was sent (and that cert's parameters must match the server cert)
 
         /*
-         * Generate a keypair (using parameters from server key) and send the public value
-         * to the server.
+         * RFC 2246 7.4.7.2 If the client certificate already contains a suitable
+         * Diffie-Hellman key, then Yc is implicit and does not need to be sent again. In
+         * this case, the Client Key Exchange message will be sent, but will be empty.
          */
-        generateEphemeralClientKeyExchange(dhAgreeServerPublicKey, os);
+        if (dhAgreeClientKeyPair != null)
+        {
+            TlsUtils.writeUint24(0, os);
+        }
+        else
+        {
+            generateEphemeralClientKeyExchange(dhAgreeServerPublicKey, os);
+        }
     }
 
     public byte[] generatePremasterSecret() throws IOException
@@ -186,6 +189,12 @@ class TlsDHKeyExchange implements TlsKeyExchange
         dhAgree.init(dhAgreeClientKeyPair.getPrivate());
         BigInteger agreement = dhAgree.calculateAgreement(dhAgreeServerPublicKey);
         return BigIntegers.asUnsignedByteArray(agreement);
+    }
+
+    protected boolean areCompatibleParameters(DHParameters a, DHParameters b)
+    {
+        return a.getP().equals(b.getP())
+            && a.getG().equals(b.getG());
     }
 
     protected void generateEphemeralClientKeyExchange(DHPublicKeyParameters otherPublicKey, OutputStream os) throws IOException
