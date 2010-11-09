@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 
 import org.bouncycastle.crypto.Signer;
@@ -43,6 +44,11 @@ class TlsDHEKeyExchange extends TlsDHKeyExchange
 
         this.dhAgreeServerPublicKey = validateDHPublicKey(new DHPublicKeyParameters(Ys,
             new DHParameters(p, g)));
+    }
+
+    public void generateClientKeyExchange(OutputStream os) throws IOException
+    {
+        generateEphemeralClientKeyExchange(dhAgreeServerPublicKey, os);
     }
 
     protected Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
