@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.test;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.RIPEMD128Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
@@ -12,8 +14,6 @@ import org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
 import org.bouncycastle.crypto.signers.ISO9796d2Signer;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.math.BigInteger;
 
 /**
  * test vectors from ISO 9796-1 and ISO 9796-2 edition 1.
@@ -103,6 +103,26 @@ public class ISO9796Test
         for (int i = 0; i != b.length; i++)
         {
             if (a[i + off] != b[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean startsWith(
+        byte[]  a,
+        byte[]  b)
+    {
+        if (a.length < b.length)
+        {
+            return false;
+        }
+
+        for (int i = 0; i != b.length; i++)
+        {
+            if (a[i] != b[i])
             {
                 return false;
             }
@@ -246,6 +266,27 @@ public class ISO9796Test
         {
             fail("failed ISO9796-2 verify Test 4");
         }
+
+        if (eng.hasFullMessage())
+        {
+            eng = new ISO9796d2Signer(rsa, new RIPEMD128Digest());
+
+            eng.init(false, pubParameters);
+
+            if (!eng.verifySignature(sig4))
+            {
+                fail("failed ISO9796-2 verify and recover Test 4");
+            }
+
+            if(!isSameAs(eng.getRecoveredMessage(), 0, msg4))
+            {
+                fail("failed ISO9796-2 recovered message Test 4");
+            }
+        }
+        else
+        {
+            fail("full message flag false - Test 4");
+        }
     }
 
     public void doTest5()
@@ -281,6 +322,16 @@ public class ISO9796Test
         if (!eng.verifySignature(sig5))
         {
             fail("failed ISO9796-2 verify Test 5");
+        }
+
+        if (eng.hasFullMessage())
+        {
+            fail("fullMessage true - Test 5");
+        }
+
+        if (!startsWith(msg5, eng.getRecoveredMessage()))
+        {
+            fail("failed ISO9796-2 partial recovered message Test 5");
         }
     }
 
