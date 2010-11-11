@@ -45,16 +45,27 @@ import org.bouncycastle.util.io.TeeOutputStream;
 /**
  * general class for generating a pkcs7-signature message.
  * <p>
- * A simple example of usage.
+ * A simple example of usage, generating a detached signature.
  *
  * <pre>
- *      CertStore               certs...
- *      CMSSignedDataGenerator    gen = new CMSSignedDataGenerator();
+ *      List             certList = new ArrayList();
+ *      CMSTypedData     msg = new CMSProcessableByteArray("Hello world!".getBytes());
  *
- *      gen.addSigner(privKey, cert, CMSSignedGenerator.DIGEST_SHA1);
- *      gen.addCertificatesAndCRLs(certs);
+ *      certList.add(signCert);
  *
- *      CMSSignedData           data = gen.generate(content, "BC");
+ *      Store           certs = new JcaCertStore(certList);
+ *
+ *      CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+ *      ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(signKP.getPrivate());
+ *
+ *      gen.addSignerInfoGenerator(
+ *                new JcaSignerInfoGeneratorBuilder(
+ *                     new JcaDigestCalculatorProviderBuilder().setProvider(BC).build())
+ *                     .build(sha1Signer, signCert));
+ *
+ *      gen.addCertificates(certs);
+ *
+ *      CMSSignedData sigData = gen.generate(msg, false);
  * </pre>
  */
 public class CMSSignedDataGenerator
