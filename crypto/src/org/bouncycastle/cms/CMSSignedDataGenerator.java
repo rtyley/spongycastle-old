@@ -56,11 +56,11 @@ import org.bouncycastle.util.io.TeeOutputStream;
  *      Store           certs = new JcaCertStore(certList);
  *
  *      CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
- *      ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(signKP.getPrivate());
+ *      ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(signKP.getPrivate());
  *
  *      gen.addSignerInfoGenerator(
  *                new JcaSignerInfoGeneratorBuilder(
- *                     new JcaDigestCalculatorProviderBuilder().setProvider(BC).build())
+ *                     new JcaDigestCalculatorProviderBuilder().setProvider("BC").build())
  *                     .build(sha1Signer, signCert));
  *
  *      gen.addCertificates(certs);

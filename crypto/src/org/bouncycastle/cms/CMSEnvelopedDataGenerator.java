@@ -21,7 +21,10 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BERSet;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
@@ -129,9 +132,7 @@ public class CMSEnvelopedDataGenerator
             throw new CMSException("exception decoding algorithm parameters.", e);
         }
 
-        Iterator it = oldRecipientInfoGenerators.iterator();
-
-        while (it.hasNext())
+        for (Iterator it = oldRecipientInfoGenerators.iterator(); it.hasNext();)
         {
             IntRecipientInfoGenerator recipient = (IntRecipientInfoGenerator)it.next();
 
@@ -149,9 +150,7 @@ public class CMSEnvelopedDataGenerator
             }
         }
 
-        it = recipientInfoGenerators.iterator();
-
-        while (it.hasNext())
+        for (Iterator it = recipientInfoGenerators.iterator(); it.hasNext();)
         {
             RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
 
@@ -175,9 +174,21 @@ public class CMSEnvelopedDataGenerator
                         encContent);
         }
 
+        ASN1Set unprotectedAttrSet = null;
+        if (!unprotectedAttributes.isEmpty())
+        {
+            ASN1EncodableVector v = new ASN1EncodableVector();
+
+            for (Iterator it = unprotectedAttributes.iterator(); it.hasNext();)
+            {
+                v.add((DEREncodable)it.next());
+            }
+            unprotectedAttrSet = new BERSet(v);
+        }
+
         ContentInfo contentInfo = new ContentInfo(
                 CMSObjectIdentifiers.envelopedData,
-                new EnvelopedData(null, new DERSet(recipientInfos), eci, null));
+                new EnvelopedData(null, new DERSet(recipientInfos), eci, unprotectedAttrSet));
 
         return new CMSEnvelopedData(contentInfo);
     }
@@ -231,9 +242,21 @@ public class CMSEnvelopedDataGenerator
                         encAlgId,
                         encContent);
 
+        ASN1Set unprotectedAttrSet = null;
+        if (!unprotectedAttributes.isEmpty())
+        {
+            ASN1EncodableVector v = new ASN1EncodableVector();
+
+            for (Iterator it = unprotectedAttributes.iterator(); it.hasNext();)
+            {
+                v.add((DEREncodable)it.next());
+            }
+            unprotectedAttrSet = new BERSet(v);
+        }
+
         ContentInfo contentInfo = new ContentInfo(
                 CMSObjectIdentifiers.envelopedData,
-                new EnvelopedData(null, new DERSet(recipientInfos), eci, null));
+                new EnvelopedData(null, new DERSet(recipientInfos), eci, unprotectedAttrSet));
 
         return new CMSEnvelopedData(contentInfo);
     }
@@ -241,6 +264,7 @@ public class CMSEnvelopedDataGenerator
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
+     * @deprecated use OutputEncryptor method.
      */
     public CMSEnvelopedData generate(
         CMSProcessable  content,
@@ -254,6 +278,7 @@ public class CMSEnvelopedDataGenerator
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
+     * @deprecated use OutputEncryptor method.
      */
     public CMSEnvelopedData generate(
         CMSProcessable  content,
@@ -271,6 +296,7 @@ public class CMSEnvelopedDataGenerator
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
+     * @deprecated use OutputEncryptor method.
      */
     public CMSEnvelopedData generate(
         CMSProcessable  content,
@@ -285,6 +311,7 @@ public class CMSEnvelopedDataGenerator
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
+     * @deprecated use OutputEncryptor method.
      */
     public CMSEnvelopedData generate(
         CMSProcessable  content,

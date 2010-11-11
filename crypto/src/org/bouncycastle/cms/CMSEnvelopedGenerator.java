@@ -22,11 +22,15 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -42,11 +46,19 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
  * A simple example of usage.
  *
  * <pre>
- *      CMSEnvelopedDataGenerator  fact = new CMSEnvelopedDataGenerator();
+ *       CMSTypedData msg     = new CMSProcessableByteArray("Hello World!".getBytes());
  *
- *      fact.addKeyTransRecipient(cert);
+ *       CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
  *
- *      CMSEnvelopedData         data = fact.generate(content, algorithm, "BC");
+ *       AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(recipientCert).setProvider("BC");
+ *
+ *       edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert, wrapper));
+ *
+ *       CMSEnvelopedData ed = edGen.generate(
+ *                                       msg,
+ *                                       new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC)
+ *                                              .setProvider("BC").build());
+ *
  * </pre>
  */
 public class CMSEnvelopedGenerator
@@ -77,6 +89,7 @@ public class CMSEnvelopedGenerator
 
     final List oldRecipientInfoGenerators = new ArrayList();
     final List recipientInfoGenerators = new ArrayList();
+    final List unprotectedAttributes = new ArrayList();
 
     final SecureRandom rand;
 
@@ -306,6 +319,11 @@ public class CMSEnvelopedGenerator
     public void addRecipientInfoGenerator(RecipientInfoGenerator recipientGenerator)
     {
         recipientInfoGenerators.add(recipientGenerator);
+    }
+
+    public void addUnprotectedAttribute(ASN1ObjectIdentifier attrType, ASN1Encodable attrValue)
+    {
+        unprotectedAttributes.add(new Attribute(attrType, new DERSet(attrValue)));
     }
 
     protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
