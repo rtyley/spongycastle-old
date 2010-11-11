@@ -111,24 +111,26 @@ public class ISO9796d2Signer
     }
 
     /**
-     * compare two byte arrays.
+     * compare two byte arrays - constant time
      */
     private boolean isSameAs(
         byte[]    a,
         byte[]    b)
     {
+        boolean isOkay = true;
+
         if (messageLength > mBuf.length)
         {
             if (mBuf.length > b.length)
             {
-                return false;
+                isOkay = false;
             }
             
             for (int i = 0; i != mBuf.length; i++)
             {
                 if (a[i] != b[i])
                 {
-                    return false;
+                    isOkay = false;
                 }
             }
         }
@@ -136,19 +138,19 @@ public class ISO9796d2Signer
         {
             if (messageLength != b.length)
             {
-                return false;
+                isOkay = false;
             }
             
             for (int i = 0; i != b.length; i++)
             {
                 if (a[i] != b[i])
                 {
-                    return false;
+                    isOkay = false;
                 }
             }
         }
         
-        return true;
+        return isOkay;
     }
     
     /**
@@ -310,18 +312,12 @@ public class ISO9796d2Signer
 
         if (((block[0] & 0xC0) ^ 0x40) != 0)
         {
-            clearBlock(mBuf);
-            clearBlock(block);
-
-            return false;
+            return returnFalse(block);
         }
 
         if (((block[block.length - 1] & 0xF) ^ 0xC) != 0)
         {
-            clearBlock(mBuf);
-            clearBlock(block);
-
-            return false;
+            return returnFalse(block);
         }
 
         int     delta = 0;
@@ -388,10 +384,7 @@ public class ISO9796d2Signer
         //
         if ((off - mStart) <= 0)
         {
-            clearBlock(mBuf);
-            clearBlock(block);
-
-            return false;
+            return returnFalse(block);
         }
 
         //
@@ -404,19 +397,23 @@ public class ISO9796d2Signer
             digest.reset();
             digest.update(block, mStart, off - mStart);
             digest.doFinal(hash, 0);
-            
+
+            boolean isOkay = true;
+
             for (int i = 0; i != hash.length; i++)
             {
                 block[off + i] ^= hash[i];
                 if (block[off + i] != 0)
                 {
-                    clearBlock(mBuf);
-                    clearBlock(block);
-
-                    return false;
+                    isOkay = false;
                 }
             }
-            
+
+            if (!isOkay)
+            {
+                return returnFalse(block);
+            }
+
             recoveredMessage = new byte[off - mStart];
             System.arraycopy(block, mStart, recoveredMessage, 0, recoveredMessage.length);
         }
@@ -425,19 +422,23 @@ public class ISO9796d2Signer
             fullMessage = false;
             
             digest.doFinal(hash, 0);
-            
+
+            boolean isOkay = true;
+
             for (int i = 0; i != hash.length; i++)
             {
                 block[off + i] ^= hash[i];
                 if (block[off + i] != 0)
                 {
-                    clearBlock(mBuf);
-                    clearBlock(block);
-
-                    return false;
+                    isOkay = false;
                 }
             }
-            
+
+            if (!isOkay)
+            {
+                return returnFalse(block);
+            }
+
             recoveredMessage = new byte[off - mStart];
             System.arraycopy(block, mStart, recoveredMessage, 0, recoveredMessage.length);
         }
@@ -450,10 +451,7 @@ public class ISO9796d2Signer
         {
             if (!isSameAs(mBuf, recoveredMessage))
             {
-                clearBlock(mBuf);
-                clearBlock(block);
-
-                return false;
+                return returnFalse(block);
             }
         }
         
@@ -461,6 +459,14 @@ public class ISO9796d2Signer
         clearBlock(block);
 
         return true;
+    }
+
+    private boolean returnFalse(byte[] block)
+    {
+        clearBlock(mBuf);
+        clearBlock(block);
+
+        return false;
     }
 
     /**
