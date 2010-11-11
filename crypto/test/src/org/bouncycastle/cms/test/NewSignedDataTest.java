@@ -573,8 +573,8 @@ public class NewSignedDataTest
     public void testSHA1AndMD5WithRSAEncapsulatedRepeated()
         throws Exception
     {
-        List                certList = new ArrayList();
-        CMSProcessable      msg = new CMSProcessableByteArray("Hello World!".getBytes());
+        List              certList = new ArrayList();
+        CMSTypedData      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
         certList.add(_origCert);
         certList.add(_signCert);
@@ -583,13 +583,15 @@ public class NewSignedDataTest
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_SHA1);
+        DigestCalculatorProvider digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(BC).build();
 
-        gen.addSigner(_origKP.getPrivate(), _origCert, CMSSignedDataGenerator.DIGEST_MD5);
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(digCalcProv).build(new JcaContentSignerBuilder("SHA1withRSA").setProvider(BC).build(_origKP.getPrivate()), _origCert));
+
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(digCalcProv).build(new JcaContentSignerBuilder("MD5withRSA").setProvider(BC).build(_origKP.getPrivate()), _origCert));
         
         gen.addCertificates(certs);
 
-        CMSSignedData s = gen.generate(msg, true, BC);
+        CMSSignedData s = gen.generate(msg, true);
 
         ByteArrayInputStream bIn = new ByteArrayInputStream(s.getEncoded());
         ASN1InputStream      aIn = new ASN1InputStream(bIn);
@@ -677,8 +679,8 @@ public class NewSignedDataTest
     public void testSHA1WithRSANoAttributes()
         throws Exception
     {
-        List                certList = new ArrayList();
-        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+        List              certList = new ArrayList();
+        CMSTypedData      msg = new CMSProcessableByteArray("Hello world!".getBytes());
     
         certList.add(_origCert);
         certList.add(_signCert);
@@ -692,7 +694,7 @@ public class NewSignedDataTest
     
         gen.addCertificates(certs);
     
-        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, BC, false);
+        CMSSignedData s = gen.generate(msg, false);
     
         //
         // compute expected content digest
@@ -1072,8 +1074,8 @@ public class NewSignedDataTest
         String          signatureAlgorithm)
         throws Exception
     {
-        List                certList = new ArrayList();
-        List                crlList = new ArrayList();
+        List              certList = new ArrayList();
+        List              crlList = new ArrayList();
         CMSTypedData      msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
         certList.add(signatureCert);

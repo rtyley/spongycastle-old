@@ -928,9 +928,9 @@ public class CMSSignedDataStreamGenerator
         boolean attrCertV1Found = false;
         boolean attrCertV2Found = false;
 
-        if (_certs != null)
+        if (certs != null)
         {
-            for (Iterator it = _certs.iterator(); it.hasNext();)
+            for (Iterator it = certs.iterator(); it.hasNext();)
             {
                 Object obj = it.next();
                 if (obj instanceof ASN1TaggedObject)
@@ -958,9 +958,9 @@ public class CMSSignedDataStreamGenerator
             return new DERInteger(5);
         }
 
-        if (_crls != null && !otherCert)         // no need to check if otherCert is true
+        if (crls != null && !otherCert)         // no need to check if otherCert is true
         {
-            for (Iterator it = _crls.iterator(); it.hasNext();)
+            for (Iterator it = crls.iterator(); it.hasNext();)
             {
                 Object obj = it.next();
                 if (obj instanceof ASN1TaggedObject)
@@ -1094,20 +1094,20 @@ public class CMSSignedDataStreamGenerator
             _out.close();
             _eiGen.close();
 
-            _digests.clear();    // clear the current preserved digest state
+            digests.clear();    // clear the current preserved digest state
 
-            if (_certs.size() != 0)
+            if (certs.size() != 0)
             {
-                ASN1Set certs = CMSUtils.createBerSetFromList(_certs);
+                ASN1Set certSet = CMSUtils.createBerSetFromList(certs);
 
-                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 0, certs).getEncoded());
+                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 0, certSet).getEncoded());
             }
 
-            if (_crls.size() != 0)
+            if (crls.size() != 0)
             {
-                ASN1Set crls = CMSUtils.createBerSetFromList(_crls);
+                ASN1Set crlSet = CMSUtils.createBerSetFromList(crls);
 
-                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 1, crls).getEncoded());
+                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 1, crlSet).getEncoded());
             }
 
             //
@@ -1125,7 +1125,7 @@ public class CMSSignedDataStreamGenerator
                     DigestAndSignerInfoGeneratorHolder holder = (DigestAndSignerInfoGeneratorHolder)it.next();
     
                     byte[] calculatedDigest = holder.digest.digest();
-                    _digests.put(holder.digestOID, calculatedDigest.clone());
+                    digests.put(holder.digestOID, calculatedDigest.clone());
                     AlgorithmIdentifier digestAlgorithm = holder.getDigestAlgorithm();
     
                     signerInfos.add(holder.signerInf.generate(_contentOID, digestAlgorithm, calculatedDigest));
@@ -1143,7 +1143,7 @@ public class CMSSignedDataStreamGenerator
 
                     byte[] calculatedDigest = sigGen.getCalculatedDigest();
 
-                    _digests.put(sigGen.getDigestAlgorithm().getAlgorithm().getId(), calculatedDigest);
+                    digests.put(sigGen.getDigestAlgorithm().getAlgorithm().getId(), calculatedDigest);
                 }
                 catch (CMSException e)
                 {

@@ -1,5 +1,25 @@
 package org.bouncycastle.cms;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -17,26 +37,6 @@ import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.Provider;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -122,7 +122,7 @@ public class CMSSignedDataGenerator
             }
 
             byte[] hash = dig.digest();
-            _digests.put(digestOID, hash.clone());
+            digests.put(digestOID, hash.clone());
 
             AttributeTable signed;
             if (addDefaultAttributes)
@@ -528,7 +528,7 @@ public class CMSSignedDataGenerator
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
 
-        _digests.clear();  // clear the current preserved digest state
+        digests.clear();  // clear the current preserved digest state
 
         //
         // add the precalculated SignerInfo objects.
@@ -582,16 +582,16 @@ public class CMSSignedDataGenerator
 
         ASN1Set certificates = null;
 
-        if (_certs.size() != 0)
+        if (certs.size() != 0)
         {
-            certificates = CMSUtils.createBerSetFromList(_certs);
+            certificates = CMSUtils.createBerSetFromList(certs);
         }
 
         ASN1Set certrevlist = null;
 
-        if (_crls.size() != 0)
+        if (crls.size() != 0)
         {
-            certrevlist = CMSUtils.createBerSetFromList(_crls);
+            certrevlist = CMSUtils.createBerSetFromList(crls);
         }
 
         ASN1OctetString octs = null;

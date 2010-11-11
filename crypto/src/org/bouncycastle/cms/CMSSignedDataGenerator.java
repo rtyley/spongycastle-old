@@ -128,7 +128,7 @@ public class CMSSignedDataGenerator
             }
 
             byte[] hash = dig.digest();
-            _digests.put(digestOID, hash.clone());
+            digests.put(digestOID, hash.clone());
 
             AttributeTable signed;
             if (addDefaultAttributes)
@@ -571,7 +571,7 @@ public class CMSSignedDataGenerator
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
 
-        _digests.clear();  // clear the current preserved digest state
+        digests.clear();  // clear the current preserved digest state
 
         //
         // add the precalculated SignerInfo objects.
@@ -666,16 +666,16 @@ public class CMSSignedDataGenerator
 
         ASN1Set certificates = null;
 
-        if (_certs.size() != 0)
+        if (certs.size() != 0)
         {
-            certificates = CMSUtils.createBerSetFromList(_certs);
+            certificates = CMSUtils.createBerSetFromList(certs);
         }
 
         ASN1Set certrevlist = null;
 
-        if (_crls.size() != 0)
+        if (crls.size() != 0)
         {
-            certrevlist = CMSUtils.createBerSetFromList(_crls);
+            certrevlist = CMSUtils.createBerSetFromList(crls);
         }
 
         ASN1OctetString octs = null;
@@ -809,7 +809,7 @@ public class CMSSignedDataGenerator
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
 
-        _digests.clear();  // clear the current preserved digest state
+        digests.clear();  // clear the current preserved digest state
 
         //
         // add the precalculated SignerInfo objects.
@@ -852,6 +852,7 @@ public class CMSSignedDataGenerator
 
             octs = new BERConstructedOctetString(bOut.toByteArray());
         }
+
         if (content != null)
         {
             OutputStream cOut = null;
@@ -917,20 +918,27 @@ public class CMSSignedDataGenerator
 
             digestAlgs.add(inf.getDigestAlgorithm());
             signerInfos.add(inf);
+
+            byte[] calcDigest = sGen.getCalculatedDigest();
+
+            if (calcDigest != null)
+            {
+                digests.put(inf.getDigestAlgorithm().getAlgorithm().getId(), calcDigest);
+            }
         }
 
         ASN1Set certificates = null;
 
-        if (_certs.size() != 0)
+        if (certs.size() != 0)
         {
-            certificates = CMSUtils.createBerSetFromList(_certs);
+            certificates = CMSUtils.createBerSetFromList(certs);
         }
 
         ASN1Set certrevlist = null;
 
-        if (_crls.size() != 0)
+        if (crls.size() != 0)
         {
-            certrevlist = CMSUtils.createBerSetFromList(_crls);
+            certrevlist = CMSUtils.createBerSetFromList(crls);
         }
 
         ContentInfo encInfo = new ContentInfo(contentTypeOID, octs);
