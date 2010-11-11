@@ -112,7 +112,7 @@ public class CMSSignedDataStreamGenerator
             AlgorithmIdentifier digAlgId = getDigestAlgorithmID();
 
             byte[] hash = _digest.digest();
-            _digests.put(_digestOID, hash.clone());
+            digests.put(_digestOID, hash.clone());
 
             byte[] bytesToSign = hash;
             Signature sig;
@@ -791,9 +791,9 @@ public class CMSSignedDataStreamGenerator
         boolean attrCertV1Found = false;
         boolean attrCertV2Found = false;
 
-        if (_certs != null)
+        if (certs != null)
         {
-            for (Iterator it = _certs.iterator(); it.hasNext();)
+            for (Iterator it = certs.iterator(); it.hasNext();)
             {
                 Object obj = it.next();
                 if (obj instanceof ASN1TaggedObject)
@@ -821,9 +821,9 @@ public class CMSSignedDataStreamGenerator
             return new DERInteger(5);
         }
 
-        if (_crls != null && !otherCert)         // no need to check if otherCert is true
+        if (crls != null && !otherCert)         // no need to check if otherCert is true
         {
-            for (Iterator it = _crls.iterator(); it.hasNext();)
+            for (Iterator it = crls.iterator(); it.hasNext();)
             {
                 Object obj = it.next();
                 if (obj instanceof ASN1TaggedObject)
@@ -1019,20 +1019,20 @@ public class CMSSignedDataStreamGenerator
             _out.close();
             _eiGen.close();
 
-            _digests.clear();    // clear the current preserved digest state
+            digests.clear();    // clear the current preserved digest state
 
-            if (_certs.size() != 0)
+            if (certs.size() != 0)
             {
-                ASN1Set certs = CMSUtils.createBerSetFromList(_certs);
+                ASN1Set certsSet = CMSUtils.createBerSetFromList(certs);
 
-                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 0, certs).getEncoded());
+                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 0, certsSet).getEncoded());
             }
 
-            if (_crls.size() != 0)
+            if (crls.size() != 0)
             {
-                ASN1Set crls = CMSUtils.createBerSetFromList(_crls);
+                ASN1Set crlsSet = CMSUtils.createBerSetFromList(crls);
 
-                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 1, crls).getEncoded());
+                _sigGen.getRawOutputStream().write(new BERTaggedObject(false, 1, crlsSet).getEncoded());
             }
             
             //

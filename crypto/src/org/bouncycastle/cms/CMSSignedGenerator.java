@@ -92,11 +92,11 @@ public class CMSSignedGenerator
         EC_ALGORITHMS.put(DIGEST_SHA512, ENCRYPTION_ECDSA_WITH_SHA512);
     }
 
-    protected List _certs = new ArrayList();
-    protected List _crls = new ArrayList();
+    protected List certs = new ArrayList();
+    protected List crls = new ArrayList();
     protected List _signers = new ArrayList();
     protected List signerGens = new ArrayList();
-    protected Map  _digests = new HashMap();
+    protected Map digests = new HashMap();
 
     protected final SecureRandom rand;
 
@@ -216,29 +216,29 @@ public class CMSSignedGenerator
         CertStore certStore)
         throws CertStoreException, CMSException
     {
-        _certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
-        _crls.addAll(CMSUtils.getCRLsFromStore(certStore));
+        certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
+        crls.addAll(CMSUtils.getCRLsFromStore(certStore));
     }
 
     public void addCertificates(
         Store certStore)
         throws CMSException
     {
-        _certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
+        certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
     }
 
     public void addCRLs(
         Store crlStore)
         throws CMSException
     {
-        _crls.addAll(CMSUtils.getCRLsFromStore(crlStore));
+        crls.addAll(CMSUtils.getCRLsFromStore(crlStore));
     }
 
     public void addAttributeCertificates(
         Store attrStore)
         throws CMSException
     {
-        _certs.addAll(CMSUtils.getAttributeCertificatesFromStore(attrStore));
+        certs.addAll(CMSUtils.getAttributeCertificatesFromStore(attrStore));
     }
 
     /**
@@ -259,7 +259,7 @@ public class CMSSignedGenerator
             {
                 X509AttributeCertificate attrCert = (X509AttributeCertificate)it.next();
 
-                _certs.add(new DERTaggedObject(false, 2,
+                certs.add(new DERTaggedObject(false, 2,
                              AttributeCertificate.getInstance(ASN1Object.fromByteArray(attrCert.getEncoded()))));
             }
         }
@@ -303,7 +303,7 @@ public class CMSSignedGenerator
      */
     public Map getGeneratedDigests()
     {
-        return new HashMap(_digests);
+        return new HashMap(digests);
     }
 
     static SignerIdentifier getSignerIdentifier(X509Certificate cert)

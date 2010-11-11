@@ -184,6 +184,7 @@ public class SignerInfoGenerator
 
             if (sAttrGen != null)
             {
+                digestAlg = digester.getAlgorithmIdentifier();
                 calculatedDigest = digester.getDigest();
                 Map parameters = getBaseParameters(contentType, digester.getAlgorithmIdentifier(), calculatedDigest);
                 AttributeTable signed = sAttrGen.getAttributes(Collections.unmodifiableMap(parameters));
@@ -196,8 +197,6 @@ public class SignerInfoGenerator
                 sOut.write(signedAttr.getEncoded(ASN1Encodable.DER));
 
                 sOut.close();
-
-                digestAlg = digester.getAlgorithmIdentifier();
             }
             else
             {
