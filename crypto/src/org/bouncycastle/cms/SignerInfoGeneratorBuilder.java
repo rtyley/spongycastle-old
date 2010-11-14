@@ -72,6 +72,11 @@ public class SignerInfoGeneratorBuilder
 
         if (signedGen != null || unsignedGen != null)
         {
+            if (signedGen == null)
+            {
+                signedGen = new DefaultSignedAttributeTableGenerator();
+            }
+
             return new SignerInfoGenerator(sigId, contentSigner, digestProvider, signedGen, unsignedGen);
         }
         

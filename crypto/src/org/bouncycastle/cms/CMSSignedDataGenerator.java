@@ -475,6 +475,7 @@ public class CMSSignedDataGenerator
      * object using the given provider - if encapsulate is true a copy
      * of the message will be included in the signature. The content type
      * is set according to the OID represented by the string signedContentType.
+     * @deprecated use generate(CMSTypedData, boolean)
      */
     public CMSSignedData generate(
         String          eContentType,
