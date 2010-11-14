@@ -1,6 +1,12 @@
 package org.bouncycastle.asn1.esf;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
 
 public class SignaturePolicyId
     extends ASN1Encodable
@@ -61,9 +67,9 @@ public class SignaturePolicyId
         this.sigPolicyQualifiers = sigPolicyQualifiers;
     }
 
-    public DERObjectIdentifier getSigPolicyId()
+    public ASN1ObjectIdentifier getSigPolicyId()
     {
-        return sigPolicyId;
+        return new ASN1ObjectIdentifier(sigPolicyId.getId());
     }
 
     public OtherHashAlgAndValue getSigPolicyHash()
