@@ -46,9 +46,9 @@ public class JcaSignerInfoGeneratorBuilder
         return this;
     }
 
-    public SignerInfoGenerator build(ContentSigner contentSigner, X509Certificate certificatet)
+    public SignerInfoGenerator build(ContentSigner contentSigner, X509Certificate certificate)
         throws OperatorCreationException, CertificateEncodingException
     {
-        return super.build(contentSigner, new JcaX509CertificateHolder(certificatet));
+        return super.build(contentSigner, new JcaX509CertificateHolder(certificate));
     }
 }
