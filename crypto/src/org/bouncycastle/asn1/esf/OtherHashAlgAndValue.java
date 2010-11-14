@@ -1,7 +1,12 @@
 package org.bouncycastle.asn1.esf;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.*;
 
 public class OtherHashAlgAndValue
     extends ASN1Encodable
@@ -13,21 +18,19 @@ public class OtherHashAlgAndValue
     public static OtherHashAlgAndValue getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof OtherHashAlgAndValue)
+        if (obj instanceof OtherHashAlgAndValue)
         {
             return (OtherHashAlgAndValue) obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new OtherHashAlgAndValue((ASN1Sequence) obj);
+            return new OtherHashAlgAndValue(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'OtherHashAlgAndValue' factory : "
-                        + obj.getClass().getName() + ".");
+        throw new IllegalArgumentException("null value in getInstance");
     }
 
-    public OtherHashAlgAndValue(
+    private OtherHashAlgAndValue(
         ASN1Sequence seq)
     {
         if (seq.size() != 2)
