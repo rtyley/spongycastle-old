@@ -33,7 +33,6 @@ public class X509CertificateHolder
         return x509Certificate.getEncoded();
     }
 
-    // TODO: need to think about this a bit more...
     public X509Extension getExtension(ASN1ObjectIdentifier oid)
     {
         return x509Certificate.getTBSCertificate().getExtensions().getExtension(oid);

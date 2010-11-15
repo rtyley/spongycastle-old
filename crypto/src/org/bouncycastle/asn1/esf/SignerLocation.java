@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.esf;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -7,8 +9,7 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
-
-import java.util.Enumeration;
+import org.bouncycastle.asn1.x500.DirectoryString;
 
 /**
  * Signer-Location attribute (RFC3126).
@@ -41,10 +42,12 @@ public class SignerLocation
             switch (o.getTagNo())
             {
             case 0:
-                this.countryName = DERUTF8String.getInstance(o, true);
+                DirectoryString countryNameDirectoryString = DirectoryString.getInstance(o, true);
+                this.countryName = new DERUTF8String(countryNameDirectoryString.getString());
                 break;
             case 1:
-                this.localityName = DERUTF8String.getInstance(o, true);
+                DirectoryString localityNameDirectoryString = DirectoryString.getInstance(o, true);
+                this.localityName = new DERUTF8String(localityNameDirectoryString.getString());
                 break;
             case 2:
                 if (o.isExplicit())
