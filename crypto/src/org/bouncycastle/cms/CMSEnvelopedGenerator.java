@@ -42,24 +42,6 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
 /**
  * General class for generating a CMS enveloped-data message.
- *
- * A simple example of usage.
- *
- * <pre>
- *       CMSTypedData msg     = new CMSProcessableByteArray("Hello World!".getBytes());
- *
- *       CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
- *
- *       AsymmetricKeyWrapper wrapper = new JceAsymmetricKeyWrapper(recipientCert).setProvider("BC");
- *
- *       edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert, wrapper));
- *
- *       CMSEnvelopedData ed = edGen.generate(
- *                                       msg,
- *                                       new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC)
- *                                              .setProvider("BC").build());
- *
- * </pre>
  */
 public class CMSEnvelopedGenerator
 {

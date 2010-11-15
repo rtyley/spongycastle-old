@@ -40,11 +40,17 @@ import org.bouncycastle.operator.OutputEncryptor;
  * A simple example of usage.
  *
  * <pre>
- *      CMSEnvelopedDataGenerator  fact = new CMSEnvelopedDataGenerator();
+ *       CMSTypedData msg     = new CMSProcessableByteArray("Hello World!".getBytes());
  *
- *      fact.addKeyTransRecipient(cert);
+ *       CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
  *
- *      CMSEnvelopedData         data = fact.generate(content, algorithm, "BC");
+ *       edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("BC"));
+ *
+ *       CMSEnvelopedData ed = edGen.generate(
+ *                                       msg,
+ *                                       new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC)
+ *                                              .setProvider("BC").build());
+ *
  * </pre>
  */
 public class CMSEnvelopedDataGenerator
