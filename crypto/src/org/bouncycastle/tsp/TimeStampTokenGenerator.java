@@ -305,8 +305,12 @@ public class TimeStampTokenGenerator
             {
                 JcaSignerInfoGeneratorBuilder sigBuilder = new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider(provider).build());
 
-                sigBuilder.setSignedAttributeGenerator(new DefaultSignedAttributeTableGenerator(signedAttr))
-                    .setUnsignedAttributeGenerator(new SimpleAttributeTableGenerator(unsignedAttr));
+                sigBuilder.setSignedAttributeGenerator(new DefaultSignedAttributeTableGenerator(signedAttr));
+
+                if (unsignedAttr != null)
+                {
+                    sigBuilder.setUnsignedAttributeGenerator(new SimpleAttributeTableGenerator(unsignedAttr));
+                }
 
                 signerInfoGen = sigBuilder.build(new JcaContentSignerBuilder(getSigAlgorithm(key, digestOID)).setProvider(provider).build(key), cert);
             }
