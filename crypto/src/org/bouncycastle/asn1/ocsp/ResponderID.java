@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1.ocsp;
 
 import org.bouncycastle.asn1.ASN1Choice;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
@@ -62,7 +62,29 @@ public class ResponderID
     {
         return getInstance(obj.getObject()); // must be explicitly tagged
     }
-    
+
+    public byte[] getKeyHash()
+    {
+		if (this.value instanceof ASN1OctetString)
+		{
+			ASN1OctetString octetString = (ASN1OctetString)this.value;
+			return octetString.getOctets();
+		}
+
+		return null;
+	}
+
+	public X509Name getName()
+	{
+		if (this.value instanceof X509Name)
+		{
+			X509Name name = (X509Name)this.value;
+			return name;
+		}
+
+		return null;
+	}
+
     /**
      * Produce an object suitable for an ASN1OutputStream.
      * <pre>
