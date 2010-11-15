@@ -363,23 +363,23 @@ public class ASN1InputStream
             case BMP_STRING:
                 return new DERBMPString(bytes);
             case BOOLEAN:
-                return new DERBoolean(bytes);
+                return new ASN1Boolean(bytes);
             case ENUMERATED:
-                return new DEREnumerated(bytes);
+                return new ASN1Enumerated(bytes);
             case GENERALIZED_TIME:
-                return new DERGeneralizedTime(bytes);
+                return new ASN1GeneralizedTime(bytes);
             case GENERAL_STRING:
                 return new DERGeneralString(bytes);
             case IA5_STRING:
                 return new DERIA5String(bytes);
             case INTEGER:
-                return new DERInteger(bytes);
+                return new ASN1Integer(bytes);
             case NULL:
                 return DERNull.INSTANCE;   // actual content is ignored (enforce 0 length?)
             case NUMERIC_STRING:
                 return new DERNumericString(bytes);
             case OBJECT_IDENTIFIER:
-                return new DERObjectIdentifier(bytes);
+                return new ASN1ObjectIdentifier(bytes);
             case OCTET_STRING:
                 return new DEROctetString(bytes);
             case PRINTABLE_STRING:
@@ -389,7 +389,7 @@ public class ASN1InputStream
             case UNIVERSAL_STRING:
                 return new DERUniversalString(bytes);
             case UTC_TIME:
-                return new DERUTCTime(bytes);
+                return new ASN1UTCTime(bytes);
             case UTF8_STRING:
                 return new DERUTF8String(bytes);
             case VISIBLE_STRING:

@@ -8,6 +8,11 @@ public class ASN1ObjectIdentifier
         super(identifier);
     }
 
+    ASN1ObjectIdentifier(byte[] bytes)
+    {
+        super(bytes);
+    }
+
     /**
      * Return an OID that creates a branch under the current one.
      *
