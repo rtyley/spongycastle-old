@@ -32,12 +32,12 @@ public class CertificationRequest
             return (CertificationRequest)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new CertificationRequest((ASN1Sequence)o);
+            return new CertificationRequest(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        throw new IllegalArgumentException("null object in getInstance");
     }
 
     protected CertificationRequest()
