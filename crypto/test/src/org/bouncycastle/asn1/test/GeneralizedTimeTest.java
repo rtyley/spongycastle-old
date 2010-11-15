@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.test;
 
-import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.util.test.SimpleTest;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
+
+import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * X.690 test example
@@ -86,6 +86,30 @@ public class GeneralizedTimeTest
             "20020122022220Z"
     };
 
+    String[] mzOutput = {
+        "20020122122220.000Z",
+        "20020122122220.000Z",
+        "20020122222220.000Z",
+        "20020122122220.000Z",
+        "20020122122220.100Z",
+        "20020122122220.100Z",
+        "20020122222220.100Z",
+        "20020122122220.100Z",
+        "20020122122220.010Z",
+        "20020122122220.010Z",
+        "20020122222220.010Z",
+        "20020122122220.010Z",
+        "20020122122220.001Z",
+        "20020122122220.001Z",
+        "20020122222220.001Z",
+        "20020122122220.001Z",
+        "20020122122220.000Z",
+        "20020122122220.000Z",
+        "20020122222220.000Z",
+        "20020122122220.000Z",
+        "20020122022220.000Z"
+    };
+
     public String getName()
     {
         return "GeneralizedTime";
@@ -120,6 +144,20 @@ public class GeneralizedTimeTest
                 {
                     fail("failed conversion test");
                 }
+            }
+        }
+
+        dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
+
+        dateF.setTimeZone(new SimpleTimeZone(0,"Z"));
+
+        for (int i = 0; i != input.length; i++)
+        {
+            DERGeneralizedTime    t = new DERGeneralizedTime(input[i]);
+
+            if (!dateF.format(t.getDate()).equals(mzOutput[i]))
+            {
+                fail("failed long date conversion test");
             }
         }
     }
