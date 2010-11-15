@@ -66,6 +66,8 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         algorithms.put("DSAWITHSHA1", X9ObjectIdentifiers.id_dsa_with_sha1);
         algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
         algorithms.put("SHA256WITHDSA", NISTObjectIdentifiers.dsa_with_sha256);
+        algorithms.put("SHA384WITHDSA", NISTObjectIdentifiers.dsa_with_sha384);
+        algorithms.put("SHA512WITHDSA", NISTObjectIdentifiers.dsa_with_sha512);
         algorithms.put("SHA1WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1);
         algorithms.put("ECDSAWITHSHA1", X9ObjectIdentifiers.ecdsa_with_SHA1);
         algorithms.put("SHA224WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
@@ -90,6 +92,8 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         noParams.add(X9ObjectIdentifiers.id_dsa_with_sha1);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha256);
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha384);
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha512);
 
         //
         // RFC 4491
