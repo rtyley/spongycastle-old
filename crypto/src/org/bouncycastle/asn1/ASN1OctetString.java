@@ -52,6 +52,12 @@ public abstract class ASN1OctetString
             return (ASN1OctetString)obj;
         }
 
+        // TODO: this needs to be deleted in V2
+        if (obj instanceof ASN1TaggedObject)
+        {
+            return getInstance(((ASN1TaggedObject)obj).getObject());
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
