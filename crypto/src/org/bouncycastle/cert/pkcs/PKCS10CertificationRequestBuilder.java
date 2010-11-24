@@ -14,8 +14,8 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.operator.ContentSigner;
 
 /**
@@ -45,10 +45,10 @@ import org.bouncycastle.operator.ContentSigner;
 public class PKCS10CertificationRequestBuilder
 {
     private SubjectPublicKeyInfo publicKeyInfo;
-    private X509Name subject;
+    private X500Name subject;
     private List attributes = new ArrayList();
 
-    public PKCS10CertificationRequestBuilder(X509Name subject, SubjectPublicKeyInfo publicKeyInfo)
+    public PKCS10CertificationRequestBuilder(X500Name subject, SubjectPublicKeyInfo publicKeyInfo)
     {
         this.subject = subject;
         this.publicKeyInfo = publicKeyInfo;

@@ -3,8 +3,10 @@ package org.bouncycastle.cert;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.util.Arrays;
@@ -27,6 +29,11 @@ public class X509AttributeCertificateHolder
         throws IOException
     {
         return attrCert.getEncoded();
+    }
+
+    public X509Extension getExtension(ASN1ObjectIdentifier oid)
+    {
+        return attrCert.getAcinfo().getExtensions().getExtension(oid);
     }
 
     public AttributeCertificate toASN1Structure()

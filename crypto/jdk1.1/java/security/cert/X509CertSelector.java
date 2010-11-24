@@ -214,9 +214,9 @@ public class X509CertSelector implements CertSelector
      *   Name ::= CHOICE {
      *     RDNSequence }
      *
-     *   RDNSequence ::= SEQUENCE OF RelativeDistinguishedName
+     *   RDNSequence ::= SEQUENCE OF RDN
      *
-     *   RelativeDistinguishedName ::=
+     *   RDN ::=
      *     SET SIZE (1 .. MAX) OF AttributeTypeAndValue
      *
      *   AttributeTypeAndValue ::= SEQUENCE {

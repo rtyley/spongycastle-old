@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 
@@ -50,6 +51,21 @@ public class CertificationRequestInfo
         }
 
         throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+    }
+
+    public CertificationRequestInfo(
+        X500Name subject,
+        SubjectPublicKeyInfo    pkInfo,
+        ASN1Set                 attributes)
+    {
+        this.subject = X509Name.getInstance(subject.getDERObject());
+        this.subjectPKInfo = pkInfo;
+        this.attributes = attributes;
+
+        if ((subject == null) || (version == null) || (subjectPKInfo == null))
+        {
+            throw new IllegalArgumentException("Not all mandatory fields set in CertificationRequestInfo generator.");
+        }
     }
 
     public CertificationRequestInfo(

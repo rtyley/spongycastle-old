@@ -6,8 +6,8 @@ import java.security.PublicKey;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.crmf.CertReqMsg;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.crmf.CRMFException;
 import org.bouncycastle.cert.crmf.CertificateRequestMessage;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
@@ -45,7 +45,7 @@ public class JcaCertificateRequestMessage
 
     public X500Principal getSubjectX500Principal()
     {
-        X509Name subject = this.getCertTemplate().getSubject();
+        X500Name subject = this.getCertTemplate().getSubject();
 
         if (subject != null)
         {

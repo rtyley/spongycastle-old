@@ -5,8 +5,8 @@ import java.math.BigInteger;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.cmp.RevDetails;
 import org.bouncycastle.asn1.crmf.CertTemplateBuilder;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Name;
 
 public class RevocationDetailsBuilder
 {
@@ -22,7 +22,7 @@ public class RevocationDetailsBuilder
         return this;
     }
 
-    public RevocationDetailsBuilder setIssuer(X509Name issuer)
+    public RevocationDetailsBuilder setIssuer(X500Name issuer)
     {
         if (issuer != null)
         {
@@ -42,7 +42,7 @@ public class RevocationDetailsBuilder
         return this;
     }
 
-    public RevocationDetailsBuilder setSubject(X509Name subject)
+    public RevocationDetailsBuilder setSubject(X500Name subject)
     {
         if (subject != null)
         {

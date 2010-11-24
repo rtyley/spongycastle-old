@@ -13,7 +13,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
  * <pre>
  * DistributionPointName ::= CHOICE {
  *     fullName                 [0] GeneralNames,
- *     nameRelativeToCRLIssuer  [1] RelativeDistinguishedName
+ *     nameRelativeToCRLIssuer  [1] RDN
  * }
  * </pre>
  */

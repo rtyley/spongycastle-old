@@ -3,7 +3,7 @@ package org.bouncycastle.cert.cmp;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.cmp.RevDetails;
-import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x500.X500Name;
 
 public class RevocationDetails
 {
@@ -14,12 +14,12 @@ public class RevocationDetails
         this.revDetails = revDetails;
     }
 
-    public X509Name getSubject()
+    public X500Name getSubject()
     {
         return revDetails.getCertDetails().getSubject();
     }
 
-    public X509Name getIssuer()
+    public X500Name getIssuer()
     {
         return revDetails.getCertDetails().getIssuer();
     }

@@ -27,11 +27,6 @@ public class X509CertificateHolder
         this.x509Certificate = x509Certificate;
     }
 
-    public byte[] getEncoded()
-        throws IOException
-    {
-        return x509Certificate.getEncoded();
-    }
 
     public X509Extension getExtension(ASN1ObjectIdentifier oid)
     {
@@ -122,4 +117,10 @@ public class X509CertificateHolder
             return 0;
         }
     }
+
+    public byte[] getEncoded()
+        throws IOException
+    {
+        return x509Certificate.getEncoded();
+    } 
 }

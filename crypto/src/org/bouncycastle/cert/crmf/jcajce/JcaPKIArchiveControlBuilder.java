@@ -5,8 +5,8 @@ import java.security.PrivateKey;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.crmf.PKIArchiveControlBuilder;
 
 public class JcaPKIArchiveControlBuilder
@@ -14,7 +14,7 @@ public class JcaPKIArchiveControlBuilder
 {
     public JcaPKIArchiveControlBuilder(PrivateKey privateKey, X500Principal name)
     {
-        this(privateKey, new GeneralName(X509Name.getInstance(name.getEncoded())));
+        this(privateKey, new GeneralName(X500Name.getInstance(name.getEncoded())));
     }
 
     public JcaPKIArchiveControlBuilder(PrivateKey privateKey, GeneralName generalName)

@@ -5,9 +5,9 @@ import java.security.PublicKey;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.crmf.CertificateRequestMessageBuilder;
 
 public class JcaCertificateRequestMessageBuilder
@@ -22,7 +22,7 @@ public class JcaCertificateRequestMessageBuilder
     {
         if (issuer != null)
         {
-            setIssuer(X509Name.getInstance(issuer.getEncoded()));
+            setIssuer(X500Name.getInstance(issuer.getEncoded()));
         }
 
         return this;
@@ -32,7 +32,7 @@ public class JcaCertificateRequestMessageBuilder
     {
         if (subject != null)
         {
-            setSubject(X509Name.getInstance(subject.getEncoded()));
+            setSubject(X500Name.getInstance(subject.getEncoded()));
         }
 
         return this;
@@ -42,7 +42,7 @@ public class JcaCertificateRequestMessageBuilder
     {
         if (sender != null)
         {
-            setAuthInfoSender(new GeneralName(X509Name.getInstance(sender.getEncoded())));
+            setAuthInfoSender(new GeneralName(X500Name.getInstance(sender.getEncoded())));
         }
 
         return this;

@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -149,6 +150,11 @@ public class OCSPReq
     public X509Extensions getRequestExtensions()
     {
         return X509Extensions.getInstance(req.getTbsRequest().getRequestExtensions());
+    }
+
+    public X509Extension getRequestExtension(ASN1ObjectIdentifier oid)
+    {
+        return req.getTbsRequest().getRequestExtensions().getExtension(oid);
     }
 
     /**
