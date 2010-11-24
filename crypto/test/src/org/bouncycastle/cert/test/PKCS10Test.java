@@ -20,6 +20,7 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
@@ -175,7 +176,7 @@ public class PKCS10Test
 
         ContentSigner signer = new JcaContentSignerBuilder(algorithm).setProvider(BC).build(privKey);
 
-        PKCS10CertificationRequestBuilder reqBuilder = new JcaPKCS10CertificationRequestBuilder(new X509Name("CN=XXX"), pubKey);
+        PKCS10CertificationRequestBuilder reqBuilder = new JcaPKCS10CertificationRequestBuilder(new X500Name("CN=XXX"), pubKey);
         PKCS10CertificationRequestHolder  req = reqBuilder.build(signer);
 
         ContentVerifierProvider verifier = new JcaContentVerifierProviderBuilder().setProvider(BC).build(pubKey);
@@ -196,7 +197,7 @@ public class PKCS10Test
         //
         ((ECPointEncoder)pubKey).setPointFormat("UNCOMPRESSED");
 
-        reqBuilder = new JcaPKCS10CertificationRequestBuilder(new X509Name("CN=XXX"), pubKey);
+        reqBuilder = new JcaPKCS10CertificationRequestBuilder(new X500Name("CN=XXX"), pubKey);
         req = reqBuilder.build(signer);
 
         if (!req.isSignatureValid(verifier))
