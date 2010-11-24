@@ -21,6 +21,7 @@ import org.bouncycastle.asn1.cmp.CertConfirmContent;
 import org.bouncycastle.asn1.cmp.CertRepMessage;
 import org.bouncycastle.asn1.cmp.PKIBody;
 import org.bouncycastle.asn1.cmp.PKIMessage;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.CertException;
@@ -193,11 +194,11 @@ public class AllTests
         PublicKey  issPub  = issKP.getPublic();
 
         X509v3CertificateBuilder v1CertGen = new JcaX509v3CertificateBuilder(
-            new X509Name(_issDN),
+            new X500Name(_issDN),
             BigInteger.valueOf(System.currentTimeMillis()),
             new Date(System.currentTimeMillis()),
             new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)),
-            new X509Name(_subDN),
+            new X500Name(_subDN),
             subPub);
 
         ContentSigner signer = new JcaContentSignerBuilder("SHA1WithRSA").setProvider(BC).build(issPriv);

@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.x509;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -194,6 +195,11 @@ public class X509Extension
     public ASN1OctetString getValue()
     {
         return value;
+    }
+
+    public ASN1Encodable getParsedValue()
+    {
+        return convertValueToObject(this);
     }
 
     public int hashCode()

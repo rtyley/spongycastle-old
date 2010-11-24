@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.x500.X500Name;
 
 /**
  * Generator for Version 1 TBSCertificateStructures.
@@ -54,6 +55,12 @@ public class V1TBSCertificateGenerator
         this.issuer = issuer;
     }
 
+    public void setIssuer(
+        X500Name issuer)
+    {
+        this.issuer = X509Name.getInstance(issuer.getDERObject());
+    }
+
     public void setStartDate(
         Time startDate)
     {
@@ -82,6 +89,12 @@ public class V1TBSCertificateGenerator
         X509Name    subject)
     {
         this.subject = subject;
+    }
+
+    public void setSubject(
+        X500Name subject)
+    {
+        this.subject = X509Name.getInstance(subject.getDERObject());
     }
 
     public void setSubjectPublicKeyInfo(

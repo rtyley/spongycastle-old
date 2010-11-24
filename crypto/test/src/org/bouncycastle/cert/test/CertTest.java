@@ -26,7 +26,6 @@ import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +43,9 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.X500NameBuilder;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -1213,20 +1215,13 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Vector                      ord = new Vector();
-        Vector                      values = new Vector();
+        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
 
-        ord.addElement(X509Principal.C);
-        ord.addElement(X509Principal.O);
-        ord.addElement(X509Principal.L);
-        ord.addElement(X509Principal.ST);
-        ord.addElement(X509Principal.E);
-
-        values.addElement("AU");
-        values.addElement("The Legion of the Bouncy Castle");
-        values.addElement("Melbourne");
-        values.addElement("Victoria");
-        values.addElement("feedback-crypto@bouncycastle.org");
+        builder.addRDN(BCStyle.C, "AU");
+        builder.addRDN(BCStyle.O, "The Legion of the Bouncy Castle");
+        builder.addRDN(BCStyle.L, "Melbourne");
+        builder.addRDN(BCStyle.ST, "Victoria");
+        builder.addRDN(BCStyle.E, "feedback-crypto@bouncycastle.org");
 
         //
         // extensions
@@ -1236,7 +1231,7 @@ public class CertTest
         // create the certificate - version 3 - without extensions
         //
         ContentSigner sigGen = new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider(BC).build(privKey);
-        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(new X509Principal(ord, values), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000), new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values), pubKey);
+        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(builder.build(), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000), new Date(System.currentTimeMillis() + 50000),builder.build(), pubKey);
 
         X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
 
@@ -1259,10 +1254,10 @@ public class CertTest
         // create the certificate - version 3 - with extensions
         //
         sigGen = new JcaContentSignerBuilder("MD5WithRSAEncryption").setProvider(BC).build(privKey);
-        certGen = new JcaX509v3CertificateBuilder(new X509Principal(ord, values), BigInteger.valueOf(1)
+        certGen = new JcaX509v3CertificateBuilder(builder.build(), BigInteger.valueOf(1)
             , new Date(System.currentTimeMillis() - 50000)
             , new Date(System.currentTimeMillis() + 50000)
-            , new X509Principal(ord, values)
+            , builder.build()
             , pubKey)
             .addExtension(new ASN1ObjectIdentifier("2.5.29.15"), true,
                 new X509KeyUsage(X509KeyUsage.encipherOnly))
@@ -1310,7 +1305,7 @@ public class CertTest
         // create the certificate - version 1
         //
         sigGen = new JcaContentSignerBuilder("MD5WithRSAEncryption").setProvider(BC).build(privKey);
-        X509v1CertificateBuilder certGen1 = new JcaX509v1CertificateBuilder(new X509Principal(ord, values), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values),pubKey);
+        X509v1CertificateBuilder certGen1 = new JcaX509v1CertificateBuilder(builder.build(), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey);
 
         cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen1.build(sigGen));
 
@@ -1350,20 +1345,13 @@ public class CertTest
         //
         // distinguished name table.
         //
-        ord = new Vector();
-        values = new Vector();
-
-        ord.addElement(X509Principal.C);
-        ord.addElement(X509Principal.O);
-        ord.addElement(X509Principal.L);
-        ord.addElement(X509Principal.ST);
-        ord.addElement(X509Principal.E);
-
-        values.addElement("AU");
-        values.addElement("The Legion of the Bouncy Castle");
-        values.addElement("Melbourne");
-        values.addElement("Victoria");
-        values.addElement("feedback-crypto@bouncycastle.org");
+        builder = new X500NameBuilder(BCStyle.INSTANCE);
+        
+        builder.addRDN(BCStyle.C, "AU");
+        builder.addRDN(BCStyle.O, "The Legion of the Bouncy Castle");
+        builder.addRDN(BCStyle.L, "Melbourne");
+        builder.addRDN(BCStyle.ST, "Victoria");
+        builder.addRDN(BCStyle.E, "feedback-crypto@bouncycastle.org");
 
         //
         // extensions
@@ -1374,7 +1362,7 @@ public class CertTest
         //
         sigGen = new BcRSAContentSignerBuilder(new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256WithRSAEncryption")).build(lwPrivKey);
         SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKeyStructure(lwPubKey.getModulus(), lwPubKey.getExponent()));
-        certGen = new X509v3CertificateBuilder(new X509Principal(ord, values), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000), new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values), pubInfo);
+        certGen = new X509v3CertificateBuilder(builder.build(), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000), new Date(System.currentTimeMillis() + 50000), builder.build(), pubInfo);
 
         X509CertificateHolder certHolder = certGen.build(sigGen);
 
@@ -1422,20 +1410,7 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Vector                      ord = new Vector();
-        Vector                      values = new Vector();
-
-        ord.addElement(X509Principal.C);
-        ord.addElement(X509Principal.O);
-        ord.addElement(X509Principal.L);
-        ord.addElement(X509Principal.ST);
-        ord.addElement(X509Principal.E);
-
-        values.addElement("AU");
-        values.addElement("The Legion of the Bouncy Castle");
-        values.addElement("Melbourne");
-        values.addElement("Victoria");
-        values.addElement("feedback-crypto@bouncycastle.org");
+        X500NameBuilder builder = createStdBuilder();
 
         //
         // extensions
@@ -1446,7 +1421,7 @@ public class CertTest
         //
 
         ContentSigner sigGen = new JcaContentSignerBuilder("SHA1withDSA").setProvider(BC).build(privKey);
-        JcaX509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(new X509Principal(ord, values),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values),pubKey);
+        JcaX509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey);
 
 
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
@@ -1467,7 +1442,7 @@ public class CertTest
         // create the certificate - version 1
         //
         sigGen = new JcaContentSignerBuilder("SHA1withDSA").setProvider(BC).build(privKey);
-        JcaX509v1CertificateBuilder  certGen1 = new JcaX509v1CertificateBuilder(new X509Principal(ord, values),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values),pubKey);
+        JcaX509v1CertificateBuilder  certGen1 = new JcaX509v1CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey);
         
             cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen1.build(sigGen));
 
@@ -1487,7 +1462,7 @@ public class CertTest
         //
         try
         {
-            certGen1 = new JcaX509v1CertificateBuilder(new X509Principal(ord, values),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values),dudPublicKey);
+            certGen1 = new JcaX509v1CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),dudPublicKey);
 
 
             fail("key without encoding not detected in v1");
@@ -1496,6 +1471,19 @@ public class CertTest
         {
             // expected
         }
+    }
+
+    private X500NameBuilder createStdBuilder()
+    {
+        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
+        
+        builder.addRDN(BCStyle.C, "AU");
+        builder.addRDN(BCStyle.O, "The Legion of the Bouncy Castle");
+        builder.addRDN(BCStyle.L, "Melbourne");
+        builder.addRDN(BCStyle.ST, "Victoria");
+        builder.addRDN(BCStyle.E, "feedback-crypto@bouncycastle.org");
+        
+        return builder;
     }
 
     /**
@@ -1544,26 +1532,13 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Hashtable                   attrs = new Hashtable();
-        Vector                      order = new Vector();
-
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.L, "Melbourne");
-        attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
-
-        order.addElement(X509Principal.C);
-        order.addElement(X509Principal.O);
-        order.addElement(X509Principal.L);
-        order.addElement(X509Principal.ST);
-        order.addElement(X509Principal.E);
+        X500NameBuilder builder = createStdBuilder();
 
 
         //
         // toString test
         //
-        X509Principal p = new X509Principal(order, attrs);
+        X500Name p = builder.build();
         String  s = p.toString();
 
         if (!s.equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne,ST=Victoria,E=feedback-crypto@bouncycastle.org"))
@@ -1588,7 +1563,7 @@ public class CertTest
                 try
         {
         ContentSigner sigGen = new JcaContentSignerBuilder("SHA1withECDSA").setProvider(BC).build(privKey);
-        JcaX509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(new X509Principal(order, attrs),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(order, attrs),pubKey);
+        JcaX509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey);
 
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
 
@@ -1606,7 +1581,7 @@ public class CertTest
             //
             ((ECPointEncoder)pubKey).setPointFormat("UNCOMPRESSED");
 
-            certGen = new JcaX509v3CertificateBuilder(new X509Principal(order, attrs),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(order, attrs),pubKey);
+            certGen = new JcaX509v3CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey);
 
             cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
 
@@ -1680,26 +1655,13 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Hashtable                   attrs = new Hashtable();
-        Vector                      order = new Vector();
-
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.L, "Melbourne");
-        attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
-
-        order.addElement(X509Principal.C);
-        order.addElement(X509Principal.O);
-        order.addElement(X509Principal.L);
-        order.addElement(X509Principal.ST);
-        order.addElement(X509Principal.E);
+        X500NameBuilder builder = createStdBuilder();
 
         //
         // create the certificate - version 3
         //
         ContentSigner sigGen = new JcaContentSignerBuilder(algorithm).setProvider(BC).build(privKey);
-        X509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(new X509Principal(order, attrs),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(order, attrs),pubKey);
+        X509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey);
 
         X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
 
@@ -1717,7 +1679,7 @@ public class CertTest
         //
         ((ECPointEncoder)pubKey).setPointFormat("UNCOMPRESSED");
 
-        certGen = new JcaX509v3CertificateBuilder(new X509Principal(order, attrs),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(order, attrs),pubKey);
+        certGen = new JcaX509v3CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey);
 
         cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
 
@@ -2110,20 +2072,7 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Hashtable                   attrs = new Hashtable();
-        Vector                      order = new Vector();
-
-        attrs.put(X509Principal.C, "AU");
-        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
-        attrs.put(X509Principal.L, "Melbourne");
-        attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
-
-        order.addElement(X509Principal.C);
-        order.addElement(X509Principal.O);
-        order.addElement(X509Principal.L);
-        order.addElement(X509Principal.ST);
-        order.addElement(X509Principal.E);
+        X500NameBuilder builder = createStdBuilder();
 
         //
         // extensions
@@ -2133,7 +2082,7 @@ public class CertTest
         // create the certificate - version 3
         //
         ContentSigner sigGen = new JcaContentSignerBuilder("GOST3411withGOST3410").setProvider(BC).build(privKey);
-        X509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(new X509Principal(order, attrs),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(order, attrs),pubKey);
+        X509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey);
 
         X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
 
@@ -2198,23 +2147,13 @@ public class CertTest
         Vector                      ord = new Vector();
         Vector                      values = new Vector();
 
-        ord.addElement(X509Principal.C);
-        ord.addElement(X509Principal.O);
-        ord.addElement(X509Principal.L);
-        ord.addElement(X509Principal.ST);
-        ord.addElement(X509Principal.E);
-
-        values.addElement("AU");
-        values.addElement("The Legion of the Bouncy Castle");
-        values.addElement("Melbourne");
-        values.addElement("Victoria");
-        values.addElement("feedback-crypto@bouncycastle.org");
+        X500NameBuilder builder = createStdBuilder();
 
         //
         // create base certificate - version 3
         //
         ContentSigner sigGen = new JcaContentSignerBuilder("MD5WithRSAEncryption").setProvider(BC).build(privKey);
-        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(new X509Principal(ord, values),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values),pubKey)
+        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey)
             .addExtension(new ASN1ObjectIdentifier("2.5.29.15"), true,
             new X509KeyUsage(X509KeyUsage.encipherOnly))
             .addExtension(new ASN1ObjectIdentifier("2.5.29.37"), true,
@@ -2228,7 +2167,7 @@ public class CertTest
         // copy certificate
         //
 
-        certGen = new JcaX509v3CertificateBuilder(new X509Principal(ord, values),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values),pubKey)
+        certGen = new JcaX509v3CertificateBuilder(builder.build(),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey)
             .copyAndAddExtension(new ASN1ObjectIdentifier("2.5.29.15"), true, baseCert)
             .copyAndAddExtension(new ASN1ObjectIdentifier("2.5.29.37"), false, baseCert);
 
@@ -2449,27 +2388,15 @@ public class CertTest
         //
         // distinguished name table.
         //
-        Vector                      ord = new Vector();
-        Vector                      values = new Vector();
-
-        ord.addElement(X509Principal.C);
-        ord.addElement(X509Principal.O);
-        ord.addElement(X509Principal.L);
-        ord.addElement(X509Principal.ST);
-        ord.addElement(X509Principal.E);
-
-        values.addElement("AU");
-        values.addElement("The Legion of the Bouncy Castle");
-        values.addElement("Melbourne");
-        values.addElement("Victoria");
-        values.addElement("feedback-crypto@bouncycastle.org");
+        
+        X500NameBuilder builder = createStdBuilder();
 
         //
         // create base certificate - version 3
         //
         ContentSigner sigGen = new JcaContentSignerBuilder(algorithm).setProvider(BC).build(privKey);
-        JcaX509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(new X509Principal(ord, values),BigInteger.valueOf(1),
-        new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal(ord, values),pubKey);
+        JcaX509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(builder.build(),BigInteger.valueOf(1),
+        new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),builder.build(),pubKey);
 
         certGen.addExtension(new ASN1ObjectIdentifier("2.5.29.15"), true,
             new X509KeyUsage(X509KeyUsage.encipherOnly));
@@ -2527,7 +2454,7 @@ public class CertTest
         PrivateKey privKey = pair.getPrivate();
 
         ContentSigner sigGen = new JcaContentSignerBuilder("MD5WithRSAEncryption").setProvider(BC).build(privKey);
-        JcaX509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(new X509Principal("CN=Test"),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X509Principal("CN=Test"),pubKey);
+        JcaX509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(new X500Name("CN=Test"),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X500Name("CN=Test"),pubKey);
         X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
 
         X509CertificateStructure struct = X509CertificateStructure.getInstance(ASN1Object.fromByteArray(cert.getEncoded()));

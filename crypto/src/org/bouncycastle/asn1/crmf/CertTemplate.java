@@ -8,10 +8,10 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
 
 public class CertTemplate
     extends ASN1Encodable
@@ -21,9 +21,9 @@ public class CertTemplate
     private DERInteger version;
     private DERInteger serialNumber;
     private AlgorithmIdentifier signingAlg;
-    private X509Name issuer;
+    private X500Name issuer;
     private OptionalValidity validity;
-    private X509Name subject;
+    private X500Name subject;
     private SubjectPublicKeyInfo publicKey;
     private DERBitString issuerUID;
     private DERBitString subjectUID;
@@ -50,13 +50,13 @@ public class CertTemplate
                 signingAlg = AlgorithmIdentifier.getInstance(tObj, false);
                 break;
             case 3:
-                issuer = X509Name.getInstance(tObj, true); // CHOICE
+                issuer = X500Name.getInstance(tObj, true); // CHOICE
                 break;
             case 4:
                 validity = OptionalValidity.getInstance(ASN1Sequence.getInstance(tObj, false));
                 break;
             case 5:
-                subject = X509Name.getInstance(tObj, true); // CHOICE
+                subject = X500Name.getInstance(tObj, true); // CHOICE
                 break;
             case 6:
                 publicKey = SubjectPublicKeyInfo.getInstance(tObj, false);
@@ -105,7 +105,7 @@ public class CertTemplate
         return signingAlg;
     }
 
-    public X509Name getIssuer()
+    public X500Name getIssuer()
     {
         return issuer;
     }
@@ -115,7 +115,7 @@ public class CertTemplate
         return validity;
     }
 
-    public X509Name getSubject()
+    public X500Name getSubject()
     {
         return subject;
     }

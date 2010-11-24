@@ -7,13 +7,13 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.operator.ContentSigner;
 
 
@@ -25,7 +25,7 @@ public class X509v3CertificateBuilder
     private V3TBSCertificateGenerator   tbsGen;
     private X509ExtensionsGenerator     extGenerator;
 
-    public X509v3CertificateBuilder(X509Name issuer, BigInteger serial, Date notBefore, Date notAfter, X509Name subject, SubjectPublicKeyInfo publicKeyInfo)
+    public X509v3CertificateBuilder(X500Name issuer, BigInteger serial, Date notBefore, Date notAfter, X500Name subject, SubjectPublicKeyInfo publicKeyInfo)
     {
         tbsGen = new V3TBSCertificateGenerator();
         tbsGen.setSerialNumber(new DERInteger(serial));

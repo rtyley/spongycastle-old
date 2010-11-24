@@ -4,10 +4,10 @@ import java.math.BigInteger;
 import java.util.Date;
 
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V1TBSCertificateGenerator;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.operator.ContentSigner;
 
 
@@ -18,7 +18,7 @@ public class X509v1CertificateBuilder
 {
     private V1TBSCertificateGenerator   tbsGen;
 
-    public X509v1CertificateBuilder(X509Name issuer, BigInteger serial, Date notBefore, Date notAfter, X509Name subject, SubjectPublicKeyInfo publicKeyInfo)
+    public X509v1CertificateBuilder(X500Name issuer, BigInteger serial, Date notBefore, Date notAfter, X500Name subject, SubjectPublicKeyInfo publicKeyInfo)
     {
         tbsGen = new V1TBSCertificateGenerator();
         tbsGen.setSerialNumber(new DERInteger(serial));

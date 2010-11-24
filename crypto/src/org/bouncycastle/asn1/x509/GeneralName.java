@@ -13,6 +13,7 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.util.IPAddress;
 
 /**
@@ -59,6 +60,13 @@ public class GeneralName
    
     public GeneralName(
         X509Name  dirName)
+    {
+        this.obj = dirName;
+        this.tag = 4;
+    }
+
+    public GeneralName(
+        X500Name dirName)
     {
         this.obj = dirName;
         this.tag = 4;
