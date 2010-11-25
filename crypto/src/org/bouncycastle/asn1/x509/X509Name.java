@@ -396,7 +396,7 @@ public class X509Name
 
         while (e.hasMoreElements())
         {
-            ASN1Set         set = ASN1Set.getInstance(e.nextElement());
+            ASN1Set         set = ASN1Set.getInstance(((DEREncodable)e.nextElement()).getDERObject());
 
             for (int i = 0; i < set.size(); i++) 
             {

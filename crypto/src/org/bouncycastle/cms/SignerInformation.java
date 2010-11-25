@@ -25,6 +25,7 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
@@ -64,8 +65,8 @@ public class SignerInformation
     private final ASN1Set           unsignedAttributeSet;
     private CMSProcessable          content;
     private byte[]                  signature;
-    private DERObjectIdentifier     contentType;
-    private IntDigestCalculator digestCalculator;
+    private ASN1ObjectIdentifier    contentType;
+    private IntDigestCalculator     digestCalculator;
     private byte[]                  resultDigest;
     private SignatureAlgorithmIdentifierFinder sigAlgFinder;
 
@@ -75,7 +76,7 @@ public class SignerInformation
 
     SignerInformation(
         SignerInfo          info,
-        DERObjectIdentifier contentType,
+        ASN1ObjectIdentifier contentType,
         CMSProcessable      content,
         IntDigestCalculator digestCalculator,
         SignatureAlgorithmIdentifierFinder sigAlgFinder)
@@ -118,7 +119,7 @@ public class SignerInformation
         this.digestCalculator = digestCalculator;
     }
 
-    public DERObjectIdentifier getContentType()
+    public ASN1ObjectIdentifier getContentType()
     {
         return this.contentType;
     }

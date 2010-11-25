@@ -2,19 +2,19 @@ package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERTaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 
 public class ContentInfo
     extends ASN1Encodable
     implements CMSObjectIdentifiers
 {
-    private DERObjectIdentifier contentType;
+    private ASN1ObjectIdentifier contentType;
     private DEREncodable        content;
 
     public static ContentInfo getInstance(
@@ -40,7 +40,7 @@ public class ContentInfo
             throw new IllegalArgumentException("Bad sequence size: " + seq.size());
         }
 
-        contentType = (DERObjectIdentifier)seq.getObjectAt(0);
+        contentType = (ASN1ObjectIdentifier)seq.getObjectAt(0);
 
         if (seq.size() > 1)
         {
@@ -55,14 +55,14 @@ public class ContentInfo
     }
 
     public ContentInfo(
-        DERObjectIdentifier contentType,
+        ASN1ObjectIdentifier contentType,
         DEREncodable        content)
     {
         this.contentType = contentType;
         this.content = content;
     }
 
-    public DERObjectIdentifier getContentType()
+    public ASN1ObjectIdentifier getContentType()
     {
         return contentType;
     }

@@ -7,6 +7,7 @@ import java.util.Vector;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
@@ -233,5 +234,61 @@ public class IETFUtils
         }
 
         return new String(cs);
+    }
+
+    public static String canonicalize(String s)
+    {
+        String value = Strings.toLowerCase(s.trim());
+
+        if (value.length() > 0 && value.charAt(0) == '#')
+        {
+            DERObject obj = decodeObject(value);
+
+            if (obj instanceof DERString)
+            {
+                value = Strings.toLowerCase(((DERString)obj).getString().trim());
+            }
+        }
+
+        value = stripInternalSpaces(value);
+
+        return value;
+    }
+
+    private static ASN1Object decodeObject(String oValue)
+    {
+        try
+        {
+            return ASN1Object.fromByteArray(Hex.decode(oValue.substring(1)));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException("unknown encoding in name: " + e);
+        }
+    }
+
+    public static String stripInternalSpaces(
+        String str)
+    {
+        StringBuffer res = new StringBuffer();
+
+        if (str.length() != 0)
+        {
+            char c1 = str.charAt(0);
+
+            res.append(c1);
+
+            for (int k = 1; k < str.length(); k++)
+            {
+                char c2 = str.charAt(k);
+                if (!(c1 == ' ' && c2 == ' '))
+                {
+                    res.append(c2);
+                }
+                c1 = c2;
+            }
+        }
+
+        return res.toString();
     }
 }
