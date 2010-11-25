@@ -30,6 +30,8 @@ public class X500Name
     extends ASN1Encodable
     implements ASN1Choice
 {
+    private static X500NameStyle    defaultStyle = BCStyle.INSTANCE;
+
     private boolean                 isHashCodeCalculated;
     private int                     hashCodeValue;
 
@@ -72,22 +74,6 @@ public class X500Name
         throw new IllegalArgumentException("null object in factory");
     }
 
-    public static X500Name getInstance(
-        X500NameStyle style,
-        Object        obj)
-    {
-        if (obj instanceof X500Name)
-        {
-            return (X500Name)obj;
-        }
-        else if (obj != null)
-        {
-            return new X500Name(style, ASN1Sequence.getInstance(obj));
-        }
-
-        throw new IllegalArgumentException("null object in factory");
-    }
-
     /**
      * Constructor from ASN1Sequence
      *
@@ -96,7 +82,7 @@ public class X500Name
     private X500Name(
         ASN1Sequence  seq)
     {
-        this(BCStyle.INSTANCE, seq);
+        this(defaultStyle, seq);
     }
 
     private X500Name(
@@ -117,7 +103,7 @@ public class X500Name
     public X500Name(
         RDN[] rDNs)
     {
-        this(BCStyle.INSTANCE, rDNs);
+        this(defaultStyle, rDNs);
     }
 
     public X500Name(
@@ -131,7 +117,7 @@ public class X500Name
     public X500Name(
         String dirName)
     {
-        this(BCStyle.INSTANCE, dirName);
+        this(defaultStyle, dirName);
     }
 
     public X500Name(
@@ -225,5 +211,30 @@ public class X500Name
     public String toString()
     {
         return style.toString(this);
+    }
+
+    /**
+     * Set the default style for X500Name construction.
+     *
+     * @param style  an X500NameStyle
+     */
+    public static void setDefaultStyle(X500NameStyle style)
+    {
+        if (style == null)
+        {
+            throw new NullPointerException("cannot set style to null");
+        }
+
+        defaultStyle = style;
+    }
+
+    /**
+     * Return the current default style.
+     *
+     * @return default style for X500Name construction.
+     */
+    public static X500NameStyle getDefaultStyle()
+    {
+        return defaultStyle;
     }
 }

@@ -4,13 +4,10 @@ import java.io.IOException;
 import java.util.Hashtable;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERPrintableString;
-import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
@@ -18,8 +15,6 @@ import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameStyle;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.encoders.Hex;
 
 public class BCStyle
     implements X500NameStyle
@@ -278,7 +273,7 @@ public class BCStyle
         DefaultLookUp.put("name", NAME);
     }
 
-    private BCStyle()
+    protected BCStyle()
     {
 
     }
@@ -359,7 +354,7 @@ public class BCStyle
         {
             for (int i = possRDNs.length - 1; i >= 0; i--)
             {
-                if (compareRDN(rdn, possRDNs[i]))
+                if (possRDNs[i] != null && rdnAreEqual(rdn, possRDNs[i]))
                 {
                     possRDNs[i] = null;
                     return true;
@@ -370,7 +365,7 @@ public class BCStyle
         {
             for (int i = 0; i != possRDNs.length; i++)
             {
-                if (compareRDN(rdn, possRDNs[i]))
+                if (possRDNs[i] != null && rdnAreEqual(rdn, possRDNs[i]))
                 {
                     possRDNs[i] = null;
                     return true;
@@ -381,45 +376,42 @@ public class BCStyle
         return false;
     }
 
-    private boolean compareRDN(RDN rdn1, RDN rdn2)
+    protected boolean rdnAreEqual(RDN rdn1, RDN rdn2)
     {
-        if (rdn2 != null)
+        if (rdn1.isMultiValued())
         {
-            if (rdn1.isMultiValued())
+            if (rdn2.isMultiValued())
             {
-                if (rdn2.isMultiValued())
-                {
-                    AttributeTypeAndValue[] atvs1 = rdn1.getTypesAndValues();
-                    AttributeTypeAndValue[] atvs2 = rdn2.getTypesAndValues();
+                AttributeTypeAndValue[] atvs1 = rdn1.getTypesAndValues();
+                AttributeTypeAndValue[] atvs2 = rdn2.getTypesAndValues();
 
-                    if (atvs1.length != atvs2.length)
+                if (atvs1.length != atvs2.length)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i != atvs1.length; i++)
+                {
+                    if (!atvAreEqual(atvs1[i], atvs2[i]))
                     {
                         return false;
                     }
-
-                    for (int i = 0; i != atvs1.length; i++)
-                    {
-                        if (!atvAreEqual(atvs1[i], atvs2[i]))
-                        {
-                            return false;
-                        }
-                    }
-                }
-                else
-                {
-                    return false;
                 }
             }
             else
             {
-                if (!rdn2.isMultiValued())
-                {
-                    return atvAreEqual(rdn1.getFirst(), rdn2.getFirst());
-                }
-                else
-                {
-                    return false;
-                }
+                return false;
+            }
+        }
+        else
+        {
+            if (!rdn2.isMultiValued())
+            {
+                return atvAreEqual(rdn1.getFirst(), rdn2.getFirst());
+            }
+            else
+            {
+                return false;
             }
         }
 
@@ -428,9 +420,14 @@ public class BCStyle
 
     private boolean atvAreEqual(AttributeTypeAndValue atv1, AttributeTypeAndValue atv2)
     {
-        if (atv1 == null && atv1 == atv2)
+        if (atv1 == atv2)
         {
             return true;
+        }
+
+        if (atv1 == null)
+        {
+            return false;
         }
 
         if (atv2 == null)
@@ -446,8 +443,8 @@ public class BCStyle
             return false;
         }
 
-        String v1 = canonicalize(IETFUtils.valueToString(atv1.getValue()));
-        String v2 = canonicalize(IETFUtils.valueToString(atv2.getValue()));
+        String v1 = IETFUtils.canonicalize(IETFUtils.valueToString(atv1.getValue()));
+        String v2 = IETFUtils.canonicalize(IETFUtils.valueToString(atv2.getValue()));
 
         if (!v1.equals(v2))
         {
@@ -494,65 +491,9 @@ public class BCStyle
     {
         String value = IETFUtils.valueToString(enc);
 
-        value = canonicalize(value);
+        value = IETFUtils.canonicalize(value);
 
         return value.hashCode();
-    }
-
-    private String canonicalize(String s)
-    {
-        String value = Strings.toLowerCase(s.trim());
-
-        if (value.length() > 0 && value.charAt(0) == '#')
-        {
-            DERObject obj = decodeObject(value);
-
-            if (obj instanceof DERString)
-            {
-                value = Strings.toLowerCase(((DERString)obj).getString().trim());
-            }
-        }
-
-        value = stripInternalSpaces(value);
-
-        return value;
-    }
-
-    private ASN1Object decodeObject(String oValue)
-    {
-        try
-        {
-            return ASN1Object.fromByteArray(Hex.decode(oValue.substring(1)));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalStateException("unknown encoding in name: " + e);
-        }
-    }
-
-    private String stripInternalSpaces(
-        String str)
-    {
-        StringBuffer res = new StringBuffer();
-
-        if (str.length() != 0)
-        {
-            char c1 = str.charAt(0);
-
-            res.append(c1);
-
-            for (int k = 1; k < str.length(); k++)
-            {
-                char c2 = str.charAt(k);
-                if (!(c1 == ' ' && c2 == ' '))
-                {
-                    res.append(c2);
-                }
-                c1 = c2;
-            }
-        }
-
-        return res.toString();
     }
 
     public String toString(X500Name name)
@@ -599,18 +540,5 @@ public class BCStyle
         }
 
         return buf.toString();
-    }
-
-    private String bytesToString(
-        byte[] data)
-    {
-        char[] cs = new char[data.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            cs[i] = (char)(data[i] & 0xff);
-        }
-
-        return new String(cs);
     }
 }

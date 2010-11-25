@@ -24,7 +24,7 @@ public interface X500NameStyle
 
     ASN1ObjectIdentifier attrNameToOID(String attrName);
 
-    boolean areEqual(X500Name name, X500Name other);
+    boolean areEqual(X500Name name1, X500Name name2);
 
     RDN[] fromString(String dirName);
 

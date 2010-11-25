@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Generator;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1SequenceParser;
@@ -32,7 +33,6 @@ import org.bouncycastle.asn1.BERSetParser;
 import org.bouncycastle.asn1.BERTaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERTags;
@@ -105,7 +105,7 @@ public class CMSSignedDataParser
     private static final CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
 
     private SignedDataParser        _signedData;
-    private DERObjectIdentifier     _signedContentType;
+    private ASN1ObjectIdentifier    _signedContentType;
     private CMSTypedStream          _signedContent;
     private Map                     _digests;
     
@@ -211,7 +211,7 @@ public class CMSSignedDataParser
             }
             else
             {
-                _signedContentType = new DERObjectIdentifier(_signedContent.getContentType());
+                _signedContentType = new ASN1ObjectIdentifier(_signedContent.getContentType());
             }
         }
         catch (IOException e)
