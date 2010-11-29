@@ -39,7 +39,6 @@ import org.bouncycastle.asn1.tsp.MessageImprint;
 import org.bouncycastle.asn1.tsp.TSTInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CRLHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.CMSAttributeTableGenerationException;
@@ -91,18 +90,22 @@ public class TimeStampTokenGenerator
      */
     public TimeStampTokenGenerator(
         final SignerInfoGenerator     signerInfoGen,
-        X509CertificateHolder   signerCertificate,
-        ASN1ObjectIdentifier    tsaPolicy)
+        ASN1ObjectIdentifier          tsaPolicy)
         throws IllegalArgumentException, TSPException
     {
         this.signerInfoGen = signerInfoGen;
         this.tsaPolicyOID = tsaPolicy.getId();
 
-        TSPUtil.validateCertificate(signerCertificate);
+        if (!signerInfoGen.hasAssociatedCertificate())
+        {
+            throw new IllegalArgumentException("SignerInfoGenerator must have an associated certificate");
+        }
+        
+        TSPUtil.validateCertificate(signerInfoGen.getAssociatedCertificate());
 
         try
         {
-            final ESSCertID essCertid = new ESSCertID(MessageDigest.getInstance("SHA-1").digest(signerCertificate.getEncoded()));
+            final ESSCertID essCertid = new ESSCertID(MessageDigest.getInstance("SHA-1").digest(signerInfoGen.getAssociatedCertificate().getEncoded()));
 
             this.signerInfoGen = new SignerInfoGenerator(signerInfoGen, new CMSAttributeTableGenerator()
             {
