@@ -246,7 +246,7 @@ public class NewAuthenticatedDataTest
 
         byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
 
-        adGen.addRecipientInfoGenerator(new JceKEKRecipientInfoGenerator(kek, kekId).setProvider(BC));
+        adGen.addRecipientInfoGenerator(new JceKEKRecipientInfoGenerator(kekId, kek).setProvider(BC));
 
         CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
