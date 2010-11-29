@@ -216,7 +216,10 @@ public class SMIMEEnvelopedGenerator
         {
             JceKeyAgreeRecipientInfoGenerator infoGenerator = new JceKeyAgreeRecipientInfoGenerator(new ASN1ObjectIdentifier(agreementAlgorithm), senderPrivateKey, senderPublicKey, new ASN1ObjectIdentifier(cekWrapAlgorithm), Collections.singletonList(recipientCert));
 
-            infoGenerator.setProvider(provider);
+            if (provider != null)
+            {
+                infoGenerator.setProvider(provider);
+            }
 
             fact.addRecipientInfoGenerator(infoGenerator);
         }
@@ -478,24 +481,27 @@ public class SMIMEEnvelopedGenerator
                 _encryptor = new JceCMSContentEncryptorBuilder(encryptionOid, keySize).setProvider(provider).build();
             }
 
-            for (Iterator it = recipients.iterator(); it.hasNext();)
+            if (provider != null)
             {
-                RecipientInfoGenerator rd = (RecipientInfoGenerator)it.next();
+                for (Iterator it = recipients.iterator(); it.hasNext();)
+                {
+                    RecipientInfoGenerator rd = (RecipientInfoGenerator)it.next();
 
-                try
-                {
-                    if (rd instanceof JceKeyTransRecipientInfoGenerator)
+                    try
                     {
-                        ((JceKeyTransRecipientInfoGenerator)rd).setProvider(provider);
+                        if (rd instanceof JceKeyTransRecipientInfoGenerator)
+                        {
+                            ((JceKeyTransRecipientInfoGenerator)rd).setProvider(provider);
+                        }
+                        else if (rd instanceof JceKEKRecipientInfoGenerator)
+                        {
+                            ((JceKEKRecipientInfoGenerator)rd).setProvider(provider);
+                        }
                     }
-                    else if (rd instanceof JceKEKRecipientInfoGenerator)
+                    catch (OperatorCreationException e)
                     {
-                        ((JceKEKRecipientInfoGenerator)rd).setProvider(provider);
+                        throw new CMSException("cannot create recipient: " + e.getMessage(), e);
                     }
-                }
-                catch (OperatorCreationException e)
-                {
-                    throw new CMSException("cannot create recipient: " + e.getMessage(), e);
                 }
             }
         }
