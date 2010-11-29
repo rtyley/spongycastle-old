@@ -2,9 +2,14 @@ package org.bouncycastle.cert;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertList;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.util.Arrays;
@@ -12,21 +17,53 @@ import org.bouncycastle.util.Arrays;
 public class X509CRLHolder
 {
     private CertificateList x509CRL;
+    private X509Extensions extensions;
 
     public X509CRLHolder(byte[] crlEncoding)
     {
-        this.x509CRL = CertificateList.getInstance(crlEncoding);
+        this(CertificateList.getInstance(crlEncoding));
     }
 
     public X509CRLHolder(CertificateList x509CRL)
     {
         this.x509CRL = x509CRL;
+        this.extensions = x509CRL.getTBSCertList().getExtensions();
     }
 
     public byte[] getEncoded()
         throws IOException
     {
         return x509CRL.getEncoded();
+    }
+
+    public boolean hasExtensions()
+    {
+        return extensions != null;
+    }
+
+    public X509Extension getExtension(ASN1ObjectIdentifier oid)
+    {
+        if (extensions != null)
+        {
+            return extensions.getExtension(oid);
+        }
+
+        return null;
+    }
+
+    public List getExtensionOIDs()
+    {
+        return CertUtils.getExtensionOIDs(extensions);
+    }
+
+    public Set getCriticalExtensionOIDs()
+    {
+        return CertUtils.getCriticalExtensionOIDs(extensions);
+    }
+
+    public Set getNonCriticalExtensionOIDs()
+    {
+        return CertUtils.getNonCriticalExtensionOIDs(extensions);
     }
 
     public CertificateList toASN1Structure()

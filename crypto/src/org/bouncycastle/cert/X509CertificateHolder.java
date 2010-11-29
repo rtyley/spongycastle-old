@@ -3,6 +3,8 @@ package org.bouncycastle.cert;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -10,6 +12,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.util.Arrays;
@@ -17,21 +20,47 @@ import org.bouncycastle.util.Arrays;
 public class X509CertificateHolder
 {
     private X509CertificateStructure x509Certificate;
+    private X509Extensions extensions;
 
     public X509CertificateHolder(byte[] certEncoding)
     {
-        this.x509Certificate = X509CertificateStructure.getInstance(certEncoding);
+        this(X509CertificateStructure.getInstance(certEncoding));
     }
 
     public X509CertificateHolder(X509CertificateStructure x509Certificate)
     {
         this.x509Certificate = x509Certificate;
+        this.extensions = x509Certificate.getTBSCertificate().getExtensions();
     }
 
+    public boolean hasExtensions()
+    {
+        return extensions != null;
+    }
 
     public X509Extension getExtension(ASN1ObjectIdentifier oid)
     {
-        return x509Certificate.getTBSCertificate().getExtensions().getExtension(oid);
+        if (extensions != null)
+        {
+            return extensions.getExtension(oid);
+        }
+
+        return null;
+    }
+
+    public List getExtensionOIDs()
+    {
+        return CertUtils.getExtensionOIDs(extensions);
+    }
+
+    public Set getCriticalExtensionOIDs()
+    {
+        return CertUtils.getCriticalExtensionOIDs(extensions);
+    }
+
+    public Set getNonCriticalExtensionOIDs()
+    {
+        return CertUtils.getNonCriticalExtensionOIDs(extensions);
     }
 
     public IssuerAndSerialNumber getIssuerAndSerialNumber()
