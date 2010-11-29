@@ -5,8 +5,10 @@ import java.security.Provider;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.CMSAttributeTableGenerator;
+import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.SignerInfoGeneratorBuilder;
 import org.bouncycastle.operator.ContentSigner;
@@ -85,6 +87,19 @@ public class JcaSimpleSignerInfoGeneratorBuilder
     public JcaSimpleSignerInfoGeneratorBuilder setSignedAttributeGenerator(CMSAttributeTableGenerator signedGen)
     {
         this.signedGen = signedGen;
+
+        return this;
+    }
+
+    /**
+     * set up a DefaultSignedAttributeTableGenerator primed with the passed in AttributeTable.
+     *
+     * @param attrTable table of attributes for priming generator
+     * @return this.
+     */
+    public JcaSimpleSignerInfoGeneratorBuilder setSignedAttributeGenerator(AttributeTable attrTable)
+    {
+        this.signedGen = new DefaultSignedAttributeTableGenerator(attrTable);
 
         return this;
     }

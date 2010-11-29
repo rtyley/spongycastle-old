@@ -31,15 +31,15 @@ public class JceKEKRecipientInfoGenerator
     private EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
     private SecureRandom random;
 
-    public JceKEKRecipientInfoGenerator(SecretKey keyEncryptionKey, KEKIdentifier kekIdentifier)
+    public JceKEKRecipientInfoGenerator(KEKIdentifier kekIdentifier, SecretKey keyEncryptionKey)
     {
         super(kekIdentifier, determineKeyEncAlg(keyEncryptionKey));
         this.keyEncryptionKey = keyEncryptionKey;
     }
 
-    public JceKEKRecipientInfoGenerator(SecretKey keyEncryptionKey, byte[] keyIdentifier)
+    public JceKEKRecipientInfoGenerator(byte[] keyIdentifier, SecretKey keyEncryptionKey)
     {
-        this(keyEncryptionKey, new KEKIdentifier(keyIdentifier, null, null));
+        this(new KEKIdentifier(keyIdentifier, null, null), keyEncryptionKey);
     }
 
     public JceKEKRecipientInfoGenerator setProvider(Provider provider)

@@ -3,10 +3,10 @@ package org.bouncycastle.cert.jcajce;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.x509.X509AttributeCertificate;
 
@@ -22,6 +22,12 @@ public class JcaAttrCertStore
         throws IOException
     {
         super(convertCerts(collection));
+    }
+
+    public JcaAttrCertStore(X509AttributeCertificate attrCert)
+        throws IOException
+    {
+        this(Collections.singletonList(attrCert));
     }
 
     private static Collection convertCerts(Collection collection)
@@ -41,7 +47,7 @@ public class JcaAttrCertStore
             }
             else
             {
-                list.add((X509AttributeCertificateHolder)o);
+                list.add(o);
             }
         }
 

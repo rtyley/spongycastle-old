@@ -150,6 +150,9 @@ public abstract class RecipientInformation
         }
     }
 
+    /**
+     * @deprecated use getContent(Recipient)
+     */
     public byte[] getContent(
         Key key,
         String provider)
@@ -158,6 +161,9 @@ public abstract class RecipientInformation
         return getContent(key, CMSUtils.getProvider(provider));
     }
 
+    /**
+     * @deprecated use getContent(Recipient)
+     */
     public byte[] getContent(
         Key key,
         Provider provider)
