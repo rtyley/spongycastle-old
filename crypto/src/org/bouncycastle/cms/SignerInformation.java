@@ -43,9 +43,9 @@ import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
-import org.bouncycastle.operator.DatedContentVerifier;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.RawContentVerifier;
@@ -553,20 +553,6 @@ public class SignerInformation
         String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(this.getDigestAlgOID());
         String          encName = CMSSignedHelper.INSTANCE.getEncryptionAlgName(this.getEncryptionAlgOID());
 
-        if (verifier instanceof DatedContentVerifier)
-        {
-            Time signingTime = getSigningTime();
-            if (signingTime != null)
-            {
-                DatedContentVerifier dcv = (DatedContentVerifier)verifier;
-
-                if (!dcv.isValid(signingTime.getDate()))
-                {
-                    throw new CMSException("verifier not valid at signingTime");   
-                }
-            }
-        }
-
         try
         {
             MessageDigest   digest = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, null);
@@ -956,6 +942,21 @@ public class SignerInformation
 
         try
         {
+
+            if (verifierProvider.hasAssociatedCertificate())
+            {
+                Time signingTime = getSigningTime();
+                if (signingTime != null)
+                {
+                    X509CertificateHolder dcv = verifierProvider.getAssociatedCertificate();
+
+                    if (!dcv.isValidOn(signingTime.getDate()))
+                    {
+                        throw new CMSException("verifier not valid at signingTime");
+                    }
+                }
+            }
+
             return doVerify(verifierProvider.get(sigAlgFinder.find(signatureName)));
         }
         catch (OperatorCreationException e)

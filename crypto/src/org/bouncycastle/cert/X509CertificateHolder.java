@@ -2,6 +2,7 @@ package org.bouncycastle.cert;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -46,6 +47,11 @@ public class X509CertificateHolder
     public X509CertificateStructure toASN1Structure()
     {
         return x509Certificate;
+    }
+
+    public boolean isValidOn(Date date)
+    {
+        return !date.before(x509Certificate.getStartDate().getDate()) && !date.after(x509Certificate.getEndDate().getDate());
     }
 
     public boolean isSignatureValid(ContentVerifierProvider verifierProvider)
@@ -122,5 +128,5 @@ public class X509CertificateHolder
         throws IOException
     {
         return x509Certificate.getEncoded();
-    } 
+    }
 }

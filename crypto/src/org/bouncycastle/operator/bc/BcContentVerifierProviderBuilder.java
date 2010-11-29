@@ -2,7 +2,6 @@ package org.bouncycastle.operator.bc;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Date;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -13,7 +12,6 @@ import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
-import org.bouncycastle.operator.DatedContentVerifier;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -35,6 +33,16 @@ public class BcContentVerifierProviderBuilder
         {
             private BcSignerOutputStream stream;
 
+            public boolean hasAssociatedCertificate()
+            {
+                return true;
+            }
+
+            public X509CertificateHolder getAssociatedCertificate()
+            {
+                return certHolder;
+            }
+
             public ContentVerifier get(AlgorithmIdentifier algorithm)
                 throws OperatorCreationException
             {
@@ -52,11 +60,11 @@ public class BcContentVerifierProviderBuilder
 
                     if (rawSig != null)
                     {
-                        return new DatedRawSigVerifier(stream, certHolder, rawSig);
+                        return new RawSigVerifier(stream, rawSig);
                     }
                     else
                     {
-                        return new DatedSigVerifier(stream, certHolder);
+                        return new SigVerifier(stream);
                     }
 
                 }
@@ -64,8 +72,6 @@ public class BcContentVerifierProviderBuilder
                 {
                     throw new OperatorCreationException("exception on setup: " + e, e);
                 }
-
-
             }
         };
     }
@@ -75,6 +81,16 @@ public class BcContentVerifierProviderBuilder
     {
         return new ContentVerifierProvider()
         {
+            public boolean hasAssociatedCertificate()
+            {
+                return false;
+            }
+
+            public X509CertificateHolder getAssociatedCertificate()
+            {
+                return null;
+            }
+
             public ContentVerifier get(AlgorithmIdentifier algorithm)
                 throws OperatorCreationException
             {
@@ -155,34 +171,6 @@ public class BcContentVerifierProviderBuilder
         }
     }
 
-    private class DatedSigVerifier
-        extends SigVerifier
-        implements DatedContentVerifier
-    {
-        private X509CertificateHolder certificate;
-
-        DatedSigVerifier(BcSignerOutputStream stream, X509CertificateHolder certificate)
-        {
-            super(stream);
-            this.certificate = certificate;
-        }
-
-        public Date getNotBefore()
-        {
-            return certificate.toASN1Structure().getStartDate().getDate();
-        }
-
-        public Date getNotAfter()
-        {
-            return certificate.toASN1Structure().getEndDate().getDate();
-        }
-
-        public boolean isValid(Date date)
-        {
-            return !date.before(getNotBefore()) && !date.after(getNotAfter());
-        }
-    }
-
     private class RawSigVerifier
         extends SigVerifier
         implements RawContentVerifier
@@ -200,34 +188,6 @@ public class BcContentVerifierProviderBuilder
             rawSignature.update(digest, 0, digest.length);
 
             return rawSignature.verifySignature(expected);
-        }
-    }
-
-    private class DatedRawSigVerifier
-        extends RawSigVerifier
-        implements DatedContentVerifier
-    {
-        private X509CertificateHolder certificate;
-
-        DatedRawSigVerifier(BcSignerOutputStream stream, X509CertificateHolder certificate, Signer rawSignature)
-        {
-            super(stream, rawSignature);
-            this.certificate = certificate;
-        }
-
-        public Date getNotBefore()
-        {
-            return certificate.toASN1Structure().getStartDate().getDate();
-        }
-
-        public Date getNotAfter()
-        {
-            return certificate.toASN1Structure().getEndDate().getDate();
-        }
-
-        public boolean isValid(Date date)
-        {
-            return !date.before(getNotBefore()) && !date.after(getNotAfter());
         }
     }
 }

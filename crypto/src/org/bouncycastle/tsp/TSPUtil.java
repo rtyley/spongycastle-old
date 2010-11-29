@@ -2,6 +2,7 @@ package org.bouncycastle.tsp;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
@@ -30,6 +31,9 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Arrays;
 
 public class TSPUtil
@@ -76,6 +80,7 @@ public class TSPUtil
      * @param provider an optional provider to use to create MessageDigest instances
      * @return a collection of TimeStampToken objects
      * @throws TSPValidationException
+     * @deprecated use getSignatureTimestamps(SignerInformation, DigestCalculatorProvider)
      */
     public static Collection getSignatureTimestamps(SignerInformation signerInfo, Provider provider)
         throws TSPValidationException
@@ -110,6 +115,69 @@ public class TSPUtil
                         timestamps.add(timeStampToken);
                     }
                     catch (NoSuchAlgorithmException e)
+                    {
+                        throw new TSPValidationException("Unknown hash algorithm specified in timestamp");
+                    }
+                    catch (Exception e)
+                    {
+                        throw new TSPValidationException("Timestamp could not be parsed");
+                    }
+                }
+            }
+        }
+
+        return timestamps;
+    }
+
+     /**
+     * Fetches the signature time-stamp attributes from a SignerInformation object.
+     * Checks that the MessageImprint for each time-stamp matches the signature field.
+     * (see RFC 3161 Appendix A).
+     *
+     * @param signerInfo a SignerInformation to search for time-stamps
+     * @param digCalcProvider provider for digest calculators
+     * @return a collection of TimeStampToken objects
+     * @throws TSPValidationException
+     */
+    public static Collection getSignatureTimestamps(SignerInformation signerInfo, DigestCalculatorProvider digCalcProvider)
+        throws TSPValidationException
+    {
+        List timestamps = new ArrayList();
+
+        AttributeTable unsignedAttrs = signerInfo.getUnsignedAttributes();
+        if (unsignedAttrs != null)
+        {
+            ASN1EncodableVector allTSAttrs = unsignedAttrs.getAll(
+                PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
+            for (int i = 0; i < allTSAttrs.size(); ++i)
+            {
+                Attribute tsAttr = (Attribute)allTSAttrs.get(i);
+                ASN1Set tsAttrValues = tsAttr.getAttrValues();
+                for (int j = 0; j < tsAttrValues.size(); ++j)
+                {
+                    try
+                    {
+                        ContentInfo contentInfo = ContentInfo.getInstance(tsAttrValues.getObjectAt(j).getDERObject());
+                        TimeStampToken timeStampToken = new TimeStampToken(contentInfo);
+                        TimeStampTokenInfo tstInfo = timeStampToken.getTimeStampInfo();
+
+                        DigestCalculator digCalc = digCalcProvider.get(tstInfo.getHashAlgorithm());
+
+                        OutputStream dOut = digCalc.getOutputStream();
+
+                        dOut.write(signerInfo.getSignature());
+                        dOut.close();
+
+                        byte[] expectedDigest = digCalc.getDigest();
+
+                        if (!Arrays.constantTimeAreEqual(expectedDigest, tstInfo.getMessageImprintDigest()))
+                        {
+                            throw new TSPValidationException("Incorrect digest in message imprint");
+                        }
+
+                        timestamps.add(timeStampToken);
+                    }
+                    catch (OperatorCreationException e)
                     {
                         throw new TSPValidationException("Unknown hash algorithm specified in timestamp");
                     }
