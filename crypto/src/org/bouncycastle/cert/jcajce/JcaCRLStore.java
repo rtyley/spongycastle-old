@@ -1,5 +1,6 @@
 package org.bouncycastle.cert.jcajce;
 
+import java.io.IOException;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
 import java.util.ArrayList;
@@ -35,7 +36,15 @@ public class JcaCRLStore
 
             if (crl instanceof X509CRL)
             {
-                list.add(new X509CRLHolder(((X509CRL)crl).getEncoded()));
+                try
+                {
+                    list.add(new X509CRLHolder(((X509CRL)crl).getEncoded()));
+                }
+                catch (IOException e)
+                {
+                    throw new CRLException("cannot read encoding: " + e.getMessage());
+                    
+                }
             }
             else
             {

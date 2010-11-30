@@ -18,17 +18,35 @@ import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.MacCalculator;
 import org.bouncycastle.util.Arrays;
 
+/**
+ * Wrapper for a PKIMessage with protection attached to it.
+ */
 public class ProtectedPKIMessage
 {
     private PKIMessage pkiMessage;
 
-    public ProtectedPKIMessage(PKIMessage pkiMessage)
+    /**
+     * Base constructor.
+     *
+     * @param pkiMessage a GeneralPKIMessage with
+     */
+    public ProtectedPKIMessage(GeneralPKIMessage pkiMessage)
+    {
+        if (!pkiMessage.hasProtection())
+        {
+            throw new IllegalArgumentException("PKIMessage not protected");
+        }
+        
+        this.pkiMessage = pkiMessage.toASN1Structure();
+    }
+
+    ProtectedPKIMessage(PKIMessage pkiMessage)
     {
         if (pkiMessage.getHeader().getProtectionAlg() == null)
         {
             throw new IllegalArgumentException("PKIMessage not protected");
         }
-        
+
         this.pkiMessage = pkiMessage;
     }
 
@@ -42,11 +60,17 @@ public class ProtectedPKIMessage
         return pkiMessage.getBody();
     }
 
-    public PKIMessage toPKIMessage()
+    public PKIMessage toASN1Structure()
     {
         return pkiMessage;
     }
 
+    /**
+     * Determine whether the message is protected by a password based MAC. Use verify(PKMACBuilder, char[])
+     * to verify the message if this method returns true.
+     *
+     * @return true if protection MAC PBE based, false otherwise.
+     */
     public boolean hasPasswordBasedMacProtection()
     {
         return pkiMessage.getHeader().getProtectionAlg().getAlgorithm().equals(CMPObjectIdentifiers.passwordBasedMac);
@@ -70,6 +94,14 @@ public class ProtectedPKIMessage
         return res;
     }
 
+    /**
+     * Verify a message with a public key based signature attached.
+     *
+     * @param verifierProvider a provider of signature verifiers.
+     * @return true if the provider is able to create a verifier that validates
+     * the signature, false otherwise.
+     * @throws CMPException if an exception is thrown trying to verify the signature.
+     */
     public boolean verify(ContentVerifierProvider verifierProvider)
         throws CMPException
     {
@@ -86,6 +118,14 @@ public class ProtectedPKIMessage
         }
     }
 
+    /**
+     * Verify a message with password based MAC protection.
+     *
+     * @param pkMacBuilder MAC builder that can be used to construct the appropriate MacCalculator
+     * @param password the MAC password
+     * @return true if the passed in password and MAC builder verify the message, false otherwise.
+     * @throws CMPException if algorithm not MAC based, or an exception is thrown verifying the MAC.
+     */
     public boolean verify(PKMACBuilder pkMacBuilder, char[] password)
         throws CMPException
     {
@@ -114,7 +154,7 @@ public class ProtectedPKIMessage
         }
         catch (Exception e)
         {
-            throw new CMPException("unable to verify signature: " + e.getMessage(), e);
+            throw new CMPException("unable to verify MAC: " + e.getMessage(), e);
         }
     }
 

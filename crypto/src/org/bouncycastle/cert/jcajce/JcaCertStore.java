@@ -1,5 +1,6 @@
 package org.bouncycastle.cert.jcajce;
 
+import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -37,7 +38,14 @@ public class JcaCertStore
             {
                 X509Certificate cert = (X509Certificate)o;
 
-                list.add(new X509CertificateHolder(cert.getEncoded()));
+                try
+                {
+                    list.add(new X509CertificateHolder(cert.getEncoded()));
+                }
+                catch (IOException e)
+                {
+                    throw new CertificateEncodingException("unable to read encoding: " + e.getMessage());
+                }
             }
             else
             {

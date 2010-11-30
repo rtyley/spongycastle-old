@@ -2,6 +2,7 @@ package org.bouncycastle.cert.crmf;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.crmf.AttributeTypeAndValue;
@@ -13,6 +14,7 @@ import org.bouncycastle.asn1.crmf.PKIArchiveOptions;
 import org.bouncycastle.asn1.crmf.PKMACValue;
 import org.bouncycastle.asn1.crmf.POPOSigningKey;
 import org.bouncycastle.asn1.crmf.ProofOfPossession;
+import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -22,9 +24,33 @@ public class CertificateRequestMessage
     private final CertReqMsg certReqMsg;
     private final Controls controls;
 
-    public CertificateRequestMessage(byte[] certReqMsg)
+    private static CertReqMsg parseBytes(byte[] encoding)
+        throws IOException
     {
-        this(CertReqMsg.getInstance(certReqMsg));
+        try
+        {
+            return CertReqMsg.getInstance(ASN1Object.fromByteArray(encoding));
+        }
+        catch (ClassCastException e)
+        {
+            throw new CertIOException("malformed data: " + e.getMessage(), e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CertIOException("malformed data: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Create a CertificateRequestMessage from the passed in bytes.
+     *
+     * @param certReqMsg BER/DER encoding of the CertReqMsg structure.
+     * @throws IOException in the event of corrupted data, or an incorrect structure.
+     */
+    public CertificateRequestMessage(byte[] certReqMsg)
+        throws IOException
+    {
+        this(parseBytes(certReqMsg));
     }
 
     public CertificateRequestMessage(CertReqMsg certReqMsg)

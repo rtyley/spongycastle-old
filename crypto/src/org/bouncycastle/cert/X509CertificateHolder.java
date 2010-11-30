@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -22,9 +23,33 @@ public class X509CertificateHolder
     private X509CertificateStructure x509Certificate;
     private X509Extensions extensions;
 
-    public X509CertificateHolder(byte[] certEncoding)
+    private static X509CertificateStructure parseBytes(byte[] certEncoding)
+        throws IOException
     {
-        this(X509CertificateStructure.getInstance(certEncoding));
+        try
+        {
+            return X509CertificateStructure.getInstance(ASN1Object.fromByteArray(certEncoding));
+        }
+        catch (ClassCastException e)
+        {
+            throw new CertIOException("malformed data: " + e.getMessage(), e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CertIOException("malformed data: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Create a X509CertificateHolder from the passed in bytes.
+     *
+     * @param certEncoding BER/DER encoding of the certificate.
+     * @throws IOException in the event of corrupted data, or an incorrect structure.
+     */
+    public X509CertificateHolder(byte[] certEncoding)
+        throws IOException
+    {
+        this(parseBytes(certEncoding));
     }
 
     public X509CertificateHolder(X509CertificateStructure x509Certificate)

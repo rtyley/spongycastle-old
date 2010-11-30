@@ -5,28 +5,32 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.NoSuchProviderException;
-import java.security.cert.X509Extension;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.tsp.TimeStampReq;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
 /**
  * Base class for an RFC 3161 Time Stamp Request.
  */
 public class TimeStampRequest
-    implements X509Extension
+    implements java.security.cert.X509Extension
 {
-    TimeStampReq req;
+    private TimeStampReq req;
+    private X509Extensions extensions;
 
     public TimeStampRequest(TimeStampReq req)
     {
         this.req = req;
+        this.extensions = req.getExtensions();
     }
 
     /**
@@ -163,18 +167,27 @@ public class TimeStampRequest
         }
     }
 
+    /**
+     * Validate the timestamp request, checking the digest to see if it is of an
+     * accepted type and whether it is of the correct length for the algorithm specified.
+     *
+     * @param algorithms a set of ASN1ObjectIdentifiers giving accepted algorithms.
+     * @param policies if non-null a set of ASN1ObjectIdentifier policies we are willing to sign under.
+     * @param extensions if non-null a set of ASN1ObjectIdentifier extensions we are willing to accept.
+     * @throws TSPException if the request is invalid, or processing fails.
+     */
     public void validate(
         Set     algorithms,
         Set     policies,
         Set     extensions)
         throws TSPException
     {
-        if (!algorithms.contains(this.getMessageImprintAlgOID()))
+        if (!algorithms.contains(new ASN1ObjectIdentifier(this.getMessageImprintAlgOID())))
         {
             throw new TSPValidationException("request contains unknown algorithm.", PKIFailureInfo.badAlg);
         }
 
-        if (policies != null && this.getReqPolicy() != null && !policies.contains(this.getReqPolicy()))
+        if (policies != null && this.getReqPolicy() != null && !policies.contains(new ASN1ObjectIdentifier(this.getReqPolicy())))
         {
             throw new TSPValidationException("request contains unknown policy.", PKIFailureInfo.unacceptedPolicy);
         }
@@ -184,7 +197,7 @@ public class TimeStampRequest
             Enumeration en = this.getExtensions().oids();
             while(en.hasMoreElements())
             {
-                String  oid = ((DERObjectIdentifier)en.nextElement()).getId();
+                ASN1ObjectIdentifier  oid = (ASN1ObjectIdentifier)en.nextElement();
                 if (!extensions.contains(oid))
                 {
                     throw new TSPValidationException("request contains unknown extension.", PKIFailureInfo.unacceptedExtension);
@@ -210,9 +223,29 @@ public class TimeStampRequest
 
     X509Extensions getExtensions()
     {
-        return req.getExtensions();
+        return extensions;
     }
-    
+
+    public boolean hasExtensions()
+    {
+        return extensions != null;
+    }
+
+    public X509Extension getExtension(ASN1ObjectIdentifier oid)
+    {
+        if (extensions != null)
+        {
+            return extensions.getExtension(oid);
+        }
+
+        return null;
+    }
+
+    public List getExtensionOIDs()
+    {
+        return TSPUtil.getExtensionOIDs(extensions);
+    }
+
     /* (non-Javadoc)
      * @see java.security.cert.X509Extension#getExtensionValue(java.lang.String)
      */
