@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.X509Name;
 
 public class ResponderID
@@ -23,7 +24,7 @@ public class ResponderID
     }
 
     public ResponderID(
-        X509Name    value)
+        X500Name value)
     {
         this.value = value;
     }
@@ -45,7 +46,7 @@ public class ResponderID
 
             if (o.getTagNo() == 1)
             {
-                return new ResponderID(X509Name.getInstance(o, true));
+                return new ResponderID(X500Name.getInstance(o, true));
             }
             else
             {
@@ -53,7 +54,7 @@ public class ResponderID
             }
         }
 
-        return new ResponderID(X509Name.getInstance(obj));
+        return new ResponderID(X500Name.getInstance(obj));
     }
 
     public static ResponderID getInstance(

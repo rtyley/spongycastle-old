@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.cert.X509CertSelector;
 
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -20,6 +21,20 @@ public class SignerId
     extends X509CertSelector
     implements Selector
 {
+    private byte[] subjectKeyId;
+
+    public SignerId()
+    {
+
+    }
+
+    SignerId(byte[] subjectKeyId)
+    {
+        super.setSubjectKeyIdentifier(new DEROctetString(subjectKeyId).getDEREncoded());
+
+        this.subjectKeyId = subjectKeyId;
+    }
+
     public int hashCode()
     {
         int code = Arrays.hashCode(this.getSubjectKeyIdentifier());
@@ -79,12 +94,6 @@ public class SignerId
             }
             else if (this.getSubjectKeyIdentifier() != null)
             {
-                // TODO: in this case we're currently including the header (which is actually correct)
-                byte[] encExtSubKeyId = this.getSubjectKeyIdentifier();
-                byte[] extSubKeyID = new byte[this.getSubjectKeyIdentifier().length - 2];
-
-                System.arraycopy(encExtSubKeyId, 2, extSubKeyID, 0, extSubKeyID.length);
-
                 X509Extension ext = certHldr.getExtension(X509Extension.subjectKeyIdentifier);
 
                 if (ext == null)
@@ -98,12 +107,12 @@ public class SignerId
 
                     dig.doFinal(hash, 0);
 
-                    return Arrays.areEqual(extSubKeyID, hash);
+                    return Arrays.areEqual(subjectKeyId, hash);
                 }
 
                 byte[] subKeyID = ASN1OctetString.getInstance(ext.getParsedValue()).getOctets();
 
-                return Arrays.areEqual(extSubKeyID, subKeyID);
+                return Arrays.areEqual(subjectKeyId, subKeyID);
             }
         }
         return false;

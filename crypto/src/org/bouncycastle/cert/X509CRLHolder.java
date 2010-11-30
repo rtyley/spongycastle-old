@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertList;
@@ -19,9 +20,33 @@ public class X509CRLHolder
     private CertificateList x509CRL;
     private X509Extensions extensions;
 
-    public X509CRLHolder(byte[] crlEncoding)
+    private static CertificateList parseBytes(byte[] crlEncoding)
+        throws IOException
     {
-        this(CertificateList.getInstance(crlEncoding));
+        try
+        {
+            return CertificateList.getInstance(ASN1Object.fromByteArray(crlEncoding));
+        }
+        catch (ClassCastException e)
+        {
+            throw new CertIOException("malformed data: " + e.getMessage(), e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CertIOException("malformed data: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Create a X509CRLHolder from the passed in bytes.
+     *
+     * @param crlEncoding BER/DER encoding of the CRL
+     * @throws IOException in the event of corrupted data, or an incorrect structure.
+     */
+    public X509CRLHolder(byte[] crlEncoding)
+        throws IOException
+    {
+        this(parseBytes(crlEncoding));
     }
 
     public X509CRLHolder(CertificateList x509CRL)

@@ -1,16 +1,21 @@
-package org.bouncycastle.asn1.test;
+package org.bouncycastle.cert.ocsp.test;
+
+import java.security.Security;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.test.SimpleTestResult;
 
 public class AllTests
     extends TestCase
 {
-    public void testASN1()
+    public void testOCSP()
     {   
-        org.bouncycastle.util.test.Test[] tests = RegressionTest.tests;
+        Security.addProvider(new BouncyCastleProvider());
+        
+        org.bouncycastle.util.test.Test[] tests = new org.bouncycastle.util.test.Test[] { new OCSPTest() };
         
         for (int i = 0; i != tests.length; i++)
         {
@@ -30,12 +35,9 @@ public class AllTests
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ASN.1 Tests");
+        TestSuite suite = new TestSuite("OCSP Tests");
         
         suite.addTestSuite(AllTests.class);
-        suite.addTestSuite(ASN1SequenceParserTest.class);
-        suite.addTestSuite(OctetStringTest.class);
-        suite.addTestSuite(ParseTest.class);
         
         return suite;
     }

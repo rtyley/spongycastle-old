@@ -30,6 +30,7 @@ import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.cmp.CertificateConfirmationContent;
 import org.bouncycastle.cert.cmp.CertificateConfirmationContentBuilder;
 import org.bouncycastle.cert.cmp.CertificateStatus;
+import org.bouncycastle.cert.cmp.GeneralPKIMessage;
 import org.bouncycastle.cert.cmp.ProtectedPKIMessage;
 import org.bouncycastle.cert.cmp.ProtectedPKIMessageBuilder;
 import org.bouncycastle.cert.crmf.PKMACBuilder;
@@ -180,7 +181,7 @@ public class AllTests
         throws Exception
     {
         PKIMessage msg = loadMessage("sample_cr.der");
-        ProtectedPKIMessage procMsg = new ProtectedPKIMessage(msg);
+        ProtectedPKIMessage procMsg = new ProtectedPKIMessage(new GeneralPKIMessage(msg));
 
         assertTrue(procMsg.verify(new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)), "TopSecret1234".toCharArray()));
     }

@@ -9,9 +9,12 @@ import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -38,6 +41,9 @@ import org.bouncycastle.util.Arrays;
 
 public class TSPUtil
 {
+    private static Set EMPTY_SET = Collections.unmodifiableSet(new HashSet());
+    private static List EMPTY_LIST = Collections.unmodifiableList(new ArrayList());
+
     private static final Map digestLengths = new HashMap();
     private static final Map digestNames = new HashMap();
 
@@ -324,5 +330,36 @@ public class TSPUtil
         }
 
         return MessageDigest.getInstance(digestName);
+    }
+
+        static Set getCriticalExtensionOIDs(X509Extensions extensions)
+    {
+        if (extensions == null)
+        {
+            return EMPTY_SET;
+        }
+
+        return Collections.unmodifiableSet(new HashSet(java.util.Arrays.asList(extensions.getCriticalExtensionOIDs())));
+    }
+
+    static Set getNonCriticalExtensionOIDs(X509Extensions extensions)
+    {
+        if (extensions == null)
+        {
+            return EMPTY_SET;
+        }
+
+        // TODO: should probably produce a set that imposes correct ordering
+        return Collections.unmodifiableSet(new HashSet(java.util.Arrays.asList(extensions.getNonCriticalExtensionOIDs())));
+    }
+
+    static List getExtensionOIDs(X509Extensions extensions)
+    {
+        if (extensions == null)
+        {
+            return EMPTY_LIST;
+        }
+
+        return Collections.unmodifiableList(java.util.Arrays.asList(extensions.getExtensionOIDs()));
     }
 }
