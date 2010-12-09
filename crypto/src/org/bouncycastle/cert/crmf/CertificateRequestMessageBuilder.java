@@ -8,8 +8,10 @@ import java.util.List;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.crmf.AttributeTypeAndValue;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
@@ -36,6 +38,7 @@ public class CertificateRequestMessageBuilder
     private char[] password;
     private GeneralName sender;
     private POPOPrivKey popoPrivKey;
+    private ASN1Null popRaVerified;
 
     public CertificateRequestMessageBuilder(BigInteger certReqId)
     {
@@ -115,6 +118,11 @@ public class CertificateRequestMessageBuilder
 
     public CertificateRequestMessageBuilder setProofOfPossessionSigningKeySigner(ContentSigner popSigner)
     {
+        if (popoPrivKey != null || popRaVerified != null)
+        {
+            throw new IllegalStateException("only one proof of possession allowed");
+        }
+
         this.popSigner = popSigner;
 
         return this;
@@ -122,7 +130,24 @@ public class CertificateRequestMessageBuilder
 
     public CertificateRequestMessageBuilder setProofOfPossessionSubsequentMessage(SubsequentMessage msg)
     {
+        if (popSigner != null || popRaVerified != null)
+        {
+            throw new IllegalStateException("only one proof of possession allowed");
+        }
+
         this.popoPrivKey = new POPOPrivKey(msg);
+
+        return this;
+    }
+
+    public CertificateRequestMessageBuilder setProofOfPossessionRaVerified()
+    {
+        if (popSigner != null || popoPrivKey != null)
+        {
+            throw new IllegalStateException("only one proof of possession allowed");
+        }
+
+        this.popRaVerified = DERNull.INSTANCE;
 
         return this;
     }
@@ -194,9 +219,13 @@ public class CertificateRequestMessageBuilder
 
             v.add(new ProofOfPossession(builder.build(popSigner)));
         }
-        if (popoPrivKey != null)
+        else if (popoPrivKey != null)
         {
             v.add(new ProofOfPossession(ProofOfPossession.TYPE_KEY_ENCIPHERMENT, popoPrivKey));
+        }
+        else if (popRaVerified != null)
+        {
+            v.add(new ProofOfPossession());
         }
 
         return new CertificateRequestMessage(CertReqMsg.getInstance(new DERSequence(v)));

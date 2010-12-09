@@ -58,6 +58,7 @@ public class ProofOfPossession
     public ProofOfPossession()
     {
         tagNo = TYPE_RA_VERIFIED;
+        obj = DERNull.INSTANCE;
     }
 
     /** Creates a ProofOfPossession for a signing key. */
