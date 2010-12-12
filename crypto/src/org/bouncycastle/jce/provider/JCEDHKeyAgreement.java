@@ -39,10 +39,12 @@ public class JCEDHKeyAgreement
         Integer i64 = new Integer(64);
         Integer i192 = new Integer(192);
         Integer i128 = new Integer(128);
+        Integer i256 = new Integer(256);
 
         algorithms.put("DES", i64);
         algorithms.put("DESEDE", i192);
         algorithms.put("BLOWFISH", i128);
+        algorithms.put("AES", i256);
     }
 
     private byte[] bigIntToBytes(
