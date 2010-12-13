@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.isismtt;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 public interface ISISMTTObjectIdentifiers
 {
 
-    public static final DERObjectIdentifier id_isismtt = new DERObjectIdentifier("1.3.36.8");
+    static final ASN1ObjectIdentifier id_isismtt = new ASN1ObjectIdentifier("1.3.36.8");
 
-    public static final DERObjectIdentifier id_isismtt_cp = new DERObjectIdentifier(id_isismtt + ".1");
+    static final ASN1ObjectIdentifier id_isismtt_cp = id_isismtt.branch("1");
 
     /**
      * The id-isismtt-cp-accredited OID indicates that the certificate is a
@@ -16,9 +16,9 @@ public interface ISISMTTObjectIdentifiers
      * Framework for Electronic Signatures, which additionally conforms the
      * special requirements of the SigG and has been issued by an accredited CA.
      */
-    public static final DERObjectIdentifier id_isismtt_cp_accredited = new DERObjectIdentifier(id_isismtt_cp + ".1");
+    static final ASN1ObjectIdentifier id_isismtt_cp_accredited = id_isismtt_cp.branch("1");
 
-    public static final DERObjectIdentifier id_isismtt_at = new DERObjectIdentifier(id_isismtt + ".3");
+    static final ASN1ObjectIdentifier id_isismtt_at = id_isismtt.branch("3");
 
     /**
      * Certificate extensionDate of certificate generation
@@ -27,19 +27,19 @@ public interface ISISMTTObjectIdentifiers
      *                DateOfCertGenSyntax ::= GeneralizedTime
      * </pre>
      */
-    public static final DERObjectIdentifier id_isismtt_at_dateOfCertGen = new DERObjectIdentifier(id_isismtt_at + ".1");
+    static final ASN1ObjectIdentifier id_isismtt_at_dateOfCertGen = id_isismtt_at.branch("1");
 
     /**
      * Attribute to indicate that the certificate holder may sign in the name of
      * a third person. May also be used as extension in a certificate.
      */
-    public static final DERObjectIdentifier id_isismtt_at_procuration = new DERObjectIdentifier(id_isismtt_at + ".2");
+    static final ASN1ObjectIdentifier id_isismtt_at_procuration = id_isismtt_at.branch("2");
 
     /**
      * Attribute to indicate admissions to certain professions. May be used as
      * attribute in attribute certificate or as extension in a certificate
      */
-    public static final DERObjectIdentifier id_isismtt_at_admission = new DERObjectIdentifier(id_isismtt_at + ".3");
+    static final ASN1ObjectIdentifier id_isismtt_at_admission = id_isismtt_at.branch("3");
 
     /**
      * Monetary limit for transactions. The QcEuMonetaryLimit QC statement MUST
@@ -48,13 +48,13 @@ public interface ISISMTTObjectIdentifiers
      * compatibility with certificates already in use, SigG conforming
      * components MUST support MonetaryLimit (as well as QcEuLimitValue).
      */
-    public static final DERObjectIdentifier id_isismtt_at_monetaryLimit = new DERObjectIdentifier(id_isismtt_at + ".4");
+    static final ASN1ObjectIdentifier id_isismtt_at_monetaryLimit = id_isismtt_at.branch("4");
 
     /**
      * A declaration of majority. May be used as attribute in attribute
      * certificate or as extension in a certificate
      */
-    public static final DERObjectIdentifier id_isismtt_at_declarationOfMajority = new DERObjectIdentifier(id_isismtt_at + ".5");
+    static final ASN1ObjectIdentifier id_isismtt_at_declarationOfMajority = id_isismtt_at.branch("5");
 
     /**
      * 
@@ -64,7 +64,7 @@ public interface ISISMTTObjectIdentifiers
      *                 ICCSNSyntax ::= OCTET STRING (SIZE(8..20))
      * </pre>
      */
-    public static final DERObjectIdentifier id_isismtt_at_iCCSN = new DERObjectIdentifier(id_isismtt_at + ".6");
+    static final ASN1ObjectIdentifier id_isismtt_at_iCCSN = id_isismtt_at.branch("6");
 
     /**
      * 
@@ -75,7 +75,7 @@ public interface ISISMTTObjectIdentifiers
      *      PKReferenceSyntax ::= OCTET STRING (SIZE(20))
      * </pre>
      */
-    public static final DERObjectIdentifier id_isismtt_at_PKReference = new DERObjectIdentifier(id_isismtt_at + ".7");
+    static final ASN1ObjectIdentifier id_isismtt_at_PKReference = id_isismtt_at.branch("7");
 
     /**
      * Some other restriction regarding the usage of this certificate. May be
@@ -88,7 +88,7 @@ public interface ISISMTTObjectIdentifiers
      * 
      * @see org.bouncycastle.asn1.isismtt.x509.Restriction
      */
-    public static final DERObjectIdentifier id_isismtt_at_restriction = new DERObjectIdentifier(id_isismtt_at + ".8");
+    static final ASN1ObjectIdentifier id_isismtt_at_restriction = id_isismtt_at.branch("8");
 
     /**
      * 
@@ -104,7 +104,7 @@ public interface ISISMTTObjectIdentifiers
      *       
      * </pre>
      */
-    public static final DERObjectIdentifier id_isismtt_at_retrieveIfAllowed = new DERObjectIdentifier(id_isismtt_at + ".9");
+    static final ASN1ObjectIdentifier id_isismtt_at_retrieveIfAllowed = id_isismtt_at.branch("9");
 
     /**
      * SingleOCSPResponse extension: The certificate requested by the client by
@@ -113,12 +113,12 @@ public interface ISISMTTObjectIdentifiers
      * 
      * @see org.bouncycastle.asn1.isismtt.ocsp.RequestedCertificate
      */
-    public static final DERObjectIdentifier id_isismtt_at_requestedCertificate = new DERObjectIdentifier(id_isismtt_at + ".10");
+    static final ASN1ObjectIdentifier id_isismtt_at_requestedCertificate = id_isismtt_at.branch("10");
 
     /**
      * Base ObjectIdentifier for naming authorities
      */
-    public static final DERObjectIdentifier id_isismtt_at_namingAuthorities = new DERObjectIdentifier(id_isismtt_at + ".11");
+    static final ASN1ObjectIdentifier id_isismtt_at_namingAuthorities = id_isismtt_at.branch("11");
 
     /**
      * SingleOCSPResponse extension: Date, when certificate has been published
@@ -130,14 +130,14 @@ public interface ISISMTTObjectIdentifiers
      *      CertInDirSince ::= GeneralizedTime
      * </pre>
      */
-    public static final DERObjectIdentifier id_isismtt_at_certInDirSince = new DERObjectIdentifier(id_isismtt_at + ".12");
+    static final ASN1ObjectIdentifier id_isismtt_at_certInDirSince = id_isismtt_at.branch("12");
 
     /**
      * Hash of a certificate in OCSP.
      * 
      * @see org.bouncycastle.asn1.isismtt.ocsp.CertHash
      */
-    public static final DERObjectIdentifier id_isismtt_at_certHash = new DERObjectIdentifier(id_isismtt_at + ".13");
+    static final ASN1ObjectIdentifier id_isismtt_at_certHash = id_isismtt_at.branch("13");
 
     /**
      * <pre>
@@ -147,7 +147,7 @@ public interface ISISMTTObjectIdentifiers
      * Used in
      * {@link org.bouncycastle.asn1.x509.SubjectDirectoryAttributes SubjectDirectoryAttributes}
      */
-    public static final DERObjectIdentifier id_isismtt_at_nameAtBirth = new DERObjectIdentifier(id_isismtt_at + ".14");
+    static final ASN1ObjectIdentifier id_isismtt_at_nameAtBirth = id_isismtt_at.branch("14");
 
     /**
      * Some other information of non-restrictive nature regarding the usage of
@@ -160,7 +160,7 @@ public interface ISISMTTObjectIdentifiers
      * 
      * @see org.bouncycastle.asn1.isismtt.x509.AdditionalInformationSyntax
      */
-    public static final DERObjectIdentifier id_isismtt_at_additionalInformation = new DERObjectIdentifier(id_isismtt_at + ".15");
+    static final ASN1ObjectIdentifier id_isismtt_at_additionalInformation = id_isismtt_at.branch("15");
 
     /**
      * Indicates that an attribute certificate exists, which limits the
@@ -176,5 +176,5 @@ public interface ISISMTTObjectIdentifiers
      *                   LiabilityLimitationFlagSyntax ::= BOOLEAN
      * </pre>
      */
-    public static final DERObjectIdentifier id_isismtt_at_liabilityLimitationFlag = new DERObjectIdentifier("0.2.262.1.10.12.0");
+    static final ASN1ObjectIdentifier id_isismtt_at_liabilityLimitationFlag = new ASN1ObjectIdentifier("0.2.262.1.10.12.0");
 }
