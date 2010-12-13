@@ -73,7 +73,7 @@ final class PEMUtilities
 
     static boolean isPKCS12(DERObjectIdentifier algOid)
     {
-        return algOid.getId().startsWith(PKCSObjectIdentifiers.pkcs_12PbeIds);
+        return algOid.getId().startsWith(PKCSObjectIdentifiers.pkcs_12PbeIds.getId());
     }
 
     static SecretKey generateSecretKeyForPKCS5Scheme2(String algorithm, char[] password, byte[] salt, int iterationCount)

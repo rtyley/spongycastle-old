@@ -167,27 +167,18 @@ public class TimeStampRequest
         }
     }
 
-    /**
-     * Validate the timestamp request, checking the digest to see if it is of an
-     * accepted type and whether it is of the correct length for the algorithm specified.
-     *
-     * @param algorithms a set of ASN1ObjectIdentifiers giving accepted algorithms.
-     * @param policies if non-null a set of ASN1ObjectIdentifier policies we are willing to sign under.
-     * @param extensions if non-null a set of ASN1ObjectIdentifier extensions we are willing to accept.
-     * @throws TSPException if the request is invalid, or processing fails.
-     */
     public void validate(
         Set     algorithms,
         Set     policies,
         Set     extensions)
         throws TSPException
     {
-        if (!algorithms.contains(new ASN1ObjectIdentifier(this.getMessageImprintAlgOID())))
+        if (!algorithms.contains(this.getMessageImprintAlgOID()))
         {
             throw new TSPValidationException("request contains unknown algorithm.", PKIFailureInfo.badAlg);
         }
 
-        if (policies != null && this.getReqPolicy() != null && !policies.contains(new ASN1ObjectIdentifier(this.getReqPolicy())))
+        if (policies != null && this.getReqPolicy() != null && !policies.contains(this.getReqPolicy()))
         {
             throw new TSPValidationException("request contains unknown policy.", PKIFailureInfo.unacceptedPolicy);
         }
@@ -197,7 +188,7 @@ public class TimeStampRequest
             Enumeration en = this.getExtensions().oids();
             while(en.hasMoreElements())
             {
-                ASN1ObjectIdentifier  oid = (ASN1ObjectIdentifier)en.nextElement();
+                String  oid = ((DERObjectIdentifier)en.nextElement()).getId();
                 if (!extensions.contains(oid))
                 {
                     throw new TSPValidationException("request contains unknown extension.", PKIFailureInfo.unacceptedExtension);
