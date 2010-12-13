@@ -1,13 +1,12 @@
 package org.bouncycastle.crypto.signers;
 
+import java.util.Hashtable;
+
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.SignerWithRecovery;
-import org.bouncycastle.crypto.digests.RIPEMD128Digest;
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 
 /**
@@ -20,6 +19,25 @@ public class ISO9796d2Signer
     static final public int   TRAILER_RIPEMD160   = 0x31CC;
     static final public int   TRAILER_RIPEMD128   = 0x32CC;
     static final public int   TRAILER_SHA1        = 0x33CC;
+    static final public int   TRAILER_SHA256      = 0x34CC;
+    static final public int   TRAILER_SHA512      = 0x35CC;
+    static final public int   TRAILER_SHA384      = 0x36CC;
+    static final public int   TRAILER_WHIRLPOOL   = 0x37CC;
+
+    private static Hashtable  trailerMap          = new Hashtable();
+
+    static
+    {
+        trailerMap.put("RIPEMD128", new Integer(TRAILER_RIPEMD128));
+        trailerMap.put("RIPEMD160", new Integer(TRAILER_RIPEMD160));
+
+        trailerMap.put("SHA-1", new Integer(TRAILER_SHA1));
+        trailerMap.put("SHA-256", new Integer(TRAILER_SHA256));
+        trailerMap.put("SHA-384", new Integer(TRAILER_SHA384));
+        trailerMap.put("SHA-512", new Integer(TRAILER_SHA512));
+
+        trailerMap.put("Whirlpool", new Integer(TRAILER_WHIRLPOOL));
+    }
 
     private Digest                      digest;
     private AsymmetricBlockCipher       cipher;
@@ -54,17 +72,11 @@ public class ISO9796d2Signer
         }
         else
         {
-            if (digest instanceof SHA1Digest)
+            Integer trailerObj = (Integer)trailerMap.get(digest.getAlgorithmName());
+
+            if (trailerObj != null)
             {
-                trailer = TRAILER_SHA1;
-            }
-            else if (digest instanceof RIPEMD160Digest)
-            {
-                trailer = TRAILER_RIPEMD160;
-            }
-            else if (digest instanceof RIPEMD128Digest)
-            {
-                trailer = TRAILER_RIPEMD128;
+                trailer = trailerObj.intValue();
             }
             else
             {
@@ -329,28 +341,17 @@ public class ISO9796d2Signer
         else
         {
             int sigTrail = ((block[block.length - 2] & 0xFF) << 8) | (block[block.length - 1] & 0xFF);
+            Integer trailerObj = (Integer)trailerMap.get(digest.getAlgorithmName());
 
-            switch (sigTrail)
+            if (trailerObj != null)
             {
-            case TRAILER_RIPEMD160:
-                    if (!(digest instanceof RIPEMD160Digest))
-                    {
-                        throw new IllegalStateException("signer should be initialised with RIPEMD160");
-                    }
-                    break;
-            case TRAILER_SHA1:
-                    if (!(digest instanceof SHA1Digest))
-                    {
-                        throw new IllegalStateException("signer should be initialised with SHA1");
-                    }
-                    break;
-            case TRAILER_RIPEMD128:
-                    if (!(digest instanceof RIPEMD128Digest))
-                    {
-                        throw new IllegalStateException("signer should be initialised with RIPEMD128");
-                    }
-                    break;
-            default:
+                if (sigTrail != trailerObj.intValue())
+                {
+                    throw new IllegalStateException("signer initialised with wrong digest for trailer " + sigTrail);
+                }
+            }
+            else
+            {
                 throw new IllegalArgumentException("unrecognised hash in signature");
             }
 
