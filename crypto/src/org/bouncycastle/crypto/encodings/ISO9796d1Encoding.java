@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.encodings;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -9,13 +11,16 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 /**
  * ISO 9796-1 padding. Note in the light of recent results you should
  * only use this with RSA (rather than the "simpler" Rabin keys) and you
- * should never use it with anything other than a hash (ie. even if the 
+ * should never use it with anything other than a hash (ie. even if the
  * message is small don't sign the message, sign it's hash) or some "random"
  * value. See your favorite search engine for details.
  */
 public class ISO9796d1Encoding
     implements AsymmetricBlockCipher
 {
+    private static final BigInteger SIXTEEN = BigInteger.valueOf(16L);
+    private static final BigInteger SIX     = BigInteger.valueOf(6L);
+
     private static byte[]    shadows = { 0xe, 0x3, 0x5, 0x8, 0x9, 0x4, 0x2, 0xf,
                                     0x0, 0xd, 0xb, 0x6, 0x7, 0xa, 0xc, 0x1 };
     private static byte[]    inverse = { 0x8, 0xf, 0x6, 0x1, 0x5, 0x2, 0xb, 0xc,
@@ -25,12 +30,13 @@ public class ISO9796d1Encoding
     private boolean                 forEncryption;
     private int                     bitSize;
     private int                     padBits = 0;
+    private BigInteger              modulus;
 
     public ISO9796d1Encoding(
         AsymmetricBlockCipher   cipher)
     {
         this.engine = cipher;
-    }   
+    }
 
     public AsymmetricBlockCipher getUnderlyingCipher()
     {
@@ -56,14 +62,15 @@ public class ISO9796d1Encoding
 
         engine.init(forEncryption, param);
 
-        bitSize = kParam.getModulus().bitLength();
+        modulus = kParam.getModulus();
+        bitSize = modulus.bitLength();
 
         this.forEncryption = forEncryption;
     }
 
     /**
      * return the input block size. The largest message we can process
-     * is (key_size_in_bits + 3)/16, which in our world comes to 
+     * is (key_size_in_bits + 3)/16, which in our world comes to
      * key_size_in_bytes / 2.
      */
     public int getInputBlockSize()
@@ -98,7 +105,7 @@ public class ISO9796d1Encoding
     }
 
     /**
-     * set the number of bits in the next message to be treated as 
+     * set the number of bits in the next message to be treated as
      * pad bits.
      */
     public void setPadBits(
@@ -163,7 +170,7 @@ public class ISO9796d1Encoding
         for (int i = block.length - 2 * t; i != block.length; i += 2)
         {
             byte    val = block[block.length - t + i / 2];
-            
+
             block[i] = (byte)((shadows[(val & 0xff) >>> 4] << 4)
                                                 | shadows[val & 0x0f]);
             block[i + 1] = val;
@@ -203,7 +210,24 @@ public class ISO9796d1Encoding
         int     r = 1;
         int     t = (bitSize + 13) / 16;
 
-        if ((block[block.length - 1] & 0x0f) != 0x6)
+        BigInteger iS = new BigInteger(1, block);
+        BigInteger iR;
+        if (iS.mod(SIXTEEN).equals(SIX))
+        {
+            iR = iS;
+        }
+        else if ((modulus.subtract(iS)).mod(SIXTEEN).equals(SIX))
+        {
+            iR = modulus.subtract(iS);
+        }
+        else
+        {
+            throw new InvalidCipherTextException("resulting integer iS or (modulus - iS) is not congruent to 6 mod 16");
+        }
+
+        block = convertOutputDecryptOnly(iR);
+
+        if ((block[block.length - 1] & 0x0f) != 0x6 )
         {
             throw new InvalidCipherTextException("invalid forcing byte in block");
         }
@@ -214,12 +238,12 @@ public class ISO9796d1Encoding
 
         boolean boundaryFound = false;
         int     boundary = 0;
-        
+
         for (int i = block.length - 1; i >= block.length - 2 * t; i -= 2)
         {
             int val = ((shadows[(block[i] & 0xff) >>> 4] << 4)
                                         | shadows[block[i] & 0x0f]);
-            
+
             if (((block[i - 1] ^ val) & 0xff) != 0)
             {
                 if (!boundaryFound)
@@ -247,5 +271,17 @@ public class ISO9796d1Encoding
         padBits = r - 1;
 
         return nblock;
+    }
+
+    private static byte[] convertOutputDecryptOnly(BigInteger result)
+    {
+        byte[] output = result.toByteArray();
+        if (output[0] == 0) // have ended up with an extra zero byte, copy down.
+        {
+            byte[] tmp = new byte[output.length - 1];
+            System.arraycopy(output, 1, tmp, 0, tmp.length);
+            return tmp;
+        }
+        return output;
     }
 }
